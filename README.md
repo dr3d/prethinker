@@ -4,6 +4,19 @@ This project is a local workbench for building a high-accuracy semantic parser (
 
 Last updated: 2026-04-09
 
+## Honest Snapshot (For NSAI Readers)
+
+Prethinker is a neuro-symbolic parsing workbench, not a finished parser product.
+
+- Problem focus: map free-form language into executable symbolic operations (`assert_fact`, `assert_rule`, `query`, `retract`) and apply them deterministically to persistent KBs.
+- Core approach: hybrid pipeline where the model proposes structure, then deterministic runtime logic refines, validates, and applies through MCP runtime tools.
+- What is solid today: architecture, provenance, prompt/version lineage, scenario ladder, and observability (`kb_runs` + HTML docs/report views).
+- What is not proven yet: broad generalization on hard inputs (transitivity, quantifiers, negation policy, pronoun ambiguity, unseen vocabulary).
+- Current evidence level: early; passing smoke-to-mid ladder checks, but still small sample counts.
+
+This is an open research effort and learning artifact, not a startup pitch.
+If you're evaluating it as a research workbench, it's useful now. If you're evaluating it as production-grade semantic parsing, it's still early.
+
 ## Goals
 
 - Build a robust semantic parser for `assert_fact`, `assert_rule`, `query`, `retract`, and `other`.
@@ -23,7 +36,7 @@ Last updated: 2026-04-09
 - `empty_kb()` is only used for brand-new ontology namespaces (unless forced).
 - Scenario validation harness and progressive ladder are in place.
 - Run provenance now captures prompt snapshot/version hash + model settings per run.
-- Hub now generates searchable run/prompt manifests for longitudinal tuning.
+- Docs index now generates searchable run/prompt manifests for longitudinal tuning.
 - Latest verified tune runs:
   - `kb_runs/stage_01_people_ladder_tune_r1.json` (passed `2/2`)
   - `kb_runs/stage_02_people_ladder_tune_r1.json` (passed `1/1`)
@@ -38,6 +51,13 @@ Last updated: 2026-04-09
   - `modelfiles/history/prompts/sp-ad589d272fbb.md`
 - Hub-published prompt snapshot:
   - `docs/prompts/sp-ad589d272fbb.md`
+
+## Model Adaptation Stance (Prompt-First, LoRA Later)
+
+- Current priority is system-prompt and runtime-policy quality, measured via scenario evidence.
+- Planned training stack is Unsloth-style LoRA fine-tuning once prompt/runtime behavior stabilizes.
+- LoRA outputs will be sanity-checked against the same benchmark ladder used for prompt iterations.
+- GGUF packaging is treated as deployment format work after behavior is validated (not as a substitute for evaluation).
 
 ## High-Level Architecture
 
@@ -68,8 +88,8 @@ Last updated: 2026-04-09
 - `kb_scenarios/`: scenario inputs + validation contracts.
 - `kb_store/`: persistent named KB namespaces and ontology metadata.
 - `kb_runs/`: JSON run reports.
-- `Semantic Parsing.md`: current semantic parsing runtime spec.
-- `Chatgpt Ideas.md`: external idea capture and strategy notes.
+- `docs/`: generated reports, ladder pages, KB snapshots, and prompt lineage manifests.
+- `ROADMAP.md`: near-term execution plan and acceptance criteria.
 
 ## Requirements
 
@@ -144,7 +164,7 @@ python scripts/render_kb_run_html.py --input kb_runs --output kb_runs/html --rec
 
 The renderer supports three skins (`standard`, `telegram`, `imessage`) and each page includes light/dark appearance toggle, for 6 appearance combinations.
 
-### 6) Build hub front page
+### 6) Build docs front page
 
 ```bash
 # render all run JSONs into docs/reports
@@ -207,7 +227,7 @@ See `kb_scenarios/README.md` for details.
 - Fallback handling improvements for parser failure slices.
 - Progressive scenario ladder for controlled complexity ramp.
 - Imported transcript renderer stack from `prolog-reasoning` and added `kb_run -> html` conversion flow.
-- Hub run explorer with filters + prompt evolution table + JSON manifests.
+- Docs run explorer with filters + prompt evolution table + JSON manifests.
 
 ## Known Gaps
 
@@ -229,6 +249,7 @@ See `kb_scenarios/README.md` for details.
 - Agent onboarding: `AGENT-README.md`
 - Session/migration log: `SESSIONS.md`
 - Next-session handoff: `NEXT-CODEX.md`
+- Execution roadmap: `ROADMAP.md`
 - Pipeline: `kb_pipeline.py`
 - KB run HTML renderer: `scripts/render_kb_run_html.py`
 - Shared theme renderer: `scripts/render_dialog_json_html.py`
@@ -236,7 +257,6 @@ See `kb_scenarios/README.md` for details.
 - Findings: `modelfiles/qwen35-9b-findings.md`
 - Scenarios: `kb_scenarios/`
 - Runs: `kb_runs/`
-- Ideas dump: `Chatgpt Ideas.md`
 
 
 
