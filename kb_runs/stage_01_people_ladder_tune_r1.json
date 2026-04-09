@@ -1,0 +1,296 @@
+﻿{
+  "run_id": "run-20260409T192526Z-stage_01_facts_only-qwen3_5_9b-27068",
+  "run_started_utc": "2026-04-09T19:25:26+00:00",
+  "run_finished_utc": "2026-04-09T19:27:02+00:00",
+  "invocation": {
+    "argv": [
+      "d:\\_PROJECTS\\prethinker\\kb_pipeline.py",
+      "--backend",
+      "ollama",
+      "--base-url",
+      "http://127.0.0.1:11434",
+      "--model",
+      "qwen3.5:9b",
+      "--scenario",
+      "d:\\_PROJECTS\\prethinker\\kb_scenarios\\stage_01_facts_only.json",
+      "--kb-name",
+      "people_ladder_tune",
+      "--out",
+      "d:\\_PROJECTS\\prethinker\\kb_runs\\stage_01_people_ladder_tune_r1.json"
+    ],
+    "cwd": "D:\\_PROJECTS\\prethinker"
+  },
+  "scenario": "stage_01_facts_only",
+  "scenario_path": "D:\\_PROJECTS\\prethinker\\kb_scenarios\\stage_01_facts_only.json",
+  "ontology_kb_name": "people_ladder_tune",
+  "kb_namespace": {
+    "kb_root": "D:\\_PROJECTS\\prethinker\\kb_store",
+    "kb_dir": "D:\\_PROJECTS\\prethinker\\kb_store\\people_ladder_tune",
+    "corpus_path": "D:\\_PROJECTS\\prethinker\\kb_store\\people_ladder_tune\\kb.pl",
+    "profile_path": "D:\\_PROJECTS\\prethinker\\kb_store\\people_ladder_tune\\ontology_profile.json",
+    "ontology_index_path": "D:\\_PROJECTS\\prethinker\\kb_store\\ontologies_index.json"
+  },
+  "backend": "ollama",
+  "base_url": "http://127.0.0.1:11434",
+  "model": "qwen3.5:9b",
+  "two_pass": true,
+  "split_extraction": true,
+  "model_settings": {
+    "temperature": 0,
+    "context_length": 4096,
+    "classifier_context_length": 2048,
+    "timeout_seconds": 120,
+    "two_pass": true,
+    "split_extraction": true,
+    "strict_registry": false,
+    "strict_types": false,
+    "backend_options": {
+      "num_ctx": 4096
+    }
+  },
+  "prompt_file": "D:\\_PROJECTS\\prethinker\\modelfiles\\semantic_parser_system_prompt.md",
+  "prompt_file_loaded": true,
+  "prompt_provenance": {
+    "status": "ok",
+    "prompt_id": "sp-ad589d272fbb",
+    "prompt_sha256": "ad589d272fbbdcc886719efd5c4d19e9dd732a469dc2f3c574d10e28bbec5dff",
+    "source_path": "D:\\_PROJECTS\\prethinker\\modelfiles\\semantic_parser_system_prompt.md",
+    "snapshot_path": "D:\\_PROJECTS\\prethinker\\modelfiles\\history\\prompts\\sp-ad589d272fbb.md",
+    "snapshot_created": true,
+    "char_count": 1910,
+    "line_count": 50,
+    "preview": "# Semantic Parser Prompt Pack (Qwen 3.5 9B)\nUse this as maintainable guidance for semantic parsing into Prolog structures.\nKeep behavior language-agnostic, deterministic, and schema-strict.\n## Core Priorities\n1. Output exactly one JSON object that matches the required schema.\n2. Preserve semantic meaning; do not hallucinate entities, facts, or arguments.\n3. Prefer canonical, stable predicate names across turns when semantics match.\n4. Use variables instead of assumptions when referents are unresolved."
+  },
+  "system_prompt_text": "# Semantic Parser Prompt Pack (Qwen 3.5 9B)\n\nUse this as maintainable guidance for semantic parsing into Prolog structures.\nKeep behavior language-agnostic, deterministic, and schema-strict.\n\n## Core Priorities\n\n1. Output exactly one JSON object that matches the required schema.\n2. Preserve semantic meaning; do not hallucinate entities, facts, or arguments.\n3. Prefer canonical, stable predicate names across turns when semantics match.\n4. Use variables instead of assumptions when referents are unresolved.\n5. Keep rationale brief and factual.\n\n## Intent Routing Guidance\n\n- `assert_fact`: declarative claims.\n- `assert_rule`: if/then, whenever, conditional, implication.\n- `query`: questions seeking truth or bindings.\n- `retract`: explicit correction/remove/retract/undo.\n- `other`: out-of-scope tasks (translation, formatting, rewrite).\n\n## Prolog Mapping Guidance\n\n- Atoms: lowercase snake_case.\n- Variables: Uppercase identifiers.\n- Facts: `predicate(atom, ...).`\n- Rules: `head(...) :- body(...).`\n- Queries: goal with trailing period and no `?-` prefix.\n- Retractions: `retract(<fact>).`\n\n## Relation and Argument Discipline\n\n- For forms like `<subject> is <relation> of <object>`, map to `relation(subject, object).`\n- Keep argument order aligned to semantic subject/object roles.\n- Avoid predicate synonym drift when an ontology already uses a compatible predicate.\n\n## Transitive Rule Readiness\n\nWhen utterances express chain logic, emit explicit compositional rules with shared variables, e.g.:\n\n- `ancestor(X, Z) :- ancestor(X, Y), ancestor(Y, Z).`\n- `depends_on(X, Z) :- depends_on(X, Y), depends_on(Y, Z).`\n\nOnly emit such rules when the utterance semantically indicates transitivity or chained implication.\n\n## Ambiguity Handling\n\n- If pronouns or entities are unresolved, set `needs_clarification=true`.\n- Use variables rather than invented atoms.\n- Keep ambiguities list short and concrete.",
+  "kb_runtime_boot_path": "D:\\_PROJECTS\\prethinker\\kb_store\\people_ladder_tune\\_bootstrap_empty.pl",
+  "kb_init": {
+    "status": "success",
+    "result_type": "runtime_emptied",
+    "message": "Runtime KB cleared to empty state.",
+    "knowledge_base_path": "D:\\_PROJECTS\\prethinker\\kb_store\\people_ladder_tune\\_bootstrap_empty.pl",
+    "remaining_clause_count": 0
+  },
+  "corpus_load": {
+    "status": "skipped",
+    "loaded_total": 0,
+    "message": "No retained corpus to preload."
+  },
+  "corpus_write": {
+    "path": "D:\\_PROJECTS\\prethinker\\kb_store\\people_ladder_tune\\kb.pl",
+    "clause_count": 2,
+    "status": "written"
+  },
+  "profile_write": {
+    "status": "written",
+    "path": "D:\\_PROJECTS\\prethinker\\kb_store\\people_ladder_tune\\ontology_profile.json",
+    "predicate_signature_count": 1
+  },
+  "index_write": {
+    "status": "written",
+    "path": "D:\\_PROJECTS\\prethinker\\kb_store\\ontologies_index.json",
+    "ontology_count": 3
+  },
+  "ontology_profile": {
+    "ontology_name": "people_ladder_tune",
+    "generated_at_utc": "2026-04-09T19:27:01+00:00",
+    "clause_count": 2,
+    "predicate_signatures": [
+      "man/1"
+    ],
+    "fact_predicates": [
+      "man/1"
+    ],
+    "rule_head_predicates": [],
+    "rule_body_predicates": []
+  },
+  "ontology_previous_profile": null,
+  "ontology_diff": {
+    "change_level": "new",
+    "requires_confirmation": false,
+    "similarity_to_previous": 0.0,
+    "added_signatures": [
+      "man/1"
+    ],
+    "removed_signatures": [],
+    "previous_signature_count": 0,
+    "current_signature_count": 1
+  },
+  "known_ontology_matches": [
+    {
+      "ontology_name": "people_core",
+      "similarity": 0.5,
+      "shared_signatures": [
+        "man/1"
+      ],
+      "other_signature_count": 2
+    },
+    {
+      "ontology_name": "people_ladder",
+      "similarity": 0.5,
+      "shared_signatures": [
+        "man/1"
+      ],
+      "other_signature_count": 2
+    }
+  ],
+  "gear_change": {
+    "change_level": "new",
+    "detected": false,
+    "requires_confirmation": false
+  },
+  "turns_total": 2,
+  "turn_parse_failures": 0,
+  "turn_apply_failures": 0,
+  "validation_total": 2,
+  "validation_passed": 2,
+  "overall_status": "passed",
+  "turns": [
+    {
+      "turn_index": 1,
+      "utterance": "Socrates is a man.",
+      "route": "assert_fact",
+      "route_source": "model",
+      "repaired": false,
+      "fallback_used": false,
+      "alignment_events": [],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "assert_fact",
+        "logic_string": "man(socrates).",
+        "components": {
+          "atoms": [
+            "socrates"
+          ],
+          "variables": [],
+          "predicates": [
+            "man"
+          ]
+        },
+        "facts": [
+          "man(socrates)."
+        ],
+        "rules": [],
+        "queries": [],
+        "confidence": {
+          "overall": 0.95,
+          "intent": 0.95,
+          "logic": 0.95
+        },
+        "ambiguities": [],
+        "needs_clarification": false,
+        "rationale": "Declarative statement asserting Socrates belongs to the category man."
+      },
+      "validation_errors": [],
+      "apply": {
+        "tool": "assert_fact",
+        "input": "man(socrates).",
+        "result": {
+          "status": "success",
+          "result_type": "fact_asserted",
+          "fact": "man(socrates).",
+          "message": "Fact asserted into runtime KB for this server process.",
+          "note": "Use reset_kb (baseline restore) or empty_kb (fully empty runtime) to clear runtime changes."
+        }
+      },
+      "apply_status": "success"
+    },
+    {
+      "turn_index": 2,
+      "utterance": "Plato is a man.",
+      "route": "assert_fact",
+      "route_source": "model",
+      "repaired": false,
+      "fallback_used": false,
+      "alignment_events": [],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "assert_fact",
+        "logic_string": "man(plato).",
+        "components": {
+          "atoms": [
+            "plato"
+          ],
+          "variables": [],
+          "predicates": [
+            "man"
+          ]
+        },
+        "facts": [
+          "man(plato)."
+        ],
+        "rules": [],
+        "queries": [],
+        "confidence": {
+          "overall": 0.95,
+          "intent": 0.95,
+          "logic": 0.95
+        },
+        "ambiguities": [],
+        "needs_clarification": false,
+        "rationale": "Direct declarative statement mapping to fact predicate."
+      },
+      "validation_errors": [],
+      "apply": {
+        "tool": "assert_fact",
+        "input": "man(plato).",
+        "result": {
+          "status": "success",
+          "result_type": "fact_asserted",
+          "fact": "man(plato).",
+          "message": "Fact asserted into runtime KB for this server process.",
+          "note": "Use reset_kb (baseline restore) or empty_kb (fully empty runtime) to clear runtime changes."
+        }
+      },
+      "apply_status": "success"
+    }
+  ],
+  "validations": [
+    {
+      "id": "socrates_man",
+      "query": "man(socrates).",
+      "expected_status": "success",
+      "result": {
+        "status": "success",
+        "result_type": "table",
+        "predicate": "man",
+        "prolog_query": "man(socrates).",
+        "variables": [],
+        "rows": [
+          {}
+        ],
+        "num_rows": 1,
+        "reasoning_basis": {
+          "kind": "fact-backed",
+          "note": "The `man` predicate is typically answered from stored facts, though rules may still participate."
+        }
+      },
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "id": "plato_man",
+      "query": "man(plato).",
+      "expected_status": "success",
+      "result": {
+        "status": "success",
+        "result_type": "table",
+        "predicate": "man",
+        "prolog_query": "man(plato).",
+        "variables": [],
+        "rows": [
+          {}
+        ],
+        "num_rows": 1,
+        "reasoning_basis": {
+          "kind": "fact-backed",
+          "note": "The `man` predicate is typically answered from stored facts, though rules may still participate."
+        }
+      },
+      "passed": true,
+      "reasons": []
+    }
+  ]
+}
+
+
+

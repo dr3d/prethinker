@@ -1,0 +1,76 @@
+{
+  "title": "Semantic Parser Run: stage_02_rule_ingest (people_ladder)",
+  "captured_at": "2026-04-09T17:54:58+00:00",
+  "model": "qwen3.5:9b",
+  "integration": "ollama",
+  "scenario": "stage_02_rule_ingest",
+  "ontology_kb_name": "people_ladder",
+  "steps": [
+    {
+      "step": "turn_01: assert_fact [skipped]",
+      "prompt": "Socrates is a man.",
+      "assistant_message": "{\n  \"route\": \"assert_fact\",\n  \"route_source\": \"model\",\n  \"repaired\": false,\n  \"fallback_used\": false,\n  \"parsed\": {\n    \"intent\": \"assert_fact\",\n    \"logic_string\": \"man(socrates).\",\n    \"components\": {\n      \"atoms\": [\n        \"socrates\"\n      ],\n      \"variables\": [],\n      \"predicates\": [\n        \"man\"\n      ]\n    },\n    \"facts\": [\n      \"man(socrates).\"\n    ],\n    \"rules\": [],\n    \"queries\": [],\n    \"confidence\": {\n      \"overall\": 0.95,\n      \"intent\": 0.95,\n      \"logic\": 0.95\n    },\n    \"ambiguities\": [],\n    \"needs_clarification\": false,\n    \"rationale\": \"Direct declarative statement mapping to a fact predicate using ontology predicate 'man'.\"\n  },\n  \"validation_errors\": [],\n  \"apply_status\": \"skipped\"\n}",
+      "tool_calls": [
+        {
+          "tool": "kb_apply::assert_fact",
+          "arguments": {
+            "turn_index": 1,
+            "input": "man(socrates)."
+          },
+          "output": {
+            "status": "skipped",
+            "message": "Fact already present in corpus."
+          }
+        }
+      ]
+    },
+    {
+      "step": "turn_02: assert_rule [skipped]",
+      "prompt": "If someone is a man then they are mortal.",
+      "assistant_message": "{\n  \"route\": \"assert_rule\",\n  \"route_source\": \"heuristic\",\n  \"repaired\": false,\n  \"fallback_used\": false,\n  \"parsed\": {\n    \"intent\": \"assert_rule\",\n    \"logic_string\": \"mortal(X) :- man(X).\",\n    \"components\": {\n      \"atoms\": [],\n      \"variables\": [\n        \"X\"\n      ],\n      \"predicates\": [\n        \"man\",\n        \"mortal\"\n      ]\n    },\n    \"facts\": [],\n    \"rules\": [\n      \"mortal(X) :- man(X).\"\n    ],\n    \"queries\": [],\n    \"confidence\": {\n      \"overall\": 0.95,\n      \"intent\": 0.95,\n      \"logic\": 0.95\n    },\n    \"ambiguities\": [],\n    \"needs_clarification\": false,\n    \"rationale\": \"Utterance expresses a conditional implication mapping to a rule using ontology predicates man and mortal.\"\n  },\n  \"validation_errors\": [],\n  \"apply_status\": \"skipped\"\n}",
+      "tool_calls": [
+        {
+          "tool": "kb_apply::assert_rule",
+          "arguments": {
+            "turn_index": 2,
+            "input": "mortal(X) :- man(X)."
+          },
+          "output": {
+            "status": "skipped",
+            "message": "Rule already present in corpus."
+          }
+        }
+      ]
+    },
+    {
+      "step": "validation_summary",
+      "prompt": "Run deterministic KB validations and compare against expectations.",
+      "assistant_message": "{\n  \"validation_total\": 1,\n  \"validation_passed\": 1,\n  \"overall_status\": \"passed\",\n  \"turn_parse_failures\": 0,\n  \"turn_apply_failures\": 0\n}",
+      "tool_calls": [
+        {
+          "tool": "validation::query_rows",
+          "arguments": {
+            "id": "rule_man_to_mortal",
+            "query": "mortal(socrates).",
+            "expected_status": "success"
+          },
+          "output": {
+            "status": "success",
+            "result_type": "table",
+            "predicate": "mortal",
+            "prolog_query": "mortal(socrates).",
+            "variables": [],
+            "rows": [
+              {}
+            ],
+            "num_rows": 1,
+            "reasoning_basis": {
+              "kind": "fact-backed",
+              "note": "The `mortal` predicate is typically answered from stored facts, though rules may still participate."
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

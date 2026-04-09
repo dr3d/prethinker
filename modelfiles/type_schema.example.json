@@ -1,0 +1,13 @@
+{
+  "entities": {
+    "john": "person",
+    "mary": "person",
+    "aspirin": "drug",
+    "diabetes": "disease"
+  },
+  "predicates": {
+    "parent/2": ["person", "person"],
+    "prescribed_drug/2": ["person", "drug"],
+    "has_diagnosis/2": ["person", "disease"]
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "name": "acid_03_temporal_override",
+  "ontology_name": "acid_temporal",
+  "utterances": [
+    "Agent a3 is provisional.",
+    "Agent a4 is valid.",
+    "Agent a3 has override.",
+    "If X is provisional then blocked(X).",
+    "If X has override then allowed(X).",
+    "If X is blocked and X is allowed then risky(X).",
+    "Actually, retract that: has_override(a3).",
+    "Agent a3 has manual_review.",
+    "If X has manual_review then blocked(X).",
+    "Translate this to Spanish: validation integrity matters."
+  ],
+  "validations": [
+    {
+      "id": "a3_blocked_true",
+      "query": "blocked(a3).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "a3_allowed_removed",
+      "query": "allowed(a3).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "a3_risky_removed",
+      "query": "risky(a3).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    }
+  ]
+}

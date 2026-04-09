@@ -1,0 +1,849 @@
+﻿<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Semantic Parser Run: stage_02_rule_ingest (people_ladder_tune)</title>
+  <meta name="description" content="Themed session transcript rendered from dialog_0lt2xx47.json." />
+  <style>
+    :root {
+      --bg: #e3ddd2;
+      --panel: #ece7de;
+      --ink: #201f1b;
+      --muted: #59544d;
+      --user: #decfba;
+      --assistant: #cedbe6;
+      --tool: #d9dfd3;
+      --border: #c2b9aa;
+      --code: #232b34;
+      --code-bg: #f7f1e6;
+      --copy-bg: #fff4df;
+      --copy-border: #b7a990;
+      --copy-ink: #3e3a31;
+      --copy-done-bg: #e5f0dd;
+      --copy-done-border: #7e9e73;
+      --copy-done-ink: #2f5130;
+    }
+
+    html[data-theme="dark"] {
+      --bg: #171a1f;
+      --panel: #1f252d;
+      --ink: #e8edf2;
+      --muted: #b7c1cc;
+      --user: #3b2f23;
+      --assistant: #21394d;
+      --tool: #293229;
+      --border: #3b4652;
+      --code: #ebf3ff;
+      --code-bg: #2a3441;
+      --copy-bg: #303944;
+      --copy-border: #4d5e71;
+      --copy-ink: #e6f1ff;
+      --copy-done-bg: #2f4a35;
+      --copy-done-border: #5f8a67;
+      --copy-done-ink: #e5f8e8;
+    }
+
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.35;
+    }
+
+    .wrap {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    h1 {
+      margin: 0 0 12px 0;
+      font-size: 34px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .topbar-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .nav-link {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      border-radius: 9px;
+      color: var(--ink);
+      font-family: "Courier New", monospace;
+      font-size: 12px;
+      line-height: 1;
+      padding: 7px 10px;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .nav-link:hover {
+      filter: brightness(1.06);
+    }
+
+    .theme-btn {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      border-radius: 9px;
+      color: var(--ink);
+      font-family: "Courier New", monospace;
+      font-size: 12px;
+      line-height: 1;
+      padding: 7px 10px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .skin-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .skin-label {
+      font-family: "Courier New", monospace;
+      font-size: 11px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .skin-select {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      border-radius: 10px;
+      color: var(--ink);
+      font-family: "Courier New", monospace;
+      font-size: 12px;
+      line-height: 1;
+      padding: 7px 8px;
+      cursor: pointer;
+    }
+
+    .theme-btn:hover {
+      filter: brightness(1.06);
+    }
+
+    .meta {
+      font-family: "Courier New", monospace;
+      font-size: 13px;
+      color: var(--muted);
+      margin: 6px 0 24px;
+    }
+
+    .step-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 1px 2px rgba(0,0,0,.04);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    h2 {
+      margin: 0 0 12px 0;
+      font-size: 22px;
+      text-transform: none;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      line-height: 1.28;
+    }
+
+    .bubble {
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .bubble.user {
+      background: var(--user);
+    }
+
+    .bubble.assistant {
+      background: var(--assistant);
+    }
+
+    .bubble-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .label {
+      font-size: 11px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-family: "Courier New", monospace;
+    }
+
+    .copy-btn {
+      border: 1px solid var(--copy-border);
+      background: var(--copy-bg);
+      border-radius: 8px;
+      color: var(--copy-ink);
+      font-family: "Courier New", monospace;
+      font-size: 11px;
+      line-height: 1;
+      padding: 4px 6px;
+      cursor: pointer;
+    }
+
+    .copy-btn:hover {
+      filter: brightness(1.05);
+    }
+
+    .copy-btn.copied {
+      border-color: var(--copy-done-border);
+      background: var(--copy-done-bg);
+      color: var(--copy-done-ink);
+    }
+
+    .toolbox {
+      background: var(--tool);
+      border-radius: 14px;
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+      font-family: "Courier New", monospace;
+      font-size: 13px;
+    }
+
+    .tool-expando {
+      padding: 0;
+    }
+
+    .tool-expando summary {
+      cursor: pointer;
+      list-style: none;
+      padding: 8px 10px;
+      font-family: "Courier New", monospace;
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .tool-expando summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .expando-count {
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 1px 7px;
+      font-size: 11px;
+      letter-spacing: 0;
+      text-transform: none;
+      color: var(--ink);
+      background: var(--panel);
+    }
+
+    .tool-list {
+      margin: 0;
+      padding: 0 10px 10px 20px;
+    }
+
+    .tool-item {
+      margin-bottom: 10px;
+    }
+
+    .tool-line {
+      margin-bottom: 4px;
+    }
+
+    .tool-output {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: color-mix(in srgb, var(--tool) 88%, var(--panel));
+      overflow: hidden;
+    }
+
+    .tool-output > summary {
+      cursor: pointer;
+      list-style: none;
+      padding: 6px 8px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+    }
+
+    .tool-output > summary::-webkit-details-marker {
+      display: none;
+    }
+
+    pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: "Courier New", monospace;
+      font-size: 13px;
+      color: var(--ink);
+    }
+
+    .bubble pre {
+      margin: 0;
+    }
+
+    .tool-output pre {
+      padding: 8px;
+      border-top: 1px solid var(--border);
+      background: color-mix(in srgb, var(--panel) 80%, var(--tool));
+    }
+
+    code {
+      font-family: "Courier New", monospace;
+      font-size: 12px;
+      color: var(--code);
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1px 4px;
+    }
+
+    @media (max-width: 760px) {
+      .topbar {
+        flex-direction: column;
+      }
+      .topbar-right {
+        width: 100%;
+        align-items: flex-start;
+      }
+      .nav-links {
+        justify-content: flex-start;
+      }
+      .skin-controls {
+        justify-content: flex-start;
+      }
+    }
+
+
+
+    .annotation-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 8px 0 12px;
+    }
+
+    .annotation-card {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+      margin-right: auto;
+      max-width: 92%;
+      background: color-mix(in srgb, var(--panel) 84%, var(--tool));
+    }
+
+    .annotation-card.annotation-score {
+      background: color-mix(in srgb, var(--assistant) 72%, var(--panel));
+    }
+
+    .annotation-card.annotation-pass {
+      background: color-mix(in srgb, var(--copy-done-bg) 58%, var(--panel));
+      border-color: color-mix(in srgb, var(--copy-done-border) 70%, var(--border));
+    }
+
+    .annotation-card.annotation-fail {
+      background: color-mix(in srgb, #ffd7d7 58%, var(--panel));
+      border-color: color-mix(in srgb, #d66 65%, var(--border));
+    }
+
+    .annotation-card.annotation-warning {
+      background: color-mix(in srgb, #ffe8b3 56%, var(--panel));
+      border-color: color-mix(in srgb, #cc9a33 65%, var(--border));
+    }
+
+    html[data-theme="dark"] .annotation-card.annotation-fail {
+      background: color-mix(in srgb, #4a2424 60%, var(--panel));
+      border-color: color-mix(in srgb, #b77676 60%, var(--border));
+    }
+
+    html[data-theme="dark"] .annotation-card.annotation-warning {
+      background: color-mix(in srgb, #4b3a20 60%, var(--panel));
+      border-color: color-mix(in srgb, #b88f49 60%, var(--border));
+    }
+
+    .annotation-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .annotation-kind {
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 1px 7px;
+      font-size: 10px;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: var(--panel);
+      font-family: "Courier New", monospace;
+    }
+
+    .annotation-title {
+      font-size: 12px;
+      color: var(--ink);
+      font-weight: 600;
+      letter-spacing: .01em;
+    }
+
+
+  </style>
+</head>
+<body data-skin="standard">
+  <div class="wrap">
+    <div class="topbar">
+      <h1>Semantic Parser Run: stage_02_rule_ingest (people_ladder_tune)</h1>
+      <div class="topbar-right">
+        <div class="nav-links">
+          <a class="nav-link" href="/hub">Back to Docs Hub</a>
+          <a class="nav-link" href="./README.md">View Repo</a>
+          <button id="appearance-toggle" class="theme-btn" aria-label="Switch transcript appearance">appearance</button>
+        </div>
+      </div>
+    </div>
+    <div class="meta">Captured: 2026-04-09T19:53:06+00:00 | Model: qwen3.5:9b | Integration: ollama | Initial skin: standard | Rendered: 2026-04-09 19:53:06 UTC</div>
+    <section class="step-card"><h2>run_context</h2><div class="bubble user"><div class="bubble-head"><div class="label">User</div><button class="copy-btn" data-copy="Capture run provenance and prompt/version settings for reproducibility." data-label="copy" data-success-label="copied" data-failure-label="copy-failed">copy</button></div><pre>Capture run provenance and prompt/version settings for reproducibility.</pre></div><details class="toolbox tool-expando"><summary><span>tool calls</span><span class="expando-count">0</span></summary><p class="tool-list">No tool calls captured.</p></details><div class="bubble assistant"><div class="bubble-head"><div class="label">Assistant</div><button class="copy-btn" data-copy="{
+  &quot;run_id&quot;: &quot;run-20260409T192706Z-stage_02_rule_ingest-qwen3_5_9b-39016&quot;,
+  &quot;run_started_utc&quot;: &quot;2026-04-09T19:27:06+00:00&quot;,
+  &quot;run_finished_utc&quot;: &quot;2026-04-09T19:27:59+00:00&quot;,
+  &quot;scenario&quot;: &quot;stage_02_rule_ingest&quot;,
+  &quot;ontology_kb_name&quot;: &quot;people_ladder_tune&quot;,
+  &quot;backend&quot;: &quot;ollama&quot;,
+  &quot;model&quot;: &quot;qwen3.5:9b&quot;,
+  &quot;model_settings&quot;: {
+    &quot;temperature&quot;: 0,
+    &quot;context_length&quot;: 4096,
+    &quot;classifier_context_length&quot;: 2048,
+    &quot;timeout_seconds&quot;: 120,
+    &quot;two_pass&quot;: true,
+    &quot;split_extraction&quot;: true,
+    &quot;strict_registry&quot;: false,
+    &quot;strict_types&quot;: false,
+    &quot;backend_options&quot;: {
+      &quot;num_ctx&quot;: 4096
+    }
+  },
+  &quot;prompt_provenance&quot;: {
+    &quot;status&quot;: &quot;ok&quot;,
+    &quot;prompt_id&quot;: &quot;sp-ad589d272fbb&quot;,
+    &quot;prompt_sha256&quot;: &quot;ad589d272fbbdcc886719efd5c4d19e9dd732a469dc2f3c574d10e28bbec5dff&quot;,
+    &quot;source_path&quot;: &quot;D:\\_PROJECTS\\prethinker\\modelfiles\\semantic_parser_system_prompt.md&quot;,
+    &quot;snapshot_path&quot;: &quot;D:\\_PROJECTS\\prethinker\\modelfiles\\history\\prompts\\sp-ad589d272fbb.md&quot;,
+    &quot;snapshot_created&quot;: false,
+    &quot;char_count&quot;: 1910,
+    &quot;line_count&quot;: 50,
+    &quot;preview&quot;: &quot;# Semantic Parser Prompt Pack (Qwen 3.5 9B)\nUse this as maintainable guidance for semantic parsing into Prolog structures.\nKeep behavior language-agnostic, deterministic, and schema-strict.\n## Core Priorities\n1. Output exactly one JSON object that matches the required schema.\n2. Preserve semantic meaning; do not hallucinate entities, facts, or arguments.\n3. Prefer canonical, stable predicate names across turns when semantics match.\n4. Use variables instead of assumptions when referents are unresolved.&quot;
+  }
+}" data-label="copy" data-success-label="copied" data-failure-label="copy-failed">copy</button></div><pre>{
+  &quot;run_id&quot;: &quot;run-20260409T192706Z-stage_02_rule_ingest-qwen3_5_9b-39016&quot;,
+  &quot;run_started_utc&quot;: &quot;2026-04-09T19:27:06+00:00&quot;,
+  &quot;run_finished_utc&quot;: &quot;2026-04-09T19:27:59+00:00&quot;,
+  &quot;scenario&quot;: &quot;stage_02_rule_ingest&quot;,
+  &quot;ontology_kb_name&quot;: &quot;people_ladder_tune&quot;,
+  &quot;backend&quot;: &quot;ollama&quot;,
+  &quot;model&quot;: &quot;qwen3.5:9b&quot;,
+  &quot;model_settings&quot;: {
+    &quot;temperature&quot;: 0,
+    &quot;context_length&quot;: 4096,
+    &quot;classifier_context_length&quot;: 2048,
+    &quot;timeout_seconds&quot;: 120,
+    &quot;two_pass&quot;: true,
+    &quot;split_extraction&quot;: true,
+    &quot;strict_registry&quot;: false,
+    &quot;strict_types&quot;: false,
+    &quot;backend_options&quot;: {
+      &quot;num_ctx&quot;: 4096
+    }
+  },
+  &quot;prompt_provenance&quot;: {
+    &quot;status&quot;: &quot;ok&quot;,
+    &quot;prompt_id&quot;: &quot;sp-ad589d272fbb&quot;,
+    &quot;prompt_sha256&quot;: &quot;ad589d272fbbdcc886719efd5c4d19e9dd732a469dc2f3c574d10e28bbec5dff&quot;,
+    &quot;source_path&quot;: &quot;D:\\_PROJECTS\\prethinker\\modelfiles\\semantic_parser_system_prompt.md&quot;,
+    &quot;snapshot_path&quot;: &quot;D:\\_PROJECTS\\prethinker\\modelfiles\\history\\prompts\\sp-ad589d272fbb.md&quot;,
+    &quot;snapshot_created&quot;: false,
+    &quot;char_count&quot;: 1910,
+    &quot;line_count&quot;: 50,
+    &quot;preview&quot;: &quot;# Semantic Parser Prompt Pack (Qwen 3.5 9B)\nUse this as maintainable guidance for semantic parsing into Prolog structures.\nKeep behavior language-agnostic, deterministic, and schema-strict.\n## Core Priorities\n1. Output exactly one JSON object that matches the required schema.\n2. Preserve semantic meaning; do not hallucinate entities, facts, or arguments.\n3. Prefer canonical, stable predicate names across turns when semantics match.\n4. Use variables instead of assumptions when referents are unresolved.&quot;
+  }
+}</pre></div><div class="annotation-stack"><div class="annotation-card annotation-info"><div class="annotation-head"><div class="annotation-title">Prompt Provenance</div><div class="annotation-kind">info</div></div><pre>prompt_id=sp-ad589d272fbb
+prompt_sha256=ad589d272fbbdcc886719efd5c4d19e9dd732a469dc2f3c574d10e28bbec5dff
+snapshot_path=D:\_PROJECTS\prethinker\modelfiles\history\prompts\sp-ad589d272fbb.md
+preview:
+# Semantic Parser Prompt Pack (Qwen 3.5 9B)
+Use this as maintainable guidance for semantic parsing into Prolog structures.
+Keep behavior language-agnostic, deterministic, and schema-strict.
+## Core Priorities
+1. Output exactly one JSON object that matches the required schema.
+2. Preserve semantic meaning; do not hallucinate entities, facts, or arguments.
+3. Prefer canonical, stable predicate names across turns when semantics match.
+4. Use variables instead of assumptions when referents are unresolved.</pre></div></div></section><section class="step-card"><h2>turn_01: assert_fact [skipped]</h2><div class="bubble user"><div class="bubble-head"><div class="label">User</div><button class="copy-btn" data-copy="Socrates is a man." data-label="copy" data-success-label="copied" data-failure-label="copy-failed">copy</button></div><pre>Socrates is a man.</pre></div><details class="toolbox tool-expando"><summary><span>tool calls</span><span class="expando-count">1</span></summary><ul class="tool-list"><li class="tool-item"><div class="tool-line"><code>kb_apply::assert_fact</code> <code>{
+  &quot;turn_index&quot;: 1,
+  &quot;input&quot;: &quot;man(socrates).&quot;
+}</code></div><details class="tool-output"><summary>output</summary><pre>{
+  &quot;status&quot;: &quot;skipped&quot;,
+  &quot;message&quot;: &quot;Fact already present in corpus.&quot;
+}</pre></details></li></ul></details><div class="bubble assistant"><div class="bubble-head"><div class="label">Assistant</div><button class="copy-btn" data-copy="{
+  &quot;expected_utterance&quot;: &quot;Socrates is a man.&quot;,
+  &quot;observed_utterance&quot;: &quot;Socrates is a man.&quot;,
+  &quot;route&quot;: &quot;assert_fact&quot;,
+  &quot;expected_route&quot;: &quot;assert_fact&quot;,
+  &quot;route_source&quot;: &quot;model&quot;,
+  &quot;repaired&quot;: false,
+  &quot;fallback_used&quot;: false,
+  &quot;parsed&quot;: {
+    &quot;intent&quot;: &quot;assert_fact&quot;,
+    &quot;logic_string&quot;: &quot;man(socrates).&quot;,
+    &quot;components&quot;: {
+      &quot;atoms&quot;: [
+        &quot;socrates&quot;
+      ],
+      &quot;variables&quot;: [],
+      &quot;predicates&quot;: [
+        &quot;man&quot;
+      ]
+    },
+    &quot;facts&quot;: [
+      &quot;man(socrates).&quot;
+    ],
+    &quot;rules&quot;: [],
+    &quot;queries&quot;: [],
+    &quot;confidence&quot;: {
+      &quot;overall&quot;: 1.0,
+      &quot;intent&quot;: 1.0,
+      &quot;logic&quot;: 1.0
+    },
+    &quot;ambiguities&quot;: [],
+    &quot;needs_clarification&quot;: false,
+    &quot;rationale&quot;: &quot;Declarative statement mapping to fact predicate.&quot;
+  },
+  &quot;validation_errors&quot;: [],
+  &quot;apply_status&quot;: &quot;skipped&quot;,
+  &quot;utterance_ok&quot;: 1.0,
+  &quot;turn_score&quot;: 1.0
+}" data-label="copy" data-success-label="copied" data-failure-label="copy-failed">copy</button></div><pre>{
+  &quot;expected_utterance&quot;: &quot;Socrates is a man.&quot;,
+  &quot;observed_utterance&quot;: &quot;Socrates is a man.&quot;,
+  &quot;route&quot;: &quot;assert_fact&quot;,
+  &quot;expected_route&quot;: &quot;assert_fact&quot;,
+  &quot;route_source&quot;: &quot;model&quot;,
+  &quot;repaired&quot;: false,
+  &quot;fallback_used&quot;: false,
+  &quot;parsed&quot;: {
+    &quot;intent&quot;: &quot;assert_fact&quot;,
+    &quot;logic_string&quot;: &quot;man(socrates).&quot;,
+    &quot;components&quot;: {
+      &quot;atoms&quot;: [
+        &quot;socrates&quot;
+      ],
+      &quot;variables&quot;: [],
+      &quot;predicates&quot;: [
+        &quot;man&quot;
+      ]
+    },
+    &quot;facts&quot;: [
+      &quot;man(socrates).&quot;
+    ],
+    &quot;rules&quot;: [],
+    &quot;queries&quot;: [],
+    &quot;confidence&quot;: {
+      &quot;overall&quot;: 1.0,
+      &quot;intent&quot;: 1.0,
+      &quot;logic&quot;: 1.0
+    },
+    &quot;ambiguities&quot;: [],
+    &quot;needs_clarification&quot;: false,
+    &quot;rationale&quot;: &quot;Declarative statement mapping to fact predicate.&quot;
+  },
+  &quot;validation_errors&quot;: [],
+  &quot;apply_status&quot;: &quot;skipped&quot;,
+  &quot;utterance_ok&quot;: 1.0,
+  &quot;turn_score&quot;: 1.0
+}</pre></div><div class="annotation-stack"><div class="annotation-card annotation-info"><div class="annotation-head"><div class="annotation-title">Prethinker Annotation</div><div class="annotation-kind">info</div></div><pre>Why asked: Seed grounded terms/constants as facts for later inference.
+Utterance expected/observed: Socrates is a man. / Socrates is a man.
+Route expected/observed: assert_fact / assert_fact
+Parser path: source=model repaired=False fallback=False</pre></div><div class="annotation-card annotation-info"><div class="annotation-head"><div class="annotation-title">KB Action</div><div class="annotation-kind">info</div></div><pre>intent=assert_fact apply_tool=assert_fact apply_status=skipped
+effect=mutation(write)
+submitted=man(socrates).
+message=Fact already present in corpus.</pre></div><div class="annotation-card annotation-info"><div class="annotation-head"><div class="annotation-title">KB Elements</div><div class="annotation-kind">info</div></div><pre>intent=assert_fact
+logic=man(socrates).
+facts=[&#x27;man(socrates).&#x27;]
+rules=[]
+queries=[]
+predicates=[&#x27;man&#x27;]
+atoms=[&#x27;socrates&#x27;] variables=[]</pre></div><div class="annotation-card annotation-score"><div class="annotation-head"><div class="annotation-title">Turn Score</div><div class="annotation-kind">score</div></div><pre>score=1.0 (parse_ok=1.0, route_ok=1.0, apply_ok=1.0, utterance_ok=1.0)
+apply_tool=assert_fact apply_status=skipped</pre></div></div></section><section class="step-card"><h2>turn_02: assert_rule [success]</h2><div class="bubble user"><div class="bubble-head"><div class="label">User</div><button class="copy-btn" data-copy="If someone is a man then they are mortal." data-label="copy" data-success-label="copied" data-failure-label="copy-failed">copy</button></div><pre>If someone is a man then they are mortal.</pre></div><details class="toolbox tool-expando"><summary><span>tool calls</span><span class="expando-count">1</span></summary><ul class="tool-list"><li class="tool-item"><div class="tool-line"><code>kb_apply::assert_rule</code> <code>{
+  &quot;turn_index&quot;: 2,
+  &quot;input&quot;: &quot;mortal(X) :- man(X).&quot;
+}</code></div><details class="tool-output"><summary>output</summary><pre>{
+  &quot;status&quot;: &quot;success&quot;,
+  &quot;result_type&quot;: &quot;rule_asserted&quot;,
+  &quot;rule&quot;: &quot;mortal(X) :- man(X).&quot;,
+  &quot;message&quot;: &quot;Rule asserted into runtime KB for this server process.&quot;,
+  &quot;note&quot;: &quot;Use reset_kb (baseline restore) or empty_kb (fully empty runtime) to clear runtime changes.&quot;
+}</pre></details></li></ul></details><div class="bubble assistant"><div class="bubble-head"><div class="label">Assistant</div><button class="copy-btn" data-copy="{
+  &quot;expected_utterance&quot;: &quot;If someone is a man then they are mortal.&quot;,
+  &quot;observed_utterance&quot;: &quot;If someone is a man then they are mortal.&quot;,
+  &quot;route&quot;: &quot;assert_rule&quot;,
+  &quot;expected_route&quot;: &quot;assert_rule&quot;,
+  &quot;route_source&quot;: &quot;heuristic&quot;,
+  &quot;repaired&quot;: false,
+  &quot;fallback_used&quot;: false,
+  &quot;parsed&quot;: {
+    &quot;intent&quot;: &quot;assert_rule&quot;,
+    &quot;logic_string&quot;: &quot;mortal(X) :- man(X).&quot;,
+    &quot;components&quot;: {
+      &quot;atoms&quot;: [],
+      &quot;variables&quot;: [
+        &quot;X&quot;
+      ],
+      &quot;predicates&quot;: [
+        &quot;man&quot;,
+        &quot;mortal&quot;
+      ]
+    },
+    &quot;facts&quot;: [],
+    &quot;rules&quot;: [
+      &quot;mortal(X) :- man(X).&quot;
+    ],
+    &quot;queries&quot;: [],
+    &quot;confidence&quot;: {
+      &quot;overall&quot;: 0.95,
+      &quot;intent&quot;: 0.95,
+      &quot;logic&quot;: 0.95
+    },
+    &quot;ambiguities&quot;: [],
+    &quot;needs_clarification&quot;: false,
+    &quot;rationale&quot;: &quot;Conditional statement mapped to implication rule using known predicate man.&quot;
+  },
+  &quot;validation_errors&quot;: [],
+  &quot;apply_status&quot;: &quot;success&quot;,
+  &quot;utterance_ok&quot;: 1.0,
+  &quot;turn_score&quot;: 1.0
+}" data-label="copy" data-success-label="copied" data-failure-label="copy-failed">copy</button></div><pre>{
+  &quot;expected_utterance&quot;: &quot;If someone is a man then they are mortal.&quot;,
+  &quot;observed_utterance&quot;: &quot;If someone is a man then they are mortal.&quot;,
+  &quot;route&quot;: &quot;assert_rule&quot;,
+  &quot;expected_route&quot;: &quot;assert_rule&quot;,
+  &quot;route_source&quot;: &quot;heuristic&quot;,
+  &quot;repaired&quot;: false,
+  &quot;fallback_used&quot;: false,
+  &quot;parsed&quot;: {
+    &quot;intent&quot;: &quot;assert_rule&quot;,
+    &quot;logic_string&quot;: &quot;mortal(X) :- man(X).&quot;,
+    &quot;components&quot;: {
+      &quot;atoms&quot;: [],
+      &quot;variables&quot;: [
+        &quot;X&quot;
+      ],
+      &quot;predicates&quot;: [
+        &quot;man&quot;,
+        &quot;mortal&quot;
+      ]
+    },
+    &quot;facts&quot;: [],
+    &quot;rules&quot;: [
+      &quot;mortal(X) :- man(X).&quot;
+    ],
+    &quot;queries&quot;: [],
+    &quot;confidence&quot;: {
+      &quot;overall&quot;: 0.95,
+      &quot;intent&quot;: 0.95,
+      &quot;logic&quot;: 0.95
+    },
+    &quot;ambiguities&quot;: [],
+    &quot;needs_clarification&quot;: false,
+    &quot;rationale&quot;: &quot;Conditional statement mapped to implication rule using known predicate man.&quot;
+  },
+  &quot;validation_errors&quot;: [],
+  &quot;apply_status&quot;: &quot;success&quot;,
+  &quot;utterance_ok&quot;: 1.0,
+  &quot;turn_score&quot;: 1.0
+}</pre></div><div class="annotation-stack"><div class="annotation-card annotation-info"><div class="annotation-head"><div class="annotation-title">Prethinker Annotation</div><div class="annotation-kind">info</div></div><pre>Why asked: Introduce an inference rule so downstream queries can derive new truths.
+Utterance expected/observed: If someone is a man then they are mortal. / If someone is a man then they are mortal.
+Route expected/observed: assert_rule / assert_rule
+Parser path: source=heuristic repaired=False fallback=False</pre></div><div class="annotation-card annotation-info"><div class="annotation-head"><div class="annotation-title">KB Action</div><div class="annotation-kind">info</div></div><pre>intent=assert_rule apply_tool=assert_rule apply_status=success
+effect=mutation(write)
+submitted=mortal(X) :- man(X).
+result_type=rule_asserted
+rule=mortal(X) :- man(X).
+message=Rule asserted into runtime KB for this server process.</pre></div><div class="annotation-card annotation-info"><div class="annotation-head"><div class="annotation-title">KB Elements</div><div class="annotation-kind">info</div></div><pre>intent=assert_rule
+logic=mortal(X) :- man(X).
+facts=[]
+rules=[&#x27;mortal(X) :- man(X).&#x27;]
+queries=[]
+predicates=[&#x27;man&#x27;, &#x27;mortal&#x27;]
+atoms=[] variables=[&#x27;X&#x27;]</pre></div><div class="annotation-card annotation-score"><div class="annotation-head"><div class="annotation-title">Turn Score</div><div class="annotation-kind">score</div></div><pre>score=1.0 (parse_ok=1.0, route_ok=1.0, apply_ok=1.0, utterance_ok=1.0)
+apply_tool=assert_rule apply_status=success</pre></div></div></section><section class="step-card"><h2>validation_summary</h2><div class="bubble user"><div class="bubble-head"><div class="label">User</div><button class="copy-btn" data-copy="Run deterministic KB validations and compare against expectations." data-label="copy" data-success-label="copied" data-failure-label="copy-failed">copy</button></div><pre>Run deterministic KB validations and compare against expectations.</pre></div><details class="toolbox tool-expando"><summary><span>tool calls</span><span class="expando-count">1</span></summary><ul class="tool-list"><li class="tool-item"><div class="tool-line"><code>validation::query_rows</code> <code>{
+  &quot;id&quot;: &quot;rule_man_to_mortal&quot;,
+  &quot;query&quot;: &quot;mortal(socrates).&quot;,
+  &quot;expected_status&quot;: &quot;success&quot;
+}</code></div><details class="tool-output"><summary>output</summary><pre>{
+  &quot;status&quot;: &quot;success&quot;,
+  &quot;result_type&quot;: &quot;table&quot;,
+  &quot;predicate&quot;: &quot;mortal&quot;,
+  &quot;prolog_query&quot;: &quot;mortal(socrates).&quot;,
+  &quot;variables&quot;: [],
+  &quot;rows&quot;: [
+    {}
+  ],
+  &quot;num_rows&quot;: 1,
+  &quot;reasoning_basis&quot;: {
+    &quot;kind&quot;: &quot;fact-backed&quot;,
+    &quot;note&quot;: &quot;The `mortal` predicate is typically answered from stored facts, though rules may still participate.&quot;
+  }
+}</pre></details></li></ul></details><div class="bubble assistant"><div class="bubble-head"><div class="label">Assistant</div><button class="copy-btn" data-copy="{
+  &quot;validation_total&quot;: 1,
+  &quot;validation_passed&quot;: 1,
+  &quot;overall_status&quot;: &quot;passed&quot;,
+  &quot;turn_parse_failures&quot;: 0,
+  &quot;turn_apply_failures&quot;: 0
+}" data-label="copy" data-success-label="copied" data-failure-label="copy-failed">copy</button></div><pre>{
+  &quot;validation_total&quot;: 1,
+  &quot;validation_passed&quot;: 1,
+  &quot;overall_status&quot;: &quot;passed&quot;,
+  &quot;turn_parse_failures&quot;: 0,
+  &quot;turn_apply_failures&quot;: 0
+}</pre></div><div class="annotation-stack"><div class="annotation-card annotation-score"><div class="annotation-head"><div class="annotation-title">Validation Score</div><div class="annotation-kind">score</div></div><pre>score=1.0 (1/1 passed)</pre></div><div class="annotation-card annotation-info"><div class="annotation-head"><div class="annotation-title">Validation Notes</div><div class="annotation-kind">info</div></div><pre>rule_man_to_mortal: PASS (query=mortal(socrates)., expected=success, observed=success)</pre></div><div class="annotation-card annotation-pass"><div class="annotation-head"><div class="annotation-title">rule_man_to_mortal</div><div class="annotation-kind">pass</div></div><pre>query=mortal(socrates).
+expected=success observed=success
+reasons=none</pre></div></div></section>
+  </div>
+  <script id="skin-css-map" type="application/json">{"standard": "    :root {\n      --bg: #e3ddd2;\n      --panel: #ece7de;\n      --ink: #201f1b;\n      --muted: #59544d;\n      --user: #decfba;\n      --assistant: #cedbe6;\n      --tool: #d9dfd3;\n      --border: #c2b9aa;\n      --code: #232b34;\n      --code-bg: #f7f1e6;\n      --copy-bg: #fff4df;\n      --copy-border: #b7a990;\n      --copy-ink: #3e3a31;\n      --copy-done-bg: #e5f0dd;\n      --copy-done-border: #7e9e73;\n      --copy-done-ink: #2f5130;\n    }\n\n    html[data-theme=\"dark\"] {\n      --bg: #171a1f;\n      --panel: #1f252d;\n      --ink: #e8edf2;\n      --muted: #b7c1cc;\n      --user: #3b2f23;\n      --assistant: #21394d;\n      --tool: #293229;\n      --border: #3b4652;\n      --code: #ebf3ff;\n      --code-bg: #2a3441;\n      --copy-bg: #303944;\n      --copy-border: #4d5e71;\n      --copy-ink: #e6f1ff;\n      --copy-done-bg: #2f4a35;\n      --copy-done-border: #5f8a67;\n      --copy-done-ink: #e5f8e8;\n    }\n\n    body {\n      margin: 0;\n      font-family: Georgia, \"Times New Roman\", serif;\n      background: var(--bg);\n      color: var(--ink);\n      line-height: 1.35;\n    }\n\n    .wrap {\n      max-width: 1080px;\n      margin: 0 auto;\n      padding: 24px;\n    }\n\n    h1 {\n      margin: 0 0 12px 0;\n      font-size: 34px;\n    }\n\n    .topbar {\n      display: flex;\n      align-items: flex-start;\n      justify-content: space-between;\n      gap: 12px;\n    }\n\n    .topbar-right {\n      display: flex;\n      flex-direction: column;\n      align-items: flex-end;\n      gap: 8px;\n    }\n\n    .nav-links {\n      display: flex;\n      align-items: center;\n      gap: 8px;\n      flex-wrap: wrap;\n      justify-content: flex-end;\n    }\n\n    .nav-link {\n      border: 1px solid var(--border);\n      background: var(--panel);\n      border-radius: 9px;\n      color: var(--ink);\n      font-family: \"Courier New\", monospace;\n      font-size: 12px;\n      line-height: 1;\n      padding: 7px 10px;\n      text-decoration: none;\n      white-space: nowrap;\n    }\n\n    .nav-link:hover {\n      filter: brightness(1.06);\n    }\n\n    .theme-btn {\n      border: 1px solid var(--border);\n      background: var(--panel);\n      border-radius: 9px;\n      color: var(--ink);\n      font-family: \"Courier New\", monospace;\n      font-size: 12px;\n      line-height: 1;\n      padding: 7px 10px;\n      cursor: pointer;\n      white-space: nowrap;\n    }\n\n    .skin-controls {\n      display: flex;\n      align-items: center;\n      gap: 6px;\n      flex-wrap: wrap;\n      justify-content: flex-end;\n    }\n\n    .skin-label {\n      font-family: \"Courier New\", monospace;\n      font-size: 11px;\n      letter-spacing: .08em;\n      text-transform: uppercase;\n      color: var(--muted);\n    }\n\n    .skin-select {\n      border: 1px solid var(--border);\n      background: var(--panel);\n      border-radius: 10px;\n      color: var(--ink);\n      font-family: \"Courier New\", monospace;\n      font-size: 12px;\n      line-height: 1;\n      padding: 7px 8px;\n      cursor: pointer;\n    }\n\n    .theme-btn:hover {\n      filter: brightness(1.06);\n    }\n\n    .meta {\n      font-family: \"Courier New\", monospace;\n      font-size: 13px;\n      color: var(--muted);\n      margin: 6px 0 24px;\n    }\n\n    .step-card {\n      background: var(--panel);\n      border: 1px solid var(--border);\n      border-radius: 16px;\n      box-shadow: 0 1px 2px rgba(0,0,0,.04);\n      padding: 16px;\n      margin-bottom: 16px;\n    }\n\n    h2 {\n      margin: 0 0 12px 0;\n      font-size: 22px;\n      text-transform: none;\n      overflow-wrap: anywhere;\n      word-break: break-word;\n      line-height: 1.28;\n    }\n\n    .bubble {\n      border-radius: 14px;\n      padding: 12px;\n      margin-bottom: 12px;\n      border: 1px solid var(--border);\n    }\n\n    .bubble.user {\n      background: var(--user);\n    }\n\n    .bubble.assistant {\n      background: var(--assistant);\n    }\n\n    .bubble-head {\n      display: flex;\n      align-items: center;\n      justify-content: space-between;\n      gap: 8px;\n      margin-bottom: 8px;\n    }\n\n    .label {\n      font-size: 11px;\n      letter-spacing: .08em;\n      text-transform: uppercase;\n      color: var(--muted);\n      font-family: \"Courier New\", monospace;\n    }\n\n    .copy-btn {\n      border: 1px solid var(--copy-border);\n      background: var(--copy-bg);\n      border-radius: 8px;\n      color: var(--copy-ink);\n      font-family: \"Courier New\", monospace;\n      font-size: 11px;\n      line-height: 1;\n      padding: 4px 6px;\n      cursor: pointer;\n    }\n\n    .copy-btn:hover {\n      filter: brightness(1.05);\n    }\n\n    .copy-btn.copied {\n      border-color: var(--copy-done-border);\n      background: var(--copy-done-bg);\n      color: var(--copy-done-ink);\n    }\n\n    .toolbox {\n      background: var(--tool);\n      border-radius: 14px;\n      margin-bottom: 12px;\n      border: 1px solid var(--border);\n      font-family: \"Courier New\", monospace;\n      font-size: 13px;\n    }\n\n    .tool-expando {\n      padding: 0;\n    }\n\n    .tool-expando summary {\n      cursor: pointer;\n      list-style: none;\n      padding: 8px 10px;\n      font-family: \"Courier New\", monospace;\n      font-size: 12px;\n      color: var(--muted);\n      display: flex;\n      align-items: center;\n      justify-content: space-between;\n      gap: 8px;\n      text-transform: uppercase;\n      letter-spacing: .08em;\n    }\n\n    .tool-expando summary::-webkit-details-marker {\n      display: none;\n    }\n\n    .expando-count {\n      border: 1px solid var(--border);\n      border-radius: 999px;\n      padding: 1px 7px;\n      font-size: 11px;\n      letter-spacing: 0;\n      text-transform: none;\n      color: var(--ink);\n      background: var(--panel);\n    }\n\n    .tool-list {\n      margin: 0;\n      padding: 0 10px 10px 20px;\n    }\n\n    .tool-item {\n      margin-bottom: 10px;\n    }\n\n    .tool-line {\n      margin-bottom: 4px;\n    }\n\n    .tool-output {\n      border: 1px solid var(--border);\n      border-radius: 10px;\n      background: color-mix(in srgb, var(--tool) 88%, var(--panel));\n      overflow: hidden;\n    }\n\n    .tool-output > summary {\n      cursor: pointer;\n      list-style: none;\n      padding: 6px 8px;\n      font-size: 11px;\n      text-transform: uppercase;\n      letter-spacing: .08em;\n      color: var(--muted);\n    }\n\n    .tool-output > summary::-webkit-details-marker {\n      display: none;\n    }\n\n    pre {\n      margin: 0;\n      white-space: pre-wrap;\n      word-break: break-word;\n      font-family: \"Courier New\", monospace;\n      font-size: 13px;\n      color: var(--ink);\n    }\n\n    .bubble pre {\n      margin: 0;\n    }\n\n    .tool-output pre {\n      padding: 8px;\n      border-top: 1px solid var(--border);\n      background: color-mix(in srgb, var(--panel) 80%, var(--tool));\n    }\n\n    code {\n      font-family: \"Courier New\", monospace;\n      font-size: 12px;\n      color: var(--code);\n      background: var(--code-bg);\n      border: 1px solid var(--border);\n      border-radius: 6px;\n      padding: 1px 4px;\n    }\n\n    @media (max-width: 760px) {\n      .topbar {\n        flex-direction: column;\n      }\n      .topbar-right {\n        width: 100%;\n        align-items: flex-start;\n      }\n      .nav-links {\n        justify-content: flex-start;\n      }\n      .skin-controls {\n        justify-content: flex-start;\n      }\n    }\n\n\n\n    .annotation-stack {\n      display: flex;\n      flex-direction: column;\n      gap: 8px;\n      margin: 8px 0 12px;\n    }\n\n    .annotation-card {\n      border: 1px solid var(--border);\n      border-radius: 12px;\n      padding: 10px 12px;\n      margin-right: auto;\n      max-width: 92%;\n      background: color-mix(in srgb, var(--panel) 84%, var(--tool));\n    }\n\n    .annotation-card.annotation-score {\n      background: color-mix(in srgb, var(--assistant) 72%, var(--panel));\n    }\n\n    .annotation-card.annotation-pass {\n      background: color-mix(in srgb, var(--copy-done-bg) 58%, var(--panel));\n      border-color: color-mix(in srgb, var(--copy-done-border) 70%, var(--border));\n    }\n\n    .annotation-card.annotation-fail {\n      background: color-mix(in srgb, #ffd7d7 58%, var(--panel));\n      border-color: color-mix(in srgb, #d66 65%, var(--border));\n    }\n\n    .annotation-card.annotation-warning {\n      background: color-mix(in srgb, #ffe8b3 56%, var(--panel));\n      border-color: color-mix(in srgb, #cc9a33 65%, var(--border));\n    }\n\n    html[data-theme=\"dark\"] .annotation-card.annotation-fail {\n      background: color-mix(in srgb, #4a2424 60%, var(--panel));\n      border-color: color-mix(in srgb, #b77676 60%, var(--border));\n    }\n\n    html[data-theme=\"dark\"] .annotation-card.annotation-warning {\n      background: color-mix(in srgb, #4b3a20 60%, var(--panel));\n      border-color: color-mix(in srgb, #b88f49 60%, var(--border));\n    }\n\n    .annotation-head {\n      display: flex;\n      align-items: center;\n      justify-content: space-between;\n      gap: 8px;\n      margin-bottom: 6px;\n    }\n\n    .annotation-kind {\n      border: 1px solid var(--border);\n      border-radius: 999px;\n      padding: 1px 7px;\n      font-size: 10px;\n      letter-spacing: .05em;\n      text-transform: uppercase;\n      color: var(--muted);\n      background: var(--panel);\n      font-family: \"Courier New\", monospace;\n    }\n\n    .annotation-title {\n      font-size: 12px;\n      color: var(--ink);\n      font-weight: 600;\n      letter-spacing: .01em;\n    }\n\n", "telegram": "    :root {\n      --bg: #dce7ee;\n      --panel: #f6fafc;\n      --ink: #15232f;\n      --muted: #5a6b78;\n      --user: #d9f1ff;\n      --assistant: #ffffff;\n      --tool: #e9f0f4;\n      --border: #c4d1da;\n      --code: #183e60;\n      --code-bg: #e7f1fb;\n      --copy-bg: #f7fbff;\n      --copy-border: #b4c5d3;\n      --copy-ink: #25485f;\n      --copy-done-bg: #d7efe0;\n      --copy-done-border: #79a98d;\n      --copy-done-ink: #245139;\n      --bubble-shadow: 0 2px 4px rgba(0, 0, 0, .08);\n    }\n\n    html[data-theme=\"dark\"] {\n      --bg: #0d1a22;\n      --panel: #122331;\n      --ink: #e6f3ff;\n      --muted: #9db1c2;\n      --user: #194567;\n      --assistant: #1d2e3c;\n      --tool: #1a313d;\n      --border: #2f4758;\n      --code: #bce2ff;\n      --code-bg: #1e3c50;\n      --copy-bg: #203543;\n      --copy-border: #365469;\n      --copy-ink: #d6edff;\n      --copy-done-bg: #214336;\n      --copy-done-border: #4e7e67;\n      --copy-done-ink: #daf6e7;\n      --bubble-shadow: 0 2px 5px rgba(0, 0, 0, .4);\n    }\n\n    body {\n      margin: 0;\n      font-family: \"Segoe UI\", Tahoma, sans-serif;\n      background:\n        radial-gradient(1200px 700px at -10% -20%, rgba(255, 255, 255, .35), transparent),\n        radial-gradient(900px 500px at 120% -10%, rgba(70, 153, 198, .25), transparent),\n        var(--bg);\n      color: var(--ink);\n      line-height: 1.35;\n    }\n\n    .wrap {\n      max-width: 1040px;\n      margin: 0 auto;\n      padding: 20px;\n    }\n\n    h1 {\n      margin: 0 0 10px 0;\n      font-size: 30px;\n      font-weight: 700;\n    }\n\n    .topbar {\n      display: flex;\n      align-items: flex-start;\n      justify-content: space-between;\n      gap: 12px;\n    }\n\n    .topbar-right {\n      display: flex;\n      flex-direction: column;\n      align-items: flex-end;\n      gap: 8px;\n    }\n\n    .nav-links {\n      display: flex;\n      align-items: center;\n      gap: 8px;\n      flex-wrap: wrap;\n      justify-content: flex-end;\n    }\n\n    .nav-link,\n    .theme-btn {\n      border: 1px solid var(--border);\n      background: var(--panel);\n      border-radius: 999px;\n      color: var(--ink);\n      font-family: \"Segoe UI\", sans-serif;\n      font-size: 12px;\n      line-height: 1;\n      padding: 8px 12px;\n      text-decoration: none;\n      cursor: pointer;\n      white-space: nowrap;\n    }\n\n    .nav-link:hover,\n    .theme-btn:hover {\n      filter: brightness(1.05);\n    }\n\n    .meta {\n      font-size: 12px;\n      color: var(--muted);\n      margin: 6px 0 16px;\n    }\n\n    .step-card {\n      background: transparent;\n      border: none;\n      box-shadow: none;\n      margin-bottom: 14px;\n      padding: 0;\n    }\n\n    h2 {\n      margin: 0 0 8px 2px;\n      font-size: 14px;\n      text-transform: none;\n      color: var(--muted);\n      letter-spacing: .02em;\n      overflow-wrap: anywhere;\n      word-break: break-word;\n      line-height: 1.28;\n    }\n\n    .bubble {\n      border-radius: 18px;\n      padding: 10px 12px;\n      margin-bottom: 10px;\n      border: 1px solid var(--border);\n      box-shadow: var(--bubble-shadow);\n      max-width: 82%;\n    }\n\n    .bubble.user {\n      background: var(--user);\n      margin-left: auto;\n      border-bottom-right-radius: 6px;\n    }\n\n    .bubble.assistant {\n      background: var(--assistant);\n      margin-right: auto;\n      border-bottom-left-radius: 6px;\n    }\n\n    .bubble-head {\n      display: flex;\n      align-items: center;\n      justify-content: space-between;\n      gap: 8px;\n      margin-bottom: 6px;\n    }\n\n    .label {\n      font-size: 11px;\n      color: var(--muted);\n      text-transform: uppercase;\n      letter-spacing: .07em;\n      font-weight: 600;\n    }\n\n    .copy-btn {\n      border: 1px solid var(--copy-border);\n      background: var(--copy-bg);\n      border-radius: 999px;\n      color: var(--copy-ink);\n      font-size: 11px;\n      line-height: 1;\n      padding: 4px 8px;\n      cursor: pointer;\n    }\n\n    .copy-btn.copied {\n      border-color: var(--copy-done-border);\n      background: var(--copy-done-bg);\n      color: var(--copy-done-ink);\n    }\n\n    .toolbox {\n      background: var(--tool);\n      border: 1px solid var(--border);\n      border-radius: 14px;\n      margin: 0 0 10px 0;\n      max-width: 88%;\n      margin-right: auto;\n      box-shadow: var(--bubble-shadow);\n    }\n\n    .tool-expando summary {\n      cursor: pointer;\n      list-style: none;\n      padding: 8px 10px;\n      color: var(--muted);\n      font-size: 11px;\n      text-transform: uppercase;\n      letter-spacing: .07em;\n      display: flex;\n      justify-content: space-between;\n      align-items: center;\n    }\n\n    .tool-expando summary::-webkit-details-marker {\n      display: none;\n    }\n\n    .expando-count {\n      border: 1px solid var(--border);\n      border-radius: 999px;\n      padding: 2px 7px;\n      background: var(--panel);\n      color: var(--ink);\n      font-size: 11px;\n      text-transform: none;\n      letter-spacing: 0;\n    }\n\n    .tool-list {\n      margin: 0;\n      padding: 0 10px 10px 18px;\n    }\n\n    .tool-item {\n      margin-bottom: 8px;\n    }\n\n    .tool-line {\n      margin-bottom: 4px;\n    }\n\n    .tool-output {\n      border: 1px solid var(--border);\n      border-radius: 10px;\n      overflow: hidden;\n      background: color-mix(in srgb, var(--tool) 78%, var(--panel));\n    }\n\n    .tool-output > summary {\n      cursor: pointer;\n      list-style: none;\n      padding: 5px 8px;\n      color: var(--muted);\n      font-size: 10px;\n      text-transform: uppercase;\n      letter-spacing: .07em;\n    }\n\n    .tool-output > summary::-webkit-details-marker {\n      display: none;\n    }\n\n    .tool-output pre {\n      margin: 0;\n      padding: 8px;\n      border-top: 1px solid var(--border);\n      background: color-mix(in srgb, var(--panel) 70%, var(--tool));\n    }\n\n    pre {\n      margin: 0;\n      white-space: pre-wrap;\n      word-break: break-word;\n      font-family: \"Consolas\", \"Courier New\", monospace;\n      font-size: 12px;\n    }\n\n    code {\n      font-family: \"Consolas\", \"Courier New\", monospace;\n      font-size: 11px;\n      color: var(--code);\n      background: var(--code-bg);\n      border: 1px solid var(--border);\n      border-radius: 6px;\n      padding: 1px 4px;\n    }\n\n    @media (max-width: 760px) {\n      .topbar {\n        flex-direction: column;\n      }\n      .topbar-right {\n        width: 100%;\n        align-items: flex-start;\n      }\n      .nav-links {\n        justify-content: flex-start;\n      }\n      .bubble,\n      .toolbox {\n        max-width: 96%;\n      }\n    }\n\n\n\n    .annotation-stack {\n      display: flex;\n      flex-direction: column;\n      gap: 8px;\n      margin: 8px 0 12px;\n    }\n\n    .annotation-card {\n      border: 1px solid var(--border);\n      border-radius: 12px;\n      padding: 10px 12px;\n      margin-right: auto;\n      max-width: 92%;\n      background: color-mix(in srgb, var(--panel) 84%, var(--tool));\n    }\n\n    .annotation-card.annotation-score {\n      background: color-mix(in srgb, var(--assistant) 72%, var(--panel));\n    }\n\n    .annotation-card.annotation-pass {\n      background: color-mix(in srgb, var(--copy-done-bg) 58%, var(--panel));\n      border-color: color-mix(in srgb, var(--copy-done-border) 70%, var(--border));\n    }\n\n    .annotation-card.annotation-fail {\n      background: color-mix(in srgb, #ffd7d7 58%, var(--panel));\n      border-color: color-mix(in srgb, #d66 65%, var(--border));\n    }\n\n    .annotation-card.annotation-warning {\n      background: color-mix(in srgb, #ffe8b3 56%, var(--panel));\n      border-color: color-mix(in srgb, #cc9a33 65%, var(--border));\n    }\n\n    html[data-theme=\"dark\"] .annotation-card.annotation-fail {\n      background: color-mix(in srgb, #4a2424 60%, var(--panel));\n      border-color: color-mix(in srgb, #b77676 60%, var(--border));\n    }\n\n    html[data-theme=\"dark\"] .annotation-card.annotation-warning {\n      background: color-mix(in srgb, #4b3a20 60%, var(--panel));\n      border-color: color-mix(in srgb, #b88f49 60%, var(--border));\n    }\n\n    .annotation-head {\n      display: flex;\n      align-items: center;\n      justify-content: space-between;\n      gap: 8px;\n      margin-bottom: 6px;\n    }\n\n    .annotation-kind {\n      border: 1px solid var(--border);\n      border-radius: 999px;\n      padding: 1px 7px;\n      font-size: 10px;\n      letter-spacing: .05em;\n      text-transform: uppercase;\n      color: var(--muted);\n      background: var(--panel);\n      font-family: \"Courier New\", monospace;\n    }\n\n    .annotation-title {\n      font-size: 12px;\n      color: var(--ink);\n      font-weight: 600;\n      letter-spacing: .01em;\n    }\n\n", "imessage": "    :root {\n      --bg: #f1f2f6;\n      --panel: #ffffff;\n      --ink: #101214;\n      --muted: #6a717b;\n      --user: #0a84ff;\n      --assistant: #e8e9ed;\n      --tool: #eef0f3;\n      --border: #d7dbe2;\n      --code: #1b3d63;\n      --code-bg: #edf5ff;\n      --copy-bg: #ffffff;\n      --copy-border: #c8cfda;\n      --copy-ink: #2f3b4b;\n      --copy-done-bg: #dceddd;\n      --copy-done-border: #84ad91;\n      --copy-done-ink: #214e33;\n    }\n\n    html[data-theme=\"dark\"] {\n      --bg: #121418;\n      --panel: #1d2128;\n      --ink: #eef3f8;\n      --muted: #98a3b1;\n      --user: #2b8cff;\n      --assistant: #2c313a;\n      --tool: #232832;\n      --border: #384050;\n      --code: #c5e3ff;\n      --code-bg: #243a52;\n      --copy-bg: #2d3643;\n      --copy-border: #47566a;\n      --copy-ink: #e2ebf6;\n      --copy-done-bg: #284137;\n      --copy-done-border: #597f6d;\n      --copy-done-ink: #ddf6e8;\n    }\n\n    body {\n      margin: 0;\n      font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif;\n      background: var(--bg);\n      color: var(--ink);\n      line-height: 1.35;\n    }\n\n    .wrap {\n      max-width: 980px;\n      margin: 0 auto;\n      padding: 18px;\n    }\n\n    h1 {\n      margin: 0 0 10px 0;\n      font-size: 28px;\n      font-weight: 700;\n    }\n\n    .topbar {\n      display: flex;\n      align-items: flex-start;\n      justify-content: space-between;\n      gap: 12px;\n    }\n\n    .topbar-right {\n      display: flex;\n      flex-direction: column;\n      align-items: flex-end;\n      gap: 8px;\n    }\n\n    .nav-links {\n      display: flex;\n      align-items: center;\n      gap: 8px;\n      flex-wrap: wrap;\n      justify-content: flex-end;\n    }\n\n    .nav-link,\n    .theme-btn {\n      border: 1px solid var(--border);\n      background: var(--panel);\n      border-radius: 999px;\n      color: var(--ink);\n      font-size: 12px;\n      line-height: 1;\n      padding: 8px 12px;\n      text-decoration: none;\n      cursor: pointer;\n      white-space: nowrap;\n    }\n\n    .meta {\n      font-size: 12px;\n      color: var(--muted);\n      margin: 6px 0 14px;\n    }\n\n    .step-card {\n      margin-bottom: 14px;\n      padding: 0;\n      background: transparent;\n      border: none;\n      box-shadow: none;\n    }\n\n    h2 {\n      margin: 0 0 8px 0;\n      font-size: 12px;\n      text-transform: none;\n      letter-spacing: .02em;\n      color: var(--muted);\n      font-weight: 600;\n      overflow-wrap: anywhere;\n      word-break: break-word;\n      line-height: 1.28;\n    }\n\n    .bubble {\n      border-radius: 22px;\n      padding: 10px 13px;\n      margin-bottom: 10px;\n      border: 1px solid transparent;\n      max-width: 78%;\n    }\n\n    .bubble.user {\n      background: var(--user);\n      color: #ffffff;\n      margin-left: auto;\n      border-bottom-right-radius: 8px;\n    }\n\n    .bubble.assistant {\n      background: var(--assistant);\n      color: var(--ink);\n      margin-right: auto;\n      border-bottom-left-radius: 8px;\n      border-color: var(--border);\n    }\n\n    .bubble-head {\n      display: flex;\n      align-items: center;\n      justify-content: space-between;\n      gap: 8px;\n      margin-bottom: 6px;\n    }\n\n    .label {\n      font-size: 10px;\n      letter-spacing: .06em;\n      text-transform: uppercase;\n      color: inherit;\n      opacity: .8;\n      font-weight: 700;\n    }\n\n    .copy-btn {\n      border: 1px solid var(--copy-border);\n      background: var(--copy-bg);\n      border-radius: 999px;\n      color: var(--copy-ink);\n      font-size: 10px;\n      line-height: 1;\n      padding: 4px 8px;\n      cursor: pointer;\n      text-transform: uppercase;\n      letter-spacing: .05em;\n    }\n\n    .copy-btn.copied {\n      border-color: var(--copy-done-border);\n      background: var(--copy-done-bg);\n      color: var(--copy-done-ink);\n    }\n\n    .toolbox {\n      background: var(--tool);\n      border: 1px solid var(--border);\n      border-radius: 16px;\n      margin: 0 0 10px 0;\n      max-width: 90%;\n      margin-right: auto;\n      overflow: hidden;\n    }\n\n    .tool-expando summary {\n      cursor: pointer;\n      list-style: none;\n      padding: 8px 10px;\n      color: var(--muted);\n      font-size: 11px;\n      text-transform: uppercase;\n      letter-spacing: .06em;\n      display: flex;\n      justify-content: space-between;\n      align-items: center;\n    }\n\n    .tool-expando summary::-webkit-details-marker {\n      display: none;\n    }\n\n    .expando-count {\n      border: 1px solid var(--border);\n      border-radius: 999px;\n      padding: 2px 7px;\n      background: var(--panel);\n      color: var(--ink);\n      font-size: 10px;\n      text-transform: none;\n      letter-spacing: 0;\n    }\n\n    .tool-list {\n      margin: 0;\n      padding: 0 10px 10px 18px;\n    }\n\n    .tool-item {\n      margin-bottom: 8px;\n    }\n\n    .tool-line {\n      margin-bottom: 3px;\n    }\n\n    .tool-output {\n      border: 1px solid var(--border);\n      border-radius: 10px;\n      background: color-mix(in srgb, var(--tool) 72%, var(--panel));\n      overflow: hidden;\n    }\n\n    .tool-output > summary {\n      cursor: pointer;\n      list-style: none;\n      padding: 5px 8px;\n      color: var(--muted);\n      font-size: 10px;\n      text-transform: uppercase;\n      letter-spacing: .06em;\n    }\n\n    .tool-output > summary::-webkit-details-marker {\n      display: none;\n    }\n\n    .tool-output pre {\n      margin: 0;\n      padding: 8px;\n      border-top: 1px solid var(--border);\n      background: color-mix(in srgb, var(--panel) 65%, var(--tool));\n    }\n\n    pre {\n      margin: 0;\n      white-space: pre-wrap;\n      word-break: break-word;\n      font-family: \"SFMono-Regular\", Menlo, Consolas, monospace;\n      font-size: 12px;\n    }\n\n    code {\n      font-family: \"SFMono-Regular\", Menlo, Consolas, monospace;\n      font-size: 11px;\n      color: var(--code);\n      background: var(--code-bg);\n      border: 1px solid var(--border);\n      border-radius: 6px;\n      padding: 1px 4px;\n    }\n\n    @media (max-width: 760px) {\n      .topbar {\n        flex-direction: column;\n      }\n      .topbar-right {\n        width: 100%;\n        align-items: flex-start;\n      }\n      .nav-links {\n        justify-content: flex-start;\n      }\n      .bubble,\n      .toolbox {\n        max-width: 96%;\n      }\n    }\n\n\n\n    .annotation-stack {\n      display: flex;\n      flex-direction: column;\n      gap: 8px;\n      margin: 8px 0 12px;\n    }\n\n    .annotation-card {\n      border: 1px solid var(--border);\n      border-radius: 12px;\n      padding: 10px 12px;\n      margin-right: auto;\n      max-width: 92%;\n      background: color-mix(in srgb, var(--panel) 84%, var(--tool));\n    }\n\n    .annotation-card.annotation-score {\n      background: color-mix(in srgb, var(--assistant) 72%, var(--panel));\n    }\n\n    .annotation-card.annotation-pass {\n      background: color-mix(in srgb, var(--copy-done-bg) 58%, var(--panel));\n      border-color: color-mix(in srgb, var(--copy-done-border) 70%, var(--border));\n    }\n\n    .annotation-card.annotation-fail {\n      background: color-mix(in srgb, #ffd7d7 58%, var(--panel));\n      border-color: color-mix(in srgb, #d66 65%, var(--border));\n    }\n\n    .annotation-card.annotation-warning {\n      background: color-mix(in srgb, #ffe8b3 56%, var(--panel));\n      border-color: color-mix(in srgb, #cc9a33 65%, var(--border));\n    }\n\n    html[data-theme=\"dark\"] .annotation-card.annotation-fail {\n      background: color-mix(in srgb, #4a2424 60%, var(--panel));\n      border-color: color-mix(in srgb, #b77676 60%, var(--border));\n    }\n\n    html[data-theme=\"dark\"] .annotation-card.annotation-warning {\n      background: color-mix(in srgb, #4b3a20 60%, var(--panel));\n      border-color: color-mix(in srgb, #b88f49 60%, var(--border));\n    }\n\n    .annotation-head {\n      display: flex;\n      align-items: center;\n      justify-content: space-between;\n      gap: 8px;\n      margin-bottom: 6px;\n    }\n\n    .annotation-kind {\n      border: 1px solid var(--border);\n      border-radius: 999px;\n      padding: 1px 7px;\n      font-size: 10px;\n      letter-spacing: .05em;\n      text-transform: uppercase;\n      color: var(--muted);\n      background: var(--panel);\n      font-family: \"Courier New\", monospace;\n    }\n\n    .annotation-title {\n      font-size: 12px;\n      color: var(--ink);\n      font-weight: 600;\n      letter-spacing: .01em;\n    }\n\n"}</script>
+  <script>
+    (() => {
+      const root = document.documentElement;
+      const body = document.body;
+      const appearanceToggle = document.getElementById("appearance-toggle");
+      const skinStyle = document.querySelector("head style");
+      const skinMapNode = document.getElementById("skin-css-map");
+      const appearanceStorageKey = "dialog_appearance_pref_dialog_0lt2xx47";
+      const defaultSkin = "standard";
+      const skinOrder = ["standard", "telegram", "imessage"];
+
+      let skinMap = {};
+      try {
+        skinMap = JSON.parse((skinMapNode && skinMapNode.textContent) || "{}");
+      } catch (error) {
+        skinMap = {};
+      }
+
+      const appearanceStates = [];
+      for (const skin of skinOrder) {
+        appearanceStates.push({ skin, theme: "light" });
+        appearanceStates.push({ skin, theme: "dark" });
+      }
+
+      const setTheme = (theme) => {
+        root.setAttribute("data-theme", theme);
+      };
+
+      const setSkin = (skin) => {
+        if (!skinMap[skin]) {
+          return;
+        }
+        if (skinStyle) {
+          skinStyle.textContent = skinMap[skin];
+        }
+        if (body) {
+          body.setAttribute("data-skin", skin);
+        }
+      };
+
+      const setAppearance = (appearance) => {
+        const skin = appearance && appearance.skin && skinMap[appearance.skin] ? appearance.skin : defaultSkin;
+        const theme = appearance && appearance.theme === "dark" ? "dark" : "light";
+        setSkin(skin);
+        setTheme(theme);
+        if (appearanceToggle) {
+          appearanceToggle.textContent = `appearance: ${skin} ${theme}`;
+        }
+      };
+
+      const findAppearanceIndex = () => {
+        const currentSkin = body ? body.getAttribute("data-skin") : defaultSkin;
+        const currentTheme = root.getAttribute("data-theme") === "dark" ? "dark" : "light";
+        return appearanceStates.findIndex((state) => state.skin === currentSkin && state.theme === currentTheme);
+      };
+
+      const storedAppearanceRaw = window.localStorage.getItem(appearanceStorageKey);
+      if (storedAppearanceRaw) {
+        try {
+          const storedAppearance = JSON.parse(storedAppearanceRaw);
+          setAppearance(storedAppearance);
+        } catch (error) {
+          setAppearance({ skin: defaultSkin, theme: "light" });
+        }
+      } else {
+        const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        setAppearance({ skin: defaultSkin, theme: prefersDark });
+      }
+
+      if (appearanceToggle) {
+        appearanceToggle.addEventListener("click", () => {
+          const index = findAppearanceIndex();
+          const next = appearanceStates[(index + 1) % appearanceStates.length] || appearanceStates[0];
+          setAppearance(next);
+          window.localStorage.setItem(appearanceStorageKey, JSON.stringify(next));
+        });
+      }
+
+      const copyButtons = document.querySelectorAll(".copy-btn");
+      for (const button of copyButtons) {
+        button.addEventListener("click", async () => {
+          const text = button.getAttribute("data-copy") || "";
+          const idle = button.getAttribute("data-label") || "copy";
+          const done = button.getAttribute("data-success-label") || "copied";
+          const fail = button.getAttribute("data-failure-label") || "copy-failed";
+          try {
+            await navigator.clipboard.writeText(text);
+            button.textContent = done;
+            button.classList.add("copied");
+          } catch (error) {
+            button.textContent = fail;
+          }
+          window.setTimeout(() => {
+            button.textContent = idle;
+            button.classList.remove("copied");
+          }, 1200);
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
+

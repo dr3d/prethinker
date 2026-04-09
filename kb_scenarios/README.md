@@ -1,0 +1,61 @@
+# KB Scenarios
+
+These scenario files are consumed by `kb_pipeline.py`.
+
+Last updated: 2026-04-09
+
+## Contract
+
+Each scenario JSON contains:
+
+- `name`: label
+- `utterances`: list of natural-language turns to parse and apply
+- `validations`: list of deterministic checks run after all turns
+
+Validation entry fields:
+
+- `id`: optional label
+- `query`: Prolog query string
+- `expect_status`: `success` or `no_results` (default `success`)
+- `min_rows`: optional minimum expected row count
+- `max_rows`: optional maximum expected row count
+- `contains_row`: optional exact row object requirement
+
+## Important Runtime Behavior
+
+`kb_pipeline.py` uses named retained KB namespaces:
+
+- New ontology KB namespace: `empty_kb()` is applied once for clean start.
+- Existing namespace: retained corpus is preloaded; no automatic empty/reset.
+
+Recommended for ladder/tuning loops:
+
+- Use a dedicated namespace such as `people_ladder_tune`.
+- Keep output run names monotonic (`..._r1`, `..._r2`, ...).
+- Re-run lower rungs after prompt edits before moving to acid tests.
+
+## Progressive Ladder
+
+Use these to ramp parser complexity before acid tests:
+
+- `stage_01_facts_only.json`
+- `stage_02_rule_ingest.json`
+- `stage_03_transitive_chain.json`
+
+## Acid Ladder (Run Hard -> Easier)
+
+Use this order to stress long-context drift, alias pressure, and correction stability:
+
+1. `acid_05_long_context_lineage.json`
+2. `acid_04_alias_pressure.json`
+3. `acid_03_temporal_override.json`
+4. `stage_03_transitive_chain.json`
+5. `stage_02_rule_ingest.json`
+6. `stage_01_facts_only.json`
+
+## Suggested Smoke Pair
+
+Use these first after any prompt edit:
+
+1. `stage_01_facts_only.json`
+2. `stage_02_rule_ingest.json`

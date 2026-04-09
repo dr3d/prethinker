@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{PAGE_TITLE}}</title>
+  <meta name="description" content="{{PAGE_DESCRIPTION}}" />
+  <style>
+{{INITIAL_SKIN_CSS}}
+  </style>
+</head>
+<body data-skin="{{INITIAL_SKIN_NAME}}">
+  <div class="wrap">
+    <div class="topbar">
+      <h1>{{PAGE_TITLE}}</h1>
+      <div class="topbar-right">
+        <div class="nav-links">
+          <a class="nav-link" href="{{NAV_DOCS_HUB}}">Back to Docs Hub</a>
+          <a class="nav-link" href="{{NAV_REPO}}">View Repo</a>
+          <button id="appearance-toggle" class="theme-btn" aria-label="Switch transcript appearance">appearance</button>
+        </div>
+      </div>
+    </div>
+    <div class="meta">{{PAGE_META}}</div>
+    {{CONTENT_HTML}}
+  </div>
+  <script id="skin-css-map" type="application/json">{{SKIN_CSS_MAP_JSON}}</script>
+  <script>
+    (() => {
+      const root = document.documentElement;
+      const body = document.body;
+      const appearanceToggle = document.getElementById("appearance-toggle");
+      const skinStyle = document.querySelector("head style");
+      const skinMapNode = document.getElementById("skin-css-map");
+      const appearanceStorageKey = "{{APPEARANCE_STORAGE_KEY}}";
+      const defaultSkin = "{{INITIAL_SKIN_NAME}}";
+      const skinOrder = {{SKIN_ORDER_JSON}};
+
+      let skinMap = {};
+      try {
+        skinMap = JSON.parse((skinMapNode && skinMapNode.textContent) || "{}");
+      } catch (error) {
+        skinMap = {};
+      }
+
+      const appearanceStates = [];
+      for (const skin of skinOrder) {
+        appearanceStates.push({ skin, theme: "light" });
+        appearanceStates.push({ skin, theme: "dark" });
+      }
+
+      const setTheme = (theme) => {
+        root.setAttribute("data-theme", theme);
+      };
+
+      const setSkin = (skin) => {
+        if (!skinMap[skin]) {
+          return;
+        }
+        if (skinStyle) {
+          skinStyle.textContent = skinMap[skin];
+        }
+        if (body) {
+          body.setAttribute("data-skin", skin);
+        }
+      };
+
+      const setAppearance = (appearance) => {
+        const skin = appearance && appearance.skin && skinMap[appearance.skin] ? appearance.skin : defaultSkin;
+        const theme = appearance && appearance.theme === "dark" ? "dark" : "light";
+        setSkin(skin);
+        setTheme(theme);
+        if (appearanceToggle) {
+          appearanceToggle.textContent = `appearance: ${skin} ${theme}`;
+        }
+      };
+
+      const findAppearanceIndex = () => {
+        const currentSkin = body ? body.getAttribute("data-skin") : defaultSkin;
+        const currentTheme = root.getAttribute("data-theme") === "dark" ? "dark" : "light";
+        return appearanceStates.findIndex((state) => state.skin === currentSkin && state.theme === currentTheme);
+      };
+
+      const storedAppearanceRaw = window.localStorage.getItem(appearanceStorageKey);
+      if (storedAppearanceRaw) {
+        try {
+          const storedAppearance = JSON.parse(storedAppearanceRaw);
+          setAppearance(storedAppearance);
+        } catch (error) {
+          setAppearance({ skin: defaultSkin, theme: "light" });
+        }
+      } else {
+        const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        setAppearance({ skin: defaultSkin, theme: prefersDark });
+      }
+
+      if (appearanceToggle) {
+        appearanceToggle.addEventListener("click", () => {
+          const index = findAppearanceIndex();
+          const next = appearanceStates[(index + 1) % appearanceStates.length] || appearanceStates[0];
+          setAppearance(next);
+          window.localStorage.setItem(appearanceStorageKey, JSON.stringify(next));
+        });
+      }
+
+      const copyButtons = document.querySelectorAll(".copy-btn");
+      for (const button of copyButtons) {
+        button.addEventListener("click", async () => {
+          const text = button.getAttribute("data-copy") || "";
+          const idle = button.getAttribute("data-label") || "copy";
+          const done = button.getAttribute("data-success-label") || "copied";
+          const fail = button.getAttribute("data-failure-label") || "copy-failed";
+          try {
+            await navigator.clipboard.writeText(text);
+            button.textContent = done;
+            button.classList.add("copied");
+          } catch (error) {
+            button.textContent = fail;
+          }
+          window.setTimeout(() => {
+            button.textContent = idle;
+            button.classList.remove("copied");
+          }, 1200);
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

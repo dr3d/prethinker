@@ -1,0 +1,141 @@
+﻿<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>KB Snapshot - people_ladder_tune</title>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --panel: #ffffff;
+      --ink: #142033;
+      --muted: #5c6b82;
+      --border: #d8e0ea;
+      --header: #f9fbfe;
+      --code-bg: #eef4ff;
+      --code-ink: #0f2c58;
+    }
+    html[data-theme="dark"] {
+      --bg: #131920;
+      --panel: #1d2530;
+      --ink: #e8eef6;
+      --muted: #a9b4c6;
+      --border: #334257;
+      --header: #212b38;
+      --code-bg: #24344a;
+      --code-ink: #cae3ff;
+    }
+    body { margin: 0; background: var(--bg); color: var(--ink); font-family: "Segoe UI", Arial, sans-serif; }
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 24px; }
+    .topbar { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+    h1 { margin: 0; font-size: 28px; }
+    .meta { color: var(--muted); font-size: 14px; margin: 8px 0 18px; }
+    .theme-btn {
+      border: 1px solid var(--border); background: var(--panel); color: var(--ink); border-radius: 999px;
+      padding: 8px 12px; font-size: 12px; cursor: pointer;
+    }
+    .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 16px; overflow: hidden; }
+    .panel h2 { margin: 0; padding: 12px 14px; font-size: 16px; border-bottom: 1px solid var(--border); background: var(--header); }
+    .panel .body { padding: 12px 14px; }
+    ul { margin: 0; padding-left: 20px; }
+    li { margin: 4px 0; }
+    code {
+      background: var(--code-bg); color: var(--code-ink); border: 1px solid var(--border); border-radius: 6px;
+      padding: 2px 5px; font-family: Consolas, "Courier New", monospace; font-size: 12px;
+    }
+    pre {
+      margin: 0; white-space: pre-wrap; word-break: break-word; background: var(--header);
+      border: 1px solid var(--border); border-radius: 8px; padding: 10px;
+      font-family: Consolas, "Courier New", monospace; font-size: 12px;
+    }
+    .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+    .stat { border: 1px solid var(--border); border-radius: 8px; padding: 10px; background: var(--header); }
+    .stat .k { color: var(--muted); font-size: 12px; }
+    .stat .v { font-size: 18px; font-weight: 600; margin-top: 2px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <h1>KB Snapshot: people_ladder_tune</h1>
+      <button id="theme-toggle" class="theme-btn" aria-label="Toggle theme">theme</button>
+    </div>
+    <p class="meta">Generated 2026-04-09 19:53:10 UTC | Corpus: D:\_PROJECTS\prethinker\kb_store\people_ladder_tune\kb.pl</p>
+
+    <section class="panel">
+      <h2>Summary</h2>
+      <div class="body">
+        <div class="stats">
+          <div class="stat"><div class="k">Facts</div><div class="v">2</div></div>
+          <div class="stat"><div class="k">Rules</div><div class="v">1</div></div>
+          <div class="stat"><div class="k">Predicate Signatures</div><div class="v">2</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Predicate Signatures</h2>
+      <div class="body"><ul><li><code>man/1</code></li><li><code>mortal/1</code></li></ul></div>
+    </section>
+
+    <section class="panel">
+      <h2>Facts</h2>
+      <div class="body"><ul><li><code>man(plato).</code></li><li><code>man(socrates).</code></li></ul></div>
+    </section>
+
+    <section class="panel">
+      <h2>Rules</h2>
+      <div class="body"><ul><li><code>mortal(X) :- man(X).</code></li></ul></div>
+    </section>
+
+    <section class="panel">
+      <h2>Ontology Profile JSON</h2>
+      <div class="body"><pre>{
+  &quot;ontology_name&quot;: &quot;people_ladder_tune&quot;,
+  &quot;generated_at_utc&quot;: &quot;2026-04-09T19:27:59+00:00&quot;,
+  &quot;clause_count&quot;: 3,
+  &quot;predicate_signatures&quot;: [
+    &quot;man/1&quot;,
+    &quot;mortal/1&quot;
+  ],
+  &quot;fact_predicates&quot;: [
+    &quot;man/1&quot;
+  ],
+  &quot;rule_head_predicates&quot;: [
+    &quot;mortal/1&quot;
+  ],
+  &quot;rule_body_predicates&quot;: [
+    &quot;man/1&quot;
+  ]
+}</pre></div>
+    </section>
+  </div>
+  <script>
+    (() => {
+      const root = document.documentElement;
+      const toggle = document.getElementById("theme-toggle");
+      const key = "kb_snapshot_theme_pref";
+      const stored = window.localStorage.getItem(key);
+      if (stored === "dark" || stored === "light") {
+        root.setAttribute("data-theme", stored);
+      } else {
+        const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+        root.setAttribute("data-theme", prefersDark ? "dark" : "light");
+      }
+      const sync = () => {
+        const current = root.getAttribute("data-theme") === "dark" ? "dark" : "light";
+        toggle.textContent = `theme: ${current}`;
+      };
+      sync();
+      toggle.addEventListener("click", () => {
+        const current = root.getAttribute("data-theme") === "dark" ? "dark" : "light";
+        const next = current === "dark" ? "light" : "dark";
+        root.setAttribute("data-theme", next);
+        window.localStorage.setItem(key, next);
+        sync();
+      });
+    })();
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,36 @@
+﻿{
+  "ontologies": {
+    "people_core": {
+      "ontology_name": "people_core",
+      "kb_dir": "D:\\_PROJECTS\\prethinker\\kb_store\\people_core",
+      "updated_at_utc": "2026-04-09T17:04:20+00:00",
+      "predicate_signatures": [
+        "man/1",
+        "mortal/1"
+      ],
+      "clause_count": 2
+    },
+    "people_ladder": {
+      "ontology_name": "people_ladder",
+      "kb_dir": "D:\\_PROJECTS\\prethinker\\kb_store\\people_ladder",
+      "updated_at_utc": "2026-04-09T17:45:14+00:00",
+      "predicate_signatures": [
+        "man/1",
+        "mortal/1"
+      ],
+      "clause_count": 3
+    },
+    "people_ladder_tune": {
+      "ontology_name": "people_ladder_tune",
+      "kb_dir": "D:\\_PROJECTS\\prethinker\\kb_store\\people_ladder_tune",
+      "updated_at_utc": "2026-04-09T19:27:59+00:00",
+      "predicate_signatures": [
+        "man/1",
+        "mortal/1"
+      ],
+      "clause_count": 3
+    }
+  }
+}
+
+

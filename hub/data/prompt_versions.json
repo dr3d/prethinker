@@ -1,0 +1,39 @@
+{
+  "generated_at_utc": "2026-04-09T19:53:16+00:00",
+  "prompt_versions_total": 3,
+  "prompt_versions": [
+    {
+      "prompt_id": "legacy-unknown",
+      "prompt_sha256": "",
+      "prompt_snapshot_rel": "",
+      "runs_total": 10,
+      "pass_rate": 0.8,
+      "avg_validation_rate": 1.0,
+      "last_seen_utc": "2026-04-09T19:53:00+00:00",
+      "scenario_count": 4,
+      "model_count": 2
+    },
+    {
+      "prompt_id": "legacy-file-only",
+      "prompt_sha256": "",
+      "prompt_snapshot_rel": "",
+      "runs_total": 3,
+      "pass_rate": 0.667,
+      "avg_validation_rate": 0.778,
+      "last_seen_utc": "2026-04-09T19:53:00+00:00",
+      "scenario_count": 2,
+      "model_count": 1
+    },
+    {
+      "prompt_id": "sp-ad589d272fbb",
+      "prompt_sha256": "ad589d272fbbdcc886719efd5c4d19e9dd732a469dc2f3c574d10e28bbec5dff",
+      "prompt_snapshot_rel": "prompts/sp-ad589d272fbb.md",
+      "runs_total": 2,
+      "pass_rate": 1.0,
+      "avg_validation_rate": 1.0,
+      "last_seen_utc": "2026-04-09T19:27:59+00:00",
+      "scenario_count": 2,
+      "model_count": 1
+    }
+  ]
+}

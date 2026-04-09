@@ -1,0 +1,16 @@
+﻿{
+  "updated_utc": "2026-04-09T20:00:00Z",
+  "project": "prethinker",
+  "best_prompt_id": "sp-ad589d272fbb",
+  "best_prompt_source": "modelfiles/semantic_parser_system_prompt.md",
+  "best_prompt_snapshot": "modelfiles/history/prompts/sp-ad589d272fbb.md",
+  "best_runs": [
+    "kb_runs/stage_01_people_ladder_tune_r1.json",
+    "kb_runs/stage_02_people_ladder_tune_r1.json"
+  ],
+  "resume_docs": [
+    "AGENT-README.md",
+    "SESSIONS.md",
+    "NEXT-CODEX.md"
+  ]
+}

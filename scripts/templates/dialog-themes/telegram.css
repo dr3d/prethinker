@@ -1,0 +1,297 @@
+    :root {
+      --bg: #dce7ee;
+      --panel: #f6fafc;
+      --ink: #15232f;
+      --muted: #5a6b78;
+      --user: #d9f1ff;
+      --assistant: #ffffff;
+      --tool: #e9f0f4;
+      --border: #c4d1da;
+      --code: #183e60;
+      --code-bg: #e7f1fb;
+      --copy-bg: #f7fbff;
+      --copy-border: #b4c5d3;
+      --copy-ink: #25485f;
+      --copy-done-bg: #d7efe0;
+      --copy-done-border: #79a98d;
+      --copy-done-ink: #245139;
+      --bubble-shadow: 0 2px 4px rgba(0, 0, 0, .08);
+    }
+
+    html[data-theme="dark"] {
+      --bg: #0d1a22;
+      --panel: #122331;
+      --ink: #e6f3ff;
+      --muted: #9db1c2;
+      --user: #194567;
+      --assistant: #1d2e3c;
+      --tool: #1a313d;
+      --border: #2f4758;
+      --code: #bce2ff;
+      --code-bg: #1e3c50;
+      --copy-bg: #203543;
+      --copy-border: #365469;
+      --copy-ink: #d6edff;
+      --copy-done-bg: #214336;
+      --copy-done-border: #4e7e67;
+      --copy-done-ink: #daf6e7;
+      --bubble-shadow: 0 2px 5px rgba(0, 0, 0, .4);
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      background:
+        radial-gradient(1200px 700px at -10% -20%, rgba(255, 255, 255, .35), transparent),
+        radial-gradient(900px 500px at 120% -10%, rgba(70, 153, 198, .25), transparent),
+        var(--bg);
+      color: var(--ink);
+      line-height: 1.35;
+    }
+
+    .wrap {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    h1 {
+      margin: 0 0 10px 0;
+      font-size: 30px;
+      font-weight: 700;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .topbar-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .nav-link,
+    .theme-btn {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      border-radius: 999px;
+      color: var(--ink);
+      font-family: "Segoe UI", sans-serif;
+      font-size: 12px;
+      line-height: 1;
+      padding: 8px 12px;
+      text-decoration: none;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .nav-link:hover,
+    .theme-btn:hover {
+      filter: brightness(1.05);
+    }
+
+    .meta {
+      font-size: 12px;
+      color: var(--muted);
+      margin: 6px 0 16px;
+    }
+
+    .step-card {
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      margin-bottom: 14px;
+      padding: 0;
+    }
+
+    h2 {
+      margin: 0 0 8px 2px;
+      font-size: 14px;
+      text-transform: none;
+      color: var(--muted);
+      letter-spacing: .02em;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      line-height: 1.28;
+    }
+
+    .bubble {
+      border-radius: 18px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      border: 1px solid var(--border);
+      box-shadow: var(--bubble-shadow);
+      max-width: 82%;
+    }
+
+    .bubble.user {
+      background: var(--user);
+      margin-left: auto;
+      border-bottom-right-radius: 6px;
+    }
+
+    .bubble.assistant {
+      background: var(--assistant);
+      margin-right: auto;
+      border-bottom-left-radius: 6px;
+    }
+
+    .bubble-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      font-weight: 600;
+    }
+
+    .copy-btn {
+      border: 1px solid var(--copy-border);
+      background: var(--copy-bg);
+      border-radius: 999px;
+      color: var(--copy-ink);
+      font-size: 11px;
+      line-height: 1;
+      padding: 4px 8px;
+      cursor: pointer;
+    }
+
+    .copy-btn.copied {
+      border-color: var(--copy-done-border);
+      background: var(--copy-done-bg);
+      color: var(--copy-done-ink);
+    }
+
+    .toolbox {
+      background: var(--tool);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      margin: 0 0 10px 0;
+      max-width: 88%;
+      margin-right: auto;
+      box-shadow: var(--bubble-shadow);
+    }
+
+    .tool-expando summary {
+      cursor: pointer;
+      list-style: none;
+      padding: 8px 10px;
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .tool-expando summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .expando-count {
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 2px 7px;
+      background: var(--panel);
+      color: var(--ink);
+      font-size: 11px;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    .tool-list {
+      margin: 0;
+      padding: 0 10px 10px 18px;
+    }
+
+    .tool-item {
+      margin-bottom: 8px;
+    }
+
+    .tool-line {
+      margin-bottom: 4px;
+    }
+
+    .tool-output {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      background: color-mix(in srgb, var(--tool) 78%, var(--panel));
+    }
+
+    .tool-output > summary {
+      cursor: pointer;
+      list-style: none;
+      padding: 5px 8px;
+      color: var(--muted);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+    }
+
+    .tool-output > summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .tool-output pre {
+      margin: 0;
+      padding: 8px;
+      border-top: 1px solid var(--border);
+      background: color-mix(in srgb, var(--panel) 70%, var(--tool));
+    }
+
+    pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: "Consolas", "Courier New", monospace;
+      font-size: 12px;
+    }
+
+    code {
+      font-family: "Consolas", "Courier New", monospace;
+      font-size: 11px;
+      color: var(--code);
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1px 4px;
+    }
+
+    @media (max-width: 760px) {
+      .topbar {
+        flex-direction: column;
+      }
+      .topbar-right {
+        width: 100%;
+        align-items: flex-start;
+      }
+      .nav-links {
+        justify-content: flex-start;
+      }
+      .bubble,
+      .toolbox {
+        max-width: 96%;
+      }
+    }

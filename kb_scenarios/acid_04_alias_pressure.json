@@ -1,0 +1,36 @@
+{
+  "name": "acid_04_alias_pressure",
+  "ontology_name": "acid_alias",
+  "utterances": [
+    "Liam is a father of Noah.",
+    "Noah is a father of Owen.",
+    "If X is a father of Y then X is a parent of Y.",
+    "If X is a parent of Y then X is an ancestor of Y.",
+    "If X is an ancestor of Y and Y is an ancestor of Z then X is an ancestor of Z.",
+    "Actually, retract that: father(noah, owen).",
+    "Noah is a parent of Owen.",
+    "Translate this to French: ontology alignment matters.",
+    "Explain this: why alias pressure hurts long runs.",
+    "Who is Liam's ancestor?"
+  ],
+  "validations": [
+    {
+      "id": "liam_to_owen_ancestor",
+      "query": "ancestor(liam, owen).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "noah_parent_owen_exists",
+      "query": "parent(noah, owen).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "father_retracted",
+      "query": "father(noah, owen).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    }
+  ]
+}

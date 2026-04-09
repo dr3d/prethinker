@@ -1,0 +1,16 @@
+﻿{
+  "name": "stage_02_rule_ingest",
+  "ontology_name": "people_stage",
+  "utterances": [
+    "Socrates is a man.",
+    "If someone is a man then they are mortal."
+  ],
+  "validations": [
+    {
+      "id": "rule_man_to_mortal",
+      "query": "mortal(socrates).",
+      "expect_status": "success",
+      "min_rows": 1
+    }
+  ]
+}

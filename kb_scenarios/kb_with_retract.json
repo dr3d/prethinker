@@ -1,0 +1,22 @@
+{
+  "name": "kb_with_retract",
+  "utterances": [
+    "Socrates is a man.",
+    "If someone is a man then they are mortal.",
+    "Actually, retract that: man(socrates)."
+  ],
+  "validations": [
+    {
+      "id": "man_socrates_removed",
+      "query": "man(socrates).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "mortal_socrates_removed",
+      "query": "mortal(socrates).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    }
+  ]
+}

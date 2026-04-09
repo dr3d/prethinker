@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Prolog Extraction Test Ladder</title>
+  <style>
+    :root { --bg:#f6f8fb; --panel:#ffffff; --ink:#142033; --muted:#5c6b82; --border:#d8e0ea; --header:#f9fbfe; }
+    html[data-theme="dark"] { --bg:#131920; --panel:#1d2530; --ink:#e8eef6; --muted:#a9b4c6; --border:#334257; --header:#212b38; }
+    body { margin:0; background:var(--bg); color:var(--ink); font-family:"Segoe UI", Arial, sans-serif; }
+    .wrap { max-width:1100px; margin:0 auto; padding:24px; }
+    .topbar { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:8px; }
+    h1 { margin:0; font-size:30px; }
+    .muted { color:var(--muted); font-size:14px; }
+    .theme-btn { border:1px solid var(--border); background:var(--panel); color:var(--ink); border-radius:999px; padding:8px 12px; font-size:12px; cursor:pointer; }
+    .panel { background:var(--panel); border:1px solid var(--border); border-radius:12px; overflow:hidden; margin-top:14px; }
+    table { width:100%; border-collapse:collapse; }
+    th, td { border-bottom:1px solid var(--border); padding:10px 8px; text-align:left; font-size:14px; vertical-align:top; }
+    th { color:var(--muted); background:var(--header); }
+    tr:last-child td { border-bottom:none; }
+    code { background:var(--header); border:1px solid var(--border); border-radius:6px; padding:2px 5px; font-family:Consolas, "Courier New", monospace; font-size:12px; }
+    a { color:#0b66d0; text-decoration:none; }
+    a:hover { text-decoration:underline; }
+    .status.passed { color:#1d7a36; font-weight:600; }
+    .status.failed { color:#a82633; font-weight:600; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div>
+        <h1>Prolog Extraction Test Ladder</h1>
+        <p class="muted">Generated 2026-04-09 19:53:12 UTC | <a href="../index.html">Back to hub</a></p>
+      </div>
+      <button id="theme-toggle" class="theme-btn" aria-label="Toggle theme">theme</button>
+    </div>
+    <div class="panel">
+      <table>
+        <thead>
+          <tr>
+            <th>Rung</th>
+            <th>Scenario</th>
+            <th>Utterances</th>
+            <th>Validations</th>
+            <th>Latest Run</th>
+          </tr>
+        </thead>
+        <tbody>
+<tr><td>1</td><td><a href="acid_05_long_context_lineage.html">acid_05_long_context_lineage</a></td><td>20</td><td>5</td><td><span class="muted">not run</span></td></tr>
+<tr><td>2</td><td><a href="acid_04_alias_pressure.html">acid_04_alias_pressure</a></td><td>10</td><td>3</td><td><span class="muted">not run</span></td></tr>
+<tr><td>3</td><td><a href="acid_03_temporal_override.html">acid_03_temporal_override</a></td><td>10</td><td>3</td><td><span class="status failed">failed</span> (<a href="../../kb_runs/acid_03_temporal_override_ollama_9b.json">json</a>)</td></tr>
+<tr><td>4</td><td><a href="stage_03_transitive_chain.html">stage_03_transitive_chain</a></td><td>4</td><td>1</td><td><span class="muted">not run</span></td></tr>
+<tr><td>5</td><td><a href="stage_02_rule_ingest.html">stage_02_rule_ingest</a></td><td>2</td><td>1</td><td><span class="status passed">passed</span> (<a href="../../kb_runs/stage_02_people_ladder_v4_split.json">json</a>)</td></tr>
+<tr><td>6</td><td><a href="stage_01_facts_only.html">stage_01_facts_only</a></td><td>2</td><td>2</td><td><span class="status passed">passed</span> (<a href="../../kb_runs/stage_01_people_ladder_tune_r1.json">json</a>)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <script>
+    (() => {
+      const root = document.documentElement;
+      const toggle = document.getElementById("theme-toggle");
+      const key = "ladder_theme_pref";
+      const stored = window.localStorage.getItem(key);
+      if (stored === "dark" || stored === "light") {
+        root.setAttribute("data-theme", stored);
+      } else {
+        const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+        root.setAttribute("data-theme", prefersDark ? "dark" : "light");
+      }
+      const sync = () => {
+        const current = root.getAttribute("data-theme") === "dark" ? "dark" : "light";
+        toggle.textContent = `theme: ${current}`;
+      };
+      sync();
+      toggle.addEventListener("click", () => {
+        const current = root.getAttribute("data-theme") === "dark" ? "dark" : "light";
+        const next = current === "dark" ? "light" : "dark";
+        root.setAttribute("data-theme", next);
+        window.localStorage.setItem(key, next);
+        sync();
+      });
+    })();
+  </script>
+</body>
+</html>

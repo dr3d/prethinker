@@ -1,0 +1,58 @@
+{
+  "name": "acid_05_long_context_lineage",
+  "ontology_name": "acid_lineage",
+  "utterances": [
+    "Ava is a parent of Ben.",
+    "Ben is a parent of Cora.",
+    "Cora is a parent of Dax.",
+    "Dax is a parent of Emma.",
+    "If X is a parent of Y then X is an ancestor of Y.",
+    "If X is an ancestor of Y and Y is an ancestor of Z then X is an ancestor of Z.",
+    "Translate this to French: the build passed.",
+    "Summarize this in one sentence: lineage reasoning remains deterministic.",
+    "Explain in plain words why this might drift over time.",
+    "Format this as bullet points: parser, validator, runtime.",
+    "Actually, retract that: parent(cora, dax).",
+    "Cora is a parent of Dean.",
+    "Dean is a parent of Emma.",
+    "Rewrite this text with fewer words: we should validate everything.",
+    "Translate this to Spanish: confidence stays low for ambiguity.",
+    "Who is Ava's ancestor?",
+    "Who is Dean's parent?",
+    "Actually, retract that: parent(dax, emma).",
+    "If X is a parent of Y then X is related_to Y.",
+    "If X is related_to Y and Y is related_to Z then X is related_to Z."
+  ],
+  "validations": [
+    {
+      "id": "ava_to_emma_survives_correction",
+      "query": "ancestor(ava, emma).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "ava_to_dean_exists",
+      "query": "ancestor(ava, dean).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "cora_dax_removed",
+      "query": "parent(cora, dax).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "dax_emma_removed",
+      "query": "parent(dax, emma).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "ava_to_dax_gone_after_retract",
+      "query": "ancestor(ava, dax).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    }
+  ]
+}

@@ -1,0 +1,231 @@
+﻿{
+  "scenario": "stage_02_rule_ingest",
+  "scenario_path": "D:\\_PROJECTS\\prethinker\\kb_scenarios\\stage_02_rule_ingest.json",
+  "ontology_kb_name": "people_ladder",
+  "kb_namespace": {
+    "kb_root": "D:\\_PROJECTS\\prethinker\\kb_store",
+    "kb_dir": "D:\\_PROJECTS\\prethinker\\kb_store\\people_ladder",
+    "corpus_path": "D:\\_PROJECTS\\prethinker\\kb_store\\people_ladder\\kb.pl",
+    "profile_path": "D:\\_PROJECTS\\prethinker\\kb_store\\people_ladder\\ontology_profile.json",
+    "ontology_index_path": "D:\\_PROJECTS\\prethinker\\kb_store\\ontologies_index.json"
+  },
+  "backend": "ollama",
+  "base_url": "http://127.0.0.1:11434",
+  "model": "qwen3.5:9b",
+  "two_pass": true,
+  "kb_runtime_boot_path": "D:\\_PROJECTS\\prethinker\\kb_store\\people_ladder\\kb.pl",
+  "kb_init": {
+    "status": "skipped",
+    "result_type": "not_called",
+    "message": "Existing ontology retained; empty_kb() not invoked.",
+    "knowledge_base_path": "D:\\_PROJECTS\\prethinker\\kb_store\\people_ladder\\kb.pl"
+  },
+  "corpus_load": {
+    "status": "success",
+    "loaded_total": 2,
+    "loaded_facts": 2,
+    "loaded_rules": 0,
+    "skipped_total": 0,
+    "failed_total": 0,
+    "errors": []
+  },
+  "corpus_write": {
+    "path": "D:\\_PROJECTS\\prethinker\\kb_store\\people_ladder\\kb.pl",
+    "clause_count": 3,
+    "status": "written"
+  },
+  "profile_write": {
+    "status": "written",
+    "path": "D:\\_PROJECTS\\prethinker\\kb_store\\people_ladder\\ontology_profile.json",
+    "predicate_signature_count": 2
+  },
+  "index_write": {
+    "status": "written",
+    "path": "D:\\_PROJECTS\\prethinker\\kb_store\\ontologies_index.json",
+    "ontology_count": 2
+  },
+  "ontology_profile": {
+    "ontology_name": "people_ladder",
+    "generated_at_utc": "2026-04-09T17:13:41+00:00",
+    "clause_count": 3,
+    "predicate_signatures": [
+      "man/1",
+      "mortal/1"
+    ],
+    "fact_predicates": [
+      "man/1"
+    ],
+    "rule_head_predicates": [
+      "mortal/1"
+    ],
+    "rule_body_predicates": [
+      "man/1"
+    ]
+  },
+  "ontology_previous_profile": {
+    "ontology_name": "people_ladder",
+    "generated_at_utc": "2026-04-09T17:08:31+00:00",
+    "clause_count": 2,
+    "predicate_signatures": [
+      "man/1"
+    ],
+    "fact_predicates": [
+      "man/1"
+    ],
+    "rule_head_predicates": [],
+    "rule_body_predicates": []
+  },
+  "ontology_diff": {
+    "change_level": "major",
+    "requires_confirmation": true,
+    "similarity_to_previous": 0.5,
+    "added_signatures": [
+      "mortal/1"
+    ],
+    "removed_signatures": [],
+    "previous_signature_count": 1,
+    "current_signature_count": 2
+  },
+  "known_ontology_matches": [
+    {
+      "ontology_name": "people_core",
+      "similarity": 1.0,
+      "shared_signatures": [
+        "man/1",
+        "mortal/1"
+      ],
+      "other_signature_count": 2
+    }
+  ],
+  "gear_change": {
+    "change_level": "major",
+    "detected": true,
+    "requires_confirmation": true
+  },
+  "turns_total": 2,
+  "turn_parse_failures": 0,
+  "turn_apply_failures": 0,
+  "validation_total": 1,
+  "validation_passed": 1,
+  "overall_status": "passed",
+  "turns": [
+    {
+      "turn_index": 1,
+      "utterance": "Socrates is a man.",
+      "route": "assert_fact",
+      "route_source": "model",
+      "repaired": false,
+      "fallback_used": true,
+      "parsed": {
+        "intent": "assert_fact",
+        "logic_string": "man(socrates).",
+        "components": {
+          "atoms": [
+            "socrates"
+          ],
+          "variables": [],
+          "predicates": [
+            "man"
+          ]
+        },
+        "facts": [
+          "man(socrates)."
+        ],
+        "rules": [],
+        "queries": [],
+        "confidence": {
+          "overall": 0.72,
+          "intent": 0.82,
+          "logic": 0.68
+        },
+        "ambiguities": [],
+        "needs_clarification": false,
+        "rationale": "Fallback unary fact parse from '<subject> is a <class>'."
+      },
+      "validation_errors": [],
+      "apply": {
+        "tool": "assert_fact",
+        "input": "man(socrates).",
+        "result": {
+          "status": "skipped",
+          "message": "Fact already present in corpus."
+        }
+      },
+      "apply_status": "skipped"
+    },
+    {
+      "turn_index": 2,
+      "utterance": "If someone is a man then they are mortal.",
+      "route": "assert_rule",
+      "route_source": "heuristic",
+      "repaired": false,
+      "fallback_used": false,
+      "parsed": {
+        "intent": "assert_rule",
+        "logic_string": "mortal(X) :- man(X).",
+        "components": {
+          "atoms": [],
+          "variables": [
+            "X"
+          ],
+          "predicates": [
+            "man",
+            "mortal"
+          ]
+        },
+        "facts": [],
+        "rules": [
+          "mortal(X) :- man(X)."
+        ],
+        "queries": [],
+        "confidence": {
+          "overall": 0.95,
+          "intent": 0.95,
+          "logic": 0.95
+        },
+        "ambiguities": [],
+        "needs_clarification": false,
+        "rationale": "The utterance expresses a universal conditional rule mapping the predicate 'man' to 'mortal' using standard Prolog syntax."
+      },
+      "validation_errors": [],
+      "apply": {
+        "tool": "assert_rule",
+        "input": "mortal(X) :- man(X).",
+        "result": {
+          "status": "success",
+          "result_type": "rule_asserted",
+          "rule": "mortal(X) :- man(X).",
+          "message": "Rule asserted into runtime KB for this server process.",
+          "note": "Use reset_kb (baseline restore) or empty_kb (fully empty runtime) to clear runtime changes."
+        }
+      },
+      "apply_status": "success"
+    }
+  ],
+  "validations": [
+    {
+      "id": "rule_man_to_mortal",
+      "query": "mortal(socrates).",
+      "expected_status": "success",
+      "result": {
+        "status": "success",
+        "result_type": "table",
+        "predicate": "mortal",
+        "prolog_query": "mortal(socrates).",
+        "variables": [],
+        "rows": [
+          {}
+        ],
+        "num_rows": 1,
+        "reasoning_basis": {
+          "kind": "fact-backed",
+          "note": "The `mortal` predicate is typically answered from stored facts, though rules may still participate."
+        }
+      },
+      "passed": true,
+      "reasons": []
+    }
+  ]
+}
+
+
