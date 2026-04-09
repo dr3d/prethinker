@@ -10,6 +10,9 @@ Each scenario JSON contains:
 
 - `name`: label
 - `utterances`: list of natural-language turns to parse and apply
+  - each item can be either:
+    - string: `"Alex is parent of Sam."`
+    - object: `{"utterance":"Alex is parent of Sam.","clarification_answers":["I mean Alex is Sam's father."],"max_clarification_rounds":2}`
 - `validations`: list of deterministic checks run after all turns
 
 Validation entry fields:
@@ -27,6 +30,9 @@ Validation entry fields:
 
 - New ontology KB namespace: `empty_kb()` is applied once for clean start.
 - Existing namespace: retained corpus is preloaded; no automatic empty/reset.
+- Clarification policy is configurable at runtime:
+  - `--clarification-eagerness` in `[0,1]` (higher asks clarification sooner)
+  - `--max-clarification-rounds` controls multi-round Q&A depth per utterance
 
 Recommended for ladder/tuning loops:
 

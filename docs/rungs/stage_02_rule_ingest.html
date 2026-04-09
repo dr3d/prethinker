@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Rung: stage_01_facts_only</title>
+  <title>Rung: stage_02_rule_ingest</title>
   <style>
     :root {
       --bg: #f6f8fb; --panel: #ffffff; --ink: #142033; --muted: #5c6b82; --border: #d8e0ea; --header: #f9fbfe;
@@ -38,17 +38,17 @@
   <div class="wrap">
     <div class="topbar">
       <div>
-        <h1>stage_01_facts_only</h1>
+        <h1>stage_02_rule_ingest</h1>
         <p class="muted">Ontology: people_stage</p>
-        <p class="muted">Scenario file: D:\_PROJECTS\prethinker\kb_scenarios\stage_01_facts_only.json</p>
+        <p class="muted">Scenario file: D:\_PROJECTS\prethinker\kb_scenarios\stage_02_rule_ingest.json</p>
       </div>
       <button id="theme-toggle" class="theme-btn" aria-label="Toggle theme">theme</button>
     </div>
-    <p class="muted">Generated 2026-04-09 19:53:12 UTC | <a href="./index.html">Back to ladder index</a> | <a href="../index.html">Back to hub</a></p>
+    <p class="muted">Generated 2026-04-09 19:53:12 UTC | <a href="./index.html">Back to ladder index</a> | <a href="../index.html">Back to docs</a></p>
 
     <section class="panel">
       <h2>Latest Run Summary</h2>
-      <div class="body"><div class="summary passed"><p><strong>Status:</strong> passed</p><p><strong>Validation:</strong> 2/2 passed</p><p><strong>Parser failures:</strong> 0 | <strong>Apply failures:</strong> 0</p><p><strong>Artifacts:</strong> <a href="../../kb_runs/stage_01_people_ladder_tune_r1.json">raw run json</a> | <a href="../reports/stage_01_people_ladder_tune_r1.html">rendered run transcript</a> | <a href="../kb/people_ladder_tune.html">KB snapshot</a></p></div></div>
+      <div class="body"><div class="summary passed"><p><strong>Status:</strong> passed</p><p><strong>Validation:</strong> 1/1 passed</p><p><strong>Parser failures:</strong> 0 | <strong>Apply failures:</strong> 0</p><p><strong>Artifacts:</strong> <a href="../../kb_runs/stage_02_people_ladder_v4_split.json">raw run json</a> | <a href="../reports/stage_02_people_ladder_v4_split.html">rendered run transcript</a> | <a href="../kb/people_ladder.html">KB snapshot</a></p></div></div>
     </section>
 
     <section class="panel">
@@ -58,7 +58,7 @@
           <thead><tr><th>#</th><th>Expected Route</th><th>Utterance</th></tr></thead>
           <tbody>
 <tr><td>1</td><td><code>assert_fact</code></td><td>Socrates is a man.</td></tr>
-<tr><td>2</td><td><code>assert_fact</code></td><td>Plato is a man.</td></tr>
+<tr><td>2</td><td><code>assert_rule</code></td><td>If someone is a man then they are mortal.</td></tr>
           </tbody>
         </table>
       </div>
@@ -70,8 +70,7 @@
         <table>
           <thead><tr><th>ID</th><th>Query</th><th>Expect</th><th>Min Rows</th><th>Max Rows</th></tr></thead>
           <tbody>
-<tr><td>socrates_man</td><td><code>man(socrates).</code></td><td>success</td><td>1</td><td></td></tr>
-<tr><td>plato_man</td><td><code>man(plato).</code></td><td>success</td><td>1</td><td></td></tr>
+<tr><td>rule_man_to_mortal</td><td><code>mortal(socrates).</code></td><td>success</td><td>1</td><td></td></tr>
           </tbody>
         </table>
       </div>

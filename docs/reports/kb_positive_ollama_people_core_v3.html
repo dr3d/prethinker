@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Semantic Parser Run: stage_01_facts_only (people_ladder)</title>
-  <meta name="description" content="Themed session transcript rendered from dialog_6248k647.json." />
+  <title>Semantic Parser Run: kb_positive (people_core)</title>
+  <meta name="description" content="Themed session transcript rendered from dialog_nkldy1vx.json." />
   <style>
     :root {
       --bg: #e3ddd2;
@@ -427,10 +427,10 @@
 <body data-skin="standard">
   <div class="wrap">
     <div class="topbar">
-      <h1>Semantic Parser Run: stage_01_facts_only (people_ladder)</h1>
+      <h1>Semantic Parser Run: kb_positive (people_core)</h1>
       <div class="topbar-right">
         <div class="nav-links">
-          <a class="nav-link" href="/hub">Back to Docs Hub</a>
+          <a class="nav-link" href="/docs">Back to Docs Hub</a>
           <a class="nav-link" href="./README.md">View Repo</a>
           <button id="appearance-toggle" class="theme-btn" aria-label="Switch transcript appearance">appearance</button>
         </div>
@@ -441,8 +441,8 @@
   &quot;run_id&quot;: null,
   &quot;run_started_utc&quot;: null,
   &quot;run_finished_utc&quot;: null,
-  &quot;scenario&quot;: &quot;stage_01_facts_only&quot;,
-  &quot;ontology_kb_name&quot;: &quot;people_ladder&quot;,
+  &quot;scenario&quot;: &quot;kb_positive&quot;,
+  &quot;ontology_kb_name&quot;: &quot;people_core&quot;,
   &quot;backend&quot;: &quot;ollama&quot;,
   &quot;model&quot;: &quot;qwen3.5:9b&quot;,
   &quot;model_settings&quot;: {},
@@ -451,8 +451,8 @@
   &quot;run_id&quot;: null,
   &quot;run_started_utc&quot;: null,
   &quot;run_finished_utc&quot;: null,
-  &quot;scenario&quot;: &quot;stage_01_facts_only&quot;,
-  &quot;ontology_kb_name&quot;: &quot;people_ladder&quot;,
+  &quot;scenario&quot;: &quot;kb_positive&quot;,
+  &quot;ontology_kb_name&quot;: &quot;people_core&quot;,
   &quot;backend&quot;: &quot;ollama&quot;,
   &quot;model&quot;: &quot;qwen3.5:9b&quot;,
   &quot;model_settings&quot;: {},
@@ -483,8 +483,7 @@ preview:
     &quot;logic_string&quot;: &quot;man(socrates).&quot;,
     &quot;components&quot;: {
       &quot;atoms&quot;: [
-        &quot;socrates&quot;,
-        &quot;man&quot;
+        &quot;socrates&quot;
       ],
       &quot;variables&quot;: [],
       &quot;predicates&quot;: [
@@ -497,13 +496,13 @@ preview:
     &quot;rules&quot;: [],
     &quot;queries&quot;: [],
     &quot;confidence&quot;: {
-      &quot;overall&quot;: 1.0,
-      &quot;intent&quot;: 1.0,
-      &quot;logic&quot;: 1.0
+      &quot;overall&quot;: 0.95,
+      &quot;intent&quot;: 0.95,
+      &quot;logic&quot;: 0.95
     },
     &quot;ambiguities&quot;: [],
     &quot;needs_clarification&quot;: false,
-    &quot;rationale&quot;: &quot;Utterance is a simple declarative statement identifying Socrates as a man.&quot;
+    &quot;rationale&quot;: &quot;The sentence is a direct assertion of a fact.&quot;
   },
   &quot;validation_errors&quot;: [],
   &quot;apply_status&quot;: &quot;success&quot;,
@@ -522,8 +521,7 @@ preview:
     &quot;logic_string&quot;: &quot;man(socrates).&quot;,
     &quot;components&quot;: {
       &quot;atoms&quot;: [
-        &quot;socrates&quot;,
-        &quot;man&quot;
+        &quot;socrates&quot;
       ],
       &quot;variables&quot;: [],
       &quot;predicates&quot;: [
@@ -536,13 +534,13 @@ preview:
     &quot;rules&quot;: [],
     &quot;queries&quot;: [],
     &quot;confidence&quot;: {
-      &quot;overall&quot;: 1.0,
-      &quot;intent&quot;: 1.0,
-      &quot;logic&quot;: 1.0
+      &quot;overall&quot;: 0.95,
+      &quot;intent&quot;: 0.95,
+      &quot;logic&quot;: 0.95
     },
     &quot;ambiguities&quot;: [],
     &quot;needs_clarification&quot;: false,
-    &quot;rationale&quot;: &quot;Utterance is a simple declarative statement identifying Socrates as a man.&quot;
+    &quot;rationale&quot;: &quot;The sentence is a direct assertion of a fact.&quot;
   },
   &quot;validation_errors&quot;: [],
   &quot;apply_status&quot;: &quot;success&quot;,
@@ -562,109 +560,106 @@ facts=[&#x27;man(socrates).&#x27;]
 rules=[]
 queries=[]
 predicates=[&#x27;man&#x27;]
-atoms=[&#x27;socrates&#x27;, &#x27;man&#x27;] variables=[]</pre></div><div class="annotation-card annotation-score"><div class="annotation-head"><div class="annotation-title">Turn Score</div><div class="annotation-kind">score</div></div><pre>score=1.0 (parse_ok=1.0, route_ok=1.0, apply_ok=1.0, utterance_ok=1.0)
-apply_tool=assert_fact apply_status=success</pre></div></div></section><section class="step-card"><h2>turn_02: assert_fact [success]</h2><div class="bubble user"><div class="bubble-head"><div class="label">User</div><button class="copy-btn" data-copy="Plato is a man." data-label="copy" data-success-label="copied" data-failure-label="copy-failed">copy</button></div><pre>Plato is a man.</pre></div><details class="toolbox tool-expando"><summary><span>tool calls</span><span class="expando-count">1</span></summary><ul class="tool-list"><li class="tool-item"><div class="tool-line"><code>kb_apply::assert_fact</code> <code>{
+atoms=[&#x27;socrates&#x27;] variables=[]</pre></div><div class="annotation-card annotation-score"><div class="annotation-head"><div class="annotation-title">Turn Score</div><div class="annotation-kind">score</div></div><pre>score=1.0 (parse_ok=1.0, route_ok=1.0, apply_ok=1.0, utterance_ok=1.0)
+apply_tool=assert_fact apply_status=success</pre></div></div></section><section class="step-card"><h2>turn_02: assert_rule [skipped]</h2><div class="bubble user"><div class="bubble-head"><div class="label">User</div><button class="copy-btn" data-copy="If someone is a man then they are mortal." data-label="copy" data-success-label="copied" data-failure-label="copy-failed">copy</button></div><pre>If someone is a man then they are mortal.</pre></div><details class="toolbox tool-expando"><summary><span>tool calls</span><span class="expando-count">1</span></summary><ul class="tool-list"><li class="tool-item"><div class="tool-line"><code>kb_apply::assert_rule</code> <code>{
   &quot;turn_index&quot;: 2,
-  &quot;input&quot;: &quot;man(plato).&quot;
+  &quot;input&quot;: &quot;mortal(X) :- man(X).&quot;
 }</code></div><details class="tool-output"><summary>output</summary><pre>{
-  &quot;status&quot;: &quot;success&quot;,
-  &quot;result_type&quot;: &quot;fact_asserted&quot;,
-  &quot;fact&quot;: &quot;man(plato).&quot;,
-  &quot;message&quot;: &quot;Fact asserted into runtime KB for this server process.&quot;,
-  &quot;note&quot;: &quot;Use reset_kb (baseline restore) or empty_kb (fully empty runtime) to clear runtime changes.&quot;
+  &quot;status&quot;: &quot;skipped&quot;,
+  &quot;message&quot;: &quot;Rule already present in corpus.&quot;
 }</pre></details></li></ul></details><div class="bubble assistant"><div class="bubble-head"><div class="label">Assistant</div><button class="copy-btn" data-copy="{
-  &quot;expected_utterance&quot;: &quot;Plato is a man.&quot;,
-  &quot;observed_utterance&quot;: &quot;Plato is a man.&quot;,
-  &quot;route&quot;: &quot;assert_fact&quot;,
-  &quot;expected_route&quot;: &quot;assert_fact&quot;,
-  &quot;route_source&quot;: &quot;model&quot;,
+  &quot;expected_utterance&quot;: &quot;If someone is a man then they are mortal.&quot;,
+  &quot;observed_utterance&quot;: &quot;If someone is a man then they are mortal.&quot;,
+  &quot;route&quot;: &quot;assert_rule&quot;,
+  &quot;expected_route&quot;: &quot;assert_rule&quot;,
+  &quot;route_source&quot;: &quot;heuristic&quot;,
   &quot;repaired&quot;: false,
   &quot;fallback_used&quot;: false,
   &quot;parsed&quot;: {
-    &quot;intent&quot;: &quot;assert_fact&quot;,
-    &quot;logic_string&quot;: &quot;man(plato).&quot;,
+    &quot;intent&quot;: &quot;assert_rule&quot;,
+    &quot;logic_string&quot;: &quot;mortal(X) :- man(X).&quot;,
     &quot;components&quot;: {
-      &quot;atoms&quot;: [
-        &quot;plato&quot;
+      &quot;atoms&quot;: [],
+      &quot;variables&quot;: [
+        &quot;X&quot;
       ],
-      &quot;variables&quot;: [],
       &quot;predicates&quot;: [
+        &quot;mortal&quot;,
         &quot;man&quot;
       ]
     },
-    &quot;facts&quot;: [
-      &quot;man(plato).&quot;
+    &quot;facts&quot;: [],
+    &quot;rules&quot;: [
+      &quot;mortal(X) :- man(X).&quot;
     ],
-    &quot;rules&quot;: [],
     &quot;queries&quot;: [],
     &quot;confidence&quot;: {
-      &quot;overall&quot;: 1.0,
-      &quot;intent&quot;: 1.0,
-      &quot;logic&quot;: 1.0
+      &quot;overall&quot;: 0.95,
+      &quot;intent&quot;: 0.95,
+      &quot;logic&quot;: 0.95
     },
     &quot;ambiguities&quot;: [],
     &quot;needs_clarification&quot;: false,
-    &quot;rationale&quot;: &quot;Direct assertion of fact using ontology predicate &#x27;man&#x27;.&quot;
+    &quot;rationale&quot;: &quot;The statement defines a logical implication suitable for a rule assertion.&quot;
   },
   &quot;validation_errors&quot;: [],
-  &quot;apply_status&quot;: &quot;success&quot;,
+  &quot;apply_status&quot;: &quot;skipped&quot;,
   &quot;utterance_ok&quot;: 1.0,
   &quot;turn_score&quot;: 1.0
 }" data-label="copy" data-success-label="copied" data-failure-label="copy-failed">copy</button></div><pre>{
-  &quot;expected_utterance&quot;: &quot;Plato is a man.&quot;,
-  &quot;observed_utterance&quot;: &quot;Plato is a man.&quot;,
-  &quot;route&quot;: &quot;assert_fact&quot;,
-  &quot;expected_route&quot;: &quot;assert_fact&quot;,
-  &quot;route_source&quot;: &quot;model&quot;,
+  &quot;expected_utterance&quot;: &quot;If someone is a man then they are mortal.&quot;,
+  &quot;observed_utterance&quot;: &quot;If someone is a man then they are mortal.&quot;,
+  &quot;route&quot;: &quot;assert_rule&quot;,
+  &quot;expected_route&quot;: &quot;assert_rule&quot;,
+  &quot;route_source&quot;: &quot;heuristic&quot;,
   &quot;repaired&quot;: false,
   &quot;fallback_used&quot;: false,
   &quot;parsed&quot;: {
-    &quot;intent&quot;: &quot;assert_fact&quot;,
-    &quot;logic_string&quot;: &quot;man(plato).&quot;,
+    &quot;intent&quot;: &quot;assert_rule&quot;,
+    &quot;logic_string&quot;: &quot;mortal(X) :- man(X).&quot;,
     &quot;components&quot;: {
-      &quot;atoms&quot;: [
-        &quot;plato&quot;
+      &quot;atoms&quot;: [],
+      &quot;variables&quot;: [
+        &quot;X&quot;
       ],
-      &quot;variables&quot;: [],
       &quot;predicates&quot;: [
+        &quot;mortal&quot;,
         &quot;man&quot;
       ]
     },
-    &quot;facts&quot;: [
-      &quot;man(plato).&quot;
+    &quot;facts&quot;: [],
+    &quot;rules&quot;: [
+      &quot;mortal(X) :- man(X).&quot;
     ],
-    &quot;rules&quot;: [],
     &quot;queries&quot;: [],
     &quot;confidence&quot;: {
-      &quot;overall&quot;: 1.0,
-      &quot;intent&quot;: 1.0,
-      &quot;logic&quot;: 1.0
+      &quot;overall&quot;: 0.95,
+      &quot;intent&quot;: 0.95,
+      &quot;logic&quot;: 0.95
     },
     &quot;ambiguities&quot;: [],
     &quot;needs_clarification&quot;: false,
-    &quot;rationale&quot;: &quot;Direct assertion of fact using ontology predicate &#x27;man&#x27;.&quot;
+    &quot;rationale&quot;: &quot;The statement defines a logical implication suitable for a rule assertion.&quot;
   },
   &quot;validation_errors&quot;: [],
-  &quot;apply_status&quot;: &quot;success&quot;,
+  &quot;apply_status&quot;: &quot;skipped&quot;,
   &quot;utterance_ok&quot;: 1.0,
   &quot;turn_score&quot;: 1.0
-}</pre></div><div class="annotation-stack"><div class="annotation-card annotation-info"><div class="annotation-head"><div class="annotation-title">Prethinker Annotation</div><div class="annotation-kind">info</div></div><pre>Why asked: Seed grounded terms/constants as facts for later inference.
-Utterance expected/observed: Plato is a man. / Plato is a man.
-Route expected/observed: assert_fact / assert_fact
-Parser path: source=model repaired=False fallback=False</pre></div><div class="annotation-card annotation-info"><div class="annotation-head"><div class="annotation-title">KB Action</div><div class="annotation-kind">info</div></div><pre>intent=assert_fact apply_tool=assert_fact apply_status=success
+}</pre></div><div class="annotation-stack"><div class="annotation-card annotation-info"><div class="annotation-head"><div class="annotation-title">Prethinker Annotation</div><div class="annotation-kind">info</div></div><pre>Why asked: Introduce an inference rule so downstream queries can derive new truths.
+Utterance expected/observed: If someone is a man then they are mortal. / If someone is a man then they are mortal.
+Route expected/observed: assert_rule / assert_rule
+Parser path: source=heuristic repaired=False fallback=False</pre></div><div class="annotation-card annotation-info"><div class="annotation-head"><div class="annotation-title">KB Action</div><div class="annotation-kind">info</div></div><pre>intent=assert_rule apply_tool=assert_rule apply_status=skipped
 effect=mutation(write)
-submitted=man(plato).
-result_type=fact_asserted
-fact=man(plato).
-message=Fact asserted into runtime KB for this server process.</pre></div><div class="annotation-card annotation-info"><div class="annotation-head"><div class="annotation-title">KB Elements</div><div class="annotation-kind">info</div></div><pre>intent=assert_fact
-logic=man(plato).
-facts=[&#x27;man(plato).&#x27;]
-rules=[]
+submitted=mortal(X) :- man(X).
+message=Rule already present in corpus.</pre></div><div class="annotation-card annotation-info"><div class="annotation-head"><div class="annotation-title">KB Elements</div><div class="annotation-kind">info</div></div><pre>intent=assert_rule
+logic=mortal(X) :- man(X).
+facts=[]
+rules=[&#x27;mortal(X) :- man(X).&#x27;]
 queries=[]
-predicates=[&#x27;man&#x27;]
-atoms=[&#x27;plato&#x27;] variables=[]</pre></div><div class="annotation-card annotation-score"><div class="annotation-head"><div class="annotation-title">Turn Score</div><div class="annotation-kind">score</div></div><pre>score=1.0 (parse_ok=1.0, route_ok=1.0, apply_ok=1.0, utterance_ok=1.0)
-apply_tool=assert_fact apply_status=success</pre></div></div></section><section class="step-card"><h2>validation_summary</h2><div class="bubble user"><div class="bubble-head"><div class="label">User</div><button class="copy-btn" data-copy="Run deterministic KB validations and compare against expectations." data-label="copy" data-success-label="copied" data-failure-label="copy-failed">copy</button></div><pre>Run deterministic KB validations and compare against expectations.</pre></div><details class="toolbox tool-expando"><summary><span>tool calls</span><span class="expando-count">2</span></summary><ul class="tool-list"><li class="tool-item"><div class="tool-line"><code>validation::query_rows</code> <code>{
-  &quot;id&quot;: &quot;socrates_man&quot;,
+predicates=[&#x27;mortal&#x27;, &#x27;man&#x27;]
+atoms=[] variables=[&#x27;X&#x27;]</pre></div><div class="annotation-card annotation-score"><div class="annotation-head"><div class="annotation-title">Turn Score</div><div class="annotation-kind">score</div></div><pre>score=1.0 (parse_ok=1.0, route_ok=1.0, apply_ok=1.0, utterance_ok=1.0)
+apply_tool=assert_rule apply_status=skipped</pre></div></div></section><section class="step-card"><h2>validation_summary</h2><div class="bubble user"><div class="bubble-head"><div class="label">User</div><button class="copy-btn" data-copy="Run deterministic KB validations and compare against expectations." data-label="copy" data-success-label="copied" data-failure-label="copy-failed">copy</button></div><pre>Run deterministic KB validations and compare against expectations.</pre></div><details class="toolbox tool-expando"><summary><span>tool calls</span><span class="expando-count">2</span></summary><ul class="tool-list"><li class="tool-item"><div class="tool-line"><code>validation::query_rows</code> <code>{
+  &quot;id&quot;: &quot;man_socrates&quot;,
   &quot;query&quot;: &quot;man(socrates).&quot;,
   &quot;expected_status&quot;: &quot;success&quot;
 }</code></div><details class="tool-output"><summary>output</summary><pre>{
@@ -682,14 +677,14 @@ apply_tool=assert_fact apply_status=success</pre></div></div></section><section 
     &quot;note&quot;: &quot;The `man` predicate is typically answered from stored facts, though rules may still participate.&quot;
   }
 }</pre></details></li><li class="tool-item"><div class="tool-line"><code>validation::query_rows</code> <code>{
-  &quot;id&quot;: &quot;plato_man&quot;,
-  &quot;query&quot;: &quot;man(plato).&quot;,
+  &quot;id&quot;: &quot;mortal_socrates&quot;,
+  &quot;query&quot;: &quot;mortal(socrates).&quot;,
   &quot;expected_status&quot;: &quot;success&quot;
 }</code></div><details class="tool-output"><summary>output</summary><pre>{
   &quot;status&quot;: &quot;success&quot;,
   &quot;result_type&quot;: &quot;table&quot;,
-  &quot;predicate&quot;: &quot;man&quot;,
-  &quot;prolog_query&quot;: &quot;man(plato).&quot;,
+  &quot;predicate&quot;: &quot;mortal&quot;,
+  &quot;prolog_query&quot;: &quot;mortal(socrates).&quot;,
   &quot;variables&quot;: [],
   &quot;rows&quot;: [
     {}
@@ -697,7 +692,7 @@ apply_tool=assert_fact apply_status=success</pre></div></div></section><section 
   &quot;num_rows&quot;: 1,
   &quot;reasoning_basis&quot;: {
     &quot;kind&quot;: &quot;fact-backed&quot;,
-    &quot;note&quot;: &quot;The `man` predicate is typically answered from stored facts, though rules may still participate.&quot;
+    &quot;note&quot;: &quot;The `mortal` predicate is typically answered from stored facts, though rules may still participate.&quot;
   }
 }</pre></details></li></ul></details><div class="bubble assistant"><div class="bubble-head"><div class="label">Assistant</div><button class="copy-btn" data-copy="{
   &quot;validation_total&quot;: 2,
@@ -711,10 +706,10 @@ apply_tool=assert_fact apply_status=success</pre></div></div></section><section 
   &quot;overall_status&quot;: &quot;passed&quot;,
   &quot;turn_parse_failures&quot;: 0,
   &quot;turn_apply_failures&quot;: 0
-}</pre></div><div class="annotation-stack"><div class="annotation-card annotation-score"><div class="annotation-head"><div class="annotation-title">Validation Score</div><div class="annotation-kind">score</div></div><pre>score=1.0 (2/2 passed)</pre></div><div class="annotation-card annotation-info"><div class="annotation-head"><div class="annotation-title">Validation Notes</div><div class="annotation-kind">info</div></div><pre>socrates_man: PASS (query=man(socrates)., expected=success, observed=success)
-plato_man: PASS (query=man(plato)., expected=success, observed=success)</pre></div><div class="annotation-card annotation-pass"><div class="annotation-head"><div class="annotation-title">socrates_man</div><div class="annotation-kind">pass</div></div><pre>query=man(socrates).
+}</pre></div><div class="annotation-stack"><div class="annotation-card annotation-score"><div class="annotation-head"><div class="annotation-title">Validation Score</div><div class="annotation-kind">score</div></div><pre>score=1.0 (2/2 passed)</pre></div><div class="annotation-card annotation-info"><div class="annotation-head"><div class="annotation-title">Validation Notes</div><div class="annotation-kind">info</div></div><pre>man_socrates: PASS (query=man(socrates)., expected=success, observed=success)
+mortal_socrates: PASS (query=mortal(socrates)., expected=success, observed=success)</pre></div><div class="annotation-card annotation-pass"><div class="annotation-head"><div class="annotation-title">man_socrates</div><div class="annotation-kind">pass</div></div><pre>query=man(socrates).
 expected=success observed=success
-reasons=none</pre></div><div class="annotation-card annotation-pass"><div class="annotation-head"><div class="annotation-title">plato_man</div><div class="annotation-kind">pass</div></div><pre>query=man(plato).
+reasons=none</pre></div><div class="annotation-card annotation-pass"><div class="annotation-head"><div class="annotation-title">mortal_socrates</div><div class="annotation-kind">pass</div></div><pre>query=mortal(socrates).
 expected=success observed=success
 reasons=none</pre></div></div></section>
   </div>
@@ -726,7 +721,7 @@ reasons=none</pre></div></div></section>
       const appearanceToggle = document.getElementById("appearance-toggle");
       const skinStyle = document.querySelector("head style");
       const skinMapNode = document.getElementById("skin-css-map");
-      const appearanceStorageKey = "dialog_appearance_pref_dialog_6248k647";
+      const appearanceStorageKey = "dialog_appearance_pref_dialog_nkldy1vx";
       const defaultSkin = "standard";
       const skinOrder = ["standard", "telegram", "imessage"];
 

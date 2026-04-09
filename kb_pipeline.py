@@ -592,6 +592,8 @@ def _call_model_prompt(
         payload = {
             "model": model,
             "stream": False,
+            "think": False,
+            "format": "json",
             "messages": [{"role": "user", "content": prompt_text}],
             "options": {"temperature": 0, "num_ctx": context_length},
         }
@@ -693,7 +695,7 @@ def _build_extractor_prompt(
         f"{route_guidance}\n"
         f"{ontology_hint}"
         "Return JSON only with exactly these keys:\n"
-        "intent,logic_string,components,facts,rules,queries,confidence,ambiguities,needs_clarification,rationale\n"
+        "intent,logic_string,components,facts,rules,queries,confidence,ambiguities,needs_clarification,uncertainty_score,uncertainty_label,clarification_question,clarification_reason,rationale\n"
         "Rules:\n"
         "- intent in assert_fact|assert_rule|query|retract|other\n"
         "- components object with arrays: atoms,variables,predicates\n"
@@ -701,6 +703,10 @@ def _build_extractor_prompt(
         "- queries must not include '?-'\n"
         "- atoms lowercase snake_case, variables Uppercase\n"
         "- confidence object with overall,intent,logic floats in [0,1]\n"
+        "- uncertainty_score float in [0,1] where 1 means very uncertain\n"
+        "- uncertainty_label in low|medium|high, aligned to uncertainty_score\n"
+        "- clarification_question is a targeted user question ending with '?' when uncertainty is medium/high\n"
+        "- clarification_reason is <=12 words and concrete\n"
         "- logic_string must be Prolog syntax (or empty only for intent=other)\n"
         "- assert_fact => logic_string == facts[0]\n"
         "- assert_rule => logic_string == rules[0]\n"
@@ -742,12 +748,15 @@ def _build_logic_only_extractor_prompt(
         f"{route_guidance}\n"
         f"{ontology_hint}"
         "Return JSON only with exactly these keys:\n"
-        "intent,logic_string,confidence,ambiguities,needs_clarification,rationale\n"
+        "intent,logic_string,confidence,ambiguities,needs_clarification,uncertainty_score,uncertainty_label,clarification_question,clarification_reason,rationale\n"
         "Rules:\n"
         "- intent in assert_fact|assert_rule|query|retract|other\n"
         "- logic_string must be Prolog (or empty only for intent=other)\n"
         "- query logic_string ends with '.' and excludes '?-'\n"
         "- confidence object keys: overall,intent,logic (0..1)\n"
+        "- uncertainty_score float in [0,1] where 1 means very uncertain\n"
+        "- uncertainty_label in low|medium|high\n"
+        "- clarification_question ends with '?' when clarification is needed\n"
         "- no markdown, no extra keys\n"
         f"Utterance:\n{utterance}"
     )
@@ -769,11 +778,14 @@ def _build_repair_prompt(
         "You are a strict JSON repairer for semantic parsing output.\n"
         "Return corrected JSON only. No markdown.\n"
         f"Route lock: {route}\n"
-        "Required keys: intent,logic_string,components,facts,rules,queries,confidence,ambiguities,needs_clarification,rationale\n"
+        "Required keys: intent,logic_string,components,facts,rules,queries,confidence,ambiguities,needs_clarification,uncertainty_score,uncertainty_label,clarification_question,clarification_reason,rationale\n"
         "Hard constraints:\n"
         "- intent in assert_fact|assert_rule|query|retract|other\n"
         "- components={atoms:[],variables:[],predicates:[]}\n"
         "- confidence={overall:0..1,intent:0..1,logic:0..1}\n"
+        "- uncertainty_score in [0,1]\n"
+        "- uncertainty_label in low|medium|high\n"
+        "- clarification_question is empty or ends with '?'\n"
         "- arrays: facts,rules,queries,ambiguities\n"
         "- query entries and logic strings must end with '.' and exclude '?-'\n"
         "- assert_fact => logic_string==facts[0]\n"
@@ -809,6 +821,178 @@ def _coerce_confidence_object(raw: Any) -> dict[str, float]:
     return {"overall": fallback, "intent": fallback, "logic": fallback}
 
 
+def _clip_01(value: Any, *, fallback: float) -> float:
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        number = fallback
+    if number < 0:
+        return 0.0
+    if number > 1:
+        return 1.0
+    return number
+
+
+def _coerce_uncertainty_label(raw: Any, *, score: float) -> str:
+    label = str(raw or "").strip().lower()
+    if label in {"low", "medium", "high"}:
+        return label
+    if score >= 0.75:
+        return "high"
+    if score >= 0.45:
+        return "medium"
+    return "low"
+
+
+def _synthesize_clarification_question(
+    *,
+    utterance: str,
+    route: str,
+    ambiguities: list[str],
+    reason: str,
+) -> str:
+    primary = ""
+    if ambiguities:
+        primary = str(ambiguities[0]).strip().rstrip(".")
+    if primary:
+        return f"Can you clarify this detail: {primary}?"
+    if reason:
+        reason_clean = reason.strip().rstrip(".")
+        return f"Can you clarify this point before I apply it: {reason_clean}?"
+    if route == "assert_fact":
+        return "Can you confirm the exact fact and entities you want stored?"
+    if route == "assert_rule":
+        return "Can you confirm the exact rule condition and conclusion?"
+    if route == "query":
+        return "Can you clarify the exact entity or relation you want queried?"
+    if route == "retract":
+        return "Can you confirm the exact fact you want retracted?"
+    return f"Can you clarify what you mean by: '{utterance}'?"
+
+
+def _estimate_uncertainty_score(parsed: dict[str, Any]) -> float:
+    confidence = parsed.get("confidence", {})
+    confidence_overall = 0.5
+    if isinstance(confidence, dict):
+        confidence_overall = _clip_01(confidence.get("overall"), fallback=0.5)
+    base = 1.0 - confidence_overall
+    ambiguities = parsed.get("ambiguities", [])
+    ambiguity_count = len(ambiguities) if isinstance(ambiguities, list) else 0
+    if ambiguity_count > 0:
+        base = max(base, min(0.9, 0.45 + 0.12 * ambiguity_count))
+    if bool(parsed.get("needs_clarification", False)):
+        base = max(base, 0.78)
+    return _clip_01(base, fallback=0.5)
+
+
+def _normalize_clarification_fields(
+    parsed: dict[str, Any],
+    *,
+    utterance: str,
+    route: str,
+) -> dict[str, Any]:
+    normalized = dict(parsed)
+    ambiguities_raw = normalized.get("ambiguities", [])
+    ambiguities: list[str] = []
+    if isinstance(ambiguities_raw, list):
+        for item in ambiguities_raw:
+            text = str(item).strip()
+            if text:
+                ambiguities.append(text)
+
+    uncertainty_score = _clip_01(
+        normalized.get("uncertainty_score"),
+        fallback=_estimate_uncertainty_score(normalized),
+    )
+    uncertainty_label = _coerce_uncertainty_label(
+        normalized.get("uncertainty_label"),
+        score=uncertainty_score,
+    )
+
+    reason = str(normalized.get("clarification_reason", "")).strip()
+    if not reason:
+        reason = str(normalized.get("rationale", "")).strip()
+    if len(reason.split()) > 12:
+        reason = " ".join(reason.split()[:12])
+
+    question = str(normalized.get("clarification_question", "")).strip()
+    if bool(normalized.get("needs_clarification", False)) and not question:
+        question = _synthesize_clarification_question(
+            utterance=utterance,
+            route=route,
+            ambiguities=ambiguities,
+            reason=reason,
+        )
+    if question and not question.endswith("?"):
+        question = question.rstrip(".") + "?"
+
+    normalized["ambiguities"] = ambiguities
+    normalized["uncertainty_score"] = uncertainty_score
+    normalized["uncertainty_label"] = uncertainty_label
+    normalized["clarification_question"] = question
+    normalized["clarification_reason"] = reason
+    return normalized
+
+
+def _clarification_policy_decision(
+    *,
+    parsed: dict[str, Any],
+    clarification_eagerness: float,
+) -> dict[str, Any]:
+    eagerness = _clip_01(clarification_eagerness, fallback=0.0)
+    uncertainty_score = _clip_01(parsed.get("uncertainty_score"), fallback=_estimate_uncertainty_score(parsed))
+    ambiguity_count = len(parsed.get("ambiguities", [])) if isinstance(parsed.get("ambiguities"), list) else 0
+    needs_clarification = bool(parsed.get("needs_clarification", False))
+    boosted_uncertainty = uncertainty_score
+    if needs_clarification:
+        boosted_uncertainty = max(boosted_uncertainty, 0.82)
+    if ambiguity_count > 0:
+        boosted_uncertainty = max(boosted_uncertainty, min(0.92, 0.45 + 0.1 * ambiguity_count))
+    threshold = max(0.05, 1.0 - eagerness)
+    request = boosted_uncertainty >= threshold
+    return {
+        "clarification_eagerness": eagerness,
+        "uncertainty_score": uncertainty_score,
+        "effective_uncertainty": round(boosted_uncertainty, 3),
+        "threshold": round(threshold, 3),
+        "request_clarification": bool(request),
+        "needs_clarification_flag": needs_clarification,
+    }
+
+
+def _coerce_utterance_entry(raw: Any) -> tuple[str, list[str], int | None]:
+    if isinstance(raw, str):
+        return raw.strip(), [], None
+    if not isinstance(raw, dict):
+        return str(raw).strip(), [], None
+
+    text = str(raw.get("utterance", "") or raw.get("text", "") or raw.get("input", "")).strip()
+    answers_raw = raw.get("clarification_answers", [])
+    answers: list[str] = []
+    if isinstance(answers_raw, list):
+        answers = [str(item).strip() for item in answers_raw if str(item).strip()]
+    max_rounds: int | None = None
+    max_rounds_raw = raw.get("max_clarification_rounds")
+    if isinstance(max_rounds_raw, (int, float)):
+        max_rounds = max(0, int(max_rounds_raw))
+    return text, answers, max_rounds
+
+
+def _build_clarification_context_utterance(utterance: str, rounds: list[dict[str, Any]]) -> str:
+    if not rounds:
+        return utterance
+    lines = [f"Original utterance:\n{utterance}", "", "Clarification transcript:"]
+    for row in rounds:
+        round_index = int(row.get("round", 0))
+        question = str(row.get("question", "")).strip()
+        answer = str(row.get("answer", "")).strip()
+        lines.append(f"Q{round_index}: {question}")
+        lines.append(f"A{round_index}: {answer}")
+    lines.append("")
+    lines.append("Use the latest clarification answers as authoritative for disambiguation.")
+    return "\n".join(lines)
+
+
 def _extract_components_from_logic(logic_string: str) -> tuple[list[str], list[str], list[str]]:
     signatures = _extract_goal_signatures(logic_string[:-1] if logic_string.endswith(".") else logic_string)
     predicate_names = sorted({sig.split("/", 1)[0] for sig in signatures if "/" in sig})
@@ -818,7 +1002,12 @@ def _extract_components_from_logic(logic_string: str) -> tuple[list[str], list[s
     return atoms, variables, predicate_names
 
 
-def _refine_logic_only_payload(core_parsed: dict[str, Any], route: str) -> dict[str, Any] | None:
+def _refine_logic_only_payload(
+    core_parsed: dict[str, Any],
+    route: str,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
     intent = str(core_parsed.get("intent", route)).strip()
     if intent not in {"assert_fact", "assert_rule", "query", "retract", "other"}:
         intent = route if route in {"assert_fact", "assert_rule", "query", "retract", "other"} else "other"
@@ -879,8 +1068,16 @@ def _refine_logic_only_payload(core_parsed: dict[str, Any], route: str) -> dict[
         "confidence": confidence,
         "ambiguities": ambiguities,
         "needs_clarification": needs_clarification,
+        "uncertainty_score": _clip_01(core_parsed.get("uncertainty_score"), fallback=_estimate_uncertainty_score(core_parsed)),
+        "uncertainty_label": _coerce_uncertainty_label(
+            core_parsed.get("uncertainty_label"),
+            score=_clip_01(core_parsed.get("uncertainty_score"), fallback=_estimate_uncertainty_score(core_parsed)),
+        ),
+        "clarification_question": str(core_parsed.get("clarification_question", "")).strip(),
+        "clarification_reason": str(core_parsed.get("clarification_reason", "")).strip(),
         "rationale": rationale or "Refined logic-only parse.",
     }
+    refined = _normalize_clarification_fields(refined, utterance=utterance, route=route)
     ok, _ = _validate_parsed(refined)
     return refined if ok else None
 
@@ -897,6 +1094,10 @@ def _validate_parsed(parsed: dict[str, Any]) -> tuple[bool, list[str]]:
         "confidence",
         "ambiguities",
         "needs_clarification",
+        "uncertainty_score",
+        "uncertainty_label",
+        "clarification_question",
+        "clarification_reason",
         "rationale",
     ]
     for key in required:
@@ -931,6 +1132,30 @@ def _validate_parsed(parsed: dict[str, Any]) -> tuple[bool, list[str]]:
     for key in ("facts", "rules", "queries", "ambiguities"):
         if not isinstance(parsed.get(key), list):
             errors.append(f"{key} must be list")
+
+    if not isinstance(parsed.get("needs_clarification"), bool):
+        errors.append("needs_clarification must be boolean")
+
+    uncertainty_score = parsed.get("uncertainty_score")
+    try:
+        uncertainty_number = float(uncertainty_score)
+    except (TypeError, ValueError):
+        errors.append("uncertainty_score must be numeric")
+        uncertainty_number = -1.0
+    if uncertainty_number < 0 or uncertainty_number > 1:
+        errors.append("uncertainty_score out of range [0,1]")
+
+    uncertainty_label = str(parsed.get("uncertainty_label", "")).strip().lower()
+    if uncertainty_label not in {"low", "medium", "high"}:
+        errors.append("uncertainty_label must be one of low|medium|high")
+
+    clarification_question = str(parsed.get("clarification_question", "")).strip()
+    if clarification_question and not clarification_question.endswith("?"):
+        errors.append("clarification_question must end with '?' when non-empty")
+
+    clarification_reason = str(parsed.get("clarification_reason", "")).strip()
+    if len(clarification_reason.split()) > 12:
+        errors.append("clarification_reason must be 12 words or fewer")
 
     logic_string = str(parsed.get("logic_string", "")).strip()
     if logic_string and not logic_string.endswith("."):
@@ -1066,6 +1291,10 @@ def _build_retract_fallback_parse(utterance: str) -> dict[str, Any] | None:
         },
         "ambiguities": [],
         "needs_clarification": False,
+        "uncertainty_score": 0.22,
+        "uncertainty_label": "low",
+        "clarification_question": "",
+        "clarification_reason": "",
         "rationale": "Fallback retract parse from explicit Prolog-like fact in utterance.",
     }
     ok, _ = _validate_parsed(parsed)
@@ -1110,6 +1339,10 @@ def _build_parse_payload(
         },
         "ambiguities": [],
         "needs_clarification": False,
+        "uncertainty_score": 0.24,
+        "uncertainty_label": "low",
+        "clarification_question": "",
+        "clarification_reason": "",
         "rationale": rationale,
     }
 
@@ -1900,6 +2133,18 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Disable logic-only split extraction and use full-schema extraction directly.",
     )
+    parser.add_argument(
+        "--clarification-eagerness",
+        type=float,
+        default=0.35,
+        help="Clarification eagerness in [0,1]. Higher asks clarification at lower uncertainty.",
+    )
+    parser.add_argument(
+        "--max-clarification-rounds",
+        type=int,
+        default=2,
+        help="Maximum clarification Q&A rounds per utterance before deferring KB apply.",
+    )
     parser.add_argument("--out", default="", help="Optional output report JSON path.")
     return parser.parse_args()
 
@@ -1971,6 +2216,8 @@ def main() -> int:
     model = args.model.strip() or DEFAULT_MODELS[backend]
     use_two_pass = bool(args.two_pass and not args.no_two_pass)
     use_split_extraction = bool(args.split_extraction and not args.no_split_extraction)
+    clarification_eagerness = _clip_01(args.clarification_eagerness, fallback=0.35)
+    max_clarification_rounds = max(0, int(args.max_clarification_rounds))
     prompt_history_dir = Path(args.prompt_history_dir)
     if not prompt_history_dir.is_absolute():
         prompt_history_dir = (Path.cwd() / prompt_history_dir).resolve()
@@ -1991,6 +2238,8 @@ def main() -> int:
         "split_extraction": use_split_extraction,
         "strict_registry": bool(args.strict_registry),
         "strict_types": bool(args.strict_types),
+        "clarification_eagerness": clarification_eagerness,
+        "max_clarification_rounds": max_clarification_rounds,
         "backend_options": {"num_ctx": args.context_length} if backend == "ollama" else {},
     }
 
@@ -2058,6 +2307,10 @@ def main() -> int:
     print(f"Model: {model}")
     print(f"Two-pass: {use_two_pass}")
     print(f"Split extraction: {use_split_extraction}")
+    print(
+        f"Clarification policy: eagerness={clarification_eagerness:.2f} "
+        f"max_rounds={max_clarification_rounds}"
+    )
     print(f"Prompt file: {prompt_file_path} ({'loaded' if prompt_guide else 'not found/empty'})")
     print(
         "Prompt provenance: "
@@ -2081,179 +2334,294 @@ def main() -> int:
 
     turn_rows: list[dict[str, Any]] = []
     for idx, raw in enumerate(utterances, start=1):
-        utterance = str(raw).strip()
+        utterance, scripted_clarification_answers, entry_max_rounds = _coerce_utterance_entry(raw)
         if not utterance:
             continue
 
-        heuristic = _heuristic_route(utterance)
-        route = heuristic
+        per_turn_max_rounds = (
+            max_clarification_rounds
+            if entry_max_rounds is None
+            else max(0, int(entry_max_rounds))
+        )
+        clarification_rounds: list[dict[str, Any]] = []
+        scripted_answer_index = 0
+        clarification_pending = False
+        clarification_pending_reason = ""
+        clarification_question = ""
+        clarification_policy = {
+            "clarification_eagerness": clarification_eagerness,
+            "uncertainty_score": 0.0,
+            "effective_uncertainty": 0.0,
+            "threshold": round(max(0.05, 1.0 - clarification_eagerness), 3),
+            "request_clarification": False,
+            "needs_clarification_flag": False,
+        }
+
+        parsed: dict[str, Any] | None = None
+        parsed_text = ""
+        route = "other"
         route_source = "heuristic"
-        runtime_constraint_guide = _build_runtime_constraint_guide(
-            registry_signatures=registry_signatures,
-            strict_registry=bool(args.strict_registry),
-            type_schema=type_schema,
-            strict_types=bool(args.strict_types),
-        )
-        turn_prompt_guide = (
-            f"{prompt_guide}\n\n{runtime_constraint_guide}".strip()
-            if runtime_constraint_guide
-            else prompt_guide
-        )
-
-        if use_two_pass and heuristic == "assert_fact":
-            cls_prompt = _build_classifier_prompt(utterance, prompt_guide=turn_prompt_guide)
-            cls_resp = _call_model_prompt(
-                backend=backend,
-                base_url=base_url,
-                model=model,
-                prompt_text=cls_prompt,
-                context_length=2048,
-                timeout=args.timeout_seconds,
-                api_key=api_key,
-            )
-            cls_json, _ = _parse_model_json(cls_resp, required_keys=["route"])
-            if isinstance(cls_json, dict):
-                candidate = str(cls_json.get("route", "")).strip()
-                if candidate in {"assert_fact", "assert_rule", "query", "retract", "other"}:
-                    route = candidate
-                    route_source = "model"
-
-        known_predicates = _known_predicate_names_from_corpus(corpus_clauses)
-        if use_split_extraction:
-            ext_prompt = _build_logic_only_extractor_prompt(
-                utterance,
-                route,
-                known_predicates=known_predicates,
-                prompt_guide=turn_prompt_guide,
-            )
-            required_keys = ["intent", "logic_string", "confidence"]
-        else:
-            ext_prompt = _build_extractor_prompt(
-                utterance,
-                route,
-                known_predicates=known_predicates,
-                prompt_guide=turn_prompt_guide,
-            )
-            required_keys = ["intent", "logic_string", "components", "confidence"]
-        ext_resp = _call_model_prompt(
-            backend=backend,
-            base_url=base_url,
-            model=model,
-            prompt_text=ext_prompt,
-            context_length=args.context_length,
-            timeout=args.timeout_seconds,
-            api_key=api_key,
-        )
-        parsed, parsed_text = _parse_model_json(ext_resp, required_keys=required_keys)
-        if use_split_extraction and isinstance(parsed, dict):
-            refined = _refine_logic_only_payload(parsed, route)
-            if isinstance(refined, dict):
-                parsed = refined
-                parsed_text = json.dumps(refined)
-            else:
-                parsed = None
-                parsed_text = ""
         repaired = False
         fallback_used = False
         validation_errors: list[str] = []
+        alignment_events: list[dict[str, Any]] = []
+        registry_unknown_signatures: list[str] = []
 
-        if not isinstance(parsed, dict):
+        while True:
+            turn_input_text = _build_clarification_context_utterance(utterance, clarification_rounds)
+            heuristic = _heuristic_route(turn_input_text)
+            route = heuristic
+            route_source = "heuristic"
+            repaired = False
+            fallback_used = False
+            validation_errors = []
+            alignment_events = []
+            registry_unknown_signatures = []
+
+            runtime_constraint_guide = _build_runtime_constraint_guide(
+                registry_signatures=registry_signatures,
+                strict_registry=bool(args.strict_registry),
+                type_schema=type_schema,
+                strict_types=bool(args.strict_types),
+            )
+            turn_prompt_guide = (
+                f"{prompt_guide}\n\n{runtime_constraint_guide}".strip()
+                if runtime_constraint_guide
+                else prompt_guide
+            )
+
+            if use_two_pass and heuristic == "assert_fact":
+                cls_prompt = _build_classifier_prompt(turn_input_text, prompt_guide=turn_prompt_guide)
+                cls_resp = _call_model_prompt(
+                    backend=backend,
+                    base_url=base_url,
+                    model=model,
+                    prompt_text=cls_prompt,
+                    context_length=2048,
+                    timeout=args.timeout_seconds,
+                    api_key=api_key,
+                )
+                cls_json, _ = _parse_model_json(cls_resp, required_keys=["route"])
+                if isinstance(cls_json, dict):
+                    candidate = str(cls_json.get("route", "")).strip()
+                    if candidate in {"assert_fact", "assert_rule", "query", "retract", "other"}:
+                        route = candidate
+                        route_source = "model"
+
+            known_predicates = _known_predicate_names_from_corpus(corpus_clauses)
             if use_split_extraction:
-                # Second prompt: full-schema refiner fallback when logic-only pass is insufficient.
-                full_prompt = _build_extractor_prompt(
-                    utterance,
+                ext_prompt = _build_logic_only_extractor_prompt(
+                    turn_input_text,
                     route,
                     known_predicates=known_predicates,
                     prompt_guide=turn_prompt_guide,
                 )
-                full_resp = _call_model_prompt(
-                    backend=backend,
-                    base_url=base_url,
-                    model=model,
-                    prompt_text=full_prompt,
-                    context_length=args.context_length,
-                    timeout=args.timeout_seconds,
-                    api_key=api_key,
-                )
-                parsed, parsed_text = _parse_model_json(
-                    full_resp,
-                    required_keys=["intent", "logic_string", "components", "confidence"],
-                )
-            validation_errors = ["Model did not return parseable JSON payload."]
-            if isinstance(parsed, dict):
-                ok_full, errors_full = _validate_parsed(parsed)
-                if ok_full:
-                    validation_errors = []
-                else:
-                    validation_errors = errors_full
-            if validation_errors:
-                fallback_parsed = _build_route_fallback_parse(route, utterance)
-                if isinstance(fallback_parsed, dict):
-                    parsed = fallback_parsed
-                    validation_errors = []
-                    fallback_used = True
-        else:
-            ok, errors = _validate_parsed(parsed)
-            validation_errors = errors
-            if not ok:
-                repair_prompt = _build_repair_prompt(
-                    utterance,
+                required_keys = ["intent", "logic_string", "confidence"]
+            else:
+                ext_prompt = _build_extractor_prompt(
+                    turn_input_text,
                     route,
-                    parsed_text or json.dumps(parsed),
-                    errors,
+                    known_predicates=known_predicates,
                     prompt_guide=turn_prompt_guide,
                 )
-                repair_resp = _call_model_prompt(
-                    backend=backend,
-                    base_url=base_url,
-                    model=model,
-                    prompt_text=repair_prompt,
-                    context_length=args.context_length,
-                    timeout=args.timeout_seconds,
-                    api_key=api_key,
+                required_keys = ["intent", "logic_string", "components", "confidence"]
+            ext_resp = _call_model_prompt(
+                backend=backend,
+                base_url=base_url,
+                model=model,
+                prompt_text=ext_prompt,
+                context_length=args.context_length,
+                timeout=args.timeout_seconds,
+                api_key=api_key,
+            )
+            parsed, parsed_text = _parse_model_json(ext_resp, required_keys=required_keys)
+            if use_split_extraction and isinstance(parsed, dict):
+                parsed = _normalize_clarification_fields(parsed, utterance=utterance, route=route)
+                refined = _refine_logic_only_payload(
+                    parsed,
+                    route,
+                    utterance=utterance,
                 )
-                repaired_json, repaired_text = _parse_model_json(
-                    repair_resp,
-                    required_keys=["intent", "logic_string", "components", "confidence"],
-                )
-                if isinstance(repaired_json, dict):
-                    ok2, errors2 = _validate_parsed(repaired_json)
-                    if ok2:
-                        parsed = repaired_json
-                        parsed_text = repaired_text
+                if isinstance(refined, dict):
+                    parsed = refined
+                    parsed_text = json.dumps(refined)
+                else:
+                    parsed = None
+                    parsed_text = ""
+
+            if not isinstance(parsed, dict):
+                if use_split_extraction:
+                    # Second prompt: full-schema refiner fallback when logic-only pass is insufficient.
+                    full_prompt = _build_extractor_prompt(
+                        turn_input_text,
+                        route,
+                        known_predicates=known_predicates,
+                        prompt_guide=turn_prompt_guide,
+                    )
+                    full_resp = _call_model_prompt(
+                        backend=backend,
+                        base_url=base_url,
+                        model=model,
+                        prompt_text=full_prompt,
+                        context_length=args.context_length,
+                        timeout=args.timeout_seconds,
+                        api_key=api_key,
+                    )
+                    parsed, parsed_text = _parse_model_json(
+                        full_resp,
+                        required_keys=["intent", "logic_string", "components", "confidence"],
+                    )
+                    if isinstance(parsed, dict):
+                        parsed = _normalize_clarification_fields(parsed, utterance=utterance, route=route)
+                validation_errors = ["Model did not return parseable JSON payload."]
+                if isinstance(parsed, dict):
+                    parsed = _normalize_clarification_fields(parsed, utterance=utterance, route=route)
+                    ok_full, errors_full = _validate_parsed(parsed)
+                    if ok_full:
                         validation_errors = []
-                        repaired = True
                     else:
-                        validation_errors = errors2
+                        validation_errors = errors_full
                 if validation_errors:
                     fallback_parsed = _build_route_fallback_parse(route, utterance)
                     if isinstance(fallback_parsed, dict):
+                        fallback_parsed = _normalize_clarification_fields(
+                            fallback_parsed,
+                            utterance=utterance,
+                            route=route,
+                        )
                         parsed = fallback_parsed
                         validation_errors = []
                         fallback_used = True
+            else:
+                parsed = _normalize_clarification_fields(parsed, utterance=utterance, route=route)
+                ok, errors = _validate_parsed(parsed)
+                validation_errors = errors
+                if not ok:
+                    repair_prompt = _build_repair_prompt(
+                        turn_input_text,
+                        route,
+                        parsed_text or json.dumps(parsed),
+                        errors,
+                        prompt_guide=turn_prompt_guide,
+                    )
+                    repair_resp = _call_model_prompt(
+                        backend=backend,
+                        base_url=base_url,
+                        model=model,
+                        prompt_text=repair_prompt,
+                        context_length=args.context_length,
+                        timeout=args.timeout_seconds,
+                        api_key=api_key,
+                    )
+                    repaired_json, repaired_text = _parse_model_json(
+                        repair_resp,
+                        required_keys=["intent", "logic_string", "components", "confidence"],
+                    )
+                    if isinstance(repaired_json, dict):
+                        repaired_json = _normalize_clarification_fields(
+                            repaired_json,
+                            utterance=utterance,
+                            route=route,
+                        )
+                        ok2, errors2 = _validate_parsed(repaired_json)
+                        if ok2:
+                            parsed = repaired_json
+                            parsed_text = repaired_text
+                            validation_errors = []
+                            repaired = True
+                        else:
+                            validation_errors = errors2
+                    if validation_errors:
+                        fallback_parsed = _build_route_fallback_parse(route, utterance)
+                        if isinstance(fallback_parsed, dict):
+                            fallback_parsed = _normalize_clarification_fields(
+                                fallback_parsed,
+                                utterance=utterance,
+                                route=route,
+                            )
+                            parsed = fallback_parsed
+                            validation_errors = []
+                            fallback_used = True
 
-        alignment_events: list[dict[str, Any]] = []
-        registry_unknown_signatures: list[str] = []
-        if isinstance(parsed, dict) and not validation_errors:
-            parsed, alignment_events = _align_parsed_predicates(parsed, registry_alias_map)
-            registry_errors, unknown_signatures = _validate_parsed_against_registry(
-                parsed,
-                allowed_signatures=registry_signatures,
-                strict_registry=bool(args.strict_registry),
+            if isinstance(parsed, dict) and not validation_errors:
+                parsed, alignment_events = _align_parsed_predicates(parsed, registry_alias_map)
+                parsed = _normalize_clarification_fields(parsed, utterance=utterance, route=route)
+                registry_errors, unknown_signatures = _validate_parsed_against_registry(
+                    parsed,
+                    allowed_signatures=registry_signatures,
+                    strict_registry=bool(args.strict_registry),
+                )
+                registry_unknown_signatures = unknown_signatures
+                if registry_errors:
+                    validation_errors.extend(registry_errors)
+                type_errors = _validate_parsed_types(
+                    parsed,
+                    type_schema=type_schema,
+                    strict_types=bool(args.strict_types),
+                )
+                if type_errors:
+                    validation_errors.extend(type_errors)
+
+            if not isinstance(parsed, dict) or validation_errors:
+                break
+
+            clarification_policy = _clarification_policy_decision(
+                parsed=parsed,
+                clarification_eagerness=clarification_eagerness,
             )
-            registry_unknown_signatures = unknown_signatures
-            if registry_errors:
-                validation_errors.extend(registry_errors)
-            type_errors = _validate_parsed_types(
-                parsed,
-                type_schema=type_schema,
-                strict_types=bool(args.strict_types),
-            )
-            if type_errors:
-                validation_errors.extend(type_errors)
+            clarification_question = str(parsed.get("clarification_question", "")).strip()
+            if not clarification_question:
+                clarification_question = _synthesize_clarification_question(
+                    utterance=utterance,
+                    route=route,
+                    ambiguities=parsed.get("ambiguities", []) if isinstance(parsed.get("ambiguities"), list) else [],
+                    reason=str(parsed.get("clarification_reason", "")).strip(),
+                )
+                parsed["clarification_question"] = clarification_question
+
+            if not clarification_policy.get("request_clarification"):
+                break
+
+            has_round_capacity = len(clarification_rounds) < per_turn_max_rounds
+            has_scripted_answer = scripted_answer_index < len(scripted_clarification_answers)
+            if has_round_capacity and has_scripted_answer:
+                scripted_answer = scripted_clarification_answers[scripted_answer_index]
+                scripted_answer_index += 1
+                clarification_rounds.append(
+                    {
+                        "round": len(clarification_rounds) + 1,
+                        "question": clarification_question,
+                        "answer": scripted_answer,
+                        "uncertainty_score": clarification_policy.get("uncertainty_score"),
+                        "effective_uncertainty": clarification_policy.get("effective_uncertainty"),
+                        "threshold": clarification_policy.get("threshold"),
+                    }
+                )
+                continue
+
+            clarification_pending = True
+            if not has_round_capacity:
+                clarification_pending_reason = "Maximum clarification rounds reached for this utterance."
+            else:
+                clarification_pending_reason = "No clarification answer available for the generated question."
+            break
 
         apply_row: dict[str, Any]
-        if not isinstance(parsed, dict) or validation_errors:
+        if clarification_pending and isinstance(parsed, dict) and not validation_errors:
+            apply_row = {
+                "tool": "none",
+                "input": {
+                    "clarification_question": clarification_question,
+                    "clarification_rounds_used": len(clarification_rounds),
+                },
+                "result": {
+                    "status": "clarification_requested",
+                    "message": clarification_pending_reason or "Clarification required before KB apply.",
+                    "clarification_question": clarification_question,
+                    "clarification_policy": clarification_policy,
+                },
+            }
+        elif not isinstance(parsed, dict) or validation_errors:
             apply_row = {
                 "tool": "none",
                 "input": None,
@@ -2279,15 +2647,28 @@ def main() -> int:
                 "registry_unknown_signatures": registry_unknown_signatures,
                 "parsed": parsed,
                 "validation_errors": validation_errors,
+                "clarification_rounds": clarification_rounds,
+                "clarification_rounds_used": len(clarification_rounds),
+                "clarification_max_rounds": per_turn_max_rounds,
+                "clarification_answers_available": len(scripted_clarification_answers),
+                "clarification_answers_used": scripted_answer_index,
+                "clarification_policy": clarification_policy,
+                "clarification_pending": clarification_pending,
+                "clarification_pending_reason": clarification_pending_reason,
+                "clarification_question": clarification_question,
                 "apply": apply_row,
                 "apply_status": apply_status,
             }
         )
 
-        status_note = "ok" if not validation_errors and apply_status in {"success", "skipped", "no_results"} else "issue"
+        if apply_status == "clarification_requested":
+            status_note = "clarification"
+        else:
+            status_note = "ok" if not validation_errors and apply_status in {"success", "skipped", "no_results"} else "issue"
         print(
             f"[turn {idx:02d}] route={route} source={route_source} repaired={repaired} fallback={fallback_used} "
-            f"apply_tool={apply_row.get('tool')} apply_status={apply_status} [{status_note}]"
+            f"clar_rounds={len(clarification_rounds)} apply_tool={apply_row.get('tool')} "
+            f"apply_status={apply_status} [{status_note}]"
         )
 
     validation_rows = _run_validations(server, validations)
@@ -2297,7 +2678,13 @@ def main() -> int:
     apply_fail_count = sum(
         1
         for row in turn_rows
-        if str(row.get("apply_status")) not in {"success", "skipped", "no_results"}
+        if str(row.get("apply_status")) not in {"success", "skipped", "no_results", "clarification_requested"}
+    )
+    clarification_requests = sum(
+        1 for row in turn_rows if str(row.get("apply_status")) == "clarification_requested"
+    )
+    clarification_rounds_total = sum(
+        int(row.get("clarification_rounds_used", 0)) for row in turn_rows
     )
 
     overall_ok = parse_fail_count == 0 and apply_fail_count == 0 and validation_pass == validation_total
@@ -2391,6 +2778,8 @@ def main() -> int:
         "turns_total": len(turn_rows),
         "turn_parse_failures": parse_fail_count,
         "turn_apply_failures": apply_fail_count,
+        "turns_clarification_requested": clarification_requests,
+        "clarification_rounds_total": clarification_rounds_total,
         "validation_total": validation_total,
         "validation_passed": validation_pass,
         "overall_status": "passed" if overall_ok else "failed",
@@ -2402,6 +2791,7 @@ def main() -> int:
     print(f"Validation: {validation_pass}/{validation_total} passed")
     print(f"Parser failures: {parse_fail_count}")
     print(f"Apply failures: {apply_fail_count}")
+    print(f"Clarification requests: {clarification_requests} (rounds={clarification_rounds_total})")
     print(
         "Ontology drift: "
         f"{ontology_diff.get('change_level')} "

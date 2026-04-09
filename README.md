@@ -37,7 +37,7 @@ Last updated: 2026-04-09
 - Latest validated prompt snapshot:
   - `modelfiles/history/prompts/sp-ad589d272fbb.md`
 - Hub-published prompt snapshot:
-  - `hub/prompts/sp-ad589d272fbb.md`
+  - `docs/prompts/sp-ad589d272fbb.md`
 
 ## High-Level Architecture
 
@@ -147,26 +147,26 @@ The renderer supports three skins (`standard`, `telegram`, `imessage`) and each 
 ### 6) Build hub front page
 
 ```bash
-# render all run JSONs into hub/reports
-python scripts/render_kb_run_html.py --input kb_runs --output hub/reports --recursive --theme standard
+# render all run JSONs into docs/reports
+python scripts/render_kb_run_html.py --input kb_runs --output docs/reports --recursive --theme standard
 
-# render persistent KB corpora into hub/kb pages
-python scripts/render_kb_store_html.py --kb-root kb_store --output-dir hub/kb --title-prefix "KB Snapshot"
+# render persistent KB corpora into docs/kb pages
+python scripts/render_kb_store_html.py --kb-root kb_store --output-dir docs/kb --title-prefix "KB Snapshot"
 
 # render human-readable rung pages from ladder scenarios + latest runs
-python scripts/render_test_ladder_html.py --scenarios-dir kb_scenarios --runs-dir kb_runs --output-dir hub/rungs --title "Prolog Extraction Test Ladder"
+python scripts/render_test_ladder_html.py --scenarios-dir kb_scenarios --runs-dir kb_runs --output-dir docs/rungs --title "Prolog Extraction Test Ladder"
 
-# build hub/index.html + run/prompt manifests
-python scripts/build_hub_index.py --reports-dir hub/reports --runs-dir kb_runs --kb-pages-dir hub/kb --ladder-index hub/rungs/index.html --output hub/index.html --title "Prethinker Report Hub"
+# build docs/index.html + run/prompt manifests
+python scripts/build_hub_index.py --reports-dir docs/reports --runs-dir kb_runs --kb-pages-dir docs/kb --ladder-index docs/rungs/index.html --output docs/index.html --title "Prethinker Report Hub"
 ```
 
-`hub/index.html` is intentionally light/dark only (not conversation skins).
+`docs/index.html` is intentionally light/dark only (not conversation skins).
 It now includes run filtering/search and prompt-evolution tables.
 Manifests are generated at:
 
-- `hub/data/runs_manifest.json`
-- `hub/data/prompt_versions.json`
-- prompt snapshots mirrored to `hub/prompts/*.md`
+- `docs/data/runs_manifest.json`
+- `docs/data/prompt_versions.json`
+- prompt snapshots mirrored to `docs/prompts/*.md`
 
 ## Key Runtime Semantics
 

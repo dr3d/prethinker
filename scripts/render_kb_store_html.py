@@ -2,7 +2,7 @@
 """
 Render persistent KB corpora from kb_store into HTML pages.
 
-Each ontology directory with kb.pl becomes one page under hub/kb by default.
+Each ontology directory with kb.pl becomes one page under docs/kb by default.
 """
 
 from __future__ import annotations
@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Render kb_store corpora into HTML snapshot pages.")
     parser.add_argument("--kb-root", default="kb_store", help="Root directory containing ontology KB folders.")
-    parser.add_argument("--output-dir", default="hub/kb", help="Output directory for rendered KB HTML pages.")
+    parser.add_argument("--output-dir", default="docs/kb", help="Output directory for rendered KB HTML pages.")
     parser.add_argument("--title-prefix", default="KB Snapshot", help="Title prefix for rendered pages.")
     return parser.parse_args()
 
@@ -326,4 +326,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

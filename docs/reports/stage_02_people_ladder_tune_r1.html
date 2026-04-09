@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Semantic Parser Run: stage_02_rule_ingest (people_ladder)</title>
-  <meta name="description" content="Themed session transcript rendered from dialog_p9f1m7tp.json." />
+  <title>Semantic Parser Run: stage_02_rule_ingest (people_ladder_tune)</title>
+  <meta name="description" content="Themed session transcript rendered from dialog_0lt2xx47.json." />
   <style>
     :root {
       --bg: #e3ddd2;
@@ -427,10 +427,10 @@
 <body data-skin="standard">
   <div class="wrap">
     <div class="topbar">
-      <h1>Semantic Parser Run: stage_02_rule_ingest (people_ladder)</h1>
+      <h1>Semantic Parser Run: stage_02_rule_ingest (people_ladder_tune)</h1>
       <div class="topbar-right">
         <div class="nav-links">
-          <a class="nav-link" href="/hub">Back to Docs Hub</a>
+          <a class="nav-link" href="/docs">Back to Docs Hub</a>
           <a class="nav-link" href="./README.md">View Repo</a>
           <button id="appearance-toggle" class="theme-btn" aria-label="Switch transcript appearance">appearance</button>
         </div>
@@ -438,30 +438,81 @@
     </div>
     <div class="meta">Captured: 2026-04-09T19:53:06+00:00 | Model: qwen3.5:9b | Integration: ollama | Initial skin: standard | Rendered: 2026-04-09 19:53:06 UTC</div>
     <section class="step-card"><h2>run_context</h2><div class="bubble user"><div class="bubble-head"><div class="label">User</div><button class="copy-btn" data-copy="Capture run provenance and prompt/version settings for reproducibility." data-label="copy" data-success-label="copied" data-failure-label="copy-failed">copy</button></div><pre>Capture run provenance and prompt/version settings for reproducibility.</pre></div><details class="toolbox tool-expando"><summary><span>tool calls</span><span class="expando-count">0</span></summary><p class="tool-list">No tool calls captured.</p></details><div class="bubble assistant"><div class="bubble-head"><div class="label">Assistant</div><button class="copy-btn" data-copy="{
-  &quot;run_id&quot;: null,
-  &quot;run_started_utc&quot;: null,
-  &quot;run_finished_utc&quot;: null,
+  &quot;run_id&quot;: &quot;run-20260409T192706Z-stage_02_rule_ingest-qwen3_5_9b-39016&quot;,
+  &quot;run_started_utc&quot;: &quot;2026-04-09T19:27:06+00:00&quot;,
+  &quot;run_finished_utc&quot;: &quot;2026-04-09T19:27:59+00:00&quot;,
   &quot;scenario&quot;: &quot;stage_02_rule_ingest&quot;,
-  &quot;ontology_kb_name&quot;: &quot;people_ladder&quot;,
+  &quot;ontology_kb_name&quot;: &quot;people_ladder_tune&quot;,
   &quot;backend&quot;: &quot;ollama&quot;,
   &quot;model&quot;: &quot;qwen3.5:9b&quot;,
-  &quot;model_settings&quot;: {},
-  &quot;prompt_provenance&quot;: {}
+  &quot;model_settings&quot;: {
+    &quot;temperature&quot;: 0,
+    &quot;context_length&quot;: 4096,
+    &quot;classifier_context_length&quot;: 2048,
+    &quot;timeout_seconds&quot;: 120,
+    &quot;two_pass&quot;: true,
+    &quot;split_extraction&quot;: true,
+    &quot;strict_registry&quot;: false,
+    &quot;strict_types&quot;: false,
+    &quot;backend_options&quot;: {
+      &quot;num_ctx&quot;: 4096
+    }
+  },
+  &quot;prompt_provenance&quot;: {
+    &quot;status&quot;: &quot;ok&quot;,
+    &quot;prompt_id&quot;: &quot;sp-ad589d272fbb&quot;,
+    &quot;prompt_sha256&quot;: &quot;ad589d272fbbdcc886719efd5c4d19e9dd732a469dc2f3c574d10e28bbec5dff&quot;,
+    &quot;source_path&quot;: &quot;D:\\_PROJECTS\\prethinker\\modelfiles\\semantic_parser_system_prompt.md&quot;,
+    &quot;snapshot_path&quot;: &quot;D:\\_PROJECTS\\prethinker\\modelfiles\\history\\prompts\\sp-ad589d272fbb.md&quot;,
+    &quot;snapshot_created&quot;: false,
+    &quot;char_count&quot;: 1910,
+    &quot;line_count&quot;: 50,
+    &quot;preview&quot;: &quot;# Semantic Parser Prompt Pack (Qwen 3.5 9B)\nUse this as maintainable guidance for semantic parsing into Prolog structures.\nKeep behavior language-agnostic, deterministic, and schema-strict.\n## Core Priorities\n1. Output exactly one JSON object that matches the required schema.\n2. Preserve semantic meaning; do not hallucinate entities, facts, or arguments.\n3. Prefer canonical, stable predicate names across turns when semantics match.\n4. Use variables instead of assumptions when referents are unresolved.&quot;
+  }
 }" data-label="copy" data-success-label="copied" data-failure-label="copy-failed">copy</button></div><pre>{
-  &quot;run_id&quot;: null,
-  &quot;run_started_utc&quot;: null,
-  &quot;run_finished_utc&quot;: null,
+  &quot;run_id&quot;: &quot;run-20260409T192706Z-stage_02_rule_ingest-qwen3_5_9b-39016&quot;,
+  &quot;run_started_utc&quot;: &quot;2026-04-09T19:27:06+00:00&quot;,
+  &quot;run_finished_utc&quot;: &quot;2026-04-09T19:27:59+00:00&quot;,
   &quot;scenario&quot;: &quot;stage_02_rule_ingest&quot;,
-  &quot;ontology_kb_name&quot;: &quot;people_ladder&quot;,
+  &quot;ontology_kb_name&quot;: &quot;people_ladder_tune&quot;,
   &quot;backend&quot;: &quot;ollama&quot;,
   &quot;model&quot;: &quot;qwen3.5:9b&quot;,
-  &quot;model_settings&quot;: {},
-  &quot;prompt_provenance&quot;: {}
-}</pre></div><div class="annotation-stack"><div class="annotation-card annotation-info"><div class="annotation-head"><div class="annotation-title">Prompt Provenance</div><div class="annotation-kind">info</div></div><pre>prompt_id=(none)
-prompt_sha256=(none)
-snapshot_path=(none)
+  &quot;model_settings&quot;: {
+    &quot;temperature&quot;: 0,
+    &quot;context_length&quot;: 4096,
+    &quot;classifier_context_length&quot;: 2048,
+    &quot;timeout_seconds&quot;: 120,
+    &quot;two_pass&quot;: true,
+    &quot;split_extraction&quot;: true,
+    &quot;strict_registry&quot;: false,
+    &quot;strict_types&quot;: false,
+    &quot;backend_options&quot;: {
+      &quot;num_ctx&quot;: 4096
+    }
+  },
+  &quot;prompt_provenance&quot;: {
+    &quot;status&quot;: &quot;ok&quot;,
+    &quot;prompt_id&quot;: &quot;sp-ad589d272fbb&quot;,
+    &quot;prompt_sha256&quot;: &quot;ad589d272fbbdcc886719efd5c4d19e9dd732a469dc2f3c574d10e28bbec5dff&quot;,
+    &quot;source_path&quot;: &quot;D:\\_PROJECTS\\prethinker\\modelfiles\\semantic_parser_system_prompt.md&quot;,
+    &quot;snapshot_path&quot;: &quot;D:\\_PROJECTS\\prethinker\\modelfiles\\history\\prompts\\sp-ad589d272fbb.md&quot;,
+    &quot;snapshot_created&quot;: false,
+    &quot;char_count&quot;: 1910,
+    &quot;line_count&quot;: 50,
+    &quot;preview&quot;: &quot;# Semantic Parser Prompt Pack (Qwen 3.5 9B)\nUse this as maintainable guidance for semantic parsing into Prolog structures.\nKeep behavior language-agnostic, deterministic, and schema-strict.\n## Core Priorities\n1. Output exactly one JSON object that matches the required schema.\n2. Preserve semantic meaning; do not hallucinate entities, facts, or arguments.\n3. Prefer canonical, stable predicate names across turns when semantics match.\n4. Use variables instead of assumptions when referents are unresolved.&quot;
+  }
+}</pre></div><div class="annotation-stack"><div class="annotation-card annotation-info"><div class="annotation-head"><div class="annotation-title">Prompt Provenance</div><div class="annotation-kind">info</div></div><pre>prompt_id=sp-ad589d272fbb
+prompt_sha256=ad589d272fbbdcc886719efd5c4d19e9dd732a469dc2f3c574d10e28bbec5dff
+snapshot_path=D:\_PROJECTS\prethinker\modelfiles\history\prompts\sp-ad589d272fbb.md
 preview:
-(none)</pre></div></div></section><section class="step-card"><h2>turn_01: assert_fact [skipped]</h2><div class="bubble user"><div class="bubble-head"><div class="label">User</div><button class="copy-btn" data-copy="Socrates is a man." data-label="copy" data-success-label="copied" data-failure-label="copy-failed">copy</button></div><pre>Socrates is a man.</pre></div><details class="toolbox tool-expando"><summary><span>tool calls</span><span class="expando-count">1</span></summary><ul class="tool-list"><li class="tool-item"><div class="tool-line"><code>kb_apply::assert_fact</code> <code>{
+# Semantic Parser Prompt Pack (Qwen 3.5 9B)
+Use this as maintainable guidance for semantic parsing into Prolog structures.
+Keep behavior language-agnostic, deterministic, and schema-strict.
+## Core Priorities
+1. Output exactly one JSON object that matches the required schema.
+2. Preserve semantic meaning; do not hallucinate entities, facts, or arguments.
+3. Prefer canonical, stable predicate names across turns when semantics match.
+4. Use variables instead of assumptions when referents are unresolved.</pre></div></div></section><section class="step-card"><h2>turn_01: assert_fact [skipped]</h2><div class="bubble user"><div class="bubble-head"><div class="label">User</div><button class="copy-btn" data-copy="Socrates is a man." data-label="copy" data-success-label="copied" data-failure-label="copy-failed">copy</button></div><pre>Socrates is a man.</pre></div><details class="toolbox tool-expando"><summary><span>tool calls</span><span class="expando-count">1</span></summary><ul class="tool-list"><li class="tool-item"><div class="tool-line"><code>kb_apply::assert_fact</code> <code>{
   &quot;turn_index&quot;: 1,
   &quot;input&quot;: &quot;man(socrates).&quot;
 }</code></div><details class="tool-output"><summary>output</summary><pre>{
@@ -474,7 +525,7 @@ preview:
   &quot;expected_route&quot;: &quot;assert_fact&quot;,
   &quot;route_source&quot;: &quot;model&quot;,
   &quot;repaired&quot;: false,
-  &quot;fallback_used&quot;: true,
+  &quot;fallback_used&quot;: false,
   &quot;parsed&quot;: {
     &quot;intent&quot;: &quot;assert_fact&quot;,
     &quot;logic_string&quot;: &quot;man(socrates).&quot;,
@@ -493,13 +544,13 @@ preview:
     &quot;rules&quot;: [],
     &quot;queries&quot;: [],
     &quot;confidence&quot;: {
-      &quot;overall&quot;: 0.72,
-      &quot;intent&quot;: 0.82,
-      &quot;logic&quot;: 0.68
+      &quot;overall&quot;: 1.0,
+      &quot;intent&quot;: 1.0,
+      &quot;logic&quot;: 1.0
     },
     &quot;ambiguities&quot;: [],
     &quot;needs_clarification&quot;: false,
-    &quot;rationale&quot;: &quot;Fallback unary fact parse from &#x27;&lt;subject&gt; is a &lt;class&gt;&#x27;.&quot;
+    &quot;rationale&quot;: &quot;Declarative statement mapping to fact predicate.&quot;
   },
   &quot;validation_errors&quot;: [],
   &quot;apply_status&quot;: &quot;skipped&quot;,
@@ -512,7 +563,7 @@ preview:
   &quot;expected_route&quot;: &quot;assert_fact&quot;,
   &quot;route_source&quot;: &quot;model&quot;,
   &quot;repaired&quot;: false,
-  &quot;fallback_used&quot;: true,
+  &quot;fallback_used&quot;: false,
   &quot;parsed&quot;: {
     &quot;intent&quot;: &quot;assert_fact&quot;,
     &quot;logic_string&quot;: &quot;man(socrates).&quot;,
@@ -531,13 +582,13 @@ preview:
     &quot;rules&quot;: [],
     &quot;queries&quot;: [],
     &quot;confidence&quot;: {
-      &quot;overall&quot;: 0.72,
-      &quot;intent&quot;: 0.82,
-      &quot;logic&quot;: 0.68
+      &quot;overall&quot;: 1.0,
+      &quot;intent&quot;: 1.0,
+      &quot;logic&quot;: 1.0
     },
     &quot;ambiguities&quot;: [],
     &quot;needs_clarification&quot;: false,
-    &quot;rationale&quot;: &quot;Fallback unary fact parse from &#x27;&lt;subject&gt; is a &lt;class&gt;&#x27;.&quot;
+    &quot;rationale&quot;: &quot;Declarative statement mapping to fact predicate.&quot;
   },
   &quot;validation_errors&quot;: [],
   &quot;apply_status&quot;: &quot;skipped&quot;,
@@ -546,7 +597,7 @@ preview:
 }</pre></div><div class="annotation-stack"><div class="annotation-card annotation-info"><div class="annotation-head"><div class="annotation-title">Prethinker Annotation</div><div class="annotation-kind">info</div></div><pre>Why asked: Seed grounded terms/constants as facts for later inference.
 Utterance expected/observed: Socrates is a man. / Socrates is a man.
 Route expected/observed: assert_fact / assert_fact
-Parser path: source=model repaired=False fallback=True</pre></div><div class="annotation-card annotation-info"><div class="annotation-head"><div class="annotation-title">KB Action</div><div class="annotation-kind">info</div></div><pre>intent=assert_fact apply_tool=assert_fact apply_status=skipped
+Parser path: source=model repaired=False fallback=False</pre></div><div class="annotation-card annotation-info"><div class="annotation-head"><div class="annotation-title">KB Action</div><div class="annotation-kind">info</div></div><pre>intent=assert_fact apply_tool=assert_fact apply_status=skipped
 effect=mutation(write)
 submitted=man(socrates).
 message=Fact already present in corpus.</pre></div><div class="annotation-card annotation-info"><div class="annotation-head"><div class="annotation-title">KB Elements</div><div class="annotation-kind">info</div></div><pre>intent=assert_fact
@@ -598,7 +649,7 @@ apply_tool=assert_fact apply_status=skipped</pre></div></div></section><section 
     },
     &quot;ambiguities&quot;: [],
     &quot;needs_clarification&quot;: false,
-    &quot;rationale&quot;: &quot;The utterance expresses a universal conditional rule mapping the predicate &#x27;man&#x27; to &#x27;mortal&#x27; using standard Prolog syntax.&quot;
+    &quot;rationale&quot;: &quot;Conditional statement mapped to implication rule using known predicate man.&quot;
   },
   &quot;validation_errors&quot;: [],
   &quot;apply_status&quot;: &quot;success&quot;,
@@ -637,7 +688,7 @@ apply_tool=assert_fact apply_status=skipped</pre></div></div></section><section 
     },
     &quot;ambiguities&quot;: [],
     &quot;needs_clarification&quot;: false,
-    &quot;rationale&quot;: &quot;The utterance expresses a universal conditional rule mapping the predicate &#x27;man&#x27; to &#x27;mortal&#x27; using standard Prolog syntax.&quot;
+    &quot;rationale&quot;: &quot;Conditional statement mapped to implication rule using known predicate man.&quot;
   },
   &quot;validation_errors&quot;: [],
   &quot;apply_status&quot;: &quot;success&quot;,
@@ -700,7 +751,7 @@ reasons=none</pre></div></div></section>
       const appearanceToggle = document.getElementById("appearance-toggle");
       const skinStyle = document.querySelector("head style");
       const skinMapNode = document.getElementById("skin-css-map");
-      const appearanceStorageKey = "dialog_appearance_pref_dialog_p9f1m7tp";
+      const appearanceStorageKey = "dialog_appearance_pref_dialog_0lt2xx47";
       const defaultSkin = "standard";
       const skinOrder = ["standard", "telegram", "imessage"];
 

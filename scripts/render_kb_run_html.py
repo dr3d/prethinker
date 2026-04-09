@@ -103,10 +103,23 @@ def _collect_kb_elements(parsed: dict[str, Any] | None) -> dict[str, Any]:
         "facts": parsed.get("facts", []) if isinstance(parsed.get("facts"), list) else [],
         "rules": parsed.get("rules", []) if isinstance(parsed.get("rules"), list) else [],
         "queries": parsed.get("queries", []) if isinstance(parsed.get("queries"), list) else [],
+        "uncertainty_score": parsed.get("uncertainty_score"),
+        "uncertainty_label": parsed.get("uncertainty_label"),
+        "needs_clarification": parsed.get("needs_clarification"),
+        "clarification_question": parsed.get("clarification_question"),
+        "clarification_reason": parsed.get("clarification_reason"),
         "atoms": components.get("atoms", []) if isinstance(components.get("atoms"), list) else [],
         "variables": components.get("variables", []) if isinstance(components.get("variables"), list) else [],
         "predicates": components.get("predicates", []) if isinstance(components.get("predicates"), list) else [],
     }
+
+
+def _coerce_utterance_text(raw: Any) -> str:
+    if isinstance(raw, str):
+        return raw
+    if isinstance(raw, dict):
+        return str(raw.get("utterance", "") or raw.get("text", "") or raw.get("input", ""))
+    return str(raw)
 
 
 def _summarize_kb_action(
@@ -163,7 +176,7 @@ def _build_turn_step(
     expected_route = _heuristic_route(expected_utterance) if expected_utterance else _heuristic_route(observed_utterance)
     parse_ok = 1.0 if not turn.get("validation_errors") else 0.0
     route_ok = 1.0 if route == expected_route else 0.0
-    apply_ok = 1.0 if apply_status in {"success", "skipped", "no_results"} else 0.0
+    apply_ok = 1.0 if apply_status in {"success", "skipped", "no_results", "clarification_requested"} else 0.0
     utterance_ok = (
         1.0
         if (not expected_utterance or _normalized_text(expected_utterance) == _normalized_text(observed_utterance))
@@ -191,6 +204,10 @@ def _build_turn_step(
         "apply_status": apply_status,
         "utterance_ok": utterance_ok,
         "turn_score": turn_score,
+        "clarification_rounds": turn.get("clarification_rounds", []),
+        "clarification_pending": bool(turn.get("clarification_pending", False)),
+        "clarification_question": turn.get("clarification_question"),
+        "clarification_policy": turn.get("clarification_policy", {}),
     }
 
     tool_calls = [
@@ -229,8 +246,23 @@ def _build_turn_step(
                 f"facts={kb_elements['facts']}\n"
                 f"rules={kb_elements['rules']}\n"
                 f"queries={kb_elements['queries']}\n"
+                f"uncertainty_score={kb_elements['uncertainty_score']} uncertainty_label={kb_elements['uncertainty_label']}\n"
+                f"needs_clarification={kb_elements['needs_clarification']}\n"
+                f"clarification_question={kb_elements['clarification_question']}\n"
+                f"clarification_reason={kb_elements['clarification_reason']}\n"
                 f"predicates={kb_elements['predicates']}\n"
                 f"atoms={kb_elements['atoms']} variables={kb_elements['variables']}"
+            ),
+        },
+        {
+            "kind": "warning" if bool(turn.get("clarification_pending", False)) else "info",
+            "title": "Clarification Policy",
+            "text": (
+                f"pending={bool(turn.get('clarification_pending', False))}\n"
+                f"question={turn.get('clarification_question')}\n"
+                f"rounds_used={turn.get('clarification_rounds_used', 0)} "
+                f"max_rounds={turn.get('clarification_max_rounds', 0)}\n"
+                f"policy={turn.get('clarification_policy', {})}"
             ),
         },
         {
@@ -376,7 +408,7 @@ def _convert_report_to_dialog_payload(report: dict[str, Any], source: Path) -> d
     if isinstance(scenario_payload, dict):
         utterances = scenario_payload.get("utterances", [])
         if isinstance(utterances, list):
-            expected_utterances = [str(item) for item in utterances]
+            expected_utterances = [_coerce_utterance_text(item) for item in utterances]
 
     turns = report.get("turns", [])
     if not isinstance(turns, list):
@@ -485,7 +517,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--docs-hub-link",
-        default="/hub",
+        default="/docs",
         help="Top-nav docs link inside rendered page.",
     )
     parser.add_argument(

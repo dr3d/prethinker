@@ -48,3 +48,20 @@ Only emit such rules when the utterance semantically indicates transitivity or c
 - If pronouns or entities are unresolved, set `needs_clarification=true`.
 - Use variables rather than invented atoms.
 - Keep ambiguities list short and concrete.
+
+## Uncertainty And Clarification Contract
+
+- Always emit:
+  - `uncertainty_score` in `[0,1]` where `1` means very uncertain.
+  - `uncertainty_label` as `low | medium | high`.
+  - `clarification_reason` with concrete wording (<= 12 words).
+  - `clarification_question` ending with `?` when uncertainty is non-trivial.
+- If uncertainty is high enough to block safe write intent, set `needs_clarification=true`.
+- Clarification questions should target missing entities, relation direction, or correction target.
+
+## Clarification Question Style
+
+- Ask one focused question at a time.
+- Prefer disambiguation over open-ended chat.
+- Good: "Do you mean `parent(alex, sam)` or `parent(sam, alex)`?"
+- Good: "Who does 'he' refer to in this statement?"

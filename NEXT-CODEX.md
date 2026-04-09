@@ -24,17 +24,17 @@ Best verified runs for that prompt:
 Run from repo root:
 
 ```bash
-python scripts/render_kb_run_html.py --input kb_runs --output hub/reports --recursive --theme standard --docs-hub-link /hub --repo-link ./README.md
-python scripts/render_kb_store_html.py --kb-root kb_store --output-dir hub/kb --title-prefix "KB Snapshot"
-python scripts/render_test_ladder_html.py --scenarios-dir kb_scenarios --runs-dir kb_runs --output-dir hub/rungs --title "Prolog Extraction Test Ladder"
-python scripts/build_hub_index.py --reports-dir hub/reports --runs-dir kb_runs --kb-pages-dir hub/kb --ladder-index hub/rungs/index.html --output hub/index.html --title "Prethinker Report Hub"
+python scripts/render_kb_run_html.py --input kb_runs --output docs/reports --recursive --theme standard --docs-hub-link /docs --repo-link ./README.md
+python scripts/render_kb_store_html.py --kb-root kb_store --output-dir docs/kb --title-prefix "KB Snapshot"
+python scripts/render_test_ladder_html.py --scenarios-dir kb_scenarios --runs-dir kb_runs --output-dir docs/rungs --title "Prolog Extraction Test Ladder"
+python scripts/build_hub_index.py --reports-dir docs/reports --runs-dir kb_runs --kb-pages-dir docs/kb --ladder-index docs/rungs/index.html --output docs/index.html --title "Prethinker Report Hub"
 ```
 
 Then open:
 
-- `hub/index.html`
-- `hub/data/prompt_versions.json`
-- `hub/data/runs_manifest.json`
+- `docs/index.html`
+- `docs/data/prompt_versions.json`
+- `docs/data/runs_manifest.json`
 
 ## Immediate Next Tuning Loop
 

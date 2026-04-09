@@ -103,9 +103,9 @@ Runtime behavior:
 - Prompt guidance is loaded from `modelfiles/semantic_parser_system_prompt.md` by default
 - Prompt snapshots are auto-written to `modelfiles/history/prompts/` and tracked in each run report
 - Split extraction is enabled by default: pass 1 logic-only parse, pass 2 deterministic schema refinement
-- Hub publishing mirrors snapshots to `hub/prompts/` and indexes prompt performance in:
-  - `hub/data/runs_manifest.json`
-  - `hub/data/prompt_versions.json`
+- Hub publishing mirrors snapshots to `docs/prompts/` and indexes prompt performance in:
+  - `docs/data/runs_manifest.json`
+  - `docs/data/prompt_versions.json`
 
 ```bash
 # Ollama

@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Semantic Parser Run: kb_positive (default)</title>
-  <meta name="description" content="Themed session transcript rendered from dialog_0933gunn.json." />
+  <title>Semantic Parser Run: kb_positive (people_core)</title>
+  <meta name="description" content="Themed session transcript rendered from dialog_z9axs8u1.json." />
   <style>
     :root {
       --bg: #e3ddd2;
@@ -427,10 +427,10 @@
 <body data-skin="standard">
   <div class="wrap">
     <div class="topbar">
-      <h1>Semantic Parser Run: kb_positive (default)</h1>
+      <h1>Semantic Parser Run: kb_positive (people_core)</h1>
       <div class="topbar-right">
         <div class="nav-links">
-          <a class="nav-link" href="/hub">Back to Docs Hub</a>
+          <a class="nav-link" href="/docs">Back to Docs Hub</a>
           <a class="nav-link" href="./README.md">View Repo</a>
           <button id="appearance-toggle" class="theme-btn" aria-label="Switch transcript appearance">appearance</button>
         </div>
@@ -442,7 +442,7 @@
   &quot;run_started_utc&quot;: null,
   &quot;run_finished_utc&quot;: null,
   &quot;scenario&quot;: &quot;kb_positive&quot;,
-  &quot;ontology_kb_name&quot;: null,
+  &quot;ontology_kb_name&quot;: &quot;people_core&quot;,
   &quot;backend&quot;: &quot;ollama&quot;,
   &quot;model&quot;: &quot;qwen3.5:9b&quot;,
   &quot;model_settings&quot;: {},
@@ -452,7 +452,7 @@
   &quot;run_started_utc&quot;: null,
   &quot;run_finished_utc&quot;: null,
   &quot;scenario&quot;: &quot;kb_positive&quot;,
-  &quot;ontology_kb_name&quot;: null,
+  &quot;ontology_kb_name&quot;: &quot;people_core&quot;,
   &quot;backend&quot;: &quot;ollama&quot;,
   &quot;model&quot;: &quot;qwen3.5:9b&quot;,
   &quot;model_settings&quot;: {},
@@ -582,10 +582,7 @@ apply_tool=assert_fact apply_status=success</pre></div></div></section><section 
     &quot;intent&quot;: &quot;assert_rule&quot;,
     &quot;logic_string&quot;: &quot;mortal(X) :- man(X).&quot;,
     &quot;components&quot;: {
-      &quot;atoms&quot;: [
-        &quot;mortal&quot;,
-        &quot;man&quot;
-      ],
+      &quot;atoms&quot;: [],
       &quot;variables&quot;: [
         &quot;X&quot;
       ],
@@ -606,7 +603,7 @@ apply_tool=assert_fact apply_status=success</pre></div></div></section><section 
     },
     &quot;ambiguities&quot;: [],
     &quot;needs_clarification&quot;: false,
-    &quot;rationale&quot;: &quot;The utterance expresses a universal conditional relationship suitable for a Prolog rule definition.&quot;
+    &quot;rationale&quot;: &quot;The statement defines a logical implication suitable for a rule assertion.&quot;
   },
   &quot;validation_errors&quot;: [],
   &quot;apply_status&quot;: &quot;success&quot;,
@@ -624,10 +621,7 @@ apply_tool=assert_fact apply_status=success</pre></div></div></section><section 
     &quot;intent&quot;: &quot;assert_rule&quot;,
     &quot;logic_string&quot;: &quot;mortal(X) :- man(X).&quot;,
     &quot;components&quot;: {
-      &quot;atoms&quot;: [
-        &quot;mortal&quot;,
-        &quot;man&quot;
-      ],
+      &quot;atoms&quot;: [],
       &quot;variables&quot;: [
         &quot;X&quot;
       ],
@@ -648,7 +642,7 @@ apply_tool=assert_fact apply_status=success</pre></div></div></section><section 
     },
     &quot;ambiguities&quot;: [],
     &quot;needs_clarification&quot;: false,
-    &quot;rationale&quot;: &quot;The utterance expresses a universal conditional relationship suitable for a Prolog rule definition.&quot;
+    &quot;rationale&quot;: &quot;The statement defines a logical implication suitable for a rule assertion.&quot;
   },
   &quot;validation_errors&quot;: [],
   &quot;apply_status&quot;: &quot;success&quot;,
@@ -668,7 +662,7 @@ facts=[]
 rules=[&#x27;mortal(X) :- man(X).&#x27;]
 queries=[]
 predicates=[&#x27;mortal&#x27;, &#x27;man&#x27;]
-atoms=[&#x27;mortal&#x27;, &#x27;man&#x27;] variables=[&#x27;X&#x27;]</pre></div><div class="annotation-card annotation-score"><div class="annotation-head"><div class="annotation-title">Turn Score</div><div class="annotation-kind">score</div></div><pre>score=1.0 (parse_ok=1.0, route_ok=1.0, apply_ok=1.0, utterance_ok=1.0)
+atoms=[] variables=[&#x27;X&#x27;]</pre></div><div class="annotation-card annotation-score"><div class="annotation-head"><div class="annotation-title">Turn Score</div><div class="annotation-kind">score</div></div><pre>score=1.0 (parse_ok=1.0, route_ok=1.0, apply_ok=1.0, utterance_ok=1.0)
 apply_tool=assert_rule apply_status=success</pre></div></div></section><section class="step-card"><h2>validation_summary</h2><div class="bubble user"><div class="bubble-head"><div class="label">User</div><button class="copy-btn" data-copy="Run deterministic KB validations and compare against expectations." data-label="copy" data-success-label="copied" data-failure-label="copy-failed">copy</button></div><pre>Run deterministic KB validations and compare against expectations.</pre></div><details class="toolbox tool-expando"><summary><span>tool calls</span><span class="expando-count">2</span></summary><ul class="tool-list"><li class="tool-item"><div class="tool-line"><code>validation::query_rows</code> <code>{
   &quot;id&quot;: &quot;man_socrates&quot;,
   &quot;query&quot;: &quot;man(socrates).&quot;,
@@ -732,7 +726,7 @@ reasons=none</pre></div></div></section>
       const appearanceToggle = document.getElementById("appearance-toggle");
       const skinStyle = document.querySelector("head style");
       const skinMapNode = document.getElementById("skin-css-map");
-      const appearanceStorageKey = "dialog_appearance_pref_dialog_0933gunn";
+      const appearanceStorageKey = "dialog_appearance_pref_dialog_z9axs8u1";
       const defaultSkin = "standard";
       const skinOrder = ["standard", "telegram", "imessage"];
 

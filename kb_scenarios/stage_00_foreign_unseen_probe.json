@@ -1,0 +1,16 @@
+{
+  "name": "stage_00_foreign_unseen_probe",
+  "ontology_name": "foreign_unseen_probe",
+  "utterances": [
+    "En cumplimiento de la norma IFRS, la subsidiaria Alfa reconoce ingresos diferidos.",
+    "Le patient presente une insuffisance renale moderee; eviter l'ibuprofene.",
+    "如果客户连续三个月逾期付款，应将其风险等级上调一级。",
+    "Bei Verdacht auf Geldwasche muss die Meldung innerhalb von 24 Stunden erfolgen.",
+    "Nao tenho certeza se ela e diretora ou apenas procuradora.",
+    "هل ألغينا شرط الموافقة المزدوجة للمدفوعات الكبيرة؟",
+    "Actually undo that last compliance rule.",
+    "Кто отвечает за контроль экспортных лицензий?"
+  ],
+  "validations": []
+}
+

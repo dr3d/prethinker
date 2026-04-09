@@ -72,7 +72,7 @@ Prompt snapshots live in:
 
 Hub publishing mirrors snapshots to:
 
-- `hub/prompts/`
+- `docs/prompts/`
 
 ## Standard Tuning Loop
 
@@ -111,19 +111,19 @@ python kb_pipeline.py --backend ollama --base-url http://127.0.0.1:11434 --model
 python kb_pipeline.py --backend ollama --base-url http://127.0.0.1:11434 --model qwen3.5:9b --scenario kb_scenarios/stage_02_rule_ingest.json --kb-name people_ladder_tune --out kb_runs/stage_02_people_ladder_tune_rN.json
 
 # 4) render reports
-python scripts/render_kb_run_html.py --input kb_runs --output hub/reports --theme standard --docs-hub-link /hub --repo-link ./README.md
+python scripts/render_kb_run_html.py --input kb_runs --output docs/reports --theme standard --docs-hub-link /docs --repo-link ./README.md
 
 # 5) rebuild hub + manifests
-python scripts/build_hub_index.py --reports-dir hub/reports --runs-dir kb_runs --kb-pages-dir hub/kb --ladder-index hub/rungs/index.html --output hub/index.html --title "Prethinker Report Hub"
+python scripts/build_hub_index.py --reports-dir docs/reports --runs-dir kb_runs --kb-pages-dir docs/kb --ladder-index docs/rungs/index.html --output docs/index.html --title "Prethinker Report Hub"
 ```
 
 ## Where To Inspect Results
 
 - run JSONs: `kb_runs/*.json`
-- run transcripts: `hub/reports/*.html`
-- hub index: `hub/index.html`
-- run manifest: `hub/data/runs_manifest.json`
-- prompt manifest: `hub/data/prompt_versions.json`
+- run transcripts: `docs/reports/*.html`
+- docs index: `docs/index.html`
+- run manifest: `docs/data/runs_manifest.json`
+- prompt manifest: `docs/data/prompt_versions.json`
 
 ## Known Legacy vs Current
 
@@ -164,10 +164,10 @@ If this work is moved back into `prolog-reasoning`, use `SESSIONS.md` as the mig
 After a folder rename, refresh rendered docs so embedded paths are coherent:
 
 ```bash
-python scripts/render_kb_run_html.py --input kb_runs --output hub/reports --recursive --theme standard --docs-hub-link /hub --repo-link ./README.md
-python scripts/render_kb_store_html.py --kb-root kb_store --output-dir hub/kb --title-prefix "KB Snapshot"
-python scripts/render_test_ladder_html.py --scenarios-dir kb_scenarios --runs-dir kb_runs --output-dir hub/rungs --title "Prolog Extraction Test Ladder"
-python scripts/build_hub_index.py --reports-dir hub/reports --runs-dir kb_runs --kb-pages-dir hub/kb --ladder-index hub/rungs/index.html --output hub/index.html --title "Prethinker Report Hub"
+python scripts/render_kb_run_html.py --input kb_runs --output docs/reports --recursive --theme standard --docs-hub-link /docs --repo-link ./README.md
+python scripts/render_kb_store_html.py --kb-root kb_store --output-dir docs/kb --title-prefix "KB Snapshot"
+python scripts/render_test_ladder_html.py --scenarios-dir kb_scenarios --runs-dir kb_runs --output-dir docs/rungs --title "Prolog Extraction Test Ladder"
+python scripts/build_hub_index.py --reports-dir docs/reports --runs-dir kb_runs --kb-pages-dir docs/kb --ladder-index docs/rungs/index.html --output docs/index.html --title "Prethinker Report Hub"
 ```
 
 

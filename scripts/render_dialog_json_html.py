@@ -724,7 +724,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--docs-hub-link",
-        default="/hub",
+        default="/docs",
         help="Top-nav docs hub link.",
     )
     parser.add_argument(

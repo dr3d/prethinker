@@ -14,11 +14,11 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Build hub index with run + prompt provenance.")
-    p.add_argument("--reports-dir", default="hub/reports")
+    p.add_argument("--reports-dir", default="docs/reports")
     p.add_argument("--runs-dir", default="kb_runs")
-    p.add_argument("--kb-pages-dir", default="hub/kb")
-    p.add_argument("--ladder-index", default="hub/rungs/index.html")
-    p.add_argument("--output", default="hub/index.html")
+    p.add_argument("--kb-pages-dir", default="docs/kb")
+    p.add_argument("--ladder-index", default="docs/rungs/index.html")
+    p.add_argument("--output", default="docs/index.html")
     p.add_argument("--title", default="Prethinker Report Hub")
     return p.parse_args()
 

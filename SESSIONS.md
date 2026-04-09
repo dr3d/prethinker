@@ -11,7 +11,7 @@ Use this as the handoff doc for future agents and for repo-to-repo migration.
 ## Folder Rename Note
 
 - The repo folder name can change without code changes because commands are relative to repo root.
-- Existing `kb_runs/*.json`, `hub/*.html`, and prompt snapshot metadata may still show older absolute paths from when those artifacts were generated.
+- Existing `kb_runs/*.json`, `docs/*.html`, and prompt snapshot metadata may still show older absolute paths from when those artifacts were generated.
 - Treat those embedded paths as historical metadata, then rerender outputs after rename to refresh visible references.
 
 ## Scope Achieved
@@ -91,7 +91,7 @@ Outcome:
 - imported conversation renderer stack from `prolog-reasoning`
 - built run report conversion into transcript pages
 - built KB snapshot and rung renderers
-- built initial `/hub/index.html`
+- built initial `/docs/index.html`
 
 Key files:
 
@@ -132,14 +132,14 @@ Outcome:
 
 Outcome:
 
-- `/hub/index.html` moved from flat listing to run explorer UI
+- `/docs/index.html` moved from flat listing to run explorer UI
 - added search + filters:
   - status, scenario, model, prompt id
 - added prompt evolution table with aggregate metrics
 - added machine-readable manifests:
-  - `hub/data/runs_manifest.json`
-  - `hub/data/prompt_versions.json`
-- prompt snapshots published to `hub/prompts/*.md`
+  - `docs/data/runs_manifest.json`
+  - `docs/data/prompt_versions.json`
+- prompt snapshots published to `docs/prompts/*.md`
 
 ## Session 9: Baseline Provenance-Aware Smoke Runs
 
@@ -152,7 +152,7 @@ Shared prompt version:
 
 - `prompt_id`: `sp-ad589d272fbb`
 - source snapshot: `modelfiles/history/prompts/sp-ad589d272fbb.md`
-- hub snapshot copy: `hub/prompts/sp-ad589d272fbb.md`
+- hub snapshot copy: `docs/prompts/sp-ad589d272fbb.md`
 
 ## Session 10: Documentation Consolidation
 
@@ -232,9 +232,9 @@ After copying into `prolog-reasoning`, verify:
    - `system_prompt_text`
 4. `render_kb_run_html.py` shows `run_context` and annotation cards.
 5. `build_hub_index.py` generates:
-   - `hub/index.html`
-   - `hub/data/runs_manifest.json`
-   - `hub/data/prompt_versions.json`
+   - `docs/index.html`
+   - `docs/data/runs_manifest.json`
+   - `docs/data/prompt_versions.json`
 6. Smoke pair passes with one prompt id:
    - stage 01 facts
    - stage 02 rule ingest
@@ -247,21 +247,21 @@ python kb_pipeline.py --backend ollama --base-url http://127.0.0.1:11434 --model
 python kb_pipeline.py --backend ollama --base-url http://127.0.0.1:11434 --model qwen3.5:9b --scenario kb_scenarios/stage_02_rule_ingest.json --kb-name people_ladder_tune --out kb_runs/stage_02_people_ladder_tune_r1.json
 
 # render + hub
-python scripts/render_kb_run_html.py --input kb_runs --output hub/reports --theme standard --docs-hub-link /hub --repo-link ./README.md
-python scripts/build_hub_index.py --reports-dir hub/reports --runs-dir kb_runs --kb-pages-dir hub/kb --ladder-index hub/rungs/index.html --output hub/index.html --title "Prethinker Report Hub"
+python scripts/render_kb_run_html.py --input kb_runs --output docs/reports --theme standard --docs-hub-link /docs --repo-link ./README.md
+python scripts/build_hub_index.py --reports-dir docs/reports --runs-dir kb_runs --kb-pages-dir docs/kb --ladder-index docs/rungs/index.html --output docs/index.html --title "Prethinker Report Hub"
 ```
 
 ## Artifacts To Trust During Future Tuning
 
 Human-facing:
 
-- `hub/index.html`
-- `hub/reports/*.html`
+- `docs/index.html`
+- `docs/reports/*.html`
 
 Machine-facing:
 
-- `hub/data/runs_manifest.json`
-- `hub/data/prompt_versions.json`
+- `docs/data/runs_manifest.json`
+- `docs/data/prompt_versions.json`
 - `kb_runs/*.json`
 
 Provenance ground truth:
@@ -273,10 +273,10 @@ Provenance ground truth:
 Run these from repo root after renaming the folder:
 
 ```bash
-python scripts/render_kb_run_html.py --input kb_runs --output hub/reports --recursive --theme standard --docs-hub-link /hub --repo-link ./README.md
-python scripts/render_kb_store_html.py --kb-root kb_store --output-dir hub/kb --title-prefix "KB Snapshot"
-python scripts/render_test_ladder_html.py --scenarios-dir kb_scenarios --runs-dir kb_runs --output-dir hub/rungs --title "Prolog Extraction Test Ladder"
-python scripts/build_hub_index.py --reports-dir hub/reports --runs-dir kb_runs --kb-pages-dir hub/kb --ladder-index hub/rungs/index.html --output hub/index.html --title "Prethinker Report Hub"
+python scripts/render_kb_run_html.py --input kb_runs --output docs/reports --recursive --theme standard --docs-hub-link /docs --repo-link ./README.md
+python scripts/render_kb_store_html.py --kb-root kb_store --output-dir docs/kb --title-prefix "KB Snapshot"
+python scripts/render_test_ladder_html.py --scenarios-dir kb_scenarios --runs-dir kb_runs --output-dir docs/rungs --title "Prolog Extraction Test Ladder"
+python scripts/build_hub_index.py --reports-dir docs/reports --runs-dir kb_runs --kb-pages-dir docs/kb --ladder-index docs/rungs/index.html --output docs/index.html --title "Prethinker Report Hub"
 ``` 
 
 ## Closeout Note

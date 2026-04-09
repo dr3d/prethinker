@@ -1,0 +1,22 @@
+{
+  "name": "stage_00_multilingual_probe",
+  "ontology_name": "multilingual_probe",
+  "utterances": [
+    "parent(juan, maria).",
+    "Juan es el padre de Maria.",
+    {
+      "utterance": "Ella trabaja alli.",
+      "clarification_answers": [
+        "Ella means Claire.",
+        "Alli means Paris."
+      ],
+      "max_clarification_rounds": 3
+    },
+    "Claire travaille a Paris.",
+    "她在那里工作。",
+    "Wer ist Marias Elternteil?",
+    "Actually, retract that: parent(juan, maria)."
+  ],
+  "validations": []
+}
+

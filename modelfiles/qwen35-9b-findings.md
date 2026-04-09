@@ -92,4 +92,4 @@ Every new run should be compared by:
 - `validation_passed / validation_total`
 - turn-level parser/apply failures
 
-Use `hub/index.html` filters (scenario + prompt id) to monitor regression before advancing to harder rungs.
+Use `docs/index.html` filters (scenario + prompt id) to monitor regression before advancing to harder rungs.

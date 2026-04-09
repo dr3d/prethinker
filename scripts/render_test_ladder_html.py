@@ -3,8 +3,8 @@
 Render human-readable ladder pages from kb_scenarios + latest kb_runs summaries.
 
 Outputs:
-- hub/rungs/index.html
-- hub/rungs/<scenario_name>.html for each ladder scenario
+- docs/rungs/index.html
+- docs/rungs/<scenario_name>.html for each ladder scenario
 """
 
 from __future__ import annotations
@@ -25,7 +25,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Render human-readable test ladder pages.")
     parser.add_argument("--scenarios-dir", default="kb_scenarios", help="Directory containing scenario JSON files.")
     parser.add_argument("--runs-dir", default="kb_runs", help="Directory containing run JSON reports.")
-    parser.add_argument("--output-dir", default="hub/rungs", help="Directory for rung HTML pages.")
+    parser.add_argument("--output-dir", default="docs/rungs", help="Directory for rung HTML pages.")
     parser.add_argument("--title", default="Test Ladder", help="Top-level title for ladder index.")
     return parser.parse_args()
 
@@ -129,12 +129,12 @@ def _render_rung_page(
         run_file = latest_run_path.name if latest_run_path else ""
         run_file_link = f"../../kb_runs/{run_file}" if run_file else "#"
         report_html_name = latest_run_path.with_suffix(".html").name if latest_run_path else ""
-        report_html_path = ROOT / "hub" / "reports" / report_html_name
+        report_html_path = ROOT / "docs" / "reports" / report_html_name
         report_html_link = f"../reports/{report_html_name}" if report_html_path.exists() else ""
         kb_page_link = ""
         kb_name = str(latest_run.get("ontology_kb_name", "")).strip()
         if kb_name:
-            kb_page = ROOT / "hub" / "kb" / f"{kb_name}.html"
+            kb_page = ROOT / "docs" / "kb" / f"{kb_name}.html"
             if kb_page.exists():
                 kb_page_link = f"../kb/{kb_name}.html"
 
@@ -233,7 +233,7 @@ def _render_rung_page(
       </div>
       <button id="theme-toggle" class="theme-btn" aria-label="Toggle theme">theme</button>
     </div>
-    <p class="muted">Generated {generated} | <a href="./index.html">Back to ladder index</a> | <a href="../index.html">Back to hub</a></p>
+    <p class="muted">Generated {generated} | <a href="./index.html">Back to ladder index</a> | <a href="../index.html">Back to docs</a></p>
 
     <section class="panel">
       <h2>Latest Run Summary</h2>
@@ -335,7 +335,7 @@ def _render_index_page(
     <div class="topbar">
       <div>
         <h1>{html.escape(title)}</h1>
-        <p class="muted">Generated {generated} | <a href="../index.html">Back to hub</a></p>
+        <p class="muted">Generated {generated} | <a href="../index.html">Back to docs</a></p>
       </div>
       <button id="theme-toggle" class="theme-btn" aria-label="Toggle theme">theme</button>
     </div>
@@ -454,4 +454,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
