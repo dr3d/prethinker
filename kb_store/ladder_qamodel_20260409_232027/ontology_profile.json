@@ -1,0 +1,18 @@
+{
+  "ontology_name": "ladder_qamodel_20260409_232027",
+  "generated_at_utc": "2026-04-10T03:21:46+00:00",
+  "clause_count": 3,
+  "predicate_signatures": [
+    "man/1",
+    "mortal/1"
+  ],
+  "fact_predicates": [
+    "man/1"
+  ],
+  "rule_head_predicates": [
+    "mortal/1"
+  ],
+  "rule_body_predicates": [
+    "man/1"
+  ]
+}

@@ -276,6 +276,20 @@ Starter files:
 - `modelfiles/predicate_registry.json`
 - `modelfiles/type_schema.example.json`
 
+### 4c) Optional automated clarification Q&A with a separate model
+
+Use this when the parser asks clarification questions and you want an explicit Q&A model to answer during runs.
+
+```bash
+python kb_pipeline.py --backend ollama --base-url http://127.0.0.1:11434 --model qwen35-semparse:9b --runtime core --scenario kb_scenarios/stage_01_facts_only.json --kb-name people_ladder --clarification-eagerness 0.95 --max-clarification-rounds 3 --clarification-answer-model gpt-oss:20b --clarification-answer-backend ollama --clarification-answer-context-length 16384 --out kb_runs/stage_01_people_ladder_qamodel.json
+```
+
+Notes:
+
+- Parser model and clarification-answer model can be different.
+- Defaults now are `--context-length 8192` and `--clarification-answer-context-length 16384`.
+- Non-informative clarification answers (for example `unknown`) or repeated same Q/A loop are treated as terminal clarification outcomes and KB apply is deferred for that turn.
+
 ### 5) Render test runs as themed HTML transcripts
 
 ```bash

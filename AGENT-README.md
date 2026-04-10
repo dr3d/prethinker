@@ -120,6 +120,8 @@ LM Studio vs Ollama operating pattern:
 - LM Studio: use stock model + `--prompt-file` for fast prompt iteration.
 - Ollama: periodically rebake `qwen35-semparse:9b` from latest prompt via `scripts/rebake_semparse.ps1`.
 - Always confirm rebaked tag with `ollama show qwen35-semparse:9b` before reporting baked-prompt results.
+- Clarification Q&A can use a separate model via:
+  `--clarification-answer-model`, `--clarification-answer-backend`, and `--clarification-answer-context-length`.
 
 ## Command Quickstart
 
