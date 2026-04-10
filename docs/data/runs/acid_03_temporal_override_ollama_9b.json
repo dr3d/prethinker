@@ -1,0 +1,682 @@
+﻿{
+  "scenario": "acid_03_temporal_override",
+  "scenario_path": "D:\\_PROJECTS\\prethinker\\kb_scenarios\\acid_03_temporal_override.json",
+  "ontology_kb_name": "acid_temporal",
+  "kb_namespace": {
+    "kb_root": "D:\\_PROJECTS\\prethinker\\kb_store",
+    "kb_dir": "D:\\_PROJECTS\\prethinker\\kb_store\\acid_temporal",
+    "corpus_path": "D:\\_PROJECTS\\prethinker\\kb_store\\acid_temporal\\kb.pl",
+    "profile_path": "D:\\_PROJECTS\\prethinker\\kb_store\\acid_temporal\\ontology_profile.json",
+    "ontology_index_path": "D:\\_PROJECTS\\prethinker\\kb_store\\ontologies_index.json"
+  },
+  "backend": "ollama",
+  "base_url": "http://127.0.0.1:11434",
+  "model": "qwen3.5:9b",
+  "two_pass": true,
+  "split_extraction": true,
+  "prompt_file": "D:\\_PROJECTS\\prethinker\\modelfiles\\semantic_parser_system_prompt.md",
+  "prompt_file_loaded": true,
+  "kb_runtime_boot_path": "D:\\_PROJECTS\\prethinker\\kb_store\\acid_temporal\\_bootstrap_empty.pl",
+  "kb_init": {
+    "status": "success",
+    "result_type": "runtime_emptied",
+    "message": "Runtime KB cleared to empty state.",
+    "knowledge_base_path": "D:\\_PROJECTS\\prethinker\\kb_store\\acid_temporal\\_bootstrap_empty.pl",
+    "remaining_clause_count": 0
+  },
+  "corpus_load": {
+    "status": "skipped",
+    "loaded_total": 0,
+    "message": "No retained corpus to preload."
+  },
+  "corpus_write": {
+    "status": "skipped",
+    "path": "D:\\_PROJECTS\\prethinker\\kb_store\\acid_temporal\\kb.pl",
+    "reason": "Run failed. Use --write-corpus-on-fail to persist anyway."
+  },
+  "profile_write": {
+    "status": "skipped",
+    "path": "D:\\_PROJECTS\\prethinker\\kb_store\\acid_temporal\\ontology_profile.json",
+    "reason": "Run failed. Use --write-corpus-on-fail to persist anyway."
+  },
+  "index_write": {
+    "status": "skipped",
+    "path": "D:\\_PROJECTS\\prethinker\\kb_store\\ontologies_index.json",
+    "reason": "Run failed. Use --write-corpus-on-fail to persist anyway."
+  },
+  "ontology_profile": {
+    "ontology_name": "acid_temporal",
+    "generated_at_utc": "2026-04-09T18:37:42+00:00",
+    "clause_count": 8,
+    "predicate_signatures": [
+      "allowed/1",
+      "blocked/1",
+      "has/2",
+      "provisional/1",
+      "risky/1",
+      "valid/1"
+    ],
+    "fact_predicates": [
+      "has/2",
+      "provisional/1",
+      "valid/1"
+    ],
+    "rule_head_predicates": [
+      "allowed/1",
+      "blocked/1",
+      "risky/1"
+    ],
+    "rule_body_predicates": [
+      "allowed/1",
+      "blocked/1",
+      "has/2",
+      "provisional/1"
+    ]
+  },
+  "ontology_previous_profile": null,
+  "ontology_diff": {
+    "change_level": "new",
+    "requires_confirmation": false,
+    "similarity_to_previous": 0.0,
+    "added_signatures": [
+      "allowed/1",
+      "blocked/1",
+      "has/2",
+      "provisional/1",
+      "risky/1",
+      "valid/1"
+    ],
+    "removed_signatures": [],
+    "previous_signature_count": 0,
+    "current_signature_count": 6
+  },
+  "known_ontology_matches": [
+    {
+      "ontology_name": "people_core",
+      "similarity": 0.0,
+      "shared_signatures": [],
+      "other_signature_count": 2
+    },
+    {
+      "ontology_name": "people_ladder",
+      "similarity": 0.0,
+      "shared_signatures": [],
+      "other_signature_count": 2
+    }
+  ],
+  "gear_change": {
+    "change_level": "new",
+    "detected": false,
+    "requires_confirmation": false
+  },
+  "turns_total": 10,
+  "turn_parse_failures": 0,
+  "turn_apply_failures": 0,
+  "validation_total": 3,
+  "validation_passed": 1,
+  "overall_status": "failed",
+  "turns": [
+    {
+      "turn_index": 1,
+      "utterance": "Agent a3 is provisional.",
+      "route": "assert_fact",
+      "route_source": "model",
+      "repaired": false,
+      "fallback_used": false,
+      "alignment_events": [],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "assert_fact",
+        "logic_string": "provisional(agent_a3).",
+        "components": {
+          "atoms": [
+            "agent_a3"
+          ],
+          "variables": [],
+          "predicates": [
+            "provisional"
+          ]
+        },
+        "facts": [
+          "provisional(agent_a3)."
+        ],
+        "rules": [],
+        "queries": [],
+        "confidence": {
+          "overall": 1.0,
+          "intent": 1.0,
+          "logic": 1.0
+        },
+        "ambiguities": [],
+        "needs_clarification": false,
+        "rationale": "Declarative statement asserting the status of agent_a3."
+      },
+      "validation_errors": [],
+      "apply": {
+        "tool": "assert_fact",
+        "input": "provisional(agent_a3).",
+        "result": {
+          "status": "success",
+          "result_type": "fact_asserted",
+          "fact": "provisional(agent_a3).",
+          "message": "Fact asserted into runtime KB for this server process.",
+          "note": "Use reset_kb (baseline restore) or empty_kb (fully empty runtime) to clear runtime changes."
+        }
+      },
+      "apply_status": "success"
+    },
+    {
+      "turn_index": 2,
+      "utterance": "Agent a4 is valid.",
+      "route": "assert_fact",
+      "route_source": "model",
+      "repaired": false,
+      "fallback_used": false,
+      "alignment_events": [],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "assert_fact",
+        "logic_string": "valid(agent_a4).",
+        "components": {
+          "atoms": [
+            "agent_a4"
+          ],
+          "variables": [],
+          "predicates": [
+            "valid"
+          ]
+        },
+        "facts": [
+          "valid(agent_a4)."
+        ],
+        "rules": [],
+        "queries": [],
+        "confidence": {
+          "overall": 0.95,
+          "intent": 0.95,
+          "logic": 0.95
+        },
+        "ambiguities": [],
+        "needs_clarification": false,
+        "rationale": "Direct declarative statement asserting a property of a specific entity."
+      },
+      "validation_errors": [],
+      "apply": {
+        "tool": "assert_fact",
+        "input": "valid(agent_a4).",
+        "result": {
+          "status": "success",
+          "result_type": "fact_asserted",
+          "fact": "valid(agent_a4).",
+          "message": "Fact asserted into runtime KB for this server process.",
+          "note": "Use reset_kb (baseline restore) or empty_kb (fully empty runtime) to clear runtime changes."
+        }
+      },
+      "apply_status": "success"
+    },
+    {
+      "turn_index": 3,
+      "utterance": "Agent a3 has override.",
+      "route": "assert_fact",
+      "route_source": "model",
+      "repaired": false,
+      "fallback_used": false,
+      "alignment_events": [],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "assert_fact",
+        "logic_string": "has(a3, override).",
+        "components": {
+          "atoms": [
+            "a3",
+            "override"
+          ],
+          "variables": [],
+          "predicates": [
+            "has"
+          ]
+        },
+        "facts": [
+          "has(a3, override)."
+        ],
+        "rules": [],
+        "queries": [],
+        "confidence": {
+          "overall": 0.95,
+          "intent": 0.95,
+          "logic": 0.95
+        },
+        "ambiguities": [],
+        "needs_clarification": false,
+        "rationale": "Direct declarative statement mapping to fact predicate."
+      },
+      "validation_errors": [],
+      "apply": {
+        "tool": "assert_fact",
+        "input": "has(a3, override).",
+        "result": {
+          "status": "success",
+          "result_type": "fact_asserted",
+          "fact": "has(a3, override).",
+          "message": "Fact asserted into runtime KB for this server process.",
+          "note": "Use reset_kb (baseline restore) or empty_kb (fully empty runtime) to clear runtime changes."
+        }
+      },
+      "apply_status": "success"
+    },
+    {
+      "turn_index": 4,
+      "utterance": "If X is provisional then blocked(X).",
+      "route": "assert_rule",
+      "route_source": "heuristic",
+      "repaired": false,
+      "fallback_used": false,
+      "alignment_events": [],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "assert_rule",
+        "logic_string": "blocked(X) :- provisional(X).",
+        "components": {
+          "atoms": [],
+          "variables": [
+            "X"
+          ],
+          "predicates": [
+            "blocked",
+            "provisional"
+          ]
+        },
+        "facts": [],
+        "rules": [
+          "blocked(X) :- provisional(X)."
+        ],
+        "queries": [],
+        "confidence": {
+          "overall": 0.95,
+          "intent": 0.95,
+          "logic": 0.95
+        },
+        "ambiguities": [],
+        "needs_clarification": false,
+        "rationale": "Utterance expresses a conditional implication mapping 'provisional' status to 'blocked' status."
+      },
+      "validation_errors": [],
+      "apply": {
+        "tool": "assert_rule",
+        "input": "blocked(X) :- provisional(X).",
+        "result": {
+          "status": "success",
+          "result_type": "rule_asserted",
+          "rule": "blocked(X) :- provisional(X).",
+          "message": "Rule asserted into runtime KB for this server process.",
+          "note": "Use reset_kb (baseline restore) or empty_kb (fully empty runtime) to clear runtime changes."
+        }
+      },
+      "apply_status": "success"
+    },
+    {
+      "turn_index": 5,
+      "utterance": "If X has override then allowed(X).",
+      "route": "assert_rule",
+      "route_source": "heuristic",
+      "repaired": false,
+      "fallback_used": false,
+      "alignment_events": [],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "assert_rule",
+        "logic_string": "allowed(X) :- has(X, override).",
+        "components": {
+          "atoms": [
+            "override"
+          ],
+          "variables": [
+            "X"
+          ],
+          "predicates": [
+            "allowed",
+            "has"
+          ]
+        },
+        "facts": [],
+        "rules": [
+          "allowed(X) :- has(X, override)."
+        ],
+        "queries": [],
+        "confidence": {
+          "overall": 1.0,
+          "intent": 1.0,
+          "logic": 1.0
+        },
+        "ambiguities": [],
+        "needs_clarification": false,
+        "rationale": "Utterance expresses a conditional implication mapping to a Prolog rule. Predicate 'has' is reused from known ontology. Variable 'X' represents the subject."
+      },
+      "validation_errors": [],
+      "apply": {
+        "tool": "assert_rule",
+        "input": "allowed(X) :- has(X, override).",
+        "result": {
+          "status": "success",
+          "result_type": "rule_asserted",
+          "rule": "allowed(X) :- has(X, override).",
+          "message": "Rule asserted into runtime KB for this server process.",
+          "note": "Use reset_kb (baseline restore) or empty_kb (fully empty runtime) to clear runtime changes."
+        }
+      },
+      "apply_status": "success"
+    },
+    {
+      "turn_index": 6,
+      "utterance": "If X is blocked and X is allowed then risky(X).",
+      "route": "assert_rule",
+      "route_source": "heuristic",
+      "repaired": false,
+      "fallback_used": false,
+      "alignment_events": [],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "assert_rule",
+        "logic_string": "risky(X) :- blocked(X), allowed(X).",
+        "components": {
+          "atoms": [],
+          "variables": [
+            "X"
+          ],
+          "predicates": [
+            "allowed",
+            "blocked",
+            "risky"
+          ]
+        },
+        "facts": [],
+        "rules": [
+          "risky(X) :- blocked(X), allowed(X)."
+        ],
+        "queries": [],
+        "confidence": {
+          "overall": 0.95,
+          "intent": 0.95,
+          "logic": 0.95
+        },
+        "ambiguities": [],
+        "needs_clarification": false,
+        "rationale": "Utterance defines a rule where risky status is implied by the conjunction of blocked and allowed predicates."
+      },
+      "validation_errors": [],
+      "apply": {
+        "tool": "assert_rule",
+        "input": "risky(X) :- blocked(X), allowed(X).",
+        "result": {
+          "status": "success",
+          "result_type": "rule_asserted",
+          "rule": "risky(X) :- blocked(X), allowed(X).",
+          "message": "Rule asserted into runtime KB for this server process.",
+          "note": "Use reset_kb (baseline restore) or empty_kb (fully empty runtime) to clear runtime changes."
+        }
+      },
+      "apply_status": "success"
+    },
+    {
+      "turn_index": 7,
+      "utterance": "Actually, retract that: has_override(a3).",
+      "route": "retract",
+      "route_source": "heuristic",
+      "repaired": false,
+      "fallback_used": false,
+      "alignment_events": [],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "retract",
+        "logic_string": "retract(has_override(a3)).",
+        "components": {
+          "atoms": [
+            "a3",
+            "has_override"
+          ],
+          "variables": [],
+          "predicates": [
+            "retract"
+          ]
+        },
+        "facts": [
+          "has_override(a3)."
+        ],
+        "rules": [],
+        "queries": [],
+        "confidence": {
+          "overall": 1.0,
+          "intent": 1.0,
+          "logic": 1.0
+        },
+        "ambiguities": [],
+        "needs_clarification": false,
+        "rationale": "User explicitly requests retraction of fact has_override(a3)."
+      },
+      "validation_errors": [],
+      "apply": {
+        "tool": "retract_fact",
+        "input": "has_override(a3).",
+        "result": {
+          "status": "no_results",
+          "message": "Fact not present in corpus."
+        }
+      },
+      "apply_status": "no_results"
+    },
+    {
+      "turn_index": 8,
+      "utterance": "Agent a3 has manual_review.",
+      "route": "assert_fact",
+      "route_source": "model",
+      "repaired": false,
+      "fallback_used": false,
+      "alignment_events": [],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "assert_fact",
+        "logic_string": "has(agent_a3, manual_review).",
+        "components": {
+          "atoms": [
+            "agent_a3",
+            "manual_review"
+          ],
+          "variables": [],
+          "predicates": [
+            "has"
+          ]
+        },
+        "facts": [
+          "has(agent_a3, manual_review)."
+        ],
+        "rules": [],
+        "queries": [],
+        "confidence": {
+          "overall": 0.95,
+          "intent": 0.95,
+          "logic": 0.95
+        },
+        "ambiguities": [],
+        "needs_clarification": false,
+        "rationale": "Direct declarative statement mapping to 'has' predicate with agent and review capability."
+      },
+      "validation_errors": [],
+      "apply": {
+        "tool": "assert_fact",
+        "input": "has(agent_a3, manual_review).",
+        "result": {
+          "status": "success",
+          "result_type": "fact_asserted",
+          "fact": "has(agent_a3, manual_review).",
+          "message": "Fact asserted into runtime KB for this server process.",
+          "note": "Use reset_kb (baseline restore) or empty_kb (fully empty runtime) to clear runtime changes."
+        }
+      },
+      "apply_status": "success"
+    },
+    {
+      "turn_index": 9,
+      "utterance": "If X has manual_review then blocked(X).",
+      "route": "assert_rule",
+      "route_source": "heuristic",
+      "repaired": false,
+      "fallback_used": false,
+      "alignment_events": [],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "assert_rule",
+        "logic_string": "blocked(X) :- has(X, manual_review).",
+        "components": {
+          "atoms": [
+            "manual_review"
+          ],
+          "variables": [
+            "X"
+          ],
+          "predicates": [
+            "blocked",
+            "has"
+          ]
+        },
+        "facts": [],
+        "rules": [
+          "blocked(X) :- has(X, manual_review)."
+        ],
+        "queries": [],
+        "confidence": {
+          "overall": 1.0,
+          "intent": 1.0,
+          "logic": 1.0
+        },
+        "ambiguities": [],
+        "needs_clarification": false,
+        "rationale": "Utterance expresses a conditional implication mapping 'has manual_review' to 'blocked' status."
+      },
+      "validation_errors": [],
+      "apply": {
+        "tool": "assert_rule",
+        "input": "blocked(X) :- has(X, manual_review).",
+        "result": {
+          "status": "success",
+          "result_type": "rule_asserted",
+          "rule": "blocked(X) :- has(X, manual_review).",
+          "message": "Rule asserted into runtime KB for this server process.",
+          "note": "Use reset_kb (baseline restore) or empty_kb (fully empty runtime) to clear runtime changes."
+        }
+      },
+      "apply_status": "success"
+    },
+    {
+      "turn_index": 10,
+      "utterance": "Translate this to Spanish: validation integrity matters.",
+      "route": "other",
+      "route_source": "heuristic",
+      "repaired": false,
+      "fallback_used": false,
+      "alignment_events": [],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "other",
+        "logic_string": "",
+        "components": {
+          "atoms": [],
+          "variables": [],
+          "predicates": []
+        },
+        "facts": [],
+        "rules": [],
+        "queries": [],
+        "confidence": {
+          "overall": 0.95,
+          "intent": 0.95,
+          "logic": 0.0
+        },
+        "ambiguities": [],
+        "needs_clarification": false,
+        "rationale": "Translation request identified as out-of-scope task per guidance."
+      },
+      "validation_errors": [],
+      "apply": {
+        "tool": "none",
+        "input": null,
+        "result": {
+          "status": "skipped",
+          "message": "Intent=other; no KB mutation/query applied."
+        }
+      },
+      "apply_status": "skipped"
+    }
+  ],
+  "validations": [
+    {
+      "id": "a3_blocked_true",
+      "query": "blocked(a3).",
+      "expected_status": "success",
+      "result": {
+        "status": "no_results",
+        "result_type": "no_result",
+        "predicate": "blocked",
+        "prolog_query": "blocked(a3).",
+        "variables": [],
+        "rows": [],
+        "num_rows": 0,
+        "reasoning_basis": {
+          "kind": "fact-backed",
+          "note": "The `blocked` predicate is typically answered from stored facts, though rules may still participate."
+        }
+      },
+      "passed": false,
+      "reasons": [
+        "Expected status=success, observed=no_results",
+        "num_rows 0 < min_rows 1"
+      ]
+    },
+    {
+      "id": "a3_allowed_removed",
+      "query": "allowed(a3).",
+      "expected_status": "no_results",
+      "result": {
+        "status": "success",
+        "result_type": "table",
+        "predicate": "allowed",
+        "prolog_query": "allowed(a3).",
+        "variables": [],
+        "rows": [
+          {}
+        ],
+        "num_rows": 1,
+        "reasoning_basis": {
+          "kind": "rule-derived",
+          "note": "The `allowed` predicate is typically computed through rules rather than stored as a single explicit fact."
+        }
+      },
+      "passed": false,
+      "reasons": [
+        "Expected status=no_results, observed=success",
+        "num_rows 1 > max_rows 0"
+      ]
+    },
+    {
+      "id": "a3_risky_removed",
+      "query": "risky(a3).",
+      "expected_status": "no_results",
+      "result": {
+        "status": "no_results",
+        "result_type": "no_result",
+        "predicate": "risky",
+        "prolog_query": "risky(a3).",
+        "variables": [],
+        "rows": [],
+        "num_rows": 0,
+        "reasoning_basis": {
+          "kind": "fact-backed",
+          "note": "The `risky` predicate is typically answered from stored facts, though rules may still participate."
+        }
+      },
+      "passed": true,
+      "reasons": []
+    }
+  ]
+}
+
+

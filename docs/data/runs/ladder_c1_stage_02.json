@@ -1,0 +1,322 @@
+{
+  "run_id": "run-20260409T221315Z-stage_02_rule_ingest-qwen3_5_9b-32700",
+  "run_started_utc": "2026-04-09T22:13:15+00:00",
+  "run_finished_utc": "2026-04-09T22:13:24+00:00",
+  "invocation": {
+    "argv": [
+      "kb_pipeline.py",
+      "--backend",
+      "ollama",
+      "--base-url",
+      "http://127.0.0.1:11434",
+      "--model",
+      "qwen3.5:9b",
+      "--prompt-file",
+      "modelfiles/semantic_parser_system_prompt.md",
+      "--clarification-eagerness",
+      "0.35",
+      "--max-clarification-rounds",
+      "2",
+      "--scenario",
+      "kb_scenarios/stage_02_rule_ingest.json",
+      "--kb-name",
+      "ladder_c1",
+      "--out",
+      "kb_runs/ladder_c1_stage_02.json"
+    ],
+    "cwd": "D:\\_PROJECTS\\prethinker"
+  },
+  "scenario": "stage_02_rule_ingest",
+  "scenario_path": "D:\\_PROJECTS\\prethinker\\kb_scenarios\\stage_02_rule_ingest.json",
+  "ontology_kb_name": "ladder_c1",
+  "kb_namespace": {
+    "kb_root": "D:\\_PROJECTS\\prethinker\\kb_store",
+    "kb_dir": "D:\\_PROJECTS\\prethinker\\kb_store\\ladder_c1",
+    "corpus_path": "D:\\_PROJECTS\\prethinker\\kb_store\\ladder_c1\\kb.pl",
+    "profile_path": "D:\\_PROJECTS\\prethinker\\kb_store\\ladder_c1\\ontology_profile.json",
+    "ontology_index_path": "D:\\_PROJECTS\\prethinker\\kb_store\\ontologies_index.json"
+  },
+  "backend": "ollama",
+  "base_url": "http://127.0.0.1:11434",
+  "model": "qwen3.5:9b",
+  "two_pass": true,
+  "split_extraction": true,
+  "model_settings": {
+    "temperature": 0,
+    "context_length": 4096,
+    "classifier_context_length": 2048,
+    "timeout_seconds": 120,
+    "two_pass": true,
+    "split_extraction": true,
+    "strict_registry": false,
+    "strict_types": false,
+    "clarification_eagerness": 0.35,
+    "max_clarification_rounds": 2,
+    "backend_options": {
+      "num_ctx": 4096
+    }
+  },
+  "prompt_file": "D:\\_PROJECTS\\prethinker\\modelfiles\\semantic_parser_system_prompt.md",
+  "prompt_file_loaded": true,
+  "prompt_provenance": {
+    "status": "ok",
+    "prompt_id": "sp-1fb66325fca5",
+    "prompt_sha256": "1fb66325fca590012493504cf9937e4e13e69401d141edae7972e7ac48646a7e",
+    "source_path": "D:\\_PROJECTS\\prethinker\\modelfiles\\semantic_parser_system_prompt.md",
+    "snapshot_path": "D:\\_PROJECTS\\prethinker\\modelfiles\\history\\prompts\\sp-1fb66325fca5.md",
+    "snapshot_created": false,
+    "char_count": 2656,
+    "line_count": 67,
+    "preview": "# Semantic Parser Prompt Pack (Qwen 3.5 9B)\nUse this as maintainable guidance for semantic parsing into Prolog structures.\nKeep behavior language-agnostic, deterministic, and schema-strict.\n## Core Priorities\n1. Output exactly one JSON object that matches the required schema.\n2. Preserve semantic meaning; do not hallucinate entities, facts, or arguments.\n3. Prefer canonical, stable predicate names across turns when semantics match.\n4. Use variables instead of assumptions when referents are unresolved."
+  },
+  "system_prompt_text": "# Semantic Parser Prompt Pack (Qwen 3.5 9B)\n\nUse this as maintainable guidance for semantic parsing into Prolog structures.\nKeep behavior language-agnostic, deterministic, and schema-strict.\n\n## Core Priorities\n\n1. Output exactly one JSON object that matches the required schema.\n2. Preserve semantic meaning; do not hallucinate entities, facts, or arguments.\n3. Prefer canonical, stable predicate names across turns when semantics match.\n4. Use variables instead of assumptions when referents are unresolved.\n5. Keep rationale brief and factual.\n\n## Intent Routing Guidance\n\n- `assert_fact`: declarative claims.\n- `assert_rule`: if/then, whenever, conditional, implication.\n- `query`: questions seeking truth or bindings.\n- `retract`: explicit correction/remove/retract/undo.\n- `other`: out-of-scope tasks (translation, formatting, rewrite).\n\n## Prolog Mapping Guidance\n\n- Atoms: lowercase snake_case.\n- Variables: Uppercase identifiers.\n- Facts: `predicate(atom, ...).`\n- Rules: `head(...) :- body(...).`\n- Queries: goal with trailing period and no `?-` prefix.\n- Retractions: `retract(<fact>).`\n\n## Relation and Argument Discipline\n\n- For forms like `<subject> is <relation> of <object>`, map to `relation(subject, object).`\n- Keep argument order aligned to semantic subject/object roles.\n- Avoid predicate synonym drift when an ontology already uses a compatible predicate.\n\n## Transitive Rule Readiness\n\nWhen utterances express chain logic, emit explicit compositional rules with shared variables, e.g.:\n\n- `ancestor(X, Z) :- ancestor(X, Y), ancestor(Y, Z).`\n- `depends_on(X, Z) :- depends_on(X, Y), depends_on(Y, Z).`\n\nOnly emit such rules when the utterance semantically indicates transitivity or chained implication.\n\n## Ambiguity Handling\n\n- If pronouns or entities are unresolved, set `needs_clarification=true`.\n- Use variables rather than invented atoms.\n- Keep ambiguities list short and concrete.\n\n## Uncertainty And Clarification Contract\n\n- Always emit:\n  - `uncertainty_score` in `[0,1]` where `1` means very uncertain.\n  - `uncertainty_label` as `low | medium | high`.\n  - `clarification_reason` with concrete wording (<= 12 words).\n  - `clarification_question` ending with `?` when uncertainty is non-trivial.\n- If uncertainty is high enough to block safe write intent, set `needs_clarification=true`.\n- Clarification questions should target missing entities, relation direction, or correction target.\n\n## Clarification Question Style\n\n- Ask one focused question at a time.\n- Prefer disambiguation over open-ended chat.\n- Good: \"Do you mean `parent(alex, sam)` or `parent(sam, alex)`?\"\n- Good: \"Who does 'he' refer to in this statement?\"",
+  "kb_runtime_boot_path": "D:\\_PROJECTS\\prethinker\\kb_store\\ladder_c1\\kb.pl",
+  "kb_init": {
+    "status": "skipped",
+    "result_type": "not_called",
+    "message": "Existing ontology retained; empty_kb() not invoked.",
+    "knowledge_base_path": "D:\\_PROJECTS\\prethinker\\kb_store\\ladder_c1\\kb.pl"
+  },
+  "corpus_load": {
+    "status": "success",
+    "loaded_total": 2,
+    "loaded_facts": 2,
+    "loaded_rules": 0,
+    "skipped_total": 0,
+    "failed_total": 0,
+    "errors": []
+  },
+  "corpus_write": {
+    "path": "D:\\_PROJECTS\\prethinker\\kb_store\\ladder_c1\\kb.pl",
+    "clause_count": 3,
+    "status": "written"
+  },
+  "profile_write": {
+    "status": "written",
+    "path": "D:\\_PROJECTS\\prethinker\\kb_store\\ladder_c1\\ontology_profile.json",
+    "predicate_signature_count": 2
+  },
+  "index_write": {
+    "status": "written",
+    "path": "D:\\_PROJECTS\\prethinker\\kb_store\\ontologies_index.json",
+    "ontology_count": 1
+  },
+  "ontology_profile": {
+    "ontology_name": "ladder_c1",
+    "generated_at_utc": "2026-04-09T22:13:24+00:00",
+    "clause_count": 3,
+    "predicate_signatures": [
+      "man/1",
+      "mortal/1"
+    ],
+    "fact_predicates": [
+      "man/1"
+    ],
+    "rule_head_predicates": [
+      "mortal/1"
+    ],
+    "rule_body_predicates": [
+      "man/1"
+    ]
+  },
+  "ontology_previous_profile": {
+    "ontology_name": "ladder_c1",
+    "generated_at_utc": "2026-04-09T22:11:43+00:00",
+    "clause_count": 2,
+    "predicate_signatures": [
+      "man/1"
+    ],
+    "fact_predicates": [
+      "man/1"
+    ],
+    "rule_head_predicates": [],
+    "rule_body_predicates": []
+  },
+  "ontology_diff": {
+    "change_level": "major",
+    "requires_confirmation": true,
+    "similarity_to_previous": 0.5,
+    "added_signatures": [
+      "mortal/1"
+    ],
+    "removed_signatures": [],
+    "previous_signature_count": 1,
+    "current_signature_count": 2
+  },
+  "known_ontology_matches": [],
+  "gear_change": {
+    "change_level": "major",
+    "detected": true,
+    "requires_confirmation": true
+  },
+  "turns_total": 2,
+  "turn_parse_failures": 0,
+  "turn_apply_failures": 0,
+  "turns_clarification_requested": 0,
+  "clarification_rounds_total": 0,
+  "validation_total": 1,
+  "validation_passed": 1,
+  "overall_status": "passed",
+  "turns": [
+    {
+      "turn_index": 1,
+      "utterance": "Socrates is a man.",
+      "route": "assert_fact",
+      "route_source": "model",
+      "repaired": false,
+      "fallback_used": false,
+      "alignment_events": [],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "assert_fact",
+        "logic_string": "man(socrates).",
+        "components": {
+          "atoms": [
+            "socrates"
+          ],
+          "variables": [],
+          "predicates": [
+            "man"
+          ]
+        },
+        "facts": [
+          "man(socrates)."
+        ],
+        "rules": [],
+        "queries": [],
+        "confidence": {
+          "overall": 1.0,
+          "intent": 1.0,
+          "logic": 1.0
+        },
+        "ambiguities": [],
+        "needs_clarification": false,
+        "uncertainty_score": 0.0,
+        "uncertainty_label": "low",
+        "clarification_question": "Can you clarify this point before I apply it: Direct mapping of declarative statement to fact using canonical predicate 'man'?",
+        "clarification_reason": "Direct mapping of declarative statement to fact using canonical predicate 'man'.",
+        "rationale": "Direct mapping of declarative statement to fact using canonical predicate 'man'."
+      },
+      "validation_errors": [],
+      "clarification_rounds": [],
+      "clarification_rounds_used": 0,
+      "clarification_max_rounds": 2,
+      "clarification_answers_available": 0,
+      "clarification_answers_used": 0,
+      "clarification_policy": {
+        "clarification_eagerness": 0.35,
+        "uncertainty_score": 0.0,
+        "effective_uncertainty": 0.0,
+        "threshold": 0.65,
+        "request_clarification": false,
+        "needs_clarification_flag": false
+      },
+      "clarification_pending": false,
+      "clarification_pending_reason": "",
+      "clarification_question": "Can you clarify this point before I apply it: Direct mapping of declarative statement to fact using canonical predicate 'man'?",
+      "apply": {
+        "tool": "assert_fact",
+        "input": "man(socrates).",
+        "result": {
+          "status": "skipped",
+          "message": "Fact already present in corpus."
+        }
+      },
+      "apply_status": "skipped"
+    },
+    {
+      "turn_index": 2,
+      "utterance": "If someone is a man then they are mortal.",
+      "route": "assert_rule",
+      "route_source": "heuristic",
+      "repaired": false,
+      "fallback_used": false,
+      "alignment_events": [],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "assert_rule",
+        "logic_string": "mortal(X) :- man(X).",
+        "components": {
+          "atoms": [],
+          "variables": [
+            "X"
+          ],
+          "predicates": [
+            "man",
+            "mortal"
+          ]
+        },
+        "facts": [],
+        "rules": [
+          "mortal(X) :- man(X)."
+        ],
+        "queries": [],
+        "confidence": {
+          "overall": 0.95,
+          "intent": 0.98,
+          "logic": 0.92
+        },
+        "ambiguities": [],
+        "needs_clarification": false,
+        "uncertainty_score": 0.05,
+        "uncertainty_label": "low",
+        "clarification_question": "Can you clarify this point before I apply it: The utterance expresses a universal conditional statement mapping 'man' to 'mortal', which?",
+        "clarification_reason": "The utterance expresses a universal conditional statement mapping 'man' to 'mortal', which",
+        "rationale": "The utterance expresses a universal conditional statement mapping 'man' to 'mortal', which maps directly to a Prolog rule. No entities are unresolved."
+      },
+      "validation_errors": [],
+      "clarification_rounds": [],
+      "clarification_rounds_used": 0,
+      "clarification_max_rounds": 2,
+      "clarification_answers_available": 0,
+      "clarification_answers_used": 0,
+      "clarification_policy": {
+        "clarification_eagerness": 0.35,
+        "uncertainty_score": 0.05,
+        "effective_uncertainty": 0.05,
+        "threshold": 0.65,
+        "request_clarification": false,
+        "needs_clarification_flag": false
+      },
+      "clarification_pending": false,
+      "clarification_pending_reason": "",
+      "clarification_question": "Can you clarify this point before I apply it: The utterance expresses a universal conditional statement mapping 'man' to 'mortal', which?",
+      "apply": {
+        "tool": "assert_rule",
+        "input": "mortal(X) :- man(X).",
+        "result": {
+          "status": "success",
+          "result_type": "rule_asserted",
+          "rule": "mortal(X) :- man(X).",
+          "message": "Rule asserted into runtime KB for this server process.",
+          "note": "Use reset_kb (baseline restore) or empty_kb (fully empty runtime) to clear runtime changes."
+        }
+      },
+      "apply_status": "success"
+    }
+  ],
+  "validations": [
+    {
+      "id": "rule_man_to_mortal",
+      "query": "mortal(socrates).",
+      "expected_status": "success",
+      "result": {
+        "status": "success",
+        "result_type": "table",
+        "predicate": "mortal",
+        "prolog_query": "mortal(socrates).",
+        "variables": [],
+        "rows": [
+          {}
+        ],
+        "num_rows": 1,
+        "reasoning_basis": {
+          "kind": "fact-backed",
+          "note": "The `mortal` predicate is typically answered from stored facts, though rules may still participate."
+        }
+      },
+      "passed": true,
+      "reasons": []
+    }
+  ]
+}

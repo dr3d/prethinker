@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-04-10T00:33:37+00:00",
+  "generated_at_utc": "2026-04-10T02:09:02+00:00",
   "runs_total": 23,
   "runs": [
     {
@@ -16,7 +16,7 @@
       "prompt_id": "sp-22ad8a6264f6",
       "prompt_sha256": "22ad8a6264f6661716a1fc9cf5d983feaa218b029386533f318b07c2ee5e733d",
       "prompt_snapshot_rel": "prompts/sp-22ad8a6264f6.md",
-      "report_json_rel": "../kb_runs/ladder_c3_acid_05.json",
+      "report_json_rel": "data/runs/ladder_c3_acid_05.json",
       "report_html_rel": ""
     },
     {
@@ -33,7 +33,7 @@
       "prompt_id": "sp-22ad8a6264f6",
       "prompt_sha256": "22ad8a6264f6661716a1fc9cf5d983feaa218b029386533f318b07c2ee5e733d",
       "prompt_snapshot_rel": "prompts/sp-22ad8a6264f6.md",
-      "report_json_rel": "../kb_runs/ladder_c3_stage_03.json",
+      "report_json_rel": "data/runs/ladder_c3_stage_03.json",
       "report_html_rel": ""
     },
     {
@@ -50,7 +50,7 @@
       "prompt_id": "sp-22ad8a6264f6",
       "prompt_sha256": "22ad8a6264f6661716a1fc9cf5d983feaa218b029386533f318b07c2ee5e733d",
       "prompt_snapshot_rel": "prompts/sp-22ad8a6264f6.md",
-      "report_json_rel": "../kb_runs/ladder_c3_stage_02.json",
+      "report_json_rel": "data/runs/ladder_c3_stage_02.json",
       "report_html_rel": ""
     },
     {
@@ -67,7 +67,7 @@
       "prompt_id": "sp-22ad8a6264f6",
       "prompt_sha256": "22ad8a6264f6661716a1fc9cf5d983feaa218b029386533f318b07c2ee5e733d",
       "prompt_snapshot_rel": "prompts/sp-22ad8a6264f6.md",
-      "report_json_rel": "../kb_runs/ladder_c3_stage_01.json",
+      "report_json_rel": "data/runs/ladder_c3_stage_01.json",
       "report_html_rel": ""
     },
     {
@@ -84,7 +84,7 @@
       "prompt_id": "sp-3f2c7de3ecad",
       "prompt_sha256": "3f2c7de3ecadaefc448752d4bb200c6521158a16375eff7bd7dc8c04fff1bb2f",
       "prompt_snapshot_rel": "prompts/sp-3f2c7de3ecad.md",
-      "report_json_rel": "../kb_runs/ladder_c2_stage_02.json",
+      "report_json_rel": "data/runs/ladder_c2_stage_02.json",
       "report_html_rel": ""
     },
     {
@@ -101,7 +101,7 @@
       "prompt_id": "sp-3f2c7de3ecad",
       "prompt_sha256": "3f2c7de3ecadaefc448752d4bb200c6521158a16375eff7bd7dc8c04fff1bb2f",
       "prompt_snapshot_rel": "prompts/sp-3f2c7de3ecad.md",
-      "report_json_rel": "../kb_runs/ladder_c2_stage_01.json",
+      "report_json_rel": "data/runs/ladder_c2_stage_01.json",
       "report_html_rel": ""
     },
     {
@@ -118,7 +118,7 @@
       "prompt_id": "sp-1fb66325fca5",
       "prompt_sha256": "1fb66325fca590012493504cf9937e4e13e69401d141edae7972e7ac48646a7e",
       "prompt_snapshot_rel": "prompts/sp-1fb66325fca5.md",
-      "report_json_rel": "../kb_runs/ladder_c1_stage_02.json",
+      "report_json_rel": "data/runs/ladder_c1_stage_02.json",
       "report_html_rel": ""
     },
     {
@@ -135,7 +135,7 @@
       "prompt_id": "sp-1fb66325fca5",
       "prompt_sha256": "1fb66325fca590012493504cf9937e4e13e69401d141edae7972e7ac48646a7e",
       "prompt_snapshot_rel": "prompts/sp-1fb66325fca5.md",
-      "report_json_rel": "../kb_runs/ladder_c1_stage_01.json",
+      "report_json_rel": "data/runs/ladder_c1_stage_01.json",
       "report_html_rel": ""
     },
     {
@@ -152,7 +152,7 @@
       "prompt_id": "legacy-file-only",
       "prompt_sha256": "",
       "prompt_snapshot_rel": "",
-      "report_json_rel": "../kb_runs/stage_02_people_ladder_v4_split.json",
+      "report_json_rel": "data/runs/stage_02_people_ladder_v4_split.json",
       "report_html_rel": "reports/stage_02_people_ladder_v4_split.html"
     },
     {
@@ -169,7 +169,7 @@
       "prompt_id": "legacy-file-only",
       "prompt_sha256": "",
       "prompt_snapshot_rel": "",
-      "report_json_rel": "../kb_runs/stage_02_people_ladder_v3_promptfile.json",
+      "report_json_rel": "data/runs/stage_02_people_ladder_v3_promptfile.json",
       "report_html_rel": "reports/stage_02_people_ladder_v3_promptfile.html"
     },
     {
@@ -186,7 +186,7 @@
       "prompt_id": "legacy-unknown",
       "prompt_sha256": "",
       "prompt_snapshot_rel": "",
-      "report_json_rel": "../kb_runs/stage_02_people_ladder_v2.json",
+      "report_json_rel": "data/runs/stage_02_people_ladder_v2.json",
       "report_html_rel": "reports/stage_02_people_ladder_v2.html"
     },
     {
@@ -203,7 +203,7 @@
       "prompt_id": "legacy-unknown",
       "prompt_sha256": "",
       "prompt_snapshot_rel": "",
-      "report_json_rel": "../kb_runs/stage_02_people_ladder.json",
+      "report_json_rel": "data/runs/stage_02_people_ladder.json",
       "report_html_rel": "reports/stage_02_people_ladder.html"
     },
     {
@@ -220,7 +220,7 @@
       "prompt_id": "legacy-unknown",
       "prompt_sha256": "",
       "prompt_snapshot_rel": "",
-      "report_json_rel": "../kb_runs/stage_01_people_ladder.json",
+      "report_json_rel": "data/runs/stage_01_people_ladder.json",
       "report_html_rel": "reports/stage_01_people_ladder.html"
     },
     {
@@ -237,7 +237,7 @@
       "prompt_id": "legacy-unknown",
       "prompt_sha256": "",
       "prompt_snapshot_rel": "",
-      "report_json_rel": "../kb_runs/kb_with_retract_ollama_people_core_v3.json",
+      "report_json_rel": "data/runs/kb_with_retract_ollama_people_core_v3.json",
       "report_html_rel": "reports/kb_with_retract_ollama_people_core_v3.html"
     },
     {
@@ -254,7 +254,7 @@
       "prompt_id": "legacy-unknown",
       "prompt_sha256": "",
       "prompt_snapshot_rel": "",
-      "report_json_rel": "../kb_runs/kb_with_retract_ollama_people_core_v2.json",
+      "report_json_rel": "data/runs/kb_with_retract_ollama_people_core_v2.json",
       "report_html_rel": "reports/kb_with_retract_ollama_people_core_v2.html"
     },
     {
@@ -271,7 +271,7 @@
       "prompt_id": "legacy-unknown",
       "prompt_sha256": "",
       "prompt_snapshot_rel": "",
-      "report_json_rel": "../kb_runs/kb_with_retract_ollama.json",
+      "report_json_rel": "data/runs/kb_with_retract_ollama.json",
       "report_html_rel": "reports/kb_with_retract_ollama.html"
     },
     {
@@ -288,7 +288,7 @@
       "prompt_id": "legacy-unknown",
       "prompt_sha256": "",
       "prompt_snapshot_rel": "",
-      "report_json_rel": "../kb_runs/kb_positive_ollama_people_core_v3.json",
+      "report_json_rel": "data/runs/kb_positive_ollama_people_core_v3.json",
       "report_html_rel": "reports/kb_positive_ollama_people_core_v3.html"
     },
     {
@@ -305,7 +305,7 @@
       "prompt_id": "legacy-unknown",
       "prompt_sha256": "",
       "prompt_snapshot_rel": "",
-      "report_json_rel": "../kb_runs/kb_positive_ollama_people_core_v2.json",
+      "report_json_rel": "data/runs/kb_positive_ollama_people_core_v2.json",
       "report_html_rel": "reports/kb_positive_ollama_people_core_v2.html"
     },
     {
@@ -322,7 +322,7 @@
       "prompt_id": "legacy-unknown",
       "prompt_sha256": "",
       "prompt_snapshot_rel": "",
-      "report_json_rel": "../kb_runs/kb_positive_ollama.json",
+      "report_json_rel": "data/runs/kb_positive_ollama.json",
       "report_html_rel": "reports/kb_positive_ollama.html"
     },
     {
@@ -339,7 +339,7 @@
       "prompt_id": "legacy-unknown",
       "prompt_sha256": "",
       "prompt_snapshot_rel": "",
-      "report_json_rel": "../kb_runs/kb_positive_lmstudio.json",
+      "report_json_rel": "data/runs/kb_positive_lmstudio.json",
       "report_html_rel": "reports/kb_positive_lmstudio.html"
     },
     {
@@ -356,7 +356,7 @@
       "prompt_id": "legacy-file-only",
       "prompt_sha256": "",
       "prompt_snapshot_rel": "",
-      "report_json_rel": "../kb_runs/acid_03_temporal_override_ollama_9b.json",
+      "report_json_rel": "data/runs/acid_03_temporal_override_ollama_9b.json",
       "report_html_rel": "reports/acid_03_temporal_override_ollama_9b.html"
     },
     {
@@ -373,7 +373,7 @@
       "prompt_id": "sp-ad589d272fbb",
       "prompt_sha256": "ad589d272fbbdcc886719efd5c4d19e9dd732a469dc2f3c574d10e28bbec5dff",
       "prompt_snapshot_rel": "prompts/sp-ad589d272fbb.md",
-      "report_json_rel": "../kb_runs/stage_02_people_ladder_tune_r1.json",
+      "report_json_rel": "data/runs/stage_02_people_ladder_tune_r1.json",
       "report_html_rel": "reports/stage_02_people_ladder_tune_r1.html"
     },
     {
@@ -390,7 +390,7 @@
       "prompt_id": "sp-ad589d272fbb",
       "prompt_sha256": "ad589d272fbbdcc886719efd5c4d19e9dd732a469dc2f3c574d10e28bbec5dff",
       "prompt_snapshot_rel": "prompts/sp-ad589d272fbb.md",
-      "report_json_rel": "../kb_runs/stage_01_people_ladder_tune_r1.json",
+      "report_json_rel": "data/runs/stage_01_people_ladder_tune_r1.json",
       "report_html_rel": "reports/stage_01_people_ladder_tune_r1.html"
     }
   ]

@@ -24,6 +24,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--cards-runs-limit", type=int, default=8)
     p.add_argument("--story-cards-output", default="docs/progress_story_cards.html")
     p.add_argument("--story-cards-runs-limit", type=int, default=5)
+    p.add_argument("--repo-link", default="https://github.com/dr3d/prethinker")
     p.add_argument("--title", default="Prethinker Report Hub")
     return p.parse_args()
 
@@ -51,6 +52,15 @@ def _publish_prompt_snapshot(snapshot_path: Path, hub_root: Path) -> str:
                 shutil.copy2(snapshot_path, target)
         except Exception:
             shutil.copy2(snapshot_path, target)
+    return _rel_path(target, hub_root)
+
+
+def _publish_run_json(run_json_path: Path, runs_root: Path, hub_root: Path) -> str:
+    """Copy a run JSON under docs/data/runs and return hub-relative path."""
+    rel_in_runs = Path(os.path.relpath(str(run_json_path), str(runs_root))).as_posix()
+    target = (hub_root / "data" / "runs" / rel_in_runs).resolve()
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(run_json_path, target)
     return _rel_path(target, hub_root)
 
 
@@ -99,6 +109,7 @@ def _collect_runs(runs_dir: Path, reports_dir: Path, out: Path) -> list[dict[str
         if snap and Path(snap).exists():
             snap_rel = _publish_prompt_snapshot(Path(snap).resolve(), out.parent)
         html = (reports_dir / f"{stem}.html").resolve()
+        published_json_rel = _publish_run_json(p.resolve(), runs_dir.resolve(), out.parent)
         rows.append(
             {
                 "run_id": str(r.get("run_id", "")).strip() or f"legacy-{stem}",
@@ -114,7 +125,7 @@ def _collect_runs(runs_dir: Path, reports_dir: Path, out: Path) -> list[dict[str
                 "prompt_id": str(pm.get("prompt_id", "")).strip() or ("legacy-file-only" if str(r.get("prompt_file", "")).strip() else "legacy-unknown"),
                 "prompt_sha256": str(pm.get("prompt_sha256", "")).strip(),
                 "prompt_snapshot_rel": snap_rel,
-                "report_json_rel": _rel_path(p, out.parent),
+                "report_json_rel": published_json_rel,
                 "report_html_rel": _rel_path(html, out.parent) if html.exists() else "",
             }
         )
@@ -432,18 +443,19 @@ def main() -> int:
     ) or "<tr><td colspan=\"3\">No KB snapshots.</td></tr>"
     ladder = f"<a href=\"{_rel_path(ladder_idx, out.parent)}\">View Test Ladder</a>" if ladder_idx.exists() else ""
     cards = f"<a href=\"{_rel_path(cards_out, out.parent)}\">Progress Cards</a>" if cards_out.exists() else ""
+    repo = f"<a href=\"{html.escape(a.repo_link)}\" target=\"_blank\" rel=\"noreferrer\">Repository</a>" if str(a.repo_link).strip() else ""
 
-    html = f"""<!doctype html><html lang="en" data-theme="light"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>{a.title}</title><style>
+    page_html = f"""<!doctype html><html lang="en" data-theme="light"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>{a.title}</title><style>
     :root{{--bg:#f6f8fb;--p:#fff;--i:#172336;--m:#607089;--b:#d8e0ea;--h:#f8fbff;--l:#0a62c6}} html[data-theme="dark"]{{--bg:#111821;--p:#1a2430;--i:#e8eef6;--m:#aab6c8;--b:#314152;--h:#212d3a;--l:#7bb6ff}} body{{margin:0;background:var(--bg);color:var(--i);font-family:Segoe UI,Arial,sans-serif}} .w{{max-width:1200px;margin:0 auto;padding:20px}} .t{{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}} .nav a,.nav button{{border:1px solid var(--b);background:var(--p);padding:7px 11px;border-radius:999px;color:var(--i);text-decoration:none;cursor:pointer}} .m{{color:var(--m);font-size:13px}} .p{{background:var(--p);border:1px solid var(--b);border-radius:12px;overflow:hidden;margin:12px 0}} .ph{{padding:10px 12px;border-bottom:1px solid var(--b);background:var(--h);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}} .c{{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr 1fr;gap:8px;padding:10px;border-bottom:1px solid var(--b)}} .c input,.c select{{border:1px solid var(--b);background:var(--p);color:var(--i);border-radius:8px;padding:7px}} table{{width:100%;border-collapse:collapse}} th,td{{padding:9px 11px;border-bottom:1px solid var(--b);font-size:13px;text-align:left;vertical-align:top}} th{{background:var(--h);color:var(--m)}} a{{color:var(--l);text-decoration:none}} a:hover{{text-decoration:underline}} .tw{{max-height:540px;overflow:auto}} .k{{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}} .s{{background:var(--p);border:1px solid var(--b);border-radius:10px;padding:8px 10px}} .s b{{font-size:20px}} .hint{{padding:8px 10px;color:var(--m);font-size:12px}}
     @media (max-width:900px){{.c{{grid-template-columns:1fr 1fr}}}} @media (max-width:620px){{.c{{grid-template-columns:1fr}}}}
     </style></head><body><div class="w">
-    <div class="t"><div><h1 style="margin:0">{a.title}</h1><div class="m">generated {dt.datetime.now(dt.timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')} | {stats} | <a href="{rp.relative_to(out.parent).as_posix()}">runs manifest</a> | <a href="{pp.relative_to(out.parent).as_posix()}">prompt versions</a></div></div><div class="nav">{ladder} {cards} <a href="#prompts">Prompt Evolution</a> <button id="theme">theme</button></div></div>
+    <div class="t"><div><h1 style="margin:0">{a.title}</h1><div class="m">generated {dt.datetime.now(dt.timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')} | {stats} | <a href="{rp.relative_to(out.parent).as_posix()}">runs manifest</a> | <a href="{pp.relative_to(out.parent).as_posix()}">prompt versions</a></div></div><div class="nav">{ladder} {cards} {repo} <a href="#prompts">Prompt Evolution</a> <button id="theme">theme</button></div></div>
     <div class="k"><div class="s">Runs<br/><b>{len(runs)}</b></div><div class="s">Passed<br/><b>{pass_total}</b></div><div class="s">Pass Rate<br/><b>{int(_score(pass_total, len(runs))*100)}%</b></div><div class="s">Scenarios<br/><b>{len(set([r['scenario'] for r in runs]))}</b></div><div class="s">Prompts<br/><b>{len(prompts)}</b></div></div>
     <div class="p"><div class="ph"><b>Run Explorer</b><span id="count" class="m"></span></div><div class="c"><input id="q" placeholder="Search run/scenario/model/prompt..."/><select id="fstatus">{st_opts}</select><select id="fscenario">{s_opts}</select><select id="fmodel">{m_opts}</select><select id="fprompt">{p_opts}</select></div><div class="tw"><table><thead><tr><th>Finished</th><th>Scenario</th><th>KB</th><th>Backend/Model</th><th>Status</th><th>Validation</th><th>Prompt</th><th>Report</th><th>JSON</th></tr></thead><tbody id="runs">{run_rows}</tbody></table></div><div class="hint">Use prompt filter to compare the same rung across prompt versions.</div></div>
     <div id="prompts" class="p"><div class="ph"><b>Prompt Evolution</b></div><div class="tw"><table><thead><tr><th>Prompt ID</th><th>Runs</th><th>Pass %</th><th>Avg Validation %</th><th>Last Seen</th><th>Scenarios</th><th>Models</th><th>Action</th></tr></thead><tbody>{prompt_rows}</tbody></table></div></div>
     <div class="p"><div class="ph"><b>KB Snapshots</b></div><table><thead><tr><th>KB</th><th>Updated</th><th>Size</th></tr></thead><tbody>{kb_rows}</tbody></table></div>
     </div><script>(()=>{{const r=document.documentElement,t=document.getElementById('theme'),k='hub_theme_pref',s=localStorage.getItem(k);r.setAttribute('data-theme',(s==='dark'||s==='light')?s:((matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light'));const sync=()=>t.textContent='theme: '+(r.getAttribute('data-theme')==='dark'?'dark':'light');sync();t.onclick=()=>{{const n=r.getAttribute('data-theme')==='dark'?'light':'dark';r.setAttribute('data-theme',n);localStorage.setItem(k,n);sync();}};const q=document.getElementById('q'),fs=document.getElementById('fstatus'),fc=document.getElementById('fscenario'),fm=document.getElementById('fmodel'),fp=document.getElementById('fprompt'),rows=[...document.querySelectorAll('#runs tr')],count=document.getElementById('count');const run=()=>{{const s=(q.value||'').toLowerCase().trim(),a=(fs.value||''),c=(fc.value||''),m=(fm.value||''),p=(fp.value||'');let n=0;for(const row of rows){{const ok=(!a||row.dataset.status===a)&&(!c||row.dataset.scenario===c)&&(!m||row.dataset.model===m)&&(!p||row.dataset.prompt===p)&&(!s||(row.dataset.search||'').includes(s));row.style.display=ok?'':'none';if(ok)n++;}}count.textContent=`showing ${{n}} / ${{rows.length}} runs`;}};[q,fs,fc,fm,fp].forEach(x=>x&&x.addEventListener('input',run));[fs,fc,fm,fp].forEach(x=>x&&x.addEventListener('change',run));for(const b of document.querySelectorAll('.pbtn')){{b.addEventListener('click',()=>{{fp.value=b.dataset.prompt||'';run();window.scrollTo({{top:0,behavior:'smooth'}});}});}}run();}})();</script></body></html>"""
-    out.write_text(html, encoding="utf-8")
+    out.write_text(page_html, encoding="utf-8")
     print(f"Wrote {out}")
     print(f"Wrote {rp}")
     print(f"Wrote {pp}")
