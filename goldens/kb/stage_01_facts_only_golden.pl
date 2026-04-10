@@ -1,0 +1,2 @@
+man(plato).
+man(socrates).

@@ -407,6 +407,44 @@ Evidence:
 - CE sweep summary:
   - `tmp/ce_sweep/ce_sweep_20260410_110945.json`
 
+## Session 14: Golden KB Benchmark System (Story -> Answer KB)
+
+Date: 2026-04-10 UTC
+
+Outcome:
+
+- added first-class golden KB tooling:
+  - `scripts/golden_kb.py`
+  - subcommands:
+    - `freeze` (freeze canonical golden KB from rigorous run report)
+    - `compare` (golden vs candidate KB diff)
+    - `benchmark` (scenario ingest + direct golden compare)
+    - `benchmark-manifest` (batch benchmark over manifest entries)
+- added golden/story scaffolding:
+  - `goldens/README.md`
+  - `goldens/manifest.json`
+  - `goldens/kb/`
+  - `goldens/probes/`
+  - `stories/README.md`
+- seeded first example pack:
+  - `stories/stage_01_facts_only.md`
+  - `goldens/probes/stage_01_facts_only.json`
+  - `goldens/kb/stage_01_facts_only_golden.pl`
+  - manifest entry for `stage_01_facts_only`
+
+Design note:
+
+- benchmark defaults now favor deterministic story->KB isolation:
+  - `clarification_eagerness=0.0`
+  - `max_clarification_rounds=0`
+  - `force_empty_kb=true`
+
+Verification:
+
+- ran manifest benchmark:
+  - `python scripts/golden_kb.py benchmark-manifest --manifest goldens/manifest.json --out-summary tmp/golden_manifest_summary_stage01.json`
+  - result: `stage_01_facts_only` run passed and `kb_match=true`
+
 
 
 

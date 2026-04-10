@@ -208,6 +208,39 @@ ollama show qwen35-semparse:9b
 
 In `ollama show`, the `System` block should match your current semantic parser prompt pack.
 
+## Golden KB Benchmark Workflow (Story -> Answer KB)
+
+We now support a faster regression path based on canonical answer KB artifacts.
+
+Concept:
+
+- rigorous ingestion pass (with crafted probe Q&A) establishes a trusted answer KB
+- trusted answer KB is frozen as `goldens/kb/<story_id>.pl`
+- routine testing runs scenario ingestion and compares generated KB directly to golden KB
+
+This lets us evaluate parser quality quickly without repeating full interactive Q&A every run.
+
+Key files:
+
+- `goldens/manifest.json`
+- `goldens/kb/`
+- `goldens/probes/`
+- `stories/`
+- `scripts/golden_kb.py`
+
+Example commands:
+
+```bash
+# freeze golden from a rigorous run report
+python scripts/golden_kb.py freeze --report kb_runs/<run>.json --output goldens/kb/<story_id>.pl --meta-out tmp/golden_freeze_<story_id>.json
+
+# fast benchmark (no clarification rounds)
+python scripts/golden_kb.py benchmark --scenario kb_scenarios/<story_id>.json --golden goldens/kb/<story_id>.pl --backend ollama --model qwen3.5:9b --prompt-file modelfiles/semantic_parser_system_prompt.md --clarification-eagerness 0.0 --max-clarification-rounds 0 --force-empty-kb --out-summary tmp/golden_bench_<story_id>.json
+
+# run all manifest entries
+python scripts/golden_kb.py benchmark-manifest --manifest goldens/manifest.json --out-summary tmp/golden_manifest_summary.json
+```
+
 ## High-Level Architecture
 
 1. Input utterance(s) from scenario JSON.
