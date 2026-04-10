@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Goldilocks Roundtrip Demo</title>
+  <style>
+    :root { --bg:#f7f7f5; --panel:#ffffff; --ink:#1f2328; --muted:#57606a; --line:#d0d7de; --link:#0969da; --ok:#1a7f37; --bad:#cf222e; }
+    body { margin:0; background:var(--bg); color:var(--ink); font-family:Georgia, 'Times New Roman', serif; }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 24px; }
+    h1,h2 { margin:0 0 8px 0; }
+    .sub { color:var(--muted); margin-bottom: 16px; }
+    .card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px; margin: 14px 0; }
+    .chips { display:flex; gap:8px; flex-wrap: wrap; margin-top:10px; }
+    .chip { border:1px solid var(--line); border-radius:999px; padding:4px 10px; font: 12px/1.4 system-ui, -apple-system, Segoe UI, Arial, sans-serif; }
+    .chip.pass { color:var(--ok); border-color:#2da44e55; background:#2da44e12; }
+    .chip.fail { color:var(--bad); border-color:#cf222e55; background:#cf222e12; }
+    pre { white-space: pre-wrap; word-break: break-word; background:#f6f8fa; border:1px solid var(--line); border-radius:10px; padding:12px; overflow:auto; font: 13px/1.5 Consolas, 'Courier New', monospace; }
+    details { border:1px solid var(--line); border-radius:10px; background:#fff; }
+    summary { cursor:pointer; padding:12px 14px; font: 600 14px/1.4 system-ui, -apple-system, Segoe UI, Arial, sans-serif; }
+    details > div { padding: 0 12px 12px 12px; }
+    a { color: var(--link); text-decoration:none; }
+    a:hover { text-decoration:underline; }
+    .topnav { font: 13px/1.4 system-ui, -apple-system, Segoe UI, Arial, sans-serif; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topnav"><a href="index.html">Docs Home</a> | <a href="../README.md">Repo README</a></div>
+    <h1>Goldilocks Roundtrip Demo</h1>
+    <div class="sub">Input story -> parsed KB -> reconstructed story from KB only.</div>
+
+    <div class="card">
+      <h2>Run Snapshot</h2>
+      <div class="chips">
+        <span class="chip fail">status: failed</span>
+        <span class="chip">turns: 50</span>
+        <span class="chip">parser failures: 7</span>
+        <span class="chip">apply failures: 7</span>
+        <span class="chip">clarification rounds: 36</span>
+      </div>
+      <p style="margin-top:10px; font:13px/1.4 system-ui, -apple-system, Segoe UI, Arial, sans-serif; color:var(--muted)">
+        run_id: run-20260410T160231Z-story_goldilocks_roundtr-qwen3_5_9b-2684
+      </p>
+      <p style="font:13px/1.4 system-ui, -apple-system, Segoe UI, Arial, sans-serif;">
+        Artifacts: 
+        <a href="data/roundtrip/goldilocks_roundtrip_input_story.md">input story</a> |
+        <a href="data/roundtrip/goldilocks_roundtrip_generated_kb.pl">generated kb.pl</a> |
+        <a href="data/roundtrip/goldilocks_roundtrip_reconstructed_story.md">reconstructed story</a>
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>1) Input Story</h2>
+      <pre># Goldilocks Roundtrip Story
+
+Goldilocks was a little girl.
+Goldilocks walked through the forest.
+Goldilocks found a small house in the forest.
+The house belonged to Papa Bear, Mama Bear, and Baby Bear.
+There were three bowls of porridge on the table.
+Papa Bear had a big bowl of porridge.
+Mama Bear had a medium bowl of porridge.
+Baby Bear had a small bowl of porridge.
+Goldilocks tasted Papa Bear&#x27;s porridge.
+Papa Bear&#x27;s porridge was too hot for Goldilocks.
+Goldilocks tasted Mama Bear&#x27;s porridge.
+Mama Bear&#x27;s porridge was too cold for Goldilocks.
+Goldilocks tasted Baby Bear&#x27;s porridge.
+Baby Bear&#x27;s porridge was just right for Goldilocks.
+Goldilocks ate all of Baby Bear&#x27;s porridge.
+There were three chairs in the house.
+Papa Bear had a big chair.
+Mama Bear had a medium chair.
+Baby Bear had a small chair.
+Goldilocks sat in Papa Bear&#x27;s chair.
+Papa Bear&#x27;s chair was too hard for Goldilocks.
+Goldilocks sat in Mama Bear&#x27;s chair.
+Mama Bear&#x27;s chair was too soft for Goldilocks.
+Goldilocks sat in Baby Bear&#x27;s chair.
+Baby Bear&#x27;s chair broke while Goldilocks was sitting in it.
+There were three beds upstairs.
+Papa Bear had a big bed.
+Mama Bear had a medium bed.
+Baby Bear had a small bed.
+Goldilocks lay in Papa Bear&#x27;s bed.
+Papa Bear&#x27;s bed was too hard for Goldilocks.
+Goldilocks lay in Mama Bear&#x27;s bed.
+Mama Bear&#x27;s bed was too soft for Goldilocks.
+Goldilocks lay in Baby Bear&#x27;s bed.
+Baby Bear&#x27;s bed was just right for Goldilocks.
+Goldilocks fell asleep in Baby Bear&#x27;s bed.
+The three bears returned home.
+Papa Bear saw that someone had tasted his porridge.
+Mama Bear saw that someone had tasted her porridge.
+Baby Bear saw that someone had eaten all his porridge.
+Papa Bear saw that someone had been sitting in his chair.
+Mama Bear saw that someone had been sitting in her chair.
+Baby Bear saw that his chair was broken.
+The bears went upstairs.
+Papa Bear saw that someone had been lying in his bed.
+Mama Bear saw that someone had been lying in her bed.
+Baby Bear saw Goldilocks asleep in his bed.
+Goldilocks woke up and saw the three bears.
+Goldilocks ran out of the house.
+Goldilocks ran back through the forest.
+</pre>
+    </div>
+
+    <div class="card">
+      <h2>2) Generated KB</h2>
+      <details>
+        <summary>Expand generated <code>kb.pl</code></summary>
+        <div><pre>% Auto-generated by kb_pipeline.py
+% Updated UTC: 2026-04-10T16:17:06+00:00
+
+chairs_in_house(baby_bear, baby_bear).
+chairs_in_house(chairs).
+chairs_in_house(medium).
+chairs_in_house(papa_bear_chair).
+chairs_in_house(small_chair).
+fits_goldilocks(baby_bear_bed, goldilocks).
+goldilocks(little_girl).
+goldilocks_found(baby_bear_bed).
+goldilocks_found(goldilocks, papa_bear_porridge).
+goldilocks_found(mama_bear_bed).
+goldilocks_found(papa_bear_bed).
+goldilocks_found(small_house, forest).
+has_porridge(goldilocks, baby_bear).
+has_porridge(goldilocks, mama_bear).
+has_porridge(goldilocks, mama_bear_chair).
+has_porridge(mama_bear, medium).
+has_porridge(papa_bear).
+returned_home(bears).
+returned_home(goldilocks).
+returned_home(the_three_bears).
+saw(baby_bear, goldilocks).
+saw(goldilocks, bear1).
+tasted(goldilocks, porridge_of_papa_bear).
+too_cold(goldilocks, porridge).
+too_hard(goldilocks, papa_bear_bed).
+too_hard(papa_bear_chair, goldilocks).
+too_hot(papa_bear_porridge).
+too_soft(mama_bear_bed).
+too_soft(mama_bear_chair, goldilocks).
+</pre></div>
+      </details>
+    </div>
+
+    <div class="card">
+      <h2>3) Reconstructed Story (from KB alone)</h2>
+      <pre># Reconstructed Story From Generated KB
+
+This is a direct reconstruction from extracted clauses, not a hand-corrected story.
+
+- In the house, baby bear is linked with baby bear.
+- There was chairs in the house.
+- There was medium in the house.
+- There was papa bear chair in the house.
+- There was small chair in the house.
+- Baby Bear Bed fit Goldilocks.
+- Goldilocks is described as little girl.
+- Goldilocks found baby bear bed.
+- Goldilocks found goldilocks in papa bear porridge.
+- Goldilocks found mama bear bed.
+- Goldilocks found papa bear bed.
+- Goldilocks found small house in forest.
+- Goldilocks had baby bear.
+- Goldilocks had mama bear.
+- Goldilocks had mama bear chair.
+- Mama Bear had medium.
+- Papa Bear had porridge.
+- Bears returned home.
+- Goldilocks returned home.
+- The Three Bears returned home.
+- Baby Bear saw goldilocks.
+- Goldilocks saw bear1.
+- Goldilocks tasted porridge of papa bear.
+- Porridge was too cold for goldilocks.
+- Goldilocks was too hard for papa bear bed.
+- Papa Bear Chair was too hard for goldilocks.
+- Papa Bear Porridge was too hot.
+- Mama Bear Bed was too soft.
+- Mama Bear Chair was too soft for goldilocks.
+</pre>
+    </div>
+
+    <p style="font:12px/1.4 system-ui, -apple-system, Segoe UI, Arial, sans-serif; color:var(--muted)">Generated 2026-04-10 18:38:29 UTC.</p>
+  </div>
+</body>
+</html>

@@ -4,6 +4,16 @@ This project is a local workbench for building a high-accuracy semantic parser (
 
 Last updated: 2026-04-10
 
+## Story Roundtrip Demo
+
+Watch the pre-thinker consume a story, then recite from captured facts and logical memory.
+
+- Demo page: `docs/goldilocks-roundtrip.html`
+- Includes:
+  - input story text
+  - expandable generated `kb.pl`
+  - reconstructed story generated from KB clauses alone
+
 ## Honest Snapshot (For NSAI Readers)
 
 Prethinker is a neuro-symbolic parsing workbench, not a finished parser product.

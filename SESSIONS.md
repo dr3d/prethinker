@@ -468,6 +468,43 @@ Notes:
 - this creates a clean bridge from raw statuses (`success/skipped/no_results/clarification_requested/validation_error/constraint_error`) to the higher-level workflow states discussed in planning
 - enables future threshold tuning and escalation policy work without re-labelling historical run output
 
+## Session 16: Goldilocks Story Roundtrip + Repo Demo Page
+
+Date: 2026-04-10 UTC
+
+Outcome:
+
+- ran long-form story ingestion experiment using Goldilocks narrative text
+- generated and preserved a failed-but-informative run corpus for analysis
+- produced a deterministic reconstruction from generated KB clauses
+- published a repo-visible demo page showing:
+  - input story
+  - expandable generated `kb.pl`
+  - reconstructed story from KB-only memory
+
+Artifacts:
+
+- story inputs:
+  - `stories/goldilocks_roundtrip.md`
+  - `stories/goldilocks_and_the_three_bears.txt`
+- scenario:
+  - `kb_scenarios/story_goldilocks_roundtrip.json`
+- report + diagnostics:
+  - `GOLDILOCKS_ROUNDTRIP_REPORT.md`
+  - `tmp/goldilocks_roundtrip_run.json`
+  - `tmp/goldilocks_failure_ledger.json`
+  - `tmp/goldilocks_reconstructed_story.md`
+- docs-published roundtrip view:
+  - `docs/goldilocks-roundtrip.html`
+  - `docs/data/roundtrip/goldilocks_roundtrip_input_story.md`
+  - `docs/data/roundtrip/goldilocks_roundtrip_generated_kb.pl`
+  - `docs/data/roundtrip/goldilocks_roundtrip_reconstructed_story.md`
+
+Notes:
+
+- README now includes a top-level “Story Roundtrip Demo” callout with the user-requested wording:
+  - “Watch the pre-thinker consume a story, then recite from captured facts and logical memory.”
+
 
 
 
