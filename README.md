@@ -63,6 +63,35 @@ If you're evaluating it as a research workbench, it's useful now. If you're eval
 - LoRA outputs will be sanity-checked against the same benchmark ladder used for prompt iterations.
 - GGUF packaging is treated as deployment format work after behavior is validated (not as a substitute for evaluation).
 
+## Prompt Tuning Workflow (LM Studio -> Ollama)
+
+Use this loop to keep prompt iteration fast and deployment stable:
+
+1. Tune/evaluate with LM Studio using runtime prompt injection.
+2. Run ladder checks and keep evidence in `kb_runs/`.
+3. When prompt improves, rebake Ollama model tag from latest prompt.
+4. Re-run smoke ladder on rebaked Ollama tag to confirm parity.
+
+Example LM Studio rung run:
+
+```bash
+python kb_pipeline.py --backend lmstudio --base-url http://127.0.0.1:1234 --model qwen/qwen3.5-9b --runtime core --prompt-file modelfiles/semantic_parser_system_prompt.md --scenario kb_scenarios/stage_01_facts_only.json --kb-name people_ladder_lms --out kb_runs/stage_01_lms_core.json
+```
+
+Rebake Ollama tag with latest prompt:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/rebake_semparse.ps1 -ModelTag qwen35-semparse:9b -BaseModel qwen3.5:9b -PromptFile modelfiles/semantic_parser_system_prompt.md
+```
+
+Verify baked system prompt:
+
+```bash
+ollama show qwen35-semparse:9b
+```
+
+In `ollama show`, the `System` block should match your current semantic parser prompt pack.
+
 ## High-Level Architecture
 
 1. Input utterance(s) from scenario JSON.

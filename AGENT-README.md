@@ -115,6 +115,12 @@ Hub publishing mirrors snapshots to:
 - `stage_03_transitive_chain.json`
 - acid scenarios
 
+LM Studio vs Ollama operating pattern:
+
+- LM Studio: use stock model + `--prompt-file` for fast prompt iteration.
+- Ollama: periodically rebake `qwen35-semparse:9b` from latest prompt via `scripts/rebake_semparse.ps1`.
+- Always confirm rebaked tag with `ollama show qwen35-semparse:9b` before reporting baked-prompt results.
+
 ## Command Quickstart
 
 ```bash
