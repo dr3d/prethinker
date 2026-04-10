@@ -1,0 +1,13 @@
+{
+  "ontology_name": "people_ladder_core_20260409_221357",
+  "generated_at_utc": "2026-04-10T02:14:16+00:00",
+  "clause_count": 2,
+  "predicate_signatures": [
+    "man/1"
+  ],
+  "fact_predicates": [
+    "man/1"
+  ],
+  "rule_head_predicates": [],
+  "rule_body_predicates": []
+}

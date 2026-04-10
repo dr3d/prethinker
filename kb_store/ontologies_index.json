@@ -51,6 +51,15 @@
         "parent/2"
       ],
       "clause_count": 4
+    },
+    "people_ladder_core_20260409_221357": {
+      "ontology_name": "people_ladder_core_20260409_221357",
+      "kb_dir": "D:\\_PROJECTS\\prethinker\\kb_store\\people_ladder_core_20260409_221357",
+      "updated_at_utc": "2026-04-10T02:14:16+00:00",
+      "predicate_signatures": [
+        "man/1"
+      ],
+      "clause_count": 2
     }
   }
 }
