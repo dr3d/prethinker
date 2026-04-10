@@ -1057,6 +1057,44 @@ def _build_clarification_context_utterance(utterance: str, rounds: list[dict[str
     return "\n".join(lines)
 
 
+def _normalize_clarification_answer_text(answer: str) -> str:
+    text = re.sub(r"\s+", " ", str(answer or "").strip()).lower()
+    return text
+
+
+def _is_non_informative_clarification_answer(answer: str) -> bool:
+    normalized = _normalize_clarification_answer_text(answer)
+    if not normalized:
+        return True
+    non_informative = {
+        "unknown",
+        "i don't know",
+        "i dont know",
+        "dont know",
+        "not sure",
+        "unsure",
+        "n/a",
+        "na",
+    }
+    return normalized in non_informative
+
+
+def _is_redundant_clarification_pair(
+    rounds: list[dict[str, Any]],
+    *,
+    question: str,
+    answer: str,
+) -> bool:
+    q_norm = _normalize_clarification_answer_text(question)
+    a_norm = _normalize_clarification_answer_text(answer)
+    for row in rounds:
+        rq = _normalize_clarification_answer_text(str(row.get("question", "")))
+        ra = _normalize_clarification_answer_text(str(row.get("answer", "")))
+        if rq == q_norm and ra == a_norm:
+            return True
+    return False
+
+
 def _coerce_synthetic_answer_text(raw: Any) -> str:
     text = str(raw or "").strip()
     if not text:
@@ -3348,6 +3386,22 @@ def main() -> int:
             if has_round_capacity and has_scripted_answer:
                 scripted_answer = scripted_clarification_answers[scripted_answer_index]
                 scripted_answer_index += 1
+                if _is_non_informative_clarification_answer(scripted_answer):
+                    clarification_pending = True
+                    clarification_pending_reason = (
+                        "Clarification answer was non-informative; KB apply deferred."
+                    )
+                    break
+                if _is_redundant_clarification_pair(
+                    clarification_rounds,
+                    question=clarification_question,
+                    answer=scripted_answer,
+                ):
+                    clarification_pending = True
+                    clarification_pending_reason = (
+                        "Clarification loop detected (same question/answer); KB apply deferred."
+                    )
+                    break
                 clarification_rounds.append(
                     {
                         "round": len(clarification_rounds) + 1,
@@ -3376,6 +3430,22 @@ def main() -> int:
                     api_key=api_key,
                 )
                 if synthetic_answer:
+                    if _is_non_informative_clarification_answer(synthetic_answer):
+                        clarification_pending = True
+                        clarification_pending_reason = (
+                            "Clarification answer model returned non-informative answer; KB apply deferred."
+                        )
+                        break
+                    if _is_redundant_clarification_pair(
+                        clarification_rounds,
+                        question=clarification_question,
+                        answer=synthetic_answer,
+                    ):
+                        clarification_pending = True
+                        clarification_pending_reason = (
+                            "Clarification loop detected from answer model; KB apply deferred."
+                        )
+                        break
                     synthetic_answer_count += 1
                     clarification_rounds.append(
                         {
