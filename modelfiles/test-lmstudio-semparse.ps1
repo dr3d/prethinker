@@ -4,11 +4,18 @@ param(
   [string]$BaseUrl = "",
   [string]$Model = "qwen/qwen3.5-9b",
   [string]$Utterance = "If someone is a manager then they can approve budgets.",
-  [string]$EnvFile = "d:\\_PROJECTS\\prolog-reasoning\\.env.local",
+  [string]$EnvFile = "",
   [bool]$TwoPass = $true,
   [int]$ContextLength = 4096,
   [int]$TimeoutSec = 90
 )
+
+$RepoRoot = Split-Path -Parent $PSScriptRoot
+if ([string]::IsNullOrWhiteSpace($EnvFile)) {
+  $EnvFile = Join-Path $RepoRoot ".env.local"
+} elseif (-not [System.IO.Path]::IsPathRooted($EnvFile)) {
+  $EnvFile = Join-Path $RepoRoot $EnvFile
+}
 
 if ([string]::IsNullOrWhiteSpace($BaseUrl)) {
   if ($Backend -eq "ollama") {
