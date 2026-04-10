@@ -123,3 +123,18 @@ Prethinker is an iterative LLM specialization lab:
 - it keeps retuning until the parser survives acid-grade semantic stress
 
 That makes it an unusual bridge between neural language understanding and symbolic correctness: the model interprets meaning, but the runtime guards truth.
+
+## Ontological Tracking and Domain Bounding
+
+Prethinker also tracks ontology state over time (`ontology_profile`, `ontology_diff`, and known ontology index data).  
+This is important because it limits what the parser should try to "mean" inside a given KB namespace.
+
+Practically, ontological tracking helps by:
+
+- keeping each KB tied to a coherent predicate/entity domain instead of drifting into unrelated topics
+- detecting drift when new predicates or argument patterns suddenly expand the semantic scope
+- enabling safer confirmation points before major domain shifts are accepted
+- improving parser consistency by encouraging reuse of established vocabulary for that namespace
+
+In other words, ontological tracking narrows the operating envelope.  
+The pre-thinker is not expected to reason over every possible domain at once; it is expected to operate sharply within the active ontology, and to treat domain expansion as an explicit, auditable event.
