@@ -1,0 +1,44 @@
+{
+  "initial_states": [
+    { "predicate": "parent", "args": ["alice", "bob"] },
+    { "predicate": "parent", "args": ["bob", "carol"] },
+    { "predicate": "compliance_mode", "args": ["strict"] }
+  ],
+  "rules": [
+    {
+      "name": "parent_implies_ancestor",
+      "antecedents": [
+        { "predicate": "parent", "args": ["?X", "?Y"] }
+      ],
+      "consequent": { "predicate": "ancestor", "args": ["?X", "?Y"] }
+    },
+    {
+      "name": "ancestor_chain",
+      "antecedents": [
+        { "predicate": "parent", "args": ["?X", "?Y"] },
+        { "predicate": "ancestor", "args": ["?Y", "?Z"] }
+      ],
+      "consequent": { "predicate": "ancestor", "args": ["?X", "?Z"] }
+    }
+  ],
+  "initial_domains": {
+    "clarification_eagerness": ["low", "medium", "high"],
+    "query_mode": ["direct", "clarify_first"]
+  },
+  "domain_constraints": [
+    {
+      "kind": "implication",
+      "left": "clarification_eagerness",
+      "when_value": "high",
+      "right": "query_mode",
+      "values": ["clarify_first"]
+    }
+  ],
+  "state_domain_links": [
+    {
+      "trigger": { "predicate": "compliance_mode", "args": ["strict"] },
+      "variable": "clarification_eagerness",
+      "allowed_values": ["high"]
+    }
+  ]
+}

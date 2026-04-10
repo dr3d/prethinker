@@ -31,6 +31,8 @@ Primary model focus right now: `qwen3.5:9b`.
 5. `kb_scenarios/README.md`
 6. `scripts/render_kb_run_html.py`
 7. `scripts/build_hub_index.py`
+8. `engine/constraint_propagation.py`
+9. `engine/propagation_runner.py`
 
 ## Fast Resume (Single-Page Handoff)
 
@@ -63,10 +65,16 @@ Primary model focus right now: `qwen3.5:9b`.
 2. split extraction (logic-only pass, deterministic refinement)
 3. schema/prolog validation and optional repair prompt
 4. optional registry/type checks
-5. deterministic MCP KB apply
+5. deterministic local core KB apply (default runtime)
 6. deterministic validation queries
 7. retained corpus/profile persistence
 8. run report with prompt/model provenance
+
+Separate local propagation layer (not yet pipeline-wired):
+
+- `engine/constraint_propagation.py` (known-state + DoF propagation)
+- `engine/propagation_schema.py` (state/rule/constraint types)
+- `engine/propagation_runner.py` (JSON problem runner)
 
 ## Provenance Contract (Required For Tuning)
 
@@ -127,6 +135,9 @@ python scripts/render_kb_run_html.py --input kb_runs --output docs/reports --the
 
 # 5) rebuild hub + manifests
 python scripts/build_hub_index.py --reports-dir docs/reports --runs-dir kb_runs --kb-pages-dir docs/kb --ladder-index docs/rungs/index.html --output docs/index.html --title "Prethinker Report Hub"
+
+# 6) run propagation example
+python -m engine.propagation_runner --problem-json kb_scenarios/propagation_problem.example.json
 ```
 
 ## Where To Inspect Results

@@ -2,7 +2,7 @@
 """
 Build and validate runtime KBs from natural-language utterances via:
 1) local 9B semantic parsing (LM Studio or Ollama)
-2) deterministic runtime apply tools (parse-only by default; optional MCP mode)
+2) deterministic runtime apply tools (local core interpreter by default; optional parse-only or MCP mode)
 
 Designed to run standalone in this repo without sibling-repo requirements.
 """
@@ -21,6 +21,8 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+from engine.core import Clause, PrologEngine, Term
 
 PROJECT_ROOT = Path(__file__).resolve().parent
 DEFAULT_PROLOG_REPO_CANDIDATES = [
@@ -1781,6 +1783,225 @@ def _load_corpus_into_server(server: Any, clauses: list[str]) -> dict[str, Any]:
     return summary
 
 
+class CorePrologRuntime:
+    """Local runtime backed by the vendored core Prolog interpreter."""
+
+    def __init__(self, max_depth: int = 500) -> None:
+        self.engine = PrologEngine(max_depth=max_depth)
+
+    @staticmethod
+    def _split_top_level(text: str, delimiter: str) -> list[str]:
+        parts: list[str] = []
+        current: list[str] = []
+        paren_depth = 0
+        bracket_depth = 0
+
+        for ch in text:
+            if ch == "(":
+                paren_depth += 1
+                current.append(ch)
+                continue
+            if ch == ")":
+                paren_depth = max(0, paren_depth - 1)
+                current.append(ch)
+                continue
+            if ch == "[":
+                bracket_depth += 1
+                current.append(ch)
+                continue
+            if ch == "]":
+                bracket_depth = max(0, bracket_depth - 1)
+                current.append(ch)
+                continue
+            if ch == delimiter and paren_depth == 0 and bracket_depth == 0:
+                part = "".join(current).strip()
+                if part:
+                    parts.append(part)
+                current = []
+                continue
+            current.append(ch)
+
+        tail = "".join(current).strip()
+        if tail:
+            parts.append(tail)
+        return parts
+
+    @staticmethod
+    def _contains_variable(term: Term) -> bool:
+        if getattr(term, "is_variable", False):
+            return True
+        args = getattr(term, "args", [])
+        return any(CorePrologRuntime._contains_variable(arg) for arg in args)
+
+    def _parse_query_term(self, query: str) -> Term:
+        normalized = (query or "").strip()
+        if not normalized:
+            raise ValueError("Empty query.")
+        if normalized.endswith("."):
+            normalized = normalized[:-1].strip()
+        if not normalized:
+            raise ValueError("Empty query.")
+        return self.engine.parse_term(normalized)
+
+    @staticmethod
+    def _collect_query_variables(term: Term) -> list[str]:
+        names: list[str] = []
+
+        def walk(node: Term) -> None:
+            if getattr(node, "is_variable", False):
+                name = getattr(node, "name", "")
+                if isinstance(name, str) and name not in names:
+                    names.append(name)
+            for arg in getattr(node, "args", []):
+                walk(arg)
+
+        walk(term)
+        return names
+
+    def empty_kb(self) -> dict[str, Any]:
+        self.engine.clauses.clear()
+        return {
+            "status": "success",
+            "result_type": "runtime_emptied",
+            "message": "Core runtime KB cleared.",
+        }
+
+    def assert_fact(self, clause: str) -> dict[str, Any]:
+        normalized = _normalize_clause(clause)
+        if not normalized:
+            return {"status": "validation_error", "message": "Empty fact clause."}
+        if ":-" in normalized:
+            return {"status": "validation_error", "message": "Fact clause contains rule operator."}
+        try:
+            fact_term = self._parse_query_term(normalized)
+        except Exception as error:
+            return {"status": "validation_error", "message": f"Fact parse failed: {error}"}
+
+        if self._contains_variable(fact_term):
+            return {"status": "validation_error", "message": "Fact must be ground (no variables)."}
+
+        for existing in self.engine.clauses:
+            if existing.head == fact_term and not existing.body:
+                return {
+                    "status": "success",
+                    "result_type": "fact_asserted",
+                    "fact": normalized,
+                    "message": "Fact already present in core runtime.",
+                }
+
+        self.engine.add_clause(Clause(fact_term))
+        return {"status": "success", "result_type": "fact_asserted", "fact": normalized}
+
+    def assert_rule(self, clause: str) -> dict[str, Any]:
+        normalized = _normalize_clause(clause)
+        if not normalized:
+            return {"status": "validation_error", "message": "Empty rule clause."}
+        raw = normalized[:-1].strip() if normalized.endswith(".") else normalized
+        if ":-" not in raw:
+            return {"status": "validation_error", "message": "Rule clause missing ':-'."}
+
+        try:
+            head_text, body_text = raw.split(":-", 1)
+            head_text = head_text.strip()
+            body_text = body_text.strip()
+            if not head_text or not body_text:
+                return {"status": "validation_error", "message": "Rule must include non-empty head and body."}
+            head_term = self._parse_query_term(head_text)
+            body_terms = [self._parse_query_term(piece) for piece in self._split_top_level(body_text, ",")]
+            if not body_terms:
+                return {"status": "validation_error", "message": "Rule body is empty."}
+        except Exception as error:
+            return {"status": "validation_error", "message": f"Rule parse failed: {error}"}
+
+        rule_clause = Clause(head_term, body_terms)
+        for existing in self.engine.clauses:
+            if existing.head == rule_clause.head and (existing.body or []) == rule_clause.body:
+                return {
+                    "status": "success",
+                    "result_type": "rule_asserted",
+                    "rule": normalized,
+                    "message": "Rule already present in core runtime.",
+                }
+
+        self.engine.add_clause(rule_clause)
+        return {"status": "success", "result_type": "rule_asserted", "rule": normalized}
+
+    def retract_fact(self, clause: str) -> dict[str, Any]:
+        normalized = _normalize_clause(clause)
+        if not normalized:
+            return {"status": "validation_error", "message": "Empty retract clause."}
+        if ":-" in normalized:
+            return {"status": "validation_error", "message": "Retract target cannot be a rule."}
+        try:
+            fact_term = self._parse_query_term(normalized)
+        except Exception as error:
+            return {"status": "validation_error", "message": f"Retract parse failed: {error}"}
+        if self._contains_variable(fact_term):
+            return {"status": "validation_error", "message": "Retract target must be ground (no variables)."}
+
+        for index, existing in enumerate(self.engine.clauses):
+            if existing.head == fact_term and not existing.body:
+                del self.engine.clauses[index]
+                return {"status": "success", "result_type": "fact_retracted", "fact": normalized}
+
+        return {"status": "no_results", "result_type": "no_result", "fact": normalized}
+
+    def query_rows(self, query: str) -> dict[str, Any]:
+        normalized = _normalize_clause(query)
+        try:
+            query_term = self._parse_query_term(normalized)
+            variable_names = self._collect_query_variables(query_term)
+            solutions = self.engine.resolve(query_term)
+        except Exception as error:
+            return {
+                "status": "error",
+                "result_type": "execution_error",
+                "predicate": "",
+                "prolog_query": normalized,
+                "message": str(error),
+                "reasoning_basis": {"kind": "core-local"},
+            }
+
+        if not solutions:
+            return {
+                "status": "no_results",
+                "result_type": "no_result",
+                "predicate": query_term.name,
+                "prolog_query": normalized,
+                "variables": variable_names,
+                "rows": [],
+                "num_rows": 0,
+                "reasoning_basis": {"kind": "core-local"},
+            }
+
+        rows: list[dict[str, str]] = []
+        seen_rows: set[str] = set()
+        if variable_names:
+            for solution in solutions:
+                row: dict[str, str] = {}
+                for variable_name in variable_names:
+                    bound = solution.apply(Term(variable_name, is_variable=True))
+                    row[variable_name] = str(bound)
+                key = json.dumps(row, sort_keys=True)
+                if key in seen_rows:
+                    continue
+                seen_rows.add(key)
+                rows.append(row)
+        else:
+            rows.append({})
+
+        return {
+            "status": "success",
+            "result_type": "table",
+            "predicate": query_term.name,
+            "prolog_query": normalized,
+            "variables": variable_names,
+            "rows": rows,
+            "num_rows": len(rows),
+            "reasoning_basis": {"kind": "core-local"},
+        }
+
+
 class ParseOnlyRuntime:
     """Lightweight local runtime used when MCP is disabled.
 
@@ -2094,16 +2315,79 @@ def _update_ontology_index(
     return payload
 
 
+def _constraint_error_result(
+    *,
+    message: str,
+    errors: list[str],
+    unknown_signatures: list[str] | None = None,
+) -> dict[str, Any]:
+    return {
+        "status": "constraint_error",
+        "result_type": "constraint_error",
+        "message": message,
+        "errors": errors,
+        "unknown_signatures": unknown_signatures or [],
+    }
+
+
+def _runtime_constraint_check(
+    *,
+    parsed_fragment: dict[str, Any],
+    registry_signatures: set[str],
+    strict_registry: bool,
+    type_schema: dict[str, Any],
+    strict_types: bool,
+) -> dict[str, Any] | None:
+    registry_errors, unknown_signatures = _validate_parsed_against_registry(
+        parsed_fragment,
+        allowed_signatures=registry_signatures,
+        strict_registry=strict_registry,
+    )
+    type_errors = _validate_parsed_types(
+        parsed_fragment,
+        type_schema=type_schema,
+        strict_types=strict_types,
+    )
+    errors = registry_errors + type_errors
+    if not errors:
+        return None
+    return _constraint_error_result(
+        message="Runtime constraint check failed for KB operation.",
+        errors=errors,
+        unknown_signatures=unknown_signatures,
+    )
+
+
 def _apply_to_kb(
     server: Any,
     parsed: dict[str, Any],
     *,
     corpus_clauses: set[str] | None = None,
+    registry_signatures: set[str] | None = None,
+    strict_registry: bool = False,
+    type_schema: dict[str, Any] | None = None,
+    strict_types: bool = False,
 ) -> dict[str, Any]:
+    allowed_signatures = registry_signatures or set()
+    schema = type_schema or {"entities": {}, "predicates": {}}
     intent = str(parsed.get("intent", "other"))
     if intent == "assert_fact":
         facts = parsed.get("facts", [])
         fact = _normalize_clause(str(facts[0]).strip() if facts else str(parsed.get("logic_string", "")).strip())
+        constraint_issue = _runtime_constraint_check(
+            parsed_fragment={
+                "logic_string": fact,
+                "facts": [fact],
+                "rules": [],
+                "queries": [],
+            },
+            registry_signatures=allowed_signatures,
+            strict_registry=strict_registry,
+            type_schema=schema,
+            strict_types=strict_types,
+        )
+        if constraint_issue is not None:
+            return {"tool": "assert_fact", "input": fact, "result": constraint_issue}
         if corpus_clauses is not None and fact in corpus_clauses:
             return {
                 "tool": "assert_fact",
@@ -2117,6 +2401,20 @@ def _apply_to_kb(
     if intent == "assert_rule":
         rules = parsed.get("rules", [])
         rule = _normalize_clause(str(rules[0]).strip() if rules else str(parsed.get("logic_string", "")).strip())
+        constraint_issue = _runtime_constraint_check(
+            parsed_fragment={
+                "logic_string": rule,
+                "facts": [],
+                "rules": [rule],
+                "queries": [],
+            },
+            registry_signatures=allowed_signatures,
+            strict_registry=strict_registry,
+            type_schema=schema,
+            strict_types=strict_types,
+        )
+        if constraint_issue is not None:
+            return {"tool": "assert_rule", "input": rule, "result": constraint_issue}
         if corpus_clauses is not None and rule in corpus_clauses:
             return {
                 "tool": "assert_rule",
@@ -2139,6 +2437,21 @@ def _apply_to_kb(
                 "result": {"status": "validation_error", "message": "Could not derive retract target fact."},
             }
         target = _normalize_clause(target)
+        retract_logic = f"retract({target[:-1] if target.endswith('.') else target})."
+        constraint_issue = _runtime_constraint_check(
+            parsed_fragment={
+                "logic_string": retract_logic,
+                "facts": [target],
+                "rules": [],
+                "queries": [],
+            },
+            registry_signatures=allowed_signatures,
+            strict_registry=strict_registry,
+            type_schema=schema,
+            strict_types=strict_types,
+        )
+        if constraint_issue is not None:
+            return {"tool": "retract_fact", "input": target, "result": constraint_issue}
         if corpus_clauses is not None and target not in corpus_clauses:
             return {
                 "tool": "retract_fact",
@@ -2151,6 +2464,20 @@ def _apply_to_kb(
         return {"tool": "retract_fact", "input": target, "result": result}
     if intent == "query":
         query = _normalize_clause(str(parsed.get("logic_string", "")).strip())
+        constraint_issue = _runtime_constraint_check(
+            parsed_fragment={
+                "logic_string": query,
+                "facts": [],
+                "rules": [],
+                "queries": [query],
+            },
+            registry_signatures=allowed_signatures,
+            strict_registry=strict_registry,
+            type_schema=schema,
+            strict_types=strict_types,
+        )
+        if constraint_issue is not None:
+            return {"tool": "query_rows", "input": query, "result": constraint_issue}
         return {"tool": "query_rows", "input": query, "result": server.query_rows(query)}
     return {
         "tool": "none",
@@ -2270,9 +2597,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--timeout-seconds", type=int, default=120, help="Network timeout per model call.")
     parser.add_argument(
         "--runtime",
-        choices=["none", "mcp"],
-        default="none",
-        help="Runtime apply mode. 'none' keeps parsing local-only (default). 'mcp' uses PrologMCPServer.",
+        choices=["core", "none", "mcp"],
+        default="core",
+        help="Runtime apply mode. 'core' uses local vendored interpreter (default). 'none' is parse-only fallback. 'mcp' uses PrologMCPServer.",
     )
     parser.add_argument(
         "--prolog-repo",
@@ -2460,7 +2787,7 @@ def main() -> int:
             print("runtime=mcp requested but no Prolog MCP repo was found.")
             print(
                 "Provide --prolog-repo (containing src/mcp_server.py), "
-                "set PRETHINKER_PROLOG_REPO, or run with --runtime none."
+                "set PRETHINKER_PROLOG_REPO, or run with --runtime core."
             )
             return 2
 
@@ -2530,6 +2857,12 @@ def main() -> int:
             server_boot_kb_path = bootstrap_path
 
         server = PrologMCPServer(kb_path=str(server_boot_kb_path))
+    elif runtime_mode == "core":
+        if corpus_exists:
+            server_boot_kb_path = corpus_path
+        else:
+            server_boot_kb_path = (kb_dir / "_bootstrap_core.pl").resolve()
+        server = CorePrologRuntime()
     else:
         if corpus_exists:
             server_boot_kb_path = corpus_path
@@ -2903,7 +3236,15 @@ def main() -> int:
                 },
             }
         else:
-            apply_row = _apply_to_kb(server, parsed, corpus_clauses=corpus_clauses)
+            apply_row = _apply_to_kb(
+                server,
+                parsed,
+                corpus_clauses=corpus_clauses,
+                registry_signatures=registry_signatures,
+                strict_registry=bool(args.strict_registry),
+                type_schema=type_schema,
+                strict_types=bool(args.strict_types),
+            )
 
         tool_result = apply_row.get("result", {})
         apply_status = str(tool_result.get("status", "unknown"))
@@ -2943,7 +3284,7 @@ def main() -> int:
             f"apply_status={apply_status} [{status_note}]"
         )
 
-    if runtime_mode == "mcp":
+    if runtime_mode in {"mcp", "core"}:
         validation_rows = _run_validations(server, validations)
     else:
         validation_rows = _skip_validations(

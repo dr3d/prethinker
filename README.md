@@ -9,7 +9,7 @@ Last updated: 2026-04-09
 Prethinker is a neuro-symbolic parsing workbench, not a finished parser product.
 
 - Problem focus: map free-form language into executable symbolic operations (`assert_fact`, `assert_rule`, `query`, `retract`) and apply them deterministically to persistent KBs.
-- Core approach: hybrid pipeline where the model proposes structure, then deterministic runtime logic refines, validates, and applies through MCP runtime tools.
+- Core approach: hybrid pipeline where the model proposes structure, then deterministic runtime logic refines, validates, and applies through local runtime tools.
 - What is solid today: architecture, provenance, prompt/version lineage, scenario ladder, and observability (`kb_runs` + HTML docs/report views).
 - What is not proven yet: broad generalization on hard inputs (transitivity, quantifiers, negation policy, pronoun ambiguity, unseen vocabulary).
 - Current evidence level: early; passing smoke-to-mid ladder checks, but still small sample counts.
@@ -22,13 +22,14 @@ If you're evaluating it as a research workbench, it's useful now. If you're eval
 - Build a robust semantic parser for `assert_fact`, `assert_rule`, `query`, `retract`, and `other`.
 - Keep ontology/KB evolution persistent across runs.
 - Start seed-light (or seedless) and grow ontology from observed utterances.
-- Validate all ingestion via deterministic MCP runtime tools.
+- Validate all ingestion via deterministic runtime tools.
 - Progress from simple scenarios to acid-test scenarios.
 
 ## Current State
 
 - Qwen 3.5 9B prompt + Modelfile exists for local Ollama use.
 - End-to-end runtime pipeline exists in `kb_pipeline.py`.
+- Default runtime is local core interpreter (`--runtime core`) with rule inference.
 - Two-step parse mode is enabled by default:
   1. route classification
   2. split extraction (logic-only pass, then deterministic schema refinement)
@@ -37,6 +38,9 @@ If you're evaluating it as a research workbench, it's useful now. If you're eval
 - Scenario validation harness and progressive ladder are in place.
 - Run provenance now captures prompt snapshot/version hash + model settings per run.
 - Docs index now generates searchable run/prompt manifests for longitudinal tuning.
+- Runtime apply path enforces registry/type constraints before KB mutations/queries.
+- Unit tests cover core runtime inference + constraint guards (`tests/test_core_runtime.py`).
+- Known-state + DoF propagation engine is now vendored locally (`engine/constraint_propagation.py`).
 - Latest verified tune runs:
   - `kb_runs/stage_01_people_ladder_tune_r1.json` (passed `2/2`)
   - `kb_runs/stage_02_people_ladder_tune_r1.json` (passed `1/1`)
@@ -67,7 +71,7 @@ If you're evaluating it as a research workbench, it's useful now. If you're eval
    - logic-only extraction
    - deterministic refinement to full schema
    - repair/fallback when needed
-4. Deterministic apply via MCP server runtime methods:
+4. Deterministic apply via runtime methods:
    - `assert_fact`
    - `assert_rule`
    - `retract_fact`
@@ -78,6 +82,9 @@ If you're evaluating it as a research workbench, it's useful now. If you're eval
 ## Repository Layout
 
 - `kb_pipeline.py`: main orchestration script.
+- `engine/constraint_propagation.py`: known-state and domain propagation logic.
+- `engine/propagation_schema.py`: propagation state/rule/constraint dataclasses.
+- `engine/propagation_runner.py`: JSON-driven propagation runner helper.
 - `scripts/render_kb_run_html.py`: converts `kb_runs/*.json` into themed transcript HTML.
 - `scripts/render_dialog_json_html.py`: shared transcript renderer (ported in-repo).
 - `modelfiles/`: model and prompt assets.
@@ -100,8 +107,7 @@ If you're evaluating it as a research workbench, it's useful now. If you're eval
 - If LM Studio auth is enabled, set one of:
   - `LM_API_TOKEN` (LM Studio native), or
   - `LMSTUDIO_API_KEY` / `PRETHINKER_API_KEY`
-- No sibling repo is required for default runs (`--runtime none`, parse-only apply path).
-- Optional only: `--runtime mcp` can integrate with a Prolog MCP runtime when explicitly configured.
+- No sibling repo is required for default runs (`--runtime core`, local vendored interpreter).
 
 ## Quick Start
 
@@ -167,6 +173,12 @@ python scripts/render_kb_run_html.py --input kb_runs --output kb_runs/html --rec
 
 The renderer supports three skins (`standard`, `telegram`, `imessage`) and each page includes light/dark appearance toggle, for 6 appearance combinations.
 
+### 5b) Run propagation example (known-state + DoF)
+
+```bash
+python -m engine.propagation_runner --problem-json kb_scenarios/propagation_problem.example.json
+```
+
 ### 6) Build docs front page
 
 ```bash
@@ -195,7 +207,7 @@ Manifests are generated at:
 
 - New ontology namespace:
   - creates seedless bootstrap file
-  - calls `empty_kb()` once for clean start
+  - starts from an empty runtime state for clean first ingest
 - Existing namespace:
   - does not call `empty_kb()` by default
   - preloads retained corpus clauses into runtime
@@ -219,6 +231,12 @@ Validation supports:
 
 See `kb_scenarios/README.md` for details.
 
+## Unit Tests
+
+```bash
+python -m unittest discover -s tests -p "test_*.py" -v
+```
+
 ## What Was Implemented In This Iteration
 
 - Seed-light named KB persistence and namespace organization.
@@ -235,7 +253,7 @@ See `kb_scenarios/README.md` for details.
 ## Known Gaps
 
 - Stage 3 transitive-chain scenario can be slow/time out depending on model/server load.
-- Predicate alignment registry layer is drafted but not fully wired into runtime yet.
+- Propagation engine is present locally but not yet wired into `kb_pipeline.py` apply/query flow.
 - Multilingual stress pack is documented in notes but not yet formalized in `kb_scenarios/`.
 
 ## Suggested Next Steps
