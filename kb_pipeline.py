@@ -1137,7 +1137,7 @@ def _generate_synthetic_clarification_answer(
         base_url=base_url,
         model=model,
         prompt_text=prompt,
-        context_length=max(512, min(context_length, 2048)),
+        context_length=max(512, context_length),
         timeout=timeout,
         api_key=api_key,
     )
@@ -2702,7 +2702,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--base-url", default="", help="Override backend base URL.")
     parser.add_argument("--model", default="", help="Override model id.")
-    parser.add_argument("--context-length", type=int, default=4096, help="Context window for model calls.")
+    parser.add_argument("--context-length", type=int, default=8192, help="Context window for model calls (default 8192).")
     parser.add_argument("--timeout-seconds", type=int, default=120, help="Network timeout per model call.")
     parser.add_argument(
         "--runtime",
@@ -2844,8 +2844,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--clarification-answer-context-length",
         type=int,
-        default=1024,
-        help="Context window for clarification-answer model calls.",
+        default=16384,
+        help="Context window for clarification-answer model calls (default 16384).",
     )
     parser.add_argument("--out", default="", help="Optional output report JSON path.")
     return parser.parse_args()
