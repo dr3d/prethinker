@@ -323,7 +323,14 @@ def _build_progress_cards_page(
     a {{ color:var(--link); text-decoration:none; }}
     a:hover {{ text-decoration:underline; }}
     .run {{ background:var(--panel); border:1px solid var(--border); border-radius:12px; margin-top:14px; overflow:hidden; }}
-    .run h3 {{ margin:0; padding:12px 14px; border-bottom:1px solid var(--border); background:var(--head); font-size:16px; }}
+    .run h3 {{ margin:0; border-bottom:1px solid var(--border); background:var(--head); font-size:16px; }}
+    .run-toggle {{ width:100%; display:flex; align-items:center; justify-content:space-between; gap:10px; margin:0; padding:12px 14px; border:0; background:transparent; color:var(--ink); font:inherit; text-align:left; cursor:pointer; }}
+    .run-toggle:hover {{ filter:brightness(1.02); }}
+    .run-toggle:focus-visible {{ outline:2px solid var(--link); outline-offset:-2px; }}
+    .run-caret {{ font-size:14px; color:var(--muted); transition:transform .15s ease; }}
+    .run.is-open .run-caret {{ transform:rotate(180deg); }}
+    .run-body {{ display:none; }}
+    .run.is-open .run-body {{ display:block; }}
     .chips {{ display:flex; flex-wrap:wrap; gap:8px; padding:12px 14px 0 14px; }}
     .chip {{ border:1px solid var(--border); background:var(--panel); border-radius:999px; padding:5px 9px; font-size:12px; }}
     .chip.ok {{ color:var(--ok); background:var(--okbg); border-color:transparent; }}
@@ -365,6 +372,49 @@ def _build_progress_cards_page(
         localStorage.setItem(key, next);
         sync();
       }});
+
+      const runs = Array.from(document.querySelectorAll('section.run'));
+      if (runs.length > 0) {{
+        runs.forEach((run, idx) => {{
+          const heading = run.querySelector(':scope > h3');
+          if (!heading) return;
+
+          const body = document.createElement('div');
+          body.className = 'run-body';
+          while (heading.nextSibling) {{
+            body.appendChild(heading.nextSibling);
+          }}
+          run.appendChild(body);
+
+          const labelHtml = heading.innerHTML;
+          heading.innerHTML = '';
+
+          const toggle = document.createElement('button');
+          toggle.type = 'button';
+          toggle.className = 'run-toggle';
+          toggle.setAttribute('aria-expanded', 'false');
+          toggle.innerHTML = `<span>${{labelHtml}}</span><span class="run-caret">▾</span>`;
+          heading.appendChild(toggle);
+
+          if (idx === 0) {{
+            run.classList.add('is-open');
+            toggle.setAttribute('aria-expanded', 'true');
+          }}
+
+          toggle.addEventListener('click', () => {{
+            if (run.classList.contains('is-open')) return;
+            runs.forEach((other) => {{
+              const otherToggle = other.querySelector(':scope > h3 > .run-toggle');
+              if (!otherToggle) return;
+              other.classList.remove('is-open');
+              otherToggle.setAttribute('aria-expanded', 'false');
+            }});
+            run.classList.add('is-open');
+            toggle.setAttribute('aria-expanded', 'true');
+            run.scrollIntoView({{ behavior: 'smooth', block: 'start' }});
+          }});
+        }});
+      }}
     }})();
   </script>
 </body>
@@ -441,6 +491,7 @@ def main() -> int:
             for p in sorted([x for x in kb_dir.rglob('*.html') if x.is_file() and x.name.lower()!='index.html'], key=lambda x: x.name.lower())
         ]
     ) or "<tr><td colspan=\"3\">No KB snapshots.</td></tr>"
+    docs_hub = "<a href=\"index.html\">Docs Hub</a>"
     ladder = f"<a href=\"{_rel_path(ladder_idx, out.parent)}\">View Test Ladder</a>" if ladder_idx.exists() else ""
     cards = f"<a href=\"{_rel_path(cards_out, out.parent)}\">Progress Cards</a>" if cards_out.exists() else ""
     repo = f"<a href=\"{html.escape(a.repo_link)}\" target=\"_blank\" rel=\"noreferrer\">Repository</a>" if str(a.repo_link).strip() else ""
@@ -449,7 +500,7 @@ def main() -> int:
     :root{{--bg:#f6f8fb;--p:#fff;--i:#172336;--m:#607089;--b:#d8e0ea;--h:#f8fbff;--l:#0a62c6}} html[data-theme="dark"]{{--bg:#111821;--p:#1a2430;--i:#e8eef6;--m:#aab6c8;--b:#314152;--h:#212d3a;--l:#7bb6ff}} body{{margin:0;background:var(--bg);color:var(--i);font-family:Segoe UI,Arial,sans-serif}} .w{{max-width:1200px;margin:0 auto;padding:20px}} .t{{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}} .nav a,.nav button{{border:1px solid var(--b);background:var(--p);padding:7px 11px;border-radius:999px;color:var(--i);text-decoration:none;cursor:pointer}} .m{{color:var(--m);font-size:13px}} .p{{background:var(--p);border:1px solid var(--b);border-radius:12px;overflow:hidden;margin:12px 0}} .ph{{padding:10px 12px;border-bottom:1px solid var(--b);background:var(--h);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}} .c{{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr 1fr;gap:8px;padding:10px;border-bottom:1px solid var(--b)}} .c input,.c select{{border:1px solid var(--b);background:var(--p);color:var(--i);border-radius:8px;padding:7px}} table{{width:100%;border-collapse:collapse}} th,td{{padding:9px 11px;border-bottom:1px solid var(--b);font-size:13px;text-align:left;vertical-align:top}} th{{background:var(--h);color:var(--m)}} a{{color:var(--l);text-decoration:none}} a:hover{{text-decoration:underline}} .tw{{max-height:540px;overflow:auto}} .k{{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}} .s{{background:var(--p);border:1px solid var(--b);border-radius:10px;padding:8px 10px}} .s b{{font-size:20px}} .hint{{padding:8px 10px;color:var(--m);font-size:12px}}
     @media (max-width:900px){{.c{{grid-template-columns:1fr 1fr}}}} @media (max-width:620px){{.c{{grid-template-columns:1fr}}}}
     </style></head><body><div class="w">
-    <div class="t"><div><h1 style="margin:0">{a.title}</h1><div class="m">generated {dt.datetime.now(dt.timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')} | {stats} | <a href="{rp.relative_to(out.parent).as_posix()}">runs manifest</a> | <a href="{pp.relative_to(out.parent).as_posix()}">prompt versions</a></div></div><div class="nav">{ladder} {cards} {repo} <a href="#prompts">Prompt Evolution</a> <button id="theme">theme</button></div></div>
+    <div class="t"><div><h1 style="margin:0">{a.title}</h1><div class="m">generated {dt.datetime.now(dt.timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')} | {stats} | <a href="{rp.relative_to(out.parent).as_posix()}">runs manifest</a> | <a href="{pp.relative_to(out.parent).as_posix()}">prompt versions</a></div></div><div class="nav">{docs_hub} {ladder} {cards} {repo} <a href="#prompts">Prompt Evolution</a> <button id="theme">theme</button></div></div>
     <div class="k"><div class="s">Runs<br/><b>{len(runs)}</b></div><div class="s">Passed<br/><b>{pass_total}</b></div><div class="s">Pass Rate<br/><b>{int(_score(pass_total, len(runs))*100)}%</b></div><div class="s">Scenarios<br/><b>{len(set([r['scenario'] for r in runs]))}</b></div><div class="s">Prompts<br/><b>{len(prompts)}</b></div></div>
     <div class="p"><div class="ph"><b>Run Explorer</b><span id="count" class="m"></span></div><div class="c"><input id="q" placeholder="Search run/scenario/model/prompt..."/><select id="fstatus">{st_opts}</select><select id="fscenario">{s_opts}</select><select id="fmodel">{m_opts}</select><select id="fprompt">{p_opts}</select></div><div class="tw"><table><thead><tr><th>Finished</th><th>Scenario</th><th>KB</th><th>Backend/Model</th><th>Status</th><th>Validation</th><th>Prompt</th><th>Report</th><th>JSON</th></tr></thead><tbody id="runs">{run_rows}</tbody></table></div><div class="hint">Use prompt filter to compare the same rung across prompt versions.</div></div>
     <div id="prompts" class="p"><div class="ph"><b>Prompt Evolution</b></div><div class="tw"><table><thead><tr><th>Prompt ID</th><th>Runs</th><th>Pass %</th><th>Avg Validation %</th><th>Last Seen</th><th>Scenarios</th><th>Models</th><th>Action</th></tr></thead><tbody>{prompt_rows}</tbody></table></div></div>

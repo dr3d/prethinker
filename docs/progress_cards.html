@@ -21,7 +21,14 @@
     a { color:var(--link); text-decoration:none; }
     a:hover { text-decoration:underline; }
     .run { background:var(--panel); border:1px solid var(--border); border-radius:12px; margin-top:14px; overflow:hidden; }
-    .run h3 { margin:0; padding:12px 14px; border-bottom:1px solid var(--border); background:var(--head); font-size:16px; }
+    .run h3 { margin:0; border-bottom:1px solid var(--border); background:var(--head); font-size:16px; }
+    .run-toggle { width:100%; display:flex; align-items:center; justify-content:space-between; gap:10px; margin:0; padding:12px 14px; border:0; background:transparent; color:var(--ink); font:inherit; text-align:left; cursor:pointer; }
+    .run-toggle:hover { filter:brightness(1.02); }
+    .run-toggle:focus-visible { outline:2px solid var(--link); outline-offset:-2px; }
+    .run-caret { font-size:14px; color:var(--muted); transition:transform .15s ease; }
+    .run.is-open .run-caret { transform:rotate(180deg); }
+    .run-body { display:none; }
+    .run.is-open .run-body { display:block; }
     .chips { display:flex; flex-wrap:wrap; gap:8px; padding:12px 14px 0 14px; }
     .chip { border:1px solid var(--border); background:var(--panel); border-radius:999px; padding:5px 9px; font-size:12px; }
     .chip.ok { color:var(--ok); background:var(--okbg); border-color:transparent; }
@@ -41,7 +48,7 @@
     <div class="top">
       <div>
         <h1 style="margin:0">Progress Cards</h1>
-        <div class="small">Recent run cards showing utterance -> generated parse JSON, with quality dimensions. Generated 2026-04-10 15:34:34 UTC</div>
+        <div class="small">Recent run cards showing utterance -> generated parse JSON, with quality dimensions. Generated 2026-04-10 23:42:54 UTC</div>
       </div>
       <div class="nav"><a href="index.html">Back to Docs Index</a> <button id="theme">theme</button></div>
     </div>
@@ -2730,6 +2737,49 @@
         localStorage.setItem(key, next);
         sync();
       });
+
+      const runs = Array.from(document.querySelectorAll('section.run'));
+      if (runs.length > 0) {
+        runs.forEach((run, idx) => {
+          const heading = run.querySelector(':scope > h3');
+          if (!heading) return;
+
+          const body = document.createElement('div');
+          body.className = 'run-body';
+          while (heading.nextSibling) {
+            body.appendChild(heading.nextSibling);
+          }
+          run.appendChild(body);
+
+          const labelHtml = heading.innerHTML;
+          heading.innerHTML = '';
+
+          const toggle = document.createElement('button');
+          toggle.type = 'button';
+          toggle.className = 'run-toggle';
+          toggle.setAttribute('aria-expanded', 'false');
+          toggle.innerHTML = `<span>${labelHtml}</span><span class="run-caret">▾</span>`;
+          heading.appendChild(toggle);
+
+          if (idx === 0) {
+            run.classList.add('is-open');
+            toggle.setAttribute('aria-expanded', 'true');
+          }
+
+          toggle.addEventListener('click', () => {
+            if (run.classList.contains('is-open')) return;
+            runs.forEach((other) => {
+              const otherToggle = other.querySelector(':scope > h3 > .run-toggle');
+              if (!otherToggle) return;
+              other.classList.remove('is-open');
+              otherToggle.setAttribute('aria-expanded', 'false');
+            });
+            run.classList.add('is-open');
+            toggle.setAttribute('aria-expanded', 'true');
+            run.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          });
+        });
+      }
     })();
   </script>
 </body>

@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Semantic Parser Run: kb_positive (people_core)</title>
-  <meta name="description" content="Themed session transcript rendered from dialog__iu1w4yv.json." />
+  <meta name="description" content="Themed session transcript rendered from dialog_o1d0ow0x.json." />
   <style>
     :root {
       --bg: #e3ddd2;
@@ -422,6 +422,57 @@
     }
 
 
+
+    .step-card h2 {
+      margin: 0;
+      padding: 0;
+    }
+
+    .step-toggle {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      border: 0;
+      background: transparent;
+      color: var(--ink);
+      cursor: pointer;
+      font: inherit;
+      text-align: left;
+      padding: 0;
+    }
+
+    .step-toggle:hover {
+      filter: brightness(1.02);
+    }
+
+    .step-toggle:focus-visible {
+      outline: 2px solid var(--copy-border);
+      outline-offset: 2px;
+      border-radius: 6px;
+    }
+
+    .step-caret {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1;
+      transition: transform .15s ease;
+      transform-origin: 50% 50%;
+    }
+
+    .step-card.is-open .step-caret {
+      transform: rotate(180deg);
+    }
+
+    .step-body {
+      display: none;
+      margin-top: 12px;
+    }
+
+    .step-card.is-open .step-body {
+      display: block;
+    }
   </style>
 </head>
 <body data-skin="standard">
@@ -436,7 +487,7 @@
         </div>
       </div>
     </div>
-    <div class="meta">Captured: 2026-04-10T15:08:39+00:00 | Model: qwen3.5:9b | Integration: ollama | Initial skin: standard | Rendered: 2026-04-10 15:08:39 UTC</div>
+    <div class="meta">Captured: 2026-04-10T23:42:14+00:00 | Model: qwen3.5:9b | Integration: ollama | Initial skin: standard | Rendered: 2026-04-10 23:42:14 UTC</div>
     <section class="step-card"><h2>run_context</h2><div class="bubble user"><div class="bubble-head"><div class="label">User</div><button class="copy-btn" data-copy="Capture run provenance and prompt/version settings for reproducibility." data-label="copy" data-success-label="copied" data-failure-label="copy-failed">copy</button></div><pre>Capture run provenance and prompt/version settings for reproducibility.</pre></div><details class="toolbox tool-expando"><summary><span>tool calls</span><span class="expando-count">0</span></summary><p class="tool-list">No tool calls captured.</p></details><div class="bubble assistant"><div class="bubble-head"><div class="label">Assistant</div><button class="copy-btn" data-copy="{
   &quot;run_id&quot;: null,
   &quot;run_started_utc&quot;: null,
@@ -756,7 +807,7 @@ reasons=none</pre></div></div></section>
       const appearanceToggle = document.getElementById("appearance-toggle");
       const skinStyle = document.querySelector("head style");
       const skinMapNode = document.getElementById("skin-css-map");
-      const appearanceStorageKey = "dialog_appearance_pref_dialog__iu1w4yv";
+      const appearanceStorageKey = "dialog_appearance_pref_dialog_o1d0ow0x";
       const defaultSkin = "standard";
       const skinOrder = ["standard", "telegram", "imessage"];
 
@@ -845,6 +896,53 @@ reasons=none</pre></div></div></section>
             button.textContent = idle;
             button.classList.remove("copied");
           }, 1200);
+        });
+      }
+
+      const stepCards = Array.from(document.querySelectorAll(".step-card"));
+      if (stepCards.length > 0) {
+        stepCards.forEach((card, idx) => {
+          const heading = card.querySelector(":scope > h2");
+          if (!heading) {
+            return;
+          }
+          const headingHtml = heading.innerHTML;
+          heading.innerHTML = "";
+
+          const body = document.createElement("div");
+          body.className = "step-body";
+          while (heading.nextSibling) {
+            body.appendChild(heading.nextSibling);
+          }
+          card.appendChild(body);
+
+          const toggle = document.createElement("button");
+          toggle.type = "button";
+          toggle.className = "step-toggle";
+          toggle.setAttribute("aria-expanded", "false");
+          toggle.innerHTML = `<span>${headingHtml}</span><span class="step-caret">▾</span>`;
+          heading.appendChild(toggle);
+
+          if (idx === 0) {
+            card.classList.add("is-open");
+            toggle.setAttribute("aria-expanded", "true");
+          }
+
+          toggle.addEventListener("click", () => {
+            if (card.classList.contains("is-open")) {
+              return;
+            }
+            stepCards.forEach((other) => {
+              const otherToggle = other.querySelector(":scope > h2 > .step-toggle");
+              other.classList.remove("is-open");
+              if (otherToggle) {
+                otherToggle.setAttribute("aria-expanded", "false");
+              }
+            });
+            card.classList.add("is-open");
+            toggle.setAttribute("aria-expanded", "true");
+            card.scrollIntoView({ behavior: "smooth", block: "start" });
+          });
         });
       }
     })();

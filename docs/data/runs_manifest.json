@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-04-10T15:34:34+00:00",
+  "generated_at_utc": "2026-04-10T23:42:54+00:00",
   "runs_total": 32,
   "runs": [
     {
@@ -153,7 +153,7 @@
       "prompt_sha256": "863b8b26402b93155a1f5c93f49c6fa8960310dfa8ceb13ed096e7531b15be14",
       "prompt_snapshot_rel": "prompts/sp-863b8b26402b.md",
       "report_json_rel": "data/runs/stage_01_core_ollama_20260409_221357.json",
-      "report_html_rel": ""
+      "report_html_rel": "reports/stage_01_core_ollama_20260409_221357.html"
     },
     {
       "run_id": "run-20260409T235652Z-acid_05_long_context_lin-qwen3_5_9b-27592",
@@ -170,7 +170,7 @@
       "prompt_sha256": "22ad8a6264f6661716a1fc9cf5d983feaa218b029386533f318b07c2ee5e733d",
       "prompt_snapshot_rel": "prompts/sp-22ad8a6264f6.md",
       "report_json_rel": "data/runs/ladder_c3_acid_05.json",
-      "report_html_rel": ""
+      "report_html_rel": "reports/ladder_c3_acid_05.html"
     },
     {
       "run_id": "run-20260409T235600Z-stage_03_transitive_chai-qwen3_5_9b-40692",
@@ -187,7 +187,7 @@
       "prompt_sha256": "22ad8a6264f6661716a1fc9cf5d983feaa218b029386533f318b07c2ee5e733d",
       "prompt_snapshot_rel": "prompts/sp-22ad8a6264f6.md",
       "report_json_rel": "data/runs/ladder_c3_stage_03.json",
-      "report_html_rel": ""
+      "report_html_rel": "reports/ladder_c3_stage_03.html"
     },
     {
       "run_id": "run-20260409T235419Z-stage_02_rule_ingest-qwen3_5_9b-38516",
@@ -204,7 +204,7 @@
       "prompt_sha256": "22ad8a6264f6661716a1fc9cf5d983feaa218b029386533f318b07c2ee5e733d",
       "prompt_snapshot_rel": "prompts/sp-22ad8a6264f6.md",
       "report_json_rel": "data/runs/ladder_c3_stage_02.json",
-      "report_html_rel": ""
+      "report_html_rel": "reports/ladder_c3_stage_02.html"
     },
     {
       "run_id": "run-20260409T235318Z-stage_01_facts_only-qwen3_5_9b-37636",
@@ -221,7 +221,7 @@
       "prompt_sha256": "22ad8a6264f6661716a1fc9cf5d983feaa218b029386533f318b07c2ee5e733d",
       "prompt_snapshot_rel": "prompts/sp-22ad8a6264f6.md",
       "report_json_rel": "data/runs/ladder_c3_stage_01.json",
-      "report_html_rel": ""
+      "report_html_rel": "reports/ladder_c3_stage_01.html"
     },
     {
       "run_id": "run-20260409T234231Z-stage_02_rule_ingest-qwen3_5_9b-12460",
@@ -238,7 +238,7 @@
       "prompt_sha256": "3f2c7de3ecadaefc448752d4bb200c6521158a16375eff7bd7dc8c04fff1bb2f",
       "prompt_snapshot_rel": "prompts/sp-3f2c7de3ecad.md",
       "report_json_rel": "data/runs/ladder_c2_stage_02.json",
-      "report_html_rel": ""
+      "report_html_rel": "reports/ladder_c2_stage_02.html"
     },
     {
       "run_id": "run-20260409T234056Z-stage_01_facts_only-qwen3_5_9b-31428",
@@ -255,7 +255,7 @@
       "prompt_sha256": "3f2c7de3ecadaefc448752d4bb200c6521158a16375eff7bd7dc8c04fff1bb2f",
       "prompt_snapshot_rel": "prompts/sp-3f2c7de3ecad.md",
       "report_json_rel": "data/runs/ladder_c2_stage_01.json",
-      "report_html_rel": ""
+      "report_html_rel": "reports/ladder_c2_stage_01.html"
     },
     {
       "run_id": "run-20260409T221315Z-stage_02_rule_ingest-qwen3_5_9b-32700",
@@ -272,7 +272,7 @@
       "prompt_sha256": "1fb66325fca590012493504cf9937e4e13e69401d141edae7972e7ac48646a7e",
       "prompt_snapshot_rel": "prompts/sp-1fb66325fca5.md",
       "report_json_rel": "data/runs/ladder_c1_stage_02.json",
-      "report_html_rel": ""
+      "report_html_rel": "reports/ladder_c1_stage_02.html"
     },
     {
       "run_id": "run-20260409T221128Z-stage_01_facts_only-qwen3_5_9b-32384",
@@ -289,7 +289,7 @@
       "prompt_sha256": "1fb66325fca590012493504cf9937e4e13e69401d141edae7972e7ac48646a7e",
       "prompt_snapshot_rel": "prompts/sp-1fb66325fca5.md",
       "report_json_rel": "data/runs/ladder_c1_stage_01.json",
-      "report_html_rel": ""
+      "report_html_rel": "reports/ladder_c1_stage_01.html"
     },
     {
       "run_id": "legacy-stage_02_people_ladder_v4_split",
