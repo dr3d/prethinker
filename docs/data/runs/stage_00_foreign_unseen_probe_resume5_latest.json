@@ -1,0 +1,909 @@
+{
+  "run_id": "run-20260410T142508Z-stage_00_foreign_unseen_-qwen3_5_9b-28928",
+  "run_started_utc": "2026-04-10T14:25:08+00:00",
+  "run_finished_utc": "2026-04-10T14:27:04+00:00",
+  "invocation": {
+    "argv": [
+      "kb_pipeline.py",
+      "--scenario",
+      "kb_scenarios/stage_00_foreign_unseen_probe.json",
+      "--backend",
+      "ollama",
+      "--model",
+      "qwen3.5:9b",
+      "--context-length",
+      "8192",
+      "--runtime",
+      "core",
+      "--kb-root",
+      "tmp/kb_store",
+      "--prompt-file",
+      "modelfiles/semantic_parser_system_prompt.md",
+      "--prompt-history-dir",
+      "tmp/prompt_history",
+      "--clarification-eagerness",
+      "0.75",
+      "--max-clarification-rounds",
+      "3",
+      "--clarification-answer-model",
+      "gpt-oss:20b",
+      "--clarification-answer-backend",
+      "ollama",
+      "--clarification-answer-context-length",
+      "16384",
+      "--out",
+      "tmp/runs/stage_00_foreign_unseen_probe_resume5_20260410_102508.json"
+    ],
+    "cwd": "D:\\_PROJECTS\\prethinker"
+  },
+  "scenario": "stage_00_foreign_unseen_probe",
+  "scenario_path": "D:\\_PROJECTS\\prethinker\\kb_scenarios\\stage_00_foreign_unseen_probe.json",
+  "ontology_kb_name": "foreign_unseen_probe",
+  "kb_namespace": {
+    "kb_root": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store",
+    "kb_dir": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store\\foreign_unseen_probe",
+    "corpus_path": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store\\foreign_unseen_probe\\kb.pl",
+    "profile_path": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store\\foreign_unseen_probe\\ontology_profile.json",
+    "ontology_index_path": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store\\ontologies_index.json"
+  },
+  "backend": "ollama",
+  "base_url": "http://127.0.0.1:11434",
+  "model": "qwen3.5:9b",
+  "runtime": "core",
+  "two_pass": true,
+  "split_extraction": true,
+  "model_settings": {
+    "temperature": 0,
+    "context_length": 8192,
+    "classifier_context_length": 2048,
+    "timeout_seconds": 120,
+    "runtime": "core",
+    "two_pass": true,
+    "split_extraction": true,
+    "strict_registry": false,
+    "strict_types": false,
+    "clarification_eagerness": 0.75,
+    "max_clarification_rounds": 3,
+    "clarification_auto_answer_enabled": true,
+    "clarification_answer_backend": "ollama",
+    "clarification_answer_base_url": "http://127.0.0.1:11434",
+    "clarification_answer_model": "gpt-oss:20b",
+    "clarification_answer_context_length": 16384,
+    "backend_options": {
+      "num_ctx": 8192
+    }
+  },
+  "prompt_file": "D:\\_PROJECTS\\prethinker\\modelfiles\\semantic_parser_system_prompt.md",
+  "prompt_file_loaded": true,
+  "env_file_loaded": "D:\\_PROJECTS\\prethinker\\.env.local",
+  "prompt_provenance": {
+    "status": "ok",
+    "prompt_id": "sp-e0a66d9a2fbe",
+    "prompt_sha256": "e0a66d9a2fbeb5870371ba189583f50de15cdfab6df7a16ef5c9143bc133f6f7",
+    "source_path": "D:\\_PROJECTS\\prethinker\\modelfiles\\semantic_parser_system_prompt.md",
+    "snapshot_path": "D:\\_PROJECTS\\prethinker\\tmp\\prompt_history\\sp-e0a66d9a2fbe.md",
+    "snapshot_created": false,
+    "char_count": 8524,
+    "line_count": 195,
+    "preview": "# Semantic Parser Prompt Pack (Qwen 3.5 9B)\nUse this as maintainable guidance for semantic parsing into Prolog structures.\nKeep behavior language-agnostic, deterministic, and schema-strict.\n## Core Priorities\n1. Output exactly one JSON object that matches the required schema.\n2. Preserve semantic meaning; do not hallucinate entities, facts, or arguments.\n3. Prefer canonical, stable predicate names across turns when semantics match.\n4. Use variables instead of assumptions when referents are unresolved."
+  },
+  "system_prompt_text": "# Semantic Parser Prompt Pack (Qwen 3.5 9B)\n\nUse this as maintainable guidance for semantic parsing into Prolog structures.\nKeep behavior language-agnostic, deterministic, and schema-strict.\n\n## Core Priorities\n\n1. Output exactly one JSON object that matches the required schema.\n2. Preserve semantic meaning; do not hallucinate entities, facts, or arguments.\n3. Prefer canonical, stable predicate names across turns when semantics match.\n4. Use variables instead of assumptions when referents are unresolved.\n5. Keep rationale brief and factual.\n\n## Intent Routing Guidance\n\n- `assert_fact`: declarative claims.\n- `assert_rule`: if/then, whenever, conditional, implication.\n- `query`: questions seeking truth or bindings.\n- `retract`: explicit correction/remove/retract/undo.\n- `other`: out-of-scope tasks (translation, formatting, rewrite).\n- Any interrogative utterance (including non-English) should default to `query` unless it explicitly commands a write action.\n\n## Prolog Mapping Guidance\n\n- Atoms: lowercase snake_case.\n- Variables: Uppercase identifiers.\n- Facts: `predicate(atom, ...).`\n- Rules: `head(...) :- body(...).`\n- Queries: goal with trailing period and no `?-` prefix.\n- Retractions: `retract(<fact>).`\n- Do not emit zero-arity forms like `policy_revoked.`\n- Always include explicit arguments in facts/rules/queries.\n- For yes/no questions, output a query predicate with explicit arguments (or variables), never a bare atom.\n- If required query arguments are unknown, use variables and raise clarification instead of emitting malformed or zero-arity query goals.\n- For `retract`, the inner target must be a fact-like term with explicit arguments (example: `retract(parent(alice,bob)).`).\n- Never emit malformed retractions like `retract(policy_revoked).` with no arguments.\n\n## Relation and Argument Discipline\n\n- For forms like `<subject> is <relation> of <object>`, map to `relation(subject, object).`\n- Keep argument order aligned to semantic subject/object roles.\n- Avoid predicate synonym drift when an ontology already uses a compatible predicate.\n- Do not reverse argument order for \"A is a relation of B\" statements.\n- Example: \"Bob is a parent of Carol.\" -> `parent(bob, carol).` (never `parent(carol, bob).`)\n- Example: \"Carol is an ancestor of Dana.\" -> `ancestor(carol, dana).`\n- If direction is genuinely unclear, use clarification rather than guessing.\n\n## Predicate Discipline\n\n- Reuse the ontology's existing canonical predicate names whenever semantics match.\n- If runtime constraints include a predicate registry, prefer registry canonical names over aliases.\n- Do not silently create near-duplicate predicates (example: `father_of` and `father` for same meaning).\n- If predicate choice is ambiguous and unsafe, raise uncertainty and ask a focused clarification question.\n- Keep lexical consistency across assertion and retraction turns (same concept -> same predicate form).\n\n## Transitive Rule Readiness\n\nWhen utterances express chain logic, emit explicit compositional rules with shared variables.\nPrefer termination-safe recursion patterns over left-recursive forms.\n\nPreferred pattern when a base relation exists:\n\n- `ancestor(X, Z) :- parent(X, Z).`\n- `ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).`\n\nAvoid left-recursive forms that put the head predicate first in the body, such as:\n\n- `ancestor(X, Z) :- ancestor(X, Y), ancestor(Y, Z).`\n- `depends_on(X, Z) :- depends_on(X, Y), depends_on(Y, Z).`\n\nOnly emit such rules when the utterance semantically indicates transitivity or chained implication.\n\n## Termination Safety Constraints (Mandatory)\n\n- Never place the same predicate as the head predicate in the first body literal.\n- If a rule would be left-recursive, rewrite it to a base-relation recursion pattern.\n- For ancestor semantics, prefer this canonical pair:\n  - `ancestor(X, Y) :- parent(X, Y).`\n  - `ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).`\n- For utterances like \"If X is an ancestor of Y and Y is an ancestor of Z then X is an ancestor of Z.\",\n  do not emit `ancestor(X, Z) :- ancestor(X, Y), ancestor(Y, Z).`\n  Instead emit `ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).` when parent relation exists.\n\n## Ambiguity Handling\n\n- If pronouns or entities are unresolved, set `needs_clarification=true`.\n- Use variables rather than invented atoms.\n- Keep ambiguities list short and concrete.\n\n## Uncertainty Scoring Rubric\n\n- 0.00-0.20: clear statement, explicit entities/roles, deterministic mapping.\n- 0.30-0.55: mild ambiguity but safe provisional parse exists.\n- 0.60-0.79: unresolved referent, role-direction ambiguity, or predicate-choice ambiguity.\n- 0.80-1.00: missing required argument, contradictory interpretation, or likely hallucination risk.\n- Unknown pronoun/referent should usually be >= 0.70.\n- Missing essential argument should usually be >= 0.85.\n- If uncertainty >= 0.60 for write intents (`assert_fact`, `assert_rule`, `retract`), prefer clarification.\n\n## Uncertainty And Clarification Contract\n\n- Always emit:\n  - `uncertainty_score` in `[0,1]` where `1` means very uncertain.\n  - `uncertainty_label` as `low | medium | high`.\n  - `clarification_reason` with concrete wording (<= 12 words).\n  - `clarification_question` ending with `?` when uncertainty is non-trivial.\n- If uncertainty is high enough to block safe write intent, set `needs_clarification=true`.\n- Clarification questions should target missing entities, relation direction, or correction target.\n\n## Clarification Question Style\n\n- Ask one focused question at a time.\n- Prefer disambiguation over open-ended chat.\n- Good: \"Do you mean `parent(alex, sam)` or `parent(sam, alex)`?\"\n- Good: \"Who does 'he' refer to in this statement?\"\n\n## Anti-Patterns To Avoid\n\n- Do not invent entities, relations, or arguments not grounded in the utterance/context.\n- Do not collapse unresolved pronouns into a guessed atom.\n- Do not emit left-recursive transitive rules.\n- Do not emit malformed JSON, markdown, or extra wrapper text.\n- Do not switch predicate naming style mid-run without semantic reason.\n- Do not flip subject/object argument order for copular relation statements.\n- Do not wrap entities as nested terms in simple unary facts (avoid `valid(agent(a4)).`).\n- Do not emit bare query atoms like `policy_revoked.` or `revoke_double_approval.`.\n- Do not emit bare retract targets like `retract(compliance_rule).`.\n\n## Few-Shot Micro-Patterns\n\n- Fact mapping:\n  - NL: \"Alice is a parent of Bob.\"\n  - Route: `assert_fact`\n  - Logic: `parent(alice, bob).`\n\n- Directionality check:\n  - NL: \"Bob is a parent of Carol.\"\n  - Route: `assert_fact`\n  - Logic: `parent(bob, carol).`\n\n- Unary adjective/state mapping:\n  - NL: \"Agent a4 is valid.\"\n  - Route: `assert_fact`\n  - Logic: `valid(a4).`\n  - Avoid: `valid(agent(a4)).`\n\n- Attribute possession consistency:\n  - NL: \"Agent a3 has override.\"\n  - Route: `assert_fact`\n  - Logic: `has_override(a3).`\n  - If later utterance says `retract(has_override(a3)).`, it must target the same predicate name.\n\n- Rule mapping:\n  - NL: \"If X is a parent of Y then X is an ancestor of Y.\"\n  - Route: `assert_rule`\n  - Logic: `ancestor(X, Y) :- parent(X, Y).`\n\n- Safe transitive recursion:\n  - NL: \"If X is an ancestor of Y and Y is an ancestor of Z then X is an ancestor of Z.\"\n  - Route: `assert_rule`\n  - Logic: `ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).`\n\n- Quantifier to rule:\n  - NL: \"Every parent of a child is a guardian of that child.\"\n  - Route: `assert_rule`\n  - Logic: `guardian(X, Y) :- parent(X, Y).`\n\n- Explicit correction/retraction:\n  - NL: \"Actually, retract that: parent(alice, bob).\"\n  - Route: `retract`\n  - Logic: `retract(parent(alice, bob)).`\n\n- Ambiguous undo/retract:\n  - NL: \"Actually undo that last compliance rule.\"\n  - Route: `retract`\n  - Logic: `retract(compliance_rule(X)).`\n  - Set `needs_clarification=true` and ask which specific rule instance should be retracted.\n\n- Yes/no status query:\n  - NL: \"Did we cancel the double-approval condition for large payments?\"\n  - Route: `query`\n  - Logic: `double_approval_required(large_payments).`\n  - If uncertain about canonical predicate name, set `needs_clarification=true` and ask for predicate confirmation.\n\n- Unresolved pronoun -> clarification:\n  - NL: \"He is a parent of Bob.\"\n  - Route: `assert_fact`\n  - Suggested parse: `parent(X, bob).`\n  - `needs_clarification`: `true`\n  - Clarification: \"Who does 'he' refer to?\"\n\n- Negation as correction intent:\n  - NL: \"Alice is not a parent of Bob.\"\n  - Route: `retract`\n  - Logic: `retract(parent(alice, bob)).`",
+  "kb_runtime_boot_path": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store\\foreign_unseen_probe\\kb.pl",
+  "kb_init": {
+    "status": "skipped",
+    "result_type": "not_called",
+    "message": "Existing ontology retained; empty_kb() not invoked.",
+    "knowledge_base_path": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store\\foreign_unseen_probe\\kb.pl"
+  },
+  "corpus_load": {
+    "status": "success",
+    "loaded_total": 2,
+    "loaded_facts": 2,
+    "loaded_rules": 0,
+    "skipped_total": 0,
+    "failed_total": 0,
+    "errors": []
+  },
+  "corpus_write": {
+    "path": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store\\foreign_unseen_probe\\kb.pl",
+    "clause_count": 5,
+    "status": "written"
+  },
+  "profile_write": {
+    "status": "written",
+    "path": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store\\foreign_unseen_probe\\ontology_profile.json",
+    "predicate_signature_count": 5
+  },
+  "index_write": {
+    "status": "written",
+    "path": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store\\ontologies_index.json",
+    "ontology_count": 6
+  },
+  "ontology_profile": {
+    "ontology_name": "foreign_unseen_probe",
+    "generated_at_utc": "2026-04-10T14:27:04+00:00",
+    "clause_count": 5,
+    "predicate_signatures": [
+      "avoid/2",
+      "recognizes_deferred_revenue/1",
+      "recognizes_deferred_revenue/2",
+      "report_within_24_hours/1",
+      "suspicion/1"
+    ],
+    "fact_predicates": [
+      "avoid/2",
+      "recognizes_deferred_revenue/1",
+      "recognizes_deferred_revenue/2",
+      "report_within_24_hours/1"
+    ],
+    "rule_head_predicates": [
+      "report_within_24_hours/1"
+    ],
+    "rule_body_predicates": [
+      "suspicion/1"
+    ]
+  },
+  "ontology_previous_profile": {
+    "ontology_name": "foreign_unseen_probe",
+    "generated_at_utc": "2026-04-10T14:23:22+00:00",
+    "clause_count": 2,
+    "predicate_signatures": [
+      "recognizes_deferred_revenue/2",
+      "report_within_24_hours/1"
+    ],
+    "fact_predicates": [
+      "recognizes_deferred_revenue/2",
+      "report_within_24_hours/1"
+    ],
+    "rule_head_predicates": [],
+    "rule_body_predicates": []
+  },
+  "ontology_diff": {
+    "change_level": "major",
+    "requires_confirmation": true,
+    "similarity_to_previous": 0.4,
+    "added_signatures": [
+      "avoid/2",
+      "recognizes_deferred_revenue/1",
+      "suspicion/1"
+    ],
+    "removed_signatures": [],
+    "previous_signature_count": 2,
+    "current_signature_count": 5
+  },
+  "known_ontology_matches": [
+    {
+      "ontology_name": "multilingual_probe",
+      "similarity": 0.0,
+      "shared_signatures": [],
+      "other_signature_count": 1
+    },
+    {
+      "ontology_name": "people_stage",
+      "similarity": 0.0,
+      "shared_signatures": [],
+      "other_signature_count": 4
+    },
+    {
+      "ontology_name": "acid_temporal",
+      "similarity": 0.0,
+      "shared_signatures": [],
+      "other_signature_count": 7
+    },
+    {
+      "ontology_name": "acid_alias",
+      "similarity": 0.0,
+      "shared_signatures": [],
+      "other_signature_count": 3
+    },
+    {
+      "ontology_name": "acid_lineage",
+      "similarity": 0.0,
+      "shared_signatures": [],
+      "other_signature_count": 3
+    }
+  ],
+  "gear_change": {
+    "change_level": "major",
+    "detected": true,
+    "requires_confirmation": true
+  },
+  "turns_total": 8,
+  "turn_parse_failures": 0,
+  "turn_apply_failures": 0,
+  "turns_clarification_requested": 4,
+  "clarification_rounds_total": 5,
+  "clarification_synthetic_answers_total": 5,
+  "validation_total": 0,
+  "validation_passed": 0,
+  "overall_status": "passed",
+  "turns": [
+    {
+      "turn_index": 1,
+      "utterance": "En cumplimiento de la norma IFRS, la subsidiaria Alfa reconoce ingresos diferidos.",
+      "route": "assert_fact",
+      "route_source": "model",
+      "repaired": false,
+      "fallback_used": false,
+      "alignment_events": [],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "assert_fact",
+        "logic_string": "recognizes_deferred_revenue(alfa).",
+        "components": {
+          "atoms": [
+            "alfa"
+          ],
+          "variables": [],
+          "predicates": [
+            "recognizes_deferred_revenue"
+          ]
+        },
+        "facts": [
+          "recognizes_deferred_revenue(alfa)."
+        ],
+        "rules": [],
+        "queries": [],
+        "confidence": {
+          "overall": 0.95,
+          "intent": 0.95,
+          "logic": 0.95
+        },
+        "ambiguities": [],
+        "needs_clarification": false,
+        "uncertainty_score": 0.05,
+        "uncertainty_label": "low",
+        "clarification_question": "Can you clarify this point before I apply it: The utterance explicitly states that subsidiary Alfa recognizes deferred revenue in compliance?",
+        "clarification_reason": "The utterance explicitly states that subsidiary Alfa recognizes deferred revenue in compliance",
+        "rationale": "The utterance explicitly states that subsidiary Alfa recognizes deferred revenue in compliance with IFRS. This maps directly to the ontology predicate 'recognizes_deferred_revenue' with the argument 'alfa'. No ambiguity exists regarding the entity or the action."
+      },
+      "validation_errors": [],
+      "clarification_rounds": [],
+      "clarification_rounds_used": 0,
+      "clarification_max_rounds": 3,
+      "clarification_answers_available": 0,
+      "clarification_answers_used": 0,
+      "clarification_scripted_answers_used": 0,
+      "clarification_synthetic_answers_used": 0,
+      "clarification_policy": {
+        "clarification_eagerness": 0.75,
+        "uncertainty_score": 0.05,
+        "effective_uncertainty": 0.05,
+        "threshold": 0.25,
+        "request_clarification": false,
+        "needs_clarification_flag": false
+      },
+      "clarification_pending": false,
+      "clarification_pending_reason": "",
+      "clarification_question": "Can you clarify this point before I apply it: The utterance explicitly states that subsidiary Alfa recognizes deferred revenue in compliance?",
+      "apply": {
+        "tool": "assert_fact",
+        "input": "recognizes_deferred_revenue(alfa).",
+        "result": {
+          "status": "success",
+          "result_type": "fact_asserted",
+          "fact": "recognizes_deferred_revenue(alfa)."
+        }
+      },
+      "apply_status": "success"
+    },
+    {
+      "turn_index": 2,
+      "utterance": "Le patient presente une insuffisance renale moderee; eviter l'ibuprofene.",
+      "route": "assert_fact",
+      "route_source": "model",
+      "repaired": false,
+      "fallback_used": false,
+      "alignment_events": [],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "assert_fact",
+        "logic_string": "avoid(patient_with_moderate_renal_insufficiency, ibuprofene).",
+        "components": {
+          "atoms": [
+            "ibuprofene",
+            "patient_with_moderate_renal_insufficiency"
+          ],
+          "variables": [],
+          "predicates": [
+            "avoid"
+          ]
+        },
+        "facts": [
+          "avoid(patient_with_moderate_renal_insufficiency, ibuprofene)."
+        ],
+        "rules": [],
+        "queries": [],
+        "confidence": {
+          "overall": 0.95,
+          "intent": 1.0,
+          "logic": 0.95
+        },
+        "ambiguities": [],
+        "needs_clarification": false,
+        "uncertainty_score": 0.15,
+        "uncertainty_label": "low",
+        "clarification_question": "Can you clarify this point before I apply it: Parsed as a declarative medical instruction. Patient identity resolved to variable per?",
+        "clarification_reason": "Parsed as a declarative medical instruction. Patient identity resolved to variable per",
+        "rationale": "Parsed as a declarative medical instruction. Patient identity resolved to variable per clarification transcript. Predicate 'avoid' used as generic per clarification transcript. Argument order follows subject (patient) -> object (drug)."
+      },
+      "validation_errors": [],
+      "clarification_rounds": [
+        {
+          "round": 1,
+          "question": "Which patient does this statement refer to?",
+          "answer": "the patient with moderate renal insufficiency",
+          "answer_source": "synthetic_model",
+          "answer_confidence": 0.9,
+          "answer_assumption": "refers to the patient mentioned",
+          "uncertainty_score": 0.65,
+          "effective_uncertainty": 0.82,
+          "threshold": 0.25
+        },
+        {
+          "round": 2,
+          "question": "Can you clarify this detail: Canonical predicate name for 'avoid' is not in the provided ontology registry; using generic 'avoid'?",
+          "answer": "We use generic 'avoid' as the specific predicate is missing.",
+          "answer_source": "synthetic_model",
+          "answer_confidence": 0.95,
+          "answer_assumption": "Ontology lacks specific 'avoid' predicate.",
+          "uncertainty_score": 0.15,
+          "effective_uncertainty": 0.55,
+          "threshold": 0.25
+        },
+        {
+          "round": 3,
+          "question": "Can you clarify this detail: Patient identity is resolved to a variable term based on clarification transcript?",
+          "answer": "Yes, patient is resolved to variable patient_with_moderate_renal_insufficiency.",
+          "answer_source": "synthetic_model",
+          "answer_confidence": 0.95,
+          "answer_assumption": "Based on clarification transcript.",
+          "uncertainty_score": 0.15,
+          "effective_uncertainty": 0.55,
+          "threshold": 0.25
+        }
+      ],
+      "clarification_rounds_used": 3,
+      "clarification_max_rounds": 3,
+      "clarification_answers_available": 0,
+      "clarification_answers_used": 0,
+      "clarification_scripted_answers_used": 0,
+      "clarification_synthetic_answers_used": 3,
+      "clarification_policy": {
+        "clarification_eagerness": 0.75,
+        "uncertainty_score": 0.15,
+        "effective_uncertainty": 0.15,
+        "threshold": 0.25,
+        "request_clarification": false,
+        "needs_clarification_flag": false
+      },
+      "clarification_pending": false,
+      "clarification_pending_reason": "",
+      "clarification_question": "Can you clarify this point before I apply it: Parsed as a declarative medical instruction. Patient identity resolved to variable per?",
+      "apply": {
+        "tool": "assert_fact",
+        "input": "avoid(patient_with_moderate_renal_insufficiency, ibuprofene).",
+        "result": {
+          "status": "success",
+          "result_type": "fact_asserted",
+          "fact": "avoid(patient_with_moderate_renal_insufficiency, ibuprofene)."
+        }
+      },
+      "apply_status": "success"
+    },
+    {
+      "turn_index": 3,
+      "utterance": "\u5982\u679c\u5ba2\u6237\u8fde\u7eed\u4e09\u4e2a\u6708\u903e\u671f\u4ed8\u6b3e\uff0c\u5e94\u5c06\u5176\u98ce\u9669\u7b49\u7ea7\u4e0a\u8c03\u4e00\u7ea7\u3002",
+      "route": "assert_rule",
+      "route_source": "model",
+      "repaired": false,
+      "fallback_used": false,
+      "alignment_events": [],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "assert_rule",
+        "logic_string": "risk_level_up(X, Y) :- overdue_payment(X, Month1), overdue_payment(X, Month2), overdue_payment(X, Month3), Month2 is Month1 + 1, Month3 is Month2 + 1, Y is risk_level(X) + 1.",
+        "components": {
+          "atoms": [
+            "is"
+          ],
+          "variables": [
+            "Month1",
+            "Month2",
+            "Month3",
+            "X",
+            "Y"
+          ],
+          "predicates": [
+            "overdue_payment",
+            "risk_level",
+            "risk_level_up"
+          ]
+        },
+        "facts": [],
+        "rules": [
+          "risk_level_up(X, Y) :- overdue_payment(X, Month1), overdue_payment(X, Month2), overdue_payment(X, Month3), Month2 is Month1 + 1, Month3 is Month2 + 1, Y is risk_level(X) + 1."
+        ],
+        "queries": [],
+        "confidence": {
+          "overall": 0.85,
+          "intent": 0.95,
+          "logic": 0.85
+        },
+        "ambiguities": [
+          "risk_level_up",
+          "overdue_payment",
+          "risk_level"
+        ],
+        "needs_clarification": true,
+        "uncertainty_score": 0.65,
+        "uncertainty_label": "medium",
+        "clarification_question": "What are the canonical predicate names for 'risk level', 'overdue payment', and the action 'upgrade risk level'?",
+        "clarification_reason": "Ontology predicates for risk and payment status are unknown.",
+        "rationale": "The utterance expresses a conditional rule (if-then) involving a temporal sequence (three consecutive months). Since canonical predicate names are not provided in the context, variables and placeholder predicates are used. The rule requires clarification on specific ontology terms to ensure schema strictness."
+      },
+      "validation_errors": [],
+      "clarification_rounds": [],
+      "clarification_rounds_used": 0,
+      "clarification_max_rounds": 3,
+      "clarification_answers_available": 0,
+      "clarification_answers_used": 0,
+      "clarification_scripted_answers_used": 0,
+      "clarification_synthetic_answers_used": 0,
+      "clarification_policy": {
+        "clarification_eagerness": 0.75,
+        "uncertainty_score": 0.65,
+        "effective_uncertainty": 0.82,
+        "threshold": 0.25,
+        "request_clarification": true,
+        "needs_clarification_flag": true
+      },
+      "clarification_pending": true,
+      "clarification_pending_reason": "Clarification answer model returned non-informative answer; KB apply deferred.",
+      "clarification_question": "What are the canonical predicate names for 'risk level', 'overdue payment', and the action 'upgrade risk level'?",
+      "apply": {
+        "tool": "none",
+        "input": {
+          "clarification_question": "What are the canonical predicate names for 'risk level', 'overdue payment', and the action 'upgrade risk level'?",
+          "clarification_rounds_used": 0
+        },
+        "result": {
+          "status": "clarification_requested",
+          "message": "Clarification answer model returned non-informative answer; KB apply deferred.",
+          "clarification_question": "What are the canonical predicate names for 'risk level', 'overdue payment', and the action 'upgrade risk level'?",
+          "clarification_policy": {
+            "clarification_eagerness": 0.75,
+            "uncertainty_score": 0.65,
+            "effective_uncertainty": 0.82,
+            "threshold": 0.25,
+            "request_clarification": true,
+            "needs_clarification_flag": true
+          }
+        }
+      },
+      "apply_status": "clarification_requested"
+    },
+    {
+      "turn_index": 4,
+      "utterance": "Bei Verdacht auf Geldwasche muss die Meldung innerhalb von 24 Stunden erfolgen.",
+      "route": "assert_rule",
+      "route_source": "model",
+      "repaired": false,
+      "fallback_used": false,
+      "alignment_events": [],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "assert_rule",
+        "logic_string": "report_within_24_hours(X) :- suspicion(X).",
+        "components": {
+          "atoms": [],
+          "variables": [
+            "X"
+          ],
+          "predicates": [
+            "report_within_24_hours",
+            "suspicion"
+          ]
+        },
+        "facts": [],
+        "rules": [
+          "report_within_24_hours(X) :- suspicion(X)."
+        ],
+        "queries": [],
+        "confidence": {
+          "overall": 0.95,
+          "intent": 1.0,
+          "logic": 0.95
+        },
+        "ambiguities": [],
+        "needs_clarification": false,
+        "uncertainty_score": 0.15,
+        "uncertainty_label": "low",
+        "clarification_question": "Can you clarify this point before I apply it: The utterance establishes a conditional rule: if there is suspicion (Verdacht), a?",
+        "clarification_reason": "The utterance establishes a conditional rule: if there is suspicion (Verdacht), a",
+        "rationale": "The utterance establishes a conditional rule: if there is suspicion (Verdacht), a report must occur within 24 hours. This maps to a rule where the head is report_within_24_hours and the body is suspicion. The clarification transcript confirms 'suspicion' is the canonical predicate for 'Verdacht'. The rule is termination-safe as it relies on a base predicate 'suspicion' rather than recursion on itself."
+      },
+      "validation_errors": [],
+      "clarification_rounds": [
+        {
+          "round": 1,
+          "question": "Can you clarify this detail: Predicate 'suspicion' inferred for 'Verdacht' as no specific predicate exists in the provided ontology list?",
+          "answer": "Yes, 'Verdacht' was mapped to 'suspicion' as a placeholder.",
+          "answer_source": "synthetic_model",
+          "answer_confidence": 0.9,
+          "answer_assumption": "No predicate exists for 'Verdacht' in ontology.",
+          "uncertainty_score": 0.15,
+          "effective_uncertainty": 0.55,
+          "threshold": 0.25
+        }
+      ],
+      "clarification_rounds_used": 1,
+      "clarification_max_rounds": 3,
+      "clarification_answers_available": 0,
+      "clarification_answers_used": 0,
+      "clarification_scripted_answers_used": 0,
+      "clarification_synthetic_answers_used": 1,
+      "clarification_policy": {
+        "clarification_eagerness": 0.75,
+        "uncertainty_score": 0.15,
+        "effective_uncertainty": 0.15,
+        "threshold": 0.25,
+        "request_clarification": false,
+        "needs_clarification_flag": false
+      },
+      "clarification_pending": false,
+      "clarification_pending_reason": "",
+      "clarification_question": "Can you clarify this point before I apply it: The utterance establishes a conditional rule: if there is suspicion (Verdacht), a?",
+      "apply": {
+        "tool": "assert_rule",
+        "input": "report_within_24_hours(X) :- suspicion(X).",
+        "result": {
+          "status": "success",
+          "result_type": "rule_asserted",
+          "rule": "report_within_24_hours(X) :- suspicion(X)."
+        }
+      },
+      "apply_status": "success"
+    },
+    {
+      "turn_index": 5,
+      "utterance": "Nao tenho certeza se ela e diretora ou apenas procuradora.",
+      "route": "assert_fact",
+      "route_source": "model",
+      "repaired": false,
+      "fallback_used": false,
+      "alignment_events": [],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "assert_fact",
+        "logic_string": "role(nao, procuradora).",
+        "components": {
+          "atoms": [
+            "nao",
+            "procuradora"
+          ],
+          "variables": [],
+          "predicates": [
+            "role"
+          ]
+        },
+        "facts": [
+          "role(nao, procuradora)."
+        ],
+        "rules": [],
+        "queries": [],
+        "confidence": {
+          "overall": 0.65,
+          "intent": 0.95,
+          "logic": 0.5
+        },
+        "ambiguities": [
+          "Unresolved referent for 'ela' (she).",
+          "Ambiguity between 'diretora' and 'procuradora' roles."
+        ],
+        "needs_clarification": true,
+        "uncertainty_score": 0.75,
+        "uncertainty_label": "high",
+        "clarification_question": "Who does 'ela' refer to, and is she a director or a prosecutor?",
+        "clarification_reason": "Pronoun 'ela' and role ambiguity require clarification.",
+        "rationale": "The utterance contains an unresolved pronoun and a choice between two potential roles, necessitating clarification before asserting a fact."
+      },
+      "validation_errors": [],
+      "clarification_rounds": [],
+      "clarification_rounds_used": 0,
+      "clarification_max_rounds": 3,
+      "clarification_answers_available": 0,
+      "clarification_answers_used": 0,
+      "clarification_scripted_answers_used": 0,
+      "clarification_synthetic_answers_used": 0,
+      "clarification_policy": {
+        "clarification_eagerness": 0.75,
+        "uncertainty_score": 0.75,
+        "effective_uncertainty": 0.82,
+        "threshold": 0.25,
+        "request_clarification": true,
+        "needs_clarification_flag": true
+      },
+      "clarification_pending": true,
+      "clarification_pending_reason": "Clarification answer model returned non-informative answer; KB apply deferred.",
+      "clarification_question": "Who does 'ela' refer to, and is she a director or a prosecutor?",
+      "apply": {
+        "tool": "none",
+        "input": {
+          "clarification_question": "Who does 'ela' refer to, and is she a director or a prosecutor?",
+          "clarification_rounds_used": 0
+        },
+        "result": {
+          "status": "clarification_requested",
+          "message": "Clarification answer model returned non-informative answer; KB apply deferred.",
+          "clarification_question": "Who does 'ela' refer to, and is she a director or a prosecutor?",
+          "clarification_policy": {
+            "clarification_eagerness": 0.75,
+            "uncertainty_score": 0.75,
+            "effective_uncertainty": 0.82,
+            "threshold": 0.25,
+            "request_clarification": true,
+            "needs_clarification_flag": true
+          }
+        }
+      },
+      "apply_status": "clarification_requested"
+    },
+    {
+      "turn_index": 6,
+      "utterance": "\u0647\u0644 \u0623\u0644\u063a\u064a\u0646\u0627 \u0634\u0631\u0637 \u0627\u0644\u0645\u0648\u0627\u0641\u0642\u0629 \u0627\u0644\u0645\u0632\u062f\u0648\u062c\u0629 \u0644\u0644\u0645\u062f\u0641\u0648\u0639\u0627\u062a \u0627\u0644\u0643\u0628\u064a\u0631\u0629\u061f",
+      "route": "query",
+      "route_source": "model",
+      "repaired": false,
+      "fallback_used": false,
+      "alignment_events": [],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "query",
+        "logic_string": "double_approval_required(large_payments).",
+        "components": {
+          "atoms": [
+            "large_payments"
+          ],
+          "variables": [],
+          "predicates": [
+            "double_approval_required"
+          ]
+        },
+        "facts": [],
+        "rules": [],
+        "queries": [
+          "double_approval_required(large_payments)."
+        ],
+        "confidence": {
+          "overall": 0.95,
+          "intent": 1.0,
+          "logic": 0.9
+        },
+        "ambiguities": [
+          "Predicate name 'double_approval_required' inferred from context; canonical name should be verified if a registry exists."
+        ],
+        "needs_clarification": false,
+        "uncertainty_score": 0.15,
+        "uncertainty_label": "low",
+        "clarification_question": "Can you clarify this detail: Predicate name 'double_approval_required' inferred from context; canonical name should be verified if a registry exists?",
+        "clarification_reason": "Interrogative utterance regarding a specific policy condition maps to a query intent.",
+        "rationale": "Interrogative utterance regarding a specific policy condition maps to a query intent. The logic string represents the fact being queried. Uncertainty is low as the semantic mapping is direct."
+      },
+      "validation_errors": [],
+      "clarification_rounds": [],
+      "clarification_rounds_used": 0,
+      "clarification_max_rounds": 3,
+      "clarification_answers_available": 0,
+      "clarification_answers_used": 0,
+      "clarification_scripted_answers_used": 0,
+      "clarification_synthetic_answers_used": 0,
+      "clarification_policy": {
+        "clarification_eagerness": 0.75,
+        "uncertainty_score": 0.15,
+        "effective_uncertainty": 0.55,
+        "threshold": 0.25,
+        "request_clarification": true,
+        "needs_clarification_flag": false
+      },
+      "clarification_pending": true,
+      "clarification_pending_reason": "Clarification answer model returned non-informative answer; KB apply deferred.",
+      "clarification_question": "Can you clarify this detail: Predicate name 'double_approval_required' inferred from context; canonical name should be verified if a registry exists?",
+      "apply": {
+        "tool": "none",
+        "input": {
+          "clarification_question": "Can you clarify this detail: Predicate name 'double_approval_required' inferred from context; canonical name should be verified if a registry exists?",
+          "clarification_rounds_used": 0
+        },
+        "result": {
+          "status": "clarification_requested",
+          "message": "Clarification answer model returned non-informative answer; KB apply deferred.",
+          "clarification_question": "Can you clarify this detail: Predicate name 'double_approval_required' inferred from context; canonical name should be verified if a registry exists?",
+          "clarification_policy": {
+            "clarification_eagerness": 0.75,
+            "uncertainty_score": 0.15,
+            "effective_uncertainty": 0.55,
+            "threshold": 0.25,
+            "request_clarification": true,
+            "needs_clarification_flag": false
+          }
+        }
+      },
+      "apply_status": "clarification_requested"
+    },
+    {
+      "turn_index": 7,
+      "utterance": "Actually undo that last compliance rule.",
+      "route": "retract",
+      "route_source": "heuristic",
+      "repaired": false,
+      "fallback_used": false,
+      "alignment_events": [],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "retract",
+        "logic_string": "retract(compliance_rule(X)).",
+        "components": {
+          "atoms": [
+            "compliance_rule"
+          ],
+          "variables": [
+            "X"
+          ],
+          "predicates": [
+            "retract"
+          ]
+        },
+        "facts": [
+          "compliance_rule(X)."
+        ],
+        "rules": [],
+        "queries": [],
+        "confidence": {
+          "overall": 0.65,
+          "intent": 0.95,
+          "logic": 0.5
+        },
+        "ambiguities": [
+          "Missing specific rule identifier or instance to retract.",
+          "Unknown canonical predicate name for 'compliance rule'."
+        ],
+        "needs_clarification": true,
+        "uncertainty_score": 0.75,
+        "uncertainty_label": "high",
+        "clarification_question": "Which specific compliance rule instance should be retracted?",
+        "clarification_reason": "Target rule instance is unspecified.",
+        "rationale": "User requests retraction of an unspecified 'last' rule. Predicate name is unknown; specific instance is missing. Safe to emit generic variable-based retract but requires clarification for precision."
+      },
+      "validation_errors": [],
+      "clarification_rounds": [],
+      "clarification_rounds_used": 0,
+      "clarification_max_rounds": 3,
+      "clarification_answers_available": 0,
+      "clarification_answers_used": 0,
+      "clarification_scripted_answers_used": 0,
+      "clarification_synthetic_answers_used": 0,
+      "clarification_policy": {
+        "clarification_eagerness": 0.75,
+        "uncertainty_score": 0.75,
+        "effective_uncertainty": 0.82,
+        "threshold": 0.25,
+        "request_clarification": true,
+        "needs_clarification_flag": true
+      },
+      "clarification_pending": true,
+      "clarification_pending_reason": "Clarification answer model returned non-informative answer; KB apply deferred.",
+      "clarification_question": "Which specific compliance rule instance should be retracted?",
+      "apply": {
+        "tool": "none",
+        "input": {
+          "clarification_question": "Which specific compliance rule instance should be retracted?",
+          "clarification_rounds_used": 0
+        },
+        "result": {
+          "status": "clarification_requested",
+          "message": "Clarification answer model returned non-informative answer; KB apply deferred.",
+          "clarification_question": "Which specific compliance rule instance should be retracted?",
+          "clarification_policy": {
+            "clarification_eagerness": 0.75,
+            "uncertainty_score": 0.75,
+            "effective_uncertainty": 0.82,
+            "threshold": 0.25,
+            "request_clarification": true,
+            "needs_clarification_flag": true
+          }
+        }
+      },
+      "apply_status": "clarification_requested"
+    },
+    {
+      "turn_index": 8,
+      "utterance": "\u041a\u0442\u043e \u043e\u0442\u0432\u0435\u0447\u0430\u0435\u0442 \u0437\u0430 \u043a\u043e\u043d\u0442\u0440\u043e\u043b\u044c \u044d\u043a\u0441\u043f\u043e\u0440\u0442\u043d\u044b\u0445 \u043b\u0438\u0446\u0435\u043d\u0437\u0438\u0439?",
+      "route": "assert_fact",
+      "route_source": "model",
+      "repaired": false,
+      "fallback_used": false,
+      "alignment_events": [],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "query",
+        "logic_string": "responsible_for_export_license_control(ministry_of_economic_development_russia).",
+        "components": {
+          "atoms": [
+            "ministry_of_economic_development_russia"
+          ],
+          "variables": [],
+          "predicates": [
+            "responsible_for_export_license_control"
+          ]
+        },
+        "facts": [],
+        "rules": [],
+        "queries": [
+          "responsible_for_export_license_control(ministry_of_economic_development_russia)."
+        ],
+        "confidence": {
+          "overall": 0.95,
+          "intent": 1.0,
+          "logic": 0.95
+        },
+        "ambiguities": [],
+        "needs_clarification": false,
+        "uncertainty_score": 0.05,
+        "uncertainty_label": "low",
+        "clarification_question": "Can you clarify this point before I apply it: The utterance is a direct question about responsibility. The clarification transcript explicitly?",
+        "clarification_reason": "The utterance is a direct question about responsibility. The clarification transcript explicitly",
+        "rationale": "The utterance is a direct question about responsibility. The clarification transcript explicitly identifies '\u041c\u0438\u043d\u0438\u0441\u0442\u0435\u0440\u0441\u0442\u0432\u043e \u044d\u043a\u043e\u043d\u043e\u043c\u0438\u0447\u0435\u0441\u043a\u043e\u0433\u043e \u0440\u0430\u0437\u0432\u0438\u0442\u0438\u044f \u0420\u0424' as the responsible entity. This maps to a query checking the fact of responsibility for the specific entity."
+      },
+      "validation_errors": [],
+      "clarification_rounds": [
+        {
+          "round": 1,
+          "question": "Can you clarify this detail: Unknown entity for 'X' (who is responsible)?",
+          "answer": "\u041c\u0438\u043d\u0438\u0441\u0442\u0435\u0440\u0441\u0442\u0432\u043e \u044d\u043a\u043e\u043d\u043e\u043c\u0438\u0447\u0435\u0441\u043a\u043e\u0433\u043e \u0440\u0430\u0437\u0432\u0438\u0442\u0438\u044f \u0420\u0424",
+          "answer_source": "synthetic_model",
+          "answer_confidence": 0.9,
+          "answer_assumption": "Russian context",
+          "uncertainty_score": 0.1,
+          "effective_uncertainty": 0.55,
+          "threshold": 0.25
+        }
+      ],
+      "clarification_rounds_used": 1,
+      "clarification_max_rounds": 3,
+      "clarification_answers_available": 0,
+      "clarification_answers_used": 0,
+      "clarification_scripted_answers_used": 0,
+      "clarification_synthetic_answers_used": 1,
+      "clarification_policy": {
+        "clarification_eagerness": 0.75,
+        "uncertainty_score": 0.05,
+        "effective_uncertainty": 0.05,
+        "threshold": 0.25,
+        "request_clarification": false,
+        "needs_clarification_flag": false
+      },
+      "clarification_pending": false,
+      "clarification_pending_reason": "",
+      "clarification_question": "Can you clarify this point before I apply it: The utterance is a direct question about responsibility. The clarification transcript explicitly?",
+      "apply": {
+        "tool": "query_rows",
+        "input": "responsible_for_export_license_control(ministry_of_economic_development_russia).",
+        "result": {
+          "status": "no_results",
+          "result_type": "no_result",
+          "predicate": "responsible_for_export_license_control",
+          "prolog_query": "responsible_for_export_license_control(ministry_of_economic_development_russia).",
+          "variables": [],
+          "rows": [],
+          "num_rows": 0,
+          "reasoning_basis": {
+            "kind": "core-local"
+          }
+        }
+      },
+      "apply_status": "no_results"
+    }
+  ],
+  "validations": []
+}

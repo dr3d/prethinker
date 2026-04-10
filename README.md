@@ -36,6 +36,10 @@ If you're evaluating it as a research workbench, it's useful now. If you're eval
   - `acid_04_alias_pressure`
   - `acid_05_long_context_lineage`
 - Evidence artifacts for this cycle are currently in `tmp/runs/` (for example `tmp/runs/resume5_summary_20260410_102508.json`) and can be promoted into `kb_runs/` + docs manifests in a publish pass.
+- Fresh CE sweep (higher-target stability run) confirmed no plateau:
+  - CE values tested: `0.55`, `0.65`, `0.75`, `0.85`
+  - all 8 target scenarios passed at every CE setting
+  - clarification rounds improved at lower CE (`0.55` produced `2` total rounds vs `4` at `0.65+`)
 
 ## Neuro-Symbolic Contract
 
@@ -79,18 +83,18 @@ flowchart LR
 
 From `docs/data/runs_manifest.json`:
 
-- Total tracked runs: `23`
-- Passed: `19`
+- Total tracked runs: `32`
+- Passed: `28`
 - Failed: `4`
-- Pass rate: `82%`
+- Pass rate: `87.5%`
 
 | Tier | Scenario | Evidence Snapshot | What It Shows | Known Risk |
 |---|---|---|---|---|
-| Base facts | `stage_01_facts_only` | multiple passing runs | stable fact extraction/apply loop | still prompt-sensitive on wording variants |
-| Rule ingest | `stage_02_rule_ingest` | multiple passing runs | basic rule extraction and apply is viable | predicate phrasing drift still possible |
-| Transitive chain | `stage_03_transitive_chain` | at least one passing run | recursive rule patterns can work | runtime/model latency and timeout sensitivity |
-| Acid temporal | `acid_03_temporal_override` | failing sample present | catches hard temporal/override behavior gaps | unresolved policy + extraction brittleness |
-| Acid long context | `acid_05_long_context_lineage` | failing sample present | catches lineage and longer-chain weakness | context/alias robustness not yet reliable |
+| Base facts | `stage_01_facts_only` | repeated passing runs (including `resume5_latest`) | stable fact extraction/apply loop | still prompt-sensitive on wording variants |
+| Rule ingest | `stage_02_rule_ingest` | repeated passing runs (including `resume5_latest`) | basic rule extraction and apply is viable | predicate phrasing drift still possible |
+| Transitive chain | `stage_03_transitive_chain` | repeated passing runs (including `resume5_latest`) | recursive rule patterns can work | runtime/model latency and timeout sensitivity |
+| Acid temporal | `acid_03_temporal_override` | passing in latest sweep (`resume5_latest`) | temporal override/retract logic can be represented and applied | still vulnerable to ontology wording drift |
+| Acid long context | `acid_05_long_context_lineage` | passing in latest sweep (`resume5_latest`) | longer lineage workflows can pass with current prompt/runtime policy | robustness under unseen domain phrasing remains an open question |
 
 ## Model Operation Modes
 
@@ -148,8 +152,14 @@ python kb_pipeline.py --backend ollama --base-url http://127.0.0.1:11434 --model
 - Unit tests cover core runtime inference + constraint guards (`tests/test_core_runtime.py`).
 - Known-state + DoF propagation engine is now vendored locally (`engine/constraint_propagation.py`).
 - Latest verified tune runs:
-  - `kb_runs/stage_01_people_ladder_tune_r1.json` (passed `2/2`)
-  - `kb_runs/stage_02_people_ladder_tune_r1.json` (passed `1/1`)
+  - `kb_runs/stage_00_foreign_unseen_probe_resume5_latest.json` (passed)
+  - `kb_runs/stage_00_multilingual_probe_resume5_latest.json` (passed)
+  - `kb_runs/stage_01_facts_only_resume5_latest.json` (passed `2/2`)
+  - `kb_runs/stage_02_rule_ingest_resume5_latest.json` (passed `1/1`)
+  - `kb_runs/stage_03_transitive_chain_resume5_latest.json` (passed `1/1`)
+  - `kb_runs/acid_03_temporal_override_resume5_latest.json` (passed `3/3`)
+  - `kb_runs/acid_04_alias_pressure_resume5_latest.json` (passed `3/3`)
+  - `kb_runs/acid_05_long_context_lineage_resume5_latest.json` (passed `5/5`)
 
 ## Current Best Settings (Qwen 3.5 9B)
 
@@ -158,9 +168,9 @@ python kb_pipeline.py --backend ollama --base-url http://127.0.0.1:11434 --model
 - Modelfile:
   - `modelfiles/qwen35-9b-semantic-parser.Modelfile`
 - Latest validated prompt snapshot:
-  - `modelfiles/history/prompts/sp-ad589d272fbb.md`
+  - `docs/prompts/sp-e0a66d9a2fbe.md`
 - Hub-published prompt snapshot:
-  - `docs/prompts/sp-ad589d272fbb.md`
+  - `docs/prompts/sp-e0a66d9a2fbe.md`
 
 ## Model Adaptation Stance (Prompt-First, LoRA Later)
 

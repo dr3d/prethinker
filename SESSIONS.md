@@ -370,6 +370,43 @@ Evidence artifacts:
 - passing prompt provenance id in these runs:
   - `sp-e0a66d9a2fbe`
 
+## Session 13: Public Source-of-Truth Publish + CE Improvement Sweep
+
+Date: 2026-04-10 UTC
+
+Outcome:
+
+- promoted latest `resume5` run set into published artifacts:
+  - `kb_runs/*_resume5_latest.json`
+  - `docs/data/runs/*_resume5_latest.json`
+  - `docs/reports/*_resume5_latest.html`
+- regenerated hub/manifests:
+  - `docs/index.html`
+  - `docs/progress_cards.html`
+  - `docs/data/runs_manifest.json`
+  - `docs/data/prompt_versions.json`
+- updated README evidence and prompt snapshot references to match published truth
+
+Published stats after refresh:
+
+- total runs: `32`
+- passed: `28`
+- failed: `4`
+- pass rate: `87.5%`
+
+Fresh higher-target run (no-stuck check):
+
+- executed clarification-eagerness sweep over full 8-scenario pack:
+  - CE `0.55`, `0.65`, `0.75`, `0.85`
+- all settings passed `8/8` scenarios
+- improvement signal:
+  - total clarification rounds dropped from `4` (CE `0.65+`) to `2` (CE `0.55`)
+
+Evidence:
+
+- CE sweep summary:
+  - `tmp/ce_sweep/ce_sweep_20260410_110945.json`
+
 
 
 
