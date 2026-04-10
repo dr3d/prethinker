@@ -1204,13 +1204,194 @@ def _generate_synthetic_clarification_answer(
     }
 
 
+def _is_variable_token(token: str) -> bool:
+    if not token:
+        return False
+    first = token[0]
+    if not (first == "_" or ("A" <= first <= "Z")):
+        return False
+    return all(ch == "_" or ch.isalnum() for ch in token[1:])
+
+
+def _term_has_variable(term: Term) -> bool:
+    if getattr(term, "is_variable", False):
+        return True
+    return any(_term_has_variable(arg) for arg in getattr(term, "args", []))
+
+
+def _parse_clause_term(clause: str) -> Term | None:
+    normalized = _normalize_clause(clause)
+    if not normalized:
+        return None
+    raw = normalized[:-1].strip() if normalized.endswith(".") else normalized.strip()
+    if not raw:
+        return None
+    parser = PrologEngine(max_depth=32)
+    try:
+        return parser.parse_term(raw)
+    except Exception:
+        return None
+
+
+def _split_rule_head_body(expr: str) -> tuple[str, str] | None:
+    text = expr.strip()
+    if not text:
+        return None
+    paren_depth = 0
+    bracket_depth = 0
+    for idx in range(len(text) - 1):
+        ch = text[idx]
+        if ch == "(":
+            paren_depth += 1
+        elif ch == ")":
+            paren_depth = max(0, paren_depth - 1)
+        elif ch == "[":
+            bracket_depth += 1
+        elif ch == "]":
+            bracket_depth = max(0, bracket_depth - 1)
+        elif ch == ":" and text[idx + 1] == "-" and paren_depth == 0 and bracket_depth == 0:
+            head = text[:idx].strip()
+            body = text[idx + 2 :].strip()
+            if head and body:
+                return head, body
+            return None
+    return None
+
+
+def _is_valid_goal_clause(clause: str, *, require_ground: bool = False) -> bool:
+    normalized = _normalize_clause(clause)
+    if not normalized:
+        return False
+    raw = normalized[:-1].strip() if normalized.endswith(".") else normalized.strip()
+    if not raw or ":-" in raw:
+        return False
+    term = _parse_clause_term(normalized)
+    if term is None:
+        return False
+    if require_ground and _term_has_variable(term):
+        return False
+    return True
+
+
+def _is_valid_rule_clause(clause: str) -> bool:
+    normalized = _normalize_clause(clause)
+    if not normalized:
+        return False
+    raw = normalized[:-1].strip() if normalized.endswith(".") else normalized.strip()
+    split = _split_rule_head_body(raw)
+    if not split:
+        return False
+    head_text, body_text = split
+    if not _is_valid_goal_clause(f"{head_text}.", require_ground=False):
+        return False
+    body_goals = _split_top_level_args(body_text)
+    if not body_goals:
+        return False
+    for goal in body_goals:
+        if not _is_valid_goal_clause(f"{goal}.", require_ground=False):
+            return False
+    return True
+
+
+def _extract_first_explicit_goal_clause(text: str, *, require_ground: bool) -> str:
+    source = text or ""
+    length = len(source)
+    for start in range(length):
+        first = source[start]
+        if first < "a" or first > "z":
+            continue
+        name_end = start + 1
+        while name_end < length and (source[name_end].isalnum() or source[name_end] == "_"):
+            name_end += 1
+        cursor = name_end
+        while cursor < length and source[cursor].isspace():
+            cursor += 1
+        if cursor >= length or source[cursor] != "(":
+            continue
+
+        depth = 0
+        close_idx = -1
+        for idx in range(cursor, length):
+            ch = source[idx]
+            if ch == "(":
+                depth += 1
+            elif ch == ")":
+                depth -= 1
+                if depth == 0:
+                    close_idx = idx
+                    break
+        if close_idx < 0:
+            continue
+
+        tail = close_idx + 1
+        while tail < length and source[tail].isspace():
+            tail += 1
+        if tail < length and source[tail] == ".":
+            candidate = source[start : tail + 1]
+        else:
+            candidate = source[start : close_idx + 1]
+        normalized = _normalize_clause(candidate)
+        if _is_valid_goal_clause(normalized, require_ground=require_ground):
+            return normalized
+    return ""
+
+
+def _walk_term_components(term: Term, atoms: set[str], variables: set[str], predicates: set[str]) -> None:
+    if getattr(term, "is_variable", False):
+        name = str(getattr(term, "name", "")).strip()
+        if name:
+            variables.add(name)
+        return
+
+    name = str(getattr(term, "name", "")).strip()
+    args = list(getattr(term, "args", []))
+    if args:
+        if name and name != "retract":
+            predicates.add(name)
+        for arg in args:
+            _walk_term_components(arg, atoms, variables, predicates)
+        return
+
+    if name and name != "retract":
+        atoms.add(name)
+
+
 def _extract_components_from_logic(logic_string: str) -> tuple[list[str], list[str], list[str]]:
-    signatures = _extract_goal_signatures(logic_string[:-1] if logic_string.endswith(".") else logic_string)
-    predicate_names = sorted({sig.split("/", 1)[0] for sig in signatures if "/" in sig})
-    variables = sorted(set(re.findall(r"\b[A-Z][A-Za-z0-9_]*\b", logic_string)))
-    atoms_raw = re.findall(r"\b[a-z][a-z0-9_]*\b", logic_string)
-    atoms = sorted({tok for tok in atoms_raw if tok not in predicate_names and tok != "retract"})
-    return atoms, variables, predicate_names
+    atoms: set[str] = set()
+    variables: set[str] = set()
+    predicates: set[str] = set()
+    clause = _normalize_clause(logic_string)
+    if not clause:
+        return [], [], []
+
+    raw = clause[:-1].strip() if clause.endswith(".") else clause.strip()
+    terms: list[Term] = []
+    split_rule = _split_rule_head_body(raw)
+    if split_rule:
+        head_text, body_text = split_rule
+        head_term = _parse_clause_term(f"{head_text}.")
+        if head_term is not None:
+            terms.append(head_term)
+        for goal_text in _split_top_level_args(body_text):
+            goal_term = _parse_clause_term(f"{goal_text}.")
+            if goal_term is not None:
+                terms.append(goal_term)
+    else:
+        term = _parse_clause_term(clause)
+        if term is not None:
+            terms.append(term)
+
+    for term in terms:
+        _walk_term_components(term, atoms, variables, predicates)
+
+    if not terms:
+        signatures = _extract_goal_signatures(raw)
+        fallback_predicates = sorted(
+            {sig.split("/", 1)[0] for sig in signatures if "/" in sig and sig != "retract/1"}
+        )
+        return [], [], fallback_predicates
+
+    return sorted(atoms), sorted(variables), sorted(predicates)
 
 
 def _refine_logic_only_payload(
@@ -1376,10 +1557,6 @@ def _validate_parsed(parsed: dict[str, Any]) -> tuple[bool, list[str]]:
     if query_prefix_bad:
         errors.append("queries must not include '?-' prefix")
 
-    prolog_goal = re.compile(r"^[a-z][a-z0-9_]*\(([^()]*)\)\.$")
-    prolog_rule = re.compile(r"^[a-z][a-z0-9_]*\(([^()]*)\)\s*:-\s*.+\.$")
-    prolog_retract = re.compile(r"^retract\(\s*[a-z][a-z0-9_]*\(([^()]*)\)\s*\)\.$")
-
     facts = [str(x).strip() for x in parsed.get("facts", [])]
     rules = [str(x).strip() for x in parsed.get("rules", [])]
     queries = [str(x).strip() for x in parsed.get("queries", [])]
@@ -1390,7 +1567,7 @@ def _validate_parsed(parsed: dict[str, Any]) -> tuple[bool, list[str]]:
         else:
             if logic_string != facts[0]:
                 errors.append("assert_fact requires logic_string == facts[0]")
-            if not prolog_goal.match(facts[0]):
+            if not _is_valid_goal_clause(facts[0], require_ground=True):
                 errors.append("facts[0] is not valid Prolog fact/goal")
     elif intent == "assert_rule":
         if not rules:
@@ -1398,7 +1575,7 @@ def _validate_parsed(parsed: dict[str, Any]) -> tuple[bool, list[str]]:
         else:
             if logic_string != rules[0]:
                 errors.append("assert_rule requires logic_string == rules[0]")
-            if not prolog_rule.match(rules[0]):
+            if not _is_valid_rule_clause(rules[0]):
                 errors.append("rules[0] is not valid Prolog rule")
     elif intent == "query":
         if not queries:
@@ -1406,10 +1583,11 @@ def _validate_parsed(parsed: dict[str, Any]) -> tuple[bool, list[str]]:
         else:
             if logic_string != queries[0]:
                 errors.append("query requires logic_string == queries[0]")
-            if not prolog_goal.match(queries[0]):
+            if not _is_valid_goal_clause(queries[0], require_ground=False):
                 errors.append("queries[0] is not valid Prolog goal")
     elif intent == "retract":
-        if not prolog_retract.match(logic_string):
+        retract_target = _extract_retract_target(logic_string, facts)
+        if not retract_target or not _is_valid_goal_clause(retract_target, require_ground=True):
             errors.append("retract requires logic_string format retract(<fact>).")
     elif intent == "other":
         if logic_string:
@@ -1445,17 +1623,17 @@ def _parse_model_json(response: ModelResponse, required_keys: list[str]) -> tupl
 
 
 def _extract_retract_target(logic_string: str, fallback_facts: list[str]) -> str | None:
-    match = re.match(r"^retract\(\s*(.+?)\s*\)\.$", logic_string.strip())
-    if match:
-        fact = match.group(1).strip()
-        if not fact.endswith("."):
-            fact += "."
-        return fact
+    parsed = _parse_clause_term(logic_string)
+    if parsed is not None and str(getattr(parsed, "name", "")) == "retract":
+        args = list(getattr(parsed, "args", []))
+        if len(args) == 1:
+            fact = _normalize_clause(str(args[0]))
+            if _is_valid_goal_clause(fact, require_ground=True):
+                return fact
     if fallback_facts:
-        fact = str(fallback_facts[0]).strip()
-        if not fact.endswith("."):
-            fact += "."
-        return fact
+        fact = _normalize_clause(str(fallback_facts[0]))
+        if _is_valid_goal_clause(fact, require_ground=True):
+            return fact
     return None
 
 
@@ -1463,26 +1641,12 @@ def _build_retract_fallback_parse(utterance: str) -> dict[str, Any] | None:
     text = utterance.strip()
     if not text:
         return None
-    fact = ""
-    match_with_dot = re.search(r"([a-z][a-z0-9_]*\([^()]*\)\.)", text)
-    if match_with_dot:
-        fact = match_with_dot.group(1).strip()
-    else:
-        match_no_dot = re.search(r"([a-z][a-z0-9_]*\([^()]*\))", text)
-        if match_no_dot:
-            fact = match_no_dot.group(1).strip() + "."
-    fact = _normalize_clause(fact)
+    fact = _extract_first_explicit_goal_clause(text, require_ground=True)
     if not fact:
         return None
-
-    predicate_match = re.match(r"^([a-z][a-z0-9_]*)\(", fact)
-    if not predicate_match:
+    atoms, variables, predicates = _extract_components_from_logic(fact)
+    if not predicates:
         return None
-    predicate = predicate_match.group(1)
-
-    tokens = re.findall(r"\b[a-z][a-z0-9_]*\b", fact)
-    atoms = [tok for idx, tok in enumerate(tokens) if not (idx == 0 and tok == predicate)]
-    variables = re.findall(r"\b[A-Z][A-Za-z0-9_]*\b", fact)
     fact_term = fact[:-1] if fact.endswith(".") else fact
     parsed = {
         "intent": "retract",
@@ -1490,7 +1654,7 @@ def _build_retract_fallback_parse(utterance: str) -> dict[str, Any] | None:
         "components": {
             "atoms": sorted(set(atoms)),
             "variables": sorted(set(variables)),
-            "predicates": [predicate],
+            "predicates": sorted(set(predicates)),
         },
         "facts": [fact],
         "rules": [],
@@ -1563,23 +1727,20 @@ def _build_assert_fact_fallback_parse(utterance: str) -> dict[str, Any] | None:
     if not text:
         return None
 
-    explicit = re.search(r"([a-z][a-z0-9_]*\([^()]*\)\.)", text)
-    if explicit:
-        fact = _normalize_clause(explicit.group(1))
-        predicate_match = re.match(r"^([a-z][a-z0-9_]*)\(", fact)
-        if not predicate_match:
+    explicit_fact = _extract_first_explicit_goal_clause(text, require_ground=True)
+    if explicit_fact:
+        atoms, variables, predicates = _extract_components_from_logic(explicit_fact)
+        if not predicates:
             return None
-        predicate = predicate_match.group(1)
-        atoms = [tok for tok in re.findall(r"\b[a-z][a-z0-9_]*\b", fact) if tok != predicate]
         parsed = _build_parse_payload(
             intent="assert_fact",
-            logic_string=fact,
-            facts=[fact],
+            logic_string=explicit_fact,
+            facts=[explicit_fact],
             rules=[],
             queries=[],
-            predicates=[predicate],
+            predicates=predicates,
             atoms=atoms,
-            variables=[],
+            variables=variables,
             rationale="Fallback fact parse from explicit Prolog fact in utterance.",
         )
         ok, _ = _validate_parsed(parsed)
@@ -1779,22 +1940,18 @@ def _build_query_fallback_parse(utterance: str) -> dict[str, Any] | None:
     if not text:
         return None
 
-    explicit = re.search(r"([a-z][a-z0-9_]*\([^()]*\)\.)", text)
-    if explicit:
-        query = _normalize_clause(explicit.group(1))
-        predicate_match = re.match(r"^([a-z][a-z0-9_]*)\(", query)
-        if not predicate_match:
+    explicit_query = _extract_first_explicit_goal_clause(text, require_ground=False)
+    if explicit_query:
+        atoms, variables, predicates = _extract_components_from_logic(explicit_query)
+        if not predicates:
             return None
-        predicate = predicate_match.group(1)
-        variables = re.findall(r"\b[A-Z][A-Za-z0-9_]*\b", query)
-        atoms = [tok for tok in re.findall(r"\b[a-z][a-z0-9_]*\b", query) if tok != predicate]
         parsed = _build_parse_payload(
             intent="query",
-            logic_string=query,
+            logic_string=explicit_query,
             facts=[],
             rules=[],
-            queries=[query],
-            predicates=[predicate],
+            queries=[explicit_query],
+            predicates=predicates,
             atoms=atoms,
             variables=variables,
             rationale="Fallback query parse from explicit Prolog query form.",
@@ -2208,7 +2365,7 @@ class ParseOnlyRuntime:
                 "reasoning_basis": {"kind": "parse-only", "note": "Only direct fact queries are supported in parse-only runtime."},
             }
         predicate, query_args = calls[0]
-        variables = [arg for arg in query_args if re.match(r"^[A-Z_][A-Za-z0-9_]*$", arg)]
+        variables = [arg for arg in query_args if _is_variable_token(arg)]
         rows: list[dict[str, Any]] = []
         for clause in self._clauses:
             if ":-" in clause:
@@ -2222,7 +2379,7 @@ class ParseOnlyRuntime:
             bindings: dict[str, str] = {}
             matched = True
             for query_arg, fact_arg in zip(query_args, fact_args):
-                if re.match(r"^[A-Z_][A-Za-z0-9_]*$", query_arg):
+                if _is_variable_token(query_arg):
                     existing = bindings.get(query_arg)
                     if existing is not None and existing != fact_arg:
                         matched = False
