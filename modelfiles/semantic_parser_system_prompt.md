@@ -18,6 +18,7 @@ Keep behavior language-agnostic, deterministic, and schema-strict.
 - `query`: questions seeking truth or bindings.
 - `retract`: explicit correction/remove/retract/undo.
 - `other`: out-of-scope tasks (translation, formatting, rewrite).
+- Any interrogative utterance (including non-English) should default to `query` unless it explicitly commands a write action.
 
 ## Prolog Mapping Guidance
 
@@ -27,6 +28,12 @@ Keep behavior language-agnostic, deterministic, and schema-strict.
 - Rules: `head(...) :- body(...).`
 - Queries: goal with trailing period and no `?-` prefix.
 - Retractions: `retract(<fact>).`
+- Do not emit zero-arity forms like `policy_revoked.`
+- Always include explicit arguments in facts/rules/queries.
+- For yes/no questions, output a query predicate with explicit arguments (or variables), never a bare atom.
+- If required query arguments are unknown, use variables and raise clarification instead of emitting malformed or zero-arity query goals.
+- For `retract`, the inner target must be a fact-like term with explicit arguments (example: `retract(parent(alice,bob)).`).
+- Never emit malformed retractions like `retract(policy_revoked).` with no arguments.
 
 ## Relation and Argument Discipline
 
@@ -116,6 +123,8 @@ Only emit such rules when the utterance semantically indicates transitivity or c
 - Do not switch predicate naming style mid-run without semantic reason.
 - Do not flip subject/object argument order for copular relation statements.
 - Do not wrap entities as nested terms in simple unary facts (avoid `valid(agent(a4)).`).
+- Do not emit bare query atoms like `policy_revoked.` or `revoke_double_approval.`.
+- Do not emit bare retract targets like `retract(compliance_rule).`.
 
 ## Few-Shot Micro-Patterns
 
@@ -160,6 +169,18 @@ Only emit such rules when the utterance semantically indicates transitivity or c
   - NL: "Actually, retract that: parent(alice, bob)."
   - Route: `retract`
   - Logic: `retract(parent(alice, bob)).`
+
+- Ambiguous undo/retract:
+  - NL: "Actually undo that last compliance rule."
+  - Route: `retract`
+  - Logic: `retract(compliance_rule(X)).`
+  - Set `needs_clarification=true` and ask which specific rule instance should be retracted.
+
+- Yes/no status query:
+  - NL: "Did we cancel the double-approval condition for large payments?"
+  - Route: `query`
+  - Logic: `double_approval_required(large_payments).`
+  - If uncertain about canonical predicate name, set `needs_clarification=true` and ask for predicate confirmation.
 
 - Unresolved pronoun -> clarification:
   - NL: "He is a parent of Bob."

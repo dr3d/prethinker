@@ -315,6 +315,61 @@ Verification notes:
   - `tmp/.tmp_check_ollama.json`
   - `tmp/.tmp_check_lmstudio.json`
 
+## Session 12: Autonomous Prompt Tuning Loop (Safe-Mode, Full Ladder + Acid)
+
+Date: 2026-04-10 UTC
+
+Outcome:
+
+- resumed autonomous tuning in unattended-safe mode:
+  - no approval-gated steps
+  - scratch artifacts routed to `tmp/`
+  - isolated KB writes via `--kb-root tmp/kb_store`
+- resolved local write-permission blockers by redirecting prompt snapshots/corpus output to temp-safe paths:
+  - `--prompt-history-dir tmp/prompt_history`
+  - `--kb-root tmp/kb_store`
+- tuned `modelfiles/semantic_parser_system_prompt.md` to harden schema-safe query/retract output in stress probes
+
+Prompt changes added:
+
+- interrogative routing guard:
+  - non-English interrogatives default to `query` unless explicit write intent
+- yes/no query shape guard:
+  - never emit bare atom query goals
+  - require explicit args/variables for query predicates
+- retract shape guard:
+  - enforce `retract(<fact_like_term_with_args>).`
+  - explicitly reject bare retract targets
+- added micro-patterns:
+  - ambiguous undo/retract behavior with clarification
+  - yes/no status query with clarification fallback
+
+Validation campaign:
+
+- baseline and iterative sweeps were run with:
+  - parser model: `qwen3.5:9b` (Ollama, temp 0, ctx 8192)
+  - clarification answer model: `gpt-oss:20b` (Ollama, ctx 16384)
+  - runtime: `core`
+  - prompt file injection enabled
+- final full sweep (`resume5`) passed all targeted scenarios:
+  - `stage_00_foreign_unseen_probe`
+  - `stage_00_multilingual_probe`
+  - `stage_01_facts_only`
+  - `stage_02_rule_ingest`
+  - `stage_03_transitive_chain`
+  - `acid_03_temporal_override`
+  - `acid_04_alias_pressure`
+  - `acid_05_long_context_lineage`
+
+Evidence artifacts:
+
+- summary:
+  - `tmp/runs/resume5_summary_20260410_102508.json`
+- per-scenario reports:
+  - `tmp/runs/*_resume5_20260410_102508.json`
+- passing prompt provenance id in these runs:
+  - `sp-e0a66d9a2fbe`
+
 
 
 
