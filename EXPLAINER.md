@@ -138,3 +138,14 @@ Practically, ontological tracking helps by:
 
 In other words, ontological tracking narrows the operating envelope.  
 The pre-thinker is not expected to reason over every possible domain at once; it is expected to operate sharply within the active ontology, and to treat domain expansion as an explicit, auditable event.
+
+## Autonomous Operation (Current Project Mode)
+
+In this project phase, the training/tuning workflow is being executed autonomously by Codex orchestration:
+
+- rung execution and reruns
+- prompt-iteration loops
+- clarification-policy tuning
+- report generation and artifact management
+
+Human input remains strategic (goals, constraints, approvals), while Codex operates the day-to-day loop for continuous iteration.

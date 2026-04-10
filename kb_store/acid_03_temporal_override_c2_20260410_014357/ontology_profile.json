@@ -1,0 +1,31 @@
+{
+  "ontology_name": "acid_03_temporal_override_c2_20260410_014357",
+  "generated_at_utc": "2026-04-10T05:45:36+00:00",
+  "clause_count": 7,
+  "predicate_signatures": [
+    "allowed/1",
+    "blocked/1",
+    "has_manual_review/1",
+    "has_override/1",
+    "provisional/1",
+    "risky/1",
+    "valid/1"
+  ],
+  "fact_predicates": [
+    "has_manual_review/1",
+    "provisional/1",
+    "valid/1"
+  ],
+  "rule_head_predicates": [
+    "allowed/1",
+    "blocked/1",
+    "risky/1"
+  ],
+  "rule_body_predicates": [
+    "allowed/1",
+    "blocked/1",
+    "has_manual_review/1",
+    "has_override/1",
+    "provisional/1"
+  ]
+}

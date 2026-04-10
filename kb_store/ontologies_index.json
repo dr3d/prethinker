@@ -77,6 +77,204 @@
       "updated_at_utc": "2026-04-10T03:31:16+00:00",
       "predicate_signatures": [],
       "clause_count": 0
+    },
+    "stage_01_facts_only_c1_20260410_013723": {
+      "ontology_name": "stage_01_facts_only_c1_20260410_013723",
+      "kb_dir": "D:\\_PROJECTS\\prethinker\\kb_store\\stage_01_facts_only_c1_20260410_013723",
+      "updated_at_utc": "2026-04-10T05:37:41+00:00",
+      "predicate_signatures": [
+        "man/1"
+      ],
+      "clause_count": 2
+    },
+    "stage_02_rule_ingest_c1_20260410_013723": {
+      "ontology_name": "stage_02_rule_ingest_c1_20260410_013723",
+      "kb_dir": "D:\\_PROJECTS\\prethinker\\kb_store\\stage_02_rule_ingest_c1_20260410_013723",
+      "updated_at_utc": "2026-04-10T05:37:52+00:00",
+      "predicate_signatures": [
+        "man/1",
+        "mortal/1"
+      ],
+      "clause_count": 2
+    },
+    "stage_03_transitive_chain_c1_20260410_013723": {
+      "ontology_name": "stage_03_transitive_chain_c1_20260410_013723",
+      "kb_dir": "D:\\_PROJECTS\\prethinker\\kb_store\\stage_03_transitive_chain_c1_20260410_013723",
+      "updated_at_utc": "2026-04-10T05:38:14+00:00",
+      "predicate_signatures": [
+        "ancestor/2",
+        "parent/2"
+      ],
+      "clause_count": 4
+    },
+    "acid_03_temporal_override_c1_20260410_013723": {
+      "ontology_name": "acid_03_temporal_override_c1_20260410_013723",
+      "kb_dir": "D:\\_PROJECTS\\prethinker\\kb_store\\acid_03_temporal_override_c1_20260410_013723",
+      "updated_at_utc": "2026-04-10T05:39:01+00:00",
+      "predicate_signatures": [
+        "allowed/1",
+        "blocked/1",
+        "has_manual_review/1",
+        "has_override/1",
+        "provisional/1",
+        "risky/1",
+        "valid/1"
+      ],
+      "clause_count": 7
+    },
+    "acid_04_alias_pressure_c1_20260410_013723": {
+      "ontology_name": "acid_04_alias_pressure_c1_20260410_013723",
+      "kb_dir": "D:\\_PROJECTS\\prethinker\\kb_store\\acid_04_alias_pressure_c1_20260410_013723",
+      "updated_at_utc": "2026-04-10T05:39:42+00:00",
+      "predicate_signatures": [
+        "ancestor/2",
+        "father/2",
+        "parent/2"
+      ],
+      "clause_count": 5
+    },
+    "acid_05_long_context_lineage_c1_20260410_013723": {
+      "ontology_name": "acid_05_long_context_lineage_c1_20260410_013723",
+      "kb_dir": "D:\\_PROJECTS\\prethinker\\kb_store\\acid_05_long_context_lineage_c1_20260410_013723",
+      "updated_at_utc": "2026-04-10T05:41:02+00:00",
+      "predicate_signatures": [
+        "ancestor/2",
+        "parent/2",
+        "related_to/2"
+      ],
+      "clause_count": 8
+    },
+    "stage_01_facts_only_c2_20260410_014357": {
+      "ontology_name": "stage_01_facts_only_c2_20260410_014357",
+      "kb_dir": "D:\\_PROJECTS\\prethinker\\kb_store\\stage_01_facts_only_c2_20260410_014357",
+      "updated_at_utc": "2026-04-10T05:44:16+00:00",
+      "predicate_signatures": [
+        "man/1"
+      ],
+      "clause_count": 2
+    },
+    "stage_02_rule_ingest_c2_20260410_014357": {
+      "ontology_name": "stage_02_rule_ingest_c2_20260410_014357",
+      "kb_dir": "D:\\_PROJECTS\\prethinker\\kb_store\\stage_02_rule_ingest_c2_20260410_014357",
+      "updated_at_utc": "2026-04-10T05:44:27+00:00",
+      "predicate_signatures": [
+        "man/1",
+        "mortal/1"
+      ],
+      "clause_count": 2
+    },
+    "stage_03_transitive_chain_c2_20260410_014357": {
+      "ontology_name": "stage_03_transitive_chain_c2_20260410_014357",
+      "kb_dir": "D:\\_PROJECTS\\prethinker\\kb_store\\stage_03_transitive_chain_c2_20260410_014357",
+      "updated_at_utc": "2026-04-10T05:44:48+00:00",
+      "predicate_signatures": [
+        "ancestor/2",
+        "parent/2"
+      ],
+      "clause_count": 4
+    },
+    "acid_03_temporal_override_c2_20260410_014357": {
+      "ontology_name": "acid_03_temporal_override_c2_20260410_014357",
+      "kb_dir": "D:\\_PROJECTS\\prethinker\\kb_store\\acid_03_temporal_override_c2_20260410_014357",
+      "updated_at_utc": "2026-04-10T05:45:36+00:00",
+      "predicate_signatures": [
+        "allowed/1",
+        "blocked/1",
+        "has_manual_review/1",
+        "has_override/1",
+        "provisional/1",
+        "risky/1",
+        "valid/1"
+      ],
+      "clause_count": 7
+    },
+    "acid_04_alias_pressure_c2_20260410_014357": {
+      "ontology_name": "acid_04_alias_pressure_c2_20260410_014357",
+      "kb_dir": "D:\\_PROJECTS\\prethinker\\kb_store\\acid_04_alias_pressure_c2_20260410_014357",
+      "updated_at_utc": "2026-04-10T05:46:15+00:00",
+      "predicate_signatures": [
+        "ancestor/2",
+        "father/2",
+        "parent/2"
+      ],
+      "clause_count": 5
+    },
+    "acid_05_long_context_lineage_c2_20260410_014357": {
+      "ontology_name": "acid_05_long_context_lineage_c2_20260410_014357",
+      "kb_dir": "D:\\_PROJECTS\\prethinker\\kb_store\\acid_05_long_context_lineage_c2_20260410_014357",
+      "updated_at_utc": "2026-04-10T05:47:34+00:00",
+      "predicate_signatures": [
+        "ancestor/2",
+        "parent/2",
+        "related_to/2"
+      ],
+      "clause_count": 8
+    },
+    "stage_01_facts_only_c3_bare_20260410_014811": {
+      "ontology_name": "stage_01_facts_only_c3_bare_20260410_014811",
+      "kb_dir": "D:\\_PROJECTS\\prethinker\\kb_store\\stage_01_facts_only_c3_bare_20260410_014811",
+      "updated_at_utc": "2026-04-10T05:48:28+00:00",
+      "predicate_signatures": [
+        "man/1"
+      ],
+      "clause_count": 2
+    },
+    "stage_02_rule_ingest_c3_bare_20260410_014811": {
+      "ontology_name": "stage_02_rule_ingest_c3_bare_20260410_014811",
+      "kb_dir": "D:\\_PROJECTS\\prethinker\\kb_store\\stage_02_rule_ingest_c3_bare_20260410_014811",
+      "updated_at_utc": "2026-04-10T05:48:38+00:00",
+      "predicate_signatures": [
+        "man/1",
+        "mortal/1"
+      ],
+      "clause_count": 2
+    },
+    "stage_03_transitive_chain_c3_bare_20260410_014811": {
+      "ontology_name": "stage_03_transitive_chain_c3_bare_20260410_014811",
+      "kb_dir": "D:\\_PROJECTS\\prethinker\\kb_store\\stage_03_transitive_chain_c3_bare_20260410_014811",
+      "updated_at_utc": "2026-04-10T05:48:59+00:00",
+      "predicate_signatures": [
+        "ancestor/2",
+        "parent/2"
+      ],
+      "clause_count": 4
+    },
+    "acid_03_temporal_override_c3_bare_20260410_014811": {
+      "ontology_name": "acid_03_temporal_override_c3_bare_20260410_014811",
+      "kb_dir": "D:\\_PROJECTS\\prethinker\\kb_store\\acid_03_temporal_override_c3_bare_20260410_014811",
+      "updated_at_utc": "2026-04-10T05:49:46+00:00",
+      "predicate_signatures": [
+        "allowed/1",
+        "blocked/1",
+        "has_manual_review/1",
+        "has_override/1",
+        "provisional/1",
+        "risky/1",
+        "valid/1"
+      ],
+      "clause_count": 7
+    },
+    "acid_04_alias_pressure_c3_bare_20260410_014811": {
+      "ontology_name": "acid_04_alias_pressure_c3_bare_20260410_014811",
+      "kb_dir": "D:\\_PROJECTS\\prethinker\\kb_store\\acid_04_alias_pressure_c3_bare_20260410_014811",
+      "updated_at_utc": "2026-04-10T05:50:24+00:00",
+      "predicate_signatures": [
+        "ancestor/2",
+        "father/2",
+        "parent/2"
+      ],
+      "clause_count": 5
+    },
+    "acid_05_long_context_lineage_c3_bare_20260410_014811": {
+      "ontology_name": "acid_05_long_context_lineage_c3_bare_20260410_014811",
+      "kb_dir": "D:\\_PROJECTS\\prethinker\\kb_store\\acid_05_long_context_lineage_c3_bare_20260410_014811",
+      "updated_at_utc": "2026-04-10T05:51:38+00:00",
+      "predicate_signatures": [
+        "ancestor/2",
+        "parent/2",
+        "related_to/2"
+      ],
+      "clause_count": 8
     }
   }
 }

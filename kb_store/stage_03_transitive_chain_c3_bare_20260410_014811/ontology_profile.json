@@ -1,0 +1,19 @@
+{
+  "ontology_name": "stage_03_transitive_chain_c3_bare_20260410_014811",
+  "generated_at_utc": "2026-04-10T05:48:59+00:00",
+  "clause_count": 4,
+  "predicate_signatures": [
+    "ancestor/2",
+    "parent/2"
+  ],
+  "fact_predicates": [
+    "parent/2"
+  ],
+  "rule_head_predicates": [
+    "ancestor/2"
+  ],
+  "rule_body_predicates": [
+    "ancestor/2",
+    "parent/2"
+  ]
+}
