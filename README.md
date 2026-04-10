@@ -257,6 +257,24 @@ python scripts/golden_kb.py benchmark-manifest --manifest goldens/manifest.json 
 5. Validation pass (`query_rows` checks against expected status/rows).
 6. Persist corpus/profile and emit run report.
 
+## Turn Decision States
+
+Run reports now include a normalized `decision_state` per turn plus aggregate `decision_state_counts`.
+
+Current mapping is light-touch and observational (no behavior change):
+
+- `commit`:
+  - apply result `status=success`
+- `stage_provisionally`:
+  - apply result `status=skipped` or `status=no_results`
+- `ask_clarification`:
+  - apply result `status=clarification_requested` with no escalation marker
+- `escalate`:
+  - apply result `status=clarification_requested` with escalation marker
+  - examples: clarification loop detected, non-informative answer, max rounds reached
+- `reject`:
+  - parser validation errors or apply `status=validation_error|constraint_error|unknown`
+
 ## Repository Layout
 
 - `kb_pipeline.py`: main orchestration script.

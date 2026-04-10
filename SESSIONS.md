@@ -445,6 +445,29 @@ Verification:
   - `python scripts/golden_kb.py benchmark-manifest --manifest goldens/manifest.json --out-summary tmp/golden_manifest_summary_stage01.json`
   - result: `stage_01_facts_only` run passed and `kb_match=true`
 
+## Session 15: Decision-State Layer (Commit/Stage/Clarify/Escalate/Reject)
+
+Date: 2026-04-10 UTC
+
+Outcome:
+
+- added a normalized turn-level decision-state mapping in `kb_pipeline.py`:
+  - `commit`
+  - `stage_provisionally`
+  - `ask_clarification`
+  - `escalate`
+  - `reject`
+- mapping is observational only (no apply-policy behavior changes)
+- run reports now include:
+  - per-turn `decision_state`
+  - aggregate `decision_state_counts`
+- console summary now prints decision-state totals after each run
+
+Notes:
+
+- this creates a clean bridge from raw statuses (`success/skipped/no_results/clarification_requested/validation_error/constraint_error`) to the higher-level workflow states discussed in planning
+- enables future threshold tuning and escalation policy work without re-labelling historical run output
+
 
 
 

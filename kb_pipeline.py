@@ -2633,6 +2633,51 @@ def _apply_to_kb(
     }
 
 
+def _decision_state_for_turn(
+    *,
+    apply_status: str,
+    validation_errors: list[str],
+    clarification_pending_reason: str,
+) -> str:
+    """
+    Map low-level parser/apply outcomes into a light-touch decision state model.
+
+    States:
+    - commit
+    - stage_provisionally
+    - ask_clarification
+    - escalate
+    - reject
+    """
+    if validation_errors:
+        return "reject"
+
+    status = str(apply_status or "unknown").strip().lower()
+    if status in {"validation_error", "constraint_error"}:
+        return "reject"
+
+    if status == "clarification_requested":
+        reason = str(clarification_pending_reason or "").strip().lower()
+        escalation_markers = (
+            "maximum clarification rounds reached",
+            "non-informative",
+            "loop detected",
+            "could not provide",
+            "no clarification answer available",
+        )
+        if any(marker in reason for marker in escalation_markers):
+            return "escalate"
+        return "ask_clarification"
+
+    if status == "success":
+        return "commit"
+
+    if status in {"skipped", "no_results"}:
+        return "stage_provisionally"
+
+    return "reject"
+
+
 def _run_validations(server: Any, validations: list[dict[str, Any]]) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for idx, check in enumerate(validations, start=1):
@@ -3509,6 +3554,11 @@ def main() -> int:
 
         tool_result = apply_row.get("result", {})
         apply_status = str(tool_result.get("status", "unknown"))
+        decision_state = _decision_state_for_turn(
+            apply_status=apply_status,
+            validation_errors=validation_errors,
+            clarification_pending_reason=clarification_pending_reason,
+        )
         turn_rows.append(
             {
                 "turn_index": idx,
@@ -3534,6 +3584,7 @@ def main() -> int:
                 "clarification_question": clarification_question,
                 "apply": apply_row,
                 "apply_status": apply_status,
+                "decision_state": decision_state,
             }
         )
 
@@ -3571,6 +3622,10 @@ def main() -> int:
     clarification_synthetic_answers_total = sum(
         int(row.get("clarification_synthetic_answers_used", 0)) for row in turn_rows
     )
+    decision_state_counts: dict[str, int] = {}
+    for row in turn_rows:
+        state = str(row.get("decision_state", "reject"))
+        decision_state_counts[state] = decision_state_counts.get(state, 0) + 1
 
     overall_ok = parse_fail_count == 0 and apply_fail_count == 0 and validation_pass == validation_total
     current_profile = _build_ontology_profile(kb_name, corpus_clauses)
@@ -3668,6 +3723,7 @@ def main() -> int:
         "turns_clarification_requested": clarification_requests,
         "clarification_rounds_total": clarification_rounds_total,
         "clarification_synthetic_answers_total": clarification_synthetic_answers_total,
+        "decision_state_counts": decision_state_counts,
         "validation_total": validation_total,
         "validation_passed": validation_pass,
         "overall_status": "passed" if overall_ok else "failed",
@@ -3681,6 +3737,7 @@ def main() -> int:
     print(f"Apply failures: {apply_fail_count}")
     print(f"Clarification requests: {clarification_requests} (rounds={clarification_rounds_total})")
     print(f"Synthetic clarification answers used: {clarification_synthetic_answers_total}")
+    print(f"Decision states: {decision_state_counts}")
     print(
         "Ontology drift: "
         f"{ontology_diff.get('change_level')} "
