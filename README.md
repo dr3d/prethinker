@@ -17,6 +17,26 @@ Prethinker is a neuro-symbolic parsing workbench, not a finished parser product.
 This is an open research effort and learning artifact, not a startup pitch.
 If you're evaluating it as a research workbench, it's useful now. If you're evaluating it as production-grade semantic parsing, it's still early.
 
+## Recent Progress (2026-04-10)
+
+- Completed an autonomous safe-mode tuning campaign (scratch/output isolated under `tmp/`).
+- Hardened system prompt rules for:
+  - interrogative routing to `query`
+  - yes/no query shape (no bare atom goals)
+  - retract shape (`retract(<fact_like_term_with_args>).`)
+- Added explicit micro-patterns for ambiguous undo/retract and yes/no status queries.
+- Latest tuned prompt provenance in those runs: `sp-e0a66d9a2fbe`.
+- In the final verification sweep (`resume5`), all targeted probes/rungs passed:
+  - `stage_00_foreign_unseen_probe`
+  - `stage_00_multilingual_probe`
+  - `stage_01_facts_only`
+  - `stage_02_rule_ingest`
+  - `stage_03_transitive_chain`
+  - `acid_03_temporal_override`
+  - `acid_04_alias_pressure`
+  - `acid_05_long_context_lineage`
+- Evidence artifacts for this cycle are currently in `tmp/runs/` (for example `tmp/runs/resume5_summary_20260410_102508.json`) and can be promoted into `kb_runs/` + docs manifests in a publish pass.
+
 ## Neuro-Symbolic Contract
 
 Prethinker is built around a strict contract between neural parsing and symbolic execution:
