@@ -1057,6 +1057,115 @@ def _build_clarification_context_utterance(utterance: str, rounds: list[dict[str
     return "\n".join(lines)
 
 
+def _coerce_synthetic_answer_text(raw: Any) -> str:
+    text = str(raw or "").strip()
+    if not text:
+        return ""
+    text = text.strip("`").strip()
+    text = re.sub(r"^\s*(answer|a)\s*:\s*", "", text, flags=re.IGNORECASE)
+    if len(text) >= 2 and ((text[0] == text[-1] == '"') or (text[0] == text[-1] == "'")):
+        text = text[1:-1].strip()
+    text = re.sub(r"\s+", " ", text).strip()
+    if len(text) > 240:
+        text = text[:240].rstrip()
+    return text
+
+
+def _build_clarification_answer_prompt(
+    *,
+    utterance: str,
+    route: str,
+    question: str,
+    parsed: dict[str, Any],
+    rounds: list[dict[str, Any]],
+) -> str:
+    prior = []
+    for row in rounds:
+        q = str(row.get("question", "")).strip()
+        a = str(row.get("answer", "")).strip()
+        if q or a:
+            prior.append(f"Q: {q}\nA: {a}")
+    prior_text = "\n".join(prior) if prior else "(none)"
+    parsed_view = {
+        "intent": parsed.get("intent"),
+        "logic_string": parsed.get("logic_string"),
+        "ambiguities": parsed.get("ambiguities", []),
+        "clarification_reason": parsed.get("clarification_reason", ""),
+        "uncertainty_score": parsed.get("uncertainty_score"),
+    }
+    return (
+        "/no_think\n"
+        "You are simulating the human speaker answering a clarification question.\n"
+        "Return minified JSON only with keys: answer,confidence,assumption\n"
+        "Rules:\n"
+        "- answer must be short, concrete, and directly answer the question\n"
+        "- if truly unknown, answer must be exactly 'unknown'\n"
+        "- confidence must be numeric in [0,1]\n"
+        "- assumption must be <=12 words\n"
+        "Do not output markdown or extra keys.\n"
+        f"Route: {route}\n"
+        f"Original utterance:\n{utterance}\n"
+        f"Clarification question:\n{question}\n"
+        f"Prior clarification transcript:\n{prior_text}\n"
+        f"Current parse draft:\n{json.dumps(parsed_view, ensure_ascii=False)}\n"
+    )
+
+
+def _generate_synthetic_clarification_answer(
+    *,
+    backend: str,
+    base_url: str,
+    model: str,
+    utterance: str,
+    route: str,
+    question: str,
+    parsed: dict[str, Any],
+    rounds: list[dict[str, Any]],
+    context_length: int,
+    timeout: int,
+    api_key: str | None,
+) -> tuple[str, dict[str, Any]]:
+    prompt = _build_clarification_answer_prompt(
+        utterance=utterance,
+        route=route,
+        question=question,
+        parsed=parsed,
+        rounds=rounds,
+    )
+    response = _call_model_prompt(
+        backend=backend,
+        base_url=base_url,
+        model=model,
+        prompt_text=prompt,
+        context_length=max(512, min(context_length, 2048)),
+        timeout=timeout,
+        api_key=api_key,
+    )
+    parsed_json, _ = _parse_model_json(response, required_keys=["answer"])
+    if isinstance(parsed_json, dict):
+        answer = _coerce_synthetic_answer_text(parsed_json.get("answer", ""))
+        if answer:
+            return answer, {
+                "answer_source": "synthetic_model",
+                "answer_confidence": _clip_01(parsed_json.get("confidence"), fallback=0.5),
+                "answer_assumption": str(parsed_json.get("assumption", "")).strip(),
+            }
+
+    fallback = _coerce_synthetic_answer_text(response.message)
+    if fallback:
+        return fallback, {
+            "answer_source": "synthetic_fallback",
+            "answer_confidence": 0.3,
+            "answer_assumption": "fallback from raw message",
+        }
+
+    return "", {
+        "answer_source": "synthetic_failed",
+        "answer_confidence": 0.0,
+        "answer_assumption": "no parseable synthetic answer",
+    }
+
+
 def _extract_components_from_logic(logic_string: str) -> tuple[list[str], list[str], list[str]]:
     signatures = _extract_goal_signatures(logic_string[:-1] if logic_string.endswith(".") else logic_string)
     predicate_names = sorted({sig.split("/", 1)[0] for sig in signatures if "/" in sig})
@@ -2716,6 +2825,28 @@ def parse_args() -> argparse.Namespace:
         default=2,
         help="Maximum clarification Q&A rounds per utterance before deferring KB apply.",
     )
+    parser.add_argument(
+        "--clarification-answer-model",
+        default="",
+        help="Optional model id used only to answer clarification questions during runs.",
+    )
+    parser.add_argument(
+        "--clarification-answer-backend",
+        choices=["", "lmstudio", "ollama"],
+        default="",
+        help="Optional backend for clarification-answer model. Defaults to --backend.",
+    )
+    parser.add_argument(
+        "--clarification-answer-base-url",
+        default="",
+        help="Optional base URL for clarification-answer model. Defaults to backend default URL.",
+    )
+    parser.add_argument(
+        "--clarification-answer-context-length",
+        type=int,
+        default=1024,
+        help="Context window for clarification-answer model calls.",
+    )
     parser.add_argument("--out", default="", help="Optional output report JSON path.")
     return parser.parse_args()
 
@@ -2799,6 +2930,15 @@ def main() -> int:
     backend = args.backend
     base_url = args.base_url.strip() or DEFAULT_BASE_URLS[backend]
     model = args.model.strip() or DEFAULT_MODELS[backend]
+    clarification_answer_model = args.clarification_answer_model.strip()
+    clarification_answer_backend = (
+        args.clarification_answer_backend.strip().lower() if args.clarification_answer_backend.strip() else backend
+    )
+    clarification_answer_base_url = (
+        args.clarification_answer_base_url.strip() or DEFAULT_BASE_URLS[clarification_answer_backend]
+    )
+    clarification_answer_context_length = max(256, int(args.clarification_answer_context_length))
+    clarification_auto_answer_enabled = bool(clarification_answer_model)
     use_two_pass = bool(args.two_pass and not args.no_two_pass)
     use_split_extraction = bool(args.split_extraction and not args.no_split_extraction)
     clarification_eagerness = _clip_01(args.clarification_eagerness, fallback=0.35)
@@ -2826,6 +2966,13 @@ def main() -> int:
         "strict_types": bool(args.strict_types),
         "clarification_eagerness": clarification_eagerness,
         "max_clarification_rounds": max_clarification_rounds,
+        "clarification_auto_answer_enabled": clarification_auto_answer_enabled,
+        "clarification_answer_backend": clarification_answer_backend if clarification_auto_answer_enabled else "",
+        "clarification_answer_base_url": clarification_answer_base_url if clarification_auto_answer_enabled else "",
+        "clarification_answer_model": clarification_answer_model if clarification_auto_answer_enabled else "",
+        "clarification_answer_context_length": (
+            clarification_answer_context_length if clarification_auto_answer_enabled else 0
+        ),
         "backend_options": {"num_ctx": args.context_length} if backend == "ollama" else {},
     }
 
@@ -2912,6 +3059,14 @@ def main() -> int:
         f"Clarification policy: eagerness={clarification_eagerness:.2f} "
         f"max_rounds={max_clarification_rounds}"
     )
+    if clarification_auto_answer_enabled:
+        print(
+            "Clarification answer model: "
+            f"{clarification_answer_backend}/{clarification_answer_model} @ {clarification_answer_base_url} "
+            f"(ctx={clarification_answer_context_length})"
+        )
+    else:
+        print("Clarification answer model: (disabled)")
     print(f"Prompt file: {prompt_file_path} ({'loaded' if prompt_guide else 'not found/empty'})")
     if env_file_path is not None:
         print(f"Env file: {env_file_path}")
@@ -2950,6 +3105,7 @@ def main() -> int:
         )
         clarification_rounds: list[dict[str, Any]] = []
         scripted_answer_index = 0
+        synthetic_answer_count = 0
         clarification_pending = False
         clarification_pending_reason = ""
         clarification_question = ""
@@ -3197,12 +3353,47 @@ def main() -> int:
                         "round": len(clarification_rounds) + 1,
                         "question": clarification_question,
                         "answer": scripted_answer,
+                        "answer_source": "scenario_scripted",
                         "uncertainty_score": clarification_policy.get("uncertainty_score"),
                         "effective_uncertainty": clarification_policy.get("effective_uncertainty"),
                         "threshold": clarification_policy.get("threshold"),
                     }
                 )
                 continue
+
+            if has_round_capacity and clarification_auto_answer_enabled:
+                synthetic_answer, answer_meta = _generate_synthetic_clarification_answer(
+                    backend=clarification_answer_backend,
+                    base_url=clarification_answer_base_url,
+                    model=clarification_answer_model,
+                    utterance=utterance,
+                    route=route,
+                    question=clarification_question,
+                    parsed=parsed,
+                    rounds=clarification_rounds,
+                    context_length=clarification_answer_context_length,
+                    timeout=args.timeout_seconds,
+                    api_key=api_key,
+                )
+                if synthetic_answer:
+                    synthetic_answer_count += 1
+                    clarification_rounds.append(
+                        {
+                            "round": len(clarification_rounds) + 1,
+                            "question": clarification_question,
+                            "answer": synthetic_answer,
+                            "answer_source": str(answer_meta.get("answer_source", "synthetic_model")),
+                            "answer_confidence": _clip_01(answer_meta.get("answer_confidence"), fallback=0.5),
+                            "answer_assumption": str(answer_meta.get("answer_assumption", "")).strip(),
+                            "uncertainty_score": clarification_policy.get("uncertainty_score"),
+                            "effective_uncertainty": clarification_policy.get("effective_uncertainty"),
+                            "threshold": clarification_policy.get("threshold"),
+                        }
+                    )
+                    continue
+                clarification_pending = True
+                clarification_pending_reason = "Clarification answer model could not provide a usable answer."
+                break
 
             clarification_pending = True
             if not has_round_capacity:
@@ -3265,6 +3456,8 @@ def main() -> int:
                 "clarification_max_rounds": per_turn_max_rounds,
                 "clarification_answers_available": len(scripted_clarification_answers),
                 "clarification_answers_used": scripted_answer_index,
+                "clarification_scripted_answers_used": scripted_answer_index,
+                "clarification_synthetic_answers_used": synthetic_answer_count,
                 "clarification_policy": clarification_policy,
                 "clarification_pending": clarification_pending,
                 "clarification_pending_reason": clarification_pending_reason,
@@ -3304,6 +3497,9 @@ def main() -> int:
     )
     clarification_rounds_total = sum(
         int(row.get("clarification_rounds_used", 0)) for row in turn_rows
+    )
+    clarification_synthetic_answers_total = sum(
+        int(row.get("clarification_synthetic_answers_used", 0)) for row in turn_rows
     )
 
     overall_ok = parse_fail_count == 0 and apply_fail_count == 0 and validation_pass == validation_total
@@ -3401,6 +3597,7 @@ def main() -> int:
         "turn_apply_failures": apply_fail_count,
         "turns_clarification_requested": clarification_requests,
         "clarification_rounds_total": clarification_rounds_total,
+        "clarification_synthetic_answers_total": clarification_synthetic_answers_total,
         "validation_total": validation_total,
         "validation_passed": validation_pass,
         "overall_status": "passed" if overall_ok else "failed",
@@ -3413,6 +3610,7 @@ def main() -> int:
     print(f"Parser failures: {parse_fail_count}")
     print(f"Apply failures: {apply_fail_count}")
     print(f"Clarification requests: {clarification_requests} (rounds={clarification_rounds_total})")
+    print(f"Synthetic clarification answers used: {clarification_synthetic_answers_total}")
     print(
         "Ontology drift: "
         f"{ontology_diff.get('change_level')} "
