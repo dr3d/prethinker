@@ -1,7 +1,40 @@
 {
-  "generated_at_utc": "2026-04-09T19:53:16+00:00",
-  "prompt_versions_total": 3,
+  "generated_at_utc": "2026-04-10T00:33:37+00:00",
+  "prompt_versions_total": 6,
   "prompt_versions": [
+    {
+      "prompt_id": "sp-22ad8a6264f6",
+      "prompt_sha256": "22ad8a6264f6661716a1fc9cf5d983feaa218b029386533f318b07c2ee5e733d",
+      "prompt_snapshot_rel": "prompts/sp-22ad8a6264f6.md",
+      "runs_total": 4,
+      "pass_rate": 0.75,
+      "avg_validation_rate": 0.9,
+      "last_seen_utc": "2026-04-09T23:58:02+00:00",
+      "scenario_count": 4,
+      "model_count": 1
+    },
+    {
+      "prompt_id": "sp-3f2c7de3ecad",
+      "prompt_sha256": "3f2c7de3ecadaefc448752d4bb200c6521158a16375eff7bd7dc8c04fff1bb2f",
+      "prompt_snapshot_rel": "prompts/sp-3f2c7de3ecad.md",
+      "runs_total": 2,
+      "pass_rate": 1.0,
+      "avg_validation_rate": 1.0,
+      "last_seen_utc": "2026-04-09T23:42:40+00:00",
+      "scenario_count": 2,
+      "model_count": 1
+    },
+    {
+      "prompt_id": "sp-1fb66325fca5",
+      "prompt_sha256": "1fb66325fca590012493504cf9937e4e13e69401d141edae7972e7ac48646a7e",
+      "prompt_snapshot_rel": "prompts/sp-1fb66325fca5.md",
+      "runs_total": 2,
+      "pass_rate": 1.0,
+      "avg_validation_rate": 1.0,
+      "last_seen_utc": "2026-04-09T22:13:24+00:00",
+      "scenario_count": 2,
+      "model_count": 1
+    },
     {
       "prompt_id": "legacy-unknown",
       "prompt_sha256": "",
@@ -9,7 +42,7 @@
       "runs_total": 10,
       "pass_rate": 0.8,
       "avg_validation_rate": 1.0,
-      "last_seen_utc": "2026-04-09T19:53:00+00:00",
+      "last_seen_utc": "2026-04-09T19:56:21+00:00",
       "scenario_count": 4,
       "model_count": 2
     },
@@ -20,7 +53,7 @@
       "runs_total": 3,
       "pass_rate": 0.667,
       "avg_validation_rate": 0.778,
-      "last_seen_utc": "2026-04-09T19:53:00+00:00",
+      "last_seen_utc": "2026-04-09T19:56:21+00:00",
       "scenario_count": 2,
       "model_count": 1
     },

@@ -31,7 +31,19 @@ Primary model focus right now: `qwen3.5:9b`.
 5. `kb_scenarios/README.md`
 6. `scripts/render_kb_run_html.py`
 7. `scripts/build_hub_index.py`
-8. `NEXT-CODEX.md` (fast session resume packet)
+
+## Fast Resume (Single-Page Handoff)
+
+- Primary target model: `qwen3.5:9b` (Ollama).
+- Editable prompt source: `modelfiles/semantic_parser_system_prompt.md`.
+- First tuning loop:
+1. Run `kb_scenarios/stage_01_facts_only.json`.
+2. Run `kb_scenarios/stage_02_rule_ingest.json`.
+3. Rebuild docs hub and compare by prompt id.
+- Provenance fields must remain present in runs:
+  - `run_id`
+  - `prompt_provenance`
+  - `system_prompt_text`
 
 ## Core Invariants
 

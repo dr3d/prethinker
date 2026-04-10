@@ -2,9 +2,9 @@
 """
 Build and validate runtime KBs from natural-language utterances via:
 1) local 9B semantic parsing (LM Studio or Ollama)
-2) deterministic MCP server runtime tools (empty_kb/assert/retract/query)
+2) deterministic runtime apply tools (parse-only by default; optional MCP mode)
 
-Designed to work without modifying prolog-reasoning server code.
+Designed to run standalone in this repo without sibling-repo requirements.
 """
 
 from __future__ import annotations
@@ -22,9 +22,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-
-DEFAULT_PROLOG_REPO = Path(r"d:\_PROJECTS\prolog-reasoning")
-DEFAULT_ENV_FILE = DEFAULT_PROLOG_REPO / ".env.local"
+PROJECT_ROOT = Path(__file__).resolve().parent
+DEFAULT_PROLOG_REPO_CANDIDATES = [
+    PROJECT_ROOT / "vendor" / "prolog-reasoning",
+    PROJECT_ROOT / ".runtime" / "prolog-reasoning",
+    PROJECT_ROOT / "prolog-reasoning",
+]
 DEFAULT_BACKEND = "ollama"
 DEFAULT_KB_ROOT = Path("kb_store")
 DEFAULT_KB_NAME = "default"
@@ -59,6 +62,60 @@ def _load_env_file(path: Path) -> None:
         value = value.strip()
         if key and key not in os.environ:
             os.environ[key] = value
+
+
+def _resolve_prolog_repo(cli_value: str) -> Path | None:
+    candidates: list[Path] = []
+    raw = (cli_value or "").strip()
+    if raw:
+        p = Path(raw)
+        candidates.append(p if p.is_absolute() else (Path.cwd() / p))
+
+    env_value = os.environ.get("PRETHINKER_PROLOG_REPO", "").strip()
+    if env_value:
+        p = Path(env_value)
+        candidates.append(p if p.is_absolute() else (Path.cwd() / p))
+
+    candidates.extend(DEFAULT_PROLOG_REPO_CANDIDATES)
+    seen: set[str] = set()
+    for candidate in candidates:
+        try:
+            resolved = candidate.resolve()
+        except OSError:
+            continue
+        key = str(resolved).lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        if (resolved / "src" / "mcp_server.py").exists():
+            return resolved
+    return None
+
+
+def _resolve_env_file(cli_value: str, prolog_repo: Path | None) -> Path | None:
+    raw = (cli_value or "").strip()
+    candidates: list[Path] = []
+    if raw:
+        p = Path(raw)
+        candidates.append(p if p.is_absolute() else (Path.cwd() / p))
+    else:
+        candidates.append(PROJECT_ROOT / ".env.local")
+        if prolog_repo is not None:
+            candidates.append(prolog_repo / ".env.local")
+
+    seen: set[str] = set()
+    for candidate in candidates:
+        try:
+            resolved = candidate.resolve()
+        except OSError:
+            continue
+        key = str(resolved).lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        if resolved.exists():
+            return resolved
+    return None
 
 
 def _load_prompt_guide(path: Path) -> str:
@@ -519,7 +576,12 @@ def _build_runtime_constraint_guide(
 
 
 def _get_api_key() -> str | None:
-    for key in ("PRETHINKER_API_KEY", "LMSTUDIO_API_KEY", "OPENAI_API_KEY"):
+    for key in (
+        "PRETHINKER_API_KEY",
+        "LMSTUDIO_API_KEY",
+        "LM_API_TOKEN",
+        "OPENAI_API_KEY",
+    ):
         value = os.environ.get(key, "").strip()
         if value:
             return value
@@ -1374,6 +1436,56 @@ def _build_assert_fact_fallback_parse(utterance: str) -> dict[str, Any] | None:
         ok, _ = _validate_parsed(parsed)
         return parsed if ok else None
 
+    my_possessive = re.match(
+        r"^\s*my\s+([A-Za-z][A-Za-z0-9_-]*)\s+is\s+([A-Za-z][A-Za-z0-9_'-]*)\.?\s*$",
+        text,
+        re.IGNORECASE,
+    )
+    if my_possessive:
+        relation = _atomize(my_possessive.group(1))
+        value_atom = _atomize(my_possessive.group(2))
+        owner_atom = "me"
+        if relation and value_atom:
+            fact = f"{relation}({value_atom}, {owner_atom})."
+            parsed = _build_parse_payload(
+                intent="assert_fact",
+                logic_string=fact,
+                facts=[fact],
+                rules=[],
+                queries=[],
+                predicates=[relation],
+                atoms=[value_atom, owner_atom],
+                variables=[],
+                rationale="Fallback possessive fact parse from 'my <relation> is <entity>'.",
+            )
+            ok, _ = _validate_parsed(parsed)
+            return parsed if ok else None
+
+    named_possessive = re.match(
+        r"^\s*([A-Za-z][A-Za-z0-9_'-]*)'?s\s+([A-Za-z][A-Za-z0-9_-]*)\s+is\s+([A-Za-z][A-Za-z0-9_'-]*)\.?\s*$",
+        text,
+        re.IGNORECASE,
+    )
+    if named_possessive:
+        owner_atom = _atomize(named_possessive.group(1))
+        relation = _atomize(named_possessive.group(2))
+        value_atom = _atomize(named_possessive.group(3))
+        if owner_atom and relation and value_atom:
+            fact = f"{relation}({value_atom}, {owner_atom})."
+            parsed = _build_parse_payload(
+                intent="assert_fact",
+                logic_string=fact,
+                facts=[fact],
+                rules=[],
+                queries=[],
+                predicates=[relation],
+                atoms=[value_atom, owner_atom],
+                variables=[],
+                rationale="Fallback possessive fact parse from '<owner>'s <relation> is <entity>'.",
+            )
+            ok, _ = _validate_parsed(parsed)
+            return parsed if ok else None
+
     unary = re.match(r"^\s*([A-Za-z][A-Za-z0-9_'-]*)\s+is\s+(?:a|an)\s+([A-Za-z][A-Za-z0-9_-]*)\.?\s*$", text, re.IGNORECASE)
     if unary:
         subject_atom = _atomize(unary.group(1))
@@ -1667,6 +1779,109 @@ def _load_corpus_into_server(server: Any, clauses: list[str]) -> dict[str, Any]:
     if summary["failed_total"] > 0:
         summary["status"] = "partial_failure"
     return summary
+
+
+class ParseOnlyRuntime:
+    """Lightweight local runtime used when MCP is disabled.
+
+    Supports deterministic fact/rule storage and direct fact query lookups.
+    It does not perform full Prolog inference for rule-derived answers.
+    """
+
+    def __init__(self) -> None:
+        self._clauses: set[str] = set()
+
+    def empty_kb(self) -> dict[str, Any]:
+        self._clauses.clear()
+        return {
+            "status": "success",
+            "result_type": "runtime_cleared",
+            "message": "Parse-only runtime cleared.",
+        }
+
+    def assert_fact(self, clause: str) -> dict[str, Any]:
+        normalized = _normalize_clause(clause)
+        if not normalized:
+            return {"status": "validation_error", "message": "Empty fact clause."}
+        if ":-" in normalized:
+            return {"status": "validation_error", "message": "Fact clause contains rule operator."}
+        self._clauses.add(normalized)
+        return {"status": "success", "result_type": "fact_asserted", "fact": normalized}
+
+    def assert_rule(self, clause: str) -> dict[str, Any]:
+        normalized = _normalize_clause(clause)
+        if not normalized:
+            return {"status": "validation_error", "message": "Empty rule clause."}
+        if ":-" not in normalized:
+            return {"status": "validation_error", "message": "Rule clause missing ':-'."}
+        self._clauses.add(normalized)
+        return {"status": "success", "result_type": "rule_asserted", "rule": normalized}
+
+    def retract_fact(self, clause: str) -> dict[str, Any]:
+        normalized = _normalize_clause(clause)
+        if normalized in self._clauses:
+            self._clauses.remove(normalized)
+            return {"status": "success", "result_type": "fact_retracted", "fact": normalized}
+        return {"status": "no_results", "result_type": "no_result", "fact": normalized}
+
+    def query_rows(self, query: str) -> dict[str, Any]:
+        normalized = _normalize_clause(query)
+        body = normalized[:-1] if normalized.endswith(".") else normalized
+        calls = _extract_calls_with_args(body)
+        if len(calls) != 1:
+            return {
+                "status": "no_results",
+                "result_type": "no_result",
+                "predicate": "",
+                "prolog_query": normalized,
+                "variables": [],
+                "rows": [],
+                "num_rows": 0,
+                "reasoning_basis": {"kind": "parse-only", "note": "Only direct fact queries are supported in parse-only runtime."},
+            }
+        predicate, query_args = calls[0]
+        variables = [arg for arg in query_args if re.match(r"^[A-Z_][A-Za-z0-9_]*$", arg)]
+        rows: list[dict[str, Any]] = []
+        for clause in self._clauses:
+            if ":-" in clause:
+                continue
+            fact_calls = _extract_calls_with_args(clause[:-1] if clause.endswith(".") else clause)
+            if len(fact_calls) != 1:
+                continue
+            fact_predicate, fact_args = fact_calls[0]
+            if fact_predicate != predicate or len(fact_args) != len(query_args):
+                continue
+            bindings: dict[str, str] = {}
+            matched = True
+            for query_arg, fact_arg in zip(query_args, fact_args):
+                if re.match(r"^[A-Z_][A-Za-z0-9_]*$", query_arg):
+                    existing = bindings.get(query_arg)
+                    if existing is not None and existing != fact_arg:
+                        matched = False
+                        break
+                    bindings[query_arg] = fact_arg
+                    continue
+                if query_arg != fact_arg:
+                    matched = False
+                    break
+            if matched:
+                row = {name: bindings.get(name, "") for name in variables}
+                rows.append(row)
+        status = "success" if rows else "no_results"
+        result_type = "table" if rows else "no_result"
+        return {
+            "status": status,
+            "result_type": result_type,
+            "predicate": predicate,
+            "prolog_query": normalized,
+            "variables": variables,
+            "rows": rows,
+            "num_rows": len(rows),
+            "reasoning_basis": {
+                "kind": "parse-only",
+                "note": "Direct fact lookup only; no rule inference in parse-only runtime.",
+            },
+        }
 
 
 def _count_top_level_args(args_text: str) -> int:
@@ -2011,9 +2226,32 @@ def _run_validations(server: Any, validations: list[dict[str, Any]]) -> list[dic
     return rows
 
 
+def _skip_validations(validations: list[dict[str, Any]], reason: str) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for idx, check in enumerate(validations, start=1):
+        rows.append(
+            {
+                "id": check.get("id", f"validation_{idx:02d}"),
+                "query": str(check.get("query", "")).strip(),
+                "expected_status": str(check.get("expect_status", "success")).strip(),
+                "result": {
+                    "status": "skipped",
+                    "result_type": "skipped",
+                    "reason": reason,
+                    "num_rows": 0,
+                    "rows": [],
+                    "variables": [],
+                },
+                "passed": True,
+                "reasons": [reason],
+            }
+        )
+    return rows
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Build and validate a runtime KB from natural language using local 9B semantic parsing + MCP server tools."
+        description="Build and validate a runtime KB from natural language using local 9B semantic parsing."
     )
     parser.add_argument(
         "--scenario",
@@ -2031,14 +2269,20 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--context-length", type=int, default=4096, help="Context window for model calls.")
     parser.add_argument("--timeout-seconds", type=int, default=120, help="Network timeout per model call.")
     parser.add_argument(
+        "--runtime",
+        choices=["none", "mcp"],
+        default="none",
+        help="Runtime apply mode. 'none' keeps parsing local-only (default). 'mcp' uses PrologMCPServer.",
+    )
+    parser.add_argument(
         "--prolog-repo",
-        default=str(DEFAULT_PROLOG_REPO),
-        help="Path to prolog-reasoning repo.",
+        default="",
+        help="Optional path containing src/mcp_server.py when --runtime mcp.",
     )
     parser.add_argument(
         "--kb-path",
         default="prolog/core.pl",
-        help="KB path passed to PrologMCPServer (relative to --prolog-repo or absolute).",
+        help="KB path passed to PrologMCPServer when --runtime mcp (relative to --prolog-repo or absolute).",
     )
     parser.add_argument(
         "--kb-root",
@@ -2108,8 +2352,8 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--env-file",
-        default=str(DEFAULT_ENV_FILE),
-        help="Optional env file for LM Studio auth keys.",
+        default="",
+        help="Optional env file for API keys. Defaults to local .env.local when present.",
     )
     parser.add_argument(
         "--two-pass",
@@ -2208,7 +2452,21 @@ def main() -> int:
             type_schema_path = (Path.cwd() / type_schema_path).resolve()
     type_schema = _load_type_schema(type_schema_path) if isinstance(type_schema_path, Path) else {"entities": {}, "predicates": {}}
 
-    _load_env_file(Path(args.env_file))
+    runtime_mode = str(args.runtime).strip().lower()
+    prolog_repo: Path | None = None
+    if runtime_mode == "mcp":
+        prolog_repo = _resolve_prolog_repo(args.prolog_repo)
+        if prolog_repo is None:
+            print("runtime=mcp requested but no Prolog MCP repo was found.")
+            print(
+                "Provide --prolog-repo (containing src/mcp_server.py), "
+                "set PRETHINKER_PROLOG_REPO, or run with --runtime none."
+            )
+            return 2
+
+    env_file_path = _resolve_env_file(args.env_file, prolog_repo)
+    if env_file_path is not None:
+        _load_env_file(env_file_path)
     api_key = _get_api_key()
 
     backend = args.backend
@@ -2234,6 +2492,7 @@ def main() -> int:
         "context_length": args.context_length,
         "classifier_context_length": 2048,
         "timeout_seconds": args.timeout_seconds,
+        "runtime": runtime_mode,
         "two_pass": use_two_pass,
         "split_extraction": use_split_extraction,
         "strict_registry": bool(args.strict_registry),
@@ -2243,32 +2502,40 @@ def main() -> int:
         "backend_options": {"num_ctx": args.context_length} if backend == "ollama" else {},
     }
 
-    prolog_repo = Path(args.prolog_repo).resolve()
-    src_path = prolog_repo / "src"
-    if not src_path.exists():
-        print(f"prolog-reasoning src not found: {src_path}")
-        return 2
-    if str(src_path) not in sys.path:
-        sys.path.insert(0, str(src_path))
+    server: Any
+    if runtime_mode == "mcp":
+        assert prolog_repo is not None
+        src_path = prolog_repo / "src"
+        if not src_path.exists():
+            print(f"prolog-reasoning src not found: {src_path}")
+            return 2
+        if str(src_path) not in sys.path:
+            sys.path.insert(0, str(src_path))
 
-    from mcp_server import PrologMCPServer  # pylint: disable=import-outside-toplevel
+        from mcp_server import PrologMCPServer  # pylint: disable=import-outside-toplevel
 
-    base_kb_path = Path(args.kb_path)
-    if not base_kb_path.is_absolute():
-        base_kb_path = (prolog_repo / base_kb_path).resolve()
+        base_kb_path = Path(args.kb_path)
+        if not base_kb_path.is_absolute():
+            base_kb_path = (prolog_repo / base_kb_path).resolve()
 
-    if args.seed_from_kb_path:
-        server_boot_kb_path = base_kb_path
-    elif corpus_exists:
-        server_boot_kb_path = corpus_path
+        if args.seed_from_kb_path:
+            server_boot_kb_path = base_kb_path
+        elif corpus_exists:
+            server_boot_kb_path = corpus_path
+        else:
+            bootstrap_path = (kb_dir / "_bootstrap_empty.pl").resolve()
+            if not bootstrap_path.exists():
+                bootstrap_path.parent.mkdir(parents=True, exist_ok=True)
+                bootstrap_path.write_text("% Seedless bootstrap KB for named ontology runtime.\n", encoding="utf-8")
+            server_boot_kb_path = bootstrap_path
+
+        server = PrologMCPServer(kb_path=str(server_boot_kb_path))
     else:
-        bootstrap_path = (kb_dir / "_bootstrap_empty.pl").resolve()
-        if not bootstrap_path.exists():
-            bootstrap_path.parent.mkdir(parents=True, exist_ok=True)
-            bootstrap_path.write_text("% Seedless bootstrap KB for named ontology runtime.\n", encoding="utf-8")
-        server_boot_kb_path = bootstrap_path
-
-    server = PrologMCPServer(kb_path=str(server_boot_kb_path))
+        if corpus_exists:
+            server_boot_kb_path = corpus_path
+        else:
+            server_boot_kb_path = (kb_dir / "_bootstrap_parse_only.pl").resolve()
+        server = ParseOnlyRuntime()
 
     should_empty = bool(args.force_empty_kb or is_brand_new_ontology)
     if should_empty:
@@ -2305,6 +2572,7 @@ def main() -> int:
     print(f"Corpus path: {corpus_path}")
     print(f"Backend: {backend} @ {base_url}")
     print(f"Model: {model}")
+    print(f"Runtime: {runtime_mode}")
     print(f"Two-pass: {use_two_pass}")
     print(f"Split extraction: {use_split_extraction}")
     print(
@@ -2312,6 +2580,10 @@ def main() -> int:
         f"max_rounds={max_clarification_rounds}"
     )
     print(f"Prompt file: {prompt_file_path} ({'loaded' if prompt_guide else 'not found/empty'})")
+    if env_file_path is not None:
+        print(f"Env file: {env_file_path}")
+    else:
+        print("Env file: (none)")
     print(
         "Prompt provenance: "
         f"id={prompt_provenance.get('prompt_id') or '(none)'} "
@@ -2671,7 +2943,13 @@ def main() -> int:
             f"apply_status={apply_status} [{status_note}]"
         )
 
-    validation_rows = _run_validations(server, validations)
+    if runtime_mode == "mcp":
+        validation_rows = _run_validations(server, validations)
+    else:
+        validation_rows = _skip_validations(
+            validations,
+            "Skipped: runtime=none (parse-only mode).",
+        )
     validation_pass = sum(1 for row in validation_rows if row.get("passed"))
     validation_total = len(validation_rows)
     parse_fail_count = sum(1 for row in turn_rows if row.get("validation_errors"))
@@ -2757,11 +3035,13 @@ def main() -> int:
         "backend": backend,
         "base_url": base_url,
         "model": model,
+        "runtime": runtime_mode,
         "two_pass": use_two_pass,
         "split_extraction": use_split_extraction,
         "model_settings": model_settings,
         "prompt_file": str(prompt_file_path),
         "prompt_file_loaded": bool(prompt_guide),
+        "env_file_loaded": str(env_file_path) if env_file_path is not None else "",
         "prompt_provenance": prompt_provenance,
         "system_prompt_text": prompt_guide,
         "kb_runtime_boot_path": str(server_boot_kb_path),

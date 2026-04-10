@@ -729,7 +729,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--repo-link",
-        default="https://github.com/dr3d/prolog-reasoning",
+        default="https://github.com/dr3d/prethinker",
         help="Top-nav repository link.",
     )
     parser.add_argument(

@@ -162,7 +162,7 @@ Outcome:
 - created onboarding and migration docs:
   - `AGENT-README.md`
   - this `SESSIONS.md`
-  - `NEXT-CODEX.md` (short resume packet for next session)
+  - `NEXT-CODEX.md` (later consolidated into `AGENT-README.md`)
 
 ## What We Learned
 
@@ -283,6 +283,37 @@ python scripts/build_hub_index.py --reports-dir docs/reports --runs-dir kb_runs 
 
 This repo now has enough structure to run repeated prompt-tuning campaigns without losing history.
 When merged back into `prolog-reasoning`, preserve the provenance contract and hub manifests first; they are the highest-leverage pieces for sustained iteration quality.
+
+## Session 11: Standalone Runtime, Backend Validation, and Repo Cleanup
+
+Date: 2026-04-10 UTC
+
+Outcome:
+
+- made `kb_pipeline.py` standalone by default (`--runtime none`) with optional MCP mode only when requested
+- added parse-only runtime path and skip-validation behavior for parse-only mode
+- removed hard dependency on sibling `prolog-reasoning` for default runs
+- validated both backends on current code:
+  - Ollama (`qwen3.5:9b`) passed smoke run
+  - LM Studio (`qwen/qwen3.5-9b`) passed smoke run after auth + fallback hardening
+- added LM Studio token fallback support via `LM_API_TOKEN`
+- added possessive fallback parse (`my <relation> is <entity>`) to reduce non-JSON extractor failures
+- added one-command rebake script:
+  - `scripts/rebake_semparse.ps1`
+- established `tmp/` workspace usage to keep root clean:
+  - moved root `.tmp*` artifacts into `tmp/`
+  - updated ignore rules for `tmp/`
+- consolidated handoff docs to avoid redundancy:
+  - `NEXT-CODEX.md` renamed/removed from root workflow
+  - `AGENT-README.md` now carries fast-resume + onboarding role
+
+Verification notes:
+
+- Python parse checks passed (`kb_pipeline.py`, `scripts/build_hub_index.py`, `scripts/render_dialog_json_html.py`)
+- Hub index build verified with temp output target under `tmp/docs/`
+- Runtime checks written to:
+  - `tmp/.tmp_check_ollama.json`
+  - `tmp/.tmp_check_lmstudio.json`
 
 
 

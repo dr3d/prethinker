@@ -1,36 +1,56 @@
-﻿{
+{
   "ontologies": {
-    "people_core": {
-      "ontology_name": "people_core",
-      "kb_dir": "D:\\_PROJECTS\\prethinker\\kb_store\\people_core",
-      "updated_at_utc": "2026-04-09T17:04:20+00:00",
-      "predicate_signatures": [
-        "man/1",
-        "mortal/1"
-      ],
-      "clause_count": 2
-    },
-    "people_ladder": {
-      "ontology_name": "people_ladder",
-      "kb_dir": "D:\\_PROJECTS\\prethinker\\kb_store\\people_ladder",
-      "updated_at_utc": "2026-04-09T17:45:14+00:00",
+    "ladder_c1": {
+      "ontology_name": "ladder_c1",
+      "kb_dir": "D:\\_PROJECTS\\prethinker\\kb_store\\ladder_c1",
+      "updated_at_utc": "2026-04-09T22:13:24+00:00",
       "predicate_signatures": [
         "man/1",
         "mortal/1"
       ],
       "clause_count": 3
     },
-    "people_ladder_tune": {
-      "ontology_name": "people_ladder_tune",
-      "kb_dir": "D:\\_PROJECTS\\prethinker\\kb_store\\people_ladder_tune",
-      "updated_at_utc": "2026-04-09T19:27:59+00:00",
+    "ladder_c2": {
+      "ontology_name": "ladder_c2",
+      "kb_dir": "D:\\_PROJECTS\\prethinker\\kb_store\\ladder_c2",
+      "updated_at_utc": "2026-04-09T23:42:40+00:00",
       "predicate_signatures": [
         "man/1",
         "mortal/1"
       ],
       "clause_count": 3
+    },
+    "ladder_diag": {
+      "ontology_name": "ladder_diag",
+      "kb_dir": "D:\\_PROJECTS\\prethinker\\kb_store\\ladder_diag",
+      "updated_at_utc": "2026-04-09T23:52:26+00:00",
+      "predicate_signatures": [
+        "ancestor/2",
+        "parent/2"
+      ],
+      "clause_count": 4
+    },
+    "ladder_c3": {
+      "ontology_name": "ladder_c3",
+      "kb_dir": "D:\\_PROJECTS\\prethinker\\kb_store\\ladder_c3",
+      "updated_at_utc": "2026-04-09T23:56:20+00:00",
+      "predicate_signatures": [
+        "ancestor/2",
+        "man/1",
+        "mortal/1",
+        "parent/2"
+      ],
+      "clause_count": 7
+    },
+    "ladder_diag2": {
+      "ontology_name": "ladder_diag2",
+      "kb_dir": "D:\\_PROJECTS\\prethinker\\kb_store\\ladder_diag2",
+      "updated_at_utc": "2026-04-09T23:55:27+00:00",
+      "predicate_signatures": [
+        "ancestor/2",
+        "parent/2"
+      ],
+      "clause_count": 4
     }
   }
 }
-
-

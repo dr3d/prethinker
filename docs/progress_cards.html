@@ -1,0 +1,1593 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Progress Cards</title>
+  <style>
+    :root {
+      --bg:#f6f8fb; --panel:#ffffff; --ink:#142033; --muted:#5f6f86; --border:#d8e0ea; --head:#f8fbff; --link:#0b66d0;
+      --ok:#1f7a3d; --okbg:#e8f7ec; --warn:#8f3b00; --warnbg:#fff3e6;
+    }
+    html[data-theme="dark"] {
+      --bg:#0f1720; --panel:#1b2430; --ink:#e8eef6; --muted:#a9b6c9; --border:#344456; --head:#223041; --link:#80baff;
+      --ok:#9ce3b2; --okbg:#1e3c2a; --warn:#ffd6a8; --warnbg:#4b2f18;
+    }
+    body { margin:0; background:var(--bg); color:var(--ink); font-family:Segoe UI, Arial, sans-serif; }
+    .wrap { max-width:1200px; margin:0 auto; padding:20px; }
+    .top { display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; }
+    .small { color:var(--muted); font-size:13px; }
+    .nav a, .nav button { border:1px solid var(--border); background:var(--panel); color:var(--ink); text-decoration:none; border-radius:999px; padding:7px 11px; cursor:pointer; }
+    a { color:var(--link); text-decoration:none; }
+    a:hover { text-decoration:underline; }
+    .run { background:var(--panel); border:1px solid var(--border); border-radius:12px; margin-top:14px; overflow:hidden; }
+    .run h3 { margin:0; padding:12px 14px; border-bottom:1px solid var(--border); background:var(--head); font-size:16px; }
+    .chips { display:flex; flex-wrap:wrap; gap:8px; padding:12px 14px 0 14px; }
+    .chip { border:1px solid var(--border); background:var(--panel); border-radius:999px; padding:5px 9px; font-size:12px; }
+    .chip.ok { color:var(--ok); background:var(--okbg); border-color:transparent; }
+    .chip.warn { color:var(--warn); background:var(--warnbg); border-color:transparent; }
+    .links { padding:8px 14px 12px 14px; }
+    .turn { border-top:1px solid var(--border); padding:12px 14px; }
+    .meta { display:flex; gap:12px; flex-wrap:wrap; font-size:12px; color:var(--muted); margin-bottom:8px; }
+    .grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .panel { border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+    .panel h4 { margin:0; padding:8px 10px; font-size:13px; background:var(--head); border-bottom:1px solid var(--border); }
+    .panel pre { margin:0; padding:10px; white-space:pre-wrap; word-break:break-word; font-family:Consolas, "Courier New", monospace; font-size:12px; line-height:1.45; max-height:360px; overflow:auto; }
+    @media (max-width:900px) { .grid { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1 style="margin:0">Progress Cards</h1>
+        <div class="small">Recent run cards showing utterance -> generated parse JSON, with quality dimensions. Generated 2026-04-10 00:33:37 UTC</div>
+      </div>
+      <div class="nav"><a href="index.html">Back to Docs Index</a> <button id="theme">theme</button></div>
+    </div>
+    <section class="run">
+<h3>acid_05_long_context_lineage <span class="small">qwen3.5:9b | 2026-04-09 23:58</span></h3>
+<div class="chips"><span class="chip warn"><b>Status</b> failed</span> <span class="chip"><b>Validation</b> 3/5 (60%)</span> <span class="chip"><b>Parser Reliability</b> 100%</span> <span class="chip"><b>Apply Reliability</b> 100%</span> <span class="chip"><b>Clarification Rate</b> 10%</span> <span class="chip"><b>Avg Uncertainty</b> 5%</span> <span class="chip"><b>Clarification Rounds</b> 0</span></div>
+<div class="small links"><a href="../kb_runs/ladder_c3_acid_05.json">run json</a> | <a href="prompts/sp-22ad8a6264f6.md">prompt snapshot</a></div>
+<article class="turn">
+  <div class="meta"><span>turn 1</span><span>route: assert_fact</span><span>apply: success</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>Ava is a parent of Ben.</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;assert_fact&quot;,
+  &quot;logic_string&quot;: &quot;parent(ava, ben).&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [
+      &quot;ava&quot;,
+      &quot;ben&quot;
+    ],
+    &quot;variables&quot;: [],
+    &quot;predicates&quot;: [
+      &quot;parent&quot;
+    ]
+  },
+  &quot;facts&quot;: [
+    &quot;parent(ava, ben).&quot;
+  ],
+  &quot;rules&quot;: [],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 1.0,
+    &quot;intent&quot;: 1.0,
+    &quot;logic&quot;: 1.0
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.0,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Direct mapping of &#x27;Ava is a parent of Ben&#x27; to fact predicate?&quot;,
+  &quot;clarification_reason&quot;: &quot;Direct mapping of &#x27;Ava is a parent of Ben&#x27; to fact predicate.&quot;,
+  &quot;rationale&quot;: &quot;Direct mapping of &#x27;Ava is a parent of Ben&#x27; to fact predicate.&quot;
+}</pre>
+    </div>
+  </div>
+</article><article class="turn">
+  <div class="meta"><span>turn 2</span><span>route: assert_fact</span><span>apply: success</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>Ben is a parent of Cora.</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;assert_fact&quot;,
+  &quot;logic_string&quot;: &quot;parent(ben, cora).&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [
+      &quot;ben&quot;,
+      &quot;cora&quot;
+    ],
+    &quot;variables&quot;: [],
+    &quot;predicates&quot;: [
+      &quot;parent&quot;
+    ]
+  },
+  &quot;facts&quot;: [
+    &quot;parent(ben, cora).&quot;
+  ],
+  &quot;rules&quot;: [],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 1.0,
+    &quot;intent&quot;: 1.0,
+    &quot;logic&quot;: 1.0
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.0,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Direct mapping of &#x27;Ben is a parent of Cora&#x27; to fact predicate?&quot;,
+  &quot;clarification_reason&quot;: &quot;Direct mapping of &#x27;Ben is a parent of Cora&#x27; to fact predicate&quot;,
+  &quot;rationale&quot;: &quot;Direct mapping of &#x27;Ben is a parent of Cora&#x27; to fact predicate using canonical argument order.&quot;
+}</pre>
+    </div>
+  </div>
+</article><article class="turn">
+  <div class="meta"><span>turn 3</span><span>route: assert_fact</span><span>apply: clarification_requested</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>Cora is a parent of Dax.</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;assert_fact&quot;,
+  &quot;logic_string&quot;: &quot;parent(dax, cora).&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [
+      &quot;cora&quot;,
+      &quot;dax&quot;
+    ],
+    &quot;variables&quot;: [],
+    &quot;predicates&quot;: [
+      &quot;parent&quot;
+    ]
+  },
+  &quot;facts&quot;: [
+    &quot;parent(dax, cora).&quot;
+  ],
+  &quot;rules&quot;: [],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 0.95,
+    &quot;intent&quot;: 1.0,
+    &quot;logic&quot;: 0.9
+  },
+  &quot;ambiguities&quot;: [
+    &quot;Direction of parent relation&quot;
+  ],
+  &quot;needs_clarification&quot;: true,
+  &quot;uncertainty_score&quot;: 0.4,
+  &quot;uncertainty_label&quot;: &quot;medium&quot;,
+  &quot;clarification_question&quot;: &quot;Does &#x27;Cora is a parent of Dax&#x27; mean parent(cora, dax) or parent(dax, cora)?&quot;,
+  &quot;clarification_reason&quot;: &quot;English &#x27;parent of&#x27; maps to predicate order; direction must be confirmed.&quot;,
+  &quot;rationale&quot;: &quot;Utterance asserts a parent relationship. Ontology uses &#x27;parent&#x27;. Direction is ambiguous in natural language without explicit &#x27;X is parent of Y&#x27; vs &#x27;Y is parent of X&#x27; distinction in standard mapping, requiring clarification on argument order.&quot;
+}</pre>
+    </div>
+  </div>
+</article><article class="turn">
+  <div class="meta"><span>turn 4</span><span>route: assert_fact</span><span>apply: success</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>Dax is a parent of Emma.</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;assert_fact&quot;,
+  &quot;logic_string&quot;: &quot;parent(dax, emma).&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [
+      &quot;dax&quot;,
+      &quot;emma&quot;
+    ],
+    &quot;variables&quot;: [],
+    &quot;predicates&quot;: [
+      &quot;parent&quot;
+    ]
+  },
+  &quot;facts&quot;: [
+    &quot;parent(dax, emma).&quot;
+  ],
+  &quot;rules&quot;: [],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 1.0,
+    &quot;intent&quot;: 1.0,
+    &quot;logic&quot;: 1.0
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.0,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Direct mapping of declarative statement to fact using canonical predicate?&quot;,
+  &quot;clarification_reason&quot;: &quot;Direct mapping of declarative statement to fact using canonical predicate.&quot;,
+  &quot;rationale&quot;: &quot;Direct mapping of declarative statement to fact using canonical predicate.&quot;
+}</pre>
+    </div>
+  </div>
+</article><article class="turn">
+  <div class="meta"><span>turn 5</span><span>route: assert_rule</span><span>apply: success</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>If X is a parent of Y then X is an ancestor of Y.</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;assert_rule&quot;,
+  &quot;logic_string&quot;: &quot;ancestor(X, Y) :- parent(X, Y).&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [],
+    &quot;variables&quot;: [
+      &quot;X&quot;,
+      &quot;Y&quot;
+    ],
+    &quot;predicates&quot;: [
+      &quot;ancestor&quot;,
+      &quot;parent&quot;
+    ]
+  },
+  &quot;facts&quot;: [],
+  &quot;rules&quot;: [
+    &quot;ancestor(X, Y) :- parent(X, Y).&quot;
+  ],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 0.95,
+    &quot;intent&quot;: 0.98,
+    &quot;logic&quot;: 0.92
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.05,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Direct mapping of parent to ancestor base case?&quot;,
+  &quot;clarification_reason&quot;: &quot;Direct mapping of parent to ancestor base case.&quot;,
+  &quot;rationale&quot;: &quot;The utterance defines the base case for the ancestor relation using the existing parent predicate, adhering to termination-safe recursion patterns.&quot;
+}</pre>
+    </div>
+  </div>
+</article><article class="turn">
+  <div class="meta"><span>turn 6</span><span>route: assert_rule</span><span>apply: success</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>If X is an ancestor of Y and Y is an ancestor of Z then X is an ancestor of Z.</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;assert_rule&quot;,
+  &quot;logic_string&quot;: &quot;ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [],
+    &quot;variables&quot;: [
+      &quot;X&quot;,
+      &quot;Y&quot;,
+      &quot;Z&quot;
+    ],
+    &quot;predicates&quot;: [
+      &quot;ancestor&quot;,
+      &quot;parent&quot;
+    ]
+  },
+  &quot;facts&quot;: [],
+  &quot;rules&quot;: [
+    &quot;ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).&quot;
+  ],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 0.95,
+    &quot;intent&quot;: 1.0,
+    &quot;logic&quot;: 0.95
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.05,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Ontology predicate &#x27;parent&#x27; assumed to exist for transitive closure?&quot;,
+  &quot;clarification_reason&quot;: &quot;Ontology predicate &#x27;parent&#x27; assumed to exist for transitive closure.&quot;,
+  &quot;rationale&quot;: &quot;Mapped transitive implication to canonical termination-safe recursion pattern using base relation &#x27;parent&#x27;.&quot;
+}</pre>
+    </div>
+  </div>
+</article><article class="turn">
+  <div class="meta"><span>turn 7</span><span>route: other</span><span>apply: skipped</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>Translate this to French: the build passed.</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;other&quot;,
+  &quot;logic_string&quot;: &quot;&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [],
+    &quot;variables&quot;: [],
+    &quot;predicates&quot;: []
+  },
+  &quot;facts&quot;: [],
+  &quot;rules&quot;: [],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 1.0,
+    &quot;intent&quot;: 1.0,
+    &quot;logic&quot;: 1.0
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.0,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Task is translation, not semantic parsing?&quot;,
+  &quot;clarification_reason&quot;: &quot;Task is translation, not semantic parsing.&quot;,
+  &quot;rationale&quot;: &quot;The utterance is a translation request, which falls under the &#x27;other&#x27; intent category. No Prolog logic or semantic parsing is required.&quot;
+}</pre>
+    </div>
+  </div>
+</article><article class="turn">
+  <div class="meta"><span>turn 8</span><span>route: other</span><span>apply: skipped</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>Summarize this in one sentence: lineage reasoning remains deterministic.</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;other&quot;,
+  &quot;logic_string&quot;: &quot;&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [],
+    &quot;variables&quot;: [],
+    &quot;predicates&quot;: []
+  },
+  &quot;facts&quot;: [],
+  &quot;rules&quot;: [],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 1.0,
+    &quot;intent&quot;: 1.0,
+    &quot;logic&quot;: 1.0
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.0,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Input is a summarization request, not a logic assertion or query?&quot;,
+  &quot;clarification_reason&quot;: &quot;Input is a summarization request, not a logic assertion or query.&quot;,
+  &quot;rationale&quot;: &quot;Input is a summarization request, not a logic assertion or query.&quot;
+}</pre>
+    </div>
+  </div>
+</article><article class="turn">
+  <div class="meta"><span>turn 9</span><span>route: other</span><span>apply: skipped</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>Explain in plain words why this might drift over time.</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;other&quot;,
+  &quot;logic_string&quot;: &quot;&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [],
+    &quot;variables&quot;: [],
+    &quot;predicates&quot;: []
+  },
+  &quot;facts&quot;: [],
+  &quot;rules&quot;: [],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 1.0,
+    &quot;intent&quot;: 1.0,
+    &quot;logic&quot;: 1.0
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.0,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: The utterance requests an explanation of a concept rather than asserting facts,?&quot;,
+  &quot;clarification_reason&quot;: &quot;The utterance requests an explanation of a concept rather than asserting facts,&quot;,
+  &quot;rationale&quot;: &quot;The utterance requests an explanation of a concept rather than asserting facts, rules, or queries, so it is routed as &#x27;other&#x27; with no Prolog logic string.&quot;
+}</pre>
+    </div>
+  </div>
+</article><article class="turn">
+  <div class="meta"><span>turn 10</span><span>route: other</span><span>apply: skipped</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>Format this as bullet points: parser, validator, runtime.</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;other&quot;,
+  &quot;logic_string&quot;: &quot;&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [],
+    &quot;variables&quot;: [],
+    &quot;predicates&quot;: []
+  },
+  &quot;facts&quot;: [],
+  &quot;rules&quot;: [],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 1.0,
+    &quot;intent&quot;: 1.0,
+    &quot;logic&quot;: 1.0
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.0,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Task is formatting instruction, not semantic parsing?&quot;,
+  &quot;clarification_reason&quot;: &quot;Task is formatting instruction, not semantic parsing.&quot;,
+  &quot;rationale&quot;: &quot;User requested formatting of the prompt instructions into bullet points. This is an &#x27;other&#x27; task (formatting/rewrite) rather than asserting facts, rules, or queries. No Prolog logic is generated.&quot;
+}</pre>
+    </div>
+  </div>
+</article><article class="turn">
+  <div class="meta"><span>turn 11</span><span>route: retract</span><span>apply: no_results</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>Actually, retract that: parent(cora, dax).</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;retract&quot;,
+  &quot;logic_string&quot;: &quot;retract(parent(cora, dax)).&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [
+      &quot;cora&quot;,
+      &quot;dax&quot;,
+      &quot;parent&quot;
+    ],
+    &quot;variables&quot;: [],
+    &quot;predicates&quot;: [
+      &quot;retract&quot;
+    ]
+  },
+  &quot;facts&quot;: [
+    &quot;parent(cora, dax).&quot;
+  ],
+  &quot;rules&quot;: [],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 1.0,
+    &quot;intent&quot;: 1.0,
+    &quot;logic&quot;: 1.0
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.0,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: User explicitly requests retraction of a specific fact?&quot;,
+  &quot;clarification_reason&quot;: &quot;User explicitly requests retraction of a specific fact.&quot;,
+  &quot;rationale&quot;: &quot;User explicitly requests retraction of a specific fact.&quot;
+}</pre>
+    </div>
+  </div>
+</article><article class="turn">
+  <div class="meta"><span>turn 12</span><span>route: assert_fact</span><span>apply: clarification_requested</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>Cora is a parent of Dean.</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;assert_fact&quot;,
+  &quot;logic_string&quot;: &quot;parent(dean, cora).&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [
+      &quot;cora&quot;,
+      &quot;dean&quot;
+    ],
+    &quot;variables&quot;: [],
+    &quot;predicates&quot;: [
+      &quot;parent&quot;
+    ]
+  },
+  &quot;facts&quot;: [
+    &quot;parent(dean, cora).&quot;
+  ],
+  &quot;rules&quot;: [],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 0.95,
+    &quot;intent&quot;: 1.0,
+    &quot;logic&quot;: 0.9
+  },
+  &quot;ambiguities&quot;: [
+    &quot;Direction of parent relation&quot;
+  ],
+  &quot;needs_clarification&quot;: true,
+  &quot;uncertainty_score&quot;: 0.4,
+  &quot;uncertainty_label&quot;: &quot;medium&quot;,
+  &quot;clarification_question&quot;: &quot;Does &#x27;Cora is a parent of Dean&#x27; mean parent(cora, dean) or parent(dean, cora)?&quot;,
+  &quot;clarification_reason&quot;: &quot;English &#x27;A is parent of B&#x27; maps to parent(A, B), but user&quot;,
+  &quot;rationale&quot;: &quot;The utterance asserts a parent-child relationship. The canonical mapping for &#x27;A is parent of B&#x27; is parent(A, B). However, the user wrote &#x27;Cora is a parent of Dean&#x27;, which semantically means Cora is the parent and Dean is the child. The initial draft `parent(dean, cora)` incorrectly reversed the roles. Correcting to `parent(cora, dean)` aligns with standard English semantics where the subject is the parent.&quot;
+}</pre>
+    </div>
+  </div>
+</article><article class="turn">
+  <div class="meta"><span>turn 13</span><span>route: assert_fact</span><span>apply: success</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>Dean is a parent of Emma.</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;assert_fact&quot;,
+  &quot;logic_string&quot;: &quot;parent(dean, emma).&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [
+      &quot;dean&quot;,
+      &quot;emma&quot;
+    ],
+    &quot;variables&quot;: [],
+    &quot;predicates&quot;: [
+      &quot;parent&quot;
+    ]
+  },
+  &quot;facts&quot;: [
+    &quot;parent(dean, emma).&quot;
+  ],
+  &quot;rules&quot;: [],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 1.0,
+    &quot;intent&quot;: 1.0,
+    &quot;logic&quot;: 1.0
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.0,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Direct mapping of &#x27;Dean is a parent of Emma&#x27; to fact predicate?&quot;,
+  &quot;clarification_reason&quot;: &quot;Direct mapping of &#x27;Dean is a parent of Emma&#x27; to fact predicate.&quot;,
+  &quot;rationale&quot;: &quot;Direct mapping of &#x27;Dean is a parent of Emma&#x27; to fact predicate.&quot;
+}</pre>
+    </div>
+  </div>
+</article><article class="turn">
+  <div class="meta"><span>turn 14</span><span>route: other</span><span>apply: skipped</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>Rewrite this text with fewer words: we should validate everything.</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;other&quot;,
+  &quot;logic_string&quot;: &quot;&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [],
+    &quot;variables&quot;: [],
+    &quot;predicates&quot;: []
+  },
+  &quot;facts&quot;: [],
+  &quot;rules&quot;: [],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 1.0,
+    &quot;intent&quot;: 1.0,
+    &quot;logic&quot;: 1.0
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.0,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Task is text rewriting, not semantic parsing?&quot;,
+  &quot;clarification_reason&quot;: &quot;Task is text rewriting, not semantic parsing.&quot;,
+  &quot;rationale&quot;: &quot;User request is for text rewriting, which falls under out-of-scope tasks.&quot;
+}</pre>
+    </div>
+  </div>
+</article><article class="turn">
+  <div class="meta"><span>turn 15</span><span>route: other</span><span>apply: skipped</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>Translate this to Spanish: confidence stays low for ambiguity.</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;other&quot;,
+  &quot;logic_string&quot;: &quot;&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [],
+    &quot;variables&quot;: [],
+    &quot;predicates&quot;: []
+  },
+  &quot;facts&quot;: [],
+  &quot;rules&quot;: [],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 1.0,
+    &quot;intent&quot;: 1.0,
+    &quot;logic&quot;: 1.0
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.0,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Task is translation, not semantic parsing?&quot;,
+  &quot;clarification_reason&quot;: &quot;Task is translation, not semantic parsing.&quot;,
+  &quot;rationale&quot;: &quot;User requested translation to Spanish; no Prolog logic or fact assertion required.&quot;
+}</pre>
+    </div>
+  </div>
+</article><article class="turn">
+  <div class="meta"><span>turn 16</span><span>route: query</span><span>apply: success</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>Who is Ava&#x27;s ancestor?</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;query&quot;,
+  &quot;logic_string&quot;: &quot;ancestor(ava, Who).&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [
+      &quot;ava&quot;
+    ],
+    &quot;variables&quot;: [
+      &quot;Who&quot;
+    ],
+    &quot;predicates&quot;: [
+      &quot;ancestor&quot;
+    ]
+  },
+  &quot;facts&quot;: [],
+  &quot;rules&quot;: [],
+  &quot;queries&quot;: [
+    &quot;ancestor(ava, Who).&quot;
+  ],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 0.95,
+    &quot;intent&quot;: 1.0,
+    &quot;logic&quot;: 0.95
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.1,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: The utterance is a direct query for a specific binding (Who) given?&quot;,
+  &quot;clarification_reason&quot;: &quot;The utterance is a direct query for a specific binding (Who) given&quot;,
+  &quot;rationale&quot;: &quot;The utterance is a direct query for a specific binding (Who) given a fixed subject (Ava) and relation (ancestor). No entities are missing or ambiguous.&quot;
+}</pre>
+    </div>
+  </div>
+</article><article class="turn">
+  <div class="meta"><span>turn 17</span><span>route: query</span><span>apply: success</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>Who is Dean&#x27;s parent?</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;query&quot;,
+  &quot;logic_string&quot;: &quot;parent(dean, Who).&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [
+      &quot;dean&quot;
+    ],
+    &quot;variables&quot;: [
+      &quot;Who&quot;
+    ],
+    &quot;predicates&quot;: [
+      &quot;parent&quot;
+    ]
+  },
+  &quot;facts&quot;: [],
+  &quot;rules&quot;: [],
+  &quot;queries&quot;: [
+    &quot;parent(dean, Who).&quot;
+  ],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 0.95,
+    &quot;intent&quot;: 1.0,
+    &quot;logic&quot;: 1.0
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.05,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Direct query for a specific fact using the &#x27;parent&#x27; predicate with &#x27;dean&#x27;?&quot;,
+  &quot;clarification_reason&quot;: &quot;Direct query for a specific fact using the &#x27;parent&#x27; predicate with &#x27;dean&#x27;&quot;,
+  &quot;rationale&quot;: &quot;Direct query for a specific fact using the &#x27;parent&#x27; predicate with &#x27;dean&#x27; as the subject and a variable for the parent.&quot;
+}</pre>
+    </div>
+  </div>
+</article><article class="turn">
+  <div class="meta"><span>turn 18</span><span>route: retract</span><span>apply: success</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>Actually, retract that: parent(dax, emma).</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;retract&quot;,
+  &quot;logic_string&quot;: &quot;retract(parent(dax, emma)).&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [
+      &quot;dax&quot;,
+      &quot;emma&quot;,
+      &quot;parent&quot;
+    ],
+    &quot;variables&quot;: [],
+    &quot;predicates&quot;: [
+      &quot;retract&quot;
+    ]
+  },
+  &quot;facts&quot;: [
+    &quot;parent(dax, emma).&quot;
+  ],
+  &quot;rules&quot;: [],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 1.0,
+    &quot;intent&quot;: 1.0,
+    &quot;logic&quot;: 1.0
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.0,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: User explicitly requests retraction of a specific fact?&quot;,
+  &quot;clarification_reason&quot;: &quot;User explicitly requests retraction of a specific fact.&quot;,
+  &quot;rationale&quot;: &quot;User explicitly requests retraction of a specific fact.&quot;
+}</pre>
+    </div>
+  </div>
+</article><article class="turn">
+  <div class="meta"><span>turn 19</span><span>route: assert_rule</span><span>apply: success</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>If X is a parent of Y then X is related_to Y.</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;assert_rule&quot;,
+  &quot;logic_string&quot;: &quot;related_to(X, Y) :- parent(X, Y).&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [],
+    &quot;variables&quot;: [
+      &quot;X&quot;,
+      &quot;Y&quot;
+    ],
+    &quot;predicates&quot;: [
+      &quot;parent&quot;,
+      &quot;related_to&quot;
+    ]
+  },
+  &quot;facts&quot;: [],
+  &quot;rules&quot;: [
+    &quot;related_to(X, Y) :- parent(X, Y).&quot;
+  ],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 0.95,
+    &quot;intent&quot;: 1.0,
+    &quot;logic&quot;: 0.95
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.05,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Semantic mapping is direct and unambiguous?&quot;,
+  &quot;clarification_reason&quot;: &quot;Semantic mapping is direct and unambiguous.&quot;,
+  &quot;rationale&quot;: &quot;Mapped &#x27;is related_to&#x27; to &#x27;related_to&#x27; predicate based on &#x27;parent&#x27; relation. Used canonical base-relation recursion pattern structure for transitivity readiness, though only base case is needed here.&quot;
+}</pre>
+    </div>
+  </div>
+</article><article class="turn">
+  <div class="meta"><span>turn 20</span><span>route: assert_rule</span><span>apply: success</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>If X is related_to Y and Y is related_to Z then X is related_to Z.</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;assert_rule&quot;,
+  &quot;logic_string&quot;: &quot;related_to(X, Z) :- related_to(X, Y), related_to(Y, Z).&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [],
+    &quot;variables&quot;: [
+      &quot;X&quot;,
+      &quot;Y&quot;,
+      &quot;Z&quot;
+    ],
+    &quot;predicates&quot;: [
+      &quot;related_to&quot;
+    ]
+  },
+  &quot;facts&quot;: [],
+  &quot;rules&quot;: [
+    &quot;related_to(X, Z) :- related_to(X, Y), related_to(Y, Z).&quot;
+  ],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 0.95,
+    &quot;intent&quot;: 1.0,
+    &quot;logic&quot;: 0.95
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.05,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Statement clearly defines transitive closure?&quot;,
+  &quot;clarification_reason&quot;: &quot;Statement clearly defines transitive closure.&quot;,
+  &quot;rationale&quot;: &quot;The utterance expresses a standard transitive property. The rule maps the head predicate &#x27;related_to&#x27; to a body involving the same predicate, forming a chain. This matches the canonical transitive rule pattern.&quot;
+}</pre>
+    </div>
+  </div>
+</article>
+</section>
+<section class="run">
+<h3>stage_03_transitive_chain <span class="small">qwen3.5:9b | 2026-04-09 23:56</span></h3>
+<div class="chips"><span class="chip ok"><b>Status</b> passed</span> <span class="chip"><b>Validation</b> 1/1 (100%)</span> <span class="chip"><b>Parser Reliability</b> 100%</span> <span class="chip"><b>Apply Reliability</b> 100%</span> <span class="chip"><b>Clarification Rate</b> 0%</span> <span class="chip"><b>Avg Uncertainty</b> 2%</span> <span class="chip"><b>Clarification Rounds</b> 0</span></div>
+<div class="small links"><a href="../kb_runs/ladder_c3_stage_03.json">run json</a> | <a href="prompts/sp-22ad8a6264f6.md">prompt snapshot</a></div>
+<article class="turn">
+  <div class="meta"><span>turn 1</span><span>route: assert_fact</span><span>apply: success</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>Alice is a parent of Bob.</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;assert_fact&quot;,
+  &quot;logic_string&quot;: &quot;parent(alice, bob).&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [
+      &quot;alice&quot;,
+      &quot;bob&quot;
+    ],
+    &quot;variables&quot;: [],
+    &quot;predicates&quot;: [
+      &quot;parent&quot;
+    ]
+  },
+  &quot;facts&quot;: [
+    &quot;parent(alice, bob).&quot;
+  ],
+  &quot;rules&quot;: [],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 1.0,
+    &quot;intent&quot;: 1.0,
+    &quot;logic&quot;: 1.0
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.0,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Direct mapping of declarative statement to fact predicate?&quot;,
+  &quot;clarification_reason&quot;: &quot;Direct mapping of declarative statement to fact predicate.&quot;,
+  &quot;rationale&quot;: &quot;Direct mapping of declarative statement to fact predicate.&quot;
+}</pre>
+    </div>
+  </div>
+</article><article class="turn">
+  <div class="meta"><span>turn 2</span><span>route: assert_fact</span><span>apply: success</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>Bob is a parent of Carol.</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;assert_fact&quot;,
+  &quot;logic_string&quot;: &quot;parent(bob, carol).&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [
+      &quot;bob&quot;,
+      &quot;carol&quot;
+    ],
+    &quot;variables&quot;: [],
+    &quot;predicates&quot;: [
+      &quot;parent&quot;
+    ]
+  },
+  &quot;facts&quot;: [
+    &quot;parent(bob, carol).&quot;
+  ],
+  &quot;rules&quot;: [],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 1.0,
+    &quot;intent&quot;: 1.0,
+    &quot;logic&quot;: 1.0
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.0,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Direct mapping of declarative statement to fact using canonical predicate?&quot;,
+  &quot;clarification_reason&quot;: &quot;Direct mapping of declarative statement to fact using canonical predicate.&quot;,
+  &quot;rationale&quot;: &quot;Direct mapping of declarative statement to fact using canonical predicate.&quot;
+}</pre>
+    </div>
+  </div>
+</article><article class="turn">
+  <div class="meta"><span>turn 3</span><span>route: assert_rule</span><span>apply: success</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>If X is a parent of Y then X is an ancestor of Y.</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;assert_rule&quot;,
+  &quot;logic_string&quot;: &quot;ancestor(X, Y) :- parent(X, Y).&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [],
+    &quot;variables&quot;: [
+      &quot;X&quot;,
+      &quot;Y&quot;
+    ],
+    &quot;predicates&quot;: [
+      &quot;ancestor&quot;,
+      &quot;parent&quot;
+    ]
+  },
+  &quot;facts&quot;: [],
+  &quot;rules&quot;: [
+    &quot;ancestor(X, Y) :- parent(X, Y).&quot;
+  ],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 0.95,
+    &quot;intent&quot;: 0.98,
+    &quot;logic&quot;: 0.92
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.05,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: No missing entities or relation direction ambiguity?&quot;,
+  &quot;clarification_reason&quot;: &quot;No missing entities or relation direction ambiguity.&quot;,
+  &quot;rationale&quot;: &quot;The utterance defines a direct implication from parent to ancestor. Using the canonical termination-safe pattern, the rule maps parent(X, Y) directly to ancestor(X, Y) without left-recursion.&quot;
+}</pre>
+    </div>
+  </div>
+</article><article class="turn">
+  <div class="meta"><span>turn 4</span><span>route: assert_rule</span><span>apply: success</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>If X is an ancestor of Y and Y is an ancestor of Z then X is an ancestor of Z.</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;assert_rule&quot;,
+  &quot;logic_string&quot;: &quot;ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [],
+    &quot;variables&quot;: [
+      &quot;X&quot;,
+      &quot;Y&quot;,
+      &quot;Z&quot;
+    ],
+    &quot;predicates&quot;: [
+      &quot;ancestor&quot;,
+      &quot;parent&quot;
+    ]
+  },
+  &quot;facts&quot;: [],
+  &quot;rules&quot;: [
+    &quot;ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).&quot;
+  ],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 0.95,
+    &quot;intent&quot;: 1.0,
+    &quot;logic&quot;: 0.95
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.05,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Ontology contains parent predicate; transitivity rule derived safely?&quot;,
+  &quot;clarification_reason&quot;: &quot;Ontology contains parent predicate; transitivity rule derived safely.&quot;,
+  &quot;rationale&quot;: &quot;The utterance expresses transitive closure over the ancestor relation. Per Termination Safety Constraints, the rule must use the base relation &#x27;parent&#x27; in the first body literal to avoid left-recursion. The canonical pattern is applied.&quot;
+}</pre>
+    </div>
+  </div>
+</article>
+</section>
+<section class="run">
+<h3>stage_02_rule_ingest <span class="small">qwen3.5:9b | 2026-04-09 23:54</span></h3>
+<div class="chips"><span class="chip ok"><b>Status</b> passed</span> <span class="chip"><b>Validation</b> 1/1 (100%)</span> <span class="chip"><b>Parser Reliability</b> 100%</span> <span class="chip"><b>Apply Reliability</b> 100%</span> <span class="chip"><b>Clarification Rate</b> 0%</span> <span class="chip"><b>Avg Uncertainty</b> 2%</span> <span class="chip"><b>Clarification Rounds</b> 0</span></div>
+<div class="small links"><a href="../kb_runs/ladder_c3_stage_02.json">run json</a> | <a href="prompts/sp-22ad8a6264f6.md">prompt snapshot</a></div>
+<article class="turn">
+  <div class="meta"><span>turn 1</span><span>route: assert_fact</span><span>apply: skipped</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>Socrates is a man.</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;assert_fact&quot;,
+  &quot;logic_string&quot;: &quot;man(socrates).&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [
+      &quot;socrates&quot;
+    ],
+    &quot;variables&quot;: [],
+    &quot;predicates&quot;: [
+      &quot;man&quot;
+    ]
+  },
+  &quot;facts&quot;: [
+    &quot;man(socrates).&quot;
+  ],
+  &quot;rules&quot;: [],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 1.0,
+    &quot;intent&quot;: 1.0,
+    &quot;logic&quot;: 1.0
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.0,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Direct declarative statement mapping to a fact?&quot;,
+  &quot;clarification_reason&quot;: &quot;Direct declarative statement mapping to a fact.&quot;,
+  &quot;rationale&quot;: &quot;Direct declarative statement mapping to a fact.&quot;
+}</pre>
+    </div>
+  </div>
+</article><article class="turn">
+  <div class="meta"><span>turn 2</span><span>route: assert_rule</span><span>apply: success</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>If someone is a man then they are mortal.</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;assert_rule&quot;,
+  &quot;logic_string&quot;: &quot;mortal(X) :- man(X).&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [],
+    &quot;variables&quot;: [
+      &quot;X&quot;
+    ],
+    &quot;predicates&quot;: [
+      &quot;man&quot;,
+      &quot;mortal&quot;
+    ]
+  },
+  &quot;facts&quot;: [],
+  &quot;rules&quot;: [
+    &quot;mortal(X) :- man(X).&quot;
+  ],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 0.95,
+    &quot;intent&quot;: 0.98,
+    &quot;logic&quot;: 0.95
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.05,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Statement is a clear universal implication?&quot;,
+  &quot;clarification_reason&quot;: &quot;Statement is a clear universal implication.&quot;,
+  &quot;rationale&quot;: &quot;Mapped &#x27;If someone is a man then they are mortal&#x27; to rule head &#x27;mortal(X)&#x27; with body &#x27;man(X)&#x27;.&quot;
+}</pre>
+    </div>
+  </div>
+</article>
+</section>
+<section class="run">
+<h3>stage_01_facts_only <span class="small">qwen3.5:9b | 2026-04-09 23:53</span></h3>
+<div class="chips"><span class="chip ok"><b>Status</b> passed</span> <span class="chip"><b>Validation</b> 2/2 (100%)</span> <span class="chip"><b>Parser Reliability</b> 100%</span> <span class="chip"><b>Apply Reliability</b> 100%</span> <span class="chip"><b>Clarification Rate</b> 0%</span> <span class="chip"><b>Avg Uncertainty</b> 0%</span> <span class="chip"><b>Clarification Rounds</b> 0</span></div>
+<div class="small links"><a href="../kb_runs/ladder_c3_stage_01.json">run json</a> | <a href="prompts/sp-22ad8a6264f6.md">prompt snapshot</a></div>
+<article class="turn">
+  <div class="meta"><span>turn 1</span><span>route: assert_fact</span><span>apply: success</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>Socrates is a man.</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;assert_fact&quot;,
+  &quot;logic_string&quot;: &quot;man(socrates).&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [
+      &quot;socrates&quot;
+    ],
+    &quot;variables&quot;: [],
+    &quot;predicates&quot;: [
+      &quot;man&quot;
+    ]
+  },
+  &quot;facts&quot;: [
+    &quot;man(socrates).&quot;
+  ],
+  &quot;rules&quot;: [],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 1.0,
+    &quot;intent&quot;: 1.0,
+    &quot;logic&quot;: 1.0
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.0,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Direct mapping of declarative statement to fact predicate?&quot;,
+  &quot;clarification_reason&quot;: &quot;Direct mapping of declarative statement to fact predicate.&quot;,
+  &quot;rationale&quot;: &quot;Direct mapping of declarative statement to fact predicate.&quot;
+}</pre>
+    </div>
+  </div>
+</article><article class="turn">
+  <div class="meta"><span>turn 2</span><span>route: assert_fact</span><span>apply: success</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>Plato is a man.</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;assert_fact&quot;,
+  &quot;logic_string&quot;: &quot;man(plato).&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [
+      &quot;plato&quot;
+    ],
+    &quot;variables&quot;: [],
+    &quot;predicates&quot;: [
+      &quot;man&quot;
+    ]
+  },
+  &quot;facts&quot;: [
+    &quot;man(plato).&quot;
+  ],
+  &quot;rules&quot;: [],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 1.0,
+    &quot;intent&quot;: 1.0,
+    &quot;logic&quot;: 1.0
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.0,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Direct mapping of declarative statement &#x27;Plato is a man&#x27; to fact predicate?&quot;,
+  &quot;clarification_reason&quot;: &quot;Direct mapping of declarative statement &#x27;Plato is a man&#x27; to fact predicate.&quot;,
+  &quot;rationale&quot;: &quot;Direct mapping of declarative statement &#x27;Plato is a man&#x27; to fact predicate.&quot;
+}</pre>
+    </div>
+  </div>
+</article>
+</section>
+<section class="run">
+<h3>stage_02_rule_ingest <span class="small">qwen3.5:9b | 2026-04-09 23:42</span></h3>
+<div class="chips"><span class="chip ok"><b>Status</b> passed</span> <span class="chip"><b>Validation</b> 1/1 (100%)</span> <span class="chip"><b>Parser Reliability</b> 100%</span> <span class="chip"><b>Apply Reliability</b> 100%</span> <span class="chip"><b>Clarification Rate</b> 0%</span> <span class="chip"><b>Avg Uncertainty</b> 2%</span> <span class="chip"><b>Clarification Rounds</b> 0</span></div>
+<div class="small links"><a href="../kb_runs/ladder_c2_stage_02.json">run json</a> | <a href="prompts/sp-3f2c7de3ecad.md">prompt snapshot</a></div>
+<article class="turn">
+  <div class="meta"><span>turn 1</span><span>route: assert_fact</span><span>apply: skipped</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>Socrates is a man.</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;assert_fact&quot;,
+  &quot;logic_string&quot;: &quot;man(socrates).&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [
+      &quot;socrates&quot;
+    ],
+    &quot;variables&quot;: [],
+    &quot;predicates&quot;: [
+      &quot;man&quot;
+    ]
+  },
+  &quot;facts&quot;: [
+    &quot;man(socrates).&quot;
+  ],
+  &quot;rules&quot;: [],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 1.0,
+    &quot;intent&quot;: 1.0,
+    &quot;logic&quot;: 1.0
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.0,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Direct mapping of declarative statement to fact predicate?&quot;,
+  &quot;clarification_reason&quot;: &quot;Direct mapping of declarative statement to fact predicate.&quot;,
+  &quot;rationale&quot;: &quot;Direct mapping of declarative statement to fact predicate.&quot;
+}</pre>
+    </div>
+  </div>
+</article><article class="turn">
+  <div class="meta"><span>turn 2</span><span>route: assert_rule</span><span>apply: success</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>If someone is a man then they are mortal.</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;assert_rule&quot;,
+  &quot;logic_string&quot;: &quot;mortal(X) :- man(X).&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [],
+    &quot;variables&quot;: [
+      &quot;X&quot;
+    ],
+    &quot;predicates&quot;: [
+      &quot;man&quot;,
+      &quot;mortal&quot;
+    ]
+  },
+  &quot;facts&quot;: [],
+  &quot;rules&quot;: [
+    &quot;mortal(X) :- man(X).&quot;
+  ],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 0.95,
+    &quot;intent&quot;: 0.98,
+    &quot;logic&quot;: 0.92
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.05,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Direct mapping of universal implication &#x27;If man then mortal&#x27; to Prolog rule?&quot;,
+  &quot;clarification_reason&quot;: &quot;Direct mapping of universal implication &#x27;If man then mortal&#x27; to Prolog rule&quot;,
+  &quot;rationale&quot;: &quot;Direct mapping of universal implication &#x27;If man then mortal&#x27; to Prolog rule using canonical predicate &#x27;man&#x27;.&quot;
+}</pre>
+    </div>
+  </div>
+</article>
+</section>
+<section class="run">
+<h3>stage_01_facts_only <span class="small">qwen3.5:9b | 2026-04-09 23:41</span></h3>
+<div class="chips"><span class="chip ok"><b>Status</b> passed</span> <span class="chip"><b>Validation</b> 2/2 (100%)</span> <span class="chip"><b>Parser Reliability</b> 100%</span> <span class="chip"><b>Apply Reliability</b> 100%</span> <span class="chip"><b>Clarification Rate</b> 0%</span> <span class="chip"><b>Avg Uncertainty</b> 0%</span> <span class="chip"><b>Clarification Rounds</b> 0</span></div>
+<div class="small links"><a href="../kb_runs/ladder_c2_stage_01.json">run json</a> | <a href="prompts/sp-3f2c7de3ecad.md">prompt snapshot</a></div>
+<article class="turn">
+  <div class="meta"><span>turn 1</span><span>route: assert_fact</span><span>apply: success</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>Socrates is a man.</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;assert_fact&quot;,
+  &quot;logic_string&quot;: &quot;man(socrates).&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [
+      &quot;socrates&quot;
+    ],
+    &quot;variables&quot;: [],
+    &quot;predicates&quot;: [
+      &quot;man&quot;
+    ]
+  },
+  &quot;facts&quot;: [
+    &quot;man(socrates).&quot;
+  ],
+  &quot;rules&quot;: [],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 1.0,
+    &quot;intent&quot;: 1.0,
+    &quot;logic&quot;: 1.0
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.0,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Direct mapping of declarative statement to fact predicate?&quot;,
+  &quot;clarification_reason&quot;: &quot;Direct mapping of declarative statement to fact predicate.&quot;,
+  &quot;rationale&quot;: &quot;Direct mapping of declarative statement to fact predicate.&quot;
+}</pre>
+    </div>
+  </div>
+</article><article class="turn">
+  <div class="meta"><span>turn 2</span><span>route: assert_fact</span><span>apply: success</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>Plato is a man.</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;assert_fact&quot;,
+  &quot;logic_string&quot;: &quot;man(plato).&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [
+      &quot;plato&quot;
+    ],
+    &quot;variables&quot;: [],
+    &quot;predicates&quot;: [
+      &quot;man&quot;
+    ]
+  },
+  &quot;facts&quot;: [
+    &quot;man(plato).&quot;
+  ],
+  &quot;rules&quot;: [],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 1.0,
+    &quot;intent&quot;: 1.0,
+    &quot;logic&quot;: 1.0
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.0,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Direct mapping of declarative statement to fact predicate?&quot;,
+  &quot;clarification_reason&quot;: &quot;Direct mapping of declarative statement to fact predicate.&quot;,
+  &quot;rationale&quot;: &quot;Direct mapping of declarative statement to fact predicate.&quot;
+}</pre>
+    </div>
+  </div>
+</article>
+</section>
+<section class="run">
+<h3>stage_02_rule_ingest <span class="small">qwen3.5:9b | 2026-04-09 22:13</span></h3>
+<div class="chips"><span class="chip ok"><b>Status</b> passed</span> <span class="chip"><b>Validation</b> 1/1 (100%)</span> <span class="chip"><b>Parser Reliability</b> 100%</span> <span class="chip"><b>Apply Reliability</b> 100%</span> <span class="chip"><b>Clarification Rate</b> 0%</span> <span class="chip"><b>Avg Uncertainty</b> 2%</span> <span class="chip"><b>Clarification Rounds</b> 0</span></div>
+<div class="small links"><a href="../kb_runs/ladder_c1_stage_02.json">run json</a> | <a href="prompts/sp-1fb66325fca5.md">prompt snapshot</a></div>
+<article class="turn">
+  <div class="meta"><span>turn 1</span><span>route: assert_fact</span><span>apply: skipped</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>Socrates is a man.</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;assert_fact&quot;,
+  &quot;logic_string&quot;: &quot;man(socrates).&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [
+      &quot;socrates&quot;
+    ],
+    &quot;variables&quot;: [],
+    &quot;predicates&quot;: [
+      &quot;man&quot;
+    ]
+  },
+  &quot;facts&quot;: [
+    &quot;man(socrates).&quot;
+  ],
+  &quot;rules&quot;: [],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 1.0,
+    &quot;intent&quot;: 1.0,
+    &quot;logic&quot;: 1.0
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.0,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Direct mapping of declarative statement to fact using canonical predicate &#x27;man&#x27;?&quot;,
+  &quot;clarification_reason&quot;: &quot;Direct mapping of declarative statement to fact using canonical predicate &#x27;man&#x27;.&quot;,
+  &quot;rationale&quot;: &quot;Direct mapping of declarative statement to fact using canonical predicate &#x27;man&#x27;.&quot;
+}</pre>
+    </div>
+  </div>
+</article><article class="turn">
+  <div class="meta"><span>turn 2</span><span>route: assert_rule</span><span>apply: success</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>If someone is a man then they are mortal.</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;assert_rule&quot;,
+  &quot;logic_string&quot;: &quot;mortal(X) :- man(X).&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [],
+    &quot;variables&quot;: [
+      &quot;X&quot;
+    ],
+    &quot;predicates&quot;: [
+      &quot;man&quot;,
+      &quot;mortal&quot;
+    ]
+  },
+  &quot;facts&quot;: [],
+  &quot;rules&quot;: [
+    &quot;mortal(X) :- man(X).&quot;
+  ],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 0.95,
+    &quot;intent&quot;: 0.98,
+    &quot;logic&quot;: 0.92
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.05,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: The utterance expresses a universal conditional statement mapping &#x27;man&#x27; to &#x27;mortal&#x27;, which?&quot;,
+  &quot;clarification_reason&quot;: &quot;The utterance expresses a universal conditional statement mapping &#x27;man&#x27; to &#x27;mortal&#x27;, which&quot;,
+  &quot;rationale&quot;: &quot;The utterance expresses a universal conditional statement mapping &#x27;man&#x27; to &#x27;mortal&#x27;, which maps directly to a Prolog rule. No entities are unresolved.&quot;
+}</pre>
+    </div>
+  </div>
+</article>
+</section>
+<section class="run">
+<h3>stage_01_facts_only <span class="small">qwen3.5:9b | 2026-04-09 22:11</span></h3>
+<div class="chips"><span class="chip ok"><b>Status</b> passed</span> <span class="chip"><b>Validation</b> 2/2 (100%)</span> <span class="chip"><b>Parser Reliability</b> 100%</span> <span class="chip"><b>Apply Reliability</b> 100%</span> <span class="chip"><b>Clarification Rate</b> 0%</span> <span class="chip"><b>Avg Uncertainty</b> 0%</span> <span class="chip"><b>Clarification Rounds</b> 0</span></div>
+<div class="small links"><a href="../kb_runs/ladder_c1_stage_01.json">run json</a> | <a href="prompts/sp-1fb66325fca5.md">prompt snapshot</a></div>
+<article class="turn">
+  <div class="meta"><span>turn 1</span><span>route: assert_fact</span><span>apply: success</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>Socrates is a man.</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;assert_fact&quot;,
+  &quot;logic_string&quot;: &quot;man(socrates).&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [
+      &quot;socrates&quot;
+    ],
+    &quot;variables&quot;: [],
+    &quot;predicates&quot;: [
+      &quot;man&quot;
+    ]
+  },
+  &quot;facts&quot;: [
+    &quot;man(socrates).&quot;
+  ],
+  &quot;rules&quot;: [],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 1.0,
+    &quot;intent&quot;: 1.0,
+    &quot;logic&quot;: 1.0
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.0,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Direct mapping of declarative statement to fact predicate?&quot;,
+  &quot;clarification_reason&quot;: &quot;Direct mapping of declarative statement to fact predicate.&quot;,
+  &quot;rationale&quot;: &quot;Direct mapping of declarative statement to fact predicate.&quot;
+}</pre>
+    </div>
+  </div>
+</article><article class="turn">
+  <div class="meta"><span>turn 2</span><span>route: assert_fact</span><span>apply: success</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>Plato is a man.</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;assert_fact&quot;,
+  &quot;logic_string&quot;: &quot;man(plato).&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [
+      &quot;plato&quot;
+    ],
+    &quot;variables&quot;: [],
+    &quot;predicates&quot;: [
+      &quot;man&quot;
+    ]
+  },
+  &quot;facts&quot;: [
+    &quot;man(plato).&quot;
+  ],
+  &quot;rules&quot;: [],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 1.0,
+    &quot;intent&quot;: 1.0,
+    &quot;logic&quot;: 1.0
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.0,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Direct mapping of declarative statement to fact predicate?&quot;,
+  &quot;clarification_reason&quot;: &quot;Direct mapping of declarative statement to fact predicate.&quot;,
+  &quot;rationale&quot;: &quot;Direct mapping of declarative statement to fact predicate.&quot;
+}</pre>
+    </div>
+  </div>
+</article>
+</section>
+  </div>
+  <script>
+    (() => {
+      const root = document.documentElement;
+      const key = 'hub_theme_pref';
+      const btn = document.getElementById('theme');
+      const saved = localStorage.getItem(key);
+      const pref = (saved === 'dark' || saved === 'light') ? saved : (matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      root.setAttribute('data-theme', pref);
+      const sync = () => (btn.textContent = 'theme: ' + (root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'));
+      sync();
+      btn.addEventListener('click', () => {
+        const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-theme', next);
+        localStorage.setItem(key, next);
+        sync();
+      });
+    })();
+  </script>
+</body>
+</html>

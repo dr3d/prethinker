@@ -79,7 +79,7 @@ If you're evaluating it as a research workbench, it's useful now. If you're eval
 
 - `kb_pipeline.py`: main orchestration script.
 - `scripts/render_kb_run_html.py`: converts `kb_runs/*.json` into themed transcript HTML.
-- `scripts/render_dialog_json_html.py`: shared transcript renderer pulled from `prolog-reasoning`.
+- `scripts/render_dialog_json_html.py`: shared transcript renderer (ported in-repo).
 - `modelfiles/`: model and prompt assets.
   - `qwen35-9b-semantic-parser.Modelfile`
   - `semantic_parser_system_prompt.md` (human-editable prompt pack)
@@ -97,8 +97,11 @@ If you're evaluating it as a research workbench, it's useful now. If you're eval
 - Access to local model server:
   - Ollama (`http://127.0.0.1:11434`) or
   - LM Studio (`http://127.0.0.1:1234`)
-- Local `prolog-reasoning` repo available at:
-  - `d:\_PROJECTS\prolog-reasoning`
+- If LM Studio auth is enabled, set one of:
+  - `LM_API_TOKEN` (LM Studio native), or
+  - `LMSTUDIO_API_KEY` / `PRETHINKER_API_KEY`
+- No sibling repo is required for default runs (`--runtime none`, parse-only apply path).
+- Optional only: `--runtime mcp` can integrate with a Prolog MCP runtime when explicitly configured.
 
 ## Quick Start
 
@@ -226,7 +229,7 @@ See `kb_scenarios/README.md` for details.
 - Prompt snapshot/version lineage (`prompt_id`, sha, immutable snapshot files).
 - Fallback handling improvements for parser failure slices.
 - Progressive scenario ladder for controlled complexity ramp.
-- Imported transcript renderer stack from `prolog-reasoning` and added `kb_run -> html` conversion flow.
+- Added `kb_run -> html` conversion flow with in-repo transcript renderer stack.
 - Docs run explorer with filters + prompt evolution table + JSON manifests.
 
 ## Known Gaps
@@ -248,7 +251,7 @@ See `kb_scenarios/README.md` for details.
 - Prompt pack: `modelfiles/semantic_parser_system_prompt.md`
 - Agent onboarding: `AGENT-README.md`
 - Session/migration log: `SESSIONS.md`
-- Next-session handoff: `NEXT-CODEX.md`
+- Next-session handoff: `AGENT-README.md`
 - Execution roadmap: `ROADMAP.md`
 - Pipeline: `kb_pipeline.py`
 - KB run HTML renderer: `scripts/render_kb_run_html.py`

@@ -18,6 +18,18 @@ Last updated: 2026-04-09
 ollama create qwen35-semparse -f modelfiles/qwen35-9b-semantic-parser.Modelfile
 ```
 
+## Rebuild From Latest Prompt (One Command)
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/rebake_semparse.ps1
+```
+
+Optional smoke test:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/rebake_semparse.ps1 -RunSmokeTest
+```
+
 ## Run
 
 ```bash
