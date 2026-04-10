@@ -2,7 +2,7 @@
 
 This project is a local workbench for building a high-accuracy semantic parser (Qwen 3.5 9B first) that converts natural language into Prolog-ready logic and applies it into named, persistent knowledge bases.
 
-Last updated: 2026-04-09
+Last updated: 2026-04-10
 
 ## Honest Snapshot (For NSAI Readers)
 
@@ -16,6 +16,92 @@ Prethinker is a neuro-symbolic parsing workbench, not a finished parser product.
 
 This is an open research effort and learning artifact, not a startup pitch.
 If you're evaluating it as a research workbench, it's useful now. If you're evaluating it as production-grade semantic parsing, it's still early.
+
+## Neuro-Symbolic Contract
+
+Prethinker is built around a strict contract between neural parsing and symbolic execution:
+
+1. LLM role: propose structured logic operations from natural language (`assert_fact`, `assert_rule`, `query`, `retract`, `other`).
+2. Deterministic gate: validate schema, normalize clauses, and enforce optional registry/type constraints.
+3. Symbolic runtime role: apply accepted operations to persistent KB state using deterministic Prolog-style execution.
+4. Evidence layer: run scenario validations and record run/prompt/model provenance in `kb_runs/` and `docs/`.
+
+The LLM proposes. The runtime decides.
+
+## What This Is / Is Not
+
+What this is:
+
+- A research workbench for neuro-symbolic semantic parsing.
+- A deterministic state-mutation pipeline with persistent KB namespaces.
+- A prompt/runtime tuning harness with reproducible run provenance.
+
+What this is not:
+
+- A general chatbot framework.
+- A production-ready zero-error semantic parser.
+- A "reasoning by vibes" stack where model output is blindly trusted.
+
+## Architecture Sketch
+
+```mermaid
+flowchart LR
+  U[Utterance] --> R[Route + Two-Pass Parse]
+  R --> V[Deterministic Validation and Normalization]
+  V --> C{Constraint Gate}
+  C -->|pass| A[Core Runtime Apply]
+  C -->|fail| E[Constraint or Validation Error]
+  A --> Q[Deterministic Query and Validation Checks]
+  Q --> P[Run Provenance and Reports]
+```
+
+## Current Evidence (As of 2026-04-10)
+
+From `docs/data/runs_manifest.json`:
+
+- Total tracked runs: `23`
+- Passed: `19`
+- Failed: `4`
+- Pass rate: `82%`
+
+| Tier | Scenario | Evidence Snapshot | What It Shows | Known Risk |
+|---|---|---|---|---|
+| Base facts | `stage_01_facts_only` | multiple passing runs | stable fact extraction/apply loop | still prompt-sensitive on wording variants |
+| Rule ingest | `stage_02_rule_ingest` | multiple passing runs | basic rule extraction and apply is viable | predicate phrasing drift still possible |
+| Transitive chain | `stage_03_transitive_chain` | at least one passing run | recursive rule patterns can work | runtime/model latency and timeout sensitivity |
+| Acid temporal | `acid_03_temporal_override` | failing sample present | catches hard temporal/override behavior gaps | unresolved policy + extraction brittleness |
+| Acid long context | `acid_05_long_context_lineage` | failing sample present | catches lineage and longer-chain weakness | context/alias robustness not yet reliable |
+
+## Model Operation Modes
+
+| Mode | Backend + Model | System Prompt Source | Best Use | Tradeoff |
+|---|---|---|---|---|
+| Fast iteration | LM Studio + stock model (`qwen/qwen3.5-9b`) | runtime `--prompt-file` injection | rapid prompt tuning loops | prompt is not baked into the model artifact |
+| Stable local deploy | Ollama + baked tag (`qwen35-semparse:9b`) | Modelfile `SYSTEM` block | reproducible local deployment/testing | requires rebake when prompt changes |
+| Baseline control | Ollama + stock tag (`qwen3.5:9b`) | runtime `--prompt-file` injection | A/B against baked model behavior | easier to drift if launch params vary |
+
+## Reproduce In 5 Minutes
+
+This is the fastest end-to-end sanity path:
+
+1. Ensure Ollama is running and model is available:
+
+```bash
+ollama list
+```
+
+2. Run rung 1 with deterministic core runtime:
+
+```bash
+python kb_pipeline.py --backend ollama --base-url http://127.0.0.1:11434 --model qwen35-semparse:9b --runtime core --prompt-file modelfiles/semantic_parser_system_prompt.md --scenario kb_scenarios/stage_01_facts_only.json --kb-name quickstart_core --out kb_runs/quickstart_stage_01_core.json
+```
+
+3. Success criteria:
+
+- `Validation: 2/2 passed`
+- `Parser failures: 0`
+- `Apply failures: 0`
+- `Overall: passed`
 
 ## Goals
 
