@@ -1,0 +1,223 @@
+{
+  "generated_at_utc": "2026-04-11T03:07:00+00:00",
+  "backend": "ollama",
+  "models": [
+    {
+      "model": "qwen3.5:4b",
+      "overall_passes": 6,
+      "overall_total": 6,
+      "validation_passed": 15,
+      "validation_total": 15,
+      "parser_failures_total": 0,
+      "apply_failures_total": 0,
+      "clarification_requests_total": 0,
+      "scenarios": [
+        {
+          "scenario": "stage_01_facts_only",
+          "status": "passed",
+          "validation_passed": 2,
+          "validation_total": 2,
+          "parser_failures": 0,
+          "apply_failures": 0,
+          "clarification_requests": 0,
+          "run_json_path": "kb_runs/size_matrix/20260411/ollama_qwen3_5_4b_stage_01_facts_only.json"
+        },
+        {
+          "scenario": "stage_02_rule_ingest",
+          "status": "passed",
+          "validation_passed": 1,
+          "validation_total": 1,
+          "parser_failures": 0,
+          "apply_failures": 0,
+          "clarification_requests": 0,
+          "run_json_path": "kb_runs/size_matrix/20260411/ollama_qwen3_5_4b_stage_02_rule_ingest.json"
+        },
+        {
+          "scenario": "stage_03_transitive_chain",
+          "status": "passed",
+          "validation_passed": 1,
+          "validation_total": 1,
+          "parser_failures": 0,
+          "apply_failures": 0,
+          "clarification_requests": 0,
+          "run_json_path": "kb_runs/size_matrix/20260411/ollama_qwen3_5_4b_stage_03_transitive_chain.json"
+        },
+        {
+          "scenario": "acid_03_temporal_override",
+          "status": "passed",
+          "validation_passed": 3,
+          "validation_total": 3,
+          "parser_failures": 0,
+          "apply_failures": 0,
+          "clarification_requests": 0,
+          "run_json_path": "kb_runs/size_matrix/20260411/ollama_qwen3_5_4b_acid_03_temporal_override.json"
+        },
+        {
+          "scenario": "acid_04_alias_pressure",
+          "status": "passed",
+          "validation_passed": 3,
+          "validation_total": 3,
+          "parser_failures": 0,
+          "apply_failures": 0,
+          "clarification_requests": 0,
+          "run_json_path": "kb_runs/size_matrix/20260411/ollama_qwen3_5_4b_acid_04_alias_pressure.json"
+        },
+        {
+          "scenario": "acid_05_long_context_lineage",
+          "status": "passed",
+          "validation_passed": 5,
+          "validation_total": 5,
+          "parser_failures": 0,
+          "apply_failures": 0,
+          "clarification_requests": 0,
+          "run_json_path": "kb_runs/size_matrix/20260411/ollama_qwen3_5_4b_acid_05_long_context_lineage.json"
+        }
+      ]
+    },
+    {
+      "model": "qwen3.5:9b",
+      "overall_passes": 6,
+      "overall_total": 6,
+      "validation_passed": 15,
+      "validation_total": 15,
+      "parser_failures_total": 0,
+      "apply_failures_total": 0,
+      "clarification_requests_total": 0,
+      "scenarios": [
+        {
+          "scenario": "stage_01_facts_only",
+          "status": "passed",
+          "validation_passed": 2,
+          "validation_total": 2,
+          "parser_failures": 0,
+          "apply_failures": 0,
+          "clarification_requests": 0,
+          "run_json_path": "kb_runs/size_matrix/20260411/ollama_qwen3_5_9b_stage_01_facts_only.json"
+        },
+        {
+          "scenario": "stage_02_rule_ingest",
+          "status": "passed",
+          "validation_passed": 1,
+          "validation_total": 1,
+          "parser_failures": 0,
+          "apply_failures": 0,
+          "clarification_requests": 0,
+          "run_json_path": "kb_runs/size_matrix/20260411/ollama_qwen3_5_9b_stage_02_rule_ingest.json"
+        },
+        {
+          "scenario": "stage_03_transitive_chain",
+          "status": "passed",
+          "validation_passed": 1,
+          "validation_total": 1,
+          "parser_failures": 0,
+          "apply_failures": 0,
+          "clarification_requests": 0,
+          "run_json_path": "kb_runs/size_matrix/20260411/ollama_qwen3_5_9b_stage_03_transitive_chain.json"
+        },
+        {
+          "scenario": "acid_03_temporal_override",
+          "status": "passed",
+          "validation_passed": 3,
+          "validation_total": 3,
+          "parser_failures": 0,
+          "apply_failures": 0,
+          "clarification_requests": 0,
+          "run_json_path": "kb_runs/size_matrix/20260411/ollama_qwen3_5_9b_acid_03_temporal_override.json"
+        },
+        {
+          "scenario": "acid_04_alias_pressure",
+          "status": "passed",
+          "validation_passed": 3,
+          "validation_total": 3,
+          "parser_failures": 0,
+          "apply_failures": 0,
+          "clarification_requests": 0,
+          "run_json_path": "kb_runs/size_matrix/20260411/ollama_qwen3_5_9b_acid_04_alias_pressure.json"
+        },
+        {
+          "scenario": "acid_05_long_context_lineage",
+          "status": "passed",
+          "validation_passed": 5,
+          "validation_total": 5,
+          "parser_failures": 0,
+          "apply_failures": 0,
+          "clarification_requests": 0,
+          "run_json_path": "kb_runs/size_matrix/20260411/ollama_qwen3_5_9b_acid_05_long_context_lineage.json"
+        }
+      ]
+    },
+    {
+      "model": "qwen3.5:27b",
+      "overall_passes": 6,
+      "overall_total": 6,
+      "validation_passed": 15,
+      "validation_total": 15,
+      "parser_failures_total": 0,
+      "apply_failures_total": 0,
+      "clarification_requests_total": 0,
+      "scenarios": [
+        {
+          "scenario": "stage_01_facts_only",
+          "status": "passed",
+          "validation_passed": 2,
+          "validation_total": 2,
+          "parser_failures": 0,
+          "apply_failures": 0,
+          "clarification_requests": 0,
+          "run_json_path": "kb_runs/size_matrix/20260411/ollama_qwen3_5_27b_stage_01_facts_only.json"
+        },
+        {
+          "scenario": "stage_02_rule_ingest",
+          "status": "passed",
+          "validation_passed": 1,
+          "validation_total": 1,
+          "parser_failures": 0,
+          "apply_failures": 0,
+          "clarification_requests": 0,
+          "run_json_path": "kb_runs/size_matrix/20260411/ollama_qwen3_5_27b_stage_02_rule_ingest.json"
+        },
+        {
+          "scenario": "stage_03_transitive_chain",
+          "status": "passed",
+          "validation_passed": 1,
+          "validation_total": 1,
+          "parser_failures": 0,
+          "apply_failures": 0,
+          "clarification_requests": 0,
+          "run_json_path": "kb_runs/size_matrix/20260411/ollama_qwen3_5_27b_stage_03_transitive_chain.json"
+        },
+        {
+          "scenario": "acid_03_temporal_override",
+          "status": "passed",
+          "validation_passed": 3,
+          "validation_total": 3,
+          "parser_failures": 0,
+          "apply_failures": 0,
+          "clarification_requests": 0,
+          "run_json_path": "kb_runs/size_matrix/20260411/ollama_qwen3_5_27b_acid_03_temporal_override.json"
+        },
+        {
+          "scenario": "acid_04_alias_pressure",
+          "status": "passed",
+          "validation_passed": 3,
+          "validation_total": 3,
+          "parser_failures": 0,
+          "apply_failures": 0,
+          "clarification_requests": 0,
+          "run_json_path": "kb_runs/size_matrix/20260411/ollama_qwen3_5_27b_acid_04_alias_pressure.json"
+        },
+        {
+          "scenario": "acid_05_long_context_lineage",
+          "status": "passed",
+          "validation_passed": 5,
+          "validation_total": 5,
+          "parser_failures": 0,
+          "apply_failures": 0,
+          "clarification_requests": 0,
+          "run_json_path": "kb_runs/size_matrix/20260411/ollama_qwen3_5_27b_acid_05_long_context_lineage.json"
+        }
+      ]
+    }
+  ],
+  "best_model_by_overall_passes": "qwen3.5:4b"
+}

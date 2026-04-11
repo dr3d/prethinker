@@ -1,11 +1,12 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Goldilocks Roundtrip Demo</title>
   <style>
     :root { --bg:#f7f7f5; --panel:#ffffff; --ink:#1f2328; --muted:#57606a; --line:#d0d7de; --link:#0969da; --ok:#1a7f37; --bad:#cf222e; }
+    html[data-theme="dark"] { --bg:#111821; --panel:#1b2430; --ink:#e8eef6; --muted:#a9b6c9; --line:#344456; --link:#80baff; --ok:#7bcf96; --bad:#ff9aa2; }
     body { margin:0; background:var(--bg); color:var(--ink); font-family:Georgia, 'Times New Roman', serif; }
     .wrap { max-width: 1100px; margin: 0 auto; padding: 24px; }
     h1,h2 { margin:0 0 8px 0; }
@@ -15,18 +16,22 @@
     .chip { border:1px solid var(--line); border-radius:999px; padding:4px 10px; font: 12px/1.4 system-ui, -apple-system, Segoe UI, Arial, sans-serif; }
     .chip.pass { color:var(--ok); border-color:#2da44e55; background:#2da44e12; }
     .chip.fail { color:var(--bad); border-color:#cf222e55; background:#cf222e12; }
-    pre { white-space: pre-wrap; word-break: break-word; background:#f6f8fa; border:1px solid var(--line); border-radius:10px; padding:12px; overflow:auto; font: 13px/1.5 Consolas, 'Courier New', monospace; }
-    details { border:1px solid var(--line); border-radius:10px; background:#fff; }
+    pre { white-space: pre-wrap; word-break: break-word; background:color-mix(in srgb, var(--panel) 85%, #f6f8fa); border:1px solid var(--line); border-radius:10px; padding:12px; overflow:auto; font: 13px/1.5 Consolas, 'Courier New', monospace; }
+    details { border:1px solid var(--line); border-radius:10px; background:var(--panel); }
     summary { cursor:pointer; padding:12px 14px; font: 600 14px/1.4 system-ui, -apple-system, Segoe UI, Arial, sans-serif; }
     details > div { padding: 0 12px 12px 12px; }
     a { color: var(--link); text-decoration:none; }
     a:hover { text-decoration:underline; }
-    .topnav { font: 13px/1.4 system-ui, -apple-system, Segoe UI, Arial, sans-serif; margin-bottom: 10px; }
+    .topnav { display:flex; align-items:center; justify-content:space-between; gap:10px; font: 13px/1.4 system-ui, -apple-system, Segoe UI, Arial, sans-serif; margin-bottom: 10px; }
+    .theme-btn { border:1px solid var(--line); background:var(--panel); color:var(--ink); border-radius:999px; padding:6px 10px; cursor:pointer; font: 12px/1.2 system-ui, -apple-system, Segoe UI, Arial, sans-serif; }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <div class="topnav"><a href="index.html">Docs Home</a> | <a href="../README.md">Repo README</a></div>
+    <div class="topnav">
+      <div><a href="index.html">Docs Home</a> | <a href="../README.md">Repo README</a></div>
+      <button id="theme-toggle" class="theme-btn">theme</button>
+    </div>
     <h1>Goldilocks Roundtrip Demo</h1>
     <div class="sub">Input story -> parsed KB -> reconstructed story from KB only.</div>
 
@@ -187,5 +192,30 @@ This is a direct reconstruction from extracted clauses, not a hand-corrected sto
 
     <p style="font:12px/1.4 system-ui, -apple-system, Segoe UI, Arial, sans-serif; color:var(--muted)">Generated 2026-04-10 18:38:29 UTC.</p>
   </div>
+  <script>
+    (() => {
+      const root = document.documentElement;
+      const btn = document.getElementById('theme-toggle');
+      const key = 'hub_theme_pref';
+      const saved = localStorage.getItem(key);
+      const initial = (saved === 'dark' || saved === 'light')
+        ? saved
+        : (matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      const sync = () => {
+        const theme = root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+        if (btn) btn.textContent = 'theme: ' + theme;
+      };
+      root.setAttribute('data-theme', initial);
+      sync();
+      if (btn) {
+        btn.addEventListener('click', () => {
+          const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+          root.setAttribute('data-theme', next);
+          localStorage.setItem(key, next);
+          sync();
+        });
+      }
+    })();
+  </script>
 </body>
 </html>

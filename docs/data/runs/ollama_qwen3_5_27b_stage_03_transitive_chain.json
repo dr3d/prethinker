@@ -1,0 +1,516 @@
+{
+  "run_id": "run-20260411T024541Z-stage_03_transitive_chai-qwen3_5_27b-11416",
+  "run_started_utc": "2026-04-11T02:45:41+00:00",
+  "run_finished_utc": "2026-04-11T02:47:01+00:00",
+  "invocation": {
+    "argv": [
+      "kb_pipeline.py",
+      "--scenario",
+      "kb_scenarios/stage_03_transitive_chain.json",
+      "--backend",
+      "ollama",
+      "--base-url",
+      "http://127.0.0.1:11434",
+      "--model",
+      "qwen3.5:27b",
+      "--context-length",
+      "8192",
+      "--timeout-seconds",
+      "420",
+      "--runtime",
+      "core",
+      "--force-empty-kb",
+      "--kb-name",
+      "sm_ollama_27b_stage_03_transitive_chain",
+      "--out",
+      "kb_runs/size_matrix/20260411/ollama_qwen3_5_27b_stage_03_transitive_chain.json"
+    ],
+    "cwd": "D:\\_PROJECTS\\prethinker"
+  },
+  "scenario": "stage_03_transitive_chain",
+  "scenario_path": "D:\\_PROJECTS\\prethinker\\kb_scenarios\\stage_03_transitive_chain.json",
+  "ontology_kb_name": "sm_ollama_27b_stage_03_transitive_chain",
+  "kb_namespace": {
+    "kb_root": "D:\\_PROJECTS\\prethinker\\kb_store",
+    "kb_dir": "D:\\_PROJECTS\\prethinker\\kb_store\\sm_ollama_27b_stage_03_transitive_chain",
+    "corpus_path": "D:\\_PROJECTS\\prethinker\\kb_store\\sm_ollama_27b_stage_03_transitive_chain\\kb.pl",
+    "profile_path": "D:\\_PROJECTS\\prethinker\\kb_store\\sm_ollama_27b_stage_03_transitive_chain\\ontology_profile.json",
+    "ontology_index_path": "D:\\_PROJECTS\\prethinker\\kb_store\\ontologies_index.json"
+  },
+  "backend": "ollama",
+  "base_url": "http://127.0.0.1:11434",
+  "model": "qwen3.5:27b",
+  "runtime": "core",
+  "two_pass": true,
+  "split_extraction": true,
+  "model_settings": {
+    "temperature": 0,
+    "context_length": 8192,
+    "classifier_context_length": 2048,
+    "timeout_seconds": 420,
+    "runtime": "core",
+    "two_pass": true,
+    "split_extraction": true,
+    "strict_registry": false,
+    "strict_types": false,
+    "clarification_eagerness": 0.35,
+    "max_clarification_rounds": 2,
+    "clarification_auto_answer_enabled": false,
+    "clarification_answer_backend": "",
+    "clarification_answer_base_url": "",
+    "clarification_answer_model": "",
+    "clarification_answer_context_length": 0,
+    "backend_options": {
+      "num_ctx": 8192
+    }
+  },
+  "prompt_file": "D:\\_PROJECTS\\prethinker\\modelfiles\\semantic_parser_system_prompt.md",
+  "prompt_file_loaded": true,
+  "env_file_loaded": "D:\\_PROJECTS\\prethinker\\.env.local",
+  "prompt_provenance": {
+    "status": "ok",
+    "prompt_id": "sp-e0a66d9a2fbe",
+    "prompt_sha256": "e0a66d9a2fbeb5870371ba189583f50de15cdfab6df7a16ef5c9143bc133f6f7",
+    "source_path": "D:\\_PROJECTS\\prethinker\\modelfiles\\semantic_parser_system_prompt.md",
+    "snapshot_path": "D:\\_PROJECTS\\prethinker\\modelfiles\\history\\prompts\\sp-e0a66d9a2fbe.md",
+    "snapshot_created": false,
+    "char_count": 8524,
+    "line_count": 195,
+    "preview": "# Semantic Parser Prompt Pack (Qwen 3.5 9B)\nUse this as maintainable guidance for semantic parsing into Prolog structures.\nKeep behavior language-agnostic, deterministic, and schema-strict.\n## Core Priorities\n1. Output exactly one JSON object that matches the required schema.\n2. Preserve semantic meaning; do not hallucinate entities, facts, or arguments.\n3. Prefer canonical, stable predicate names across turns when semantics match.\n4. Use variables instead of assumptions when referents are unresolved."
+  },
+  "system_prompt_text": "# Semantic Parser Prompt Pack (Qwen 3.5 9B)\n\nUse this as maintainable guidance for semantic parsing into Prolog structures.\nKeep behavior language-agnostic, deterministic, and schema-strict.\n\n## Core Priorities\n\n1. Output exactly one JSON object that matches the required schema.\n2. Preserve semantic meaning; do not hallucinate entities, facts, or arguments.\n3. Prefer canonical, stable predicate names across turns when semantics match.\n4. Use variables instead of assumptions when referents are unresolved.\n5. Keep rationale brief and factual.\n\n## Intent Routing Guidance\n\n- `assert_fact`: declarative claims.\n- `assert_rule`: if/then, whenever, conditional, implication.\n- `query`: questions seeking truth or bindings.\n- `retract`: explicit correction/remove/retract/undo.\n- `other`: out-of-scope tasks (translation, formatting, rewrite).\n- Any interrogative utterance (including non-English) should default to `query` unless it explicitly commands a write action.\n\n## Prolog Mapping Guidance\n\n- Atoms: lowercase snake_case.\n- Variables: Uppercase identifiers.\n- Facts: `predicate(atom, ...).`\n- Rules: `head(...) :- body(...).`\n- Queries: goal with trailing period and no `?-` prefix.\n- Retractions: `retract(<fact>).`\n- Do not emit zero-arity forms like `policy_revoked.`\n- Always include explicit arguments in facts/rules/queries.\n- For yes/no questions, output a query predicate with explicit arguments (or variables), never a bare atom.\n- If required query arguments are unknown, use variables and raise clarification instead of emitting malformed or zero-arity query goals.\n- For `retract`, the inner target must be a fact-like term with explicit arguments (example: `retract(parent(alice,bob)).`).\n- Never emit malformed retractions like `retract(policy_revoked).` with no arguments.\n\n## Relation and Argument Discipline\n\n- For forms like `<subject> is <relation> of <object>`, map to `relation(subject, object).`\n- Keep argument order aligned to semantic subject/object roles.\n- Avoid predicate synonym drift when an ontology already uses a compatible predicate.\n- Do not reverse argument order for \"A is a relation of B\" statements.\n- Example: \"Bob is a parent of Carol.\" -> `parent(bob, carol).` (never `parent(carol, bob).`)\n- Example: \"Carol is an ancestor of Dana.\" -> `ancestor(carol, dana).`\n- If direction is genuinely unclear, use clarification rather than guessing.\n\n## Predicate Discipline\n\n- Reuse the ontology's existing canonical predicate names whenever semantics match.\n- If runtime constraints include a predicate registry, prefer registry canonical names over aliases.\n- Do not silently create near-duplicate predicates (example: `father_of` and `father` for same meaning).\n- If predicate choice is ambiguous and unsafe, raise uncertainty and ask a focused clarification question.\n- Keep lexical consistency across assertion and retraction turns (same concept -> same predicate form).\n\n## Transitive Rule Readiness\n\nWhen utterances express chain logic, emit explicit compositional rules with shared variables.\nPrefer termination-safe recursion patterns over left-recursive forms.\n\nPreferred pattern when a base relation exists:\n\n- `ancestor(X, Z) :- parent(X, Z).`\n- `ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).`\n\nAvoid left-recursive forms that put the head predicate first in the body, such as:\n\n- `ancestor(X, Z) :- ancestor(X, Y), ancestor(Y, Z).`\n- `depends_on(X, Z) :- depends_on(X, Y), depends_on(Y, Z).`\n\nOnly emit such rules when the utterance semantically indicates transitivity or chained implication.\n\n## Termination Safety Constraints (Mandatory)\n\n- Never place the same predicate as the head predicate in the first body literal.\n- If a rule would be left-recursive, rewrite it to a base-relation recursion pattern.\n- For ancestor semantics, prefer this canonical pair:\n  - `ancestor(X, Y) :- parent(X, Y).`\n  - `ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).`\n- For utterances like \"If X is an ancestor of Y and Y is an ancestor of Z then X is an ancestor of Z.\",\n  do not emit `ancestor(X, Z) :- ancestor(X, Y), ancestor(Y, Z).`\n  Instead emit `ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).` when parent relation exists.\n\n## Ambiguity Handling\n\n- If pronouns or entities are unresolved, set `needs_clarification=true`.\n- Use variables rather than invented atoms.\n- Keep ambiguities list short and concrete.\n\n## Uncertainty Scoring Rubric\n\n- 0.00-0.20: clear statement, explicit entities/roles, deterministic mapping.\n- 0.30-0.55: mild ambiguity but safe provisional parse exists.\n- 0.60-0.79: unresolved referent, role-direction ambiguity, or predicate-choice ambiguity.\n- 0.80-1.00: missing required argument, contradictory interpretation, or likely hallucination risk.\n- Unknown pronoun/referent should usually be >= 0.70.\n- Missing essential argument should usually be >= 0.85.\n- If uncertainty >= 0.60 for write intents (`assert_fact`, `assert_rule`, `retract`), prefer clarification.\n\n## Uncertainty And Clarification Contract\n\n- Always emit:\n  - `uncertainty_score` in `[0,1]` where `1` means very uncertain.\n  - `uncertainty_label` as `low | medium | high`.\n  - `clarification_reason` with concrete wording (<= 12 words).\n  - `clarification_question` ending with `?` when uncertainty is non-trivial.\n- If uncertainty is high enough to block safe write intent, set `needs_clarification=true`.\n- Clarification questions should target missing entities, relation direction, or correction target.\n\n## Clarification Question Style\n\n- Ask one focused question at a time.\n- Prefer disambiguation over open-ended chat.\n- Good: \"Do you mean `parent(alex, sam)` or `parent(sam, alex)`?\"\n- Good: \"Who does 'he' refer to in this statement?\"\n\n## Anti-Patterns To Avoid\n\n- Do not invent entities, relations, or arguments not grounded in the utterance/context.\n- Do not collapse unresolved pronouns into a guessed atom.\n- Do not emit left-recursive transitive rules.\n- Do not emit malformed JSON, markdown, or extra wrapper text.\n- Do not switch predicate naming style mid-run without semantic reason.\n- Do not flip subject/object argument order for copular relation statements.\n- Do not wrap entities as nested terms in simple unary facts (avoid `valid(agent(a4)).`).\n- Do not emit bare query atoms like `policy_revoked.` or `revoke_double_approval.`.\n- Do not emit bare retract targets like `retract(compliance_rule).`.\n\n## Few-Shot Micro-Patterns\n\n- Fact mapping:\n  - NL: \"Alice is a parent of Bob.\"\n  - Route: `assert_fact`\n  - Logic: `parent(alice, bob).`\n\n- Directionality check:\n  - NL: \"Bob is a parent of Carol.\"\n  - Route: `assert_fact`\n  - Logic: `parent(bob, carol).`\n\n- Unary adjective/state mapping:\n  - NL: \"Agent a4 is valid.\"\n  - Route: `assert_fact`\n  - Logic: `valid(a4).`\n  - Avoid: `valid(agent(a4)).`\n\n- Attribute possession consistency:\n  - NL: \"Agent a3 has override.\"\n  - Route: `assert_fact`\n  - Logic: `has_override(a3).`\n  - If later utterance says `retract(has_override(a3)).`, it must target the same predicate name.\n\n- Rule mapping:\n  - NL: \"If X is a parent of Y then X is an ancestor of Y.\"\n  - Route: `assert_rule`\n  - Logic: `ancestor(X, Y) :- parent(X, Y).`\n\n- Safe transitive recursion:\n  - NL: \"If X is an ancestor of Y and Y is an ancestor of Z then X is an ancestor of Z.\"\n  - Route: `assert_rule`\n  - Logic: `ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).`\n\n- Quantifier to rule:\n  - NL: \"Every parent of a child is a guardian of that child.\"\n  - Route: `assert_rule`\n  - Logic: `guardian(X, Y) :- parent(X, Y).`\n\n- Explicit correction/retraction:\n  - NL: \"Actually, retract that: parent(alice, bob).\"\n  - Route: `retract`\n  - Logic: `retract(parent(alice, bob)).`\n\n- Ambiguous undo/retract:\n  - NL: \"Actually undo that last compliance rule.\"\n  - Route: `retract`\n  - Logic: `retract(compliance_rule(X)).`\n  - Set `needs_clarification=true` and ask which specific rule instance should be retracted.\n\n- Yes/no status query:\n  - NL: \"Did we cancel the double-approval condition for large payments?\"\n  - Route: `query`\n  - Logic: `double_approval_required(large_payments).`\n  - If uncertain about canonical predicate name, set `needs_clarification=true` and ask for predicate confirmation.\n\n- Unresolved pronoun -> clarification:\n  - NL: \"He is a parent of Bob.\"\n  - Route: `assert_fact`\n  - Suggested parse: `parent(X, bob).`\n  - `needs_clarification`: `true`\n  - Clarification: \"Who does 'he' refer to?\"\n\n- Negation as correction intent:\n  - NL: \"Alice is not a parent of Bob.\"\n  - Route: `retract`\n  - Logic: `retract(parent(alice, bob)).`",
+  "kb_runtime_boot_path": "D:\\_PROJECTS\\prethinker\\kb_store\\sm_ollama_27b_stage_03_transitive_chain\\_bootstrap_core.pl",
+  "kb_init": {
+    "status": "success",
+    "result_type": "runtime_emptied",
+    "message": "Core runtime KB cleared."
+  },
+  "corpus_load": {
+    "status": "skipped",
+    "loaded_total": 0,
+    "message": "No retained corpus to preload."
+  },
+  "corpus_write": {
+    "path": "D:\\_PROJECTS\\prethinker\\kb_store\\sm_ollama_27b_stage_03_transitive_chain\\kb.pl",
+    "clause_count": 4,
+    "status": "written"
+  },
+  "profile_write": {
+    "status": "written",
+    "path": "D:\\_PROJECTS\\prethinker\\kb_store\\sm_ollama_27b_stage_03_transitive_chain\\ontology_profile.json",
+    "predicate_signature_count": 2
+  },
+  "index_write": {
+    "status": "written",
+    "path": "D:\\_PROJECTS\\prethinker\\kb_store\\ontologies_index.json",
+    "ontology_count": 41
+  },
+  "ontology_profile": {
+    "ontology_name": "sm_ollama_27b_stage_03_transitive_chain",
+    "generated_at_utc": "2026-04-11T02:47:00+00:00",
+    "clause_count": 4,
+    "predicate_signatures": [
+      "ancestor/2",
+      "parent/2"
+    ],
+    "fact_predicates": [
+      "parent/2"
+    ],
+    "rule_head_predicates": [
+      "ancestor/2"
+    ],
+    "rule_body_predicates": [
+      "ancestor/2",
+      "parent/2"
+    ]
+  },
+  "ontology_previous_profile": null,
+  "ontology_diff": {
+    "change_level": "new",
+    "requires_confirmation": false,
+    "similarity_to_previous": 0.0,
+    "added_signatures": [
+      "ancestor/2",
+      "parent/2"
+    ],
+    "removed_signatures": [],
+    "previous_signature_count": 0,
+    "current_signature_count": 2
+  },
+  "known_ontology_matches": [
+    {
+      "ontology_name": "ladder_diag",
+      "similarity": 1.0,
+      "shared_signatures": [
+        "ancestor/2",
+        "parent/2"
+      ],
+      "other_signature_count": 2
+    },
+    {
+      "ontology_name": "ladder_diag2",
+      "similarity": 1.0,
+      "shared_signatures": [
+        "ancestor/2",
+        "parent/2"
+      ],
+      "other_signature_count": 2
+    },
+    {
+      "ontology_name": "stage_03_transitive_chain_c1_20260410_013723",
+      "similarity": 1.0,
+      "shared_signatures": [
+        "ancestor/2",
+        "parent/2"
+      ],
+      "other_signature_count": 2
+    },
+    {
+      "ontology_name": "stage_03_transitive_chain_c2_20260410_014357",
+      "similarity": 1.0,
+      "shared_signatures": [
+        "ancestor/2",
+        "parent/2"
+      ],
+      "other_signature_count": 2
+    },
+    {
+      "ontology_name": "stage_03_transitive_chain_c3_bare_20260410_014811",
+      "similarity": 1.0,
+      "shared_signatures": [
+        "ancestor/2",
+        "parent/2"
+      ],
+      "other_signature_count": 2
+    }
+  ],
+  "gear_change": {
+    "change_level": "new",
+    "detected": false,
+    "requires_confirmation": false
+  },
+  "turns_total": 4,
+  "turn_parse_failures": 0,
+  "turn_apply_failures": 0,
+  "turns_clarification_requested": 0,
+  "clarification_rounds_total": 0,
+  "clarification_synthetic_answers_total": 0,
+  "decision_state_counts": {
+    "commit": 4
+  },
+  "validation_total": 1,
+  "validation_passed": 1,
+  "overall_status": "passed",
+  "turns": [
+    {
+      "turn_index": 1,
+      "utterance": "Alice is a parent of Bob.",
+      "route": "assert_fact",
+      "route_source": "model",
+      "repaired": false,
+      "fallback_used": false,
+      "alignment_events": [],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "assert_fact",
+        "logic_string": "parent(alice, bob).",
+        "components": {
+          "atoms": [
+            "alice",
+            "bob"
+          ],
+          "variables": [],
+          "predicates": [
+            "parent"
+          ]
+        },
+        "facts": [
+          "parent(alice, bob)."
+        ],
+        "rules": [],
+        "queries": [],
+        "confidence": {
+          "overall": 0.98,
+          "intent": 0.99,
+          "logic": 0.97
+        },
+        "ambiguities": [],
+        "needs_clarification": false,
+        "uncertainty_score": 0.05,
+        "uncertainty_label": "low",
+        "clarification_question": "Can you clarify this point before I apply it: Direct mapping of subject-object relation to canonical predicate?",
+        "clarification_reason": "Direct mapping of subject-object relation to canonical predicate.",
+        "rationale": "Direct mapping of subject-object relation to canonical predicate."
+      },
+      "validation_errors": [],
+      "clarification_rounds": [],
+      "clarification_rounds_used": 0,
+      "clarification_max_rounds": 2,
+      "clarification_answers_available": 0,
+      "clarification_answers_used": 0,
+      "clarification_scripted_answers_used": 0,
+      "clarification_synthetic_answers_used": 0,
+      "clarification_policy": {
+        "clarification_eagerness": 0.35,
+        "uncertainty_score": 0.05,
+        "effective_uncertainty": 0.05,
+        "threshold": 0.65,
+        "request_clarification": false,
+        "needs_clarification_flag": false
+      },
+      "clarification_pending": false,
+      "clarification_pending_reason": "",
+      "clarification_question": "Can you clarify this point before I apply it: Direct mapping of subject-object relation to canonical predicate?",
+      "apply": {
+        "tool": "assert_fact",
+        "input": "parent(alice, bob).",
+        "result": {
+          "status": "success",
+          "result_type": "fact_asserted",
+          "fact": "parent(alice, bob)."
+        }
+      },
+      "apply_status": "success",
+      "decision_state": "commit"
+    },
+    {
+      "turn_index": 2,
+      "utterance": "Bob is a parent of Carol.",
+      "route": "assert_fact",
+      "route_source": "model",
+      "repaired": false,
+      "fallback_used": false,
+      "alignment_events": [],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "assert_fact",
+        "logic_string": "parent(bob, carol).",
+        "components": {
+          "atoms": [
+            "bob",
+            "carol"
+          ],
+          "variables": [],
+          "predicates": [
+            "parent"
+          ]
+        },
+        "facts": [
+          "parent(bob, carol)."
+        ],
+        "rules": [],
+        "queries": [],
+        "confidence": {
+          "overall": 0.98,
+          "intent": 0.99,
+          "logic": 0.97
+        },
+        "ambiguities": [],
+        "needs_clarification": false,
+        "uncertainty_score": 0.05,
+        "uncertainty_label": "low",
+        "clarification_question": "Can you clarify this point before I apply it: Direct mapping of subject-object relation to canonical predicate?",
+        "clarification_reason": "Direct mapping of subject-object relation to canonical predicate.",
+        "rationale": "Direct mapping of subject-object relation to canonical predicate."
+      },
+      "validation_errors": [],
+      "clarification_rounds": [],
+      "clarification_rounds_used": 0,
+      "clarification_max_rounds": 2,
+      "clarification_answers_available": 0,
+      "clarification_answers_used": 0,
+      "clarification_scripted_answers_used": 0,
+      "clarification_synthetic_answers_used": 0,
+      "clarification_policy": {
+        "clarification_eagerness": 0.35,
+        "uncertainty_score": 0.05,
+        "effective_uncertainty": 0.05,
+        "threshold": 0.65,
+        "request_clarification": false,
+        "needs_clarification_flag": false
+      },
+      "clarification_pending": false,
+      "clarification_pending_reason": "",
+      "clarification_question": "Can you clarify this point before I apply it: Direct mapping of subject-object relation to canonical predicate?",
+      "apply": {
+        "tool": "assert_fact",
+        "input": "parent(bob, carol).",
+        "result": {
+          "status": "success",
+          "result_type": "fact_asserted",
+          "fact": "parent(bob, carol)."
+        }
+      },
+      "apply_status": "success",
+      "decision_state": "commit"
+    },
+    {
+      "turn_index": 3,
+      "utterance": "If X is a parent of Y then X is an ancestor of Y.",
+      "route": "assert_rule",
+      "route_source": "heuristic",
+      "repaired": false,
+      "fallback_used": false,
+      "alignment_events": [],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "assert_rule",
+        "logic_string": "ancestor(X, Y) :- parent(X, Y).",
+        "components": {
+          "atoms": [],
+          "variables": [
+            "X",
+            "Y"
+          ],
+          "predicates": [
+            "ancestor",
+            "parent"
+          ]
+        },
+        "facts": [],
+        "rules": [
+          "ancestor(X, Y) :- parent(X, Y)."
+        ],
+        "queries": [],
+        "confidence": {
+          "overall": 0.98,
+          "intent": 0.99,
+          "logic": 0.97
+        },
+        "ambiguities": [],
+        "needs_clarification": false,
+        "uncertainty_score": 0.05,
+        "uncertainty_label": "low",
+        "clarification_question": "Can you clarify this point before I apply it: Direct mapping of conditional statement to Prolog rule using canonical predicates?",
+        "clarification_reason": "Direct mapping of conditional statement to Prolog rule using canonical predicates.",
+        "rationale": "Direct mapping of conditional statement to Prolog rule using canonical predicates."
+      },
+      "validation_errors": [],
+      "clarification_rounds": [],
+      "clarification_rounds_used": 0,
+      "clarification_max_rounds": 2,
+      "clarification_answers_available": 0,
+      "clarification_answers_used": 0,
+      "clarification_scripted_answers_used": 0,
+      "clarification_synthetic_answers_used": 0,
+      "clarification_policy": {
+        "clarification_eagerness": 0.35,
+        "uncertainty_score": 0.05,
+        "effective_uncertainty": 0.05,
+        "threshold": 0.65,
+        "request_clarification": false,
+        "needs_clarification_flag": false
+      },
+      "clarification_pending": false,
+      "clarification_pending_reason": "",
+      "clarification_question": "Can you clarify this point before I apply it: Direct mapping of conditional statement to Prolog rule using canonical predicates?",
+      "apply": {
+        "tool": "assert_rule",
+        "input": "ancestor(X, Y) :- parent(X, Y).",
+        "result": {
+          "status": "success",
+          "result_type": "rule_asserted",
+          "rule": "ancestor(X, Y) :- parent(X, Y)."
+        }
+      },
+      "apply_status": "success",
+      "decision_state": "commit"
+    },
+    {
+      "turn_index": 4,
+      "utterance": "If X is an ancestor of Y and Y is an ancestor of Z then X is an ancestor of Z.",
+      "route": "assert_rule",
+      "route_source": "heuristic",
+      "repaired": false,
+      "fallback_used": false,
+      "alignment_events": [],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "assert_rule",
+        "logic_string": "ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).",
+        "components": {
+          "atoms": [],
+          "variables": [
+            "X",
+            "Y",
+            "Z"
+          ],
+          "predicates": [
+            "ancestor",
+            "parent"
+          ]
+        },
+        "facts": [],
+        "rules": [
+          "ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z)."
+        ],
+        "queries": [],
+        "confidence": {
+          "overall": 0.95,
+          "intent": 0.98,
+          "logic": 0.92
+        },
+        "ambiguities": [],
+        "needs_clarification": false,
+        "uncertainty_score": 0.15,
+        "uncertainty_label": "low",
+        "clarification_question": "Can you clarify this point before I apply it: Mapped transitive ancestor logic to safe recursion using parent base relation to?",
+        "clarification_reason": "Mapped transitive ancestor logic to safe recursion using parent base relation to",
+        "rationale": "Mapped transitive ancestor logic to safe recursion using parent base relation to avoid left-recursion."
+      },
+      "validation_errors": [],
+      "clarification_rounds": [],
+      "clarification_rounds_used": 0,
+      "clarification_max_rounds": 2,
+      "clarification_answers_available": 0,
+      "clarification_answers_used": 0,
+      "clarification_scripted_answers_used": 0,
+      "clarification_synthetic_answers_used": 0,
+      "clarification_policy": {
+        "clarification_eagerness": 0.35,
+        "uncertainty_score": 0.15,
+        "effective_uncertainty": 0.15,
+        "threshold": 0.65,
+        "request_clarification": false,
+        "needs_clarification_flag": false
+      },
+      "clarification_pending": false,
+      "clarification_pending_reason": "",
+      "clarification_question": "Can you clarify this point before I apply it: Mapped transitive ancestor logic to safe recursion using parent base relation to?",
+      "apply": {
+        "tool": "assert_rule",
+        "input": "ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).",
+        "result": {
+          "status": "success",
+          "result_type": "rule_asserted",
+          "rule": "ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z)."
+        }
+      },
+      "apply_status": "success",
+      "decision_state": "commit"
+    }
+  ],
+  "validations": [
+    {
+      "id": "ancestor_two_hop",
+      "query": "ancestor(alice, carol).",
+      "expected_status": "success",
+      "result": {
+        "status": "success",
+        "result_type": "table",
+        "predicate": "ancestor",
+        "prolog_query": "ancestor(alice, carol).",
+        "variables": [],
+        "rows": [
+          {}
+        ],
+        "num_rows": 1,
+        "reasoning_basis": {
+          "kind": "core-local"
+        }
+      },
+      "passed": true,
+      "reasons": []
+    }
+  ]
+}
