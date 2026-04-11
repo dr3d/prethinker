@@ -323,10 +323,10 @@ def _build_progress_cards_page(
     a {{ color:var(--link); text-decoration:none; }}
     a:hover {{ text-decoration:underline; }}
     .run {{ background:var(--panel); border:1px solid var(--border); border-radius:12px; margin-top:14px; overflow:hidden; }}
-    .run h3 {{ margin:0; border-bottom:1px solid var(--border); background:var(--head); font-size:16px; }}
-    .run-toggle {{ width:100%; display:flex; align-items:center; justify-content:space-between; gap:10px; margin:0; padding:12px 14px; border:0; background:transparent; color:var(--ink); font:inherit; text-align:left; cursor:pointer; }}
-    .run-toggle:hover {{ filter:brightness(1.02); }}
-    .run-toggle:focus-visible {{ outline:2px solid var(--link); outline-offset:-2px; }}
+    .run h3 {{ margin:0; border-bottom:1px solid var(--border); background:var(--head); font-size:16px; padding:12px 14px; }}
+    .run-heading {{ display:flex; align-items:center; justify-content:space-between; gap:10px; cursor:pointer; }}
+    .run-heading:focus-visible {{ outline:2px solid var(--link); outline-offset:2px; border-radius:6px; }}
+    .run-heading-label {{ min-width:0; overflow-wrap:anywhere; word-break:break-word; line-height:inherit; }}
     .run-caret {{ font-size:14px; color:var(--muted); transition:transform .15s ease; }}
     .run.is-open .run-caret {{ transform:rotate(180deg); }}
     .run-body {{ display:none; }}
@@ -389,29 +389,47 @@ def _build_progress_cards_page(
           const labelHtml = heading.innerHTML;
           heading.innerHTML = '';
 
-          const toggle = document.createElement('button');
-          toggle.type = 'button';
-          toggle.className = 'run-toggle';
-          toggle.setAttribute('aria-expanded', 'false');
-          toggle.innerHTML = `<span>${{labelHtml}}</span><span class="run-caret">▾</span>`;
-          heading.appendChild(toggle);
+          heading.classList.add('run-heading');
+          heading.setAttribute('tabindex', '0');
+          heading.setAttribute('role', 'button');
+          heading.setAttribute('aria-expanded', 'false');
+
+          const label = document.createElement('span');
+          label.className = 'run-heading-label';
+          label.innerHTML = labelHtml;
+
+          const caret = document.createElement('span');
+          caret.className = 'run-caret';
+          caret.setAttribute('aria-hidden', 'true');
+          caret.innerHTML = '&#9662;';
+
+          heading.appendChild(label);
+          heading.appendChild(caret);
 
           if (idx === 0) {{
             run.classList.add('is-open');
-            toggle.setAttribute('aria-expanded', 'true');
+            heading.setAttribute('aria-expanded', 'true');
           }}
 
-          toggle.addEventListener('click', () => {{
+          const expand = () => {{
             if (run.classList.contains('is-open')) return;
             runs.forEach((other) => {{
-              const otherToggle = other.querySelector(':scope > h3 > .run-toggle');
-              if (!otherToggle) return;
+              const otherHeading = other.querySelector(':scope > h3');
+              if (!otherHeading) return;
               other.classList.remove('is-open');
-              otherToggle.setAttribute('aria-expanded', 'false');
+              otherHeading.setAttribute('aria-expanded', 'false');
             }});
             run.classList.add('is-open');
-            toggle.setAttribute('aria-expanded', 'true');
+            heading.setAttribute('aria-expanded', 'true');
             run.scrollIntoView({{ behavior: 'smooth', block: 'start' }});
+          }};
+
+          heading.addEventListener('click', expand);
+          heading.addEventListener('keydown', (event) => {{
+            if (event.key === 'Enter' || event.key === ' ') {{
+              event.preventDefault();
+              expand();
+            }}
           }});
         }});
       }}

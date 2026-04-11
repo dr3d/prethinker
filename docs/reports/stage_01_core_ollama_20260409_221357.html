@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Semantic Parser Run: stage_01_facts_only (people_ladder_core_20260409_221357)</title>
-  <meta name="description" content="Themed session transcript rendered from dialog_6p34v1sw.json." />
+  <meta name="description" content="Themed session transcript rendered from dialog_tjvcatt6.json." />
   <style>
     :root {
       --bg: #e3ddd2;
@@ -423,42 +423,34 @@
 
 
 
-    .step-card h2 {
-      margin: 0;
-      padding: 0;
-    }
-
-    .step-toggle {
-      width: 100%;
+    .step-heading {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 10px;
-      border: 0;
-      background: transparent;
-      color: var(--ink);
       cursor: pointer;
-      font: inherit;
-      text-align: left;
-      padding: 0;
     }
 
-    .step-toggle:hover {
-      filter: brightness(1.02);
-    }
-
-    .step-toggle:focus-visible {
+    .step-heading:focus-visible {
       outline: 2px solid var(--copy-border);
       outline-offset: 2px;
       border-radius: 6px;
     }
 
+    .step-heading-label {
+      min-width: 0;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      line-height: inherit;
+    }
+
     .step-caret {
-      color: var(--muted);
+      color: var(--ink);
       font-size: 14px;
       line-height: 1;
       transition: transform .15s ease;
       transform-origin: 50% 50%;
+      color: var(--muted);
     }
 
     .step-card.is-open .step-caret {
@@ -467,7 +459,7 @@
 
     .step-body {
       display: none;
-      margin-top: 12px;
+      margin-top: 0;
     }
 
     .step-card.is-open .step-body {
@@ -487,7 +479,7 @@
         </div>
       </div>
     </div>
-    <div class="meta">Captured: 2026-04-10T23:42:15+00:00 | Model: qwen35-semparse:9b | Integration: ollama | Initial skin: standard | Rendered: 2026-04-10 23:42:15 UTC</div>
+    <div class="meta">Captured: 2026-04-11T01:25:17+00:00 | Model: qwen35-semparse:9b | Integration: ollama | Initial skin: standard | Rendered: 2026-04-11 01:25:17 UTC</div>
     <section class="step-card"><h2>run_context</h2><div class="bubble user"><div class="bubble-head"><div class="label">User</div><button class="copy-btn" data-copy="Capture run provenance and prompt/version settings for reproducibility." data-label="copy" data-success-label="copied" data-failure-label="copy-failed">copy</button></div><pre>Capture run provenance and prompt/version settings for reproducibility.</pre></div><details class="toolbox tool-expando"><summary><span>tool calls</span><span class="expando-count">0</span></summary><p class="tool-list">No tool calls captured.</p></details><div class="bubble assistant"><div class="bubble-head"><div class="label">Assistant</div><button class="copy-btn" data-copy="{
   &quot;run_id&quot;: &quot;run-20260410T021357Z-stage_01_facts_only-qwen35_semparse_9b-38268&quot;,
   &quot;run_started_utc&quot;: &quot;2026-04-10T02:13:57+00:00&quot;,
@@ -898,7 +890,7 @@ reasons=none</pre></div></div></section>
       const appearanceToggle = document.getElementById("appearance-toggle");
       const skinStyle = document.querySelector("head style");
       const skinMapNode = document.getElementById("skin-css-map");
-      const appearanceStorageKey = "dialog_appearance_pref_dialog_6p34v1sw";
+      const appearanceStorageKey = "dialog_appearance_pref_dialog_tjvcatt6";
       const defaultSkin = "standard";
       const skinOrder = ["standard", "telegram", "imessage"];
 
@@ -1007,32 +999,50 @@ reasons=none</pre></div></div></section>
           }
           card.appendChild(body);
 
-          const toggle = document.createElement("button");
-          toggle.type = "button";
-          toggle.className = "step-toggle";
-          toggle.setAttribute("aria-expanded", "false");
-          toggle.innerHTML = `<span>${headingHtml}</span><span class="step-caret">▾</span>`;
-          heading.appendChild(toggle);
+          heading.classList.add("step-heading");
+          heading.setAttribute("tabindex", "0");
+          heading.setAttribute("role", "button");
+          heading.setAttribute("aria-expanded", "false");
+
+          const label = document.createElement("span");
+          label.className = "step-heading-label";
+          label.innerHTML = headingHtml;
+
+          const caret = document.createElement("span");
+          caret.className = "step-caret";
+          caret.setAttribute("aria-hidden", "true");
+          caret.innerHTML = "&#9662;";
+
+          heading.appendChild(label);
+          heading.appendChild(caret);
 
           if (idx === 0) {
             card.classList.add("is-open");
-            toggle.setAttribute("aria-expanded", "true");
+            heading.setAttribute("aria-expanded", "true");
           }
 
-          toggle.addEventListener("click", () => {
+          const expand = () => {
             if (card.classList.contains("is-open")) {
               return;
             }
             stepCards.forEach((other) => {
-              const otherToggle = other.querySelector(":scope > h2 > .step-toggle");
+              const otherHeading = other.querySelector(":scope > h2");
               other.classList.remove("is-open");
-              if (otherToggle) {
-                otherToggle.setAttribute("aria-expanded", "false");
+              if (otherHeading) {
+                otherHeading.setAttribute("aria-expanded", "false");
               }
             });
             card.classList.add("is-open");
-            toggle.setAttribute("aria-expanded", "true");
+            heading.setAttribute("aria-expanded", "true");
             card.scrollIntoView({ behavior: "smooth", block: "start" });
+          };
+
+          heading.addEventListener("click", expand);
+          heading.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              expand();
+            }
           });
         });
       }
