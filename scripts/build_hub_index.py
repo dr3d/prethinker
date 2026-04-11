@@ -26,6 +26,11 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--story-cards-runs-limit", type=int, default=5)
     p.add_argument("--repo-link", default="https://github.com/dr3d/prethinker")
     p.add_argument("--title", default="Prethinker Report Hub")
+    p.add_argument(
+        "--historical-runs-dir",
+        default="kb_runs",
+        help="Runs directory used for historical metrics (separate from --runs-dir slice).",
+    )
     return p.parse_args()
 
 
@@ -131,6 +136,52 @@ def _collect_runs(runs_dir: Path, reports_dir: Path, out: Path) -> list[dict[str
         )
     rows.sort(key=lambda x: (x["finished_utc"], x["run_id"]), reverse=True)
     return rows
+
+
+def _collect_historical_metrics(runs_dir: Path) -> dict[str, Any]:
+    rows: list[dict[str, Any]] = []
+    for p in sorted(runs_dir.rglob("*.json"), key=lambda x: x.name.lower()):
+        if p.name.lower().endswith(".dialog.json"):
+            continue
+        r = _read_json(p)
+        if not r:
+            continue
+        status = str(r.get("overall_status", "")).strip().lower()
+        backend = str(r.get("backend", "")).strip().lower()
+        if not status or not backend:
+            continue
+        finished = str(r.get("run_finished_utc", "")).strip() or str(r.get("run_started_utc", "")).strip()
+        if not finished:
+            finished = dt.datetime.fromtimestamp(p.stat().st_mtime, tz=dt.timezone.utc).replace(microsecond=0).isoformat()
+        rows.append(
+            {
+                "scenario": str(r.get("scenario", p.stem)),
+                "status": status,
+                "backend": backend,
+                "validation_passed": int(r.get("validation_passed", 0) or 0),
+                "validation_total": int(r.get("validation_total", 0) or 0),
+                "finished_utc": finished,
+            }
+        )
+
+    rows.sort(key=lambda x: str(x.get("finished_utc", "")), reverse=True)
+    runs_total = len(rows)
+    runs_passed = sum(1 for row in rows if row["status"] == "passed")
+    val_passed = sum(int(row.get("validation_passed", 0)) for row in rows)
+    val_total = sum(int(row.get("validation_total", 0)) for row in rows)
+    latest = rows[0] if rows else {}
+    return {
+        "generated_at_utc": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat(),
+        "runs_total": runs_total,
+        "runs_passed": runs_passed,
+        "run_pass_rate": round(_score(runs_passed, runs_total), 3),
+        "validation_passed": val_passed,
+        "validation_total": val_total,
+        "validation_pass_rate": round(_score(val_passed, val_total), 3),
+        "latest_scenario": str(latest.get("scenario", "")),
+        "latest_finished_utc": str(latest.get("finished_utc", "")),
+        "backends": sorted({str(row.get("backend", "")) for row in rows if str(row.get("backend", ""))}),
+    }
 
 
 def _collect_prompts(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -448,6 +499,7 @@ def _build_progress_cards_page(
 def main() -> int:
     a = parse_args()
     reports_dir, runs_dir = _resolve(a.reports_dir), _resolve(a.runs_dir)
+    historical_runs_dir = _resolve(a.historical_runs_dir)
     kb_dir, ladder_idx, out = _resolve(a.kb_pages_dir), _resolve(a.ladder_index), _resolve(a.output)
     cards_out = _resolve(a.cards_output)
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -457,8 +509,11 @@ def main() -> int:
     data_dir = (out.parent / "data").resolve()
     data_dir.mkdir(parents=True, exist_ok=True)
     rp, pp = data_dir / "runs_manifest.json", data_dir / "prompt_versions.json"
+    hm = data_dir / "historical_metrics.json"
     rp.write_text(json.dumps({"generated_at_utc": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat(), "runs_total": len(runs), "runs": runs}, indent=2), encoding="utf-8")
     pp.write_text(json.dumps({"generated_at_utc": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat(), "prompt_versions_total": len(prompts), "prompt_versions": prompts}, indent=2), encoding="utf-8")
+    historical = _collect_historical_metrics(historical_runs_dir)
+    hm.write_text(json.dumps(historical, indent=2), encoding="utf-8")
     _build_progress_cards_page(
         runs=runs,
         docs_root=out.parent,

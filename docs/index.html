@@ -404,6 +404,7 @@
         <a class="btn primary" href="run-reports-hub.html">Open Run Reports Explorer</a>
         <a class="btn alt" href="rungs/index.html">Open Test Ladder</a>
         <a class="btn" href="progress_cards.html">Open Progress Cards</a>
+        <a class="btn" href="model-size-matrix.md">Open Model Size Matrix (3x6)</a>
         <a class="btn" href="goldilocks-roundtrip.html">Open Goldilocks Roundtrip</a>
         <a class="btn" href="https://github.com/dr3d/prethinker">View Repository</a>
       </div>
@@ -417,12 +418,14 @@
         <div class="metric">
           <div class="k">Runs</div>
           <div id="m-runs" class="v">-</div>
-          <div class="hint">all captured runs</div>
+          <div class="hint">historical captured runs</div>
+          <div id="m-runs-matrix" class="hint">matrix slice: -</div>
         </div>
         <div class="metric">
           <div class="k">Pass Rate</div>
           <div id="m-pass" class="v">-</div>
-          <div class="hint">overall scenario validation</div>
+          <div class="hint">historical run pass rate</div>
+          <div id="m-pass-matrix" class="hint">matrix slice: -</div>
         </div>
         <div class="metric">
           <div class="k">Prompt Versions</div>
@@ -622,17 +625,29 @@
       async function load() {
         const runsRes = await fetch("data/runs_manifest.json", { cache: "no-store" });
         const promptsRes = await fetch("data/prompt_versions.json", { cache: "no-store" });
+        const historicalRes = await fetch("data/historical_metrics.json", { cache: "no-store" });
+        const matrixRes = await fetch("data/model_size_matrix_3x6_summary.json", { cache: "no-store" });
         const runsDoc = await runsRes.json();
         const promptsDoc = await promptsRes.json();
+        const historicalDoc = await historicalRes.json();
+        const matrixDoc = await matrixRes.json();
 
         const runs = Array.isArray(runsDoc.runs) ? runsDoc.runs : [];
         const prompts = Array.isArray(promptsDoc.prompt_versions) ? promptsDoc.prompt_versions : [];
         const passed = runs.filter((r) => r && r.status === "passed").length;
+        const historicalRuns = Number(historicalDoc.runs_total || 0);
+        const historicalPassRate = Number(historicalDoc.run_pass_rate || 0);
+        const historicalLatest = historicalDoc.latest_scenario || "";
+        const matrixModels = Array.isArray(matrixDoc.models) ? matrixDoc.models : [];
+        const matrixTotal = matrixModels.reduce((acc, m) => acc + Number(m.overall_total || 0), 0);
+        const matrixPassed = matrixModels.reduce((acc, m) => acc + Number(m.overall_passes || 0), 0);
 
-        document.getElementById("m-runs").textContent = `${runs.length}`;
-        document.getElementById("m-pass").textContent = runs.length ? `${Math.round((passed / runs.length) * 100)}%` : "-";
+        document.getElementById("m-runs").textContent = `${historicalRuns || runs.length}`;
+        document.getElementById("m-pass").textContent = historicalRuns ? `${Math.round(historicalPassRate * 100)}%` : (runs.length ? `${Math.round((passed / runs.length) * 100)}%` : "-");
         document.getElementById("m-prompts").textContent = `${prompts.length}`;
-        document.getElementById("m-latest").textContent = runs.length ? (runs[0].scenario || "-") : "-";
+        document.getElementById("m-latest").textContent = historicalLatest || (runs.length ? (runs[0].scenario || "-") : "-");
+        document.getElementById("m-runs-matrix").textContent = matrixTotal ? `matrix slice: ${matrixTotal} runs` : "matrix slice: -";
+        document.getElementById("m-pass-matrix").textContent = matrixTotal ? `matrix slice: ${Math.round((matrixPassed / matrixTotal) * 100)}%` : "matrix slice: -";
 
         const latestBody = document.getElementById("latest-runs");
         if (latestBody) {
@@ -684,6 +699,8 @@
         document.getElementById("m-pass").textContent = "n/a";
         document.getElementById("m-prompts").textContent = "n/a";
         document.getElementById("m-latest").textContent = "n/a";
+        document.getElementById("m-runs-matrix").textContent = "matrix slice: n/a";
+        document.getElementById("m-pass-matrix").textContent = "matrix slice: n/a";
         const latestBody = document.getElementById("latest-runs");
         const promptBody = document.getElementById("prompt-leaders");
         if (latestBody) latestBody.innerHTML = '<tr><td colspan="4" class="mono">unable to load runs manifest</td></tr>';

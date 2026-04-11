@@ -1,7 +1,7 @@
 <!-- prompt_id: sp-e0a66d9a2fbe -->
 <!-- prompt_sha256: e0a66d9a2fbeb5870371ba189583f50de15cdfab6df7a16ef5c9143bc133f6f7 -->
 <!-- source_path: D:\_PROJECTS\prethinker\modelfiles\semantic_parser_system_prompt.md -->
-<!-- captured_at_utc: 2026-04-11T01:39:13+00:00 -->
+<!-- captured_at_utc: 2026-04-10T14:22:06+00:00 -->
 
 # Semantic Parser Prompt Pack (Qwen 3.5 9B)
 
