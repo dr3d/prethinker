@@ -32,6 +32,7 @@ DEFAULT_PROLOG_REPO_CANDIDATES = [
 ]
 DEFAULT_BACKEND = "ollama"
 DEFAULT_KB_ROOT = Path("kb_store")
+DEFAULT_EPHEMERAL_KB_ROOT = Path("tmp/kb_store")
 DEFAULT_KB_NAME = "default"
 DEFAULT_PREDICATE_REGISTRY = Path("modelfiles/predicate_registry.json")
 DEFAULT_PROMPT_HISTORY_DIR = Path("modelfiles/history/prompts")
@@ -679,32 +680,71 @@ def _call_model_prompt(
             reasoning = str(raw["thinking"])
         return ModelResponse(message=message, reasoning=reasoning, raw=raw)
 
-    payload = {
+    # LM Studio: prefer OpenAI-compatible endpoint first; fallback to legacy API.
+    openai_payload = {
         "model": model,
-        "input": prompt_text,
+        "messages": [{"role": "user", "content": prompt_text}],
         "temperature": 0,
+        "stream": False,
+        "max_tokens": 1024,
         "context_length": context_length,
     }
-    raw = _post_json(
-        f"{base_url.rstrip('/')}/api/v1/chat",
-        payload,
-        timeout=timeout,
-        api_key=api_key,
-    )
-    message = ""
-    reasoning = ""
-    output_items = raw.get("output", [])
-    if isinstance(output_items, list):
-        for item in output_items:
-            if not isinstance(item, dict):
-                continue
-            typ = item.get("type")
-            content = item.get("content")
-            if typ == "message" and isinstance(content, str) and content.strip():
-                message = content.strip()
-            if typ == "reasoning" and isinstance(content, str) and content.strip():
-                reasoning = content
-    return ModelResponse(message=message, reasoning=reasoning, raw=raw)
+    try:
+        raw = _post_json(
+            f"{base_url.rstrip('/')}/v1/chat/completions",
+            openai_payload,
+            timeout=timeout,
+            api_key=api_key,
+        )
+        message = ""
+        reasoning = ""
+        choices = raw.get("choices", [])
+        if isinstance(choices, list) and choices:
+            choice0 = choices[0] if isinstance(choices[0], dict) else {}
+            msg_obj = choice0.get("message", {})
+            if isinstance(msg_obj, dict):
+                message = str(msg_obj.get("content", "") or "")
+                reasoning = str(
+                    msg_obj.get("reasoning_content", "")
+                    or msg_obj.get("reasoning", "")
+                    or ""
+                )
+        if not message and isinstance(raw.get("output_text"), str):
+            message = str(raw.get("output_text", "") or "")
+        if not message and isinstance(raw.get("response"), str):
+            message = str(raw.get("response", "") or "")
+        return ModelResponse(message=message, reasoning=reasoning, raw=raw)
+    except RuntimeError as error:
+        msg = str(error)
+        fallback_allowed = ("HTTP 404" in msg) or ("HTTP 405" in msg)
+        if not fallback_allowed:
+            raise
+        legacy_payload = {
+            "model": model,
+            "input": prompt_text,
+            "temperature": 0,
+            "context_length": context_length,
+        }
+        raw = _post_json(
+            f"{base_url.rstrip('/')}/api/v1/chat",
+            legacy_payload,
+            timeout=timeout,
+            api_key=api_key,
+        )
+        message = ""
+        reasoning = ""
+        output_items = raw.get("output", [])
+        if isinstance(output_items, list):
+            for item in output_items:
+                if not isinstance(item, dict):
+                    continue
+                typ = item.get("type")
+                content = item.get("content")
+                if typ == "message" and isinstance(content, str) and content.strip():
+                    message = content.strip()
+                if typ == "reasoning" and isinstance(content, str) and content.strip():
+                    reasoning = content
+        return ModelResponse(message=message, reasoning=reasoning, raw=raw)
 
 
 def _heuristic_route(text: str) -> str:
@@ -2007,6 +2047,16 @@ def _normalize_kb_name(raw_name: str) -> str:
     return cleaned or DEFAULT_KB_NAME
 
 
+def _is_ephemeral_kb_name(kb_name: str) -> bool:
+    return kb_name.startswith(("sm_", "tmp_", "scratch_"))
+
+
+def _uses_default_kb_root(raw_value: str) -> bool:
+    normalized = str(raw_value).strip().replace("\\", "/").rstrip("/").lower()
+    default = str(DEFAULT_KB_ROOT).replace("\\", "/").rstrip("/").lower()
+    return normalized == default
+
+
 def _normalize_clause(clause: str) -> str:
     normalized = clause.strip()
     if normalized and not normalized.endswith("."):
@@ -2966,6 +3016,16 @@ def parse_args() -> argparse.Namespace:
         help="Root folder where named ontology KBs are stored.",
     )
     parser.add_argument(
+        "--ephemeral-kb-root",
+        default=str(DEFAULT_EPHEMERAL_KB_ROOT),
+        help="Root folder for ephemeral KB namespaces (auto-used for names like sm_*, tmp_*, scratch_*).",
+    )
+    parser.add_argument(
+        "--force-ephemeral-kb",
+        action="store_true",
+        help="Always route KB writes to --ephemeral-kb-root.",
+    )
+    parser.add_argument(
         "--kb-name",
         default="",
         help="Named ontology KB. Defaults to scenario ontology_name or scenario name.",
@@ -3114,7 +3174,14 @@ def main() -> int:
         or str(payload.get("name", scenario_path.stem)).strip()
     )
     kb_name = _normalize_kb_name(kb_name_source)
-    kb_root = Path(args.kb_root).resolve()
+    use_ephemeral_kb = bool(args.force_ephemeral_kb) or (
+        _is_ephemeral_kb_name(kb_name) and _uses_default_kb_root(args.kb_root)
+    )
+    kb_root = (
+        Path(args.ephemeral_kb_root).resolve()
+        if use_ephemeral_kb
+        else Path(args.kb_root).resolve()
+    )
     kb_dir = (kb_root / kb_name).resolve()
     profile_path = kb_dir / "ontology_profile.json"
     ontology_index_path = kb_root / "ontologies_index.json"
