@@ -5,9 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{{PAGE_TITLE}}</title>
   <meta name="description" content="{{PAGE_DESCRIPTION}}" />
-  <style>
+  <style id="skin-style">
 {{INITIAL_SKIN_CSS}}
-
+  </style>
+  <style id="accordion-style">
     .step-heading {
       display: flex;
       align-items: center;
@@ -73,7 +74,7 @@
       const root = document.documentElement;
       const body = document.body;
       const appearanceToggle = document.getElementById("appearance-toggle");
-      const skinStyle = document.querySelector("head style");
+      const skinStyle = document.getElementById("skin-style");
       const skinMapNode = document.getElementById("skin-css-map");
       const appearanceStorageKey = "{{APPEARANCE_STORAGE_KEY}}";
       const defaultSkin = "{{INITIAL_SKIN_NAME}}";
