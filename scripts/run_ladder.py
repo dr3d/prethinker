@@ -399,10 +399,14 @@ def main() -> int:
         print(f"No scenarios found in: {scenarios_dir}")
         return 2
 
-    start_idx = _parse_bound(args.start_rung, all_rows, default_index=1)
-    end_idx = _parse_bound(args.end_rung, all_rows, default_index=len(all_rows))
-    if start_idx > end_idx:
-        raise ValueError(f"start-rung ({start_idx}) must be <= end-rung ({end_idx})")
+    try:
+        start_idx = _parse_bound(args.start_rung, all_rows, default_index=1)
+        end_idx = _parse_bound(args.end_rung, all_rows, default_index=len(all_rows))
+        if start_idx > end_idx:
+            raise ValueError(f"start-rung ({start_idx}) must be <= end-rung ({end_idx})")
+    except ValueError as exc:
+        print(f"Invalid rung range: {exc}")
+        return 2
     selected = [row for row in all_rows if start_idx <= row.index <= end_idx]
 
     prompt_sha = _prompt_sha256(prompt_file)
