@@ -128,6 +128,13 @@ def _parse_dt(raw: str) -> datetime | None:
     return dt.astimezone(timezone.utc)
 
 
+def _argv_flag_value(argv: list[str], flag: str) -> str:
+    for i, token in enumerate(argv):
+        if token == flag and i + 1 < len(argv):
+            return str(argv[i + 1]).strip()
+    return ""
+
+
 def _extract_report_signature(report: dict[str, Any]) -> dict[str, Any]:
     ms = report.get("model_settings", {})
     if not isinstance(ms, dict):
@@ -159,6 +166,10 @@ def _extract_report_signature(report: dict[str, Any]) -> dict[str, Any]:
         "clarification_answer_context_length": int(ms.get("clarification_answer_context_length", 0) or 0),
         "prompt_sha256": str(prompt.get("prompt_sha256", "")).strip(),
         "force_empty_kb": "--force-empty-kb" in argv_set,
+        "kb_root": _argv_flag_value(argv, "--kb-root"),
+        "kb_name": _argv_flag_value(argv, "--kb-name"),
+        "corpus_path": _argv_flag_value(argv, "--corpus-path"),
+        "seed_from_kb_path": "--seed-from-kb-path" in argv_set,
     }
 
 
@@ -185,6 +196,10 @@ def _build_target_signature(args: argparse.Namespace, prompt_sha256: str) -> dic
         "clarification_answer_context_length": answer_ctx,
         "prompt_sha256": str(prompt_sha256).strip(),
         "force_empty_kb": bool(args.force_empty_kb),
+        "kb_root": str(args.kb_root).strip(),
+        "kb_name": str(args.kb_name).strip(),
+        "corpus_path": str(args.corpus_path).strip(),
+        "seed_from_kb_path": bool(args.seed_from_kb_path),
     }
 
 
@@ -287,8 +302,12 @@ def _run_one(args: argparse.Namespace, scenario: ScenarioRow, out_path: Path) ->
     ]
     if args.corpus_path:
         cmd.extend(["--corpus-path", str(args.corpus_path)])
+    if args.kb_name:
+        cmd.extend(["--kb-name", str(args.kb_name)])
     if args.force_empty_kb:
         cmd.append("--force-empty-kb")
+    if args.seed_from_kb_path:
+        cmd.append("--seed-from-kb-path")
     if args.strict_registry:
         cmd.extend(["--predicate-registry", str(args.predicate_registry), "--strict-registry"])
     if args.type_schema:
@@ -329,6 +348,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--prompt-history-dir", default="tmp/prompt_history")
     p.add_argument("--env-file", default="")
     p.add_argument("--kb-root", default="tmp/kb_store")
+    p.add_argument("--kb-name", default="")
     p.add_argument("--corpus-path", default="")
     p.add_argument("--context-length", type=int, default=8192)
     p.add_argument("--timeout-seconds", type=int, default=120)
@@ -345,6 +365,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--no-two-pass", action="store_true")
     p.add_argument("--no-split-extraction", action="store_true")
     p.add_argument("--force-empty-kb", action="store_true")
+    p.add_argument("--seed-from-kb-path", action="store_true")
     p.add_argument("--label", default="smart_latest", help="Suffix used in output report filenames.")
     p.add_argument("--skip-passed-fresh", action="store_true", default=True)
     p.add_argument("--no-skip-passed-fresh", action="store_true", help="Disable skip optimization.")

@@ -2968,7 +2968,7 @@ def _skip_validations(validations: list[dict[str, Any]], reason: str) -> list[di
                     "rows": [],
                     "variables": [],
                 },
-                "passed": True,
+                "passed": False,
                 "reasons": [reason],
             }
         )
@@ -3835,7 +3835,7 @@ def main() -> int:
     apply_fail_count = sum(
         1
         for row in turn_rows
-        if str(row.get("apply_status")) not in {"success", "skipped", "no_results", "clarification_requested"}
+        if str(row.get("apply_status")) not in {"success", "skipped", "no_results"}
     )
     clarification_requests = sum(
         1 for row in turn_rows if str(row.get("apply_status")) == "clarification_requested"
@@ -3851,7 +3851,13 @@ def main() -> int:
         state = str(row.get("decision_state", "reject"))
         decision_state_counts[state] = decision_state_counts.get(state, 0) + 1
 
-    overall_ok = parse_fail_count == 0 and apply_fail_count == 0 and validation_pass == validation_total
+    run_skipped = runtime_mode == "none"
+    overall_ok = (
+        (not run_skipped)
+        and parse_fail_count == 0
+        and apply_fail_count == 0
+        and validation_pass == validation_total
+    )
     current_profile = _build_ontology_profile(kb_name, corpus_clauses)
     ontology_diff = _compare_ontology_profiles(existing_profile, current_profile)
     known_index_before = _load_ontology_index(ontology_index_path)
@@ -3950,7 +3956,7 @@ def main() -> int:
         "decision_state_counts": decision_state_counts,
         "validation_total": validation_total,
         "validation_passed": validation_pass,
-        "overall_status": "passed" if overall_ok else "failed",
+        "overall_status": "skipped" if run_skipped else ("passed" if overall_ok else "failed"),
         "turns": turn_rows,
         "validations": validation_rows,
     }
@@ -3980,7 +3986,7 @@ def main() -> int:
         out_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
         print(f"Report written: {out_path}")
 
-    return 0 if overall_ok else 1
+    return 0 if (overall_ok or run_skipped) else 1
 
 
 if __name__ == "__main__":

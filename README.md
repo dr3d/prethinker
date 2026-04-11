@@ -358,6 +358,7 @@ Helpful controls:
 - `--start-rung` and `--end-rung` accept rung index or scenario name
 - `--no-skip-passed-fresh` forces full rerun
 - `--dry-run` shows planned run/skip decisions without executing
+- default output is `tmp/runs/ladder`; use `--out-dir kb_runs/ladder` when you want runs to appear in published hub/rung docs
 
 ### 4) Tune prompt without code edits
 

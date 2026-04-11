@@ -113,7 +113,10 @@ def _collect_runs(runs_dir: Path, reports_dir: Path, out: Path) -> list[dict[str
         snap_rel = ""
         if snap and Path(snap).exists():
             snap_rel = _publish_prompt_snapshot(Path(snap).resolve(), out.parent)
-        html = (reports_dir / f"{stem}.html").resolve()
+        rel = p.relative_to(runs_dir)
+        html_nested = (reports_dir / rel).with_suffix(".html").resolve()
+        html_flat = (reports_dir / f"{stem}.html").resolve()
+        html = html_nested if html_nested.exists() else html_flat
         published_json_rel = _publish_run_json(p.resolve(), runs_dir.resolve(), out.parent)
         rows.append(
             {
