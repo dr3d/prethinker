@@ -1,0 +1,56 @@
+{
+  "name": "rung_100_fuzzy_tail_directional_chatty",
+  "ontology_name": "rung_100_fuzzy_directional_chatty",
+  "utterances": [
+    "ok so Ari is Bo's parent, that's the setup.",
+    "Cy has Bo as a parent, pretty sure.",
+    "Di got parented by Cy.",
+    "Eli has Di as a parent.",
+    "Fay is Eli's parent.",
+    "Gus has Fay as a parent.",
+    "If X is a parent of Y then X is an ancestor of Y.",
+    "If X is an ancestor of Y and Y is an ancestor of Z then X is an ancestor of Z.",
+    "Actually remove this if it exists: parent(cy, bo).",
+    "Also remove this if it exists: parent(di, cy).",
+    "Is Ari an ancestor of Eli, or nah?",
+    "And is Fay an ancestor of Gus?"
+  ],
+  "validations": [
+    {
+      "id": "bo_cy_parent",
+      "query": "parent(bo, cy).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "cy_di_parent",
+      "query": "parent(cy, di).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "cy_bo_absent",
+      "query": "parent(cy, bo).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "di_cy_absent",
+      "query": "parent(di, cy).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "ari_eli_ancestor",
+      "query": "ancestor(ari, eli).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "fay_gus_ancestor",
+      "query": "ancestor(fay, gus).",
+      "expect_status": "success",
+      "min_rows": 1
+    }
+  ]
+}

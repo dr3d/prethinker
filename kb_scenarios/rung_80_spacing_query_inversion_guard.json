@@ -1,0 +1,40 @@
+{
+  "name": "rung_80_spacing_query_inversion_guard",
+  "ontology_name": "rung_80_query_inversion_guard",
+  "utterances": [
+    "Sora is a parent of Tia.",
+    "Uma has Tia as a parent.",
+    "Vero is parented by Uma.",
+    "Wren has Vero as a parent.",
+    "If X is a parent of Y then X is an ancestor of Y.",
+    "If X is an ancestor of Y and Y is an ancestor of Z then X is an ancestor of Z.",
+    "Is Sora an ancestor of Wren?",
+    "Is Uma a parent of Tia?"
+  ],
+  "validations": [
+    {
+      "id": "tia_uma_parent",
+      "query": "parent(tia, uma).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "vero_wren_parent",
+      "query": "parent(vero, wren).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "sora_wren_ancestor",
+      "query": "ancestor(sora, wren).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "uma_tia_absent",
+      "query": "parent(uma, tia).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    }
+  ]
+}

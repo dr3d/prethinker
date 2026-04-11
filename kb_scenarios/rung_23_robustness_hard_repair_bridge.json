@@ -1,0 +1,34 @@
+﻿{
+  "name": "rung_23_robustness_hard_repair_bridge",
+  "ontology_name": "rung_23_hard_repair_bridge",
+  "utterances": [
+    "Please record this: Ivy is Jules's parent.",
+    "Also, Jules is Kira's parent.",
+    "If X is a parent of Y then X is an ancestor of Y.",
+    "If X is an ancestor of Y and Y is an ancestor of Z then X is an ancestor of Z.",
+    "Actually, strike exactly this edge: parent(jules, kira).",
+    "What I meant was that Jules is Leo's parent.",
+    "And Leo is Mira's parent.",
+    "Is Ivy an ancestor of Mira now?"
+  ],
+  "validations": [
+    {
+      "id": "old_jules_kira_removed",
+      "query": "parent(jules, kira).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "new_bridge_exists",
+      "query": "parent(jules, leo).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "ivy_mira_ancestor",
+      "query": "ancestor(ivy, mira).",
+      "expect_status": "success",
+      "min_rows": 1
+    }
+  ]
+}

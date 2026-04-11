@@ -1,0 +1,44 @@
+{
+  "name": "rung_140_ce_pronoun_typo_missing_qmark",
+  "ontology_name": "rung_140_ce_pronoun_typo_qmark",
+  "utterances": [
+    {
+      "utterance": "uhh he parnt of mia",
+      "clarification_answers": [
+        "He means Noah.",
+        "Yes, Noah is a parent of Mia."
+      ],
+      "max_clarification_rounds": 2
+    },
+    "Zoe has Mia as a parent.",
+    "If X is a parent of Y then X is an ancestor of Y.",
+    "If X is an ancestor of Y and Y is an ancestor of Z then X is an ancestor of Z.",
+    "is noah ancestor of zoe"
+  ],
+  "validations": [
+    {
+      "id": "noah_mia_parent",
+      "query": "parent(noah, mia).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "mia_zoe_parent",
+      "query": "parent(mia, zoe).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "noah_zoe_ancestor",
+      "query": "ancestor(noah, zoe).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "he_mia_absent",
+      "query": "parent(he, mia).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    }
+  ]
+}

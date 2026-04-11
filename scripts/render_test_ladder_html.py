@@ -49,22 +49,25 @@ def _read_json(path: Path) -> dict[str, Any] | None:
 
 def _scenario_sort_key(path: Path) -> tuple[int, int, str]:
     stem = path.stem.lower()
-    # acid_05_* should come before acid_04_*, then stage_03_*, stage_02_*, ...
-    match = re.match(r"^(acid|stage)_(\d+)_", stem)
+    # rung_20_* should come before rung_19_*, then acid_16_*, ..., then stage_03_*, ...
+    match = re.match(r"^(rung|acid|stage)_(\d+)_", stem)
     if not match:
-        return (2, 0, stem)
+        return (3, 0, stem)
     family = match.group(1)
     rung = int(match.group(2))
-    if family == "acid":
+    if family == "rung":
         return (0, -rung, stem)
-    return (1, -rung, stem)
+    if family == "acid":
+        return (1, -rung, stem)
+    return (2, -rung, stem)
 
 
 def _collect_ladder_scenarios(scenarios_dir: Path) -> list[Path]:
     candidates = [
         p
         for p in scenarios_dir.glob("*.json")
-        if p.is_file() and (p.name.startswith("acid_") or p.name.startswith("stage_"))
+        if p.is_file()
+        and (p.name.startswith("rung_") or p.name.startswith("acid_") or p.name.startswith("stage_"))
     ]
     candidates.sort(key=_scenario_sort_key)
     return candidates

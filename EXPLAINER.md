@@ -47,6 +47,18 @@ That makes failures inspectable:
 
 The main flow lives in `kb_pipeline.py`.
 
+![Pre-thinker Control Plane](docs/assets/prethinker-control-plane-infographic-v2.png)
+
+How to read the diagram:
+
+- User utterances are intercepted by **Pre-thinker first**.
+- **Sharp Memory** (deterministic Prolog KB) is the source of truth.
+- The served **LLM** and its context are useful but probabilistic.
+- Clarification can be sourced from:
+  - user Q/A
+  - served-LLM Q/A (KB-grounded context)
+- For write intents (`assert_fact`, `assert_rule`, `retract`), final user yes/no confirmation gates KB mutation.
+
 1. Route + parse
 - Two-pass mode is default:
   - pass 1: classify intent

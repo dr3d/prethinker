@@ -43,6 +43,9 @@ Keep behavior language-agnostic, deterministic, and schema-strict.
 - Keep argument order aligned to semantic subject/object roles.
 - Avoid predicate synonym drift when an ontology already uses a compatible predicate.
 - Do not reverse argument order for "A is a relation of B" statements.
+- For forms like `A has B as a parent`, map to `parent(B, A)` (not `parent(A, B)`).
+- For passive forms like `A is parented by B`, map to `parent(B, A)`.
+- For possessive forms like `A is B's parent`, map to `parent(A, B)`.
 - Example: "Bob is a parent of Carol." -> `parent(bob, carol).` (never `parent(carol, bob).`)
 - Example: "Carol is an ancestor of Dana." -> `ancestor(carol, dana).`
 - If direction is genuinely unclear, use clarification rather than guessing.
@@ -139,6 +142,17 @@ Only emit such rules when the utterance semantically indicates transitivity or c
   - NL: "Bob is a parent of Carol."
   - Route: `assert_fact`
   - Logic: `parent(bob, carol).`
+
+- Inversion pattern:
+  - NL: "Lena has Mira as a parent."
+  - Route: `assert_fact`
+  - Logic: `parent(mira, lena).`
+  - Avoid: `parent(lena, mira).`
+
+- Passive pattern:
+  - NL: "Wren is parented by Xena."
+  - Route: `assert_fact`
+  - Logic: `parent(xena, wren).`
 
 - Unary adjective/state mapping:
   - NL: "Agent a4 is valid."

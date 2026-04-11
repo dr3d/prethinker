@@ -12,7 +12,7 @@ Each scenario JSON contains:
 - `utterances`: list of natural-language turns to parse and apply
   - each item can be either:
     - string: `"Alex is parent of Sam."`
-    - object: `{"utterance":"Alex is parent of Sam.","clarification_answers":["I mean Alex is Sam's father."],"max_clarification_rounds":2}`
+    - object: `{"utterance":"Alex is parent of Sam.","clarification_answers":["I mean Alex is Sam's father."],"confirmation_answers":["yes"],"max_clarification_rounds":2,"require_final_confirmation":true}`
 - `validations`: list of deterministic checks run after all turns
 
 Validation entry fields:
@@ -33,6 +33,7 @@ Validation entry fields:
 - Clarification policy is configurable at runtime:
   - `--clarification-eagerness` in `[0,1]` (higher asks clarification sooner)
   - `--max-clarification-rounds` controls multi-round Q&A depth per utterance
+  - `--require-final-confirmation` requires explicit yes/no before write intents are applied (`assert_fact`, `assert_rule`, `retract`)
 
 Recommended for ladder/tuning loops:
 
@@ -48,22 +49,52 @@ Use these to ramp parser complexity before acid tests:
 - `stage_02_rule_ingest.json`
 - `stage_03_transitive_chain.json`
 
+## Naming Note
+
+- Existing `acid_*` scenario names are retained as historical record.
+- New hard-rung scenarios should use `rung_<nn>_<slug>.json` going forward.
+
+## Rung Width (Language Robustness)
+
+Rungs now grow in two dimensions:
+
+- Height: harder logic/composition.
+- Width: more linguistic variation for the same target KB result.
+
+When adding new `rung_*` scenarios, include language-robustness pressure where possible:
+
+- paraphrase/restatement
+- inversion/passive voice
+- synonym/lexical drift
+- hedged language ("maybe", "I think", "probably")
+- punctuation/typo/noisy phrasing
+- pronoun/ellipsis ambiguity
+
+Design rule:
+
+- clean and noisy variants should map to the same intended KB outcome (or the same clarification/escalation expectation when ambiguity is intentionally unresolved).
+
 ## Acid Ladder (Run Hard -> Easier)
 
 Use this order to stress long-context drift, alias pressure, and correction stability:
 
-1. `acid_08_contradiction_reconciliation.json`
-2. `acid_10_compound_retract_unpacking.json`
-3. `acid_11_batched_fact_rule_retract_mix.json`
-4. `acid_09_compound_rule_unpacking.json`
-5. `acid_07_relation_drift_pressure.json`
-6. `acid_06_compound_unpacking.json`
-7. `acid_05_long_context_lineage.json`
-8. `acid_04_alias_pressure.json`
-9. `acid_03_temporal_override.json`
-10. `stage_03_transitive_chain.json`
-11. `stage_02_rule_ingest.json`
-12. `stage_01_facts_only.json`
+1. `acid_16_rule_stack_retarget.json`
+2. `acid_15_dual_track_repair.json`
+3. `acid_14_unary_conjunction_retract_effect.json`
+4. `acid_13_branch_preservation_after_repair.json`
+5. `acid_12_compound_repair_with_query.json`
+6. `acid_11_batched_fact_rule_retract_mix.json`
+7. `acid_10_compound_retract_unpacking.json`
+8. `acid_09_compound_rule_unpacking.json`
+9. `acid_08_contradiction_reconciliation.json`
+10. `acid_07_relation_drift_pressure.json`
+11. `acid_06_compound_unpacking.json`
+12. `acid_05_long_context_lineage.json`
+13. `acid_04_alias_pressure.json`
+14. `acid_03_temporal_override.json`
+15. `stage_03_transitive_chain.json`
+16. `stage_02_rule_ingest.json`
+17. `stage_01_facts_only.json`
 
 ## Suggested Smoke Pair
 

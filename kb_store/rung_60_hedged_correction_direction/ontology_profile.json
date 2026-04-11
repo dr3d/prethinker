@@ -1,0 +1,19 @@
+{
+  "ontology_name": "rung_60_hedged_correction_direction",
+  "generated_at_utc": "2026-04-11T17:25:26+00:00",
+  "clause_count": 5,
+  "predicate_signatures": [
+    "ancestor/2",
+    "parent/2"
+  ],
+  "fact_predicates": [
+    "parent/2"
+  ],
+  "rule_head_predicates": [
+    "ancestor/2"
+  ],
+  "rule_body_predicates": [
+    "ancestor/2",
+    "parent/2"
+  ]
+}

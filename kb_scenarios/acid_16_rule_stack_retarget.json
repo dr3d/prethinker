@@ -1,0 +1,33 @@
+{
+  "name": "acid_16_rule_stack_retarget",
+  "ontology_name": "acid_rule_stack_retarget",
+  "utterances": [
+    "Sara is a parent of Pru, Pru is a parent of Quin, and Quin is trusted.",
+    "If X is a parent of Y then X is an ancestor of Y, and if X is an ancestor of Y and Y is an ancestor of Z then X is an ancestor of Z.",
+    "If X is an ancestor of Y and Y is trusted then X is endorsed.",
+    "Actually retract these: parent(pru, quin) and trusted(quin).",
+    "Pru is a parent of Ria, Ria is a parent of Quin, and Ria is trusted.",
+    "Is Sara endorsed?",
+    "Summarize the retarget in one sentence."
+  ],
+  "validations": [
+    {
+      "id": "pru_quin_removed",
+      "query": "parent(pru, quin).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "quin_trusted_removed",
+      "query": "trusted(quin).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "sara_endorsed_via_ria_chain",
+      "query": "endorsed(sara).",
+      "expect_status": "success",
+      "min_rows": 1
+    }
+  ]
+}

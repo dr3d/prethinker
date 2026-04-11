@@ -1,0 +1,32 @@
+{
+  "name": "rung_110_fuzzy_tail_fragmented_syntax",
+  "ontology_name": "rung_110_fuzzy_fragmented_syntax",
+  "utterances": [
+    "Mara -> parent of Nia.",
+    "Oren has Nia as a parent.",
+    "Quin, parented by Oren.",
+    "if X parent Y then X ancestor Y.",
+    "if X ancestor Y and Y ancestor Z then X ancestor Z.",
+    "Mara ancestor of Quin?"
+  ],
+  "validations": [
+    {
+      "id": "nia_oren_parent",
+      "query": "parent(nia, oren).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "oren_quin_parent",
+      "query": "parent(oren, quin).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "mara_quin_ancestor",
+      "query": "ancestor(mara, quin).",
+      "expect_status": "success",
+      "min_rows": 1
+    }
+  ]
+}

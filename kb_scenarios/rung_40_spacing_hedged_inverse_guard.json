@@ -1,0 +1,34 @@
+{
+  "name": "rung_40_spacing_hedged_inverse_guard",
+  "ontology_name": "rung_40_hedged_inverse_guard",
+  "utterances": [
+    "Gina mentors Harper.",
+    "Harper supervises Ivan.",
+    "If X mentors Y then guides(X, Y).",
+    "If X supervises Y then guides(X, Y).",
+    "If X guides Y and Y guides Z then guides(X, Z).",
+    "I'm pretty sure Ivan has Harper as a supervisor.",
+    "Actually remove the opposite-direction supervisor edge if it exists: supervises(ivan, harper).",
+    "Does Gina guide Ivan?"
+  ],
+  "validations": [
+    {
+      "id": "harper_ivan_supervises_exists",
+      "query": "supervises(harper, ivan).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "ivan_harper_supervises_absent",
+      "query": "supervises(ivan, harper).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "gina_guides_ivan",
+      "query": "guides(gina, ivan).",
+      "expect_status": "success",
+      "min_rows": 1
+    }
+  ]
+}

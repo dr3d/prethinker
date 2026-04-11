@@ -26,6 +26,7 @@ from engine.core import Clause, PrologEngine, Term
 
 PROJECT_ROOT = Path(__file__).resolve().parent
 DEFAULT_PROLOG_REPO_CANDIDATES = [
+    PROJECT_ROOT,
     PROJECT_ROOT / "vendor" / "prolog-reasoning",
     PROJECT_ROOT / ".runtime" / "prolog-reasoning",
     PROJECT_ROOT / "prolog-reasoning",
@@ -43,6 +44,24 @@ DEFAULT_BASE_URLS = {
 DEFAULT_MODELS = {
     "lmstudio": "qwen/qwen3.5-9b",
     "ollama": "qwen3.5:9b",
+}
+AMBIGUOUS_PRONOUN_ATOMS = {
+    "he",
+    "him",
+    "his",
+    "she",
+    "her",
+    "hers",
+    "they",
+    "them",
+    "their",
+    "theirs",
+    "it",
+    "its",
+    "this",
+    "that",
+    "these",
+    "those",
 }
 
 
@@ -760,6 +779,16 @@ def _heuristic_route(text: str) -> str:
     return "assert_fact"
 
 
+def _has_rule_cues(text: str) -> bool:
+    lowered = (text or "").strip().lower()
+    return bool(
+        re.search(
+            r"\b(if|whenever|then|implies|unless|only if|every|all|any)\b",
+            lowered,
+        )
+    )
+
+
 def _build_classifier_prompt(utterance: str, *, prompt_guide: str = "") -> str:
     guide = f"Additional guidance:\n{prompt_guide}\n" if prompt_guide else ""
     return (
@@ -1064,22 +1093,212 @@ def _clarification_policy_decision(
     }
 
 
-def _coerce_utterance_entry(raw: Any) -> tuple[str, list[str], int | None]:
+def _coerce_utterance_entry(raw: Any) -> tuple[str, list[str], int | None, list[str], bool | None]:
     if isinstance(raw, str):
-        return raw.strip(), [], None
+        return raw.strip(), [], None, [], None
     if not isinstance(raw, dict):
-        return str(raw).strip(), [], None
+        return str(raw).strip(), [], None, [], None
 
     text = str(raw.get("utterance", "") or raw.get("text", "") or raw.get("input", "")).strip()
     answers_raw = raw.get("clarification_answers", [])
     answers: list[str] = []
     if isinstance(answers_raw, list):
         answers = [str(item).strip() for item in answers_raw if str(item).strip()]
+    confirmation_answers_raw = raw.get("confirmation_answers", [])
+    confirmation_answers: list[str] = []
+    if isinstance(confirmation_answers_raw, list):
+        confirmation_answers = [str(item).strip() for item in confirmation_answers_raw if str(item).strip()]
     max_rounds: int | None = None
     max_rounds_raw = raw.get("max_clarification_rounds")
     if isinstance(max_rounds_raw, (int, float)):
         max_rounds = max(0, int(max_rounds_raw))
-    return text, answers, max_rounds
+    require_confirmation: bool | None = None
+    raw_require_confirmation = raw.get("require_final_confirmation")
+    if isinstance(raw_require_confirmation, bool):
+        require_confirmation = raw_require_confirmation
+    return text, answers, max_rounds, confirmation_answers, require_confirmation
+
+
+def _truncate_text(raw: str, limit: int) -> str:
+    text = str(raw or "").strip()
+    if limit <= 0 or len(text) <= limit:
+        return text
+    if limit <= 3:
+        return text[:limit]
+    return text[: limit - 3].rstrip() + "..."
+
+
+def _snapshot_kb_clauses_for_clarification(
+    *,
+    server: Any,
+    corpus_clauses: set[str] | None,
+    max_items: int,
+    max_chars: int,
+) -> list[str]:
+    clauses: list[str] = []
+    if isinstance(corpus_clauses, set):
+        clauses.extend(
+            _normalize_clause(item)
+            for item in sorted(corpus_clauses)
+            if _normalize_clause(item)
+        )
+
+    if not clauses and hasattr(server, "engine"):
+        engine = getattr(server, "engine", None)
+        runtime_clauses = getattr(engine, "clauses", []) if engine is not None else []
+        for row in runtime_clauses:
+            text = _normalize_clause(repr(row))
+            if text:
+                clauses.append(text)
+    if not clauses and hasattr(server, "_clauses"):
+        raw = getattr(server, "_clauses", set())
+        if isinstance(raw, set):
+            clauses.extend(
+                _normalize_clause(item)
+                for item in sorted(raw)
+                if _normalize_clause(item)
+            )
+
+    deduped: list[str] = []
+    seen: set[str] = set()
+    for clause in clauses:
+        if clause in seen:
+            continue
+        seen.add(clause)
+        deduped.append(clause)
+
+    if max_items > 0 and len(deduped) > max_items:
+        deduped = deduped[-max_items:]
+
+    if max_chars > 0:
+        selected: list[str] = []
+        budget = max_chars
+        for clause in reversed(deduped):
+            needed = len(clause) + 1
+            if selected and needed > budget:
+                continue
+            if not selected and len(clause) > budget:
+                selected.append(_truncate_text(clause, max(32, budget)))
+                break
+            if needed > budget:
+                break
+            selected.append(clause)
+            budget -= needed
+        deduped = list(reversed(selected))
+
+    return deduped
+
+
+def _recent_turn_context_for_clarification(
+    *,
+    turn_rows: list[dict[str, Any]],
+    max_turns: int,
+    max_chars: int = 2400,
+) -> list[str]:
+    if max_turns <= 0 or not turn_rows:
+        return []
+    rows = turn_rows[-max_turns:]
+    lines: list[str] = []
+    for row in rows:
+        idx = int(row.get("turn_index", 0) or 0)
+        utterance = _truncate_text(str(row.get("utterance", "")), 140)
+        apply_status = str(row.get("apply_status", "")).strip() or "unknown"
+        parsed = row.get("parsed", {})
+        logic = ""
+        if isinstance(parsed, dict):
+            logic = _truncate_text(str(parsed.get("logic_string", "")), 140)
+        line = f"T{idx:02d} [{apply_status}] U: {utterance}"
+        if logic:
+            line += f" | L: {logic}"
+        lines.append(line)
+
+    if max_chars > 0:
+        selected: list[str] = []
+        budget = max_chars
+        for line in reversed(lines):
+            needed = len(line) + 1
+            if selected and needed > budget:
+                continue
+            if not selected and len(line) > budget:
+                selected.append(_truncate_text(line, max(32, budget)))
+                break
+            if needed > budget:
+                break
+            selected.append(line)
+            budget -= needed
+        lines = list(reversed(selected))
+    return lines
+
+
+def _build_clarification_context_pack(
+    *,
+    server: Any,
+    corpus_clauses: set[str] | None,
+    turn_rows: list[dict[str, Any]],
+    history_turns: int,
+    kb_clause_limit: int,
+    kb_char_budget: int,
+) -> dict[str, Any]:
+    kb_lines = _snapshot_kb_clauses_for_clarification(
+        server=server,
+        corpus_clauses=corpus_clauses,
+        max_items=max(0, kb_clause_limit),
+        max_chars=max(0, kb_char_budget),
+    )
+    recent_lines = _recent_turn_context_for_clarification(
+        turn_rows=turn_rows,
+        max_turns=max(0, history_turns),
+    )
+    return {
+        "kb_clauses": kb_lines,
+        "recent_turns": recent_lines,
+        "kb_clause_count": len(kb_lines),
+        "recent_turn_count": len(recent_lines),
+    }
+
+
+def _is_affirmative_confirmation(answer: str) -> bool:
+    text = _normalize_clarification_answer_text(answer)
+    return text in {
+        "y",
+        "yes",
+        "yeah",
+        "yep",
+        "sure",
+        "ok",
+        "okay",
+        "confirm",
+        "approved",
+        "go ahead",
+        "do it",
+        "apply",
+    }
+
+
+def _is_negative_confirmation(answer: str) -> bool:
+    text = _normalize_clarification_answer_text(answer)
+    return text in {
+        "n",
+        "no",
+        "nope",
+        "nah",
+        "stop",
+        "cancel",
+        "reject",
+        "do not apply",
+        "dont apply",
+        "don't apply",
+    }
+
+
+def _build_final_confirmation_question(parsed: dict[str, Any]) -> str:
+    intent = str(parsed.get("intent", "")).strip()
+    logic = _truncate_text(str(parsed.get("logic_string", "")).strip(), 180)
+    if intent in {"assert_fact", "assert_rule", "retract"} and logic:
+        return f"Confirm KB write `{intent}` with `{logic}`? (yes/no)"
+    if intent in {"assert_fact", "assert_rule", "retract"}:
+        return f"Confirm KB write `{intent}`? (yes/no)"
+    return "Confirm this operation? (yes/no)"
 
 
 def _build_clarification_context_utterance(utterance: str, rounds: list[dict[str, Any]]) -> str:
@@ -1156,6 +1375,7 @@ def _build_clarification_answer_prompt(
     question: str,
     parsed: dict[str, Any],
     rounds: list[dict[str, Any]],
+    context_pack: dict[str, Any] | None = None,
 ) -> str:
     prior = []
     for row in rounds:
@@ -1171,17 +1391,32 @@ def _build_clarification_answer_prompt(
         "clarification_reason": parsed.get("clarification_reason", ""),
         "uncertainty_score": parsed.get("uncertainty_score"),
     }
+    kb_lines: list[str] = []
+    recent_lines: list[str] = []
+    if isinstance(context_pack, dict):
+        kb_raw = context_pack.get("kb_clauses", [])
+        recent_raw = context_pack.get("recent_turns", [])
+        if isinstance(kb_raw, list):
+            kb_lines = [str(item).strip() for item in kb_raw if str(item).strip()]
+        if isinstance(recent_raw, list):
+            recent_lines = [str(item).strip() for item in recent_raw if str(item).strip()]
+    kb_text = "\n".join(f"- {row}" for row in kb_lines) if kb_lines else "(none)"
+    recent_text = "\n".join(f"- {row}" for row in recent_lines) if recent_lines else "(none)"
     return (
         "/no_think\n"
-        "You are simulating the human speaker answering a clarification question.\n"
+        "You are the clarification proxy for a served assistant model.\n"
         "Return minified JSON only with keys: answer,confidence,assumption\n"
         "Rules:\n"
         "- answer must be short, concrete, and directly answer the question\n"
+        "- treat deterministic KB context as highest-trust evidence\n"
+        "- if deterministic context and recent turns do not support certainty, answer must be 'unknown'\n"
         "- if truly unknown, answer must be exactly 'unknown'\n"
         "- confidence must be numeric in [0,1]\n"
         "- assumption must be <=12 words\n"
         "Do not output markdown or extra keys.\n"
         f"Route: {route}\n"
+        f"Deterministic KB context:\n{kb_text}\n"
+        f"Recent accepted turns:\n{recent_text}\n"
         f"Original utterance:\n{utterance}\n"
         f"Clarification question:\n{question}\n"
         f"Prior clarification transcript:\n{prior_text}\n"
@@ -1199,6 +1434,7 @@ def _generate_synthetic_clarification_answer(
     question: str,
     parsed: dict[str, Any],
     rounds: list[dict[str, Any]],
+    context_pack: dict[str, Any] | None,
     context_length: int,
     timeout: int,
     api_key: str | None,
@@ -1209,6 +1445,7 @@ def _generate_synthetic_clarification_answer(
         question=question,
         parsed=parsed,
         rounds=rounds,
+        context_pack=context_pack,
     )
     response = _call_model_prompt(
         backend=backend,
@@ -1227,6 +1464,8 @@ def _generate_synthetic_clarification_answer(
                 "answer_source": "synthetic_model",
                 "answer_confidence": _clip_01(parsed_json.get("confidence"), fallback=0.5),
                 "answer_assumption": str(parsed_json.get("assumption", "")).strip(),
+                "context_kb_clause_count": int((context_pack or {}).get("kb_clause_count", 0) or 0),
+                "context_recent_turn_count": int((context_pack or {}).get("recent_turn_count", 0) or 0),
             }
 
     fallback = _coerce_synthetic_answer_text(response.message)
@@ -1241,6 +1480,8 @@ def _generate_synthetic_clarification_answer(
         "answer_source": "synthetic_failed",
         "answer_confidence": 0.0,
         "answer_assumption": "no parseable synthetic answer",
+        "context_kb_clause_count": int((context_pack or {}).get("kb_clause_count", 0) or 0),
+        "context_recent_turn_count": int((context_pack or {}).get("recent_turn_count", 0) or 0),
     }
 
 
@@ -1781,6 +2022,10 @@ def _atomize(text: str) -> str:
     return lowered
 
 
+def _is_ambiguous_pronoun_atom(atom: str) -> bool:
+    return str(atom or "").strip().lower() in AMBIGUOUS_PRONOUN_ATOMS
+
+
 def _build_parse_payload(
     *,
     intent: str,
@@ -1898,6 +2143,27 @@ def _build_assert_fact_fallback_parse(utterance: str) -> dict[str, Any] | None:
         subject_atom = _atomize(unary.group(1))
         predicate = _atomize(unary.group(2))
         if subject_atom and predicate:
+            if _is_ambiguous_pronoun_atom(subject_atom):
+                var_name = "X"
+                fact = f"{predicate}({var_name})."
+                parsed = _build_parse_payload(
+                    intent="assert_fact",
+                    logic_string=fact,
+                    facts=[fact],
+                    rules=[],
+                    queries=[],
+                    predicates=[predicate],
+                    atoms=[],
+                    variables=[var_name],
+                    rationale="Fallback unary parse detected unresolved pronoun subject.",
+                )
+                parsed["needs_clarification"] = True
+                parsed["ambiguities"] = [f"Pronoun '{subject_atom}' is unresolved."]
+                parsed["uncertainty_score"] = 0.78
+                parsed["uncertainty_label"] = "high"
+                parsed["clarification_reason"] = "Pronoun referent unresolved."
+                parsed["clarification_question"] = f"Who does '{subject_atom}' refer to?"
+                return parsed
             fact = f"{predicate}({subject_atom})."
             parsed = _build_parse_payload(
                 intent="assert_fact",
@@ -1923,6 +2189,34 @@ def _build_assert_fact_fallback_parse(utterance: str) -> dict[str, Any] | None:
         relation = _atomize(binary.group(2))
         obj_atom = _atomize(binary.group(3))
         if subject_atom and relation and obj_atom:
+            subject_is_pronoun = _is_ambiguous_pronoun_atom(subject_atom)
+            object_is_pronoun = _is_ambiguous_pronoun_atom(obj_atom)
+            if subject_is_pronoun or object_is_pronoun:
+                left = "X" if subject_is_pronoun else subject_atom
+                right = "Y" if object_is_pronoun else obj_atom
+                fact = f"{relation}({left}, {right})."
+                parsed = _build_parse_payload(
+                    intent="assert_fact",
+                    logic_string=fact,
+                    facts=[fact],
+                    rules=[],
+                    queries=[],
+                    predicates=[relation],
+                    atoms=[x for x in [subject_atom if not subject_is_pronoun else "", obj_atom if not object_is_pronoun else ""] if x],
+                    variables=[v for v in [left if subject_is_pronoun else "", right if object_is_pronoun else ""] if v],
+                    rationale="Fallback binary parse detected unresolved pronoun argument.",
+                )
+                parsed["needs_clarification"] = True
+                pronouns = [x for x, ok in [(subject_atom, subject_is_pronoun), (obj_atom, object_is_pronoun)] if ok]
+                parsed["ambiguities"] = [f"Unresolved pronoun(s): {', '.join(pronouns)}."]
+                parsed["uncertainty_score"] = 0.8
+                parsed["uncertainty_label"] = "high"
+                parsed["clarification_reason"] = "Pronoun referent unresolved."
+                if len(pronouns) == 1:
+                    parsed["clarification_question"] = f"Who does '{pronouns[0]}' refer to?"
+                else:
+                    parsed["clarification_question"] = "Who are the pronoun referents in this relation?"
+                return parsed
             fact = f"{relation}({subject_atom}, {obj_atom})."
             parsed = _build_parse_payload(
                 intent="assert_fact",
@@ -2791,19 +3085,41 @@ def _batch_status(results: list[dict[str, Any]]) -> str:
 def _expand_assert_fact_clauses(candidates: list[str]) -> list[str]:
     expanded: list[str] = []
     for raw_clause in candidates:
-        clause = _normalize_clause(raw_clause)
-        if not clause:
+        text = str(raw_clause or "").strip()
+        if not text:
             continue
-        raw = clause[:-1].strip() if clause.endswith(".") else clause.strip()
-        if ":-" in raw:
-            expanded.append(clause)
-            continue
-        goals = _split_top_level_args(raw)
-        if len(goals) > 1 and all(_is_valid_goal_clause(f"{g}.", require_ground=True) for g in goals):
-            for goal in goals:
-                expanded.append(_normalize_clause(f"{goal}."))
-        else:
-            expanded.append(clause)
+
+        # First pass: break multi-line / multi-sentence fact payloads.
+        fragments: list[str] = []
+        for line in text.splitlines():
+            part = line.strip()
+            if part:
+                fragments.append(part)
+        if not fragments:
+            fragments = [text]
+
+        sentence_parts: list[str] = []
+        for fragment in fragments:
+            chunks = [c.strip() for c in fragment.split(".") if c.strip()]
+            if chunks:
+                sentence_parts.extend(chunks)
+            else:
+                sentence_parts.append(fragment)
+
+        for part in sentence_parts:
+            clause = _normalize_clause(f"{part}.")
+            if not clause:
+                continue
+            raw = clause[:-1].strip() if clause.endswith(".") else clause.strip()
+            if ":-" in raw:
+                expanded.append(clause)
+                continue
+            goals = _split_top_level_args(raw)
+            if len(goals) > 1 and all(_is_valid_goal_clause(f"{g}.", require_ground=True) for g in goals):
+                for goal in goals:
+                    expanded.append(_normalize_clause(f"{goal}."))
+            else:
+                expanded.append(clause)
     seen: set[str] = set()
     unique: list[str] = []
     for clause in expanded:
@@ -3092,7 +3408,7 @@ def _decision_state_for_turn(
     if status in {"validation_error", "constraint_error"}:
         return "reject"
 
-    if status == "clarification_requested":
+    if status in {"clarification_requested", "confirmation_requested"}:
         reason = str(clarification_pending_reason or "").strip().lower()
         escalation_markers = (
             "maximum clarification rounds reached",
@@ -3238,7 +3554,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--prolog-repo",
         default="",
-        help="Optional path containing src/mcp_server.py when --runtime mcp.",
+        help="Optional path containing src/mcp_server.py when --runtime mcp (defaults to local repo if present).",
     )
     parser.add_argument(
         "--kb-path",
@@ -3361,6 +3677,11 @@ def parse_args() -> argparse.Namespace:
         help="Maximum clarification Q&A rounds per utterance before deferring KB apply.",
     )
     parser.add_argument(
+        "--require-final-confirmation",
+        action="store_true",
+        help="Require explicit final yes/no confirmation before any KB write intent is applied.",
+    )
+    parser.add_argument(
         "--clarification-answer-model",
         default="",
         help="Optional model id used only to answer clarification questions during runs.",
@@ -3381,6 +3702,30 @@ def parse_args() -> argparse.Namespace:
         type=int,
         default=16384,
         help="Context window for clarification-answer model calls (default 16384).",
+    )
+    parser.add_argument(
+        "--clarification-answer-history-turns",
+        type=int,
+        default=8,
+        help="How many prior accepted turns to include for clarification answer context.",
+    )
+    parser.add_argument(
+        "--clarification-answer-kb-clause-limit",
+        type=int,
+        default=80,
+        help="Maximum KB clauses included in clarification answer context.",
+    )
+    parser.add_argument(
+        "--clarification-answer-kb-char-budget",
+        type=int,
+        default=5000,
+        help="Approximate char budget for KB clause context sent to clarification answer model.",
+    )
+    parser.add_argument(
+        "--clarification-answer-min-confidence",
+        type=float,
+        default=0.55,
+        help="Minimum synthetic clarification confidence required to accept auto-answer.",
     )
     parser.add_argument("--out", default="", help="Optional output report JSON path.")
     return parser.parse_args()
@@ -3480,6 +3825,10 @@ def main() -> int:
         args.clarification_answer_base_url.strip() or DEFAULT_BASE_URLS[clarification_answer_backend]
     )
     clarification_answer_context_length = max(256, int(args.clarification_answer_context_length))
+    clarification_answer_history_turns = max(0, int(args.clarification_answer_history_turns))
+    clarification_answer_kb_clause_limit = max(0, int(args.clarification_answer_kb_clause_limit))
+    clarification_answer_kb_char_budget = max(0, int(args.clarification_answer_kb_char_budget))
+    clarification_answer_min_confidence = _clip_01(args.clarification_answer_min_confidence, fallback=0.55)
     clarification_auto_answer_enabled = bool(clarification_answer_model)
     use_two_pass = bool(args.two_pass and not args.no_two_pass)
     use_split_extraction = bool(args.split_extraction and not args.no_split_extraction)
@@ -3491,6 +3840,7 @@ def main() -> int:
     )
     clarification_eagerness = _clip_01(args.clarification_eagerness, fallback=0.35)
     max_clarification_rounds = max(0, int(args.max_clarification_rounds))
+    require_final_confirmation = bool(args.require_final_confirmation)
     prompt_history_dir = Path(args.prompt_history_dir)
     if not prompt_history_dir.is_absolute():
         prompt_history_dir = (Path.cwd() / prompt_history_dir).resolve()
@@ -3514,12 +3864,25 @@ def main() -> int:
         "strict_types": bool(args.strict_types),
         "clarification_eagerness": clarification_eagerness,
         "max_clarification_rounds": max_clarification_rounds,
+        "require_final_confirmation": require_final_confirmation,
         "clarification_auto_answer_enabled": clarification_auto_answer_enabled,
         "clarification_answer_backend": clarification_answer_backend if clarification_auto_answer_enabled else "",
         "clarification_answer_base_url": clarification_answer_base_url if clarification_auto_answer_enabled else "",
         "clarification_answer_model": clarification_answer_model if clarification_auto_answer_enabled else "",
         "clarification_answer_context_length": (
             clarification_answer_context_length if clarification_auto_answer_enabled else 0
+        ),
+        "clarification_answer_history_turns": (
+            clarification_answer_history_turns if clarification_auto_answer_enabled else 0
+        ),
+        "clarification_answer_kb_clause_limit": (
+            clarification_answer_kb_clause_limit if clarification_auto_answer_enabled else 0
+        ),
+        "clarification_answer_kb_char_budget": (
+            clarification_answer_kb_char_budget if clarification_auto_answer_enabled else 0
+        ),
+        "clarification_answer_min_confidence": (
+            clarification_answer_min_confidence if clarification_auto_answer_enabled else 0.0
         ),
         "backend_options": {"num_ctx": context_length} if backend == "ollama" else {},
     }
@@ -3605,13 +3968,18 @@ def main() -> int:
     print(f"Split extraction: {use_split_extraction}")
     print(
         f"Clarification policy: eagerness={clarification_eagerness:.2f} "
-        f"max_rounds={max_clarification_rounds}"
+        f"max_rounds={max_clarification_rounds} "
+        f"final_confirmation={require_final_confirmation}"
     )
     if clarification_auto_answer_enabled:
         print(
             "Clarification answer model: "
             f"{clarification_answer_backend}/{clarification_answer_model} @ {clarification_answer_base_url} "
-            f"(ctx={clarification_answer_context_length})"
+            f"(ctx={clarification_answer_context_length} "
+            f"history_turns={clarification_answer_history_turns} "
+            f"kb_limit={clarification_answer_kb_clause_limit} "
+            f"kb_chars={clarification_answer_kb_char_budget} "
+            f"min_conf={clarification_answer_min_confidence:.2f})"
         )
     else:
         print("Clarification answer model: (disabled)")
@@ -3642,7 +4010,13 @@ def main() -> int:
 
     turn_rows: list[dict[str, Any]] = []
     for idx, raw in enumerate(utterances, start=1):
-        utterance, scripted_clarification_answers, entry_max_rounds = _coerce_utterance_entry(raw)
+        (
+            utterance,
+            scripted_clarification_answers,
+            entry_max_rounds,
+            scripted_confirmation_answers,
+            entry_require_confirmation,
+        ) = _coerce_utterance_entry(raw)
         if not utterance:
             continue
 
@@ -3651,11 +4025,21 @@ def main() -> int:
             if entry_max_rounds is None
             else max(0, int(entry_max_rounds))
         )
+        per_turn_require_confirmation = (
+            require_final_confirmation
+            if entry_require_confirmation is None
+            else bool(entry_require_confirmation)
+        )
         clarification_rounds: list[dict[str, Any]] = []
         scripted_answer_index = 0
         synthetic_answer_count = 0
         clarification_pending = False
         clarification_pending_reason = ""
+        confirmation_pending = False
+        confirmation_question = ""
+        confirmation_answer = ""
+        confirmation_result = "not_required"
+        confirmation_answer_index = 0
         clarification_question = ""
         clarification_policy = {
             "clarification_eagerness": clarification_eagerness,
@@ -3673,6 +4057,7 @@ def main() -> int:
         repaired = False
         fallback_used = False
         validation_errors: list[str] = []
+        deferred_validation_errors: list[str] = []
         alignment_events: list[dict[str, Any]] = []
         registry_unknown_signatures: list[str] = []
 
@@ -3714,8 +4099,14 @@ def main() -> int:
                 if isinstance(cls_json, dict):
                     candidate = str(cls_json.get("route", "")).strip()
                     if candidate in {"assert_fact", "assert_rule", "query", "retract", "other"}:
-                        route = candidate
-                        route_source = "model"
+                        # Guard against classifier drift: only promote assert_fact -> assert_rule
+                        # when the utterance has explicit rule cues.
+                        if candidate == "assert_rule" and heuristic == "assert_fact" and not _has_rule_cues(turn_input_text):
+                            route = heuristic
+                            route_source = "heuristic"
+                        else:
+                            route = candidate
+                            route_source = "model"
 
             known_predicates = _known_predicate_names_from_corpus(corpus_clauses)
             if use_split_extraction:
@@ -3871,6 +4262,10 @@ def main() -> int:
                 if type_errors:
                     validation_errors.extend(type_errors)
 
+            if isinstance(parsed, dict) and validation_errors and bool(parsed.get("needs_clarification", False)):
+                deferred_validation_errors = list(validation_errors)
+                validation_errors = []
+
             if not isinstance(parsed, dict) or validation_errors:
                 break
 
@@ -3926,6 +4321,14 @@ def main() -> int:
                 continue
 
             if has_round_capacity and clarification_auto_answer_enabled:
+                clarification_context_pack = _build_clarification_context_pack(
+                    server=server,
+                    corpus_clauses=corpus_clauses,
+                    turn_rows=turn_rows,
+                    history_turns=clarification_answer_history_turns,
+                    kb_clause_limit=clarification_answer_kb_clause_limit,
+                    kb_char_budget=clarification_answer_kb_char_budget,
+                )
                 synthetic_answer, answer_meta = _generate_synthetic_clarification_answer(
                     backend=clarification_answer_backend,
                     base_url=clarification_answer_base_url,
@@ -3935,11 +4338,19 @@ def main() -> int:
                     question=clarification_question,
                     parsed=parsed,
                     rounds=clarification_rounds,
+                    context_pack=clarification_context_pack,
                     context_length=clarification_answer_context_length,
                     timeout=args.timeout_seconds,
                     api_key=api_key,
                 )
                 if synthetic_answer:
+                    answer_confidence = _clip_01(answer_meta.get("answer_confidence"), fallback=0.5)
+                    if answer_confidence < clarification_answer_min_confidence:
+                        clarification_pending = True
+                        clarification_pending_reason = (
+                            "Clarification answer model confidence below threshold; KB apply deferred."
+                        )
+                        break
                     if _is_non_informative_clarification_answer(synthetic_answer):
                         clarification_pending = True
                         clarification_pending_reason = (
@@ -3963,8 +4374,10 @@ def main() -> int:
                             "question": clarification_question,
                             "answer": synthetic_answer,
                             "answer_source": str(answer_meta.get("answer_source", "synthetic_model")),
-                            "answer_confidence": _clip_01(answer_meta.get("answer_confidence"), fallback=0.5),
+                            "answer_confidence": answer_confidence,
                             "answer_assumption": str(answer_meta.get("answer_assumption", "")).strip(),
+                            "answer_context_kb_clause_count": int(answer_meta.get("context_kb_clause_count", 0) or 0),
+                            "answer_context_recent_turn_count": int(answer_meta.get("context_recent_turn_count", 0) or 0),
                             "uncertainty_score": clarification_policy.get("uncertainty_score"),
                             "effective_uncertainty": clarification_policy.get("effective_uncertainty"),
                             "threshold": clarification_policy.get("threshold"),
@@ -3983,18 +4396,54 @@ def main() -> int:
             break
 
         apply_row: dict[str, Any]
+        if (
+            not clarification_pending
+            and isinstance(parsed, dict)
+            and not validation_errors
+            and per_turn_require_confirmation
+            and str(parsed.get("intent", "")).strip() in {"assert_fact", "assert_rule", "retract"}
+        ):
+            confirmation_question = _build_final_confirmation_question(parsed)
+            if confirmation_answer_index < len(scripted_confirmation_answers):
+                confirmation_answer = scripted_confirmation_answers[confirmation_answer_index]
+                confirmation_answer_index += 1
+                if _is_affirmative_confirmation(confirmation_answer):
+                    confirmation_result = "accepted"
+                elif _is_negative_confirmation(confirmation_answer):
+                    clarification_pending = True
+                    confirmation_pending = True
+                    confirmation_result = "declined"
+                    clarification_pending_reason = "Final user confirmation declined; KB apply deferred."
+                else:
+                    clarification_pending = True
+                    confirmation_pending = True
+                    confirmation_result = "invalid"
+                    clarification_pending_reason = "Final user confirmation was not yes/no; KB apply deferred."
+            else:
+                clarification_pending = True
+                confirmation_pending = True
+                confirmation_result = "missing"
+                clarification_pending_reason = "Final user confirmation required before KB apply."
+
         if clarification_pending and isinstance(parsed, dict) and not validation_errors:
+            pending_status = "confirmation_requested" if confirmation_pending else "clarification_requested"
             apply_row = {
                 "tool": "none",
                 "input": {
                     "clarification_question": clarification_question,
                     "clarification_rounds_used": len(clarification_rounds),
+                    "confirmation_question": confirmation_question,
+                    "confirmation_answer": confirmation_answer,
                 },
                 "result": {
-                    "status": "clarification_requested",
+                    "status": pending_status,
                     "message": clarification_pending_reason or "Clarification required before KB apply.",
                     "clarification_question": clarification_question,
                     "clarification_policy": clarification_policy,
+                    "confirmation_required": bool(confirmation_pending),
+                    "confirmation_question": confirmation_question,
+                    "confirmation_answer": confirmation_answer,
+                    "confirmation_result": confirmation_result,
                 },
             }
         elif not isinstance(parsed, dict) or validation_errors:
@@ -4036,6 +4485,7 @@ def main() -> int:
                 "registry_unknown_signatures": registry_unknown_signatures,
                 "parsed": parsed,
                 "validation_errors": validation_errors,
+                "deferred_validation_errors": deferred_validation_errors,
                 "clarification_rounds": clarification_rounds,
                 "clarification_rounds_used": len(clarification_rounds),
                 "clarification_max_rounds": per_turn_max_rounds,
@@ -4047,14 +4497,24 @@ def main() -> int:
                 "clarification_pending": clarification_pending,
                 "clarification_pending_reason": clarification_pending_reason,
                 "clarification_question": clarification_question,
+                "confirmation_required": bool(
+                    per_turn_require_confirmation
+                    and isinstance(parsed, dict)
+                    and str(parsed.get("intent", "")).strip() in {"assert_fact", "assert_rule", "retract"}
+                ),
+                "confirmation_question": confirmation_question,
+                "confirmation_answer": confirmation_answer,
+                "confirmation_result": confirmation_result,
+                "confirmation_answers_available": len(scripted_confirmation_answers),
+                "confirmation_answers_used": confirmation_answer_index,
                 "apply": apply_row,
                 "apply_status": apply_status,
                 "decision_state": decision_state,
             }
         )
 
-        if apply_status == "clarification_requested":
-            status_note = "clarification"
+        if apply_status in {"clarification_requested", "confirmation_requested"}:
+            status_note = "confirmation" if apply_status == "confirmation_requested" else "clarification"
         else:
             status_note = "ok" if not validation_errors and apply_status in {"success", "skipped", "no_results"} else "issue"
         print(
@@ -4079,7 +4539,12 @@ def main() -> int:
         if str(row.get("apply_status")) not in {"success", "skipped", "no_results"}
     )
     clarification_requests = sum(
-        1 for row in turn_rows if str(row.get("apply_status")) == "clarification_requested"
+        1
+        for row in turn_rows
+        if str(row.get("apply_status")) in {"clarification_requested", "confirmation_requested"}
+    )
+    confirmation_requests = sum(
+        1 for row in turn_rows if str(row.get("apply_status")) == "confirmation_requested"
     )
     clarification_rounds_total = sum(
         int(row.get("clarification_rounds_used", 0)) for row in turn_rows
@@ -4192,6 +4657,7 @@ def main() -> int:
         "turn_parse_failures": parse_fail_count,
         "turn_apply_failures": apply_fail_count,
         "turns_clarification_requested": clarification_requests,
+        "turns_confirmation_requested": confirmation_requests,
         "clarification_rounds_total": clarification_rounds_total,
         "clarification_synthetic_answers_total": clarification_synthetic_answers_total,
         "decision_state_counts": decision_state_counts,
@@ -4206,7 +4672,10 @@ def main() -> int:
     print(f"Validation: {validation_pass}/{validation_total} passed")
     print(f"Parser failures: {parse_fail_count}")
     print(f"Apply failures: {apply_fail_count}")
-    print(f"Clarification requests: {clarification_requests} (rounds={clarification_rounds_total})")
+    print(
+        "Clarification requests: "
+        f"{clarification_requests} (confirmation={confirmation_requests}, rounds={clarification_rounds_total})"
+    )
     print(f"Synthetic clarification answers used: {clarification_synthetic_answers_total}")
     print(f"Decision states: {decision_state_counts}")
     print(

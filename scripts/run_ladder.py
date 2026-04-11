@@ -66,7 +66,7 @@ def _prompt_sha256(path: Path) -> str:
 
 
 def _parse_family_and_rung(stem: str) -> tuple[str, int]:
-    m = re.match(r"^(stage|acid)_(\d+)_", stem)
+    m = re.match(r"^(stage|acid|rung)_(\d+)_", stem)
     if m:
         return m.group(1), int(m.group(2))
     if stem.startswith("story_"):
@@ -76,7 +76,7 @@ def _parse_family_and_rung(stem: str) -> tuple[str, int]:
 
 def _sort_key(path: Path) -> tuple[int, int, str]:
     family, rung_num = _parse_family_and_rung(path.stem)
-    family_order = {"stage": 0, "acid": 1, "story": 2, "misc": 3}.get(family, 99)
+    family_order = {"stage": 0, "acid": 1, "rung": 2, "story": 3, "misc": 4}.get(family, 99)
     return (family_order, rung_num, path.stem)
 
 
@@ -86,7 +86,7 @@ def _collect_scenarios(scenarios_dir: Path, include_misc: bool) -> list[Scenario
         if not p.is_file():
             continue
         stem = p.stem
-        if stem.startswith(("stage_", "acid_", "story_")):
+        if stem.startswith(("stage_", "acid_", "rung_", "story_")):
             rows.append(p)
             continue
         if include_misc:
@@ -501,9 +501,18 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--runs-dir", default=str(DEFAULT_RUNS_DIR))
     p.add_argument("--out-dir", default=str(DEFAULT_OUT_DIR))
     p.add_argument("--summary-out", default="")
-    p.add_argument("--include-misc", action="store_true", help="Include non stage/acid/story scenario JSON files.")
+    p.add_argument("--include-misc", action="store_true", help="Include non stage/acid/rung/story scenario JSON files.")
     p.add_argument("--start-rung", default="", help="Rung index (1-based) or scenario name (stem/json).")
     p.add_argument("--end-rung", default="", help="Rung index (1-based) or scenario name (stem/json).")
+    p.add_argument(
+        "--tail-rungs",
+        type=int,
+        default=0,
+        help=(
+            "Run only the last N rungs in sorted order (rolling frontier window). "
+            "When >0, this overrides --start-rung/--end-rung."
+        ),
+    )
     p.add_argument("--backend", default="ollama")
     p.add_argument("--base-url", default="http://127.0.0.1:11434")
     p.add_argument("--model", default="qwen3.5:9b")
@@ -579,15 +588,25 @@ def main() -> int:
         print(f"No scenarios found in: {scenarios_dir}")
         return 2
 
-    try:
-        start_idx = _parse_bound(args.start_rung, all_rows, default_index=1)
-        end_idx = _parse_bound(args.end_rung, all_rows, default_index=len(all_rows))
-        if start_idx > end_idx:
-            raise ValueError(f"start-rung ({start_idx}) must be <= end-rung ({end_idx})")
-    except ValueError as exc:
-        print(f"Invalid rung range: {exc}")
-        return 2
-    selected = [row for row in all_rows if start_idx <= row.index <= end_idx]
+    if int(args.tail_rungs) > 0:
+        tail_n = int(args.tail_rungs)
+        tail_pool = [row for row in all_rows if row.family in {"stage", "acid", "rung"}]
+        if not tail_pool:
+            print("No ladder scenarios available for --tail-rungs.")
+            return 2
+        selected = tail_pool[-tail_n:] if tail_n < len(tail_pool) else tail_pool[:]
+        start_idx = selected[0].index
+        end_idx = selected[-1].index
+    else:
+        try:
+            start_idx = _parse_bound(args.start_rung, all_rows, default_index=1)
+            end_idx = _parse_bound(args.end_rung, all_rows, default_index=len(all_rows))
+            if start_idx > end_idx:
+                raise ValueError(f"start-rung ({start_idx}) must be <= end-rung ({end_idx})")
+        except ValueError as exc:
+            print(f"Invalid rung range: {exc}")
+            return 2
+        selected = [row for row in all_rows if start_idx <= row.index <= end_idx]
 
     prompt_sha = _prompt_sha256(prompt_file)
     target_sig = _build_target_signature(args, prompt_sha256=prompt_sha)
@@ -697,6 +716,9 @@ def main() -> int:
         "failed_count": failed,
         "start_rung": args.start_rung,
         "end_rung": args.end_rung,
+        "tail_rungs": int(args.tail_rungs),
+        "resolved_start_rung": selected[0].stem if selected else "",
+        "resolved_end_rung": selected[-1].stem if selected else "",
         "label": args.label,
         "target_signature": target_sig,
         "rows": run_rows,

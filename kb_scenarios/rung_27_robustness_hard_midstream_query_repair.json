@@ -1,0 +1,36 @@
+﻿{
+  "name": "rung_27_robustness_hard_midstream_query_repair",
+  "ontology_name": "rung_27_hard_midstream_query_repair",
+  "utterances": [
+    "Faye is the parent of Glen.",
+    "Glen is the parent of Hope.",
+    "Hope is the parent of Iris.",
+    "If X is a parent of Y then X is an ancestor of Y.",
+    "If X is an ancestor of Y and Y is an ancestor of Z then X is an ancestor of Z.",
+    "Before any repair, is Faye an ancestor of Iris?",
+    "That center edge needs correction, so retract parent(glen, hope).",
+    "Replace it with this: Glen is the parent of Jude.",
+    "Jude is the parent of Hope.",
+    "After that repair, is Faye an ancestor of Iris now?"
+  ],
+  "validations": [
+    {
+      "id": "old_glen_hope_removed",
+      "query": "parent(glen, hope).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "glen_jude_exists",
+      "query": "parent(glen, jude).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "faye_iris_ancestor_after_repair",
+      "query": "ancestor(faye, iris).",
+      "expect_status": "success",
+      "min_rows": 1
+    }
+  ]
+}

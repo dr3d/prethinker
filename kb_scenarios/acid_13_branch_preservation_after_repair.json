@@ -1,0 +1,32 @@
+{
+  "name": "acid_13_branch_preservation_after_repair",
+  "ontology_name": "acid_branch_preserve",
+  "utterances": [
+    "Noel is a parent of Opal, Noel is a parent of Pax, and Opal is a parent of Quin.",
+    "If X is a parent of Y then X is an ancestor of Y, and if X is an ancestor of Y and Y is an ancestor of Z then X is an ancestor of Z.",
+    "Actually, retract that: parent(noel, opal).",
+    "Noel is a parent of Rhea, and Rhea is a parent of Quin.",
+    "Who is an ancestor of Quin?",
+    "Summarize the branch change in one sentence."
+  ],
+  "validations": [
+    {
+      "id": "noel_opal_removed",
+      "query": "parent(noel, opal).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "noel_pax_preserved",
+      "query": "parent(noel, pax).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "noel_quin_restored_via_rhea",
+      "query": "ancestor(noel, quin).",
+      "expect_status": "success",
+      "min_rows": 1
+    }
+  ]
+}

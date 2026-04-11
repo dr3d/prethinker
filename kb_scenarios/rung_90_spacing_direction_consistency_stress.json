@@ -1,0 +1,42 @@
+{
+  "name": "rung_90_spacing_direction_consistency_stress",
+  "ontology_name": "rung_90_direction_consistency_stress",
+  "utterances": [
+    "Xia is Yan's parent.",
+    "Zed has Yan as a parent.",
+    "Abe is parented by Zed.",
+    "Bea has Abe as a parent.",
+    "Cia is Bea's parent.",
+    "If X is a parent of Y then X is an ancestor of Y.",
+    "If X is an ancestor of Y and Y is an ancestor of Z then X is an ancestor of Z.",
+    "Please remove this only if it appears in reversed direction: parent(zed, yan).",
+    "Is Xia an ancestor of Abe?",
+    "Is Yan an ancestor of Bea?"
+  ],
+  "validations": [
+    {
+      "id": "yan_zed_parent",
+      "query": "parent(yan, zed).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "xia_abe_ancestor",
+      "query": "ancestor(xia, abe).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "yan_bea_ancestor",
+      "query": "ancestor(yan, bea).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "zed_yan_absent",
+      "query": "parent(zed, yan).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    }
+  ]
+}

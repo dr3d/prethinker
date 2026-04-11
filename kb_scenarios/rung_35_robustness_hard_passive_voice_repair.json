@@ -1,0 +1,33 @@
+﻿{
+  "name": "rung_35_robustness_hard_passive_voice_repair",
+  "ontology_name": "rung_35_hard_passive_voice_repair",
+  "utterances": [
+    "Owen is parented by Piper.",
+    "Piper is parented by Quinn.",
+    "If X is a parent of Y then X is an ancestor of Y.",
+    "If X is an ancestor of Y and Y is an ancestor of Z then X is an ancestor of Z.",
+    "I may have said that middle link too quickly, so retract parent(quinn, piper).",
+    "Let me restate it carefully: Piper is parented by Rowan.",
+    "Is Rowan an ancestor of Owen now?"
+  ],
+  "validations": [
+    {
+      "id": "old_quinn_piper_removed",
+      "query": "parent(quinn, piper).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "rowan_piper_parent",
+      "query": "parent(rowan, piper).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "rowan_owen_ancestor",
+      "query": "ancestor(rowan, owen).",
+      "expect_status": "success",
+      "min_rows": 1
+    }
+  ]
+}

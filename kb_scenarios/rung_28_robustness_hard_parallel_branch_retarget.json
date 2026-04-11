@@ -1,0 +1,36 @@
+﻿{
+  "name": "rung_28_robustness_hard_parallel_branch_retarget",
+  "ontology_name": "rung_28_hard_parallel_branch_retarget",
+  "utterances": [
+    "Kara is the parent of Lior.",
+    "Lior is the parent of Mona.",
+    "Kara is the parent of Nia too.",
+    "Mona is the parent of Oren.",
+    "If X is a parent of Y then X is an ancestor of Y.",
+    "If X is an ancestor of Y and Y is an ancestor of Z then X is an ancestor of Z.",
+    "That one branch needs a retarget, so retract parent(lior, mona).",
+    "Use this branch instead: Lior is the parent of Pax.",
+    "Pax is the parent of Mona.",
+    "Is Kara still an ancestor of Oren after that change?"
+  ],
+  "validations": [
+    {
+      "id": "old_lior_mona_removed",
+      "query": "parent(lior, mona).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "kara_nia_preserved",
+      "query": "parent(kara, nia).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "kara_oren_ancestor",
+      "query": "ancestor(kara, oren).",
+      "expect_status": "success",
+      "min_rows": 1
+    }
+  ]
+}

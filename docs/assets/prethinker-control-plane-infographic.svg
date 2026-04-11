@@ -1,0 +1,137 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" role="img" aria-labelledby="title desc">
+  <title id="title">Pre-thinker Control Plane Infographic</title>
+  <desc id="desc">Pre-thinker sits between user and served LLM, uses deterministic Prolog memory, and runs clarification loops before committing writes.</desc>
+
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#070d1f"/>
+      <stop offset="50%" stop-color="#0d1a36"/>
+      <stop offset="100%" stop-color="#14244a"/>
+    </linearGradient>
+    <radialGradient id="glowA" cx="0.14" cy="0.16" r="0.55">
+      <stop offset="0%" stop-color="#34d6d233" />
+      <stop offset="100%" stop-color="#34d6d200" />
+    </radialGradient>
+    <radialGradient id="glowB" cx="0.87" cy="0.18" r="0.50">
+      <stop offset="0%" stop-color="#f2b65d2a" />
+      <stop offset="100%" stop-color="#f2b65d00" />
+    </radialGradient>
+    <linearGradient id="panelUser" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#123258"/>
+      <stop offset="100%" stop-color="#1f4d7c"/>
+    </linearGradient>
+    <linearGradient id="panelPre" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1f4578"/>
+      <stop offset="100%" stop-color="#2e5f98"/>
+    </linearGradient>
+    <linearGradient id="panelLLM" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#5a78bb"/>
+      <stop offset="100%" stop-color="#7696dc"/>
+    </linearGradient>
+    <linearGradient id="panelSharp" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1ea08f"/>
+      <stop offset="100%" stop-color="#33c2a8"/>
+    </linearGradient>
+    <linearGradient id="panelMushy" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#b87a2c"/>
+      <stop offset="100%" stop-color="#d59945"/>
+    </linearGradient>
+    <linearGradient id="diamondA" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#143251"/>
+      <stop offset="100%" stop-color="#22466f"/>
+    </linearGradient>
+    <linearGradient id="diamondB" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#17375a"/>
+      <stop offset="100%" stop-color="#2a527f"/>
+    </linearGradient>
+    <filter id="shadowSoft" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#000000" flood-opacity="0.30"/>
+    </filter>
+    <filter id="shadowHard" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="14" stdDeviation="14" flood-color="#000000" flood-opacity="0.42"/>
+    </filter>
+    <marker id="arrowMain" markerWidth="16" markerHeight="12" refX="13" refY="6" orient="auto-start-reverse">
+      <path d="M0,0 L16,6 L0,12 z" fill="#d9e9ff"/>
+    </marker>
+    <marker id="arrowLoop" markerWidth="12" markerHeight="8" refX="10" refY="4" orient="auto-start-reverse">
+      <path d="M0,0 L12,4 L0,8 z" fill="#9fc6ff"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1920" height="1080" fill="url(#bg)"/>
+  <rect x="0" y="0" width="1920" height="1080" fill="url(#glowA)"/>
+  <rect x="0" y="0" width="1920" height="1080" fill="url(#glowB)"/>
+
+  <text x="90" y="84" fill="#f1f7ff" font-size="56" font-weight="780" font-family="Segoe UI, Inter, Arial, sans-serif">
+    Pre-thinker Control Plane
+  </text>
+  <text x="90" y="126" fill="#a9c4e8" font-size="28" font-family="Segoe UI, Inter, Arial, sans-serif">
+    Deterministic memory and clarification-gated writes around a served LLM
+  </text>
+
+  <ellipse cx="170" cy="452" rx="118" ry="94" fill="url(#panelUser)" stroke="#9ec4ef" stroke-width="2.6" filter="url(#shadowSoft)"/>
+  <text x="170" y="458" text-anchor="middle" fill="#f2f8ff" font-size="40" font-weight="760" font-family="Segoe UI, Inter, Arial, sans-serif">USER</text>
+
+  <ellipse cx="910" cy="225" rx="266" ry="120" fill="url(#panelSharp)" stroke="#9deedf" stroke-width="3.2" filter="url(#shadowHard)"/>
+  <text x="910" y="212" text-anchor="middle" fill="#edfffb" font-size="40" font-weight="780" font-family="Segoe UI, Inter, Arial, sans-serif">Sharp Memory</text>
+  <text x="910" y="251" text-anchor="middle" fill="#d8fff5" font-size="24" font-family="Segoe UI, Inter, Arial, sans-serif">Deterministic Prolog KB</text>
+
+  <rect x="620" y="348" width="580" height="272" rx="34" fill="url(#panelPre)" stroke="#9fcbff" stroke-width="3.2" filter="url(#shadowHard)"/>
+  <text x="910" y="420" text-anchor="middle" fill="#f2f7ff" font-size="52" font-weight="840" font-family="Segoe UI, Inter, Arial, sans-serif">
+    PRE-THINKER
+  </text>
+  <text x="910" y="466" text-anchor="middle" fill="#d8e8ff" font-size="23" font-family="Segoe UI, Inter, Arial, sans-serif">
+    Parse  |  Uncertainty  |  Clarify  |  Confirm  |  Commit
+  </text>
+  <rect x="682" y="495" width="456" height="90" rx="15" fill="#102641" stroke="#6ea3dc" stroke-width="2.1"/>
+  <text x="910" y="531" text-anchor="middle" fill="#c9e0ff" font-size="22" font-weight="680" font-family="Segoe UI, Inter, Arial, sans-serif">Write intents are gated</text>
+  <text x="910" y="560" text-anchor="middle" fill="#d6e9ff" font-size="21" font-family="Segoe UI, Inter, Arial, sans-serif">Final user yes/no required before KB mutation</text>
+
+  <rect x="1270" y="392" width="190" height="182" rx="24" fill="url(#panelLLM)" stroke="#bfd3ff" stroke-width="3.1" filter="url(#shadowSoft)"/>
+  <text x="1365" y="483" text-anchor="middle" fill="#f3f7ff" font-size="45" font-weight="820" font-family="Segoe UI, Inter, Arial, sans-serif">LLM</text>
+
+  <ellipse cx="1705" cy="486" rx="192" ry="126" fill="url(#panelMushy)" stroke="#ffddb5" stroke-width="3" filter="url(#shadowSoft)"/>
+  <text x="1705" y="472" text-anchor="middle" fill="#fff5e8" font-size="40" font-weight="760" font-family="Segoe UI, Inter, Arial, sans-serif">Mushy Memory</text>
+  <text x="1705" y="510" text-anchor="middle" fill="#ffeccd" font-size="22" font-family="Segoe UI, Inter, Arial, sans-serif">Probabilistic context</text>
+
+  <polygon points="560,760 660,650 820,650 920,760 820,870 660,870" fill="url(#diamondA)" stroke="#7fb8ff" stroke-width="3" filter="url(#shadowSoft)"/>
+  <text x="740" y="733" text-anchor="middle" fill="#ebf3ff" font-size="32" font-weight="760" font-family="Segoe UI, Inter, Arial, sans-serif">Q ↔ A</text>
+  <text x="740" y="778" text-anchor="middle" fill="#cce1ff" font-size="20" font-family="Segoe UI, Inter, Arial, sans-serif">User clarification</text>
+  <text x="740" y="812" text-anchor="middle" fill="#cce1ff" font-size="20" font-family="Segoe UI, Inter, Arial, sans-serif">and final confirmation</text>
+
+  <polygon points="1000,760 1100,650 1260,650 1360,760 1260,870 1100,870" fill="url(#diamondB)" stroke="#7fb8ff" stroke-width="3" filter="url(#shadowSoft)"/>
+  <text x="1180" y="733" text-anchor="middle" fill="#ebf3ff" font-size="32" font-weight="760" font-family="Segoe UI, Inter, Arial, sans-serif">Q ↔ A</text>
+  <text x="1180" y="778" text-anchor="middle" fill="#cce1ff" font-size="20" font-family="Segoe UI, Inter, Arial, sans-serif">Served-LLM clarification</text>
+  <text x="1180" y="812" text-anchor="middle" fill="#cce1ff" font-size="20" font-family="Segoe UI, Inter, Arial, sans-serif">with KB-grounded context</text>
+
+  <line x1="286" y1="476" x2="620" y2="476" stroke="#d9e9ff" stroke-width="5.2" marker-start="url(#arrowMain)" marker-end="url(#arrowMain)"/>
+  <text x="452" y="447" text-anchor="middle" fill="#d9e9ff" font-size="24" font-weight="660" font-family="Segoe UI, Inter, Arial, sans-serif">Utterance In</text>
+  <text x="452" y="513" text-anchor="middle" fill="#d9e9ff" font-size="23" font-weight="650" font-family="Segoe UI, Inter, Arial, sans-serif">Answer Out</text>
+
+  <line x1="1200" y1="484" x2="1270" y2="484" stroke="#d9e9ff" stroke-width="5.2" marker-start="url(#arrowMain)" marker-end="url(#arrowMain)"/>
+  <line x1="1460" y1="484" x2="1510" y2="484" stroke="#d9e9ff" stroke-width="5.2" marker-start="url(#arrowMain)" marker-end="url(#arrowMain)"/>
+
+  <line x1="930" y1="350" x2="930" y2="314" stroke="#d9e9ff" stroke-width="5.2" marker-start="url(#arrowMain)" marker-end="url(#arrowMain)"/>
+
+  <path d="M620,606 C562,640 562,670 620,704" fill="none" stroke="#9fc6ff" stroke-width="4.2" marker-start="url(#arrowLoop)" marker-end="url(#arrowLoop)"/>
+  <path d="M560,760 C470,740 398,666 286,534" fill="none" stroke="#9fc6ff" stroke-width="4.2" marker-start="url(#arrowLoop)" marker-end="url(#arrowLoop)"/>
+
+  <path d="M1200,606 C1258,640 1258,670 1200,704" fill="none" stroke="#9fc6ff" stroke-width="4.2" marker-start="url(#arrowLoop)" marker-end="url(#arrowLoop)"/>
+  <path d="M1360,760 C1432,738 1462,682 1490,576" fill="none" stroke="#9fc6ff" stroke-width="4.2" marker-start="url(#arrowLoop)" marker-end="url(#arrowLoop)"/>
+
+  <rect x="86" y="918" width="1748" height="118" rx="20" fill="#0d2038" stroke="#355b84" stroke-width="2.4"/>
+  <line x1="668" y1="936" x2="668" y2="1018" stroke="#2f4d70" stroke-width="2"/>
+  <line x1="1250" y1="936" x2="1250" y2="1018" stroke="#2f4d70" stroke-width="2"/>
+
+  <circle cx="132" cy="978" r="10" fill="#33c2a8"/>
+  <text x="156" y="972" fill="#dafcf5" font-size="22" font-family="Segoe UI, Inter, Arial, sans-serif">Deterministic truth in</text>
+  <text x="156" y="999" fill="#dafcf5" font-size="22" font-family="Segoe UI, Inter, Arial, sans-serif">Sharp Memory (Prolog KB)</text>
+
+  <circle cx="714" cy="978" r="10" fill="#7696dc"/>
+  <text x="738" y="972" fill="#dce8ff" font-size="22" font-family="Segoe UI, Inter, Arial, sans-serif">LLM helps language shaping</text>
+  <text x="738" y="999" fill="#dce8ff" font-size="22" font-family="Segoe UI, Inter, Arial, sans-serif">but is not source of truth</text>
+
+  <circle cx="1296" cy="978" r="10" fill="#d59945"/>
+  <text x="1320" y="972" fill="#ffeccf" font-size="22" font-family="Segoe UI, Inter, Arial, sans-serif">Uncertain writes must clarify,</text>
+  <text x="1320" y="999" fill="#ffeccf" font-size="22" font-family="Segoe UI, Inter, Arial, sans-serif">confirm, then commit</text>
+</svg>

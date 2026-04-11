@@ -1,0 +1,20 @@
+{
+  "ontology_name": "rung_18_easy_inversion_retract",
+  "generated_at_utc": "2026-04-11T16:13:39+00:00",
+  "clause_count": 2,
+  "predicate_signatures": [
+    "approved/1",
+    "blocked/1",
+    "flagged/1"
+  ],
+  "fact_predicates": [
+    "approved/1"
+  ],
+  "rule_head_predicates": [
+    "blocked/1"
+  ],
+  "rule_body_predicates": [
+    "approved/1",
+    "flagged/1"
+  ]
+}

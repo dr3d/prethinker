@@ -1,0 +1,24 @@
+{
+  "ontology_name": "acid_rule_stack_retarget",
+  "generated_at_utc": "2026-04-11T15:44:16+00:00",
+  "clause_count": 7,
+  "predicate_signatures": [
+    "ancestor/2",
+    "endorsed/1",
+    "parent/2",
+    "trusted/1"
+  ],
+  "fact_predicates": [
+    "parent/2",
+    "trusted/1"
+  ],
+  "rule_head_predicates": [
+    "ancestor/2",
+    "endorsed/1"
+  ],
+  "rule_body_predicates": [
+    "ancestor/2",
+    "parent/2",
+    "trusted/1"
+  ]
+}

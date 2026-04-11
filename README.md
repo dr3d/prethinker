@@ -113,6 +113,29 @@ From `docs/data/runs_manifest.json`:
 | Acid temporal | `acid_03_temporal_override` | passing in latest sweep (`resume5_latest`) | temporal override/retract logic can be represented and applied | still vulnerable to ontology wording drift |
 | Acid long context | `acid_05_long_context_lineage` | passing in latest sweep (`resume5_latest`) | longer lineage workflows can pass with current prompt/runtime policy | robustness under unseen domain phrasing remains an open question |
 
+## Evaluation Axes (Height And Width)
+
+The ladder is now treated as two orthogonal axes:
+
+- Height: logical difficulty (facts -> rules -> transitive chains -> correction/retraction stress).
+- Width: language variability at a fixed logical target (paraphrase, inversion, synonym drift, hedging, punctuation/noise, pronoun ambiguity).
+
+This keeps "100% on easy wording" from being confused with parser robustness.
+
+### Width Lane Policy
+
+- New hard scenarios should increasingly include language-noise variants that target the same expected KB outcome.
+- Each noisy variant is judged against the same golden/expected end state as its clean counterpart.
+- We track degradation, not only absolute pass rate:
+  - `clean_pass_rate`
+  - `noisy_pass_rate`
+  - `degradation`
+  - `clarification_trigger_rate`
+  - `bad_commit_rate` (incorrect KB mutation without clarification)
+- To avoid report sprawl:
+  - one compact summary artifact per matrix run
+  - full per-case transcripts retained primarily for failures/regressions
+
 ## Model Operation Modes
 
 | Mode | Backend + Model | System Prompt Source | Best Use | Tradeoff |
@@ -367,6 +390,25 @@ Helpful controls:
 - `--dry-run` shows planned run/skip decisions without executing
 - default output is `tmp/runs/ladder`; use `--out-dir kb_runs/ladder` when you want runs to appear in published hub/rung docs
 
+### 3c) Differential Engine Validation (Vendored vs Baseline)
+
+Use this to verify vendored engine behavior against the prior repo baseline engine.
+
+```bash
+python scripts/run_differential_validation.py --reference-repo ../prolog-reasoning --out docs/data/differential_validation_latest.json --fail-on-disagreement
+```
+
+Current differential categories:
+
+- `unification`
+- `recursion`
+- `negation`
+- `backtracking`
+- `findall`
+- `retraction_behavior`
+
+This publishes per-category agreement rates and detailed step-by-step case outputs.
+
 ### 4) Tune prompt without code edits
 
 Edit:
@@ -402,14 +444,27 @@ Starter files:
 Use this when the parser asks clarification questions and you want an explicit Q&A model to answer during runs.
 
 ```bash
-python kb_pipeline.py --backend ollama --base-url http://127.0.0.1:11434 --model qwen35-semparse:9b --runtime core --scenario kb_scenarios/stage_01_facts_only.json --kb-name people_ladder --clarification-eagerness 0.95 --max-clarification-rounds 3 --clarification-answer-model gpt-oss:20b --clarification-answer-backend ollama --clarification-answer-context-length 16384 --out kb_runs/stage_01_people_ladder_qamodel.json
+python kb_pipeline.py --backend ollama --base-url http://127.0.0.1:11434 --model qwen35-semparse:9b --runtime core --scenario kb_scenarios/stage_01_facts_only.json --kb-name people_ladder --clarification-eagerness 0.95 --max-clarification-rounds 3 --clarification-answer-model gpt-oss:20b --clarification-answer-backend ollama --clarification-answer-context-length 16384 --clarification-answer-history-turns 8 --clarification-answer-kb-clause-limit 80 --clarification-answer-kb-char-budget 5000 --clarification-answer-min-confidence 0.55 --out kb_runs/stage_01_people_ladder_qamodel.json
 ```
 
 Notes:
 
 - Parser model and clarification-answer model can be different.
 - Defaults now are `--context-length 8192` and `--clarification-answer-context-length 16384`.
+- Clarification responder is now context-grounded: pre-thinker sends a deterministic KB snapshot plus recent accepted turns, so the responder is not answering blindly.
+- Auto clarification answers below `--clarification-answer-min-confidence` are rejected and KB apply is deferred.
+- Optional safety gate: add `--require-final-confirmation` to require final yes/no before every write apply; scripted scenarios can provide per-turn `confirmation_answers`.
 - Non-informative clarification answers (for example `unknown`) or repeated same Q/A loop are treated as terminal clarification outcomes and KB apply is deferred for that turn.
+
+### 4d) Clarification cadence sweep (CE + responder confidence)
+
+Use this to tune orchestration between parser uncertainty and `gpt-oss:20b` clarification behavior.
+
+```bash
+python scripts/run_clarification_cadence.py --ce-values 0.55,0.75,0.90 --min-confidence-values 0.45,0.55,0.65 --model qwen3.5:9b --clarification-answer-model gpt-oss:20b --summary-out tmp/runs/clarification_cadence_summary_latest.json
+```
+
+This writes per-run reports plus a ranked summary with pass rate, clarification volume, and synthetic-round usage.
 
 ### 5) Render test runs as themed HTML transcripts
 
@@ -485,6 +540,12 @@ See `kb_scenarios/README.md` for details.
 
 ```bash
 python -m unittest discover -s tests -p "test_*.py" -v
+```
+
+Differential validation (stronger vendoring check):
+
+```bash
+python scripts/run_differential_validation.py --reference-repo ../prolog-reasoning --fail-on-disagreement
 ```
 
 ## What Was Implemented In This Iteration

@@ -1,0 +1,42 @@
+{
+  "name": "rung_70_spacing_multi_branch_inverse_repair",
+  "ontology_name": "rung_70_multi_branch_inverse_repair",
+  "utterances": [
+    "Mara is Nia's parent.",
+    "Oren has Nia as a parent.",
+    "Pax has Nia as a parent.",
+    "Quin is parented by Oren.",
+    "Rae is parented by Pax.",
+    "If X is a parent of Y then X is an ancestor of Y.",
+    "If X is an ancestor of Y and Y is an ancestor of Z then X is an ancestor of Z.",
+    "Actually retract this if it appears reversed: parent(quin, oren).",
+    "Actually retract this if it appears reversed: parent(rae, pax).",
+    "Is Mara an ancestor of Rae?"
+  ],
+  "validations": [
+    {
+      "id": "nia_oren_parent",
+      "query": "parent(nia, oren).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "nia_pax_parent",
+      "query": "parent(nia, pax).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "mara_rae_ancestor",
+      "query": "ancestor(mara, rae).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "quin_oren_absent",
+      "query": "parent(quin, oren).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    }
+  ]
+}

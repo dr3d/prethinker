@@ -31,6 +31,58 @@ def parse_args() -> argparse.Namespace:
         default="kb_runs",
         help="Runs directory used for historical metrics (separate from --runs-dir slice).",
     )
+    p.add_argument(
+        "--explorer-runs-limit",
+        type=int,
+        default=30,
+        help="Maximum curated rows shown in Run Explorer table.",
+    )
+    p.add_argument(
+        "--spotcheck-limit",
+        type=int,
+        default=12,
+        help="Maximum rows shown in Spot Checks section.",
+    )
+    p.add_argument(
+        "--scenario-progress-limit",
+        type=int,
+        default=24,
+        help="Maximum scenarios shown in Progress by Scenario section.",
+    )
+    p.add_argument(
+        "--scenario-progress-window",
+        type=int,
+        default=6,
+        help="How many most recent runs per scenario to use for local trend pass rate.",
+    )
+    p.add_argument(
+        "--spotcheck-scenarios",
+        default=(
+            "stage_01_facts_only,stage_02_rule_ingest,stage_03_transitive_chain,"
+            "acid_03_temporal_override,acid_04_alias_pressure,acid_05_long_context_lineage,"
+            "rung_140_ce_pronoun_typo_missing_qmark,rung_150_ce_typo_uncertainty_chain,"
+            "rung_160_ce_soft_retract_noise,rung_170_ce_pronoun_followup_no_qmark"
+        ),
+        help="Comma-separated scenario names to prioritize in Spot Checks.",
+    )
+    p.add_argument(
+        "--success-highlights-limit",
+        type=int,
+        default=12,
+        help="Maximum newest successful runs shown in Success Highlights.",
+    )
+    p.add_argument(
+        "--curated-failure-limit",
+        type=int,
+        default=0,
+        help="How many recent failures to include in curated explorer (default 0 for public signal view).",
+    )
+    p.add_argument(
+        "--prompt-table-limit",
+        type=int,
+        default=6,
+        help="How many latest prompt versions to show in Prompt Evolution table.",
+    )
     return p.parse_args()
 
 
@@ -217,6 +269,173 @@ def _collect_prompts(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
         )
     out.sort(key=lambda x: (x["last_seen_utc"], x["prompt_id"]), reverse=True)
     return out
+
+
+def _csv_values(raw: str) -> list[str]:
+    return [x.strip() for x in str(raw or "").split(",") if x.strip()]
+
+
+def _is_pass(row: dict[str, Any]) -> bool:
+    return str(row.get("status", "")).strip().lower() == "passed"
+
+
+def _latest_by_scenario(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    seen: set[str] = set()
+    out: list[dict[str, Any]] = []
+    for row in rows:
+        scenario = str(row.get("scenario", "")).strip()
+        if not scenario or scenario in seen:
+            continue
+        seen.add(scenario)
+        out.append(row)
+    return out
+
+
+def _select_spot_checks(
+    rows: list[dict[str, Any]],
+    *,
+    pinned_scenarios: list[str],
+    limit: int,
+) -> list[dict[str, Any]]:
+    if not rows:
+        return []
+    selected: list[dict[str, Any]] = []
+    used: set[str] = set()
+
+    def add(row: dict[str, Any]) -> None:
+        rid = str(row.get("run_id", "")).strip()
+        if not rid or rid in used:
+            return
+        selected.append(row)
+        used.add(rid)
+
+    for scenario in pinned_scenarios:
+        hit = next(
+            (
+                r
+                for r in rows
+                if str(r.get("scenario", "")).strip() == scenario and _is_pass(r)
+            ),
+            None,
+        )
+        if hit is None:
+            hit = next((r for r in rows if str(r.get("scenario", "")).strip() == scenario), None)
+        if hit is not None:
+            add(hit)
+        if len(selected) >= limit:
+            return selected[:limit]
+
+    # Fill with newest distinct successful scenarios first.
+    for row in _latest_by_scenario([r for r in rows if _is_pass(r)]):
+        add(row)
+        if len(selected) >= limit:
+            break
+    # If still short, backfill with any newest distinct scenarios.
+    if len(selected) < limit:
+        for row in _latest_by_scenario(rows):
+            add(row)
+            if len(selected) >= limit:
+                break
+    return selected[:limit]
+
+
+def _select_curated_explorer_runs(
+    rows: list[dict[str, Any]],
+    *,
+    spot_checks: list[dict[str, Any]],
+    limit: int,
+    failure_limit: int,
+) -> list[dict[str, Any]]:
+    if not rows:
+        return []
+    selected: list[dict[str, Any]] = []
+    used: set[str] = set()
+
+    def add(row: dict[str, Any]) -> None:
+        rid = str(row.get("run_id", "")).strip()
+        if not rid or rid in used:
+            return
+        selected.append(row)
+        used.add(rid)
+
+    for row in spot_checks:
+        add(row)
+    # Prioritize successful latest-per-scenario evidence.
+    for row in _latest_by_scenario([r for r in rows if _is_pass(r)]):
+        add(row)
+    # Optionally include a small failure slice.
+    fail_added = 0
+    for row in rows:
+        if _is_pass(row):
+            continue
+        if fail_added >= max(0, int(failure_limit)):
+            break
+        add(row)
+        fail_added += 1
+    # Fill by newest successful runs if still under target.
+    for row in [r for r in rows if _is_pass(r)]:
+        add(row)
+        if len(selected) >= limit:
+            break
+    # If still short, backfill with newest runs regardless of status.
+    if len(selected) < limit:
+        for row in rows:
+            add(row)
+            if len(selected) >= limit:
+                break
+    return selected[: max(1, limit)]
+
+
+def _select_success_highlights(rows: list[dict[str, Any]], limit: int) -> list[dict[str, Any]]:
+    passed = [r for r in rows if _is_pass(r)]
+    return passed[: max(1, int(limit))]
+
+
+def _collect_scenario_progress(
+    rows: list[dict[str, Any]],
+    *,
+    window: int,
+    limit: int,
+) -> list[dict[str, Any]]:
+    buckets: dict[str, list[dict[str, Any]]] = {}
+    for row in rows:
+        scenario = str(row.get("scenario", "")).strip()
+        if not scenario:
+            continue
+        buckets.setdefault(scenario, []).append(row)
+
+    out: list[dict[str, Any]] = []
+    w = max(1, int(window))
+    for scenario, items in buckets.items():
+        sorted_items = sorted(items, key=lambda x: str(x.get("finished_utc", "")), reverse=True)
+        latest = sorted_items[0]
+        sample = sorted_items[:w]
+        sample_total = len(sample)
+        sample_passed = sum(1 for row in sample if _is_pass(row))
+        out.append(
+            {
+                "scenario": scenario,
+                "latest_status": str(latest.get("status", "unknown")),
+                "latest_finished_utc": str(latest.get("finished_utc", "")),
+                "latest_validation_passed": int(latest.get("validation_passed", 0) or 0),
+                "latest_validation_total": int(latest.get("validation_total", 0) or 0),
+                "trend_sample_total": sample_total,
+                "trend_sample_passed": sample_passed,
+                "trend_pass_rate": round(_score(sample_passed, sample_total), 3),
+                "latest_run_id": str(latest.get("run_id", "")),
+                "latest_report_html_rel": str(latest.get("report_html_rel", "")),
+                "latest_report_json_rel": str(latest.get("report_json_rel", "")),
+            }
+        )
+    out.sort(
+        key=lambda x: (
+            str(x.get("latest_finished_utc", "")),
+            float(x.get("trend_pass_rate", 0.0)),
+            str(x.get("scenario", "")),
+        ),
+        reverse=True,
+    )
+    return out[: max(1, int(limit))]
 
 
 def _options(values: list[str], label: str) -> str:
@@ -508,13 +727,59 @@ def main() -> int:
     out.parent.mkdir(parents=True, exist_ok=True)
 
     runs = _collect_runs(runs_dir, reports_dir, out)
+    pinned_scenarios = _csv_values(a.spotcheck_scenarios)
+    spot_checks = _select_spot_checks(
+        runs,
+        pinned_scenarios=pinned_scenarios,
+        limit=max(1, int(a.spotcheck_limit)),
+    )
+    success_highlights = _select_success_highlights(
+        runs,
+        limit=max(1, int(a.success_highlights_limit)),
+    )
+    explorer_runs = _select_curated_explorer_runs(
+        runs,
+        spot_checks=spot_checks,
+        limit=max(1, int(a.explorer_runs_limit)),
+        failure_limit=max(0, int(a.curated_failure_limit)),
+    )
+    scenario_progress = _collect_scenario_progress(
+        runs,
+        window=max(1, int(a.scenario_progress_window)),
+        limit=max(1, int(a.scenario_progress_limit)),
+    )
     prompts = _collect_prompts(runs)
     data_dir = (out.parent / "data").resolve()
     data_dir.mkdir(parents=True, exist_ok=True)
     rp, pp = data_dir / "runs_manifest.json", data_dir / "prompt_versions.json"
+    rc, sp = data_dir / "runs_curated.json", data_dir / "scenario_progress.json"
     hm = data_dir / "historical_metrics.json"
     rp.write_text(json.dumps({"generated_at_utc": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat(), "runs_total": len(runs), "runs": runs}, indent=2), encoding="utf-8")
     pp.write_text(json.dumps({"generated_at_utc": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat(), "prompt_versions_total": len(prompts), "prompt_versions": prompts}, indent=2), encoding="utf-8")
+    rc.write_text(
+        json.dumps(
+            {
+                "generated_at_utc": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat(),
+                "runs_total_full": len(runs),
+                "runs_total_curated": len(explorer_runs),
+                "runs": explorer_runs,
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    sp.write_text(
+        json.dumps(
+            {
+                "generated_at_utc": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat(),
+                "window": int(a.scenario_progress_window),
+                "scenario_count": len(scenario_progress),
+                "scenarios": scenario_progress,
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
     historical = _collect_historical_metrics(historical_runs_dir)
     hm.write_text(json.dumps(historical, indent=2), encoding="utf-8")
     _build_progress_cards_page(
@@ -525,11 +790,14 @@ def main() -> int:
     )
 
     pass_total = sum(1 for r in runs if r["status"] == "passed")
-    stats = f"runs={len(runs)} passed={pass_total} pass_rate={int(_score(pass_total, len(runs))*100)}% prompts={len(prompts)}"
-    s_opts = _options([str(r["scenario"]) for r in runs], "All scenarios")
-    m_opts = _options([str(r["model"]) for r in runs], "All models")
-    st_opts = _options([str(r["status"]) for r in runs], "All statuses")
-    p_opts = _options([str(r["prompt_id"]) for r in runs], "All prompts")
+    stats = (
+        f"runs={len(runs)} passed={pass_total} pass_rate={int(_score(pass_total, len(runs))*100)}% "
+        f"prompts={len(prompts)} curated={len(explorer_runs)}"
+    )
+    s_opts = _options([str(r["scenario"]) for r in explorer_runs], "All scenarios")
+    m_opts = _options([str(r["model"]) for r in explorer_runs], "All models")
+    st_opts = _options([str(r["status"]) for r in explorer_runs], "All statuses")
+    p_opts = _options([str(r["prompt_id"]) for r in explorer_runs], "All prompts")
     run_rows = "\n".join(
         [
             "<tr data-status=\"{status}\" data-scenario=\"{scenario}\" data-model=\"{model}\" data-prompt=\"{prompt}\" data-search=\"{search}\"><td>{finished}</td><td>{scenario}</td><td>{kb}</td><td>{backend}/{model}</td><td>{status}</td><td>{vp}/{vt}</td><td>{prompt_cell}</td><td>{report}</td><td><a href=\"{json}\">json</a></td></tr>".format(
@@ -547,9 +815,52 @@ def main() -> int:
                 report=(f"<a href=\"{r['report_html_rel']}\">report</a>" if r["report_html_rel"] else "-"),
                 json=r["report_json_rel"],
             )
-            for r in runs
+            for r in explorer_runs
         ]
     ) or "<tr><td colspan=\"9\">No runs found.</td></tr>"
+    success_rows = "\n".join(
+        [
+            "<tr><td>{finished}</td><td>{scenario}</td><td>{model}</td><td>{vp}/{vt}</td><td>{report}</td></tr>".format(
+                finished=_fmt_iso(str(r["finished_utc"])),
+                scenario=html.escape(str(r["scenario"])),
+                model=html.escape(str(r["model"])),
+                vp=int(r["validation_passed"]),
+                vt=int(r["validation_total"]),
+                report=(f"<a href=\"{r['report_html_rel']}\">report</a>" if str(r.get("report_html_rel", "")).strip() else "-"),
+            )
+            for r in success_highlights
+        ]
+    ) or "<tr><td colspan=\"5\">No successful runs found.</td></tr>"
+    spot_rows = "\n".join(
+        [
+            "<tr><td>{finished}</td><td>{scenario}</td><td>{status}</td><td>{vp}/{vt}</td><td>{model}</td><td>{report}</td></tr>".format(
+                finished=_fmt_iso(str(r["finished_utc"])),
+                scenario=html.escape(str(r["scenario"])),
+                status=html.escape(str(r["status"])),
+                vp=int(r["validation_passed"]),
+                vt=int(r["validation_total"]),
+                model=html.escape(str(r["model"])),
+                report=(f"<a href=\"{r['report_html_rel']}\">report</a>" if str(r.get("report_html_rel", "")).strip() else "-"),
+            )
+            for r in spot_checks
+        ]
+    ) or "<tr><td colspan=\"6\">No spot checks available.</td></tr>"
+    progress_rows = "\n".join(
+        [
+            "<tr><td>{scenario}</td><td>{latest}</td><td>{status}</td><td>{vp}/{vt}</td><td>{trend}% ({sp}/{st})</td><td>{report}</td></tr>".format(
+                scenario=html.escape(str(r["scenario"])),
+                latest=_fmt_iso(str(r["latest_finished_utc"])),
+                status=html.escape(str(r["latest_status"])),
+                vp=int(r["latest_validation_passed"]),
+                vt=int(r["latest_validation_total"]),
+                trend=int(float(r["trend_pass_rate"]) * 100),
+                sp=int(r["trend_sample_passed"]),
+                st=int(r["trend_sample_total"]),
+                report=(f"<a href=\"{r['latest_report_html_rel']}\">latest</a>" if str(r.get("latest_report_html_rel", "")).strip() else "-"),
+            )
+            for r in scenario_progress
+        ]
+    ) or "<tr><td colspan=\"6\">No scenario progress data.</td></tr>"
     prompt_rows = "\n".join(
         [
             "<tr><td>{pid}</td><td>{runs}</td><td>{pr}%</td><td>{vr}%</td><td>{last}</td><td>{sc}</td><td>{mc}</td><td><button class=\"pbtn\" data-prompt=\"{pid_text}\">show runs</button></td></tr>".format(
@@ -562,7 +873,7 @@ def main() -> int:
                 sc=p["scenario_count"],
                 mc=p["model_count"],
             )
-            for p in prompts
+            for p in prompts[: max(1, int(a.prompt_table_limit))]
         ]
     ) or "<tr><td colspan=\"8\">No prompt versions.</td></tr>"
     kb_rows = "\n".join(
@@ -580,10 +891,13 @@ def main() -> int:
     :root{{--bg:#f6f8fb;--p:#fff;--i:#172336;--m:#607089;--b:#d8e0ea;--h:#f8fbff;--l:#0a62c6}} html[data-theme="dark"]{{--bg:#111821;--p:#1a2430;--i:#e8eef6;--m:#aab6c8;--b:#314152;--h:#212d3a;--l:#7bb6ff}} body{{margin:0;background:var(--bg);color:var(--i);font-family:Segoe UI,Arial,sans-serif}} .w{{max-width:1200px;margin:0 auto;padding:20px}} .t{{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}} .nav a,.nav button{{border:1px solid var(--b);background:var(--p);padding:7px 11px;border-radius:999px;color:var(--i);text-decoration:none;cursor:pointer}} .m{{color:var(--m);font-size:13px}} .p{{background:var(--p);border:1px solid var(--b);border-radius:12px;overflow:hidden;margin:12px 0}} .ph{{padding:10px 12px;border-bottom:1px solid var(--b);background:var(--h);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}} .c{{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr 1fr;gap:8px;padding:10px;border-bottom:1px solid var(--b)}} .c input,.c select{{border:1px solid var(--b);background:var(--p);color:var(--i);border-radius:8px;padding:7px}} table{{width:100%;border-collapse:collapse}} th,td{{padding:9px 11px;border-bottom:1px solid var(--b);font-size:13px;text-align:left;vertical-align:top}} th{{background:var(--h);color:var(--m)}} a{{color:var(--l);text-decoration:none}} a:hover{{text-decoration:underline}} .tw{{max-height:540px;overflow:auto}} .k{{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}} .s{{background:var(--p);border:1px solid var(--b);border-radius:10px;padding:8px 10px}} .s b{{font-size:20px}} .hint{{padding:8px 10px;color:var(--m);font-size:12px}}
     @media (max-width:900px){{.c{{grid-template-columns:1fr 1fr}}}} @media (max-width:620px){{.c{{grid-template-columns:1fr}}}}
     </style></head><body><div class="w">
-    <div class="t"><div><h1 style="margin:0">{a.title}</h1><div class="m">generated {dt.datetime.now(dt.timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')} | {stats} | <a href="{rp.relative_to(out.parent).as_posix()}">runs manifest</a> | <a href="{pp.relative_to(out.parent).as_posix()}">prompt versions</a></div></div><div class="nav">{docs_hub} {ladder} {cards} {repo} <a href="#prompts">Prompt Evolution</a> <button id="theme">theme</button></div></div>
+    <div class="t"><div><h1 style="margin:0">{a.title}</h1><div class="m">generated {dt.datetime.now(dt.timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')} | {stats} | <a href="{rc.relative_to(out.parent).as_posix()}">curated evidence</a> | <a href="{sp.relative_to(out.parent).as_posix()}">scenario progress</a> | <a href="{pp.relative_to(out.parent).as_posix()}">prompt versions</a></div><div class="m">raw archives: <a href="{rp.relative_to(out.parent).as_posix()}">full runs manifest</a></div></div><div class="nav">{docs_hub} {ladder} {cards} {repo} <a href="#prompts">Prompt Evolution</a> <button id="theme">theme</button></div></div>
     <div class="k"><div class="s">Runs<br/><b>{len(runs)}</b></div><div class="s">Passed<br/><b>{pass_total}</b></div><div class="s">Pass Rate<br/><b>{int(_score(pass_total, len(runs))*100)}%</b></div><div class="s">Scenarios<br/><b>{len(set([r['scenario'] for r in runs]))}</b></div><div class="s">Prompts<br/><b>{len(prompts)}</b></div></div>
-    <div class="p"><div class="ph"><b>Run Explorer</b><span id="count" class="m"></span></div><div class="c"><input id="q" placeholder="Search run/scenario/model/prompt..."/><select id="fstatus">{st_opts}</select><select id="fscenario">{s_opts}</select><select id="fmodel">{m_opts}</select><select id="fprompt">{p_opts}</select></div><div class="tw"><table><thead><tr><th>Finished</th><th>Scenario</th><th>KB</th><th>Backend/Model</th><th>Status</th><th>Validation</th><th>Prompt</th><th>Report</th><th>JSON</th></tr></thead><tbody id="runs">{run_rows}</tbody></table></div><div class="hint">Use prompt filter to compare the same rung across prompt versions.</div></div>
-    <div id="prompts" class="p"><div class="ph"><b>Prompt Evolution</b></div><div class="tw"><table><thead><tr><th>Prompt ID</th><th>Runs</th><th>Pass %</th><th>Avg Validation %</th><th>Last Seen</th><th>Scenarios</th><th>Models</th><th>Action</th></tr></thead><tbody>{prompt_rows}</tbody></table></div></div>
+    <div class="p"><div class="ph"><b>Newest Success Highlights</b><span class="m">public signal view</span></div><div class="tw"><table><thead><tr><th>Finished</th><th>Scenario</th><th>Model</th><th>Validation</th><th>Report</th></tr></thead><tbody>{success_rows}</tbody></table></div></div>
+    <div class="p"><div class="ph"><b>Spot Checks</b><span class="m">curated checkpoints (not exhaustive)</span></div><div class="tw"><table><thead><tr><th>Finished</th><th>Scenario</th><th>Status</th><th>Validation</th><th>Model</th><th>Report</th></tr></thead><tbody>{spot_rows}</tbody></table></div></div>
+    <div class="p"><div class="ph"><b>Progress by Scenario</b><span class="m">trend window: last {int(a.scenario_progress_window)} runs per scenario</span></div><div class="tw"><table><thead><tr><th>Scenario</th><th>Latest</th><th>Status</th><th>Validation</th><th>Trend Pass %</th><th>Report</th></tr></thead><tbody>{progress_rows}</tbody></table></div></div>
+    <div class="p"><div class="ph"><b>Run Explorer (Curated)</b><span id="count" class="m"></span></div><div class="c"><input id="q" placeholder="Search run/scenario/model/prompt..."/><select id="fstatus">{st_opts}</select><select id="fscenario">{s_opts}</select><select id="fmodel">{m_opts}</select><select id="fprompt">{p_opts}</select></div><div class="tw"><table><thead><tr><th>Finished</th><th>Scenario</th><th>KB</th><th>Backend/Model</th><th>Status</th><th>Validation</th><th>Prompt</th><th>Report</th><th>JSON</th></tr></thead><tbody id="runs">{run_rows}</tbody></table></div><div class="hint">This explorer is curated for signal. Full history is in runs manifest.</div></div>
+    <div id="prompts" class="p"><div class="ph"><b>Prompt Evolution</b><span class="m">latest {max(1, int(a.prompt_table_limit))} snapshots</span></div><div class="tw"><table><thead><tr><th>Prompt ID</th><th>Runs</th><th>Pass %</th><th>Avg Validation %</th><th>Last Seen</th><th>Scenarios</th><th>Models</th><th>Action</th></tr></thead><tbody>{prompt_rows}</tbody></table></div></div>
     <div class="p"><div class="ph"><b>KB Snapshots</b></div><table><thead><tr><th>KB</th><th>Updated</th><th>Size</th></tr></thead><tbody>{kb_rows}</tbody></table></div>
     </div><script>(()=>{{const r=document.documentElement,t=document.getElementById('theme'),k='hub_theme_pref',s=localStorage.getItem(k);r.setAttribute('data-theme',(s==='dark'||s==='light')?s:((matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light'));const sync=()=>t.textContent='theme: '+(r.getAttribute('data-theme')==='dark'?'dark':'light');sync();t.onclick=()=>{{const n=r.getAttribute('data-theme')==='dark'?'light':'dark';r.setAttribute('data-theme',n);localStorage.setItem(k,n);sync();}};const q=document.getElementById('q'),fs=document.getElementById('fstatus'),fc=document.getElementById('fscenario'),fm=document.getElementById('fmodel'),fp=document.getElementById('fprompt'),rows=[...document.querySelectorAll('#runs tr')],count=document.getElementById('count');const run=()=>{{const s=(q.value||'').toLowerCase().trim(),a=(fs.value||''),c=(fc.value||''),m=(fm.value||''),p=(fp.value||'');let n=0;for(const row of rows){{const ok=(!a||row.dataset.status===a)&&(!c||row.dataset.scenario===c)&&(!m||row.dataset.model===m)&&(!p||row.dataset.prompt===p)&&(!s||(row.dataset.search||'').includes(s));row.style.display=ok?'':'none';if(ok)n++;}}count.textContent=`showing ${{n}} / ${{rows.length}} runs`;}};[q,fs,fc,fm,fp].forEach(x=>x&&x.addEventListener('input',run));[fs,fc,fm,fp].forEach(x=>x&&x.addEventListener('change',run));for(const b of document.querySelectorAll('.pbtn')){{b.addEventListener('click',()=>{{fp.value=b.dataset.prompt||'';run();window.scrollTo({{top:0,behavior:'smooth'}});}});}}run();}})();</script></body></html>"""
     out.write_text(page_html, encoding="utf-8")

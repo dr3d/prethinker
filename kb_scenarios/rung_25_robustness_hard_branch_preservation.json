@@ -1,0 +1,35 @@
+﻿{
+  "name": "rung_25_robustness_hard_branch_preservation",
+  "ontology_name": "rung_25_hard_branch_preservation",
+  "utterances": [
+    "Wes is Yan's parent.",
+    "Yan is Zed's parent.",
+    "Wes is Ava's parent too.",
+    "If X is a parent of Y then X is an ancestor of Y.",
+    "If X is an ancestor of Y and Y is an ancestor of Z then X is an ancestor of Z.",
+    "That middle link was the wrong one, so retract parent(yan, zed).",
+    "Replace it with this path instead: Yan is Bea's parent.",
+    "And Bea is Zed's parent.",
+    "Is Wes an ancestor of Zed now?"
+  ],
+  "validations": [
+    {
+      "id": "old_yan_zed_removed",
+      "query": "parent(yan, zed).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "wes_zed_ancestor",
+      "query": "ancestor(wes, zed).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "wes_ava_parent_preserved",
+      "query": "parent(wes, ava).",
+      "expect_status": "success",
+      "min_rows": 1
+    }
+  ]
+}

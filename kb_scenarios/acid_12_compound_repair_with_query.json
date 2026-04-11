@@ -1,0 +1,32 @@
+{
+  "name": "acid_12_compound_repair_with_query",
+  "ontology_name": "acid_compound_repair_query",
+  "utterances": [
+    "Iris is a parent of Jace, Jace is a parent of Kira, and Kira is a parent of Lio.",
+    "If X is a parent of Y then X is an ancestor of Y, and if X is an ancestor of Y and Y is an ancestor of Z then X is an ancestor of Z.",
+    "Actually retract these: parent(jace, kira) and parent(kira, lio).",
+    "Jace is a parent of Mira, and Mira is a parent of Lio.",
+    "Is Iris an ancestor of Lio?",
+    "Explain briefly why that worked."
+  ],
+  "validations": [
+    {
+      "id": "jace_kira_removed",
+      "query": "parent(jace, kira).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "kira_lio_removed",
+      "query": "parent(kira, lio).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "iris_lio_restored_via_mira",
+      "query": "ancestor(iris, lio).",
+      "expect_status": "success",
+      "min_rows": 1
+    }
+  ]
+}

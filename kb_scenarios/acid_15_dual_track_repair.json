@@ -1,0 +1,33 @@
+{
+  "name": "acid_15_dual_track_repair",
+  "ontology_name": "acid_dual_track_repair",
+  "utterances": [
+    "Lena is active, Mira is active, and Mira is suspended.",
+    "If X is active and X is suspended then restricted(X).",
+    "Lena is a manager of Niko, and Niko is a manager of Oren.",
+    "Actually retract these: suspended(mira) and manager(niko, oren).",
+    "Niko is a manager of Pia.",
+    "Is Mira restricted?",
+    "Is Niko a manager of Oren?"
+  ],
+  "validations": [
+    {
+      "id": "mira_no_longer_restricted",
+      "query": "restricted(mira).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "old_manager_edge_removed",
+      "query": "manager(niko, oren).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "niko_pia_added",
+      "query": "manager(niko, pia).",
+      "expect_status": "success",
+      "min_rows": 1
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "name": "rung_45_spacing_inverse_parent_bundle",
+  "ontology_name": "rung_45_inverse_parent_bundle",
+  "utterances": [
+    "Aiden is Bella's parent.",
+    "Cal has Bella as a parent.",
+    "Dana is parented by Cal.",
+    "If X is a parent of Y then X is an ancestor of Y.",
+    "If X is an ancestor of Y and Y is an ancestor of Z then X is an ancestor of Z.",
+    "Is Aiden an ancestor of Dana?"
+  ],
+  "validations": [
+    {
+      "id": "aiden_bella_parent",
+      "query": "parent(aiden, bella).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "bella_cal_parent",
+      "query": "parent(bella, cal).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "cal_dana_parent",
+      "query": "parent(cal, dana).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "aiden_dana_ancestor",
+      "query": "ancestor(aiden, dana).",
+      "expect_status": "success",
+      "min_rows": 1
+    }
+  ]
+}

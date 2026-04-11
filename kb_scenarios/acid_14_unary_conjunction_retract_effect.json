@@ -1,0 +1,26 @@
+{
+  "name": "acid_14_unary_conjunction_retract_effect",
+  "ontology_name": "acid_unary_conj_retract",
+  "utterances": [
+    "Ava is approved, Ben is approved, and Ben is flagged.",
+    "If X is approved and X is flagged then blocked(X).",
+    "Actually, retract that: flagged(ben).",
+    "Is Ben blocked?",
+    "Ava is flagged.",
+    "Is Ava blocked?"
+  ],
+  "validations": [
+    {
+      "id": "ben_not_blocked_after_flag_retract",
+      "query": "blocked(ben).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "ava_blocked_after_flag_assert",
+      "query": "blocked(ava).",
+      "expect_status": "success",
+      "min_rows": 1
+    }
+  ]
+}

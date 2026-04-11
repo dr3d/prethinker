@@ -1,0 +1,32 @@
+{
+  "name": "rung_35_spacing_passive_direction_repair",
+  "ontology_name": "rung_35_passive_direction_repair",
+  "utterances": [
+    "Drew is a parent of Elle.",
+    "Frank is parented by Elle.",
+    "If X is a parent of Y then X is an ancestor of Y.",
+    "If X is an ancestor of Y and Y is an ancestor of Z then X is an ancestor of Z.",
+    "Actually retract this if it was created in the wrong direction: parent(frank, elle).",
+    "Is Drew an ancestor of Frank?"
+  ],
+  "validations": [
+    {
+      "id": "elle_frank_parent",
+      "query": "parent(elle, frank).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "frank_elle_not_parent",
+      "query": "parent(frank, elle).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "drew_frank_ancestor",
+      "query": "ancestor(drew, frank).",
+      "expect_status": "success",
+      "min_rows": 1
+    }
+  ]
+}

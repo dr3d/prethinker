@@ -1,0 +1,38 @@
+{
+  "name": "rung_120_fuzzy_tail_name_noise",
+  "ontology_name": "rung_120_fuzzy_name_noise",
+  "utterances": [
+    "Iris is Juno's parent.",
+    "Kai has Juno as a parent.",
+    "Lark is parented by Kai.",
+    "If X is a parent of Y then X is an ancestor of Y.",
+    "If X is an ancestor of Y and Y is an ancestor of Z then X is an ancestor of Z.",
+    "Is Iris an ancestor of Lark?"
+  ],
+  "validations": [
+    {
+      "id": "iris_juno_parent",
+      "query": "parent(iris, juno).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "juno_kai_parent",
+      "query": "parent(juno, kai).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "kai_lark_parent",
+      "query": "parent(kai, lark).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "iris_lark_ancestor",
+      "query": "ancestor(iris, lark).",
+      "expect_status": "success",
+      "min_rows": 1
+    }
+  ]
+}

@@ -89,6 +89,20 @@ Goal: move from "well-instrumented prototype" to "skeptically credible public ev
 - Add one typed domain beyond family trees (for example compliance, incident tracking, or manufacturing).
 - Show why deterministic mutation + provenance matters in that domain.
 
+10. Orthogonal language-robustness benchmark lane
+- Keep the existing ladder as the logic-difficulty axis ("height").
+- Add a language-noise axis ("width") at fixed logical targets.
+- Benchmark clean vs noisy variants to publish degradation, not just aggregate pass-rate.
+- Core metrics to track per run:
+  - `clean_pass_rate`
+  - `noisy_pass_rate`
+  - `degradation`
+  - `clarification_trigger_rate`
+  - `bad_commit_rate`
+- Keep artifact volume practical:
+  - one compact matrix summary per run
+  - full per-case reports persisted mainly for failures/regressions
+
 ## Near-Term Objectives
 
 1. Make the workbench reproducible by other people.
@@ -96,6 +110,12 @@ Goal: move from "well-instrumented prototype" to "skeptically credible public ev
 3. Implement uncertainty-aware clarification behavior as a first-class runtime policy.
 4. Tighten symbolic guardrails (predicate alignment and type discipline).
 5. Separate architecture storytelling from empirically proven claims in all public surfaces.
+
+## Next-Go Control Plane Track
+
+For the next build lane focused on full pre-think interposition (`/prethink` MCP wrapper, CE source broker, short-circuit vs forward-with-facts routing), see:
+
+- `NEXT_GO_PRETHINK_CONTROL_PLANE_PLAN.md`
 
 ## 2-Week Execution Plan
 
@@ -118,6 +138,7 @@ Goal: move from "well-instrumented prototype" to "skeptically credible public ev
 - Add deeper transitive-chain and compositional rule stress scenarios.
 - Add explicit ambiguity scenarios (pronouns, underspecified references).
 - Add a frozen holdout pack not used during prompt tuning.
+- Add paired clean/noisy variants for selected hard rungs to measure language-robustness degradation directly.
 
 ### Week 2: Behavior Upgrades + Reporting
 
