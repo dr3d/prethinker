@@ -1,0 +1,35 @@
+{
+  "name": "acid_10_compound_retract_unpacking",
+  "ontology_name": "acid_compound_retract_unpack",
+  "utterances": [
+    "Uma is a parent of Vera.",
+    "Vera is a parent of Wynn.",
+    "Wynn is a parent of Xena.",
+    "If X is a parent of Y then X is an ancestor of Y.",
+    "If X is an ancestor of Y and Y is an ancestor of Z then X is an ancestor of Z.",
+    "Actually retract these: parent(vera, wynn) and parent(wynn, xena).",
+    "Vera is a parent of Wren.",
+    "Wren is a parent of Xena.",
+    "Summarize this: deterministic mutation should stay explicit."
+  ],
+  "validations": [
+    {
+      "id": "legacy_edge_1_removed",
+      "query": "parent(vera, wynn).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "legacy_edge_2_removed",
+      "query": "parent(wynn, xena).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "new_route_recovers_lineage",
+      "query": "ancestor(uma, xena).",
+      "expect_status": "success",
+      "min_rows": 1
+    }
+  ]
+}

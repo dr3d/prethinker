@@ -1471,12 +1471,25 @@ def _refine_logic_only_payload(
             return None
         queries = [logic_string]
     elif intent == "retract":
-        target = _extract_retract_target(logic_string, [])
-        if not target:
+        targets = _extract_retract_targets(logic_string, [])
+        if len(targets) <= 1:
+            extracted_calls: list[str] = []
+            for name, args in _extract_calls_with_args(utterance):
+                if not name or not args:
+                    continue
+                call = _normalize_clause(f"{name}({', '.join(args)}).")
+                if _is_valid_goal_clause(call, require_ground=True):
+                    extracted_calls.append(call)
+            if len(extracted_calls) > len(targets):
+                targets = extracted_calls
+        if not targets:
             return None
-        fact_term = target[:-1] if target.endswith(".") else target
-        logic_string = f"retract({fact_term})."
-        facts = [target]
+        facts = targets
+        retract_clauses: list[str] = []
+        for target in targets:
+            fact_term = target[:-1] if target.endswith(".") else target
+            retract_clauses.append(f"retract({fact_term}).")
+        logic_string = "\n".join(retract_clauses)
     elif intent == "other":
         logic_string = ""
 
@@ -1605,18 +1618,26 @@ def _validate_parsed(parsed: dict[str, Any]) -> tuple[bool, list[str]]:
         if not facts:
             errors.append("assert_fact requires facts[0]")
         else:
-            if logic_string != facts[0]:
-                errors.append("assert_fact requires logic_string == facts[0]")
-            if not _is_valid_goal_clause(facts[0], require_ground=True):
-                errors.append("facts[0] is not valid Prolog fact/goal")
+            if len(facts) == 1 and logic_string != facts[0]:
+                errors.append("assert_fact requires logic_string == facts[0] when a single fact is emitted")
+            for idx, fact in enumerate(facts, start=1):
+                if not _is_valid_goal_clause(fact, require_ground=True):
+                    errors.append(f"facts[{idx - 1}] is not valid Prolog fact/goal")
+            if len(facts) > 1 and logic_string:
+                if not all((f[:-1] if f.endswith(".") else f) in logic_string for f in facts):
+                    errors.append("assert_fact multi-fact logic_string must include every emitted fact clause")
     elif intent == "assert_rule":
         if not rules:
             errors.append("assert_rule requires rules[0]")
         else:
-            if logic_string != rules[0]:
-                errors.append("assert_rule requires logic_string == rules[0]")
-            if not _is_valid_rule_clause(rules[0]):
-                errors.append("rules[0] is not valid Prolog rule")
+            if len(rules) == 1 and logic_string != rules[0]:
+                errors.append("assert_rule requires logic_string == rules[0] when a single rule is emitted")
+            for idx, rule in enumerate(rules, start=1):
+                if not _is_valid_rule_clause(rule):
+                    errors.append(f"rules[{idx - 1}] is not valid Prolog rule")
+            if len(rules) > 1 and logic_string:
+                if not all((r[:-1] if r.endswith(".") else r) in logic_string for r in rules):
+                    errors.append("assert_rule multi-rule logic_string must include every emitted rule clause")
     elif intent == "query":
         if not queries:
             errors.append("query requires queries[0]")
@@ -1626,9 +1647,13 @@ def _validate_parsed(parsed: dict[str, Any]) -> tuple[bool, list[str]]:
             if not _is_valid_goal_clause(queries[0], require_ground=False):
                 errors.append("queries[0] is not valid Prolog goal")
     elif intent == "retract":
-        retract_target = _extract_retract_target(logic_string, facts)
-        if not retract_target or not _is_valid_goal_clause(retract_target, require_ground=True):
+        retract_targets = _extract_retract_targets(logic_string, facts)
+        if not retract_targets:
             errors.append("retract requires logic_string format retract(<fact>).")
+        else:
+            for idx, target in enumerate(retract_targets, start=1):
+                if not _is_valid_goal_clause(target, require_ground=True):
+                    errors.append(f"retract target at index {idx - 1} is not a valid grounded fact")
     elif intent == "other":
         if logic_string:
             errors.append("other requires empty logic_string")
@@ -1662,19 +1687,51 @@ def _parse_model_json(response: ModelResponse, required_keys: list[str]) -> tupl
     return None, ""
 
 
-def _extract_retract_target(logic_string: str, fallback_facts: list[str]) -> str | None:
-    parsed = _parse_clause_term(logic_string)
-    if parsed is not None and str(getattr(parsed, "name", "")) == "retract":
-        args = list(getattr(parsed, "args", []))
-        if len(args) == 1:
+def _extract_retract_targets(logic_string: str, fallback_facts: list[str]) -> list[str]:
+    targets: list[str] = []
+    logic = str(logic_string or "").strip()
+    if logic:
+        fragments: list[str] = []
+        for line in logic.splitlines():
+            part = line.strip()
+            if not part:
+                continue
+            chunks = [c.strip() for c in part.split(".") if c.strip()]
+            if chunks:
+                fragments.extend(chunks)
+            else:
+                fragments.append(part)
+        if not fragments:
+            fragments = [logic]
+        for fragment in fragments:
+            clause = _normalize_clause(f"{fragment}.")
+            parsed = _parse_clause_term(clause)
+            if parsed is None or str(getattr(parsed, "name", "")) != "retract":
+                continue
+            args = list(getattr(parsed, "args", []))
+            if len(args) != 1:
+                continue
             fact = _normalize_clause(str(args[0]))
             if _is_valid_goal_clause(fact, require_ground=True):
-                return fact
-    if fallback_facts:
-        fact = _normalize_clause(str(fallback_facts[0]))
+                targets.append(fact)
+
+    for raw_fact in fallback_facts:
+        fact = _normalize_clause(str(raw_fact))
         if _is_valid_goal_clause(fact, require_ground=True):
-            return fact
-    return None
+            targets.append(fact)
+
+    seen: set[str] = set()
+    unique: list[str] = []
+    for target in targets:
+        if target and target not in seen:
+            seen.add(target)
+            unique.append(target)
+    return unique
+
+
+def _extract_retract_target(logic_string: str, fallback_facts: list[str]) -> str | None:
+    targets = _extract_retract_targets(logic_string, fallback_facts)
+    return targets[0] if targets else None
 
 
 def _build_retract_fallback_parse(utterance: str) -> dict[str, Any] | None:
@@ -2712,6 +2769,90 @@ def _runtime_constraint_check(
     )
 
 
+def _batch_status(results: list[dict[str, Any]]) -> str:
+    statuses = [str(row.get("status", "")).strip().lower() for row in results]
+    if not statuses:
+        return "validation_error"
+    if any(s in {"constraint_error", "validation_error", "error", "unknown"} for s in statuses):
+        for s in statuses:
+            if s in {"constraint_error", "validation_error", "error", "unknown"}:
+                return s
+    if any(s == "success" for s in statuses):
+        return "success"
+    if all(s == "skipped" for s in statuses):
+        return "skipped"
+    if all(s == "no_results" for s in statuses):
+        return "no_results"
+    if "no_results" in statuses:
+        return "no_results"
+    return statuses[0] if statuses[0] else "unknown"
+
+
+def _expand_assert_fact_clauses(candidates: list[str]) -> list[str]:
+    expanded: list[str] = []
+    for raw_clause in candidates:
+        clause = _normalize_clause(raw_clause)
+        if not clause:
+            continue
+        raw = clause[:-1].strip() if clause.endswith(".") else clause.strip()
+        if ":-" in raw:
+            expanded.append(clause)
+            continue
+        goals = _split_top_level_args(raw)
+        if len(goals) > 1 and all(_is_valid_goal_clause(f"{g}.", require_ground=True) for g in goals):
+            for goal in goals:
+                expanded.append(_normalize_clause(f"{goal}."))
+        else:
+            expanded.append(clause)
+    seen: set[str] = set()
+    unique: list[str] = []
+    for clause in expanded:
+        if clause and clause not in seen:
+            seen.add(clause)
+            unique.append(clause)
+    return unique
+
+
+def _expand_assert_rule_clauses(candidates: list[str]) -> list[str]:
+    expanded: list[str] = []
+    for raw_clause in candidates:
+        clause = _normalize_clause(raw_clause)
+        if not clause:
+            continue
+        if _is_valid_rule_clause(clause):
+            expanded.append(clause)
+            continue
+
+        fragments: list[str] = []
+        for line in str(raw_clause).splitlines():
+            part = line.strip()
+            if part:
+                fragments.append(part)
+        if not fragments:
+            fragments = [str(raw_clause).strip()]
+
+        split_parts: list[str] = []
+        for fragment in fragments:
+            chunks = [c.strip() for c in fragment.split(".") if c.strip()]
+            if chunks:
+                split_parts.extend(chunks)
+            else:
+                split_parts.append(fragment)
+
+        for part in split_parts:
+            normalized = _normalize_clause(f"{part}.")
+            if _is_valid_rule_clause(normalized):
+                expanded.append(normalized)
+
+    seen: set[str] = set()
+    unique: list[str] = []
+    for clause in expanded:
+        if clause and clause not in seen:
+            seen.add(clause)
+            unique.append(clause)
+    return unique
+
+
 def _apply_to_kb(
     server: Any,
     parsed: dict[str, Any],
@@ -2727,95 +2868,183 @@ def _apply_to_kb(
     intent = str(parsed.get("intent", "other"))
     if intent == "assert_fact":
         facts = parsed.get("facts", [])
-        fact = _normalize_clause(str(facts[0]).strip() if facts else str(parsed.get("logic_string", "")).strip())
-        constraint_issue = _runtime_constraint_check(
-            parsed_fragment={
-                "logic_string": fact,
-                "facts": [fact],
-                "rules": [],
-                "queries": [],
-            },
-            registry_signatures=allowed_signatures,
-            strict_registry=strict_registry,
-            type_schema=schema,
-            strict_types=strict_types,
-        )
-        if constraint_issue is not None:
-            return {"tool": "assert_fact", "input": fact, "result": constraint_issue}
-        if corpus_clauses is not None and fact in corpus_clauses:
+        candidates = [str(x).strip() for x in facts if str(x).strip()]
+        if not candidates:
+            fallback = str(parsed.get("logic_string", "")).strip()
+            if fallback:
+                candidates = [fallback]
+        expanded_facts = _expand_assert_fact_clauses(candidates)
+        if not expanded_facts:
             return {
                 "tool": "assert_fact",
-                "input": fact,
-                "result": {"status": "skipped", "message": "Fact already present in corpus."},
+                "input": None,
+                "result": {"status": "validation_error", "message": "No valid fact clauses were provided."},
             }
-        result = server.assert_fact(fact)
-        if corpus_clauses is not None and result.get("status") == "success":
-            corpus_clauses.add(fact)
-        return {"tool": "assert_fact", "input": fact, "result": result}
+
+        for fact in expanded_facts:
+            constraint_issue = _runtime_constraint_check(
+                parsed_fragment={
+                    "logic_string": fact,
+                    "facts": [fact],
+                    "rules": [],
+                    "queries": [],
+                },
+                registry_signatures=allowed_signatures,
+                strict_registry=strict_registry,
+                type_schema=schema,
+                strict_types=strict_types,
+            )
+            if constraint_issue is not None:
+                return {"tool": "assert_fact", "input": fact, "result": constraint_issue}
+
+        op_results: list[dict[str, Any]] = []
+        for fact in expanded_facts:
+            if corpus_clauses is not None and fact in corpus_clauses:
+                op_results.append({"status": "skipped", "message": "Fact already present in corpus.", "fact": fact})
+                continue
+            result = server.assert_fact(fact)
+            if corpus_clauses is not None and result.get("status") == "success":
+                corpus_clauses.add(fact)
+            op_results.append({"status": str(result.get("status", "unknown")), "fact": fact, "raw": result})
+
+        if len(expanded_facts) == 1:
+            single = op_results[0]
+            if "raw" in single:
+                result_obj = dict(single.get("raw", {}))
+            else:
+                result_obj = {"status": single.get("status", "unknown"), "message": single.get("message", "")}
+            return {"tool": "assert_fact", "input": expanded_facts[0], "result": result_obj}
+
+        status = _batch_status(op_results)
+        return {
+            "tool": "assert_fact_batch",
+            "input": expanded_facts,
+            "result": {
+                "status": status,
+                "result_type": "batch",
+                "applied_total": len(expanded_facts),
+                "operations": op_results,
+            },
+        }
     if intent == "assert_rule":
         rules = parsed.get("rules", [])
-        rule = _normalize_clause(str(rules[0]).strip() if rules else str(parsed.get("logic_string", "")).strip())
-        constraint_issue = _runtime_constraint_check(
-            parsed_fragment={
-                "logic_string": rule,
-                "facts": [],
-                "rules": [rule],
-                "queries": [],
-            },
-            registry_signatures=allowed_signatures,
-            strict_registry=strict_registry,
-            type_schema=schema,
-            strict_types=strict_types,
-        )
-        if constraint_issue is not None:
-            return {"tool": "assert_rule", "input": rule, "result": constraint_issue}
-        if corpus_clauses is not None and rule in corpus_clauses:
+        candidates = [str(x).strip() for x in rules if str(x).strip()]
+        if not candidates:
+            fallback = str(parsed.get("logic_string", "")).strip()
+            if fallback:
+                candidates = [fallback]
+        expanded_rules = _expand_assert_rule_clauses(candidates)
+        if not expanded_rules:
             return {
                 "tool": "assert_rule",
-                "input": rule,
-                "result": {"status": "skipped", "message": "Rule already present in corpus."},
+                "input": None,
+                "result": {"status": "validation_error", "message": "No valid rule clauses were provided."},
             }
-        result = server.assert_rule(rule)
-        if corpus_clauses is not None and result.get("status") == "success":
-            corpus_clauses.add(rule)
-        return {"tool": "assert_rule", "input": rule, "result": result}
+
+        for rule in expanded_rules:
+            constraint_issue = _runtime_constraint_check(
+                parsed_fragment={
+                    "logic_string": rule,
+                    "facts": [],
+                    "rules": [rule],
+                    "queries": [],
+                },
+                registry_signatures=allowed_signatures,
+                strict_registry=strict_registry,
+                type_schema=schema,
+                strict_types=strict_types,
+            )
+            if constraint_issue is not None:
+                return {"tool": "assert_rule", "input": rule, "result": constraint_issue}
+
+        op_results: list[dict[str, Any]] = []
+        for rule in expanded_rules:
+            if corpus_clauses is not None and rule in corpus_clauses:
+                op_results.append({"status": "skipped", "message": "Rule already present in corpus.", "rule": rule})
+                continue
+            result = server.assert_rule(rule)
+            if corpus_clauses is not None and result.get("status") == "success":
+                corpus_clauses.add(rule)
+            op_results.append({"status": str(result.get("status", "unknown")), "rule": rule, "raw": result})
+
+        if len(expanded_rules) == 1:
+            single = op_results[0]
+            if "raw" in single:
+                result_obj = dict(single.get("raw", {}))
+            else:
+                result_obj = {"status": single.get("status", "unknown"), "message": single.get("message", "")}
+            return {"tool": "assert_rule", "input": expanded_rules[0], "result": result_obj}
+
+        status = _batch_status(op_results)
+        return {
+            "tool": "assert_rule_batch",
+            "input": expanded_rules,
+            "result": {
+                "status": status,
+                "result_type": "batch",
+                "applied_total": len(expanded_rules),
+                "operations": op_results,
+            },
+        }
     if intent == "retract":
-        target = _extract_retract_target(
+        targets = _extract_retract_targets(
             str(parsed.get("logic_string", "")),
             [str(x) for x in parsed.get("facts", [])],
         )
-        if not target:
+        if not targets:
             return {
                 "tool": "retract_fact",
                 "input": None,
                 "result": {"status": "validation_error", "message": "Could not derive retract target fact."},
             }
-        target = _normalize_clause(target)
-        retract_logic = f"retract({target[:-1] if target.endswith('.') else target})."
-        constraint_issue = _runtime_constraint_check(
-            parsed_fragment={
-                "logic_string": retract_logic,
-                "facts": [target],
-                "rules": [],
-                "queries": [],
+        normalized_targets = [_normalize_clause(t) for t in targets if _normalize_clause(t)]
+
+        for target in normalized_targets:
+            retract_logic = f"retract({target[:-1] if target.endswith('.') else target})."
+            constraint_issue = _runtime_constraint_check(
+                parsed_fragment={
+                    "logic_string": retract_logic,
+                    "facts": [target],
+                    "rules": [],
+                    "queries": [],
+                },
+                registry_signatures=allowed_signatures,
+                strict_registry=strict_registry,
+                type_schema=schema,
+                strict_types=strict_types,
+            )
+            if constraint_issue is not None:
+                return {"tool": "retract_fact", "input": target, "result": constraint_issue}
+
+        op_results: list[dict[str, Any]] = []
+        for target in normalized_targets:
+            if corpus_clauses is not None and target not in corpus_clauses:
+                op_results.append({"status": "no_results", "message": "Fact not present in corpus.", "fact": target})
+                continue
+            result = server.retract_fact(target)
+            if corpus_clauses is not None and result.get("status") in {"success", "no_results"}:
+                corpus_clauses.discard(target)
+            op_results.append({"status": str(result.get("status", "unknown")), "fact": target, "raw": result})
+
+        if len(normalized_targets) == 1:
+            single = op_results[0]
+            if "raw" in single:
+                result_obj = dict(single.get("raw", {}))
+            else:
+                result_obj = {"status": single.get("status", "unknown"), "message": single.get("message", "")}
+            return {"tool": "retract_fact", "input": normalized_targets[0], "result": result_obj}
+
+        status = _batch_status(op_results)
+        return {
+            "tool": "retract_fact_batch",
+            "input": normalized_targets,
+            "result": {
+                "status": status,
+                "result_type": "batch",
+                "applied_total": len(normalized_targets),
+                "operations": op_results,
             },
-            registry_signatures=allowed_signatures,
-            strict_registry=strict_registry,
-            type_schema=schema,
-            strict_types=strict_types,
-        )
-        if constraint_issue is not None:
-            return {"tool": "retract_fact", "input": target, "result": constraint_issue}
-        if corpus_clauses is not None and target not in corpus_clauses:
-            return {
-                "tool": "retract_fact",
-                "input": target,
-                "result": {"status": "no_results", "message": "Fact not present in corpus."},
-            }
-        result = server.retract_fact(target)
-        if corpus_clauses is not None and result.get("status") in {"success", "no_results"}:
-            corpus_clauses.discard(target)
-        return {"tool": "retract_fact", "input": target, "result": result}
+        }
     if intent == "query":
         query = _normalize_clause(str(parsed.get("logic_string", "")).strip())
         constraint_issue = _runtime_constraint_check(
@@ -2993,6 +3222,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--base-url", default="", help="Override backend base URL.")
     parser.add_argument("--model", default="", help="Override model id.")
     parser.add_argument("--context-length", type=int, default=8192, help="Context window for model calls (default 8192).")
+    parser.add_argument(
+        "--classifier-context-length",
+        type=int,
+        default=0,
+        help="Context window for classifier pass in two-pass mode (0 inherits --context-length).",
+    )
     parser.add_argument("--timeout-seconds", type=int, default=120, help="Network timeout per model call.")
     parser.add_argument(
         "--runtime",
@@ -3248,6 +3483,12 @@ def main() -> int:
     clarification_auto_answer_enabled = bool(clarification_answer_model)
     use_two_pass = bool(args.two_pass and not args.no_two_pass)
     use_split_extraction = bool(args.split_extraction and not args.no_split_extraction)
+    context_length = max(512, int(args.context_length))
+    classifier_context_length = (
+        context_length
+        if int(args.classifier_context_length) <= 0
+        else max(512, int(args.classifier_context_length))
+    )
     clarification_eagerness = _clip_01(args.clarification_eagerness, fallback=0.35)
     max_clarification_rounds = max(0, int(args.max_clarification_rounds))
     prompt_history_dir = Path(args.prompt_history_dir)
@@ -3263,8 +3504,8 @@ def main() -> int:
     run_id = f"run-{run_started.strftime('%Y%m%dT%H%M%SZ')}-{scenario_slug[:24]}-{model_slug[:20]}-{os.getpid()}"
     model_settings = {
         "temperature": 0,
-        "context_length": args.context_length,
-        "classifier_context_length": 2048,
+        "context_length": context_length,
+        "classifier_context_length": classifier_context_length,
         "timeout_seconds": args.timeout_seconds,
         "runtime": runtime_mode,
         "two_pass": use_two_pass,
@@ -3280,7 +3521,7 @@ def main() -> int:
         "clarification_answer_context_length": (
             clarification_answer_context_length if clarification_auto_answer_enabled else 0
         ),
-        "backend_options": {"num_ctx": args.context_length} if backend == "ollama" else {},
+        "backend_options": {"num_ctx": context_length} if backend == "ollama" else {},
     }
 
     server: Any
@@ -3465,7 +3706,7 @@ def main() -> int:
                     base_url=base_url,
                     model=model,
                     prompt_text=cls_prompt,
-                    context_length=2048,
+                    context_length=classifier_context_length,
                     timeout=args.timeout_seconds,
                     api_key=api_key,
                 )
@@ -3498,7 +3739,7 @@ def main() -> int:
                 base_url=base_url,
                 model=model,
                 prompt_text=ext_prompt,
-                context_length=args.context_length,
+                context_length=context_length,
                 timeout=args.timeout_seconds,
                 api_key=api_key,
             )
@@ -3531,7 +3772,7 @@ def main() -> int:
                         base_url=base_url,
                         model=model,
                         prompt_text=full_prompt,
-                        context_length=args.context_length,
+                        context_length=context_length,
                         timeout=args.timeout_seconds,
                         api_key=api_key,
                     )
@@ -3577,7 +3818,7 @@ def main() -> int:
                         base_url=base_url,
                         model=model,
                         prompt_text=repair_prompt,
-                        context_length=args.context_length,
+                        context_length=context_length,
                         timeout=args.timeout_seconds,
                         api_key=api_key,
                     )

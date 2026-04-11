@@ -1,0 +1,32 @@
+{
+  "name": "acid_11_batched_fact_rule_retract_mix",
+  "ontology_name": "acid_batch_mix",
+  "utterances": [
+    "Yara is a parent of Zed, Zed is a parent of Abel, and Abel is a parent of Bex.",
+    "If X is a parent of Y then X is an ancestor of Y, and if X is an ancestor of Y and Y is an ancestor of Z then X is an ancestor of Z.",
+    "Actually retract these: parent(zed, abel) and parent(abel, bex).",
+    "Zed is a parent of Arlo.",
+    "Arlo is a parent of Bex.",
+    "Explain briefly why deterministic rollback helps."
+  ],
+  "validations": [
+    {
+      "id": "zed_abel_removed",
+      "query": "parent(zed, abel).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "abel_bex_removed",
+      "query": "parent(abel, bex).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "yara_to_bex_recovers_via_arlo",
+      "query": "ancestor(yara, bex).",
+      "expect_status": "success",
+      "min_rows": 1
+    }
+  ]
+}

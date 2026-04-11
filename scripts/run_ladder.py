@@ -14,6 +14,7 @@ import hashlib
 import json
 import subprocess
 import sys
+from collections import Counter
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -267,6 +268,158 @@ def _find_reusable_pass(
     return None
 
 
+def _ensure_learning_log(path: Path) -> None:
+    if path.exists():
+        return
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        (
+            "# Run Learnings\n\n"
+            "Append-only log of ladder cycle outcomes and what changed.\n"
+            "Auto-populated by `scripts/run_ladder.py` via `--learn-log`.\n\n"
+        ),
+        encoding="utf-8",
+    )
+
+
+def _safe_int(value: Any, default: int = 0) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def _truncate(text: str, limit: int = 140) -> str:
+    raw = str(text or "").strip()
+    if len(raw) <= limit:
+        return raw
+    return raw[: max(0, limit - 3)].rstrip() + "..."
+
+
+def _scenario_learning_line(row: dict[str, Any]) -> str:
+    scenario = str(row.get("scenario", "")).strip() or "(unknown)"
+    action = str(row.get("action", "")).strip()
+    if action == "skipped_cached_pass":
+        return f"`{scenario}`: skipped (reused fresh cached pass)."
+    if action != "executed":
+        return f"`{scenario}`: {action or 'unknown action'}."
+
+    rc = _safe_int(row.get("return_code"), 0)
+    if rc != 0:
+        if bool(row.get("timed_out")):
+            timeout_seconds = _safe_int(row.get("timeout_seconds"), 0)
+            return f"`{scenario}`: timed out after {timeout_seconds}s."
+        return f"`{scenario}`: subprocess failed (return code {rc})."
+
+    report_path_text = str(row.get("report", "")).strip()
+    if not report_path_text:
+        return f"`{scenario}`: executed (no report path recorded)."
+    report_path = Path(report_path_text)
+    report = _read_json(report_path)
+    if not isinstance(report, dict):
+        return f"`{scenario}`: executed (report unreadable)."
+
+    v_pass = _safe_int(report.get("validation_passed"), _safe_int(row.get("validation_passed")))
+    v_total = _safe_int(report.get("validation_total"), _safe_int(row.get("validation_total")))
+    parse_fail = _safe_int(report.get("turn_parse_failures"))
+    apply_fail = _safe_int(report.get("turn_apply_failures"))
+    clar_rounds = _safe_int(report.get("clarification_rounds_total"))
+    status = str(report.get("overall_status", row.get("overall_status", ""))).strip().lower()
+    prompt_id = str((report.get("prompt_provenance") or {}).get("prompt_id", "")).strip()
+    prompt_seg = f"; prompt={prompt_id}" if prompt_id else ""
+
+    failed_validations: list[dict[str, Any]] = []
+    validations = report.get("validations")
+    if isinstance(validations, list):
+        for item in validations:
+            if isinstance(item, dict) and not bool(item.get("passed")):
+                failed_validations.append(item)
+
+    if status == "passed" and v_total > 0 and v_pass == v_total:
+        return (
+            f"`{scenario}`: passed {v_pass}/{v_total}; "
+            f"parse_fail={parse_fail}, apply_fail={apply_fail}, clar_rounds={clar_rounds}{prompt_seg}."
+        )
+
+    if failed_validations:
+        first = failed_validations[0]
+        vid = str(first.get("id", "")).strip() or "validation"
+        reasons = first.get("reasons")
+        reason_text = ""
+        if isinstance(reasons, list) and reasons:
+            reason_text = _truncate(str(reasons[0]), 120)
+        if reason_text:
+            return (
+                f"`{scenario}`: failed {v_pass}/{v_total}; first failing check `{vid}` "
+                f"({reason_text}){prompt_seg}."
+            )
+        return f"`{scenario}`: failed {v_pass}/{v_total}; first failing check `{vid}`{prompt_seg}."
+
+    return (
+        f"`{scenario}`: status={status or 'unknown'} {v_pass}/{v_total}; "
+        f"parse_fail={parse_fail}, apply_fail={apply_fail}, clar_rounds={clar_rounds}{prompt_seg}."
+    )
+
+
+def _append_learning_entry(
+    *,
+    log_path: Path,
+    summary: dict[str, Any],
+    args: argparse.Namespace,
+) -> None:
+    _ensure_learning_log(log_path)
+
+    generated_at = str(summary.get("generated_at_utc", "")).strip()
+    selected_count = _safe_int(summary.get("selected_count"))
+    executed_count = _safe_int(summary.get("executed_count"))
+    skipped_count = _safe_int(summary.get("skipped_count"))
+    failed_count = _safe_int(summary.get("failed_count"))
+    target = summary.get("target_signature")
+    if not isinstance(target, dict):
+        target = {}
+    prompt_sha = str(target.get("prompt_sha256", "")).strip()
+    prompt_short = prompt_sha[:12] if prompt_sha else ""
+    model = str(target.get("model", "")).strip()
+    backend = str(target.get("backend", "")).strip()
+    runtime = str(target.get("runtime", "")).strip()
+
+    rows = summary.get("rows")
+    if not isinstance(rows, list):
+        rows = []
+
+    action_counts = Counter()
+    for row in rows:
+        if isinstance(row, dict):
+            action_counts[str(row.get("action", "")).strip() or "unknown"] += 1
+
+    lines: list[str] = []
+    lines.append(f"## {generated_at or datetime.now(timezone.utc).replace(microsecond=0).isoformat()}")
+    lines.append(
+        f"- Run: `{args.label}` | range `{args.start_rung or 'start'} -> {args.end_rung or 'end'}` | "
+        f"selected `{selected_count}` | executed `{executed_count}` | skipped `{skipped_count}` | failed `{failed_count}`"
+    )
+    lines.append(
+        f"- Runtime: `{backend}` / `{model}` / `{runtime}` | ctx `{_safe_int(target.get('context_length'))}` "
+        f"| CE `{target.get('clarification_eagerness')}` | prompt `{prompt_short or 'n/a'}`"
+    )
+    if action_counts:
+        compact = ", ".join(f"{k}={v}" for k, v in sorted(action_counts.items()))
+        lines.append(f"- Actions: {compact}")
+    if str(args.learn_note).strip():
+        lines.append(f"- Human note: {_truncate(str(args.learn_note).strip(), 400)}")
+    lines.append("- Learned:")
+    if rows:
+        for row in rows:
+            if isinstance(row, dict):
+                lines.append(f"  - {_scenario_learning_line(row)}")
+    else:
+        lines.append("  - No row data recorded.")
+    lines.append("")
+
+    with log_path.open("a", encoding="utf-8") as f:
+        f.write("\n".join(lines))
+
+
 def _run_one(args: argparse.Namespace, scenario: ScenarioRow, out_path: Path) -> int:
     cmd: list[str] = [
         sys.executable,
@@ -384,6 +537,16 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--force-empty-kb", action="store_true")
     p.add_argument("--seed-from-kb-path", action="store_true")
     p.add_argument("--label", default="smart_latest", help="Suffix used in output report filenames.")
+    p.add_argument(
+        "--learn-log",
+        default="docs/run-learnings.md",
+        help="Append concise run learnings to this Markdown log (empty string disables).",
+    )
+    p.add_argument(
+        "--learn-note",
+        default="",
+        help="Optional human note appended to the learnings entry for this run.",
+    )
     p.add_argument("--skip-passed-fresh", action="store_true", default=True)
     p.add_argument("--no-skip-passed-fresh", action="store_true", help="Disable skip optimization.")
     p.add_argument("--dry-run", action="store_true")
@@ -540,6 +703,15 @@ def main() -> int:
     }
     summary_out.write_text(json.dumps(summary, indent=2), encoding="utf-8")
     print(f"Summary: {summary_out}")
+
+    learn_log_raw = str(args.learn_log).strip()
+    if learn_log_raw:
+        if args.dry_run:
+            print("Learn log skipped (dry-run).")
+        else:
+            learn_log_path = _resolve(learn_log_raw)
+            _append_learning_entry(log_path=learn_log_path, summary=summary, args=args)
+            print(f"Learn log appended: {learn_log_path}")
 
     return 1 if failed > 0 else 0
 

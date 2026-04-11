@@ -4,6 +4,13 @@ This project is a local workbench for building a high-accuracy semantic parser (
 
 Last updated: 2026-04-10
 
+## Repository Status Note
+
+This repository is new. Core reasoning components (especially the Prolog engine/runtime) were migrated from prior work with an existing unit test history. Test migration is in progress; current status and run-by-run learnings are tracked in:
+
+- `docs/run-learnings.md`
+- `SESSIONS.md`
+
 ## Story Roundtrip Demo
 
 Watch the pre-thinker consume a story, then recite from captured facts and logical memory.

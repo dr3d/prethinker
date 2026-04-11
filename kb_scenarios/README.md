@@ -53,14 +53,17 @@ Use these to ramp parser complexity before acid tests:
 Use this order to stress long-context drift, alias pressure, and correction stability:
 
 1. `acid_08_contradiction_reconciliation.json`
-2. `acid_07_relation_drift_pressure.json`
-3. `acid_06_compound_unpacking.json`
-4. `acid_05_long_context_lineage.json`
-5. `acid_04_alias_pressure.json`
-6. `acid_03_temporal_override.json`
-7. `stage_03_transitive_chain.json`
-8. `stage_02_rule_ingest.json`
-9. `stage_01_facts_only.json`
+2. `acid_10_compound_retract_unpacking.json`
+3. `acid_11_batched_fact_rule_retract_mix.json`
+4. `acid_09_compound_rule_unpacking.json`
+5. `acid_07_relation_drift_pressure.json`
+6. `acid_06_compound_unpacking.json`
+7. `acid_05_long_context_lineage.json`
+8. `acid_04_alias_pressure.json`
+9. `acid_03_temporal_override.json`
+10. `stage_03_transitive_chain.json`
+11. `stage_02_rule_ingest.json`
+12. `stage_01_facts_only.json`
 
 ## Suggested Smoke Pair
 

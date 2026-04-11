@@ -1,0 +1,24 @@
+{
+  "name": "acid_09_compound_rule_unpacking",
+  "ontology_name": "acid_compound_rule_unpack",
+  "utterances": [
+    "Mira is a parent of Niko.",
+    "Niko is a parent of Oona.",
+    "If X is a parent of Y then X is an ancestor of Y, and if X is an ancestor of Y and Y is an ancestor of Z then X is an ancestor of Z.",
+    "Translate this to Italian: deterministic parsing beats lucky guessing."
+  ],
+  "validations": [
+    {
+      "id": "mira_to_niko_base",
+      "query": "ancestor(mira, niko).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "mira_to_oona_transitive",
+      "query": "ancestor(mira, oona).",
+      "expect_status": "success",
+      "min_rows": 1
+    }
+  ]
+}

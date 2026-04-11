@@ -1,4 +1,9 @@
-﻿# Semantic Parser Prompt Pack (Qwen 3.5 9B)
+<!-- prompt_id: sp-e0a66d9a2fbe -->
+<!-- prompt_sha256: e0a66d9a2fbeb5870371ba189583f50de15cdfab6df7a16ef5c9143bc133f6f7 -->
+<!-- source_path: D:\_PROJECTS\prethinker\modelfiles\semantic_parser_system_prompt.md -->
+<!-- captured_at_utc: 2026-04-11T12:54:57+00:00 -->
+
+# Semantic Parser Prompt Pack (Qwen 3.5 9B)
 
 Use this as maintainable guidance for semantic parsing into Prolog structures.
 Keep behavior language-agnostic, deterministic, and schema-strict.
@@ -30,12 +35,10 @@ Keep behavior language-agnostic, deterministic, and schema-strict.
 - Retractions: `retract(<fact>).`
 - Do not emit zero-arity forms like `policy_revoked.`
 - Always include explicit arguments in facts/rules/queries.
-- If one utterance contains multiple independent write operations joined by "and", emit all operations (do not silently drop later clauses).
 - For yes/no questions, output a query predicate with explicit arguments (or variables), never a bare atom.
 - If required query arguments are unknown, use variables and raise clarification instead of emitting malformed or zero-arity query goals.
 - For `retract`, the inner target must be a fact-like term with explicit arguments (example: `retract(parent(alice,bob)).`).
 - Never emit malformed retractions like `retract(policy_revoked).` with no arguments.
-- For multi-target retract utterances, include every target in `facts` and include each `retract(...)` clause in `logic_string` (newline-separated clauses are acceptable).
 
 ## Relation and Argument Discipline
 
@@ -171,16 +174,6 @@ Only emit such rules when the utterance semantically indicates transitivity or c
   - NL: "Actually, retract that: parent(alice, bob)."
   - Route: `retract`
   - Logic: `retract(parent(alice, bob)).`
-
-- Multi-target retraction:
-  - NL: "Actually retract these: parent(vera, wynn) and parent(wynn, xena)."
-  - Route: `retract`
-  - Logic:
-    - `retract(parent(vera, wynn)).`
-    - `retract(parent(wynn, xena)).`
-  - Facts:
-    - `parent(vera, wynn).`
-    - `parent(wynn, xena).`
 
 - Ambiguous undo/retract:
   - NL: "Actually undo that last compliance rule."
