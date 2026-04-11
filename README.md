@@ -337,6 +337,28 @@ python kb_pipeline.py --backend ollama --base-url http://127.0.0.1:11434 --model
 python kb_pipeline.py --backend ollama --base-url http://127.0.0.1:11434 --model qwen3.5:9b --scenario kb_scenarios/stage_03_transitive_chain.json --kb-name people_ladder --out kb_runs/stage_03_people_ladder.json
 ```
 
+### 3b) Smart ladder runner (skip unchanged passes)
+
+Use this to avoid re-running expensive rungs when nothing relevant changed.
+
+```bash
+python scripts/run_ladder.py --backend ollama --base-url http://127.0.0.1:11434 --model qwen3.5:9b --prompt-file modelfiles/semantic_parser_system_prompt.md --start-rung stage_02_rule_ingest --end-rung acid_05_long_context_lineage --clarification-eagerness 0.75 --max-clarification-rounds 3 --clarification-answer-model gpt-oss:20b --clarification-answer-backend ollama --clarification-answer-base-url http://127.0.0.1:11434 --clarification-answer-context-length 16384
+```
+
+What gets skipped:
+
+- same scenario name
+- scenario file unchanged since cached run
+- same backend/model/runtime/context and clarification settings
+- same prompt hash
+- cached run already passed
+
+Helpful controls:
+
+- `--start-rung` and `--end-rung` accept rung index or scenario name
+- `--no-skip-passed-fresh` forces full rerun
+- `--dry-run` shows planned run/skip decisions without executing
+
 ### 4) Tune prompt without code edits
 
 Edit:

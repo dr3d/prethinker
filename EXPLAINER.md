@@ -1,10 +1,14 @@
 # Prethinker Explainer
 
-Prethinker is a neuro-symbolic training workbench with one clear mission: shape a language model into a specialized semantic parser that does one job extremely well. That job is to take natural language, break it into formal logic, and hand that logic to a deterministic Prolog runtime for storage, inference, and retrieval.
+## What This Project Is
 
-It is not built as a general chatbot. It is built as a logic compiler.
+Prethinker is a neuro-symbolic workbench for one narrow mission:
+turn natural language into deterministic Prolog-operable state.
 
-At the front of the system, an LLM reads an utterance and tries to map it into one of a small set of intent types:
+It is not a chatbot framework.  
+It is a semantic parser lab and runtime pipeline.
+
+The parser model's job is to classify intent and propose logic:
 
 - `assert_fact`
 - `assert_rule`
@@ -12,140 +16,202 @@ At the front of the system, an LLM reads an utterance and tries to map it into o
 - `retract`
 - `other`
 
-Then it extracts structured logical content:
+The runtime's job is to validate, apply, and verify those proposals against persistent KB state.
 
-- predicates
-- atoms/constants
-- variables
-- facts
-- rules
-- queries
+Core principle:
 
-The key design principle is this: the LLM proposes, the deterministic runtime decides.
+**The LLM proposes. The runtime decides.**
+
+---
+
+## Why Neuro-Symbolic
+
+LLMs are flexible but probabilistic.  
+Symbolic runtimes are rigid but auditable.
+
+Prethinker combines both:
+
+- Neural side for language perception and structure extraction
+- Symbolic side for deterministic memory mutation and inference
+
+That makes failures inspectable:
+
+- what was parsed
+- why it was accepted or rejected
+- what changed in KB state
+- what validations passed or failed
+
+---
 
 ## Pipeline Internals
 
-The pipeline in `kb_pipeline.py` runs as a disciplined sequence:
+The main flow lives in `kb_pipeline.py`.
 
-1. Route classification  
-The system first decides what kind of operation the utterance represents.
+1. Route + parse
+- Two-pass mode is default:
+  - pass 1: classify intent
+  - pass 2: extract logic-focused structure
+- Deterministic refinement normalizes to schema and clause shape.
 
-2. Extraction pass  
-The model produces logic-focused output (not free-form prose), then a refinement step normalizes this into strict JSON schema and Prolog-ready clauses.
+2. Validation + repair
+- Schema checks
+- Prolog shape checks
+- route/logic consistency checks
+- optional predicate registry + type schema checks
+- repair prompt path when malformed
 
-3. Validation and repair  
-The output is validated for schema correctness, Prolog shape, route consistency, and optional registry/type constraints. If malformed, the system can run a repair prompt.
+3. Uncertainty + clarification gate
+- Every turn carries uncertainty fields (`uncertainty_score`, label, flags).
+- Clarification Eagerness (CE) is the ingestion gate:
+  - high CE = ask earlier
+  - low CE = commit earlier
+- CE is effectively a controlled "annoyance dial" for precision vs throughput.
 
-4. Clarification gating (CE policy)  
-Each parsed turn carries uncertainty signals (`uncertainty_score`, ambiguity markers, clarification flags).  
-A Clarification Eagerness (CE) factor acts like an “annoyance dial”:
-- high CE = ask clarification sooner
-- low CE = proceed unless uncertainty is very high
+4. Clarification Q&A loop (optional)
+- Parser model can hand off clarification answers to a second model.
+- Typical split:
+  - parser: `qwen35-semparse:9b`
+  - clarification responder: `gpt-oss:20b`
+- Loop guardrails are in place:
+  - stop on repetitive Q/A loops
+  - stop on non-informative answers
+  - defer unsafe writes instead of forcing bad facts
 
-This gate determines whether to apply to KB immediately or request clarification first.
+5. Deterministic apply
+- Local vendored Prolog core runtime (`engine/core.py`) handles:
+  - fact assertion
+  - rule assertion
+  - retraction
+  - query evaluation
+- No sibling repository is required for default operation.
 
-5. Deterministic apply  
-Accepted clauses are applied to the local Prolog core runtime (`assert_fact`, `assert_rule`, `retract_fact`, `query_rows`) against named persistent KB namespaces.
+6. Scenario validation
+- Deterministic query contracts confirm whether the resulting KB behaves as expected.
 
-6. Validation checks  
-Scenario contracts run deterministic queries and compare expected results.
+7. Provenance + observability
+- Every run records:
+  - prompt hash and snapshot
+  - model/runtime settings
+  - turn traces and decision states
+  - validation outcomes
+  - ontology drift signals
 
-7. Provenance and reporting  
-Every run stores prompt hash/snapshot, model settings, turn traces, validation outcomes, and drift signals for reproducible iteration.
+---
+
+## Decision States
+
+Each turn is mapped into operational states:
+
+- `commit`
+- `stage_provisionally`
+- `ask_clarification`
+- `escalate`
+- `reject`
+
+This gives a clean workflow layer over raw parser/apply statuses.
+
+---
 
 ## Ladder Strategy
 
-The ladder is the training discipline.  
-Instead of random prompt tweaks, Prethinker climbs progressive rungs:
+Prethinker uses progressive rungs, then acid pressure:
 
-- Stage 1: atomic facts
-- Stage 2: rule ingestion
-- Stage 3: transitive/chain reasoning
-- then acid tests for harder failure modes (temporal overrides, long context lineage, ambiguity pressure, etc.)
+- `stage_01_facts_only`
+- `stage_02_rule_ingest`
+- `stage_03_transitive_chain`
+- acid scenarios (`acid_03`, `acid_04`, `acid_05`, and beyond)
 
-The workflow is cyclical and empirical:
+The key improvement is avoiding wasted reruns:
 
-- tune system prompt
-- run rung(s)
-- inspect failures
-- retune
-- rerun from lower rungs upward
-- repeat until higher rungs stabilize
-- then attack acid tests
-- loop again
+- `scripts/run_ladder.py` supports `--start-rung` and `--end-rung`
+- it skips already-passed fresh runs when scenario + prompt + settings match
+- it allows targeted reruns instead of replaying the full ladder every cycle
 
-So prompt evolution is treated like code evolution: versioned, measured, and regression-tested.
+So ladder runs now optimize wallclock while preserving rigor.
 
-## Clarification Eagerness (CE)
+---
 
-CE is one of the most important control knobs in the system.  
-It governs how aggressively the pipeline asks clarification before writing to KB.
+## Acid Philosophy: Never Let 100% Become Static
 
-High CE is useful when:
+A fixed benchmark eventually overfits.
 
-- bootstrapping a new KB with unknown vocabulary
-- preventing early ontology pollution
-- prioritizing precision over ingestion speed
+Prethinker treats acid as a moving frontier:
 
-Lower CE is useful when:
+- keep a tiny smoke baseline for sanity
+- expand hard rungs over time
+- maintain holdout-style scenarios
+- keep introducing unseen wording and ontology pressure
 
-- ingesting high-volume cleaner text
-- accepting more automatic forward progress
+Goal:
+avoid "stuck at 100%" on stale tests and keep measuring real generalization.
 
-In short, CE is the ingestion gate between ambiguity and memory mutation.
+---
 
-## Dual-Model Clarification Q&A
+## Golden KB Workflow
 
-A major internal upgrade is clarification automation with model role separation.  
-When clarification is needed, Prethinker can call a second, smarter model dedicated to Q&A responses (for example `gpt-oss:20b`) while the primary parser remains the semparse model (`qwen35-semparse:9b`).
+For faster regression checks:
 
-This allows:
+1. Run a rigorous parse + probe pass
+2. Freeze the accepted result as a golden KB artifact
+3. Compare future runs directly against that expected KB
 
-- parser model = extraction specialist
-- Q&A model = clarification responder
+This reduces repeated interactive probing during routine tuning loops while preserving deterministic evaluation.
 
-This is especially useful during early KB bootstrapping, where vocabulary and relations are underdefined. High CE can force early disambiguation, helping establish a clean ontology foundation instead of ingesting fuzzy facts.
-
-The system now also stops wasteful clarification loops:
-
-- non-informative answers (like `unknown`) trigger immediate defer
-- repeated same Q/A pairs stop early
-
-So ambiguity is surfaced as a first-class unresolved state, not silently forced into bad KB writes.
-
-## Why This Is Interesting
-
-Prethinker is an iterative LLM specialization lab:
-
-- it continuously engineers a model toward deterministic logic extraction
-- it uses Prolog as the memory and inference substrate
-- it climbs a formal ladder of increasingly difficult tests
-- it keeps retuning until the parser survives acid-grade semantic stress
-
-That makes it an unusual bridge between neural language understanding and symbolic correctness: the model interprets meaning, but the runtime guards truth.
+---
 
 ## Ontological Tracking and Domain Bounding
 
-Prethinker also tracks ontology state over time (`ontology_profile`, `ontology_diff`, and known ontology index data).  
-This is important because it limits what the parser should try to "mean" inside a given KB namespace.
+The system tracks ontology profiles and diffs per KB namespace.
 
-Practically, ontological tracking helps by:
+This helps:
 
-- keeping each KB tied to a coherent predicate/entity domain instead of drifting into unrelated topics
-- detecting drift when new predicates or argument patterns suddenly expand the semantic scope
-- enabling safer confirmation points before major domain shifts are accepted
-- improving parser consistency by encouraging reuse of established vocabulary for that namespace
+- keep namespaces semantically coherent
+- detect drift and unexpected predicate expansion
+- require explicit intent before major domain shifts
+- constrain parser behavior to the active ontology, not "all possible topics"
 
-In other words, ontological tracking narrows the operating envelope.  
-The pre-thinker is not expected to reason over every possible domain at once; it is expected to operate sharply within the active ontology, and to treat domain expansion as an explicit, auditable event.
+In practice, ontological tracking narrows the search space and reduces semantic sprawl.
 
-## Autonomous Operation (Current Project Mode)
+---
 
-In this project phase, the training/tuning workflow is being executed autonomously by Codex orchestration:
+## Runtime Hygiene and Artifact Policy
 
-- rung execution and reruns
-- prompt-iteration loops
-- clarification-policy tuning
-- report generation and artifact management
+Persistent knowledge lives in `kb_store/`.
 
-Human input remains strategic (goals, constraints, approvals), while Codex operates the day-to-day loop for continuous iteration.
+Ephemeral/scratch outputs are routed to `tmp/` (including transient KB namespaces like `sm_*`).
+
+This keeps the repository view clean while retaining full run evidence.
+
+---
+
+## Honest Maturity Snapshot
+
+What is strong now:
+
+- architecture and separation of concerns
+- deterministic runtime integration
+- clarification gating mechanics
+- provenance and reportability
+- progressive benchmark discipline
+
+What is still open:
+
+- broader generalization under harder semantics
+- continued acid expansion (ambiguity, contradiction, temporal revision, long narrative, unseen domains)
+- evidence depth over larger sample volumes
+
+Prethinker is best understood as a serious research workbench, not a finished product.
+
+---
+
+## Autonomous Project Mode
+
+Current workflow is run autonomously by Codex orchestration:
+
+- rung execution
+- selective reruns
+- prompt iteration support
+- report generation
+- artifact hygiene
+
+Human guidance sets goals and constraints; Codex runs the operational loop.
