@@ -327,8 +327,19 @@ def _run_one(args: argparse.Namespace, scenario: ScenarioRow, out_path: Path) ->
     if args.env_file:
         cmd.extend(["--env-file", str(args.env_file)])
 
-    proc = subprocess.run(cmd, cwd=ROOT)
-    return int(proc.returncode)
+    try:
+        proc = subprocess.run(
+            cmd,
+            cwd=ROOT,
+            timeout=max(1, int(args.scenario_timeout_seconds)),
+        )
+        return int(proc.returncode)
+    except subprocess.TimeoutExpired:
+        print(
+            f"[TIMEOUT] {scenario.stem} exceeded "
+            f"{int(args.scenario_timeout_seconds)}s and was terminated."
+        )
+        return 124
 
 
 def parse_args() -> argparse.Namespace:
@@ -352,6 +363,12 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--corpus-path", default="")
     p.add_argument("--context-length", type=int, default=8192)
     p.add_argument("--timeout-seconds", type=int, default=120)
+    p.add_argument(
+        "--scenario-timeout-seconds",
+        type=int,
+        default=600,
+        help="Hard timeout per scenario subprocess to avoid frozen runs (default 600).",
+    )
     p.add_argument("--clarification-eagerness", type=float, default=0.35)
     p.add_argument("--max-clarification-rounds", type=int, default=2)
     p.add_argument("--clarification-answer-model", default="")
@@ -471,7 +488,16 @@ def main() -> int:
         report = _read_json(out_path) if out_path.exists() else None
         if rc != 0 or not isinstance(report, dict):
             failed += 1
-            run_rows.append({"scenario": row.stem, "action": "executed", "return_code": rc, "overall_status": "error"})
+            row_out = {
+                "scenario": row.stem,
+                "action": "executed",
+                "return_code": rc,
+                "overall_status": "error",
+            }
+            if rc == 124:
+                row_out["timed_out"] = True
+                row_out["timeout_seconds"] = int(args.scenario_timeout_seconds)
+            run_rows.append(row_out)
             print(f"[FAIL] {row.stem} (return code {rc})")
             if args.stop_on_fail:
                 break
