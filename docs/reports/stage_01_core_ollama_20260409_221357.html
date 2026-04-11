@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Semantic Parser Run: stage_01_facts_only (people_ladder_core_20260409_221357)</title>
-  <meta name="description" content="Themed session transcript rendered from dialog_ubglvr2s.json." />
+  <meta name="description" content="Themed session transcript rendered from dialog_3eye3d8g.json." />
   <style id="skin-style">
     :root {
       --bg: #e3ddd2;
@@ -447,7 +447,7 @@
 
     .step-caret {
       color: var(--ink);
-      font-size: 14px;
+      font-size: 19px;
       line-height: 1;
       transition: transform .15s ease;
       transform-origin: 50% 50%;
@@ -480,7 +480,7 @@
         </div>
       </div>
     </div>
-    <div class="meta">Captured: 2026-04-11T01:31:11+00:00 | Model: qwen35-semparse:9b | Integration: ollama | Initial skin: standard | Rendered: 2026-04-11 01:31:11 UTC</div>
+    <div class="meta">Captured: 2026-04-11T01:35:22+00:00 | Model: qwen35-semparse:9b | Integration: ollama | Initial skin: standard | Rendered: 2026-04-11 01:35:22 UTC</div>
     <section class="step-card"><h2>run_context</h2><div class="bubble user"><div class="bubble-head"><div class="label">User</div><button class="copy-btn" data-copy="Capture run provenance and prompt/version settings for reproducibility." data-label="copy" data-success-label="copied" data-failure-label="copy-failed">copy</button></div><pre>Capture run provenance and prompt/version settings for reproducibility.</pre></div><details class="toolbox tool-expando"><summary><span>tool calls</span><span class="expando-count">0</span></summary><p class="tool-list">No tool calls captured.</p></details><div class="bubble assistant"><div class="bubble-head"><div class="label">Assistant</div><button class="copy-btn" data-copy="{
   &quot;run_id&quot;: &quot;run-20260410T021357Z-stage_01_facts_only-qwen35_semparse_9b-38268&quot;,
   &quot;run_started_utc&quot;: &quot;2026-04-10T02:13:57+00:00&quot;,
@@ -891,7 +891,7 @@ reasons=none</pre></div></div></section>
       const appearanceToggle = document.getElementById("appearance-toggle");
       const skinStyle = document.getElementById("skin-style");
       const skinMapNode = document.getElementById("skin-css-map");
-      const appearanceStorageKey = "dialog_appearance_pref_dialog_ubglvr2s";
+      const appearanceStorageKey = "dialog_appearance_pref_dialog_3eye3d8g";
       const defaultSkin = "standard";
       const skinOrder = ["standard", "telegram", "imessage"];
 
@@ -1022,8 +1022,10 @@ reasons=none</pre></div></div></section>
             heading.setAttribute("aria-expanded", "true");
           }
 
-          const expand = () => {
+          const toggle = () => {
             if (card.classList.contains("is-open")) {
+              card.classList.remove("is-open");
+              heading.setAttribute("aria-expanded", "false");
               return;
             }
             stepCards.forEach((other) => {
@@ -1038,11 +1040,11 @@ reasons=none</pre></div></div></section>
             card.scrollIntoView({ behavior: "smooth", block: "start" });
           };
 
-          heading.addEventListener("click", expand);
+          heading.addEventListener("click", toggle);
           heading.addEventListener("keydown", (event) => {
             if (event.key === "Enter" || event.key === " ") {
               event.preventDefault();
-              expand();
+              toggle();
             }
           });
         });

@@ -327,7 +327,7 @@ def _build_progress_cards_page(
     .run-heading {{ display:flex; align-items:center; justify-content:space-between; gap:10px; cursor:pointer; }}
     .run-heading:focus-visible {{ outline:2px solid var(--link); outline-offset:2px; border-radius:6px; }}
     .run-heading-label {{ min-width:0; overflow-wrap:anywhere; word-break:break-word; line-height:inherit; }}
-    .run-caret {{ font-size:14px; color:var(--muted); transition:transform .15s ease; }}
+    .run-caret {{ font-size:19px; color:var(--muted); transition:transform .15s ease; }}
     .run.is-open .run-caret {{ transform:rotate(180deg); }}
     .run-body {{ display:none; }}
     .run.is-open .run-body {{ display:block; }}
@@ -411,8 +411,12 @@ def _build_progress_cards_page(
             heading.setAttribute('aria-expanded', 'true');
           }}
 
-          const expand = () => {{
-            if (run.classList.contains('is-open')) return;
+          const toggle = () => {{
+            if (run.classList.contains('is-open')) {{
+              run.classList.remove('is-open');
+              heading.setAttribute('aria-expanded', 'false');
+              return;
+            }}
             runs.forEach((other) => {{
               const otherHeading = other.querySelector(':scope > h3');
               if (!otherHeading) return;
@@ -424,11 +428,11 @@ def _build_progress_cards_page(
             run.scrollIntoView({{ behavior: 'smooth', block: 'start' }});
           }};
 
-          heading.addEventListener('click', expand);
+          heading.addEventListener('click', toggle);
           heading.addEventListener('keydown', (event) => {{
             if (event.key === 'Enter' || event.key === ' ') {{
               event.preventDefault();
-              expand();
+              toggle();
             }}
           }});
         }});

@@ -25,7 +25,7 @@
     .run-heading { display:flex; align-items:center; justify-content:space-between; gap:10px; cursor:pointer; }
     .run-heading:focus-visible { outline:2px solid var(--link); outline-offset:2px; border-radius:6px; }
     .run-heading-label { min-width:0; overflow-wrap:anywhere; word-break:break-word; line-height:inherit; }
-    .run-caret { font-size:14px; color:var(--muted); transition:transform .15s ease; }
+    .run-caret { font-size:19px; color:var(--muted); transition:transform .15s ease; }
     .run.is-open .run-caret { transform:rotate(180deg); }
     .run-body { display:none; }
     .run.is-open .run-body { display:block; }
@@ -48,7 +48,7 @@
     <div class="top">
       <div>
         <h1 style="margin:0">Progress Cards</h1>
-        <div class="small">Recent run cards showing utterance -> generated parse JSON, with quality dimensions. Generated 2026-04-11 01:26:28 UTC</div>
+        <div class="small">Recent run cards showing utterance -> generated parse JSON, with quality dimensions. Generated 2026-04-11 01:35:25 UTC</div>
       </div>
       <div class="nav"><a href="index.html">Back to Docs Index</a> <button id="theme">theme</button></div>
     </div>
@@ -2776,8 +2776,12 @@
             heading.setAttribute('aria-expanded', 'true');
           }
 
-          const expand = () => {
-            if (run.classList.contains('is-open')) return;
+          const toggle = () => {
+            if (run.classList.contains('is-open')) {
+              run.classList.remove('is-open');
+              heading.setAttribute('aria-expanded', 'false');
+              return;
+            }
             runs.forEach((other) => {
               const otherHeading = other.querySelector(':scope > h3');
               if (!otherHeading) return;
@@ -2789,11 +2793,11 @@
             run.scrollIntoView({ behavior: 'smooth', block: 'start' });
           };
 
-          heading.addEventListener('click', expand);
+          heading.addEventListener('click', toggle);
           heading.addEventListener('keydown', (event) => {
             if (event.key === 'Enter' || event.key === ' ') {
               event.preventDefault();
-              expand();
+              toggle();
             }
           });
         });

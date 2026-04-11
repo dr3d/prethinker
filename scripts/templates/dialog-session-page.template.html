@@ -32,7 +32,7 @@
 
     .step-caret {
       color: var(--ink);
-      font-size: 14px;
+      font-size: 19px;
       line-height: 1;
       transition: transform .15s ease;
       transform-origin: 50% 50%;
@@ -207,8 +207,10 @@
             heading.setAttribute("aria-expanded", "true");
           }
 
-          const expand = () => {
+          const toggle = () => {
             if (card.classList.contains("is-open")) {
+              card.classList.remove("is-open");
+              heading.setAttribute("aria-expanded", "false");
               return;
             }
             stepCards.forEach((other) => {
@@ -223,11 +225,11 @@
             card.scrollIntoView({ behavior: "smooth", block: "start" });
           };
 
-          heading.addEventListener("click", expand);
+          heading.addEventListener("click", toggle);
           heading.addEventListener("keydown", (event) => {
             if (event.key === "Enter" || event.key === " ") {
               event.preventDefault();
-              expand();
+              toggle();
             }
           });
         });
