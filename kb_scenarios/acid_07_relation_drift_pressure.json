@@ -1,0 +1,34 @@
+{
+  "name": "acid_07_relation_drift_pressure",
+  "ontology_name": "acid_relation_drift",
+  "utterances": [
+    "Rhea is a mentor of Soren.",
+    "Soren is an advisor of Talia.",
+    "If X is a mentor of Y then X is a guide of Y.",
+    "If X is an advisor of Y then X is a guide of Y.",
+    "If X is a guide of Y and Y is a guide of Z then X is a guide of Z.",
+    "Actually, retract that: advisor(soren, talia).",
+    "Soren is a mentor of Talia.",
+    "Format this sentence as YAML: provenance matters."
+  ],
+  "validations": [
+    {
+      "id": "rhea_guides_talia_via_mentor_chain",
+      "query": "guide(rhea, talia).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "advisor_relation_retracted",
+      "query": "advisor(soren, talia).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "mentor_relation_kept",
+      "query": "mentor(soren, talia).",
+      "expect_status": "success",
+      "min_rows": 1
+    }
+  ]
+}

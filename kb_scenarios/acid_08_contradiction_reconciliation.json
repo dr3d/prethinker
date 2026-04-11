@@ -1,0 +1,34 @@
+{
+  "name": "acid_08_contradiction_reconciliation",
+  "ontology_name": "acid_contradiction_reconcile",
+  "utterances": [
+    "Node n1 is online.",
+    "If X is online then reachable(X).",
+    "Node n1 is offline.",
+    "If X is offline then not_reachable(X).",
+    "Actually, retract that: offline(n1).",
+    "Node n1 has manual_override.",
+    "If X has manual_override then reachable(X).",
+    "Rewrite this sentence with fewer words: deterministic state avoids confusion."
+  ],
+  "validations": [
+    {
+      "id": "n1_reachable_true",
+      "query": "reachable(n1).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "n1_offline_removed",
+      "query": "offline(n1).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "n1_not_reachable_removed",
+      "query": "not_reachable(n1).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    }
+  ]
+}

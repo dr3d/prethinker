@@ -1,0 +1,34 @@
+{
+  "name": "acid_06_compound_unpacking",
+  "ontology_name": "acid_compound_unpack",
+  "utterances": [
+    "Iris is a parent of Juno, and Juno is a parent of Kian.",
+    "If X is a parent of Y then X is an ancestor of Y.",
+    "If X is an ancestor of Y and Y is an ancestor of Z then X is an ancestor of Z.",
+    "Actually, retract that: parent(juno, kian).",
+    "Juno is a parent of Kira.",
+    "Kira is a parent of Lio.",
+    "Translate this to German: symbolic state must remain auditable.",
+    "Who is Iris's ancestor?"
+  ],
+  "validations": [
+    {
+      "id": "iris_to_kian_removed_after_retract",
+      "query": "ancestor(iris, kian).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "iris_to_kira_survives",
+      "query": "ancestor(iris, kira).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "iris_to_lio_survives",
+      "query": "ancestor(iris, lio).",
+      "expect_status": "success",
+      "min_rows": 1
+    }
+  ]
+}
