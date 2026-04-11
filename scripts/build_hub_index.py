@@ -19,13 +19,13 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--runs-dir", default="kb_runs")
     p.add_argument("--kb-pages-dir", default="docs/kb")
     p.add_argument("--ladder-index", default="docs/rungs/index.html")
-    p.add_argument("--output", default="docs/index.html")
+    p.add_argument("--output", default="docs/run-reports-hub.html")
     p.add_argument("--cards-output", default="docs/progress_cards.html")
     p.add_argument("--cards-runs-limit", type=int, default=8)
     p.add_argument("--story-cards-output", default="docs/progress_story_cards.html")
     p.add_argument("--story-cards-runs-limit", type=int, default=5)
     p.add_argument("--repo-link", default="https://github.com/dr3d/prethinker")
-    p.add_argument("--title", default="Prethinker Report Hub")
+    p.add_argument("--title", default="Prethinker Run Reports Hub")
     p.add_argument(
         "--historical-runs-dir",
         default="kb_runs",
