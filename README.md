@@ -9,6 +9,7 @@ Last updated: 2026-04-12
 - docs hub: `docs/index.html`
 - run explorer: `docs/run-reports-hub.html`
 - demo playbook: `docs/DEMO_PLAYBOOK.md`
+- track scoreboard: `docs/TRACK_SCOREBOARD.md`
 - explainer article: `EXPLAINER.md`
 - assembly log: `SESSIONS.md`
 
@@ -119,6 +120,11 @@ If you're evaluating it as a research workbench, it's useful now. If you're eval
   - with progress memory: off-focus writes intercepted (`block_rate=1.0`, off-focus query results `no_results`)
   - without progress memory: off-focus writes committed (off-focus query results `success`)
   - parser confidence unchanged across both arms (`avg_conf=0.971`), confirming governance gain rather than confidence inflation
+- Track-based same-model sweep added (`qwen35-semparse:9b` as parser + served-LLM):
+  - `gate_ladder_frontier`: `7/8` (`87.5%`)
+  - `examples_all`: `2/7` (`28.6%`)
+  - `book_acid_goldilocks`: `0/2` (`0.0%`)
+  - score artifacts: `docs/TRACK_SCOREBOARD.md` and `docs/data/tracks/*.json`
 - Caveat: `stage_00` probes and long story roundtrip remain exploratory and are not treated as primary gating battery for the ladder frontier.
 
 ## Neuro-Symbolic Contract
@@ -510,6 +516,15 @@ python scripts/run_track.py --track gate_ladder_frontier --backend ollama --base
 
 # run examples/demo battery (showcase + regression)
 python scripts/run_track.py --track examples_all --backend ollama --base-url http://127.0.0.1:11434 --model qwen35-semparse:9b --prompt-file modelfiles/semantic_parser_system_prompt.md
+
+# run book-acid battery (narrative ingestion + QA probes)
+python scripts/run_track.py --track book_acid_goldilocks --backend ollama --base-url http://127.0.0.1:11434 --model qwen35-semparse:9b --prompt-file modelfiles/semantic_parser_system_prompt.md
+
+# run book-acid with clarification answer model in-loop
+python scripts/run_track.py --track book_acid_goldilocks --backend ollama --base-url http://127.0.0.1:11434 --model qwen35-semparse:9b --prompt-file modelfiles/semantic_parser_system_prompt.md --clarification-eagerness 0.85 --max-clarification-rounds 3 --clarification-answer-model gpt-oss:20b --clarification-answer-backend ollama --clarification-answer-base-url http://127.0.0.1:11434 --clarification-answer-context-length 16384 --clarification-answer-min-confidence 0.55
+
+# run with an explicit served-LLM (preferred choreography path)
+python scripts/run_track.py --track book_acid_goldilocks --backend ollama --base-url http://127.0.0.1:11434 --model qwen35-semparse:9b --prompt-file modelfiles/semantic_parser_system_prompt.md --clarification-eagerness 0.85 --max-clarification-rounds 3 --served-llm-model qwen3.5:9b --served-llm-backend ollama --served-llm-base-url http://127.0.0.1:11434 --served-llm-context-length 8192 --clarification-answer-min-confidence 0.55
 ```
 
 Track definitions live in:

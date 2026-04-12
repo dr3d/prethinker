@@ -135,6 +135,13 @@ Additional benefit-targeted probes:
 5. `rung_410_progress_goal_context_steering.json`
 6. `rung_420_progress_focus_shift_transition.json`
 
+## Book-Acid Rungs
+
+These push toward narrative/book ingestion and Q&A over long-form prose:
+
+1. `rung_430_goldilocks_roundtrip_retry.json` (structured story retry + deterministic checks)
+2. `rung_431_book_goldilocks_raw_chaptered_qa.json` (raw source text chunks + probe checks)
+
 ## Demo Pack Scenarios
 
 These are presentation-oriented runnable demos (not core ladder gates):
@@ -161,4 +168,7 @@ python scripts/run_track.py --track gate_ladder_frontier --fail-on-under
 
 # examples + demos battery
 python scripts/run_track.py --track examples_all
+
+# book-acid Goldilocks sweep
+python scripts/run_track.py --track book_acid_goldilocks
 ```

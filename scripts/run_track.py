@@ -64,6 +64,18 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument("--context-length", type=int, default=0)
     p.add_argument("--clarification-eagerness", type=float, default=-1.0)
     p.add_argument("--max-clarification-rounds", type=int, default=-1)
+    p.add_argument("--clarification-answer-model", default="")
+    p.add_argument("--clarification-answer-backend", default="")
+    p.add_argument("--clarification-answer-base-url", default="")
+    p.add_argument("--clarification-answer-context-length", type=int, default=0)
+    p.add_argument("--clarification-answer-min-confidence", type=float, default=-1.0)
+    p.add_argument("--clarification-answer-history-turns", type=int, default=-1)
+    p.add_argument("--clarification-answer-kb-clause-limit", type=int, default=-1)
+    p.add_argument("--clarification-answer-kb-char-budget", type=int, default=-1)
+    p.add_argument("--served-llm-model", default="")
+    p.add_argument("--served-llm-backend", default="")
+    p.add_argument("--served-llm-base-url", default="")
+    p.add_argument("--served-llm-context-length", type=int, default=0)
     p.add_argument("--fail-on-under", action="store_true", help="Exit non-zero when pass rate is below track required_pass_rate.")
     return p.parse_args()
 
@@ -147,6 +159,30 @@ def main() -> int:
             cmd.extend(["--clarification-eagerness", str(args.clarification_eagerness)])
         if args.max_clarification_rounds >= 0:
             cmd.extend(["--max-clarification-rounds", str(args.max_clarification_rounds)])
+        if args.clarification_answer_model:
+            cmd.extend(["--clarification-answer-model", args.clarification_answer_model])
+        if args.clarification_answer_backend:
+            cmd.extend(["--clarification-answer-backend", args.clarification_answer_backend])
+        if args.clarification_answer_base_url:
+            cmd.extend(["--clarification-answer-base-url", args.clarification_answer_base_url])
+        if args.clarification_answer_context_length > 0:
+            cmd.extend(["--clarification-answer-context-length", str(args.clarification_answer_context_length)])
+        if args.clarification_answer_min_confidence >= 0.0:
+            cmd.extend(["--clarification-answer-min-confidence", str(args.clarification_answer_min_confidence)])
+        if args.clarification_answer_history_turns >= 0:
+            cmd.extend(["--clarification-answer-history-turns", str(args.clarification_answer_history_turns)])
+        if args.clarification_answer_kb_clause_limit >= 0:
+            cmd.extend(["--clarification-answer-kb-clause-limit", str(args.clarification_answer_kb_clause_limit)])
+        if args.clarification_answer_kb_char_budget >= 0:
+            cmd.extend(["--clarification-answer-kb-char-budget", str(args.clarification_answer_kb_char_budget)])
+        if args.served_llm_model:
+            cmd.extend(["--served-llm-model", args.served_llm_model])
+        if args.served_llm_backend:
+            cmd.extend(["--served-llm-backend", args.served_llm_backend])
+        if args.served_llm_base_url:
+            cmd.extend(["--served-llm-base-url", args.served_llm_base_url])
+        if args.served_llm_context_length > 0:
+            cmd.extend(["--served-llm-context-length", str(args.served_llm_context_length)])
 
         print(f"[{idx:02d}/{len(scenarios)}] running {scenario_name}")
         proc = subprocess.run(cmd, cwd=str(ROOT), check=False)
@@ -207,6 +243,18 @@ def main() -> int:
             "context_length": args.context_length,
             "clarification_eagerness": args.clarification_eagerness,
             "max_clarification_rounds": args.max_clarification_rounds,
+            "clarification_answer_model": args.clarification_answer_model,
+            "clarification_answer_backend": args.clarification_answer_backend,
+            "clarification_answer_base_url": args.clarification_answer_base_url,
+            "clarification_answer_context_length": args.clarification_answer_context_length,
+            "clarification_answer_min_confidence": args.clarification_answer_min_confidence,
+            "clarification_answer_history_turns": args.clarification_answer_history_turns,
+            "clarification_answer_kb_clause_limit": args.clarification_answer_kb_clause_limit,
+            "clarification_answer_kb_char_budget": args.clarification_answer_kb_char_budget,
+            "served_llm_model": args.served_llm_model,
+            "served_llm_backend": args.served_llm_backend,
+            "served_llm_base_url": args.served_llm_base_url,
+            "served_llm_context_length": args.served_llm_context_length,
         },
         "records": records,
     }

@@ -49,6 +49,15 @@
         "demo_04_reimbursement_violation_check"
       ],
       "required_pass_rate": 0.8
+    },
+    {
+      "id": "book_acid_goldilocks",
+      "description": "Book-scale Goldilocks progression: structured retry then raw chaptered ingest with QA probes.",
+      "scenarios": [
+        "rung_430_goldilocks_roundtrip_retry",
+        "rung_431_book_goldilocks_raw_chaptered_qa"
+      ],
+      "required_pass_rate": 0.5
     }
   ]
 }

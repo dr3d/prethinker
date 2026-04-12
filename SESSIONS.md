@@ -707,6 +707,42 @@ Interpretation:
 - this confirms demos/examples can now be folded into routine grunt-work without contaminating ladder gate semantics.
 - failing demos are now explicit tracked debt rather than ad-hoc notes.
 
+## Session 24: Same-Model Clarification Sweep + Book-Acid Probe
+
+Date: 2026-04-12 UTC
+
+Outcome:
+
+- executed track sweeps with one model family for both roles:
+  - parser: `qwen35-semparse:9b`
+  - served-LLM clarifier: `qwen35-semparse:9b`
+- published track score artifacts:
+  - `docs/TRACK_SCOREBOARD.md`
+  - `docs/data/tracks/gate_ladder_frontier_same_model_latest.json`
+  - `docs/data/tracks/examples_all_same_model_latest.json`
+  - `docs/data/tracks/book_acid_goldilocks_same_model_latest.json`
+- added long-form book-acid scenarios:
+  - `kb_scenarios/rung_430_goldilocks_roundtrip_retry.json`
+  - `kb_scenarios/rung_431_book_goldilocks_raw_chaptered_qa.json`
+  - wired into `kb_scenarios/tracks.json` via `book_acid_goldilocks`
+
+Score snapshot (same-model sweep):
+
+- `gate_ladder_frontier`: `7/8` (`87.5%`) vs target `100%`
+- `examples_all`: `2/7` (`28.6%`) vs target `80%`
+- `book_acid_goldilocks`: `0/2` (`0.0%`) vs target `50%`
+
+Interpretation:
+
+- orchestration path is confirmed: clarification answers are attributed to `served_llm` when enabled.
+- same-model simplification does not remove long-form ingest brittleness; book-acid failures remain dominated by skipped/escalated turns and missing extracted structure, not by clarifier model choice alone.
+
+Parallel audit (subagent):
+
+- delivered cleanup recommendations for high-noise legacy artifacts.
+- captured as:
+  - `docs/LEGACY_CLEANUP_PLAN.md`
+
 
 
 
