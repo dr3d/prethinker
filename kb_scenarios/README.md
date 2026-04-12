@@ -143,3 +143,22 @@ These are presentation-oriented runnable demos (not core ladder gates):
 2. `demo_02_policy_stress_test_machine.json`
 3. `demo_03_story_world_interrogator.json`
 4. `demo_04_reimbursement_violation_check.json`
+
+## Scenario Tracks
+
+Track manifest:
+
+- `kb_scenarios/tracks.json`
+
+Run tracks:
+
+```bash
+# list tracks
+python scripts/run_track.py --list-tracks
+
+# strict gate battery
+python scripts/run_track.py --track gate_ladder_frontier --fail-on-under
+
+# examples + demos battery
+python scripts/run_track.py --track examples_all
+```

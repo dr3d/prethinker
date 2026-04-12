@@ -674,6 +674,39 @@ Notes:
 - these demo scenarios are intended as showcase starters and are not ladder-gating replacements.
 - they can be run through the same pipeline/runtime and rendered with existing report tooling.
 
+## Session 23: Scenario Track Runner (Gates vs Examples)
+
+Date: 2026-04-12 UTC
+
+Outcome:
+
+- added explicit track manifest:
+  - `kb_scenarios/tracks.json`
+- added generic track runner:
+  - `scripts/run_track.py`
+- updated docs for track usage:
+  - `README.md`
+  - `kb_scenarios/README.md`
+
+Track model:
+
+- `gate_ladder_frontier`: strict must-pass gating battery
+- `examples_ops_natural`: prolog-reasoning migrated natural flows
+- `examples_demo_portfolio`: public demo battery
+- `examples_all`: ops + demos combined sweep
+
+Smoke evidence:
+
+- ran `examples_demo_portfolio` on `qwen35-semparse:9b`
+- result: `2/4` passed (`50%`) vs target `75%` (`meets_target=false`)
+- summary:
+  - `tmp/runs/tracks/examples_demo_portfolio_latest.json`
+
+Interpretation:
+
+- this confirms demos/examples can now be folded into routine grunt-work without contaminating ladder gate semantics.
+- failing demos are now explicit tracked debt rather than ad-hoc notes.
+
 
 
 

@@ -497,7 +497,26 @@ Helpful controls:
 - `--dry-run` shows planned run/skip decisions without executing
 - default output is `tmp/runs/ladder`; use `--out-dir kb_runs/ladder` when you want runs to appear in published hub/rung docs
 
-### 3c) Differential Engine Validation (Vendored vs Baseline)
+### 3c) Run scenario tracks (gates vs examples vs demos)
+
+Use track manifests to fold demos/examples into repeatable grunt-work without mixing them into the strict ladder gate.
+
+```bash
+# list available tracks
+python scripts/run_track.py --list-tracks
+
+# run core gate battery (must-pass)
+python scripts/run_track.py --track gate_ladder_frontier --backend ollama --base-url http://127.0.0.1:11434 --model qwen35-semparse:9b --prompt-file modelfiles/semantic_parser_system_prompt.md --fail-on-under
+
+# run examples/demo battery (showcase + regression)
+python scripts/run_track.py --track examples_all --backend ollama --base-url http://127.0.0.1:11434 --model qwen35-semparse:9b --prompt-file modelfiles/semantic_parser_system_prompt.md
+```
+
+Track definitions live in:
+
+- `kb_scenarios/tracks.json`
+
+### 3d) Differential Engine Validation (Vendored vs Baseline)
 
 Use this to verify vendored engine behavior against the prior repo baseline engine.
 

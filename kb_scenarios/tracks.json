@@ -1,0 +1,54 @@
+{
+  "tracks": [
+    {
+      "id": "gate_ladder_frontier",
+      "description": "Core gating battery (must-pass) across ladder + CE + progress-memory frontier.",
+      "scenarios": [
+        "stage_01_facts_only",
+        "stage_02_rule_ingest",
+        "stage_03_transitive_chain",
+        "rung_230_fuzzy_ce_branch_exclusion_language",
+        "rung_340_ce_story_pronoun_transfer",
+        "rung_360_ce_story_branch_merge_noise",
+        "rung_400_progress_relevance_repair",
+        "rung_420_progress_focus_shift_transition"
+      ],
+      "required_pass_rate": 1.0
+    },
+    {
+      "id": "examples_ops_natural",
+      "description": "Operational natural-language examples migrated from prolog-reasoning (hospital, war-room, fantasy).",
+      "scenarios": [
+        "rung_241_ops_hospital_cpm_natural_flow",
+        "rung_251_ops_indie_warroom_natural_flow",
+        "rung_261_sim_fantasy_overlord_natural_flow"
+      ],
+      "required_pass_rate": 1.0
+    },
+    {
+      "id": "examples_demo_portfolio",
+      "description": "Public-facing demo showcase battery (meeting, policy, story, reimbursement).",
+      "scenarios": [
+        "demo_01_meeting_commitment_extractor",
+        "demo_02_policy_stress_test_machine",
+        "demo_03_story_world_interrogator",
+        "demo_04_reimbursement_violation_check"
+      ],
+      "required_pass_rate": 0.75
+    },
+    {
+      "id": "examples_all",
+      "description": "Combined examples sweep: ops examples + demo portfolio.",
+      "scenarios": [
+        "rung_241_ops_hospital_cpm_natural_flow",
+        "rung_251_ops_indie_warroom_natural_flow",
+        "rung_261_sim_fantasy_overlord_natural_flow",
+        "demo_01_meeting_commitment_extractor",
+        "demo_02_policy_stress_test_machine",
+        "demo_03_story_world_interrogator",
+        "demo_04_reimbursement_violation_check"
+      ],
+      "required_pass_rate": 0.8
+    }
+  ]
+}
