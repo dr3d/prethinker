@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Rung: rung_300_story_nested_corrections</title>
+  <style>
+    :root {
+      --bg: #f6f8fb; --panel: #ffffff; --ink: #142033; --muted: #5c6b82; --border: #d8e0ea; --header: #f9fbfe;
+      --ok-bg: #e7f6ea; --ok-ink: #1d5d2b; --fail-bg: #fdecee; --fail-ink: #7a1f2b;
+    }
+    html[data-theme="dark"] {
+      --bg: #131920; --panel: #1d2530; --ink: #e8eef6; --muted: #a9b4c6; --border: #334257; --header: #212b38;
+      --ok-bg: #1f3a28; --ok-ink: #b7efc5; --fail-bg: #47232c; --fail-ink: #f6c2cc;
+    }
+    body { margin: 0; background: var(--bg); color: var(--ink); font-family: "Segoe UI", Arial, sans-serif; }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 24px; }
+    .topbar { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+    h1 { margin: 0; font-size: 28px; }
+    .muted { color: var(--muted); font-size: 14px; }
+    .theme-btn { border: 1px solid var(--border); background: var(--panel); color: var(--ink); border-radius: 999px; padding: 8px 12px; font-size: 12px; cursor: pointer; }
+    .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; margin-top: 14px; overflow: hidden; }
+    .panel h2 { margin: 0; padding: 12px 14px; font-size: 16px; background: var(--header); border-bottom: 1px solid var(--border); }
+    .body { padding: 12px 14px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border-bottom: 1px solid var(--border); padding: 10px 8px; font-size: 14px; text-align: left; vertical-align: top; }
+    th { color: var(--muted); background: var(--header); }
+    tr:last-child td { border-bottom: none; }
+    code { background: var(--header); border: 1px solid var(--border); border-radius: 6px; padding: 2px 5px; font-family: Consolas, "Courier New", monospace; font-size: 12px; }
+    a { color: #0b66d0; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .summary { border: 1px solid var(--border); border-radius: 10px; padding: 10px; }
+    .summary.passed { background: var(--ok-bg); color: var(--ok-ink); }
+    .summary.failed { background: var(--fail-bg); color: var(--fail-ink); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div>
+        <h1>rung_300_story_nested_corrections</h1>
+        <p class="muted">Ontology: rung_300_story_nested_corrections</p>
+        <p class="muted">Scenario file: D:\_PROJECTS\prethinker\kb_scenarios\rung_300_story_nested_corrections.json</p>
+      </div>
+      <button id="theme-toggle" class="theme-btn" aria-label="Toggle theme">theme</button>
+    </div>
+    <p class="muted">Generated 2026-04-12 10:37:31 UTC | <a href="./index.html">Back to ladder index</a> | <a href="../index.html">Back to docs</a></p>
+
+    <section class="panel">
+      <h2>Latest Run Summary</h2>
+      <div class="body"><div class="summary passed"><p><strong>Status:</strong> passed</p><p><strong>Validation:</strong> 17/17 passed</p><p><strong>Parser failures:</strong> 0 | <strong>Apply failures:</strong> 0</p><p><strong>Artifacts:</strong> <a href="../../kb_runs/rung_300_story_nested_corrections_frontier_storypush_300_330_check_20260412.json">raw run json</a> | <a href="../reports/rung_300_story_nested_corrections_frontier_storypush_300_330_check_20260412.html">rendered run transcript</a></p></div></div>
+    </section>
+
+    <section class="panel">
+      <h2>Utterance Plan</h2>
+      <div class="body">
+        <table>
+          <thead><tr><th>#</th><th>Expected Route</th><th>Utterance</th></tr></thead>
+          <tbody>
+<tr><td>1</td><td><code>assert_fact</code></td><td>Read this like a repaired novel chapter, but keep the extracted state exact.</td></tr>
+<tr><td>2</td><td><code>assert_fact</code></td><td>assert rule ancestor(X, Y) :- parent(X, Y).</td></tr>
+<tr><td>3</td><td><code>assert_fact</code></td><td>assert rule ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).</td></tr>
+<tr><td>4</td><td><code>assert_fact</code></td><td>assert rule in_region(X, Z) :- at(X, Y), inside(Y, Z).</td></tr>
+<tr><td>5</td><td><code>assert_fact</code></td><td>Ledger draft, first pass: Liora is Eamon&#x27;s parent. Liora is Brin&#x27;s parent. Eamon is Cira&#x27;s parent. Cira is Dain&#x27;s parent.</td></tr>
+<tr><td>6</td><td><code>assert_fact</code></td><td>The staging notes are cleaner than the family notes: Dain is at old_quay. old_quay is inside frostmere. Set carries(cira, red_ledger).</td></tr>
+<tr><td>7</td><td><code>assert_fact</code></td><td>Time strip from the same bundle: Set before(bell_toll, archive_visit). Set before(archive_visit, moonlit_departure). Set before(bell_toll, moonlit_departure).</td></tr>
+<tr><td>8</td><td><code>query</code></td><td>Quick check, slightly premature maybe: is Liora already an ancestor of Dain and is he still at the old quay?</td></tr>
+<tr><td>9</td><td><code>retract</code></td><td>Archivist correction, first layer: retract parent(cira, dain).</td></tr>
+<tr><td>10</td><td><code>assert_fact</code></td><td>Set parent(brin, dain).</td></tr>
+<tr><td>11</td><td><code>retract</code></td><td>No, nested fix now: retract parent(eamon, cira).</td></tr>
+<tr><td>12</td><td><code>assert_fact</code></td><td>Set parent(sela, cira). Set parent(liora, sela).</td></tr>
+<tr><td>13</td><td><code>retract</code></td><td>Scene cleanup after the page reorder: retract at(dain, old_quay).</td></tr>
+<tr><td>14</td><td><code>assert_fact</code></td><td>Set at(dain, north_lantern). Set inside(north_lantern, frostmere).</td></tr>
+<tr><td>15</td><td><code>retract</code></td><td>Prop cleanup: retract carries(cira, red_ledger).</td></tr>
+<tr><td>16</td><td><code>assert_fact</code></td><td>Set carries(dain, red_ledger).</td></tr>
+<tr><td>17</td><td><code>retract</code></td><td>Timing note: retract before(archive_visit, moonlit_departure).</td></tr>
+<tr><td>18</td><td><code>assert_fact</code></td><td>Set before(archive_visit, flood_delay). Set before(flood_delay, moonlit_departure).</td></tr>
+<tr><td>19</td><td><code>assert_fact</code></td><td>Final continuity query: query ancestor(liora, dain). Query carries(dain, red_ledger). Query at(dain, north_lantern).</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Validation Contract</h2>
+      <div class="body">
+        <table>
+          <thead><tr><th>ID</th><th>Query</th><th>Expect</th><th>Min Rows</th><th>Max Rows</th></tr></thead>
+          <tbody>
+<tr><td>liora_eamon_parent_kept</td><td><code>parent(liora, eamon).</code></td><td>success</td><td>1</td><td></td></tr>
+<tr><td>liora_brin_parent_kept</td><td><code>parent(liora, brin).</code></td><td>success</td><td>1</td><td></td></tr>
+<tr><td>liora_sela_parent_added</td><td><code>parent(liora, sela).</code></td><td>success</td><td>1</td><td></td></tr>
+<tr><td>sela_cira_parent_added</td><td><code>parent(sela, cira).</code></td><td>success</td><td>1</td><td></td></tr>
+<tr><td>cira_dain_parent_removed</td><td><code>parent(cira, dain).</code></td><td>no_results</td><td></td><td>0</td></tr>
+<tr><td>brin_dain_parent_added</td><td><code>parent(brin, dain).</code></td><td>success</td><td>1</td><td></td></tr>
+<tr><td>eamon_cira_parent_removed</td><td><code>parent(eamon, cira).</code></td><td>no_results</td><td></td><td>0</td></tr>
+<tr><td>liora_dain_ancestor_kept</td><td><code>ancestor(liora, dain).</code></td><td>success</td><td>1</td><td></td></tr>
+<tr><td>eamon_not_ancestor_of_cira</td><td><code>ancestor(eamon, cira).</code></td><td>no_results</td><td></td><td>0</td></tr>
+<tr><td>dain_at_north_lantern</td><td><code>at(dain, north_lantern).</code></td><td>success</td><td>1</td><td></td></tr>
+<tr><td>dain_not_at_old_quay</td><td><code>at(dain, old_quay).</code></td><td>no_results</td><td></td><td>0</td></tr>
+<tr><td>dain_in_frostmere</td><td><code>in_region(dain, frostmere).</code></td><td>success</td><td>1</td><td></td></tr>
+<tr><td>dain_has_red_ledger</td><td><code>carries(dain, red_ledger).</code></td><td>success</td><td>1</td><td></td></tr>
+<tr><td>cira_no_red_ledger</td><td><code>carries(cira, red_ledger).</code></td><td>no_results</td><td></td><td>0</td></tr>
+<tr><td>archive_visit_before_flood_delay</td><td><code>before(archive_visit, flood_delay).</code></td><td>success</td><td>1</td><td></td></tr>
+<tr><td>bell_toll_before_moonlit_departure</td><td><code>before(bell_toll, moonlit_departure).</code></td><td>success</td><td>1</td><td></td></tr>
+<tr><td>moonlit_departure_not_before_archive_visit</td><td><code>before(moonlit_departure, archive_visit).</code></td><td>no_results</td><td></td><td>0</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+  <script>
+    (() => {
+      const root = document.documentElement;
+      const toggle = document.getElementById("theme-toggle");
+      const key = "rung_theme_pref";
+      const stored = window.localStorage.getItem(key);
+      if (stored === "dark" || stored === "light") {
+        root.setAttribute("data-theme", stored);
+      } else {
+        const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+        root.setAttribute("data-theme", prefersDark ? "dark" : "light");
+      }
+      const sync = () => {
+        const current = root.getAttribute("data-theme") === "dark" ? "dark" : "light";
+        toggle.textContent = `theme: ${current}`;
+      };
+      sync();
+      toggle.addEventListener("click", () => {
+        const current = root.getAttribute("data-theme") === "dark" ? "dark" : "light";
+        const next = current === "dark" ? "light" : "dark";
+        root.setAttribute("data-theme", next);
+        window.localStorage.setItem(key, next);
+        sync();
+      });
+    })();
+  </script>
+</body>
+</html>

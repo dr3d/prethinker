@@ -595,3 +595,236 @@ Auto-populated by `scripts/run_ladder.py` via `--learn-log`.
 - Actions: executed=1
 - Learned:
   - `rung_230_fuzzy_ce_branch_exclusion_language`: passed 6/6; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+## 2026-04-12T04:52:03+00:00
+- Run: `frontier_refresh_20260412` | range `rung_230_fuzzy_ce_branch_exclusion_language -> rung_261_sim_fantasy_overlord_natural_flow` | selected `7` | executed `1` | skipped `0` | failed `1`
+- Runtime: `ollama` / `qwen35-semparse:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=1
+- Learned:
+  - `rung_230_fuzzy_ce_branch_exclusion_language`: subprocess failed (return code 1).
+## 2026-04-12T04:56:21+00:00
+- Run: `frontier_refresh_full_20260412` | range `rung_230_fuzzy_ce_branch_exclusion_language -> rung_261_sim_fantasy_overlord_natural_flow` | selected `7` | executed `7` | skipped `0` | failed `5`
+- Runtime: `ollama` / `qwen35-semparse:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=7
+- Learned:
+  - `rung_230_fuzzy_ce_branch_exclusion_language`: subprocess failed (return code 1).
+  - `rung_240_ops_hospital_vendor_delay_core`: subprocess failed (return code 1).
+  - `rung_241_ops_hospital_cpm_natural_flow`: subprocess failed (return code 1).
+  - `rung_250_ops_indie_launch_uncertainty_routing`: subprocess failed (return code 1).
+  - `rung_251_ops_indie_warroom_natural_flow`: passed 6/6; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_260_sim_fantasy_state_repair`: subprocess failed (return code 1).
+  - `rung_261_sim_fantasy_overlord_natural_flow`: passed 5/5; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+## 2026-04-12T04:57:50+00:00
+- Run: `frontier_storypush_20260412` | range `rung_270_story_lineage_fragmented_ingest -> rung_290_story_multi_branch_pronoun_pressure` | selected `3` | executed `3` | skipped `0` | failed `3`
+- Runtime: `ollama` / `qwen35-semparse:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=3
+- Learned:
+  - `rung_270_story_lineage_fragmented_ingest`: subprocess failed (return code 1).
+  - `rung_280_story_revision_temporal_shift`: subprocess failed (return code 1).
+  - `rung_290_story_multi_branch_pronoun_pressure`: subprocess failed (return code 1).
+## 2026-04-12T05:15:34+00:00
+- Run: `frontier_storypush_refined_20260412` | range `rung_270_story_lineage_fragmented_ingest -> rung_290_story_multi_branch_pronoun_pressure` | selected `3` | executed `3` | skipped `0` | failed `3`
+- Runtime: `ollama` / `qwen35-semparse:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=3
+- Learned:
+  - `rung_270_story_lineage_fragmented_ingest`: subprocess failed (return code 1).
+  - `rung_280_story_revision_temporal_shift`: timed out after 900s.
+  - `rung_290_story_multi_branch_pronoun_pressure`: subprocess failed (return code 1).
+## 2026-04-12T05:20:46+00:00
+- Run: `frontier_storypush_fixA_20260412` | range `rung_270_story_lineage_fragmented_ingest -> rung_270_story_lineage_fragmented_ingest` | selected `1` | executed `1` | skipped `0` | failed `1`
+- Runtime: `ollama` / `qwen35-semparse:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=1
+- Learned:
+  - `rung_270_story_lineage_fragmented_ingest`: subprocess failed (return code 1).
+## 2026-04-12T05:21:47+00:00
+- Run: `frontier_storypush_fixB_20260412` | range `rung_270_story_lineage_fragmented_ingest -> rung_270_story_lineage_fragmented_ingest` | selected `1` | executed `1` | skipped `0` | failed `0`
+- Runtime: `ollama` / `qwen35-semparse:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=1
+- Learned:
+  - `rung_270_story_lineage_fragmented_ingest`: passed 11/11; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+## 2026-04-12T05:22:28+00:00
+- Run: `frontier_storypush_fixB_20260412` | range `rung_290_story_multi_branch_pronoun_pressure -> rung_290_story_multi_branch_pronoun_pressure` | selected `1` | executed `1` | skipped `0` | failed `1`
+- Runtime: `ollama` / `qwen35-semparse:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=1
+- Learned:
+  - `rung_290_story_multi_branch_pronoun_pressure`: subprocess failed (return code 1).
+## 2026-04-12T05:23:24+00:00
+- Run: `frontier_storypush_fixC_20260412` | range `rung_290_story_multi_branch_pronoun_pressure -> rung_290_story_multi_branch_pronoun_pressure` | selected `1` | executed `1` | skipped `0` | failed `1`
+- Runtime: `ollama` / `qwen35-semparse:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=1
+- Learned:
+  - `rung_290_story_multi_branch_pronoun_pressure`: subprocess failed (return code 1).
+## 2026-04-12T05:24:18+00:00
+- Run: `frontier_storypush_fixD_20260412` | range `rung_290_story_multi_branch_pronoun_pressure -> rung_290_story_multi_branch_pronoun_pressure` | selected `1` | executed `1` | skipped `0` | failed `0`
+- Runtime: `ollama` / `qwen35-semparse:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=1
+- Learned:
+  - `rung_290_story_multi_branch_pronoun_pressure`: passed 12/12; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+## 2026-04-12T05:25:05+00:00
+- Run: `frontier_storypush_fixB_20260412` | range `rung_280_story_revision_temporal_shift -> rung_280_story_revision_temporal_shift` | selected `1` | executed `1` | skipped `0` | failed `0`
+- Runtime: `ollama` / `qwen35-semparse:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=1
+- Learned:
+  - `rung_280_story_revision_temporal_shift`: passed 12/12; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+## 2026-04-12T05:27:20+00:00
+- Run: `frontier_storypush_fixD_pack_20260412` | range `rung_270_story_lineage_fragmented_ingest -> rung_290_story_multi_branch_pronoun_pressure` | selected `3` | executed `3` | skipped `0` | failed `0`
+- Runtime: `ollama` / `qwen35-semparse:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=3
+- Learned:
+  - `rung_270_story_lineage_fragmented_ingest`: passed 11/11; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_280_story_revision_temporal_shift`: passed 12/12; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_290_story_multi_branch_pronoun_pressure`: passed 12/12; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+## 2026-04-12T05:28:53+00:00
+- Run: `frontier_storypush_new300_320_baseline_20260412` | range `rung_300_story_nested_corrections -> rung_320_story_temporal_exception_rebinding` | selected `3` | executed `3` | skipped `0` | failed `3`
+- Runtime: `ollama` / `qwen35-semparse:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=3
+- Learned:
+  - `rung_300_story_nested_corrections`: subprocess failed (return code 1).
+  - `rung_310_story_cross_clause_pronoun_weave`: subprocess failed (return code 1).
+  - `rung_320_story_temporal_exception_rebinding`: subprocess failed (return code 1).
+## 2026-04-12T05:51:08+00:00
+- Run: `frontier_storypush_new300_320_refined1_20260412` | range `rung_300_story_nested_corrections -> rung_320_story_temporal_exception_rebinding` | selected `3` | executed `3` | skipped `0` | failed `2`
+- Runtime: `ollama` / `qwen35-semparse:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=3
+- Learned:
+  - `rung_300_story_nested_corrections`: timed out after 600s.
+  - `rung_310_story_cross_clause_pronoun_weave`: passed 15/15; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_320_story_temporal_exception_rebinding`: timed out after 600s.
+## 2026-04-12T06:01:03+00:00
+- Run: `frontier_storypush_new300_refined1_20260412` | range `rung_300_story_nested_corrections -> rung_300_story_nested_corrections` | selected `1` | executed `1` | skipped `0` | failed `1`
+- Runtime: `ollama` / `qwen35-semparse:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=1
+- Learned:
+  - `rung_300_story_nested_corrections`: timed out after 600s.
+## 2026-04-12T06:02:28+00:00
+- Run: `frontier_storypush_new300_refined2_20260412` | range `rung_300_story_nested_corrections -> rung_300_story_nested_corrections` | selected `1` | executed `1` | skipped `0` | failed `1`
+- Runtime: `ollama` / `qwen35-semparse:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=1
+- Learned:
+  - `rung_300_story_nested_corrections`: subprocess failed (return code 1).
+## 2026-04-12T06:03:34+00:00
+- Run: `frontier_storypush_new300_refined3_20260412` | range `rung_300_story_nested_corrections -> rung_300_story_nested_corrections` | selected `1` | executed `1` | skipped `0` | failed `0`
+- Runtime: `ollama` / `qwen35-semparse:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=1
+- Learned:
+  - `rung_300_story_nested_corrections`: passed 17/17; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+## 2026-04-12T06:04:14+00:00
+- Run: `frontier_storypush_new310_refined2_20260412` | range `rung_310_story_cross_clause_pronoun_weave -> rung_310_story_cross_clause_pronoun_weave` | selected `1` | executed `1` | skipped `0` | failed `0`
+- Runtime: `ollama` / `qwen35-semparse:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=1
+- Learned:
+  - `rung_310_story_cross_clause_pronoun_weave`: passed 15/15; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+## 2026-04-12T06:05:04+00:00
+- Run: `frontier_storypush_new320_refined2_20260412` | range `rung_320_story_temporal_exception_rebinding -> rung_320_story_temporal_exception_rebinding` | selected `1` | executed `1` | skipped `0` | failed `1`
+- Runtime: `ollama` / `qwen35-semparse:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=1
+- Learned:
+  - `rung_320_story_temporal_exception_rebinding`: subprocess failed (return code 1).
+## 2026-04-12T06:06:16+00:00
+- Run: `frontier_storypush_new320_refined3_20260412` | range `rung_320_story_temporal_exception_rebinding -> rung_320_story_temporal_exception_rebinding` | selected `1` | executed `1` | skipped `0` | failed `0`
+- Runtime: `ollama` / `qwen35-semparse:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=1
+- Learned:
+  - `rung_320_story_temporal_exception_rebinding`: passed 17/17; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+## 2026-04-12T06:08:31+00:00
+- Run: `frontier_storypush_new300_320_refined_pack_20260412` | range `rung_300_story_nested_corrections -> rung_320_story_temporal_exception_rebinding` | selected `3` | executed `3` | skipped `0` | failed `0`
+- Runtime: `ollama` / `qwen35-semparse:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=3
+- Learned:
+  - `rung_300_story_nested_corrections`: passed 17/17; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_310_story_cross_clause_pronoun_weave`: passed 15/15; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_320_story_temporal_exception_rebinding`: passed 17/17; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+## 2026-04-12T06:12:40+00:00
+- Run: `frontier_storypush_270_320_check_20260412` | range `rung_270_story_lineage_fragmented_ingest -> rung_320_story_temporal_exception_rebinding` | selected `6` | executed `6` | skipped `0` | failed `0`
+- Runtime: `ollama` / `qwen35-semparse:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=6
+- Learned:
+  - `rung_270_story_lineage_fragmented_ingest`: passed 11/11; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_280_story_revision_temporal_shift`: passed 12/12; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_290_story_multi_branch_pronoun_pressure`: passed 12/12; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_300_story_nested_corrections`: passed 17/17; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_310_story_cross_clause_pronoun_weave`: passed 15/15; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_320_story_temporal_exception_rebinding`: passed 17/17; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+## 2026-04-12T06:14:01+00:00
+- Run: `frontier_storypush_new330_baseline_20260412` | range `rung_330_story_booklet_cross_scene_rebind -> rung_330_story_booklet_cross_scene_rebind` | selected `1` | executed `1` | skipped `0` | failed `1`
+- Runtime: `ollama` / `qwen35-semparse:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=1
+- Learned:
+  - `rung_330_story_booklet_cross_scene_rebind`: subprocess failed (return code 1).
+## 2026-04-12T06:15:05+00:00
+- Run: `frontier_storypush_new330_refined2_20260412` | range `rung_330_story_booklet_cross_scene_rebind -> rung_330_story_booklet_cross_scene_rebind` | selected `1` | executed `1` | skipped `0` | failed `0`
+- Runtime: `ollama` / `qwen35-semparse:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=1
+- Learned:
+  - `rung_330_story_booklet_cross_scene_rebind`: passed 15/15; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+## 2026-04-12T06:18:00+00:00
+- Run: `frontier_storypush_300_330_check_20260412` | range `rung_300_story_nested_corrections -> rung_330_story_booklet_cross_scene_rebind` | selected `4` | executed `4` | skipped `0` | failed `0`
+- Runtime: `ollama` / `qwen35-semparse:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=4
+- Learned:
+  - `rung_300_story_nested_corrections`: passed 17/17; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_310_story_cross_clause_pronoun_weave`: passed 15/15; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_320_story_temporal_exception_rebinding`: passed 17/17; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_330_story_booklet_cross_scene_rebind`: passed 15/15; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+## 2026-04-12T10:05:40+00:00
+- Run: `frontier_ce_340_350_baseline_20260412` | range `rung_340_ce_story_pronoun_transfer -> rung_350_ce_story_multi_round_revision` | selected `2` | executed `2` | skipped `0` | failed `2`
+- Runtime: `ollama` / `qwen35-semparse:9b` / `core` | ctx `8192` | CE `0.85` | prompt `1e43c641b01b`
+- Actions: executed=2
+- Learned:
+  - `rung_340_ce_story_pronoun_transfer`: subprocess failed (return code 1).
+  - `rung_350_ce_story_multi_round_revision`: subprocess failed (return code 1).
+## 2026-04-12T10:07:17+00:00
+- Run: `frontier_ce_340_350_refined1_20260412` | range `rung_340_ce_story_pronoun_transfer -> rung_350_ce_story_multi_round_revision` | selected `2` | executed `2` | skipped `0` | failed `2`
+- Runtime: `ollama` / `qwen35-semparse:9b` / `core` | ctx `8192` | CE `0.85` | prompt `1e43c641b01b`
+- Actions: executed=2
+- Learned:
+  - `rung_340_ce_story_pronoun_transfer`: subprocess failed (return code 1).
+  - `rung_350_ce_story_multi_round_revision`: subprocess failed (return code 1).
+## 2026-04-12T10:09:30+00:00
+- Run: `frontier_ce_340_single_refined2_20260412` | range `rung_340_ce_story_pronoun_transfer -> rung_340_ce_story_pronoun_transfer` | selected `1` | executed `1` | skipped `0` | failed `1`
+- Runtime: `ollama` / `qwen35-semparse:9b` / `core` | ctx `8192` | CE `0.85` | prompt `1e43c641b01b`
+- Actions: executed=1
+- Learned:
+  - `rung_340_ce_story_pronoun_transfer`: subprocess failed (return code 1).
+## 2026-04-12T10:12:07+00:00
+- Run: `frontier_ce_340_350_refined2_20260412` | range `rung_340_ce_story_pronoun_transfer -> rung_350_ce_story_multi_round_revision` | selected `2` | executed `2` | skipped `0` | failed `0`
+- Runtime: `ollama` / `qwen35-semparse:9b` / `core` | ctx `8192` | CE `0.85` | prompt `1e43c641b01b`
+- Actions: executed=2
+- Learned:
+  - `rung_340_ce_story_pronoun_transfer`: passed 11/11; parse_fail=0, apply_fail=0, clar_rounds=3; prompt=sp-1e43c641b01b.
+  - `rung_350_ce_story_multi_round_revision`: passed 11/11; parse_fail=0, apply_fail=0, clar_rounds=2; prompt=sp-1e43c641b01b.
+## 2026-04-12T10:13:23+00:00
+- Run: `frontier_ce_360_baseline_20260412` | range `rung_360_ce_story_branch_merge_noise -> rung_360_ce_story_branch_merge_noise` | selected `1` | executed `1` | skipped `0` | failed `0`
+- Runtime: `ollama` / `qwen35-semparse:9b` / `core` | ctx `8192` | CE `0.9` | prompt `1e43c641b01b`
+- Actions: executed=1
+- Learned:
+  - `rung_360_ce_story_branch_merge_noise`: passed 12/12; parse_fail=0, apply_fail=0, clar_rounds=1; prompt=sp-1e43c641b01b.
+## 2026-04-12T10:15:55+00:00
+- Run: `frontier_ce_340_360_check_20260412` | range `rung_340_ce_story_pronoun_transfer -> rung_360_ce_story_branch_merge_noise` | selected `3` | executed `3` | skipped `0` | failed `1`
+- Runtime: `ollama` / `qwen35-semparse:9b` / `core` | ctx `8192` | CE `0.9` | prompt `1e43c641b01b`
+- Actions: executed=3
+- Learned:
+  - `rung_340_ce_story_pronoun_transfer`: passed 11/11; parse_fail=0, apply_fail=0, clar_rounds=3; prompt=sp-1e43c641b01b.
+  - `rung_350_ce_story_multi_round_revision`: subprocess failed (return code 1).
+  - `rung_360_ce_story_branch_merge_noise`: passed 12/12; parse_fail=0, apply_fail=0, clar_rounds=1; prompt=sp-1e43c641b01b.
+## 2026-04-12T10:19:00+00:00
+- Run: `frontier_ce_340_360_refined2_check_20260412` | range `rung_340_ce_story_pronoun_transfer -> rung_360_ce_story_branch_merge_noise` | selected `3` | executed `3` | skipped `0` | failed `1`
+- Runtime: `ollama` / `qwen35-semparse:9b` / `core` | ctx `8192` | CE `0.9` | prompt `1e43c641b01b`
+- Actions: executed=3
+- Learned:
+  - `rung_340_ce_story_pronoun_transfer`: passed 11/11; parse_fail=0, apply_fail=0, clar_rounds=3; prompt=sp-1e43c641b01b.
+  - `rung_350_ce_story_multi_round_revision`: subprocess failed (return code 1).
+  - `rung_360_ce_story_branch_merge_noise`: passed 12/12; parse_fail=0, apply_fail=0, clar_rounds=1; prompt=sp-1e43c641b01b.
+## 2026-04-12T10:20:10+00:00
+- Run: `frontier_ce_350_refined3_single_20260412` | range `rung_350_ce_story_multi_round_revision -> rung_350_ce_story_multi_round_revision` | selected `1` | executed `1` | skipped `0` | failed `0`
+- Runtime: `ollama` / `qwen35-semparse:9b` / `core` | ctx `8192` | CE `0.9` | prompt `1e43c641b01b`
+- Actions: executed=1
+- Learned:
+  - `rung_350_ce_story_multi_round_revision`: passed 11/11; parse_fail=0, apply_fail=0, clar_rounds=1; prompt=sp-1e43c641b01b.
+## 2026-04-12T10:22:39+00:00
+- Run: `frontier_ce_340_360_refined3_check_20260412` | range `rung_340_ce_story_pronoun_transfer -> rung_360_ce_story_branch_merge_noise` | selected `3` | executed `3` | skipped `0` | failed `0`
+- Runtime: `ollama` / `qwen35-semparse:9b` / `core` | ctx `8192` | CE `0.9` | prompt `1e43c641b01b`
+- Actions: executed=3
+- Learned:
+  - `rung_340_ce_story_pronoun_transfer`: passed 11/11; parse_fail=0, apply_fail=0, clar_rounds=3; prompt=sp-1e43c641b01b.
+  - `rung_350_ce_story_multi_round_revision`: passed 11/11; parse_fail=0, apply_fail=0, clar_rounds=1; prompt=sp-1e43c641b01b.
+  - `rung_360_ce_story_branch_merge_noise`: passed 12/12; parse_fail=0, apply_fail=0, clar_rounds=1; prompt=sp-1e43c641b01b.

@@ -205,6 +205,34 @@
         "parent/2"
       ],
       "clause_count": 6
+    },
+    "rung_251_ops_indie_warroom_natural_flow": {
+      "ontology_name": "rung_251_ops_indie_warroom_natural_flow",
+      "kb_dir": "D:\\_PROJECTS\\prethinker\\kb_store\\rung_251_ops_indie_warroom_natural_flow",
+      "updated_at_utc": "2026-04-12T03:15:51+00:00",
+      "predicate_signatures": [
+        "completed/1",
+        "depends_on/2",
+        "milestone/1",
+        "set_task/1",
+        "set_task/2",
+        "supplier_status/2",
+        "task/1"
+      ],
+      "clause_count": 24
+    },
+    "rung_261_sim_fantasy_overlord_natural_flow": {
+      "ontology_name": "rung_261_sim_fantasy_overlord_natural_flow",
+      "kb_dir": "D:\\_PROJECTS\\prethinker\\kb_store\\rung_261_sim_fantasy_overlord_natural_flow",
+      "updated_at_utc": "2026-04-12T03:17:54+00:00",
+      "predicate_signatures": [
+        "at/2",
+        "has_item/2",
+        "soaked/2",
+        "time_of_day/1",
+        "weather/1"
+      ],
+      "clause_count": 7
     }
   }
 }

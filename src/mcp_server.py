@@ -377,6 +377,11 @@ class PrologMCPServer:
             "segments": segments,
             "writes_applied": 0,
             "queries_executed": 0,
+            "query_attempts": 0,
+            "query_no_results": 0,
+            "no_result_streak": 0,
+            "last_query": "",
+            "last_query_status": "",
         }
         return {
             "status": "success",
@@ -897,6 +902,9 @@ class PrologMCPServer:
             "clarification_question": str(self._pending_prethink.get("clarification_question", "")),
             "writes_applied": int(self._pending_prethink.get("writes_applied", 0)),
             "queries_executed": int(self._pending_prethink.get("queries_executed", 0)),
+            "query_attempts": int(self._pending_prethink.get("query_attempts", 0)),
+            "query_no_results": int(self._pending_prethink.get("query_no_results", 0)),
+            "no_result_streak": int(self._pending_prethink.get("no_result_streak", 0)),
         }
 
     def _tool_requires_prethink(self, tool: str) -> bool:
@@ -907,10 +915,16 @@ class PrologMCPServer:
         return False
 
     def _check_prethink_gate(self, tool: str, arguments: dict[str, Any]) -> dict[str, Any] | None:
-        if not self._tool_requires_prethink(tool):
+        pending = self._pending_prethink
+        provided_id = str(arguments.get("prethink_id", "")).strip()
+        gate_required = self._tool_requires_prethink(tool)
+        # Even when query pre-think is not globally required, honor gate logic if
+        # caller provides prethink_id for an active turn (LM Studio manual flow).
+        if tool == "query_rows" and provided_id and pending is not None:
+            gate_required = True
+        if not gate_required:
             return None
 
-        pending = self._pending_prethink
         if pending is None:
             return {
                 "status": "blocked",
@@ -929,7 +943,6 @@ class PrologMCPServer:
                 "state": self._serialize_state(),
             }
 
-        provided_id = str(arguments.get("prethink_id", "")).strip()
         expected_id = str(pending.get("prethink_id", "")).strip()
         if not provided_id or provided_id != expected_id:
             return {
@@ -975,6 +988,41 @@ class PrologMCPServer:
                 "state": self._serialize_state(),
             }
 
+        if tool == "query_rows":
+            no_result_streak = int(pending.get("no_result_streak", 0))
+            query_attempts = int(pending.get("query_attempts", 0))
+            writes_applied = int(pending.get("writes_applied", 0))
+            if no_result_streak >= 2 and writes_applied == 0:
+                return {
+                    "status": "blocked",
+                    "result_type": "query_loop_guard",
+                    "message": (
+                        "Repeated no-result queries detected for this pre-think turn. "
+                        "Stop query retries and issue a fresh pre_think with a concrete user utterance."
+                    ),
+                    "required": {
+                        "action": "call_pre_think_with_new_user_utterance",
+                        "reason": "repeated_no_result_streak",
+                    },
+                    "pending_prethink": self._pending_prethink_summary(),
+                    "state": self._serialize_state(),
+                }
+            if query_attempts >= 6 and writes_applied == 0:
+                return {
+                    "status": "blocked",
+                    "result_type": "query_loop_guard",
+                    "message": (
+                        "Query attempt limit reached with no committed context updates for this turn. "
+                        "Start a new pre_think turn."
+                    ),
+                    "required": {
+                        "action": "call_pre_think_with_new_user_utterance",
+                        "reason": "query_attempt_limit",
+                    },
+                    "pending_prethink": self._pending_prethink_summary(),
+                    "state": self._serialize_state(),
+                }
+
         return None
 
     def _consume_prethink_after_call(self, tool: str, result: dict[str, Any]) -> None:
@@ -985,12 +1033,29 @@ class PrologMCPServer:
         pending = self._pending_prethink
         if pending is None:
             return
-        if str(result.get("status", "")).strip() != "success":
-            return
+        status = str(result.get("status", "")).strip()
         if tool in {"assert_fact", "assert_rule", "retract_fact"}:
+            if status != "success":
+                return
             pending["writes_applied"] = int(pending.get("writes_applied", 0)) + 1
         if tool == "query_rows":
-            pending["queries_executed"] = int(pending.get("queries_executed", 0)) + 1
+            pending["query_attempts"] = int(pending.get("query_attempts", 0)) + 1
+            query_text = str(result.get("prolog_query", "")).strip().lower()
+            last_query = str(pending.get("last_query", "")).strip().lower()
+            last_status = str(pending.get("last_query_status", "")).strip()
+            if status == "success":
+                pending["queries_executed"] = int(pending.get("queries_executed", 0)) + 1
+                pending["no_result_streak"] = 0
+            elif status == "no_results":
+                pending["query_no_results"] = int(pending.get("query_no_results", 0)) + 1
+                if query_text and query_text == last_query and last_status == "no_results":
+                    pending["no_result_streak"] = int(pending.get("no_result_streak", 0)) + 1
+                else:
+                    pending["no_result_streak"] = 1
+            else:
+                pending["no_result_streak"] = 0
+            pending["last_query"] = query_text
+            pending["last_query_status"] = status
         return
 
     def _serialize_state(self) -> dict[str, Any]:

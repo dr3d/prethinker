@@ -1,6 +1,6 @@
 ﻿# SESSIONS (Assembly Log and Migration Guide)
 
-Last updated: 2026-04-09
+Last updated: 2026-04-12
 
 ## Purpose
 
@@ -504,6 +504,62 @@ Notes:
 
 - README now includes a top-level “Story Roundtrip Demo” callout with the user-requested wording:
   - “Watch the pre-thinker consume a story, then recite from captured facts and logical memory.”
+
+## Session 17: Story/CE Frontier Expansion To rung_360
+
+Date: 2026-04-12 UTC
+
+Outcome:
+
+- promoted new ladder frontier evidence from autonomous cycles into canonical run history:
+  - `rung_270_story_lineage_fragmented_ingest`
+  - `rung_280_story_revision_temporal_shift`
+  - `rung_290_story_multi_branch_pronoun_pressure`
+  - `rung_300_story_nested_corrections`
+  - `rung_310_story_cross_clause_pronoun_weave`
+  - `rung_320_story_temporal_exception_rebinding`
+  - `rung_330_story_booklet_cross_scene_rebind`
+  - `rung_340_ce_story_pronoun_transfer`
+  - `rung_350_ce_story_multi_round_revision`
+  - `rung_360_ce_story_branch_merge_noise`
+- regenerated ladder pages and index:
+  - `docs/rungs/index.html`
+  - `docs/rungs/*.html` (74 scenario pages)
+- refreshed run reports for newly promoted scenarios:
+  - `docs/reports/*rung_270*` through `*rung_360*`
+
+Key result:
+
+- frontier CE/story trio passed in refined check:
+  - `rung_340`: `11/11`
+  - `rung_350`: `11/11`
+  - `rung_360`: `12/12`
+
+## Session 18: Docs Publish Retention (Curated + Historical Split)
+
+Date: 2026-04-12 UTC
+
+Outcome:
+
+- added curated publish utility:
+  - `scripts/refresh_published_runs.py`
+- established publish split:
+  - full historical corpus stays in `kb_runs/`
+  - curated docs source now generated into `kb_runs_published/`
+  - docs JSON corpus (`docs/data/runs/`) rebuilt from curated set only
+  - historical stats (`docs/data/historical_metrics.json`) computed from full corpus
+- rebuilt docs surfaces with updated curation:
+  - `docs/run-reports-hub.html`
+  - `docs/progress_cards.html`
+  - `docs/data/runs_manifest.json`
+  - `docs/data/runs_curated.json`
+  - `docs/data/scenario_progress.json`
+  - `docs/data/historical_metrics.json`
+
+Notes:
+
+- this prevents docs/report sprawl while preserving full evidence and trendability.
+- docs landing content and README were updated to explain the retention model.
 
 
 

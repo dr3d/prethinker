@@ -232,6 +232,31 @@ class LocalMcpServerTests(unittest.TestCase):
         self.assertEqual(row.get("JanPlace"), "morro_bay_california")
         self.assertEqual(row.get("WillPlace"), "san_francisco")
 
+    def test_query_loop_guard_blocks_repeated_no_result_churn(self) -> None:
+        packet = self.server.tools_call("pre_think", {"utterance": "Who is my?"})
+        self.assertEqual(packet.get("status"), "success")
+        prethink_id = packet.get("packet", {}).get("prethink_id")
+        self.assertTrue(prethink_id)
+
+        first = self.server.tools_call(
+            "query_rows",
+            {"query": "user_intent(X).", "prethink_id": prethink_id},
+        )
+        self.assertEqual(first.get("status"), "no_results")
+
+        second = self.server.tools_call(
+            "query_rows",
+            {"query": "user_intent(X).", "prethink_id": prethink_id},
+        )
+        self.assertEqual(second.get("status"), "no_results")
+
+        blocked = self.server.tools_call(
+            "query_rows",
+            {"query": "user_intent(X).", "prethink_id": prethink_id},
+        )
+        self.assertEqual(blocked.get("status"), "blocked")
+        self.assertEqual(blocked.get("result_type"), "query_loop_guard")
+
     def test_unknown_tool_returns_not_found(self) -> None:
         result = self.server.tools_call("not_a_tool", {})
         self.assertEqual(result.get("status"), "not_found")

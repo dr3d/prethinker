@@ -1,0 +1,21 @@
+{
+  "ontology_name": "rung_261_sim_fantasy_overlord_natural_flow",
+  "generated_at_utc": "2026-04-12T03:17:54+00:00",
+  "clause_count": 7,
+  "predicate_signatures": [
+    "at/2",
+    "has_item/2",
+    "soaked/2",
+    "time_of_day/1",
+    "weather/1"
+  ],
+  "fact_predicates": [
+    "at/2",
+    "has_item/2",
+    "soaked/2",
+    "time_of_day/1",
+    "weather/1"
+  ],
+  "rule_head_predicates": [],
+  "rule_body_predicates": []
+}

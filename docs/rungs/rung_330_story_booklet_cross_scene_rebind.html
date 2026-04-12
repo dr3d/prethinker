@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Rung: rung_330_story_booklet_cross_scene_rebind</title>
+  <style>
+    :root {
+      --bg: #f6f8fb; --panel: #ffffff; --ink: #142033; --muted: #5c6b82; --border: #d8e0ea; --header: #f9fbfe;
+      --ok-bg: #e7f6ea; --ok-ink: #1d5d2b; --fail-bg: #fdecee; --fail-ink: #7a1f2b;
+    }
+    html[data-theme="dark"] {
+      --bg: #131920; --panel: #1d2530; --ink: #e8eef6; --muted: #a9b4c6; --border: #334257; --header: #212b38;
+      --ok-bg: #1f3a28; --ok-ink: #b7efc5; --fail-bg: #47232c; --fail-ink: #f6c2cc;
+    }
+    body { margin: 0; background: var(--bg); color: var(--ink); font-family: "Segoe UI", Arial, sans-serif; }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 24px; }
+    .topbar { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+    h1 { margin: 0; font-size: 28px; }
+    .muted { color: var(--muted); font-size: 14px; }
+    .theme-btn { border: 1px solid var(--border); background: var(--panel); color: var(--ink); border-radius: 999px; padding: 8px 12px; font-size: 12px; cursor: pointer; }
+    .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; margin-top: 14px; overflow: hidden; }
+    .panel h2 { margin: 0; padding: 12px 14px; font-size: 16px; background: var(--header); border-bottom: 1px solid var(--border); }
+    .body { padding: 12px 14px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border-bottom: 1px solid var(--border); padding: 10px 8px; font-size: 14px; text-align: left; vertical-align: top; }
+    th { color: var(--muted); background: var(--header); }
+    tr:last-child td { border-bottom: none; }
+    code { background: var(--header); border: 1px solid var(--border); border-radius: 6px; padding: 2px 5px; font-family: Consolas, "Courier New", monospace; font-size: 12px; }
+    a { color: #0b66d0; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .summary { border: 1px solid var(--border); border-radius: 10px; padding: 10px; }
+    .summary.passed { background: var(--ok-bg); color: var(--ok-ink); }
+    .summary.failed { background: var(--fail-bg); color: var(--fail-ink); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div>
+        <h1>rung_330_story_booklet_cross_scene_rebind</h1>
+        <p class="muted">Ontology: rung_330_story_booklet_cross_scene_rebind</p>
+        <p class="muted">Scenario file: D:\_PROJECTS\prethinker\kb_scenarios\rung_330_story_booklet_cross_scene_rebind.json</p>
+      </div>
+      <button id="theme-toggle" class="theme-btn" aria-label="Toggle theme">theme</button>
+    </div>
+    <p class="muted">Generated 2026-04-12 10:37:31 UTC | <a href="./index.html">Back to ladder index</a> | <a href="../index.html">Back to docs</a></p>
+
+    <section class="panel">
+      <h2>Latest Run Summary</h2>
+      <div class="body"><div class="summary passed"><p><strong>Status:</strong> passed</p><p><strong>Validation:</strong> 15/15 passed</p><p><strong>Parser failures:</strong> 0 | <strong>Apply failures:</strong> 0</p><p><strong>Artifacts:</strong> <a href="../../kb_runs/rung_330_story_booklet_cross_scene_rebind_frontier_storypush_300_330_check_20260412.json">raw run json</a> | <a href="../reports/rung_330_story_booklet_cross_scene_rebind_frontier_storypush_300_330_check_20260412.html">rendered run transcript</a></p></div></div>
+    </section>
+
+    <section class="panel">
+      <h2>Utterance Plan</h2>
+      <div class="body">
+        <table>
+          <thead><tr><th>#</th><th>Expected Route</th><th>Utterance</th></tr></thead>
+          <tbody>
+<tr><td>1</td><td><code>assert_fact</code></td><td>Treat this as a short-book ingest with scene edits and family rebinding.</td></tr>
+<tr><td>2</td><td><code>assert_fact</code></td><td>assert rule ancestor(X, Y) :- parent(X, Y).</td></tr>
+<tr><td>3</td><td><code>assert_fact</code></td><td>assert rule ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).</td></tr>
+<tr><td>4</td><td><code>assert_fact</code></td><td>assert rule in_region(X, Z) :- at(X, Y), inside(Y, Z).</td></tr>
+<tr><td>5</td><td><code>assert_fact</code></td><td>Chapter one family ledger: Set parent(elara, noam). Set parent(elara, riven). Set parent(noam, kes). Set parent(riven, ysa).</td></tr>
+<tr><td>6</td><td><code>assert_fact</code></td><td>Chapter one staging: Set at(kes, cedar_pier). Set inside(cedar_pier, north_basin). Set carries(noam, brass_seal).</td></tr>
+<tr><td>7</td><td><code>assert_fact</code></td><td>Chapter two timing strip: Set before(dawn_watch, bridge_call). Set before(bridge_call, tide_release). Set before(dawn_watch, tide_release).</td></tr>
+<tr><td>8</td><td><code>assert_fact</code></td><td>Early continuity check, still rough: query ancestor(elara, kes). Query in_region(kes, north_basin).</td></tr>
+<tr><td>9</td><td><code>retract</code></td><td>Author revision: retract parent(noam, kes).</td></tr>
+<tr><td>10</td><td><code>assert_fact</code></td><td>Author revision continuation: Set parent(riven, kes).</td></tr>
+<tr><td>11</td><td><code>retract</code></td><td>retract fact carries(noam, brass_seal).</td></tr>
+<tr><td>12</td><td><code>assert_fact</code></td><td>Set carries(riven, brass_seal).</td></tr>
+<tr><td>13</td><td><code>retract</code></td><td>Stage rewrite: retract at(kes, cedar_pier).</td></tr>
+<tr><td>14</td><td><code>assert_fact</code></td><td>Set at(kes, ash_steps). Set inside(ash_steps, north_basin).</td></tr>
+<tr><td>15</td><td><code>retract</code></td><td>Late errata: retract before(bridge_call, tide_release).</td></tr>
+<tr><td>16</td><td><code>assert_fact</code></td><td>Set before(bridge_call, fog_hold). Set before(fog_hold, tide_release).</td></tr>
+<tr><td>17</td><td><code>assert_fact</code></td><td>Final continuity query: query ancestor(elara, kes). Query carries(riven, brass_seal). Query at(kes, ash_steps).</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Validation Contract</h2>
+      <div class="body">
+        <table>
+          <thead><tr><th>ID</th><th>Query</th><th>Expect</th><th>Min Rows</th><th>Max Rows</th></tr></thead>
+          <tbody>
+<tr><td>elara_noam_parent_kept</td><td><code>parent(elara, noam).</code></td><td>success</td><td>1</td><td></td></tr>
+<tr><td>elara_riven_parent_kept</td><td><code>parent(elara, riven).</code></td><td>success</td><td>1</td><td></td></tr>
+<tr><td>noam_kes_parent_removed</td><td><code>parent(noam, kes).</code></td><td>no_results</td><td></td><td>0</td></tr>
+<tr><td>riven_kes_parent_added</td><td><code>parent(riven, kes).</code></td><td>success</td><td>1</td><td></td></tr>
+<tr><td>elara_ancestor_of_kes</td><td><code>ancestor(elara, kes).</code></td><td>success</td><td>1</td><td></td></tr>
+<tr><td>noam_not_ancestor_of_kes</td><td><code>ancestor(noam, kes).</code></td><td>no_results</td><td></td><td>0</td></tr>
+<tr><td>riven_ancestor_of_kes</td><td><code>ancestor(riven, kes).</code></td><td>success</td><td>1</td><td></td></tr>
+<tr><td>kes_at_ash_steps</td><td><code>at(kes, ash_steps).</code></td><td>success</td><td>1</td><td></td></tr>
+<tr><td>kes_not_at_cedar_pier</td><td><code>at(kes, cedar_pier).</code></td><td>no_results</td><td></td><td>0</td></tr>
+<tr><td>kes_in_north_basin</td><td><code>in_region(kes, north_basin).</code></td><td>success</td><td>1</td><td></td></tr>
+<tr><td>riven_has_brass_seal</td><td><code>carries(riven, brass_seal).</code></td><td>success</td><td>1</td><td></td></tr>
+<tr><td>noam_no_brass_seal</td><td><code>carries(noam, brass_seal).</code></td><td>no_results</td><td></td><td>0</td></tr>
+<tr><td>dawn_before_tide_release</td><td><code>before(dawn_watch, tide_release).</code></td><td>success</td><td>1</td><td></td></tr>
+<tr><td>bridge_before_fog_hold</td><td><code>before(bridge_call, fog_hold).</code></td><td>success</td><td>1</td><td></td></tr>
+<tr><td>bridge_not_direct_before_tide_release</td><td><code>before(bridge_call, tide_release).</code></td><td>no_results</td><td></td><td>0</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+  <script>
+    (() => {
+      const root = document.documentElement;
+      const toggle = document.getElementById("theme-toggle");
+      const key = "rung_theme_pref";
+      const stored = window.localStorage.getItem(key);
+      if (stored === "dark" || stored === "light") {
+        root.setAttribute("data-theme", stored);
+      } else {
+        const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+        root.setAttribute("data-theme", prefersDark ? "dark" : "light");
+      }
+      const sync = () => {
+        const current = root.getAttribute("data-theme") === "dark" ? "dark" : "light";
+        toggle.textContent = `theme: ${current}`;
+      };
+      sync();
+      toggle.addEventListener("click", () => {
+        const current = root.getAttribute("data-theme") === "dark" ? "dark" : "light";
+        const next = current === "dark" ? "light" : "dark";
+        root.setAttribute("data-theme", next);
+        window.localStorage.setItem(key, next);
+        sync();
+      });
+    })();
+  </script>
+</body>
+</html>

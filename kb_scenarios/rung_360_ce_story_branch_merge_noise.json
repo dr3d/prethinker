@@ -1,0 +1,112 @@
+{
+  "name": "rung_360_ce_story_branch_merge_noise",
+  "ontology_name": "rung_360_ce_story_branch_merge_noise",
+  "utterances": [
+    "Chapter-merge mode, noisy language allowed, deterministic KB required.",
+    "Set parent(aeris, bryn). Set parent(aeris, corin). Set parent(bryn, dina). Set parent(corin, elan).",
+    "assert rule ancestor(X, Y) :- parent(X, Y).",
+    "assert rule ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).",
+    "assert rule in_region(X, Z) :- at(X, Y), inside(Y, Z).",
+    "Set at(dina, west_quay). Set inside(west_quay, moon_basin). Set carries(bryn, tide_key).",
+    {
+      "utterance": "she moved em to north ramp same basin",
+      "clarification_answers": [
+        "She means Corin and em means Elan."
+      ],
+      "max_clarification_rounds": 1
+    },
+    "Set at(elan, north_ramp). Set inside(north_ramp, moon_basin).",
+    {
+      "utterance": "actually key goes to the other kid branch not his own",
+      "clarification_answers": [
+        "Key means tide_key. Give it to Corin, not Bryn."
+      ],
+      "max_clarification_rounds": 1
+    },
+    "retract fact carries(bryn, tide_key).",
+    "Set carries(corin, tide_key).",
+    {
+      "utterance": "merge those middles so aeris still reaches both leaves",
+      "clarification_answers": [
+        "Merge means add parent(corin, dina) without removing existing parents."
+      ],
+      "max_clarification_rounds": 1
+    },
+    "Set parent(corin, dina).",
+    "Final query pass: query ancestor(aeris, dina). Query ancestor(aeris, elan). Query in_region(elan, moon_basin). Query carries(corin, tide_key)."
+  ],
+  "validations": [
+    {
+      "id": "aeris_bryn_parent_kept",
+      "query": "parent(aeris, bryn).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "aeris_corin_parent_kept",
+      "query": "parent(aeris, corin).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "bryn_dina_parent_kept",
+      "query": "parent(bryn, dina).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "corin_elan_parent_kept",
+      "query": "parent(corin, elan).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "corin_dina_parent_added",
+      "query": "parent(corin, dina).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "aeris_reaches_dina",
+      "query": "ancestor(aeris, dina).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "aeris_reaches_elan",
+      "query": "ancestor(aeris, elan).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "elan_at_north_ramp",
+      "query": "at(elan, north_ramp).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "elan_in_moon_basin",
+      "query": "in_region(elan, moon_basin).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "corin_has_tide_key",
+      "query": "carries(corin, tide_key).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "bryn_no_tide_key",
+      "query": "carries(bryn, tide_key).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "pronoun_atom_she_absent",
+      "query": "parent(she, elan).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    }
+  ]
+}

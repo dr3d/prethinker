@@ -1,0 +1,57 @@
+{
+  "name": "rung_261_sim_fantasy_overlord_natural_flow",
+  "ontology_name": "rung_261_sim_fantasy_overlord_natural_flow",
+  "utterances": [
+    "Set at(aria, docks).",
+    "Set at(silas, market).",
+    "Set at(mara, ruins).",
+    "Set has_item(silas, healing_herb).",
+    "Set weather(clear).",
+    "Assert fact time_of_day(day).",
+    "Turn update: set time_of_day(night). Set weather(storm).",
+    "Set soaked(aria). Set soaked(silas).",
+    "Move Aria: retract at(aria, docks).",
+    "Move Aria: set at(aria, market).",
+    "Transfer herb: retract has_item(silas, healing_herb).",
+    "Transfer herb: set has_item(aria, healing_herb).",
+    "Set status(aria, insomnia).",
+    "Move Mara: retract at(mara, ruins).",
+    "Move Mara: set at(mara, market).",
+    "Charm turn: set charmed(aria, mara).",
+    "Recovery: retract charmed(aria, mara).",
+    "Recovery: retract soaked(aria). Recovery: retract soaked(silas).",
+    "Assert fact time_of_day(day)."
+  ],
+  "validations": [
+    {
+      "id": "aria_at_market",
+      "query": "at(aria, market).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "aria_has_herb",
+      "query": "has_item(aria, healing_herb).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "silas_no_herb",
+      "query": "has_item(silas, healing_herb).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "aria_not_charmed",
+      "query": "charmed(aria, mara).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "time_back_to_day",
+      "query": "time_of_day(day).",
+      "expect_status": "success",
+      "min_rows": 1
+    }
+  ]
+}

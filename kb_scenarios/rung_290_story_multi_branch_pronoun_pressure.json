@@ -1,0 +1,94 @@
+{
+  "name": "rung_290_story_multi_branch_pronoun_pressure",
+  "ontology_name": "rung_290_story_multi_branch_pronoun_pressure",
+  "utterances": [
+    "Treat this like a crowded family chapter with pronouns that keep trying to slide onto the wrong branch.",
+    "assert rule ancestor(X, Y) :- parent(X, Y).",
+    "assert rule ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).",
+    "assert rule in_region(X, Z) :- at(X, Y), inside(Y, Z).",
+    "Family chunk from the quay chapters: assert fact parent(orla, jalen). assert fact parent(orla, mira). assert fact parent(jalen, sena). assert fact parent(mira, taren). assert fact parent(mira, elowen).",
+    "The location and prop lines are split across the next page: assert fact at(taren, lantern_house). assert fact inside(lantern_house, low_harbor). assert fact carries(mira, brass_key).",
+    "Quick continuity check before the copy editor intervenes: query ancestor(orla, taren). Query ancestor(orla, sena). Query carries(mira, brass_key).",
+    "Copy-edit correction: the sentence that says 'her son waited behind him' was attached to the wrong sibling. retract fact parent(mira, taren).",
+    "Copy-edit continuation, explicit form: assert fact parent(jalen, taren).",
+    "Pronoun resolution note from the margin: when it says 'she left the brass key with him,' she is Mira and him is Jalen. retract fact carries(mira, brass_key).",
+    "Set carries(jalen, brass_key).",
+    "One last staging fix for the same scene: retract fact at(taren, lantern_house).",
+    "Staging continuation, explicit form: assert fact at(taren, silt_stairs). assert fact inside(silt_stairs, low_harbor).",
+    "After those fixes, answer from the corrected branch only: query parent(mira, elowen). Query parent(jalen, taren). Query in_region(taren, low_harbor)."
+  ],
+  "validations": [
+    {
+      "id": "orla_jalen_parent_kept",
+      "query": "parent(orla, jalen).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "orla_mira_parent_kept",
+      "query": "parent(orla, mira).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "jalen_sena_parent_kept",
+      "query": "parent(jalen, sena).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "mira_elowen_parent_kept",
+      "query": "parent(mira, elowen).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "mira_taren_parent_removed",
+      "query": "parent(mira, taren).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "jalen_taren_parent_added",
+      "query": "parent(jalen, taren).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "orla_taren_ancestor_after_branch_shift",
+      "query": "ancestor(orla, taren).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "jalen_has_brass_key",
+      "query": "carries(jalen, brass_key).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "mira_no_longer_has_brass_key",
+      "query": "carries(mira, brass_key).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "taren_at_silt_stairs",
+      "query": "at(taren, silt_stairs).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "taren_not_at_lantern_house",
+      "query": "at(taren, lantern_house).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "taren_still_in_low_harbor",
+      "query": "in_region(taren, low_harbor).",
+      "expect_status": "success",
+      "min_rows": 1
+    }
+  ]
+}

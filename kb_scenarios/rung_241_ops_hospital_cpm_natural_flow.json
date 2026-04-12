@@ -1,0 +1,67 @@
+{
+  "name": "rung_241_ops_hospital_cpm_natural_flow",
+  "ontology_name": "rung_241_ops_hospital_cpm_natural_flow",
+  "utterances": [
+    "We are running a hospital control-room board. Site prep is a task.",
+    "Foundation is a task, and foundation depends on site_prep.",
+    "Structural frame is a task, and structural_frame depends on foundation.",
+    "Interior buildout is a task, and interior_buildout depends on structural_frame.",
+    "Medical gas certification is a task, and medical_gas_cert depends on interior_buildout.",
+    "Regulatory inspection is a task, and regulatory_inspection depends on medical_gas_cert.",
+    "Occupancy permit is a task, and occupancy_permit depends on regulatory_inspection.",
+    "Go live is a task, and go_live depends on occupancy_permit.",
+    "Medical gas cert is supplied by medgas_vendor.",
+    "Enclosure glazing is supplied by glass_vendor.",
+    "medgas_vendor is on_time and glass_vendor is on_time.",
+    "go_live is a milestone.",
+    {
+      "utterance": "Ops note: med gas vendor might be delayed; use the canonical supplier id and apply that delay now.",
+      "clarification_answers": [
+        "Use medgas_vendor and set supplier_status to delayed."
+      ],
+      "max_clarification_rounds": 2
+    },
+    "Update: glass vendor slipped too.",
+    "What is blocked right now?",
+    "Recovery update: glass vendor is back on_time.",
+    "Recheck milestone risk for go live."
+  ],
+  "validations": [
+    {
+      "id": "foundation_dep_site_prep",
+      "query": "depends_on(foundation, site_prep).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "structural_dep_foundation",
+      "query": "depends_on(structural_frame, foundation).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "go_live_dep_occupancy",
+      "query": "depends_on(go_live, occupancy_permit).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "medgas_supplier_link",
+      "query": "task_supplier(medical_gas_cert, medgas_vendor).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "medgas_delayed",
+      "query": "supplier_status(medgas_vendor, delayed).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "go_live_milestone_present",
+      "query": "milestone(go_live).",
+      "expect_status": "success",
+      "min_rows": 1
+    }
+  ]
+}

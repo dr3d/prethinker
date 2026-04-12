@@ -1,0 +1,129 @@
+{
+  "name": "rung_320_story_temporal_exception_rebinding",
+  "ontology_name": "rung_320_story_temporal_exception_rebinding",
+  "utterances": [
+    "Use revised-chronicle mode here.",
+    "assert rule ancestor(X, Y) :- parent(X, Y).",
+    "assert rule ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).",
+    "assert rule in_region(X, Z) :- at(X, Y), inside(Y, Z).",
+    "Monastery chapter, rough cut: Nara is Esi's parent. Esi is Tobin's parent. Tobin is Lio's parent.",
+    "Set at(tobin, west_archive). Set inside(west_archive, sunmere). Set carries(tobin, seal_ring).",
+    "Schedule note from the chapter head: Set before(first_bell, oath_reading). Set before(oath_reading, river_launch). Set before(river_launch, night_fire). Set before(first_bell, night_fire). Set occurs_on(river_launch, day_8).",
+    "Quick question before the storm note lands: is Nara already an ancestor of Lio, and does river_launch still sit on day_8?",
+    "Storm exception, middle beat only: retract before(oath_reading, river_launch).",
+    "Storm exception continuation: Set before(oath_reading, repair_vigil). Set before(repair_vigil, river_launch).",
+    "Day correction: retract occurs_on(river_launch, day_8).",
+    "Set occurs_on(river_launch, day_9).",
+    "Family rebinding from the corrected folio: retract parent(esi, tobin).",
+    "Family rebinding continuation: Set parent(mara, tobin). Set parent(nara, mara).",
+    "Quiet cleanup after that: retract carries(tobin, seal_ring).",
+    "Quiet cleanup continuation: Set carries(lio, seal_ring).",
+    "Location cleanup: retract at(tobin, west_archive).",
+    "Location continuation: Set at(tobin, south_walk). Set inside(south_walk, sunmere).",
+    "Final revised-state query: query ancestor(nara, lio). Query occurs_on(river_launch, day_9). Query at(tobin, south_walk)."
+  ],
+  "validations": [
+    {
+      "id": "nara_esi_parent_kept",
+      "query": "parent(nara, esi).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "esi_tobin_parent_removed",
+      "query": "parent(esi, tobin).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "nara_mara_parent_added",
+      "query": "parent(nara, mara).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "mara_tobin_parent_added",
+      "query": "parent(mara, tobin).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "tobin_lio_parent_kept",
+      "query": "parent(tobin, lio).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "nara_ancestor_of_lio",
+      "query": "ancestor(nara, lio).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "esi_not_ancestor_of_lio",
+      "query": "ancestor(esi, lio).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "first_bell_before_night_fire",
+      "query": "before(first_bell, night_fire).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "oath_reading_before_repair_vigil",
+      "query": "before(oath_reading, repair_vigil).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "river_launch_not_before_oath_reading",
+      "query": "before(river_launch, oath_reading).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "river_launch_on_day_9",
+      "query": "occurs_on(river_launch, day_9).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "river_launch_not_on_day_8",
+      "query": "occurs_on(river_launch, day_8).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "lio_has_seal_ring",
+      "query": "carries(lio, seal_ring).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "tobin_no_seal_ring",
+      "query": "carries(tobin, seal_ring).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "tobin_at_south_walk",
+      "query": "at(tobin, south_walk).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "tobin_not_at_west_archive",
+      "query": "at(tobin, west_archive).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "tobin_in_sunmere",
+      "query": "in_region(tobin, sunmere).",
+      "expect_status": "success",
+      "min_rows": 1
+    }
+  ]
+}

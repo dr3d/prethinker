@@ -1,0 +1,115 @@
+{
+  "name": "rung_330_story_booklet_cross_scene_rebind",
+  "ontology_name": "rung_330_story_booklet_cross_scene_rebind",
+  "utterances": [
+    "Treat this as a short-book ingest with scene edits and family rebinding.",
+    "assert rule ancestor(X, Y) :- parent(X, Y).",
+    "assert rule ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).",
+    "assert rule in_region(X, Z) :- at(X, Y), inside(Y, Z).",
+    "Chapter one family ledger: Set parent(elara, noam). Set parent(elara, riven). Set parent(noam, kes). Set parent(riven, ysa).",
+    "Chapter one staging: Set at(kes, cedar_pier). Set inside(cedar_pier, north_basin). Set carries(noam, brass_seal).",
+    "Chapter two timing strip: Set before(dawn_watch, bridge_call). Set before(bridge_call, tide_release). Set before(dawn_watch, tide_release).",
+    "Early continuity check, still rough: query ancestor(elara, kes). Query in_region(kes, north_basin).",
+    "Author revision: retract parent(noam, kes).",
+    "Author revision continuation: Set parent(riven, kes).",
+    "retract fact carries(noam, brass_seal).",
+    "Set carries(riven, brass_seal).",
+    "Stage rewrite: retract at(kes, cedar_pier).",
+    "Set at(kes, ash_steps). Set inside(ash_steps, north_basin).",
+    "Late errata: retract before(bridge_call, tide_release).",
+    "Set before(bridge_call, fog_hold). Set before(fog_hold, tide_release).",
+    "Final continuity query: query ancestor(elara, kes). Query carries(riven, brass_seal). Query at(kes, ash_steps)."
+  ],
+  "validations": [
+    {
+      "id": "elara_noam_parent_kept",
+      "query": "parent(elara, noam).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "elara_riven_parent_kept",
+      "query": "parent(elara, riven).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "noam_kes_parent_removed",
+      "query": "parent(noam, kes).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "riven_kes_parent_added",
+      "query": "parent(riven, kes).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "elara_ancestor_of_kes",
+      "query": "ancestor(elara, kes).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "noam_not_ancestor_of_kes",
+      "query": "ancestor(noam, kes).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "riven_ancestor_of_kes",
+      "query": "ancestor(riven, kes).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "kes_at_ash_steps",
+      "query": "at(kes, ash_steps).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "kes_not_at_cedar_pier",
+      "query": "at(kes, cedar_pier).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "kes_in_north_basin",
+      "query": "in_region(kes, north_basin).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "riven_has_brass_seal",
+      "query": "carries(riven, brass_seal).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "noam_no_brass_seal",
+      "query": "carries(noam, brass_seal).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "dawn_before_tide_release",
+      "query": "before(dawn_watch, tide_release).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "bridge_before_fog_hold",
+      "query": "before(bridge_call, fog_hold).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "bridge_not_direct_before_tide_release",
+      "query": "before(bridge_call, tide_release).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    }
+  ]
+}

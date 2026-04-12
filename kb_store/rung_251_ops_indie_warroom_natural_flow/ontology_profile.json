@@ -1,0 +1,25 @@
+{
+  "ontology_name": "rung_251_ops_indie_warroom_natural_flow",
+  "generated_at_utc": "2026-04-12T03:15:50+00:00",
+  "clause_count": 24,
+  "predicate_signatures": [
+    "completed/1",
+    "depends_on/2",
+    "milestone/1",
+    "set_task/1",
+    "set_task/2",
+    "supplier_status/2",
+    "task/1"
+  ],
+  "fact_predicates": [
+    "completed/1",
+    "depends_on/2",
+    "milestone/1",
+    "set_task/1",
+    "set_task/2",
+    "supplier_status/2",
+    "task/1"
+  ],
+  "rule_head_predicates": [],
+  "rule_body_predicates": []
+}

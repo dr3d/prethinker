@@ -1,0 +1,129 @@
+{
+  "name": "rung_300_story_nested_corrections",
+  "ontology_name": "rung_300_story_nested_corrections",
+  "utterances": [
+    "Read this like a repaired novel chapter, but keep the extracted state exact.",
+    "assert rule ancestor(X, Y) :- parent(X, Y).",
+    "assert rule ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).",
+    "assert rule in_region(X, Z) :- at(X, Y), inside(Y, Z).",
+    "Ledger draft, first pass: Liora is Eamon's parent. Liora is Brin's parent. Eamon is Cira's parent. Cira is Dain's parent.",
+    "The staging notes are cleaner than the family notes: Dain is at old_quay. old_quay is inside frostmere. Set carries(cira, red_ledger).",
+    "Time strip from the same bundle: Set before(bell_toll, archive_visit). Set before(archive_visit, moonlit_departure). Set before(bell_toll, moonlit_departure).",
+    "Quick check, slightly premature maybe: is Liora already an ancestor of Dain and is he still at the old quay?",
+    "Archivist correction, first layer: retract parent(cira, dain).",
+    "Set parent(brin, dain).",
+    "No, nested fix now: retract parent(eamon, cira).",
+    "Set parent(sela, cira). Set parent(liora, sela).",
+    "Scene cleanup after the page reorder: retract at(dain, old_quay).",
+    "Set at(dain, north_lantern). Set inside(north_lantern, frostmere).",
+    "Prop cleanup: retract carries(cira, red_ledger).",
+    "Set carries(dain, red_ledger).",
+    "Timing note: retract before(archive_visit, moonlit_departure).",
+    "Set before(archive_visit, flood_delay). Set before(flood_delay, moonlit_departure).",
+    "Final continuity query: query ancestor(liora, dain). Query carries(dain, red_ledger). Query at(dain, north_lantern)."
+  ],
+  "validations": [
+    {
+      "id": "liora_eamon_parent_kept",
+      "query": "parent(liora, eamon).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "liora_brin_parent_kept",
+      "query": "parent(liora, brin).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "liora_sela_parent_added",
+      "query": "parent(liora, sela).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "sela_cira_parent_added",
+      "query": "parent(sela, cira).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "cira_dain_parent_removed",
+      "query": "parent(cira, dain).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "brin_dain_parent_added",
+      "query": "parent(brin, dain).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "eamon_cira_parent_removed",
+      "query": "parent(eamon, cira).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "liora_dain_ancestor_kept",
+      "query": "ancestor(liora, dain).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "eamon_not_ancestor_of_cira",
+      "query": "ancestor(eamon, cira).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "dain_at_north_lantern",
+      "query": "at(dain, north_lantern).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "dain_not_at_old_quay",
+      "query": "at(dain, old_quay).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "dain_in_frostmere",
+      "query": "in_region(dain, frostmere).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "dain_has_red_ledger",
+      "query": "carries(dain, red_ledger).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "cira_no_red_ledger",
+      "query": "carries(cira, red_ledger).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "archive_visit_before_flood_delay",
+      "query": "before(archive_visit, flood_delay).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "bell_toll_before_moonlit_departure",
+      "query": "before(bell_toll, moonlit_departure).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "moonlit_departure_not_before_archive_visit",
+      "query": "before(moonlit_departure, archive_visit).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    }
+  ]
+}

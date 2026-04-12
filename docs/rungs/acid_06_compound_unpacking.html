@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Rung: acid_06_compound_unpacking</title>
+  <style>
+    :root {
+      --bg: #f6f8fb; --panel: #ffffff; --ink: #142033; --muted: #5c6b82; --border: #d8e0ea; --header: #f9fbfe;
+      --ok-bg: #e7f6ea; --ok-ink: #1d5d2b; --fail-bg: #fdecee; --fail-ink: #7a1f2b;
+    }
+    html[data-theme="dark"] {
+      --bg: #131920; --panel: #1d2530; --ink: #e8eef6; --muted: #a9b4c6; --border: #334257; --header: #212b38;
+      --ok-bg: #1f3a28; --ok-ink: #b7efc5; --fail-bg: #47232c; --fail-ink: #f6c2cc;
+    }
+    body { margin: 0; background: var(--bg); color: var(--ink); font-family: "Segoe UI", Arial, sans-serif; }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 24px; }
+    .topbar { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+    h1 { margin: 0; font-size: 28px; }
+    .muted { color: var(--muted); font-size: 14px; }
+    .theme-btn { border: 1px solid var(--border); background: var(--panel); color: var(--ink); border-radius: 999px; padding: 8px 12px; font-size: 12px; cursor: pointer; }
+    .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; margin-top: 14px; overflow: hidden; }
+    .panel h2 { margin: 0; padding: 12px 14px; font-size: 16px; background: var(--header); border-bottom: 1px solid var(--border); }
+    .body { padding: 12px 14px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border-bottom: 1px solid var(--border); padding: 10px 8px; font-size: 14px; text-align: left; vertical-align: top; }
+    th { color: var(--muted); background: var(--header); }
+    tr:last-child td { border-bottom: none; }
+    code { background: var(--header); border: 1px solid var(--border); border-radius: 6px; padding: 2px 5px; font-family: Consolas, "Courier New", monospace; font-size: 12px; }
+    a { color: #0b66d0; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .summary { border: 1px solid var(--border); border-radius: 10px; padding: 10px; }
+    .summary.passed { background: var(--ok-bg); color: var(--ok-ink); }
+    .summary.failed { background: var(--fail-bg); color: var(--fail-ink); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div>
+        <h1>acid_06_compound_unpacking</h1>
+        <p class="muted">Ontology: acid_compound_unpack</p>
+        <p class="muted">Scenario file: D:\_PROJECTS\prethinker\kb_scenarios\acid_06_compound_unpacking.json</p>
+      </div>
+      <button id="theme-toggle" class="theme-btn" aria-label="Toggle theme">theme</button>
+    </div>
+    <p class="muted">Generated 2026-04-12 10:37:31 UTC | <a href="./index.html">Back to ladder index</a> | <a href="../index.html">Back to docs</a></p>
+
+    <section class="panel">
+      <h2>Latest Run Summary</h2>
+      <div class="body"><p class="muted">No run report found yet for this scenario.</p></div>
+    </section>
+
+    <section class="panel">
+      <h2>Utterance Plan</h2>
+      <div class="body">
+        <table>
+          <thead><tr><th>#</th><th>Expected Route</th><th>Utterance</th></tr></thead>
+          <tbody>
+<tr><td>1</td><td><code>assert_fact</code></td><td>Iris is a parent of Juno, and Juno is a parent of Kian.</td></tr>
+<tr><td>2</td><td><code>assert_rule</code></td><td>If X is a parent of Y then X is an ancestor of Y.</td></tr>
+<tr><td>3</td><td><code>assert_rule</code></td><td>If X is an ancestor of Y and Y is an ancestor of Z then X is an ancestor of Z.</td></tr>
+<tr><td>4</td><td><code>retract</code></td><td>Actually, retract that: parent(juno, kian).</td></tr>
+<tr><td>5</td><td><code>assert_fact</code></td><td>Juno is a parent of Kira.</td></tr>
+<tr><td>6</td><td><code>assert_fact</code></td><td>Kira is a parent of Lio.</td></tr>
+<tr><td>7</td><td><code>other</code></td><td>Translate this to German: symbolic state must remain auditable.</td></tr>
+<tr><td>8</td><td><code>query</code></td><td>Who is Iris&#x27;s ancestor?</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Validation Contract</h2>
+      <div class="body">
+        <table>
+          <thead><tr><th>ID</th><th>Query</th><th>Expect</th><th>Min Rows</th><th>Max Rows</th></tr></thead>
+          <tbody>
+<tr><td>iris_to_kian_removed_after_retract</td><td><code>ancestor(iris, kian).</code></td><td>no_results</td><td></td><td>0</td></tr>
+<tr><td>iris_to_kira_survives</td><td><code>ancestor(iris, kira).</code></td><td>success</td><td>1</td><td></td></tr>
+<tr><td>iris_to_lio_survives</td><td><code>ancestor(iris, lio).</code></td><td>success</td><td>1</td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+  <script>
+    (() => {
+      const root = document.documentElement;
+      const toggle = document.getElementById("theme-toggle");
+      const key = "rung_theme_pref";
+      const stored = window.localStorage.getItem(key);
+      if (stored === "dark" || stored === "light") {
+        root.setAttribute("data-theme", stored);
+      } else {
+        const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+        root.setAttribute("data-theme", prefersDark ? "dark" : "light");
+      }
+      const sync = () => {
+        const current = root.getAttribute("data-theme") === "dark" ? "dark" : "light";
+        toggle.textContent = `theme: ${current}`;
+      };
+      sync();
+      toggle.addEventListener("click", () => {
+        const current = root.getAttribute("data-theme") === "dark" ? "dark" : "light";
+        const next = current === "dark" ? "light" : "dark";
+        root.setAttribute("data-theme", next);
+        window.localStorage.setItem(key, next);
+        sync();
+      });
+    })();
+  </script>
+</body>
+</html>

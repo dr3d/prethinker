@@ -1,94 +1,17 @@
 {
-  "generated_at_utc": "2026-04-11T19:04:31+00:00",
-  "prompt_versions_total": 8,
+  "generated_at_utc": "2026-04-12T10:42:51+00:00",
+  "prompt_versions_total": 1,
   "prompt_versions": [
     {
-      "prompt_id": "sp-e0a66d9a2fbe",
-      "prompt_sha256": "e0a66d9a2fbeb5870371ba189583f50de15cdfab6df7a16ef5c9143bc133f6f7",
-      "prompt_snapshot_rel": "prompts/sp-e0a66d9a2fbe.md",
-      "runs_total": 26,
-      "pass_rate": 1.0,
-      "avg_validation_rate": 0.923,
-      "last_seen_utc": "2026-04-11T03:00:26+00:00",
-      "scenario_count": 8,
-      "model_count": 3
-    },
-    {
-      "prompt_id": "sp-863b8b26402b",
-      "prompt_sha256": "863b8b26402b93155a1f5c93f49c6fa8960310dfa8ceb13ed096e7531b15be14",
-      "prompt_snapshot_rel": "prompts/sp-863b8b26402b.md",
-      "runs_total": 1,
+      "prompt_id": "sp-1e43c641b01b",
+      "prompt_sha256": "1e43c641b01b7c845b82331b521d58c1993e8010bd9283f5085dac687520159e",
+      "prompt_snapshot_rel": "prompts/sp-1e43c641b01b.md",
+      "runs_total": 27,
       "pass_rate": 1.0,
       "avg_validation_rate": 1.0,
-      "last_seen_utc": "2026-04-10T02:14:16+00:00",
-      "scenario_count": 1,
-      "model_count": 1
-    },
-    {
-      "prompt_id": "sp-22ad8a6264f6",
-      "prompt_sha256": "22ad8a6264f6661716a1fc9cf5d983feaa218b029386533f318b07c2ee5e733d",
-      "prompt_snapshot_rel": "prompts/sp-22ad8a6264f6.md",
-      "runs_total": 4,
-      "pass_rate": 0.75,
-      "avg_validation_rate": 0.9,
-      "last_seen_utc": "2026-04-09T23:58:02+00:00",
-      "scenario_count": 4,
-      "model_count": 1
-    },
-    {
-      "prompt_id": "sp-3f2c7de3ecad",
-      "prompt_sha256": "3f2c7de3ecadaefc448752d4bb200c6521158a16375eff7bd7dc8c04fff1bb2f",
-      "prompt_snapshot_rel": "prompts/sp-3f2c7de3ecad.md",
-      "runs_total": 2,
-      "pass_rate": 1.0,
-      "avg_validation_rate": 1.0,
-      "last_seen_utc": "2026-04-09T23:42:40+00:00",
-      "scenario_count": 2,
-      "model_count": 1
-    },
-    {
-      "prompt_id": "sp-1fb66325fca5",
-      "prompt_sha256": "1fb66325fca590012493504cf9937e4e13e69401d141edae7972e7ac48646a7e",
-      "prompt_snapshot_rel": "prompts/sp-1fb66325fca5.md",
-      "runs_total": 2,
-      "pass_rate": 1.0,
-      "avg_validation_rate": 1.0,
-      "last_seen_utc": "2026-04-09T22:13:24+00:00",
-      "scenario_count": 2,
-      "model_count": 1
-    },
-    {
-      "prompt_id": "legacy-unknown",
-      "prompt_sha256": "",
-      "prompt_snapshot_rel": "",
-      "runs_total": 9,
-      "pass_rate": 0.778,
-      "avg_validation_rate": 1.0,
-      "last_seen_utc": "2026-04-09T19:56:21+00:00",
-      "scenario_count": 4,
-      "model_count": 1
-    },
-    {
-      "prompt_id": "legacy-file-only",
-      "prompt_sha256": "",
-      "prompt_snapshot_rel": "",
-      "runs_total": 3,
-      "pass_rate": 0.667,
-      "avg_validation_rate": 0.778,
-      "last_seen_utc": "2026-04-09T19:56:21+00:00",
-      "scenario_count": 2,
-      "model_count": 1
-    },
-    {
-      "prompt_id": "sp-ad589d272fbb",
-      "prompt_sha256": "ad589d272fbbdcc886719efd5c4d19e9dd732a469dc2f3c574d10e28bbec5dff",
-      "prompt_snapshot_rel": "prompts/sp-ad589d272fbb.md",
-      "runs_total": 2,
-      "pass_rate": 1.0,
-      "avg_validation_rate": 1.0,
-      "last_seen_utc": "2026-04-09T19:27:59+00:00",
-      "scenario_count": 2,
-      "model_count": 1
+      "last_seen_utc": "2026-04-12T10:22:39+00:00",
+      "scenario_count": 27,
+      "model_count": 2
     }
   ]
 }

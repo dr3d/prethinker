@@ -442,6 +442,8 @@ def _render_tool_call(call: dict[str, Any], *, max_output_chars: int) -> str:
 def _render_turn_card(
     turn: dict[str, Any],
     *,
+    user_label: str,
+    assistant_label: str,
     copy_label: str,
     copy_success_label: str,
     copy_failure_label: str,
@@ -522,7 +524,7 @@ def _render_turn_card(
         f"<h2>{title}</h2>"
         "<div class=\"bubble user\">"
         "<div class=\"bubble-head\">"
-        "<div class=\"label\">User</div>"
+        f"<div class=\"label\">{html.escape(user_label)}</div>"
         f"<button class=\"copy-btn\" data-copy=\"{user_copy_attr}\" data-label=\"{copy_label_attr}\" "
         f"data-success-label=\"{copy_success_attr}\" data-failure-label=\"{copy_failure_attr}\">{html.escape(copy_label)}</button>"
         "</div>"
@@ -531,7 +533,7 @@ def _render_turn_card(
         f"{tool_html}"
         "<div class=\"bubble assistant\">"
         "<div class=\"bubble-head\">"
-        "<div class=\"label\">Assistant</div>"
+        f"<div class=\"label\">{html.escape(assistant_label)}</div>"
         f"<button class=\"copy-btn\" data-copy=\"{assistant_copy_attr}\" data-label=\"{copy_label_attr}\" "
         f"data-success-label=\"{copy_success_attr}\" data-failure-label=\"{copy_failure_attr}\">{html.escape(copy_label)}</button>"
         "</div>"
@@ -613,6 +615,8 @@ def _render_one_file(
     cards_html = "".join(
         _render_turn_card(
             turn,
+            user_label=args.user_label,
+            assistant_label=args.assistant_label,
             copy_label=args.copy_label,
             copy_success_label=args.copy_success_label,
             copy_failure_label=args.copy_failure_label,
@@ -731,6 +735,16 @@ def parse_args() -> argparse.Namespace:
         "--repo-link",
         default="https://github.com/dr3d/prethinker",
         help="Top-nav repository link.",
+    )
+    parser.add_argument(
+        "--user-label",
+        default="User",
+        help="Label text for user bubbles.",
+    )
+    parser.add_argument(
+        "--assistant-label",
+        default="Assistant",
+        help="Label text for assistant bubbles.",
     )
     parser.add_argument(
         "--copy-label",

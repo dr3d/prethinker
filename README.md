@@ -29,7 +29,7 @@ Prethinker is a neuro-symbolic parsing workbench, not a finished parser product.
 - Core approach: hybrid pipeline where the model proposes structure, then deterministic runtime logic refines, validates, and applies through local runtime tools.
 - What is solid today: architecture, provenance, prompt/version lineage, scenario ladder, and observability (`kb_runs` + HTML docs/report views).
 - What is not proven yet: broad generalization on hard inputs (transitivity, quantifiers, negation policy, pronoun ambiguity, unseen vocabulary).
-- Current evidence level: early; passing smoke-to-mid ladder checks, but still small sample counts.
+- Current evidence level: stronger than initial smoke stage; frontier now includes story/CE rungs through `rung_360`, but domain breadth and long-tail language still need expansion.
 
 This is an open research effort and learning artifact, not a startup pitch.
 If you're evaluating it as a research workbench, it's useful now. If you're evaluating it as production-grade semantic parsing, it's still early.
@@ -62,10 +62,17 @@ If you're evaluating it as a research workbench, it's useful now. If you're eval
 
 - Prompt provenance for this cycle remained stable at `sp-1e43c641b01b` (pipeline/runtime changes, not SP changes).
 - Clean-root ladder verification reached `100%` on `stage_01 -> rung_200` (`53/53` scenarios in that sweep).
-- Added harder CE/noise rungs:
-  - `rung_210_fuzzy_ce_selective_edge_rebuild`
-  - `rung_220_fuzzy_ce_rule_timing_branch_swap`
-  - `rung_230_fuzzy_ce_branch_exclusion_language`
+- Added and validated higher frontier story/clarification rungs:
+  - `rung_270_story_lineage_fragmented_ingest`
+  - `rung_280_story_revision_temporal_shift`
+  - `rung_290_story_multi_branch_pronoun_pressure`
+  - `rung_300_story_nested_corrections`
+  - `rung_310_story_cross_clause_pronoun_weave`
+  - `rung_320_story_temporal_exception_rebinding`
+  - `rung_330_story_booklet_cross_scene_rebind`
+  - `rung_340_ce_story_pronoun_transfer`
+  - `rung_350_ce_story_multi_round_revision`
+  - `rung_360_ce_story_branch_merge_noise`
 - New guardrails added in `kb_pipeline.py` to stabilize noisy retract turns:
   - route-intent realignment fallback (`route=retract` cannot silently commit `intent=other`)
   - retract arrow-edge target normalization (`x->y` style repair to `parent(x,y)`)
@@ -75,6 +82,10 @@ If you're evaluating it as a research workbench, it's useful now. If you're eval
   - `rung_210`: `6/6`
   - `rung_220`: `9/9`
   - `rung_230`: `6/6`
+- Story/CE frontier check passes:
+  - `rung_340`: `11/11`
+  - `rung_350`: `11/11`
+  - `rung_360`: `12/12`
 - Regression test status for MCP server: `12 passed` (`tests/test_mcp_server.py`).
 - Caveat: `stage_00` probes and long story roundtrip remain exploratory and are not treated as primary gating battery for the ladder frontier.
 
@@ -88,6 +99,20 @@ Prethinker is built around a strict contract between neural parsing and symbolic
 4. Evidence layer: run scenario validations and record run/prompt/model provenance in `kb_runs/` and `docs/`.
 
 The LLM proposes. The runtime decides.
+
+## Pattern Name: Governed Intent Compiler
+
+`Governed Intent Compiler` is the working design-pattern label for this architecture.
+
+It is not a formal GoF/book pattern name; it is a composed pattern used here:
+
+- `Interpreter`: natural language -> structured intent
+- `Command`: structured intent -> executable operation
+- `Policy Gate`: uncertainty/clarification/confirmation before mutation
+- `Human Approval`: explicit user go/no-go for writes
+- `Deterministic Runtime`: auditable state mutation and query
+
+In short: stochastic language understanding, deterministic state authority.
 
 ## What This Is / Is Not
 
@@ -116,22 +141,45 @@ flowchart LR
   Q --> P[Run Provenance and Reports]
 ```
 
-## Current Evidence (As of 2026-04-10)
+## Current Evidence (As of 2026-04-12)
 
-From `docs/data/runs_manifest.json`:
+Latest cycle evidence is based on clean-root ladder sweeps in `tmp/runs/`:
 
-- Total tracked runs: `32`
-- Passed: `28`
-- Failed: `4`
-- Pass rate: `87.5%`
+- `stage_01 -> rung_200`: `53/53` scenarios passed (`failed_count=0`)
+  - source: `tmp/runs/ladder_summary_20260411_235125.json`
+- Stability check after retract/exclusion fixes:
+  - `rung_210` + `rung_220`: both passed (`15/15` validations total)
+  - source: `tmp/runs/ladder_summary_20260412_022243.json`
+- Frontier extension:
+  - `rung_230`: passed (`6/6`)
+  - source: `tmp/runs/ladder_summary_20260412_022335.json`
+- Story/CE frontier extension:
+  - `rung_270 -> rung_330`: passed in frontier sweeps
+  - source: `kb_runs/rung_270_story_lineage_fragmented_ingest_frontier_storypush_270_320_check_20260412.json` through `kb_runs/rung_330_story_booklet_cross_scene_rebind_frontier_storypush_300_330_check_20260412.json`
+  - `rung_340 -> rung_360`: passed in refined CE check
+  - source: `kb_runs/rung_340_ce_story_pronoun_transfer_frontier_ce_340_360_refined3_check_20260412.json` through `kb_runs/rung_360_ce_story_branch_merge_noise_frontier_ce_340_360_refined3_check_20260412.json`
 
-| Tier | Scenario | Evidence Snapshot | What It Shows | Known Risk |
+Note: docs publishing is now intentionally curated. `docs/data/runs_manifest.json` reflects the curated public slice (`kb_runs_published/`) while `docs/data/historical_metrics.json` is computed from the full run history in `kb_runs/`.
+
+| Tier | Scenario Range | Evidence Snapshot | What It Shows | Known Risk |
 |---|---|---|---|---|
-| Base facts | `stage_01_facts_only` | repeated passing runs (including `resume5_latest`) | stable fact extraction/apply loop | still prompt-sensitive on wording variants |
-| Rule ingest | `stage_02_rule_ingest` | repeated passing runs (including `resume5_latest`) | basic rule extraction and apply is viable | predicate phrasing drift still possible |
-| Transitive chain | `stage_03_transitive_chain` | repeated passing runs (including `resume5_latest`) | recursive rule patterns can work | runtime/model latency and timeout sensitivity |
-| Acid temporal | `acid_03_temporal_override` | passing in latest sweep (`resume5_latest`) | temporal override/retract logic can be represented and applied | still vulnerable to ontology wording drift |
-| Acid long context | `acid_05_long_context_lineage` | passing in latest sweep (`resume5_latest`) | longer lineage workflows can pass with current prompt/runtime policy | robustness under unseen domain phrasing remains an open question |
+| Core ladder | `stage_01` to `rung_200` | clean sweep `53/53` passed | strong end-to-end ingestion/query/retract reliability across current ladder battery | not a guarantee on unseen domains/language forms |
+| CE/noise stability | `rung_210` + `rung_220` | stability rerun passed after retract guard updates | clarification + noisy retract handling now more deterministic | still sensitive to rare phrasing variants |
+| New frontier | `rung_230` | first hard-extension rung now passing | branch exclusion language (`not`, `stays`, `keep`) handled correctly | farther-language frontier still expanding |
+| Story/CE frontier | `rung_270` to `rung_360` | frontier sweeps + refined check passed | wider natural-language story ingestion under CE pressure is holding | cross-domain breadth still limited |
+
+## Run Retention Policy
+
+- Full evidence corpus: `kb_runs/` (canonical historical runs, used for historical metrics and deep analysis).
+- Curated publish slice: `kb_runs_published/` (bounded run set used to build docs explorer/manifests).
+- Docs JSON corpus: `docs/data/runs/` (generated from curated publish slice only).
+- Snapshot archives: `archives/` (periodic cold snapshots for preservation).
+
+Refresh curated publish slice with:
+
+```bash
+python scripts/refresh_published_runs.py --source-dir kb_runs --output-dir kb_runs_published --max-runs 24
+```
 
 ## Evaluation Axes (Height And Width)
 
@@ -228,9 +276,9 @@ python kb_pipeline.py --backend ollama --base-url http://127.0.0.1:11434 --model
 - Modelfile:
   - `modelfiles/qwen35-9b-semantic-parser.Modelfile`
 - Latest validated prompt snapshot:
-  - `docs/prompts/sp-e0a66d9a2fbe.md`
+  - `docs/prompts/sp-1e43c641b01b.md`
 - Hub-published prompt snapshot:
-  - `docs/prompts/sp-e0a66d9a2fbe.md`
+  - `docs/prompts/sp-1e43c641b01b.md`
 
 ## Model Adaptation Stance (Prompt-First, LoRA Later)
 
@@ -507,8 +555,11 @@ python -m engine.propagation_runner --problem-json kb_scenarios/propagation_prob
 ### 6) Build docs front page
 
 ```bash
-# render all run JSONs into docs/reports
-python scripts/render_kb_run_html.py --input kb_runs --output docs/reports --recursive --theme standard
+# refresh curated publish set (keeps docs lean)
+python scripts/refresh_published_runs.py --source-dir kb_runs --output-dir kb_runs_published --max-runs 24
+
+# render curated run JSONs into docs/reports
+python scripts/render_kb_run_html.py --input kb_runs_published --output docs/reports --recursive --theme standard
 
 # render persistent KB corpora into docs/kb pages
 python scripts/render_kb_store_html.py --kb-root kb_store --output-dir docs/kb --title-prefix "KB Snapshot"
@@ -516,12 +567,12 @@ python scripts/render_kb_store_html.py --kb-root kb_store --output-dir docs/kb -
 # render human-readable rung pages from ladder scenarios + latest runs
 python scripts/render_test_ladder_html.py --scenarios-dir kb_scenarios --runs-dir kb_runs --output-dir docs/rungs --title "Prolog Extraction Test Ladder"
 
-# build docs/index.html + run/prompt manifests
-python scripts/build_hub_index.py --reports-dir docs/reports --runs-dir kb_runs --kb-pages-dir docs/kb --ladder-index docs/rungs/index.html --output docs/index.html --title "Prethinker Report Hub"
+# build docs/run-reports-hub.html + data manifests (curated view + full-history metrics)
+python scripts/build_hub_index.py --reports-dir docs/reports --runs-dir kb_runs_published --historical-runs-dir kb_runs --kb-pages-dir docs/kb --ladder-index docs/rungs/index.html --output docs/run-reports-hub.html --title "Prethinker Report Hub"
 ```
 
-`docs/index.html` is intentionally light/dark only (not conversation skins).
-It now includes run filtering/search and prompt-evolution tables.
+`docs/index.html` is the curated landing page.
+`docs/run-reports-hub.html` is the searchable explorer with run filtering/search and prompt-evolution tables.
 Manifests are generated at:
 
 - `docs/data/runs_manifest.json`

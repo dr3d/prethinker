@@ -1,0 +1,69 @@
+{
+  "name": "rung_251_ops_indie_warroom_natural_flow",
+  "ontology_name": "rung_251_ops_indie_warroom_natural_flow",
+  "utterances": [
+    "We are running an indie launch war room. Set task(final_build_candidate).",
+    "Set task(console_submission). Set depends_on(console_submission, final_build_candidate).",
+    "Set task(platform_release_slot). Set depends_on(platform_release_slot, console_submission).",
+    "Set task(matchmaking_scale_test). Set depends_on(matchmaking_scale_test, final_build_candidate).",
+    "Set task(day_one_patch). Set depends_on(day_one_patch, final_build_candidate).",
+    "Set task(global_launch). Set depends_on(global_launch, console_submission).",
+    "Set depends_on(global_launch, day_one_patch). Set depends_on(global_launch, matchmaking_scale_test).",
+    "Set task_supplier(console_submission, console_cert_vendor).",
+    "Set task_supplier(matchmaking_scale_test, cloud_vendor).",
+    "Set supplier_status(console_cert_vendor, on_time). Set supplier_status(cloud_vendor, on_time).",
+    "Assert fact milestone(global_launch).",
+    "Set completed(vertical_slice_lock). Set completed(crash_triage_sweep).",
+    "Incident update: set supplier_status(cloud_vendor, delayed).",
+    "Incident update: set supplier_status(console_cert_vendor, delayed).",
+    {
+      "utterance": "Producer note: I think launch date might be june_3 but it is not locked yet.",
+      "clarification_answers": [
+        "Treat it as tentative only and do not commit a hard launch date fact."
+      ],
+      "max_clarification_rounds": 2
+    },
+    "Recovery update: set supplier_status(cloud_vendor, on_time).",
+    "Recovery update: set supplier_status(console_cert_vendor, on_time).",
+    "Set completed(final_build_candidate). Set completed(console_submission). Set completed(platform_release_slot).",
+    "Give me the latest launch status now."
+  ],
+  "validations": [
+    {
+      "id": "launch_dep_console_submission",
+      "query": "depends_on(global_launch, console_submission).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "launch_dep_matchmaking",
+      "query": "depends_on(global_launch, matchmaking_scale_test).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "supplier_cloud_recovered",
+      "query": "supplier_status(cloud_vendor, on_time).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "supplier_console_recovered",
+      "query": "supplier_status(console_cert_vendor, on_time).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "platform_release_completed",
+      "query": "completed(platform_release_slot).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "global_launch_milestone",
+      "query": "milestone(global_launch).",
+      "expect_status": "success",
+      "min_rows": 1
+    }
+  ]
+}

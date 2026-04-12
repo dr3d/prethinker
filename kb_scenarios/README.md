@@ -102,3 +102,14 @@ Use these first after any prompt edit:
 
 1. `stage_01_facts_only.json`
 2. `stage_02_rule_ingest.json`
+
+## Cross-Domain Expansion Rungs
+
+These extend beyond family-only parsing into operational and simulation language:
+
+1. `rung_240_ops_hospital_vendor_delay_core.json`
+2. `rung_241_ops_hospital_cpm_natural_flow.json`
+3. `rung_250_ops_indie_launch_uncertainty_routing.json`
+4. `rung_251_ops_indie_warroom_natural_flow.json`
+5. `rung_260_sim_fantasy_state_repair.json`
+6. `rung_261_sim_fantasy_overlord_natural_flow.json`

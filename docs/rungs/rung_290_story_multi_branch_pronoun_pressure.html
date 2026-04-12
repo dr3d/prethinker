@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Rung: rung_290_story_multi_branch_pronoun_pressure</title>
+  <style>
+    :root {
+      --bg: #f6f8fb; --panel: #ffffff; --ink: #142033; --muted: #5c6b82; --border: #d8e0ea; --header: #f9fbfe;
+      --ok-bg: #e7f6ea; --ok-ink: #1d5d2b; --fail-bg: #fdecee; --fail-ink: #7a1f2b;
+    }
+    html[data-theme="dark"] {
+      --bg: #131920; --panel: #1d2530; --ink: #e8eef6; --muted: #a9b4c6; --border: #334257; --header: #212b38;
+      --ok-bg: #1f3a28; --ok-ink: #b7efc5; --fail-bg: #47232c; --fail-ink: #f6c2cc;
+    }
+    body { margin: 0; background: var(--bg); color: var(--ink); font-family: "Segoe UI", Arial, sans-serif; }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 24px; }
+    .topbar { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+    h1 { margin: 0; font-size: 28px; }
+    .muted { color: var(--muted); font-size: 14px; }
+    .theme-btn { border: 1px solid var(--border); background: var(--panel); color: var(--ink); border-radius: 999px; padding: 8px 12px; font-size: 12px; cursor: pointer; }
+    .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; margin-top: 14px; overflow: hidden; }
+    .panel h2 { margin: 0; padding: 12px 14px; font-size: 16px; background: var(--header); border-bottom: 1px solid var(--border); }
+    .body { padding: 12px 14px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border-bottom: 1px solid var(--border); padding: 10px 8px; font-size: 14px; text-align: left; vertical-align: top; }
+    th { color: var(--muted); background: var(--header); }
+    tr:last-child td { border-bottom: none; }
+    code { background: var(--header); border: 1px solid var(--border); border-radius: 6px; padding: 2px 5px; font-family: Consolas, "Courier New", monospace; font-size: 12px; }
+    a { color: #0b66d0; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .summary { border: 1px solid var(--border); border-radius: 10px; padding: 10px; }
+    .summary.passed { background: var(--ok-bg); color: var(--ok-ink); }
+    .summary.failed { background: var(--fail-bg); color: var(--fail-ink); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div>
+        <h1>rung_290_story_multi_branch_pronoun_pressure</h1>
+        <p class="muted">Ontology: rung_290_story_multi_branch_pronoun_pressure</p>
+        <p class="muted">Scenario file: D:\_PROJECTS\prethinker\kb_scenarios\rung_290_story_multi_branch_pronoun_pressure.json</p>
+      </div>
+      <button id="theme-toggle" class="theme-btn" aria-label="Toggle theme">theme</button>
+    </div>
+    <p class="muted">Generated 2026-04-12 10:37:31 UTC | <a href="./index.html">Back to ladder index</a> | <a href="../index.html">Back to docs</a></p>
+
+    <section class="panel">
+      <h2>Latest Run Summary</h2>
+      <div class="body"><div class="summary passed"><p><strong>Status:</strong> passed</p><p><strong>Validation:</strong> 12/12 passed</p><p><strong>Parser failures:</strong> 0 | <strong>Apply failures:</strong> 0</p><p><strong>Artifacts:</strong> <a href="../../kb_runs/rung_290_story_multi_branch_pronoun_pressure_frontier_storypush_270_320_check_20260412.json">raw run json</a> | <a href="../reports/rung_290_story_multi_branch_pronoun_pressure_frontier_storypush_270_320_check_20260412.html">rendered run transcript</a></p></div></div>
+    </section>
+
+    <section class="panel">
+      <h2>Utterance Plan</h2>
+      <div class="body">
+        <table>
+          <thead><tr><th>#</th><th>Expected Route</th><th>Utterance</th></tr></thead>
+          <tbody>
+<tr><td>1</td><td><code>assert_fact</code></td><td>Treat this like a crowded family chapter with pronouns that keep trying to slide onto the wrong branch.</td></tr>
+<tr><td>2</td><td><code>assert_fact</code></td><td>assert rule ancestor(X, Y) :- parent(X, Y).</td></tr>
+<tr><td>3</td><td><code>assert_fact</code></td><td>assert rule ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).</td></tr>
+<tr><td>4</td><td><code>assert_fact</code></td><td>assert rule in_region(X, Z) :- at(X, Y), inside(Y, Z).</td></tr>
+<tr><td>5</td><td><code>assert_fact</code></td><td>Family chunk from the quay chapters: assert fact parent(orla, jalen). assert fact parent(orla, mira). assert fact parent(jalen, sena). assert fact parent(mira, taren). assert fact parent(mira, elowen).</td></tr>
+<tr><td>6</td><td><code>assert_fact</code></td><td>The location and prop lines are split across the next page: assert fact at(taren, lantern_house). assert fact inside(lantern_house, low_harbor). assert fact carries(mira, brass_key).</td></tr>
+<tr><td>7</td><td><code>assert_fact</code></td><td>Quick continuity check before the copy editor intervenes: query ancestor(orla, taren). Query ancestor(orla, sena). Query carries(mira, brass_key).</td></tr>
+<tr><td>8</td><td><code>retract</code></td><td>Copy-edit correction: the sentence that says &#x27;her son waited behind him&#x27; was attached to the wrong sibling. retract fact parent(mira, taren).</td></tr>
+<tr><td>9</td><td><code>assert_fact</code></td><td>Copy-edit continuation, explicit form: assert fact parent(jalen, taren).</td></tr>
+<tr><td>10</td><td><code>retract</code></td><td>Pronoun resolution note from the margin: when it says &#x27;she left the brass key with him,&#x27; she is Mira and him is Jalen. retract fact carries(mira, brass_key).</td></tr>
+<tr><td>11</td><td><code>assert_fact</code></td><td>Set carries(jalen, brass_key).</td></tr>
+<tr><td>12</td><td><code>retract</code></td><td>One last staging fix for the same scene: retract fact at(taren, lantern_house).</td></tr>
+<tr><td>13</td><td><code>assert_fact</code></td><td>Staging continuation, explicit form: assert fact at(taren, silt_stairs). assert fact inside(silt_stairs, low_harbor).</td></tr>
+<tr><td>14</td><td><code>assert_fact</code></td><td>After those fixes, answer from the corrected branch only: query parent(mira, elowen). Query parent(jalen, taren). Query in_region(taren, low_harbor).</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Validation Contract</h2>
+      <div class="body">
+        <table>
+          <thead><tr><th>ID</th><th>Query</th><th>Expect</th><th>Min Rows</th><th>Max Rows</th></tr></thead>
+          <tbody>
+<tr><td>orla_jalen_parent_kept</td><td><code>parent(orla, jalen).</code></td><td>success</td><td>1</td><td></td></tr>
+<tr><td>orla_mira_parent_kept</td><td><code>parent(orla, mira).</code></td><td>success</td><td>1</td><td></td></tr>
+<tr><td>jalen_sena_parent_kept</td><td><code>parent(jalen, sena).</code></td><td>success</td><td>1</td><td></td></tr>
+<tr><td>mira_elowen_parent_kept</td><td><code>parent(mira, elowen).</code></td><td>success</td><td>1</td><td></td></tr>
+<tr><td>mira_taren_parent_removed</td><td><code>parent(mira, taren).</code></td><td>no_results</td><td></td><td>0</td></tr>
+<tr><td>jalen_taren_parent_added</td><td><code>parent(jalen, taren).</code></td><td>success</td><td>1</td><td></td></tr>
+<tr><td>orla_taren_ancestor_after_branch_shift</td><td><code>ancestor(orla, taren).</code></td><td>success</td><td>1</td><td></td></tr>
+<tr><td>jalen_has_brass_key</td><td><code>carries(jalen, brass_key).</code></td><td>success</td><td>1</td><td></td></tr>
+<tr><td>mira_no_longer_has_brass_key</td><td><code>carries(mira, brass_key).</code></td><td>no_results</td><td></td><td>0</td></tr>
+<tr><td>taren_at_silt_stairs</td><td><code>at(taren, silt_stairs).</code></td><td>success</td><td>1</td><td></td></tr>
+<tr><td>taren_not_at_lantern_house</td><td><code>at(taren, lantern_house).</code></td><td>no_results</td><td></td><td>0</td></tr>
+<tr><td>taren_still_in_low_harbor</td><td><code>in_region(taren, low_harbor).</code></td><td>success</td><td>1</td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+  <script>
+    (() => {
+      const root = document.documentElement;
+      const toggle = document.getElementById("theme-toggle");
+      const key = "rung_theme_pref";
+      const stored = window.localStorage.getItem(key);
+      if (stored === "dark" || stored === "light") {
+        root.setAttribute("data-theme", stored);
+      } else {
+        const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+        root.setAttribute("data-theme", prefersDark ? "dark" : "light");
+      }
+      const sync = () => {
+        const current = root.getAttribute("data-theme") === "dark" ? "dark" : "light";
+        toggle.textContent = `theme: ${current}`;
+      };
+      sync();
+      toggle.addEventListener("click", () => {
+        const current = root.getAttribute("data-theme") === "dark" ? "dark" : "light";
+        const next = current === "dark" ? "light" : "dark";
+        root.setAttribute("data-theme", next);
+        window.localStorage.setItem(key, next);
+        sync();
+      });
+    })();
+  </script>
+</body>
+</html>

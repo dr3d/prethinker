@@ -498,6 +498,8 @@ def _render_with_shared_renderer(
         docs_hub_link,
         "--repo-link",
         repo_link,
+        "--assistant-label",
+        "Pre-Thinker",
     ]
     subprocess.run(cmd, cwd=str(ROOT), check=True)
 
