@@ -1376,6 +1376,7 @@ def _build_clarification_answer_prompt(
     parsed: dict[str, Any],
     rounds: list[dict[str, Any]],
     context_pack: dict[str, Any] | None = None,
+    answer_role: str = "proxy_model",
 ) -> str:
     prior = []
     for row in rounds:
@@ -1402,18 +1403,32 @@ def _build_clarification_answer_prompt(
             recent_lines = [str(item).strip() for item in recent_raw if str(item).strip()]
     kb_text = "\n".join(f"- {row}" for row in kb_lines) if kb_lines else "(none)"
     recent_text = "\n".join(f"- {row}" for row in recent_lines) if recent_lines else "(none)"
+    role = str(answer_role or "proxy_model").strip().lower()
+    if role == "served_llm":
+        role_rules = (
+            "- use deterministic KB context first, then recent turns, then utterance language cues\n"
+            "- if one interpretation is clearly most likely, answer concretely\n"
+            "- if multiple plausible interpretations remain, answer must be exactly 'unknown'\n"
+            "- keep confidence conservative; <=0.55 when ambiguity remains\n"
+        )
+    else:
+        role_rules = (
+            "- treat deterministic KB context as highest-trust evidence\n"
+            "- if deterministic context and recent turns do not support certainty, answer must be 'unknown'\n"
+            "- if truly unknown, answer must be exactly 'unknown'\n"
+        )
+
     return (
         "/no_think\n"
         "You are the clarification proxy for a served assistant model.\n"
         "Return minified JSON only with keys: answer,confidence,assumption\n"
         "Rules:\n"
         "- answer must be short, concrete, and directly answer the question\n"
-        "- treat deterministic KB context as highest-trust evidence\n"
-        "- if deterministic context and recent turns do not support certainty, answer must be 'unknown'\n"
-        "- if truly unknown, answer must be exactly 'unknown'\n"
+        f"{role_rules}"
         "- confidence must be numeric in [0,1]\n"
         "- assumption must be <=12 words\n"
         "Do not output markdown or extra keys.\n"
+        f"Answer role: {role}\n"
         f"Route: {route}\n"
         f"Deterministic KB context:\n{kb_text}\n"
         f"Recent accepted turns:\n{recent_text}\n"
@@ -1438,6 +1453,8 @@ def _generate_synthetic_clarification_answer(
     context_length: int,
     timeout: int,
     api_key: str | None,
+    answer_source_prefix: str = "synthetic",
+    answer_role: str = "proxy_model",
 ) -> tuple[str, dict[str, Any]]:
     prompt = _build_clarification_answer_prompt(
         utterance=utterance,
@@ -1446,6 +1463,7 @@ def _generate_synthetic_clarification_answer(
         parsed=parsed,
         rounds=rounds,
         context_pack=context_pack,
+        answer_role=answer_role,
     )
     response = _call_model_prompt(
         backend=backend,
@@ -1461,7 +1479,7 @@ def _generate_synthetic_clarification_answer(
         answer = _coerce_synthetic_answer_text(parsed_json.get("answer", ""))
         if answer:
             return answer, {
-                "answer_source": "synthetic_model",
+                "answer_source": f"{answer_source_prefix}_model",
                 "answer_confidence": _clip_01(parsed_json.get("confidence"), fallback=0.5),
                 "answer_assumption": str(parsed_json.get("assumption", "")).strip(),
                 "context_kb_clause_count": int((context_pack or {}).get("kb_clause_count", 0) or 0),
@@ -1471,13 +1489,13 @@ def _generate_synthetic_clarification_answer(
     fallback = _coerce_synthetic_answer_text(response.message)
     if fallback:
         return fallback, {
-            "answer_source": "synthetic_fallback",
+            "answer_source": f"{answer_source_prefix}_fallback",
             "answer_confidence": 0.3,
             "answer_assumption": "fallback from raw message",
         }
 
     return "", {
-        "answer_source": "synthetic_failed",
+        "answer_source": f"{answer_source_prefix}_failed",
         "answer_confidence": 0.0,
         "answer_assumption": "no parseable synthetic answer",
         "context_kb_clause_count": int((context_pack or {}).get("kb_clause_count", 0) or 0),
@@ -1979,6 +1997,47 @@ def _build_retract_fallback_parse(utterance: str) -> dict[str, Any] | None:
     text = utterance.strip()
     if not text:
         return None
+
+    arrow_edge = re.search(
+        r"([A-Za-z][A-Za-z0-9_'-]*)\s*(?:->|→|=>)\s*([A-Za-z][A-Za-z0-9_'-]*)\s+edge\b",
+        text,
+        re.IGNORECASE,
+    )
+    if arrow_edge:
+        left_atom = _atomize(arrow_edge.group(1))
+        right_atom = _atomize(arrow_edge.group(2))
+        if left_atom and right_atom:
+            # In family-graph phrasing, "x->y edge" typically denotes parent(x,y).
+            fact = f"parent({left_atom}, {right_atom})."
+            fact_term = fact[:-1]
+            parsed = {
+                "intent": "retract",
+                "logic_string": f"retract({fact_term}).",
+                "components": {
+                    "atoms": sorted({left_atom, right_atom}),
+                    "variables": [],
+                    "predicates": ["parent"],
+                },
+                "facts": [fact],
+                "rules": [],
+                "queries": [],
+                "confidence": {
+                    "overall": 0.66,
+                    "intent": 0.8,
+                    "logic": 0.6,
+                },
+                "ambiguities": [],
+                "needs_clarification": False,
+                "uncertainty_score": 0.28,
+                "uncertainty_label": "low",
+                "clarification_question": "",
+                "clarification_reason": "",
+                "rationale": "Fallback retract parse from arrow-edge phrasing (x->y edge).",
+            }
+            ok_edge, _ = _validate_parsed(parsed)
+            if ok_edge:
+                return parsed
+
     fact = _extract_first_explicit_goal_clause(text, require_ground=True)
     if not fact:
         return None
@@ -2069,6 +2128,36 @@ def _build_assert_fact_fallback_parse(utterance: str) -> dict[str, Any] | None:
     if not text:
         return None
 
+    # Strip common discourse lead-ins so core relation patterns still match.
+    lowered = text.lower()
+    leadins = [
+        "please record this:",
+        "record this:",
+        "note this:",
+        "note that:",
+        "what i meant was that ",
+        "i meant that ",
+        "actually, ",
+    ]
+    for marker in leadins:
+        if lowered.startswith(marker):
+            text = text[len(marker) :].strip()
+            lowered = text.lower()
+            break
+    # Remove lightweight connective prefixes that often precede factual clauses.
+    connective_prefix = re.compile(r"^(?:and|also|so|then|well|okay|ok)\s*,?\s+", re.IGNORECASE)
+    while True:
+        stripped = connective_prefix.sub("", text, count=1).strip()
+        if stripped == text or not stripped:
+            break
+        text = stripped
+        lowered = text.lower()
+    if ":" in text:
+        _, tail = text.split(":", 1)
+        if tail.strip():
+            text = tail.strip()
+            lowered = text.lower()
+
     explicit_fact = _extract_first_explicit_goal_clause(text, require_ground=True)
     if explicit_fact:
         atoms, variables, predicates = _extract_components_from_logic(explicit_fact)
@@ -2109,6 +2198,31 @@ def _build_assert_fact_fallback_parse(utterance: str) -> dict[str, Any] | None:
                 atoms=[value_atom, owner_atom],
                 variables=[],
                 rationale="Fallback possessive fact parse from 'my <relation> is <entity>'.",
+            )
+            ok, _ = _validate_parsed(parsed)
+            return parsed if ok else None
+
+    inverse_named_possessive = re.match(
+        r"^\s*([A-Za-z][A-Za-z0-9_'-]*)\s+is\s+([A-Za-z][A-Za-z0-9_'-]*)'?s\s+([A-Za-z][A-Za-z0-9_-]*)\.?\s*$",
+        text,
+        re.IGNORECASE,
+    )
+    if inverse_named_possessive:
+        subject_atom = _atomize(inverse_named_possessive.group(1))
+        owner_atom = _atomize(inverse_named_possessive.group(2))
+        relation = _atomize(inverse_named_possessive.group(3))
+        if subject_atom and owner_atom and relation:
+            fact = f"{relation}({subject_atom}, {owner_atom})."
+            parsed = _build_parse_payload(
+                intent="assert_fact",
+                logic_string=fact,
+                facts=[fact],
+                rules=[],
+                queries=[],
+                predicates=[relation],
+                atoms=[subject_atom, owner_atom],
+                variables=[],
+                rationale="Fallback possessive relation parse from '<subject> is <owner>\\'s <relation>'.",
             )
             ok, _ = _validate_parsed(parsed)
             return parsed if ok else None
@@ -2184,6 +2298,15 @@ def _build_assert_fact_fallback_parse(utterance: str) -> dict[str, Any] | None:
         text,
         re.IGNORECASE,
     )
+    if not binary:
+        binary = re.match(
+            (
+                r"^\s*([A-Za-z][A-Za-z0-9_'-]*)\s+is\s+(?:a|an|the)?\s*([A-Za-z][A-Za-z0-9_-]*)\s+of\s+"
+                r"([A-Za-z][A-Za-z0-9_'-]*)(?:\s+(?:too|also|again|still|as_well))?\.?\s*$"
+            ),
+            text,
+            re.IGNORECASE,
+        )
     if binary:
         subject_atom = _atomize(binary.group(1))
         relation = _atomize(binary.group(2))
@@ -2232,6 +2355,321 @@ def _build_assert_fact_fallback_parse(utterance: str) -> dict[str, Any] | None:
             ok, _ = _validate_parsed(parsed)
             return parsed if ok else None
     return None
+
+
+def _apply_directional_fact_guard(
+    parsed: dict[str, Any],
+    *,
+    utterance: str,
+    route: str,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """
+    Deterministic guard for common role-direction slips.
+
+    When the utterance is a clear "<subject> is <relation> of <object>" form and
+    model output inverts the two arguments, prefer the fallback orientation.
+    """
+    events: list[dict[str, Any]] = []
+    if not isinstance(parsed, dict):
+        return parsed, events
+
+    intent = str(parsed.get("intent", "")).strip().lower()
+    route_name = str(route or "").strip().lower()
+    if intent != "assert_fact" and route_name != "assert_fact":
+        return parsed, events
+
+    fallback = _build_assert_fact_fallback_parse(utterance)
+    if not isinstance(fallback, dict):
+        return parsed, events
+
+    logic_text = str(parsed.get("logic_string", "")).strip()
+    fallback_logic = str(fallback.get("logic_string", "")).strip()
+    if not logic_text or not fallback_logic:
+        return parsed, events
+
+    current_calls = _extract_calls_with_args(logic_text[:-1] if logic_text.endswith(".") else logic_text)
+    fallback_calls = _extract_calls_with_args(
+        fallback_logic[:-1] if fallback_logic.endswith(".") else fallback_logic
+    )
+    if len(current_calls) != 1 or len(fallback_calls) != 1:
+        return parsed, events
+
+    current_name, current_args = current_calls[0]
+    fallback_name, fallback_args = fallback_calls[0]
+    if current_name != fallback_name:
+        return parsed, events
+    if len(current_args) != 2 or len(fallback_args) != 2:
+        return parsed, events
+
+    left = current_args[0].strip()
+    right = current_args[1].strip()
+    f_left = fallback_args[0].strip()
+    f_right = fallback_args[1].strip()
+    if not left or not right or not f_left or not f_right:
+        return parsed, events
+    if left == right or f_left == f_right:
+        return parsed, events
+    if _is_variable_token(left) or _is_variable_token(right):
+        return parsed, events
+    if _is_variable_token(f_left) or _is_variable_token(f_right):
+        return parsed, events
+    def _is_adjacent_transposition(source: str, target: str) -> bool:
+        if len(source) != len(target) or len(source) < 2:
+            return False
+        if source == target:
+            return False
+        for idx in range(len(source) - 1):
+            swapped = source[:idx] + source[idx + 1] + source[idx] + source[idx + 2 :]
+            if swapped == target:
+                return True
+        return False
+
+    def _is_single_edit(source: str, target: str) -> bool:
+        if source == target:
+            return True
+        if _is_adjacent_transposition(source, target):
+            return True
+        len_diff = abs(len(source) - len(target))
+        if len_diff > 1:
+            return False
+        if len(source) == len(target):
+            mismatches = sum(1 for a, b in zip(source, target) if a != b)
+            return mismatches <= 1
+        if len(source) < len(target):
+            source, target = target, source
+        # source is longer by one char
+        i = 0
+        j = 0
+        edits = 0
+        while i < len(source) and j < len(target):
+            if source[i] == target[j]:
+                i += 1
+                j += 1
+            else:
+                edits += 1
+                i += 1
+                if edits > 1:
+                    return False
+        return True
+
+    def _atom_matches(expected: str, observed: str) -> bool:
+        if expected == observed:
+            return True
+        return _is_single_edit(expected.lower(), observed.lower())
+
+    reversed_match = _atom_matches(f_right, left) and _atom_matches(f_left, right)
+    direct_match = _atom_matches(f_left, left) and _atom_matches(f_right, right)
+    if not reversed_match and not direct_match:
+        return parsed, events
+
+    corrected_logic = f"{fallback_name}({f_left}, {f_right})."
+    atoms, variables, predicates = _extract_components_from_logic(corrected_logic)
+    parsed["logic_string"] = corrected_logic
+    parsed["facts"] = [corrected_logic]
+    parsed["rules"] = []
+    parsed["queries"] = []
+    parsed["components"] = {
+        "atoms": sorted(set(atoms)),
+        "variables": sorted(set(variables)),
+        "predicates": sorted(set(predicates)),
+    }
+    rationale = str(parsed.get("rationale", "")).strip()
+    if rationale:
+        parsed["rationale"] = (
+            rationale + " Directional fact guard corrected inverted subject/object order."
+        )
+    else:
+        parsed["rationale"] = "Directional fact guard corrected inverted subject/object order."
+
+    events.append(
+        {
+            "kind": "directional_fact_guard",
+            "predicate": fallback_name,
+            "from": f"{current_name}({left}, {right})",
+            "to": f"{fallback_name}({f_left}, {f_right})",
+            "match_mode": "reversed" if reversed_match and not direct_match else "canonicalized",
+        }
+    )
+    return parsed, events
+
+
+def _apply_retract_exclusion_guard(
+    parsed: dict[str, Any],
+    *,
+    utterance: str,
+    route: str,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    events: list[dict[str, Any]] = []
+    if not isinstance(parsed, dict):
+        return parsed, events
+
+    intent = str(parsed.get("intent", "")).strip().lower()
+    route_name = str(route or "").strip().lower()
+    if intent != "retract" and route_name != "retract":
+        return parsed, events
+
+    text = str(utterance or "")
+    excluded_edges = re.findall(
+        r"\bnot\s+([A-Za-z][A-Za-z0-9_'-]*)\s*(?:->|→|=>)\s*([A-Za-z][A-Za-z0-9_'-]*)\b",
+        text,
+        flags=re.IGNORECASE,
+    )
+    protected_edges = re.findall(
+        r"([A-Za-z][A-Za-z0-9_'-]*)\s*(?:->|→|=>)\s*([A-Za-z][A-Za-z0-9_'-]*)\s+(?:stays?|keeps?|remains?)\b",
+        text,
+        flags=re.IGNORECASE,
+    )
+    protected_edges.extend(
+        re.findall(
+            r"\bkeep\s+([A-Za-z][A-Za-z0-9_'-]*)\s*(?:->|→|=>)\s*([A-Za-z][A-Za-z0-9_'-]*)\b",
+            text,
+            flags=re.IGNORECASE,
+        )
+    )
+    if not excluded_edges and not protected_edges:
+        return parsed, events
+
+    excluded_facts: set[str] = set()
+    for left_raw, right_raw in excluded_edges + protected_edges:
+        left_atom = _atomize(left_raw)
+        right_atom = _atomize(right_raw)
+        if left_atom and right_atom:
+            excluded_facts.add(f"parent({left_atom}, {right_atom}).")
+    if not excluded_facts:
+        return parsed, events
+
+    logic_text = str(parsed.get("logic_string", "")).strip()
+    parsed_facts = [str(x).strip() for x in parsed.get("facts", []) if str(x).strip()]
+    targets = _extract_retract_targets(logic_text, parsed_facts)
+    if not targets:
+        return parsed, events
+
+    kept_targets = [t for t in targets if t not in excluded_facts]
+    removed_targets = [t for t in targets if t in excluded_facts]
+    if not removed_targets:
+        return parsed, events
+    if not kept_targets:
+        return parsed, events
+
+    clauses = [f"retract({t[:-1] if t.endswith('.') else t})." for t in kept_targets]
+    new_logic = "\n".join(clauses)
+    atoms, variables, predicates = _extract_components_from_logic(new_logic)
+    parsed["logic_string"] = new_logic
+    parsed["facts"] = kept_targets
+    parsed["rules"] = []
+    parsed["queries"] = []
+    parsed["components"] = {
+        "atoms": sorted(set(atoms)),
+        "variables": sorted(set(variables)),
+        "predicates": sorted(set(predicates)),
+    }
+    rationale = str(parsed.get("rationale", "")).strip()
+    suffix = "Retract exclusion guard removed explicitly negated edge target(s)."
+    parsed["rationale"] = f"{rationale} {suffix}".strip() if rationale else suffix
+    events.append(
+        {
+            "kind": "retract_exclusion_guard",
+            "removed": removed_targets,
+            "kept": kept_targets,
+        }
+    )
+    return parsed, events
+
+
+def _apply_retract_edge_target_guard(
+    parsed: dict[str, Any],
+    *,
+    utterance: str,
+    route: str,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    events: list[dict[str, Any]] = []
+    if not isinstance(parsed, dict):
+        return parsed, events
+
+    intent = str(parsed.get("intent", "")).strip().lower()
+    route_name = str(route or "").strip().lower()
+    if intent != "retract" and route_name != "retract":
+        return parsed, events
+
+    text = str(utterance or "")
+    lowered = text.lower()
+    edge_pairs = re.findall(
+        r"([A-Za-z][A-Za-z0-9_'-]*)\s*(?:->|→|=>)\s*([A-Za-z][A-Za-z0-9_'-]*)",
+        text,
+        flags=re.IGNORECASE,
+    )
+    if not edge_pairs:
+        return parsed, events
+
+    excluded_pairs = set(
+        (
+            _atomize(left),
+            _atomize(right),
+        )
+        for left, right in re.findall(
+            r"\bnot\s+([A-Za-z][A-Za-z0-9_'-]*)\s*(?:->|→|=>)\s*([A-Za-z][A-Za-z0-9_'-]*)",
+            text,
+            flags=re.IGNORECASE,
+        )
+    )
+
+    desired_targets: list[str] = []
+    for left_raw, right_raw in edge_pairs:
+        left_atom = _atomize(left_raw)
+        right_atom = _atomize(right_raw)
+        if not left_atom or not right_atom:
+            continue
+        if (left_atom, right_atom) in excluded_pairs:
+            continue
+        target = f"parent({left_atom}, {right_atom})."
+        if target not in desired_targets:
+            desired_targets.append(target)
+    if not desired_targets:
+        return parsed, events
+
+    logic_text = str(parsed.get("logic_string", "")).strip()
+    parsed_facts = [str(x).strip() for x in parsed.get("facts", []) if str(x).strip()]
+    current_targets = _extract_retract_targets(logic_text, parsed_facts)
+
+    def _is_parent_binary_fact(clause_text: str) -> bool:
+        term = _parse_clause_term(clause_text)
+        if term is None or str(getattr(term, "name", "")).strip() != "parent":
+            return False
+        args = list(getattr(term, "args", []))
+        return len(args) == 2 and not any(getattr(arg, "is_variable", False) for arg in args)
+
+    malformed_or_nonparent = (
+        not current_targets or any(not _is_parent_binary_fact(target) for target in current_targets)
+    )
+    has_only_constraint = " only" in f" {lowered} "
+    mismatched_targets = set(current_targets) != set(desired_targets)
+    if not malformed_or_nonparent and not (has_only_constraint and mismatched_targets):
+        return parsed, events
+
+    clauses = [f"retract({t[:-1] if t.endswith('.') else t})." for t in desired_targets]
+    new_logic = "\n".join(clauses)
+    atoms, variables, predicates = _extract_components_from_logic(new_logic)
+    parsed["logic_string"] = new_logic
+    parsed["facts"] = desired_targets
+    parsed["rules"] = []
+    parsed["queries"] = []
+    parsed["components"] = {
+        "atoms": sorted(set(atoms)),
+        "variables": sorted(set(variables)),
+        "predicates": sorted(set(predicates)),
+    }
+    rationale = str(parsed.get("rationale", "")).strip()
+    suffix = "Retract edge target guard normalized arrow-edge retract target(s)."
+    parsed["rationale"] = f"{rationale} {suffix}".strip() if rationale else suffix
+    events.append(
+        {
+            "kind": "retract_edge_target_guard",
+            "from_targets": current_targets,
+            "to_targets": desired_targets,
+            "only_constraint": has_only_constraint,
+        }
+    )
+    return parsed, events
 
 
 def _build_assert_rule_fallback_parse(utterance: str) -> dict[str, Any] | None:
@@ -3130,13 +3568,67 @@ def _expand_assert_fact_clauses(candidates: list[str]) -> list[str]:
 
 
 def _expand_assert_rule_clauses(candidates: list[str]) -> list[str]:
+    def _rewrite_ancestor_transitive_rule(clause_text: str) -> str:
+        normalized = _normalize_clause(clause_text)
+        if not normalized:
+            return normalized
+        raw = normalized[:-1].strip() if normalized.endswith(".") else normalized.strip()
+        split = _split_rule_head_body(raw)
+        if not split:
+            return normalized
+        head_text, body_text = split
+        head_term = _parse_clause_term(f"{head_text}.")
+        if head_term is None or str(getattr(head_term, "name", "")).strip() != "ancestor":
+            return normalized
+        head_args = list(getattr(head_term, "args", []))
+        if len(head_args) != 2:
+            return normalized
+        hx, hz = head_args[0], head_args[1]
+        if not getattr(hx, "is_variable", False) or not getattr(hz, "is_variable", False):
+            return normalized
+        x_name = str(getattr(hx, "name", "")).strip()
+        z_name = str(getattr(hz, "name", "")).strip()
+        if not x_name or not z_name:
+            return normalized
+
+        goals = _split_top_level_args(body_text)
+        if len(goals) != 2:
+            return normalized
+        g1 = _parse_clause_term(f"{goals[0]}.")
+        g2 = _parse_clause_term(f"{goals[1]}.")
+        if g1 is None or g2 is None:
+            return normalized
+        if str(getattr(g1, "name", "")).strip() != "ancestor":
+            return normalized
+        if str(getattr(g2, "name", "")).strip() != "ancestor":
+            return normalized
+        g1_args = list(getattr(g1, "args", []))
+        g2_args = list(getattr(g2, "args", []))
+        if len(g1_args) != 2 or len(g2_args) != 2:
+            return normalized
+        a1, a2 = g1_args
+        b1, b2 = g2_args
+        if not all(getattr(arg, "is_variable", False) for arg in [a1, a2, b1, b2]):
+            return normalized
+        a1n = str(getattr(a1, "name", "")).strip()
+        a2n = str(getattr(a2, "name", "")).strip()
+        b1n = str(getattr(b1, "name", "")).strip()
+        b2n = str(getattr(b2, "name", "")).strip()
+        if not (a1n and a2n and b1n and b2n):
+            return normalized
+        if not (a1n == x_name and a2n == b1n and b2n == z_name):
+            return normalized
+
+        rewritten = f"ancestor({x_name}, {z_name}) :- parent({x_name}, {a2n}), ancestor({a2n}, {z_name})."
+        return _normalize_clause(rewritten)
+
     expanded: list[str] = []
     for raw_clause in candidates:
         clause = _normalize_clause(raw_clause)
         if not clause:
             continue
         if _is_valid_rule_clause(clause):
-            expanded.append(clause)
+            expanded.append(_rewrite_ancestor_transitive_rule(clause))
             continue
 
         fragments: list[str] = []
@@ -3158,7 +3650,7 @@ def _expand_assert_rule_clauses(candidates: list[str]) -> list[str]:
         for part in split_parts:
             normalized = _normalize_clause(f"{part}.")
             if _is_valid_rule_clause(normalized):
-                expanded.append(normalized)
+                expanded.append(_rewrite_ancestor_transitive_rule(normalized))
 
     seen: set[str] = set()
     unique: list[str] = []
@@ -3725,7 +4217,29 @@ def parse_args() -> argparse.Namespace:
         "--clarification-answer-min-confidence",
         type=float,
         default=0.55,
-        help="Minimum synthetic clarification confidence required to accept auto-answer.",
+        help="Minimum generated clarification confidence required to accept auto-answer.",
+    )
+    parser.add_argument(
+        "--served-llm-model",
+        default="",
+        help="Optional served-LLM model id for clarification Q&A (preferred over --clarification-answer-model when set).",
+    )
+    parser.add_argument(
+        "--served-llm-backend",
+        choices=["", "lmstudio", "ollama"],
+        default="",
+        help="Optional backend for --served-llm-model. Defaults to --backend.",
+    )
+    parser.add_argument(
+        "--served-llm-base-url",
+        default="",
+        help="Optional base URL for --served-llm-model. Defaults to backend default URL.",
+    )
+    parser.add_argument(
+        "--served-llm-context-length",
+        type=int,
+        default=16384,
+        help="Context window for served-LLM clarification calls (default 16384).",
     )
     parser.add_argument("--out", default="", help="Optional output report JSON path.")
     return parser.parse_args()
@@ -3817,6 +4331,16 @@ def main() -> int:
     backend = args.backend
     base_url = args.base_url.strip() or DEFAULT_BASE_URLS[backend]
     model = args.model.strip() or DEFAULT_MODELS[backend]
+
+    served_llm_model = args.served_llm_model.strip()
+    served_llm_backend = (
+        args.served_llm_backend.strip().lower() if args.served_llm_backend.strip() else backend
+    )
+    served_llm_base_url = (
+        args.served_llm_base_url.strip() or DEFAULT_BASE_URLS[served_llm_backend]
+    )
+    served_llm_context_length = max(256, int(args.served_llm_context_length))
+
     clarification_answer_model = args.clarification_answer_model.strip()
     clarification_answer_backend = (
         args.clarification_answer_backend.strip().lower() if args.clarification_answer_backend.strip() else backend
@@ -3829,7 +4353,26 @@ def main() -> int:
     clarification_answer_kb_clause_limit = max(0, int(args.clarification_answer_kb_clause_limit))
     clarification_answer_kb_char_budget = max(0, int(args.clarification_answer_kb_char_budget))
     clarification_answer_min_confidence = _clip_01(args.clarification_answer_min_confidence, fallback=0.55)
-    clarification_auto_answer_enabled = bool(clarification_answer_model)
+
+    if served_llm_model:
+        clarification_auto_answer_enabled = True
+        auto_answer_model = served_llm_model
+        auto_answer_backend = served_llm_backend
+        auto_answer_base_url = served_llm_base_url
+        auto_answer_context_length = served_llm_context_length
+        auto_answer_source_prefix = "served_llm"
+        auto_answer_role = "served_llm"
+        auto_answer_label = "served-LLM clarification model"
+    else:
+        clarification_auto_answer_enabled = bool(clarification_answer_model)
+        auto_answer_model = clarification_answer_model
+        auto_answer_backend = clarification_answer_backend
+        auto_answer_base_url = clarification_answer_base_url
+        auto_answer_context_length = clarification_answer_context_length
+        auto_answer_source_prefix = "synthetic"
+        auto_answer_role = "proxy_model"
+        auto_answer_label = "clarification answer model"
+
     use_two_pass = bool(args.two_pass and not args.no_two_pass)
     use_split_extraction = bool(args.split_extraction and not args.no_split_extraction)
     context_length = max(512, int(args.context_length))
@@ -3866,11 +4409,11 @@ def main() -> int:
         "max_clarification_rounds": max_clarification_rounds,
         "require_final_confirmation": require_final_confirmation,
         "clarification_auto_answer_enabled": clarification_auto_answer_enabled,
-        "clarification_answer_backend": clarification_answer_backend if clarification_auto_answer_enabled else "",
-        "clarification_answer_base_url": clarification_answer_base_url if clarification_auto_answer_enabled else "",
-        "clarification_answer_model": clarification_answer_model if clarification_auto_answer_enabled else "",
+        "clarification_answer_backend": auto_answer_backend if clarification_auto_answer_enabled else "",
+        "clarification_answer_base_url": auto_answer_base_url if clarification_auto_answer_enabled else "",
+        "clarification_answer_model": auto_answer_model if clarification_auto_answer_enabled else "",
         "clarification_answer_context_length": (
-            clarification_answer_context_length if clarification_auto_answer_enabled else 0
+            auto_answer_context_length if clarification_auto_answer_enabled else 0
         ),
         "clarification_answer_history_turns": (
             clarification_answer_history_turns if clarification_auto_answer_enabled else 0
@@ -3884,6 +4427,12 @@ def main() -> int:
         "clarification_answer_min_confidence": (
             clarification_answer_min_confidence if clarification_auto_answer_enabled else 0.0
         ),
+        "clarification_answer_source_prefix": auto_answer_source_prefix if clarification_auto_answer_enabled else "",
+        "clarification_answer_role": auto_answer_role if clarification_auto_answer_enabled else "",
+        "served_llm_model": served_llm_model,
+        "served_llm_backend": served_llm_backend if served_llm_model else "",
+        "served_llm_base_url": served_llm_base_url if served_llm_model else "",
+        "served_llm_context_length": served_llm_context_length if served_llm_model else 0,
         "backend_options": {"num_ctx": context_length} if backend == "ollama" else {},
     }
 
@@ -3973,9 +4522,9 @@ def main() -> int:
     )
     if clarification_auto_answer_enabled:
         print(
-            "Clarification answer model: "
-            f"{clarification_answer_backend}/{clarification_answer_model} @ {clarification_answer_base_url} "
-            f"(ctx={clarification_answer_context_length} "
+            f"{auto_answer_label.capitalize()}: "
+            f"{auto_answer_backend}/{auto_answer_model} @ {auto_answer_base_url} "
+            f"(ctx={auto_answer_context_length} "
             f"history_turns={clarification_answer_history_turns} "
             f"kb_limit={clarification_answer_kb_clause_limit} "
             f"kb_chars={clarification_answer_kb_char_budget} "
@@ -4032,7 +4581,9 @@ def main() -> int:
         )
         clarification_rounds: list[dict[str, Any]] = []
         scripted_answer_index = 0
-        synthetic_answer_count = 0
+        generated_answer_count = 0
+        served_llm_answer_count = 0
+        proxy_answer_count = 0
         clarification_pending = False
         clarification_pending_reason = ""
         confirmation_pending = False
@@ -4041,6 +4592,7 @@ def main() -> int:
         confirmation_result = "not_required"
         confirmation_answer_index = 0
         clarification_question = ""
+        clarification_answer_attempt: dict[str, Any] = {}
         clarification_policy = {
             "clarification_eagerness": clarification_eagerness,
             "uncertainty_score": 0.0,
@@ -4244,7 +4796,54 @@ def main() -> int:
                             fallback_used = True
 
             if isinstance(parsed, dict) and not validation_errors:
-                parsed, alignment_events = _align_parsed_predicates(parsed, registry_alias_map)
+                parsed_intent = str(parsed.get("intent", "")).strip().lower()
+                if route in {"assert_fact", "assert_rule", "query", "retract"} and parsed_intent != route:
+                    fallback_parsed = _build_route_fallback_parse(route, utterance)
+                    if isinstance(fallback_parsed, dict):
+                        fallback_parsed = _normalize_clarification_fields(
+                            fallback_parsed,
+                            utterance=utterance,
+                            route=route,
+                        )
+                        ok_fb, errors_fb = _validate_parsed(fallback_parsed)
+                        if ok_fb:
+                            parsed = fallback_parsed
+                            fallback_used = True
+                            alignment_events.append(
+                                {
+                                    "kind": "route_intent_realign",
+                                    "from_intent": parsed_intent or "unknown",
+                                    "to_intent": route,
+                                }
+                            )
+                        elif errors_fb:
+                            validation_errors.extend(errors_fb)
+
+            if isinstance(parsed, dict) and not validation_errors:
+                parsed, direction_events = _apply_directional_fact_guard(
+                    parsed,
+                    utterance=utterance,
+                    route=route,
+                )
+                if direction_events:
+                    alignment_events.extend(direction_events)
+                parsed, retract_edge_events = _apply_retract_edge_target_guard(
+                    parsed,
+                    utterance=utterance,
+                    route=route,
+                )
+                if retract_edge_events:
+                    alignment_events.extend(retract_edge_events)
+                parsed, retract_exclusion_events = _apply_retract_exclusion_guard(
+                    parsed,
+                    utterance=utterance,
+                    route=route,
+                )
+                if retract_exclusion_events:
+                    alignment_events.extend(retract_exclusion_events)
+                parsed, alias_events = _align_parsed_predicates(parsed, registry_alias_map)
+                if alias_events:
+                    alignment_events.extend(alias_events)
                 parsed = _normalize_clarification_fields(parsed, utterance=utterance, route=route)
                 registry_errors, unknown_signatures = _validate_parsed_against_registry(
                     parsed,
@@ -4330,31 +4929,44 @@ def main() -> int:
                     kb_char_budget=clarification_answer_kb_char_budget,
                 )
                 synthetic_answer, answer_meta = _generate_synthetic_clarification_answer(
-                    backend=clarification_answer_backend,
-                    base_url=clarification_answer_base_url,
-                    model=clarification_answer_model,
+                    backend=auto_answer_backend,
+                    base_url=auto_answer_base_url,
+                    model=auto_answer_model,
                     utterance=utterance,
                     route=route,
                     question=clarification_question,
                     parsed=parsed,
                     rounds=clarification_rounds,
                     context_pack=clarification_context_pack,
-                    context_length=clarification_answer_context_length,
+                    context_length=auto_answer_context_length,
                     timeout=args.timeout_seconds,
                     api_key=api_key,
+                    answer_source_prefix=auto_answer_source_prefix,
+                    answer_role=auto_answer_role,
                 )
+                clarification_answer_attempt = {
+                    "model": auto_answer_model,
+                    "backend": auto_answer_backend,
+                    "base_url": auto_answer_base_url,
+                    "answer_role": auto_answer_role,
+                    "answer_source_prefix": auto_answer_source_prefix,
+                    "answer_source": str(answer_meta.get("answer_source", "")),
+                    "answer_confidence": _clip_01(answer_meta.get("answer_confidence"), fallback=0.0),
+                    "answer_assumption": str(answer_meta.get("answer_assumption", "")).strip(),
+                    "answer_text": synthetic_answer,
+                }
                 if synthetic_answer:
                     answer_confidence = _clip_01(answer_meta.get("answer_confidence"), fallback=0.5)
                     if answer_confidence < clarification_answer_min_confidence:
                         clarification_pending = True
                         clarification_pending_reason = (
-                            "Clarification answer model confidence below threshold; KB apply deferred."
+                            f"{auto_answer_label.capitalize()} confidence below threshold; KB apply deferred."
                         )
                         break
                     if _is_non_informative_clarification_answer(synthetic_answer):
                         clarification_pending = True
                         clarification_pending_reason = (
-                            "Clarification answer model returned non-informative answer; KB apply deferred."
+                            f"{auto_answer_label.capitalize()} returned non-informative answer; KB apply deferred."
                         )
                         break
                     if _is_redundant_clarification_pair(
@@ -4367,13 +4979,18 @@ def main() -> int:
                             "Clarification loop detected from answer model; KB apply deferred."
                         )
                         break
-                    synthetic_answer_count += 1
+                    answer_source = str(answer_meta.get("answer_source", f"{auto_answer_source_prefix}_model"))
+                    generated_answer_count += 1
+                    if answer_source.startswith("served_llm"):
+                        served_llm_answer_count += 1
+                    else:
+                        proxy_answer_count += 1
                     clarification_rounds.append(
                         {
                             "round": len(clarification_rounds) + 1,
                             "question": clarification_question,
                             "answer": synthetic_answer,
-                            "answer_source": str(answer_meta.get("answer_source", "synthetic_model")),
+                            "answer_source": answer_source,
                             "answer_confidence": answer_confidence,
                             "answer_assumption": str(answer_meta.get("answer_assumption", "")).strip(),
                             "answer_context_kb_clause_count": int(answer_meta.get("context_kb_clause_count", 0) or 0),
@@ -4385,7 +5002,7 @@ def main() -> int:
                     )
                     continue
                 clarification_pending = True
-                clarification_pending_reason = "Clarification answer model could not provide a usable answer."
+                clarification_pending_reason = f"{auto_answer_label.capitalize()} could not provide a usable answer."
                 break
 
             clarification_pending = True
@@ -4492,11 +5109,15 @@ def main() -> int:
                 "clarification_answers_available": len(scripted_clarification_answers),
                 "clarification_answers_used": scripted_answer_index,
                 "clarification_scripted_answers_used": scripted_answer_index,
-                "clarification_synthetic_answers_used": synthetic_answer_count,
+                "clarification_synthetic_answers_used": generated_answer_count,
+                "clarification_generated_answers_used": generated_answer_count,
+                "clarification_served_llm_answers_used": served_llm_answer_count,
+                "clarification_proxy_answers_used": proxy_answer_count,
                 "clarification_policy": clarification_policy,
                 "clarification_pending": clarification_pending,
                 "clarification_pending_reason": clarification_pending_reason,
                 "clarification_question": clarification_question,
+                "clarification_answer_attempt": clarification_answer_attempt,
                 "confirmation_required": bool(
                     per_turn_require_confirmation
                     and isinstance(parsed, dict)
@@ -4551,6 +5172,12 @@ def main() -> int:
     )
     clarification_synthetic_answers_total = sum(
         int(row.get("clarification_synthetic_answers_used", 0)) for row in turn_rows
+    )
+    clarification_served_llm_answers_total = sum(
+        int(row.get("clarification_served_llm_answers_used", 0)) for row in turn_rows
+    )
+    clarification_proxy_answers_total = sum(
+        int(row.get("clarification_proxy_answers_used", 0)) for row in turn_rows
     )
     decision_state_counts: dict[str, int] = {}
     for row in turn_rows:
@@ -4660,6 +5287,8 @@ def main() -> int:
         "turns_confirmation_requested": confirmation_requests,
         "clarification_rounds_total": clarification_rounds_total,
         "clarification_synthetic_answers_total": clarification_synthetic_answers_total,
+        "clarification_served_llm_answers_total": clarification_served_llm_answers_total,
+        "clarification_proxy_answers_total": clarification_proxy_answers_total,
         "decision_state_counts": decision_state_counts,
         "validation_total": validation_total,
         "validation_passed": validation_pass,
@@ -4676,7 +5305,11 @@ def main() -> int:
         "Clarification requests: "
         f"{clarification_requests} (confirmation={confirmation_requests}, rounds={clarification_rounds_total})"
     )
-    print(f"Synthetic clarification answers used: {clarification_synthetic_answers_total}")
+    print(
+        "Generated clarification answers used: "
+        f"{clarification_synthetic_answers_total} "
+        f"(served_llm={clarification_served_llm_answers_total}, proxy={clarification_proxy_answers_total})"
+    )
     print(f"Decision states: {decision_state_counts}")
     print(
         "Ontology drift: "

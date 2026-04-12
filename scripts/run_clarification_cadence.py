@@ -77,7 +77,7 @@ def _synthetic_rounds_used(report: dict[str, Any]) -> int:
             if not isinstance(row, dict):
                 continue
             source = str(row.get("answer_source", "")).strip().lower()
-            if source.startswith("synthetic"):
+            if source.startswith("synthetic") or source.startswith("served_llm"):
                 count += 1
     return count
 
@@ -136,6 +136,14 @@ def _run_one(
         "--out",
         str(out_path),
     ]
+    if str(args.served_llm_model).strip():
+        cmd.extend(["--served-llm-model", args.served_llm_model])
+    if str(args.served_llm_backend).strip():
+        cmd.extend(["--served-llm-backend", args.served_llm_backend])
+    if str(args.served_llm_base_url).strip():
+        cmd.extend(["--served-llm-base-url", args.served_llm_base_url])
+    if int(args.served_llm_context_length) > 0:
+        cmd.extend(["--served-llm-context-length", str(int(args.served_llm_context_length))])
     if args.env_file:
         cmd.extend(["--env-file", args.env_file])
     if args.require_final_confirmation:
@@ -185,6 +193,10 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--clarification-answer-kb-clause-limit", type=int, default=80)
     p.add_argument("--clarification-answer-kb-char-budget", type=int, default=5000)
     p.add_argument("--max-clarification-rounds", type=int, default=2)
+    p.add_argument("--served-llm-model", default="")
+    p.add_argument("--served-llm-backend", default="")
+    p.add_argument("--served-llm-base-url", default="")
+    p.add_argument("--served-llm-context-length", type=int, default=16384)
     p.add_argument("--require-final-confirmation", action="store_true")
     p.add_argument("--timeout-seconds", type=int, default=120)
     p.add_argument("--scenario-timeout-seconds", type=int, default=720)
@@ -327,6 +339,7 @@ def main() -> int:
         "generated_at_utc": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
         "parser_model": args.model,
         "clarification_answer_model": args.clarification_answer_model,
+        "served_llm_model": args.served_llm_model,
         "settings_count": len(settings),
         "scenarios_count": len(scenarios),
         "rows": rows,

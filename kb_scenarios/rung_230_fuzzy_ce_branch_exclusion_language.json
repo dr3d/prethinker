@@ -1,0 +1,54 @@
+﻿{
+  "name": "rung_230_fuzzy_ce_branch_exclusion_language",
+  "ontology_name": "rung_230_fuzzy_ce_branch_exclusion_language",
+  "utterances": [
+    "Rhea is Pax's parent.",
+    "Uma has Pax as a parent, noisy but true.",
+    "Sia is parented by Uma.",
+    "If X is a parent of Y then X is an ancestor of Y.",
+    "And if X is an ancestor of Y and Y is an ancestor of Z then X is an ancestor of Z.",
+    "quick check: is rhea ancestor of sia",
+    "nah swap middle: drop pax->uma only, not the rhea branch",
+    "Pax is Toma's parent.",
+    "Sia is parented by Toma.",
+    "final check rhea ancestor of sia right"
+  ],
+  "validations": [
+    {
+      "id": "rhea_pax_parent_kept",
+      "query": "parent(rhea, pax).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "pax_uma_removed",
+      "query": "parent(pax, uma).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "pax_toma_parent",
+      "query": "parent(pax, toma).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "toma_sia_parent",
+      "query": "parent(toma, sia).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "rhea_sia_ancestor",
+      "query": "ancestor(rhea, sia).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "rhea_uma_no_longer_ancestor",
+      "query": "ancestor(rhea, uma).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    }
+  ]
+}

@@ -289,3 +289,309 @@ Auto-populated by `scripts/run_ladder.py` via `--learn-log`.
   - `ce=0.90` remains over-eager on retract noise: parser can consume both scripted clarification answers but still asks a third confirmation-style clarification and hits max rounds.
   - Resulting guidance: for current noisy-English pack, `ce≈0.75` is the stable operating point; if running `ce=0.90`, increase max clarification rounds or tighten clar loop-stop heuristics.
   - Summary artifact: `tmp/runs/clarification_cadence_summary_baseline_v2_20260411.json`.
+## 2026-04-11T21:21:09+00:00
+- Run: `auto_frontier_a1_fix1` | range `rung_28_robustness_hard_parallel_branch_retarget -> rung_28_robustness_hard_parallel_branch_retarget` | selected `1` | executed `1` | skipped `0` | failed `1`
+- Runtime: `ollama` / `qwen3.5:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=1
+- Learned:
+  - `rung_28_robustness_hard_parallel_branch_retarget`: subprocess failed (return code 1).
+## 2026-04-11T21:21:55+00:00
+- Run: `auto_frontier_a1_fix2` | range `rung_28_robustness_hard_parallel_branch_retarget -> rung_28_robustness_hard_parallel_branch_retarget` | selected `1` | executed `1` | skipped `0` | failed `0`
+- Runtime: `ollama` / `qwen3.5:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=1
+- Learned:
+  - `rung_28_robustness_hard_parallel_branch_retarget`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+## 2026-04-11T21:36:59+00:00
+- Run: `auto_frontier_fix2` | range `rung_120_fuzzy_tail_name_noise -> rung_120_fuzzy_tail_name_noise` | selected `1` | executed `1` | skipped `0` | failed `0`
+- Runtime: `ollama` / `qwen3.5:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=1
+- Learned:
+  - `rung_120_fuzzy_tail_name_noise`: passed 4/4; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+## 2026-04-11T21:37:23+00:00
+- Run: `auto_frontier_fix2` | range `rung_180_ce_noisy_pronoun_reverse_guard -> rung_180_ce_noisy_pronoun_reverse_guard` | selected `1` | executed `1` | skipped `0` | failed `0`
+- Runtime: `ollama` / `qwen3.5:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=1
+- Learned:
+  - `rung_180_ce_noisy_pronoun_reverse_guard`: passed 6/6; parse_fail=0, apply_fail=0, clar_rounds=1; prompt=sp-1e43c641b01b.
+## 2026-04-11T21:37:54+00:00
+- Run: `auto_frontier_fix2` | range `rung_200_ce_selective_branch_repair_queries -> rung_200_ce_selective_branch_repair_queries` | selected `1` | executed `1` | skipped `0` | failed `1`
+- Runtime: `ollama` / `qwen3.5:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=1
+- Learned:
+  - `rung_200_ce_selective_branch_repair_queries`: subprocess failed (return code 1).
+## 2026-04-11T21:39:02+00:00
+- Run: `auto_frontier_fix3` | range `rung_200_ce_selective_branch_repair_queries -> rung_200_ce_selective_branch_repair_queries` | selected `1` | executed `1` | skipped `0` | failed `0`
+- Runtime: `ollama` / `qwen3.5:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=1
+- Learned:
+  - `rung_200_ce_selective_branch_repair_queries`: passed 8/8; parse_fail=0, apply_fail=0, clar_rounds=1; prompt=sp-1e43c641b01b.
+## 2026-04-11T22:04:09+00:00
+- Run: `auto_frontier_fix3` | range `rung_110_fuzzy_tail_fragmented_syntax -> rung_110_fuzzy_tail_fragmented_syntax` | selected `1` | executed `1` | skipped `0` | failed `1`
+- Runtime: `ollama` / `qwen3.5:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=1
+- Learned:
+  - `rung_110_fuzzy_tail_fragmented_syntax`: timed out after 1500s.
+## 2026-04-11T22:16:57+00:00
+- Run: `auto_frontier_fix4` | range `rung_110_fuzzy_tail_fragmented_syntax -> rung_110_fuzzy_tail_fragmented_syntax` | selected `1` | executed `1` | skipped `0` | failed `0`
+- Runtime: `ollama` / `qwen3.5:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=1
+- Learned:
+  - `rung_110_fuzzy_tail_fragmented_syntax`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+## 2026-04-11T22:56:17+00:00
+- Run: `auto_cycle_full_20260411` | range `start -> end` | selected `56` | executed `1` | skipped `0` | failed `1`
+- Runtime: `ollama` / `qwen3.5:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=1
+- Learned:
+  - `stage_00_foreign_unseen_probe`: subprocess failed (return code 1).
+## 2026-04-11T23:18:12+00:00
+- Run: `auto_cycle_stage1plus_20260411` | range `stage_01_facts_only -> end` | selected `54` | executed `21` | skipped `0` | failed `1`
+- Runtime: `ollama` / `qwen3.5:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=21
+- Learned:
+  - `stage_01_facts_only`: passed 2/2; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `stage_02_rule_ingest`: passed 1/1; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `stage_03_transitive_chain`: passed 1/1; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `acid_03_temporal_override`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `acid_04_alias_pressure`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `acid_05_long_context_lineage`: passed 5/5; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `acid_06_compound_unpacking`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `acid_07_relation_drift_pressure`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `acid_08_contradiction_reconciliation`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `acid_09_compound_rule_unpacking`: passed 2/2; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `acid_10_compound_retract_unpacking`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `acid_11_batched_fact_rule_retract_mix`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `acid_12_compound_repair_with_query`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `acid_13_branch_preservation_after_repair`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `acid_14_unary_conjunction_retract_effect`: passed 2/2; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `acid_15_dual_track_repair`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `acid_16_rule_stack_retarget`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_17_robustness_easy_paraphrase_chain`: passed 2/2; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_18_robustness_easy_inversion_retract`: passed 2/2; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_19_robustness_hard_hedged_retarget`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_20_robustness_hard_inversion_chain`: timed out after 900s.
+## 2026-04-11T23:22:29+00:00
+- Run: `debug_rung20` | range `rung_20_robustness_hard_inversion_chain -> rung_20_robustness_hard_inversion_chain` | selected `1` | executed `1` | skipped `0` | failed `1`
+- Runtime: `ollama` / `qwen3.5:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=1
+- Learned:
+  - `rung_20_robustness_hard_inversion_chain`: timed out after 240s.
+## 2026-04-11T23:27:25+00:00
+- Run: `debug_rung20_forceempty` | range `rung_20_robustness_hard_inversion_chain -> rung_20_robustness_hard_inversion_chain` | selected `1` | executed `1` | skipped `0` | failed `1`
+- Runtime: `ollama` / `qwen3.5:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=1
+- Learned:
+  - `rung_20_robustness_hard_inversion_chain`: timed out after 240s.
+## 2026-04-11T23:35:20+00:00
+- Run: `auto_cycle_cleanroot_20260411` | range `stage_01_facts_only -> end` | selected `54` | executed `24` | skipped `0` | failed `1`
+- Runtime: `ollama` / `qwen3.5:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=24
+- Learned:
+  - `stage_01_facts_only`: passed 2/2; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `stage_02_rule_ingest`: passed 1/1; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `stage_03_transitive_chain`: passed 1/1; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `acid_03_temporal_override`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `acid_04_alias_pressure`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `acid_05_long_context_lineage`: passed 5/5; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `acid_06_compound_unpacking`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `acid_07_relation_drift_pressure`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `acid_08_contradiction_reconciliation`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `acid_09_compound_rule_unpacking`: passed 2/2; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `acid_10_compound_retract_unpacking`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `acid_11_batched_fact_rule_retract_mix`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `acid_12_compound_repair_with_query`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `acid_13_branch_preservation_after_repair`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `acid_14_unary_conjunction_retract_effect`: passed 2/2; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `acid_15_dual_track_repair`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `acid_16_rule_stack_retarget`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_17_robustness_easy_paraphrase_chain`: passed 2/2; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_18_robustness_easy_inversion_retract`: passed 2/2; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_19_robustness_hard_hedged_retarget`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_20_robustness_hard_inversion_chain`: passed 2/2; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_21_robustness_hard_hedged_retract_shift`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_22_robustness_hard_retarget_lineage`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_23_robustness_hard_repair_bridge`: subprocess failed (return code 1).
+## 2026-04-11T23:36:24+00:00
+- Run: `verify_rung23_fix` | range `rung_23_robustness_hard_repair_bridge -> rung_23_robustness_hard_repair_bridge` | selected `1` | executed `1` | skipped `0` | failed `1`
+- Runtime: `ollama` / `qwen3.5:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=1
+- Learned:
+  - `rung_23_robustness_hard_repair_bridge`: subprocess failed (return code 1).
+## 2026-04-11T23:36:58+00:00
+- Run: `verify_rung23_fix2` | range `rung_23_robustness_hard_repair_bridge -> rung_23_robustness_hard_repair_bridge` | selected `1` | executed `1` | skipped `0` | failed `0`
+- Runtime: `ollama` / `qwen3.5:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=1
+- Learned:
+  - `rung_23_robustness_hard_repair_bridge`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+## 2026-04-11T23:51:16+00:00
+- Run: `auto_cycle_cleanroot_tail_20260411` | range `rung_24_robustness_hard_passive_retarget -> end` | selected `30` | executed `30` | skipped `0` | failed `1`
+- Runtime: `ollama` / `qwen3.5:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=30
+- Learned:
+  - `rung_24_robustness_hard_passive_retarget`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_25_robustness_hard_branch_preservation`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_26_robustness_hard_double_repair_chain`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_27_robustness_hard_midstream_query_repair`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_28_robustness_hard_parallel_branch_retarget`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_30_robustness_hard_role_inversion_parent_form`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_30_spacing_role_inversion_pressure`: passed 4/4; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_35_robustness_hard_passive_voice_repair`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_35_spacing_passive_direction_repair`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_40_robustness_hard_hedged_inversion_bundle`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_40_spacing_hedged_inverse_guard`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_45_spacing_inverse_parent_bundle`: passed 4/4; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_50_spacing_passive_inverse_mix`: passed 4/4; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_60_spacing_hedged_correction_direction`: passed 4/4; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_70_spacing_multi_branch_inverse_repair`: passed 4/4; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_80_spacing_query_inversion_guard`: passed 4/4; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_90_spacing_direction_consistency_stress`: passed 4/4; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_99_spacing_max_english_directional_stress`: passed 6/6; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_100_fuzzy_tail_directional_chatty`: passed 6/6; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_110_fuzzy_tail_fragmented_syntax`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_120_fuzzy_tail_name_noise`: passed 4/4; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_130_fuzzy_tail_soft_retract_language`: passed 4/4; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_140_ce_pronoun_typo_missing_qmark`: passed 4/4; parse_fail=0, apply_fail=0, clar_rounds=1; prompt=sp-1e43c641b01b.
+  - `rung_150_ce_typo_uncertainty_chain`: passed 4/4; parse_fail=0, apply_fail=0, clar_rounds=1; prompt=sp-1e43c641b01b.
+  - `rung_160_ce_soft_retract_noise`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=1; prompt=sp-1e43c641b01b.
+  - `rung_170_ce_pronoun_followup_no_qmark`: passed 4/4; parse_fail=0, apply_fail=0, clar_rounds=1; prompt=sp-1e43c641b01b.
+  - `rung_180_ce_noisy_pronoun_reverse_guard`: passed 6/6; parse_fail=0, apply_fail=0, clar_rounds=1; prompt=sp-1e43c641b01b.
+  - `rung_190_ce_midstream_retarget_queries`: passed 6/6; parse_fail=0, apply_fail=0, clar_rounds=1; prompt=sp-1e43c641b01b.
+  - `rung_200_ce_selective_branch_repair_queries`: passed 8/8; parse_fail=0, apply_fail=0, clar_rounds=1; prompt=sp-1e43c641b01b.
+  - `story_goldilocks_roundtrip`: subprocess failed (return code 1).
+## 2026-04-12T00:08:47+00:00
+- Run: `auto_cycle_stage1_to_rung200_clean_20260411` | range `stage_01_facts_only -> rung_200_ce_selective_branch_repair_queries` | selected `53` | executed `53` | skipped `0` | failed `0`
+- Runtime: `ollama` / `qwen3.5:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=53
+- Learned:
+  - `stage_01_facts_only`: passed 2/2; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `stage_02_rule_ingest`: passed 1/1; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `stage_03_transitive_chain`: passed 1/1; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `acid_03_temporal_override`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `acid_04_alias_pressure`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `acid_05_long_context_lineage`: passed 5/5; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `acid_06_compound_unpacking`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `acid_07_relation_drift_pressure`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `acid_08_contradiction_reconciliation`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `acid_09_compound_rule_unpacking`: passed 2/2; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `acid_10_compound_retract_unpacking`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `acid_11_batched_fact_rule_retract_mix`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `acid_12_compound_repair_with_query`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `acid_13_branch_preservation_after_repair`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `acid_14_unary_conjunction_retract_effect`: passed 2/2; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `acid_15_dual_track_repair`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `acid_16_rule_stack_retarget`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_17_robustness_easy_paraphrase_chain`: passed 2/2; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_18_robustness_easy_inversion_retract`: passed 2/2; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_19_robustness_hard_hedged_retarget`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_20_robustness_hard_inversion_chain`: passed 2/2; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_21_robustness_hard_hedged_retract_shift`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_22_robustness_hard_retarget_lineage`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_23_robustness_hard_repair_bridge`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_24_robustness_hard_passive_retarget`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_25_robustness_hard_branch_preservation`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_26_robustness_hard_double_repair_chain`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_27_robustness_hard_midstream_query_repair`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_28_robustness_hard_parallel_branch_retarget`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_30_robustness_hard_role_inversion_parent_form`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_30_spacing_role_inversion_pressure`: passed 4/4; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_35_robustness_hard_passive_voice_repair`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_35_spacing_passive_direction_repair`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_40_robustness_hard_hedged_inversion_bundle`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_40_spacing_hedged_inverse_guard`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_45_spacing_inverse_parent_bundle`: passed 4/4; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_50_spacing_passive_inverse_mix`: passed 4/4; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_60_spacing_hedged_correction_direction`: passed 4/4; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_70_spacing_multi_branch_inverse_repair`: passed 4/4; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_80_spacing_query_inversion_guard`: passed 4/4; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_90_spacing_direction_consistency_stress`: passed 4/4; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_99_spacing_max_english_directional_stress`: passed 6/6; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_100_fuzzy_tail_directional_chatty`: passed 6/6; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_110_fuzzy_tail_fragmented_syntax`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_120_fuzzy_tail_name_noise`: passed 4/4; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_130_fuzzy_tail_soft_retract_language`: passed 4/4; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_140_ce_pronoun_typo_missing_qmark`: passed 4/4; parse_fail=0, apply_fail=0, clar_rounds=1; prompt=sp-1e43c641b01b.
+  - `rung_150_ce_typo_uncertainty_chain`: passed 4/4; parse_fail=0, apply_fail=0, clar_rounds=1; prompt=sp-1e43c641b01b.
+  - `rung_160_ce_soft_retract_noise`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=1; prompt=sp-1e43c641b01b.
+  - `rung_170_ce_pronoun_followup_no_qmark`: passed 4/4; parse_fail=0, apply_fail=0, clar_rounds=1; prompt=sp-1e43c641b01b.
+  - `rung_180_ce_noisy_pronoun_reverse_guard`: passed 6/6; parse_fail=0, apply_fail=0, clar_rounds=1; prompt=sp-1e43c641b01b.
+  - `rung_190_ce_midstream_retarget_queries`: passed 6/6; parse_fail=0, apply_fail=0, clar_rounds=1; prompt=sp-1e43c641b01b.
+  - `rung_200_ce_selective_branch_repair_queries`: passed 8/8; parse_fail=0, apply_fail=0, clar_rounds=1; prompt=sp-1e43c641b01b.
+## 2026-04-12T00:20:55+00:00
+- Run: `auto_newrungs_210_220_20260412` | range `rung_210_fuzzy_ce_selective_edge_rebuild -> rung_220_fuzzy_ce_rule_timing_branch_swap` | selected `2` | executed `1` | skipped `0` | failed `1`
+- Runtime: `ollama` / `qwen3.5:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=1
+- Learned:
+  - `rung_210_fuzzy_ce_selective_edge_rebuild`: subprocess failed (return code 1).
+## 2026-04-12T00:22:49+00:00
+- Run: `verify_rung210_fix1_20260412` | range `rung_210_fuzzy_ce_selective_edge_rebuild -> rung_210_fuzzy_ce_selective_edge_rebuild` | selected `1` | executed `1` | skipped `0` | failed `0`
+- Runtime: `ollama` / `qwen3.5:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=1
+- Learned:
+  - `rung_210_fuzzy_ce_selective_edge_rebuild`: passed 9/9; parse_fail=0, apply_fail=0, clar_rounds=1; prompt=sp-1e43c641b01b.
+## 2026-04-12T00:23:22+00:00
+- Run: `verify_rung220_20260412` | range `rung_220_fuzzy_ce_rule_timing_branch_swap -> rung_220_fuzzy_ce_rule_timing_branch_swap` | selected `1` | executed `1` | skipped `0` | failed `1`
+- Runtime: `ollama` / `qwen3.5:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=1
+- Learned:
+  - `rung_220_fuzzy_ce_rule_timing_branch_swap`: subprocess failed (return code 1).
+## 2026-04-12T00:24:40+00:00
+- Run: `verify_rung220_fix1_20260412` | range `rung_220_fuzzy_ce_rule_timing_branch_swap -> rung_220_fuzzy_ce_rule_timing_branch_swap` | selected `1` | executed `1` | skipped `0` | failed `0`
+- Runtime: `ollama` / `qwen3.5:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=1
+- Learned:
+  - `rung_220_fuzzy_ce_rule_timing_branch_swap`: passed 9/9; parse_fail=0, apply_fail=0, clar_rounds=1; prompt=sp-1e43c641b01b.
+## 2026-04-12T00:25:39+00:00
+- Run: `verify_rungs_210_220_pair_20260412` | range `rung_210_fuzzy_ce_selective_edge_rebuild -> rung_220_fuzzy_ce_rule_timing_branch_swap` | selected `2` | executed `2` | skipped `0` | failed `0`
+- Runtime: `ollama` / `qwen3.5:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=2
+- Learned:
+  - `rung_210_fuzzy_ce_selective_edge_rebuild`: passed 9/9; parse_fail=0, apply_fail=0, clar_rounds=1; prompt=sp-1e43c641b01b.
+  - `rung_220_fuzzy_ce_rule_timing_branch_swap`: passed 9/9; parse_fail=0, apply_fail=0, clar_rounds=1; prompt=sp-1e43c641b01b.
+## 2026-04-12T00:26:44+00:00
+- Run: `verify_rung230_20260412` | range `rung_230_fuzzy_ce_branch_exclusion_language -> rung_230_fuzzy_ce_branch_exclusion_language` | selected `1` | executed `1` | skipped `0` | failed `1`
+- Runtime: `ollama` / `qwen3.5:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=1
+- Learned:
+  - `rung_230_fuzzy_ce_branch_exclusion_language`: subprocess failed (return code 1).
+## 2026-04-12T02:16:11+00:00
+- Run: `verify_rung230_fix1_20260412` | range `rung_230_fuzzy_ce_branch_exclusion_language -> rung_230_fuzzy_ce_branch_exclusion_language` | selected `1` | executed `1` | skipped `0` | failed `0`
+- Runtime: `ollama` / `qwen3.5:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=1
+- Learned:
+  - `rung_230_fuzzy_ce_branch_exclusion_language`: passed 6/6; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+## 2026-04-12T02:20:38+00:00
+- Run: `sanity_210_230_20260412` | range `rung_210_fuzzy_ce_selective_edge_rebuild -> rung_230_fuzzy_ce_branch_exclusion_language` | selected `3` | executed `1` | skipped `0` | failed `1`
+- Runtime: `ollama` / `qwen3.5:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=1
+- Learned:
+  - `rung_210_fuzzy_ce_selective_edge_rebuild`: subprocess failed (return code 1).
+## 2026-04-12T02:21:14+00:00
+- Run: `r210_rep1_20260412` | range `rung_210_fuzzy_ce_selective_edge_rebuild -> rung_210_fuzzy_ce_selective_edge_rebuild` | selected `1` | executed `1` | skipped `0` | failed `1`
+- Runtime: `ollama` / `qwen3.5:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=1
+- Learned:
+  - `rung_210_fuzzy_ce_selective_edge_rebuild`: subprocess failed (return code 1).
+## 2026-04-12T02:21:32+00:00
+- Run: `r210_rep2_20260412` | range `rung_210_fuzzy_ce_selective_edge_rebuild -> rung_210_fuzzy_ce_selective_edge_rebuild` | selected `1` | executed `1` | skipped `0` | failed `1`
+- Runtime: `ollama` / `qwen3.5:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=1
+- Learned:
+  - `rung_210_fuzzy_ce_selective_edge_rebuild`: subprocess failed (return code 1).
+## 2026-04-12T02:21:50+00:00
+- Run: `r210_rep3_20260412` | range `rung_210_fuzzy_ce_selective_edge_rebuild -> rung_210_fuzzy_ce_selective_edge_rebuild` | selected `1` | executed `1` | skipped `0` | failed `1`
+- Runtime: `ollama` / `qwen3.5:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=1
+- Learned:
+  - `rung_210_fuzzy_ce_selective_edge_rebuild`: subprocess failed (return code 1).
+## 2026-04-12T02:23:29+00:00
+- Run: `stability_210_220_after_staysfix_20260412` | range `rung_210_fuzzy_ce_selective_edge_rebuild -> rung_220_fuzzy_ce_rule_timing_branch_swap` | selected `2` | executed `2` | skipped `0` | failed `0`
+- Runtime: `ollama` / `qwen3.5:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=2
+- Learned:
+  - `rung_210_fuzzy_ce_selective_edge_rebuild`: passed 6/6; parse_fail=0, apply_fail=0, clar_rounds=1; prompt=sp-1e43c641b01b.
+  - `rung_220_fuzzy_ce_rule_timing_branch_swap`: passed 9/9; parse_fail=0, apply_fail=0, clar_rounds=1; prompt=sp-1e43c641b01b.
+## 2026-04-12T02:23:53+00:00
+- Run: `stability_230_after_staysfix_20260412` | range `rung_230_fuzzy_ce_branch_exclusion_language -> rung_230_fuzzy_ce_branch_exclusion_language` | selected `1` | executed `1` | skipped `0` | failed `0`
+- Runtime: `ollama` / `qwen3.5:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=1
+- Learned:
+  - `rung_230_fuzzy_ce_branch_exclusion_language`: passed 6/6; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.

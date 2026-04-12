@@ -165,6 +165,10 @@ def _extract_report_signature(report: dict[str, Any]) -> dict[str, Any]:
         "clarification_answer_backend": str(ms.get("clarification_answer_backend", "")).strip(),
         "clarification_answer_base_url": str(ms.get("clarification_answer_base_url", "")).strip(),
         "clarification_answer_context_length": int(ms.get("clarification_answer_context_length", 0) or 0),
+        "served_llm_model": str(ms.get("served_llm_model", "")).strip(),
+        "served_llm_backend": str(ms.get("served_llm_backend", "")).strip(),
+        "served_llm_base_url": str(ms.get("served_llm_base_url", "")).strip(),
+        "served_llm_context_length": int(ms.get("served_llm_context_length", 0) or 0),
         "prompt_sha256": str(prompt.get("prompt_sha256", "")).strip(),
         "force_empty_kb": "--force-empty-kb" in argv_set,
         "kb_root": _argv_flag_value(argv, "--kb-root"),
@@ -179,6 +183,10 @@ def _build_target_signature(args: argparse.Namespace, prompt_sha256: str) -> dic
     answer_backend = str(args.clarification_answer_backend).strip() if answer_model else ""
     answer_base_url = str(args.clarification_answer_base_url).strip() if answer_model else ""
     answer_ctx = int(args.clarification_answer_context_length) if answer_model else 0
+    served_model = str(args.served_llm_model).strip()
+    served_backend = str(args.served_llm_backend).strip() if served_model else ""
+    served_base_url = str(args.served_llm_base_url).strip() if served_model else ""
+    served_ctx = int(args.served_llm_context_length) if served_model else 0
     return {
         "backend": str(args.backend).strip(),
         "base_url": str(args.base_url).strip(),
@@ -195,6 +203,10 @@ def _build_target_signature(args: argparse.Namespace, prompt_sha256: str) -> dic
         "clarification_answer_backend": answer_backend,
         "clarification_answer_base_url": answer_base_url,
         "clarification_answer_context_length": answer_ctx,
+        "served_llm_model": served_model,
+        "served_llm_backend": served_backend,
+        "served_llm_base_url": served_base_url,
+        "served_llm_context_length": served_ctx,
         "prompt_sha256": str(prompt_sha256).strip(),
         "force_empty_kb": bool(args.force_empty_kb),
         "kb_root": str(args.kb_root).strip(),
@@ -477,6 +489,14 @@ def _run_one(args: argparse.Namespace, scenario: ScenarioRow, out_path: Path) ->
         cmd.extend(["--clarification-answer-backend", str(args.clarification_answer_backend)])
     if args.clarification_answer_base_url:
         cmd.extend(["--clarification-answer-base-url", str(args.clarification_answer_base_url)])
+    if args.served_llm_model:
+        cmd.extend(["--served-llm-model", str(args.served_llm_model)])
+    if args.served_llm_backend:
+        cmd.extend(["--served-llm-backend", str(args.served_llm_backend)])
+    if args.served_llm_base_url:
+        cmd.extend(["--served-llm-base-url", str(args.served_llm_base_url)])
+    if int(args.served_llm_context_length) > 0:
+        cmd.extend(["--served-llm-context-length", str(int(args.served_llm_context_length))])
     if args.env_file:
         cmd.extend(["--env-file", str(args.env_file)])
 
@@ -537,6 +557,10 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--clarification-answer-backend", default="")
     p.add_argument("--clarification-answer-base-url", default="")
     p.add_argument("--clarification-answer-context-length", type=int, default=16384)
+    p.add_argument("--served-llm-model", default="")
+    p.add_argument("--served-llm-backend", default="")
+    p.add_argument("--served-llm-base-url", default="")
+    p.add_argument("--served-llm-context-length", type=int, default=16384)
     p.add_argument("--predicate-registry", default="modelfiles/predicate_registry.json")
     p.add_argument("--strict-registry", action="store_true")
     p.add_argument("--type-schema", default="")

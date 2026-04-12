@@ -1,0 +1,66 @@
+{
+  "name": "rung_210_fuzzy_ce_selective_edge_rebuild",
+  "ontology_name": "rung_210_fuzzy_ce_selective_edge_rebuild",
+  "utterances": [
+    "Mira is Niko's parent.",
+    {
+      "utterance": "uh hes probs parent of opal too, same niko from above",
+      "clarification_answers": [
+        "He means Niko. Niko is a parent of Opal."
+      ],
+      "max_clarification_rounds": 2
+    },
+    "If X is a parent of Y then X is an ancestor of Y.",
+    "If X is an ancestor of Y and Y is an ancestor of Z then X is an ancestor of Z.",
+    "quick check is mira ancestor of opal rn",
+    {
+      "utterance": "nah undo just that niko -> opal bit, mira -> niko stays",
+      "clarification_answers": [
+        "Retract parent(niko, opal).",
+        "Yes, remove only parent(niko, opal)."
+      ],
+      "max_clarification_rounds": 2
+    },
+    "Rhea is parented by Niko.",
+    "Opal has Rhea as a parent.",
+    "after the cleanup does mira reach opal again"
+  ],
+  "validations": [
+    {
+      "id": "mira_niko_parent",
+      "query": "parent(mira, niko).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "niko_opal_removed",
+      "query": "parent(niko, opal).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "niko_rhea_parent",
+      "query": "parent(niko, rhea).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "rhea_opal_parent",
+      "query": "parent(rhea, opal).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "mira_opal_ancestor",
+      "query": "ancestor(mira, opal).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "ghost_he_absent",
+      "query": "parent(he, opal).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    }
+  ]
+}

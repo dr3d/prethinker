@@ -2,7 +2,7 @@
 
 This project is a local workbench for building a high-accuracy semantic parser (Qwen 3.5 9B first) that converts natural language into Prolog-ready logic and applies it into named, persistent knowledge bases.
 
-Last updated: 2026-04-10
+Last updated: 2026-04-12
 
 ## Repository Status Note
 
@@ -57,6 +57,26 @@ If you're evaluating it as a research workbench, it's useful now. If you're eval
   - CE values tested: `0.55`, `0.65`, `0.75`, `0.85`
   - all 8 target scenarios passed at every CE setting
   - clarification rounds improved at lower CE (`0.55` produced `2` total rounds vs `4` at `0.65+`)
+
+## Latest Status Rollup (2026-04-12)
+
+- Prompt provenance for this cycle remained stable at `sp-1e43c641b01b` (pipeline/runtime changes, not SP changes).
+- Clean-root ladder verification reached `100%` on `stage_01 -> rung_200` (`53/53` scenarios in that sweep).
+- Added harder CE/noise rungs:
+  - `rung_210_fuzzy_ce_selective_edge_rebuild`
+  - `rung_220_fuzzy_ce_rule_timing_branch_swap`
+  - `rung_230_fuzzy_ce_branch_exclusion_language`
+- New guardrails added in `kb_pipeline.py` to stabilize noisy retract turns:
+  - route-intent realignment fallback (`route=retract` cannot silently commit `intent=other`)
+  - retract arrow-edge target normalization (`x->y` style repair to `parent(x,y)`)
+  - retract exclusion handling for explicit preserves (`not x->y`, `x->y stays`, `keep x->y`)
+  - stronger lead-in normalization for fact parsing (`please record this:`, connective prefixes)
+- Post-fix stability check passes:
+  - `rung_210`: `6/6`
+  - `rung_220`: `9/9`
+  - `rung_230`: `6/6`
+- Regression test status for MCP server: `12 passed` (`tests/test_mcp_server.py`).
+- Caveat: `stage_00` probes and long story roundtrip remain exploratory and are not treated as primary gating battery for the ladder frontier.
 
 ## Neuro-Symbolic Contract
 

@@ -1,0 +1,80 @@
+{
+  "name": "rung_200_ce_selective_branch_repair_queries",
+  "ontology_name": "rung_200_ce_selective_branch_repair_queries",
+  "utterances": [
+    "Asha is Ben's parent.",
+    "Cara has Ben as a parent.",
+    {
+      "utterance": "he also probs parent of drew, same ben, sorry",
+      "clarification_answers": [
+        "He means Ben. Ben is a parent of Drew."
+      ],
+      "max_clarification_rounds": 2
+    },
+    "Elle is parented by Drew.",
+    "If X is a parent of Y then X is an ancestor of Y, and if X is an ancestor of Y and Y is an ancestor of Z then X is an ancestor of Z.",
+    "sanity check: is asha ancestor of elle",
+    {
+      "utterance": "wait scrap the ben->drew bit, not the cara branch, i tagged the wrong sibling",
+      "clarification_answers": [
+        "Retract parent(ben, drew).",
+        "Yes, remove only parent(ben, drew)."
+      ],
+      "max_clarification_rounds": 2
+    },
+    "Ben is Gia's parent.",
+    "Drew has Gia as a parent.",
+    "after that cleanup is asha ancestor of drew now",
+    "and asha still ancestor of cara right"
+  ],
+  "validations": [
+    {
+      "id": "asha_ben_parent",
+      "query": "parent(asha, ben).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "ben_cara_parent",
+      "query": "parent(ben, cara).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "ben_drew_removed",
+      "query": "parent(ben, drew).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "ben_gia_parent",
+      "query": "parent(ben, gia).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "gia_drew_parent",
+      "query": "parent(gia, drew).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "asha_drew_ancestor",
+      "query": "ancestor(asha, drew).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "asha_cara_ancestor",
+      "query": "ancestor(asha, cara).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "he_drew_absent",
+      "query": "parent(he, drew).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    }
+  ]
+}
