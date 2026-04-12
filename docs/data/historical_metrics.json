@@ -1,13 +1,13 @@
 {
-  "generated_at_utc": "2026-04-12T10:42:51+00:00",
-  "runs_total": 76,
-  "runs_passed": 72,
-  "run_pass_rate": 0.947,
-  "validation_passed": 307,
-  "validation_total": 311,
-  "validation_pass_rate": 0.987,
-  "latest_scenario": "rung_360_ce_story_branch_merge_noise",
-  "latest_finished_utc": "2026-04-12T10:22:39+00:00",
+  "generated_at_utc": "2026-04-12T12:18:23+00:00",
+  "runs_total": 86,
+  "runs_passed": 81,
+  "run_pass_rate": 0.942,
+  "validation_passed": 323,
+  "validation_total": 327,
+  "validation_pass_rate": 0.988,
+  "latest_scenario": "progress_memory_contamination_ablation",
+  "latest_finished_utc": "2026-04-12T11:51:45+00:00",
   "backends": [
     "ollama"
   ]

@@ -4,6 +4,13 @@ This project is a local workbench for building a high-accuracy semantic parser (
 
 Last updated: 2026-04-12
 
+## Quick Links
+
+- docs hub: `docs/index.html`
+- run explorer: `docs/run-reports-hub.html`
+- explainer article: `EXPLAINER.md`
+- assembly log: `SESSIONS.md`
+
 ## Repository Status Note
 
 This repository is new. Core reasoning components (especially the Prolog engine/runtime) were migrated from prior work with an existing unit test history. Test migration is in progress; current status and run-by-run learnings are tracked in:
@@ -29,7 +36,7 @@ Prethinker is a neuro-symbolic parsing workbench, not a finished parser product.
 - Core approach: hybrid pipeline where the model proposes structure, then deterministic runtime logic refines, validates, and applies through local runtime tools.
 - What is solid today: architecture, provenance, prompt/version lineage, scenario ladder, and observability (`kb_runs` + HTML docs/report views).
 - What is not proven yet: broad generalization on hard inputs (transitivity, quantifiers, negation policy, pronoun ambiguity, unseen vocabulary).
-- Current evidence level: stronger than initial smoke stage; frontier now includes story/CE rungs through `rung_360`, but domain breadth and long-tail language still need expansion.
+- Current evidence level: stronger than initial smoke stage; frontier now includes story/CE and progress-memory rungs through `rung_420`, but domain breadth and long-tail language still need expansion.
 
 This is an open research effort and learning artifact, not a startup pitch.
 If you're evaluating it as a research workbench, it's useful now. If you're evaluating it as production-grade semantic parsing, it's still early.
@@ -87,6 +94,20 @@ If you're evaluating it as a research workbench, it's useful now. If you're eval
   - `rung_350`: `11/11`
   - `rung_360`: `12/12`
 - Regression test status for MCP server: `12 passed` (`tests/test_mcp_server.py`).
+- Progress-Memory lane added and validated:
+  - new rungs: `rung_370`, `rung_380`, `rung_390`, `rung_400`, `rung_410`, `rung_420`
+  - new tests: `tests/test_progress_memory.py`
+  - run reports now include governance metrics:
+    - `off_focus_write_attempts`
+    - `off_focus_write_intercepts`
+    - `off_focus_write_commits`
+    - `off_focus_write_block_rate`
+    - `off_focus_write_contamination_rate`
+    - `kb_contamination_delta`
+- Fresh contamination ablation (same scenario, with/without progress memory):
+  - with progress memory: off-focus writes intercepted (`block_rate=1.0`, off-focus query results `no_results`)
+  - without progress memory: off-focus writes committed (off-focus query results `success`)
+  - parser confidence unchanged across both arms (`avg_conf=0.971`), confirming governance gain rather than confidence inflation
 - Caveat: `stage_00` probes and long story roundtrip remain exploratory and are not treated as primary gating battery for the ladder frontier.
 
 ## Neuro-Symbolic Contract
@@ -158,6 +179,13 @@ Latest cycle evidence is based on clean-root ladder sweeps in `tmp/runs/`:
   - source: `kb_runs/rung_270_story_lineage_fragmented_ingest_frontier_storypush_270_320_check_20260412.json` through `kb_runs/rung_330_story_booklet_cross_scene_rebind_frontier_storypush_300_330_check_20260412.json`
   - `rung_340 -> rung_360`: passed in refined CE check
   - source: `kb_runs/rung_340_ce_story_pronoun_transfer_frontier_ce_340_360_refined3_check_20260412.json` through `kb_runs/rung_360_ce_story_branch_merge_noise_frontier_ce_340_360_refined3_check_20260412.json`
+- Progress-memory extension:
+  - `rung_370 -> rung_420`: passed in latest progress-memory validation cycle
+  - source: `kb_runs/rung_370_progress_feasibility_alignment_progress_memory_v1_20260412.json` through `kb_runs/rung_420_progress_focus_shift_transition_progress_memory_v1_20260412.json`
+- Progress-memory ablation evidence:
+  - with-progress: `kb_runs/progress_memory_contamination_ablation_with_progress_20260412.json`
+  - no-progress: `kb_runs/progress_memory_contamination_ablation_no_progress_20260412.json`
+  - result: progress-memory policy blocked off-focus KB writes without changing parser confidence baseline
 
 Note: docs publishing is now intentionally curated. `docs/data/runs_manifest.json` reflects the curated public slice (`kb_runs_published/`) while `docs/data/historical_metrics.json` is computed from the full run history in `kb_runs/`.
 

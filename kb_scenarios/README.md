@@ -2,7 +2,7 @@
 
 These scenario files are consumed by `kb_pipeline.py`.
 
-Last updated: 2026-04-09
+Last updated: 2026-04-12
 
 ## Contract
 
@@ -13,6 +13,13 @@ Each scenario JSON contains:
   - each item can be either:
     - string: `"Alex is parent of Sam."`
     - object: `{"utterance":"Alex is parent of Sam.","clarification_answers":["I mean Alex is Sam's father."],"confirmation_answers":["yes"],"max_clarification_rounds":2,"require_final_confirmation":true}`
+    - object can also include Progress Memory directives:
+      - `progress.set_active_focus`: list of active focus strings
+      - `progress.add_goals`: list of goal strings
+      - `progress.add_open_questions`: list of unresolved question strings
+      - `progress.resolve_goals`: list of goal ids/text to resolve
+      - `progress.resolve_questions`: list of question ids/text to resolve
+      - `progress.add_notes`: list of notes for progress context
 - `validations`: list of deterministic checks run after all turns
 
 Validation entry fields:
@@ -113,3 +120,17 @@ These extend beyond family-only parsing into operational and simulation language
 4. `rung_251_ops_indie_warroom_natural_flow.json`
 5. `rung_260_sim_fantasy_state_repair.json`
 6. `rung_261_sim_fantasy_overlord_natural_flow.json`
+
+## Progress-Memory Rungs
+
+These scenarios exercise the feasibility-vs-progress lane and goal-directed clarification behavior:
+
+1. `rung_370_progress_feasibility_alignment.json`
+2. `rung_380_progress_irrelevant_fact_filter.json`
+3. `rung_390_progress_goal_directed_clarification.json`
+
+Additional benefit-targeted probes:
+
+4. `rung_400_progress_relevance_repair.json`
+5. `rung_410_progress_goal_context_steering.json`
+6. `rung_420_progress_focus_shift_transition.json`

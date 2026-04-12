@@ -1,0 +1,45 @@
+{
+  "name": "rung_390_progress_goal_directed_clarification",
+  "ontology_name": "rung_390_progress_goal_directed_clarification",
+  "utterances": [
+    {
+      "utterance": "We are tracking maritime handoff custody and seal continuity.",
+      "progress": {
+        "set_active_focus": [
+          "maritime handoff custody carries brass_seal",
+          "seal carrier continuity riven"
+        ],
+        "add_goals": [
+          "track who carries the brass seal"
+        ],
+        "add_open_questions": [
+          "who carries brass_seal now"
+        ]
+      }
+    },
+    {
+      "utterance": "person(riven).",
+      "clarification_answers": [
+        "This establishes riven as the named carrier in the custody chain."
+      ],
+      "max_clarification_rounds": 2
+    },
+    {
+      "utterance": "he carries brass_seal.",
+      "clarification_answers": [
+        "he means riven",
+        "this is part of maritime handoff custody tracking"
+      ],
+      "max_clarification_rounds": 2
+    },
+    "query carries(riven, brass_seal)."
+  ],
+  "validations": [
+    {
+      "id": "carrier_resolved",
+      "query": "carries(riven, brass_seal).",
+      "expect_status": "success",
+      "min_rows": 1
+    }
+  ]
+}

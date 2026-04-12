@@ -561,6 +561,96 @@ Notes:
 - this prevents docs/report sprawl while preserving full evidence and trendability.
 - docs landing content and README were updated to explain the retention model.
 
+## Session 19: Progress Memory v1 (Governance Layer + New Rungs)
+
+Date: 2026-04-12 UTC
+
+Outcome:
+
+- implemented Progress Memory v1 in `kb_pipeline.py`:
+  - per-ontology `progress.json` state (`active_focus`, `goals`, `open_questions`, `resolved_items`, `notes`)
+  - scenario-level progress directives (`progress.set_active_focus`, `add_goals`, `add_open_questions`, `resolve_goals`, `resolve_questions`, `add_notes`)
+  - progress-aware clarification policy inputs:
+    - `progress_low_relevance_threshold`
+    - `progress_high_risk_threshold`
+  - progress context included in clarification answer prompt packs
+- added dedicated progress-memory unit tests:
+  - `tests/test_progress_memory.py`
+- added progress-memory scenario packs:
+  - `rung_370_progress_feasibility_alignment`
+  - `rung_380_progress_irrelevant_fact_filter`
+  - `rung_390_progress_goal_directed_clarification`
+  - `rung_400_progress_relevance_repair`
+  - `rung_410_progress_goal_context_steering`
+  - `rung_420_progress_focus_shift_transition`
+
+Verification:
+
+- full test suite passed (`28/28`)
+- all new progress rungs passed in core runtime checks
+
+## Session 20: Progress Memory Value Proof (Contamination Ablation + Metrics)
+
+Date: 2026-04-12 UTC
+
+Outcome:
+
+- added run-level governance metrics to `kb_pipeline.py` reports:
+  - `off_focus_write_attempts`
+  - `off_focus_write_intercepts`
+  - `off_focus_write_commits`
+  - `off_focus_write_block_rate`
+  - `off_focus_write_contamination_rate`
+  - `kb_contamination_delta`
+- added per-turn tracking fields to support those aggregates:
+  - `progress_low_relevance_seen`
+  - `progress_high_risk_seen`
+- ran same-scenario contamination ablation with fresh KB namespaces:
+  - with progress memory:
+    - off-focus writes intercepted
+    - `block_rate=1.000`
+    - off-focus query outcomes were `no_results`
+  - without progress memory:
+    - off-focus writes committed
+    - off-focus query outcomes were `success`
+  - parser confidence was unchanged between arms (`avg_conf=0.971`)
+
+Interpretation:
+
+- progress memory provides state-governance value (KB contamination control), not parser-confidence lift.
+- this justifies keeping progress memory in high-integrity flows and optionally disabling it in bulk-ingest lanes.
+
+## Session 21: Public-Facing Polish + Docs Hub Refresh
+
+Date: 2026-04-12 UTC
+
+Outcome:
+
+- refreshed public docs surfaces to foreground current frontier work:
+  - `docs/index.html` updated callouts for `rung_370 -> rung_420`
+  - explicit links added for progress-memory contamination ablation runs
+  - founder explainer card retained as top-level narrative entry point
+- updated README quick-link framing and evidence summary wording so outside readers land on:
+  - docs hub
+  - run explorer
+  - explainer article
+  - sessions assembly log
+- regenerated report hub/manifests after adding new progress-memory run artifacts:
+  - `docs/run-reports-hub.html`
+  - `docs/data/runs_manifest.json`
+  - `docs/data/runs_curated.json`
+  - `docs/data/scenario_progress.json`
+  - `docs/data/prompt_versions.json`
+  - `docs/data/historical_metrics.json`
+
+Notes:
+
+- this publish pass keeps the "curated public slice + full historical corpus" split intact:
+  - `kb_runs/` remains canonical history
+  - `kb_runs_published/` remains bounded docs source
+- objective for this pass was presentation clarity, not benchmark inflation:
+  evidence now emphasizes current frontier and governance deltas while preserving full lineage in raw runs.
+
 
 
 

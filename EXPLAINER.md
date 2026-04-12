@@ -1,182 +1,77 @@
-# Prethinker Explainer (Fresh Draft)
+# Prethinker Explainer (X Article Draft)
 
-## What We Are Building
+This file is the public narrative draft for sharing Prethinker progress and design decisions.
 
-Prethinker is a control plane that sits in front of an LLM and protects deterministic memory.
+## Latest Discoveries In Linguistic Parsing Science (As Observed In This Project)
 
-Its job is narrow and strict:
+The main discovery is that most real parser failures do not look like ignorance. They look like near-correctness. The model often understands the sentence well enough to sound right, but still chooses the wrong write target, flips an argument order, packs multiple operations into one blob, or treats a repair as commentary instead of an executable retract. That is the dangerous zone.
 
-- read human language
-- extract machine-usable intent
-- decide whether it is safe enough to write
-- mutate/query Prolog state only through governed paths
+We have seen several concrete failure modes repeatedly.
 
-This project is not about making a friendlier chatbot.  
-It is about making a safer thinking boundary.
+First, English surface form is a bad predictor of argument order. Possessive, passive, and inversion forms all create false confidence. "A is B's parent," "A has B as a parent," and "A is parented by B" are close in wording and very different in Prolog direction. Early runs passed easy declaratives and still failed on these alternations.
 
-## Core Idea
+Second, compound utterances are not just longer utterances. They are a different parsing problem. The model can semantically understand "assert this, retract that, and tell me whether the lineage still holds" while still serializing the whole turn as one malformed logic string. A large part of the hard-rung work was learning that multi-clause language must be unpacked explicitly, not merely "understood."
 
-We call the pattern a **Governed Intent Compiler**.
+Third, natural-language retracts are unusually under-specified. People do not say `retract(parent(x,y))`. They say "undo that," "not that branch," "keep this edge," "swap the middle one," or "I tagged the wrong sibling." We learned that correction language needs its own normalization layer. Without that layer, the system either misses the retract or removes the wrong edge.
 
-Natural language is treated like source text.  
-Prethinker compiles it into structured operations:
+Fourth, exclusion language is a silent killer. Turns containing "not," "stays," or "keep" can look like ordinary retracts while actually specifying what must remain untouched. This project hit that exact bug class and had to add explicit handling so a repair turn could exclude preserved branches rather than wipe them out.
 
-- `assert_fact`
-- `assert_rule`
-- `query`
-- `retract`
-- `other`
+Fifth, clarification can hurt accuracy if asked at the wrong time. The lesson from the CE sweeps was not simply "ask more" or "ask less." It was that clarification helps when referents or write targets are genuinely unresolved, and hurts when the parse is already deterministic. Good clarification policy is selective friction.
 
-Then policy decides what happens next.
+Sixth, story-width frontier runs showed that failures move as the system improves. Early failures were basic routing and schema shape. Later failures were timing, correction semantics, branch preservation, and long-turn consistency. That is a healthier class of problem, but it is still a hard problem.
 
-## Contract
+The honest takeaway is that linguistic parsing at high accuracy is less about broad semantic vibes and more about controlling narrow failure channels: argument direction, clause unpacking, retract targeting, pronoun carryover, and confidence illusion.
 
-**The LLM proposes. The runtime decides.**
+## Precise Mechanisms Of GIC Design And How High Accuracy Is Achieved
 
-More concretely:
+Prethinker is built as a Governed Intent Compiler, or GIC. Natural language is treated as source text that may propose writes, queries, or repairs, but proposal is not authority.
 
-1. Parser proposes a structured JSON interpretation.
-2. Pipeline validates and normalizes it.
-3. Policy classifies risk/uncertainty.
-4. If safe and authorized, deterministic runtime applies it.
-5. If not safe, Prethinker clarifies or refuses.
+The architecture runs on two different memories because they solve different problems.
 
-## Why This Exists
+The first memory is the deterministic KB. This is the sharp memory. It lives in retained named Prolog corpora, supports exact queries, preserves provenance, and is the only memory allowed to count as state authority.
 
-Fluent LLM output is not the same as reliable memory mutation.
+The second memory is the served LLM context. This is the mushy memory. It is useful for resolving phrasing, pronouns, likely referents, and clarification candidates, but it is probabilistic and non-authoritative by design. It can help interpret language. It cannot define truth.
 
-For fact-sensitive workflows, we need:
+That split is the core accuracy mechanism. We do not ask the LLM to both interpret and own the world state. We ask it to propose, then force the proposal through deterministic checks, normalization, and apply policy.
 
-- deterministic state
-- reversible updates
-- auditable trace of every write
-- explicit handling of ambiguity
+The MITM role is the control-plane interception point. Prethinker sits between the human utterance and any durable state mutation. Every turn is intercepted before write execution. The interceptor classifies the turn, normalizes it into one of the governed intents, decides whether the turn is safe enough to apply, and only then allows the runtime to assert, retract, or query. Without that MITM layer, wrong writes become conversationally plausible and operationally invisible.
 
-Prethinker is the layer that enforces that discipline.
+Accuracy is also achieved by using two clarification paths, not one.
 
-## The Memory Split
+One path is direct user clarification. This is the highest-trust disambiguation source because the human owns the intended meaning. If a write target is ambiguous, user clarification can resolve the referent and authorize the mutation.
 
-The architecture intentionally separates two memory modes:
+The other path is served-LLM clarification. In current runs this can be a separate model, often `gpt-oss:20b`, grounded with recent accepted turns plus a deterministic KB snapshot and bounded by confidence thresholds. Its job is to answer advisory clarification prompts when we want a synthetic clarification loop during evaluation or semi-automated operation.
 
-- **Sharp memory**: Prolog KB (deterministic, auditable, queryable)
-- **Mushy memory**: served LLM context (helpful, probabilistic, non-authoritative)
+Those two paths are intentionally asymmetric. The served LLM is advisory. The user is authoritative.
 
-Sharp memory is truth authority.  
-Mushy memory is advisory context.
+That trust boundary is non-negotiable. A served LLM answer can suggest a likely interpretation, but it does not manufacture certainty. Final commit authority for uncertain writes must come from deterministic KB disambiguation or explicit user confirmation. The MCP server and pipeline both reflect that same rule: writes can be blocked until confirmation, and clarification answers are recorded as inputs to governance, not as autonomous commit rights.
 
-## Clarification Philosophy
+The robotic clarification voice is also intentional. It is not unfinished product design. It is an interface safety choice. The clarification text is brief, narrow, and almost mechanical because social fluency can disguise uncertainty. The system should sound like an instrument when it is asking for write authority. If a warmer conversational layer is wanted later, it can sit on top of this. The canonical control plane should remain plain.
 
-Clarification is not a side feature; it is the safety mechanism.
+## How Prethinker Was Built And Tuned
 
-When uncertainty is high, Prethinker asks for clarity before writes.
-This is controlled by CE (Clarification Eagerness):
+The project was built with a ladder method because single benchmark scores hide too much. We moved upward and wider at the same time.
 
-- higher CE: ask sooner
-- lower CE: commit sooner
+Moving upward means increasing logical difficulty: facts, then rules, then transitive chains, then retractions, branch repair, exclusion language, story revisions, and multi-round clarification pressure.
 
-Write operations can also require explicit user confirmation (`go/no-go`) before mutation.
+Moving wider means holding the logical target fixed while making the English worse: paraphrase, passive voice, inversion, pronouns, typos, hedging, missing punctuation, mixed ingest/query turns, and repair language that sounds natural instead of formal.
 
-## Served LLM Role (Strictly Limited)
+That ladder design matters because many systems pass the clean lane and fail the width lane. In this repo, the frontier now reaches clean-root sweeps through `rung_200`, validated follow-up checks on `rung_210` and `rung_220`, and story plus CE frontier passes through `rung_360`. Just as important, the run logs show the misses that happened before those passes. The history is part of the method.
 
-The served LLM can help with language shape and candidate interpretation, especially for messy phrasing and pronouns.
+Tuning was not only prompt work. It was orchestration work. `kb_pipeline.py` now layers route selection, split extraction, schema and Prolog validation, optional repair, policy gating, deterministic runtime apply, and post-run validation. Many accuracy gains came from guardrails around the model, not from the model alone.
 
-But it is not trusted as an authority:
+The development workflow also uses parallel agents for throughput and containment. Codex and agent54 work as separate operators with explicit file ownership and disjoint write sets. That lowers merge risk, keeps experiments auditable, and lets one agent extend scenarios or documentation while another hardens runtime behavior or evaluates frontier runs. In practice this is less about novelty than about keeping iteration speed high without corrupting the repo state.
 
-- it can suggest
-- it cannot commit
-- it cannot silently override policy
-- it cannot create certainty by itself
+The runtime and cost profile shape the tuning strategy. Real run campaigns here are not toy loops. Frontier sweeps, clarification cadence checks, story-width passes, and reruns after a guardrail change can consume multi-hour blocks on an RTX 5090. The binding constraint is usually wall-clock, GPU occupancy, and human attention for reading the failures, not merely the ability to launch another run. That pushes the project toward asymptotic improvement: smaller gains, better instrumentation, stricter scenario design, and more selective reruns instead of brute-force optimism.
 
-User confirmation remains the final gate for writes when enabled.
+This is why provenance, run retention, and curated evidence matter so much in this repo. When cycles are expensive, forgetting what changed is one of the most costly bugs.
 
-## Voice Model
+## What This Means Now
 
-Prethinker is intentionally robotic.
+Prethinker is no longer just a prompt experiment. It is a governed architecture for turning noisy language into deterministic state updates under explicit trust rules.
 
-- brief
-- precise
-- non-social
-- no fluff
+What it means now is simple.
 
-That is by design. It is an instrument voice, not a companion voice.
-
-If a friendlier surface is desired, that can be layered later as presentation, while canonical semantics stay unchanged.
-
-## Pipeline Shape
-
-Main orchestrator: `kb_pipeline.py`  
-Runtime engine: `engine/core.py`
-
-Flow:
-
-1. route + extract
-2. validate + repair if needed
-3. score uncertainty
-4. run policy gate (`commit`, `stage_provisionally`, `ask_clarification`, `escalate`, `reject`)
-5. apply deterministic operation (or block)
-6. record provenance + validation outputs
-
-## Evaluation Strategy
-
-Rungs are used as progressive pressure, not vanity scores.
-
-Two dimensions:
-
-- logic height (facts -> rules -> chains -> corrections)
-- language width (paraphrase, inversion, noisy phrasing, pronouns, missing punctuation)
-
-The objective is not "100% once."  
-The objective is sustained performance as test pressure expands.
-
-## Golden KB Direction
-
-When a scenario is rigorously validated, its resulting KB can be frozen as a golden target.
-
-Then future runs can be scored against expected end-state quickly and deterministically.
-
-This speeds iteration without removing rigor.
-
-## What Is Strong Right Now
-
-- clear separation between neural parsing and symbolic authority
-- deterministic local runtime integration
-- policy-gated clarification path
-- strong run provenance and reportability
-- growing cross-domain rung battery
-
-## Evidence Publishing Model
-
-The project keeps two evidence views on purpose:
-
-- full run history in `kb_runs/` for deep audit and trend analysis
-- curated published slice in docs (`docs/data/runs/`) for signal-first public reporting
-
-Historical counters on the docs hub are computed from the full corpus, while the explorer table stays intentionally bounded so reporting remains readable.
-
-## What Is Hard Right Now
-
-- pronoun/coreference across turns
-- high-noise language while preserving exact predicate intent
-- balancing throughput vs clarification friction
-- preventing subtle wrong writes under confidence illusions
-
-## Project Posture
-
-Prethinker is a serious research workbench in active evolution.
-
-It is already useful for controlled domains and disciplined experimentation.
-It is not presented as a universal, final semantic parser.
-
-## Founder Lens
-
-I did not build this to make a chat persona. I built it to protect truth in memory.
-
-When language is fuzzy, people still need reliable state. Prethinker is the boundary
-that slows the system down just enough to ask the right question before writing
-something wrong forever.
-
-If it sometimes feels strict, that is the point. Fluency is cheap; accountable memory is not.
-
-## Diagram
+The system is good enough to demonstrate real control-plane discipline, real frontier progress, and honest evidence of where it still breaks. It is not claiming universal semantic parsing. It is claiming that if memory matters, the right architecture is one where the model does not get to write alone.
 
 ![Pre-thinker Control Plane](docs/assets/prethinker-control-plane-infographic-v2.png)

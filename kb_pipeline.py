@@ -35,6 +35,7 @@ DEFAULT_BACKEND = "ollama"
 DEFAULT_KB_ROOT = Path("kb_store")
 DEFAULT_EPHEMERAL_KB_ROOT = Path("tmp/kb_store")
 DEFAULT_KB_NAME = "default"
+DEFAULT_PROGRESS_MEMORY_NAME = "progress.json"
 DEFAULT_PREDICATE_REGISTRY = Path("modelfiles/predicate_registry.json")
 DEFAULT_PROMPT_HISTORY_DIR = Path("modelfiles/history/prompts")
 DEFAULT_BASE_URLS = {
@@ -63,6 +64,7 @@ AMBIGUOUS_PRONOUN_ATOMS = {
     "these",
     "those",
 }
+WRITE_INTENTS = {"assert_fact", "assert_rule", "retract"}
 
 
 @dataclass
@@ -1071,26 +1073,63 @@ def _clarification_policy_decision(
     *,
     parsed: dict[str, Any],
     clarification_eagerness: float,
+    utterance: str = "",
+    progress_memory: dict[str, Any] | None = None,
+    progress_low_relevance_threshold: float = 0.34,
+    progress_high_risk_threshold: float = 0.18,
 ) -> dict[str, Any]:
     eagerness = _clip_01(clarification_eagerness, fallback=0.0)
     uncertainty_score = _clip_01(parsed.get("uncertainty_score"), fallback=_estimate_uncertainty_score(parsed))
     ambiguity_count = len(parsed.get("ambiguities", [])) if isinstance(parsed.get("ambiguities"), list) else 0
     needs_clarification = bool(parsed.get("needs_clarification", False))
+    intent = str(parsed.get("intent", "")).strip().lower()
     boosted_uncertainty = uncertainty_score
     if needs_clarification:
         boosted_uncertainty = max(boosted_uncertainty, 0.82)
     if ambiguity_count > 0:
         boosted_uncertainty = max(boosted_uncertainty, min(0.92, 0.45 + 0.1 * ambiguity_count))
+
+    low_threshold = _clip_01(progress_low_relevance_threshold, fallback=0.34)
+    high_threshold = _clip_01(progress_high_risk_threshold, fallback=0.18)
+    if high_threshold > low_threshold:
+        high_threshold = low_threshold
+
+    progress_summary = _progress_relevance_summary(
+        parsed=parsed,
+        utterance=utterance,
+        progress_memory=progress_memory,
+    )
+    progress_score = _clip_01(progress_summary.get("progress_relevance_score"), fallback=1.0)
+    progress_low_relevance = False
+    progress_high_risk = False
+    if (
+        progress_summary.get("progress_focus_present")
+        and intent in WRITE_INTENTS
+    ):
+        if progress_score <= high_threshold:
+            progress_low_relevance = True
+            progress_high_risk = True
+            boosted_uncertainty = max(boosted_uncertainty, 0.9)
+        elif progress_score <= low_threshold:
+            progress_low_relevance = True
+            boosted_uncertainty = max(boosted_uncertainty, 0.8)
+
     threshold = max(0.05, 1.0 - eagerness)
     request = boosted_uncertainty >= threshold
-    return {
+    out = {
         "clarification_eagerness": eagerness,
         "uncertainty_score": uncertainty_score,
         "effective_uncertainty": round(boosted_uncertainty, 3),
         "threshold": round(threshold, 3),
         "request_clarification": bool(request),
         "needs_clarification_flag": needs_clarification,
+        "progress_low_relevance": bool(progress_low_relevance),
+        "progress_high_risk": bool(progress_high_risk),
+        "progress_low_relevance_threshold": round(low_threshold, 3),
+        "progress_high_risk_threshold": round(high_threshold, 3),
     }
+    out.update(progress_summary)
+    return out
 
 
 def _coerce_utterance_entry(raw: Any) -> tuple[str, list[str], int | None, list[str], bool | None]:
@@ -1235,6 +1274,7 @@ def _build_clarification_context_pack(
     server: Any,
     corpus_clauses: set[str] | None,
     turn_rows: list[dict[str, Any]],
+    progress_memory: dict[str, Any] | None,
     history_turns: int,
     kb_clause_limit: int,
     kb_char_budget: int,
@@ -1249,11 +1289,26 @@ def _build_clarification_context_pack(
         turn_rows=turn_rows,
         max_turns=max(0, history_turns),
     )
+    progress_lines: list[str] = []
+    if isinstance(progress_memory, dict):
+        progress_lines.extend(_progress_focus_preview(progress_memory, max_items=5))
+        for row in progress_memory.get("open_questions", []):
+            if not isinstance(row, dict):
+                continue
+            if str(row.get("status", "open")).strip().lower() != "open":
+                continue
+            text = str(row.get("text", "")).strip()
+            if text:
+                progress_lines.append(f"open_question: {text}")
+            if len(progress_lines) >= 8:
+                break
     return {
         "kb_clauses": kb_lines,
         "recent_turns": recent_lines,
+        "progress_summary": progress_lines,
         "kb_clause_count": len(kb_lines),
         "recent_turn_count": len(recent_lines),
+        "progress_summary_count": len(progress_lines),
     }
 
 
@@ -1394,15 +1449,20 @@ def _build_clarification_answer_prompt(
     }
     kb_lines: list[str] = []
     recent_lines: list[str] = []
+    progress_lines: list[str] = []
     if isinstance(context_pack, dict):
         kb_raw = context_pack.get("kb_clauses", [])
         recent_raw = context_pack.get("recent_turns", [])
+        progress_raw = context_pack.get("progress_summary", [])
         if isinstance(kb_raw, list):
             kb_lines = [str(item).strip() for item in kb_raw if str(item).strip()]
         if isinstance(recent_raw, list):
             recent_lines = [str(item).strip() for item in recent_raw if str(item).strip()]
+        if isinstance(progress_raw, list):
+            progress_lines = [str(item).strip() for item in progress_raw if str(item).strip()]
     kb_text = "\n".join(f"- {row}" for row in kb_lines) if kb_lines else "(none)"
     recent_text = "\n".join(f"- {row}" for row in recent_lines) if recent_lines else "(none)"
+    progress_text = "\n".join(f"- {row}" for row in progress_lines) if progress_lines else "(none)"
     role = str(answer_role or "proxy_model").strip().lower()
     if role == "served_llm":
         role_rules = (
@@ -1431,6 +1491,7 @@ def _build_clarification_answer_prompt(
         f"Answer role: {role}\n"
         f"Route: {route}\n"
         f"Deterministic KB context:\n{kb_text}\n"
+        f"Progress memory context:\n{progress_text}\n"
         f"Recent accepted turns:\n{recent_text}\n"
         f"Original utterance:\n{utterance}\n"
         f"Clarification question:\n{question}\n"
@@ -1484,6 +1545,7 @@ def _generate_synthetic_clarification_answer(
                 "answer_assumption": str(parsed_json.get("assumption", "")).strip(),
                 "context_kb_clause_count": int((context_pack or {}).get("kb_clause_count", 0) or 0),
                 "context_recent_turn_count": int((context_pack or {}).get("recent_turn_count", 0) or 0),
+                "context_progress_summary_count": int((context_pack or {}).get("progress_summary_count", 0) or 0),
             }
 
     fallback = _coerce_synthetic_answer_text(response.message)
@@ -1500,6 +1562,7 @@ def _generate_synthetic_clarification_answer(
         "answer_assumption": "no parseable synthetic answer",
         "context_kb_clause_count": int((context_pack or {}).get("kb_clause_count", 0) or 0),
         "context_recent_turn_count": int((context_pack or {}).get("recent_turn_count", 0) or 0),
+        "context_progress_summary_count": int((context_pack or {}).get("progress_summary_count", 0) or 0),
     }
 
 
@@ -3362,6 +3425,460 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
     path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
 
+def _progress_text_key(text: str) -> str:
+    return re.sub(r"\s+", " ", str(text or "").strip()).strip().lower()
+
+
+def _progress_item_id(kind: str, text: str) -> str:
+    key = _progress_text_key(text)
+    digest = hashlib.sha1(key.encode("utf-8")).hexdigest()[:10] if key else "empty"
+    return f"{kind}_{digest}"
+
+
+def _coerce_string_list(raw: Any) -> list[str]:
+    if isinstance(raw, str):
+        text = raw.strip()
+        return [text] if text else []
+    if not isinstance(raw, list):
+        return []
+    out: list[str] = []
+    for item in raw:
+        text = str(item).strip()
+        if text:
+            out.append(text)
+    return out
+
+
+def _empty_progress_memory(kb_name: str) -> dict[str, Any]:
+    return {
+        "schema_version": 1,
+        "ontology_name": kb_name,
+        "updated_at_utc": _utc_now_iso(),
+        "active_focus": [],
+        "goals": [],
+        "open_questions": [],
+        "resolved_items": [],
+        "notes": [],
+    }
+
+
+def _normalize_progress_memory(raw: dict[str, Any] | None, *, kb_name: str) -> dict[str, Any]:
+    base = _empty_progress_memory(kb_name)
+    if not isinstance(raw, dict):
+        return base
+    base["ontology_name"] = str(raw.get("ontology_name") or kb_name).strip() or kb_name
+    base["updated_at_utc"] = str(raw.get("updated_at_utc") or _utc_now_iso())
+
+    base["active_focus"] = _coerce_string_list(raw.get("active_focus"))
+
+    goals_raw = raw.get("goals", [])
+    goals: list[dict[str, Any]] = []
+    if isinstance(goals_raw, list):
+        for item in goals_raw:
+            if not isinstance(item, dict):
+                continue
+            text = str(item.get("text", "")).strip()
+            if not text:
+                continue
+            goal_id = str(item.get("id", "")).strip() or _progress_item_id("goal", text)
+            status = str(item.get("status", "active")).strip().lower()
+            if status not in {"active", "resolved"}:
+                status = "active"
+            goals.append(
+                {
+                    "id": goal_id,
+                    "text": text,
+                    "status": status,
+                    "priority": int(item.get("priority", 1) or 1),
+                    "created_turn": int(item.get("created_turn", 0) or 0),
+                    "updated_turn": int(item.get("updated_turn", 0) or 0),
+                    "source": str(item.get("source", "scenario")).strip() or "scenario",
+                }
+            )
+    base["goals"] = goals
+
+    questions_raw = raw.get("open_questions", [])
+    questions: list[dict[str, Any]] = []
+    if isinstance(questions_raw, list):
+        for item in questions_raw:
+            if not isinstance(item, dict):
+                continue
+            text = str(item.get("text", "")).strip()
+            if not text:
+                continue
+            qid = str(item.get("id", "")).strip() or _progress_item_id("question", text)
+            status = str(item.get("status", "open")).strip().lower()
+            if status not in {"open", "resolved"}:
+                status = "open"
+            questions.append(
+                {
+                    "id": qid,
+                    "text": text,
+                    "status": status,
+                    "priority": int(item.get("priority", 1) or 1),
+                    "created_turn": int(item.get("created_turn", 0) or 0),
+                    "updated_turn": int(item.get("updated_turn", 0) or 0),
+                    "source": str(item.get("source", "scenario")).strip() or "scenario",
+                }
+            )
+    base["open_questions"] = questions
+
+    resolved_raw = raw.get("resolved_items", [])
+    resolved_items: list[dict[str, Any]] = []
+    if isinstance(resolved_raw, list):
+        for item in resolved_raw:
+            if not isinstance(item, dict):
+                continue
+            text = str(item.get("text", "")).strip()
+            if not text:
+                continue
+            resolved_items.append(
+                {
+                    "kind": str(item.get("kind", "note")).strip() or "note",
+                    "id": str(item.get("id", "")).strip() or _progress_item_id("resolved", text),
+                    "text": text,
+                    "resolution": str(item.get("resolution", "")).strip(),
+                    "resolved_turn": int(item.get("resolved_turn", 0) or 0),
+                    "resolved_at_utc": str(item.get("resolved_at_utc", "")).strip() or _utc_now_iso(),
+                }
+            )
+    base["resolved_items"] = resolved_items[-200:]
+
+    base["notes"] = _coerce_string_list(raw.get("notes"))
+    return base
+
+
+def _load_progress_memory(path: Path, *, kb_name: str) -> dict[str, Any]:
+    parsed = _load_json(path)
+    return _normalize_progress_memory(parsed, kb_name=kb_name)
+
+
+def _extract_progress_directives(raw_utterance_entry: Any) -> dict[str, Any]:
+    if not isinstance(raw_utterance_entry, dict):
+        return {}
+    payload: dict[str, Any] = {}
+    progress_raw = raw_utterance_entry.get("progress", {})
+    if isinstance(progress_raw, dict):
+        payload.update(progress_raw)
+    for key in (
+        "set_active_focus",
+        "add_goals",
+        "add_open_questions",
+        "resolve_goals",
+        "resolve_questions",
+        "add_notes",
+    ):
+        if key in raw_utterance_entry and key not in payload:
+            payload[key] = raw_utterance_entry.get(key)
+    return payload
+
+
+def _apply_progress_directives(
+    progress_memory: dict[str, Any],
+    directives: dict[str, Any],
+    *,
+    turn_index: int,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    mem = _normalize_progress_memory(
+        progress_memory,
+        kb_name=str(progress_memory.get("ontology_name", DEFAULT_KB_NAME)),
+    )
+    if not isinstance(directives, dict) or not directives:
+        mem["updated_at_utc"] = _utc_now_iso()
+        return mem, []
+
+    events: list[dict[str, Any]] = []
+
+    set_focus = _coerce_string_list(directives.get("set_active_focus"))
+    if set_focus:
+        deduped = list(dict.fromkeys(set_focus))
+        mem["active_focus"] = deduped
+        events.append({"kind": "set_active_focus", "count": len(deduped)})
+
+    add_notes = _coerce_string_list(directives.get("add_notes"))
+    for note in add_notes:
+        mem.setdefault("notes", []).append(note)
+    if add_notes:
+        events.append({"kind": "add_notes", "count": len(add_notes)})
+
+    goals = list(mem.get("goals", []))
+    for text in _coerce_string_list(directives.get("add_goals")):
+        key = _progress_text_key(text)
+        existing = next((row for row in goals if _progress_text_key(row.get("text", "")) == key), None)
+        if existing is not None:
+            existing["status"] = "active"
+            existing["updated_turn"] = int(turn_index)
+            events.append({"kind": "reactivate_goal", "id": existing.get("id"), "text": text})
+            continue
+        row = {
+            "id": _progress_item_id("goal", text),
+            "text": text,
+            "status": "active",
+            "priority": 1,
+            "created_turn": int(turn_index),
+            "updated_turn": int(turn_index),
+            "source": "scenario_directive",
+        }
+        goals.append(row)
+        events.append({"kind": "add_goal", "id": row["id"], "text": text})
+    mem["goals"] = goals[-200:]
+
+    questions = list(mem.get("open_questions", []))
+    for text in _coerce_string_list(directives.get("add_open_questions")):
+        key = _progress_text_key(text)
+        existing = next((row for row in questions if _progress_text_key(row.get("text", "")) == key), None)
+        if existing is not None:
+            existing["status"] = "open"
+            existing["updated_turn"] = int(turn_index)
+            events.append({"kind": "reopen_question", "id": existing.get("id"), "text": text})
+            continue
+        row = {
+            "id": _progress_item_id("question", text),
+            "text": text,
+            "status": "open",
+            "priority": 1,
+            "created_turn": int(turn_index),
+            "updated_turn": int(turn_index),
+            "source": "scenario_directive",
+        }
+        questions.append(row)
+        events.append({"kind": "add_open_question", "id": row["id"], "text": text})
+    mem["open_questions"] = questions[-200:]
+
+    resolved_items = list(mem.get("resolved_items", []))
+
+    resolve_goal_keys = {_progress_text_key(x) for x in _coerce_string_list(directives.get("resolve_goals"))}
+    if resolve_goal_keys:
+        for row in mem.get("goals", []):
+            row_key = _progress_text_key(str(row.get("id", "")))
+            text_key = _progress_text_key(str(row.get("text", "")))
+            if row_key not in resolve_goal_keys and text_key not in resolve_goal_keys:
+                continue
+            if str(row.get("status", "active")) == "resolved":
+                continue
+            row["status"] = "resolved"
+            row["updated_turn"] = int(turn_index)
+            resolved_items.append(
+                {
+                    "kind": "goal",
+                    "id": str(row.get("id", "")),
+                    "text": str(row.get("text", "")),
+                    "resolution": "resolved_by_directive",
+                    "resolved_turn": int(turn_index),
+                    "resolved_at_utc": _utc_now_iso(),
+                }
+            )
+            events.append({"kind": "resolve_goal", "id": row.get("id"), "text": row.get("text", "")})
+
+    resolve_question_keys = {_progress_text_key(x) for x in _coerce_string_list(directives.get("resolve_questions"))}
+    if resolve_question_keys:
+        for row in mem.get("open_questions", []):
+            row_key = _progress_text_key(str(row.get("id", "")))
+            text_key = _progress_text_key(str(row.get("text", "")))
+            if row_key not in resolve_question_keys and text_key not in resolve_question_keys:
+                continue
+            if str(row.get("status", "open")) == "resolved":
+                continue
+            row["status"] = "resolved"
+            row["updated_turn"] = int(turn_index)
+            resolved_items.append(
+                {
+                    "kind": "question",
+                    "id": str(row.get("id", "")),
+                    "text": str(row.get("text", "")),
+                    "resolution": "resolved_by_directive",
+                    "resolved_turn": int(turn_index),
+                    "resolved_at_utc": _utc_now_iso(),
+                }
+            )
+            events.append({"kind": "resolve_question", "id": row.get("id"), "text": row.get("text", "")})
+
+    mem["resolved_items"] = resolved_items[-300:]
+    mem["updated_at_utc"] = _utc_now_iso()
+    return mem, events
+
+
+def _progress_signal_terms(progress_memory: dict[str, Any]) -> set[str]:
+    terms: set[str] = set()
+
+    def add_text(raw: str) -> None:
+        normalized = _atomize(str(raw))
+        if not normalized:
+            return
+        terms.add(normalized)
+        parts = [p for p in normalized.split("_") if p]
+        for part in parts:
+            terms.add(part)
+
+    for text in _coerce_string_list(progress_memory.get("active_focus")):
+        add_text(text)
+    for row in progress_memory.get("goals", []):
+        if not isinstance(row, dict):
+            continue
+        if str(row.get("status", "active")).strip().lower() != "active":
+            continue
+        add_text(str(row.get("text", "")))
+    for row in progress_memory.get("open_questions", []):
+        if not isinstance(row, dict):
+            continue
+        if str(row.get("status", "open")).strip().lower() != "open":
+            continue
+        add_text(str(row.get("text", "")))
+    return terms
+
+
+def _progress_focus_units(progress_memory: dict[str, Any]) -> list[set[str]]:
+    units: list[set[str]] = []
+
+    def add_unit(raw: str) -> None:
+        normalized = _atomize(str(raw))
+        if not normalized:
+            return
+        terms = {part for part in normalized.split("_") if part}
+        if terms:
+            units.append(terms)
+
+    for text in _coerce_string_list(progress_memory.get("active_focus")):
+        add_unit(text)
+    for row in progress_memory.get("goals", []):
+        if not isinstance(row, dict):
+            continue
+        if str(row.get("status", "active")).strip().lower() != "active":
+            continue
+        add_unit(str(row.get("text", "")))
+    for row in progress_memory.get("open_questions", []):
+        if not isinstance(row, dict):
+            continue
+        if str(row.get("status", "open")).strip().lower() != "open":
+            continue
+        add_unit(str(row.get("text", "")))
+
+    return units
+
+
+def _parsed_signal_terms(parsed: dict[str, Any], *, utterance: str) -> set[str]:
+    terms: set[str] = set()
+
+    def add_text(raw: str) -> None:
+        normalized = _atomize(str(raw))
+        if not normalized:
+            return
+        terms.add(normalized)
+        for part in normalized.split("_"):
+            if part:
+                terms.add(part)
+
+    add_text(utterance)
+    add_text(str(parsed.get("logic_string", "")))
+    components = parsed.get("components", {})
+    if isinstance(components, dict):
+        for item in components.get("predicates", []):
+            add_text(str(item))
+        for item in components.get("atoms", []):
+            add_text(str(item))
+    for item in parsed.get("facts", []):
+        add_text(str(item))
+    for item in parsed.get("rules", []):
+        add_text(str(item))
+    for item in parsed.get("queries", []):
+        add_text(str(item))
+    return terms
+
+
+def _progress_relevance_summary(
+    *,
+    parsed: dict[str, Any],
+    utterance: str,
+    progress_memory: dict[str, Any] | None,
+) -> dict[str, Any]:
+    if not isinstance(progress_memory, dict):
+        return {
+            "progress_memory_available": False,
+            "progress_focus_present": False,
+            "progress_signal_term_count": 0,
+            "parsed_signal_term_count": 0,
+            "overlap_term_count": 0,
+            "progress_best_focus_overlap": 0.0,
+            "progress_relevance_score": 1.0,
+        }
+    progress_terms = _progress_signal_terms(progress_memory)
+    if not progress_terms:
+        return {
+            "progress_memory_available": True,
+            "progress_focus_present": False,
+            "progress_signal_term_count": 0,
+            "parsed_signal_term_count": 0,
+            "overlap_term_count": 0,
+            "progress_best_focus_overlap": 0.0,
+            "progress_relevance_score": 1.0,
+        }
+    parsed_terms = _parsed_signal_terms(parsed, utterance=utterance)
+    if not parsed_terms:
+        return {
+            "progress_memory_available": True,
+            "progress_focus_present": True,
+            "progress_signal_term_count": len(progress_terms),
+            "parsed_signal_term_count": 0,
+            "overlap_term_count": 0,
+            "progress_best_focus_overlap": 0.0,
+            "progress_relevance_score": 0.0,
+        }
+    overlap = progress_terms & parsed_terms
+    precision = len(overlap) / max(1, len(parsed_terms))
+    recall = len(overlap) / max(1, len(progress_terms))
+    # Bias toward precision: parsed-turn relevance to active objectives.
+    base_score = (0.75 * precision) + (0.25 * recall)
+
+    focus_units = _progress_focus_units(progress_memory)
+    best_focus_overlap = 0.0
+    for unit in focus_units:
+        if not unit:
+            continue
+        overlap_ratio = len(unit & parsed_terms) / max(1, len(unit))
+        if overlap_ratio > best_focus_overlap:
+            best_focus_overlap = overlap_ratio
+
+    score = max(base_score, best_focus_overlap)
+    return {
+        "progress_memory_available": True,
+        "progress_focus_present": True,
+        "progress_signal_term_count": len(progress_terms),
+        "parsed_signal_term_count": len(parsed_terms),
+        "overlap_term_count": len(overlap),
+        "progress_overlap_terms": sorted(overlap)[:20],
+        "progress_best_focus_overlap": round(_clip_01(best_focus_overlap, fallback=0.0), 3),
+        "progress_relevance_score": round(_clip_01(score, fallback=0.0), 3),
+    }
+
+
+def _progress_focus_preview(progress_memory: dict[str, Any], *, max_items: int = 3) -> list[str]:
+    rows: list[str] = []
+    for text in _coerce_string_list(progress_memory.get("active_focus"))[: max_items]:
+        rows.append(f"focus: {text}")
+    for item in progress_memory.get("goals", []):
+        if not isinstance(item, dict):
+            continue
+        if str(item.get("status", "active")).strip().lower() != "active":
+            continue
+        rows.append(f"goal: {str(item.get('text', '')).strip()}")
+        if len(rows) >= max_items:
+            break
+    return rows[:max_items]
+
+
+def _synthesize_progress_clarification_question(
+    *,
+    progress_memory: dict[str, Any] | None,
+) -> str:
+    if isinstance(progress_memory, dict):
+        preview = _progress_focus_preview(progress_memory, max_items=1)
+        if preview:
+            focus = preview[0].split(":", 1)[-1].strip()
+            if focus:
+                return f"How does this relate to current focus '{focus}'?"
+    return "How is this relevant to the current objective?"
+
+
 def _compare_ontology_profiles(previous: dict[str, Any] | None, current: dict[str, Any]) -> dict[str, Any]:
     prev_set = set()
     if isinstance(previous, dict):
@@ -4174,6 +4691,29 @@ def parse_args() -> argparse.Namespace:
         help="Require explicit final yes/no confirmation before any KB write intent is applied.",
     )
     parser.add_argument(
+        "--progress-memory",
+        action="store_true",
+        default=True,
+        help="Enable Progress Memory policy context (default on).",
+    )
+    parser.add_argument(
+        "--no-progress-memory",
+        action="store_true",
+        help="Disable Progress Memory policy context.",
+    )
+    parser.add_argument(
+        "--progress-low-relevance-threshold",
+        type=float,
+        default=0.34,
+        help="Progress relevance score threshold below which write intents trigger clarification pressure.",
+    )
+    parser.add_argument(
+        "--progress-high-risk-threshold",
+        type=float,
+        default=0.18,
+        help="Progress relevance score threshold treated as high-risk for write intents.",
+    )
+    parser.add_argument(
         "--clarification-answer-model",
         default="",
         help="Optional model id used only to answer clarification questions during runs.",
@@ -4247,6 +4787,12 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
+    progress_memory_enabled = bool(args.progress_memory and not args.no_progress_memory)
+    progress_low_relevance_threshold = _clip_01(args.progress_low_relevance_threshold, fallback=0.34)
+    progress_high_risk_threshold = _clip_01(args.progress_high_risk_threshold, fallback=0.18)
+    if progress_high_risk_threshold > progress_low_relevance_threshold:
+        progress_high_risk_threshold = progress_low_relevance_threshold
+
     run_started = datetime.now(timezone.utc).replace(microsecond=0)
     scenario_path = Path(args.scenario).resolve()
     if not scenario_path.exists():
@@ -4277,6 +4823,7 @@ def main() -> int:
         else Path(args.kb_root).resolve()
     )
     kb_dir = (kb_root / kb_name).resolve()
+    progress_path = kb_dir / DEFAULT_PROGRESS_MEMORY_NAME
     profile_path = kb_dir / "ontology_profile.json"
     ontology_index_path = kb_root / "ontologies_index.json"
     if args.corpus_path.strip():
@@ -4289,6 +4836,11 @@ def main() -> int:
 
     existing_corpus_clauses = _read_corpus_clauses(corpus_path)
     existing_profile = _load_json(profile_path)
+    progress_memory = (
+        _load_progress_memory(progress_path, kb_name=kb_name)
+        if progress_memory_enabled
+        else _empty_progress_memory(kb_name)
+    )
     corpus_exists = corpus_path.exists()
     is_brand_new_ontology = (not corpus_exists) and (not existing_profile)
 
@@ -4408,6 +4960,9 @@ def main() -> int:
         "clarification_eagerness": clarification_eagerness,
         "max_clarification_rounds": max_clarification_rounds,
         "require_final_confirmation": require_final_confirmation,
+        "progress_memory_enabled": progress_memory_enabled,
+        "progress_low_relevance_threshold": progress_low_relevance_threshold,
+        "progress_high_risk_threshold": progress_high_risk_threshold,
         "clarification_auto_answer_enabled": clarification_auto_answer_enabled,
         "clarification_answer_backend": auto_answer_backend if clarification_auto_answer_enabled else "",
         "clarification_answer_base_url": auto_answer_base_url if clarification_auto_answer_enabled else "",
@@ -4520,6 +5075,13 @@ def main() -> int:
         f"max_rounds={max_clarification_rounds} "
         f"final_confirmation={require_final_confirmation}"
     )
+    print(
+        "Progress memory: "
+        f"enabled={progress_memory_enabled} "
+        f"path={progress_path} "
+        f"low_rel={progress_low_relevance_threshold:.2f} "
+        f"high_risk={progress_high_risk_threshold:.2f}"
+    )
     if clarification_auto_answer_enabled:
         print(
             f"{auto_answer_label.capitalize()}: "
@@ -4568,6 +5130,24 @@ def main() -> int:
         ) = _coerce_utterance_entry(raw)
         if not utterance:
             continue
+        progress_directives = _extract_progress_directives(raw)
+        progress_events: list[dict[str, Any]] = []
+        progress_snapshot_before = (
+            _normalize_progress_memory(progress_memory, kb_name=kb_name)
+            if progress_memory_enabled
+            else _empty_progress_memory(kb_name)
+        )
+        if progress_memory_enabled and progress_directives:
+            progress_memory, progress_events = _apply_progress_directives(
+                progress_memory,
+                progress_directives,
+                turn_index=idx,
+            )
+        progress_snapshot_after_directives = (
+            _normalize_progress_memory(progress_memory, kb_name=kb_name)
+            if progress_memory_enabled
+            else _empty_progress_memory(kb_name)
+        )
 
         per_turn_max_rounds = (
             max_clarification_rounds
@@ -4600,7 +5180,14 @@ def main() -> int:
             "threshold": round(max(0.05, 1.0 - clarification_eagerness), 3),
             "request_clarification": False,
             "needs_clarification_flag": False,
+            "progress_memory_available": bool(progress_memory_enabled),
+            "progress_focus_present": False,
+            "progress_relevance_score": 1.0,
+            "progress_low_relevance": False,
+            "progress_high_risk": False,
         }
+        progress_low_relevance_seen = False
+        progress_high_risk_seen = False
 
         parsed: dict[str, Any] | None = None
         parsed_text = ""
@@ -4871,15 +5458,30 @@ def main() -> int:
             clarification_policy = _clarification_policy_decision(
                 parsed=parsed,
                 clarification_eagerness=clarification_eagerness,
+                utterance=turn_input_text,
+                progress_memory=progress_memory if progress_memory_enabled else None,
+                progress_low_relevance_threshold=progress_low_relevance_threshold,
+                progress_high_risk_threshold=progress_high_risk_threshold,
             )
+            if clarification_policy.get("progress_low_relevance"):
+                progress_low_relevance_seen = True
+            if clarification_policy.get("progress_high_risk"):
+                progress_high_risk_seen = True
             clarification_question = str(parsed.get("clarification_question", "")).strip()
             if not clarification_question:
-                clarification_question = _synthesize_clarification_question(
-                    utterance=utterance,
-                    route=route,
-                    ambiguities=parsed.get("ambiguities", []) if isinstance(parsed.get("ambiguities"), list) else [],
-                    reason=str(parsed.get("clarification_reason", "")).strip(),
-                )
+                if clarification_policy.get("progress_low_relevance"):
+                    clarification_question = _synthesize_progress_clarification_question(
+                        progress_memory=progress_memory if progress_memory_enabled else None,
+                    )
+                    if not str(parsed.get("clarification_reason", "")).strip():
+                        parsed["clarification_reason"] = "Low relevance to active objective."
+                else:
+                    clarification_question = _synthesize_clarification_question(
+                        utterance=utterance,
+                        route=route,
+                        ambiguities=parsed.get("ambiguities", []) if isinstance(parsed.get("ambiguities"), list) else [],
+                        reason=str(parsed.get("clarification_reason", "")).strip(),
+                    )
                 parsed["clarification_question"] = clarification_question
 
             if not clarification_policy.get("request_clarification"):
@@ -4924,6 +5526,7 @@ def main() -> int:
                     server=server,
                     corpus_clauses=corpus_clauses,
                     turn_rows=turn_rows,
+                    progress_memory=progress_memory if progress_memory_enabled else None,
                     history_turns=clarification_answer_history_turns,
                     kb_clause_limit=clarification_answer_kb_clause_limit,
                     kb_char_budget=clarification_answer_kb_char_budget,
@@ -4995,6 +5598,9 @@ def main() -> int:
                             "answer_assumption": str(answer_meta.get("answer_assumption", "")).strip(),
                             "answer_context_kb_clause_count": int(answer_meta.get("context_kb_clause_count", 0) or 0),
                             "answer_context_recent_turn_count": int(answer_meta.get("context_recent_turn_count", 0) or 0),
+                            "answer_context_progress_summary_count": int(
+                                answer_meta.get("context_progress_summary_count", 0) or 0
+                            ),
                             "uncertainty_score": clarification_policy.get("uncertainty_score"),
                             "effective_uncertainty": clarification_policy.get("effective_uncertainty"),
                             "threshold": clarification_policy.get("threshold"),
@@ -5114,6 +5720,12 @@ def main() -> int:
                 "clarification_served_llm_answers_used": served_llm_answer_count,
                 "clarification_proxy_answers_used": proxy_answer_count,
                 "clarification_policy": clarification_policy,
+                "progress_low_relevance_seen": progress_low_relevance_seen,
+                "progress_high_risk_seen": progress_high_risk_seen,
+                "progress_directives": progress_directives,
+                "progress_events": progress_events,
+                "progress_snapshot_before": progress_snapshot_before,
+                "progress_snapshot_after_directives": progress_snapshot_after_directives,
                 "clarification_pending": clarification_pending,
                 "clarification_pending_reason": clarification_pending_reason,
                 "clarification_question": clarification_question,
@@ -5179,6 +5791,45 @@ def main() -> int:
     clarification_proxy_answers_total = sum(
         int(row.get("clarification_proxy_answers_used", 0)) for row in turn_rows
     )
+    progress_low_relevance_clarifications = sum(
+        1
+        for row in turn_rows
+        if isinstance(row.get("clarification_policy"), dict)
+        and bool(row["clarification_policy"].get("progress_low_relevance"))
+        and bool(row["clarification_policy"].get("request_clarification"))
+    )
+    progress_high_risk_turns = sum(
+        1
+        for row in turn_rows
+        if isinstance(row.get("clarification_policy"), dict)
+        and bool(row["clarification_policy"].get("progress_high_risk"))
+    )
+    off_focus_write_attempts = sum(
+        1
+        for row in turn_rows
+        if isinstance(row.get("parsed"), dict)
+        and str(row["parsed"].get("intent", "")).strip().lower() in WRITE_INTENTS
+        and bool(row.get("progress_low_relevance_seen"))
+    )
+    off_focus_write_intercepts = sum(
+        1
+        for row in turn_rows
+        if isinstance(row.get("parsed"), dict)
+        and str(row["parsed"].get("intent", "")).strip().lower() in WRITE_INTENTS
+        and bool(row.get("progress_low_relevance_seen"))
+        and str(row.get("decision_state", "")).strip().lower() != "commit"
+    )
+    off_focus_write_commits = sum(
+        1
+        for row in turn_rows
+        if isinstance(row.get("parsed"), dict)
+        and str(row["parsed"].get("intent", "")).strip().lower() in WRITE_INTENTS
+        and bool(row.get("progress_low_relevance_seen"))
+        and str(row.get("decision_state", "")).strip().lower() == "commit"
+    )
+    off_focus_write_block_rate = round(off_focus_write_intercepts / max(1, off_focus_write_attempts), 3)
+    off_focus_write_contamination_rate = round(off_focus_write_commits / max(1, off_focus_write_attempts), 3)
+    kb_contamination_delta = off_focus_write_commits - off_focus_write_intercepts
     decision_state_counts: dict[str, int] = {}
     for row in turn_rows:
         state = str(row.get("decision_state", "reject"))
@@ -5221,6 +5872,22 @@ def main() -> int:
             "path": str(ontology_index_path),
             "ontology_count": len(index_payload.get("ontologies", {})),
         }
+        if progress_memory_enabled:
+            progress_memory["updated_at_utc"] = _utc_now_iso()
+            _write_json(progress_path, progress_memory)
+            progress_write = {
+                "status": "written",
+                "path": str(progress_path),
+                "active_focus_count": len(_coerce_string_list(progress_memory.get("active_focus"))),
+                "goal_count": len(progress_memory.get("goals", [])),
+                "open_question_count": len(progress_memory.get("open_questions", [])),
+            }
+        else:
+            progress_write = {
+                "status": "skipped",
+                "path": str(progress_path),
+                "reason": "Progress memory disabled.",
+            }
     else:
         corpus_write = {
             "status": "skipped",
@@ -5235,6 +5902,11 @@ def main() -> int:
         index_write = {
             "status": "skipped",
             "path": str(ontology_index_path),
+            "reason": "Run failed. Use --write-corpus-on-fail to persist anyway.",
+        }
+        progress_write = {
+            "status": "skipped",
+            "path": str(progress_path),
             "reason": "Run failed. Use --write-corpus-on-fail to persist anyway.",
         }
 
@@ -5254,6 +5926,7 @@ def main() -> int:
             "kb_root": str(kb_root),
             "kb_dir": str(kb_dir),
             "corpus_path": str(corpus_path),
+            "progress_path": str(progress_path),
             "profile_path": str(profile_path),
             "ontology_index_path": str(ontology_index_path),
         },
@@ -5273,6 +5946,9 @@ def main() -> int:
         "kb_init": kb_init,
         "corpus_load": corpus_load,
         "corpus_write": corpus_write,
+        "progress_write": progress_write,
+        "progress_memory_enabled": progress_memory_enabled,
+        "progress_memory": progress_memory,
         "profile_write": profile_write,
         "index_write": index_write,
         "ontology_profile": current_profile,
@@ -5289,6 +5965,14 @@ def main() -> int:
         "clarification_synthetic_answers_total": clarification_synthetic_answers_total,
         "clarification_served_llm_answers_total": clarification_served_llm_answers_total,
         "clarification_proxy_answers_total": clarification_proxy_answers_total,
+        "progress_low_relevance_clarifications": progress_low_relevance_clarifications,
+        "progress_high_risk_turns": progress_high_risk_turns,
+        "off_focus_write_attempts": off_focus_write_attempts,
+        "off_focus_write_intercepts": off_focus_write_intercepts,
+        "off_focus_write_commits": off_focus_write_commits,
+        "off_focus_write_block_rate": off_focus_write_block_rate,
+        "off_focus_write_contamination_rate": off_focus_write_contamination_rate,
+        "kb_contamination_delta": kb_contamination_delta,
         "decision_state_counts": decision_state_counts,
         "validation_total": validation_total,
         "validation_passed": validation_pass,
@@ -5309,6 +5993,20 @@ def main() -> int:
         "Generated clarification answers used: "
         f"{clarification_synthetic_answers_total} "
         f"(served_llm={clarification_served_llm_answers_total}, proxy={clarification_proxy_answers_total})"
+    )
+    print(
+        "Progress-policy clarifications: "
+        f"{progress_low_relevance_clarifications} "
+        f"(high_risk_turns={progress_high_risk_turns})"
+    )
+    print(
+        "Off-focus write policy: "
+        f"attempts={off_focus_write_attempts} "
+        f"intercepts={off_focus_write_intercepts} "
+        f"commits={off_focus_write_commits} "
+        f"block_rate={off_focus_write_block_rate:.3f} "
+        f"contamination_rate={off_focus_write_contamination_rate:.3f} "
+        f"delta={kb_contamination_delta}"
     )
     print(f"Decision states: {decision_state_counts}")
     print(

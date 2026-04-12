@@ -1,0 +1,43 @@
+{
+  "name": "rung_370_progress_feasibility_alignment",
+  "ontology_name": "rung_370_progress_feasibility_alignment",
+  "utterances": [
+    {
+      "utterance": "We are focused on hospital oxygen supply and ICU capacity.",
+      "progress": {
+        "set_active_focus": [
+          "hospital oxygen supply",
+          "icu capacity"
+        ],
+        "add_goals": [
+          "stabilize oxygen supply chain",
+          "protect icu throughput"
+        ],
+        "add_open_questions": [
+          "which supplier is delayed"
+        ],
+        "add_notes": [
+          "progress memory bootstrapped for operations objective"
+        ]
+      }
+    },
+    "incident(oxygen_supply_delay).",
+    "capacity(icu_wing_a, constrained).",
+    "query incident(oxygen_supply_delay).",
+    "query capacity(icu_wing_a, constrained)."
+  ],
+  "validations": [
+    {
+      "id": "incident_recorded",
+      "query": "incident(oxygen_supply_delay).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "capacity_recorded",
+      "query": "capacity(icu_wing_a, constrained).",
+      "expect_status": "success",
+      "min_rows": 1
+    }
+  ]
+}
