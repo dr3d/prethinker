@@ -651,6 +651,29 @@ Notes:
 - objective for this pass was presentation clarity, not benchmark inflation:
   evidence now emphasizes current frontier and governance deltas while preserving full lineage in raw runs.
 
+## Session 22: Demo Portfolio Pack (User + Co-Design Merge)
+
+Date: 2026-04-12 UTC
+
+Outcome:
+
+- added a public demo playbook that merges user-proposed showcase scenarios with Prethinker-native ideas:
+  - `docs/DEMO_PLAYBOOK.md`
+- added runnable starter demo scenarios:
+  - `kb_scenarios/demo_01_meeting_commitment_extractor.json`
+  - `kb_scenarios/demo_02_policy_stress_test_machine.json`
+  - `kb_scenarios/demo_03_story_world_interrogator.json`
+  - `kb_scenarios/demo_04_reimbursement_violation_check.json`
+- updated docs/README surfaces to expose the new demo lane:
+  - `README.md` quick links + demo section
+  - `docs/index.html` new “Demo Playbook (10 + merged)” card
+  - `kb_scenarios/README.md` demo-pack listing
+
+Notes:
+
+- these demo scenarios are intended as showcase starters and are not ladder-gating replacements.
+- they can be run through the same pipeline/runtime and rendered with existing report tooling.
+
 
 
 

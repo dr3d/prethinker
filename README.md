@@ -8,6 +8,7 @@ Last updated: 2026-04-12
 
 - docs hub: `docs/index.html`
 - run explorer: `docs/run-reports-hub.html`
+- demo playbook: `docs/DEMO_PLAYBOOK.md`
 - explainer article: `EXPLAINER.md`
 - assembly log: `SESSIONS.md`
 
@@ -27,6 +28,16 @@ Watch the pre-thinker consume a story, then recite from captured facts and logic
   - input story text
   - expandable generated `kb.pl`
   - reconstructed story generated from KB clauses alone
+
+## Demo Scenario Playbook
+
+Public demo concepts plus runnable starter scenarios are tracked in:
+
+- `docs/DEMO_PLAYBOOK.md`
+- `kb_scenarios/demo_01_meeting_commitment_extractor.json`
+- `kb_scenarios/demo_02_policy_stress_test_machine.json`
+- `kb_scenarios/demo_03_story_world_interrogator.json`
+- `kb_scenarios/demo_04_reimbursement_violation_check.json`
 
 ## Honest Snapshot (For NSAI Readers)
 

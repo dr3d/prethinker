@@ -134,3 +134,12 @@ Additional benefit-targeted probes:
 4. `rung_400_progress_relevance_repair.json`
 5. `rung_410_progress_goal_context_steering.json`
 6. `rung_420_progress_focus_shift_transition.json`
+
+## Demo Pack Scenarios
+
+These are presentation-oriented runnable demos (not core ladder gates):
+
+1. `demo_01_meeting_commitment_extractor.json`
+2. `demo_02_policy_stress_test_machine.json`
+3. `demo_03_story_world_interrogator.json`
+4. `demo_04_reimbursement_violation_check.json`

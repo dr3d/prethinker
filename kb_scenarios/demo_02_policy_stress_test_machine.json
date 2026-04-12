@@ -1,0 +1,30 @@
+{
+  "name": "demo_02_policy_stress_test_machine",
+  "ontology_name": "demo_02_policy_stress_test_machine",
+  "utterances": [
+    "If reimbursement_amount(T, over_10000) and requested_by(T, P) and approved_by(T, P) then policy_violation(T, self_approval_over_10000).",
+    "If requested_by(T, E) and approved_by(T, M) and manages(M, E) then policy_violation(T, manager_approval_conflict).",
+    "reimbursement_amount(feb_txn_01, over_10000).",
+    "requested_by(feb_txn_01, dana).",
+    "approved_by(feb_txn_01, dana).",
+    "reimbursement_amount(feb_txn_02, over_10000).",
+    "requested_by(feb_txn_02, alex).",
+    "approved_by(feb_txn_02, maya).",
+    "manages(maya, alex).",
+    "Which February transactions violate policy?"
+  ],
+  "validations": [
+    {
+      "id": "txn01_self_approval_violation",
+      "query": "policy_violation(feb_txn_01, self_approval_over_10000).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "txn02_manager_conflict_violation",
+      "query": "policy_violation(feb_txn_02, manager_approval_conflict).",
+      "expect_status": "success",
+      "min_rows": 1
+    }
+  ]
+}

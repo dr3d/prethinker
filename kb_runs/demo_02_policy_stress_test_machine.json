@@ -1,0 +1,1536 @@
+{
+  "run_id": "run-20260412T130357Z-demo_02_policy_stress_te-qwen35_semparse_9b-26940",
+  "run_started_utc": "2026-04-12T13:03:57+00:00",
+  "run_finished_utc": "2026-04-12T13:04:21+00:00",
+  "invocation": {
+    "argv": [
+      "kb_pipeline.py",
+      "--backend",
+      "ollama",
+      "--base-url",
+      "http://127.0.0.1:11434",
+      "--model",
+      "qwen35-semparse:9b",
+      "--runtime",
+      "core",
+      "--scenario",
+      "kb_scenarios/demo_02_policy_stress_test_machine.json",
+      "--kb-name",
+      "demo_02_policy_stress_test_machine",
+      "--out",
+      "kb_runs/demo_02_policy_stress_test_machine.json"
+    ],
+    "cwd": "D:\\_PROJECTS\\prethinker"
+  },
+  "scenario": "demo_02_policy_stress_test_machine",
+  "scenario_path": "D:\\_PROJECTS\\prethinker\\kb_scenarios\\demo_02_policy_stress_test_machine.json",
+  "ontology_kb_name": "demo_02_policy_stress_test_machine",
+  "kb_namespace": {
+    "kb_root": "D:\\_PROJECTS\\prethinker\\kb_store",
+    "kb_dir": "D:\\_PROJECTS\\prethinker\\kb_store\\demo_02_policy_stress_test_machine",
+    "corpus_path": "D:\\_PROJECTS\\prethinker\\kb_store\\demo_02_policy_stress_test_machine\\kb.pl",
+    "progress_path": "D:\\_PROJECTS\\prethinker\\kb_store\\demo_02_policy_stress_test_machine\\progress.json",
+    "profile_path": "D:\\_PROJECTS\\prethinker\\kb_store\\demo_02_policy_stress_test_machine\\ontology_profile.json",
+    "ontology_index_path": "D:\\_PROJECTS\\prethinker\\kb_store\\ontologies_index.json"
+  },
+  "backend": "ollama",
+  "base_url": "http://127.0.0.1:11434",
+  "model": "qwen35-semparse:9b",
+  "runtime": "core",
+  "two_pass": true,
+  "split_extraction": true,
+  "model_settings": {
+    "temperature": 0,
+    "context_length": 8192,
+    "classifier_context_length": 8192,
+    "timeout_seconds": 120,
+    "runtime": "core",
+    "two_pass": true,
+    "split_extraction": true,
+    "strict_registry": false,
+    "strict_types": false,
+    "clarification_eagerness": 0.35,
+    "max_clarification_rounds": 2,
+    "require_final_confirmation": false,
+    "progress_memory_enabled": true,
+    "progress_low_relevance_threshold": 0.34,
+    "progress_high_risk_threshold": 0.18,
+    "clarification_auto_answer_enabled": false,
+    "clarification_answer_backend": "",
+    "clarification_answer_base_url": "",
+    "clarification_answer_model": "",
+    "clarification_answer_context_length": 0,
+    "clarification_answer_history_turns": 0,
+    "clarification_answer_kb_clause_limit": 0,
+    "clarification_answer_kb_char_budget": 0,
+    "clarification_answer_min_confidence": 0.0,
+    "clarification_answer_source_prefix": "",
+    "clarification_answer_role": "",
+    "served_llm_model": "",
+    "served_llm_backend": "",
+    "served_llm_base_url": "",
+    "served_llm_context_length": 0,
+    "backend_options": {
+      "num_ctx": 8192
+    }
+  },
+  "prompt_file": "D:\\_PROJECTS\\prethinker\\modelfiles\\semantic_parser_system_prompt.md",
+  "prompt_file_loaded": true,
+  "env_file_loaded": "D:\\_PROJECTS\\prethinker\\.env.local",
+  "prompt_provenance": {
+    "status": "ok",
+    "prompt_id": "sp-1e43c641b01b",
+    "prompt_sha256": "1e43c641b01b7c845b82331b521d58c1993e8010bd9283f5085dac687520159e",
+    "source_path": "D:\\_PROJECTS\\prethinker\\modelfiles\\semantic_parser_system_prompt.md",
+    "snapshot_path": "D:\\_PROJECTS\\prethinker\\modelfiles\\history\\prompts\\sp-1e43c641b01b.md",
+    "snapshot_created": false,
+    "char_count": 9603,
+    "line_count": 221,
+    "preview": "# Semantic Parser Prompt Pack (Qwen 3.5 9B)\nUse this as maintainable guidance for semantic parsing into Prolog structures.\nKeep behavior language-agnostic, deterministic, and schema-strict.\n## Core Priorities\n1. Output exactly one JSON object that matches the required schema.\n2. Preserve semantic meaning; do not hallucinate entities, facts, or arguments.\n3. Prefer canonical, stable predicate names across turns when semantics match.\n4. Use variables instead of assumptions when referents are unresolved."
+  },
+  "system_prompt_text": "# Semantic Parser Prompt Pack (Qwen 3.5 9B)\n\nUse this as maintainable guidance for semantic parsing into Prolog structures.\nKeep behavior language-agnostic, deterministic, and schema-strict.\n\n## Core Priorities\n\n1. Output exactly one JSON object that matches the required schema.\n2. Preserve semantic meaning; do not hallucinate entities, facts, or arguments.\n3. Prefer canonical, stable predicate names across turns when semantics match.\n4. Use variables instead of assumptions when referents are unresolved.\n5. Keep rationale brief and factual.\n\n## Intent Routing Guidance\n\n- `assert_fact`: declarative claims.\n- `assert_rule`: if/then, whenever, conditional, implication.\n- `query`: questions seeking truth or bindings.\n- `retract`: explicit correction/remove/retract/undo.\n- `other`: out-of-scope tasks (translation, formatting, rewrite).\n- Any interrogative utterance (including non-English) should default to `query` unless it explicitly commands a write action.\n\n## Prolog Mapping Guidance\n\n- Atoms: lowercase snake_case.\n- Variables: Uppercase identifiers.\n- Facts: `predicate(atom, ...).`\n- Rules: `head(...) :- body(...).`\n- Queries: goal with trailing period and no `?-` prefix.\n- Retractions: `retract(<fact>).`\n- Do not emit zero-arity forms like `policy_revoked.`\n- Always include explicit arguments in facts/rules/queries.\n- If one utterance contains multiple independent write operations joined by \"and\", emit all operations (do not silently drop later clauses).\n- For yes/no questions, output a query predicate with explicit arguments (or variables), never a bare atom.\n- If required query arguments are unknown, use variables and raise clarification instead of emitting malformed or zero-arity query goals.\n- For `retract`, the inner target must be a fact-like term with explicit arguments (example: `retract(parent(alice,bob)).`).\n- Never emit malformed retractions like `retract(policy_revoked).` with no arguments.\n- For multi-target retract utterances, include every target in `facts` and include each `retract(...)` clause in `logic_string` (newline-separated clauses are acceptable).\n\n## Relation and Argument Discipline\n\n- For forms like `<subject> is <relation> of <object>`, map to `relation(subject, object).`\n- Keep argument order aligned to semantic subject/object roles.\n- Avoid predicate synonym drift when an ontology already uses a compatible predicate.\n- Do not reverse argument order for \"A is a relation of B\" statements.\n- For forms like `A has B as a parent`, map to `parent(B, A)` (not `parent(A, B)`).\n- For passive forms like `A is parented by B`, map to `parent(B, A)`.\n- For possessive forms like `A is B's parent`, map to `parent(A, B)`.\n- Example: \"Bob is a parent of Carol.\" -> `parent(bob, carol).` (never `parent(carol, bob).`)\n- Example: \"Carol is an ancestor of Dana.\" -> `ancestor(carol, dana).`\n- If direction is genuinely unclear, use clarification rather than guessing.\n\n## Predicate Discipline\n\n- Reuse the ontology's existing canonical predicate names whenever semantics match.\n- If runtime constraints include a predicate registry, prefer registry canonical names over aliases.\n- Do not silently create near-duplicate predicates (example: `father_of` and `father` for same meaning).\n- If predicate choice is ambiguous and unsafe, raise uncertainty and ask a focused clarification question.\n- Keep lexical consistency across assertion and retraction turns (same concept -> same predicate form).\n\n## Transitive Rule Readiness\n\nWhen utterances express chain logic, emit explicit compositional rules with shared variables.\nPrefer termination-safe recursion patterns over left-recursive forms.\n\nPreferred pattern when a base relation exists:\n\n- `ancestor(X, Z) :- parent(X, Z).`\n- `ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).`\n\nAvoid left-recursive forms that put the head predicate first in the body, such as:\n\n- `ancestor(X, Z) :- ancestor(X, Y), ancestor(Y, Z).`\n- `depends_on(X, Z) :- depends_on(X, Y), depends_on(Y, Z).`\n\nOnly emit such rules when the utterance semantically indicates transitivity or chained implication.\n\n## Termination Safety Constraints (Mandatory)\n\n- Never place the same predicate as the head predicate in the first body literal.\n- If a rule would be left-recursive, rewrite it to a base-relation recursion pattern.\n- For ancestor semantics, prefer this canonical pair:\n  - `ancestor(X, Y) :- parent(X, Y).`\n  - `ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).`\n- For utterances like \"If X is an ancestor of Y and Y is an ancestor of Z then X is an ancestor of Z.\",\n  do not emit `ancestor(X, Z) :- ancestor(X, Y), ancestor(Y, Z).`\n  Instead emit `ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).` when parent relation exists.\n\n## Ambiguity Handling\n\n- If pronouns or entities are unresolved, set `needs_clarification=true`.\n- Use variables rather than invented atoms.\n- Keep ambiguities list short and concrete.\n\n## Uncertainty Scoring Rubric\n\n- 0.00-0.20: clear statement, explicit entities/roles, deterministic mapping.\n- 0.30-0.55: mild ambiguity but safe provisional parse exists.\n- 0.60-0.79: unresolved referent, role-direction ambiguity, or predicate-choice ambiguity.\n- 0.80-1.00: missing required argument, contradictory interpretation, or likely hallucination risk.\n- Unknown pronoun/referent should usually be >= 0.70.\n- Missing essential argument should usually be >= 0.85.\n- If uncertainty >= 0.60 for write intents (`assert_fact`, `assert_rule`, `retract`), prefer clarification.\n\n## Uncertainty And Clarification Contract\n\n- Always emit:\n  - `uncertainty_score` in `[0,1]` where `1` means very uncertain.\n  - `uncertainty_label` as `low | medium | high`.\n  - `clarification_reason` with concrete wording (<= 12 words).\n  - `clarification_question` ending with `?` when uncertainty is non-trivial.\n- If uncertainty is high enough to block safe write intent, set `needs_clarification=true`.\n- Clarification questions should target missing entities, relation direction, or correction target.\n\n## Clarification Question Style\n\n- Ask one focused question at a time.\n- Prefer disambiguation over open-ended chat.\n- Good: \"Do you mean `parent(alex, sam)` or `parent(sam, alex)`?\"\n- Good: \"Who does 'he' refer to in this statement?\"\n\n## Anti-Patterns To Avoid\n\n- Do not invent entities, relations, or arguments not grounded in the utterance/context.\n- Do not collapse unresolved pronouns into a guessed atom.\n- Do not emit left-recursive transitive rules.\n- Do not emit malformed JSON, markdown, or extra wrapper text.\n- Do not switch predicate naming style mid-run without semantic reason.\n- Do not flip subject/object argument order for copular relation statements.\n- Do not wrap entities as nested terms in simple unary facts (avoid `valid(agent(a4)).`).\n- Do not emit bare query atoms like `policy_revoked.` or `revoke_double_approval.`.\n- Do not emit bare retract targets like `retract(compliance_rule).`.\n\n## Few-Shot Micro-Patterns\n\n- Fact mapping:\n  - NL: \"Alice is a parent of Bob.\"\n  - Route: `assert_fact`\n  - Logic: `parent(alice, bob).`\n\n- Directionality check:\n  - NL: \"Bob is a parent of Carol.\"\n  - Route: `assert_fact`\n  - Logic: `parent(bob, carol).`\n\n- Inversion pattern:\n  - NL: \"Lena has Mira as a parent.\"\n  - Route: `assert_fact`\n  - Logic: `parent(mira, lena).`\n  - Avoid: `parent(lena, mira).`\n\n- Passive pattern:\n  - NL: \"Wren is parented by Xena.\"\n  - Route: `assert_fact`\n  - Logic: `parent(xena, wren).`\n\n- Unary adjective/state mapping:\n  - NL: \"Agent a4 is valid.\"\n  - Route: `assert_fact`\n  - Logic: `valid(a4).`\n  - Avoid: `valid(agent(a4)).`\n\n- Attribute possession consistency:\n  - NL: \"Agent a3 has override.\"\n  - Route: `assert_fact`\n  - Logic: `has_override(a3).`\n  - If later utterance says `retract(has_override(a3)).`, it must target the same predicate name.\n\n- Rule mapping:\n  - NL: \"If X is a parent of Y then X is an ancestor of Y.\"\n  - Route: `assert_rule`\n  - Logic: `ancestor(X, Y) :- parent(X, Y).`\n\n- Safe transitive recursion:\n  - NL: \"If X is an ancestor of Y and Y is an ancestor of Z then X is an ancestor of Z.\"\n  - Route: `assert_rule`\n  - Logic: `ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).`\n\n- Quantifier to rule:\n  - NL: \"Every parent of a child is a guardian of that child.\"\n  - Route: `assert_rule`\n  - Logic: `guardian(X, Y) :- parent(X, Y).`\n\n- Explicit correction/retraction:\n  - NL: \"Actually, retract that: parent(alice, bob).\"\n  - Route: `retract`\n  - Logic: `retract(parent(alice, bob)).`\n\n- Multi-target retraction:\n  - NL: \"Actually retract these: parent(vera, wynn) and parent(wynn, xena).\"\n  - Route: `retract`\n  - Logic:\n    - `retract(parent(vera, wynn)).`\n    - `retract(parent(wynn, xena)).`\n  - Facts:\n    - `parent(vera, wynn).`\n    - `parent(wynn, xena).`\n\n- Ambiguous undo/retract:\n  - NL: \"Actually undo that last compliance rule.\"\n  - Route: `retract`\n  - Logic: `retract(compliance_rule(X)).`\n  - Set `needs_clarification=true` and ask which specific rule instance should be retracted.\n\n- Yes/no status query:\n  - NL: \"Did we cancel the double-approval condition for large payments?\"\n  - Route: `query`\n  - Logic: `double_approval_required(large_payments).`\n  - If uncertain about canonical predicate name, set `needs_clarification=true` and ask for predicate confirmation.\n\n- Unresolved pronoun -> clarification:\n  - NL: \"He is a parent of Bob.\"\n  - Route: `assert_fact`\n  - Suggested parse: `parent(X, bob).`\n  - `needs_clarification`: `true`\n  - Clarification: \"Who does 'he' refer to?\"\n\n- Negation as correction intent:\n  - NL: \"Alice is not a parent of Bob.\"\n  - Route: `retract`\n  - Logic: `retract(parent(alice, bob)).`",
+  "kb_runtime_boot_path": "D:\\_PROJECTS\\prethinker\\kb_store\\demo_02_policy_stress_test_machine\\_bootstrap_core.pl",
+  "kb_init": {
+    "status": "success",
+    "result_type": "runtime_emptied",
+    "message": "Core runtime KB cleared."
+  },
+  "corpus_load": {
+    "status": "skipped",
+    "loaded_total": 0,
+    "message": "No retained corpus to preload."
+  },
+  "corpus_write": {
+    "path": "D:\\_PROJECTS\\prethinker\\kb_store\\demo_02_policy_stress_test_machine\\kb.pl",
+    "clause_count": 9,
+    "status": "written"
+  },
+  "progress_write": {
+    "status": "written",
+    "path": "D:\\_PROJECTS\\prethinker\\kb_store\\demo_02_policy_stress_test_machine\\progress.json",
+    "active_focus_count": 0,
+    "goal_count": 0,
+    "open_question_count": 0
+  },
+  "progress_memory_enabled": true,
+  "progress_memory": {
+    "schema_version": 1,
+    "ontology_name": "demo_02_policy_stress_test_machine",
+    "updated_at_utc": "2026-04-12T13:04:21+00:00",
+    "active_focus": [],
+    "goals": [],
+    "open_questions": [],
+    "resolved_items": [],
+    "notes": []
+  },
+  "profile_write": {
+    "status": "written",
+    "path": "D:\\_PROJECTS\\prethinker\\kb_store\\demo_02_policy_stress_test_machine\\ontology_profile.json",
+    "predicate_signature_count": 5
+  },
+  "index_write": {
+    "status": "written",
+    "path": "D:\\_PROJECTS\\prethinker\\kb_store\\ontologies_index.json",
+    "ontology_count": 23
+  },
+  "ontology_profile": {
+    "ontology_name": "demo_02_policy_stress_test_machine",
+    "generated_at_utc": "2026-04-12T13:04:21+00:00",
+    "clause_count": 9,
+    "predicate_signatures": [
+      "approved_by/2",
+      "manages/2",
+      "policy_violation/2",
+      "reimbursement_amount/2",
+      "requested_by/2"
+    ],
+    "fact_predicates": [
+      "approved_by/2",
+      "manages/2",
+      "reimbursement_amount/2",
+      "requested_by/2"
+    ],
+    "rule_head_predicates": [
+      "policy_violation/2"
+    ],
+    "rule_body_predicates": [
+      "approved_by/2",
+      "manages/2",
+      "reimbursement_amount/2",
+      "requested_by/2"
+    ]
+  },
+  "ontology_previous_profile": null,
+  "ontology_diff": {
+    "change_level": "new",
+    "requires_confirmation": false,
+    "similarity_to_previous": 0.0,
+    "added_signatures": [
+      "approved_by/2",
+      "manages/2",
+      "policy_violation/2",
+      "reimbursement_amount/2",
+      "requested_by/2"
+    ],
+    "removed_signatures": [],
+    "previous_signature_count": 0,
+    "current_signature_count": 5
+  },
+  "known_ontology_matches": [
+    {
+      "ontology_name": "acid_dual_track_repair",
+      "similarity": 0.0,
+      "shared_signatures": [],
+      "other_signature_count": 4
+    },
+    {
+      "ontology_name": "acid_rule_stack_retarget",
+      "similarity": 0.0,
+      "shared_signatures": [],
+      "other_signature_count": 4
+    },
+    {
+      "ontology_name": "rung_17_easy_paraphrase_chain",
+      "similarity": 0.0,
+      "shared_signatures": [],
+      "other_signature_count": 2
+    },
+    {
+      "ontology_name": "rung_18_easy_inversion_retract",
+      "similarity": 0.0,
+      "shared_signatures": [],
+      "other_signature_count": 3
+    },
+    {
+      "ontology_name": "rung_19_hard_hedged_retarget",
+      "similarity": 0.0,
+      "shared_signatures": [],
+      "other_signature_count": 2
+    }
+  ],
+  "gear_change": {
+    "change_level": "new",
+    "detected": false,
+    "requires_confirmation": false
+  },
+  "turns_total": 10,
+  "turn_parse_failures": 0,
+  "turn_apply_failures": 0,
+  "turns_clarification_requested": 0,
+  "turns_confirmation_requested": 0,
+  "clarification_rounds_total": 0,
+  "clarification_synthetic_answers_total": 0,
+  "clarification_served_llm_answers_total": 0,
+  "clarification_proxy_answers_total": 0,
+  "progress_low_relevance_clarifications": 0,
+  "progress_high_risk_turns": 0,
+  "off_focus_write_attempts": 0,
+  "off_focus_write_intercepts": 0,
+  "off_focus_write_commits": 0,
+  "off_focus_write_block_rate": 0.0,
+  "off_focus_write_contamination_rate": 0.0,
+  "kb_contamination_delta": 0,
+  "decision_state_counts": {
+    "commit": 9,
+    "stage_provisionally": 1
+  },
+  "validation_total": 2,
+  "validation_passed": 2,
+  "overall_status": "passed",
+  "turns": [
+    {
+      "turn_index": 1,
+      "utterance": "If reimbursement_amount(T, over_10000) and requested_by(T, P) and approved_by(T, P) then policy_violation(T, self_approval_over_10000).",
+      "route": "assert_rule",
+      "route_source": "heuristic",
+      "repaired": false,
+      "fallback_used": false,
+      "alignment_events": [],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "assert_rule",
+        "logic_string": "policy_violation(T, self_approval_over_10000) :- reimbursement_amount(T, over_10000), requested_by(T, P), approved_by(T, P).",
+        "components": {
+          "atoms": [
+            "over_10000",
+            "self_approval_over_10000"
+          ],
+          "variables": [
+            "P",
+            "T"
+          ],
+          "predicates": [
+            "approved_by",
+            "policy_violation",
+            "reimbursement_amount",
+            "requested_by"
+          ]
+        },
+        "facts": [],
+        "rules": [
+          "policy_violation(T, self_approval_over_10000) :- reimbursement_amount(T, over_10000), requested_by(T, P), approved_by(T, P)."
+        ],
+        "queries": [],
+        "confidence": {
+          "overall": 0.95,
+          "intent": 1.0,
+          "logic": 0.95
+        },
+        "ambiguities": [],
+        "needs_clarification": false,
+        "uncertainty_score": 0.05,
+        "uncertainty_label": "low",
+        "clarification_question": "Can you clarify this point before I apply it: Direct mapping of conditional logic to Prolog rule. Subject/object roles preserved. No?",
+        "clarification_reason": "Direct mapping of conditional logic to Prolog rule. Subject/object roles preserved. No",
+        "rationale": "Direct mapping of conditional logic to Prolog rule. Subject/object roles preserved. No left-recursion."
+      },
+      "validation_errors": [],
+      "deferred_validation_errors": [],
+      "clarification_rounds": [],
+      "clarification_rounds_used": 0,
+      "clarification_max_rounds": 2,
+      "clarification_answers_available": 0,
+      "clarification_answers_used": 0,
+      "clarification_scripted_answers_used": 0,
+      "clarification_synthetic_answers_used": 0,
+      "clarification_generated_answers_used": 0,
+      "clarification_served_llm_answers_used": 0,
+      "clarification_proxy_answers_used": 0,
+      "clarification_policy": {
+        "clarification_eagerness": 0.35,
+        "uncertainty_score": 0.05,
+        "effective_uncertainty": 0.05,
+        "threshold": 0.65,
+        "request_clarification": false,
+        "needs_clarification_flag": false,
+        "progress_low_relevance": false,
+        "progress_high_risk": false,
+        "progress_low_relevance_threshold": 0.34,
+        "progress_high_risk_threshold": 0.18,
+        "progress_memory_available": true,
+        "progress_focus_present": false,
+        "progress_signal_term_count": 0,
+        "parsed_signal_term_count": 0,
+        "overlap_term_count": 0,
+        "progress_best_focus_overlap": 0.0,
+        "progress_relevance_score": 1.0
+      },
+      "progress_low_relevance_seen": false,
+      "progress_high_risk_seen": false,
+      "progress_directives": {},
+      "progress_events": [],
+      "progress_snapshot_before": {
+        "schema_version": 1,
+        "ontology_name": "demo_02_policy_stress_test_machine",
+        "updated_at_utc": "2026-04-12T13:03:57+00:00",
+        "active_focus": [],
+        "goals": [],
+        "open_questions": [],
+        "resolved_items": [],
+        "notes": []
+      },
+      "progress_snapshot_after_directives": {
+        "schema_version": 1,
+        "ontology_name": "demo_02_policy_stress_test_machine",
+        "updated_at_utc": "2026-04-12T13:03:57+00:00",
+        "active_focus": [],
+        "goals": [],
+        "open_questions": [],
+        "resolved_items": [],
+        "notes": []
+      },
+      "clarification_pending": false,
+      "clarification_pending_reason": "",
+      "clarification_question": "Can you clarify this point before I apply it: Direct mapping of conditional logic to Prolog rule. Subject/object roles preserved. No?",
+      "clarification_answer_attempt": {},
+      "confirmation_required": false,
+      "confirmation_question": "",
+      "confirmation_answer": "",
+      "confirmation_result": "not_required",
+      "confirmation_answers_available": 0,
+      "confirmation_answers_used": 0,
+      "apply": {
+        "tool": "assert_rule",
+        "input": "policy_violation(T, self_approval_over_10000) :- reimbursement_amount(T, over_10000), requested_by(T, P), approved_by(T, P).",
+        "result": {
+          "status": "success",
+          "result_type": "rule_asserted",
+          "rule": "policy_violation(T, self_approval_over_10000) :- reimbursement_amount(T, over_10000), requested_by(T, P), approved_by(T, P)."
+        }
+      },
+      "apply_status": "success",
+      "decision_state": "commit"
+    },
+    {
+      "turn_index": 2,
+      "utterance": "If requested_by(T, E) and approved_by(T, M) and manages(M, E) then policy_violation(T, manager_approval_conflict).",
+      "route": "assert_rule",
+      "route_source": "heuristic",
+      "repaired": false,
+      "fallback_used": false,
+      "alignment_events": [],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "assert_rule",
+        "logic_string": "policy_violation(T, manager_approval_conflict) :- requested_by(T, E), approved_by(T, M), manages(M, E).",
+        "components": {
+          "atoms": [
+            "manager_approval_conflict"
+          ],
+          "variables": [
+            "E",
+            "M",
+            "T"
+          ],
+          "predicates": [
+            "approved_by",
+            "manages",
+            "policy_violation",
+            "requested_by"
+          ]
+        },
+        "facts": [],
+        "rules": [
+          "policy_violation(T, manager_approval_conflict) :- requested_by(T, E), approved_by(T, M), manages(M, E)."
+        ],
+        "queries": [],
+        "confidence": {
+          "overall": 0.95,
+          "intent": 1.0,
+          "logic": 0.95
+        },
+        "ambiguities": [],
+        "needs_clarification": false,
+        "uncertainty_score": 0.05,
+        "uncertainty_label": "low",
+        "clarification_question": "Can you clarify this point before I apply it: Direct mapping of conditional logic to Prolog rule using provided ontology predicates?",
+        "clarification_reason": "Direct mapping of conditional logic to Prolog rule using provided ontology predicates.",
+        "rationale": "Direct mapping of conditional logic to Prolog rule using provided ontology predicates."
+      },
+      "validation_errors": [],
+      "deferred_validation_errors": [],
+      "clarification_rounds": [],
+      "clarification_rounds_used": 0,
+      "clarification_max_rounds": 2,
+      "clarification_answers_available": 0,
+      "clarification_answers_used": 0,
+      "clarification_scripted_answers_used": 0,
+      "clarification_synthetic_answers_used": 0,
+      "clarification_generated_answers_used": 0,
+      "clarification_served_llm_answers_used": 0,
+      "clarification_proxy_answers_used": 0,
+      "clarification_policy": {
+        "clarification_eagerness": 0.35,
+        "uncertainty_score": 0.05,
+        "effective_uncertainty": 0.05,
+        "threshold": 0.65,
+        "request_clarification": false,
+        "needs_clarification_flag": false,
+        "progress_low_relevance": false,
+        "progress_high_risk": false,
+        "progress_low_relevance_threshold": 0.34,
+        "progress_high_risk_threshold": 0.18,
+        "progress_memory_available": true,
+        "progress_focus_present": false,
+        "progress_signal_term_count": 0,
+        "parsed_signal_term_count": 0,
+        "overlap_term_count": 0,
+        "progress_best_focus_overlap": 0.0,
+        "progress_relevance_score": 1.0
+      },
+      "progress_low_relevance_seen": false,
+      "progress_high_risk_seen": false,
+      "progress_directives": {},
+      "progress_events": [],
+      "progress_snapshot_before": {
+        "schema_version": 1,
+        "ontology_name": "demo_02_policy_stress_test_machine",
+        "updated_at_utc": "2026-04-12T13:03:57+00:00",
+        "active_focus": [],
+        "goals": [],
+        "open_questions": [],
+        "resolved_items": [],
+        "notes": []
+      },
+      "progress_snapshot_after_directives": {
+        "schema_version": 1,
+        "ontology_name": "demo_02_policy_stress_test_machine",
+        "updated_at_utc": "2026-04-12T13:03:57+00:00",
+        "active_focus": [],
+        "goals": [],
+        "open_questions": [],
+        "resolved_items": [],
+        "notes": []
+      },
+      "clarification_pending": false,
+      "clarification_pending_reason": "",
+      "clarification_question": "Can you clarify this point before I apply it: Direct mapping of conditional logic to Prolog rule using provided ontology predicates?",
+      "clarification_answer_attempt": {},
+      "confirmation_required": false,
+      "confirmation_question": "",
+      "confirmation_answer": "",
+      "confirmation_result": "not_required",
+      "confirmation_answers_available": 0,
+      "confirmation_answers_used": 0,
+      "apply": {
+        "tool": "assert_rule",
+        "input": "policy_violation(T, manager_approval_conflict) :- requested_by(T, E), approved_by(T, M), manages(M, E).",
+        "result": {
+          "status": "success",
+          "result_type": "rule_asserted",
+          "rule": "policy_violation(T, manager_approval_conflict) :- requested_by(T, E), approved_by(T, M), manages(M, E)."
+        }
+      },
+      "apply_status": "success",
+      "decision_state": "commit"
+    },
+    {
+      "turn_index": 3,
+      "utterance": "reimbursement_amount(feb_txn_01, over_10000).",
+      "route": "assert_fact",
+      "route_source": "model",
+      "repaired": false,
+      "fallback_used": false,
+      "alignment_events": [
+        {
+          "kind": "directional_fact_guard",
+          "predicate": "reimbursement_amount",
+          "from": "reimbursement_amount(feb_txn_01, over_10000)",
+          "to": "reimbursement_amount(feb_txn_01, over_10000)",
+          "match_mode": "canonicalized"
+        }
+      ],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "assert_fact",
+        "logic_string": "reimbursement_amount(feb_txn_01, over_10000).",
+        "components": {
+          "atoms": [
+            "feb_txn_01",
+            "over_10000"
+          ],
+          "variables": [],
+          "predicates": [
+            "reimbursement_amount"
+          ]
+        },
+        "facts": [
+          "reimbursement_amount(feb_txn_01, over_10000)."
+        ],
+        "rules": [],
+        "queries": [],
+        "confidence": {
+          "overall": 0.95,
+          "intent": 1.0,
+          "logic": 0.95
+        },
+        "ambiguities": [],
+        "needs_clarification": false,
+        "uncertainty_score": 0.05,
+        "uncertainty_label": "low",
+        "clarification_question": "Can you clarify this point before I apply it: Direct mapping of declarative fact to ontology predicate?",
+        "clarification_reason": "Direct mapping of declarative fact to ontology predicate.",
+        "rationale": "Direct mapping of declarative fact to ontology predicate. Directional fact guard corrected inverted subject/object order."
+      },
+      "validation_errors": [],
+      "deferred_validation_errors": [],
+      "clarification_rounds": [],
+      "clarification_rounds_used": 0,
+      "clarification_max_rounds": 2,
+      "clarification_answers_available": 0,
+      "clarification_answers_used": 0,
+      "clarification_scripted_answers_used": 0,
+      "clarification_synthetic_answers_used": 0,
+      "clarification_generated_answers_used": 0,
+      "clarification_served_llm_answers_used": 0,
+      "clarification_proxy_answers_used": 0,
+      "clarification_policy": {
+        "clarification_eagerness": 0.35,
+        "uncertainty_score": 0.05,
+        "effective_uncertainty": 0.05,
+        "threshold": 0.65,
+        "request_clarification": false,
+        "needs_clarification_flag": false,
+        "progress_low_relevance": false,
+        "progress_high_risk": false,
+        "progress_low_relevance_threshold": 0.34,
+        "progress_high_risk_threshold": 0.18,
+        "progress_memory_available": true,
+        "progress_focus_present": false,
+        "progress_signal_term_count": 0,
+        "parsed_signal_term_count": 0,
+        "overlap_term_count": 0,
+        "progress_best_focus_overlap": 0.0,
+        "progress_relevance_score": 1.0
+      },
+      "progress_low_relevance_seen": false,
+      "progress_high_risk_seen": false,
+      "progress_directives": {},
+      "progress_events": [],
+      "progress_snapshot_before": {
+        "schema_version": 1,
+        "ontology_name": "demo_02_policy_stress_test_machine",
+        "updated_at_utc": "2026-04-12T13:03:57+00:00",
+        "active_focus": [],
+        "goals": [],
+        "open_questions": [],
+        "resolved_items": [],
+        "notes": []
+      },
+      "progress_snapshot_after_directives": {
+        "schema_version": 1,
+        "ontology_name": "demo_02_policy_stress_test_machine",
+        "updated_at_utc": "2026-04-12T13:03:57+00:00",
+        "active_focus": [],
+        "goals": [],
+        "open_questions": [],
+        "resolved_items": [],
+        "notes": []
+      },
+      "clarification_pending": false,
+      "clarification_pending_reason": "",
+      "clarification_question": "Can you clarify this point before I apply it: Direct mapping of declarative fact to ontology predicate?",
+      "clarification_answer_attempt": {},
+      "confirmation_required": false,
+      "confirmation_question": "",
+      "confirmation_answer": "",
+      "confirmation_result": "not_required",
+      "confirmation_answers_available": 0,
+      "confirmation_answers_used": 0,
+      "apply": {
+        "tool": "assert_fact",
+        "input": "reimbursement_amount(feb_txn_01, over_10000).",
+        "result": {
+          "status": "success",
+          "result_type": "fact_asserted",
+          "fact": "reimbursement_amount(feb_txn_01, over_10000)."
+        }
+      },
+      "apply_status": "success",
+      "decision_state": "commit"
+    },
+    {
+      "turn_index": 4,
+      "utterance": "requested_by(feb_txn_01, dana).",
+      "route": "assert_fact",
+      "route_source": "model",
+      "repaired": false,
+      "fallback_used": false,
+      "alignment_events": [
+        {
+          "kind": "directional_fact_guard",
+          "predicate": "requested_by",
+          "from": "requested_by(feb_txn_01, dana)",
+          "to": "requested_by(feb_txn_01, dana)",
+          "match_mode": "canonicalized"
+        }
+      ],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "assert_fact",
+        "logic_string": "requested_by(feb_txn_01, dana).",
+        "components": {
+          "atoms": [
+            "dana",
+            "feb_txn_01"
+          ],
+          "variables": [],
+          "predicates": [
+            "requested_by"
+          ]
+        },
+        "facts": [
+          "requested_by(feb_txn_01, dana)."
+        ],
+        "rules": [],
+        "queries": [],
+        "confidence": {
+          "overall": 1.0,
+          "intent": 1.0,
+          "logic": 1.0
+        },
+        "ambiguities": [],
+        "needs_clarification": false,
+        "uncertainty_score": 0.0,
+        "uncertainty_label": "low",
+        "clarification_question": "Can you clarify this point before I apply it: Direct mapping of subject 'feb_txn_01' and object 'dana' to predicate 'requested_by'?",
+        "clarification_reason": "Direct mapping of subject 'feb_txn_01' and object 'dana' to predicate 'requested_by'.",
+        "rationale": "Direct mapping of subject 'feb_txn_01' and object 'dana' to predicate 'requested_by'. Directional fact guard corrected inverted subject/object order."
+      },
+      "validation_errors": [],
+      "deferred_validation_errors": [],
+      "clarification_rounds": [],
+      "clarification_rounds_used": 0,
+      "clarification_max_rounds": 2,
+      "clarification_answers_available": 0,
+      "clarification_answers_used": 0,
+      "clarification_scripted_answers_used": 0,
+      "clarification_synthetic_answers_used": 0,
+      "clarification_generated_answers_used": 0,
+      "clarification_served_llm_answers_used": 0,
+      "clarification_proxy_answers_used": 0,
+      "clarification_policy": {
+        "clarification_eagerness": 0.35,
+        "uncertainty_score": 0.0,
+        "effective_uncertainty": 0.0,
+        "threshold": 0.65,
+        "request_clarification": false,
+        "needs_clarification_flag": false,
+        "progress_low_relevance": false,
+        "progress_high_risk": false,
+        "progress_low_relevance_threshold": 0.34,
+        "progress_high_risk_threshold": 0.18,
+        "progress_memory_available": true,
+        "progress_focus_present": false,
+        "progress_signal_term_count": 0,
+        "parsed_signal_term_count": 0,
+        "overlap_term_count": 0,
+        "progress_best_focus_overlap": 0.0,
+        "progress_relevance_score": 1.0
+      },
+      "progress_low_relevance_seen": false,
+      "progress_high_risk_seen": false,
+      "progress_directives": {},
+      "progress_events": [],
+      "progress_snapshot_before": {
+        "schema_version": 1,
+        "ontology_name": "demo_02_policy_stress_test_machine",
+        "updated_at_utc": "2026-04-12T13:03:57+00:00",
+        "active_focus": [],
+        "goals": [],
+        "open_questions": [],
+        "resolved_items": [],
+        "notes": []
+      },
+      "progress_snapshot_after_directives": {
+        "schema_version": 1,
+        "ontology_name": "demo_02_policy_stress_test_machine",
+        "updated_at_utc": "2026-04-12T13:03:57+00:00",
+        "active_focus": [],
+        "goals": [],
+        "open_questions": [],
+        "resolved_items": [],
+        "notes": []
+      },
+      "clarification_pending": false,
+      "clarification_pending_reason": "",
+      "clarification_question": "Can you clarify this point before I apply it: Direct mapping of subject 'feb_txn_01' and object 'dana' to predicate 'requested_by'?",
+      "clarification_answer_attempt": {},
+      "confirmation_required": false,
+      "confirmation_question": "",
+      "confirmation_answer": "",
+      "confirmation_result": "not_required",
+      "confirmation_answers_available": 0,
+      "confirmation_answers_used": 0,
+      "apply": {
+        "tool": "assert_fact",
+        "input": "requested_by(feb_txn_01, dana).",
+        "result": {
+          "status": "success",
+          "result_type": "fact_asserted",
+          "fact": "requested_by(feb_txn_01, dana)."
+        }
+      },
+      "apply_status": "success",
+      "decision_state": "commit"
+    },
+    {
+      "turn_index": 5,
+      "utterance": "approved_by(feb_txn_01, dana).",
+      "route": "assert_fact",
+      "route_source": "model",
+      "repaired": false,
+      "fallback_used": false,
+      "alignment_events": [
+        {
+          "kind": "directional_fact_guard",
+          "predicate": "approved_by",
+          "from": "approved_by(feb_txn_01, dana)",
+          "to": "approved_by(feb_txn_01, dana)",
+          "match_mode": "canonicalized"
+        }
+      ],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "assert_fact",
+        "logic_string": "approved_by(feb_txn_01, dana).",
+        "components": {
+          "atoms": [
+            "dana",
+            "feb_txn_01"
+          ],
+          "variables": [],
+          "predicates": [
+            "approved_by"
+          ]
+        },
+        "facts": [
+          "approved_by(feb_txn_01, dana)."
+        ],
+        "rules": [],
+        "queries": [],
+        "confidence": {
+          "overall": 1.0,
+          "intent": 1.0,
+          "logic": 1.0
+        },
+        "ambiguities": [],
+        "needs_clarification": false,
+        "uncertainty_score": 0.0,
+        "uncertainty_label": "low",
+        "clarification_question": "Can you clarify this point before I apply it: Direct mapping of 'approved_by(feb_txn_01, dana)' to canonical predicate?",
+        "clarification_reason": "Direct mapping of 'approved_by(feb_txn_01, dana)' to canonical predicate.",
+        "rationale": "Direct mapping of 'approved_by(feb_txn_01, dana)' to canonical predicate. Directional fact guard corrected inverted subject/object order."
+      },
+      "validation_errors": [],
+      "deferred_validation_errors": [],
+      "clarification_rounds": [],
+      "clarification_rounds_used": 0,
+      "clarification_max_rounds": 2,
+      "clarification_answers_available": 0,
+      "clarification_answers_used": 0,
+      "clarification_scripted_answers_used": 0,
+      "clarification_synthetic_answers_used": 0,
+      "clarification_generated_answers_used": 0,
+      "clarification_served_llm_answers_used": 0,
+      "clarification_proxy_answers_used": 0,
+      "clarification_policy": {
+        "clarification_eagerness": 0.35,
+        "uncertainty_score": 0.0,
+        "effective_uncertainty": 0.0,
+        "threshold": 0.65,
+        "request_clarification": false,
+        "needs_clarification_flag": false,
+        "progress_low_relevance": false,
+        "progress_high_risk": false,
+        "progress_low_relevance_threshold": 0.34,
+        "progress_high_risk_threshold": 0.18,
+        "progress_memory_available": true,
+        "progress_focus_present": false,
+        "progress_signal_term_count": 0,
+        "parsed_signal_term_count": 0,
+        "overlap_term_count": 0,
+        "progress_best_focus_overlap": 0.0,
+        "progress_relevance_score": 1.0
+      },
+      "progress_low_relevance_seen": false,
+      "progress_high_risk_seen": false,
+      "progress_directives": {},
+      "progress_events": [],
+      "progress_snapshot_before": {
+        "schema_version": 1,
+        "ontology_name": "demo_02_policy_stress_test_machine",
+        "updated_at_utc": "2026-04-12T13:03:57+00:00",
+        "active_focus": [],
+        "goals": [],
+        "open_questions": [],
+        "resolved_items": [],
+        "notes": []
+      },
+      "progress_snapshot_after_directives": {
+        "schema_version": 1,
+        "ontology_name": "demo_02_policy_stress_test_machine",
+        "updated_at_utc": "2026-04-12T13:03:57+00:00",
+        "active_focus": [],
+        "goals": [],
+        "open_questions": [],
+        "resolved_items": [],
+        "notes": []
+      },
+      "clarification_pending": false,
+      "clarification_pending_reason": "",
+      "clarification_question": "Can you clarify this point before I apply it: Direct mapping of 'approved_by(feb_txn_01, dana)' to canonical predicate?",
+      "clarification_answer_attempt": {},
+      "confirmation_required": false,
+      "confirmation_question": "",
+      "confirmation_answer": "",
+      "confirmation_result": "not_required",
+      "confirmation_answers_available": 0,
+      "confirmation_answers_used": 0,
+      "apply": {
+        "tool": "assert_fact",
+        "input": "approved_by(feb_txn_01, dana).",
+        "result": {
+          "status": "success",
+          "result_type": "fact_asserted",
+          "fact": "approved_by(feb_txn_01, dana)."
+        }
+      },
+      "apply_status": "success",
+      "decision_state": "commit"
+    },
+    {
+      "turn_index": 6,
+      "utterance": "reimbursement_amount(feb_txn_02, over_10000).",
+      "route": "assert_fact",
+      "route_source": "model",
+      "repaired": false,
+      "fallback_used": false,
+      "alignment_events": [
+        {
+          "kind": "directional_fact_guard",
+          "predicate": "reimbursement_amount",
+          "from": "reimbursement_amount(feb_txn_02, over_10000)",
+          "to": "reimbursement_amount(feb_txn_02, over_10000)",
+          "match_mode": "canonicalized"
+        }
+      ],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "assert_fact",
+        "logic_string": "reimbursement_amount(feb_txn_02, over_10000).",
+        "components": {
+          "atoms": [
+            "feb_txn_02",
+            "over_10000"
+          ],
+          "variables": [],
+          "predicates": [
+            "reimbursement_amount"
+          ]
+        },
+        "facts": [
+          "reimbursement_amount(feb_txn_02, over_10000)."
+        ],
+        "rules": [],
+        "queries": [],
+        "confidence": {
+          "overall": 0.95,
+          "intent": 1.0,
+          "logic": 0.95
+        },
+        "ambiguities": [],
+        "needs_clarification": false,
+        "uncertainty_score": 0.05,
+        "uncertainty_label": "low",
+        "clarification_question": "Can you clarify this point before I apply it: Direct mapping of declarative fact to ontology predicate?",
+        "clarification_reason": "Direct mapping of declarative fact to ontology predicate.",
+        "rationale": "Direct mapping of declarative fact to ontology predicate. Directional fact guard corrected inverted subject/object order."
+      },
+      "validation_errors": [],
+      "deferred_validation_errors": [],
+      "clarification_rounds": [],
+      "clarification_rounds_used": 0,
+      "clarification_max_rounds": 2,
+      "clarification_answers_available": 0,
+      "clarification_answers_used": 0,
+      "clarification_scripted_answers_used": 0,
+      "clarification_synthetic_answers_used": 0,
+      "clarification_generated_answers_used": 0,
+      "clarification_served_llm_answers_used": 0,
+      "clarification_proxy_answers_used": 0,
+      "clarification_policy": {
+        "clarification_eagerness": 0.35,
+        "uncertainty_score": 0.05,
+        "effective_uncertainty": 0.05,
+        "threshold": 0.65,
+        "request_clarification": false,
+        "needs_clarification_flag": false,
+        "progress_low_relevance": false,
+        "progress_high_risk": false,
+        "progress_low_relevance_threshold": 0.34,
+        "progress_high_risk_threshold": 0.18,
+        "progress_memory_available": true,
+        "progress_focus_present": false,
+        "progress_signal_term_count": 0,
+        "parsed_signal_term_count": 0,
+        "overlap_term_count": 0,
+        "progress_best_focus_overlap": 0.0,
+        "progress_relevance_score": 1.0
+      },
+      "progress_low_relevance_seen": false,
+      "progress_high_risk_seen": false,
+      "progress_directives": {},
+      "progress_events": [],
+      "progress_snapshot_before": {
+        "schema_version": 1,
+        "ontology_name": "demo_02_policy_stress_test_machine",
+        "updated_at_utc": "2026-04-12T13:03:57+00:00",
+        "active_focus": [],
+        "goals": [],
+        "open_questions": [],
+        "resolved_items": [],
+        "notes": []
+      },
+      "progress_snapshot_after_directives": {
+        "schema_version": 1,
+        "ontology_name": "demo_02_policy_stress_test_machine",
+        "updated_at_utc": "2026-04-12T13:03:57+00:00",
+        "active_focus": [],
+        "goals": [],
+        "open_questions": [],
+        "resolved_items": [],
+        "notes": []
+      },
+      "clarification_pending": false,
+      "clarification_pending_reason": "",
+      "clarification_question": "Can you clarify this point before I apply it: Direct mapping of declarative fact to ontology predicate?",
+      "clarification_answer_attempt": {},
+      "confirmation_required": false,
+      "confirmation_question": "",
+      "confirmation_answer": "",
+      "confirmation_result": "not_required",
+      "confirmation_answers_available": 0,
+      "confirmation_answers_used": 0,
+      "apply": {
+        "tool": "assert_fact",
+        "input": "reimbursement_amount(feb_txn_02, over_10000).",
+        "result": {
+          "status": "success",
+          "result_type": "fact_asserted",
+          "fact": "reimbursement_amount(feb_txn_02, over_10000)."
+        }
+      },
+      "apply_status": "success",
+      "decision_state": "commit"
+    },
+    {
+      "turn_index": 7,
+      "utterance": "requested_by(feb_txn_02, alex).",
+      "route": "assert_fact",
+      "route_source": "model",
+      "repaired": false,
+      "fallback_used": false,
+      "alignment_events": [
+        {
+          "kind": "directional_fact_guard",
+          "predicate": "requested_by",
+          "from": "requested_by(feb_txn_02, alex)",
+          "to": "requested_by(feb_txn_02, alex)",
+          "match_mode": "canonicalized"
+        }
+      ],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "assert_fact",
+        "logic_string": "requested_by(feb_txn_02, alex).",
+        "components": {
+          "atoms": [
+            "alex",
+            "feb_txn_02"
+          ],
+          "variables": [],
+          "predicates": [
+            "requested_by"
+          ]
+        },
+        "facts": [
+          "requested_by(feb_txn_02, alex)."
+        ],
+        "rules": [],
+        "queries": [],
+        "confidence": {
+          "overall": 1.0,
+          "intent": 1.0,
+          "logic": 1.0
+        },
+        "ambiguities": [],
+        "needs_clarification": false,
+        "uncertainty_score": 0.0,
+        "uncertainty_label": "low",
+        "clarification_question": "Can you clarify this point before I apply it: Direct mapping of subject 'requested_by' with explicit arguments?",
+        "clarification_reason": "Direct mapping of subject 'requested_by' with explicit arguments.",
+        "rationale": "Direct mapping of subject 'requested_by' with explicit arguments. Directional fact guard corrected inverted subject/object order."
+      },
+      "validation_errors": [],
+      "deferred_validation_errors": [],
+      "clarification_rounds": [],
+      "clarification_rounds_used": 0,
+      "clarification_max_rounds": 2,
+      "clarification_answers_available": 0,
+      "clarification_answers_used": 0,
+      "clarification_scripted_answers_used": 0,
+      "clarification_synthetic_answers_used": 0,
+      "clarification_generated_answers_used": 0,
+      "clarification_served_llm_answers_used": 0,
+      "clarification_proxy_answers_used": 0,
+      "clarification_policy": {
+        "clarification_eagerness": 0.35,
+        "uncertainty_score": 0.0,
+        "effective_uncertainty": 0.0,
+        "threshold": 0.65,
+        "request_clarification": false,
+        "needs_clarification_flag": false,
+        "progress_low_relevance": false,
+        "progress_high_risk": false,
+        "progress_low_relevance_threshold": 0.34,
+        "progress_high_risk_threshold": 0.18,
+        "progress_memory_available": true,
+        "progress_focus_present": false,
+        "progress_signal_term_count": 0,
+        "parsed_signal_term_count": 0,
+        "overlap_term_count": 0,
+        "progress_best_focus_overlap": 0.0,
+        "progress_relevance_score": 1.0
+      },
+      "progress_low_relevance_seen": false,
+      "progress_high_risk_seen": false,
+      "progress_directives": {},
+      "progress_events": [],
+      "progress_snapshot_before": {
+        "schema_version": 1,
+        "ontology_name": "demo_02_policy_stress_test_machine",
+        "updated_at_utc": "2026-04-12T13:03:57+00:00",
+        "active_focus": [],
+        "goals": [],
+        "open_questions": [],
+        "resolved_items": [],
+        "notes": []
+      },
+      "progress_snapshot_after_directives": {
+        "schema_version": 1,
+        "ontology_name": "demo_02_policy_stress_test_machine",
+        "updated_at_utc": "2026-04-12T13:03:57+00:00",
+        "active_focus": [],
+        "goals": [],
+        "open_questions": [],
+        "resolved_items": [],
+        "notes": []
+      },
+      "clarification_pending": false,
+      "clarification_pending_reason": "",
+      "clarification_question": "Can you clarify this point before I apply it: Direct mapping of subject 'requested_by' with explicit arguments?",
+      "clarification_answer_attempt": {},
+      "confirmation_required": false,
+      "confirmation_question": "",
+      "confirmation_answer": "",
+      "confirmation_result": "not_required",
+      "confirmation_answers_available": 0,
+      "confirmation_answers_used": 0,
+      "apply": {
+        "tool": "assert_fact",
+        "input": "requested_by(feb_txn_02, alex).",
+        "result": {
+          "status": "success",
+          "result_type": "fact_asserted",
+          "fact": "requested_by(feb_txn_02, alex)."
+        }
+      },
+      "apply_status": "success",
+      "decision_state": "commit"
+    },
+    {
+      "turn_index": 8,
+      "utterance": "approved_by(feb_txn_02, maya).",
+      "route": "assert_fact",
+      "route_source": "model",
+      "repaired": false,
+      "fallback_used": false,
+      "alignment_events": [
+        {
+          "kind": "directional_fact_guard",
+          "predicate": "approved_by",
+          "from": "approved_by(feb_txn_02, maya)",
+          "to": "approved_by(feb_txn_02, maya)",
+          "match_mode": "canonicalized"
+        }
+      ],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "assert_fact",
+        "logic_string": "approved_by(feb_txn_02, maya).",
+        "components": {
+          "atoms": [
+            "feb_txn_02",
+            "maya"
+          ],
+          "variables": [],
+          "predicates": [
+            "approved_by"
+          ]
+        },
+        "facts": [
+          "approved_by(feb_txn_02, maya)."
+        ],
+        "rules": [],
+        "queries": [],
+        "confidence": {
+          "overall": 1.0,
+          "intent": 1.0,
+          "logic": 1.0
+        },
+        "ambiguities": [],
+        "needs_clarification": false,
+        "uncertainty_score": 0.0,
+        "uncertainty_label": "low",
+        "clarification_question": "Can you clarify this point before I apply it: Direct mapping of 'approved_by(feb_txn_02, maya)' to canonical predicate?",
+        "clarification_reason": "Direct mapping of 'approved_by(feb_txn_02, maya)' to canonical predicate.",
+        "rationale": "Direct mapping of 'approved_by(feb_txn_02, maya)' to canonical predicate. Directional fact guard corrected inverted subject/object order."
+      },
+      "validation_errors": [],
+      "deferred_validation_errors": [],
+      "clarification_rounds": [],
+      "clarification_rounds_used": 0,
+      "clarification_max_rounds": 2,
+      "clarification_answers_available": 0,
+      "clarification_answers_used": 0,
+      "clarification_scripted_answers_used": 0,
+      "clarification_synthetic_answers_used": 0,
+      "clarification_generated_answers_used": 0,
+      "clarification_served_llm_answers_used": 0,
+      "clarification_proxy_answers_used": 0,
+      "clarification_policy": {
+        "clarification_eagerness": 0.35,
+        "uncertainty_score": 0.0,
+        "effective_uncertainty": 0.0,
+        "threshold": 0.65,
+        "request_clarification": false,
+        "needs_clarification_flag": false,
+        "progress_low_relevance": false,
+        "progress_high_risk": false,
+        "progress_low_relevance_threshold": 0.34,
+        "progress_high_risk_threshold": 0.18,
+        "progress_memory_available": true,
+        "progress_focus_present": false,
+        "progress_signal_term_count": 0,
+        "parsed_signal_term_count": 0,
+        "overlap_term_count": 0,
+        "progress_best_focus_overlap": 0.0,
+        "progress_relevance_score": 1.0
+      },
+      "progress_low_relevance_seen": false,
+      "progress_high_risk_seen": false,
+      "progress_directives": {},
+      "progress_events": [],
+      "progress_snapshot_before": {
+        "schema_version": 1,
+        "ontology_name": "demo_02_policy_stress_test_machine",
+        "updated_at_utc": "2026-04-12T13:03:57+00:00",
+        "active_focus": [],
+        "goals": [],
+        "open_questions": [],
+        "resolved_items": [],
+        "notes": []
+      },
+      "progress_snapshot_after_directives": {
+        "schema_version": 1,
+        "ontology_name": "demo_02_policy_stress_test_machine",
+        "updated_at_utc": "2026-04-12T13:03:57+00:00",
+        "active_focus": [],
+        "goals": [],
+        "open_questions": [],
+        "resolved_items": [],
+        "notes": []
+      },
+      "clarification_pending": false,
+      "clarification_pending_reason": "",
+      "clarification_question": "Can you clarify this point before I apply it: Direct mapping of 'approved_by(feb_txn_02, maya)' to canonical predicate?",
+      "clarification_answer_attempt": {},
+      "confirmation_required": false,
+      "confirmation_question": "",
+      "confirmation_answer": "",
+      "confirmation_result": "not_required",
+      "confirmation_answers_available": 0,
+      "confirmation_answers_used": 0,
+      "apply": {
+        "tool": "assert_fact",
+        "input": "approved_by(feb_txn_02, maya).",
+        "result": {
+          "status": "success",
+          "result_type": "fact_asserted",
+          "fact": "approved_by(feb_txn_02, maya)."
+        }
+      },
+      "apply_status": "success",
+      "decision_state": "commit"
+    },
+    {
+      "turn_index": 9,
+      "utterance": "manages(maya, alex).",
+      "route": "assert_fact",
+      "route_source": "model",
+      "repaired": false,
+      "fallback_used": false,
+      "alignment_events": [
+        {
+          "kind": "directional_fact_guard",
+          "predicate": "manages",
+          "from": "manages(maya, alex)",
+          "to": "manages(maya, alex)",
+          "match_mode": "canonicalized"
+        }
+      ],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "assert_fact",
+        "logic_string": "manages(maya, alex).",
+        "components": {
+          "atoms": [
+            "alex",
+            "maya"
+          ],
+          "variables": [],
+          "predicates": [
+            "manages"
+          ]
+        },
+        "facts": [
+          "manages(maya, alex)."
+        ],
+        "rules": [],
+        "queries": [],
+        "confidence": {
+          "overall": 1.0,
+          "intent": 1.0,
+          "logic": 1.0
+        },
+        "ambiguities": [],
+        "needs_clarification": false,
+        "uncertainty_score": 0.0,
+        "uncertainty_label": "low",
+        "clarification_question": "Can you clarify this point before I apply it: Direct mapping of 'manages(maya, alex)' to fact?",
+        "clarification_reason": "Direct mapping of 'manages(maya, alex)' to fact.",
+        "rationale": "Direct mapping of 'manages(maya, alex)' to fact. Directional fact guard corrected inverted subject/object order."
+      },
+      "validation_errors": [],
+      "deferred_validation_errors": [],
+      "clarification_rounds": [],
+      "clarification_rounds_used": 0,
+      "clarification_max_rounds": 2,
+      "clarification_answers_available": 0,
+      "clarification_answers_used": 0,
+      "clarification_scripted_answers_used": 0,
+      "clarification_synthetic_answers_used": 0,
+      "clarification_generated_answers_used": 0,
+      "clarification_served_llm_answers_used": 0,
+      "clarification_proxy_answers_used": 0,
+      "clarification_policy": {
+        "clarification_eagerness": 0.35,
+        "uncertainty_score": 0.0,
+        "effective_uncertainty": 0.0,
+        "threshold": 0.65,
+        "request_clarification": false,
+        "needs_clarification_flag": false,
+        "progress_low_relevance": false,
+        "progress_high_risk": false,
+        "progress_low_relevance_threshold": 0.34,
+        "progress_high_risk_threshold": 0.18,
+        "progress_memory_available": true,
+        "progress_focus_present": false,
+        "progress_signal_term_count": 0,
+        "parsed_signal_term_count": 0,
+        "overlap_term_count": 0,
+        "progress_best_focus_overlap": 0.0,
+        "progress_relevance_score": 1.0
+      },
+      "progress_low_relevance_seen": false,
+      "progress_high_risk_seen": false,
+      "progress_directives": {},
+      "progress_events": [],
+      "progress_snapshot_before": {
+        "schema_version": 1,
+        "ontology_name": "demo_02_policy_stress_test_machine",
+        "updated_at_utc": "2026-04-12T13:03:57+00:00",
+        "active_focus": [],
+        "goals": [],
+        "open_questions": [],
+        "resolved_items": [],
+        "notes": []
+      },
+      "progress_snapshot_after_directives": {
+        "schema_version": 1,
+        "ontology_name": "demo_02_policy_stress_test_machine",
+        "updated_at_utc": "2026-04-12T13:03:57+00:00",
+        "active_focus": [],
+        "goals": [],
+        "open_questions": [],
+        "resolved_items": [],
+        "notes": []
+      },
+      "clarification_pending": false,
+      "clarification_pending_reason": "",
+      "clarification_question": "Can you clarify this point before I apply it: Direct mapping of 'manages(maya, alex)' to fact?",
+      "clarification_answer_attempt": {},
+      "confirmation_required": false,
+      "confirmation_question": "",
+      "confirmation_answer": "",
+      "confirmation_result": "not_required",
+      "confirmation_answers_available": 0,
+      "confirmation_answers_used": 0,
+      "apply": {
+        "tool": "assert_fact",
+        "input": "manages(maya, alex).",
+        "result": {
+          "status": "success",
+          "result_type": "fact_asserted",
+          "fact": "manages(maya, alex)."
+        }
+      },
+      "apply_status": "success",
+      "decision_state": "commit"
+    },
+    {
+      "turn_index": 10,
+      "utterance": "Which February transactions violate policy?",
+      "route": "query",
+      "route_source": "heuristic",
+      "repaired": false,
+      "fallback_used": false,
+      "alignment_events": [],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "query",
+        "logic_string": "policy_violation(X, february).",
+        "components": {
+          "atoms": [
+            "february"
+          ],
+          "variables": [
+            "X"
+          ],
+          "predicates": [
+            "policy_violation"
+          ]
+        },
+        "facts": [],
+        "rules": [],
+        "queries": [
+          "policy_violation(X, february)."
+        ],
+        "confidence": {
+          "overall": 0.95,
+          "intent": 1.0,
+          "logic": 0.9
+        },
+        "ambiguities": [
+          "The specific policy predicate name is not explicitly defined in the context, so 'policy_violation' is used as a generic placeholder."
+        ],
+        "needs_clarification": false,
+        "uncertainty_score": 0.15,
+        "uncertainty_label": "low",
+        "clarification_question": "Can you clarify this detail: The specific policy predicate name is not explicitly defined in the context, so 'policy_violation' is used as a generic placeholder?",
+        "clarification_reason": "The utterance is a direct question seeking facts about policy violations in",
+        "rationale": "The utterance is a direct question seeking facts about policy violations in February. It maps to a query for the predicate 'policy_violation' with the argument 'february'."
+      },
+      "validation_errors": [],
+      "deferred_validation_errors": [],
+      "clarification_rounds": [],
+      "clarification_rounds_used": 0,
+      "clarification_max_rounds": 2,
+      "clarification_answers_available": 0,
+      "clarification_answers_used": 0,
+      "clarification_scripted_answers_used": 0,
+      "clarification_synthetic_answers_used": 0,
+      "clarification_generated_answers_used": 0,
+      "clarification_served_llm_answers_used": 0,
+      "clarification_proxy_answers_used": 0,
+      "clarification_policy": {
+        "clarification_eagerness": 0.35,
+        "uncertainty_score": 0.15,
+        "effective_uncertainty": 0.55,
+        "threshold": 0.65,
+        "request_clarification": false,
+        "needs_clarification_flag": false,
+        "progress_low_relevance": false,
+        "progress_high_risk": false,
+        "progress_low_relevance_threshold": 0.34,
+        "progress_high_risk_threshold": 0.18,
+        "progress_memory_available": true,
+        "progress_focus_present": false,
+        "progress_signal_term_count": 0,
+        "parsed_signal_term_count": 0,
+        "overlap_term_count": 0,
+        "progress_best_focus_overlap": 0.0,
+        "progress_relevance_score": 1.0
+      },
+      "progress_low_relevance_seen": false,
+      "progress_high_risk_seen": false,
+      "progress_directives": {},
+      "progress_events": [],
+      "progress_snapshot_before": {
+        "schema_version": 1,
+        "ontology_name": "demo_02_policy_stress_test_machine",
+        "updated_at_utc": "2026-04-12T13:03:57+00:00",
+        "active_focus": [],
+        "goals": [],
+        "open_questions": [],
+        "resolved_items": [],
+        "notes": []
+      },
+      "progress_snapshot_after_directives": {
+        "schema_version": 1,
+        "ontology_name": "demo_02_policy_stress_test_machine",
+        "updated_at_utc": "2026-04-12T13:03:57+00:00",
+        "active_focus": [],
+        "goals": [],
+        "open_questions": [],
+        "resolved_items": [],
+        "notes": []
+      },
+      "clarification_pending": false,
+      "clarification_pending_reason": "",
+      "clarification_question": "Can you clarify this detail: The specific policy predicate name is not explicitly defined in the context, so 'policy_violation' is used as a generic placeholder?",
+      "clarification_answer_attempt": {},
+      "confirmation_required": false,
+      "confirmation_question": "",
+      "confirmation_answer": "",
+      "confirmation_result": "not_required",
+      "confirmation_answers_available": 0,
+      "confirmation_answers_used": 0,
+      "apply": {
+        "tool": "query_rows",
+        "input": "policy_violation(X, february).",
+        "result": {
+          "status": "no_results",
+          "result_type": "no_result",
+          "predicate": "policy_violation",
+          "prolog_query": "policy_violation(X, february).",
+          "variables": [
+            "X"
+          ],
+          "rows": [],
+          "num_rows": 0,
+          "reasoning_basis": {
+            "kind": "core-local"
+          }
+        }
+      },
+      "apply_status": "no_results",
+      "decision_state": "stage_provisionally"
+    }
+  ],
+  "validations": [
+    {
+      "id": "txn01_self_approval_violation",
+      "query": "policy_violation(feb_txn_01, self_approval_over_10000).",
+      "expected_status": "success",
+      "result": {
+        "status": "success",
+        "result_type": "table",
+        "predicate": "policy_violation",
+        "prolog_query": "policy_violation(feb_txn_01, self_approval_over_10000).",
+        "variables": [],
+        "rows": [
+          {}
+        ],
+        "num_rows": 1,
+        "reasoning_basis": {
+          "kind": "core-local"
+        }
+      },
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "id": "txn02_manager_conflict_violation",
+      "query": "policy_violation(feb_txn_02, manager_approval_conflict).",
+      "expected_status": "success",
+      "result": {
+        "status": "success",
+        "result_type": "table",
+        "predicate": "policy_violation",
+        "prolog_query": "policy_violation(feb_txn_02, manager_approval_conflict).",
+        "variables": [],
+        "rows": [
+          {}
+        ],
+        "num_rows": 1,
+        "reasoning_basis": {
+          "kind": "core-local"
+        }
+      },
+      "passed": true,
+      "reasons": []
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "name": "demo_03_story_world_interrogator",
+  "ontology_name": "demo_03_story_world_interrogator",
+  "utterances": [
+    "victor owns warehouse_east.",
+    "lena has_key warehouse_east.",
+    "theo was_at docks_815.",
+    "exchanged_messages(lena, theo).",
+    "If has_key(X, warehouse_east) then can_enter_east_door(X).",
+    "If has_key(X, warehouse_east) and exchanged_messages(X, theo) then suspect(X).",
+    "Who could enter through the east door?",
+    "Who is a suspect?"
+  ],
+  "validations": [
+    {
+      "id": "lena_has_key",
+      "query": "has_key(lena, warehouse_east).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "lena_can_enter",
+      "query": "can_enter_east_door(lena).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "lena_marked_suspect",
+      "query": "suspect(lena).",
+      "expect_status": "success",
+      "min_rows": 1
+    }
+  ]
+}
