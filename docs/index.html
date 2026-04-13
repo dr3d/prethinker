@@ -813,7 +813,7 @@
               const parsedAbs = new URL(rawHref, window.location.href);
               if (parsedAbs.href.startsWith(repoBase)) {
                 anchor.target = repoTabTarget;
-                anchor.rel = "noopener noreferrer";
+                anchor.removeAttribute("rel");
               }
             } catch (_) {}
             continue;
@@ -855,7 +855,7 @@
           if (!resolvedPath) continue;
           anchor.href = `${repoBlobBase}${resolvedPath}${resolvedHash}`;
           anchor.target = repoTabTarget;
-          anchor.rel = "noopener noreferrer";
+          anchor.removeAttribute("rel");
         }
       }
 
@@ -1037,7 +1037,7 @@
                 <td>${promptId}</td>
                 <td>${p.runs_total ?? "-"}</td>
                 <td>${pct(p.pass_rate)}</td>
-                <td><a href="${href}"${String(href).startsWith("http") ? ` target="${repoTabTarget}" rel="noopener noreferrer"` : ""}>open</a></td>
+                <td><a href="${href}"${String(href).startsWith("http") ? ` target="${repoTabTarget}"` : ""}>open</a></td>
               `;
               promptBody.appendChild(tr);
             }
