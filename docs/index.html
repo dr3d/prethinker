@@ -770,6 +770,9 @@
       const root = document.documentElement;
       const btn = document.getElementById("theme-toggle");
       const key = "prethinker_docs_theme";
+      const repoBlobBase = "https://github.com/dr3d/prethinker/blob/main/";
+      const repoBase = "https://github.com/dr3d/prethinker";
+      const repoTabTarget = "prethinker-repo";
 
       function apply(theme) {
         root.setAttribute("data-theme", theme);
@@ -795,7 +798,6 @@
       }
 
       function rewriteRepoArtifactLinksToGitHub() {
-        const repoBlobBase = "https://github.com/dr3d/prethinker/blob/main/";
         const repoName = "prethinker";
         const currentPath = window.location.pathname || "";
         const marker = "/docs/index.html";
@@ -805,7 +807,17 @@
         for (const anchor of anchors) {
           const rawHref = anchor.getAttribute("href");
           if (!rawHref) continue;
-          if (/^(https?:|mailto:|#)/i.test(rawHref)) continue;
+          if (/^mailto:/i.test(rawHref) || rawHref.startsWith("#")) continue;
+          if (/^https?:/i.test(rawHref)) {
+            try {
+              const parsedAbs = new URL(rawHref, window.location.href);
+              if (parsedAbs.href.startsWith(repoBase)) {
+                anchor.target = repoTabTarget;
+                anchor.rel = "noopener noreferrer";
+              }
+            } catch (_) {}
+            continue;
+          }
 
           let resolvedPath = "";
           let resolvedHash = "";
@@ -842,7 +854,7 @@
 
           if (!resolvedPath) continue;
           anchor.href = `${repoBlobBase}${resolvedPath}${resolvedHash}`;
-          anchor.target = "_blank";
+          anchor.target = repoTabTarget;
           anchor.rel = "noopener noreferrer";
         }
       }
@@ -1025,7 +1037,7 @@
                 <td>${promptId}</td>
                 <td>${p.runs_total ?? "-"}</td>
                 <td>${pct(p.pass_rate)}</td>
-                <td><a href="${href}"${String(href).startsWith("http") ? ' target="_blank" rel="noopener noreferrer"' : ""}>open</a></td>
+                <td><a href="${href}"${String(href).startsWith("http") ? ` target="${repoTabTarget}" rel="noopener noreferrer"` : ""}>open</a></td>
               `;
               promptBody.appendChild(tr);
             }
