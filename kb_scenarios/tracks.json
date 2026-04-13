@@ -27,12 +27,13 @@
     },
     {
       "id": "examples_demo_portfolio",
-      "description": "Public-facing demo showcase battery (meeting, policy, story, reimbursement).",
+      "description": "Public-facing demo showcase battery (meeting, policy, story, reimbursement, time-loop carnival).",
       "scenarios": [
         "demo_01_meeting_commitment_extractor",
         "demo_02_policy_stress_test_machine",
         "demo_03_story_world_interrogator",
-        "demo_04_reimbursement_violation_check"
+        "demo_04_reimbursement_violation_check",
+        "demo_05_time_loop_carnival"
       ],
       "required_pass_rate": 0.75
     },
@@ -46,7 +47,8 @@
         "demo_01_meeting_commitment_extractor",
         "demo_02_policy_stress_test_machine",
         "demo_03_story_world_interrogator",
-        "demo_04_reimbursement_violation_check"
+        "demo_04_reimbursement_violation_check",
+        "demo_05_time_loop_carnival"
       ],
       "required_pass_rate": 0.8
     },

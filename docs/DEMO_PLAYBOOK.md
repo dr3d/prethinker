@@ -21,6 +21,7 @@ Prethinker is not "chat with memory." It is a **Governed Intent Compiler**:
 | Family History Oracle | Genealogy consistency and lineage reconstruction | "Which branches conflict on dates?" |
 | Policy Stress Test Machine | Rule conflict and eligibility pressure testing | "Did any March grants violate policy?" |
 | Story World Interrogator | Narrative world as queryable logic | "Who knew before chapter 12?" |
+| Time-Loop Carnival | Stateful world mutation with retractions over looping rounds | "Who can reset the loop now?" |
 | Meeting-to-Commitment Extractor | Semantic linting for meetings and commitments | "What commitments were actually made?" |
 | Conspiracy Engine | Evidence chain reconstruction under uncertainty | "What chain links the outage to the forged permit?" |
 | Constraint Playground | Plain-language constraint solving | "Find all valid seatings." |
@@ -64,6 +65,7 @@ These are executable starter scenarios in this repo:
 - `kb_scenarios/demo_02_policy_stress_test_machine.json`
 - `kb_scenarios/demo_03_story_world_interrogator.json`
 - `kb_scenarios/demo_04_reimbursement_violation_check.json`
+- `kb_scenarios/demo_05_time_loop_carnival.json`
 
 Run one:
 
@@ -76,6 +78,18 @@ Render report:
 ```bash
 python scripts/render_kb_run_html.py --input kb_runs/demo_02_policy_stress_test_machine.json --output docs/reports/demo_02_policy_stress_test_machine.html --theme standard
 ```
+
+## New Demo Focus: Time-Loop Carnival
+
+`demo_05_time_loop_carnival` stresses stateful world updates in one narrative arc:
+
+1. establish world state (`loop_ticket`, `entered`, `has_key`)
+2. ask capability query ("Who can reset the loop?")
+3. mutate state with movement + explicit retraction
+4. add loop-local gate state and infer derived block status
+5. retract key ownership and verify capability removal
+
+This scenario is intentionally designed as a "playable world memory" demo rather than a static fact set.
 
 ## Demo Pattern (Use Every Time)
 

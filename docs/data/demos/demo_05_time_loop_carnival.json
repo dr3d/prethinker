@@ -1,0 +1,45 @@
+{
+  "name": "demo_05_time_loop_carnival",
+  "ontology_name": "demo_05_time_loop_carnival",
+  "utterances": [
+    "loop_ticket(tia).",
+    "loop_ticket(orin).",
+    "entered(tia, hall_of_mirrors, loop_1).",
+    "entered(orin, ferris_gate, loop_1).",
+    "If has_key(P, brass_clock_key) then can_reset_loop(P).",
+    "has_key(tia, brass_clock_key).",
+    "Who can reset the loop?",
+    "entered(orin, hall_of_mirrors, loop_2).",
+    "Actually, retract that: entered(orin, ferris_gate, loop_1).",
+    "blocked(gate_north, loop_2).",
+    "Is gate_north blocked in loop_2?",
+    "Actually, retract that: has_key(tia, brass_clock_key).",
+    "Who can reset the loop now?"
+  ],
+  "validations": [
+    {
+      "id": "orin_moved_into_hall_loop2",
+      "query": "entered(orin, hall_of_mirrors, loop_2).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "orin_removed_from_ferris_gate_loop1",
+      "query": "entered(orin, ferris_gate, loop_1).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "north_gate_blocked_loop2",
+      "query": "blocked(gate_north, loop_2).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "tia_cannot_reset_after_key_retract",
+      "query": "can_reset_loop(tia).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    }
+  ]
+}

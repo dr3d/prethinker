@@ -582,7 +582,9 @@
           <a class="btn" href="reports/demo_02_policy_stress_test_machine.html">Policy demo transcript</a>
           <a class="btn" href="reports/demo_03_story_world_interrogator.html">Demo 03 transcript</a>
           <a class="btn" href="reports/demo_04_reimbursement_violation_check.html">Demo 04 transcript</a>
+          <a class="btn" href="reports/demo_05_time_loop_carnival.html">Demo 05 transcript</a>
           <a class="btn" href="data/demos/demo_02_policy_stress_test_machine.json">Policy demo scenario</a>
+          <a class="btn" href="data/demos/demo_05_time_loop_carnival.json">Time-loop scenario</a>
         </div>
       </article>
     </section>
@@ -997,7 +999,6 @@
 
           links.innerHTML = "";
           for (const entry of discovered) {
-            const pick = entry.audio[0] || entry.video[0];
             const a = document.createElement("a");
             a.className = `btn${entry.title === item.title ? " primary" : ""}`;
             a.href = "#showcase";
@@ -1007,14 +1008,6 @@
               loadEntry(entry);
             });
             links.appendChild(a);
-
-            if (pick) {
-              const openLink = document.createElement("a");
-              openLink.className = "btn";
-              openLink.href = pick.src;
-              openLink.textContent = "open file";
-              links.appendChild(openLink);
-            }
           }
         }
 

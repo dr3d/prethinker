@@ -135,4 +135,4 @@ If English can be compiled into deterministic state under governance, you can na
 
 That is the product direction: not "chat that sounds smart," but **stateful reasoning you can inspect**.
 
-![Pre-thinker Control Plane](docs/assets/prethinker-control-plane-infographic-v2.png)
+![Prethinker control plane: natural-language input flows through interception, normalization, clarification/confirmation gates, then deterministic KB mutation](docs/assets/prethinker-control-plane-infographic-v2.png)

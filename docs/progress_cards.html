@@ -48,14 +48,562 @@
     <div class="top">
       <div>
         <h1 style="margin:0">Progress Cards</h1>
-        <div class="small">Recent run cards showing utterance -> generated parse JSON, with quality dimensions. Generated 2026-04-13 01:03:01 UTC</div>
+        <div class="small">Recent run cards showing utterance -> generated parse JSON, with quality dimensions. Generated 2026-04-13 15:54:15 UTC</div>
       </div>
       <div class="nav"><a href="index.html">Back to Docs Index</a> <button id="theme">theme</button></div>
     </div>
     <section class="run">
+<h3>demo_05_time_loop_carnival <span class="small">qwen35-semparse:9b | 2026-04-13 08:40</span></h3>
+<div class="chips"><span class="chip ok"><b>Status</b> passed</span> <span class="chip"><b>Validation</b> 4/4 (100%)</span> <span class="chip"><b>Parser Reliability</b> 100%</span> <span class="chip"><b>Apply Reliability</b> 100%</span> <span class="chip"><b>Clarification Rate</b> 0%</span> <span class="chip"><b>Avg Uncertainty</b> 5%</span> <span class="chip"><b>Clarification Rounds</b> 0</span></div>
+<div class="small links"><a href="reports/demo_05_time_loop_carnival.html">run transcript</a> | <a href="https://github.com/dr3d/prethinker/blob/main/kb_runs/demo_05_time_loop_carnival.json" target="_blank" rel="noopener noreferrer">run json</a> | <a href="https://github.com/dr3d/prethinker/blob/main/prompts/sp-1e43c641b01b.md" target="_blank" rel="noopener noreferrer">prompt snapshot</a></div>
+<article class="turn">
+  <div class="meta"><span>turn 1</span><span>route: assert_fact</span><span>apply: success</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>loop_ticket(tia).</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;assert_fact&quot;,
+  &quot;logic_string&quot;: &quot;loop_ticket(tia).&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [
+      &quot;tia&quot;
+    ],
+    &quot;variables&quot;: [],
+    &quot;predicates&quot;: [
+      &quot;loop_ticket&quot;
+    ]
+  },
+  &quot;facts&quot;: [
+    &quot;loop_ticket(tia).&quot;
+  ],
+  &quot;rules&quot;: [],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 0.95,
+    &quot;intent&quot;: 0.95,
+    &quot;logic&quot;: 0.95
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.05,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Direct mapping of atomic term &#x27;loop_ticket(tia)&#x27; to fact assertion?&quot;,
+  &quot;clarification_reason&quot;: &quot;Direct mapping of atomic term &#x27;loop_ticket(tia)&#x27; to fact assertion.&quot;,
+  &quot;rationale&quot;: &quot;Direct mapping of atomic term &#x27;loop_ticket(tia)&#x27; to fact assertion.&quot;
+}</pre>
+    </div>
+  </div>
+</article><article class="turn">
+  <div class="meta"><span>turn 2</span><span>route: other</span><span>apply: skipped</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>loop_ticket(orin).</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;other&quot;,
+  &quot;logic_string&quot;: &quot;&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [],
+    &quot;variables&quot;: [],
+    &quot;predicates&quot;: []
+  },
+  &quot;facts&quot;: [],
+  &quot;rules&quot;: [],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 0.95,
+    &quot;intent&quot;: 1.0,
+    &quot;logic&quot;: 1.0
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.05,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Utterance is a command to execute a specific action (loop_ticket) on a?&quot;,
+  &quot;clarification_reason&quot;: &quot;Utterance is a command to execute a specific action (loop_ticket) on a&quot;,
+  &quot;rationale&quot;: &quot;Utterance is a command to execute a specific action (loop_ticket) on a specific entity (orin). This is an out-of-scope task for semantic parsing into Prolog facts/rules, hence intent &#x27;other&#x27; and empty logic_string.&quot;
+}</pre>
+    </div>
+  </div>
+</article><article class="turn">
+  <div class="meta"><span>turn 3</span><span>route: assert_fact</span><span>apply: success</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>entered(tia, hall_of_mirrors, loop_1).</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;assert_fact&quot;,
+  &quot;logic_string&quot;: &quot;entered(tia, hall_of_mirrors, loop_1).&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [
+      &quot;hall_of_mirrors&quot;,
+      &quot;loop_1&quot;,
+      &quot;tia&quot;
+    ],
+    &quot;variables&quot;: [],
+    &quot;predicates&quot;: [
+      &quot;entered&quot;
+    ]
+  },
+  &quot;facts&quot;: [
+    &quot;entered(tia, hall_of_mirrors, loop_1).&quot;
+  ],
+  &quot;rules&quot;: [],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 0.95,
+    &quot;intent&quot;: 1.0,
+    &quot;logic&quot;: 0.95
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.05,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Direct mapping of entered(subject, location, instance) to fact?&quot;,
+  &quot;clarification_reason&quot;: &quot;Direct mapping of entered(subject, location, instance) to fact.&quot;,
+  &quot;rationale&quot;: &quot;Direct mapping of entered(subject, location, instance) to fact.&quot;
+}</pre>
+    </div>
+  </div>
+</article><article class="turn">
+  <div class="meta"><span>turn 4</span><span>route: assert_fact</span><span>apply: success</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>entered(orin, ferris_gate, loop_1).</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;assert_fact&quot;,
+  &quot;logic_string&quot;: &quot;entered(orin, ferris_gate, loop_1).&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [
+      &quot;ferris_gate&quot;,
+      &quot;loop_1&quot;,
+      &quot;orin&quot;
+    ],
+    &quot;variables&quot;: [],
+    &quot;predicates&quot;: [
+      &quot;entered&quot;
+    ]
+  },
+  &quot;facts&quot;: [
+    &quot;entered(orin, ferris_gate, loop_1).&quot;
+  ],
+  &quot;rules&quot;: [],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 1.0,
+    &quot;intent&quot;: 1.0,
+    &quot;logic&quot;: 1.0
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.0,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Direct fact mapping with explicit entities and canonical predicate?&quot;,
+  &quot;clarification_reason&quot;: &quot;Direct fact mapping with explicit entities and canonical predicate.&quot;,
+  &quot;rationale&quot;: &quot;Direct fact mapping with explicit entities and canonical predicate.&quot;
+}</pre>
+    </div>
+  </div>
+</article><article class="turn">
+  <div class="meta"><span>turn 5</span><span>route: assert_rule</span><span>apply: success</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>If has_key(P, brass_clock_key) then can_reset_loop(P).</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;assert_rule&quot;,
+  &quot;logic_string&quot;: &quot;can_reset_loop(P) :- has_key(P, brass_clock_key).&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [
+      &quot;brass_clock_key&quot;
+    ],
+    &quot;variables&quot;: [
+      &quot;P&quot;
+    ],
+    &quot;predicates&quot;: [
+      &quot;can_reset_loop&quot;,
+      &quot;has_key&quot;
+    ]
+  },
+  &quot;facts&quot;: [],
+  &quot;rules&quot;: [
+    &quot;can_reset_loop(P) :- has_key(P, brass_clock_key).&quot;
+  ],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 0.95,
+    &quot;intent&quot;: 1.0,
+    &quot;logic&quot;: 0.95
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.05,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Direct mapping of conditional statement to Prolog rule using provided ontology predicates?&quot;,
+  &quot;clarification_reason&quot;: &quot;Direct mapping of conditional statement to Prolog rule using provided ontology predicates.&quot;,
+  &quot;rationale&quot;: &quot;Direct mapping of conditional statement to Prolog rule using provided ontology predicates.&quot;
+}</pre>
+    </div>
+  </div>
+</article><article class="turn">
+  <div class="meta"><span>turn 6</span><span>route: assert_fact</span><span>apply: success</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>has_key(tia, brass_clock_key).</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;assert_fact&quot;,
+  &quot;logic_string&quot;: &quot;has_key(tia, brass_clock_key).&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [
+      &quot;brass_clock_key&quot;,
+      &quot;tia&quot;
+    ],
+    &quot;variables&quot;: [],
+    &quot;predicates&quot;: [
+      &quot;has_key&quot;
+    ]
+  },
+  &quot;facts&quot;: [
+    &quot;has_key(tia, brass_clock_key).&quot;
+  ],
+  &quot;rules&quot;: [],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 1.0,
+    &quot;intent&quot;: 1.0,
+    &quot;logic&quot;: 1.0
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.0,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Direct mapping of &#x27;has_key(tia, brass_clock_key)&#x27; to fact?&quot;,
+  &quot;clarification_reason&quot;: &quot;Direct mapping of &#x27;has_key(tia, brass_clock_key)&#x27; to fact.&quot;,
+  &quot;rationale&quot;: &quot;Direct mapping of &#x27;has_key(tia, brass_clock_key)&#x27; to fact. Directional fact guard corrected inverted subject/object order.&quot;
+}</pre>
+    </div>
+  </div>
+</article><article class="turn">
+  <div class="meta"><span>turn 7</span><span>route: query</span><span>apply: success</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>Who can reset the loop?</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;query&quot;,
+  &quot;logic_string&quot;: &quot;can_reset_loop(X).&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [],
+    &quot;variables&quot;: [
+      &quot;X&quot;
+    ],
+    &quot;predicates&quot;: [
+      &quot;can_reset_loop&quot;
+    ]
+  },
+  &quot;facts&quot;: [],
+  &quot;rules&quot;: [],
+  &quot;queries&quot;: [
+    &quot;can_reset_loop(X).&quot;
+  ],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 0.95,
+    &quot;intent&quot;: 1.0,
+    &quot;logic&quot;: 0.95
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.1,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Utterance is a direct question seeking bindings for the predicate can_reset_loop. The?&quot;,
+  &quot;clarification_reason&quot;: &quot;Utterance is a direct question seeking bindings for the predicate can_reset_loop. The&quot;,
+  &quot;rationale&quot;: &quot;Utterance is a direct question seeking bindings for the predicate can_reset_loop. The ontology predicate can_reset_loop is reused. Variables are used for the unknown subject.&quot;
+}</pre>
+    </div>
+  </div>
+</article><article class="turn">
+  <div class="meta"><span>turn 8</span><span>route: assert_fact</span><span>apply: success</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>entered(orin, hall_of_mirrors, loop_2).</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;assert_fact&quot;,
+  &quot;logic_string&quot;: &quot;entered(orin, hall_of_mirrors, loop_2).&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [
+      &quot;hall_of_mirrors&quot;,
+      &quot;loop_2&quot;,
+      &quot;orin&quot;
+    ],
+    &quot;variables&quot;: [],
+    &quot;predicates&quot;: [
+      &quot;entered&quot;
+    ]
+  },
+  &quot;facts&quot;: [
+    &quot;entered(orin, hall_of_mirrors, loop_2).&quot;
+  ],
+  &quot;rules&quot;: [],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 0.95,
+    &quot;intent&quot;: 0.95,
+    &quot;logic&quot;: 0.95
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.05,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Direct mapping of declarative fact with explicit entities and predicate from ontology?&quot;,
+  &quot;clarification_reason&quot;: &quot;Direct mapping of declarative fact with explicit entities and predicate from ontology.&quot;,
+  &quot;rationale&quot;: &quot;Direct mapping of declarative fact with explicit entities and predicate from ontology.&quot;
+}</pre>
+    </div>
+  </div>
+</article><article class="turn">
+  <div class="meta"><span>turn 9</span><span>route: retract</span><span>apply: success</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>Actually, retract that: entered(orin, ferris_gate, loop_1).</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;retract&quot;,
+  &quot;logic_string&quot;: &quot;retract(entered(orin, ferris_gate, loop_1)).&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [
+      &quot;ferris_gate&quot;,
+      &quot;loop_1&quot;,
+      &quot;orin&quot;
+    ],
+    &quot;variables&quot;: [],
+    &quot;predicates&quot;: [
+      &quot;entered&quot;
+    ]
+  },
+  &quot;facts&quot;: [
+    &quot;entered(orin, ferris_gate, loop_1).&quot;
+  ],
+  &quot;rules&quot;: [],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 0.95,
+    &quot;intent&quot;: 1.0,
+    &quot;logic&quot;: 1.0
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.05,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: User explicitly commands retraction of a specific fact with clear arguments?&quot;,
+  &quot;clarification_reason&quot;: &quot;User explicitly commands retraction of a specific fact with clear arguments.&quot;,
+  &quot;rationale&quot;: &quot;User explicitly commands retraction of a specific fact with clear arguments.&quot;
+}</pre>
+    </div>
+  </div>
+</article><article class="turn">
+  <div class="meta"><span>turn 10</span><span>route: assert_fact</span><span>apply: success</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>blocked(gate_north, loop_2).</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;assert_fact&quot;,
+  &quot;logic_string&quot;: &quot;blocked(gate_north, loop_2).&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [
+      &quot;gate_north&quot;,
+      &quot;loop_2&quot;
+    ],
+    &quot;variables&quot;: [],
+    &quot;predicates&quot;: [
+      &quot;blocked&quot;
+    ]
+  },
+  &quot;facts&quot;: [
+    &quot;blocked(gate_north, loop_2).&quot;
+  ],
+  &quot;rules&quot;: [],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 0.95,
+    &quot;intent&quot;: 1.0,
+    &quot;logic&quot;: 0.95
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.05,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Direct mapping of &#x27;blocked(gate_north, loop_2)&#x27; using provided ontology predicate &#x27;blocked&#x27;?&quot;,
+  &quot;clarification_reason&quot;: &quot;Direct mapping of &#x27;blocked(gate_north, loop_2)&#x27; using provided ontology predicate &#x27;blocked&#x27;.&quot;,
+  &quot;rationale&quot;: &quot;Direct mapping of &#x27;blocked(gate_north, loop_2)&#x27; using provided ontology predicate &#x27;blocked&#x27;. Directional fact guard corrected inverted subject/object order.&quot;
+}</pre>
+    </div>
+  </div>
+</article><article class="turn">
+  <div class="meta"><span>turn 11</span><span>route: query</span><span>apply: success</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>Is gate_north blocked in loop_2?</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;query&quot;,
+  &quot;logic_string&quot;: &quot;blocked(gate_north, loop_2).&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [
+      &quot;gate_north&quot;,
+      &quot;loop_2&quot;
+    ],
+    &quot;variables&quot;: [],
+    &quot;predicates&quot;: [
+      &quot;blocked&quot;
+    ]
+  },
+  &quot;facts&quot;: [],
+  &quot;rules&quot;: [],
+  &quot;queries&quot;: [
+    &quot;blocked(gate_north, loop_2).&quot;
+  ],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 0.95,
+    &quot;intent&quot;: 1.0,
+    &quot;logic&quot;: 0.95
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.05,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Interrogative utterance seeking truth value for blocked(gate_north, loop_2)?&quot;,
+  &quot;clarification_reason&quot;: &quot;Interrogative utterance seeking truth value for blocked(gate_north, loop_2).&quot;,
+  &quot;rationale&quot;: &quot;Interrogative utterance seeking truth value for blocked(gate_north, loop_2).&quot;
+}</pre>
+    </div>
+  </div>
+</article><article class="turn">
+  <div class="meta"><span>turn 12</span><span>route: retract</span><span>apply: success</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>Actually, retract that: has_key(tia, brass_clock_key).</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;retract&quot;,
+  &quot;logic_string&quot;: &quot;retract(has_key(tia, brass_clock_key)).&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [
+      &quot;brass_clock_key&quot;,
+      &quot;tia&quot;
+    ],
+    &quot;variables&quot;: [],
+    &quot;predicates&quot;: [
+      &quot;has_key&quot;
+    ]
+  },
+  &quot;facts&quot;: [
+    &quot;has_key(tia, brass_clock_key).&quot;
+  ],
+  &quot;rules&quot;: [],
+  &quot;queries&quot;: [],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 0.95,
+    &quot;intent&quot;: 1.0,
+    &quot;logic&quot;: 1.0
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.05,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Explicit retraction command with clear target fact?&quot;,
+  &quot;clarification_reason&quot;: &quot;Explicit retraction command with clear target fact.&quot;,
+  &quot;rationale&quot;: &quot;Explicit retraction command with clear target fact.&quot;
+}</pre>
+    </div>
+  </div>
+</article><article class="turn">
+  <div class="meta"><span>turn 13</span><span>route: query</span><span>apply: no_results</span></div>
+  <div class="grid">
+    <div class="panel">
+      <h4>Utterance</h4>
+      <pre>Who can reset the loop now?</pre>
+    </div>
+    <div class="panel">
+      <h4>Generated Parse JSON</h4>
+      <pre>{
+  &quot;intent&quot;: &quot;query&quot;,
+  &quot;logic_string&quot;: &quot;can_reset_loop(X).&quot;,
+  &quot;components&quot;: {
+    &quot;atoms&quot;: [],
+    &quot;variables&quot;: [
+      &quot;X&quot;
+    ],
+    &quot;predicates&quot;: [
+      &quot;can_reset_loop&quot;
+    ]
+  },
+  &quot;facts&quot;: [],
+  &quot;rules&quot;: [],
+  &quot;queries&quot;: [
+    &quot;can_reset_loop(X).&quot;
+  ],
+  &quot;confidence&quot;: {
+    &quot;overall&quot;: 0.95,
+    &quot;intent&quot;: 1.0,
+    &quot;logic&quot;: 0.95
+  },
+  &quot;ambiguities&quot;: [],
+  &quot;needs_clarification&quot;: false,
+  &quot;uncertainty_score&quot;: 0.1,
+  &quot;uncertainty_label&quot;: &quot;low&quot;,
+  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Interrogative utterance seeking bindings for &#x27;can_reset_loop&#x27;. Predicate &#x27;can_reset_loop&#x27; is in known ontology?&quot;,
+  &quot;clarification_reason&quot;: &quot;Interrogative utterance seeking bindings for &#x27;can_reset_loop&#x27;. Predicate &#x27;can_reset_loop&#x27; is in known ontology.&quot;,
+  &quot;rationale&quot;: &quot;Interrogative utterance seeking bindings for &#x27;can_reset_loop&#x27;. Predicate &#x27;can_reset_loop&#x27; is in known ontology. Use variable X for unknown subject.&quot;
+}</pre>
+    </div>
+  </div>
+</article>
+</section>
+<section class="run">
 <h3>rung_449_frontier_multibind_uncle_query <span class="small">qwen35-semparse:9b | 2026-04-12 22:37</span></h3>
 <div class="chips"><span class="chip ok"><b>Status</b> passed</span> <span class="chip"><b>Validation</b> 4/4 (100%)</span> <span class="chip"><b>Parser Reliability</b> 100%</span> <span class="chip"><b>Apply Reliability</b> 100%</span> <span class="chip"><b>Clarification Rate</b> 0%</span> <span class="chip"><b>Avg Uncertainty</b> 5%</span> <span class="chip"><b>Clarification Rounds</b> 0</span></div>
-<div class="small links"><a href="reports/rung_449_frontier_multibind_uncle_query_frontier_language_width_v6_20260412_222723.html">run transcript</a> | <a href="https://github.com/dr3d/prethinker/blob/main/kb_runs_published/rung_449_frontier_multibind_uncle_query_frontier_language_width_v6_20260412_222723.json" target="_blank" rel="noopener noreferrer">run json</a> | <a href="prompts/sp-1e43c641b01b.md">prompt snapshot</a></div>
+<div class="small links"><a href="reports/rung_449_frontier_multibind_uncle_query_frontier_language_width_v6_20260412_222723.html">run transcript</a> | <a href="https://github.com/dr3d/prethinker/blob/main/kb_runs/rung_449_frontier_multibind_uncle_query_frontier_language_width_v6_20260412_222723.json" target="_blank" rel="noopener noreferrer">run json</a> | <a href="https://github.com/dr3d/prethinker/blob/main/prompts/sp-1e43c641b01b.md" target="_blank" rel="noopener noreferrer">prompt snapshot</a></div>
 <article class="turn">
   <div class="meta"><span>turn 1</span><span>route: other</span><span>apply: skipped</span></div>
   <div class="grid">
@@ -348,7 +896,7 @@
 <section class="run">
 <h3>rung_446_frontier_policy_noisy_rebind_loop <span class="small">qwen35-semparse:9b | 2026-04-12 22:36</span></h3>
 <div class="chips"><span class="chip ok"><b>Status</b> passed</span> <span class="chip"><b>Validation</b> 7/7 (100%)</span> <span class="chip"><b>Parser Reliability</b> 100%</span> <span class="chip"><b>Apply Reliability</b> 100%</span> <span class="chip"><b>Clarification Rate</b> 0%</span> <span class="chip"><b>Avg Uncertainty</b> 3%</span> <span class="chip"><b>Clarification Rounds</b> 1</span></div>
-<div class="small links"><a href="reports/rung_446_frontier_policy_noisy_rebind_loop_frontier_language_width_v6_20260412_222723.html">run transcript</a> | <a href="https://github.com/dr3d/prethinker/blob/main/kb_runs_published/rung_446_frontier_policy_noisy_rebind_loop_frontier_language_width_v6_20260412_222723.json" target="_blank" rel="noopener noreferrer">run json</a> | <a href="prompts/sp-1e43c641b01b.md">prompt snapshot</a></div>
+<div class="small links"><a href="reports/rung_446_frontier_policy_noisy_rebind_loop_frontier_language_width_v6_20260412_222723.html">run transcript</a> | <a href="https://github.com/dr3d/prethinker/blob/main/kb_runs/rung_446_frontier_policy_noisy_rebind_loop_frontier_language_width_v6_20260412_222723.json" target="_blank" rel="noopener noreferrer">run json</a> | <a href="https://github.com/dr3d/prethinker/blob/main/prompts/sp-1e43c641b01b.md" target="_blank" rel="noopener noreferrer">prompt snapshot</a></div>
 <article class="turn">
   <div class="meta"><span>turn 1</span><span>route: other</span><span>apply: skipped</span></div>
   <div class="grid">
@@ -1076,7 +1624,7 @@
 <section class="run">
 <h3>rung_445_frontier_compound_write_query_braid <span class="small">qwen35-semparse:9b | 2026-04-12 22:36</span></h3>
 <div class="chips"><span class="chip ok"><b>Status</b> passed</span> <span class="chip"><b>Validation</b> 6/6 (100%)</span> <span class="chip"><b>Parser Reliability</b> 100%</span> <span class="chip"><b>Apply Reliability</b> 100%</span> <span class="chip"><b>Clarification Rate</b> 0%</span> <span class="chip"><b>Avg Uncertainty</b> 3%</span> <span class="chip"><b>Clarification Rounds</b> 0</span></div>
-<div class="small links"><a href="reports/rung_445_frontier_compound_write_query_braid_frontier_language_width_v6_20260412_222723.html">run transcript</a> | <a href="https://github.com/dr3d/prethinker/blob/main/kb_runs_published/rung_445_frontier_compound_write_query_braid_frontier_language_width_v6_20260412_222723.json" target="_blank" rel="noopener noreferrer">run json</a> | <a href="prompts/sp-1e43c641b01b.md">prompt snapshot</a></div>
+<div class="small links"><a href="reports/rung_445_frontier_compound_write_query_braid_frontier_language_width_v6_20260412_222723.html">run transcript</a> | <a href="https://github.com/dr3d/prethinker/blob/main/kb_runs/rung_445_frontier_compound_write_query_braid_frontier_language_width_v6_20260412_222723.json" target="_blank" rel="noopener noreferrer">run json</a> | <a href="https://github.com/dr3d/prethinker/blob/main/prompts/sp-1e43c641b01b.md" target="_blank" rel="noopener noreferrer">prompt snapshot</a></div>
 <article class="turn">
   <div class="meta"><span>turn 1</span><span>route: other</span><span>apply: skipped</span></div>
   <div class="grid">
@@ -1496,7 +2044,7 @@
 <section class="run">
 <h3>rung_444_frontier_unpunctuated_coref_sweep <span class="small">qwen35-semparse:9b | 2026-04-12 22:35</span></h3>
 <div class="chips"><span class="chip ok"><b>Status</b> passed</span> <span class="chip"><b>Validation</b> 6/6 (100%)</span> <span class="chip"><b>Parser Reliability</b> 100%</span> <span class="chip"><b>Apply Reliability</b> 100%</span> <span class="chip"><b>Clarification Rate</b> 0%</span> <span class="chip"><b>Avg Uncertainty</b> 3%</span> <span class="chip"><b>Clarification Rounds</b> 0</span></div>
-<div class="small links"><a href="reports/rung_444_frontier_unpunctuated_coref_sweep_frontier_language_width_v6_20260412_222723.html">run transcript</a> | <a href="https://github.com/dr3d/prethinker/blob/main/kb_runs_published/rung_444_frontier_unpunctuated_coref_sweep_frontier_language_width_v6_20260412_222723.json" target="_blank" rel="noopener noreferrer">run json</a> | <a href="prompts/sp-1e43c641b01b.md">prompt snapshot</a></div>
+<div class="small links"><a href="reports/rung_444_frontier_unpunctuated_coref_sweep_frontier_language_width_v6_20260412_222723.html">run transcript</a> | <a href="https://github.com/dr3d/prethinker/blob/main/kb_runs/rung_444_frontier_unpunctuated_coref_sweep_frontier_language_width_v6_20260412_222723.json" target="_blank" rel="noopener noreferrer">run json</a> | <a href="https://github.com/dr3d/prethinker/blob/main/prompts/sp-1e43c641b01b.md" target="_blank" rel="noopener noreferrer">prompt snapshot</a></div>
 <article class="turn">
   <div class="meta"><span>turn 1</span><span>route: other</span><span>apply: skipped</span></div>
   <div class="grid">
@@ -1953,7 +2501,7 @@
 <section class="run">
 <h3>rung_443_frontier_dual_item_handoff_coref <span class="small">qwen35-semparse:9b | 2026-04-12 22:35</span></h3>
 <div class="chips"><span class="chip ok"><b>Status</b> passed</span> <span class="chip"><b>Validation</b> 7/7 (100%)</span> <span class="chip"><b>Parser Reliability</b> 100%</span> <span class="chip"><b>Apply Reliability</b> 100%</span> <span class="chip"><b>Clarification Rate</b> 0%</span> <span class="chip"><b>Avg Uncertainty</b> 2%</span> <span class="chip"><b>Clarification Rounds</b> 2</span></div>
-<div class="small links"><a href="reports/rung_443_frontier_dual_item_handoff_coref_frontier_language_width_v6_20260412_222723.html">run transcript</a> | <a href="https://github.com/dr3d/prethinker/blob/main/kb_runs_published/rung_443_frontier_dual_item_handoff_coref_frontier_language_width_v6_20260412_222723.json" target="_blank" rel="noopener noreferrer">run json</a> | <a href="prompts/sp-1e43c641b01b.md">prompt snapshot</a></div>
+<div class="small links"><a href="reports/rung_443_frontier_dual_item_handoff_coref_frontier_language_width_v6_20260412_222723.html">run transcript</a> | <a href="https://github.com/dr3d/prethinker/blob/main/kb_runs/rung_443_frontier_dual_item_handoff_coref_frontier_language_width_v6_20260412_222723.json" target="_blank" rel="noopener noreferrer">run json</a> | <a href="https://github.com/dr3d/prethinker/blob/main/prompts/sp-1e43c641b01b.md" target="_blank" rel="noopener noreferrer">prompt snapshot</a></div>
 <article class="turn">
   <div class="meta"><span>turn 1</span><span>route: other</span><span>apply: skipped</span></div>
   <div class="grid">
@@ -2640,7 +3188,7 @@
 <section class="run">
 <h3>rung_442_frontier_policy_multirevision_guard <span class="small">qwen35-semparse:9b | 2026-04-12 22:34</span></h3>
 <div class="chips"><span class="chip ok"><b>Status</b> passed</span> <span class="chip"><b>Validation</b> 9/9 (100%)</span> <span class="chip"><b>Parser Reliability</b> 100%</span> <span class="chip"><b>Apply Reliability</b> 100%</span> <span class="chip"><b>Clarification Rate</b> 0%</span> <span class="chip"><b>Avg Uncertainty</b> 2%</span> <span class="chip"><b>Clarification Rounds</b> 0</span></div>
-<div class="small links"><a href="reports/rung_442_frontier_policy_multirevision_guard_frontier_language_width_v6_20260412_222723.html">run transcript</a> | <a href="https://github.com/dr3d/prethinker/blob/main/kb_runs_published/rung_442_frontier_policy_multirevision_guard_frontier_language_width_v6_20260412_222723.json" target="_blank" rel="noopener noreferrer">run json</a> | <a href="prompts/sp-1e43c641b01b.md">prompt snapshot</a></div>
+<div class="small links"><a href="reports/rung_442_frontier_policy_multirevision_guard_frontier_language_width_v6_20260412_222723.html">run transcript</a> | <a href="https://github.com/dr3d/prethinker/blob/main/kb_runs/rung_442_frontier_policy_multirevision_guard_frontier_language_width_v6_20260412_222723.json" target="_blank" rel="noopener noreferrer">run json</a> | <a href="https://github.com/dr3d/prethinker/blob/main/prompts/sp-1e43c641b01b.md" target="_blank" rel="noopener noreferrer">prompt snapshot</a></div>
 <article class="turn">
   <div class="meta"><span>turn 1</span><span>route: other</span><span>apply: skipped</span></div>
   <div class="grid">
@@ -3564,7 +4112,7 @@
 <section class="run">
 <h3>rung_441_frontier_pronoun_bucket_shuffle <span class="small">qwen35-semparse:9b | 2026-04-12 22:33</span></h3>
 <div class="chips"><span class="chip ok"><b>Status</b> passed</span> <span class="chip"><b>Validation</b> 7/7 (100%)</span> <span class="chip"><b>Parser Reliability</b> 100%</span> <span class="chip"><b>Apply Reliability</b> 100%</span> <span class="chip"><b>Clarification Rate</b> 0%</span> <span class="chip"><b>Avg Uncertainty</b> 1%</span> <span class="chip"><b>Clarification Rounds</b> 0</span></div>
-<div class="small links"><a href="reports/rung_441_frontier_pronoun_bucket_shuffle_frontier_language_width_v6_20260412_222723.html">run transcript</a> | <a href="https://github.com/dr3d/prethinker/blob/main/kb_runs_published/rung_441_frontier_pronoun_bucket_shuffle_frontier_language_width_v6_20260412_222723.json" target="_blank" rel="noopener noreferrer">run json</a> | <a href="prompts/sp-1e43c641b01b.md">prompt snapshot</a></div>
+<div class="small links"><a href="reports/rung_441_frontier_pronoun_bucket_shuffle_frontier_language_width_v6_20260412_222723.html">run transcript</a> | <a href="https://github.com/dr3d/prethinker/blob/main/kb_runs/rung_441_frontier_pronoun_bucket_shuffle_frontier_language_width_v6_20260412_222723.json" target="_blank" rel="noopener noreferrer">run json</a> | <a href="https://github.com/dr3d/prethinker/blob/main/prompts/sp-1e43c641b01b.md" target="_blank" rel="noopener noreferrer">prompt snapshot</a></div>
 <article class="turn">
   <div class="meta"><span>turn 1</span><span>route: other</span><span>apply: skipped</span></div>
   <div class="grid">
@@ -4178,725 +4726,6 @@
   &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Direct mapping of query to Prolog goal with explicit arguments?&quot;,
   &quot;clarification_reason&quot;: &quot;Direct mapping of query to Prolog goal with explicit arguments.&quot;,
   &quot;rationale&quot;: &quot;Direct mapping of query to Prolog goal with explicit arguments.&quot;
-}</pre>
-    </div>
-  </div>
-</article>
-</section>
-<section class="run">
-<h3>rung_440_frontier_policy_revision_loop <span class="small">qwen35-semparse:9b | 2026-04-12 22:32</span></h3>
-<div class="chips"><span class="chip ok"><b>Status</b> passed</span> <span class="chip"><b>Validation</b> 7/7 (100%)</span> <span class="chip"><b>Parser Reliability</b> 100%</span> <span class="chip"><b>Apply Reliability</b> 100%</span> <span class="chip"><b>Clarification Rate</b> 0%</span> <span class="chip"><b>Avg Uncertainty</b> 3%</span> <span class="chip"><b>Clarification Rounds</b> 1</span></div>
-<div class="small links"><a href="reports/rung_440_frontier_policy_revision_loop_frontier_language_width_v6_20260412_222723.html">run transcript</a> | <a href="https://github.com/dr3d/prethinker/blob/main/kb_runs_published/rung_440_frontier_policy_revision_loop_frontier_language_width_v6_20260412_222723.json" target="_blank" rel="noopener noreferrer">run json</a> | <a href="prompts/sp-1e43c641b01b.md">prompt snapshot</a></div>
-<article class="turn">
-  <div class="meta"><span>turn 1</span><span>route: other</span><span>apply: skipped</span></div>
-  <div class="grid">
-    <div class="panel">
-      <h4>Utterance</h4>
-      <pre>Use requester/2, approver/2, manager_of/2, conflict/2, eligible/1.</pre>
-    </div>
-    <div class="panel">
-      <h4>Generated Parse JSON</h4>
-      <pre>{
-  &quot;intent&quot;: &quot;other&quot;,
-  &quot;logic_string&quot;: &quot;&quot;,
-  &quot;components&quot;: {
-    &quot;atoms&quot;: [],
-    &quot;variables&quot;: [],
-    &quot;predicates&quot;: []
-  },
-  &quot;facts&quot;: [],
-  &quot;rules&quot;: [],
-  &quot;queries&quot;: [],
-  &quot;confidence&quot;: {
-    &quot;overall&quot;: 1.0,
-    &quot;intent&quot;: 1.0,
-    &quot;logic&quot;: 1.0
-  },
-  &quot;ambiguities&quot;: [],
-  &quot;needs_clarification&quot;: false,
-  &quot;uncertainty_score&quot;: 0.0,
-  &quot;uncertainty_label&quot;: &quot;low&quot;,
-  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Instruction to set intent to &#x27;other&#x27; and leave logic_string empty?&quot;,
-  &quot;clarification_reason&quot;: &quot;Instruction to set intent to &#x27;other&#x27; and leave logic_string empty.&quot;,
-  &quot;rationale&quot;: &quot;Instruction to set intent to &#x27;other&#x27; and leave logic_string empty.&quot;
-}</pre>
-    </div>
-  </div>
-</article><article class="turn">
-  <div class="meta"><span>turn 2</span><span>route: assert_fact</span><span>apply: success</span></div>
-  <div class="grid">
-    <div class="panel">
-      <h4>Utterance</h4>
-      <pre>Set requester(claim_12, dana).</pre>
-    </div>
-    <div class="panel">
-      <h4>Generated Parse JSON</h4>
-      <pre>{
-  &quot;intent&quot;: &quot;assert_fact&quot;,
-  &quot;logic_string&quot;: &quot;requester(claim_12, dana).&quot;,
-  &quot;components&quot;: {
-    &quot;atoms&quot;: [
-      &quot;claim_12&quot;,
-      &quot;dana&quot;
-    ],
-    &quot;variables&quot;: [],
-    &quot;predicates&quot;: [
-      &quot;requester&quot;
-    ]
-  },
-  &quot;facts&quot;: [
-    &quot;requester(claim_12, dana).&quot;
-  ],
-  &quot;rules&quot;: [],
-  &quot;queries&quot;: [],
-  &quot;confidence&quot;: {
-    &quot;overall&quot;: 1.0,
-    &quot;intent&quot;: 1.0,
-    &quot;logic&quot;: 1.0
-  },
-  &quot;ambiguities&quot;: [],
-  &quot;needs_clarification&quot;: false,
-  &quot;uncertainty_score&quot;: 0.0,
-  &quot;uncertainty_label&quot;: &quot;low&quot;,
-  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Direct mapping of &#x27;Set requester(claim_12, dana)&#x27; to fact assertion?&quot;,
-  &quot;clarification_reason&quot;: &quot;Direct mapping of &#x27;Set requester(claim_12, dana)&#x27; to fact assertion.&quot;,
-  &quot;rationale&quot;: &quot;Direct mapping of &#x27;Set requester(claim_12, dana)&#x27; to fact assertion. Directional fact guard corrected inverted subject/object order.&quot;
-}</pre>
-    </div>
-  </div>
-</article><article class="turn">
-  <div class="meta"><span>turn 3</span><span>route: assert_fact</span><span>apply: success</span></div>
-  <div class="grid">
-    <div class="panel">
-      <h4>Utterance</h4>
-      <pre>Set approver(claim_12, dana).</pre>
-    </div>
-    <div class="panel">
-      <h4>Generated Parse JSON</h4>
-      <pre>{
-  &quot;intent&quot;: &quot;assert_fact&quot;,
-  &quot;logic_string&quot;: &quot;approver(claim_12, dana).&quot;,
-  &quot;components&quot;: {
-    &quot;atoms&quot;: [
-      &quot;claim_12&quot;,
-      &quot;dana&quot;
-    ],
-    &quot;variables&quot;: [],
-    &quot;predicates&quot;: [
-      &quot;approver&quot;
-    ]
-  },
-  &quot;facts&quot;: [
-    &quot;approver(claim_12, dana).&quot;
-  ],
-  &quot;rules&quot;: [],
-  &quot;queries&quot;: [],
-  &quot;confidence&quot;: {
-    &quot;overall&quot;: 1.0,
-    &quot;intent&quot;: 1.0,
-    &quot;logic&quot;: 1.0
-  },
-  &quot;ambiguities&quot;: [],
-  &quot;needs_clarification&quot;: false,
-  &quot;uncertainty_score&quot;: 0.0,
-  &quot;uncertainty_label&quot;: &quot;low&quot;,
-  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Direct mapping of declarative claim to fact predicate?&quot;,
-  &quot;clarification_reason&quot;: &quot;Direct mapping of declarative claim to fact predicate.&quot;,
-  &quot;rationale&quot;: &quot;Direct mapping of declarative claim to fact predicate. Directional fact guard corrected inverted subject/object order.&quot;
-}</pre>
-    </div>
-  </div>
-</article><article class="turn">
-  <div class="meta"><span>turn 4</span><span>route: assert_fact</span><span>apply: success</span></div>
-  <div class="grid">
-    <div class="panel">
-      <h4>Utterance</h4>
-      <pre>Set manager_of(leo, dana).</pre>
-    </div>
-    <div class="panel">
-      <h4>Generated Parse JSON</h4>
-      <pre>{
-  &quot;intent&quot;: &quot;assert_fact&quot;,
-  &quot;logic_string&quot;: &quot;manager_of(leo, dana).&quot;,
-  &quot;components&quot;: {
-    &quot;atoms&quot;: [
-      &quot;dana&quot;,
-      &quot;leo&quot;
-    ],
-    &quot;variables&quot;: [],
-    &quot;predicates&quot;: [
-      &quot;manager_of&quot;
-    ]
-  },
-  &quot;facts&quot;: [
-    &quot;manager_of(leo, dana).&quot;
-  ],
-  &quot;rules&quot;: [],
-  &quot;queries&quot;: [],
-  &quot;confidence&quot;: {
-    &quot;overall&quot;: 1.0,
-    &quot;intent&quot;: 1.0,
-    &quot;logic&quot;: 1.0
-  },
-  &quot;ambiguities&quot;: [],
-  &quot;needs_clarification&quot;: false,
-  &quot;uncertainty_score&quot;: 0.0,
-  &quot;uncertainty_label&quot;: &quot;low&quot;,
-  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Direct mapping of &#x27;Set manager_of(leo, dana).&#x27; to fact assertion?&quot;,
-  &quot;clarification_reason&quot;: &quot;Direct mapping of &#x27;Set manager_of(leo, dana).&#x27; to fact assertion.&quot;,
-  &quot;rationale&quot;: &quot;Direct mapping of &#x27;Set manager_of(leo, dana).&#x27; to fact assertion. Directional fact guard corrected inverted subject/object order.&quot;
-}</pre>
-    </div>
-  </div>
-</article><article class="turn">
-  <div class="meta"><span>turn 5</span><span>route: assert_fact</span><span>apply: success</span></div>
-  <div class="grid">
-    <div class="panel">
-      <h4>Utterance</h4>
-      <pre>assert rule conflict(C, P) :- requester(C, P), approver(C, P).</pre>
-    </div>
-    <div class="panel">
-      <h4>Generated Parse JSON</h4>
-      <pre>{
-  &quot;intent&quot;: &quot;assert_rule&quot;,
-  &quot;logic_string&quot;: &quot;conflict(C, P) :- requester(C, P), approver(C, P).&quot;,
-  &quot;components&quot;: {
-    &quot;atoms&quot;: [],
-    &quot;variables&quot;: [
-      &quot;C&quot;,
-      &quot;P&quot;
-    ],
-    &quot;predicates&quot;: [
-      &quot;approver&quot;,
-      &quot;conflict&quot;,
-      &quot;requester&quot;
-    ]
-  },
-  &quot;facts&quot;: [],
-  &quot;rules&quot;: [
-    &quot;conflict(C, P) :- requester(C, P), approver(C, P).&quot;
-  ],
-  &quot;queries&quot;: [],
-  &quot;confidence&quot;: {
-    &quot;overall&quot;: 0.95,
-    &quot;intent&quot;: 1.0,
-    &quot;logic&quot;: 0.95
-  },
-  &quot;ambiguities&quot;: [],
-  &quot;needs_clarification&quot;: false,
-  &quot;uncertainty_score&quot;: 0.05,
-  &quot;uncertainty_label&quot;: &quot;low&quot;,
-  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Utterance explicitly defines a rule with clear head and body predicates using?&quot;,
-  &quot;clarification_reason&quot;: &quot;Utterance explicitly defines a rule with clear head and body predicates using&quot;,
-  &quot;rationale&quot;: &quot;Utterance explicitly defines a rule with clear head and body predicates using provided ontology terms.&quot;
-}</pre>
-    </div>
-  </div>
-</article><article class="turn">
-  <div class="meta"><span>turn 6</span><span>route: assert_fact</span><span>apply: success</span></div>
-  <div class="grid">
-    <div class="panel">
-      <h4>Utterance</h4>
-      <pre>assert rule conflict(C, M) :- requester(C, P), manager_of(M, P), approver(C, M).</pre>
-    </div>
-    <div class="panel">
-      <h4>Generated Parse JSON</h4>
-      <pre>{
-  &quot;intent&quot;: &quot;assert_rule&quot;,
-  &quot;logic_string&quot;: &quot;conflict(C, M) :- requester(C, P), manager_of(M, P), approver(C, M).&quot;,
-  &quot;components&quot;: {
-    &quot;atoms&quot;: [],
-    &quot;variables&quot;: [
-      &quot;C&quot;,
-      &quot;M&quot;,
-      &quot;P&quot;
-    ],
-    &quot;predicates&quot;: [
-      &quot;approver&quot;,
-      &quot;conflict&quot;,
-      &quot;manager_of&quot;,
-      &quot;requester&quot;
-    ]
-  },
-  &quot;facts&quot;: [],
-  &quot;rules&quot;: [
-    &quot;conflict(C, M) :- requester(C, P), manager_of(M, P), approver(C, M).&quot;
-  ],
-  &quot;queries&quot;: [],
-  &quot;confidence&quot;: {
-    &quot;overall&quot;: 0.95,
-    &quot;intent&quot;: 1.0,
-    &quot;logic&quot;: 0.95
-  },
-  &quot;ambiguities&quot;: [],
-  &quot;needs_clarification&quot;: false,
-  &quot;uncertainty_score&quot;: 0.05,
-  &quot;uncertainty_label&quot;: &quot;low&quot;,
-  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Utterance explicitly defines a rule with clear variables and predicates from the?&quot;,
-  &quot;clarification_reason&quot;: &quot;Utterance explicitly defines a rule with clear variables and predicates from the&quot;,
-  &quot;rationale&quot;: &quot;Utterance explicitly defines a rule with clear variables and predicates from the known ontology. Argument order aligns with semantic roles (conflict between C and M given shared P).&quot;
-}</pre>
-    </div>
-  </div>
-</article><article class="turn">
-  <div class="meta"><span>turn 7</span><span>route: assert_fact</span><span>apply: success</span></div>
-  <div class="grid">
-    <div class="panel">
-      <h4>Utterance</h4>
-      <pre>assert rule eligible(C) :- requester(C, R), approver(C, A), R \= A.</pre>
-    </div>
-    <div class="panel">
-      <h4>Generated Parse JSON</h4>
-      <pre>{
-  &quot;intent&quot;: &quot;assert_rule&quot;,
-  &quot;logic_string&quot;: &quot;eligible(C) :- requester(C, R), approver(C, A), R \\= A.&quot;,
-  &quot;components&quot;: {
-    &quot;atoms&quot;: [],
-    &quot;variables&quot;: [
-      &quot;A&quot;,
-      &quot;C&quot;,
-      &quot;R&quot;,
-      &quot;R \\= A&quot;
-    ],
-    &quot;predicates&quot;: [
-      &quot;approver&quot;,
-      &quot;eligible&quot;,
-      &quot;requester&quot;
-    ]
-  },
-  &quot;facts&quot;: [],
-  &quot;rules&quot;: [
-    &quot;eligible(C) :- requester(C, R), approver(C, A), R \\= A.&quot;
-  ],
-  &quot;queries&quot;: [],
-  &quot;confidence&quot;: {
-    &quot;overall&quot;: 0.95,
-    &quot;intent&quot;: 1.0,
-    &quot;logic&quot;: 0.95
-  },
-  &quot;ambiguities&quot;: [],
-  &quot;needs_clarification&quot;: false,
-  &quot;uncertainty_score&quot;: 0.05,
-  &quot;uncertainty_label&quot;: &quot;low&quot;,
-  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Utterance explicitly defines a rule with clear variables and predicates matching ontology?&quot;,
-  &quot;clarification_reason&quot;: &quot;Utterance explicitly defines a rule with clear variables and predicates matching ontology.&quot;,
-  &quot;rationale&quot;: &quot;Utterance explicitly defines a rule with clear variables and predicates matching ontology.&quot;
-}</pre>
-    </div>
-  </div>
-</article><article class="turn">
-  <div class="meta"><span>turn 8</span><span>route: retract</span><span>apply: success</span></div>
-  <div class="grid">
-    <div class="panel">
-      <h4>Utterance</h4>
-      <pre>fix it so manager leo signs for now then we test</pre>
-    </div>
-    <div class="panel">
-      <h4>Generated Parse JSON</h4>
-      <pre>{
-  &quot;intent&quot;: &quot;retract&quot;,
-  &quot;logic_string&quot;: &quot;retract(approver(claim_12, dana)).\nretract(approver(claim_12, leo)).&quot;,
-  &quot;components&quot;: {
-    &quot;atoms&quot;: [
-      &quot;retract(approver(claim_12, dana)).\nretract(approver(claim_12, leo))&quot;
-    ],
-    &quot;variables&quot;: [],
-    &quot;predicates&quot;: []
-  },
-  &quot;facts&quot;: [
-    &quot;approver(claim_12, dana).&quot;,
-    &quot;approver(claim_12, leo).&quot;
-  ],
-  &quot;rules&quot;: [],
-  &quot;queries&quot;: [],
-  &quot;confidence&quot;: {
-    &quot;overall&quot;: 0.95,
-    &quot;intent&quot;: 1.0,
-    &quot;logic&quot;: 0.95
-  },
-  &quot;ambiguities&quot;: [],
-  &quot;needs_clarification&quot;: false,
-  &quot;uncertainty_score&quot;: 0.05,
-  &quot;uncertainty_label&quot;: &quot;low&quot;,
-  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Clarification transcript explicitly instructs retracting approver(claim_12, dana) and setting approver(claim_12, leo). The?&quot;,
-  &quot;clarification_reason&quot;: &quot;Clarification transcript explicitly instructs retracting approver(claim_12, dana) and setting approver(claim_12, leo). The&quot;,
-  &quot;rationale&quot;: &quot;Clarification transcript explicitly instructs retracting approver(claim_12, dana) and setting approver(claim_12, leo). The &#x27;fix it&#x27; command implies correcting the state by retracting the old fact and asserting the new one. Since the transcript provides the exact facts to retract, no further clarification is needed. The intent is to retract the specific facts mentioned in the transcript.&quot;
-}</pre>
-    </div>
-  </div>
-</article><article class="turn">
-  <div class="meta"><span>turn 9</span><span>route: retract</span><span>apply: no_results</span></div>
-  <div class="grid">
-    <div class="panel">
-      <h4>Utterance</h4>
-      <pre>retract fact approver(claim_12, dana).</pre>
-    </div>
-    <div class="panel">
-      <h4>Generated Parse JSON</h4>
-      <pre>{
-  &quot;intent&quot;: &quot;retract&quot;,
-  &quot;logic_string&quot;: &quot;retract(approver(claim_12, dana)).&quot;,
-  &quot;components&quot;: {
-    &quot;atoms&quot;: [
-      &quot;claim_12&quot;,
-      &quot;dana&quot;
-    ],
-    &quot;variables&quot;: [],
-    &quot;predicates&quot;: [
-      &quot;approver&quot;
-    ]
-  },
-  &quot;facts&quot;: [
-    &quot;approver(claim_12, dana).&quot;
-  ],
-  &quot;rules&quot;: [],
-  &quot;queries&quot;: [],
-  &quot;confidence&quot;: {
-    &quot;overall&quot;: 0.95,
-    &quot;intent&quot;: 1.0,
-    &quot;logic&quot;: 0.95
-  },
-  &quot;ambiguities&quot;: [],
-  &quot;needs_clarification&quot;: false,
-  &quot;uncertainty_score&quot;: 0.05,
-  &quot;uncertainty_label&quot;: &quot;low&quot;,
-  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: User explicitly commands retraction of fact approver(claim_12, dana). Predicate &#x27;approver&#x27; is canonical?&quot;,
-  &quot;clarification_reason&quot;: &quot;User explicitly commands retraction of fact approver(claim_12, dana). Predicate &#x27;approver&#x27; is canonical.&quot;,
-  &quot;rationale&quot;: &quot;User explicitly commands retraction of fact approver(claim_12, dana). Predicate &#x27;approver&#x27; is canonical. Arguments are explicit.&quot;
-}</pre>
-    </div>
-  </div>
-</article><article class="turn">
-  <div class="meta"><span>turn 10</span><span>route: assert_fact</span><span>apply: success</span></div>
-  <div class="grid">
-    <div class="panel">
-      <h4>Utterance</h4>
-      <pre>Set approver(claim_12, leo).</pre>
-    </div>
-    <div class="panel">
-      <h4>Generated Parse JSON</h4>
-      <pre>{
-  &quot;intent&quot;: &quot;assert_fact&quot;,
-  &quot;logic_string&quot;: &quot;approver(claim_12, leo).&quot;,
-  &quot;components&quot;: {
-    &quot;atoms&quot;: [
-      &quot;claim_12&quot;,
-      &quot;leo&quot;
-    ],
-    &quot;variables&quot;: [],
-    &quot;predicates&quot;: [
-      &quot;approver&quot;
-    ]
-  },
-  &quot;facts&quot;: [
-    &quot;approver(claim_12, leo).&quot;
-  ],
-  &quot;rules&quot;: [],
-  &quot;queries&quot;: [],
-  &quot;confidence&quot;: {
-    &quot;overall&quot;: 1.0,
-    &quot;intent&quot;: 1.0,
-    &quot;logic&quot;: 1.0
-  },
-  &quot;ambiguities&quot;: [],
-  &quot;needs_clarification&quot;: false,
-  &quot;uncertainty_score&quot;: 0.0,
-  &quot;uncertainty_label&quot;: &quot;low&quot;,
-  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Direct mapping of declarative claim to fact predicate?&quot;,
-  &quot;clarification_reason&quot;: &quot;Direct mapping of declarative claim to fact predicate.&quot;,
-  &quot;rationale&quot;: &quot;Direct mapping of declarative claim to fact predicate. Directional fact guard corrected inverted subject/object order.&quot;
-}</pre>
-    </div>
-  </div>
-</article><article class="turn">
-  <div class="meta"><span>turn 11</span><span>route: assert_fact</span><span>apply: success</span></div>
-  <div class="grid">
-    <div class="panel">
-      <h4>Utterance</h4>
-      <pre>still bad, move signoff to mira and keep requester same</pre>
-    </div>
-    <div class="panel">
-      <h4>Generated Parse JSON</h4>
-      <pre>{
-  &quot;intent&quot;: &quot;assert_fact&quot;,
-  &quot;logic_string&quot;: &quot;signoff(mira).&quot;,
-  &quot;components&quot;: {
-    &quot;atoms&quot;: [
-      &quot;mira&quot;
-    ],
-    &quot;variables&quot;: [],
-    &quot;predicates&quot;: [
-      &quot;signoff&quot;
-    ]
-  },
-  &quot;facts&quot;: [
-    &quot;signoff(mira).&quot;
-  ],
-  &quot;rules&quot;: [],
-  &quot;queries&quot;: [],
-  &quot;confidence&quot;: {
-    &quot;overall&quot;: 0.95,
-    &quot;intent&quot;: 0.95,
-    &quot;logic&quot;: 0.95
-  },
-  &quot;ambiguities&quot;: [],
-  &quot;needs_clarification&quot;: false,
-  &quot;uncertainty_score&quot;: 0.15,
-  &quot;uncertainty_label&quot;: &quot;low&quot;,
-  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Interpreted &#x27;move signoff to mira&#x27; as asserting the new signoff responsibility. &#x27;keep?&quot;,
-  &quot;clarification_reason&quot;: &quot;Interpreted &#x27;move signoff to mira&#x27; as asserting the new signoff responsibility. &#x27;keep&quot;,
-  &quot;rationale&quot;: &quot;Interpreted &#x27;move signoff to mira&#x27; as asserting the new signoff responsibility. &#x27;keep requester same&#x27; is a maintenance instruction for an existing fact not present in the current context, so no fact is asserted for it. &#x27;still bad&#x27; is conversational filler.&quot;
-}</pre>
-    </div>
-  </div>
-</article><article class="turn">
-  <div class="meta"><span>turn 12</span><span>route: retract</span><span>apply: success</span></div>
-  <div class="grid">
-    <div class="panel">
-      <h4>Utterance</h4>
-      <pre>retract fact approver(claim_12, leo).</pre>
-    </div>
-    <div class="panel">
-      <h4>Generated Parse JSON</h4>
-      <pre>{
-  &quot;intent&quot;: &quot;retract&quot;,
-  &quot;logic_string&quot;: &quot;retract(approver(claim_12, leo)).&quot;,
-  &quot;components&quot;: {
-    &quot;atoms&quot;: [
-      &quot;claim_12&quot;,
-      &quot;leo&quot;
-    ],
-    &quot;variables&quot;: [],
-    &quot;predicates&quot;: [
-      &quot;approver&quot;
-    ]
-  },
-  &quot;facts&quot;: [
-    &quot;approver(claim_12, leo).&quot;
-  ],
-  &quot;rules&quot;: [],
-  &quot;queries&quot;: [],
-  &quot;confidence&quot;: {
-    &quot;overall&quot;: 0.95,
-    &quot;intent&quot;: 1.0,
-    &quot;logic&quot;: 0.95
-  },
-  &quot;ambiguities&quot;: [],
-  &quot;needs_clarification&quot;: false,
-  &quot;uncertainty_score&quot;: 0.05,
-  &quot;uncertainty_label&quot;: &quot;low&quot;,
-  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: User explicitly commands retraction of fact approver(claim_12, leo). Predicate &#x27;approver&#x27; is canonical?&quot;,
-  &quot;clarification_reason&quot;: &quot;User explicitly commands retraction of fact approver(claim_12, leo). Predicate &#x27;approver&#x27; is canonical.&quot;,
-  &quot;rationale&quot;: &quot;User explicitly commands retraction of fact approver(claim_12, leo). Predicate &#x27;approver&#x27; is canonical. Arguments are explicit.&quot;
-}</pre>
-    </div>
-  </div>
-</article><article class="turn">
-  <div class="meta"><span>turn 13</span><span>route: assert_fact</span><span>apply: success</span></div>
-  <div class="grid">
-    <div class="panel">
-      <h4>Utterance</h4>
-      <pre>Set approver(claim_12, mira).</pre>
-    </div>
-    <div class="panel">
-      <h4>Generated Parse JSON</h4>
-      <pre>{
-  &quot;intent&quot;: &quot;assert_fact&quot;,
-  &quot;logic_string&quot;: &quot;approver(claim_12, mira).&quot;,
-  &quot;components&quot;: {
-    &quot;atoms&quot;: [
-      &quot;claim_12&quot;,
-      &quot;mira&quot;
-    ],
-    &quot;variables&quot;: [],
-    &quot;predicates&quot;: [
-      &quot;approver&quot;
-    ]
-  },
-  &quot;facts&quot;: [
-    &quot;approver(claim_12, mira).&quot;
-  ],
-  &quot;rules&quot;: [],
-  &quot;queries&quot;: [],
-  &quot;confidence&quot;: {
-    &quot;overall&quot;: 1.0,
-    &quot;intent&quot;: 1.0,
-    &quot;logic&quot;: 1.0
-  },
-  &quot;ambiguities&quot;: [],
-  &quot;needs_clarification&quot;: false,
-  &quot;uncertainty_score&quot;: 0.0,
-  &quot;uncertainty_label&quot;: &quot;low&quot;,
-  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Direct mapping of declarative claim to fact predicate?&quot;,
-  &quot;clarification_reason&quot;: &quot;Direct mapping of declarative claim to fact predicate.&quot;,
-  &quot;rationale&quot;: &quot;Direct mapping of declarative claim to fact predicate. Directional fact guard corrected inverted subject/object order.&quot;
-}</pre>
-    </div>
-  </div>
-</article><article class="turn">
-  <div class="meta"><span>turn 14</span><span>route: assert_fact</span><span>apply: skipped</span></div>
-  <div class="grid">
-    <div class="panel">
-      <h4>Utterance</h4>
-      <pre>Set requester(claim_12, dana).</pre>
-    </div>
-    <div class="panel">
-      <h4>Generated Parse JSON</h4>
-      <pre>{
-  &quot;intent&quot;: &quot;assert_fact&quot;,
-  &quot;logic_string&quot;: &quot;requester(claim_12, dana).&quot;,
-  &quot;components&quot;: {
-    &quot;atoms&quot;: [
-      &quot;claim_12&quot;,
-      &quot;dana&quot;
-    ],
-    &quot;variables&quot;: [],
-    &quot;predicates&quot;: [
-      &quot;requester&quot;
-    ]
-  },
-  &quot;facts&quot;: [
-    &quot;requester(claim_12, dana).&quot;
-  ],
-  &quot;rules&quot;: [],
-  &quot;queries&quot;: [],
-  &quot;confidence&quot;: {
-    &quot;overall&quot;: 1.0,
-    &quot;intent&quot;: 1.0,
-    &quot;logic&quot;: 1.0
-  },
-  &quot;ambiguities&quot;: [],
-  &quot;needs_clarification&quot;: false,
-  &quot;uncertainty_score&quot;: 0.0,
-  &quot;uncertainty_label&quot;: &quot;low&quot;,
-  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Direct mapping of &#x27;Set requester(claim_12, dana)&#x27; to fact assertion?&quot;,
-  &quot;clarification_reason&quot;: &quot;Direct mapping of &#x27;Set requester(claim_12, dana)&#x27; to fact assertion.&quot;,
-  &quot;rationale&quot;: &quot;Direct mapping of &#x27;Set requester(claim_12, dana)&#x27; to fact assertion. Directional fact guard corrected inverted subject/object order.&quot;
-}</pre>
-    </div>
-  </div>
-</article><article class="turn">
-  <div class="meta"><span>turn 15</span><span>route: query</span><span>apply: no_results</span></div>
-  <div class="grid">
-    <div class="panel">
-      <h4>Utterance</h4>
-      <pre>query conflict(claim_12, dana).</pre>
-    </div>
-    <div class="panel">
-      <h4>Generated Parse JSON</h4>
-      <pre>{
-  &quot;intent&quot;: &quot;query&quot;,
-  &quot;logic_string&quot;: &quot;conflict(claim_12, dana).&quot;,
-  &quot;components&quot;: {
-    &quot;atoms&quot;: [
-      &quot;claim_12&quot;,
-      &quot;dana&quot;
-    ],
-    &quot;variables&quot;: [],
-    &quot;predicates&quot;: [
-      &quot;conflict&quot;
-    ]
-  },
-  &quot;facts&quot;: [],
-  &quot;rules&quot;: [],
-  &quot;queries&quot;: [
-    &quot;conflict(claim_12, dana).&quot;
-  ],
-  &quot;confidence&quot;: {
-    &quot;overall&quot;: 0.95,
-    &quot;intent&quot;: 1.0,
-    &quot;logic&quot;: 0.95
-  },
-  &quot;ambiguities&quot;: [],
-  &quot;needs_clarification&quot;: false,
-  &quot;uncertainty_score&quot;: 0.05,
-  &quot;uncertainty_label&quot;: &quot;low&quot;,
-  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Utterance is a direct query about a specific fact using known ontology?&quot;,
-  &quot;clarification_reason&quot;: &quot;Utterance is a direct query about a specific fact using known ontology&quot;,
-  &quot;rationale&quot;: &quot;Utterance is a direct query about a specific fact using known ontology predicates. No ambiguity detected.&quot;
-}</pre>
-    </div>
-  </div>
-</article><article class="turn">
-  <div class="meta"><span>turn 16</span><span>route: query</span><span>apply: no_results</span></div>
-  <div class="grid">
-    <div class="panel">
-      <h4>Utterance</h4>
-      <pre>query conflict(claim_12, leo).</pre>
-    </div>
-    <div class="panel">
-      <h4>Generated Parse JSON</h4>
-      <pre>{
-  &quot;intent&quot;: &quot;query&quot;,
-  &quot;logic_string&quot;: &quot;conflict(claim_12, leo).&quot;,
-  &quot;components&quot;: {
-    &quot;atoms&quot;: [
-      &quot;claim_12&quot;,
-      &quot;leo&quot;
-    ],
-    &quot;variables&quot;: [],
-    &quot;predicates&quot;: [
-      &quot;conflict&quot;
-    ]
-  },
-  &quot;facts&quot;: [],
-  &quot;rules&quot;: [],
-  &quot;queries&quot;: [
-    &quot;conflict(claim_12, leo).&quot;
-  ],
-  &quot;confidence&quot;: {
-    &quot;overall&quot;: 0.95,
-    &quot;intent&quot;: 1.0,
-    &quot;logic&quot;: 0.95
-  },
-  &quot;ambiguities&quot;: [],
-  &quot;needs_clarification&quot;: false,
-  &quot;uncertainty_score&quot;: 0.05,
-  &quot;uncertainty_label&quot;: &quot;low&quot;,
-  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Direct mapping of query utterance to Prolog goal using provided ontology predicate?&quot;,
-  &quot;clarification_reason&quot;: &quot;Direct mapping of query utterance to Prolog goal using provided ontology predicate.&quot;,
-  &quot;rationale&quot;: &quot;Direct mapping of query utterance to Prolog goal using provided ontology predicate.&quot;
-}</pre>
-    </div>
-  </div>
-</article><article class="turn">
-  <div class="meta"><span>turn 17</span><span>route: query</span><span>apply: success</span></div>
-  <div class="grid">
-    <div class="panel">
-      <h4>Utterance</h4>
-      <pre>query eligible(claim_12).</pre>
-    </div>
-    <div class="panel">
-      <h4>Generated Parse JSON</h4>
-      <pre>{
-  &quot;intent&quot;: &quot;query&quot;,
-  &quot;logic_string&quot;: &quot;eligible(claim_12).&quot;,
-  &quot;components&quot;: {
-    &quot;atoms&quot;: [
-      &quot;claim_12&quot;
-    ],
-    &quot;variables&quot;: [],
-    &quot;predicates&quot;: [
-      &quot;eligible&quot;
-    ]
-  },
-  &quot;facts&quot;: [],
-  &quot;rules&quot;: [],
-  &quot;queries&quot;: [
-    &quot;eligible(claim_12).&quot;
-  ],
-  &quot;confidence&quot;: {
-    &quot;overall&quot;: 0.95,
-    &quot;intent&quot;: 1.0,
-    &quot;logic&quot;: 0.95
-  },
-  &quot;ambiguities&quot;: [],
-  &quot;needs_clarification&quot;: false,
-  &quot;uncertainty_score&quot;: 0.05,
-  &quot;uncertainty_label&quot;: &quot;low&quot;,
-  &quot;clarification_question&quot;: &quot;Can you clarify this point before I apply it: Direct query for specific fact eligibility of claim_12?&quot;,
-  &quot;clarification_reason&quot;: &quot;Direct query for specific fact eligibility of claim_12.&quot;,
-  &quot;rationale&quot;: &quot;Direct query for specific fact eligibility of claim_12.&quot;
 }</pre>
     </div>
   </div>

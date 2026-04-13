@@ -2,7 +2,13 @@
 
 This project is a local workbench for building a high-accuracy semantic parser (Qwen 3.5 9B first) that converts natural language into Prolog-ready logic and applies it into named, persistent knowledge bases.
 
-Last updated: 2026-04-12
+Last updated: 2026-04-13
+
+## Latest Ops Update (2026-04-13)
+
+- Docs hub front door now uses a visitor-first hero funnel (explainer, contamination ablation, run reports) with plain-language action notes.
+- Media showcase is now video-first with audio fallback and one-button-per-media selection.
+- Added runnable demo scenario `demo_05_time_loop_carnival` (state mutation + retract + post-change query), with published run JSON + HTML transcript.
 
 ## Quick Links
 
@@ -39,6 +45,7 @@ Public demo concepts plus runnable starter scenarios are tracked in:
 - `kb_scenarios/demo_02_policy_stress_test_machine.json`
 - `kb_scenarios/demo_03_story_world_interrogator.json`
 - `kb_scenarios/demo_04_reimbursement_violation_check.json`
+- `kb_scenarios/demo_05_time_loop_carnival.json`
 
 ## Honest Snapshot (For NSAI Readers)
 

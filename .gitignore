@@ -13,6 +13,7 @@ kb_store/frontierv*/
 kb_store/ceprobe_*/
 kb_store/confprobe_*/
 kb_store/rung_*/
+kb_store/demo_*/
 
 # Local runtime cache/index (do not publish by accident)
 kb_store/ontologies_index.json
