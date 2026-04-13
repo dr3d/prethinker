@@ -18,6 +18,7 @@ Last updated: 2026-04-13
 - track scoreboard: `docs/TRACK_SCOREBOARD.md`
 - explainer article: `EXPLAINER.md`
 - assembly log: `SESSIONS.md`
+- codex ide handoff: `CODEX_IDE_HANDOFF.md`
 
 ## Repository Status Note
 
