@@ -8,3 +8,8 @@ __pycache__/
 *.pyd
 codex-state.json
 docs/drafts/
+ui_gateway/
+kb_store/frontierv*/
+kb_store/ceprobe_*/
+kb_store/confprobe_*/
+kb_store/rung_*/

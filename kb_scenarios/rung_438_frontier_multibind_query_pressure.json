@@ -1,0 +1,66 @@
+{
+  "name": "rung_438_frontier_multibind_query_pressure",
+  "ontology_name": "rung_438_frontier_multibind_query_pressure",
+  "utterances": [
+    "Use parent/2, ancestor/2, lives_in/2, inside/2, in_region/2, carries/2.",
+    "Set parent(ian, scott). Set parent(scott, dana). Set parent(scott, pierce).",
+    "assert rule ancestor(X, Y) :- parent(X, Y).",
+    "assert rule ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).",
+    "assert rule in_region(X, Z) :- lives_in(X, Y), inside(Y, Z).",
+    {
+      "utterance": "they both live in salem, but pierce got moved to bend after",
+      "clarification_answers": [
+        "They means Dana and Pierce.",
+        "Set lives_in(dana, salem). Set lives_in(pierce, salem). Retract lives_in(pierce, salem). Set lives_in(pierce, bend)."
+      ],
+      "max_clarification_rounds": 2
+    },
+    "Set lives_in(dana, salem).",
+    "Set lives_in(pierce, bend).",
+    "Set inside(salem, oregon). Set inside(bend, oregon).",
+    "Set carries(scott, brass_key).",
+    "query ancestor(ian, dana).",
+    "query ancestor(ian, pierce).",
+    "query in_region(dana, oregon).",
+    "query in_region(pierce, oregon).",
+    "query carries(scott, brass_key)."
+  ],
+  "validations": [
+    {
+      "id": "ian_reaches_dana",
+      "query": "ancestor(ian, dana).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "ian_reaches_pierce",
+      "query": "ancestor(ian, pierce).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "dana_in_oregon",
+      "query": "in_region(dana, oregon).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "pierce_in_oregon",
+      "query": "in_region(pierce, oregon).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "scott_has_key",
+      "query": "carries(scott, brass_key).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "pierce_not_in_salem",
+      "query": "lives_in(pierce, salem).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    }
+  ]
+}

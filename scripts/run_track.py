@@ -59,11 +59,13 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument("--base-url", default="http://127.0.0.1:11434")
     p.add_argument("--model", default="qwen35-semparse:9b")
     p.add_argument("--runtime", default="core")
+    p.add_argument("--kb-root", default="")
     p.add_argument("--prompt-file", default="")
     p.add_argument("--kb-name-prefix", default="")
     p.add_argument("--context-length", type=int, default=0)
     p.add_argument("--clarification-eagerness", type=float, default=-1.0)
     p.add_argument("--max-clarification-rounds", type=int, default=-1)
+    p.add_argument("--require-final-confirmation", action="store_true")
     p.add_argument("--clarification-answer-model", default="")
     p.add_argument("--clarification-answer-backend", default="")
     p.add_argument("--clarification-answer-base-url", default="")
@@ -153,12 +155,16 @@ def main() -> int:
         ]
         if args.prompt_file:
             cmd.extend(["--prompt-file", args.prompt_file])
+        if args.kb_root:
+            cmd.extend(["--kb-root", args.kb_root])
         if args.context_length > 0:
             cmd.extend(["--context-length", str(args.context_length)])
         if args.clarification_eagerness >= 0.0:
             cmd.extend(["--clarification-eagerness", str(args.clarification_eagerness)])
         if args.max_clarification_rounds >= 0:
             cmd.extend(["--max-clarification-rounds", str(args.max_clarification_rounds)])
+        if args.require_final_confirmation:
+            cmd.append("--require-final-confirmation")
         if args.clarification_answer_model:
             cmd.extend(["--clarification-answer-model", args.clarification_answer_model])
         if args.clarification_answer_backend:
@@ -239,10 +245,12 @@ def main() -> int:
             "base_url": args.base_url,
             "model": args.model,
             "runtime": args.runtime,
+            "kb_root": args.kb_root,
             "prompt_file": args.prompt_file,
             "context_length": args.context_length,
             "clarification_eagerness": args.clarification_eagerness,
             "max_clarification_rounds": args.max_clarification_rounds,
+            "require_final_confirmation": bool(args.require_final_confirmation),
             "clarification_answer_model": args.clarification_answer_model,
             "clarification_answer_backend": args.clarification_answer_backend,
             "clarification_answer_base_url": args.clarification_answer_base_url,

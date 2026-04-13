@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from datetime import datetime, timezone
 from dataclasses import dataclass
@@ -22,7 +23,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from kb_pipeline import CorePrologRuntime
+from kb_pipeline import CorePrologRuntime, _call_model_prompt, _parse_model_json
 
 
 def _coerce_bool(value: Any, default: bool) -> bool:
@@ -65,7 +66,19 @@ class PrologMCPServer:
         "2024-11-05",
     ]
 
-    def __init__(self, kb_path: str = "") -> None:
+    def __init__(
+        self,
+        kb_path: str = "",
+        *,
+        compiler_mode: str = "strict",
+        compiler_backend: str = "ollama",
+        compiler_base_url: str = "http://127.0.0.1:11434",
+        compiler_model: str = "qwen35-semparse:9b",
+        compiler_context_length: int = 8192,
+        compiler_timeout: int = 60,
+        compiler_prompt_file: str = "",
+        compiler_prompt_enabled: bool = True,
+    ) -> None:
         self._runtime = CorePrologRuntime()
         self._kb_path = str(Path(kb_path).resolve()) if str(kb_path).strip() else ""
         self._session = PreThinkSessionState()
@@ -73,6 +86,39 @@ class PrologMCPServer:
         self._prethink_counter = 1
         self._pending_prethink: dict[str, Any] | None = None
         self._trace_path = REPO_ROOT / "tmp" / "mcp_trace.log"
+        self._compiler_mode = str(compiler_mode or "strict").strip().lower()
+        if self._compiler_mode not in {"strict", "auto", "heuristic"}:
+            self._compiler_mode = "strict"
+        self._compiler_backend = str(compiler_backend or "ollama").strip()
+        self._compiler_base_url = str(compiler_base_url or "http://127.0.0.1:11434").strip()
+        self._compiler_model = str(compiler_model or "qwen35-semparse:9b").strip()
+        self._compiler_context_length = max(512, int(compiler_context_length))
+        self._compiler_timeout = max(5, int(compiler_timeout))
+        prompt_candidate = str(compiler_prompt_file or "").strip()
+        if not prompt_candidate:
+            prompt_candidate = str(REPO_ROOT / "modelfiles" / "semantic_parser_system_prompt.md")
+        self._compiler_prompt_path = Path(prompt_candidate)
+        self._compiler_prompt_enabled = bool(compiler_prompt_enabled)
+        self._compiler_prompt_text = ""
+        self._compiler_prompt_loaded = False
+        self._compiler_prompt_load_error = ""
+        self._compiler_api_key = os.getenv("LMSTUDIO_API_KEY", "").strip() or None
+        self._load_compiler_prompt()
+
+    def _load_compiler_prompt(self) -> None:
+        if not self._compiler_prompt_enabled:
+            self._compiler_prompt_text = ""
+            self._compiler_prompt_loaded = True
+            self._compiler_prompt_load_error = ""
+            return
+        try:
+            self._compiler_prompt_text = self._compiler_prompt_path.read_text(encoding="utf-8")
+            self._compiler_prompt_loaded = bool(self._compiler_prompt_text.strip())
+            self._compiler_prompt_load_error = ""
+        except Exception as exc:
+            self._compiler_prompt_text = ""
+            self._compiler_prompt_loaded = False
+            self._compiler_prompt_load_error = str(exc)
 
     # Direct runtime methods used by kb_pipeline with --runtime mcp
     def empty_kb(self) -> dict[str, Any]:
@@ -304,11 +350,79 @@ class PrologMCPServer:
     def show_pre_think_state(self) -> dict[str, Any]:
         return {"status": "success", "result_type": "session_state", "state": self._serialize_state()}
 
+    def _build_compiler_prompt(self, utterance: str) -> str:
+        prompt_section = self._compiler_prompt_text.strip()
+        return (
+            "/no_think\n"
+            f"{prompt_section}\n\n"
+            "You are compiling a PRE-THINK routing packet.\n"
+            "Return minified JSON only with keys:\n"
+            "intent,needs_clarification,uncertainty_score,clarification_question,clarification_reason,rationale\n"
+            "Rules:\n"
+            "- intent must be one of: assert_fact,assert_rule,query,retract,other\n"
+            "- needs_clarification must be boolean\n"
+            "- uncertainty_score must be numeric in [0,1]\n"
+            "- clarification_question may be empty string if not needed\n"
+            "- clarification_reason should be short and concrete\n"
+            "- no markdown, no prose wrappers\n"
+            f"USER_UTTERANCE:\n{utterance}\n"
+        )
+
+    def _compile_prethink_semantics(self, utterance: str) -> tuple[dict[str, Any] | None, str]:
+        if not self._compiler_prompt_loaded:
+            reason = self._compiler_prompt_load_error or "compiler prompt unavailable"
+            return None, f"Compiler prompt not loaded: {reason}"
+        prompt = self._build_compiler_prompt(utterance)
+        try:
+            response = _call_model_prompt(
+                backend=self._compiler_backend,
+                base_url=self._compiler_base_url,
+                model=self._compiler_model,
+                prompt_text=prompt,
+                context_length=self._compiler_context_length,
+                timeout=self._compiler_timeout,
+                api_key=self._compiler_api_key,
+            )
+            parsed, _ = _parse_model_json(
+                response,
+                required_keys=["intent", "needs_clarification", "uncertainty_score"],
+            )
+            if not isinstance(parsed, dict):
+                return None, "Compiler returned non-parseable JSON payload."
+            intent = str(parsed.get("intent", "")).strip()
+            if intent not in {"assert_fact", "assert_rule", "query", "retract", "other"}:
+                return None, f"Compiler returned invalid intent: {intent}"
+            return parsed, ""
+        except Exception as exc:
+            return None, str(exc)
+
     def pre_think(self, arguments: dict[str, Any] | None = None) -> dict[str, Any]:
         args = arguments or {}
         utterance = str(args.get("utterance", "")).strip()
         if not utterance:
             return {"status": "validation_error", "message": "utterance is required"}
+
+        compiled: dict[str, Any] | None = None
+        compile_error = ""
+        if self._compiler_mode != "heuristic":
+            compiled, compile_error = self._compile_prethink_semantics(utterance)
+            if compiled is None and self._compiler_mode == "strict":
+                return {
+                    "status": "blocked",
+                    "result_type": "compiler_unavailable",
+                    "message": (
+                        "Pre-think compiler is strict-bound and unavailable. "
+                        f"Configure {self._compiler_model} or switch compiler_mode."
+                    ),
+                    "details": {
+                        "compiler_mode": self._compiler_mode,
+                        "compiler_backend": self._compiler_backend,
+                        "compiler_base_url": self._compiler_base_url,
+                        "compiler_model": self._compiler_model,
+                        "compiler_prompt_path": str(self._compiler_prompt_path),
+                        "error": compile_error,
+                    },
+                }
 
         lower = utterance.lower()
         looks_like_query = utterance.endswith("?") or lower.startswith(
@@ -319,32 +433,64 @@ class PrologMCPServer:
             for token in (" is ", " are ", " was ", " were ", " if ", " then ", " retract ", " remove ")
         )
 
+        compiler_intent = str((compiled or {}).get("intent", "")).strip()
+        intent = compiler_intent or ("query" if looks_like_query else ("assert_fact" if looks_like_write else "other"))
+        uncertainty = _clip_01((compiled or {}).get("uncertainty_score"), 0.0)
+        compiler_needs_clarification = _coerce_bool((compiled or {}).get("needs_clarification"), False)
+        compiler_clarification_question = str((compiled or {}).get("clarification_question", "")).strip()
+        compiler_clarification_reason = str((compiled or {}).get("clarification_reason", "")).strip()
+
         if not self._session.enabled:
             mode = "forward_with_facts"
             note = "pre-think disabled for this session; forwarding without gating."
-        elif looks_like_query:
+        elif intent == "query":
             mode = "short_circuit"
-            note = "query-like utterance; candidate for deterministic short-circuit."
-        elif looks_like_write:
+            note = "query-like utterance from compiler."
+        elif intent in {"assert_fact", "assert_rule", "retract"}:
             mode = "block_or_clarify"
-            note = "write-like utterance; apply validation and clarification gates before mutation."
+            note = "write-like utterance from compiler; apply gates before mutation."
         else:
             mode = "forward_with_facts"
-            note = "mixed/unclear utterance; forward with deterministic evidence packet."
+            note = "other/mixed utterance from compiler."
 
         coreference = self._build_coreference_hint(utterance)
         segments = self._build_turn_segments(utterance)
-        clarification_required = bool(coreference.get("clarification_recommended"))
-        clarification_question = str(coreference.get("clarification_question", "")).strip()
+        ce_threshold = max(0.0, 1.0 - float(self._session.clarification_eagerness))
+        clarification_required = bool(
+            compiler_needs_clarification
+            or bool(coreference.get("clarification_recommended"))
+            or (uncertainty >= ce_threshold and self._session.enabled)
+        )
+        clarification_question = compiler_clarification_question or str(
+            coreference.get("clarification_question", "")
+        ).strip()
+        if clarification_required and not clarification_question:
+            clarification_question = "Please clarify the intended fact or referent before I continue."
         packet = {
             "prethink_id": self._next_prethink_id(),
             "utterance": utterance,
             "mode": mode,
             "signals": {
-                "looks_like_query": looks_like_query,
-                "looks_like_write": looks_like_write,
+                "looks_like_query": intent == "query",
+                "looks_like_write": intent in {"assert_fact", "assert_rule", "retract"},
+                "compiler_intent": intent,
+                "compiler_uncertainty_score": uncertainty,
             },
             "coreference": coreference,
+            "compiler": {
+                "mode": self._compiler_mode,
+                "backend": self._compiler_backend,
+                "base_url": self._compiler_base_url,
+                "model": self._compiler_model,
+                "context_length": self._compiler_context_length,
+                "prompt_enabled": bool(self._compiler_prompt_enabled),
+                "prompt_path": str(self._compiler_prompt_path) if self._compiler_prompt_enabled else "",
+                "used": compiled is not None,
+                "error": compile_error,
+                "intent": intent,
+                "needs_clarification": compiler_needs_clarification,
+                "clarification_reason": compiler_clarification_reason,
+            },
             "execution_protocol": {
                 "strategy": "segment_checkpoint_pipeline",
                 "steps": [
@@ -361,6 +507,7 @@ class PrologMCPServer:
             "clarification": {
                 "required_before_query": clarification_required,
                 "question": clarification_question,
+                "reason": compiler_clarification_reason,
             },
             "requires_user_confirmation": bool(self._session.require_final_confirmation),
             "clarification_eagerness": float(self._session.clarification_eagerness),
@@ -373,6 +520,8 @@ class PrologMCPServer:
             "utterance": utterance,
             "clarification_required_before_query": clarification_required,
             "clarification_question": clarification_question,
+            "compiler_intent": intent,
+            "compiler_uncertainty_score": uncertainty,
             "clarification_answer": "",
             "segments": segments,
             "writes_applied": 0,
@@ -896,6 +1045,8 @@ class PrologMCPServer:
             "prethink_id": str(self._pending_prethink.get("prethink_id", "")),
             "mode": str(self._pending_prethink.get("mode", "")),
             "utterance": str(self._pending_prethink.get("utterance", "")),
+            "compiler_intent": str(self._pending_prethink.get("compiler_intent", "")),
+            "compiler_uncertainty_score": float(self._pending_prethink.get("compiler_uncertainty_score", 0.0)),
             "clarification_required_before_query": bool(
                 self._pending_prethink.get("clarification_required_before_query", False)
             ),
@@ -1064,6 +1215,13 @@ class PrologMCPServer:
             "all_turns_require_prethink": bool(self._session.all_turns_require_prethink),
             "clarification_eagerness": round(float(self._session.clarification_eagerness), 4),
             "require_final_confirmation": bool(self._session.require_final_confirmation),
+            "compiler_mode": self._compiler_mode,
+            "compiler_backend": self._compiler_backend,
+            "compiler_base_url": self._compiler_base_url,
+            "compiler_model": self._compiler_model,
+            "compiler_context_length": self._compiler_context_length,
+            "compiler_prompt_path": str(self._compiler_prompt_path),
+            "compiler_prompt_loaded": bool(self._compiler_prompt_loaded),
             "pending_prethink": self._pending_prethink_summary(),
         }
         if self._kb_path:
@@ -1093,6 +1251,84 @@ class PrologMCPServer:
             return [self._json_safe(item) for item in value]
         return str(value)
 
+    def _format_row_inline(self, row: dict[str, Any]) -> str:
+        if not isinstance(row, dict) or not row:
+            return "(empty)"
+        items = [f"{key}={value}" for key, value in row.items()]
+        return ", ".join(items)
+
+    def _human_tool_text(self, result: dict[str, Any]) -> str:
+        status = str(result.get("status", "")).strip() or "unknown"
+        result_type = str(result.get("result_type", "")).strip()
+        message = str(result.get("message", "")).strip()
+
+        if result_type == "table":
+            query = str(result.get("prolog_query", "")).strip()
+            rows = result.get("rows", [])
+            if not isinstance(rows, list):
+                rows = []
+            preview_rows = [self._format_row_inline(row) for row in rows[:8] if isinstance(row, dict)]
+            preview = " | ".join(preview_rows) if preview_rows else "(no rows)"
+            num_rows = int(result.get("num_rows", len(rows)) or 0)
+            return f"query={query}; status={status}; rows={num_rows}; preview={preview}"
+
+        if result_type == "no_result":
+            query = str(result.get("prolog_query", "")).strip()
+            return f"query={query}; status=no_results"
+
+        if result_type == "fact_asserted":
+            return f"fact_asserted={str(result.get('fact', '')).strip()}"
+
+        if result_type == "rule_asserted":
+            return f"rule_asserted={str(result.get('rule', '')).strip()}"
+
+        if result_type == "fact_retracted":
+            return f"fact_retracted={str(result.get('fact', '')).strip()}"
+
+        if result_type == "session_updated":
+            state = result.get("state", {})
+            if isinstance(state, dict):
+                enabled = state.get("enabled")
+                eagerness = state.get("clarification_eagerness")
+                require_confirm = state.get("require_final_confirmation")
+                return (
+                    "session_updated;"
+                    f" enabled={enabled};"
+                    f" clarification_eagerness={eagerness};"
+                    f" require_final_confirmation={require_confirm}"
+                )
+            return "session_updated"
+
+        if result_type == "session_state":
+            state = result.get("state", {})
+            if isinstance(state, dict):
+                enabled = state.get("enabled")
+                pending = bool(state.get("pending_prethink"))
+                return f"session_state; enabled={enabled}; pending_prethink={pending}"
+            return "session_state"
+
+        if result_type == "pre_think_packet":
+            packet = result.get("packet", {})
+            if isinstance(packet, dict):
+                mode = packet.get("mode")
+                prethink_id = packet.get("prethink_id")
+                clar = packet.get("clarification", {})
+                clar_required = bool(clar.get("required_before_query")) if isinstance(clar, dict) else False
+                return (
+                    "pre_think_packet;"
+                    f" id={prethink_id};"
+                    f" mode={mode};"
+                    f" clarification_required_before_query={clar_required}"
+                )
+            return "pre_think_packet"
+
+        if result_type == "clarification_recorded":
+            return f"clarification_recorded; prethink_id={str(result.get('prethink_id', '')).strip()}"
+
+        if message:
+            return f"status={status}; message={message}"
+        return f"status={status}"
+
     def _format_tool_result(self, result: dict[str, Any]) -> dict[str, Any]:
         sanitized = self._json_safe(result)
         is_error = str(sanitized.get("status", "")).strip() in {
@@ -1101,9 +1337,9 @@ class PrologMCPServer:
             "not_found",
             "blocked",
         }
-        pretty = json.dumps(sanitized, indent=2)
+        text = self._human_tool_text(sanitized)
         return {
-            "content": [{"type": "text", "text": pretty}],
+            "content": [{"type": "text", "text": text}],
             "structuredContent": sanitized,
             "isError": is_error,
         }
@@ -1133,7 +1369,7 @@ class PrologMCPServer:
                     "capabilities": {"tools": {"listChanged": False}},
                     "serverInfo": {"name": "prethinker", "version": "0.1"},
                     "instructions": (
-                        "Use pre_think and deterministic runtime tools for pre-think interposition experiments."
+                        "Use pre_think and deterministic runtime tools; pre_think is compiler-bound in strict mode."
                     ),
                 },
             }
@@ -1170,9 +1406,34 @@ def main() -> int:
     parser.add_argument("--kb-path", default="", help="Optional KB path label for metadata.")
     parser.add_argument("--stdio", action="store_true", help="Use stdio transport (for LM Studio).")
     parser.add_argument("--test", action="store_true", help="Print available tools and exit.")
+    parser.add_argument(
+        "--compiler-mode",
+        choices=["strict", "auto", "heuristic"],
+        default="strict",
+        help="Pre-think compiler mode: strict binds to compiler model, auto falls back to heuristics, heuristic skips compiler.",
+    )
+    parser.add_argument("--compiler-backend", default="ollama", help="Compiler backend (ollama or lmstudio).")
+    parser.add_argument("--compiler-base-url", default="http://127.0.0.1:11434", help="Compiler backend base URL.")
+    parser.add_argument("--compiler-model", default="qwen35-semparse:9b", help="Compiler model tag.")
+    parser.add_argument("--compiler-context-length", type=int, default=8192, help="Compiler context length.")
+    parser.add_argument("--compiler-timeout", type=int, default=60, help="Compiler timeout in seconds.")
+    parser.add_argument(
+        "--compiler-prompt-file",
+        default=str(REPO_ROOT / "modelfiles" / "semantic_parser_system_prompt.md"),
+        help="System prompt file used by compiler model.",
+    )
     args = parser.parse_args()
 
-    server = PrologMCPServer(kb_path=args.kb_path)
+    server = PrologMCPServer(
+        kb_path=args.kb_path,
+        compiler_mode=args.compiler_mode,
+        compiler_backend=args.compiler_backend,
+        compiler_base_url=args.compiler_base_url,
+        compiler_model=args.compiler_model,
+        compiler_context_length=args.compiler_context_length,
+        compiler_timeout=args.compiler_timeout,
+        compiler_prompt_file=args.compiler_prompt_file,
+    )
 
     if args.test:
         print("Prethinker MCP server initialized\n")

@@ -1,0 +1,65 @@
+{
+  "name": "rung_434_dual_pronoun_flip_guard",
+  "ontology_name": "rung_434_dual_pronoun_flip_guard",
+  "utterances": [
+    "Iris is Nia's parent.",
+    "Omar has Nia as a parent.",
+    {
+      "utterance": "she maybe parnt of Pax too same mom as first line",
+      "clarification_answers": [
+        "She means Iris. Iris is a parent of Pax."
+      ],
+      "max_clarification_rounds": 2
+    },
+    "Qin is parented by Pax.",
+    "If X is a parent of Y then X is an ancestor of Y.",
+    "If X is an ancestor of Y and Y is an ancestor of Z then X is an ancestor of Z.",
+    "is iris ancestor of qin",
+    "if parser got weird and made nia parent iris retract parent(nia, iris).",
+    "and dont let she become a literal parent atom either"
+  ],
+  "validations": [
+    {
+      "id": "iris_nia_parent",
+      "query": "parent(iris, nia).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "nia_omar_parent",
+      "query": "parent(nia, omar).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "iris_pax_parent",
+      "query": "parent(iris, pax).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "pax_qin_parent",
+      "query": "parent(pax, qin).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "iris_qin_ancestor",
+      "query": "ancestor(iris, qin).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "nia_iris_absent",
+      "query": "parent(nia, iris).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "she_pax_absent",
+      "query": "parent(she, pax).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    }
+  ]
+}

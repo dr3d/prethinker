@@ -1,0 +1,71 @@
+{
+  "generated_at_utc": "2026-04-12T22:20:25.450014+00:00",
+  "manifest_path": "D:\\_PROJECTS\\prethinker\\kb_scenarios\\tracks.json",
+  "track_id": "frontier_clarification_probe_v1",
+  "track_description": "Clarification probe on the newest noisy compression rungs.",
+  "required_pass_rate": 1.0,
+  "runs_total": 3,
+  "runs_passed": 3,
+  "run_pass_rate": 1.0,
+  "meets_target": true,
+  "settings": {
+    "backend": "ollama",
+    "base_url": "http://127.0.0.1:11434",
+    "model": "qwen35-semparse:9b",
+    "runtime": "core",
+    "prompt_file": "",
+    "context_length": 0,
+    "clarification_eagerness": 0.85,
+    "max_clarification_rounds": 3,
+    "clarification_answer_model": "",
+    "clarification_answer_backend": "",
+    "clarification_answer_base_url": "",
+    "clarification_answer_context_length": 0,
+    "clarification_answer_min_confidence": -1.0,
+    "clarification_answer_history_turns": -1,
+    "clarification_answer_kb_clause_limit": -1,
+    "clarification_answer_kb_char_budget": -1,
+    "served_llm_model": "",
+    "served_llm_backend": "",
+    "served_llm_base_url": "",
+    "served_llm_context_length": 0
+  },
+  "records": [
+    {
+      "scenario": "rung_444_frontier_unpunctuated_coref_sweep",
+      "scenario_path": "D:\\_PROJECTS\\prethinker\\kb_scenarios\\rung_444_frontier_unpunctuated_coref_sweep.json",
+      "run_output": "D:\\_PROJECTS\\prethinker\\tmp\\runs\\tracks\\rung_444_frontier_unpunctuated_coref_sweep_frontier_clarification_probe_v1_20260412_221839.json",
+      "overall_status": "passed",
+      "validation_passed": 6,
+      "validation_total": 6,
+      "turns_total": 11,
+      "turn_apply_failures": 0,
+      "turn_parse_failures": 0,
+      "exit_code": 0
+    },
+    {
+      "scenario": "rung_445_frontier_compound_write_query_braid",
+      "scenario_path": "D:\\_PROJECTS\\prethinker\\kb_scenarios\\rung_445_frontier_compound_write_query_braid.json",
+      "run_output": "D:\\_PROJECTS\\prethinker\\tmp\\runs\\tracks\\rung_445_frontier_compound_write_query_braid_frontier_clarification_probe_v1_20260412_221839.json",
+      "overall_status": "passed",
+      "validation_passed": 6,
+      "validation_total": 6,
+      "turns_total": 10,
+      "turn_apply_failures": 0,
+      "turn_parse_failures": 0,
+      "exit_code": 0
+    },
+    {
+      "scenario": "rung_446_frontier_policy_noisy_rebind_loop",
+      "scenario_path": "D:\\_PROJECTS\\prethinker\\kb_scenarios\\rung_446_frontier_policy_noisy_rebind_loop.json",
+      "run_output": "D:\\_PROJECTS\\prethinker\\tmp\\runs\\tracks\\rung_446_frontier_policy_noisy_rebind_loop_frontier_clarification_probe_v1_20260412_221839.json",
+      "overall_status": "passed",
+      "validation_passed": 7,
+      "validation_total": 7,
+      "turns_total": 17,
+      "turn_apply_failures": 0,
+      "turn_parse_failures": 0,
+      "exit_code": 0
+    }
+  ]
+}

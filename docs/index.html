@@ -321,6 +321,54 @@
       gap: 8px;
     }
 
+    .showcase-shell {
+      margin-top: 12px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      background: color-mix(in srgb, var(--paper) 88%, transparent);
+    }
+
+    .showcase-cover {
+      margin: 0 0 10px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      background: color-mix(in srgb, var(--paper) 92%, transparent);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .showcase-cover img {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: 360px;
+      object-fit: cover;
+    }
+
+    .showcase-cover figcaption {
+      padding: 9px 10px;
+      border-top: 1px solid var(--border);
+      font-family: "IBM Plex Mono", Consolas, monospace;
+      font-size: 12px;
+      color: var(--muted);
+      background: color-mix(in srgb, var(--paper) 90%, transparent);
+    }
+
+    .showcase-media {
+      width: 100%;
+      margin-top: 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: color-mix(in srgb, var(--paper) 94%, transparent);
+    }
+
+    .showcase-note {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
     .table-wrap {
       margin-top: 10px;
       border: 1px solid var(--border);
@@ -416,6 +464,7 @@
       </div>
       <div class="jump-row">
         <a class="jump" href="#start">start here</a>
+        <a class="jump" href="#showcase">showcase</a>
         <a class="jump" href="#frontier">frontier</a>
         <a class="jump" href="#tracking">tracking</a>
         <a class="jump" href="#artifacts">artifacts</a>
@@ -525,6 +574,27 @@
       </article>
     </section>
 
+    <h2 id="showcase" class="section-title">Podcast Showcase</h2>
+    <p class="section-lede">Listen directly in the hub. This player auto-detects available media formats and is ready for future <code>.m4a</code> and <code>.mp4</code> drops in <code>docs/assets/</code>.</p>
+    <section class="grid">
+      <article class="card wide">
+        <span class="label">featured media</span>
+        <h3>How PRETHINKER Protects AI Database Integrity</h3>
+        <p>Current release includes MP3 audio. If matching M4A or MP4 files are added later, this section will surface them automatically without hub rewiring.</p>
+        <div class="showcase-shell">
+          <figure class="showcase-cover">
+            <img src="assets/pre-thinker-hero-cinematic.png" alt="PRETHINKER podcast cover art" loading="lazy" />
+            <figcaption>Podcast cover: PRETHINKER control-plane visual.</figcaption>
+          </figure>
+          <div id="media-availability" class="mono">Checking available podcast formats...</div>
+          <audio id="project-audio" class="showcase-media" controls preload="metadata"></audio>
+          <video id="project-video" class="showcase-media" controls preload="metadata" poster="assets/pre-thinker-hero-cinematic.png" hidden></video>
+          <div id="media-links" class="actions"></div>
+          <div class="showcase-note">Expected filenames: <code>How-PRETHINKER-Protects-AI-Database-Integrity.mp3</code>, <code>.m4a</code>, <code>.mp4</code>.</div>
+        </div>
+      </article>
+    </section>
+
     <h2 id="frontier" class="section-title">Latest Frontier Wins</h2>
     <p class="section-lede">Newest stability and extension results from the latest autonomous ladder cycles (prompt ID <code>sp-1e43c641b01b</code>).</p>
     <section class="grid">
@@ -581,13 +651,16 @@
       </article>
 
       <article class="card wide">
-        <h3>Track Scoreboard (Same-Model Sweep)</h3>
-        <p>Latest pass rates using <code>qwen35-semparse:9b</code> as both parser and served-LLM clarification model.</p>
+        <h3>Track Scoreboard (Frontier + Baseline)</h3>
+        <p>Latest frontier-width sweeps now include v4/v5/v6 and probe tracks (clarification + confirmation), alongside historical same-model baseline tracks.</p>
         <div class="actions">
           <a class="btn primary" href="TRACK_SCOREBOARD.md">Open Scoreboard</a>
-          <a class="btn" href="data/tracks/gate_ladder_frontier_same_model_latest.json">gate_ladder_frontier</a>
-          <a class="btn" href="data/tracks/examples_all_same_model_latest.json">examples_all</a>
-          <a class="btn" href="data/tracks/book_acid_goldilocks_same_model_latest.json">book_acid_goldilocks</a>
+          <a class="btn" href="data/tracks/frontier_language_width_v4_latest.json">frontier v4</a>
+          <a class="btn" href="data/tracks/frontier_language_width_v5_latest.json">frontier v5</a>
+          <a class="btn" href="data/tracks/frontier_language_width_v6_latest.json">frontier v6</a>
+          <a class="btn" href="data/tracks/frontier_clarification_probe_v1_latest.json">clarification probe</a>
+          <a class="btn" href="data/tracks/frontier_confirmation_probe_v1_latest.json">confirmation probe</a>
+          <a class="btn" href="data/tracks/gate_ladder_frontier_same_model_latest.json">same-model baseline</a>
           <a class="btn" href="LEGACY_CLEANUP_PLAN.md">Legacy cleanup plan</a>
         </div>
       </article>
@@ -720,6 +793,43 @@
         });
       }
 
+      function rewriteMarkdownLinksToGitHub() {
+        const repoBlobBase = "https://github.com/dr3d/prethinker/blob/main/";
+        const currentPath = window.location.pathname || "";
+        const marker = "/docs/index.html";
+        const markerIdx = currentPath.indexOf(marker);
+        const repoPrefix = markerIdx >= 0 ? currentPath.slice(0, markerIdx + 1) : "/";
+        const anchors = document.querySelectorAll("a[href]");
+        for (const anchor of anchors) {
+          const rawHref = anchor.getAttribute("href");
+          if (!rawHref) continue;
+          if (/^(https?:|mailto:|#)/i.test(rawHref)) continue;
+
+          let resolvedPath = "";
+          let resolvedHash = "";
+          try {
+            const parsed = new URL(rawHref, window.location.href);
+            const path = (parsed.pathname || "").replace(/\\/g, "/");
+            if (!path.toLowerCase().endsWith(".md")) continue;
+            resolvedHash = parsed.hash || "";
+            if (path.startsWith(repoPrefix)) {
+              resolvedPath = path.slice(repoPrefix.length);
+            } else {
+              resolvedPath = path.replace(/^\/+/, "");
+            }
+          } catch (_) {
+            continue;
+          }
+
+          if (!resolvedPath) continue;
+          anchor.href = `${repoBlobBase}${resolvedPath}${resolvedHash}`;
+          anchor.target = "_blank";
+          anchor.rel = "noopener noreferrer";
+        }
+      }
+
+      rewriteMarkdownLinksToGitHub();
+
       function pct(value) {
         if (typeof value !== "number" || Number.isNaN(value)) return "-";
         return `${Math.round(value * 100)}%`;
@@ -730,6 +840,104 @@
         const d = new Date(iso);
         if (Number.isNaN(d.getTime())) return iso;
         return d.toISOString().slice(0, 16).replace("T", " ");
+      }
+
+      function probeMedia(url, kind) {
+        return new Promise((resolve) => {
+          const el = document.createElement(kind);
+          let done = false;
+          const finish = (ok) => {
+            if (done) return;
+            done = true;
+            try {
+              el.pause();
+              el.removeAttribute("src");
+              el.load();
+            } catch (_) {}
+            resolve(ok);
+          };
+          el.preload = "metadata";
+          el.addEventListener("loadedmetadata", () => finish(true), { once: true });
+          el.addEventListener("canplay", () => finish(true), { once: true });
+          el.addEventListener("error", () => finish(false), { once: true });
+          setTimeout(() => finish(false), 2600);
+          el.src = url;
+          try {
+            el.load();
+          } catch (_) {
+            finish(false);
+          }
+        });
+      }
+
+      async function setupShowcase() {
+        const availability = document.getElementById("media-availability");
+        const audio = document.getElementById("project-audio");
+        const video = document.getElementById("project-video");
+        const links = document.getElementById("media-links");
+        if (!availability || !audio || !video || !links) return;
+
+        const base = "assets/How-PRETHINKER-Protects-AI-Database-Integrity";
+        const audioCandidates = [
+          { src: `${base}.mp3`, type: "audio/mpeg", label: "MP3" },
+          { src: `${base}.m4a`, type: "audio/mp4", label: "M4A" }
+        ];
+        const videoCandidates = [
+          { src: `${base}.mp4`, type: "video/mp4", label: "MP4" }
+        ];
+
+        const availableAudio = [];
+        for (const c of audioCandidates) {
+          if (await probeMedia(c.src, "audio")) availableAudio.push(c);
+        }
+        const availableVideo = [];
+        for (const c of videoCandidates) {
+          if (await probeMedia(c.src, "video")) availableVideo.push(c);
+        }
+
+        if (availableAudio.length) {
+          audio.innerHTML = "";
+          for (const c of availableAudio) {
+            const source = document.createElement("source");
+            source.src = c.src;
+            source.type = c.type;
+            audio.appendChild(source);
+          }
+          audio.load();
+          audio.hidden = false;
+        } else {
+          audio.hidden = true;
+        }
+
+        if (availableVideo.length) {
+          video.innerHTML = "";
+          for (const c of availableVideo) {
+            const source = document.createElement("source");
+            source.src = c.src;
+            source.type = c.type;
+            video.appendChild(source);
+          }
+          video.load();
+          video.hidden = false;
+        } else {
+          video.hidden = true;
+        }
+
+        links.innerHTML = "";
+        for (const c of [...availableAudio, ...availableVideo]) {
+          const a = document.createElement("a");
+          a.className = "btn";
+          a.href = c.src;
+          a.textContent = `Open ${c.label}`;
+          links.appendChild(a);
+        }
+
+        if (!availableAudio.length && !availableVideo.length) {
+          availability.textContent = "No podcast media files found in docs/assets yet.";
+        } else {
+          const list = [...availableAudio, ...availableVideo].map((c) => c.label).join(", ");
+          availability.textContent = `Available formats: ${list}`;
+        }
       }
 
       async function load() {
@@ -804,7 +1012,7 @@
         }
       }
 
-      load().catch(() => {
+      Promise.all([setupShowcase(), load()]).catch(() => {
         document.getElementById("m-runs").textContent = "n/a";
         document.getElementById("m-pass").textContent = "n/a";
         document.getElementById("m-prompts").textContent = "n/a";

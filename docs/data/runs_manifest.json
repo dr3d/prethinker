@@ -1,6 +1,6 @@
 {
-  "generated_at_utc": "2026-04-12T13:05:51+00:00",
-  "runs_total": 27,
+  "generated_at_utc": "2026-04-13T00:32:16+00:00",
+  "runs_total": 31,
   "runs": [
     {
       "run_id": "run-20260412T130439Z-demo_04_reimbursement_vi-qwen35_semparse_9b-44172",
@@ -460,6 +460,74 @@
       "prompt_snapshot_rel": "prompts/sp-1e43c641b01b.md",
       "report_json_rel": "data/runs/acid_04_alias_pressure_auto_cycle_stage1_to_rung200_clean_20260411.json",
       "report_html_rel": "reports/acid_04_alias_pressure_auto_cycle_stage1_to_rung200_clean_20260411.html"
+    },
+    {
+      "run_id": "run-20260411T235139Z-acid_03_temporal_overrid-qwen3_5_9b-10212",
+      "scenario": "acid_03_temporal_override",
+      "kb_name": "acid_temporal",
+      "backend": "ollama",
+      "model": "qwen3.5:9b",
+      "status": "passed",
+      "validation_total": 3,
+      "validation_passed": 3,
+      "validation_rate": 1.0,
+      "finished_utc": "2026-04-11T23:51:54+00:00",
+      "prompt_id": "sp-1e43c641b01b",
+      "prompt_sha256": "1e43c641b01b7c845b82331b521d58c1993e8010bd9283f5085dac687520159e",
+      "prompt_snapshot_rel": "prompts/sp-1e43c641b01b.md",
+      "report_json_rel": "data/runs/acid_03_temporal_override_auto_cycle_stage1_to_rung200_clean_20260411.json",
+      "report_html_rel": "reports/acid_03_temporal_override_auto_cycle_stage1_to_rung200_clean_20260411.html"
+    },
+    {
+      "run_id": "run-20260411T235133Z-stage_03_transitive_chai-qwen3_5_9b-29012",
+      "scenario": "stage_03_transitive_chain",
+      "kb_name": "people_stage",
+      "backend": "ollama",
+      "model": "qwen3.5:9b",
+      "status": "passed",
+      "validation_total": 1,
+      "validation_passed": 1,
+      "validation_rate": 1.0,
+      "finished_utc": "2026-04-11T23:51:39+00:00",
+      "prompt_id": "sp-1e43c641b01b",
+      "prompt_sha256": "1e43c641b01b7c845b82331b521d58c1993e8010bd9283f5085dac687520159e",
+      "prompt_snapshot_rel": "prompts/sp-1e43c641b01b.md",
+      "report_json_rel": "data/runs/stage_03_transitive_chain_auto_cycle_stage1_to_rung200_clean_20260411.json",
+      "report_html_rel": "reports/stage_03_transitive_chain_auto_cycle_stage1_to_rung200_clean_20260411.html"
+    },
+    {
+      "run_id": "run-20260411T235129Z-stage_02_rule_ingest-qwen3_5_9b-39620",
+      "scenario": "stage_02_rule_ingest",
+      "kb_name": "people_stage",
+      "backend": "ollama",
+      "model": "qwen3.5:9b",
+      "status": "passed",
+      "validation_total": 1,
+      "validation_passed": 1,
+      "validation_rate": 1.0,
+      "finished_utc": "2026-04-11T23:51:33+00:00",
+      "prompt_id": "sp-1e43c641b01b",
+      "prompt_sha256": "1e43c641b01b7c845b82331b521d58c1993e8010bd9283f5085dac687520159e",
+      "prompt_snapshot_rel": "prompts/sp-1e43c641b01b.md",
+      "report_json_rel": "data/runs/stage_02_rule_ingest_auto_cycle_stage1_to_rung200_clean_20260411.json",
+      "report_html_rel": "reports/stage_02_rule_ingest_auto_cycle_stage1_to_rung200_clean_20260411.html"
+    },
+    {
+      "run_id": "run-20260411T235126Z-stage_01_facts_only-qwen3_5_9b-26908",
+      "scenario": "stage_01_facts_only",
+      "kb_name": "people_stage",
+      "backend": "ollama",
+      "model": "qwen3.5:9b",
+      "status": "passed",
+      "validation_total": 2,
+      "validation_passed": 2,
+      "validation_rate": 1.0,
+      "finished_utc": "2026-04-11T23:51:29+00:00",
+      "prompt_id": "sp-1e43c641b01b",
+      "prompt_sha256": "1e43c641b01b7c845b82331b521d58c1993e8010bd9283f5085dac687520159e",
+      "prompt_snapshot_rel": "prompts/sp-1e43c641b01b.md",
+      "report_json_rel": "data/runs/stage_01_facts_only_auto_cycle_stage1_to_rung200_clean_20260411.json",
+      "report_html_rel": "reports/stage_01_facts_only_auto_cycle_stage1_to_rung200_clean_20260411.html"
     }
   ]
 }

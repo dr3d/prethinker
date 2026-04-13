@@ -743,6 +743,86 @@ Parallel audit (subagent):
 - captured as:
   - `docs/LEGACY_CLEANUP_PLAN.md`
 
+## Session 25: Frontier Width V3->V5 Expansion + CE/Confirmation Probes
+
+Date: 2026-04-12 UTC
+
+Outcome:
+
+- expanded frontier width battery with new rungs:
+  - `rung_441_frontier_pronoun_bucket_shuffle`
+  - `rung_442_frontier_policy_multirevision_guard`
+  - `rung_443_frontier_dual_item_handoff_coref`
+  - `rung_444_frontier_unpunctuated_coref_sweep`
+  - `rung_445_frontier_compound_write_query_braid`
+  - `rung_446_frontier_policy_noisy_rebind_loop`
+- added track manifests:
+  - `frontier_language_width_v4`
+  - `frontier_language_width_v5`
+  - `frontier_clarification_probe_v1`
+  - `frontier_confirmation_probe_v1`
+- updated scenario docs:
+  - `kb_scenarios/README.md`
+  - `kb_scenarios/tracks.json`
+- added track-runner confirmation passthrough:
+  - `scripts/run_track.py` now supports `--require-final-confirmation`
+  - `scripts/run_track.py` now supports `--kb-root` for temp KB namespace routing
+
+Key run evidence:
+
+- v4 first pass:
+  - `tmp/runs/tracks/track_frontier_language_width_v4_summary_20260412_214759.json`
+  - result: `12/12` (100%)
+- v5 first pass (intentionally rough new rungs):
+  - `tmp/runs/tracks/track_frontier_language_width_v5_summary_20260412_215734.json`
+  - result: `12/15` (80%) with failures concentrated in `rung_444/445/446`
+- v5 repair pass after minimal bridge-turn tightening:
+  - `tmp/runs/tracks/track_frontier_language_width_v5_summary_20260412_220839.json`
+  - result: `15/15` (100%)
+- CE probe with high eagerness:
+  - `tmp/runs/tracks/track_frontier_clarification_probe_v1_summary_20260412_221839.json`
+  - result: `3/3` (100%)
+- confirmation probe:
+  - initial behavior-discovery run (no-path shows as apply-failure in scoring):
+    - `tmp/runs/tracks/track_frontier_confirmation_probe_v1_summary_20260412_222129.json`
+  - stabilized yes-path probe:
+    - `tmp/runs/tracks/track_frontier_confirmation_probe_v1_summary_20260412_222221.json`
+    - result: `2/2` (100%)
+
+What we learned:
+
+- we can induce meaningful frontier failures by reducing bridge scaffolding on noisy turns, then recover deterministically with minimal canonical bridge turns.
+- higher `clarification_eagerness` alone does not guarantee user-facing clarification requests in these scenarios; parser certainty can remain high even when wrong unless scenario design forces ambiguity.
+- in current track scoring, explicit confirmation decline (`no`) is counted as an apply failure at scenario level; this is a useful operational signal but makes "expected decline" scenarios fail track gates unless handled as a separate behavior probe.
+- run summaries currently report confirmation requests when confirmation is pending/deferred; scripted immediate `yes` confirmations do not increment that counter.
+
+## Session 26: Frontier Width V6 (Multi-Bind Query Pressure) + Temp KB Routing
+
+Date: 2026-04-12 UTC
+
+Outcome:
+
+- added new frontier rung:
+  - `rung_449_frontier_multibind_uncle_query`
+  - purpose: pressure variable-binding query answers (`uncle(scott, X)`) with deterministic `min_rows` validation.
+- added track:
+  - `frontier_language_width_v6` in `kb_scenarios/tracks.json`
+- updated scenario docs:
+  - `kb_scenarios/README.md` now includes v6 + `--kb-root tmp/kb_store` tip.
+- validated track-runner temp routing:
+  - `scripts/run_track.py --kb-root tmp/kb_store ...`
+  - all v6 KB namespaces were written under `tmp/kb_store/` instead of canonical `kb_store/`.
+
+Key run evidence:
+
+- `tmp/runs/tracks/track_frontier_language_width_v6_summary_20260412_222723.json`
+- result: `16/16` (100.0%)
+
+Interpretation:
+
+- the current SP + pipeline stack remains stable under expanded width and multi-bind query pressure.
+- explicit temp KB routing is now viable as default hygiene for unattended sweeps.
+
 
 
 

@@ -1,0 +1,73 @@
+{
+  "name": "rung_437_frontier_policy_override_flow",
+  "ontology_name": "rung_437_frontier_policy_override_flow",
+  "utterances": [
+    "Use requester/2, approver/2, manager_of/2, conflict/2, eligible/1 predicates.",
+    "Set requester(claim_7, dana).",
+    "Set approver(claim_7, dana).",
+    "Set manager_of(leo, dana).",
+    "assert rule conflict(C, P) :- requester(C, P), approver(C, P).",
+    "assert rule conflict(C, M) :- requester(C, P), manager_of(M, P), approver(C, M).",
+    "assert rule eligible(C) :- requester(C, R), approver(C, A), R \\= A.",
+    {
+      "utterance": "fix claim_7 so dana requests it but leo approves it, then tell me if conflict remains",
+      "clarification_answers": [
+        "Retract approver(claim_7, dana). Set approver(claim_7, leo)."
+      ],
+      "max_clarification_rounds": 1
+    },
+    "Set requester(claim_7, dana).",
+    "retract fact approver(claim_7, dana).",
+    "Set approver(claim_7, leo).",
+    "note: managerial conflict still observed before override.",
+    "retract fact approver(claim_7, leo).",
+    "Set approver(claim_7, mira).",
+    "query conflict(claim_7, dana).",
+    "query conflict(claim_7, leo).",
+    "query eligible(claim_7)."
+  ],
+  "validations": [
+    {
+      "id": "claim7_requester_is_dana",
+      "query": "requester(claim_7, dana).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "claim7_approver_is_mira",
+      "query": "approver(claim_7, mira).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "claim7_not_approved_by_dana",
+      "query": "approver(claim_7, dana).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "claim7_not_approved_by_leo",
+      "query": "approver(claim_7, leo).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "self_conflict_removed",
+      "query": "conflict(claim_7, dana).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "manager_conflict_removed",
+      "query": "conflict(claim_7, leo).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "claim7_eligible_now",
+      "query": "eligible(claim_7).",
+      "expect_status": "success",
+      "min_rows": 1
+    }
+  ]
+}

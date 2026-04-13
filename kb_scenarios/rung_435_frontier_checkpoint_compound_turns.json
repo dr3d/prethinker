@@ -1,0 +1,73 @@
+{
+  "name": "rung_435_frontier_checkpoint_compound_turns",
+  "ontology_name": "rung_435_frontier_checkpoint_compound_turns",
+  "utterances": [
+    "Use parent/2, sibling/2, lives_in/2, inside/2, in_region/2, carries/2, ancestor/2 for this run.",
+    "Set parent(ian, scott). Set parent(scott, dana).",
+    "assert rule ancestor(X, Y) :- parent(X, Y).",
+    "assert rule ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).",
+    "assert rule in_region(X, Z) :- lives_in(X, Y), inside(Y, Z).",
+    {
+      "utterance": "ian's granddaughter is dana and they live in salem; and salem is in oregon",
+      "clarification_answers": [
+        "They means Ian and Dana.",
+        "Set lives_in(ian, salem). Set lives_in(dana, salem). Set inside(salem, oregon)."
+      ],
+      "max_clarification_rounds": 2
+    },
+    "Set lives_in(dana, salem).",
+    "Set inside(salem, oregon).",
+    "query ancestor(ian, dana).",
+    {
+      "utterance": "scott has a brother blake and he carries brass_key but then give that key to dana",
+      "clarification_answers": [
+        "He means Blake.",
+        "Set sibling(scott, blake). Set carries(blake, brass_key). Retract carries(blake, brass_key). Set carries(dana, brass_key)."
+      ],
+      "max_clarification_rounds": 2
+    },
+    "Set carries(blake, brass_key).",
+    "retract fact carries(blake, brass_key).",
+    "Set carries(dana, brass_key).",
+    "query in_region(dana, oregon).",
+    "query carries(dana, brass_key)."
+  ],
+  "validations": [
+    {
+      "id": "ian_scott_parent",
+      "query": "parent(ian, scott).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "scott_dana_parent",
+      "query": "parent(scott, dana).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "ian_dana_ancestor",
+      "query": "ancestor(ian, dana).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "dana_in_oregon",
+      "query": "in_region(dana, oregon).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "dana_has_key",
+      "query": "carries(dana, brass_key).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "blake_no_longer_has_key",
+      "query": "carries(blake, brass_key).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    }
+  ]
+}

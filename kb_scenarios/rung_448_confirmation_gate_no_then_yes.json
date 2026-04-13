@@ -1,0 +1,43 @@
+{
+  "name": "rung_448_confirmation_gate_no_then_yes",
+  "ontology_name": "rung_448_confirmation_gate_no_then_yes",
+  "utterances": [
+    "Use parent/2.",
+    {
+      "utterance": "set parent(ian, scott).",
+      "require_final_confirmation": true,
+      "confirmation_answers": [
+        "yes"
+      ]
+    },
+    {
+      "utterance": "set parent(ian, blake).",
+      "require_final_confirmation": true,
+      "confirmation_answers": [
+        "yes"
+      ]
+    },
+    "query parent(ian, scott).",
+    "query parent(ian, blake)."
+  ],
+  "validations": [
+    {
+      "id": "parent_scott_after_confirm",
+      "query": "parent(ian, scott).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "parent_blake_after_confirm",
+      "query": "parent(ian, blake).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "inverse_parent_absent",
+      "query": "parent(scott, ian).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    }
+  ]
+}

@@ -1,11 +1,12 @@
 import unittest
+from pathlib import Path
 
 from src.mcp_server import PrologMCPServer
 
 
 class LocalMcpServerTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.server = PrologMCPServer()
+        self.server = PrologMCPServer(compiler_mode="heuristic")
 
     def test_tools_list_contains_core_surface(self) -> None:
         result = self.server.tools_list()
@@ -260,6 +261,16 @@ class LocalMcpServerTests(unittest.TestCase):
     def test_unknown_tool_returns_not_found(self) -> None:
         result = self.server.tools_call("not_a_tool", {})
         self.assertEqual(result.get("status"), "not_found")
+
+    def test_strict_compiler_mode_blocks_without_compiler_prompt(self) -> None:
+        missing = Path("tmp") / "does_not_exist_semparse_prompt.md"
+        strict_server = PrologMCPServer(
+            compiler_mode="strict",
+            compiler_prompt_file=str(missing),
+        )
+        packet = strict_server.tools_call("pre_think", {"utterance": "Alice is Bob's parent."})
+        self.assertEqual(packet.get("status"), "blocked")
+        self.assertEqual(packet.get("result_type"), "compiler_unavailable")
 
 
 if __name__ == "__main__":

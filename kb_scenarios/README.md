@@ -142,6 +142,53 @@ These push toward narrative/book ingestion and Q&A over long-form prose:
 1. `rung_430_goldilocks_roundtrip_retry.json` (structured story retry + deterministic checks)
 2. `rung_431_book_goldilocks_raw_chaptered_qa.json` (raw source text chunks + probe checks)
 
+Authoring note for book-acid:
+
+- Keep the long-form narrative pressure, but add a few short bridge utterances when raw chapter chunks would otherwise be skipped as "just narrative."
+- Use scripted `clarification_answers` for answer-critical probes or pronoun-heavy turns when the challenge is book retention, not referent roulette.
+- Prefer validations on answer-critical facts (`ate_all/2`, `broke/1`, `slept_in/2`, `saw/2`) over a single brittle paraphrase-specific predicate/state when multiple faithful encodings are plausible.
+
+## Frontier Width V2 Rungs
+
+These rungs push language-noise and midstream-repair pressure harder while preserving deterministic validation:
+
+1. `rung_432_noise_pronoun_inversion_chain.json`
+2. `rung_433_noisy_inverse_retarget_repair.json`
+3. `rung_434_dual_pronoun_flip_guard.json`
+4. `rung_435_frontier_checkpoint_compound_turns.json`
+5. `rung_436_frontier_noise_typo_coref.json`
+6. `rung_437_frontier_policy_override_flow.json`
+
+## Frontier Width V3 Add-ons
+
+Additional harder-width rungs layered on top of v2:
+
+1. `rung_438_frontier_multibind_query_pressure.json`
+2. `rung_439_frontier_plural_coref_exception_guard.json`
+3. `rung_440_frontier_policy_revision_loop.json`
+
+## Frontier Width V4 Add-ons
+
+Further width pressure with higher-noise pronoun shifts and multi-step policy/asset revision loops:
+
+1. `rung_441_frontier_pronoun_bucket_shuffle.json`
+2. `rung_442_frontier_policy_multirevision_guard.json`
+3. `rung_443_frontier_dual_item_handoff_coref.json`
+
+## Frontier Width V5 Add-ons
+
+Compressed language pressure add-ons:
+
+1. `rung_444_frontier_unpunctuated_coref_sweep.json`
+2. `rung_445_frontier_compound_write_query_braid.json`
+3. `rung_446_frontier_policy_noisy_rebind_loop.json`
+
+## Frontier Width V6 Add-on
+
+Variable-binding answer pressure:
+
+1. `rung_449_frontier_multibind_uncle_query.json`
+
 ## Demo Pack Scenarios
 
 These are presentation-oriented runnable demos (not core ladder gates):
@@ -171,4 +218,29 @@ python scripts/run_track.py --track examples_all
 
 # book-acid Goldilocks sweep
 python scripts/run_track.py --track book_acid_goldilocks
+
+# frontier language-width stress sweep
+python scripts/run_track.py --track frontier_language_width_v2
+
+# extended frontier sweep (v3)
+python scripts/run_track.py --track frontier_language_width_v3
+
+# frontier width v4 sweep
+python scripts/run_track.py --track frontier_language_width_v4
+
+# frontier width v5 sweep
+python scripts/run_track.py --track frontier_language_width_v5
+
+# frontier width v6 sweep
+python scripts/run_track.py --track frontier_language_width_v6
+
+# CE probe on newest noisy rungs
+python scripts/run_track.py --track frontier_clarification_probe_v1 --clarification-eagerness 0.85 --max-clarification-rounds 3
+
+# final-confirmation gate probe
+python scripts/run_track.py --track frontier_confirmation_probe_v1 --require-final-confirmation
 ```
+
+Tip for unattended sweeps:
+
+- add `--kb-root tmp/kb_store` to keep temporary run namespaces out of the canonical `kb_store/`.

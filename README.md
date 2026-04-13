@@ -80,6 +80,15 @@ If you're evaluating it as a research workbench, it's useful now. If you're eval
 ## Latest Status Rollup (2026-04-12)
 
 - Prompt provenance for this cycle remained stable at `sp-1e43c641b01b` (pipeline/runtime changes, not SP changes).
+- Frontier language-width expansion now validated through `rung_449`:
+  - `frontier_language_width_v4`: `12/12` (100%)
+  - `frontier_language_width_v5`: `15/15` (100%) after one targeted repair cycle on new noisy rungs
+  - `frontier_language_width_v6`: `16/16` (100%) including multi-bind variable-answer pressure (`uncle(scott, X)` with `min_rows=2`)
+  - summary JSON: `docs/data/tracks/frontier_language_width_v4_latest.json`, `frontier_language_width_v5_latest.json`, `frontier_language_width_v6_latest.json`
+- New probe tracks added and passing:
+  - `frontier_clarification_probe_v1`: `3/3` (100%)
+  - `frontier_confirmation_probe_v1`: `2/2` (100%)
+  - summary JSON: `docs/data/tracks/frontier_clarification_probe_v1_latest.json`, `frontier_confirmation_probe_v1_latest.json`
 - Clean-root ladder verification reached `100%` on `stage_01 -> rung_200` (`53/53` scenarios in that sweep).
 - Added and validated higher frontier story/clarification rungs:
   - `rung_270_story_lineage_fragmented_ingest`
@@ -105,7 +114,11 @@ If you're evaluating it as a research workbench, it's useful now. If you're eval
   - `rung_340`: `11/11`
   - `rung_350`: `11/11`
   - `rung_360`: `12/12`
-- Regression test status for MCP server: `12 passed` (`tests/test_mcp_server.py`).
+- Regression test status for MCP server: `14 passed` (`tests/test_mcp_server.py`).
+- MCP `pre_think` now defaults to **strict compiler-bound mode**:
+  - compiler model: `qwen35-semparse:9b`
+  - compiler prompt: `modelfiles/semantic_parser_system_prompt.md`
+  - no silent heuristic fallback when compiler is unavailable
 - Progress-Memory lane added and validated:
   - new rungs: `rung_370`, `rung_380`, `rung_390`, `rung_400`, `rung_410`, `rung_420`
   - new tests: `tests/test_progress_memory.py`
@@ -126,6 +139,9 @@ If you're evaluating it as a research workbench, it's useful now. If you're eval
   - `book_acid_goldilocks`: `0/2` (`0.0%`)
   - score artifacts: `docs/TRACK_SCOREBOARD.md` and `docs/data/tracks/*.json`
 - Caveat: `stage_00` probes and long story roundtrip remain exploratory and are not treated as primary gating battery for the ladder frontier.
+- `scripts/run_track.py` now supports:
+  - `--require-final-confirmation` (pass-through to pipeline)
+  - `--kb-root` (temp KB routing, useful for unattended sweeps to avoid cluttering canonical `kb_store/`)
 
 ## Neuro-Symbolic Contract
 

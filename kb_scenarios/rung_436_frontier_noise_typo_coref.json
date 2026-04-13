@@ -1,0 +1,73 @@
+{
+  "name": "rung_436_frontier_noise_typo_coref",
+  "ontology_name": "rung_436_frontier_noise_typo_coref",
+  "utterances": [
+    "Use parent/2, at/2, inside/2, in_region/2, carries/2, ancestor/2 predicates. Keep carries/2 for possession; do not remap carries to at/2.",
+    "set parent(avery, blake). set parent(blake, casey).",
+    "assert rule ancestor(X, Y) :- parent(X, Y).",
+    "assert rule ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).",
+    "assert rule in_region(X, Z) :- at(X, Y), inside(Y, Z).",
+    {
+      "utterance": "blake + casey r in north_quay n thats in moon_basin, they both there",
+      "clarification_answers": [
+        "Set at(blake, north_quay). Set at(casey, north_quay). Set inside(north_quay, moon_basin).",
+        "They means Blake and Casey."
+      ],
+      "max_clarification_rounds": 2
+    },
+    "Set at(casey, north_quay).",
+    "Set inside(north_quay, moon_basin).",
+    {
+      "utterance": "he had tide_key maybe, no wait move it to her",
+      "clarification_answers": [
+        "He means Blake, her means Casey, and the item is tide_key.",
+        "Set carries(blake, tide_key). Retract carries(blake, tide_key). Set carries(casey, tide_key)."
+      ],
+      "max_clarification_rounds": 2
+    },
+    "Set carries(blake, tide_key).",
+    "retract fact carries(blake, tide_key).",
+    "carries(casey, tide_key).",
+    "qry: is avery ancestor of casey",
+    "query in_region(casey, moon_basin).",
+    "who carries tide_key now"
+  ],
+  "validations": [
+    {
+      "id": "avery_casey_ancestor",
+      "query": "ancestor(avery, casey).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "casey_in_moon_basin",
+      "query": "in_region(casey, moon_basin).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "casey_has_tide_key",
+      "query": "carries(casey, tide_key).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "blake_no_tide_key",
+      "query": "carries(blake, tide_key).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "pronoun_atom_he_absent",
+      "query": "carries(he, tide_key).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "pronoun_atom_her_absent",
+      "query": "carries(her, tide_key).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    }
+  ]
+}

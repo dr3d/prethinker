@@ -58,6 +58,118 @@
         "rung_431_book_goldilocks_raw_chaptered_qa"
       ],
       "required_pass_rate": 0.5
+    },
+    {
+      "id": "frontier_language_width_v2",
+      "description": "Frontier width stress pack: noisy pronouns, inverse phrasing, midstream repair, checkpointed mixed turns.",
+      "scenarios": [
+        "rung_432_noise_pronoun_inversion_chain",
+        "rung_433_noisy_inverse_retarget_repair",
+        "rung_434_dual_pronoun_flip_guard",
+        "rung_435_frontier_checkpoint_compound_turns",
+        "rung_436_frontier_noise_typo_coref",
+        "rung_437_frontier_policy_override_flow"
+      ],
+      "required_pass_rate": 0.67
+    },
+    {
+      "id": "frontier_language_width_v3",
+      "description": "Extended frontier width pack (v2 plus multi-bind and policy-revision loops).",
+      "scenarios": [
+        "rung_432_noise_pronoun_inversion_chain",
+        "rung_433_noisy_inverse_retarget_repair",
+        "rung_434_dual_pronoun_flip_guard",
+        "rung_435_frontier_checkpoint_compound_turns",
+        "rung_436_frontier_noise_typo_coref",
+        "rung_437_frontier_policy_override_flow",
+        "rung_438_frontier_multibind_query_pressure",
+        "rung_439_frontier_plural_coref_exception_guard",
+        "rung_440_frontier_policy_revision_loop"
+      ],
+      "required_pass_rate": 0.67
+    },
+    {
+      "id": "frontier_language_width_v4",
+      "description": "Frontier width v4: v3 plus higher-noise pronoun bucket shifts and multi-revision policy/asset handoffs.",
+      "scenarios": [
+        "rung_432_noise_pronoun_inversion_chain",
+        "rung_433_noisy_inverse_retarget_repair",
+        "rung_434_dual_pronoun_flip_guard",
+        "rung_435_frontier_checkpoint_compound_turns",
+        "rung_436_frontier_noise_typo_coref",
+        "rung_437_frontier_policy_override_flow",
+        "rung_438_frontier_multibind_query_pressure",
+        "rung_439_frontier_plural_coref_exception_guard",
+        "rung_440_frontier_policy_revision_loop",
+        "rung_441_frontier_pronoun_bucket_shuffle",
+        "rung_442_frontier_policy_multirevision_guard",
+        "rung_443_frontier_dual_item_handoff_coref"
+      ],
+      "required_pass_rate": 0.67
+    },
+    {
+      "id": "frontier_language_width_v5",
+      "description": "Frontier width v5: v4 plus unpunctuated narrative sweeps and compressed write-query braids.",
+      "scenarios": [
+        "rung_432_noise_pronoun_inversion_chain",
+        "rung_433_noisy_inverse_retarget_repair",
+        "rung_434_dual_pronoun_flip_guard",
+        "rung_435_frontier_checkpoint_compound_turns",
+        "rung_436_frontier_noise_typo_coref",
+        "rung_437_frontier_policy_override_flow",
+        "rung_438_frontier_multibind_query_pressure",
+        "rung_439_frontier_plural_coref_exception_guard",
+        "rung_440_frontier_policy_revision_loop",
+        "rung_441_frontier_pronoun_bucket_shuffle",
+        "rung_442_frontier_policy_multirevision_guard",
+        "rung_443_frontier_dual_item_handoff_coref",
+        "rung_444_frontier_unpunctuated_coref_sweep",
+        "rung_445_frontier_compound_write_query_braid",
+        "rung_446_frontier_policy_noisy_rebind_loop"
+      ],
+      "required_pass_rate": 0.67
+    },
+    {
+      "id": "frontier_clarification_probe_v1",
+      "description": "Clarification probe on the newest noisy compression rungs.",
+      "scenarios": [
+        "rung_444_frontier_unpunctuated_coref_sweep",
+        "rung_445_frontier_compound_write_query_braid",
+        "rung_446_frontier_policy_noisy_rebind_loop"
+      ],
+      "required_pass_rate": 1.0
+    },
+    {
+      "id": "frontier_confirmation_probe_v1",
+      "description": "Final-confirmation gating probe (yes and no-then-yes paths).",
+      "scenarios": [
+        "rung_447_confirmation_gate_single_yes",
+        "rung_448_confirmation_gate_no_then_yes"
+      ],
+      "required_pass_rate": 1.0
+    },
+    {
+      "id": "frontier_language_width_v6",
+      "description": "Frontier width v6: v5 plus multi-bind variable-answer pressure rung.",
+      "scenarios": [
+        "rung_432_noise_pronoun_inversion_chain",
+        "rung_433_noisy_inverse_retarget_repair",
+        "rung_434_dual_pronoun_flip_guard",
+        "rung_435_frontier_checkpoint_compound_turns",
+        "rung_436_frontier_noise_typo_coref",
+        "rung_437_frontier_policy_override_flow",
+        "rung_438_frontier_multibind_query_pressure",
+        "rung_439_frontier_plural_coref_exception_guard",
+        "rung_440_frontier_policy_revision_loop",
+        "rung_441_frontier_pronoun_bucket_shuffle",
+        "rung_442_frontier_policy_multirevision_guard",
+        "rung_443_frontier_dual_item_handoff_coref",
+        "rung_444_frontier_unpunctuated_coref_sweep",
+        "rung_445_frontier_compound_write_query_braid",
+        "rung_446_frontier_policy_noisy_rebind_loop",
+        "rung_449_frontier_multibind_uncle_query"
+      ],
+      "required_pass_rate": 0.67
     }
   ]
 }

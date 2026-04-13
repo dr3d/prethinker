@@ -1,0 +1,80 @@
+{
+  "name": "rung_443_frontier_dual_item_handoff_coref",
+  "ontology_name": "rung_443_frontier_dual_item_handoff_coref",
+  "utterances": [
+    "Use parent/2, ancestor/2, lives_in/2, inside/2, in_region/2, carries/2.",
+    "Set parent(ivy, nora). Set parent(nora, owen). Set parent(nora, pia).",
+    "assert rule ancestor(X, Y) :- parent(X, Y).",
+    "assert rule ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).",
+    "assert rule in_region(X, Z) :- lives_in(X, Y), inside(Y, Z).",
+    {
+      "utterance": "the kids are at queensbridge + harbor_point, both in metro_zone, then the older one moved to rivergate",
+      "clarification_answers": [
+        "Kids means Owen and Pia. Older one means Owen.",
+        "Set lives_in(owen, queensbridge). Set lives_in(pia, harbor_point). Set inside(queensbridge, metro_zone). Set inside(harbor_point, metro_zone). Retract lives_in(owen, queensbridge). Set lives_in(owen, rivergate). Set inside(rivergate, metro_zone)."
+      ],
+      "max_clarification_rounds": 2
+    },
+    "Set lives_in(owen, rivergate).",
+    "Set lives_in(pia, harbor_point).",
+    "Set inside(rivergate, metro_zone).",
+    "Set inside(harbor_point, metro_zone).",
+    {
+      "utterance": "she handed amber_badge to him and cobalt_badge to her, no wait keep cobalt_badge with nora",
+      "clarification_answers": [
+        "She means Nora, him means Owen, and her means Pia.",
+        "Set carries(owen, amber_badge). Set carries(pia, cobalt_badge). Retract carries(pia, cobalt_badge). Set carries(nora, cobalt_badge)."
+      ],
+      "max_clarification_rounds": 2
+    },
+    "Set carries(owen, amber_badge).",
+    "Set carries(nora, cobalt_badge).",
+    "query ancestor(ivy, owen).",
+    "query in_region(owen, metro_zone).",
+    "query carries(nora, cobalt_badge)."
+  ],
+  "validations": [
+    {
+      "id": "ivy_ancestor_owen",
+      "query": "ancestor(ivy, owen).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "ivy_ancestor_pia",
+      "query": "ancestor(ivy, pia).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "owen_in_metro_zone",
+      "query": "in_region(owen, metro_zone).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "pia_in_metro_zone",
+      "query": "in_region(pia, metro_zone).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "owen_has_amber_badge",
+      "query": "carries(owen, amber_badge).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "nora_has_cobalt_badge",
+      "query": "carries(nora, cobalt_badge).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "pia_no_cobalt_badge",
+      "query": "carries(pia, cobalt_badge).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    }
+  ]
+}

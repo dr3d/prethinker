@@ -1,0 +1,57 @@
+{
+  "name": "rung_432_noise_pronoun_inversion_chain",
+  "ontology_name": "rung_432_noise_pronoun_inversion_chain",
+  "utterances": [
+    "Ava is Bo's parent.",
+    {
+      "utterance": "uh shes maybe parnt of Cy too same lady as above",
+      "clarification_answers": [
+        "She means Ava. Ava is a parent of Cy."
+      ],
+      "max_clarification_rounds": 2
+    },
+    "Di has Cy as a parent.",
+    "If X is a parent of Y then X is an ancestor of Y.",
+    "If X is an ancestor of Y and Y is an ancestor of Z then X is an ancestor of Z.",
+    "is ava ancestor of di",
+    "and if noise flipped anything retract parent(cy, ava)."
+  ],
+  "validations": [
+    {
+      "id": "ava_bo_parent",
+      "query": "parent(ava, bo).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "ava_cy_parent",
+      "query": "parent(ava, cy).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "cy_di_parent",
+      "query": "parent(cy, di).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "ava_di_ancestor",
+      "query": "ancestor(ava, di).",
+      "expect_status": "success",
+      "min_rows": 1
+    },
+    {
+      "id": "she_cy_absent",
+      "query": "parent(she, cy).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    },
+    {
+      "id": "cy_ava_absent",
+      "query": "parent(cy, ava).",
+      "expect_status": "no_results",
+      "max_rows": 0
+    }
+  ]
+}
