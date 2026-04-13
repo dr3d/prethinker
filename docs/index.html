@@ -591,7 +591,7 @@
           <audio id="project-audio" class="showcase-media" controls preload="metadata"></audio>
           <video id="project-video" class="showcase-media" controls preload="metadata" poster="assets/pre-thinker-hero-cinematic.png" hidden></video>
           <div id="media-links" class="actions"></div>
-          <div class="showcase-note">Expected filenames: <code>How-PRETHINKER-Protects-AI-Database-Integrity.mp3</code>, <code>.m4a</code>, <code>.mp4</code>.</div>
+          <div class="showcase-note">Auto-discovers known podcast assets in <code>docs/assets/</code> and supports <code>.mp3</code>, <code>.m4a</code>, and <code>.mp4</code>.</div>
         </div>
       </article>
     </section>
@@ -909,67 +909,108 @@
         const links = document.getElementById("media-links");
         if (!availability || !audio || !video || !links) return;
 
-        const base = "assets/How-PRETHINKER-Protects-AI-Database-Integrity";
-        const audioCandidates = [
-          { src: `${base}.mp3`, type: "audio/mpeg", label: "MP3" },
-          { src: `${base}.m4a`, type: "audio/mp4", label: "M4A" }
-        ];
-        const videoCandidates = [
-          { src: `${base}.mp4`, type: "video/mp4", label: "MP4" }
+        const catalog = [
+          {
+            title: "How PRETHINKER Protects AI Database Integrity",
+            base: "assets/How-PRETHINKER-Protects-AI-Database-Integrity"
+          },
+          {
+            title: "English as a Logic Programming Language",
+            base: "assets/English-as-a-Logic-Programming-Language"
+          },
+          {
+            title: "Fixing AI Hallucinations with Prolog",
+            base: "assets/Fixing-AI-Hallucinations-with-Prolog"
+          }
         ];
 
-        const availableAudio = [];
-        for (const c of audioCandidates) {
-          if (await probeMedia(c.src, "audio")) availableAudio.push(c);
-        }
-        const availableVideo = [];
-        for (const c of videoCandidates) {
-          if (await probeMedia(c.src, "video")) availableVideo.push(c);
+        const discovered = [];
+        for (const entry of catalog) {
+          const audioCandidates = [
+            { src: `${entry.base}.mp3`, type: "audio/mpeg", label: "MP3" },
+            { src: `${entry.base}.m4a`, type: "audio/mp4", label: "M4A" }
+          ];
+          const videoCandidates = [
+            { src: `${entry.base}.mp4`, type: "video/mp4", label: "MP4" }
+          ];
+          const availableAudio = [];
+          for (const c of audioCandidates) {
+            if (await probeMedia(c.src, "audio")) availableAudio.push(c);
+          }
+          const availableVideo = [];
+          for (const c of videoCandidates) {
+            if (await probeMedia(c.src, "video")) availableVideo.push(c);
+          }
+          if (availableAudio.length || availableVideo.length) {
+            discovered.push({ title: entry.title, audio: availableAudio, video: availableVideo });
+          }
         }
 
-        if (availableAudio.length) {
+        function loadEntry(item) {
           audio.innerHTML = "";
-          for (const c of availableAudio) {
-            const source = document.createElement("source");
-            source.src = c.src;
-            source.type = c.type;
-            audio.appendChild(source);
-          }
-          audio.load();
-          audio.hidden = false;
-        } else {
-          audio.hidden = true;
-        }
-
-        if (availableVideo.length) {
           video.innerHTML = "";
-          for (const c of availableVideo) {
-            const source = document.createElement("source");
-            source.src = c.src;
-            source.type = c.type;
-            video.appendChild(source);
+
+          if (item.audio.length) {
+            for (const c of item.audio) {
+              const source = document.createElement("source");
+              source.src = c.src;
+              source.type = c.type;
+              audio.appendChild(source);
+            }
+            audio.load();
+            audio.hidden = false;
+          } else {
+            audio.hidden = true;
           }
-          video.load();
-          video.hidden = false;
-        } else {
-          video.hidden = true;
+
+          if (item.video.length) {
+            for (const c of item.video) {
+              const source = document.createElement("source");
+              source.src = c.src;
+              source.type = c.type;
+              video.appendChild(source);
+            }
+            video.load();
+            video.hidden = false;
+          } else {
+            video.hidden = true;
+          }
+
+          const labels = [...item.audio, ...item.video].map((c) => c.label).join(", ");
+          availability.textContent = `Loaded: ${item.title} (${labels})`;
+
+          links.innerHTML = "";
+          for (const entry of discovered) {
+            const pick = entry.audio[0] || entry.video[0];
+            const a = document.createElement("a");
+            a.className = `btn${entry.title === item.title ? " primary" : ""}`;
+            a.href = "#showcase";
+            a.textContent = entry.title;
+            a.addEventListener("click", (ev) => {
+              ev.preventDefault();
+              loadEntry(entry);
+            });
+            links.appendChild(a);
+
+            if (pick) {
+              const openLink = document.createElement("a");
+              openLink.className = "btn";
+              openLink.href = pick.src;
+              openLink.textContent = "open file";
+              links.appendChild(openLink);
+            }
+          }
         }
 
-        links.innerHTML = "";
-        for (const c of [...availableAudio, ...availableVideo]) {
-          const a = document.createElement("a");
-          a.className = "btn";
-          a.href = c.src;
-          a.textContent = `Open ${c.label}`;
-          links.appendChild(a);
-        }
-
-        if (!availableAudio.length && !availableVideo.length) {
+        if (!discovered.length) {
           availability.textContent = "No podcast media files found in docs/assets yet.";
-        } else {
-          const list = [...availableAudio, ...availableVideo].map((c) => c.label).join(", ");
-          availability.textContent = `Available formats: ${list}`;
+          audio.hidden = true;
+          video.hidden = true;
+          links.innerHTML = "";
+          return;
         }
+
+        loadEntry(discovered[0]);
       }
 
       async function load() {
