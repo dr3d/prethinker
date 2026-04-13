@@ -828,6 +828,14 @@
             } else {
               resolvedPath = path.replace(/^\/+/, "");
             }
+
+            // Links authored as `kb_runs/...` in docs resolve to `/docs/kb_runs/...`
+            // in the browser URL, but the repository truth is at root `kb_runs/...`.
+            if (resolvedPath.startsWith("docs/kb_runs/")) {
+              resolvedPath = resolvedPath.slice("docs/".length);
+            } else if (resolvedPath.startsWith("docs/kb_runs_published/")) {
+              resolvedPath = resolvedPath.slice("docs/".length);
+            }
           } catch (_) {
             continue;
           }
