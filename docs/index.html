@@ -1018,12 +1018,14 @@
             for (const p of leaders) {
               const tr = document.createElement("tr");
               const promptId = p.prompt_id || "-";
-              const href = p.prompt_snapshot_rel || "run-reports-hub.html#prompts";
+              const href = p.prompt_snapshot_rel
+                ? `${repoBlobBase}docs/${String(p.prompt_snapshot_rel).replace(/^\/+/, "")}`
+                : "run-reports-hub.html#prompts";
               tr.innerHTML = `
                 <td>${promptId}</td>
                 <td>${p.runs_total ?? "-"}</td>
                 <td>${pct(p.pass_rate)}</td>
-                <td><a href="${href}">open</a></td>
+                <td><a href="${href}"${String(href).startsWith("http") ? ' target="_blank" rel="noopener noreferrer"' : ""}>open</a></td>
               `;
               promptBody.appendChild(tr);
             }
