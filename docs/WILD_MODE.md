@@ -43,6 +43,31 @@ System prompt execution sanity:
 - recent excursion runs show `system_prompt_sources.double_source_active=false` in run metadata
 - this indicates no runtime double-system-prompt collision in those runs
 
+From CE envelope sweeps on `2026-04-13`:
+
+- aggressive CE wall (`ce=0.90`, rounds `3`):
+  - `excursion_frontier_v2_full`: `2/12` (`16.7%`)
+  - `excursion_failure_promotions_v1`: `0/3` (`0.0%`)
+  - failure mode: escalation/clarification pressure can suppress useful commits
+- balanced CE (`ce=0.55`, rounds `2`):
+  - `excursion_failure_promotions_v1`: `3/3` (`100%`)
+  - tradeoff: safer commits, but low clarification-route exercise in those specific rungs
+- typo/pronoun stress under higher CE (`ce=0.70`):
+  - `frontier_language_width_v6`: `6/16` (`37.5%`)
+  - confirms this lane still has severe brittleness on bare model under pressure
+
+From MITM clarification-loop runs (`2026-04-13`):
+
+- `rung460_ce85_mitm`: fallback sidecar resolved `4/4` pending clarification stalls (grade `A`)
+- `hn_signal_v3_ce85_mitm`: unresolved pending clarifications remained (`2/15` turns pending, fallback resolved `0/4`, grade `D`)
+- interpretation: the CE/Q&A route works, but can still dead-end on underspecified user-identity/predicate-canonicalization questions
+
+From latest source harvest:
+
+- new harder pack published: `HN_MIDGROUND_PACK_V3.md`
+- six additional HN threads with deeper BFS sampling (`max_comments=140`, `max_depth=4`)
+- ready-to-run turnsets expanded to OP + 14 comments (15-turn stress format)
+
 ## What Counts As Progress
 
 Progress is not just a higher pass rate.
@@ -56,5 +81,6 @@ Progress means:
 ## Linked Artifacts
 
 - excursion source pack: `stories/excursions/HN_MIDGROUND_PACK_V2.md`
-- session log entry: `SESSIONS.md` (Session 32)
+- harder source pack: `stories/excursions/HN_MIDGROUND_PACK_V3.md`
+- session log entry: `SESSIONS.md` (Session 33)
 - failure isolation note: `docs/WILD_FAILURE_ISOLATION.md`

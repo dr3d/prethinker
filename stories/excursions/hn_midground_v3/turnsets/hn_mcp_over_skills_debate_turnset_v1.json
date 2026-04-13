@@ -1,0 +1,99 @@
+﻿{
+    "name":  "hn_mcp_over_skills_debate_turnset_v1",
+    "source_thread_id":  47712718,
+    "source_url":  "https://news.ycombinator.com/item?id=47712718",
+    "difficulty":  "G3",
+    "lane":  "agent_tooling",
+    "utterances":  [
+                       {
+                           "utterance":  "OP (title): I still prefer MCP over skills",
+                           "source":  "op",
+                           "source_id":  47712718
+                       },
+                       {
+                           "utterance":  "antirez: Don\u0027t focus on what you prefer: it does not matter. Focus on what tool the LLM requires to do its work in the best way. MCP adds friction, imagine doing yourself the work using the average MCP server. However, skills alone are not sufficient if you want, for instance, creating the ability for LLMs to instrument a complicated system. Work in two steps:\n1. Ask the LLM to build a tool, under your guide and specification, in order do a specific task. For instance, if you are working with embedded systems, build some monitoring interface that allows, with a simple CLI, to do the debugging of the app as it is working, breakpoints, to spawn the emulator, to restart the program from scratch in a second by re-uploading the live image and resetting the microcontroller. This is just an example, I bet you got what I mean.\n2. Then write a skill file where the usage of the tool at \"1\" is explained.\nOf course, for simple tasks, you don\u0027t need the first step at all. For instance it does not make sense to have an MCP to use git. The agent knows how to use git: git is comfortable for you, to use manually. It is, likewise, good for the LLM. Similarly if you always estimante the price of running something with AWS, instead of an MCP with services discovery and pricing that needs to be queried in JSON (would you ever use something like that?) write a simple .md file (using the LLM itself) with the prices of the things you use most commonly. This is what you would love to have. And, this is what the LLM wants. For complicated problems, instead, build the dream tool you would build for yourself, then document it in a .md file.",
+                           "source":  "comment",
+                           "source_id":  47715000,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "plandis: I could not agree any less with the author. I don’t want APIs, I want agents to use the same CLI tooling I already use that is locally available. If my agents are using CLI tooling anyways there is no need to add an extra layer via MCP.\nI don’t want remote MCP calls, I don’t even want remote models but that’s cost prohibitive.\nIf I need to call an API, a skill with existing CLI tooling is more than capable.",
+                           "source":  "comment",
+                           "source_id":  47713089,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "tow21: This argument always sounds like two crowds shouting past each other.\nAre you a solo developer, are you fully in control of your environment, are you focused on productivity and extremely tight feedback loops, do you have a high tolerance for risk: you should probably use CLIs. MCPs will just irritate you.\nAre you trying to work together with multiple people at organizational scale and alignment is a problem; are you working in a range of environments which need controls and management, do you have a more defensive risk tolerance ... then by the time you wrap CLIs into a form that are suitable you will have reinvented a version of the MCP protocol. You might as well just use MCP in the first place.\nAside - yes, MCP in its current iteration is fairly greedy in its context usage, but that\u0027s very obviously going to be fixed with various progressive-disclosure approaches as the spec develops.",
+                           "source":  "comment",
+                           "source_id":  47715032,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "alierfan: This isn\u0027t a zero-sum game or a choice of one over the other. They solve different layers of the developer experience: MCP provides a standardized, portable interface for external data/tools (the infrastructure), while Skills offer project-specific, high-level behavioral context (the orchestration). A robust workflow uses MCP to ensure tool reliability and Skills to define when and how to deploy those tools.",
+                           "source":  "comment",
+                           "source_id":  47713065,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "_pdp_: Scanning through the comments here I am almost certain the majority of people in this thread run coding agents on-device. Skills that access already available resources is then more convenient and you can easily make the argument that it is more agronomic.\nThat being said, majority of users on this planet don\u0027t use AI agents like that. They go to ChatGPT or equivalent. MCP in this case is the obvious choice because it provides remote access and it has better authentication story.\nIn order to make any argument about pro/con of MCP vs Skills you first need to find out who is the user.",
+                           "source":  "comment",
+                           "source_id":  47715515,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "grensley: The \"only skills\" people are usually non-technical and the \"only CLI\" people are often solo builders.\nMCP makes a lot of sense for enterprise IMO. Defines auth and interfaces in a way that\u0027s a natural extension of APIs.",
+                           "source":  "comment",
+                           "source_id":  47713172,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "lifeisstillgood: I agree for a slightly different reason - human stupidity.\nDespite many decades of proof that automation simplifies and reveals the illogical in organisations, digitisation has mostly stopped at below the “CXO”\nlevel - and so there are not APIs or CLIs available to anyone - but MCP is cutting through\nJust consider:\nThroughout companies large and small, Agile is what coders do, real project managers still use deadlines and upfront design of what will be in the deadline - so any attempt to convert the whole company to react to the reality of the road is blocked\nReports flow upwards - but through the reporting chain. So those PowerPoints are … massaged to meet to correct story, and the more levels it’s massaged the more it fails to resemble reality. Everyone knows this but managing the transition means potentially losing control …\nThere are plenty of digitisationmprojects going on - but do they enable full automation or are they another case of an existing political arena building its own political choices in software - “our area in a database to be accessed via an UI by our people” - almost never “our area to be used by others via API and totally replacing our people”.\n(I think I need to be more persuasive",
+                           "source":  "comment",
+                           "source_id":  47714794,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "WhyNotHugo: I like skills because they rely on the same tools which humans rely upon. A well-written skill can be read and used by a human too.\nA skill is just a description for how to use an existing CLI tool. You don\u0027t need to write new code for the LLM to interact with some system. You just tell the LLM to use the same tool humans do. And if you find the CLI is lacking in some way, you can improve it and direct human usage benefits from that improvement too.\nOn the other hand, an MCP requires implementing a new API for a service, an API exclusive to LLMs, and keeping parallel documentation for that. Every hour of effort put into it is an hour that\u0027s taken away from improving the human-facing API and documentation.\nThe way skills are lazy-loaded when needed also keeps context clean when they\u0027re not used. To be fair, MCPs could be lazy-loaded the same way, that\u0027s just an implementation detail.",
+                           "source":  "comment",
+                           "source_id":  47717555,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "robotobos: Despite thinking this is AI-generated, I agree but everything has a caveat.\nSkills are good for instilling non-repeatable, yet intuitive or institutional knowledge.\nMCP’s are great for custom, repeatable tasks. After 5-10 runs of watching my LLM write the same exact script, I just asked it to hardcode the solution and make it a tool. The result is runs are way faster and repeatable.",
+                           "source":  "comment",
+                           "source_id":  47712816,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "nextaccountic: \u003e Context Bloat: Using a skill often requires loading the entire SKILL.md into the LLM’s context window, rather than just exposing the single tool signature it needs. It’s like forcing someone to read the entire car’s owner’s manual when all they want to do is call car.turn_on().\nMCP has severe context bloat just by starting a thread. If harnesses were smart enough to, during install time, summarize the tools provided by a MCP server (rather than dumping the whole thing in context), it would be better. But a worse problem is that the output of MCP goes straight into the context of the agent, rather than being piped somewhere else\nA solution is to have the agent run a cli tool to access mcp services. That way the agent can filter the output with jq, store it in a file for analysis later, etc",
+                           "source":  "comment",
+                           "source_id":  47714718,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "losvedir: For my use I prefer just a raw CLI. As long as it\u0027s built following conventions (e.g. using cobra for a Go app) then the agent will just natively know how to use it, by which I mean how to progressively learn what it needs by reading the `help` output. In that case you don\u0027t need a skill or anything. Just say \"I want this information, use the xyz app\". It will then try `xyz --help` or `xyz help` or a variant, just like a human would, see the subcommands, do `xyz help subcommand` and eventually find what it needs to do the job. Good tools provide an OAuth flow like `xyz login`, which will open a browser window where you can determine which resources you want to give the CLI (and thereby the agent) access to.\nThis only works for people using agents themselves on computers they control, rather than, e.g., the Claude web app, but is a good chunk of my usage.\nI think people are either over or under thinking the auth piece, though. The agent should have access to their own token. Both CLIs and MCPs and even raw API requests work this way. I don\u0027t think MCPs provide any further security. You should assume the agent can access anything in its environment and do everything up to what the credential permits. You don\u0027t want to give your more powerful credential to the MCP server and hope that the MCP server somehow restricts the agent to doing less (it can probably find the credential and make out-of-band calls if it wants). The only way I think it could work like that is how... is it Sprite does it?... where you give use a fake token and have an off-machine proxy that it goes through where it MitMs the request and injects the real credential.",
+                           "source":  "comment",
+                           "source_id":  47716771,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "alexhans: This frames MCP vs Skills as an either/or, but they operate at different layers. MCP exposes capabilities and Skills may shape how capabilities are used.\nBoth are useful to different people (and role families) in different ways and if you don\u0027t feel certain pain points, you may not care about some of the value they provide.\nAgent skills are useful because they\u0027re standardized prompt sharing but more than that, because they have progressive disclosure so you don\u0027t bloat your context with an inefficietly designed MCP and their UX is very well aligned such that \"/SkillBuilder\" skills are provided from the start and provide a good path for developers or non traditional builders to turn conversations into semi or full automation. I use this mental model to focus on the iteration pattern and incremental building [1].\n[1] https://alexhans.github.io/posts/series/evals/building-agent...",
+                           "source":  "comment",
+                           "source_id":  47715258,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "jauntywundrkind: I\u0027ve remained leaning a bit towards MCP until lately. Both have pretty easy ways to call the other (plenty of cli API callers, and tools like mcp-cli for the reverse https://github.com/philschmid/mcp-cli ). Skills have really made progressive discovery if cli-tools much better, and MCP design has adapted likewise. I\u0027ve lightly preferred MCP for formalism, for it feeling more concrete as a thing.\nBut what really changed my mind is seeing how much more casual scripting the LLMs do these days. They\u0027ll build rad unix pipes, or some python or node short scripts. With CLI tools, it all composes: every trick it learns can plug directly into every other capability.\nWhere-as with MCP, the LLM has to act as the pipe. Tool calls don\u0027t compose! It can read something like this tmux skill then just adapt it in all sorts of crazy ways! It can sort of do that with tool calls, but much less so. https://github.com/nickgnd/tmux-mcp \nI\u0027d love to see a capnproto capnweb or some such, with third party handoff (apologies Kenton for once again raising 3ph), where a tool call could return a result and we could forward the result to a different LLM, without even waiting for the result to come back. If the LLM could compose tool calls, it would start to have some parity with the composability of the cli+skill. But it doesn\u0027t. And as of very recently I\u0027ve decided that is too strong a selling point to be ignored. I also just like how the cli remains the universe system: if these are so isomorphic as I keep telling myself, what really does the new kid on the block really bring? How much is a new incarnation better if their capabilities are so near? We should keep building cli tools, good cli tools, so that man and machine benefit.\nThat said I still leave the beads mcp server around. And I turn on the neovim MCP when I want to talk to neovim. Ah well. I should try harder to switch.",
+                           "source":  "comment",
+                           "source_id":  47713205,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "usrbinbash: \u003e The core philosophy of MCP is simple: it’s an API abstraction. The LLM doesn’t need to understand the how; it just needs to know the what.\nWrong. It needs to \"understand\" both these things. The only difference is where and how the strings explaining them are generated.",
+                           "source":  "comment",
+                           "source_id":  47714666,
+                           "depth":  1
+                       }
+                   ],
+    "notes":  "Auto-generated OP+14-comment turnset from HN snapshot (v3 hard pack)."
+}

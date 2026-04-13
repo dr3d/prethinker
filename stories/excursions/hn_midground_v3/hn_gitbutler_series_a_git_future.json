@@ -1,0 +1,1142 @@
+﻿{
+    "thread_id":  47712656,
+    "hn_url":  "https://news.ycombinator.com/item?id=47712656",
+    "title":  "We\u0027ve raised $17M to build what comes after Git",
+    "by":  "ellieh",
+    "unix_time":  1775785978,
+    "score":  336,
+    "descendants":  751,
+    "difficulty":  "G3",
+    "lane":  "startup_strategy",
+    "label":  "hn_gitbutler_series_a_git_future",
+    "why_selected":  "Future-looking product claims, skepticism, and counterfactual comparisons.",
+    "op_text":  "",
+    "harvested_comment_count":  140,
+    "comment_sample_policy":  {
+                                  "traversal":  "bfs",
+                                  "max_comments":  140,
+                                  "max_depth":  4
+                              },
+    "comments":  [
+                     {
+                         "id":  47719696,
+                         "by":  "trashb",
+                         "time":  1775835262,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "\u003e The old model assumed one person, one branch, one terminal, one linear flow. Not only has the problem not been solved well for that old model, it’s now only been compounded with our new AI tools.\nA bit of a strange thing to say in my book. Git isn\u0027t SVN and I think these problems are already solved with git. I agree that the interface is not always very intuitive but Git has the infrastructure which is very much focused on supporting alternatives to \"one person, one branch, one terminal, one linear flow\".\n\u003e the problem that Git has solved for the last 20 years is overdue for a redesign.\nTo me it\u0027s not clear what the problem is that would require a redesign."
+                     },
+                     {
+                         "id":  47713641,
+                         "by":  "tiffanyh",
+                         "time":  1775795223,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "A lot of people seem confused about how they raised the money, but it’s actually a pretty easy VC pitch.\n- It’s from one of GitHub’s cofounders.\n- GitHub had a $7.5B exit.\n- And the story is: AI is completely changing how software gets built, with plenty of proof points already showing up in the billions in revenue being made from things like Claude Code, Cusor, Codex, etc.\nSo the pitch is basically: back the team that can build the universal infrastructure for AI and agentic coding."
+                     },
+                     {
+                         "id":  47713460,
+                         "by":  "Meleagris",
+                         "time":  1775793666,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "I recently switched to Jujutsu (jj) and it made me realize that “what comes after Git” might already exist.\nIt turns out the snapshot model is a perfect fit for AI-assisted development. I can iterate freely without thinking about commits or worrying about saving known-good versions.\nYou can just mess around and make it presentable later, which Git never really let you do nicely.\nPlus there’s essentially zero learning curve, since all the models know how to use JJ really well."
+                     },
+                     {
+                         "id":  47720343,
+                         "by":  "Vampyre",
+                         "time":  1775837848,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "- leads with amount of money raised\n- mentions a16z\n- i use git every single day and have no idea what exactly the thing will do\nthey aren\u0027t building something to help you, they\u0027re building something to trap you. even if it\u0027s free, does things you like, etc., do not use it. their end goal is to screw you"
+                     },
+                     {
+                         "id":  47715106,
+                         "by":  "factorialboy",
+                         "time":  1775808979,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Installed GitButler to try it out — and realized it installs malicious Git hooks to take over the git commit workflow:\n* pre-commit — The malicious one. It intercepted every `git commit` attempt and aborted it with that error message, forcing you to use `but commit` instead. Effectively a commit hijack — no way to commit to your own repo without their tool.\n* post-checkout — Fired whenever you switched branches. GitButler used it to track your branch state and sync its virtual branch model. It cleaned this one up itself when we checked out.\n* There\u0027s also typically a prepare-commit-msg hook that GitButler installs to inject its metadata into commit messages, though we didn\u0027t hit that one.\n* The pre-commit hook is the aggressive one — it\u0027s a standard git hook location, so git runs it unconditionally before every commit. GitButler installs it silently as part of \"setting up\" a repo, with no opt-in. The only escape (without their CLI) is exactly what we did: delete it manually."
+                     },
+                     {
+                         "id":  47720680,
+                         "by":  "nine_k",
+                         "time":  1775839369,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "The tool that could replace git must free, ubiquitous, and arguably open-source. This is why I cannot imagine how raising $17M may pay for itself in that case, to say nothing of a 10× return.\nIt may be a great tool, but I\u0027d be very reluctant to use a closed-source solution as a cornerstone of infrastructure."
+                     },
+                     {
+                         "id":  47714653,
+                         "by":  "tmountain",
+                         "time":  1775805171,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "I personally feel that:\n1) Git is fine\n2) I would not want to replace critical open source tooling with something backed by investor capital from its inception.\nSure, it will be “open source “, but with people throwing money behind it, there’s a plan to extract value from the user base from day one.\nI’m tired of being “the product”.\nCritical open source tooltips by should spring from the community, not from corporate sponsorship."
+                     },
+                     {
+                         "id":  47713351,
+                         "by":  "MBCook",
+                         "time":  1775792600,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Why does it take $17m to beat Git?\nHow will you ever get the network effects needed to get sustained users with a commercial tool?\nGiven Git was created because BitKeeper, a commercial tool, pulled their permission for kernel developers to use their tool aren’t we ignoring a lesson there?"
+                     },
+                     {
+                         "id":  47715810,
+                         "by":  "qwery",
+                         "time":  1775815318,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "First off, I\u0027m of course interested to see what the future infrastructure of software building next looks like.\n\u003e The hard problem is not generating change, it’s organizing, reviewing, and integrating change without creating chaos.\nSure, writing some code isn\u0027t the bottleneck. Glossed over is the part where the developer determines what changes to make , which in my experience is the most significant cost during development and it dwarfs anything to do with version control. You can spend a lot of energy on the organising, reviewing, patching, etc. stuff -- and you should be doing some amount of this, in most situations -- but if you\u0027re spending more of your development budget on metaprojects than you think you should be, I don\u0027t think optimising the metatooling is going to magically resolve that. Address the organisational issues first.\n\u003e This is what we’re doing at GitButler, this is why we’ve raised the funding to help build all of this, faster.\nThe time constraint (\"faster\") is, of course, entirely self-imposed for business reasons. There\u0027s no reason to expect that \u0027high cost + high speed\u0027 is the best or even a good way to build this sort of tooling, or anything else, for that matter.\nGit\u0027s UI has become increasingly friendly over a very long time of gradual improvements.\nYes, Mercurial was pretty much ideal out of the gate, but the development process in that case was (AFAIK) a world away from burning money and rushing to the finish.\nMaybe going slow is better?"
+                     },
+                     {
+                         "id":  47714627,
+                         "by":  "nikolay",
+                         "time":  1775805048,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "The only security incident I\u0027ve had in my career was due to Git Butler - it committed temporary files into GitHub without me explicitly approving it! Of course, it was a private repository, but still, it became impossible to delete those secrets because there were plenty of commits afterward. Given the large file tree and many updated files in the commit, it wasn\u0027t apparent that those folders got sneaked into the commit.\nSo, I really hope security incidents don\u0027t come after Git!"
+                     },
+                     {
+                         "id":  47713432,
+                         "by":  "OsrsNeedsf2P",
+                         "time":  1775793386,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "To all the salty people- the person cofounded GitHub. It\u0027s not the product that raised 17M, it\u0027s the person."
+                     },
+                     {
+                         "id":  47712848,
+                         "by":  "al_borland",
+                         "time":  1775787635,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "I like what I see in the video, it would solve a lot of problems I end up having with git.\nThat said, I find the branding confusing. They say this is what comes after git, but in the name and the overall functionality, seems to just be an abstraction on top of git, not a new source control tool to replace git."
+                     },
+                     {
+                         "id":  47714456,
+                         "by":  "rsanheim",
+                         "time":  1775803872,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Wow. So much hate in the comments here. Of all the funding / equity events lately, I wonder how this one gets so much doubt and distrust from the start.\nIf this isn’t something to at least root for, in the sense of a small team, novel product, serving a real need, then I dunno what is. You can use jj or tangled and still appreciate improvements to git and vcs on the web in general. Competition amongst many players is a good thing, even if you don’t believe in this one particular vision.\nHeaven forbid it isn’t 100M going to a YC alum for yet another AI funding raise."
+                     },
+                     {
+                         "id":  47714447,
+                         "by":  "pu_pe",
+                         "time":  1775803797,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "I actually believe we need to rethink Git for modern needs. Saving prompts and sessions alongside commits could become the norm for example, or I could imagine having different flags for whether a contribution was created by a human or not.\nThis doesn\u0027t seem to be the direction these guys are going though, it looks like they think Git should be more social or something."
+                     },
+                     {
+                         "id":  47717659,
+                         "by":  "modernerd",
+                         "time":  1775826815,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "For a long time I couldn\u0027t decide if Git Butler was a real product or a very elaborate joke to get devs to type \"but rub\" into their terminal.\n https://docs.gitbutler.com/cli-guides/cli-tutorial/rubbing \nI like their vision, though, this is compelling to me:\n\u003e What if it was easier to for a team to work together than it is to work alone?\nIt generally _is_ easier to work alone with git. UI and DX experiments feel worthwhile. lazygit and Magit are both widely used and loved, for example, but largely focus on the single user experience."
+                     },
+                     {
+                         "id":  47713550,
+                         "by":  "steelbrain",
+                         "time":  1775794322,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "The source code is hosted on Github: https://github.com/gitbutlerapp/gitbutler \nI was really hoping we\u0027d see some competition to Github, but no, this is competition for the likes of the Conductor App. Disappointed, I must say. I am tired of using and waiting for alternatives of, Github.\nThe diff view in particular makes me rage. CodeMirror has a demo where they render a million lines. Github starts dying when rendering a couple thousand. There are options like Codeberg but the experience is unfortunately even worse."
+                     },
+                     {
+                         "id":  47720609,
+                         "by":  "brockers",
+                         "time":  1775839002,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Honest question. I love some of the additional capabilities and specifically the dependency commits, virtual branches, and JSON output...\nBUT why not just work with the git community to add this functionality? It doesn\u0027t seem like the kind of thing that needs to \"replace\" git, as opposed to \"improve\" git?"
+                     },
+                     {
+                         "id":  47716026,
+                         "by":  "hotgeart",
+                         "time":  1775817319,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Git just works.\nIf you\u0027re not really familiar with it, you can use a free UI.\nIf you don\u0027t know anything about it, AI like ChatGPT or Claude can help you commit or even teach you Git.\nIf you raise money for this project, you probably intend to make money in the near future. I don’t think anyone here wants ads on Git or to argue with a manager to get the premium version of GitButler just because you reached the commit limit.\nThese $17M should go to the Git maintainers."
+                     },
+                     {
+                         "id":  47715751,
+                         "by":  "weedhopper",
+                         "time":  1775814908,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "The amount of ~skepticism~ hate is astounding here!! People don’t even acknowledge that it’s written in RUST!!!!"
+                     },
+                     {
+                         "id":  47718882,
+                         "by":  "utilize1808",
+                         "time":  1775832087,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Nowadays I just ask my LLM butler to \"organize outstanding changes into coherent commits\". No new software needed."
+                     },
+                     {
+                         "id":  47714451,
+                         "by":  "hmontazeri",
+                         "time":  1775803835,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "i dont get it, watched the video seeing the \"power\" of using multiple branches at the same workdirectory etc. all i was thinking was ok they want to make it easy for coding agents work with multiple branches / feautres at once... Just that works already pretty well with git and worktrees... and agent uses the tools anyway... dont know what they want to build with 17M"
+                     },
+                     {
+                         "id":  47713479,
+                         "by":  "yellow_lead",
+                         "time":  1775793800,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "I thought gitbutler was not a great name, but then I saw their CLI command name is \"but\""
+                     },
+                     {
+                         "id":  47714795,
+                         "by":  "orthecreedence",
+                         "time":  1775806382,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "\u003e We\u0027ve raised $17M to build something like git and bait-and-switch it later because VCs only exist to extract value and anything we end up building will be a shadow of a fart of how useful git actually is\nFTFY. I don\u0027t understand how anyone could think to replace git by raising money. The only way to truly do this is grassroots iteration. You can build the software, but the distribution will never reach the same network size as git before your investors start asking \"When do I get my return?\"\n\u003e Imagine your tools telling you as soon as there are possible merge conflicts between teammates, rather than at the end of the process.\nSo you\u0027re centralizing a fully distributed process because grepping for \"\u003c\u003c\u003c\u003c\u003c\u003c\u003c\" and asking your teammate the best way to merge is too hard? I thought coding was supposed to be social?\nI mean, honestly, go for it and build what you want. I\u0027m all for it! But maybe don\u0027t compare it to git. It\u0027s tone deaf."
+                     },
+                     {
+                         "id":  47716121,
+                         "by":  "gcr",
+                         "time":  1775818133,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "jj is rapidly becoming the new standard for post-git VCS in my circles. I’d love to see more startups working on that."
+                     },
+                     {
+                         "id":  47716150,
+                         "by":  "treeblah",
+                         "time":  1775818352,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Claims about “what comes after git” aside, I really like the idea of virtual branches. Worktrees have a pitfall IMO that they don’t allow you to test changes in a running local env, meaning I need to commit the changes, close the worktree, and checkout the branch on my primary workspace to verify.\nGitbutler virtual branches OTOH appear to provide branch independence for agents/commits, while simultaneously allowing me to locally verify all branches together in a single local env. This seems quite a bit nicer than checking out worktree branches in the primary workspace for verification, or trying to re-run local setup in each worktree."
+                     },
+                     {
+                         "id":  47713523,
+                         "by":  "jillesvangurp",
+                         "time":  1775794145,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Why are investors still investing in SAAS products like this? I\u0027ve heard some investors made rather blunt statements about such investments being a very hard sell to them at this point. Clearly somebody believes differently here.\nWe have AI now. AI tools are pretty handy with Git. I\u0027ve not manually resolved git conflicts in months now. That\u0027s more or less a solved problem for me. Mostly codex creates and manages pull requests for me. I also have it manage my GitHub issues on some projects. For some things, I also let it do release management with elaborate checklists, release prep, and driving automation for package deployment via github actions triggered via tags, and then creating the gh release and attaching binaries. In short, I just give a thumbs up and all the right things happen.\nTo be blunt, I think a SAAS service that tries to make Git nicer to use is a going to be a bit redundant. I don\u0027t think AI tools really need that help. Or a git replacement. And people will mostly be delegating whatever it is they still do manually with Git pretty soon. I\u0027ve made that switch already because I\u0027m an early adopter. And because I\u0027m lazy and it seems AI is more disciplined at following good practices and process than I am."
+                     },
+                     {
+                         "id":  47715113,
+                         "by":  "danpalmer",
+                         "time":  1775809041,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "jj is what comes after git.\nIt can back on to git if you want, so a migration doesn\u0027t have to be all-at-once. It already has all of these features and more. It\u0027s stable, fast, very extensible.\njj truly is the future of version control, whereas git plus some loosely specified possibly proprietary layer is not.\nI\u0027m excited to see what ersc.io produces for a jj hosting service and hopefully review UI."
+                     },
+                     {
+                         "id":  47719170,
+                         "by":  "bitbasher",
+                         "time":  1775833220,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Real question--- why does one of the GitHub co-founders need to raise 17M for a venture? I\u0027m certain they could fund it themselves. Is this more or less a marketing play than anything else?"
+                     },
+                     {
+                         "id":  47719955,
+                         "by":  "Nifty3929",
+                         "time":  1775836231,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "The remaining lifetime of a technology is proportional to how long it has already existed.\nHowever good this new thing might be, however much better it might be than git - I don\u0027t like it\u0027s chances."
+                     },
+                     {
+                         "id":  47716509,
+                         "by":  "csmantle",
+                         "time":  1775820647,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "I failed to see why this would be something that \"comes after Git\" from a VCS perspective.\nThe line-based diff(1)/diff3(1)/patch(1) kit often works, and that mindset thrives and gets carried till today. Many toolkits and utilities have been designed to make it more ergonomic, and they are good. Jujutsu is an example. We also have different theories and implementations, some even more algebraically sound like Darcs and Pijul.\nBut GitHub the Platform is another story, given that they struggled to achieve 90% availability these days."
+                     },
+                     {
+                         "id":  47719765,
+                         "by":  "jayd16",
+                         "time":  1775835569,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Seems fine I guess. I\u0027m not a fan of Perforce but it does have some features that git still struggles with and needs to address to break into new customers. This Gitbutler seems to address some of them but I can\u0027t say it really feels next gen.\nI like the idea of parallel branches. I feel like you could probably get away with just creating multiple, named stages but having a full history is nice. P4 has multiple pending CLs and it works nicely enough. This sounds a bit better so that\u0027s cool.\nAs far as \"social coding\" git\u0027s design is really at odds with any sort of real time communication. I would love to see a first class support for file locking, and file status work flows. It\u0027s not big at all in code dev because code can be merged but for non-coders, source controlled assets are often not mergeable. To solve this, P4 is often used with heavily integrated tools that provide live file status (Locked, out of date, edited by others). This way merge conflicts are prevented at author time. Git is really lacking here. Is fetching constantly really the best we can do?\nThen of course... can we get some large file and partial checkout workflows that don\u0027t feel good?"
+                     },
+                     {
+                         "id":  47715274,
+                         "by":  "hanwenn",
+                         "time":  1775810555,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Is anyone from GitButler reading this?\nAs others alluded, JJ already exists and is a credible successor to Git for the client side.\nTechnical desides aside though: how is this supposed to make money for the investors?"
+                     },
+                     {
+                         "id":  47720205,
+                         "by":  "qrbcards",
+                         "time":  1775837236,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Genuinely curious about the collaboration model here. Git\u0027s biggest weakness isn\u0027t technical — it\u0027s that merge conflicts are a social problem disguised as a technical one. Two people editing the same file usually means the ownership boundaries are wrong, not that the VCS is.\nWhat does \"what comes after Git\" look like for a two-person team vs. a 200-person org? The pain points are completely different."
+                     },
+                     {
+                         "id":  47715450,
+                         "by":  "tankenmate",
+                         "time":  1775812234,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "As long as this tool doesn\u0027t break \"fast forward merge\" and proper linear history and allows you do delete PRs unlike its GitHub progenitor then I\u0027m happy.\nI have found that a number of times GitHub\u0027s idea of \"convenient\" comes either from 1) not understanding git fundamentals such that it closes off possible workflows, or 2) pushing a philosophy on users, i.e. I know better than you, so I\u0027m going to block you."
+                     },
+                     {
+                         "id":  47719594,
+                         "by":  "0xbadcafebee",
+                         "time":  1775834871,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "\u003e Imagine your version control tool taking what you’ve worked on and helping you craft logical, beautiful changes with proper context\nThis is actually really important/useful, it\u0027s just not apparent to people who haven\u0027t worked on AI agents.\nAI agents do a lot of work under the hood to try to save your tokens. There are two basic methods: 1) semantic knowledge maps, 2) PageRank. Agents like Aider will build a semantic knowledge graph of your codebase - the files in it, the functions, variables, etc - so that it can tell the agent exactly where everything is in a tiny summary. It\u0027ll also then use PageRank to build a graphed rank of these things, to surface the most relevant items first. ( https://aider.chat/2023/10/22/repomap.html )\nA modern VCS could do all of these things for you too, and the result should be making it easier to work with code, pulling in the related context simultaneously, so your changes make sense."
+                     },
+                     {
+                         "id":  47729212,
+                         "by":  "fireant",
+                         "time":  1775902228,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "So many people in this thread started commenting before trying the product or even watching a simple video of what it does. It\u0027s like reddit, commenting based on title without any actual comprehension of the content. Shameful really."
+                     },
+                     {
+                         "id":  47720421,
+                         "by":  "prepend",
+                         "time":  1775838150,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "I thought git didn’t allow companies to use git in their name any more and grandfathered in girhub, gitlab, etc. How did this company get a trademark.\nAlso, I don’t think I would use this and the problems they describe aren’t really things I care much about.\nI wish them the best, but $17m on a devtools company that thinks they are replacing git is going to be rough going."
+                     },
+                     {
+                         "id":  47720881,
+                         "by":  "knorker",
+                         "time":  1775840275,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "But… why? (pun intended)\nThey raised $17M to build what appears to be solvable by some git wrapper scripts that could have been written by AI in 5 minutes?\nTo me the extra \"wat\" about this is that if I spend the sub-$1 to get the git wrapper scripts, I can get them exactly the way I want them, instead of being mandated to use the commands they made up. A huge gain for AI is the ability to have exactly the software you personally want, even if nobody else wants it just so.\nSo they are building the exact opposite of the need that AI brings forward. What they are building is not even median software that is in danger of being replaced (e.g. see Cloudflare spending a week to build \"a wordpress\"), but something that\u0027s the most extreme example of AI-will-replace-this that could possibly exist.\nWho will buy this?\nThe only way this makes sense is as a plea for being acqui-hired (and the project dropped)."
+                     },
+                     {
+                         "id":  47730285,
+                         "by":  "mastermage",
+                         "time":  1775913224,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "I think Git specifically with jj is still a massively good tool. There are some interesting alternatives happening like Fossil with its auto commit which for single devs is probably realy nice. \nOr Pijul but thats very early stage.\nAlternatively I had the idea of something that automatically syncs your current working progress similar to how Word and Excel autosave work. With a main \"branch\" thats never developed in and will only be merged into from synced streams. But that idea is nowhere near cooked out yet."
+                     },
+                     {
+                         "id":  47716114,
+                         "by":  "ivanjermakov",
+                         "time":  1775818082,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "X is hard to use because when something goes wrong you need to have a deep knowledge to figure it out! Let\u0027s build Y on top of X to make this easy! Now you just need to have deep knowledge of both Y and X to figure problems out. And it\u0027s gonna cost $17M to build Y. Deal?"
+                     },
+                     {
+                         "id":  47722797,
+                         "by":  "wooptoo",
+                         "time":  1775850458,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Those who don\u0027t understand git are bound to reinvent it. Git is fine as it is, with some porcelain and QoL improvements here and there. Some of the most capable devs I know use git + cgit for collaboration and they manage just fine."
+                     },
+                     {
+                         "id":  47716588,
+                         "by":  "assimpleaspossi",
+                         "time":  1775821134,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Git isn\u0027t that old. I find it interesting people want to replace it by big money. Does this say something about the quality of git? Enough people also complain about that.\nI\u0027m reminded of a comedy album, \"The First Family\", from the 1960s where Bobby Kennedy impersonator wanted to form a new political party. He named it something like \"Major Affiliate For an Independent America\" (I might have that wrong.) Or the M-A-F-I-A.\nHe said their first order of business was to change the name of the organization.\n https://www.youtube.com/watch?v=Xwu8S6Ekx9w \nEDIT: I\u0027m not positive that\u0027s the correct album but have a good laugh anyway."
+                     },
+                     {
+                         "id":  47716966,
+                         "by":  "internet_points",
+                         "time":  1775823493,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Jumping on the bandwagon, Magit is raising $$$ to Keep Version Control Magical https://github.com/magit/magit/issues/5555"
+                     },
+                     {
+                         "id":  47716236,
+                         "by":  "mort96",
+                         "time":  1775818975,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "What \"comes after Git\" is not a proprietary solution developed by a VC-backed company."
+                     },
+                     {
+                         "id":  47717142,
+                         "by":  "ipsento606",
+                         "time":  1775824382,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "I\u0027m trying to estimate how much better than git a new system would have to be to convince me to abandon git and learn the new system\nI don\u0027t know the answer, but I think it could easily be three times as good and I would still stick with git"
+                     },
+                     {
+                         "id":  47716405,
+                         "by":  "itsfridaythen",
+                         "time":  1775820022,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "The title is misleading and click bait perhaps.\nBut you also get an idea of the average reading skill of people based on the top 3 comments: \"I don\u0027t want a replacement for Git!\"\nI\u0027m not blaming anyone, or maybe both the readers and the authors.\nPeople now write something that could\u0027ve been published as a short story 30 years ago, for something that could be a paragraph in length, detailing their emotional state, minute background information, their hopes and dreams.\nThe adaptive response to this by humans and society is to read the headline and ignore the prose, as the prose is so god damn long.\n\"Gitbutler is a UI for Git\" would\u0027ve been more suitable than hype about replacing git."
+                     },
+                     {
+                         "id":  47719195,
+                         "by":  "itsderek23",
+                         "time":  1775833293,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "How I\u0027m using git/Github has changed with agentic coding. However, I\u0027m not using swarms of agents to write code, so it\u0027s bit hard for me to decipher the JTBD of gitbutler.\nAnother take I\u0027ve seen is https://agentrepo.com/ , which is light-weighted hosted git that\u0027s easy for agents to use (no accounts, no API keys, public repos are free). There are large parts of the GitHub experience I\u0027m no longer using (mostly driving from Claude), so I think this is an interesting take."
+                     },
+                     {
+                         "id":  47716937,
+                         "by":  "dirtbag__dad",
+                         "time":  1775823348,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "I watched the demo video on the git butler home page and agree with the premises that:\n1. git is not going away\n2. git UX is not great\nSo i appreciate their effort to manage development better as agents make it possible to churn out multiple features and refactors at once.\nBUT, I reject this premise:\n3. Humans will review the code\nAs agents make it possible to do so much more code (even tens of files sucks to review, even if it’s broken into tiny PRs), I don’t want to be the gatekeeper at the code review level.\nI’d rather some sort of policy or governance tooling that bullies code to follow patterns I’ve approved, and force QA to a higher abstraction or downstream moment (tests?)"
+                     },
+                     {
+                         "id":  47721606,
+                         "by":  "CAP_NET_ADMIN",
+                         "time":  1775844091,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "\"What comes after Git\"\n looks inside \nGit CLI with flowers and unicorns.\nIs this what gets funded nowadays? I really hope for a gigantic mega crash of all the IT companies. This industry deserves it like none other."
+                     },
+                     {
+                         "id":  47714983,
+                         "by":  "aoshifo",
+                         "time":  1775808092,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Remind me, how much venture capital did Linus need to raise for building git?"
+                     },
+                     {
+                         "id":  47720195,
+                         "by":  "joostdevries",
+                         "time":  1775837206,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Maybe the pitch is:\ngit is distributed. Decentralised improvement. \nLocal computers and their users make changes. \nThese steps of local added value are then centrally combined into a shared timeline. A single product.\nDuring the improvement the locus of control is local. \nWhich means it is hard to harvest the knowledge of this local knowledge and replace it. \nAnd it\u0027s hard to make local users serve the central AI.\nNot something you put in the public mission statement.\nBecause you might get boycotts."
+                     },
+                     {
+                         "id":  47718131,
+                         "by":  "schacon",
+                         "time":  1775828913,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Hey, this is Scott - the guy in the photo who wrote this post. AMA."
+                     },
+                     {
+                         "id":  47714559,
+                         "by":  "voidUpdate",
+                         "time":  1775804544,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Is this actually replacing git, or just a new frontend for the same git stuff? In any case, I\u0027ll be interested to see if this still exists in a year, and if that $17M actually made it replace git"
+                     },
+                     {
+                         "id":  47718212,
+                         "by":  "troyvit",
+                         "time":  1775829227,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Huh. I look at what it took to build Git to begin with[1] and have to wonder if the thing that comes after it is really going to be _that much_ better. Git came about because there was a need for it. I feel like GitButler came about because there was a need for funding. Maybe I just need to have my coffee before commenting.\n[1] https://en.wikipedia.org/wiki/Git#History"
+                     },
+                     {
+                         "id":  47714593,
+                         "by":  "bob1029",
+                         "time":  1775804778,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Git is pretty close to ideal for the distributed model.\nI think the real money is in figuring out a centralized model that doesn\u0027t suck. Explicitly locking things has certain advantages. Two people working on the same file at the same time is often cursed in some way even if a merge is technically possible. Especially if it\u0027s a binary asset. Someone is going to lose all of their work if we have a merge conflict on a png file. It would be much better to know up front that the file is locked by some other artist on the team."
+                     },
+                     {
+                         "id":  47714797,
+                         "by":  "callamdelaney",
+                         "time":  1775806400,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Apparently what comes after git is git"
+                     },
+                     {
+                         "id":  47720089,
+                         "by":  "vadepaysa",
+                         "time":  1775836781,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "No shade on these guys, looks like a cool tool and I\u0027ll try it. However, I find myself doing large majority of my git operations using a an agent[1] or a TUI [2], and I rarely open a git interface. I can get everything done straight from the terminal.\nI guess I can overcome the \"what if I cannot undo\" anxiety.\n[1] https://getcook.dev \n[2] lazygit"
+                     },
+                     {
+                         "id":  47715675,
+                         "by":  "secondcoming",
+                         "time":  1775814300,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "\u003e Imaging being able to work on a branch stacked on a coworkers branch while you’re both constantly modifying them\nI think that\u0027s something I don\u0027t want to imagine"
+                     },
+                     {
+                         "id":  47718871,
+                         "by":  "kordlessagain",
+                         "time":  1775832034,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "No CLI installer for Windows.\nApp itself for Windows won\u0027t proceed past my selected repo. Said something about bad permissions, but I use that repo every day."
+                     },
+                     {
+                         "id":  47715843,
+                         "by":  "0xy4sh",
+                         "time":  1775815595,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Makes sense. Git solved versioning, not collaboration at scale. Most real pain today is juggling context across PRs, tools, and now agents not writing code."
+                     },
+                     {
+                         "id":  47714664,
+                         "by":  "nottorp",
+                         "time":  1775805252,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Humm at a quick glance git was functional enough for the linux kernel after 2 people worked on it for 4 months. That doesn\u0027t really add up to 17M."
+                     },
+                     {
+                         "id":  47713597,
+                         "by":  "everybodyknows",
+                         "time":  1775794752,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "I can\u0027t see any significant difference between their \"Operations Log\":\n https://docs.gitbutler.com/cli-guides/cli-tutorial/operation... \nand git\u0027s reflog :\n https://git-scm.com/docs/git-reflog"
+                     },
+                     {
+                         "id":  47718501,
+                         "by":  "permalaise",
+                         "time":  1775830488,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Doesn\u0027t jj basically do all this and more?"
+                     },
+                     {
+                         "id":  47714674,
+                         "by":  "foota",
+                         "time":  1775805307,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Some others mentioned pijul, but I will put in my two cents about it. I have been looking to make use of it because it seems really nice for working with an agent. Essentially you get patches that are independently and can be applied anywhere instead of commits. If there is ambiguity applying a patch then you have to resolve it, but that resolution is sort of a first class object."
+                     },
+                     {
+                         "id":  47738743,
+                         "by":  "rldjbpin",
+                         "time":  1775995786,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "building the future of source control over the incumbent tech does not bring much excitement personally.\ndoes not takeaway the interest and funding they are able to bring. raising money is not always a bad thing, if say, there will be a webapp to go alongside their approach to workflows."
+                     },
+                     {
+                         "id":  47714398,
+                         "by":  "aleksanb",
+                         "time":  1775803275,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Linus Torvalds was able to build this in a cave!\nWith a box of scraps!"
+                     },
+                     {
+                         "id":  47714158,
+                         "by":  "politelemon",
+                         "time":  1775800597,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "The title mentions \u0027after git\u0027 but the video demo shows that it\u0027s very much tied to git and Github. The post also mentions the overhead of dealing with git, but the examples shown come with their own overhead and commands. I\u0027m admittedly unable to see the appeal or just misunderstanding it, but the number of stars on the repo shows I\u0027m in the minority."
+                     },
+                     {
+                         "id":  47714336,
+                         "by":  "hdgvhicv",
+                         "time":  1775802471,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Linus built git in an afternoon with $17 for snacks"
+                     },
+                     {
+                         "id":  47720487,
+                         "by":  "srameshc",
+                         "time":  1775838455,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "I do not understand the problem solution, but if anything with git, I would want Codeberg style. I moved to gitlab and they were soldout and I am back on github slowly transitioning out. Common sentiment I believe is we want git, but on our own terms, not another VC funded project to move in."
+                     },
+                     {
+                         "id":  47720650,
+                         "by":  "jmount",
+                         "time":  1775839205,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "My only issue is the title. It appears they are building a replacement for GitHub of which a replacement for Git is just a component. Building a replacement for GitHub is going to need at least the sort of funding they are mentioning. So once one reads the article it makes a bit more sense."
+                     },
+                     {
+                         "id":  47714613,
+                         "by":  "loveparade",
+                         "time":  1775804933,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "I watched the video but I don\u0027t quite get it. I feel like I\u0027m missing something? A nicer git workflow is not what I need because I can ask an LLM to fix my git state and branches. This feels a bit backwards. LLMs are already great at working with raw git as their primitive.\nI\u0027m curious what their long term vision they pitched investors is."
+                     },
+                     {
+                         "id":  47714943,
+                         "by":  "admiralrohan",
+                         "time":  1775807766,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "They need to have a dedicated page explaining me why should I change my current workflow. Else I don\u0027t get the point."
+                     },
+                     {
+                         "id":  47714616,
+                         "by":  "satvikpendem",
+                         "time":  1775804974,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Why this and not jujutsu, pijul or sapling? These are all version control systems that are better than git in various ways."
+                     },
+                     {
+                         "id":  47723400,
+                         "by":  "pojzon",
+                         "time":  1775853527,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Real problem is how to cope with few billion of bots hammering APIs 24/7 saturating net cables, physical infrastructure and taking down platform with constant DDOS.\nIm curious when it will be “SO BAD” we start blocking every AI agent on firewall level."
+                     },
+                     {
+                         "id":  47719645,
+                         "by":  "zer00eyz",
+                         "time":  1775835089,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "From their docs:\n\u003e We are creating not only a new kind of Git client,\nNope, not going to be the tool of the future.\nThe fundamental problem is it is still based on git.\nTill this addresses submodules and makes them a first class citizen it\u0027s just tooling on top of a VCS that still ONLY supports single project thinking."
+                     },
+                     {
+                         "id":  47716596,
+                         "by":  "michaelashley29",
+                         "time":  1775821176,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "I feel like we’re over-capitalizing a problem that could be solved with better protocols. If the \"Git successor\" is just a wrapper to help agents not hallucinate their own worktrees, it feels like a very expensive solution to a context-window management problem."
+                     },
+                     {
+                         "id":  47721647,
+                         "by":  "stronglikedan",
+                         "time":  1775844288,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "I don\u0027t have to read the article to know that if it not just git with fixes and new features, it\u0027s not going to pan out. This is like building a new house because your current house needs a couple of leaks fixed and a coat of paint."
+                     },
+                     {
+                         "id":  47717853,
+                         "by":  "hakube",
+                         "time":  1775827792,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "That money could\u0027ve gone to something useful instead of building \"git but better\""
+                     },
+                     {
+                         "id":  47716651,
+                         "by":  "rainmaking",
+                         "time":  1775821529,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "I was thinking- why on earth raise 17M for that, it sounds like something you make in a basement with a few friends, if that.\nBut then it\u0027s the github cofounder- well, github did add a lot of stuff onto git I didn\u0027t know I needed, so I\u0027m curious."
+                     },
+                     {
+                         "id":  47718321,
+                         "by":  "geooff_",
+                         "time":  1775829733,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "LLMs have solved the Git problem without any need for other tooling. There is no learning curve anymore. You don\u0027t need to know any commands or even look at the CLI. You can explain in plain text what you\u0027re trying to do."
+                     },
+                     {
+                         "id":  47713502,
+                         "by":  "charlesfries",
+                         "time":  1775793936,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "I\u0027d like to see some kind of \"whitespace aware\" smart diff in whatever comes after git"
+                     },
+                     {
+                         "id":  47719199,
+                         "by":  "ElevenLathe",
+                         "time":  1775833310,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "I wonder what the development of git itself has cost in engineer time? Presumably more than $17 million? Assuming a fully loaded engineer is 250k, that only amounts to 68 engineer-years over 20 calendar years, which seems low."
+                     },
+                     {
+                         "id":  47717760,
+                         "by":  "joshribakoff",
+                         "time":  1775827345,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "“raise 17m to try to kill off and extract value from popular open source tool”\nPound foolish and folly"
+                     },
+                     {
+                         "id":  47729709,
+                         "by":  "feelamee",
+                         "time":  1775907504,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "the one feature which I have never seen in VCS is ability to stick commit message not just to all changes, but specifically to line/hunk.\nIt looks like very intuitive for me - I don\u0027t want to invent \"references style\" to say something about specific changed line in my commit - I want comment this line directly."
+                     },
+                     {
+                         "id":  47715616,
+                         "by":  "jumploops",
+                         "time":  1775813841,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "I don\u0027t know about a new Git, but GitHub feels like the cruftiest part of agentic coding.\nThe Github PR flow is second nature to me, almost soothing.\nBut it\u0027s also entirely unnecessary and sometimes even limiting to the agent."
+                     },
+                     {
+                         "id":  47714539,
+                         "by":  "fuzzy2",
+                         "time":  1775804438,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Dunno what they’re trying to build, but I encourage everyone to try what they already have built. It helps me work on multiple changesets in parallel. This often just happens, for example you work on something and discover a bug in something else that needs to be fixed. In GitButler, I can just create another branch, drag the changes in there, push and done.\nAlso, if you ever worked with Perforce, you might be familiar with changelists. It’s kind of like that.\nNow, GitButler is by no means perfect. There are many rough edges. It tends to get stuck in unexpected states and sometimes it isn’t easy to rectify this.\nIt also cannot split changes in a single file, which is a bummer, because that’s something I encounter routinely. But I understand this complicates the existing model tremendously."
+                     },
+                     {
+                         "id":  47725576,
+                         "by":  "jasonvorhe",
+                         "time":  1775866222,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "So they\u0027re looking to replace something Torvalds built while steering the Linux kernel with no financial backing but they somehow need 17 million?\nSus."
+                     },
+                     {
+                         "id":  47721158,
+                         "by":  "rokob",
+                         "time":  1775841788,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "It’s weird because I could see raising money on the premise that GitHub is garbage, not git. But then you can’t say I co-founded GitHub as your bona fides."
+                     },
+                     {
+                         "id":  47720079,
+                         "by":  "philipwhiuk",
+                         "time":  1775836758,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "If you\u0027re building on top Git, you\u0027re not really coming after it are you - you\u0027re coming as well as it.\nIf you want to come AFTER Git... you need to not use Git."
+                     },
+                     {
+                         "id":  47713455,
+                         "by":  "anishgupta",
+                         "time":  1775793625,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "GitHub CEO also raised 60M for \u0027entire\u0027 to bring agent context to git. The dust is yet to settle here as it\u0027s difficult to bring a paridgm shift from today\u0027s git workflows"
+                     },
+                     {
+                         "id":  47715608,
+                         "by":  "rohitpaulk",
+                         "time":  1775813771,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Most of the comments here are clearly from people who haven\u0027t used GitButler. Try it out and it\u0027s a very sticky product, clearly superior workflow to vanilla Git."
+                     },
+                     {
+                         "id":  47713230,
+                         "by":  "f33d5173",
+                         "time":  1775791537,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Isn\u0027t that jj? Hopefully no one tells the VCs."
+                     },
+                     {
+                         "id":  47719887,
+                         "by":  "eximius",
+                         "time":  1775836059,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Looks like almost as good as JJ but with VC money."
+                     },
+                     {
+                         "id":  47718107,
+                         "by":  "goatking",
+                         "time":  1775828804,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "I looked at the demonstration video and closed it after a couple of minutes.\nI don\u0027t see how this tool will replace git.\nWell, I think it won\u0027t"
+                     },
+                     {
+                         "id":  47715677,
+                         "by":  "maxehmookau",
+                         "time":  1775814313,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Ok, ok, if you give me $16M I\u0027ll do it faster."
+                     },
+                     {
+                         "id":  47716105,
+                         "by":  "nacozarina",
+                         "time":  1775818044,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Is $17M private equity enough to poison the initiative? Or is software-by-committee still the real project killer? Let’s find out…"
+                     },
+                     {
+                         "id":  47717466,
+                         "by":  "sourcegrift",
+                         "time":  1775825948,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "I like pijul\u0027s mental model much more but it\u0027s a single developer who\u0027s slightly prone to getting sidetracked."
+                     },
+                     {
+                         "id":  47718624,
+                         "by":  "purpleidea",
+                         "time":  1775830968,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "This will just force them to build in some sort of revenue extraction model. Pass! Git and copyleft are fine as is."
+                     },
+                     {
+                         "id":  47714604,
+                         "by":  "TRCat",
+                         "time":  1775804863,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "I was skeptical at first, but then I watched the video and it really looks interesting. I wonder if this works with Azure DevOps?"
+                     },
+                     {
+                         "id":  47720574,
+                         "by":  "PeterStuer",
+                         "time":  1775838829,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "The only thing I want is an as far as Claude Code can tell 100% Github clone running on my $5 Hetzner VPS."
+                     },
+                     {
+                         "id":  47720913,
+                         "by":  "Suffocate5100",
+                         "time":  1775840425,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Anything that leads off with how much money you\u0027ve raised is automatically disqualifying."
+                     },
+                     {
+                         "id":  47719111,
+                         "by":  "PunchyHamster",
+                         "time":  1775833009,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "I love how whole article described none of the ideas they have for product, just buzzwords"
+                     },
+                     {
+                         "id":  47715478,
+                         "by":  "kshri24",
+                         "time":  1775812543,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Great! Instead of solving actual problems we are seeing funding for stuff we don\u0027t need."
+                     },
+                     {
+                         "id":  47713404,
+                         "by":  "alexpadula",
+                         "time":  1775793057,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Rather confusing, your name has Git in it, “to build what comes after git”, what comes after your own Git product? Good luck."
+                     },
+                     {
+                         "id":  47714780,
+                         "by":  "999900000999",
+                         "time":  1775806211,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "How do you intend to make money ?\nEasier Git doesn\u0027t translate into something I can get my boss to pay for."
+                     },
+                     {
+                         "id":  47724917,
+                         "by":  "endofreach",
+                         "time":  1775862327,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "\"We’re not building some “better git”.\nWe’re building the infrastructure for how software gets built next.\"\nDude, aside from this type of phrasing being cringe, it\u0027s such blatantly obvious LLM induced psychosis phrase... ridiculous.\nI didn\u0027t even read that insanely long article explaining why one would need this (the necessity should have rang one or two bells for the author)... but all i could think of before reading that cringe ending, was: you\u0027re building what comes after git, but carry \"git\" in your name seems kinda odd... already revealing you either don\u0027t believe your own claims, or you do, but don\u0027t really mean what you\u0027re claiming... either way: WTF. Insane what\u0027s getting funded.\nAlso: the trend of companies overly feeling the need to explain they\u0027re not just X + AI (which also means LLM API), should really ring a lot of other bells to everyone else... god damn, too many bells to ring... and it seems like there is only AI chatbots left, that respond to anyone ringing the bell... god damn... they already took over \u0026 infected the human brain..."
+                     },
+                     {
+                         "id":  47716184,
+                         "by":  "hansmayer",
+                         "time":  1775818622,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "\"Gitbutler\", really rolls off the tongue, doesn´t it :) Oh and the irony of raising $17M to \"replace\" a tool which kinda...does not need replacing at all? How about replacing some of the entshittified services, like Google Workspace? Now that would be worth the $17M raised."
+                     },
+                     {
+                         "id":  47728994,
+                         "by":  "jtesp",
+                         "time":  1775899434,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "this is cool. i don\u0027t understand why the word git is in the name if they are trying to get (pun intended) away from git.\nbuthub has a nice ring to it"
+                     },
+                     {
+                         "id":  47724594,
+                         "by":  "pedalpete",
+                         "time":  1775860723,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "If you are building for what comes after git, why name it git?"
+                     },
+                     {
+                         "id":  47716415,
+                         "by":  "lawgimenez",
+                         "time":  1775820064,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "First time I heard of gitbutler, is this like gitk? If anyone remembers gitk"
+                     },
+                     {
+                         "id":  47715673,
+                         "by":  "mhh__",
+                         "time":  1775814272,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Improving something that basically everyone uses is obviously worth money"
+                     },
+                     {
+                         "id":  47716946,
+                         "by":  "dboreham",
+                         "time":  1775823385,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "$17M doesn\u0027t seem like enough for this. Perhaps for a prototype."
+                     },
+                     {
+                         "id":  47714400,
+                         "by":  "ultrablack",
+                         "time":  1775803293,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "For $17 milion there are few thibga without any gui that i couldnt build."
+                     },
+                     {
+                         "id":  47714525,
+                         "by":  "pjmalandrino",
+                         "time":  1775804326,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Wow, very impressive, great job!\nYou mentioned monitoring, I think it might be a very interesting way to see the \"ongoing\" work of your agents and orchestrate them. Do you have a precise idea on how it\u0027s going to happen, or is this already planned?"
+                     },
+                     {
+                         "id":  47732237,
+                         "by":  "simonebrunozzi",
+                         "time":  1775927652,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "\u003e I know what you’re thinking. You’re hoping that we’ll use phrases such as “we’re excited,” “this is just the beginning,” and “AI is changing everything”. While all those things are true, I’ll try to avoid them and instead make this announcement a little more personal.\nRefreshing. I am so tired of the usual PR-approved phrases that you read in every announcement.\nOther than that, I agree with other comments: not sure what Git\u0027s problem is, and what they are supposed to solve. Star Wars\u0027 \"it\u0027s a trap\" vibes."
+                     },
+                     {
+                         "id":  47716359,
+                         "by":  "itsfridaythen",
+                         "time":  1775819762,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "The title is misleading, it\u0027s not a git replacement"
+                     },
+                     {
+                         "id":  47715224,
+                         "by":  "latexr",
+                         "time":  1775810019,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "\u003e I know what you’re thinking. You’re hoping that we’ll use phrases such as “we’re excited,” “this is just the beginning,” and “AI is changing everything”. While all those things are true\nSuperbly tone deaf. The only people who might possibly want to read that are those already drinking your Kool-Aid, most everyone else can already smell the bullshit."
+                     },
+                     {
+                         "id":  47717667,
+                         "by":  "groundzeros2015",
+                         "time":  1775826858,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "How much money did they need to raise to make git?"
+                     },
+                     {
+                         "id":  47720335,
+                         "by":  "oytis",
+                         "time":  1775837804,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "How many millions were raised to build Git?"
+                     },
+                     {
+                         "id":  47715798,
+                         "by":  "momocowcow",
+                         "time":  1775815266,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Blog post written by llm.\nNo thanks.\nWas their series A pitch also written by llm?"
+                     },
+                     {
+                         "id":  47716727,
+                         "by":  "ggrab",
+                         "time":  1775822139,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "There\u0027s definitely a need for this, but the underlying reason there\u0027s a need for this is so beyond me.\nI\u0027ve worked with a lot of Software Engineers over the years, even at FAANG, that didn\u0027t have a good technical understanding of git (basically, your repo is a tree structure, most commands are just about manipulating that tree in some way).\nI mean, just spend the hour to go through a git tutorial. There\u0027s so many great ones like the interactive one that shows the tree as you go through the levels. It\u0027s your profession.\nAlso, I think another layer on top of Git as this seems to propose won\u0027t fix it -- once something non-obvious happens, these people continue to be stuck."
+                     },
+                     {
+                         "id":  47717388,
+                         "by":  "exe34",
+                         "time":  1775825595,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "You could have given Linus the weekend off."
+                     },
+                     {
+                         "id":  47713607,
+                         "by":  "ddtaylor",
+                         "time":  1775794900,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Raising a bunch of money to recreate the wheel."
+                     },
+                     {
+                         "id":  47717523,
+                         "by":  "bullen",
+                         "time":  1775826196,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Meanwhile CVS just keeps working fine..."
+                     },
+                     {
+                         "id":  47737686,
+                         "by":  "firemelt",
+                         "time":  1775986699,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "idk what this guys can come up with, i mean anything beyond git is a bloated mess that no one wanted to use, just look at gitlab"
+                     },
+                     {
+                         "id":  47717234,
+                         "by":  "alper",
+                         "time":  1775824824,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "A lot of blood in the water for Github."
+                     },
+                     {
+                         "id":  47714609,
+                         "by":  "johntopia",
+                         "time":  1775804901,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "gitbutler is actually a great product tbh"
+                     },
+                     {
+                         "id":  47714437,
+                         "by":  "olalonde",
+                         "time":  1775803679,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "\u003e I may have even had a small hand in some part of that.\nQuite an understatement. I\u0027m pretty sure GitHub is the primary reason that Git took off like it did."
+                     },
+                     {
+                         "id":  47718112,
+                         "by":  "nathan_compton",
+                         "time":  1775828836,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "I really, genuinely, do not want a replacement for git developed by a company that raised money to build it, since it will inevitably be a walled garden of one kind or another that enshittifies as it tries to make the money back. Git is fine and there is one thing no VC funded effort can get: freedom from the vampires.\nLike all I see here is \"We want to build a fence around git and then charge you to go through it.\" I mean this as kindly as I can mean it: no thank you."
+                     },
+                     {
+                         "id":  47733227,
+                         "by":  "leoh",
+                         "time":  1775935120,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "It’s called jj"
+                     },
+                     {
+                         "id":  47736297,
+                         "by":  "DANmode",
+                         "time":  1775970467,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "\u003e That’s fundamentally what is behind this round.\nDrop the “fundamentally”.\n“It’s cleaner that way.”"
+                     },
+                     {
+                         "id":  47718784,
+                         "by":  "otabdeveloper4",
+                         "time":  1775831626,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "\u003e Proprietary git wrapper with pay-to-play \"enterprise\" gating\nOh boy. Thanks for the nightmares."
+                     },
+                     {
+                         "id":  47713323,
+                         "by":  "tormeh",
+                         "time":  1775792393,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Pijul?\nGit has issues, but it works pretty well once you learn it and it\u0027s basically universal. Will be hard to dislodge."
+                     },
+                     {
+                         "id":  47715459,
+                         "by":  "red_admiral",
+                         "time":  1775812363,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "I\u0027m still not convinced we need a replacement for git.\n\u003e The old model assumed one person, one branch, one terminal, one linear flow.\nUm, there\u0027s more than one flow out there? Feature branches are usually \"one person, lots of branches, squish at the end\". Since when is Git linear? Some of them even come with their own scripts or GUIs.\nI\u0027m even less convinced that something that\u0027s raised $17M already will provide a free-as-in-beer solution."
+                     },
+                     {
+                         "id":  47714852,
+                         "by":  "solidarnosc",
+                         "time":  1775806908,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "That\u0027s a lot of money for something very much not necessary... I\u0027m in the wrong business!"
+                     },
+                     {
+                         "id":  47721477,
+                         "by":  "Scarblac",
+                         "time":  1775843419,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "The initial version of Git was written in two weeks, what do you need $17m for?"
+                     },
+                     {
+                         "id":  47715554,
+                         "by":  "dhruv3006",
+                         "time":  1775813321,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Github fallout effect?"
+                     },
+                     {
+                         "id":  47720844,
+                         "by":  "gervwyk",
+                         "time":  1775840085,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "please also build it for easy multimedia management"
+                     },
+                     {
+                         "id":  47719176,
+                         "by":  "andiareso",
+                         "time":  1775833238,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "Jesus this website is overstimulating and it\u0027s extremely difficult to understand. What the hell they are selling other than a UI on top of Git? Git works perfectly fine especially if you take an hour or two to learn how to do a few more complicated but useful workflows (rebasing, cherry-picking)."
+                     },
+                     {
+                         "id":  47714533,
+                         "by":  "cocodill",
+                         "time":  1775804394,
+                         "depth":  1,
+                         "parent":  47712656,
+                         "text":  "There is only a tiny final step left, a real piece of cake, to build the thing."
+                     }
+                 ]
+}

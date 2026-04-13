@@ -1,0 +1,80 @@
+﻿{
+    "manifest_id":  "hn_midground_manifest_v3",
+    "generated_on":  "2026-04-13",
+    "source":  "Hacker News official Firebase API",
+    "generated_by":  "scripts ad-hoc harvest via PowerShell",
+    "pack":  [
+                 {
+                     "id":  "hn_mcp_over_skills_debate",
+                     "thread_id":  47712718,
+                     "difficulty":  "G3",
+                     "lane":  "agent_tooling",
+                     "hn_url":  "https://news.ycombinator.com/item?id=47712718",
+                     "title":  "I still prefer MCP over skills",
+                     "descendants":  370,
+                     "harvested_comment_count":  140,
+                     "snapshot_path":  "stories/excursions/hn_midground_v3/hn_mcp_over_skills_debate.json",
+                     "suggested_turn_window":  "10-16"
+                 },
+                 {
+                     "id":  "hn_mythos_vuln_frontier",
+                     "thread_id":  47732020,
+                     "difficulty":  "G4",
+                     "lane":  "security_reasoning",
+                     "hn_url":  "https://news.ycombinator.com/item?id=47732020",
+                     "title":  "Small models also found the vulnerabilities that Mythos found",
+                     "descendants":  339,
+                     "harvested_comment_count":  140,
+                     "snapshot_path":  "stories/excursions/hn_midground_v3/hn_mythos_vuln_frontier.json",
+                     "suggested_turn_window":  "10-16"
+                 },
+                 {
+                     "id":  "hn_signal_notification_forensics",
+                     "thread_id":  47716490,
+                     "difficulty":  "G4",
+                     "lane":  "privacy_legal",
+                     "hn_url":  "https://news.ycombinator.com/item?id=47716490",
+                     "title":  "FBI used iPhone notification data to retrieve deleted Signal messages",
+                     "descendants":  305,
+                     "harvested_comment_count":  140,
+                     "snapshot_path":  "stories/excursions/hn_midground_v3/hn_signal_notification_forensics.json",
+                     "suggested_turn_window":  "10-16"
+                 },
+                 {
+                     "id":  "hn_france_windows_to_linux",
+                     "thread_id":  47719486,
+                     "difficulty":  "G3",
+                     "lane":  "policy_geopolitics",
+                     "hn_url":  "https://news.ycombinator.com/item?id=47719486",
+                     "title":  "France to ditch Windows for Linux to reduce reliance on US tech",
+                     "descendants":  698,
+                     "harvested_comment_count":  140,
+                     "snapshot_path":  "stories/excursions/hn_midground_v3/hn_france_windows_to_linux.json",
+                     "suggested_turn_window":  "10-16"
+                 },
+                 {
+                     "id":  "hn_gitbutler_series_a_git_future",
+                     "thread_id":  47712656,
+                     "difficulty":  "G3",
+                     "lane":  "startup_strategy",
+                     "hn_url":  "https://news.ycombinator.com/item?id=47712656",
+                     "title":  "We\u0027ve raised $17M to build what comes after Git",
+                     "descendants":  751,
+                     "harvested_comment_count":  140,
+                     "snapshot_path":  "stories/excursions/hn_midground_v3/hn_gitbutler_series_a_git_future.json",
+                     "suggested_turn_window":  "10-16"
+                 },
+                 {
+                     "id":  "hn_20_dollar_stack_mrr",
+                     "thread_id":  47736555,
+                     "difficulty":  "G3",
+                     "lane":  "ops_claims",
+                     "hn_url":  "https://news.ycombinator.com/item?id=47736555",
+                     "title":  "I run multiple $10K MRR companies on a $20/month tech stack",
+                     "descendants":  495,
+                     "harvested_comment_count":  140,
+                     "snapshot_path":  "stories/excursions/hn_midground_v3/hn_20_dollar_stack_mrr.json",
+                     "suggested_turn_window":  "10-16"
+                 }
+             ]
+}

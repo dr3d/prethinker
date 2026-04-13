@@ -1,0 +1,1142 @@
+﻿{
+    "thread_id":  47719486,
+    "hn_url":  "https://news.ycombinator.com/item?id=47719486",
+    "title":  "France to ditch Windows for Linux to reduce reliance on US tech",
+    "by":  "Teever",
+    "unix_time":  1775834448,
+    "score":  627,
+    "descendants":  698,
+    "difficulty":  "G3",
+    "lane":  "policy_geopolitics",
+    "label":  "hn_france_windows_to_linux",
+    "why_selected":  "Policy claims, strategic justification, and correction-heavy political framing.",
+    "op_text":  "",
+    "harvested_comment_count":  140,
+    "comment_sample_policy":  {
+                                  "traversal":  "bfs",
+                                  "max_comments":  140,
+                                  "max_depth":  4
+                              },
+    "comments":  [
+                     {
+                         "id":  47717066,
+                         "by":  "lionkor",
+                         "time":  1775823978,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "All the comments about Linux gaming make me want to give my $0.02. I\u0027ve been gaming on Linux, with no Windows installed anywhere, for around 6 years. In the first 3 years, it was a massive pain. Games like S.T.A.L.K.E.R. would consistently have issues with mouse input, weird acceleration, a lot of games wouldn\u0027t run at all. This is NO LONGER the case at all. Things run very well out of the box.\nAll games I want to play run very well and mostly the process is just \"install -\u003e play\".\nIf a game has an aggressive anticheat, like Battlefield 6 or Valorant, it will not work and you can forget about it.\nControllers work fine, so do some wheels and other peripherals, but a good number of wheels, pedals, joysticks, VR headsets, and other wild and wacky input devices might not work that well or not at all. It mostly depends on whether the software for them runs on Linux, runs in Wine, or is needed at all. Not sure about VR, but I know it was a bit dire 1-2 years ago.\nIf you don\u0027t play hardcore simulator games, and don\u0027t play one of the competitive shooters with aggressive anticheat (e.g. CS2 and other competitive shooters run perfectly well), you can just install Linux, install Steam or one of the other launchers, and just hit play.\nIf you\u0027re not sure, you can check the status on https://protondb.com ."
+                     },
+                     {
+                         "id":  47716191,
+                         "by":  "esskay",
+                         "time":  1775818663,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "Yeah good on them, everyone needs to do this. It\u0027s nuts Windows is still the go-to for anything these days despite everyone knowing what a parasitic, buggy mess it is. \"Easy\" shouldn\u0027t be the excuse in this day and age. Big orgs and especially government entities should be hiring the people that know what they\u0027re doing and get off that crummy platform."
+                     },
+                     {
+                         "id":  47720807,
+                         "by":  "Melatonic",
+                         "time":  1775839902,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "The age of the Linux desktop might actually finally be coming\nPersonally I think we are at an interim period for a big player to emerge and take over this space. If enough governments in the EU start switching over to customized linux distros theres a big chance for someone like Nokia to come in and develop their own approved distro with proper MDM and GPO-like management functionality baked in .\nOn top of that it could be great to see SteamOS continue to gain share and become more than just something people run on gaming purpose hardware.\nAnd thirdly would love to see a more simplistic but super lean and functional OS built on something like the BSD."
+                     },
+                     {
+                         "id":  47721574,
+                         "by":  "idoubtit",
+                         "time":  1775843899,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "The title is very far from the actual public statement that is linked in the article.\nThe French government announced that its digital agency will switch to Linux during this year. This is about a few hundreds of computers owned by the agency.\nThe second statement is that this agency is expected to publish, by the end of the year, a plan to reduce the digital dependency on the US. It\u0027s not \"France to ditch Windows\", it should be \"French government promises to plan soon for possible ways to decrease digital dependencies, but calendar unknown\". Also note that the government (and president) will change next year, so even if the present drive was real, a political u-turn could come soon.\nOverall, this statement could be the presage of a major upturn in a few years, but I think it far more probable that the policy change will be minor. There\u0027s already a small tendency toward Linux and Free Software in the public sector."
+                     },
+                     {
+                         "id":  47716655,
+                         "by":  "sylens",
+                         "time":  1775821556,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "Many government orgs have spent the last decade and a half slowly transitioning old legacy applications and platforms to browser-based alternatives. That old ERP software that used to require a thick client? Now it runs in Chrome. Microsoft recognized this and smartly moved to keep these customers locked in via an ever growing Microsoft Office bundle - subscription based, with Teams for their chat and then building up additional capabilities to extend the dependency, like InTune.\nWhere we are at now is that the pain of moving away from Windows is acceptable for many larger organizations and governments, especially those with flat or decreasing budgets. You can just swap out the OS layer and keep other processes the same - keep using Office with just the browser versions if you want, or move to an alternative (like EU-based). Teams works on Linux. There is no moat on Windows anymore"
+                     },
+                     {
+                         "id":  47716787,
+                         "by":  "ngomez",
+                         "time":  1775822495,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "Interestingly, Microsoft has been trying to get ahead of this for a couple of years now with their National Partner Clouds program [0], which they describe as:\n\u003e designed for scenarios where full ownership and operational independence from Microsoft is required\nIn France\u0027s case, Capgemini and Orange have a joint venture to operate datacenters that Microsoft runs Azure and Office on top of [1]. Moving away from Windows and Teams would still reduce their dependence on Microsoft substantially. But if the core goal is to reduce dependence on non-European suppliers, I would be wary of the French government buying services from \"Bleu\" when it\u0027s mainly Microsoft and a couple of consultancies in a trenchcoat.\n[0] https://learn.microsoft.com/en-us/azure/azure-sovereign-clou... \n[1] https://www.capgemini.com/news/press-releases/capgemini-and-..."
+                     },
+                     {
+                         "id":  47716143,
+                         "by":  "Latitude7973",
+                         "time":  1775818309,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "France has been making good moves to achieve software independence from the US. It would be an even better move to allow those in Europe or indeed the rest of the world to also benefit."
+                     },
+                     {
+                         "id":  47719980,
+                         "by":  "dleslie",
+                         "time":  1775836316,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "Canada has been using and developing FOSS for a while now.\n0: https://www.canada.ca/en/government/system/digital-governmen... \n1: https://events19.linuxfoundation.org/wp-content/uploads/2017... \n2: https://github.com/canada-ca/ \nThere\u0027s still a great deal of Windows usage, but hopefully that will phase out with the passage of time. Canada\u0027s bureaucracy moves slowly, at the pace of generational attrition. It won\u0027t be until the last GenX retires that they could even meaningfully begin transitioning the average office worker away from Windows."
+                     },
+                     {
+                         "id":  47716401,
+                         "by":  "faccacta",
+                         "time":  1775819978,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "It seems like what Europe really needs to do this is a viable mobile OS. It\u0027s been true for a while that Linux + LibreOffice is plenty to handle most government workers\u0027 needs on the desktop, but that\u0027s only good for when they are at their desks. Are there any viable alternatives to iOS and Android that are totally free of \"dépendances extra-européennes\"? What\u0027s the plan?"
+                     },
+                     {
+                         "id":  47716494,
+                         "by":  "morog",
+                         "time":  1775820558,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "I used Linux 10 years ago, but then due to job or corp. and needing Teams and Outlook I was forced to uses Windows. Now with corp job over I was finally able to switch to Linux this week (Fedora + KDE). Loving improvements made in the last 10 years, KDE will always have its quirks, but it is fast and smooth with no crashes yet. I got Claude to make me a migration script which worked brilliantly, haven\u0027t needed to boot Windows yet. Browser sessions and everything worked like nothing had changed. All my various ssh / putty configs migrated to Konsole, Thunderbird carries on like nothing has changed. Ahhhh freedom!"
+                     },
+                     {
+                         "id":  47716646,
+                         "by":  "benterix",
+                         "time":  1775821480,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "At this point I wouldn\u0027t be surprised if American companies started using it if the French get it right. The instability of the current administration is one thing, but Microsoft disregard for its user deserves an appropriate response that will actually hit them where they care."
+                     },
+                     {
+                         "id":  47719828,
+                         "by":  "BLKNSLVR",
+                         "time":  1775835821,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "I hope it succeeds and I hope they document the experience and invite interested parties to see how it was setup and how (well) it works in order to encourage as many governments and organisations as possible to do the same."
+                     },
+                     {
+                         "id":  47719957,
+                         "by":  "yibers",
+                         "time":  1775836232,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "I am saying this as a very long time Windows user, and it saddens me. Politics aside, from a pure technichal, functional, privacy and UX perspective, the case for changing over from Windows to Linux is getting stronger by the day."
+                     },
+                     {
+                         "id":  47720698,
+                         "by":  "sega_sai",
+                         "time":  1775839451,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "I think France seem serious in actually switching to open source/EU software. I recently had a telecon on Visio (France\u0027s Teams/Zoom substitute) and it worked well in a browser with ~ 10 participants."
+                     },
+                     {
+                         "id":  47716472,
+                         "by":  "harlequinetcie",
+                         "time":  1775820472,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "I find fascinating how so many people are moving away from Microsoft decades after they should have because of simply the inertia that large organizations have on adoption.\nAbove all, I\u0027m also surprised on how those same organization are using Anthropic or OpenAI or other close source solutions for their agent harnesses instead of going for Open Source.\nMalte just yesterday showed how powerful innovation with small teams can be achieved particularly in EU.\nI hope they start looking for those alternatives too for their agentic systems, beyond using pi-mono."
+                     },
+                     {
+                         "id":  47720255,
+                         "by":  "MegagramEnjoyer",
+                         "time":  1775837438,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "I applaud France for this decision. Windows is basically legal spyware and adware at this point"
+                     },
+                     {
+                         "id":  47719851,
+                         "by":  "Teever",
+                         "time":  1775835917,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "I’ve commented on this before but you’ll know France is serious when there are Linux ports of Solidworks and Catia.\nFrance has a real edge over American companies by being the dominant player in the CAD world, it’s always surprised me that they nerfed that advantage by tying to an American operating system."
+                     },
+                     {
+                         "id":  47716218,
+                         "by":  "spiderfarmer",
+                         "time":  1775818843,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "Being dependent on US tech feels the same as when we were dependent on Russian energy: strategically unwise and avoidable. We have alternatives, they just need work."
+                     },
+                     {
+                         "id":  47716938,
+                         "by":  "derfurth",
+                         "time":  1775823354,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "It would be great, however the title is misleading: the only announcement regarding linux desktop is that the DINUM - a relatively small but perhaps influential government agency pledges to leave Windows.\nI believe the largest Linux Desktop initiative in France is GendBuntu[1] for the National Gendarmerie\n[1] https://en.wikipedia.org/wiki/GendBuntu"
+                     },
+                     {
+                         "id":  47716516,
+                         "by":  "VadimPR",
+                         "time":  1775820703,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "Anyone here familiar with the details of GendBuntu[1], the Ubuntu distro used by the French Gendarmerie? I\u0027d love to hear what is working and what isn\u0027t on the ground.\n[1] - https://en.wikipedia.org/wiki/GendBuntu?useskin=vector"
+                     },
+                     {
+                         "id":  47716461,
+                         "by":  "21asdffdsa12",
+                         "time":  1775820346,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "There should be a chapter in economic books on how entrenched monopoly companies become on the inside, like small states where little companies (called departments) play freemarket for promotion points, the outside forces completely suspended while the endoplasmic reticulum of the monopoly company lasts."
+                     },
+                     {
+                         "id":  47716720,
+                         "by":  "gib444",
+                         "time":  1775822073,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "Efforts like this are good for people to realise there is a lot of talent in Europe that just gets overshadowed by USA\u0027s dominance.\nUSAians tend think everything is less popular in Europe simply because it is inferior and fails purely on its technical merits. I know nothing will ever change their minds, but at least non-European non-USAians might recognise the efforts a bit more.\nWe are also willing to accept \u0027good but not perfect\u0027 and understand tradeoffs."
+                     },
+                     {
+                         "id":  47716197,
+                         "by":  "JaggerJo",
+                         "time":  1775818694,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "Hope we’ll do the same in germany."
+                     },
+                     {
+                         "id":  47723939,
+                         "by":  "aucisson_masque",
+                         "time":  1775856922,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "Side note but I had absolutely no idea that the USA sanctioned international justice court judges because they had put an arrest warrant on Benjamin Netanyahu.\nIts not a surprise from Russia but the USA. I guess we’re right to cut all bridges as fast as possible with the USA."
+                     },
+                     {
+                         "id":  47719944,
+                         "by":  "sherburt3",
+                         "time":  1775836194,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "I\u0027m sure there\u0027s a barely functioning business critical app that runs exclusively on Windows NT in their administration that would beg to differ"
+                     },
+                     {
+                         "id":  47717140,
+                         "by":  "sjdv1982",
+                         "time":  1775824373,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "I am actually a research engineer paid by the French government. They take digital sovereignty pretty serious over here, which is sometimes good, sometimes less so.\nDefinitely the right call on Windows, though. Even my parents (in their mid-seventies) moved to Linux this year."
+                     },
+                     {
+                         "id":  47725289,
+                         "by":  "tedggh",
+                         "time":  1775864333,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "I think this has been attempted many times before by other nations including Brazil without success. It’s one thing to replace a few hundred workstations in a non critical governmental office, another to replace the entire infrastructure of a government which also collaborates with the private sector. Usually these projects start with a lot of passion then die off when can’t justify the investment."
+                     },
+                     {
+                         "id":  47718328,
+                         "by":  "guenthert",
+                         "time":  1775829763,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "I puzzles me to no end why the typical office clerk should care about the OS at all. I understand that secretaries will be trained on MS Word and will then have a strong preference to use such (or at least something which very closely resembles it). Same for accountants with Excel. But clerks in e.g. Revenue Service? Those I expect to interact (perhaps these days via a Web interface) with custom software. Why would those ever see a \u0027Start\u0027 button or somesuch?"
+                     },
+                     {
+                         "id":  47720932,
+                         "by":  "jaspanglia",
+                         "time":  1775840527,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "Wish it would succeed, other day was reading about stuff and figure out, how much European Tech is actually controlled by American/Israeli Hegemony."
+                     },
+                     {
+                         "id":  47724032,
+                         "by":  "liendolucas",
+                         "time":  1775857542,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "All countries should follow suit.\nNations and individuals can\u0027t depend or be held hostages of a handful of companies on the other side of the Atlantic that have the will to do whatever they want with their customers data.\nThis is the right path to follow and wish that in upcoming years this initiative becomes a reality across the globe. Long success for Linux and all BSDs!"
+                     },
+                     {
+                         "id":  47716876,
+                         "by":  "looksjjhg",
+                         "time":  1775822985,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "It’s quite remarkable what the current administration have “achieved” in a year or so"
+                     },
+                     {
+                         "id":  47717294,
+                         "by":  "hereme888",
+                         "time":  1775825118,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "Hopefully the rest of the world can benefit from their efforts. I hope the whole EU starts moving to Linux."
+                     },
+                     {
+                         "id":  47716638,
+                         "by":  "Frieren",
+                         "time":  1775821459,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "Europe in general have great software engineers. What it lacks is investment. To see the goverment serving its own country instead of foreign billionaire interests is good change of pace.\nAnd Linux development and adoption helps everybody not just France. A win win."
+                     },
+                     {
+                         "id":  47718399,
+                         "by":  "supliminal",
+                         "time":  1775830037,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "I think the commentary here is mostly in agreement, we are just debating the finer points.\nThis should have happened already, is the general theme. I still have my Shrike CDs around and the modern-day Fedora (I think 44 is about to launch next week?) is more than sufficient for many, many use cases within the government, regardless of which distro they end up with.\nMy hope is that the backing of EU software development teams to open source will lift all boats and in addition to Linux, BSD may get some fruits of labor out of it.\n9front as always is to be strictly forbidden without a security clearance."
+                     },
+                     {
+                         "id":  47717244,
+                         "by":  "OtomotO",
+                         "time":  1775824870,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "I\u0027ve been on Linux (I use Arch btw) since 2011.\nI\u0027ve been dual booting the first couple of years, then dumped Windows completely in 2016.\nSince then I am on Linux only. Private and corporate.\nYes, sometimes I need to access a Windows machine or do work in one (I am my own boss), but then the client pays a \"pain tax\" as I call it.\nThere are some games I can\u0027t play I would\u0027ve played in the past.\nMostly competitive online games.\nTechnically that\u0027s annoying, but for me personally it\u0027s not a problem as I am not in my teens of twenties anymore and I have other hobbies and obligations."
+                     },
+                     {
+                         "id":  47716752,
+                         "by":  "apatheticonion",
+                         "time":  1775822279,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "Hopefully this results in investment in desktop environments and Wine!"
+                     },
+                     {
+                         "id":  47726491,
+                         "by":  "diogenes_atx",
+                         "time":  1775872724,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "From the perspective of systems administration for large enterprise networks, it seems unlikely that Linux desktops could replace Windows PC\u0027s without a domain controller like Microsoft Active Directory. Am I missing something here? How is it possible to manage a large enterprise network with hundreds, or even thousands, of desktop workstations without a domain controller?"
+                     },
+                     {
+                         "id":  47716227,
+                         "by":  "Jyaif",
+                         "time":  1775818896,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "Unless you need some windows-only software, using windows at this point is masochism.\nI was never a fan of Linux, but the Microsoft driven enshitification is so strong that Linux is now a better option. To win, all Linux had to do is stand still, and that\u0027s exactly what it did! Ubuntu in 2026 is pretty much the same as Ubuntu from 2006."
+                     },
+                     {
+                         "id":  47716230,
+                         "by":  "tom-blk",
+                         "time":  1775818917,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "Got my full support, go go go!!!"
+                     },
+                     {
+                         "id":  47719878,
+                         "by":  "moron4hire",
+                         "time":  1775836025,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "I wish the US Government would do the same"
+                     },
+                     {
+                         "id":  47718169,
+                         "by":  "vfclists",
+                         "time":  1775829047,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "Will the French government view open source software as software which should be well-funded and well structured, ie Blender level quality and organization, or are they going to underfund it and thus have it succumb to the shenanigans of Redhat, aka IBM, the infamous pushers of Gnome and Wayland?"
+                     },
+                     {
+                         "id":  47721232,
+                         "by":  "frugalmail",
+                         "time":  1775842154,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "Any closed source, centralized system is going to be higher risk than an open source distributed system that can be independently verified and audited by multiple parties.\nYou just have to be willing to put in the investment to verify/review with parties that meet your needs."
+                     },
+                     {
+                         "id":  47716529,
+                         "by":  "motbus3",
+                         "time":  1775820757,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "This should have been done years ago.\nThis will certainly drive bad actors to harm Linux too unfortunately"
+                     },
+                     {
+                         "id":  47716393,
+                         "by":  "schnitzelstoat",
+                         "time":  1775819943,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "It\u0027s a good move. Hopefully, they stick with it. I remember some cases in Germany where they switched and then later switched back.\nIt\u0027s a shame that we have no equivalent to Google or AWS in Europe and now that it seems LLMs might eat search, we don\u0027t have any of those either."
+                     },
+                     {
+                         "id":  47730034,
+                         "by":  "ksec",
+                         "time":  1775910811,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "Rust + Linux. It is brewing, and that is what Government around the world wants.\nBut not FreeBSD, C, Go, or others.\nBasically Government doesn\u0027t want MIT / BSD, they want GPL and AGPL."
+                     },
+                     {
+                         "id":  47727248,
+                         "by":  "laughing_man",
+                         "time":  1775880042,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "I don\u0027t know why any state or large company would tie itself to Windows. All the applications that used to justify just getting whatever Microsoft produced next are web based now."
+                     },
+                     {
+                         "id":  47716495,
+                         "by":  "a-dub",
+                         "time":  1775820558,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "hmm. hoping that all the weird business requirements get confined to a specific distro with careful gating prior to upstreaming. it would be bad if they were allowed to pollute the ecosystem more generally (which one could argue is why windows is the way it is)."
+                     },
+                     {
+                         "id":  47719800,
+                         "by":  "shafiemoji",
+                         "time":  1775835712,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "Wish the Bangladeshi government did this instead of relying on pirated copies of Windows 7"
+                     },
+                     {
+                         "id":  47718306,
+                         "by":  "socketcluster",
+                         "time":  1775829661,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "Great to see France purging itself of corruption. Why did they pay for an inferior product for so many decades when a superior free alternative was available? It was regulatory capture; corruption."
+                     },
+                     {
+                         "id":  47716511,
+                         "by":  "LightBug1",
+                         "time":  1775820657,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "Excellent move. Hopefully these moves continue the trend spreading through Europe.\nWith another 3 or so years with the Orange Dildo in charge, there\u0027s a decent chance the momentum will turn into something tangible."
+                     },
+                     {
+                         "id":  47716626,
+                         "by":  "Eldodi",
+                         "time":  1775821351,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "French administration is about to become even more inefficient it was!"
+                     },
+                     {
+                         "id":  47717264,
+                         "by":  "xandrius",
+                         "time":  1775824997,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "My main reasons not to be able to fully switch 100% to Linux are the following:\n1. Graphic design software is subpar (expecially when compared to mac) and very often under supported. And GIMP has absolutely the worst UX of any program I\u0027ve ever seen for such a widely recommended software.\n2. Gamedev (i.e. Unity) is much less stable and annoying to work with (mac is much better but Windows still wins)\n3. Older hardware support, most of the times you can use a super old software (say a printer) and it works. Linux much better than mac for this, from my experience\n4. Lots of things on Win are plug and play, Linux is a pain of custom drivers from dead githubs. Mac slightly better or worse, it might either exist as a stupidly expensive application or have to jump hoops to get a driver in.\nAnd I know people say \"just use Wine\" or \"GIMP is actually great and free\" but at the end of the day, I want my main driver to be stable and good to use. If anytime I save a project running via Wine has a non 0% chance of it crashing and bringing down my entire work, it\u0027s not going to happen.\nI do use and recommend Linux quite extensively but that\u0027s why I always have 3 different systems at any given time:\n1. Win: gamedev, hardware stuff or bigger games, some design, GPU heavy work.\n2. Mac: design, light GPU work, browsing and portability (battery life and cooling is fantastic)\n3. Linux: everything else\nThis hasn\u0027t changed in the past 10+ years, even though now I can see much more gaming happening on Linux, which is very nice."
+                     },
+                     {
+                         "id":  47723560,
+                         "by":  "tsoukase",
+                         "time":  1775854603,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "It\u0027s extremely difficult to compete with the US SW companies. Their products are so engaging and attractive that anyone till up to the leaders are tempted to use. It\u0027s not surprising that EU\u0027s attempt to de-USAisation happens with Linux/OSS and not with an in-house prop SW because it\u0027s unable to write one. Also it doesn\u0027t happen without cries and pain. We speak for an endeavour to bring a 90% share of a beloved product to 3% and vice versa for a nerdy \"cold\" one. I keep a long lasting pop corn bag to follow the numbers."
+                     },
+                     {
+                         "id":  47719938,
+                         "by":  "ChrisArchitect",
+                         "time":  1775836182,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "[dupe] Discussion on source: https://news.ycombinator.com/item?id=47716043"
+                     },
+                     {
+                         "id":  47727022,
+                         "by":  "gengstrand",
+                         "time":  1775877812,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "From the article.\nThe French government did not provide a specific timeline for the switchover, or which distributions it was considering.\nGot to be Mandrake right?"
+                     },
+                     {
+                         "id":  47717301,
+                         "by":  "throw88555",
+                         "time":  1775825160,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "Every nations should avoid US based products and services. USA, China and Russia are rogue states. they pose a great risk to every other nation"
+                     },
+                     {
+                         "id":  47716631,
+                         "by":  "zoobab",
+                         "time":  1775821384,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "What they should launch is an abuse of dominant position on the desktop/laptop market, with appropriate remedies such as fines."
+                     },
+                     {
+                         "id":  47718579,
+                         "by":  "999900000999",
+                         "time":  1775830779,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "What are my options if I want an independent phone OS ? Can I go into a store in Paris and buy an independent phone ?"
+                     },
+                     {
+                         "id":  47716448,
+                         "by":  "simmerup",
+                         "time":  1775820248,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "Switched to Nobara after getting fed up with one too many Windows bugs. Been a really pleasant experience to be honest"
+                     },
+                     {
+                         "id":  47717896,
+                         "by":  "wslh",
+                         "time":  1775827980,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "I hope they also help in improving battery management on Linux notebooks, even pressing vendors via regulations."
+                     },
+                     {
+                         "id":  47721248,
+                         "by":  "oscord",
+                         "time":  1775842232,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "Ditch iOS and Android for a Blackberry OS / Nokia ? \nReally, are there any alternatives?"
+                     },
+                     {
+                         "id":  47716545,
+                         "by":  "self_awareness",
+                         "time":  1775820865,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "It\u0027s kind of good news, but it\u0027s also bad news -- with Linux popularity, crapware will be more popular. I kind of liked times when Linux was used only by power users. Today it\u0027s slightly different, and with more popularity... we get things like age verification in systemd.\nBut well, I can always switch to FreeBSD I guess. And that\u0027s my plan B."
+                     },
+                     {
+                         "id":  47716702,
+                         "by":  "mrtksn",
+                         "time":  1775821913,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "Prediction: If USA ends up attacking EU, EU will freeze all the US tech company money and compel them to open their platforms and move all the backend services to EU soil in exchange of unfreezing it and continue operating in a free but regulated market.\nFor example locked communication devices are huge national security risk, so Apple will have their money frozen and given two options:\n1) Open up iOS etc, bring all the servers to EU. Continue business as usual, EU financial institutions may choose to use Apple services as Apple pay but they may choose to bypass it. EU developers may choose to use Apple App Store services and pay the Apple\u0027s fees or they may choose to bypass it. Apple may chose to make Xcode a paid software, developers may choose not to purchase Xcode and use other non-Apple tools and pay nothing to Apple.\n2) Use credit against the frozen money to refund your users if they bring their devices to you. All the Apple devices will be locked out from EU mobile providers(technically very easy for iPhone, simply by blocking devices with Apple IMEI on EU networks) and any remaining devices of the users will be refunded with the Apple\u0027s money. After some grace period, any money remaining in Apple\u0027s account will be transferred to Apple and if Apple wants to do business in EU again will have to do the option 1.\nI\u0027m bit on the doomer side of things, so I think that if Trump keeps his current course and power, at the end of the term American software industry will shrink by %90 as it will be expelled from most of the world and will be serving to 350M people instead of 8B people. Its amazing how US is screwing up its dominant position in this incredibly lucrative industry that lets them serve a market of 8B people and accumulate huge wealth in the process."
+                     },
+                     {
+                         "id":  47716246,
+                         "by":  "UK-Al05",
+                         "time":  1775819017,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "These are almost always negation strategies rather than serious initiatives."
+                     },
+                     {
+                         "id":  47720020,
+                         "by":  "1970-01-01",
+                         "time":  1775836476,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "\u003eThe French government did not provide a specific timeline for the switchover, or which distributions it was considering.\nDo they realize they need to pick a LTS distro now? You can\u0027t mix and match distros without having a massive IT and user retraining budgets."
+                     },
+                     {
+                         "id":  47716756,
+                         "by":  "haritha-j",
+                         "time":  1775822301,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "Ah Windows. The Temu wine."
+                     },
+                     {
+                         "id":  47716950,
+                         "by":  "michaelashley29",
+                         "time":  1775823420,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "been a long time coming for windows. wonder who else will follow suit"
+                     },
+                     {
+                         "id":  47716500,
+                         "by":  "shevy-java",
+                         "time":  1775820608,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "At the least the french government has a plan. Now please have a look at Germany - the current leading guy is absolutely clueless as to what he wants to do. From appeasing Trump to ... actually doing what else? Germany with regards to its politicians is a problem for the EU. Yes, we also have Hungary etc... but it\u0027s a small country that is over-hyped by the media due to its intrinsic corruption in the leadership; the real problem really is Germany. In the past it always was \"too much bureaucracy\" - the problem goes much deeper. The THINKING process in Germany is broken. France, Sweden, Denmark, Netherlands, Finland, Norway (not EU but clever nonetheless) and so forth, are much better at THINKING. Something is broken in Germany and Merz is the showcase of cluenessness here."
+                     },
+                     {
+                         "id":  47717626,
+                         "by":  "cicko",
+                         "time":  1775826691,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "About f\u0027ing time."
+                     },
+                     {
+                         "id":  47717197,
+                         "by":  "OtomotO",
+                         "time":  1775824660,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "France is doing many thinks way better than Germany.\nThis is one of them."
+                     },
+                     {
+                         "id":  47719973,
+                         "by":  "lousken",
+                         "time":  1775836294,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "Now nextcloud and libreoffice should give up the stupid drama and focus on beating microsoft."
+                     },
+                     {
+                         "id":  47719716,
+                         "by":  "josefritzishere",
+                         "time":  1775835334,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "We\u0027re going to keep seeing this due to destabilization and political changes in the US. It drives nationalization elsewhere, even among allies."
+                     },
+                     {
+                         "id":  47719900,
+                         "by":  "heyflyguy",
+                         "time":  1775836092,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "man, that\u0027s great - but can you imagine some bureaucrat lifer having to adapt to this?"
+                     },
+                     {
+                         "id":  47722765,
+                         "by":  "hackerbeat",
+                         "time":  1775850290,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "Good. The US is gone."
+                     },
+                     {
+                         "id":  47716933,
+                         "by":  "CalRobert",
+                         "time":  1775823317,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "But will they use azure?"
+                     },
+                     {
+                         "id":  47716960,
+                         "by":  "soggybread",
+                         "time":  1775823466,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "Honestly the only thing keeping me from bringing up the idea of moving to linux is that Windows has active directory and domain wide group policies - if linux had something similar that was easy to manage I\u0027m sure a lot more corporations would move to linux. The ease at which I can adjust system settings throughout the company or within each department such as disabling/enabling features, mapping drives or printers. I haven\u0027t found a better alternative than active directory"
+                     },
+                     {
+                         "id":  47716843,
+                         "by":  "w4yai",
+                         "time":  1775822813,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "Vive la France !"
+                     },
+                     {
+                         "id":  47716447,
+                         "by":  "cynicalsecurity",
+                         "time":  1775820245,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "Vive la France !"
+                     },
+                     {
+                         "id":  47721350,
+                         "by":  "selectively",
+                         "time":  1775842823,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "Political posturing that will never actually occur."
+                     },
+                     {
+                         "id":  47716533,
+                         "by":  "bloqs",
+                         "time":  1775820799,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "Fantastic news"
+                     },
+                     {
+                         "id":  47720601,
+                         "by":  "simonask",
+                         "time":  1775838971,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "Please tell me this also means that they are redirecting the expenses currently going to Microsoft into funding open source development?"
+                     },
+                     {
+                         "id":  47716654,
+                         "by":  "dkga",
+                         "time":  1775821539,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "de Gaule v2.0 :)"
+                     },
+                     {
+                         "id":  47719872,
+                         "by":  "otabdeveloper4",
+                         "time":  1775835999,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "What? Again?\nI lost count, it\u0027s how many attempts again? Fill me in."
+                     },
+                     {
+                         "id":  47717383,
+                         "by":  "fHr",
+                         "time":  1775825549,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "Holy based"
+                     },
+                     {
+                         "id":  47717064,
+                         "by":  "sneak",
+                         "time":  1775823969,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "Next up: governments rejecting use of AWS."
+                     },
+                     {
+                         "id":  47716679,
+                         "by":  "HumblyTossed",
+                         "time":  1775821735,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "This is traditionally how you renegotiate with MS.\nBut seriously, how long before MS offers them a deal they would rather not refuse?"
+                     },
+                     {
+                         "id":  47719914,
+                         "by":  "yorwba",
+                         "time":  1775836127,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "Previous discussion: https://news.ycombinator.com/item?id=47716043 (764 points 5 hours ago, 384 comments)"
+                     },
+                     {
+                         "id":  47721464,
+                         "by":  "DeathArrow",
+                         "time":  1775843385,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "So did the Great Country of North Korea."
+                     },
+                     {
+                         "id":  47722073,
+                         "by":  "afewquarks",
+                         "time":  1775846842,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "I know this might be a controversial take but nevertheless I will state my opinion: I do not think \"the year of the Linux desktop\" is the good idea that most people seem to think. Everything that gets the eye of Sauron on it proceeds to become a complete mess.\nResources always win. All that is needed to ruin an open project is dump money into heavy development up to the point where it becomes impossible to do without it. Plenty such cases already.\nThis also ruins the development of the project akin to feeding wild life, you get them dependent on you, and if you stop feeding them they lose the ability to feed themselves in the wild. Such is the Linux ecosystem, based on a type of work that so far made a great project for people who have a bit of technical skills. Making it more accessible to the masses only brings that kind of bullshit into it. Inevitably. There is no way something of such importance, to the masses, won\u0027t get corrupted in one way or another. That never happens, if there is too much interest there will be funds dumped into corrupting it, one way or another.\nThe best path forward for Linux was as before, to fly just under the radar, to bee a bit too complicated for most people. This is what protects it. Most, if anyone, don\u0027t seem to understand this very simple fact. No older Linux user gets anything worthwhile out of this deal, nothing relevant, just inevitable enshitification of it. Historically proven over and over again. I find \"the year of the Linux desktop\" to be a childish take in a world that functions on completely different principles.\nedit: To add a bit more context, Windows is not the mess that it is today because of evil Microsoft, it is a reflection of its user-base. Same with Linux.\nThey did that to Windows, with their behavior, with accepting all that nonsense.\nYou want to bring the very same type of people, with that kind of attitude, in Linux, what exactly do you thing is going to happen? They will adapt to Linux mentality or they\u0027ll proceed to ruin Linux with their behavior? I can take a good guess on what will happen. People will people, and corpos will corpo to milk them."
+                     },
+                     {
+                         "id":  47717689,
+                         "by":  "buttersicle",
+                         "time":  1775826966,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "Government is the perfect place to do this. It doesn\u0027t matter if it craters productivity because the organization\u0027s budget is not conditioned on delivering impact."
+                     },
+                     {
+                         "id":  47720053,
+                         "by":  "WaryByDesign",
+                         "time":  1775836647,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "It\u0027s... an admirable goal, but it pretty much remains to be seen if \"France\"[1] follows through.\nPrevious attempts to \"ditch Windows\" have not ended that well. Munich in 2003, the entire Federal German government in 2009, Munich again in 2013, Munich again in 2021, and so on. Most common end-result: back to Windows.\nBreaking points are typically the lack of an \"Office 2016\" compatible suite, lack of \"Adobe PDF\" tooling, and a mishmash of legacy apps. The latter seems trivially addressable by a \"Remote Desktop/RemoteApps\" environment, but there are definitely issues, mostly surrounding printing and clipboard handling.\nAll of that can be solved, but definitely requires more funding and, crucially, coordination, beyond \"Open Source Cures All.\"\n[1] Oh, I just love it when an entire culturally-diverse region gets lumped in together, or, when, as in this case, ~6M French government employees are treated as a homogeneous group."
+                     },
+                     {
+                         "id":  47720766,
+                         "by":  "charcircuit",
+                         "time":  1775839769,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "Desktop Linux\u0027s security and antimalware solutions are not ready for government usage. This is a cyber attack waiting to happen if they go through with this. They should at least switch to ChromeOS if they want to use Linux."
+                     },
+                     {
+                         "id":  47721990,
+                         "by":  "Chance-Device",
+                         "time":  1775846328,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "Who do they think writes Linux? The European Commission? They’re on the US tech stack whether they want to be or not, and nobody in Europe has the will or resources to pull a China and make their own alternative. More’s the pity."
+                     },
+                     {
+                         "id":  47720495,
+                         "by":  "somat",
+                         "time":  1775838480,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "I understand what they mean, linux offers freedom, enough that it divorces your tech stack from any one company.\nBut isn\u0027t linux US tech? The blueprint, UNIX was a US project, torvolds works from the US. the original userland GNU was a US based project. The new userland systemd is a US based project."
+                     },
+                     {
+                         "id":  47716141,
+                         "by":  "sgt",
+                         "time":  1775818301,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "That might work for government employees using webapps all day. But for power users it is unlikely to be friction free."
+                     },
+                     {
+                         "id":  47719994,
+                         "by":  "AtlasBarfed",
+                         "time":  1775836404,
+                         "depth":  1,
+                         "parent":  47719486,
+                         "text":  "The fact that open source is a national security concern should have been something that a crazy orange man should have triggered.\nThus was obvious decades ago. And open source is the key model for collective development in a secure manner for disparate countries to secure their software base.\nAlas, I fear they will only concentrate on the server side. The securing of the desktop should be a parallel concern as well, to help prevent your citizenry from becoming DDOS slaves."
+                     },
+                     {
+                         "id":  47717380,
+                         "by":  "himata4113",
+                         "time":  1775825524,
+                         "depth":  2,
+                         "parent":  47717066,
+                         "text":  "Well actually I\u0027ve been technically playing all the games that are protected by these aggressive anticheats on linux since I\u0027ve decided to switch.\nMy setup is a custom version of the linux kernel that \u0027backdoors\u0027 itself and exposes host information to the windows vm making all the anticheats happy enough to work out of the box. Have not gotten banned in any of the games either. Custom VMM and EDK builds are required to block blanket detections of virtualized hardware.\nI repurposed lookingglass to instead stream all the wdm buffers as seperate applications that I can open directly in linux like they\u0027re native applications. The neat part is that I forward all the installed applications to KRunner which talks to the windows vm and launches the application there and spawns a looking glass instance for that applications assigned path.\nThe only downside that this is a two GPU solution and you have to run any GPU intensive applications in windows."
+                     },
+                     {
+                         "id":  47717739,
+                         "by":  "Goronmon",
+                         "time":  1775827235,
+                         "depth":  2,
+                         "parent":  47717066,
+                         "text":  "All games I want to play run very well and mostly the process is just \"install -\u003e play\". \nThis is largely true for games running directly through Steam, it can get pretty annoying for games that exist outside Steam.\nEspecially when you have to do things like apply an \".msi\" style patch to a game .\nIt\u0027s doable, but the number of steps and tools you may have to pull in (such as protontricks) does get to be a bit of a pain at times."
+                     },
+                     {
+                         "id":  47717369,
+                         "by":  "fauzanhilmi",
+                         "time":  1775825458,
+                         "depth":  2,
+                         "parent":  47717066,
+                         "text":  "Related: Wine 11 rewrites how Linux runs Windows games at kernel with massive speed gains \n https://news.ycombinator.com/item?id=47507150"
+                     },
+                     {
+                         "id":  47718493,
+                         "by":  "embeng4096",
+                         "time":  1775830473,
+                         "depth":  2,
+                         "parent":  47717066,
+                         "text":  "Yep, my casual Steam games run well out of the box. I don’t even use a gaming-focused distro like Bazzite, just EndeavourOS. Helldivers 2, No Rest For The Wicked, Slay The Spire 2, even modded Lethal Company with friends using r2modman (also worked OOTB). And of course Discord works, including streaming when friends want to watch\nIf I really want to play Apex or Battlefield I’ll fire up my dual drive dual boot Windows, and in the meantime, no more Microsoft spying on me, forced Windows updates and reboots at random times, ads in my Start menu, Xbox apps and other bloatware, etc"
+                     },
+                     {
+                         "id":  47717729,
+                         "by":  "sorbusherra",
+                         "time":  1775827177,
+                         "depth":  2,
+                         "parent":  47717066,
+                         "text":  "For me the biggest surprise was that old ps2 usb racing sim wheel+pedals just worked instantly with linux, and I could use it in dirt rally without any pains. It felt amazing. oculus quest 2 also works very well with alvr, even wirelessly."
+                     },
+                     {
+                         "id":  47717122,
+                         "by":  "Levitating",
+                         "time":  1775824262,
+                         "depth":  2,
+                         "parent":  47717066,
+                         "text":  "\u003e Games like S.T.A.L.K.E.R.\nThe old stalker games run on the X-Ray engine (the mods on a modified OSS version of it). In my experience they\u0027ve always worked pretty well, though the games are quirky in general.\nGood hunting stalker."
+                     },
+                     {
+                         "id":  47729912,
+                         "by":  "Wowfunhappy",
+                         "time":  1775909707,
+                         "depth":  2,
+                         "parent":  47717066,
+                         "text":  "My concern has long been, what happens when I want to do something weird ?\nI have a projector that supports stereoscopic 3D. Sometimes I use things like HelixMod to add 3D to games. What would that look like on Linux?\nSometimes I use GPU driver settings to force games to use higher render resolutions (above my monitor\u0027s resolution), or better anisotropic filtering. What does that look like?"
+                     },
+                     {
+                         "id":  47718255,
+                         "by":  "bcjdjsndon",
+                         "time":  1775829433,
+                         "depth":  2,
+                         "parent":  47717066,
+                         "text":  "\u003e Things run very well out of the box.\n\u003e a good number of wheels, pedals, joysticks, VR headsets, and other wild and wacky input devices might not work that well or not at all\n\u003e If a game has an aggressive anticheat, like Battlefield 6 or Valorant, it will not work and you can forget about it\n\u003e Not sure about VR, but I know it was a bit dire 1-2 years ago\nThe determination of the average Linux user to ignore the faults of Linux is something to behold"
+                     },
+                     {
+                         "id":  47725850,
+                         "by":  "exiguus",
+                         "time":  1775868064,
+                         "depth":  2,
+                         "parent":  47717066,
+                         "text":  "I have been running Steam on a Fedora Sway spin on a ThinkCentre M75q Gen 5 for nearly two years now, playing Hades or Hollow Knight. Before that, I ran Steam on Debian on a ThinkPad T14/P14s to play Cities Skylines. I usually use an Xbox or PlayStation 3 controller. It works great!"
+                     },
+                     {
+                         "id":  47717736,
+                         "by":  "pjmlp",
+                         "time":  1775827218,
+                         "depth":  2,
+                         "parent":  47717066,
+                         "text":  "Playing Linux or Windows native games, because that is the whole issue, it is hardly any different than asserting there are Linux games when they are actually Amiga games running with UAE.\nThose games running on Proton are still produced on a Windows factory."
+                     },
+                     {
+                         "id":  47718564,
+                         "by":  "Farox",
+                         "time":  1775830741,
+                         "depth":  2,
+                         "parent":  47717066,
+                         "text":  "I have 3 4k monitors. Windows drives them without a problem. Linux still can\u0027t. I tried for a whole day and eventually gave up."
+                     },
+                     {
+                         "id":  47717399,
+                         "by":  "robinwhg",
+                         "time":  1775825636,
+                         "depth":  2,
+                         "parent":  47717066,
+                         "text":  "Is there a performance hit for cs 2 compared to windows with an rtx card? That‘s pretty much the only thing holding me back."
+                     },
+                     {
+                         "id":  47717243,
+                         "by":  "otikik",
+                         "time":  1775824869,
+                         "depth":  2,
+                         "parent":  47717066,
+                         "text":  "I have been a happy user of the Bazzite distro (which used proton) for several years at this point. Very happy as well."
+                     },
+                     {
+                         "id":  47730148,
+                         "by":  "mastermage",
+                         "time":  1775911984,
+                         "depth":  2,
+                         "parent":  47717066,
+                         "text":  "I think Marvel Rivals works fine so its not all Competitive Shooters ä."
+                     },
+                     {
+                         "id":  47718383,
+                         "by":  "satvikpendem",
+                         "time":  1775829975,
+                         "depth":  2,
+                         "parent":  47717066,
+                         "text":  "\u003e If a game has an aggressive anticheat, like Battlefield 6 or Valorant, it will not work and you can forget about it.\nYeah this is why I stick with Windows. Unlike it seems a lot of people on HN I don\u0027t really see any issues with it that would want to make me move away, especially as I already have WSL if I do need Linux, as WSL has GPU passthrough."
+                     },
+                     {
+                         "id":  47717261,
+                         "by":  "3form",
+                         "time":  1775824979,
+                         "depth":  2,
+                         "parent":  47717066,
+                         "text":  "And importantly, older games now tend to work better in Linux than they do in Windows."
+                     },
+                     {
+                         "id":  47720595,
+                         "by":  "smusamashah",
+                         "time":  1775838941,
+                         "depth":  2,
+                         "parent":  47717066,
+                         "text":  "The DB lists popular games, what about indie games coming out every day?"
+                     },
+                     {
+                         "id":  47717226,
+                         "by":  "LorenDB",
+                         "time":  1775824773,
+                         "depth":  2,
+                         "parent":  47717066,
+                         "text":  "VR works quite well these days."
+                     },
+                     {
+                         "id":  47716666,
+                         "by":  "ChocolateGod",
+                         "time":  1775821647,
+                         "depth":  2,
+                         "parent":  47716191,
+                         "text":  "\u003e It\u0027s nuts Windows is still the go-to for anything these days despite everyone knowing what a parasitic\nLinux still doesn\u0027t have anywhere near as nice and cohesive as Group Policy, Active Directory etc.\nPlus you can pay Microsoft to host it all for you on Azure."
+                     },
+                     {
+                         "id":  47717933,
+                         "by":  "andrepd",
+                         "time":  1775828121,
+                         "depth":  2,
+                         "parent":  47716191,
+                         "text":  "The money governments sink into Microsoft could have funded a sovereign OSS ecosystem many times over."
+                     },
+                     {
+                         "id":  47723127,
+                         "by":  "snowstorm82",
+                         "time":  1775852145,
+                         "depth":  2,
+                         "parent":  47716191,
+                         "text":  "I am skeptical about there is such \"people that know what they are doing\", nor would I trust such a claims. But with little twist I think I could onboard the idea with, \"people who aim for analytical and open approach and reports\". Thus opening the decision making under post analysis and future improvements so research body of knowledge would eventually turn the tide.\nI haven\u0027t installed or used windows much for last decade, but still I\u0027m bit a shamed that each time I install Linux on some computer I live existing windows drive untouched and available for backup in case I need it for some reason."
+                     },
+                     {
+                         "id":  47718870,
+                         "by":  "booleandilemma",
+                         "time":  1775832030,
+                         "depth":  2,
+                         "parent":  47716191,
+                         "text":  "\"Easy\" shouldn\u0027t be the excuse in this day and age. \nI think \"Easy\" has been the excuse for everything humans do in every day and age."
+                     },
+                     {
+                         "id":  47719515,
+                         "by":  "derangedHorse",
+                         "time":  1775834549,
+                         "depth":  2,
+                         "parent":  47716191,
+                         "text":  "Problem is that people like having a similar interface for both work and non-work things, and Linux doesn’t have enough penetration into the consumer market to influence stakeholders. The first step is making Linux the default choice for hardware providers. Framework was one of those pioneering this but was underfunded imo"
+                     },
+                     {
+                         "id":  47716408,
+                         "by":  "polski-g",
+                         "time":  1775820033,
+                         "depth":  2,
+                         "parent":  47716191,
+                         "text":  "It makes sense that everyone uses Windows for gaming, because you can\u0027t run games in your browser.\nIt makes zero sense for businesses to use Windows if they\u0027re only doing PowerPoint and video conferences."
+                     },
+                     {
+                         "id":  47721375,
+                         "by":  "jjcm",
+                         "time":  1775842966,
+                         "depth":  2,
+                         "parent":  47720807,
+                         "text":  "I\u0027ve been using linux as a daily driver since the start of the year.\nThere\u0027s still a long ways to go before things \"just work\". It\u0027s about equivalent to windows right now in terms of frustrations, it\u0027s just that frustrations are more along the lines of \"this is a bit wonky\" instead of \"this is malicious / was their intended behavior\". It\u0027s gotten a LOT better, don\u0027t get me wrong, but it\u0027s still far off from what a typical user would need.\nI\u0027d love to see either Valve or Nvidia really put in effort into creating their own hardware/software integration on a level that Apple does. I think it\u0027d go a long way to legitimizing it."
+                     },
+                     {
+                         "id":  47721673,
+                         "by":  "dschep",
+                         "time":  1775844431,
+                         "depth":  2,
+                         "parent":  47720807,
+                         "text":  "\u003e \"theres a big chance for someone like Nokia to come in and develop their own approved distro\"\nSUSE is a German company, so probably nothing to even develop."
+                     },
+                     {
+                         "id":  47721970,
+                         "by":  "krsw",
+                         "time":  1775846203,
+                         "depth":  2,
+                         "parent":  47720807,
+                         "text":  "Yeah, I think if Windows 11 is going subscription based (plus all the copilot pushing garbage and even more baked in ads) that will be a strong incentive to switch to Linux or SteamOS. I barely even play games enough anymore to make a desktop worthwhile. Might just jump to Mac only."
+                     },
+                     {
+                         "id":  47721100,
+                         "by":  "TacticalCoder",
+                         "time":  1775841412,
+                         "depth":  2,
+                         "parent":  47720807,
+                         "text":  "\u003e Personally I think we are at an interim period for a big player to emerge and take over this space...\nAnd even without a big player, the number of people who are entirely operational with just a browser at work is huge.\nMany SMEs already realized they can switch seamlessly between Windows and OS X / MacOS and I see people working on either one or the other. For example a desktop PC running Windows and a Mac laptop is not uncommon.\nI switched an employee at my wife\u0027s SME to... Debian! And the transition has been more than fine: they live in the browser (Google Workspace, paid company subscription). Unattended-upgrades, a user account that cannot sudo, and that\u0027s it.\nThe number of desktop PC running Windows that are actually glorified browsers has to be through the roof.\nOnce people realize there\u0027s no need to pay the double-whammy Microsoft tax (pay for a new Windows / also pay for a new PC), suddenly installing Linux becomes an option.\nNow I know: using Linux and Google is not \"getting rid of US tech\". But it\u0027s \"getting of Microsoft\" and that is fine with me. I\u0027ll never ever forgive the mediocrity this company has brought onto the world."
+                     },
+                     {
+                         "id":  47721046,
+                         "by":  "jodrellblank",
+                         "time":  1775841124,
+                         "depth":  2,
+                         "parent":  47720807,
+                         "text":  "\u003e \" theres a big chance for someone like Nokia to come in and develop their own approved distro \"\nMicrosoft bought Nokia\u0027s devices and services division for Windows Mobile in 2014. https://en.wikipedia.org/wiki/Microsoft_Mobile"
+                     },
+                     {
+                         "id":  47721413,
+                         "by":  "red_admiral",
+                         "time":  1775843170,
+                         "depth":  2,
+                         "parent":  47720807,
+                         "text":  "big player + (standard) linux desktop may well be coming, but that means losing the semi-anarchist bazaar mentality. Will the standard be gnome or KDE or XFCE or ...? If gnome, version 2 or 3? Firefox or chrome as the default browser (or derivatives like waterfox or plain chromium ...)? AI integration?\nThe moment you\u0027re developing for people with no IT experience and no CS degree, you\u0027re going to have to make tradeoffs like Microsoft or Google or Apple have to make today, and somehow deal with the \"curl ... |sh\" problem."
+                     },
+                     {
+                         "id":  47721489,
+                         "by":  "cineticdaffodil",
+                         "time":  1775843490,
+                         "depth":  2,
+                         "parent":  47720807,
+                         "text":  "Personally i think there is a huge innovationspace for pipe connected agents doing work for the user.. a example:\nA firefox agent downloading pictures of cats.. piping them to a graphics program drawing mustaches on them piping them to a moviemaker piping them to a firefox video uploading \"the longest catswithmustaches\" shorts compilation ever.. all clicked together in a \"incredibble machine\" like explorer by a user who doesent even know how to code.."
+                     },
+                     {
+                         "id":  47721033,
+                         "by":  "upcoming-sesame",
+                         "time":  1775841013,
+                         "depth":  2,
+                         "parent":  47720807,
+                         "text":  "honestly since the browser has more or less become the real operating system the host OS doesn\u0027t matter so much anymore. most people do 90% of their work in the browser anyway"
+                     },
+                     {
+                         "id":  47722007,
+                         "by":  "PoignardAzur",
+                         "time":  1775846411,
+                         "depth":  2,
+                         "parent":  47721574,
+                         "text":  "Uh, TIL the DINUM still used Windows. I wonder what held them, it\u0027s certainly not a lack of familiarity with Linux.\nI feel you\u0027re underselling the second statement a bit:\n\u003e Each ministry (including operators) will be required to finalize its own [migration] plan by fall \nThis sounds like there\u0027s actual pressure to start moving soon, especially for adopting existing DINUM solutions.\n(I agree the title is clickbait.)"
+                     },
+                     {
+                         "id":  47717191,
+                         "by":  "alper",
+                         "time":  1775824633,
+                         "depth":  2,
+                         "parent":  47716655,
+                         "text":  "\u003e to browser-based alternatives\nAnd many of those tool providers could see for 10-20 years now that if they didn\u0027t provide a web based version sometime soon, they would go out of business sooner or later.\nThere are almost no applications that a government employee should be running natively on their machine anyway."
+                     },
+                     {
+                         "id":  47716272,
+                         "by":  "vrganj",
+                         "time":  1775819162,
+                         "depth":  2,
+                         "parent":  47716143,
+                         "text":  "France and Germany are actually cooperating on most of these, like the word processor: https://www.techspot.com/news/107225-france-germany-unveil-d... \nPlus, it\u0027s all open source, so the rest of the world is free to use it as well!"
+                     },
+                     {
+                         "id":  47716377,
+                         "by":  "palata",
+                         "time":  1775819855,
+                         "depth":  2,
+                         "parent":  47716143,
+                         "text":  "\u003e It would be an even better move to allow those in Europe or indeed the rest of the world to also benefit.\nThose initiatives are usually open source. It\u0027s just that many times, each country wants to make their own. But it\u0027s still better than staying with the TooBigTech monopolies."
+                     },
+                     {
+                         "id":  47716388,
+                         "by":  "kergonath",
+                         "time":  1775819930,
+                         "depth":  2,
+                         "parent":  47716143,
+                         "text":  "France is funding a lot of open source projects. They may not be very sexy or trendy, but they are there."
+                     },
+                     {
+                         "id":  47716206,
+                         "by":  "brnt",
+                         "time":  1775818773,
+                         "depth":  2,
+                         "parent":  47716143,
+                         "text":  "They do: https://github.com/suitenumerique \nIt\u0027s used by, among others, the Dutch government: https://github.com/MinBZK/mijn-bureau"
+                     },
+                     {
+                         "id":  47716159,
+                         "by":  "rvnx",
+                         "time":  1775818395,
+                         "depth":  2,
+                         "parent":  47716143,
+                         "text":  "It\u0027s good to differentiate truly independent tech from the unfortunately common government-pushed French-tech that are US-tech rewrapped.\ne.g. Qwant is a re-skin of Microsoft Bing\nIt\u0027s a great move overall."
+                     },
+                     {
+                         "id":  47716453,
+                         "by":  "mrjay42",
+                         "time":  1775820299,
+                         "depth":  2,
+                         "parent":  47716143,
+                         "text":  "There\u0027s been some \u0027back and forth\u0027 or \"progress and regress\u0027 about this.\nAdoption of Free Software:\n2012 Prime Minister circular — the most important formal turning point: Orientations pour l\u0027usage des logiciels libres dans l\u0027administration, signed on 19 September 2012. It explicitly gave guidance to public administrations on free software use.\n2016 Digital Republic Law — reinforced the direction by encouraging public administrations to use free software and open formats.\n2021 action plan for Free Software and Digital Commons — launched after the Prime Minister’s circular of 27 April 2021, with goals to increase awareness, use, publication of source code, and reuse across administrations.\n2024–2026 LaSuite / Suite Numérique — current state-led open-source collaboration suite, presented by DINUM as a coherent set of open-source tools for public agents and positioned as part of the state’s sovereignty strategy\nRollbacks and proprietary deals\nMicrosoft “Open Bar” contract with the Ministry of Defence / Armed Forces — a major counterexample. The Senate records say the framework agreement started in 2009 and was renewed for 2013–2017 and 2017–2021, without publicity or competition, giving the ministry broad access to Microsoft’s catalog.\nCriticism and replacement with UGAP purchasing — later reporting says the open-bar arrangement ended in February 2021 and was replaced by a convention via UGAP, but the ministry still relied on broad Microsoft licensing and associated services.\n2025 education procurement for Microsoft — a public tender worth 74 million euros for the Ministry of Education and higher education services was attributed to Microsoft, showing that proprietary dependence continued alongside open-source policy.\n2025–2026 public-private partnerships in sovereignty language — France and Germany announced a partnership with Mistral AI and SAP for sovereign AI in public administration, which is not a free-software rollback in the strict sense, but it is a clear example of the state pursuing sovereignty through private-sector partnerships rather than purely internal open-source development.\n---\nConclusion:\nLike anything in capitalism: it\u0027s a constant fight, permanent struggle. The big private companies will try to massively impact political life.\nSo, there IS in France this \u0027feeling\u0027, this consciousness, throughout the political landscape (mostly on the left and also a little bit on the right) that we need to have some sovereignty over our data, services, software, etc.\nEvery once in a while, a right-side political figure, who are basically ruling since 2000, (except from 2012-2017 where France had a social-democratic government and president) has a sparkle of dignity, decency, logic, and honesty towards the best interests of the country and leans towards Free Software adoption. But...the lobbies are always there to rollback each decision, or part of each decision, and gradually gain back their influence."
+                     },
+                     {
+                         "id":  47721141,
+                         "by":  "unfocused",
+                         "time":  1775841681,
+                         "depth":  2,
+                         "parent":  47719980,
+                         "text":  "I work in government. Link 1 (2018) is essentially a dream. All of government got forced to use MS Dynamics CRM. Basically, anybody with a software requirement for case management, had to use MS Dynamics. I recommended we use Drupal in 2011. That was killed because everything had to be MS. I\u0027m kind of surprised that it is in there given that nobody was allowed to use.\nLink 0 and 2 are essentially from TBS and CDS. They coexist together. They are essentially working at the very top as entities that gather information from other departments. They can do whatever they want because they help write the rules.\nI\u0027m not trying to discredit your post, just saying that as someone who has brought OSS tools to development at the government and tried to use OSS tools for client (I failed at that), it is nearly impossible at the moment. We are married to Microsoft and its cloud.\nI do agree, that it may take an entire generation because right now, 190+ departments are not exactly jumping to FOSS, and in many situations, they are down right told you are not allowed.\nIn addition, the current de facto document management system is from OpenText. Although many just use Sharepoint Online.\nIronically, as everything moves to the cloud, it would be easier to move to a solution that is FOSS based, and based in the cloud. Technology has matured enough that you don\u0027t need executables on a desktop, you just need a browser pointing to a website."
+                     },
+                     {
+                         "id":  47720081,
+                         "by":  "realo",
+                         "time":  1775836762,
+                         "depth":  2,
+                         "parent":  47719980,
+                         "text":  "Apparently not everyone got the memo...\n https://www.cbc.ca/news/canada/ottawa/federal-phoenix-pay-sy..."
+                     },
+                     {
+                         "id":  47725890,
+                         "by":  "robocat",
+                         "time":  1775868382,
+                         "depth":  2,
+                         "parent":  47719980,
+                         "text":  "\u003e won\u0027t be until the last GenX retires\nI was part of a SaaS company of diehard GenX Windows fans.\nDecades of abuse by Microsoft has definitely hurt them: they have lost hope and are cynical about the future of Windows. I reckon they would switch away if they could afford to.\nEvery year Microsoft does something to make you feel like you\u0027re being screwed over.\nWe only just missed taking a silverlight bullet. Windows phone wasted over a year of development. Internet Explorer doubled development costs. The OS version churn is expensive. However SQL server has been a good foundation.\nMicrosoft used to love developers. They just abuse them now. Even Apple is nicer to developers!"
+                     },
+                     {
+                         "id":  47716445,
+                         "by":  "embedding-shape",
+                         "time":  1775820227,
+                         "depth":  2,
+                         "parent":  47716401,
+                         "text":  "The Finns, as always, continue to develop mobile phones, Jolla is back from the dead and supposedly starts shipping sometime in 2026 with a new iteration on the hardware and the OS, time will tell if it\u0027ll have any impact.\nMight not be 100% Europe-made from the get go, but good ideas and executions often start with small steps and iterate rather than having something groundbreaking out of the gate."
+                     }
+                 ]
+}

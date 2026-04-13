@@ -1,0 +1,99 @@
+﻿{
+    "name":  "hn_france_windows_to_linux_turnset_v1",
+    "source_thread_id":  47719486,
+    "source_url":  "https://news.ycombinator.com/item?id=47719486",
+    "difficulty":  "G3",
+    "lane":  "policy_geopolitics",
+    "utterances":  [
+                       {
+                           "utterance":  "OP (title): France to ditch Windows for Linux to reduce reliance on US tech",
+                           "source":  "op",
+                           "source_id":  47719486
+                       },
+                       {
+                           "utterance":  "lionkor: All the comments about Linux gaming make me want to give my $0.02. I\u0027ve been gaming on Linux, with no Windows installed anywhere, for around 6 years. In the first 3 years, it was a massive pain. Games like S.T.A.L.K.E.R. would consistently have issues with mouse input, weird acceleration, a lot of games wouldn\u0027t run at all. This is NO LONGER the case at all. Things run very well out of the box.\nAll games I want to play run very well and mostly the process is just \"install -\u003e play\".\nIf a game has an aggressive anticheat, like Battlefield 6 or Valorant, it will not work and you can forget about it.\nControllers work fine, so do some wheels and other peripherals, but a good number of wheels, pedals, joysticks, VR headsets, and other wild and wacky input devices might not work that well or not at all. It mostly depends on whether the software for them runs on Linux, runs in Wine, or is needed at all. Not sure about VR, but I know it was a bit dire 1-2 years ago.\nIf you don\u0027t play hardcore simulator games, and don\u0027t play one of the competitive shooters with aggressive anticheat (e.g. CS2 and other competitive shooters run perfectly well), you can just install Linux, install Steam or one of the other launchers, and just hit play.\nIf you\u0027re not sure, you can check the status on https://protondb.com .",
+                           "source":  "comment",
+                           "source_id":  47717066,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "esskay: Yeah good on them, everyone needs to do this. It\u0027s nuts Windows is still the go-to for anything these days despite everyone knowing what a parasitic, buggy mess it is. \"Easy\" shouldn\u0027t be the excuse in this day and age. Big orgs and especially government entities should be hiring the people that know what they\u0027re doing and get off that crummy platform.",
+                           "source":  "comment",
+                           "source_id":  47716191,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "Melatonic: The age of the Linux desktop might actually finally be coming\nPersonally I think we are at an interim period for a big player to emerge and take over this space. If enough governments in the EU start switching over to customized linux distros theres a big chance for someone like Nokia to come in and develop their own approved distro with proper MDM and GPO-like management functionality baked in .\nOn top of that it could be great to see SteamOS continue to gain share and become more than just something people run on gaming purpose hardware.\nAnd thirdly would love to see a more simplistic but super lean and functional OS built on something like the BSD.",
+                           "source":  "comment",
+                           "source_id":  47720807,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "idoubtit: The title is very far from the actual public statement that is linked in the article.\nThe French government announced that its digital agency will switch to Linux during this year. This is about a few hundreds of computers owned by the agency.\nThe second statement is that this agency is expected to publish, by the end of the year, a plan to reduce the digital dependency on the US. It\u0027s not \"France to ditch Windows\", it should be \"French government promises to plan soon for possible ways to decrease digital dependencies, but calendar unknown\". Also note that the government (and president) will change next year, so even if the present drive was real, a political u-turn could come soon.\nOverall, this statement could be the presage of a major upturn in a few years, but I think it far more probable that the policy change will be minor. There\u0027s already a small tendency toward Linux and Free Software in the public sector.",
+                           "source":  "comment",
+                           "source_id":  47721574,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "sylens: Many government orgs have spent the last decade and a half slowly transitioning old legacy applications and platforms to browser-based alternatives. That old ERP software that used to require a thick client? Now it runs in Chrome. Microsoft recognized this and smartly moved to keep these customers locked in via an ever growing Microsoft Office bundle - subscription based, with Teams for their chat and then building up additional capabilities to extend the dependency, like InTune.\nWhere we are at now is that the pain of moving away from Windows is acceptable for many larger organizations and governments, especially those with flat or decreasing budgets. You can just swap out the OS layer and keep other processes the same - keep using Office with just the browser versions if you want, or move to an alternative (like EU-based). Teams works on Linux. There is no moat on Windows anymore",
+                           "source":  "comment",
+                           "source_id":  47716655,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "ngomez: Interestingly, Microsoft has been trying to get ahead of this for a couple of years now with their National Partner Clouds program [0], which they describe as:\n\u003e designed for scenarios where full ownership and operational independence from Microsoft is required\nIn France\u0027s case, Capgemini and Orange have a joint venture to operate datacenters that Microsoft runs Azure and Office on top of [1]. Moving away from Windows and Teams would still reduce their dependence on Microsoft substantially. But if the core goal is to reduce dependence on non-European suppliers, I would be wary of the French government buying services from \"Bleu\" when it\u0027s mainly Microsoft and a couple of consultancies in a trenchcoat.\n[0] https://learn.microsoft.com/en-us/azure/azure-sovereign-clou... \n[1] https://www.capgemini.com/news/press-releases/capgemini-and-...",
+                           "source":  "comment",
+                           "source_id":  47716787,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "Latitude7973: France has been making good moves to achieve software independence from the US. It would be an even better move to allow those in Europe or indeed the rest of the world to also benefit.",
+                           "source":  "comment",
+                           "source_id":  47716143,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "dleslie: Canada has been using and developing FOSS for a while now.\n0: https://www.canada.ca/en/government/system/digital-governmen... \n1: https://events19.linuxfoundation.org/wp-content/uploads/2017... \n2: https://github.com/canada-ca/ \nThere\u0027s still a great deal of Windows usage, but hopefully that will phase out with the passage of time. Canada\u0027s bureaucracy moves slowly, at the pace of generational attrition. It won\u0027t be until the last GenX retires that they could even meaningfully begin transitioning the average office worker away from Windows.",
+                           "source":  "comment",
+                           "source_id":  47719980,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "faccacta: It seems like what Europe really needs to do this is a viable mobile OS. It\u0027s been true for a while that Linux + LibreOffice is plenty to handle most government workers\u0027 needs on the desktop, but that\u0027s only good for when they are at their desks. Are there any viable alternatives to iOS and Android that are totally free of \"dépendances extra-européennes\"? What\u0027s the plan?",
+                           "source":  "comment",
+                           "source_id":  47716401,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "morog: I used Linux 10 years ago, but then due to job or corp. and needing Teams and Outlook I was forced to uses Windows. Now with corp job over I was finally able to switch to Linux this week (Fedora + KDE). Loving improvements made in the last 10 years, KDE will always have its quirks, but it is fast and smooth with no crashes yet. I got Claude to make me a migration script which worked brilliantly, haven\u0027t needed to boot Windows yet. Browser sessions and everything worked like nothing had changed. All my various ssh / putty configs migrated to Konsole, Thunderbird carries on like nothing has changed. Ahhhh freedom!",
+                           "source":  "comment",
+                           "source_id":  47716494,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "benterix: At this point I wouldn\u0027t be surprised if American companies started using it if the French get it right. The instability of the current administration is one thing, but Microsoft disregard for its user deserves an appropriate response that will actually hit them where they care.",
+                           "source":  "comment",
+                           "source_id":  47716646,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "BLKNSLVR: I hope it succeeds and I hope they document the experience and invite interested parties to see how it was setup and how (well) it works in order to encourage as many governments and organisations as possible to do the same.",
+                           "source":  "comment",
+                           "source_id":  47719828,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "yibers: I am saying this as a very long time Windows user, and it saddens me. Politics aside, from a pure technichal, functional, privacy and UX perspective, the case for changing over from Windows to Linux is getting stronger by the day.",
+                           "source":  "comment",
+                           "source_id":  47719957,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "sega_sai: I think France seem serious in actually switching to open source/EU software. I recently had a telecon on Visio (France\u0027s Teams/Zoom substitute) and it worked well in a browser with ~ 10 participants.",
+                           "source":  "comment",
+                           "source_id":  47720698,
+                           "depth":  1
+                       }
+                   ],
+    "notes":  "Auto-generated OP+14-comment turnset from HN snapshot (v3 hard pack)."
+}

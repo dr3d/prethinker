@@ -1,0 +1,1142 @@
+﻿{
+    "thread_id":  47716490,
+    "hn_url":  "https://news.ycombinator.com/item?id=47716490",
+    "title":  "FBI used iPhone notification data to retrieve deleted Signal messages",
+    "by":  "01-_-",
+    "unix_time":  1775820544,
+    "score":  628,
+    "descendants":  305,
+    "difficulty":  "G4",
+    "lane":  "privacy_legal",
+    "label":  "hn_signal_notification_forensics",
+    "why_selected":  "Legal/privacy assertions, uncertainty, and contested evidence framing.",
+    "op_text":  "",
+    "harvested_comment_count":  140,
+    "comment_sample_policy":  {
+                                  "traversal":  "bfs",
+                                  "max_comments":  140,
+                                  "max_depth":  4
+                              },
+    "comments":  [
+                     {
+                         "id":  47720347,
+                         "by":  "upofadown",
+                         "time":  1775837855,
+                         "depth":  1,
+                         "parent":  47716490,
+                         "text":  "Putting on my user hat...\n\"OK. Signal has forward secrecy. So messages are gone after I receive them. Great!\"\nOh, you didn\u0027t turn on disappearing messages? Oh, right, then forensic tools like Cellebrite can get them. You have to turn on disappearing messages. The default is off.\nOh, you did turn on disappearing messages? We send the messages in notifications. So the OS can keep them. Turns out Apple was doing that. There is an option you can turn on to prevent that. It is off by default.\n\"I\u0027ll just delete the entire app!\" No, sorry, the OS still has your messages...\nAt what point does the usability get so bad that we can blame the messaging system?\nThis same app had a usability issue that turned into a security issue just last year:\nEnd to End Encrypted Messaging in the News: An Editorial Usability Case Study (my article)\n https://articles.59.ca/doku.php?id=em:sg"
+                     },
+                     {
+                         "id":  47716967,
+                         "by":  "jonpalmisc",
+                         "time":  1775823497,
+                         "depth":  1,
+                         "parent":  47716490,
+                         "text":  "Settings \u003e Notifications \u003e Notification Content \u003e Show: \"Name Only\" or \"No Name or Content\"\nI\u0027ve had this enabled to prevent sensitive messages from appearing in full whilst showing someone something on my phone, but I guess this is an added benefit as well."
+                     },
+                     {
+                         "id":  47716774,
+                         "by":  "chasil",
+                         "time":  1775822407,
+                         "depth":  1,
+                         "parent":  47716490,
+                         "text":  "First, a critical setting for Signal users:\n\"Signal’s settings include an option that prevents the actual message content from being previewed in notifications. However, it appears the defendant did not have that setting enabled, which, in turn, seemingly allowed the system to store the content in the database.\"\nSecond, how can I see this notification history?"
+                     },
+                     {
+                         "id":  47718981,
+                         "by":  "pigggg",
+                         "time":  1775832487,
+                         "depth":  1,
+                         "parent":  47716490,
+                         "text":  "Just curious, how come at least once a month signal bugs me to turn on notifications? I said no for a reason, every single time - why does it keep asking?\nNot implying anything evil but it feels a bit weird esp after this."
+                     },
+                     {
+                         "id":  47717544,
+                         "by":  "blitzar",
+                         "time":  1775826289,
+                         "depth":  1,
+                         "parent":  47716490,
+                         "text":  "\u003e testimony in a recent trial\nCourt cases are the real way to audit security.\nLarping about security and complaining about companies responding to court orders only gets you so far. Its way more useful to look at what actually happens in reality."
+                     },
+                     {
+                         "id":  47717462,
+                         "by":  "niek_pas",
+                         "time":  1775825933,
+                         "depth":  1,
+                         "parent":  47716490,
+                         "text":  "I wonder why Apple doesn\u0027t \u0027just\u0027 delete the notification data associated with the app from the internal database when the user deletes the app? It seems like asking for problems to just keep old notification content around forever."
+                     },
+                     {
+                         "id":  47717513,
+                         "by":  "alsetmusic",
+                         "time":  1775826163,
+                         "depth":  1,
+                         "parent":  47716490,
+                         "text":  "Original article: FBI Extracts Suspect’s Deleted Signal Messages Saved in iPhone Notification Database[0]\n0. https://www.404media.co/fbi-extracts-suspects-deleted-signal..."
+                     },
+                     {
+                         "id":  47718844,
+                         "by":  "1vuio0pswjnm7",
+                         "time":  1775831922,
+                         "depth":  1,
+                         "parent":  47716490,
+                         "text":  "\"However, it appears the defendant did not have that setting enabled, which, in turn, seemingly allowed the system to store the content in the database.\"\n\"[A]llowing the system to store the content in the database\" where a third party, such as Apple or a government, can access it is the default\nOnly a small minority of users know about settings and how to change them. The vast majority of users do not change default settings. Apple knows this"
+                     },
+                     {
+                         "id":  47719927,
+                         "by":  "donohoe",
+                         "time":  1775836149,
+                         "depth":  1,
+                         "parent":  47716490,
+                         "text":  "Was this not a known issue (in terms of trade-offs) for years? I recall discussion back in 2018 at least that made mention of this concern.\n https://github.com/RealityNet/iOS-Forensics-References \n https://theforensicscooter.com/2021/10/03/ios-knowledgec-db-..."
+                     },
+                     {
+                         "id":  47718259,
+                         "by":  "6thbit",
+                         "time":  1775829448,
+                         "depth":  1,
+                         "parent":  47716490,
+                         "text":  "So this is where we find out the one end of e2e is the phone and not the app.\nSemi-related, in whatsapp reading the text in the notification doesn\u0027t mark the message as read, so the OS is kinda mitm here."
+                     },
+                     {
+                         "id":  47716753,
+                         "by":  "etiam",
+                         "time":  1775822281,
+                         "depth":  1,
+                         "parent":  47716490,
+                         "text":  "Also discussed yesterday, in https://news.ycombinator.com/item?id=47703573"
+                     },
+                     {
+                         "id":  47717023,
+                         "by":  "chinathrow",
+                         "time":  1775823744,
+                         "depth":  1,
+                         "parent":  47716490,
+                         "text":  "On Android, when I use WhatsApp and have notifications for groups turned off, I can still see that they arrive briefly and then get removed (the icon top left vanishes). I wonder often, if this is a way to push all group message content into an unencrypted data trace as well - for the same use case."
+                     },
+                     {
+                         "id":  47719564,
+                         "by":  "halapro",
+                         "time":  1775834729,
+                         "depth":  1,
+                         "parent":  47716490,
+                         "text":  "While it\u0027s definitely surprising that the OS caches this data after the notifications have been swiped away, I always thought that notifications are an obvious hole in the whole E2E encryption setup."
+                     },
+                     {
+                         "id":  47721681,
+                         "by":  "AlBugdy",
+                         "time":  1775844470,
+                         "depth":  1,
+                         "parent":  47716490,
+                         "text":  "So Signal is sending the notifications through Apple\u0027s ecosystem somehow, presumably to save battery life by not having a persistent connection to Signal\u0027s servers? That\u0027s what I think happens on Android, too. When I had Lineage years ago, I had a persistent connection to Signal as the notifications didn\u0027t come through Google. Unfortunately there was a persistent notification for the persistent connection with no way to remove it.\nAfter these news Signal should ask the users ASAP and on new installs something like:\n\u003e Do you want the notifications to pass through Apple (no privacy, better battery) or through Signal itself (better privacy, but less battery life due to the persistent connection to Signal\u0027s servers.\nIt should be as part of the setup wizard, not inside the settings.\nCorrect me if I\u0027ve misunderstood something."
+                     },
+                     {
+                         "id":  47716677,
+                         "by":  "frizlab",
+                         "time":  1775821726,
+                         "depth":  1,
+                         "parent":  47716490,
+                         "text":  "Aren’t notifications supposed to be encrypted for Signal?"
+                     },
+                     {
+                         "id":  47720611,
+                         "by":  "sneak",
+                         "time":  1775839012,
+                         "depth":  1,
+                         "parent":  47716490,
+                         "text":  "How convenient that Apple can turn a blind eye to this, and maintain their useful fiction that they don’t provide law enforcement backdoors.\nPrivacy, that’s Apple: https://www.reuters.com/article/world/exclusive-apple-droppe..."
+                     },
+                     {
+                         "id":  47721841,
+                         "by":  "ttkari",
+                         "time":  1775845484,
+                         "depth":  1,
+                         "parent":  47716490,
+                         "text":  "This is the same issue that got a local drug organization busted some time ago - their entire α-PVP cooking operation was busted after one of the gang members was caught during a sale, his iphone was confiscated and the entire org was right there in the notification history.\nI guess that\u0027s what you deserve if you trust apple with your operational security."
+                     },
+                     {
+                         "id":  47723331,
+                         "by":  "fmx",
+                         "time":  1775853180,
+                         "depth":  1,
+                         "parent":  47716490,
+                         "text":  "Perhaps a stupid question, but why do notifications need to be stored in a database in persistent storage at all?\nOK, maybe they can be stored until they\u0027re dismissed in case the battery suddenly dies, so they can be displayed again on next boot and are not lost, but it sounds like they are being stored long after they are dismissed."
+                     },
+                     {
+                         "id":  47720883,
+                         "by":  "SwtCyber",
+                         "time":  1775840283,
+                         "depth":  1,
+                         "parent":  47716490,
+                         "text":  "This is one of those cases where the \"secure app\" narrative collides with how messy real systems actually are"
+                     },
+                     {
+                         "id":  47716852,
+                         "by":  "lenerdenator",
+                         "time":  1775822873,
+                         "depth":  1,
+                         "parent":  47716490,
+                         "text":  "There needs to be a bit more \"group chat\" control in Signal messages, wherein you could enforce certain settings for certain chats regardless of the phone settings. You could have group chats that would enforce not showing more information in the notifications, while others would still allow it."
+                     },
+                     {
+                         "id":  47717317,
+                         "by":  "shalmanese",
+                         "time":  1775825228,
+                         "depth":  1,
+                         "parent":  47716490,
+                         "text":  "I thought Signal didn’t show message previews by default and you had to go in and enable it? I’ve never had message previews in my Signal and I don’t remember changing anything. Maybe when they introduced the feature, you could pick but they strongly suggested it not showing?"
+                     },
+                     {
+                         "id":  47718036,
+                         "by":  "echelon_musk",
+                         "time":  1775828540,
+                         "depth":  1,
+                         "parent":  47716490,
+                         "text":  "As an aside, I decrypted an encrypted iPhone backup using a tool from GitHub because I wanted easy access to my Voice Memo recordings.\nPhotos I had long deleted were still in the backup! It\u0027s quite surprising just how much is being stored by the phone."
+                     },
+                     {
+                         "id":  47728859,
+                         "by":  "lrvick",
+                         "time":  1775898020,
+                         "depth":  1,
+                         "parent":  47716490,
+                         "text":  "There is no such thing as strong end to end encryption on a proprietary operating system no one but the provider can verify."
+                     },
+                     {
+                         "id":  47718560,
+                         "by":  "ChrisArchitect",
+                         "time":  1775830732,
+                         "depth":  1,
+                         "parent":  47716490,
+                         "text":  "[dupe] Discussion on source: https://news.ycombinator.com/item?id=47703573"
+                     },
+                     {
+                         "id":  47721784,
+                         "by":  "kouru225",
+                         "time":  1775845136,
+                         "depth":  1,
+                         "parent":  47716490,
+                         "text":  "I don’t know why anyone trusts Signal. People keep talking about them. I thought it was clear years ago that they were a sketchy company"
+                     },
+                     {
+                         "id":  47717831,
+                         "by":  "SergeAx",
+                         "time":  1775827670,
+                         "depth":  1,
+                         "parent":  47716490,
+                         "text":  "Probably stupid question: why won\u0027t they e2e-encrypt push notifications too? The vector is obvious and has been open since forever."
+                     },
+                     {
+                         "id":  47719598,
+                         "by":  "seydor",
+                         "time":  1775834886,
+                         "depth":  1,
+                         "parent":  47716490,
+                         "text":  "We are running out of Murphy\u0027s laws for digital communications. People will go back to physical messaging"
+                     },
+                     {
+                         "id":  47720612,
+                         "by":  "SilverElfin",
+                         "time":  1775839019,
+                         "depth":  1,
+                         "parent":  47716490,
+                         "text":  "Is there a way to delete all Apple notification history from Apple’s servers?"
+                     },
+                     {
+                         "id":  47718857,
+                         "by":  "walmas",
+                         "time":  1775831959,
+                         "depth":  1,
+                         "parent":  47716490,
+                         "text":  "People also got charges in the same case for removing people from a Signal chat"
+                     },
+                     {
+                         "id":  47720034,
+                         "by":  "b8",
+                         "time":  1775836544,
+                         "depth":  1,
+                         "parent":  47716490,
+                         "text":  "Sounds like an intentional government feature. Just speculation though. I\u0027m glad I have a Pixel, but I\u0027m on the default OS and need to switch to GrapiousOS (secure version). Just haven\u0027t due to lack of nice Google features."
+                     },
+                     {
+                         "id":  47719771,
+                         "by":  "seethishat",
+                         "time":  1775835597,
+                         "depth":  1,
+                         "parent":  47716490,
+                         "text":  "A lot of dumb criminals seem to carry smart phones. The irony."
+                     },
+                     {
+                         "id":  47720834,
+                         "by":  "lowbloodsugar",
+                         "time":  1775840048,
+                         "depth":  1,
+                         "parent":  47716490,
+                         "text":  "Terrorism charges. That’s what we should be talking about."
+                     },
+                     {
+                         "id":  47720569,
+                         "by":  "SilasX",
+                         "time":  1775838818,
+                         "depth":  1,
+                         "parent":  47716490,
+                         "text":  "Hmmm this is interesting. Because I\u0027ve long had the complaint that notifications are frustratingly ephemeral. There have been many cases where I\u0027ve gotten a notification that my phone clearly has but which I can\u0027t read, because when I tap it, it\u0027s purged permanently, and then I have a spotty internet connection, so I can\u0027t see it in the actual app that loaded.\nI\u0027m always like \"JFC, can\u0027t you cache the notifications, so I can see it there while waiting for the app to gets its act together?\" But no, that\u0027s never an option.\nSo I\u0027m getting a laugh out of how notifications last long enough to be extracted by someone just not the person that they\u0027re for. (Though to be fair, it could be a case of a notification that was never tapped, and therefore hadn\u0027t been purged yet. I couldn\u0027t tell from the story.)"
+                     },
+                     {
+                         "id":  47717089,
+                         "by":  "mnls",
+                         "time":  1775824115,
+                         "depth":  1,
+                         "parent":  47716490,
+                         "text":  "People who NEED to hide their notifications from iOS have this already disabled.\nThey rest who \"evaluate their threat models\" can practice Spy-life-gymnastics by disabling it from Signal."
+                     },
+                     {
+                         "id":  47719720,
+                         "by":  "dav",
+                         "time":  1775835363,
+                         "depth":  1,
+                         "parent":  47716490,
+                         "text":  "iOS Data Protection — The Four Classes\nData Protection is implemented by constructing and managing a hierarchy of keys, building on the hardware encryption technologies built into Apple devices. It\u0027s controlled on a per-file basis by assigning each file to a class; accessibility is determined by whether the class keys have been unlocked.\nThe four protection classes, from strongest to weakest:\nNSFileProtectionComplete — Files are only accessible when the device is unlocked.\nNSFileProtectionCompleteUnlessOpen — A file can only be opened when the device is unlocked, but is not closed when the device is locked — it\u0027s encrypted when the last open handle is closed. Suitable for data being uploaded in the background.\nNSFileProtectionCompleteUntilFirstUserAuthentication — The resource cannot be accessed until after the device has booted. After the user unlocks the device for the first time, the app can access the resource and continue to do so even if the user subsequently locks the device. Fortify This is commonly called AFU (After First Unlock). This is the default class for all third-party app data not otherwise assigned to a Data Protection class.\nNSFileProtectionNone — The resource has no special protections. It can be read or written at any time. The encryption only uses a key derived from the device\u0027s UID.\nThe BFU/AFU Distinction — The Heart of the Signal Issue\nApple\u0027s iOS devices operate in two key security states that directly impact data accessibility: Before First Unlock (BFU) and After First Unlock (AFU).\nWhen an iPhone is in the BFU state, it has been powered on or rebooted but not yet unlocked with a passcode. In this state, the Secure Enclave does not release the decryption keys needed to access most user data.\nOnce you\u0027ve unlocked once (AFU), files protected with NSFileProtectionCompleteUntilFirstUserAuthentication become accessible, the Keychain is available, and background processes and apps can access encrypted content as needed.\nThe Signal notification content issue connects here because notification data (including previews) stored in the default CompleteUntilFirstUserAuthentication class remains decryptable by any process — including OS-level forensic tools — as long as the phone has been unlocked at least once since the last reboot."
+                     },
+                     {
+                         "id":  47718927,
+                         "by":  "nottorp",
+                         "time":  1775832257,
+                         "depth":  1,
+                         "parent":  47716490,
+                         "text":  "... and I thought I\u0027m turning off notifications for all apps just so I don\u0027t get spammed. Looks like the setting is more useful than that."
+                     },
+                     {
+                         "id":  47716853,
+                         "by":  "i_am_proteus",
+                         "time":  1775822877,
+                         "depth":  1,
+                         "parent":  47716490,
+                         "text":  "Reminder that no end-to-end encryption arrangement can do anything before encryption, or after decryption, at the endpoints."
+                     },
+                     {
+                         "id":  47719612,
+                         "by":  "jsdevtom",
+                         "time":  1775834957,
+                         "depth":  1,
+                         "parent":  47716490,
+                         "text":  "If I have access to the UI, I don\u0027t need to break your encryption."
+                     },
+                     {
+                         "id":  47718060,
+                         "by":  "nixosbestos",
+                         "time":  1775828619,
+                         "depth":  1,
+                         "parent":  47716490,
+                         "text":  "Um. Android has notification history also and I see no similar ability to hide notification content from the system ..."
+                     },
+                     {
+                         "id":  47719815,
+                         "by":  "lofaszvanitt",
+                         "time":  1775835759,
+                         "depth":  1,
+                         "parent":  47716490,
+                         "text":  "Sigh, just the usual. If you don\u0027t know the platform\u0027s nuances, you are fckd."
+                     },
+                     {
+                         "id":  47719291,
+                         "by":  "bharat1010",
+                         "time":  1775833693,
+                         "depth":  1,
+                         "parent":  47716490,
+                         "text":  "Kind of a wake-up call that even \"deleted\" messages aren\u0027t really gone if the OS is caching notification previews — makes you rethink what end-to-end encryption actually protects you from."
+                     },
+                     {
+                         "id":  47717022,
+                         "by":  "kome",
+                         "time":  1775823737,
+                         "depth":  1,
+                         "parent":  47716490,
+                         "text":  "signal is security theater, and a very bad user experience"
+                     },
+                     {
+                         "id":  47721743,
+                         "by":  "microtonal",
+                         "time":  1775844861,
+                         "depth":  2,
+                         "parent":  47720347,
+                         "text":  "I think one of the main issues is that end-to-end message encryption is a sham as long as backups are not encrypted. I could have good device security, but if the person I\u0027m talking to does not use ADP, iMessage and WhatsApp messages get backed up with only at-rest encryption (I think Signal opts out of standard iOS backups) and possibly the same for backups of the iPhone notification database (which the article suggests as a possibility).\nSimilarly on Android, WhatsApp suggests unencrypted backups to Google Drive by default.\nPutting on my tinfoil hat, I am pretty sure that Google/Apple/Meta have some deal (successor to PRISM) where end-to-end encrypted messaging is tolerated as long as they have defaults that make it possible to access chats anyway. Apple not enabling ADP by default and WhatsApp doing Google Drive backups that are not end-to-end encrypted is the implementation. Since most people just use the defaults, it undermines security of people who care.\nIt\u0027s a \u0027win-win\u0027, the tech companies can wash their hands in innocence, the agencies get access to data, and phone users believe that they are chatting in a secure/private manner."
+                     },
+                     {
+                         "id":  47721172,
+                         "by":  "jacquesm",
+                         "time":  1775841882,
+                         "depth":  2,
+                         "parent":  47720347,
+                         "text":  "People keep pushing signal because it is supposedly secure. But it runs on platforms that are so complex with so much eco system garbage that there is no way know even within a low percentage of confidence if you\u0027ve done everything required to ensure you are communicating just with the person you think you are. There could be listeners at just about every layer and that is still without looking at the meta-data angle which is just as important (who communicated with who and when, and possibly from where)."
+                     },
+                     {
+                         "id":  47720973,
+                         "by":  "DevX101",
+                         "time":  1775840720,
+                         "depth":  2,
+                         "parent":  47720347,
+                         "text":  "The median user isn\u0027t going to change default settings, so your app is as secure as whatever the default it."
+                     },
+                     {
+                         "id":  47727121,
+                         "by":  "commandersaki",
+                         "time":  1775878784,
+                         "depth":  2,
+                         "parent":  47720347,
+                         "text":  "We send the messages in notifications. So the OS can keep them. Turns out Apple was doing that. There is an option you can turn on to prevent that. It is off by default. \nAt least on my iPhone the default is to preview messages only when unlocked [0]. This user went out of their way to show previews in a locked state which meant it was vulnerable by digital acquisition without unlock code.\n[0] https://files.catbox.moe/3gwjoy.png"
+                     },
+                     {
+                         "id":  47722882,
+                         "by":  "GeekyBear",
+                         "time":  1775850883,
+                         "depth":  2,
+                         "parent":  47720347,
+                         "text":  "\u003e Oh, you did turn on disappearing messages? We send the messages in notifications. So the OS can keep them.\nWorse than that, they did not take advantage of the ability to send that message data as an encrypted payload inside the notification.\n https://blog.davidlibeau.fr/push-notifications-are-a-privacy... \nEither do not include sensitive user data inside a notification by default, or encrypt that data before you send it to the notification server."
+                     },
+                     {
+                         "id":  47721611,
+                         "by":  "dist-epoch",
+                         "time":  1775844108,
+                         "depth":  2,
+                         "parent":  47720347,
+                         "text":  "Use SimpleX if you really want a secure messenger. Endorsed by Whonix, which in endorsed by Snowden.\n https://www.whonix.org/wiki/Chat#Recommendation"
+                     },
+                     {
+                         "id":  47730143,
+                         "by":  "bombcar",
+                         "time":  1775911917,
+                         "depth":  2,
+                         "parent":  47720347,
+                         "text":  "If the encryption security isn’t a freaking pain in every ass in the Tri county area, it’s not secure.\nThat’s been my go-to and I’ve yet to see it not work."
+                     },
+                     {
+                         "id":  47722962,
+                         "by":  "ransom1538",
+                         "time":  1775851326,
+                         "depth":  2,
+                         "parent":  47720347,
+                         "text":  "0) send a public key. 1) encrypt the file with your private key 2) send file.\nWTF. This is super simple stuff."
+                     },
+                     {
+                         "id":  47717237,
+                         "by":  "nickburns",
+                         "time":  1775824836,
+                         "depth":  2,
+                         "parent":  47716967,
+                         "text":  "Just to clarify, this is within the Signal app settings—not the OS (iOS or Android) system settings.\nCritical distinction, as merely changing OS notification settings will simply prevent notification content from being displayed on-screen."
+                     },
+                     {
+                         "id":  47717148,
+                         "by":  "jhalstead",
+                         "time":  1775824407,
+                         "depth":  2,
+                         "parent":  47716967,
+                         "text":  "Fwiw, in my Signal app on Android this setting is in\nSettings \u003e Notifications \u003e Messages \u003e Show"
+                     },
+                     {
+                         "id":  47721637,
+                         "by":  "kwanbix",
+                         "time":  1775844232,
+                         "depth":  2,
+                         "parent":  47716967,
+                         "text":  "I allway say it: it is the defaults, stupid (paraphrasign).\nThe Defaults have to be the most sensitive ones.\nIf you are a supposed super secure app, this should be the default."
+                     },
+                     {
+                         "id":  47718009,
+                         "by":  "cdrnsf",
+                         "time":  1775828446,
+                         "depth":  2,
+                         "parent":  47716967,
+                         "text":  "Disable Apple Intelligence summaries for sensitive app notifications too."
+                     },
+                     {
+                         "id":  47717199,
+                         "by":  "embedding-shape",
+                         "time":  1775824685,
+                         "depth":  2,
+                         "parent":  47716967,
+                         "text":  "I guess enabling Lockdown mode might avoid this particular issue too, together with a bunch of other stuff?"
+                     },
+                     {
+                         "id":  47719562,
+                         "by":  "Night_Thastus",
+                         "time":  1775834706,
+                         "depth":  2,
+                         "parent":  47716967,
+                         "text":  "This seems to be the default for me, at least on Android."
+                     },
+                     {
+                         "id":  47719830,
+                         "by":  "echelon_musk",
+                         "time":  1775835842,
+                         "depth":  2,
+                         "parent":  47716967,
+                         "text":  "WhatsApp supports this too.\nSettings \u003e Notifications \u003e Show preview"
+                     },
+                     {
+                         "id":  47720901,
+                         "by":  "SwtCyber",
+                         "time":  1775840355,
+                         "depth":  2,
+                         "parent":  47716967,
+                         "text":  "Originally enabled it just to avoid awkward moments"
+                     },
+                     {
+                         "id":  47717075,
+                         "by":  "alin23",
+                         "time":  1775824034,
+                         "depth":  2,
+                         "parent":  47716774,
+                         "text":  "Not sure if it\u0027s exactly the same, but I had to add a When notification arrives with , do event trigger in my Crank macOS app ( https://lowtechguys.com/crank ) so I can show you how to do it on macOS:\n HOURS=6\n EPOCH_DIFF=978307200\n SINCE=$(echo \"$(date +%s) - $EPOCH_DIFF - $HOURS * 3600\" | bc)\n\n sqlite3 ~/Library/Group\\ Containers/group.com.apple.usernoted/db2/db \\\n \"SELECT r.delivered_date, COALESCE(a.identifier, \u0027unknown\u0027), hex(r.data)\n FROM record r\n LEFT JOIN app a ON r.app_id = a.app_id\n WHERE r.delivered_date \u003e $SINCE\n ORDER BY r.delivered_date ASC;\" \\\n | while IFS=\u0027|\u0027 read -r cfdate bundle hexdata; do\n date -r $(echo \"$cfdate + $EPOCH_DIFF\" | bc | cut -d. -f1) \u0027+%Y-%m-%d %H:%M:%S\u0027\n echo \" app: $bundle\"\n echo \"$hexdata\" | xxd -r -p \u003e /tmp/notif.plist\n plutil -p /tmp/notif.plist 2\u003e/dev/null \\\n | grep -E \u0027\"(titl|title|subt|subtitle|body|message)\"\u0027 \\\n | sed \u0027s/^ */ /\u0027\n echo \"---\"\n done\n \nBasically, notifications are in an sqlite db at ~/Library/Group Containers/group.com.apple.usernoted/db2/db and are stored as plist blobs.\nIn recent years, filesystem paths for system services have started to converge for both macOS and iOS so I\u0027m thinking with jailbreak you could get read access to that database and get the same data out of it."
+                     },
+                     {
+                         "id":  47717160,
+                         "by":  "627467",
+                         "time":  1775824487,
+                         "depth":  2,
+                         "parent":  47716774,
+                         "text":  "On android there are apps that let you see the history - i use NotiStar occasionally to see if i unwittingly dismissed important notifications. And i believe there are apps/settings that help you clear the history from the device.\nBut this is a reminder that these centralized notification infrastructure (FCM and APNs) store notification content (if the app is told to send content in it - signal with option enabled wouldn\u0027t send content) even if we clear local history these middleman still hold it"
+                     },
+                     {
+                         "id":  47717120,
+                         "by":  "jhalstead",
+                         "time":  1775824256,
+                         "depth":  2,
+                         "parent":  47716774,
+                         "text":  "On a Pixel, I can see some history by going to\nAndroid \u003e Settings \u003e Notifications \u003e Manage \u003e Notification History"
+                     },
+                     {
+                         "id":  47718888,
+                         "by":  "commandersaki",
+                         "time":  1775832109,
+                         "depth":  2,
+                         "parent":  47716774,
+                         "text":  "So I wonder about this. The quote from the 404 media article [0] is:\n “We learned that specifically on iPhones, if one’s settings in the Signal app allow for message notifications and previews to show up on the lock screen, [then] the iPhone will internally store those notifications/message previews in the internal memory of the device,” a supporter of the defendants who was taking notes during the trial told 404 Media \nThe default setting appears to be to only show notification preview when unlocked. Will that notification still be stored unencrypted in notification storage or is it in an encrypted store because it will preview after unlock?\nIt makes sense that any notification that previews on the lock screen would be unencrypted (including the case where it is encrypted but the encryption key is adjacently stored).\nThis all reads to me that this was a user induced OPSEC issue and Signal had the right defaults.\n[0] https://archive.is/bSQhD#selection-619.0-622.0"
+                     },
+                     {
+                         "id":  47717759,
+                         "by":  "nashashmi",
+                         "time":  1775827340,
+                         "depth":  2,
+                         "parent":  47716774,
+                         "text":  "On android its quite easy. There is a page of a protocol address that has all notifications show. I used to have a shortcut to it. It has been years since I was on android.\nBut it was really useful each time I did not see a notification in time.\nEdit: typo"
+                     },
+                     {
+                         "id":  47720947,
+                         "by":  "SwtCyber",
+                         "time":  1775840583,
+                         "depth":  2,
+                         "parent":  47716774,
+                         "text":  "You don\u0027t, at least not without forensics tools"
+                     },
+                     {
+                         "id":  47719298,
+                         "by":  "benhurmarcel",
+                         "time":  1775833708,
+                         "depth":  2,
+                         "parent":  47716774,
+                         "text":  "I wonder how long does the system store those notifications"
+                     },
+                     {
+                         "id":  47719026,
+                         "by":  "greysonp",
+                         "time":  1775832692,
+                         "depth":  2,
+                         "parent":  47718981,
+                         "text":  "Signal developer here. It\u0027s just because notification reliability is always a top support complaint, and a lot of people turn off notifications and don\u0027t realize they\u0027ve done so. Admittedly, once a month is likely too aggressive."
+                     },
+                     {
+                         "id":  47719077,
+                         "by":  "ryandrake",
+                         "time":  1775832864,
+                         "depth":  2,
+                         "parent":  47718981,
+                         "text":  "\u003e why does it keep asking?\nWhy does any software keep asking you to do things you explicitly told them you don\u0027t want to do? Because it\u0027s in the software developer\u0027s best interest to get you to do them, not yours. We\u0027ve gotten way past the point in software where we no longer expect the software to serve the user\u0027s interest and solve the user\u0027s problems. Now, the expectation is that the user gets nagged and coerced into serving the software\u0027s interest and solving the developers\u0027 problems.\nEDIT: Looks like a developer confirmed this in a sibling comment already: It nags you because that solves their support problem."
+                     },
+                     {
+                         "id":  47719091,
+                         "by":  "mackman",
+                         "time":  1775832930,
+                         "depth":  2,
+                         "parent":  47718981,
+                         "text":  "Messaging platforms where people receive and promptly respond to messages are more successful in the long run. That\u0027s why SMS overtook email. If you own a messaging platform there isn\u0027t anything inherently nefarious about pushing people to enable notifications."
+                     },
+                     {
+                         "id":  47720928,
+                         "by":  "SwtCyber",
+                         "time":  1775840499,
+                         "depth":  2,
+                         "parent":  47718981,
+                         "text":  "Pretty sure that\u0027s just iOS behavior + app design. If notifications are off, apps will occasionally prompt again to make sure you didn\u0027t disable them by accident or miss something"
+                     },
+                     {
+                         "id":  47719262,
+                         "by":  "benhurmarcel",
+                         "time":  1775833559,
+                         "depth":  2,
+                         "parent":  47718981,
+                         "text":  "Reminds me what Whatsapp if you set up a 2FA PIN, which forces you to type it about every week to check if you forgot it. So annoying."
+                     },
+                     {
+                         "id":  47719043,
+                         "by":  "johnnyApplePRNG",
+                         "time":  1775832751,
+                         "depth":  2,
+                         "parent":  47718981,
+                         "text":  "NSL, perhaps?"
+                     },
+                     {
+                         "id":  47719061,
+                         "by":  "tclancy",
+                         "time":  1775832805,
+                         "depth":  2,
+                         "parent":  47717544,
+                         "text":  "I know it’s not germane to the Signal issue, but this caught my eye, “who previously pleaded guilty to providing material support to terrorists”.\nThe case comes with a long statement about the Antifa “organization”. Just your weekly reminder we are living under an Orwellian administration. https://www.justice.gov/opa/pr/antifa-cell-members-convicted..."
+                     },
+                     {
+                         "id":  47719297,
+                         "by":  "bronco21016",
+                         "time":  1775833705,
+                         "depth":  2,
+                         "parent":  47717544,
+                         "text":  "Yes and no. Court cases certainly will disclose what capabilities various parties have come up with when it comes to security. However, there are documented cases where the government chooses to abandon prosecution for the sole purpose of preventing disclosure of some of their cyber capabilities."
+                     },
+                     {
+                         "id":  47720956,
+                         "by":  "SwtCyber",
+                         "time":  1775840638,
+                         "depth":  2,
+                         "parent":  47717544,
+                         "text":  "True, court cases are one of the few times details actually surface"
+                     },
+                     {
+                         "id":  47717634,
+                         "by":  "tbrownaw",
+                         "time":  1775826711,
+                         "depth":  2,
+                         "parent":  47717544,
+                         "text":  "The recent Trivy / LiteLLM mess was also a security thing, and seems rather different."
+                     },
+                     {
+                         "id":  47718951,
+                         "by":  "jMyles",
+                         "time":  1775832352,
+                         "depth":  2,
+                         "parent":  47717544,
+                         "text":  "The problem is that, in the current environment of dishonest and corrupt states, \"what actually happens in reality\" isn\u0027t the same as what happens in court because of parallel construction."
+                     },
+                     {
+                         "id":  47717549,
+                         "by":  "alsetmusic",
+                         "time":  1775826297,
+                         "depth":  2,
+                         "parent":  47717462,
+                         "text":  "It\u0027s one of those problems where as soon as someone notices, it\u0027s crazy that no one noticed. I can\u0027t imagine this not being overhauled going forward. It\u0027s just a bad way to operate and now it\u0027s news."
+                     },
+                     {
+                         "id":  47718005,
+                         "by":  "rustyhancock",
+                         "time":  1775828428,
+                         "depth":  2,
+                         "parent":  47717462,
+                         "text":  "If it never hits flash that might work, but if it\u0027s in flash storage then the block may not be erased by the time its dumped.\nI\u0027m not sure precisely how the NAND controller responds to requests for raw data from blocks with \"deleted\" data. And if this would require decapping the flash.\nSome flash will happily let you see the data and delay erasing it.\nGenerally flash is non deterministic about when blocks even those with entirely stale data are erased . It might be years before the block is reused due to wear leveling algorithms and it might retain data that entire time.\nHere\u0027s hoping the controller for phones which hold sensitive data are more active"
+                     },
+                     {
+                         "id":  47720855,
+                         "by":  "gumby271",
+                         "time":  1775840130,
+                         "depth":  2,
+                         "parent":  47717462,
+                         "text":  "I think that\u0027s how the Android notification history works. If I uninstall an app, the entries in the history aren\u0027t shown anymore. You also have to opt in to notification history and toggling it off and back on clears the old entries. There\u0027s also a time window that it keeps entries for: https://source.android.com/docs/core/display/notification-hi..."
+                     },
+                     {
+                         "id":  47718145,
+                         "by":  "gruez",
+                         "time":  1775828947,
+                         "depth":  2,
+                         "parent":  47717462,
+                         "text":  "If the \"database\" works like most other databases (eg. postgres or sqlite), deleting a row doesn\u0027t immediately cause the data to be wiped from disk, for performance reasons. Then as others mentioned you have filesystem/SSD logic that does something similar on top of that."
+                     },
+                     {
+                         "id":  47717546,
+                         "by":  "tbrownaw",
+                         "time":  1775826297,
+                         "depth":  2,
+                         "parent":  47717513,
+                         "text":  "That\u0027s unfortunately less informative if you aren\u0027t already one of their subscribers."
+                     },
+                     {
+                         "id":  47720286,
+                         "by":  "rsync",
+                         "time":  1775837567,
+                         "depth":  2,
+                         "parent":  47718844,
+                         "text":  "“Only a small minority of users know about settings and how to change them. The vast majority of users do not change default settings.”\nEven worse, whatever critical settings you may set as a sophisticated user will frequently be reset, or changed, or re-organized under different settings… And of course, set back to insecure defaults… With subsequent software updates.\nThis is a regular occurrence with Firefox and privacy settings.\nWhatever the actual impetus is, we should act as if this is intentional."
+                     },
+                     {
+                         "id":  47719053,
+                         "by":  "nine_k",
+                         "time":  1775832768,
+                         "depth":  2,
+                         "parent":  47718844,
+                         "text":  "If you care about security at all, you disable any previews on the lock screen. The lock screen is by definition visible to anyone without any authorization. Showing anything on it immediately destroys any secrecy. It must be obvious to anyone capable of elementary logic inference.\nIf you don\u0027t know how to disable it, you use your favorite search engine / LLM / knowledgeable relative to find out, and disable it.\nBut if you just didn\u0027t pay attention, \"never thought about it\", you don\u0027t care about security, and no amount of technical means would help, sorry."
+                     },
+                     {
+                         "id":  47721471,
+                         "by":  "1vuio0pswjnm7",
+                         "time":  1775843407,
+                         "depth":  2,
+                         "parent":  47718844,
+                         "text":  "Imagine a parallel universe where stories about use of personal computers were written from a different perspective. For example,\n\"However, it appears Apple\u0027s system uses a default setting which, in turn, seemingly allowed it to store the defandant\u0027s content in Apple\u0027s database\"\ninstead of\n\"However, it appears the defendant did not have that setting enabled which, in turn, seemingly allowed the system to stoire the content in the database\"\nIn the later version, the defendant, namely his inaction in not changing a default setting, appears solely responsible for the outcome. And the actor that placed a copy of his incoming messages in a database that the actor created is referred to as \"the system\", not the corporation that wrote the system and sold the computer with this system pre-instaalled"
+                     },
+                     {
+                         "id":  47718917,
+                         "by":  "esseph",
+                         "time":  1775832214,
+                         "depth":  2,
+                         "parent":  47718844,
+                         "text":  "\u003e Only a small minority of users know about settings and how to change them.\nI couldn\u0027t believe this so went to look up some data on this.\nHoly FUCK that is bleak. There needs to be way more computer education , not just \"how2type\" classes."
+                     },
+                     {
+                         "id":  47718327,
+                         "by":  "zenoprax",
+                         "time":  1775829762,
+                         "depth":  2,
+                         "parent":  47718259,
+                         "text":  "Signal creates the notification, does it not? That\u0027s like claiming `echo \"my_private_data\" | notify-send` is insecure.\nIf piping encrypted content resulted in a plaintext notification then you\u0027d have a right to be concerned."
+                     },
+                     {
+                         "id":  47717114,
+                         "by":  "arkon_hn",
+                         "time":  1775824233,
+                         "depth":  2,
+                         "parent":  47717023,
+                         "text":  "If the notification has the data, then yes. It\u0027s trivial to create an app that listens to notifications; Samsung even has one themselves called NotiStar that replicates the notification history feature that Android normally has."
+                     },
+                     {
+                         "id":  47720831,
+                         "by":  "pipe01",
+                         "time":  1775840042,
+                         "depth":  2,
+                         "parent":  47717023,
+                         "text":  "I\u0027ve never seen this happen, maybe you\u0027re seeing the \"Fetching messages\" notification that sometimes pops up for a second?"
+                     },
+                     {
+                         "id":  47719621,
+                         "by":  "Thorrez",
+                         "time":  1775834986,
+                         "depth":  2,
+                         "parent":  47719564,
+                         "text":  "AIUI, Signal push notifications just saying a message was received. Signal then fetches the E2E encrypted message from the server and decrypts it locally. So Apple/Google cannot read the messages, nor can Signal servers."
+                     },
+                     {
+                         "id":  47721762,
+                         "by":  "svpk",
+                         "time":  1775844997,
+                         "depth":  2,
+                         "parent":  47721681,
+                         "text":  "In my recollection, which may be imperfect:\n1. On android if Google Play isn\u0027t available (or you install the no Google apk version) it\u0027ll use a websocket for notifications. Apple doesn\u0027t allow a persistent connection except through their own notification framework.\n2. In either case Signal doesn\u0027t send message contents through the notification framework (not even encrypted). Once Signal receives a notification the app wakes up and reaches out to the signal service directly for actual encrypted message.\n3. Regardless when signal shows the contents of your message in the notification menu of your device your device keeps a record on your device of that message content.\nThe FBI here didn\u0027t get anything from apple, once they had the apple device unlocked they looked at the notification database on the device to get the message contents. This isn\u0027t really any different from the fact that if the FBI has your unlocked phone they can read your signal messages. The notable bit is that the notification database retains messages even after the app is deleted."
+                     },
+                     {
+                         "id":  47721894,
+                         "by":  "jshier",
+                         "time":  1775845766,
+                         "depth":  2,
+                         "parent":  47721681,
+                         "text":  "There is no other way to send push notifications on iOS, you have to use APNS. When the app is active you can switch to your own local socket connection, but as soon as it goes into the background those connections are lost. Pushes can also start the app in the background if it hasn\u0027t been used in a while and has been evicted by the OS.\nYou can send push notifications with your own encryption on top, which I believe Signal does, so Apple can\u0027t see it on the APNS side, but your local extension to decrypt the content is still subject to the user\u0027s settings, and part of the notification history if you put message content in the notification."
+                     },
+                     {
+                         "id":  47716732,
+                         "by":  "shantara",
+                         "time":  1775822166,
+                         "depth":  2,
+                         "parent":  47716677,
+                         "text":  "iOS stores the previously displayed notifications in an internal database, which was used to access the data. It’s outside of Signal’s control, they recommend disabling showing notification content in their settings to prevent this attack vector"
+                     },
+                     {
+                         "id":  47716758,
+                         "by":  "makosdv",
+                         "time":  1775822312,
+                         "depth":  2,
+                         "parent":  47716677,
+                         "text":  "You can choose what to show in the notification and there is an option to include the message, so I\u0027m guessing that allowed some unencrypted incoming messages to be read."
+                     },
+                     {
+                         "id":  47716915,
+                         "by":  "krisknez",
+                         "time":  1775823224,
+                         "depth":  2,
+                         "parent":  47716677,
+                         "text":  "This kind of vulnerability is not tied to Signal but all apps which send notification."
+                     },
+                     {
+                         "id":  47718345,
+                         "by":  "throawayonthe",
+                         "time":  1775829845,
+                         "depth":  2,
+                         "parent":  47716677,
+                         "text":  "They are;\n“Messages were recovered from Sharp’s phone through Apple’s internal notification storage—Signal had been removed, but incoming notifications were preserved in internal memory. Only incoming messages were captured (no outgoing).”\nie the messages recovered were 1. incoming 2. stored by the OS after decryption\ni also was spooked by the headline :p"
+                     },
+                     {
+                         "id":  47723891,
+                         "by":  "heisenbit",
+                         "time":  1775856622,
+                         "depth":  2,
+                         "parent":  47723331,
+                         "text":  "I suspect they live in a database and are eventually going where GC data goes."
+                     },
+                     {
+                         "id":  47716932,
+                         "by":  "preinheimer",
+                         "time":  1775823316,
+                         "depth":  2,
+                         "parent":  47716852,
+                         "text":  "This feels like it would run against the “I bought my device, I should control how it behaves” line of thinking."
+                     },
+                     {
+                         "id":  47717792,
+                         "by":  "foooorsyth",
+                         "time":  1775827537,
+                         "depth":  2,
+                         "parent":  47717317,
+                         "text":  "The opposite, actually. Signal endlessly nags you to turn on notifications, and when you turn them on, previews and content are shown by default. You cannot opt out of the nags."
+                     },
+                     {
+                         "id":  47718248,
+                         "by":  "boysenberry",
+                         "time":  1775829393,
+                         "depth":  2,
+                         "parent":  47718036,
+                         "text":  "What did you use?"
+                     },
+                     {
+                         "id":  47717953,
+                         "by":  "0x62",
+                         "time":  1775828212,
+                         "depth":  2,
+                         "parent":  47717831,
+                         "text":  "Signal does not send any sensitive information in push notifications sent via APNs [0]. This story concerns the local OS cache of push notifications, which are triggered after E2E decryption has occurred.\n[0] https://mastodon.world/@Mer__edith/111563865413484025"
+                     },
+                     {
+                         "id":  47718128,
+                         "by":  "tbrownaw",
+                         "time":  1775828911,
+                         "depth":  2,
+                         "parent":  47717831,
+                         "text":  "The \"e\" in e2e encryption is a computing device, not the device\u0027s user\u0027s brain."
+                     },
+                     {
+                         "id":  47720285,
+                         "by":  "coldtea",
+                         "time":  1775837567,
+                         "depth":  2,
+                         "parent":  47719598,
+                         "text":  "Younger people have largely abandonded even physical contact and talk, they ain\u0027t going back nowhere."
+                     },
+                     {
+                         "id":  47720685,
+                         "by":  "scarecrowbob",
+                         "time":  1775839388,
+                         "depth":  2,
+                         "parent":  47719771,
+                         "text":  "Probably, but these are people who are being charged for political \"crimes\" brought mostly because the government doesn\u0027t think people have a right to protest. While it\u0027s unsurprising that the citizen who discharged their weapon was tried for this, most of the other folks were just doing run-of-the-mill protest stuff.\nI also get that in Texas they are fine \"criminalizing\" protesting, but that\u0027s just part of its hyper-authoritarian \"charm\", and a lot of us don\u0027t think that protesting in itself should be criminal."
+                     },
+                     {
+                         "id":  47720995,
+                         "by":  "komali2",
+                         "time":  1775840812,
+                         "depth":  2,
+                         "parent":  47720834,
+                         "text":  "It sounds like they were considering liberating the ICE concentration camp. If you go down that route, you need to be ready for the terrorism charges. They brought rifles and one of them allegedly shot at a cop.\nPersonally, it\u0027s a moral good to free people from a concentration camp, even if it requires violence to do so. However it\u0027s also obvious that when you oppose a State, you get hit with terrorism charges. ...unless you\u0027re a jan6er, of course."
+                     },
+                     {
+                         "id":  47717835,
+                         "by":  "phyzome",
+                         "time":  1775827694,
+                         "depth":  2,
+                         "parent":  47717089,
+                         "text":  "What a goofy comment.\nThe article you\u0027re commenting on is about people who obviously would have wanted this disabled, but didn\u0027t have it disabled, presumably because they didn\u0027t know about this issue."
+                     },
+                     {
+                         "id":  47717275,
+                         "by":  "xandrius",
+                         "time":  1775825057,
+                         "depth":  2,
+                         "parent":  47717089,
+                         "text":  "Victim blaming?"
+                     },
+                     {
+                         "id":  47717019,
+                         "by":  "windowliker",
+                         "time":  1775823719,
+                         "depth":  2,
+                         "parent":  47716853,
+                         "text":  "Right. It\u0027s purely a protection against MitM snooping. The app has to have the messages in plaintext to display to you via whatever mechanism the OS uses. Seems obvious, but also not, at the same time.\nI\u0027ve found other ways Signal can leak information, even with disappearing messages. It\u0027s not the total install-and-be-done privacy screen that some people think it is, and requires a little effort at the user end to fill in a few gaps."
+                     },
+                     {
+                         "id":  47718230,
+                         "by":  "TeMPOraL",
+                         "time":  1775829337,
+                         "depth":  2,
+                         "parent":  47718060,
+                         "text":  "Good. The moment they add it, all kinds of apps will start to abuse it, for \"sekhurity\" (read: engagement) reasons. See e.g. all the apps that now disallow taking screenshots, for no legitimate reason.\nPersonally I\u0027d be in favor of a hard app store policy, that if an app notifies you about something, all the importantdetails (like full message text) must be included - specifically to allow the user to view the important information without having to open the app itself."
+                     },
+                     {
+                         "id":  47720923,
+                         "by":  "gumby271",
+                         "time":  1775840475,
+                         "depth":  2,
+                         "parent":  47718060,
+                         "text":  "In the Signal app itself there\u0027s an option to hide the message body or both the sender and body, that way the OS wont have anything to store in the history."
+                     },
+                     {
+                         "id":  47717176,
+                         "by":  "noman-land",
+                         "time":  1775824554,
+                         "depth":  2,
+                         "parent":  47717022,
+                         "text":  "Prove it."
+                     },
+                     {
+                         "id":  47721886,
+                         "by":  "AJ007",
+                         "time":  1775845739,
+                         "depth":  3,
+                         "parent":  47721743,
+                         "text":  "\"end-to-end message encryption is a sham as long as\" -- I agree with that but would add even more caveats. If someone can\u0027t list those caveats off the top of their head they shouldn\u0027t be pretending they aren\u0027t able to communicate securely.\nJust look at Salt Typhoon, every single person should be way more paranoid than they are, including government \u0026 agency officials. The attach surface and potential damage - financial and reputation - will only get worse with AI automation and impersonation, and that\u0027s for people who are doing nothing interesting and are law abiding citizens."
+                     },
+                     {
+                         "id":  47722209,
+                         "by":  "tapoxi",
+                         "time":  1775847583,
+                         "depth":  3,
+                         "parent":  47721743,
+                         "text":  "Signal data is not backed up, they have a local backup solution and an in-app e2e cloud backup for $2/month."
+                     },
+                     {
+                         "id":  47722991,
+                         "by":  "alfiedotwtf",
+                         "time":  1775851466,
+                         "depth":  3,
+                         "parent":  47721743,
+                         "text":  "This is what I’ve always hated with Apple Time Machine, which I think MUST have been deliberate:\n - create an encrypted disk\n - install Mac OS on the encrypted disk\n - use Time Machine to back it up with encrypt turned on\n \nAll good so far. Ok, time to restore:\n - Restore from Time Machine\n - enjoy your PLAIN TEXT install :poo:"
+                     },
+                     {
+                         "id":  47724431,
+                         "by":  "lo_zamoyski",
+                         "time":  1775859914,
+                         "depth":  3,
+                         "parent":  47721743,
+                         "text":  "\u003e the tech companies can wash their hands in innocence\nHostile defaults, not just in tech, is how Western liberal soft power often works. They can always claim \"hey, you have the choice\", but they know very well most people won\u0027t even know they have the choice, or is it so cumbersome or costly to move away from the hostile defaults - and stay that way - that in practice, the effect is the same as if you lived in a totalitarian regime. The difference is that you can keep believing in the deception of \"freedom\" in a Western liberal society; in a totalitarian regime, you are much more likely to know you\u0027ve got a jackboot on your throat, because there is one.\nWhat is needed isn\u0027t radical liberal atomistic individualism which rationalizes the antisocial war of all against all that rewards raw might. You won\u0027t find freedom there. You need a culture of respect of and sense of duty toward the authentic common good, backed by moral authority , where authority is power + justice."
+                     },
+                     {
+                         "id":  47721871,
+                         "by":  "dingaling",
+                         "time":  1775845667,
+                         "depth":  3,
+                         "parent":  47721172,
+                         "text":  "I\u0027ve raised concerns about the Signal project whitewashing risks such as keyboard apps or the OS itself, and the usual response is that it\u0027s my fault for using an untrustworthy OS and outside Signal\u0027s scope.\nAt some point there need to be a frank admission that ETE encrypted messaging apps are just the top layer of an opaque stack that could easily be operating against you.\nThey\u0027ve made encryption so slick and routine that they\u0027ve opened a whole new vector of attack through excessive user trust and laziness.\nEncrypting a message used to be slow, laborious and cumbersome; which meant that there was a reticence to send messages that didn\u0027t need to be sent, and therefore to minimise disclosure. Nowadays everything is sent, under an umbrella of misplaced trust."
+                     },
+                     {
+                         "id":  47721831,
+                         "by":  "OutOfHere",
+                         "time":  1775845450,
+                         "depth":  3,
+                         "parent":  47721172,
+                         "text":  "There is nothing secure about sending encrypted content to notifications. If it were secure, it would only notify that there is a message, with no details included."
+                     },
+                     {
+                         "id":  47721877,
+                         "by":  "stvltvs",
+                         "time":  1775845697,
+                         "depth":  3,
+                         "parent":  47720973,
+                         "text":  "Even if I change the setting, my messages aren\u0027t truly secure against this unless all recipients do the same on all of their devices."
+                     },
+                     {
+                         "id":  47732224,
+                         "by":  "eggnet",
+                         "time":  1775927597,
+                         "depth":  3,
+                         "parent":  47727121,
+                         "text":  "That doesn’t solve the problem. You have to configure Signal to not send the information in the notification."
+                     },
+                     {
+                         "id":  47723353,
+                         "by":  "janfoeh",
+                         "time":  1775853297,
+                         "depth":  3,
+                         "parent":  47722882,
+                         "text":  "According to Michael Tsai, they did use encrypted notification payloads. The OS just then stores the decrypted payloads in its notification database. [0]\n[0] https://mjtsai.com/blog/2026/04/10/notifications-privacy/"
+                     },
+                     {
+                         "id":  47723445,
+                         "by":  "greysonp",
+                         "time":  1775853835,
+                         "depth":  3,
+                         "parent":  47722882,
+                         "text":  "Signal developer here. Our FCM and APN notifications are empty and just tell the app to wake up, fetch encrypted messages, decrypt them, and then generate the notification ourselves locally."
+                     },
+                     {
+                         "id":  47737092,
+                         "by":  "wqaatwt",
+                         "time":  1775980490,
+                         "depth":  3,
+                         "parent":  47721611,
+                         "text":  "\u003e endorsed by Snowden.\nWho is endorsed by the Russian government"
+                     },
+                     {
+                         "id":  47726142,
+                         "by":  "bladeacidic",
+                         "time":  1775869884,
+                         "depth":  3,
+                         "parent":  47721611,
+                         "text":  "SimpleX has the same problem with notifications. You still have to properly configure it. Opsec is hard."
+                     },
+                     {
+                         "id":  47724142,
+                         "by":  "amethyst",
+                         "time":  1775858339,
+                         "depth":  3,
+                         "parent":  47722962,
+                         "text":  "3) recipient stores decrypted content in plain text and backs that up in well-known cloud storage systems"
+                     },
+                     {
+                         "id":  47717768,
+                         "by":  "hammock",
+                         "time":  1775827382,
+                         "depth":  3,
+                         "parent":  47717237,
+                         "text":  "Wait so if I do iOS setting notifications \u003e never show previews it’s still caching them in the background? Unencrypted?"
+                     },
+                     {
+                         "id":  47717610,
+                         "by":  "JumpCrisscross",
+                         "time":  1775826620,
+                         "depth":  3,
+                         "parent":  47717237,
+                         "text":  "Signal should switch the default to being less verbose."
+                     },
+                     {
+                         "id":  47719432,
+                         "by":  "wodenokoto",
+                         "time":  1775834218,
+                         "depth":  3,
+                         "parent":  47717237,
+                         "text":  "When you put it up against each other it makes perfect sense, but I would never have thought about it in that way!\nThank you for adding this to the conversation."
+                     },
+                     {
+                         "id":  47717600,
+                         "by":  "wolvoleo",
+                         "time":  1775826570,
+                         "depth":  3,
+                         "parent":  47717148,
+                         "text":  "My Samsung also keeps a history of notification content. Under Settings-\u003eNotifications -\u003eAdvanced -\u003e Notification History"
+                     },
+                     {
+                         "id":  47718042,
+                         "by":  "huxley",
+                         "time":  1775828554,
+                         "depth":  3,
+                         "parent":  47718009,
+                         "text":  "Given the quality of the summaries, you might want to keep them just for plausible deniability"
+                     },
+                     {
+                         "id":  47717360,
+                         "by":  "everdrive",
+                         "time":  1775825402,
+                         "depth":  3,
+                         "parent":  47717199,
+                         "text":  "Why would lockdown mode prevent this? I have lockdown mode on but that doesn\u0027t automatically make my notifications private."
+                     },
+                     {
+                         "id":  47719737,
+                         "by":  "izacus",
+                         "time":  1775835433,
+                         "depth":  3,
+                         "parent":  47719562,
+                         "text":  "Android also supports custom encrypted payloads so Signal doesn\u0027t have to give them to Google."
+                     },
+                     {
+                         "id":  47717481,
+                         "by":  "chasil",
+                         "time":  1775826024,
+                         "depth":  3,
+                         "parent":  47717160,
+                         "text":  "On Lineage Android, i see: Settings / Notifications / Notification History.\nIf you drop a settings widget on your home screen, it will let you choose a specific area, including notifications.\nI don\u0027t know if the output is the complete database."
+                     },
+                     {
+                         "id":  47717967,
+                         "by":  "seb1204",
+                         "time":  1775828294,
+                         "depth":  3,
+                         "parent":  47717120,
+                         "text":  "Yes, mine (the history option) is turned off. Nice opt in implementation."
+                     },
+                     {
+                         "id":  47718604,
+                         "by":  "arvid-lind",
+                         "time":  1775830902,
+                         "depth":  3,
+                         "parent":  47717120,
+                         "text":  "Wasn\u0027t sure if it was the Pixel or GrapheneOS, but what a relief to actually be covered in one of these weird 0day issues.\nUnrelated to the OP, but I bet the thousands of \"exploits\" that Claude Mythos has identified already are a lot of these kind of things that regular people would never think about."
+                     },
+                     {
+                         "id":  47720937,
+                         "by":  "sillysaurusx",
+                         "time":  1775840545,
+                         "depth":  3,
+                         "parent":  47718888,
+                         "text":  "I think that’s a little nutty. People go to signal for secure messaging. That’s their entire brand. An insecure by default setting is the wrong setting, even if it nets them a lot of tech illiterate users. Compromising the security of the system defeats the entire point of using Signal instead of some other messenger.\nBy this logic, you, me, and everyone else using the defaults are using bad opsec. Doesn’t that strike you as problematic?"
+                     },
+                     {
+                         "id":  47717955,
+                         "by":  "tsimionescu",
+                         "time":  1775828217,
+                         "depth":  3,
+                         "parent":  47717759,
+                         "text":  "\u003e I used to have a seizure to it.\nHopefully, you meant to write \"shortcut\"..."
+                     },
+                     {
+                         "id":  47719278,
+                         "by":  "dataflow",
+                         "time":  1775833640,
+                         "depth":  3,
+                         "parent":  47719026,
+                         "text":  "How about instead of prompting to enable notifications, you leave a small banner or other unintrusive/non-annoying UI noting that they\u0027re off, which users can tap in order to learn more about how to reenable them?\nFor an app that prides itself on privacy, it\u0027s kind of crazy that you\u0027re making it so easy to accidentally blow it."
+                     },
+                     {
+                         "id":  47719125,
+                         "by":  "pigggg",
+                         "time":  1775833064,
+                         "depth":  3,
+                         "parent":  47719026,
+                         "text":  "Is there some \"no means no\" additional setting that could be added where someone has to go into settings that would prevent that?\nI fear that with the notifications pop up asking me this I might hit the wrong button and woops turn it on."
+                     },
+                     {
+                         "id":  47720042,
+                         "by":  "elevation",
+                         "time":  1775836595,
+                         "depth":  3,
+                         "parent":  47719026,
+                         "text":  "\u003e notification reliability is always a top support complaint\nI know octogenarians who use signal daily. \"You called me and it didn\u0027t ring\" or \"messaged and it didn\u0027t beep\" are definitely the top support complaints I receive. Thanks for being sensitive to this use case."
+                     },
+                     {
+                         "id":  47721182,
+                         "by":  "jacquesm",
+                         "time":  1775841912,
+                         "depth":  3,
+                         "parent":  47719026,
+                         "text":  "Any time after a user switches it off on purpose is too aggressive."
+                     },
+                     {
+                         "id":  47719563,
+                         "by":  "peacebeard",
+                         "time":  1775834723,
+                         "depth":  3,
+                         "parent":  47719026,
+                         "text":  "Making the product worse for everybody because a minority can’t manage their own settings is a terrible strategy."
+                     }
+                 ]
+}

@@ -1,0 +1,99 @@
+﻿{
+    "name":  "hn_mythos_vuln_frontier_turnset_v1",
+    "source_thread_id":  47732020,
+    "source_url":  "https://news.ycombinator.com/item?id=47732020",
+    "difficulty":  "G4",
+    "lane":  "security_reasoning",
+    "utterances":  [
+                       {
+                           "utterance":  "OP (title): Small models also found the vulnerabilities that Mythos found",
+                           "source":  "op",
+                           "source_id":  47732020
+                       },
+                       {
+                           "utterance":  "johnfn: The Anthropic writeup addresses this explicitly:\n\u003e This was the most critical vulnerability we discovered in OpenBSD with Mythos Preview after a thousand runs through our scaffold. Across a thousand runs through our scaffold, the total cost was under $20,000 and found several dozen more findings. While the specific run that found the bug above cost under $50, that number only makes sense with full hindsight. Like any search process, we can\u0027t know in advance which run will succeed.\nMythos scoured the entire continent for gold and found some. For these small models, the authors pointed at a particular acre of land and said \"any gold there? eh? eh?\" while waggling their eyebrows suggestively.\nFor a true apples-to-apples comparison, let\u0027s see it sweep the entire FreeBSD codebase. I hypothesize it will find the exploit, but it will also turn up so much irrelevant nonsense that it won\u0027t matter.",
+                           "source":  "comment",
+                           "source_id":  47732337,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "epistasis: \u003e We took the specific vulnerabilities Anthropic showcases in their announcement, isolated the relevant code, and ran them through small, cheap, open-weights models. Those models recovered much of the same analysis. Eight out of eight models detected Mythos\u0027s flagship FreeBSD exploit, including one with only 3.6 billion active parameters costing $0.11 per million tokens.\nImpressive, and very valuable work, but isolating the relevant code changes the situation so much that I\u0027m not sure it\u0027s much of the same use case.\nBeing able to dump an entire code base and have the model scan it is they type of situation where it opens up vulnerability scans to an entirely larger class of people.",
+                           "source":  "comment",
+                           "source_id":  47732254,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "tptacek: If you cut out the vulnerable code from Heartbleed and just put it in front of a C programmer, they will immediately flag it. It\u0027s obvious. But it took Neel Mehta to discover it. What\u0027s difficult about finding vulnerabilities isn\u0027t properly identifying whether code is mishandling buffers or holding references after freeing something; it\u0027s spotting that in the context of a large, complex program, and working out how attacker-controlled data hits that code.\nIt\u0027s weird that Aisle wrote this.",
+                           "source":  "comment",
+                           "source_id":  47732350,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "antirez: Congrats: completely broken methodology, with a big conflict of interest. Giving specific bug hints, with an isolated function that is suspected to have bugs, is not the same task, NOR (crucially) is a task you can decompose the bigger task into. It is basically impossible to segment code in pieces, provide pieces to smaller models, and expect them to find all the bugs GPT 5.4 or other large models can find. Second: the smarter the model, and less the pipeline is important. In the latest couple of days I found tons if Redis bugs with a three prompts open-ended pipeline composed of a couple of shell scripts. Do you think I was not already tying with weaker models? I did, but it didn\u0027t work. Don\u0027t trust what you read, you have access to frontier models for 20$ a month. Download some C code, create a trivial pipeline that starts from a random file and looks for vulnerabilities, then another step that validates it under a hard test, like ASAN crash, or ability to reach some secret, and so forth, and only then the problem can be reported. Test yourself what it is possible. Don\u0027t let your fear make you blind. Also, there is a big problem that makes the blog post reasoning not just weak per se, but categorically weak: if small model X can find 80% of vulnerabilities, if there is a model Y that can find the other potential 20%, we need \"Y\": the maintainers should make sure they access to models that are at least as good as the black hats folks.",
+                           "source":  "comment",
+                           "source_id":  47732340,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "muyuu: I think the \"Mythos\" name is genius. The people at Anthropic make a bunch of claims and the public is expected to just believe them without any possibility of testing those claims or reproducing those results, and since so many people are invested in this saviour for the Global economy, or in the industry in general, or in hype to feed their engagement-based income sources, then there is faith to spare.\nMeanwhile this mythical beast wasn\u0027t able to prevent the Bun vulnerability that exposed their code, let alone precluding the need to acquire that IP in the first place for presumably hundreds of millions of $$$, instead of coding a better replacement or a solution of its own.\nWhat is real and measurable is that subscription plan users are getting a much degraded service for the same money through both open and hidden policies, while Anthropic moves compute to serve off-the-counter customers. The same people who come with the most obvious and brazen lies to dismiss the clear degradation of their service also come with this \"security\" justification for a move that looks just like good old market segmentation which would perfectly fit the strong symptoms that they cannot afford to offer tokens at a competitive price in this market.",
+                           "source":  "comment",
+                           "source_id":  47735605,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "vmg12: The technique Anthropic uses was demonstrated by Nicholas Carlini in a talk he gave 2 weeks ago and it\u0027s very simple, when asking LLMs to review code, ask them to focus its review on one file in a single session. Here is the video with the timestamp (watch through to ~5:30, they show two different ways of prompting claude).\n https://youtu.be/1sd26pWhfmg?t=204 \n https://youtu.be/1sd26pWhfmg?t=273 \nIMO the big \"innovation\" being shown by Mythos is the effectiveness with prompting LLMs to look for security vulnerabilities by focusing on specific files one at a time and automating this prompting with a simple script.\nPrompting Mythos to focus on a single file per session is why I suspect it cost Anthropic $20k to find some of the bugs in these codebases. I know this same technique is effective with Opus 4.6 and GPT 5.4 because I\u0027ve been using it on my own code. If you just ask the agent to review your pr with a low effort prompt they are not exhaustive, they will not actually read each changed file and look at how it interacts with the system as a whole. If the entire session is to review the changes for a single file, the llm will do much more work reviewing it.\nEdit: I changed my phrasing, it\u0027s not about restricting its entire context to one file but focusing it on one file but still allowing it to look at how other files interact with it.",
+                           "source":  "comment",
+                           "source_id":  47732549,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "StrauXX: A lot of comments here are dismissing this post because the relevant code was isolated. But thats the exact same thing Anthropic did with Mythos! They describe their (very lean) harness in the Anthropic Red Mythos blog post. The harness first assigns each file in the given codebase an importance value. Then points claude code at the cpdebase with a prompt stating that it should focus on that file. It spawns a claude code instances for each file in the codebase.\nSo no, the fact that the posters isolated the relevant code does not invalidate their findings.\n[1] https://red.anthropic.com/2026/mythos-preview/",
+                           "source":  "comment",
+                           "source_id":  47735019,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "woodruffw: \u003e Those models recovered much of the same analysis\nThis is an essentially unquantifiable statement that makes the underlying claim harder to believe as an external party. What does “much” mean here? The end state of vulnerability exploitation is typically eminently quantifiable (in the form of a functional PoC that demonstrates an exploited end state), so the strong version of the claims here would ideally be backed up by those kinds of PoCs.\n(Like other readers, I also find the trick of pre-feeding the smaller models the “relevant” code to be potentially disqualifying in a fair comparison. Discovering the relevant code is arguably one of the hardest parts of human VR.)",
+                           "source":  "comment",
+                           "source_id":  47732343,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "lordofgibbons: Without showing false-positive rates this analysis is useless.\nIf your model says every line if your code has a bug, it will catch 100% of the bugs, but it\u0027s not useful at all. They tested false-positives with only a single bug...\nI\u0027m not defending anthropic and openai either. Their numbers are garbage too since they don\u0027t produce false-positive rates either.\nWhy is this \"analysis\" making the rounds?",
+                           "source":  "comment",
+                           "source_id":  47732441,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "MaxLeiter: I think they key thing here is they \"isolated the relevant code\"\nIf the exploits exist in e.g. one file, great. But many complex zerodays and exploits are chains of various bugs/behaviors in complex systems.\nImportant research but I don’t think it dispels anything about Mythos",
+                           "source":  "comment",
+                           "source_id":  47732273,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "throwaway13337: So there are two competing narratives:\n1. Mythos uniquely is able to find vulnerabilities that other LLMs cannot practically.\n2. All LLMs could already do this but no one tried the way anthropic did.\nThe truth is one of these. And it comes down whether the comparison is apples to apples. Since we don\u0027t know the exact specifics of how either tests were performed, we lack a way of knowing absolutely.\nSo I guess, like so many things today, we can to pick the truth we find most comfortable personally.",
+                           "source":  "comment",
+                           "source_id":  47733021,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "chirau: Their isolation approach is totally different from Mythos approach though. Mythos had to evaluate whole code bases rather than isolated sections. It\u0027s like saying one dog walked into the Amazon jungle and found a tennis ball and then another team isolated a 1 square kilometer radius that they knew the ball was definitely in and found the same ball.",
+                           "source":  "comment",
+                           "source_id":  47732325,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "TacticalCoder: I don\u0027t dispute the fact that it\u0027s more than cool that we have a new tool to find security exploits (and do many other things) but... A big shoot-out to OpenBSD?\nWe\u0027re literally talking about the biggest computers on the planet ever, trained with the biggest amount of data ever available to a system, with the biggest investment ever made by man or close to it and...\nThe subtlest security bug it can find required: going 28 years in the past and find a...\nDenial-of-service?\nA freaking DoS? Not a remote root exploit. Not a local exploit.\nJust a DoS? And it had to go into 28 years old code to find that?\nSo kudos, hats off, deep bow not to Mythos but to OpenBSD? Just a bit, no!?",
+                           "source":  "comment",
+                           "source_id":  47732567,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "bryantwolf: All of this discourse seems very bizarre.\nIf smaller models can find these things, that doesn’t mean mythos is worse than we thought. It means all models are more capable.\nAlso if pointing models at files and giving them hints is all it takes to make them find all kinds of stuff, well, we can also spray and pray that pretty well with llms can’t we.\nIt just points to us finding a lot more stuff with only a little bit more sophistication.\nHopefully the growing pains are short and defense wins",
+                           "source":  "comment",
+                           "source_id":  47733030,
+                           "depth":  1
+                       }
+                   ],
+    "notes":  "Auto-generated OP+14-comment turnset from HN snapshot (v3 hard pack)."
+}

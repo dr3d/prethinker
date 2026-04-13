@@ -1,0 +1,99 @@
+﻿{
+    "name":  "hn_signal_notification_forensics_turnset_v1",
+    "source_thread_id":  47716490,
+    "source_url":  "https://news.ycombinator.com/item?id=47716490",
+    "difficulty":  "G4",
+    "lane":  "privacy_legal",
+    "utterances":  [
+                       {
+                           "utterance":  "OP (title): FBI used iPhone notification data to retrieve deleted Signal messages",
+                           "source":  "op",
+                           "source_id":  47716490
+                       },
+                       {
+                           "utterance":  "upofadown: Putting on my user hat...\n\"OK. Signal has forward secrecy. So messages are gone after I receive them. Great!\"\nOh, you didn\u0027t turn on disappearing messages? Oh, right, then forensic tools like Cellebrite can get them. You have to turn on disappearing messages. The default is off.\nOh, you did turn on disappearing messages? We send the messages in notifications. So the OS can keep them. Turns out Apple was doing that. There is an option you can turn on to prevent that. It is off by default.\n\"I\u0027ll just delete the entire app!\" No, sorry, the OS still has your messages...\nAt what point does the usability get so bad that we can blame the messaging system?\nThis same app had a usability issue that turned into a security issue just last year:\nEnd to End Encrypted Messaging in the News: An Editorial Usability Case Study (my article)\n https://articles.59.ca/doku.php?id=em:sg",
+                           "source":  "comment",
+                           "source_id":  47720347,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "jonpalmisc: Settings \u003e Notifications \u003e Notification Content \u003e Show: \"Name Only\" or \"No Name or Content\"\nI\u0027ve had this enabled to prevent sensitive messages from appearing in full whilst showing someone something on my phone, but I guess this is an added benefit as well.",
+                           "source":  "comment",
+                           "source_id":  47716967,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "chasil: First, a critical setting for Signal users:\n\"Signal’s settings include an option that prevents the actual message content from being previewed in notifications. However, it appears the defendant did not have that setting enabled, which, in turn, seemingly allowed the system to store the content in the database.\"\nSecond, how can I see this notification history?",
+                           "source":  "comment",
+                           "source_id":  47716774,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "pigggg: Just curious, how come at least once a month signal bugs me to turn on notifications? I said no for a reason, every single time - why does it keep asking?\nNot implying anything evil but it feels a bit weird esp after this.",
+                           "source":  "comment",
+                           "source_id":  47718981,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "blitzar: \u003e testimony in a recent trial\nCourt cases are the real way to audit security.\nLarping about security and complaining about companies responding to court orders only gets you so far. Its way more useful to look at what actually happens in reality.",
+                           "source":  "comment",
+                           "source_id":  47717544,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "niek_pas: I wonder why Apple doesn\u0027t \u0027just\u0027 delete the notification data associated with the app from the internal database when the user deletes the app? It seems like asking for problems to just keep old notification content around forever.",
+                           "source":  "comment",
+                           "source_id":  47717462,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "alsetmusic: Original article: FBI Extracts Suspect’s Deleted Signal Messages Saved in iPhone Notification Database[0]\n0. https://www.404media.co/fbi-extracts-suspects-deleted-signal...",
+                           "source":  "comment",
+                           "source_id":  47717513,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "1vuio0pswjnm7: \"However, it appears the defendant did not have that setting enabled, which, in turn, seemingly allowed the system to store the content in the database.\"\n\"[A]llowing the system to store the content in the database\" where a third party, such as Apple or a government, can access it is the default\nOnly a small minority of users know about settings and how to change them. The vast majority of users do not change default settings. Apple knows this",
+                           "source":  "comment",
+                           "source_id":  47718844,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "donohoe: Was this not a known issue (in terms of trade-offs) for years? I recall discussion back in 2018 at least that made mention of this concern.\n https://github.com/RealityNet/iOS-Forensics-References \n https://theforensicscooter.com/2021/10/03/ios-knowledgec-db-...",
+                           "source":  "comment",
+                           "source_id":  47719927,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "6thbit: So this is where we find out the one end of e2e is the phone and not the app.\nSemi-related, in whatsapp reading the text in the notification doesn\u0027t mark the message as read, so the OS is kinda mitm here.",
+                           "source":  "comment",
+                           "source_id":  47718259,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "etiam: Also discussed yesterday, in https://news.ycombinator.com/item?id=47703573",
+                           "source":  "comment",
+                           "source_id":  47716753,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "chinathrow: On Android, when I use WhatsApp and have notifications for groups turned off, I can still see that they arrive briefly and then get removed (the icon top left vanishes). I wonder often, if this is a way to push all group message content into an unencrypted data trace as well - for the same use case.",
+                           "source":  "comment",
+                           "source_id":  47717023,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "halapro: While it\u0027s definitely surprising that the OS caches this data after the notifications have been swiped away, I always thought that notifications are an obvious hole in the whole E2E encryption setup.",
+                           "source":  "comment",
+                           "source_id":  47719564,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "AlBugdy: So Signal is sending the notifications through Apple\u0027s ecosystem somehow, presumably to save battery life by not having a persistent connection to Signal\u0027s servers? That\u0027s what I think happens on Android, too. When I had Lineage years ago, I had a persistent connection to Signal as the notifications didn\u0027t come through Google. Unfortunately there was a persistent notification for the persistent connection with no way to remove it.\nAfter these news Signal should ask the users ASAP and on new installs something like:\n\u003e Do you want the notifications to pass through Apple (no privacy, better battery) or through Signal itself (better privacy, but less battery life due to the persistent connection to Signal\u0027s servers.\nIt should be as part of the setup wizard, not inside the settings.\nCorrect me if I\u0027ve misunderstood something.",
+                           "source":  "comment",
+                           "source_id":  47721681,
+                           "depth":  1
+                       }
+                   ],
+    "notes":  "Auto-generated OP+14-comment turnset from HN snapshot (v3 hard pack)."
+}

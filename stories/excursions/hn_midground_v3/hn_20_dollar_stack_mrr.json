@@ -1,0 +1,1142 @@
+﻿{
+    "thread_id":  47736555,
+    "hn_url":  "https://news.ycombinator.com/item?id=47736555",
+    "title":  "I run multiple $10K MRR companies on a $20/month tech stack",
+    "by":  "tradertef",
+    "unix_time":  1775973600,
+    "score":  931,
+    "descendants":  495,
+    "difficulty":  "G3",
+    "lane":  "ops_claims",
+    "label":  "hn_20_dollar_stack_mrr",
+    "why_selected":  "Operational claims, implied causality, and practical/financial pushback.",
+    "op_text":  "",
+    "harvested_comment_count":  140,
+    "comment_sample_policy":  {
+                                  "traversal":  "bfs",
+                                  "max_comments":  140,
+                                  "max_depth":  4
+                              },
+    "comments":  [
+                     {
+                         "id":  47737182,
+                         "by":  "hackingonempty",
+                         "time":  1775981191,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "\u003e The enterprise mindset dictates that you need an out-of-process database server. But the truth is, a local SQLite file communicating over the C-interface or memory is orders of magnitude faster than making a TCP network hop to a remote Postgres server.\nI don\u0027t want to diss SQLite because it is awesome and more than adequate for many/most web apps but you can connect to Postgres (or any DB really) on localhost over a Unix domain socket and avoid nearly all of the overhead.\nIt\u0027s not much harder to use than SQLite, you get all of the Postgres features, it\u0027s easier to run reports or whatever on the live db from a different box, and much easier if it comes time to setup a read replica, HA, or run the DB on a different box from the app.\nI don\u0027t think running Postgres on the same box as your app is the same class of optimistic over provisioning as setting up a kubernetes cluster."
+                     },
+                     {
+                         "id":  47737434,
+                         "by":  "senko",
+                         "time":  1775983930,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "If this sounds like basic advice, consider there are a lot of people out there that believe they have to start with serverless, kubernetes, fleets of servers, planet-scale databases, multi-zone high-availability setups, and many other \"best practices\".\nSaying \"you can just run things on a cheap VPS\" sounds amateurish: people are immediately out with \"Yeah but scaling\", \"Yeah but high availability\", \"Yeah but backups\", \"Yeah but now you have to maintain it\" arguments, that are basically regurgitated sales pitches for various cloud platforms. It\u0027s learned helplessness."
+                     },
+                     {
+                         "id":  47737522,
+                         "by":  "KronisLV",
+                         "time":  1775984990,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "\u003e I use Linode or DigitalOcean. Pay no more than $5 to $10 a month. 1GB of RAM sounds terrifying to modern web developers, but it is plenty if you know what you are doing.\nIf you get one dedicated server for multiple separate projects, you can still keep the costs down but relax those constraints.\nFor example, look at the Hetzner server auction: https://www.hetzner.com/sb/ \nI pay about 40 EUR a month for this:\n Disk: 736G / 7.3T (11%)\n CPU: Intel Core i7-7700 @ 8x 4.2GHz [42.0°C]\n RAM: 18004MiB / 64088MiB\n \nI put Proxmox on it and can have as many VMs as the IO pressure of the OSes will permit: https://www.proxmox.com/en/ (I cared mostly about storage so got HDDs in RAID 0, others might just get a server with SSDs)\nYou could have 15 VMs each with 4 GB of RAM and it would still come out to around 2.66 EUR per month per VM. It\u0027s just way more cost efficient at any sort of scale (number of projects) when compared to regular VPSes, and as long as you don\u0027t put any trash on it, Proxmox itself is fairly stable, being a single point of failure aside.\nOf course, with refurbished gear you\u0027d want backups, but you really need those anyways.\nAside from that, Hetzner and Contabo (opinions vary about that one though) are going to be more affordable even when it comes to regular VPS hosting. I think Scaleway also had those small Stardust instances if you want something really cheap, but they go out of stock pretty quickly as well."
+                     },
+                     {
+                         "id":  47737125,
+                         "by":  "gobdovan",
+                         "time":  1775980704,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "Nice list! I\u0027d say the SQLite with WAL is the biggest money saver mentioned.\nOne note: you can absolutely use Python or Node just as well as Go. There\u0027s Hetzner that offers 4GB RAM, 10TB network (then 1$/TB egress), 2CPUs machines for 5$.\nTwo disclaimers for VPS:\nIf you\u0027re using a dedicated server instead of a cloud server, just don\u0027t forget to backup DB to a Storage box often (3$ /mo for 1TB, use rsync). It\u0027s a good practice either way, but cloud instances seem more reliable to hardware faults. Also avoid their object store.\nYou are responsible for security. I saw good devs skipping basic SSH hardening and get infected by bots in \u003c1hr. My go-to move when I spin up servers is a two-stage Terraform setup: first, I set up SSH with only my IP allowed, set up Tailscale and then shutdown the public SSH IP entrypoint completely.\nTake care and have fun!"
+                     },
+                     {
+                         "id":  47737244,
+                         "by":  "f311a",
+                         "time":  1775981843,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "There are zero reasons to limit yourself to 1GB of RAM. By paying $20 instead of $5 you can get at least 8gb of RAM. You can use it for caches or a database that supports concurrent writes. The $15 difference won’t make any financial difference if you are trying to run a small business.\nThinking about on how to fit everything on a $5 VPS does not help your business."
+                     },
+                     {
+                         "id":  47737984,
+                         "by":  "taffydavid",
+                         "time":  1775988866,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "\u003e I bought a GitHub Copilot subscription in 2023, plugged it into standard VS Code, and never left. I tried Cursor and the other fancy forks when they briefly surpassed it with agentic coding, but Copilot Chat always catches up.\n\u003e Here is the trick that you might have missed: somehow, Microsoft is able to charge per request, not per token. And a \"request\" is simply what I type into the chat box. Even if the agent spends the next 30 minutes chewing through my entire codebase, mapping dependencies, and changing hundreds of files, I still pay roughly $0.04.\n\u003e The optimal strategy is simple: write brutally detailed prompts with strict success criteria (which is best practice anyway), tell the agent to \"keep going until all errors are fixed,\" hit enter, and go make a coffee while Satya Nadella subsidizes your compute costs.\nWow. I\u0027ll definitely be investigating this!"
+                     },
+                     {
+                         "id":  47737077,
+                         "by":  "vxsz",
+                         "time":  1775980361,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "I learned nothing. Most of this seems like common basic advice, wrapped up in AI written paragraphs...\nInitially from the title, I thought it would be about brainstorming and launching a successful idea, and that sort of thing."
+                     },
+                     {
+                         "id":  47737716,
+                         "by":  "Gooblebrai",
+                         "time":  1775986908,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "I know this article is about the stack, but I\u0027d like to point out that the success of the author has probably more to do with their marketing/sales strategy than their choice of technical infrastructure.\nSomething to remind to many tech folks on HN"
+                     },
+                     {
+                         "id":  47737167,
+                         "by":  "aleda145",
+                         "time":  1775981111,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "Great stack! I\u0027m doing a similar approach for my latest project (kavla.dev) but using fly.io and their suspend feature.\nScaling to zero with database persistence using litestream has cut my bill down to $0.1 per month for my backend+database.\nGranted I still don\u0027t have that many users, and they get 200ms of extra latency if the backend needs to wake up. But it\u0027s nice to never have to worry about accidental costs!"
+                     },
+                     {
+                         "id":  47742620,
+                         "by":  "leaves83829",
+                         "time":  1776017636,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "I quite like the websequencediagram. looks like a cool product!\nHe\u0027s mainly talking about the tech implementation which is the easy part.\nthe hard part of creating a business is finding a problem valuable enough to solve and reaching the users who need that problem solved. that\u0027s where the real value is."
+                     },
+                     {
+                         "id":  47737248,
+                         "by":  "t_mahmood",
+                         "time":  1775981871,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "SQLite is fine, but I have ran Postgresql on a $20 server without any issues, and I would suggest if you have to deal with concurrent users and tasks, Postgresql is the way to go. SQLite WAL works, but sometimes it caused some issues, when you have a lot of concurrent tasks running continuously.\nAnd, not sure I\u0027m correct, but I felt Postgresql has more optimized storage if you have large text data than SQLite, at least for me I had storage full with SQLite, but same application on Postgresql never had this issue"
+                     },
+                     {
+                         "id":  47737194,
+                         "by":  "ianpurton",
+                         "time":  1775981372,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "When he switches from Kubernetes in the cloud to Nginx -\u003e App Binary -\u003e Sqlite he trades operations functionality for cost.\nBut, actually you can run Kubernetes and Postgres etc on a VPS.\nSee https://stack-cli.com/ where you can specify a Supabase style infra on a low cost VPS on top of K3s."
+                     },
+                     {
+                         "id":  47748153,
+                         "by":  "ornornor",
+                         "time":  1776060052,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "I don’t get the copilot part.\nOpus 4.6 is a 3x multiplier as per GH pricing ( https://docs.github.com/en/copilot/concepts/billing/copilot-... ) so each request costs 0.12$ not 0.04$, and if using the fast mode opus 4.6 then it’s 30x so 1.20$/request.\nHow does the author get 0.04$ per?"
+                     },
+                     {
+                         "id":  47739143,
+                         "by":  "nerder92",
+                         "time":  1775999028,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "This is supposed to be a contrarian opinion yet this is a retoric yapped non-stop in the “build in public” community. Of course lean is a good approach, it makes sense, and most engineers know this. Is not a new concept, we’ve been doing this for years in every branch of engineering.\nThe invented “people start with a k8s cluster for 5 users” doesn’t really exist. This is just a story repeated ad nauseam to fit a narrative that help them justify their choices. This position is just as dogmatic, if not more, than the alleged dogma it attempts to disrupt.\nSmart technical leaders knows that technical decisions only matter in context never in absolutes. The right answer is always “it depends”.\nI can agree that there is a tendency to prematurely optimize infra, as a direct consequence of lack of measuring especially in young busy startups. One could argue that premature optimization might be the smart choice when you don’t have enough data, as in the best case scenario (your startup do well) you’ve saved some time, worst case scenario you’ve lost some money that depending on the situation might be less valuable than time spent in maintaining, and later refactoring, infra."
+                     },
+                     {
+                         "id":  47737446,
+                         "by":  "brkn",
+                         "time":  1775984142,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "The text feels incoherent to me and lacks some nuance.\nIt starts about cutting costs by the choice of infrastructure and goes further to less resource hungry tools and cheaper services. But never compares the cost of these things. Do I save actually the upgrade to a bigger server by using Go and sqlite over let\u0027s say Python and postgres? Or does it not even matter when you have just n many users. \nThen I do not understand why at one point the convenience of using OpenRouter is preferred over managing multiple API keys, when that should be cheaper and a cost point that could increase faster than your infrastructure costs.\nThere are some more points, but I do not want to write a long comment."
+                     },
+                     {
+                         "id":  47737497,
+                         "by":  "jmward01",
+                         "time":  1775984703,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "The basic premise, try to be lean, is a good one. The implementation will clearly be debated with everyone having their own opinion on it but the core point is sound. I\u0027d argue a different version of this though: keeping things lean forces simplicity and focus which is incredibly important early on. I have stepped into several startups and seen a mess of old/broken/I don\u0027t know what it does so leave it/etc etc. All of that, beyond the cost, slows you down because of the complexity. Regular gardening of your tech stack matters and has a lot of benefits."
+                     },
+                     {
+                         "id":  47742251,
+                         "by":  "Leomuck",
+                         "time":  1776015077,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "I do agree that the overall tendency towards cloud has made things much more complicated and expensive than they need to be in many cases. Cloud has its place, but so do simple server instances. Many projects won\u0027t reach any kind of scale that would exceed the capabilities of a medium-sized VPS. We\u0027re running a page with 600k users at work that could easily fit on a 30€ VPS. Instead, we moved to AWS and are now paying 800€ for it. No benefits whatsoever.\nSo yea, stick with what worked for decades if you don\u0027t see a reason not to.\nAlso, I remember reading that StackOverflow runs on a bunch of super powerful root servers?"
+                     },
+                     {
+                         "id":  47738208,
+                         "by":  "wg0",
+                         "time":  1775990843,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "Anyone doing per tenant database with SQLITE + Litestream? Please share your experiences and pain points. I know migrations are one. The other challenge is locating the correct database from incoming request. What else?"
+                     },
+                     {
+                         "id":  47737474,
+                         "by":  "gloomyday",
+                         "time":  1775984506,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "I think newer developers really need to learn that you can actually do production stuff using bare tools. It is not crazy, especially in the beginning, and it will save you a ton of money and time."
+                     },
+                     {
+                         "id":  47737216,
+                         "by":  "prakhar897",
+                         "time":  1775981517,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "Do these things actually work? I\u0027ve seen way too many gurus on twitter claiming to make 10K+ MRR every month. And then they quietly start applying for jobs. or selling courses instead of cashing in."
+                     },
+                     {
+                         "id":  47737137,
+                         "by":  "firefoxd",
+                         "time":  1775980778,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "I was writing about this recently [0]. In the 2000s, we were bragging about how cheap our services are and are getting. Today, a graduate with an idea is paying $200 amounts in AWS after the student discounts. They break the bank and go broke before they have tested the idea. Programming is literally free today.\n[0]: https://idiallo.com/blog/programming-tools-are-free"
+                     },
+                     {
+                         "id":  47737348,
+                         "by":  "ponco",
+                         "time":  1775982813,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "Always good to challenge the narrative - but I don\u0027t pay for RDS Postgres because of the WAL, replication, all the beauty of pg etc. I pay RDS because it\u0027s largely set and forget. I am gladly paying AWS to think about it for me. I think at a certain scale, this is a really good tradeoff. At the very beginning it could be overkill, and at the top end obviously its unsuitable - but for most of us those tradeoffs are why it\u0027s successful."
+                     },
+                     {
+                         "id":  47742864,
+                         "by":  "elias1233",
+                         "time":  1776018993,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "With the Oracle Cloud Free Tier you can do this for a whopping $0/month. They give you a 4 core ARM CPU and 24 GB RAM for free, plus 200 GB storage."
+                     },
+                     {
+                         "id":  47737193,
+                         "by":  "jstanley",
+                         "time":  1775981352,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "The most interesting thing in here is https://github.com/smhanov/laconic which is the author\u0027s \"agentic research orchestrator for Go that is optimized to use free search \u0026 low-cost limited context window llms\".\nI have been doing this kind of thing with Cursor and Codex subscriptions, but they do have annoying rate limits, and Cursor on the Auto model seems to perform poorly if you ask it to do too much work, so I am keen to try out laconic on my local GPU.\nEDIT:\nHaving tried it out, this may be a false economy.\nThe way it works is it has a bunch of different prompts for the LLMs (Planner, Synthesizer, Finalizer).\nThe \"Planner\" is given your input question and the \"scratchpad\" and has to come up with DuckDuckGo search terms.\nThen the harness runs the DuckDuckGo search and gives the question, results, and scratchpad to the Synthesizer. The Synthesizer updates the scratchpad with new information that is learnt.\nThis continues in a loop, with the Planner coming up with new search queries and the Synthesizer updating the scratchpad, until eventually the Planner decides to give a final answer, at which point the Finalizer summarises the information in a user-friendly final answer.\nThat is a pretty clever design! It allows you to do relatively complex research with only a very small amount of context window. So I love that.\nHowever I have found that the Synthesizer step is extremely slow on my RTX3060, and also I think it would cost me about £1/day extra to run the RTX3060 flat out vs idle. For the amount of work laconic can do in a day (not a lot!), I think I am better off just sending the money to OpenAI and getting the results more quickly.\nBut I still love the design, this is a very creative way to use a very small context window. And has the obvious privacy and freedom advantages over depending on OpenAI."
+                     },
+                     {
+                         "id":  47743597,
+                         "by":  "elwebmaster",
+                         "time":  1776022868,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "Can OP write another article focusing on the revenue side, how to actually bring in $10K MRR, forget about the tech stack, AI can solve that."
+                     },
+                     {
+                         "id":  47752684,
+                         "by":  "hamuraijack",
+                         "time":  1776091162,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "While this may be true that MOST projects don\u0027t need the complexity that the internet proselytizes, if you want a job in tech, you\u0027ll have to learn the teachings of the internet and what the \"industry\" agrees are \"best practices\"."
+                     },
+                     {
+                         "id":  47738240,
+                         "by":  "podlp",
+                         "time":  1775991103,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "I love SQLite and have ran it even on networked drives with queued writes for read-heavy applications. It’s an incredibly robust piece of software that’s often cost me pennies per month to serve 100k+ monthly users. But there’s definitely a time and place for solid, dedicated database servers like Postgres."
+                     },
+                     {
+                         "id":  47737156,
+                         "by":  "thibaultmol",
+                         "time":  1775980994,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "Pretty sure this is just written by AI... Why else would someone call \"Sonnet 3.5 Sonnet and gpt 4o\u0027 high end models."
+                     },
+                     {
+                         "id":  47738446,
+                         "by":  "yoaso",
+                         "time":  1775993304,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "I\u0027m taking the opposite approach - managed services all the way, and my monthly infrastructure costs are higher than what\u0027s described here.\nNo regrets. Infrastructure isn\u0027t the problem I\u0027m trying to solve. The problem is: who\u0027s actually going to pay for this?\nOptimizing infrastructure before you have customers is like designing a kitchen before you\u0027ve written the menu. I launched within 72 hours of starting development and went straight to customer validation. The market feedback started coming in immediately.\nInfrastructure costs show up in your bill. The cost of slow customer validation doesn\u0027t show up anywhere - until it\u0027s too late. That\u0027s the number I watch."
+                     },
+                     {
+                         "id":  47739384,
+                         "by":  "AlexSalikov",
+                         "time":  1776000478,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "Similar approach here. I run a side project on Next.js + Vercel (free tier) + Neon Postgres (free tier). Total hosting cost: $0/month.\nThe one place I\u0027d push back on SQLite: if your app has any write concurrency from external processes (cron jobs, webhooks), WAL mode helps but you still hit lock contention. I have data collection scripts running every 30 minutes that write to the same DB the web app reads from. Postgres handled that cleanly from day one. Neon\u0027s free tier is 512MB with connection pooling — more than enough for a side project with real data."
+                     },
+                     {
+                         "id":  47739690,
+                         "by":  "plomme",
+                         "time":  1776002098,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "The biggest cost when bootstrapping always seemed to be your salary to me, not infra costs. How long can you pay your mortgage and feed your kids off what should be your retirement or rainy day funds?"
+                     },
+                     {
+                         "id":  47738505,
+                         "by":  "pdimitar",
+                         "time":  1775993853,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "I do appreciate the technical simplicity argument and I\u0027m always advocating for it. And the few neat tricks i.e. Copilot.\nThat being said, I\u0027d much rather read a few ideas for good recurring passive income. Instead, the author kind of flexes on that, then says \"I get refused VC money because they don\u0027t see how their money would be useful for me\" -- which is one more flex -- and moves on to the technical bits.\nIt\u0027s coming across as bragging to me."
+                     },
+                     {
+                         "id":  47737868,
+                         "by":  "ronbenton",
+                         "time":  1775988086,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "I want to know how he’s identifying and monetizing businesses"
+                     },
+                     {
+                         "id":  47737937,
+                         "by":  "WolfOliver",
+                         "time":  1775988520,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "20$ vs 300$ does not really matter if you have multiple 10K MRR."
+                     },
+                     {
+                         "id":  47754387,
+                         "by":  "otterley",
+                         "time":  1776097411,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "I\u0027m curious as to what these $10k MRR companies are."
+                     },
+                     {
+                         "id":  47738085,
+                         "by":  "iamflimflam1",
+                         "time":  1775989669,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "Would be handy to actually see what these companies do…"
+                     },
+                     {
+                         "id":  47737209,
+                         "by":  "cagz",
+                         "time":  1775981461,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "Nice tech read, but without information about which companies, doing what, just feels way too click-baity."
+                     },
+                     {
+                         "id":  47736976,
+                         "by":  "hackingonempty",
+                         "time":  1775979176,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "\u003e If you need a little breathing room, just use a swapfile.\nYou should always use a swap file/partition, even if you don\u0027t want any swapping. That\u0027s because there are always cold pages and if you have no swap space that memory cannot be used for apps or buffers, it\u0027s just wasted."
+                     },
+                     {
+                         "id":  47739247,
+                         "by":  "skeeter2020",
+                         "time":  1775999650,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "I get that the focus of this article is on the tech portion, but I don\u0027t know anyone pitching today (aside from OpenAI) who is asking for big funding for the tech costs. It doesn\u0027t really matter if you built a system that costs you $200/month or $20/month if your lifetime value is $1000 and CAC is only $10 but you\u0027ve got no money. That\u0027s what people want to fund. VC funding is gasoline you pour on a fire (or fuel for you rocket if you\u0027re being charitable) - it makes you go faster; a pitch that focuses on \"slightly lower monthly op costs\" is not attractive."
+                     },
+                     {
+                         "id":  47739001,
+                         "by":  "shireboy",
+                         "time":  1775997850,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "This is my life goal right now. I have a bajillion ideas, know how to code them (even faster now), and just not enough time due to day job. A few questions:\nHow do you market them?\nIs customer support an issue?\nDo you see risk since ai makes it so easy to build/copy?"
+                     },
+                     {
+                         "id":  47738764,
+                         "by":  "BobBagwill",
+                         "time":  1775995996,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "Modern tech stacks always remind me of this cartoon:\n https://www.toontales.net/short/lumber-jerks/ \nAcme Toothpicks"
+                     },
+                     {
+                         "id":  47737570,
+                         "by":  "pelorat",
+                         "time":  1775985467,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "This is how every website used to be run before everyone fell four the cloud trap."
+                     },
+                     {
+                         "id":  47738377,
+                         "by":  "xxxxxxxx",
+                         "time":  1775992635,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "This is similar to what I do. Linode, Debian, Go, HTMX, SQLite (with modernc.org/SQLite so I have no CGO dependency) and Caddy. If I have apps that need a lot of storage, I just add an S3 bucket."
+                     },
+                     {
+                         "id":  47742976,
+                         "by":  "arc_light",
+                         "time":  1776019472,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "Solid writeup and impressive experience. You can try Caddy instead of nginx. Automatic HTTPS, dead-simple config, and it proxies to your Go binary in about 4 lines. If you\u0027re still manually managing Let\u0027s Encrypt certs in 2026, stop. Caddyfile for a Go backend is literally: reverse_proxy localhost:8080 — that\u0027s the whole thing."
+                     },
+                     {
+                         "id":  47738631,
+                         "by":  "cmiles8",
+                         "time":  1775994876,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "The biggest risk to cloud revenues is that everyone wakes up and realizes they could slash their cloud bills by 60+% quite quickly with just some minimal leaning."
+                     },
+                     {
+                         "id":  47740929,
+                         "by":  "ZeWaren",
+                         "time":  1776007995,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "I run a dozen PHP (Laravel) / MySQL / Redis apps on a single server which cost 45€ per month.\nApplications each have their own FreeBSD jails, so they\u0027re isolated.\nZFS incremental replication on top of regular app backups provide a quick recovery process should the hardware of that machine fail.\nMoving those apps to the cloud would cost orders of magnitude more, for benefits I don\u0027t need."
+                     },
+                     {
+                         "id":  47744342,
+                         "by":  "hedayet",
+                         "time":  1776027168,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "All the title is telling me is that [M|A]RR has been so abused, they stopped making any sense.\nA company selling dollar for cents would have infinite MRR, doesn\u0027t make it a \"business\", let alone a good business.\nInstead, tell us how much do you make in profit/month, not your gross MRR."
+                     },
+                     {
+                         "id":  47745028,
+                         "by":  "dh1011",
+                         "time":  1776031287,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "\u003e If you have a graphics card sitting somewhere in your house, you already have unlimited AI credits.\nI tried running a local LLM, and it’s actually cheaper to use AI credits when you factor in electricity costs. Only use a local LLM if data privacy is your priority."
+                     },
+                     {
+                         "id":  47737452,
+                         "by":  "mstaoru",
+                         "time":  1775984197,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "While I applaud the acumen, this reads like watching a kid standing on the 3rd floor balcony shouting \"look what I can do!\"\n$20/month. Yeah. Great, but why? You get a lot of peace of mind with \"real\" HA setup with real backups and real recovery, for not much more than $20, if you are careful.\nAnother half of article is about running \"free, unlimited\" local AI on a GPU (Santa brought it) with, apparently, free electricity (Santa pays for it)."
+                     },
+                     {
+                         "id":  47741019,
+                         "by":  "dwa3592",
+                         "time":  1776008441,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "\u003e\u003eThe optimal strategy is simple: write brutally detailed prompts with strict success criteria (which is best practice anyway), tell the agent to \"keep going until all errors are fixed,\" hit enter, and go make a coffee while Satya Nadella subsidizes your compute costs.\n100% agreed."
+                     },
+                     {
+                         "id":  47744458,
+                         "by":  "mercatop",
+                         "time":  1776027832,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "The real insight here isn\u0027t SQLite vs Postgres or VPS vs cloud – it\u0027s that for most indie/small SaaS, your bottleneck is never infrastructure. It\u0027s finding customers, keeping them, and shipping fast enough to stay relevant.\nI\u0027ve seen teams spend weeks setting up Kubernetes for an app that serves 50 requests per minute. The infrastructure complexity doesn\u0027t just cost money – it costs cognitive load that could go into product work.\nThe one thing I\u0027d add to the article: this approach works brilliantly until you need a second engineer. The moment you\u0027re not the only person deploying, you need at least some reproducibility – even a simple Makefile and a documented deploy process goes a long way."
+                     },
+                     {
+                         "id":  47748524,
+                         "by":  "adamgoodapp",
+                         "time":  1776062903,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "I found Cloudflare\u0027s offering to be more than enough and get multi regional deployment."
+                     },
+                     {
+                         "id":  47738209,
+                         "by":  "stavros",
+                         "time":  1775990857,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "Forget about the tech stack, how do I get multiple $10k MRR companies?"
+                     },
+                     {
+                         "id":  47740735,
+                         "by":  "mperham",
+                         "time":  1776007096,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "SQLite? Luxury! My servers use CSV files for the database. (It’s actually true)"
+                     },
+                     {
+                         "id":  47737256,
+                         "by":  "44za12",
+                         "time":  1775981910,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "I read it as an article in defence of boring tech with a fancier/clickbaity title.\nHere’s the more honest one i wrote a while back:\n https://aazar.me/posts/in-defense-of-boring-technology"
+                     },
+                     {
+                         "id":  47737236,
+                         "by":  "zmmmmm",
+                         "time":  1775981775,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "Can anybody validate this Github Copilot trick for accessign Opus 4.6? Sounds too good to be true."
+                     },
+                     {
+                         "id":  47744909,
+                         "by":  "ewams",
+                         "time":  1776030471,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "How do you handle billing / payment processing?"
+                     },
+                     {
+                         "id":  47739154,
+                         "by":  "ilikestarcraft",
+                         "time":  1775999093,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "One thing that I noticed was the mention of Claude 3.5 Sonnet or GPT-4o as cutting-edge models when the blog was written 25 days ago. This sadly makes me suspect that this was written by a LLM instead of a person..."
+                     },
+                     {
+                         "id":  47737107,
+                         "by":  "dnnddidiej",
+                         "time":  1775980611,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "Is infra where investors money is going? I imagined salaries would be it. Marketing costs maybe."
+                     },
+                     {
+                         "id":  47739585,
+                         "by":  "peter_retief",
+                         "time":  1776001527,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "AWS is not value for money, I do have a DO account that is great but my development is mostly hosted locally with tunnels from cloudflare, it is remarkable how far you (I) can get with that setup."
+                     },
+                     {
+                         "id":  47739147,
+                         "by":  "ilikestarcraft",
+                         "time":  1775999055,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "One thing that I noticed was the mention of Claude 3.5 Sonnet or GPT-4o when the blog was written 25 days ago. This sadly makes me suspect that this was written by a LLM instead of a person..."
+                     },
+                     {
+                         "id":  47749325,
+                         "by":  "firemelt",
+                         "time":  1776069044,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "granted my mmr is not 10k but I also run my apps on $6 digital ocean up until I need a background job which I raise it to $12 server"
+                     },
+                     {
+                         "id":  47738421,
+                         "by":  "sourcecodeplz",
+                         "time":  1775993075,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "I do it even more simpler: build in PHP and webhosting from Hetzner. All managed: email, sub-domains, name-servers, OS updates/patches etc.\nI really started to enjoy managed servers/instances."
+                     },
+                     {
+                         "id":  47738923,
+                         "by":  "jjjggggggg",
+                         "time":  1775997287,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "Where do you get your eh-trade.ca stock price data? Given the licensing fees, that seems like one of the greater challenges of bootstrapping anything with market data."
+                     },
+                     {
+                         "id":  47740701,
+                         "by":  "niedbalski",
+                         "time":  1776006895,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "Truth has been told."
+                     },
+                     {
+                         "id":  47737509,
+                         "by":  "jofzar",
+                         "time":  1775984890,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "I decided to look at their website halfway through the post,\n https://imgur.com/a/7M4PdO6 \nThis is really what 10k mrr can get you? A badly designed AI slop website that isn\u0027t even mobile correctly compatible. The logo is white background on black website like a university project.\nI can\u0027t believe that people are willingly spending money on this."
+                     },
+                     {
+                         "id":  47741689,
+                         "by":  "zkmon",
+                         "time":  1776011855,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "How do you connect back from VPS to local LLM?"
+                     },
+                     {
+                         "id":  47737599,
+                         "by":  "Myzel394",
+                         "time":  1775985733,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "Does anybody know a good service to self host Ai? My graphics card is shit, I want to rent hardware to run my own models"
+                     },
+                     {
+                         "id":  47738242,
+                         "by":  "krypttt",
+                         "time":  1775991123,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "We have gone full circle haven\u0027t we?"
+                     },
+                     {
+                         "id":  47737184,
+                         "by":  "raincole",
+                         "time":  1775981229,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "So what\u0027s the $10K MMR product, exactly? The lede is buried into nonexistence. Is it this one: https://www.websequencediagrams.com/ ...?\n\u003e Here is the trick that you might have missed: somehow, Microsoft is able to charge per request, not per token. And a \"request\" is simply what I type into the chat box. Even if the agent spends the next 30 minutes chewing through my entire codebase, mapping dependencies, and changing hundreds of files, I still pay roughly $0.04.\nReally? Lol. If it\u0027s true why would you publish it? To ensure Microsoft will patch it up and fuck up your workflow?"
+                     },
+                     {
+                         "id":  47740534,
+                         "by":  "sadeed08",
+                         "time":  1776006109,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "Very good article for a beginner starting newly to keep things lean and simple."
+                     },
+                     {
+                         "id":  47737918,
+                         "by":  "esskay",
+                         "time":  1775988383,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "It always make me both roll my eyes and smile a little when i see someone daft enough to think they need some obscene setup - you dont. You never have. You are not Amazon, Microsoft, Google, etc. If you get to the point where you need that kind of setup you\u0027re already employing a dev ops team thats telling you that.\nStick whatever you\u0027re working on onto a ~$5/mo cheapo vps from someone like Hetzner, Digitalocean, etc and just get on with building your thing."
+                     },
+                     {
+                         "id":  47744117,
+                         "by":  "osigurdson",
+                         "time":  1776025730,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "Lots of debate about SQLite vs Postgres. One thing to note is you can certainly run Postgres (Kubernetes even if you want) and your app for $20 / month."
+                     },
+                     {
+                         "id":  47737082,
+                         "by":  "brador",
+                         "time":  1775980410,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "You already have and had everything you need to scale the business to max and it hasn’t happened so more money won’t help.\nWhat do you want VC to do?\nYou didn’t bring a plan."
+                     },
+                     {
+                         "id":  47737380,
+                         "by":  "ValtteriL",
+                         "time":  1775983122,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "\u003eThe feedback was simply: \"What do you even need funding for?\"\nNot clear from the text, but what was your plan using the funding on? If you did not have a plan, what did you expect? VCs want to see how adding more money results in asymmetric returns."
+                     },
+                     {
+                         "id":  47738182,
+                         "by":  "hirako2000",
+                         "time":  1775990638,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "Very interesting insights on long running Llms locally.\nEdited."
+                     },
+                     {
+                         "id":  47743376,
+                         "by":  "pipeninja",
+                         "time":  1776021744,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "Dude you are my spirit animal. Ive been building lean like this forever and thought I was the only nutcase out there...I too have had the same pitch problems as you, when a platform is hella efficient and there is no spending to be had on fixed assets, its not very appealing to investors."
+                     },
+                     {
+                         "id":  47737855,
+                         "by":  "m00dy",
+                         "time":  1775987962,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "I think making is the easiest part, would be really cool if you also reveal how you distribute what you are making for $20/mo."
+                     },
+                     {
+                         "id":  47737180,
+                         "by":  "sailingcode",
+                         "time":  1775981182,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "AI has solved the \"code problem\", but it hasn\u0027t solved the \"marketing problem\"…"
+                     },
+                     {
+                         "id":  47737276,
+                         "by":  "petesergeant",
+                         "time":  1775982186,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "If you can’t articulate what you need funding for, don’t be surprised if nobody will give it to you?"
+                     },
+                     {
+                         "id":  47736556,
+                         "by":  "tradertef",
+                         "time":  1775973600,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "Not my website. I found this interesting."
+                     },
+                     {
+                         "id":  47737745,
+                         "by":  "blurb2023",
+                         "time":  1775987181,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "well, the guy runs what he runs and can\u0027t complain"
+                     },
+                     {
+                         "id":  47744648,
+                         "by":  "coolThingsFirst",
+                         "time":  1776028957,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "For his GPU he needs to have special permission from the ISP for incoming connections correct?"
+                     },
+                     {
+                         "id":  47743771,
+                         "by":  "nodesocket",
+                         "time":  1776023793,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "I run a python flask app on Docker on AWS EC2. Including Dozzle (logs), Beszel (monitoring) and Unami (analytics). Runs on three t4g instances. One being a dedicated caddy exposed to the internet, one being a NAT gateway (self managed) and the main Docker worker host (private). All in cost is $35 a month. You’re splitting hairs and being the typical overly frugal developer instead of founder mode if you optimizing dollars when you have $20k / mo revenue.\nWhat do I get as an advantage being on AWS? S3 (literally like a $1 month) SQS (free tier) and Lambda (async jobs; free tier). Capacity if needed, just scale up t4g instances."
+                     },
+                     {
+                         "id":  47742049,
+                         "by":  "phendrenad2",
+                         "time":  1776013828,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "This seems extremely spartan. Live a little, splurge on the 2GB server and MariaDB instead of SQLite!"
+                     },
+                     {
+                         "id":  47738718,
+                         "by":  "nullorempty",
+                         "time":  1775995587,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "Eh-trade.ca eh? The name spells the exit strategy this is seeking. Awesome idea and a great execution. Vertical scaling will take this simple setup far and probably far enough."
+                     },
+                     {
+                         "id":  47741165,
+                         "by":  "nickandbro",
+                         "time":  1776009155,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "Pieter levels would love this."
+                     },
+                     {
+                         "id":  47737274,
+                         "by":  "petesergeant",
+                         "time":  1775982163,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "You can get all the advantages and almost none of the constraints by buying a bigger base server for $50/m"
+                     },
+                     {
+                         "id":  47737977,
+                         "by":  "turdfergusonsr",
+                         "time":  1775988814,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "eh the super low cost only comes from low complexity. If complex, people pay more, features cost more, infra costs aren’t that big of a cost compared to dev time."
+                     },
+                     {
+                         "id":  47737173,
+                         "by":  "globalnode",
+                         "time":  1775981165,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "nice article, validates some of the things i already thought. although im sure things like aws and database servers etc are still useful for big companies"
+                     },
+                     {
+                         "id":  47737341,
+                         "by":  "Madmallard",
+                         "time":  1775982741,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "So is the slopaclypse gonna destroy HN too? 2nd from the top AI written non-proofread article"
+                     },
+                     {
+                         "id":  47736991,
+                         "by":  "p4bl0",
+                         "time":  1775979344,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "Just in case, if there are others like me who where wondering what does \"MRR\" means, it seems to be \"monthly recurring revenue\"."
+                     },
+                     {
+                         "id":  47737360,
+                         "by":  "6stringmerc",
+                         "time":  1775982909,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "What a fascinating article. I especially love the part about writing extremely detailed requests which only cost $0.04 versus the token approach most “vibe code” devs use. Fortunately his tactic is almost impossible to emulate for 90% of the YCombinator audience / HN commentators.\nWhy do I know this? Because there had to be a declaration here to stop using ChatGPT and other Agents to write YOUR OWN GODDAMN POSTS. Thinking isn’t your strong suit, Greed is, and taking the time to learn the power of English doesn’t satisfy the latter, so you minimize it to your own detriment.\nDon’t get mad at me. Go punch a mirror."
+                     },
+                     {
+                         "id":  47737175,
+                         "by":  "trick-or-treat",
+                         "time":  1775981169,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "LMFAO at Linode / Digital Ocean as lean servers.\nHetzner / Contabo maybe. Cloudflare workers definitely.\nThis guy is not at my level and multiple $10k MRR is possible but unlikely."
+                     },
+                     {
+                         "id":  47740396,
+                         "by":  "diebillionaires",
+                         "time":  1776005397,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "Agree with a lot of this except sqlite, and the fact that if I commit to building something I typically put it in the cloud with basic scaling from the start for efficiency."
+                     },
+                     {
+                         "id":  47736970,
+                         "by":  "komat",
+                         "time":  1775979034,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "Cool but missing the Claude Code or Coding Agent part imo"
+                     },
+                     {
+                         "id":  47736979,
+                         "by":  "codemog",
+                         "time":  1775979258,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "A lot of this advice is good or at least interesting. A lot of it is questionable. Python is completely fine for the backend. And using SQLite for your prod database is a bad idea, just use Postgres or similar."
+                     },
+                     {
+                         "id":  47739369,
+                         "by":  "the__alchemist",
+                         "time":  1776000391,
+                         "depth":  1,
+                         "parent":  47736555,
+                         "text":  "I concur with some of the commenters that this read as a bit of a brain dump. It has a thread connecting several loosely-related topics.\nObservation #1: You can also solve the tech stack problem with Heroku. I think the author\u0027s stack probably has a steeper learning curve, but is a cheaper option. I think it\u0027s a bit of an odd comparison (I won\u0027t say straw-man, as I don\u0027t doubt some people do this) to go from a fully-controlled simple setup to using AWS with a pile of extra crap. You can also, for example, run something similar to what he or she is describing on AWS, Heroku etc. (I.e. without the things in the AWS diagram he indicated like kubernetes and load balancers.)\nObservation #2: I have not found WAL mode is an antidote to SQLite locks during multiple concurrent writes. (This is anecdotal)\nI think regarding Go vs Python/Ruby etc. I completely get that. I would now like to check out Go on web. I use Rust for most of my software writing, but am still on Python for web servers, because there is nothing I can use for Rust that is as powerful and easy as Django."
+                     },
+                     {
+                         "id":  47737886,
+                         "by":  "andersmurphy",
+                         "time":  1775988161,
+                         "depth":  2,
+                         "parent":  47737182,
+                         "text":  "Sqlite smokes postgres on the same machine even with domain sockets [1]. This is before you get into using multiple sqlite database.\nWhat features postgres offers over sqlite in the context of running on a single machine with a monolithic app? Application functions [2] means you can extend it however you need with the same language you use to build your application. It also has a much better backup and replication story thanks to litestream [3].\n- [1] https://andersmurphy.com/2025/12/02/100000-tps-over-a-billio... \n- [2] https://sqlite.org/appfunc.html \n- [3] https://litestream.io/ \nThe main problem with sqlite is the defaults are not great and you should really use it with separate read and write connections where the application manages the write queue rather than letting sqlite handle it."
+                     },
+                     {
+                         "id":  47737396,
+                         "by":  "eurleif",
+                         "time":  1775983294,
+                         "depth":  2,
+                         "parent":  47737182,
+                         "text":  "Looks like the overhead is not insignificant:\n Running 100,000 `SELECT 1` queries:\n PostgreSQL (localhost): 2.77 seconds\n SQLite (in-memory): 0.07 seconds\n \n( https://gist.github.com/leifkb/1ad16a741fd061216f074aedf1eca... )"
+                     },
+                     {
+                         "id":  47737594,
+                         "by":  "usernametaken29",
+                         "time":  1775985718,
+                         "depth":  2,
+                         "parent":  47737182,
+                         "text":  "I have used SQLite with extensions in extreme throughput scenarios. We’re talking running through it millions of documents per second in order to do disambiguation.\nI won’t say this wouldn’t have been possible with a remote server, but it would have been a significant technical challenge.\nInstead we packed up the database on S3, and each instance got a fresh copy and hammered away at the task. SQLite is the time tested alternative for when you need performance, not features"
+                     },
+                     {
+                         "id":  47737312,
+                         "by":  "jampekka",
+                         "time":  1775982420,
+                         "depth":  2,
+                         "parent":  47737182,
+                         "text":  "\u003e It\u0027s not much harder to use than SQLite, you get all of the Postgres features, it\u0027s easier to run reports or whatever on the live db from a different box, and much easier if it comes time to setup a read replica, HA, or run the DB on a different box from the app.\nIsn\u0027t this idea to spend a bit more effort and overhead to get YAGNI features exactly what TFA argues against?"
+                     },
+                     {
+                         "id":  47737636,
+                         "by":  "jbverschoor",
+                         "time":  1775986099,
+                         "depth":  2,
+                         "parent":  47737182,
+                         "text":  "I\u0027ve been doing that for decades.. People seem to simply not know about unix architecture.\nWhat I like about sqlite is that it\u0027s simply one file"
+                     },
+                     {
+                         "id":  47743069,
+                         "by":  "eikenberry",
+                         "time":  1776019953,
+                         "depth":  2,
+                         "parent":  47737182,
+                         "text":  "\u003e It\u0027s not much harder to use than SQLite, you get all of the Postgres features [..]\nMore features is a net negative if you don\u0027t need those features. Ideally you want your DB to support exactly what you need and nothing more. Not typically realistic but the closer you can get the better."
+                     },
+                     {
+                         "id":  47743419,
+                         "by":  "pipeninja",
+                         "time":  1776022019,
+                         "depth":  2,
+                         "parent":  47737182,
+                         "text":  "You can\u0027t simply copy/paste a Postgres database though...also you\u0027d be surprised how fast SQLite can be...I\u0027ve used SQLite for projects where I just couldn\u0027t get the performance elsewhere. For example, I had a names database with over 100 million rows in it for converting names to diminutives (e.g. David to Dave) and the inverse...after I precomputed a metric ton of indices it went like a rocket. Sure the file was quite big but oh boy was it quick."
+                     },
+                     {
+                         "id":  47738089,
+                         "by":  "weego",
+                         "time":  1775989696,
+                         "depth":  2,
+                         "parent":  47737182,
+                         "text":  "Thats just swapping another enterprise focused concern into the mix. Your database connection latency is absolutely not a concerning part of your system."
+                     },
+                     {
+                         "id":  47742530,
+                         "by":  "himata4113",
+                         "time":  1776016974,
+                         "depth":  2,
+                         "parent":  47737182,
+                         "text":  "As someone who sets up a k3s cluster for a single user project I feel called out.\nThe thing is one you learn the technology, everything else seems more work than the \"easy way\"."
+                     },
+                     {
+                         "id":  47737494,
+                         "by":  "dizhn",
+                         "time":  1775984682,
+                         "depth":  2,
+                         "parent":  47737182,
+                         "text":  "Author\u0027s own \u0027auth\u0027 project works with sqlite and postgres."
+                     },
+                     {
+                         "id":  47737344,
+                         "by":  "Jolter",
+                         "time":  1775982779,
+                         "depth":  2,
+                         "parent":  47737182,
+                         "text":  "I mean, you’re not wrong about the facts, but it’s also pretty trivial to migrate the data from SQLite into a separate Postgres server later, if it turns out you do need those features after all. But most of the time, you don’t."
+                     },
+                     {
+                         "id":  47745801,
+                         "by":  "dzonga",
+                         "time":  1776037847,
+                         "depth":  2,
+                         "parent":  47737182,
+                         "text":  "mysql is really easy to run too.\nPostgres too (though it might come with a few operational headaches)\nall these things are awesome.\nhowever the complex over-engineering comes from people putting a k8 cluster or some cloud services when self hosting will do."
+                     },
+                     {
+                         "id":  47737996,
+                         "by":  "direwolf20",
+                         "time":  1775988957,
+                         "depth":  2,
+                         "parent":  47737182,
+                         "text":  "IIRC TCP/IP through localhost actually benchmarked faster than Unix sockets because it was optimized harder. Might\u0027ve been fixed now. Unix sockets gives you the advantage of authentication based on the user ID of who\u0027s connecting.\nMy experience with sqlite for server-based apps has been that as your app grows, you almost always eventually need something bigger than sqlite and need to migrate anyway. For a server-based app, where minimizing deployment complexity isn\u0027t an extremely important concern, and with mixed reads and writes, it\u0027s rarely a bad idea to use Postgres or MariaDB from the start. Yes there are niche scenarios where sqlite on the server might be better, but they\u0027re niche."
+                     },
+                     {
+                         "id":  47741584,
+                         "by":  "winrid",
+                         "time":  1776011354,
+                         "depth":  2,
+                         "parent":  47737182,
+                         "text":  "you also get a much better query execution engine, so if you need to run reports or analytics they will be faster"
+                     },
+                     {
+                         "id":  47738202,
+                         "by":  "lichenwarp",
+                         "time":  1775990817,
+                         "depth":  2,
+                         "parent":  47737182,
+                         "text":  "ORDERS OF MAGNITUDE NEWS"
+                     },
+                     {
+                         "id":  47742289,
+                         "by":  "operatingthetan",
+                         "time":  1776015301,
+                         "depth":  2,
+                         "parent":  47737434,
+                         "text":  "When I was a consultant we would plan out 25 piece cloud deployments for little pie in the sky apps that would never see more than 200 users. Everyone has been trained that \u0027cloud\u0027 means a lot of expensive moving parts and doesn\u0027t stop to plan their deployments beyond that."
+                     },
+                     {
+                         "id":  47741696,
+                         "by":  "GorbachevyChase",
+                         "time":  1776011891,
+                         "depth":  2,
+                         "parent":  47737434,
+                         "text":  "Don’t forget that people involved in information technology procurement will pay very large sums of the company’s money to not have to understand anything."
+                     },
+                     {
+                         "id":  47738564,
+                         "by":  "kandros",
+                         "time":  1775994352,
+                         "depth":  2,
+                         "parent":  47737434,
+                         "text":  "“Cloud-native natives” had so much free plans that had no need to understand what a basic app really needs."
+                     },
+                     {
+                         "id":  47743606,
+                         "by":  "Lalabadie",
+                         "time":  1776022950,
+                         "depth":  2,
+                         "parent":  47737434,
+                         "text":  "More and more, I\u0027m seeing this issue with agents-based workflows as well. The training set is full (in quantity and in proportion) of codebases that are organized for very large teams, so that\u0027s what most prompted architectures lead to.\nIn my case I\u0027m seeing it a lot on the front-end side. My clients end up with single-page apps that install Shadcn, Tailwind, React, React Router, Axios, Zod, React Form and Vite, all to center a some input elements and perform a few in-browser API calls. It\u0027s a huge maintenance burden even before they start getting value out of it.\nThese large setups are often a correct answer, but not the right one for the situation."
+                     },
+                     {
+                         "id":  47741878,
+                         "by":  "jayd16",
+                         "time":  1776012870,
+                         "depth":  2,
+                         "parent":  47737434,
+                         "text":  "Hmm backups seems like an important one."
+                     },
+                     {
+                         "id":  47737661,
+                         "by":  "ramraj07",
+                         "time":  1775986305,
+                         "depth":  2,
+                         "parent":  47737434,
+                         "text":  "Apparently the phrase cargo cult software engineering is not common anymore. Explains these things perfectly."
+                     },
+                     {
+                         "id":  47739058,
+                         "by":  "throw-the-towel",
+                         "time":  1775998370,
+                         "depth":  2,
+                         "parent":  47737434,
+                         "text":  "And now big tech often doesn\u0027t even have the high availability to show for all that complexity."
+                     },
+                     {
+                         "id":  47744248,
+                         "by":  "littlestymaar",
+                         "time":  1776026544,
+                         "depth":  2,
+                         "parent":  47737434,
+                         "text":  "\u003e If this sounds like basic advice, consider there are a lot of people out there that believe they have to start with serverless, kubernetes, fleets of servers, planet-scale databases, multi-zone high-availability setups, and many other \"best practices\".\nI currently work in a small b2c startup with 200 active users (and targeting 5000 by the end of the year) and we\u0027re already paying AWS $1000/month on infra and it drives me crazy…\nAnd the deployment process is also over-engineered in a way that makes it hard to change anything (if you want to release without changing things too much that\u0027s fine, but changing the deployment process is already a nightmare).\n“But best practices”, “but scalability”, “but 99.999% uptime” …"
+                     },
+                     {
+                         "id":  47737881,
+                         "by":  "InfraScaler",
+                         "time":  1775988130,
+                         "depth":  2,
+                         "parent":  47737434,
+                         "text":  "I don\u0027t know what to say. People keep saying these engineers exist and here I am not having seen a single, and I follow many indie hackers communities."
+                     },
+                     {
+                         "id":  47741383,
+                         "by":  "nchmy",
+                         "time":  1776010196,
+                         "depth":  2,
+                         "parent":  47737522,
+                         "text":  "Agreed. Though, now that hetzner has increased pricing, OVH is quite competitively priced and has some newer hardware available."
+                     },
+                     {
+                         "id":  47738123,
+                         "by":  "compounding_it",
+                         "time":  1775990027,
+                         "depth":  2,
+                         "parent":  47737522,
+                         "text":  "What do you do about ipv4 ? Do you also use a routing VM to manage all that ?\nIt’s very interesting how people rent large VMs with a hypervisor. I’m wondering if licenses for VPS have any clauses preventing this for commercial scale."
+                     },
+                     {
+                         "id":  47740573,
+                         "by":  "utopiah",
+                         "time":  1776006320,
+                         "depth":  2,
+                         "parent":  47737522,
+                         "text":  "Why VMs over containers?"
+                     },
+                     {
+                         "id":  47749503,
+                         "by":  "rldjbpin",
+                         "time":  1776070660,
+                         "depth":  2,
+                         "parent":  47737522,
+                         "text":  "might also consider using a solution such as disco [1] which avoids requiring VMs while still allowing the ergonomics of cloud services.\nat the end of the day, for a \"$20/month\" stack, there may probably not be enough services running to make sense for going dedicated yet.\n[1] https://github.com/letsdiscodev/"
+                     },
+                     {
+                         "id":  47742799,
+                         "by":  "DeathArrow",
+                         "time":  1776018658,
+                         "depth":  2,
+                         "parent":  47737522,
+                         "text":  "Wouldn\u0027t be easier and more efficient to just run docker containers?"
+                     },
+                     {
+                         "id":  47747853,
+                         "by":  "thatwasunusual",
+                         "time":  1776057274,
+                         "depth":  2,
+                         "parent":  47737522,
+                         "text":  "\u003e I put Proxmox on it [...]\nHow, exactly? Doesn\u0027t it require phyiscal access to the server?"
+                     },
+                     {
+                         "id":  47738812,
+                         "by":  "jon-wood",
+                         "time":  1775996394,
+                         "depth":  2,
+                         "parent":  47737125,
+                         "text":  "Personally for backups I’d avoid using a product provided by the same company as the VM I’m backing up. You should be defending against the individual VM suffering corruption of some kind, needing to roll back to a previous version because of an error you made, and finally your VM provider taking a dislike to you (rationally or otherwise) and shutting down your account.\nIf you’re backing up to a third party losing your account isn’t a disaster, bring up a VM somewhere else, restore from backups, redirect DNS and you’re up and running again. If the backups are on a disk you can’t access anymore then a minor issue has just escalated to an existential threat to your company.\nPersonally I use Backblaze B2 for my offsite backups because they’re ridiculously cheap, but other options exist and Restic will write to all of them near identically."
+                     },
+                     {
+                         "id":  47737342,
+                         "by":  "t_mahmood",
+                         "time":  1775982757,
+                         "depth":  2,
+                         "parent":  47737125,
+                         "text":  "About security, wall of shame story,\nOnce I had Postgresql db with default password on a new vps, and forgetting to disable password based login, on a server with no domain. And it got hacked in a day, and was being used as bot server. And that was 10 years ago.\nRecently deployed server, and was getting ssh login attempts within an hour, and it didn\u0027t had a domain. Fortunately, I\u0027ve learned my lesson, and turned of password based login as soon as the server was up and running.\nAnd similar attempts bogged down my desktop to halt.\nHaving an machine open to the world is now very scary. Thanks God for service like tailscale exists."
+                     },
+                     {
+                         "id":  47739011,
+                         "by":  "joelthelion",
+                         "time":  1775997918,
+                         "depth":  2,
+                         "parent":  47737125,
+                         "text":  "\u003e You are responsible for security. I saw good devs skipping basic SSH hardening and get infected by bots in \u003c1hr. My go-to move when I spin up servers is a two-stage Terraform setup: first, I set up SSH with only my IP allowed, set up Tailscale and then shutdown the public SSH IP entrypoint completely.\nNote that you don\u0027t need all of that to keep your SSH server secure. Just having a good password (ideally on a non-root account) is more than enough."
+                     },
+                     {
+                         "id":  47737211,
+                         "by":  "selcuka",
+                         "time":  1775981469,
+                         "depth":  2,
+                         "parent":  47737125,
+                         "text":  "\u003e Nice list! I\u0027d say the SQLite with WAL is the biggest money saver mentioned.\nFunny you said that. I migrated an old, Django web site to a slightly more modern architecture (docker compose with uvicorn instead of bare metal uWSGI) the other day, and while doing that I noticed that it doesn\u0027t need PostgreSQL at all. The old server had it already installed, so it was the lazy choice.\nI just dumped all data and loaded it into an SQLite database with WAL and it\u0027s much easier to maintain and back up now."
+                     },
+                     {
+                         "id":  47738011,
+                         "by":  "dwedge",
+                         "time":  1775989076,
+                         "depth":  2,
+                         "parent":  47737125,
+                         "text":  "I need more info about devs getting infected over ssh in less than an hour. Unless they had a comically weak root password or left VNC I don\u0027t believe it at all"
+                     },
+                     {
+                         "id":  47742303,
+                         "by":  "bilinguliar",
+                         "time":  1776015358,
+                         "depth":  2,
+                         "parent":  47737125,
+                         "text":  "Sqlite + Litestream for backups."
+                     },
+                     {
+                         "id":  47737914,
+                         "by":  "InfraScaler",
+                         "time":  1775988351,
+                         "depth":  2,
+                         "parent":  47737125,
+                         "text":  "Does WAL really offer multiple concurrent writers? I know little about DBs and I\u0027ve done a couple of Google searches and people say it allows concurrent reads while a write is happening, but no concurrent writers?\nNot everybody says so... So, can anyone explain what\u0027s the right way to think about WAL?"
+                     },
+                     {
+                         "id":  47738230,
+                         "by":  "egwor",
+                         "time":  1775991038,
+                         "depth":  2,
+                         "parent":  47737125,
+                         "text":  "First step is to get ssh setup correctly, and second step is to enable a firewall to block incoming connections on everything except the key ports (ssh but on a different port/web/ssl). This immediately eliminates a swathe of issues!"
+                     },
+                     {
+                         "id":  47737625,
+                         "by":  "asymmetric",
+                         "time":  1775985938,
+                         "depth":  2,
+                         "parent":  47737125,
+                         "text":  "\u003e Also avoid their object store.\nCurious as to why you say this. I’m using litestream to backup to Hetzner object storage, and it’s been working well so far.\nI guess itt’s probably more expensive than just a storage box?\nNot sure but I also don’t have to set up cron jobs and the like."
+                     },
+                     {
+                         "id":  47738409,
+                         "by":  "nurgalive",
+                         "time":  1775992985,
+                         "depth":  2,
+                         "parent":  47737125,
+                         "text":  "When creating a VPS on Hetzner, it lets you by default to configure the key auth only."
+                     },
+                     {
+                         "id":  47737377,
+                         "by":  "jampekka",
+                         "time":  1775983102,
+                         "depth":  2,
+                         "parent":  47737244,
+                         "text":  "$15 is not exactly zero, is it? If you don\u0027t need more than 1GB, why pay anything for more than 1GB?\nI recall running LAMP stacks on something like 128MB about 20 years ago and not really having problems with memory. Most current website backends are not really much more complicated than they were back then if you don\u0027t haul in bloat."
+                     },
+                     {
+                         "id":  47737544,
+                         "by":  "100ms",
+                         "time":  1775985283,
+                         "depth":  2,
+                         "parent":  47737244,
+                         "text":  "NVME read latency is around 100usec, a SQLite3 database in the low terabytes needs somewhere between 3-5 random IOs per point lookup, so you\u0027re talking worst case for an already meaningful amount of data about 0.5ms per cold lookup. Say your app is complex and makes 10 of these per request, 5 ms. That leaves you serving 200 requests/sec before ever needing any kind of cache.\nThat\u0027s 17 million hits per day in about 3.9 MiB/sec sustained disk IO, before factoring in the parallelism that almost any bargain bucket NVME drive already offers (allowing you to at least 4x these numbers). But already you\u0027re talking about quadrupling the infrastructure spend before serving a single request, which is the entire point of the article."
+                     }
+                 ]
+}

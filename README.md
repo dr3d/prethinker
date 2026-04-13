@@ -20,6 +20,7 @@ Last updated: 2026-04-13
 - run explorer: `docs/run-reports-hub.html`
 - demo playbook: `docs/DEMO_PLAYBOOK.md`
 - excursion source bank: `stories/excursions/SOURCE_BANK_V1.md`
+- excursion hard pack: `stories/excursions/HN_MIDGROUND_PACK_V3.md`
 - out in the wild article: `docs/WILD_MODE.md`
 - wild failure isolation: `docs/WILD_FAILURE_ISOLATION.md`
 - track scoreboard: `docs/TRACK_SCOREBOARD.md`

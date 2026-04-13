@@ -119,3 +119,60 @@ Pattern:
 - `rung_467_frontier_failure_question_advice_dual_intent`
 
 These are the first direct artifacts from this failure-promotion loop.
+
+## CE Boundary Findings (2026-04-13)
+
+Additional sweeps showed a strong CE sensitivity boundary:
+
+- `track_excursion_frontier_v2_full_cepush_summary_20260413.json`
+  - settings: `ce=0.90`, rounds=`3`, served=`qwen3.5:9b`
+  - result: `2/12` (`16.7%`)
+- `track_excursion_failure_promotions_v1_cepush_summary_20260413.json`
+  - settings: `ce=0.90`, rounds=`3`
+  - result: `0/3` (`0.0%`)
+- `track_excursion_failure_promotions_v1_cemed_summary_20260413.json`
+  - settings: `ce=0.55`, rounds=`2`
+  - result: `3/3` (`100%`)
+
+Interpretation:
+
+- high CE can over-escalate and starve factual commits.
+- moderate CE restores commit flow but may under-exercise clarification routes in cleaner promoted-guard rungs.
+
+## Clarification-Route Stress Findings
+
+### Positive route exercise
+
+- `20260413_221027_rung460_ce85_mitm/session_summary.json`
+  - `committed_turns=9/9`
+  - `fallback_resolution_total=4/4`
+  - readiness grade `A`
+
+### Hard stuck case
+
+- `20260413_222531_hn_signal_v3_ce85_mitm/session_summary.json`
+  - `committed_turns=13/15`
+  - `pending_turns=2`
+  - `fallback_resolution_total=0/4`
+  - readiness grade `D`
+
+Observed stuck pattern:
+
+- clarification question asks for canonical user/predicate identity that remains unresolved.
+- sidecar fallback answers are accepted but replay still ends in `clarification_requested` due max-round cap.
+
+## Bare-vs-Baked Drift Check (Hard Cases)
+
+Source: `tmp/runs/sp_parity/sp_parity_summary_push_20260413.json`
+
+- scenarios: `4`
+- parity mismatches: `1`
+- mismatch case:
+  - `rung_444_frontier_unpunctuated_coref_sweep`
+  - runtime lane: `4/6` failed
+  - baked lane: `2/6` failed
+
+Takeaway:
+
+- most tested hard cases were parity-aligned, but some non-trivial drift remains.
+- keep parity checks in the loop when changing CE policy or prompt delivery mode.

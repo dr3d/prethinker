@@ -28,6 +28,48 @@ Use this as the handoff doc for future agents and for repo-to-repo migration.
 
 ## Timeline of Major Sessions
 
+## Session 33 (2026-04-13): CE Envelope Push + Hard-Wild v3 Harvest + Parity Drift Probe
+
+Outcome:
+
+- ran CE envelope stress sweeps on bare lane (`qwen3.5:9b` + runtime prompt) with served-LLM clarification enabled:
+  - `excursion_frontier_v2_full` at `ce=0.90`:
+    - `2/12` (`16.7%`)
+    - artifact: `tmp/runs/tracks/track_excursion_frontier_v2_full_cepush_summary_20260413.json`
+  - `excursion_failure_promotions_v1` at `ce=0.90`:
+    - `0/3` (`0.0%`)
+    - artifact: `tmp/runs/tracks/track_excursion_failure_promotions_v1_cepush_summary_20260413.json`
+  - same promoted-failure track at `ce=0.55`:
+    - `3/3` (`100%`)
+    - artifact: `tmp/runs/tracks/track_excursion_failure_promotions_v1_cemed_summary_20260413.json`
+  - frontier typo/pronoun pack at `ce=0.70`:
+    - `frontier_language_width_v6` -> `6/16` (`37.5%`)
+    - artifact: `tmp/runs/tracks/track_frontier_language_width_v6_ce070_summary_20260413.json`
+
+- exercised MITM clarification/fallback loops with high CE:
+  - successful recovery example:
+    - `tmp/runs/mitm_sessions/20260413_221027_rung460_ce85_mitm/session_summary.json`
+    - fallback resolution `4/4`, readiness `A`
+  - hard stuck example:
+    - `tmp/runs/mitm_sessions/20260413_222531_hn_signal_v3_ce85_mitm/session_summary.json`
+    - pending turns `2/15`, fallback resolution `0/4`, readiness `D`
+
+- generated harder real-world HN source pack (`v3`) with deeper sampling:
+  - `stories/excursions/hn_midground_manifest_v3.json`
+  - `stories/excursions/HN_MIDGROUND_PACK_V3.md`
+  - `stories/excursions/hn_midground_v3/*.json`
+  - `stories/excursions/hn_midground_v3/turnsets/*.json` (OP + 14 comments, 15 turns)
+
+- ran bare-vs-baked parity on hard cases:
+  - artifact: `tmp/runs/sp_parity/sp_parity_summary_push_20260413.json`
+  - result: `1` mismatch across `4` scenarios (`rung_444`), while `rung_446`, `rung_466`, and `rung_460` were parity-aligned.
+
+Interpretation:
+
+- CE has a narrow operating window: too high over-escalates and starves commits; too low restores throughput but can under-exercise clarification routes.
+- clarification loop is functional but can dead-end on identity/canonical-predicate ambiguity under noisy discourse.
+- hard-wild data expansion plus parity checks are now in place to prevent synthetic-only optimism.
+
 ## Session 32 (2026-04-13): HN Midground Harvest v2 (Real-World Transcript Bank)
 
 Outcome:

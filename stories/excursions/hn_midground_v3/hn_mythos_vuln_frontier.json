@@ -1,0 +1,1142 @@
+﻿{
+    "thread_id":  47732020,
+    "hn_url":  "https://news.ycombinator.com/item?id=47732020",
+    "title":  "Small models also found the vulnerabilities that Mythos found",
+    "by":  "dominicq",
+    "unix_time":  1775926048,
+    "score":  1264,
+    "descendants":  339,
+    "difficulty":  "G4",
+    "lane":  "security_reasoning",
+    "label":  "hn_mythos_vuln_frontier",
+    "why_selected":  "Dense technical claims with partial agreement/disagreement across comments.",
+    "op_text":  "",
+    "harvested_comment_count":  140,
+    "comment_sample_policy":  {
+                                  "traversal":  "bfs",
+                                  "max_comments":  140,
+                                  "max_depth":  4
+                              },
+    "comments":  [
+                     {
+                         "id":  47732337,
+                         "by":  "johnfn",
+                         "time":  1775928436,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "The Anthropic writeup addresses this explicitly:\n\u003e This was the most critical vulnerability we discovered in OpenBSD with Mythos Preview after a thousand runs through our scaffold. Across a thousand runs through our scaffold, the total cost was under $20,000 and found several dozen more findings. While the specific run that found the bug above cost under $50, that number only makes sense with full hindsight. Like any search process, we can\u0027t know in advance which run will succeed.\nMythos scoured the entire continent for gold and found some. For these small models, the authors pointed at a particular acre of land and said \"any gold there? eh? eh?\" while waggling their eyebrows suggestively.\nFor a true apples-to-apples comparison, let\u0027s see it sweep the entire FreeBSD codebase. I hypothesize it will find the exploit, but it will also turn up so much irrelevant nonsense that it won\u0027t matter."
+                     },
+                     {
+                         "id":  47732254,
+                         "by":  "epistasis",
+                         "time":  1775927773,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "\u003e We took the specific vulnerabilities Anthropic showcases in their announcement, isolated the relevant code, and ran them through small, cheap, open-weights models. Those models recovered much of the same analysis. Eight out of eight models detected Mythos\u0027s flagship FreeBSD exploit, including one with only 3.6 billion active parameters costing $0.11 per million tokens.\nImpressive, and very valuable work, but isolating the relevant code changes the situation so much that I\u0027m not sure it\u0027s much of the same use case.\nBeing able to dump an entire code base and have the model scan it is they type of situation where it opens up vulnerability scans to an entirely larger class of people."
+                     },
+                     {
+                         "id":  47732350,
+                         "by":  "tptacek",
+                         "time":  1775928488,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "If you cut out the vulnerable code from Heartbleed and just put it in front of a C programmer, they will immediately flag it. It\u0027s obvious. But it took Neel Mehta to discover it. What\u0027s difficult about finding vulnerabilities isn\u0027t properly identifying whether code is mishandling buffers or holding references after freeing something; it\u0027s spotting that in the context of a large, complex program, and working out how attacker-controlled data hits that code.\nIt\u0027s weird that Aisle wrote this."
+                     },
+                     {
+                         "id":  47732340,
+                         "by":  "antirez",
+                         "time":  1775928451,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "Congrats: completely broken methodology, with a big conflict of interest. Giving specific bug hints, with an isolated function that is suspected to have bugs, is not the same task, NOR (crucially) is a task you can decompose the bigger task into. It is basically impossible to segment code in pieces, provide pieces to smaller models, and expect them to find all the bugs GPT 5.4 or other large models can find. Second: the smarter the model, and less the pipeline is important. In the latest couple of days I found tons if Redis bugs with a three prompts open-ended pipeline composed of a couple of shell scripts. Do you think I was not already tying with weaker models? I did, but it didn\u0027t work. Don\u0027t trust what you read, you have access to frontier models for 20$ a month. Download some C code, create a trivial pipeline that starts from a random file and looks for vulnerabilities, then another step that validates it under a hard test, like ASAN crash, or ability to reach some secret, and so forth, and only then the problem can be reported. Test yourself what it is possible. Don\u0027t let your fear make you blind. Also, there is a big problem that makes the blog post reasoning not just weak per se, but categorically weak: if small model X can find 80% of vulnerabilities, if there is a model Y that can find the other potential 20%, we need \"Y\": the maintainers should make sure they access to models that are at least as good as the black hats folks."
+                     },
+                     {
+                         "id":  47735605,
+                         "by":  "muyuu",
+                         "time":  1775960078,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "I think the \"Mythos\" name is genius. The people at Anthropic make a bunch of claims and the public is expected to just believe them without any possibility of testing those claims or reproducing those results, and since so many people are invested in this saviour for the Global economy, or in the industry in general, or in hype to feed their engagement-based income sources, then there is faith to spare.\nMeanwhile this mythical beast wasn\u0027t able to prevent the Bun vulnerability that exposed their code, let alone precluding the need to acquire that IP in the first place for presumably hundreds of millions of $$$, instead of coding a better replacement or a solution of its own.\nWhat is real and measurable is that subscription plan users are getting a much degraded service for the same money through both open and hidden policies, while Anthropic moves compute to serve off-the-counter customers. The same people who come with the most obvious and brazen lies to dismiss the clear degradation of their service also come with this \"security\" justification for a move that looks just like good old market segmentation which would perfectly fit the strong symptoms that they cannot afford to offer tokens at a competitive price in this market."
+                     },
+                     {
+                         "id":  47732549,
+                         "by":  "vmg12",
+                         "time":  1775929810,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "The technique Anthropic uses was demonstrated by Nicholas Carlini in a talk he gave 2 weeks ago and it\u0027s very simple, when asking LLMs to review code, ask them to focus its review on one file in a single session. Here is the video with the timestamp (watch through to ~5:30, they show two different ways of prompting claude).\n https://youtu.be/1sd26pWhfmg?t=204 \n https://youtu.be/1sd26pWhfmg?t=273 \nIMO the big \"innovation\" being shown by Mythos is the effectiveness with prompting LLMs to look for security vulnerabilities by focusing on specific files one at a time and automating this prompting with a simple script.\nPrompting Mythos to focus on a single file per session is why I suspect it cost Anthropic $20k to find some of the bugs in these codebases. I know this same technique is effective with Opus 4.6 and GPT 5.4 because I\u0027ve been using it on my own code. If you just ask the agent to review your pr with a low effort prompt they are not exhaustive, they will not actually read each changed file and look at how it interacts with the system as a whole. If the entire session is to review the changes for a single file, the llm will do much more work reviewing it.\nEdit: I changed my phrasing, it\u0027s not about restricting its entire context to one file but focusing it on one file but still allowing it to look at how other files interact with it."
+                     },
+                     {
+                         "id":  47735019,
+                         "by":  "StrauXX",
+                         "time":  1775951846,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "A lot of comments here are dismissing this post because the relevant code was isolated. But thats the exact same thing Anthropic did with Mythos! They describe their (very lean) harness in the Anthropic Red Mythos blog post. The harness first assigns each file in the given codebase an importance value. Then points claude code at the cpdebase with a prompt stating that it should focus on that file. It spawns a claude code instances for each file in the codebase.\nSo no, the fact that the posters isolated the relevant code does not invalidate their findings.\n[1] https://red.anthropic.com/2026/mythos-preview/"
+                     },
+                     {
+                         "id":  47732343,
+                         "by":  "woodruffw",
+                         "time":  1775928463,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "\u003e Those models recovered much of the same analysis\nThis is an essentially unquantifiable statement that makes the underlying claim harder to believe as an external party. What does “much” mean here? The end state of vulnerability exploitation is typically eminently quantifiable (in the form of a functional PoC that demonstrates an exploited end state), so the strong version of the claims here would ideally be backed up by those kinds of PoCs.\n(Like other readers, I also find the trick of pre-feeding the smaller models the “relevant” code to be potentially disqualifying in a fair comparison. Discovering the relevant code is arguably one of the hardest parts of human VR.)"
+                     },
+                     {
+                         "id":  47732441,
+                         "by":  "lordofgibbons",
+                         "time":  1775929136,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "Without showing false-positive rates this analysis is useless.\nIf your model says every line if your code has a bug, it will catch 100% of the bugs, but it\u0027s not useful at all. They tested false-positives with only a single bug...\nI\u0027m not defending anthropic and openai either. Their numbers are garbage too since they don\u0027t produce false-positive rates either.\nWhy is this \"analysis\" making the rounds?"
+                     },
+                     {
+                         "id":  47732273,
+                         "by":  "MaxLeiter",
+                         "time":  1775927964,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "I think they key thing here is they \"isolated the relevant code\"\nIf the exploits exist in e.g. one file, great. But many complex zerodays and exploits are chains of various bugs/behaviors in complex systems.\nImportant research but I don’t think it dispels anything about Mythos"
+                     },
+                     {
+                         "id":  47733021,
+                         "by":  "throwaway13337",
+                         "time":  1775933384,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "So there are two competing narratives:\n1. Mythos uniquely is able to find vulnerabilities that other LLMs cannot practically.\n2. All LLMs could already do this but no one tried the way anthropic did.\nThe truth is one of these. And it comes down whether the comparison is apples to apples. Since we don\u0027t know the exact specifics of how either tests were performed, we lack a way of knowing absolutely.\nSo I guess, like so many things today, we can to pick the truth we find most comfortable personally."
+                     },
+                     {
+                         "id":  47732325,
+                         "by":  "chirau",
+                         "time":  1775928328,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "Their isolation approach is totally different from Mythos approach though. Mythos had to evaluate whole code bases rather than isolated sections. It\u0027s like saying one dog walked into the Amazon jungle and found a tennis ball and then another team isolated a 1 square kilometer radius that they knew the ball was definitely in and found the same ball."
+                     },
+                     {
+                         "id":  47732567,
+                         "by":  "TacticalCoder",
+                         "time":  1775929911,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "I don\u0027t dispute the fact that it\u0027s more than cool that we have a new tool to find security exploits (and do many other things) but... A big shoot-out to OpenBSD?\nWe\u0027re literally talking about the biggest computers on the planet ever, trained with the biggest amount of data ever available to a system, with the biggest investment ever made by man or close to it and...\nThe subtlest security bug it can find required: going 28 years in the past and find a...\nDenial-of-service?\nA freaking DoS? Not a remote root exploit. Not a local exploit.\nJust a DoS? And it had to go into 28 years old code to find that?\nSo kudos, hats off, deep bow not to Mythos but to OpenBSD? Just a bit, no!?"
+                     },
+                     {
+                         "id":  47733030,
+                         "by":  "bryantwolf",
+                         "time":  1775933458,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "All of this discourse seems very bizarre.\nIf smaller models can find these things, that doesn’t mean mythos is worse than we thought. It means all models are more capable.\nAlso if pointing models at files and giving them hints is all it takes to make them find all kinds of stuff, well, we can also spray and pray that pretty well with llms can’t we.\nIt just points to us finding a lot more stuff with only a little bit more sophistication.\nHopefully the growing pains are short and defense wins"
+                     },
+                     {
+                         "id":  47733127,
+                         "by":  "chopete3",
+                         "time":  1775934273,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "The impact of the Mythos announcement on the cybersecurity firms( like Crowdstrike,ZScalar etc) is big enough(10-15% drop in stock price) and this pushback is expected.\nCompanies like Aisle.com (the blog) and other VAPT companies charge huge amounts to detect vulnerabilities.\nIf Cloud Mythos become a simple github hook their value will get reduced.\nThat is a disruption."
+                     },
+                     {
+                         "id":  47753469,
+                         "by":  "sheepscreek",
+                         "time":  1776094258,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "I think what made Mythos a big deal is not that it could find vulnerabilities. Opus can do that too. But Mythos went a step further and autonomously built exploits very successfully whereas Opus struggled to do that.\nMost modern day exploits are multi-step requiring a multitude of skills to pull off successfully."
+                     },
+                     {
+                         "id":  47732446,
+                         "by":  "bhouston",
+                         "time":  1775929181,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "This is quite misleading.\nIf you isolate the positive cases and then ask a tool to label them and it labels them all positive, doesn\u0027t prove anything. This is a one-sided test and it is really easy to write a tool that passes it -- just return always true!\nYou need to test your tool on both positive and negative cases and check if it is accurate on both.\nIf you don\u0027t, you could end up with hundreds or thousands of false positives when using this on real-world samples.\nThe real test is to use it to find new real bugs in the midst of a large code base."
+                     },
+                     {
+                         "id":  47732515,
+                         "by":  "operatingthetan",
+                         "time":  1775929572,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "My theory is that Mythos is basically just Opus with revised context window handling and more compute thrown at it. So while it will be a step forward, it is probably primarily hype."
+                     },
+                     {
+                         "id":  47732301,
+                         "by":  "amazingamazing",
+                         "time":  1775928160,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "Did mythos isolate the code to begin with? Without a clear methodology that can be attempted with another model the whole thing is meaningless"
+                     },
+                     {
+                         "id":  47732316,
+                         "by":  "dist-epoch",
+                         "time":  1775928227,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "Anthropic claim is not necessarily that Mythos found vulnerabilities that other models couldn\u0027t but that it could easily exploit them while previous models failed to do that:\n\u003e “Opus 4.6 is currently far better at identifying and fixing vulnerabilities than at exploiting them.” Our internal evaluations showed that Opus 4.6 generally had a near-0% success rate at autonomous exploit development. But Mythos Preview is in a different league. For example, Opus 4.6 turned the vulnerabilities it had found in Mozilla’s Firefox 147 JavaScript engine—all patched in Firefox 148—into JavaScript shell exploits only two times out of several hundred attempts. We re-ran this experiment as a benchmark for Mythos Preview, which developed working exploits 181 times, and achieved register control on 29 more."
+                     },
+                     {
+                         "id":  47736694,
+                         "by":  "solatic",
+                         "time":  1775975245,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "Most commenters here: \"Mythos is powerful because you can point it at a whole codebase, if you point the smaller models at a whole codebase and iterate through small sections of code, you\u0027ll get too many false-positives to handle.\"\nThis misses the point entirely. You pay $20k as a one-time fee to establish a baseline. Your codebase develops one PR at a time, which... updates isolated sections of code. Which means you don\u0027t need Mythos for a PR, just small, open-weight models. Maybe you run Mythos once a year to ensure that you keep your baseline updated and reduce the risk that the open-weights models missed anything.\nSeeing this as anything but a huge win for open-weights models and a huge loss for Anthropic misses the point entirely. Mythos isn\u0027t something you can persuade Fortune 500 companies to spend $20k/day or even $20k/week to spend on, like they were hoping for. $20k/year is a lot less valuable, and it won\u0027t justify development costs or Anthropic\u0027s growth multiple."
+                     },
+                     {
+                         "id":  47733303,
+                         "by":  "slibhb",
+                         "time":  1775935777,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "The best way to think of Anthropic\u0027s communication about Mythos is as advertisement. It\u0027s basically \"our model is too smart to release\" which suggests they\u0027re ahead of OpenAI (without proof)"
+                     },
+                     {
+                         "id":  47735588,
+                         "by":  "onesociety2022",
+                         "time":  1775959835,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "This article is written by a company building an AI cybersecurity solution. Not sure how much you can trust them on this topic - their business will get destroyed if Mythos is actually so superior to existing models that it doesn’t require a big investment into the scaffold/harness to find security vulnerabilities. If the model is too good, then what’s the value of their solution?"
+                     },
+                     {
+                         "id":  47732568,
+                         "by":  "mrifaki",
+                         "time":  1775929933,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "finding vulns in a large codebase is a search problem with a huge\nnegative space and what aisle measured is classification accuracy on\nground-truth positives, those are different tasks so a model that\ncorrectly labels a pre-isolated vulnerable function tells me almost\nnothing about that model\u0027s ability to surface the same function out of\na million lines of unrelated code under a realistic triage budget\nthe experiment i\u0027d want to see is running each of the small models as an\nunsupervised scanner across full freebsd then return the top-k suspicious\nfunctions per model and compute precision at recall levels that\ncorrespond to real analyst triage budgets, if mythos s findings show up\nin the small models top 100, i\u0027d call that meaningful but if they only\nsurface under 10k false positives then the cost advantage\ncollapses because analyst triage time is more expensive than frontier\nmodel compute to begin with\nsecond thing i keep coming back to is the $20k mythos number is a search\nbudget not a model cost, small models at one hundredth the per-token\nprice don\u0027t give us one hundredth the total budget when the search\nprocess is the same shape, i still run thousands of iterations and the\nissue for autonomous vuln research is how fast the reward signal\nconverges and the aisle post doesn\u0027t touch any of this"
+                     },
+                     {
+                         "id":  47733047,
+                         "by":  "abel_",
+                         "time":  1775933622,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "This misses the broader ongoing trend. For a few million dollars, of course you can create a startup that builds tools it can use to more efficiently find code vulnerabilities. And of course you can do this with weaker models with scaffolds that incorporate lots of human understanding. The difference now is that you don\u0027t need an expensive team, nor a bunch of human heuristics, nor a million dollars. The requisite cost and skill are falling rapidly."
+                     },
+                     {
+                         "id":  47732354,
+                         "by":  "herf",
+                         "time":  1775928503,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "There are a lot of details in the original article, in most cases comparing with Opus, which required \"human guidance\" to exploit the FreeBSD vulnerability:\n https://red.anthropic.com/2026/mythos-preview/ \nAlso \"isolating the relevant code\" in the repro is not a detail - Mythos seems to find issues much more independently."
+                     },
+                     {
+                         "id":  47733151,
+                         "by":  "coppsilgold",
+                         "time":  1775934448,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "LLMs are wordsmith oracles. A lot of effort went into trying to coax interactive intelligence from them but the truth is that you could have probably always harnessed the base models directly to do very useful things. The instruct tuned models give your harness even more degrees of freedom.\nA while ago, the autoresearch[1] harness went viral, yet it\u0027s but a highly simplified version of AlphaEvolve[2][3][4].\nIn the cybersecury context, you can envision a clever harness that probes every function in a codebase for vulnerabilities, then bubbles the candidates up to their callsites (and probes whether the vulnerability can be triggered from there) and then all the way to an interface (such as a syscall) where a potential exploit can be manifested. And those would be the low hanging fruit, other vulnerabilities may require the interplay of multiple functions. Or race conditions.\n[1] https://github.com/karpathy/autoresearch \u003e\n[2] https://deepmind.google/blog/alphaevolve-a-gemini-powered-co... \u003e\n[3] https://arxiv.org/abs/2506.13131 \u003e\n[4] https://github.com/algorithmicsuperintelligence/openevolve \u003e"
+                     },
+                     {
+                         "id":  47732591,
+                         "by":  "cedws",
+                         "time":  1775930077,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "Didn’t they also use Mythos to scan Linux many times over and it only found one DoS bug or something? I find it hard to believe there is only one security bug lurking."
+                     },
+                     {
+                         "id":  47752304,
+                         "by":  "krschacht",
+                         "time":  1776089663,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "At the end of this article it states, \"Our tests gave models the vulnerable function directly, often with contextual hints (e.g., \"consider wraparound behavior\"). A real autonomous discovery pipeline starts from a full codebase with no hints.\" I\u0027m not a cybersecurity expert, but isn\u0027t 80% of the challenge finding where the exploit lives in the code!?\nThat really undermines the author\u0027s claims. This article feels dishonest in it\u0027s claim that \"small, cheap, open-weights models ... recovered much of the same analysis.\""
+                     },
+                     {
+                         "id":  47736732,
+                         "by":  "latentframe",
+                         "time":  1775975731,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "Good writeup seems like it’s not really the big model against the small one anymore and if smaller models can do most of the job once the context is smaller then it’s more about the system around them and the expertise ..."
+                     },
+                     {
+                         "id":  47735761,
+                         "by":  "morpheuskafka",
+                         "time":  1775962358,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "Everyone is commenting that this doesn\u0027t count because they pointed it at the specific files that Mythos already found vulnerable.\nBut sometimes you do know where vulnerabilities are and still don\u0027t know what they are. For example, an update may be released in beta changing the part of the Mac or Windows kernel or some app, but they haven\u0027t published the CVE yet. If locally runnable (even with significant compute costs) LLMs can find and exploit it based on either the location of the changed file or the actual diff of the compiled output, we could see exploits before the update ever went to production?"
+                     },
+                     {
+                         "id":  47733475,
+                         "by":  "midnitewarrior",
+                         "time":  1775937371,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "At the center of every security situation is the question, \"is the effort worth the reward?\"\nWe prepare security measures based on the perceived effort a bad actor would need to defeat that method, along with considering the harm of the measure being defeated. We don\u0027t build Fort Knox for candy bars, it was built for gold bars.\nThese model advances change the equation. The effort and cost to defeat a measure goes down by an order of magnitude or more.\nThings nobody would have considered to reasonably attempt are becoming possible. However. We have 2000-2020s security measures in place that will not survive the AI models of 2026+. The investment to resecure things will be massive, and won\u0027t come soon enough."
+                     },
+                     {
+                         "id":  47752648,
+                         "by":  "hamuraijack",
+                         "time":  1776091043,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "This feels so dishonest. If the vulnerabilities are a needle in the haystack. Mythos was just given the haystack and told to find the needle while the authors pointed to a spot in the haystack and told their LLM to try looking around there. That\u0027s not even close to being the same."
+                     },
+                     {
+                         "id":  47735310,
+                         "by":  "make_it_sure",
+                         "time":  1775955500,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "The only reason that\u0027s on top of HN is that people really want Mythos to be bad. This \"study\" is a cheap gimmick, they pointed to the actual location with the vulnerability and said \"something is bad here, find it\".\nThe hardest part is locating the issue, if you point directly to it, you\u0027re not comparing the same thing by far, and they know it. This was just a stunt by them to get publicity, they knew what they were doing and many fell for it, including here."
+                     },
+                     {
+                         "id":  47737108,
+                         "by":  "high_byte",
+                         "time":  1775980616,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "\"The correct answer: not currently vulnerable, but the code is fragile and one refactor away from being exploitable.\"\nabsolutely. I see this pattern all the time when doing security audits - code that is nearly-vulnerable. I would mark these things as informational and recommend to harden them anyway, and any model would do a good job to do the same."
+                     },
+                     {
+                         "id":  47732347,
+                         "by":  "Retr0id",
+                         "time":  1775928468,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "And what about the false-positive rate?"
+                     },
+                     {
+                         "id":  47733050,
+                         "by":  "yalogin",
+                         "time":  1775933628,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "Intuitively every existing model has already been trained on all code, all vulnerabilities reported, all security papers. So they all have the capability. Small models fall short because they may not be able to find a vulnerability that spans across a large function chain but for the most part they should suffice too.\nOf course I say this without any knowledge of what mythos is doing or how it’s different. I am sure it’s somehow different"
+                     },
+                     {
+                         "id":  47734986,
+                         "by":  "Animats",
+                         "time":  1775951449,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "What are they finding? Buffer overflows? Something else?\nAlso, if someone has the time and tokens, would they please run the OpenJPEG 2000 decoder through this tester? It\u0027s known to be brittle. The data format has lots of offsets, and it\u0027s permitted to truncate the file to get a lower-rez version. That combo leads to trouble."
+                     },
+                     {
+                         "id":  47736656,
+                         "by":  "rurban",
+                         "time":  1775974759,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "If they would have watched Carlini\u0027s \"unblocked\" talk on youtube, which is much more detailed than the blog post, they would not need this writeup. He was worried about the reproducers of the zero-day\u0027s. Not the actual zero-days that much."
+                     },
+                     {
+                         "id":  47735763,
+                         "by":  "jurschreuder",
+                         "time":  1775962370,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "All these models will completely mess up your code if you let them.\nAnd if they constantly scan your code with various settings and updates you will spend hours a day reading, trying to understand locally coherent but structurally incoherent vibes trying to pinpoint the exact reasoning flaw. Exhausting."
+                     },
+                     {
+                         "id":  47734577,
+                         "by":  "mrinterweb",
+                         "time":  1775946585,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "I feel like there have been enough hyperbolic claims by Anthropic, that I\u0027m starting to get some real Boy Who Cried Wolf energy. I\u0027m starting to tune out, and assume it is a marketing ploy. Trust me, I\u0027m an Antropic fan, and I pay my $200/month for max, but the claims are wearing thin."
+                     },
+                     {
+                         "id":  47733262,
+                         "by":  "AlexandrB",
+                         "time":  1775935423,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "The whole \"this tool is too dangerous to be public\" idea reeks of marketing. Just like all the \"AI is an existential threat\" talk a year ago. These companies are using ideas usually reserved for something like nuclear weapons to make their products look more impressive."
+                     },
+                     {
+                         "id":  47732638,
+                         "by":  "elzbardico",
+                         "time":  1775930436,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "I think that probably Mytho\u0027s mojo comes from a lot of post-training on this kind of task.\nI occasionally pick up contract work doing coding annotation to make some quick extra money, and a few months ago one of the projects was heavily focused on spotting common memory access bugs in C and C++."
+                     },
+                     {
+                         "id":  47733394,
+                         "by":  "charcircuit",
+                         "time":  1775936607,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "The thesis that the system is more important than the model is not bitter lesson pilled. I would not bet on this in the long term. We will get to the point where you can just tell the model to go find and classify the severity of all security problems with a codebase."
+                     },
+                     {
+                         "id":  47732295,
+                         "by":  "JackYoustra",
+                         "time":  1775928101,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "\u003e Isolated the relevant code\nI mean isn\u0027t that most of it? If you put a snippet of code in front of me and said \"there\u0027s probably a vulnerability here\" I could probably spend a few hours (a much lower METR time!) and find it. It\u0027s a whole other ballgame to ask me with no context to come up with an exploit."
+                     },
+                     {
+                         "id":  47732537,
+                         "by":  "nickdothutton",
+                         "time":  1775929687,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "POC of GTFO should apply to AI models too, or the false positive rate will overwhelm."
+                     },
+                     {
+                         "id":  47733300,
+                         "by":  "npilk",
+                         "time":  1775935728,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "Wouldn\u0027t this mean we\u0027re even more cooked? I\u0027ve seen this page cited a few times as evidence that Mythos is no big deal, but if true then the same big deal is already out there with other models today."
+                     },
+                     {
+                         "id":  47737475,
+                         "by":  "JoshTko",
+                         "time":  1775984509,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "I bet Anthropic just had marketing strategy discussions with Mythos to get the \"breakthrough hacking tool!\" framing."
+                     },
+                     {
+                         "id":  47738042,
+                         "by":  "ptrwis",
+                         "time":  1775989294,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "When you pair-programming with AI, even Haiku is very good. Just treat is as you assistant."
+                     },
+                     {
+                         "id":  47734461,
+                         "by":  "thywis",
+                         "time":  1775945557,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "Sure, but it\u0027s more about whether the small model can find the vulnerability that bigger model can."
+                     },
+                     {
+                         "id":  47734647,
+                         "by":  "oliveiracwb",
+                         "time":  1775947479,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "I trust miracle models about as much as I trust my uncle\u0027s memes or three-day prosperity courses."
+                     },
+                     {
+                         "id":  47739133,
+                         "by":  "HarHarVeryFunny",
+                         "time":  1775998941,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "Most of the comments here seems to be responding to the issue of finding vulnerabilities, rather than exploiting them, but the Anthropic claim is that the Mythos advance is being able to actually develop exploits whereas Opus 4.6 had been able to find vulnerabilities, but was poor at being able to develop exploits for them.\nIt\u0027s also noteworthy that Anthropic attributes Mythos\u0027 improvement to advances in \"coding, reasoning and autonomy\", and that the autonomy part seems especially important since they go on to say that trying to develop exploits included adding debug code to projects, running them under a debugger, etc.\nWhen comparing the capabilities of Mythos to previous generation and/or smaller models, it seems it would therefore be useful to distinguish between identifying potential vulnerabilities and actually trying to build exploits for them in agentic fashion. Finding the \"needle in a haystack\" (potential vulnerability) is one aspect, but the other part is an agentic exploit-writing harness being handed the needle and asked to try to exploit it.\nI wonder how much effort Anthropic put into building the harnesses and environments for Mythos to run, modify and debug code? For example, was Mythos set up to be able to build and run a modified BSD in some virtual environment, or did it just take suspect functions and test those in isolation?\nIt\u0027d be interesting to put the capabilities of Opus 4.6, Mythos, and other models into perspective by comparing them to traditional non-AI static analysis security scanning tools. Anthropic mention that the open source projects they scanned came from the OSS-Fuzz corpus, but as far as I can see they don\u0027t say what other tools have, or have not, been used to scan these projects.\nIt\u0027d also be interesting to know to what extent Mythos was explicitly RL trained to develop exploits (especially since it sounds as if Anthropic have the dataset and environment needed to do this) as opposed to this just being a natural consequence of the model being better. If this was the case then it might be a large part of why they are not releasing it - can\u0027t really position yourself as strong on security if you deliberately develop and release a hacking tool!"
+                     },
+                     {
+                         "id":  47738584,
+                         "by":  "tom-blk",
+                         "time":  1775994505,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "Interesting comparison, cool article!"
+                     },
+                     {
+                         "id":  47734841,
+                         "by":  "etothet",
+                         "time":  1775949870,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "My big question around the Mythos FUD, is this: if we take for fact the Mythos is as powerful and dangerous as we’re being told (and I realize this is part marketing), and because of that Anthropic isn’t going to release it…how long can that last? Isn’t it reasonable that OpenAI or xAI or some other company - or foreign government - will come up with a similarly dangerous model fairly soon?\nSo what’s Anthropic’s plan here? How long can they withhold releasing Mythos or something Mythos-like? Is it reasonable to think they - or another AI provider - are going to dumb down future models so they’re less dangerous? I personally don’t think that’s the case.\nI’m not saying Anthropic should\nor shouldn’t release Mythos, but it leaves me wonderingwhat’s going to be different in, say, 6 months or even a year when they or another provider releases a model as dangerous as we’re being told Mythos is?"
+                     },
+                     {
+                         "id":  47735062,
+                         "by":  "jeffrwells",
+                         "time":  1775952519,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "Anthropic has become a PR vaporware company"
+                     },
+                     {
+                         "id":  47735107,
+                         "by":  "pugazh35",
+                         "time":  1775953273,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "Maybe P vs NP, plays a silent role in it"
+                     },
+                     {
+                         "id":  47733686,
+                         "by":  "_pdp_",
+                         "time":  1775938900,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "find ./ \\( -name \u0027*.c\u0027 -o -name \u0027*.cpp\u0027 \\) -exec agent.sh -p \"can you spot any vulnerabilities in {}\" \\;"
+                     },
+                     {
+                         "id":  47733081,
+                         "by":  "omcnoe",
+                         "time":  1775933838,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "The methodology here is completely wrong, outright dishonest.\nFinding a needle in a haystack is easy if someone hands you the small handful of hay containing the needle up front, and raises their eyebrows at you saying “there might be a needle in this clump of hay”."
+                     },
+                     {
+                         "id":  47733002,
+                         "by":  "cmiles8",
+                         "time":  1775933262,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "Mythos is clearly a nice improvement. It’s also clear there’s a lot of unfounded hype around it to keep the AI hype cycle going.\nGating access is also a clever marketing move:\nOption A: Release it but run out of capacity, everyone is annoyed and moves on. Drives focus back to smaller models.\nOption B: A bunch of manufactured hype and putting up velvet ropes around it saying it’s “too dangerous” to let near mortals touch it. Press buys it hook, like, and sinker, sidesteps the capacity issues and keeps the hype train going a bit longer.\nSeems quite clear we’re seeing “Option B” play out here."
+                     },
+                     {
+                         "id":  47732777,
+                         "by":  "hedgehog",
+                         "time":  1775931515,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "It\u0027s strange to me they didn\u0027t reduce to PoC so the quantitative part is an apples-to-apples comparison. You don\u0027t need any fancy tooling, if you want to do this at home you can do something like below in whatever command line agent and model you like. A while back I did take one bug all the way through remediation just out of curiosity.\n\"\"\"\nYour task is to study the following directive, research coding agent prompting, research the directive\u0027s domain best practices, and finally draft a prompt in markdown format to be run in a loop until the directive is complete.\nConcept: Iterative review -- study an issue, enumerate the findings, fix each of the findings, and then repeat, until review finds no issues.\n \nYour job is to run a security bug factory that produces remediation packages as described below. Design and apply a methodology based on best practices in exploit development, lean manufacturing, threat modeling, and the scientific method. Use checklists, templates, and your own scripts to improve token efficiency and speed. Use existing tools where possible. Use existing research and bug findings for the target and similar codebases to guide your search. Study the target\u0027s development process to understand what kind of harness and tools you need for this work, and what will work in this development environment. A complete remediation package includes a readme documenting the problem and recommendations, runnable PoC with any necessary data files, and proposed patch.\nTrack your work in TODO.md (tasks identified as necessary) LOG.md (chronological list of tasks complete and lessons) and STATUS.md (concise summary of the current work being done). Never let these get more than a few minutes out of date. At each step ensure the repo file tree would make sense to the next engineer, and if not reorganize it. Apply iterative review before considering a task complete.\nYour task is to run until the first complete remediation package is ready for user review.\nYour target is .\nThe prompt will be run as follows, design accordingly. Once the process starts, it is imperative not to interrupt the user until completion or until further progress is not possible. Keep output at each step to a concise summary suitable for a chat message.\n```\nwhile output=$(claude -p \"$(cat prompt.md)\"); do echo \"$output\"; echo \"$output\" | grep -q \"XDONEDONEX\" \u0026\u0026 break; done\n```\n \nDraft the prompt into prompt.md, and apply iterative review with additional research steps to ensure will execute the directive as faithfully as possible.\n\"\"\""
+                     },
+                     {
+                         "id":  47734586,
+                         "by":  "starboyy",
+                         "time":  1775946714,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "Tagline is very funny"
+                     },
+                     {
+                         "id":  47732357,
+                         "by":  "robotswantdata",
+                         "time":  1775928529,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "They found a nail in a small bucket of sand, vs mythos with the entire beach reviewed."
+                     },
+                     {
+                         "id":  47734087,
+                         "by":  "palashdeb",
+                         "time":  1775942305,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "Been tracking this since the blog post, quick a big deal they are making it."
+                     },
+                     {
+                         "id":  47737102,
+                         "by":  "brador",
+                         "time":  1775980556,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "I want that Doom thing but finding vulnerabilities using AI models.\nLike I discovered a JavaScript vulnerability using a fridge."
+                     },
+                     {
+                         "id":  47735656,
+                         "by":  "nickpsecurity",
+                         "time":  1775960725,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "We\u0027ve always had good tools for program analysis and testing. They\u0027re usually exhorbitantly expensive.\nI\u0027m hoping the good results with AI models drive down the prices of traditional tools. Then, we can train open models to integrate with them."
+                     },
+                     {
+                         "id":  47735130,
+                         "by":  "tonymet",
+                         "time":  1775953577,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "My router had a broken IPv6 firewall and lacked root access. I needed a root shell to run ip6tables. I exfil\u0027d the code and ran Gemini to discover shell injection vulnerabilities. I was able to get root shell to run ip6tables and add the firewall. I had notified the vendor for a couple years that the firewall was broken and showed them the issue but it hadn\u0027t been fixed."
+                     },
+                     {
+                         "id":  47734853,
+                         "by":  "dev1ycan",
+                         "time":  1775950009,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "It was obvious since the start that 1)it\u0027s probably all javascript based or android websites/programs that contain a ton of \"vulnerable\" libraries (or really old closed sourced c++ code).\nAlso you\u0027re not helping your case as a software company if you feed your code to an LLM, great job making it all public, because it will most likely be used as training data like it or not."
+                     },
+                     {
+                         "id":  47745760,
+                         "by":  "ehtbanton",
+                         "time":  1776037604,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "Wake me up when Anthropic does something right again..."
+                     },
+                     {
+                         "id":  47736713,
+                         "by":  "bottlepalm",
+                         "time":  1775975389,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "None of these comments will age well. I don\u0027t know if it is denial, or cope, or being threatened by AI or what, but no one is taking AI serious enough. Simply take what is being presented at face value, stop thinking everything is a conspiracy and realize the implications. Zero days in software are one thing, it\u0027s a hop skip and jump from there to zero days in biology - and no one will be laughing about that."
+                     },
+                     {
+                         "id":  47733804,
+                         "by":  "abhinaystha",
+                         "time":  1775939811,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "Tech companies are just hyping their model to that the bubble wont burst so easily."
+                     },
+                     {
+                         "id":  47734993,
+                         "by":  "ares623",
+                         "time":  1775951476,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "Once again, it would\u0027ve been so easy and simple to remove all doubt from their claims: release all the tools and harnesses they used to do it and allow 3rd parties to try and replicate their results using different models. If Mythos itself is as big a moat as they claim it is, then there shouldn\u0027t be any problem here.\nThey did the same stunt with the C compiler. They could\u0027ve released a tool to let others replicate it, but they didn\u0027t."
+                     },
+                     {
+                         "id":  47732427,
+                         "by":  "ctoth",
+                         "time":  1775929041,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "\u003e They recovered much of the same analysis\nReally?\n\u003e We isolated the vulnerable vc_rpc_gss_validate function, provided architectural context (that it handles network-parsed RPC credentials, that oa_length comes from the packet), and asked eight models to assess it for security vulnerabilities.\nNo."
+                     },
+                     {
+                         "id":  47734052,
+                         "by":  "nfcampos",
+                         "time":  1775941874,
+                         "depth":  1,
+                         "parent":  47732020,
+                         "text":  "Anthropic marketing (and even supposedly technical write ups) sadly has become more hyperbole and less substance over time imo. This technology is so impressive on its own, really feels like shootings themselves in the foot in the long run, but what do I know\nCase in point here where they conveniently fail to report the false positive rate, while also saying that if it wasn’t for Address Sanitizer discarding all the false positives this system would have been next to useless"
+                     },
+                     {
+                         "id":  47732838,
+                         "by":  "kilpikaarna",
+                         "time":  1775931931,
+                         "depth":  2,
+                         "parent":  47732337,
+                         "text":  "Wasn\u0027t the scaffolding for the Mythos run basically a line of bash that loops through every file of the codebase and prompts the model to find vulnerabilities in it? That sounds pretty close to \"any gold there?\" to me, only automated.\nHave Anthropic actually said anything about the amount of false positives Mythos turned up?\nFWIW, I saw some talk on Xitter (so grain of salt) about people replicating their result with other (public) SotA models, but each turned up only a subset of the ones Mythos found. I\u0027d say that sounds plausible from the perspective of Mythos being an incremental (though an unusually large increment perhaps) improvement over previous models, but one that also brings with it a correspondingly significant increase in complexity.\nSo the angle they choose to use for presenting it and the subsequent buzz is at least part hype -- saying \"it\u0027s too powerful to release publicly\" sounds a lot cooler than \"it costs $20000 to run over your codebase, so we\u0027re going to offer this directly to enterprise customers (and a few token open source projects for marketing)\". Keep in mind that the examples in Nicholas Carlini\u0027s presentation were using Opus, so security is clearly something they\u0027ve been working on for a while (as they should, because it\u0027s a huge risk). They didn\u0027t just suddenly find themselves having accidentally created a super hacker."
+                     },
+                     {
+                         "id":  47732631,
+                         "by":  "notnullorvoid",
+                         "time":  1775930414,
+                         "depth":  2,
+                         "parent":  47732337,
+                         "text":  "\u003e I hypothesize it will find the exploit, but it will also turn up so much irrelevant nonsense that it won\u0027t matter.\nThe trick with Mythos wasn\u0027t that it didn\u0027t hallucinate nonsense vulnerabilities, it absolutely did. It was able to verify some were real though by testing them.\nThe question is if smaller models can verify and test the vulnerabilities too, and can it be done cheaper than these Mythos experiments."
+                     },
+                     {
+                         "id":  47733485,
+                         "by":  "WhyNotHugo",
+                         "time":  1775937473,
+                         "depth":  2,
+                         "parent":  47732337,
+                         "text":  "OTOH, this article goes too far the opposite extreme:\n\u003e We isolated the vulnerable svc_rpc_gss_validate function, provided architectural context (that it handles network-parsed RPC credentials, that oa_length comes from the packet), and asked eight models to assess it for security vulnerabilities.\nTo follow your analogy, they pointed to the exact room where the gold was hidden, and their model found it. But finding the right room within the entire continent in honestly the hard part."
+                     },
+                     {
+                         "id":  47733926,
+                         "by":  "rakel_rakel",
+                         "time":  1775940624,
+                         "depth":  2,
+                         "parent":  47732337,
+                         "text":  "Spending $20000 (and whatever other resources this thing consumes) on a denial of service vulnerability in OpenBSD seems very off balance to me.\nGiven the tone with which the project communicates discussing other operating systems approaches to security, I understand that it can be seen as some kind of trophy for Mythos.\nBut really, searching the number of erratas on the releases page that include \"could crash the kernel\" makes me think that investing in the OpenBSD project by donating to the foundation would be better than using your closed source model for peacocking around people who might think it\u0027s harder than it is to find such a bug."
+                     },
+                     {
+                         "id":  47732670,
+                         "by":  "celeritascelery",
+                         "time":  1775930655,
+                         "depth":  2,
+                         "parent":  47732337,
+                         "text":  "That was my thought exactly. If small models can find these same vulnerabilities, and your company is trying to find vulnerabilities, why didn’t you find them?"
+                     },
+                     {
+                         "id":  47754822,
+                         "by":  "coldtea",
+                         "time":  1776099167,
+                         "depth":  2,
+                         "parent":  47732337,
+                         "text":  "\u003e Mythos scoured the entire continent for gold and found some. For these small models, the authors pointed at a particular acre of land and said \"any gold there? eh? eh?\" while waggling their eyebrows suggestively. \nWhich sounds trivial for a hacker wanting to find vulnerabilities to replicate, so what\u0027s the huge advantage of Mython then? That you don\u0027t need to spend 5 minutes to nudge it to the most complex/ripe for vulnerabilities parts of a codebase?"
+                     },
+                     {
+                         "id":  47734915,
+                         "by":  "davemp",
+                         "time":  1775950673,
+                         "depth":  2,
+                         "parent":  47732337,
+                         "text":  "\u003e Across a thousand runs through our scaffold, the total cost was under $20,000\nLots of questions about the $20k. Is that raw electricity costs, subsidized user token costs? If so, the actual costs to run these sorts of tasks sustainably could be something like $200k. Even at $50k, a FreeBSD DoS is not an extremely competitive price. That\u0027s like 2-4mo of labor.\nDon\u0027t get me wrong, I think this seems like a great use for LLMs. It intuitively feels like a much more powerful form of white box fuzzing that used techniques like symbolic execution to try to guide execution contexts to more important code paths."
+                     },
+                     {
+                         "id":  47732579,
+                         "by":  "hellcow",
+                         "time":  1775930008,
+                         "depth":  2,
+                         "parent":  47732337,
+                         "text":  "It seems feasible to use a small/cheap model to flag possible vulnerabilities, and then use a more expensive model to do a second-pass to confirm those, rather than on every file. Could dramatically reduce the total cost and speed up the process."
+                     },
+                     {
+                         "id":  47732715,
+                         "by":  "alpha_squared",
+                         "time":  1775931003,
+                         "depth":  2,
+                         "parent":  47732337,
+                         "text":  "This is addressed elsewhere in the comments, but it appears this is actually a direct comparison to how Anthropic got their Mythos headline results.\n https://news.ycombinator.com/item?id=47732322"
+                     },
+                     {
+                         "id":  47732723,
+                         "by":  "yorwba",
+                         "time":  1775931074,
+                         "depth":  2,
+                         "parent":  47732337,
+                         "text":  "We don\u0027t even need to hypothesize that much on the irrelevant nonsense, since they helpfully provide data with the detected vulnerability patched: https://aisle.com/blog/ai-cybersecurity-after-mythos-the-jag... and half of the small models they touted as finding the vulnerability still found it in the patched code in 3/3 runs. A model that finds a vulnerability 100% of the time even when there is none is just as informative as a model that finds a vulnerability 0% of the time even when there is one. You could replace it with a rock that has \"There\u0027s a vulnerability somewhere.\" engraved on it.\nThey\u0027re a company selling a system for detecting vulnerabilities reliant on models trained by others, so they\u0027re strongly incentivized to claim that the moat is in the system, not the model, and this post really puts the thumb on the scale. They set up a test that can hardly distinguish between models (just three runs, really??) unless some are completely broken or work perfectly, the test indeed suggests that some are completely broken, and then they try to spin it as a win anyway!\nA high false-positive rate isn\u0027t necessarily an issue if you can produce a working PoC to demonstrate the true positives, where they kinda-sorta admit that you might need a stronger model for this (a.k.a. what they can\u0027t provide to their customers).\nOverall I rate Aisle intellectually dishonest hypemongers talking their own book."
+                     },
+                     {
+                         "id":  47732546,
+                         "by":  "SoftTalker",
+                         "time":  1775929777,
+                         "depth":  2,
+                         "parent":  47732337,
+                         "text":  "How much of that is simply scale? Anthropic threw probably an entire data center at analyzing a code base. Has anyone done the same with a \"small\" model?"
+                     },
+                     {
+                         "id":  47743006,
+                         "by":  "shmagadee",
+                         "time":  1776019610,
+                         "depth":  2,
+                         "parent":  47732337,
+                         "text":  "I\u0027ve read this statement a bunch of times and am still unclear what it is saying. It could mean: \n- The entire set of thousands of \"findings\" was generated with $20k worth of runs (have seen this in press publications and many user posts online). \n- The only the OpenBSD specific findings were generated with $20k\n- Some other subset of findings associated with a specific run configuration were generated with $20k?\nI\u0027ve also asked several LLMs to parse the wording for more clarity without success. They all highlight it as ambiguous wording. Why not use more direct language and provide the supporting data? They also stated that they are providing $100M in credits to their partners. So if bullet 1 or 2 are the meaning and \"findings\" scale linearly with cost, we\u0027re talking either millions (100M/20k * 1k+ findings) or hundreds of thousands. Does that make any sense? Or is the idea that all of these companies will run scans across their critical codebases continuously? Anyone else have a better sense of the math going on here?"
+                     },
+                     {
+                         "id":  47733915,
+                         "by":  "lmeyerov",
+                         "time":  1775940513,
+                         "depth":  2,
+                         "parent":  47732337,
+                         "text":  "Instead of scanning more code, afaict what you seem to want is instead, scan on the same small area, and compare on how many FPs are found there. A common measure here is what % of the reported issues got labeled as security issues and fixed. I don\u0027t see Mythos publishing on relative FP rate, so dunno how to compare those. Maybe something substantively changed?\nAt the same time, I\u0027m not sure that really changes anything because I don\u0027t see a reason to believe attacks are constrained by the quality of source code vulnerability finding tools, at least for the last 10-15 years after open source fuzzing tools got a lot better, popular, and industrialized.\nThis might sound like a grumpy reply, but as someone on both sides here, it\u0027s easy to maintain two positions:\n1. This stuff is great, and doing code reviews has been one of my favorite claude code use cases for a year now, including security review. It is both easier to use than traditional tools, and opens up higher-level analysis too.\n2. Finding bugs in source code was sufficiently cheap already for attackers. They don\u0027t need the ease of use or high-level thing in practice, there\u0027s enough tooling out there that makes enough of these. Likewise, groups have already industrialized.\nThere\u0027s an element of vuln-pocalypse that may be coming with the ease of use going further than already happening with existing out-of-the-box blackbox \u0026 source code scanning tools . That\u0027s not really what I worry about though.\nScarier to me, instead, is what this does to today\u0027s reliance on human response. AI rapidly industrializes what how attackers escalate access and wedge in once they\u0027re in. Even without AI, that\u0027s been getting faster and more comprehensive, and with AI, the higher-level orchestration can get much more aggressive for much less capable people. So the steady stream of existing vulns \u0026 takeovers into much more industrialized escalations is what worries me more. As coordination keeps moving into machine speed, the current reliance on human response is becoming less and less of an option."
+                     },
+                     {
+                         "id":  47746622,
+                         "by":  "AbstractH24",
+                         "time":  1776045077,
+                         "depth":  2,
+                         "parent":  47732337,
+                         "text":  "So the real learning here is the cost of “using” GenAI to do things is declining at a rapid speed.\nWe’re not doing anything that couldn’t be done before, we’re just doing it faster, easier and cheaper.\nSounds like a recipe for a lot of junk being built. Also sounds like something that’s been true since the beginning of humanity.\nIn the more near term, sounds like a reminder the datacenters and processing boom will look at lot like the fiber one."
+                     },
+                     {
+                         "id":  47733490,
+                         "by":  "hoppp",
+                         "time":  1775937523,
+                         "depth":  2,
+                         "parent":  47732337,
+                         "text":  "They pay me 20k and give me time maybe I find it also."
+                     },
+                     {
+                         "id":  47742238,
+                         "by":  "mlmonkey",
+                         "time":  1776014998,
+                         "depth":  2,
+                         "parent":  47732337,
+                         "text":  "We can reduce this to an even more basic question: if these small models are equally comparable in finding vulnerabilities, why haven\u0027t they done so yet? . After all, the source code is out in the open, and has been for decades. Please go ahead, find (and report) the vulnerabilities."
+                     },
+                     {
+                         "id":  47735548,
+                         "by":  "klempner",
+                         "time":  1775959141,
+                         "depth":  2,
+                         "parent":  47732337,
+                         "text":  "The broad answer to the \"irrelevant nonsense\" for something like this is to use more expensive models to validate.\nYou don\u0027t need a model with a false positive rate that\u0027s good enough to not waste my time -- you just need one that\u0027s good enough to not waste the time (tokens) of Mythos or whatever your expensive frontier model is. Even if it\u0027s not, you have the option of putting another layer of intermediate model in the middle."
+                     },
+                     {
+                         "id":  47733615,
+                         "by":  "lukev",
+                         "time":  1775938445,
+                         "depth":  2,
+                         "parent":  47732337,
+                         "text":  "This is a really interesting point though -- it\u0027s really scaffold-dependent.\nBecause for the same price, you could point the small model at each function, one by one, N times each, across N prompts instructing it to look for a specific class of issue.\nIt\u0027s not that there\u0027s no difference between models, but it\u0027s hard to judge exactly how much difference there is when so much depends on the scaffold used. For a properly scientific test, you\u0027d need to use exactly the same one.\nWhich isn\u0027t possible when Anthropic won\u0027t release the model."
+                     },
+                     {
+                         "id":  47733037,
+                         "by":  "letitgo12345",
+                         "time":  1775933541,
+                         "depth":  2,
+                         "parent":  47732337,
+                         "text":  "Can\u0027t you execute the bug to see if the vulnerability is real? So you have a perfect filter. Maybe Mythos decided w/o executing but we don\u0027t know that."
+                     },
+                     {
+                         "id":  47734690,
+                         "by":  "andy_ppp",
+                         "time":  1775947855,
+                         "depth":  2,
+                         "parent":  47732337,
+                         "text":  "I wonder if you could just setup a small model and suggest a load of things and try every file and it might still end up being cheaper and just as good as Mythos at a specific task. Maybe this will be something that holds true for more things, formulating a small model to do specific things may well end up being as effective/efficient as a larger model looking at a huge solution space."
+                     },
+                     {
+                         "id":  47733528,
+                         "by":  "glerk",
+                         "time":  1775937795,
+                         "depth":  2,
+                         "parent":  47732337,
+                         "text":  "I\u0027m having trouble finding this info (I assume they won\u0027t publish it), but could the secret sauce be much larger and more readily accessible context window?\nOpenBSD\u0027s code is in the 10s of millions of lines. Being able to hold all of it in context would make bug finding much easier."
+                     },
+                     {
+                         "id":  47735423,
+                         "by":  "Sparkyte",
+                         "time":  1775957333,
+                         "depth":  2,
+                         "parent":  47732337,
+                         "text":  "Why not just write many small models for explicit tasks than running one bigger model anyway? I prefer the agentic subject matter expert design anyway. I suppose because it wants to look at the whole code base?"
+                     },
+                     {
+                         "id":  47733056,
+                         "by":  "cyanydeez",
+                         "time":  1775933666,
+                         "depth":  2,
+                         "parent":  47732337,
+                         "text":  "so what you\u0027re saying is no one could ever write a loop like:\nfor githubProject in githubProjects\n opencode command /findvulnerability\nend for\nSeems like a silly thing to try and back up."
+                     },
+                     {
+                         "id":  47732322,
+                         "by":  "elicash",
+                         "time":  1775928307,
+                         "depth":  2,
+                         "parent":  47732254,
+                         "text":  "This is from the first of the caveats that they list:\n\u003e Scoped context: Our tests gave models the vulnerable function directly, often with contextual hints (e.g., \"consider wraparound behavior\"). A real autonomous discovery pipeline starts from a full codebase with no hints. The models\u0027 performance here is an upper bound on what they\u0027d achieve in a fully autonomous scan. That said, a well-designed scaffold naturally produces this kind of scoped context through its targeting and iterative prompting stages, which is exactly what both AISLE\u0027s and Anthropic\u0027s systems do.\nThat\u0027s why their point is what the subheadline says, that the moat is the system, not the model.\nEverybody so far here seems to be misunderstanding the point they are making."
+                     },
+                     {
+                         "id":  47732345,
+                         "by":  "loire280",
+                         "time":  1775928467,
+                         "depth":  2,
+                         "parent":  47732254,
+                         "text":  "\u003e Anthropic\u0027s own scaffold is described in their technical post: launch a container, prompt the model to scan files, let it hypothesize and test, use ASan as a crash oracle, rank files by attack surface, run validation. That is very close to the kind of system we and others in the field have built, and we\u0027ve demonstrated it with multiple model families, achieving our best results with models that are not Anthropic\u0027s. The value lies in the targeting, the iterative deepening, the validation, the triage, the maintainer trust. The public evidence so far does not suggest that these workflows must be coupled to one specific frontier model.\nThe argument in the article is that the framework to run and analyze the software being tested is doing most of the work in Anthropic\u0027s experiment, and that you can get similar results from other models when used in the same way."
+                     },
+                     {
+                         "id":  47732394,
+                         "by":  "Jcampuzano2",
+                         "time":  1775928787,
+                         "depth":  2,
+                         "parent":  47732254,
+                         "text":  "The thing is with smaller cheaper models it is very possible to simply take every file in a codebase, and prompt it asking for it to find vulnerabilities.\nYou could even isolate it down to every function and create a harness that provides it a chain of where and how the function is used and repeat this for every single function in a codebase.\nFor some very large codebases this would be unreasonable, but many of the companies making these larger models do realistically have the compute available to run a model on every single function in most codebases.\nYou have the harness run this many times per file/function, and then find ones that are consistently/on average pointed as as possible vulnerability vectors, and then pass those on to a larger model to inspect deeper and repeat.\nMost of the work here wouldn\u0027t be the model, it\u0027d be the harness which is part of what the article alludes to."
+                     },
+                     {
+                         "id":  47732309,
+                         "by":  "odie5533",
+                         "time":  1775928200,
+                         "depth":  2,
+                         "parent":  47732254,
+                         "text":  "Isn\u0027t the difference just harness then? I can write a harness that chunks code into individual functions or groups of functions and then feed it into a vulnerability analysis agent."
+                     },
+                     {
+                         "id":  47732447,
+                         "by":  "ctoth",
+                         "time":  1775929184,
+                         "depth":  2,
+                         "parent":  47732350,
+                         "text":  "\u003e It\u0027s weird that Aisle wrote this.\nNo, writing an advertisement is not weird. What\u0027s weird is that it\u0027s top of HN. Or really, no, this isn\u0027t weird either if you think about it -- people lookin for a gotcha \"Oh see, that new model really isn\u0027t that good/it\u0027s surely hitting a wall/plateau any day now\" upvoted it."
+                     },
+                     {
+                         "id":  47732938,
+                         "by":  "tombert",
+                         "time":  1775932773,
+                         "depth":  2,
+                         "parent":  47732350,
+                         "text":  "It\u0027s weird, because when working on a big project, taking a break for a week or two, and returning to it, I will find a bug and will see hundreds of lines of code that are absolutely terrible, and I will tell myself \"Tom you know better than to do this, this is a rookie mistake\".\nI think people forget that it\u0027s hard to be clever and tidy 100% of the time. Big programs take a lot of discipline and an understanding of the context that can be really hard to maintain. This is one of several reasons that my second draft or third draft of code is almost always considerably better than the first draft."
+                     },
+                     {
+                         "id":  47732613,
+                         "by":  "SoftTalker",
+                         "time":  1775930269,
+                         "depth":  2,
+                         "parent":  47732350,
+                         "text":  "It\u0027s also that humans are very bad at repetitive detailed tasks. Sitting down with a code base and looking at each function for integer overflow comparison bugs gets boring really fast. It\u0027s a rare person who can do that for as long as it takes to find a bug that they don\u0027t already have some clues about.\nIt\u0027s the flaw in the \"given enough eyeballs, all bugs are shallow\" argument. Because eyeballs grow tired of looking at endless lines of code.\nMachines on the other hand are excellent at this. They don\u0027t get bored, they just keep doing what they are told to do with no drop-off in attention or focus."
+                     },
+                     {
+                         "id":  47732463,
+                         "by":  "kennywinker",
+                         "time":  1775929245,
+                         "depth":  2,
+                         "parent":  47732350,
+                         "text":  "If it’s obvious when you look close, then automate looking close. Seems simple to write tools that spider thru a code base, finding logical groupings and feeding them into an LLM with prompts like “there is a vulnerability in this code, find it”.\nThe thesis is, the tooling is what matters - the tools (what they call the harness) can turn a dumb llm into a smart llm."
+                     },
+                     {
+                         "id":  47735382,
+                         "by":  "windexh8er",
+                         "time":  1775956536,
+                         "depth":  2,
+                         "parent":  47732350,
+                         "text":  "What\u0027s weird is that Google, Anthropic and OpenAI are claiming the model is the powerhouse, when what Aisle is stating is very much not the case.\nIt almost seems like a coordinated effort (Google in January, Anthropic and OAI in April) building out gated models that will eventually be very expensive. Yet, here we are: Aisle is saying that\u0027s not required to get there.\nI don\u0027t think it\u0027s weird at all. It seems to me the Frontier providers are just trying to find, still unsuccessfully, a moat to make their unsustainable business model... Well. Sustainable."
+                     },
+                     {
+                         "id":  47732968,
+                         "by":  "tucnak",
+                         "time":  1775932987,
+                         "depth":  2,
+                         "parent":  47732350,
+                         "text":  "The point of contention is whether Mythos is the product of its intelligence or its harness; the results like this, and other similar testimonies, call into question too-dangerous-to-release marketing, and for good reason, too. Because it is powerful marketing. Aisle merely says the intelligence is there in the small models. I say, it\u0027s already clear that competent defenders could viably mimic, or perhaps even eclipse what Mythos does, by (a) making better harness, (b) simply spending more on batch jobs, bootstrapping, cache better, etc. You may not be doing this yourself, but your probably should."
+                     },
+                     {
+                         "id":  47736063,
+                         "by":  "maevyn11",
+                         "time":  1775966749,
+                         "depth":  2,
+                         "parent":  47732350,
+                         "text":  "Yea I think if you read the actual design of the test they are presenting as evidence it shows that what these small models are doing is not the same as what Mythos did. They isolated the vulnerable code down to the vulnerable subset of the function and provided hints in the prompt about all of the key contextual factors that matter to finding the vulnerability. That makes the problem significantly easier.\nI realize they are trying to prove that an agentic harness running small models can ultimately achieve the same thing as what Mythos did, but they are handwaving away the steps it takes to construct the context Mythos handled in model and using a misleading test result to prove small models can handle the key step.\nPoor evidence of a premise that logically wouldn\u0027t even be proven if the their evidence was valid. If they could find these types of vulnerabilities with the same effectiveness they would have done it already."
+                     },
+                     {
+                         "id":  47735601,
+                         "by":  "danieltanfh95",
+                         "time":  1775960059,
+                         "depth":  2,
+                         "parent":  47732350,
+                         "text":  "People really lack imagination. The point here is that a dedicated attacker with a good harness and really cheap models can run the attack regardless. It\u0027s like portscan/url search attacks. They could run all of these against all codebases and clients. However, on the flip side, this also means we could run cheap models against every PR made, and do a thorough red-team security review.\nNone of these requires mythos. If anything we just need Opus 4.5+ that is not lobotomised."
+                     },
+                     {
+                         "id":  47732629,
+                         "by":  "drc500free",
+                         "time":  1775930395,
+                         "depth":  2,
+                         "parent":  47732350,
+                         "text":  "It’s like not differentiating between solving and verifying.\n“PKI is easy to break if someone gives us the prime factors to start with!”"
+                     },
+                     {
+                         "id":  47736454,
+                         "by":  "ehnto",
+                         "time":  1775972505,
+                         "depth":  2,
+                         "parent":  47732350,
+                         "text":  "So it follows that the most efficient time to discover bugs is when you first write them."
+                     },
+                     {
+                         "id":  47736899,
+                         "by":  "alanning",
+                         "time":  1775977887,
+                         "depth":  2,
+                         "parent":  47732350,
+                         "text":  "Off-topic but is there an effort to test AI models against code versions with major historic bugs (Heartbleed, GHOST, log4j, etc)? Seems like the kind of thing that would be relevant in security-related AI benchmarks."
+                     },
+                     {
+                         "id":  47747256,
+                         "by":  "fred_is_fred",
+                         "time":  1776051123,
+                         "depth":  2,
+                         "parent":  47732350,
+                         "text":  "\u003eIf you cut out the vulnerable code from Heartbleed and just put it in front of a C programmer, they will immediately flag it. It\u0027s obvious.\nGenuinely curious - why couldn\u0027t a static analyzer also find the issue then? Those have been worked on for 50+ years at this point, maybe longer."
+                     },
+                     {
+                         "id":  47734044,
+                         "by":  "slopinthebag",
+                         "time":  1775941751,
+                         "depth":  2,
+                         "parent":  47732340,
+                         "text":  "Idk, it seems reasonable to me\n\u003e \"Our tests gave models the vulnerable function directly, often with contextual hints. A real autonomous discovery pipeline starts from a full codebase with no hints. The models\u0027 performance here is an upper bound on what they\u0027d achieve in a fully autonomous scan. That said, a well-designed scaffold naturally produces this kind of scoped context through its targeting and iterative prompting stages, which is exactly what both AISLE\u0027s and Anthropic\u0027s systems do.\"\nAlso they included a test with a false positive, the small models got it right and Opus got it wrong. So this paper shows with the right approach and harness these smaller models can produce the same results. Thats awesome!\nSo, if you\u0027re struggling to make these smaller models work it\u0027s almost certainly an issue of holding them wrong. They require a different approach/harness since they are less capable of working with a vague prompt and have a smaller context, but incredibly powerful when wielded by someone who knows how to use them. And since they are so fast and cheap, you can use them in ways that are not feasible with the larger, slower, more expensive models. But you have to know how to use them, it requires skill unlike just lazily prompting Claude Code, however the results can be far better. If you aren\u0027t integrating them in your workflow you\u0027re ngmi imo :) This will be the next big trend, especially as they continue to improve relative to SOTA which is running into compute limitations."
+                     },
+                     {
+                         "id":  47733688,
+                         "by":  "Departed7405",
+                         "time":  1775938903,
+                         "depth":  2,
+                         "parent":  47732340,
+                         "text":  "Exactly, this is so flawed. Anthropic themselves said they only reported \u003c1% of the vulnerabilities found, cause the rest is unpatched.\nGive open models an environment (prior to Feb 15- so no Mythos-discovered vulns are patche) of Linux and see how many vulnerabilities it can find. Then put it in a sandbox and see if it can escape and send you an e-mail."
+                     },
+                     {
+                         "id":  47732951,
+                         "by":  "nsbsbdjdididi",
+                         "time":  1775932843,
+                         "depth":  2,
+                         "parent":  47732340,
+                         "text":  "Thanks Dario, very cool!"
+                     },
+                     {
+                         "id":  47736580,
+                         "by":  "JSR_FDED",
+                         "time":  1775973870,
+                         "depth":  2,
+                         "parent":  47735605,
+                         "text":  "One very clever consequence of Anthropic\u0027s guarded release of the Mythos model is that they\u0027ve kind of claimed the position of best in class here, and also positioned themselves as the responsible vendor in this space in one fell swoop."
+                     },
+                     {
+                         "id":  47738439,
+                         "by":  "kilroy123",
+                         "time":  1775993229,
+                         "depth":  2,
+                         "parent":  47735605,
+                         "text":  "Well said. I really hope the Chinese models keep getting better. Competition is good."
+                     },
+                     {
+                         "id":  47735762,
+                         "by":  "tokioyoyo",
+                         "time":  1775962359,
+                         "depth":  2,
+                         "parent":  47735605,
+                         "text":  "There are two possibilities:\na) Anthropic is lying, and every company that is collaborating on vulnerability squishing project is an accomplice in this big lie\nb) Anthropic has then goldest gold of the shovels to sell to people, which is actually useful for enterprises\nEveryone, including Ant, understands that other companies will catch up in terms of model strength. So it’s a damned if you do, damned if you don’t position wrt releasing it to the public."
+                     },
+                     {
+                         "id":  47732790,
+                         "by":  "mirsadm",
+                         "time":  1775931593,
+                         "depth":  2,
+                         "parent":  47732549,
+                         "text":  "How is that going to find anything that interacts across files?"
+                     },
+                     {
+                         "id":  47735724,
+                         "by":  "felipeerias",
+                         "time":  1775961750,
+                         "depth":  2,
+                         "parent":  47735019,
+                         "text":  "From the article:\n\u003e Our tests gave models the vulnerable function directly, often with contextual hints (e.g., \"consider wraparound behavior\")."
+                     },
+                     {
+                         "id":  47735333,
+                         "by":  "make_it_sure",
+                         "time":  1775955844,
+                         "depth":  2,
+                         "parent":  47735019,
+                         "text":  "check other comments, they didn\u0027t"
+                     },
+                     {
+                         "id":  47733749,
+                         "by":  "sfink",
+                         "time":  1775939328,
+                         "depth":  2,
+                         "parent":  47732441,
+                         "text":  "Yes, and in this case they pointed at the function, so a 1-bit model (\"yes\") would be correct. But it\u0027s not that bad. First, they included a test with a false positive. The small models got it right, Opus got it wrong. Second, they asked for an analysis. Look for \"Exploitation reasoning, single follow-up prompt:\" in the post. It\u0027s hard to tell how good they were at a glance, though apparently the full logs are available so you could pull them up.\nAnyway, it seems like they erred in the up-front claim \"small models found the vulnerability we pointed directly at!\", but the findings are at least somewhat stronger if you read through the details.\nThe small models didn\u0027t match Mythos at exploitation. They suggested plausible exploits, but didn\u0027t actually try them out so I can\u0027t tell if they would have worked. Deepseek R1\u0027s sounds pretty convincing to me, but I\u0027m not a good judge. (I\u0027m more in the space of accidentally writing vulnerabilities, not seeking them out or exploiting them. Well, ok, I have a static analysis that finds some, at least.)"
+                     },
+                     {
+                         "id":  47735068,
+                         "by":  "sealeck",
+                         "time":  1775952635,
+                         "depth":  2,
+                         "parent":  47732441,
+                         "text":  "Why does the false positive rate matter if you have a verifiable oracle? You can just disregard anything that fails the oracle"
+                     },
+                     {
+                         "id":  47733404,
+                         "by":  "davebren",
+                         "time":  1775936689,
+                         "depth":  2,
+                         "parent":  47732441,
+                         "text":  "It should at least get the same coverage anthropic got then, if not more."
+                     },
+                     {
+                         "id":  47732857,
+                         "by":  "slopinthebag",
+                         "time":  1775932068,
+                         "depth":  2,
+                         "parent":  47732273,
+                         "text":  "Did Mythos identify vulnerabilities across files? Afaik Mythos worked the same way, analysing a single file at a time."
+                     },
+                     {
+                         "id":  47733389,
+                         "by":  "davebren",
+                         "time":  1775936596,
+                         "depth":  2,
+                         "parent":  47732273,
+                         "text":  "Seems perfectly comparable to anthropic\u0027s method, they just wrapped the same kind of prompt in a for loop."
+                     },
+                     {
+                         "id":  47734614,
+                         "by":  "goldenarm",
+                         "time":  1775947003,
+                         "depth":  2,
+                         "parent":  47733021,
+                         "text":  "People have found 0days assisted by LLMs for a while, and none of them wrote hype pieces to find an excuse not to release their 10x bigger model in the middle of a GPU shortage.\n https://sean.heelan.io/2025/05/22/how-i-used-o3-to-find-cve-..."
+                     },
+                     {
+                         "id":  47732422,
+                         "by":  "kennywinker",
+                         "time":  1775929002,
+                         "depth":  2,
+                         "parent":  47732325,
+                         "text":  "I don’t think mythos can ingest an entire codebase into context. So it’s spinning off sub-agents to process chunks. Which supports their thesis: the harness is the moat. The tooling is whats important, the model is far far less important."
+                     },
+                     {
+                         "id":  47733787,
+                         "by":  "hakanderyal",
+                         "time":  1775939637,
+                         "depth":  2,
+                         "parent":  47732325,
+                         "text":  "Even that would be more meaningful test. They basically coated the ball with a strong smell, then they prepped the dog with that smell, then set it loose in a 5x5 meter area.\n\"Our tests gave models the vulnerable function directly, often with contextual hints (e.g., \"consider wraparound behavior\").\""
+                     },
+                     {
+                         "id":  47733432,
+                         "by":  "davebren",
+                         "time":  1775936914,
+                         "depth":  2,
+                         "parent":  47733030,
+                         "text":  "\u003e If smaller models can find these things, that doesn’t mean mythos is worse than we thought. It means all models are more capable.\nIt means \"it\u0027s so dangerous we can\u0027t release it\" was a blatant lie since anthropic would have already known this."
+                     },
+                     {
+                         "id":  47737286,
+                         "by":  "throwa356262",
+                         "time":  1775982280,
+                         "depth":  2,
+                         "parent":  47733127,
+                         "text":  "If anyone can get Crowdstrike to go bankrupt I will be rooting for them.\nThose guys are the reason our new work laptops run at 1/3 of speed.\nWhile back crowdstrike managed to simultaneously crash every windows computer and bring every major company to a halt and somehow are still around."
+                     },
+                     {
+                         "id":  47733365,
+                         "by":  "zer00eyz",
+                         "time":  1775936338,
+                         "depth":  2,
+                         "parent":  47733127,
+                         "text":  "Crowdstrike, no pe because it just had its first profitable quarter (38 million)\nZScalar No PE\nPalo Alto Networks Inc (PANW) 86 PE\nFortinet : (FTNT) 31.63 PE\nThat last one, didn\u0027t get hit at all by the Mythos announcement, because at some level it has at least some grounding in fiscal reality."
+                     },
+                     {
+                         "id":  47735358,
+                         "by":  "grg0",
+                         "time":  1775956264,
+                         "depth":  2,
+                         "parent":  47732446,
+                         "text":  "AKA F-score. https://en.wikipedia.org/wiki/F-score"
+                     },
+                     {
+                         "id":  47732961,
+                         "by":  "appcustodian2",
+                         "time":  1775932933,
+                         "depth":  2,
+                         "parent":  47732515,
+                         "text":  "N model is basically just N-1 model with revised context window handling and more compute thrown at it"
+                     },
+                     {
+                         "id":  47737373,
+                         "by":  "pertymcpert",
+                         "time":  1775983065,
+                         "depth":  2,
+                         "parent":  47732515,
+                         "text":  "Shit. Really? You mean they modified their frontier model to improve it and make it better and just called it a day? That their benchmarks which show step change improvements are just the result of successive changes on an EXISTING MODEL ?\nSay it isn\u0027t so! I for one like to start from scratch each time I release my version of my compiler toolchain."
+                     },
+                     {
+                         "id":  47732479,
+                         "by":  "bhouston",
+                         "time":  1775929391,
+                         "depth":  2,
+                         "parent":  47732301,
+                         "text":  "They did do one agent per code chunk, yes. But key is that their agent had to identify when there was a vulnerability and when there wasn\u0027t. This \"small model\" test only had to label the known positive cases as positive -- which any function that simply returns \"true\" can do. This whole test setup is annoying because it proves nothing."
+                     },
+                     {
+                         "id":  47732327,
+                         "by":  "aniceperson",
+                         "time":  1775928350,
+                         "depth":  2,
+                         "parent":  47732301,
+                         "text":  "to be fair, last post i saw from anthropic on finding linux kernel vulnerability was a while loop per failed prompting \"there is a vulnerability here, find it\"\nmore important than that, no frontier model can keep the entire linux kernel in context, so there definitely is code isolation, either explicitly or implicitly (the model itself delegates subagents with smaller chunks of code)"
+                     },
+                     {
+                         "id":  47732477,
+                         "by":  "loeg",
+                         "time":  1775929343,
+                         "depth":  2,
+                         "parent":  47732301,
+                         "text":  "No. How would it? Before the vulns were identified by Mythos, no one knew what the relevant portion to isolate was."
+                     },
+                     {
+                         "id":  47732798,
+                         "by":  "rychu",
+                         "time":  1775931650,
+                         "depth":  2,
+                         "parent":  47732316,
+                         "text":  "If that was normal Opus, then it sounds to me like Mythos could be a big model, instruction tuned, but without all the safety/refusal part of training."
+                     },
+                     {
+                         "id":  47733877,
+                         "by":  "pardon_me",
+                         "time":  1775940244,
+                         "depth":  2,
+                         "parent":  47733303,
+                         "text":  "The whole company is like that. If things were as amazing as advertised, they wouldn\u0027t even need to advertise. Or to release models to the public at all."
+                     }
+                 ]
+}

@@ -1,0 +1,1142 @@
+﻿{
+    "thread_id":  47712718,
+    "hn_url":  "https://news.ycombinator.com/item?id=47712718",
+    "title":  "I still prefer MCP over skills",
+    "by":  "gmays",
+    "unix_time":  1775786508,
+    "score":  457,
+    "descendants":  370,
+    "difficulty":  "G3",
+    "lane":  "agent_tooling",
+    "label":  "hn_mcp_over_skills_debate",
+    "why_selected":  "Mixed preference claims, concrete examples, and rebuttal corrections.",
+    "op_text":  "",
+    "harvested_comment_count":  140,
+    "comment_sample_policy":  {
+                                  "traversal":  "bfs",
+                                  "max_comments":  140,
+                                  "max_depth":  4
+                              },
+    "comments":  [
+                     {
+                         "id":  47715000,
+                         "by":  "antirez",
+                         "time":  1775808218,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "Don\u0027t focus on what you prefer: it does not matter. Focus on what tool the LLM requires to do its work in the best way. MCP adds friction, imagine doing yourself the work using the average MCP server. However, skills alone are not sufficient if you want, for instance, creating the ability for LLMs to instrument a complicated system. Work in two steps:\n1. Ask the LLM to build a tool, under your guide and specification, in order do a specific task. For instance, if you are working with embedded systems, build some monitoring interface that allows, with a simple CLI, to do the debugging of the app as it is working, breakpoints, to spawn the emulator, to restart the program from scratch in a second by re-uploading the live image and resetting the microcontroller. This is just an example, I bet you got what I mean.\n2. Then write a skill file where the usage of the tool at \"1\" is explained.\nOf course, for simple tasks, you don\u0027t need the first step at all. For instance it does not make sense to have an MCP to use git. The agent knows how to use git: git is comfortable for you, to use manually. It is, likewise, good for the LLM. Similarly if you always estimante the price of running something with AWS, instead of an MCP with services discovery and pricing that needs to be queried in JSON (would you ever use something like that?) write a simple .md file (using the LLM itself) with the prices of the things you use most commonly. This is what you would love to have. And, this is what the LLM wants. For complicated problems, instead, build the dream tool you would build for yourself, then document it in a .md file."
+                     },
+                     {
+                         "id":  47713089,
+                         "by":  "plandis",
+                         "time":  1775789926,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "I could not agree any less with the author. I don’t want APIs, I want agents to use the same CLI tooling I already use that is locally available. If my agents are using CLI tooling anyways there is no need to add an extra layer via MCP.\nI don’t want remote MCP calls, I don’t even want remote models but that’s cost prohibitive.\nIf I need to call an API, a skill with existing CLI tooling is more than capable."
+                     },
+                     {
+                         "id":  47715032,
+                         "by":  "tow21",
+                         "time":  1775808423,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "This argument always sounds like two crowds shouting past each other.\nAre you a solo developer, are you fully in control of your environment, are you focused on productivity and extremely tight feedback loops, do you have a high tolerance for risk: you should probably use CLIs. MCPs will just irritate you.\nAre you trying to work together with multiple people at organizational scale and alignment is a problem; are you working in a range of environments which need controls and management, do you have a more defensive risk tolerance ... then by the time you wrap CLIs into a form that are suitable you will have reinvented a version of the MCP protocol. You might as well just use MCP in the first place.\nAside - yes, MCP in its current iteration is fairly greedy in its context usage, but that\u0027s very obviously going to be fixed with various progressive-disclosure approaches as the spec develops."
+                     },
+                     {
+                         "id":  47713065,
+                         "by":  "alierfan",
+                         "time":  1775789675,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "This isn\u0027t a zero-sum game or a choice of one over the other. They solve different layers of the developer experience: MCP provides a standardized, portable interface for external data/tools (the infrastructure), while Skills offer project-specific, high-level behavioral context (the orchestration). A robust workflow uses MCP to ensure tool reliability and Skills to define when and how to deploy those tools."
+                     },
+                     {
+                         "id":  47715515,
+                         "by":  "_pdp_",
+                         "time":  1775813026,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "Scanning through the comments here I am almost certain the majority of people in this thread run coding agents on-device. Skills that access already available resources is then more convenient and you can easily make the argument that it is more agronomic.\nThat being said, majority of users on this planet don\u0027t use AI agents like that. They go to ChatGPT or equivalent. MCP in this case is the obvious choice because it provides remote access and it has better authentication story.\nIn order to make any argument about pro/con of MCP vs Skills you first need to find out who is the user."
+                     },
+                     {
+                         "id":  47713172,
+                         "by":  "grensley",
+                         "time":  1775790833,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "The \"only skills\" people are usually non-technical and the \"only CLI\" people are often solo builders.\nMCP makes a lot of sense for enterprise IMO. Defines auth and interfaces in a way that\u0027s a natural extension of APIs."
+                     },
+                     {
+                         "id":  47714794,
+                         "by":  "lifeisstillgood",
+                         "time":  1775806381,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "I agree for a slightly different reason - human stupidity.\nDespite many decades of proof that automation simplifies and reveals the illogical in organisations, digitisation has mostly stopped at below the “CXO”\nlevel - and so there are not APIs or CLIs available to anyone - but MCP is cutting through\nJust consider:\nThroughout companies large and small, Agile is what coders do, real project managers still use deadlines and upfront design of what will be in the deadline - so any attempt to convert the whole company to react to the reality of the road is blocked\nReports flow upwards - but through the reporting chain. So those PowerPoints are … massaged to meet to correct story, and the more levels it’s massaged the more it fails to resemble reality. Everyone knows this but managing the transition means potentially losing control …\nThere are plenty of digitisationmprojects going on - but do they enable full automation or are they another case of an existing political arena building its own political choices in software - “our area in a database to be accessed via an UI by our people” - almost never “our area to be used by others via API and totally replacing our people”.\n(I think I need to be more persuasive"
+                     },
+                     {
+                         "id":  47717555,
+                         "by":  "WhyNotHugo",
+                         "time":  1775826321,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "I like skills because they rely on the same tools which humans rely upon. A well-written skill can be read and used by a human too.\nA skill is just a description for how to use an existing CLI tool. You don\u0027t need to write new code for the LLM to interact with some system. You just tell the LLM to use the same tool humans do. And if you find the CLI is lacking in some way, you can improve it and direct human usage benefits from that improvement too.\nOn the other hand, an MCP requires implementing a new API for a service, an API exclusive to LLMs, and keeping parallel documentation for that. Every hour of effort put into it is an hour that\u0027s taken away from improving the human-facing API and documentation.\nThe way skills are lazy-loaded when needed also keeps context clean when they\u0027re not used. To be fair, MCPs could be lazy-loaded the same way, that\u0027s just an implementation detail."
+                     },
+                     {
+                         "id":  47712816,
+                         "by":  "robotobos",
+                         "time":  1775787337,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "Despite thinking this is AI-generated, I agree but everything has a caveat.\nSkills are good for instilling non-repeatable, yet intuitive or institutional knowledge.\nMCP’s are great for custom, repeatable tasks. After 5-10 runs of watching my LLM write the same exact script, I just asked it to hardcode the solution and make it a tool. The result is runs are way faster and repeatable."
+                     },
+                     {
+                         "id":  47714718,
+                         "by":  "nextaccountic",
+                         "time":  1775805681,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "\u003e Context Bloat: Using a skill often requires loading the entire SKILL.md into the LLM’s context window, rather than just exposing the single tool signature it needs. It’s like forcing someone to read the entire car’s owner’s manual when all they want to do is call car.turn_on().\nMCP has severe context bloat just by starting a thread. If harnesses were smart enough to, during install time, summarize the tools provided by a MCP server (rather than dumping the whole thing in context), it would be better. But a worse problem is that the output of MCP goes straight into the context of the agent, rather than being piped somewhere else\nA solution is to have the agent run a cli tool to access mcp services. That way the agent can filter the output with jq, store it in a file for analysis later, etc"
+                     },
+                     {
+                         "id":  47716771,
+                         "by":  "losvedir",
+                         "time":  1775822401,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "For my use I prefer just a raw CLI. As long as it\u0027s built following conventions (e.g. using cobra for a Go app) then the agent will just natively know how to use it, by which I mean how to progressively learn what it needs by reading the `help` output. In that case you don\u0027t need a skill or anything. Just say \"I want this information, use the xyz app\". It will then try `xyz --help` or `xyz help` or a variant, just like a human would, see the subcommands, do `xyz help subcommand` and eventually find what it needs to do the job. Good tools provide an OAuth flow like `xyz login`, which will open a browser window where you can determine which resources you want to give the CLI (and thereby the agent) access to.\nThis only works for people using agents themselves on computers they control, rather than, e.g., the Claude web app, but is a good chunk of my usage.\nI think people are either over or under thinking the auth piece, though. The agent should have access to their own token. Both CLIs and MCPs and even raw API requests work this way. I don\u0027t think MCPs provide any further security. You should assume the agent can access anything in its environment and do everything up to what the credential permits. You don\u0027t want to give your more powerful credential to the MCP server and hope that the MCP server somehow restricts the agent to doing less (it can probably find the credential and make out-of-band calls if it wants). The only way I think it could work like that is how... is it Sprite does it?... where you give use a fake token and have an off-machine proxy that it goes through where it MitMs the request and injects the real credential."
+                     },
+                     {
+                         "id":  47715258,
+                         "by":  "alexhans",
+                         "time":  1775810402,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "This frames MCP vs Skills as an either/or, but they operate at different layers. MCP exposes capabilities and Skills may shape how capabilities are used.\nBoth are useful to different people (and role families) in different ways and if you don\u0027t feel certain pain points, you may not care about some of the value they provide.\nAgent skills are useful because they\u0027re standardized prompt sharing but more than that, because they have progressive disclosure so you don\u0027t bloat your context with an inefficietly designed MCP and their UX is very well aligned such that \"/SkillBuilder\" skills are provided from the start and provide a good path for developers or non traditional builders to turn conversations into semi or full automation. I use this mental model to focus on the iteration pattern and incremental building [1].\n[1] https://alexhans.github.io/posts/series/evals/building-agent..."
+                     },
+                     {
+                         "id":  47713205,
+                         "by":  "jauntywundrkind",
+                         "time":  1775791228,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "I\u0027ve remained leaning a bit towards MCP until lately. Both have pretty easy ways to call the other (plenty of cli API callers, and tools like mcp-cli for the reverse https://github.com/philschmid/mcp-cli ). Skills have really made progressive discovery if cli-tools much better, and MCP design has adapted likewise. I\u0027ve lightly preferred MCP for formalism, for it feeling more concrete as a thing.\nBut what really changed my mind is seeing how much more casual scripting the LLMs do these days. They\u0027ll build rad unix pipes, or some python or node short scripts. With CLI tools, it all composes: every trick it learns can plug directly into every other capability.\nWhere-as with MCP, the LLM has to act as the pipe. Tool calls don\u0027t compose! It can read something like this tmux skill then just adapt it in all sorts of crazy ways! It can sort of do that with tool calls, but much less so. https://github.com/nickgnd/tmux-mcp \nI\u0027d love to see a capnproto capnweb or some such, with third party handoff (apologies Kenton for once again raising 3ph), where a tool call could return a result and we could forward the result to a different LLM, without even waiting for the result to come back. If the LLM could compose tool calls, it would start to have some parity with the composability of the cli+skill. But it doesn\u0027t. And as of very recently I\u0027ve decided that is too strong a selling point to be ignored. I also just like how the cli remains the universe system: if these are so isomorphic as I keep telling myself, what really does the new kid on the block really bring? How much is a new incarnation better if their capabilities are so near? We should keep building cli tools, good cli tools, so that man and machine benefit.\nThat said I still leave the beads mcp server around. And I turn on the neovim MCP when I want to talk to neovim. Ah well. I should try harder to switch."
+                     },
+                     {
+                         "id":  47714666,
+                         "by":  "usrbinbash",
+                         "time":  1775805263,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "\u003e The core philosophy of MCP is simple: it’s an API abstraction. The LLM doesn’t need to understand the how; it just needs to know the what.\nWrong. It needs to \"understand\" both these things. The only difference is where and how the strings explaining them are generated."
+                     },
+                     {
+                         "id":  47713491,
+                         "by":  "Aperocky",
+                         "time":  1775793880,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "Occams Razor spares none.\nEverything will go to the simplest and most convenient, often both, despite the resistance of the complexity lovers.\nSorry MCP, you are not as simple as CLI/skill/combination, and no, you are not more secure just because you are buried under 3 level of spaghetti. There are no reason for you to exist, just like Copilot. I don\u0027t just wish, but know you\u0027ll go into obscurity like IE6."
+                     },
+                     {
+                         "id":  47713604,
+                         "by":  "imron",
+                         "time":  1775794831,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "My biggest gripe with skills is that even clear and explicit instructions are regularly ignored - even when the skill is brief (\u003c 100 lines).\nI’ll often see the agent saying it’s about to do something so I’ll stop it and ask “what does the xxx skill say about doing that?’ And it’ll go away and think and then say “oh, the skill says I should never do that”"
+                     },
+                     {
+                         "id":  47717382,
+                         "by":  "password4321",
+                         "time":  1775825538,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "Surprised to see no mention in the article or discussion yet about using MCPs in \u0027code mode\u0027, where an API is generated client-side relying on MCP primarily as an interface standard. I\u0027m still learning but I\u0027ve read this reduces the amount of context required to use the MCP.\nIt seems like a lot of the discussion is arguing in favor of API usage without realizing that MCP basically standardizes a universal API, thus enabling code mode."
+                     },
+                     {
+                         "id":  47719984,
+                         "by":  "noisy_boy",
+                         "time":  1775836350,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "I feel like MCPs are encapsulation of multiple steps where the input to the first step is sufficient to drive the flow. Why would I spend tokens for the LLM to do reasoning at each of the steps when I can just provide the input + MCP call backed by a fixed program that can deal with the overall flow deterministically. If I have to do the same series of steps everytime, a script beats LLM doing the each step individually in terms of cost and time. If the flow involved some sort of fuzzy analysis or decision making in multiple places, I would probably let the LLM carry out the flow or break it into a combination of MCP calls orchestrated by the LLM.\nIn my case, my MCP is setup with the endpoints being very thin LLM facing layer with the meat of the action being done by helper methods. I also have cli scripts that import/use the same helpers so the core logic is centralized and the only difference is that thin layer, which could be the LLM endpoint or cli\u0027s argparse. If I need another type of interface, that can also call the same helpers."
+                     },
+                     {
+                         "id":  47717220,
+                         "by":  "CharlieDigital",
+                         "time":  1775824750,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "One thing that I have found is that the platforms are surprisingly poor at consistently implementing MCP, which is actually a pretty simple protocol.\nTake Codex, for example, it does not support the MCP prompts spec[0][1] which is quite powerful because it solves a lot of friction with deploying and synchronizing SKILL.md files. It also allows customization of virtual SKILL.md files since it allows compositing the markdown on the server.\nIt baffles me why such a simple protocol and powerful capability is not supported by Codex. If anyone from OpenAI is reading this, would love to understand the reasoning for the poor support for this relatively simple protocol.\n[0] https://github.com/openai/codex/issues/5059 \n[1] https://modelcontextprotocol.io/specification/2025-06-18/ser..."
+                     },
+                     {
+                         "id":  47720917,
+                         "by":  "neosat",
+                         "time":  1775840453,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "The juxtaposition of MCP vs Skills in the article is very strange. \nThese are not competing ways to achieve something. Rather skills is often a way to enable an optimization on top of MCPs.\nA simplified but clarifying way to think about it is that MCP exposes all the things that can be done, and Skills encode a workflow/expertise/perspective on how something should be done given all the capabilities.\nSo I\u0027m not sure why the article portrays one to be conflicting with the other (e.g. \"the narrative that “MCP is dead” and “Skills are the new standard” has been hammered into my brain. Everywhere I look, someone is celebrating the death of the Model Context Protocol in favor of dropping a SKILL.md into their repository.\").\nYou can just not choose to use a skill if it\u0027s not useful. But if it\u0027s useful a skill can add to what an MCP alone can do."
+                     },
+                     {
+                         "id":  47713042,
+                         "by":  "ghm2199",
+                         "time":  1775789464,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "For indie developers like myself, I often use chat GPT desktop and Claude desktop for arbitrary tasks, though my main workhorse is a customized coding harness with CC daemons on my nas. With the apps, b I missed having access to my Nas server where my dev environment is. So I wrote a file system MCP and hosted it with a reverse proxy on my Truenas with auth0. I wanted access to it from all platforms CharGPT mobile, desktop. Same for CC.\nFor chatgpt desktop and Claude desktop my experience with MCPs connected to my home NAS is pretty poor. It(as in the app) often times out fetching data(even though there is no latency for serving the request in the logs), often the existing connection gets invalidated between 2 chat turns and chat gpt just moves on answering without the file in hand.\nI am not using it for writing code, its mostly read only access to Fs. Has anyone surmounted these problems for this access patterns and written about how to build mcps to be reliable?"
+                     },
+                     {
+                         "id":  47717779,
+                         "by":  "cphoover",
+                         "time":  1775827460,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "I think language grammars are the an interesting way to define a ruleset too. Forget REST API\u0027s or MCP Servers for a second... Define a domain specific language, and let the language model generate a valid instruction within the confines of that grammar.\nThan pass the program, your server or application can parse the instructions and work from the generated AST to do all sorts of interesting things, within the confines of your language features.\nIt\u0027s verifiable, since you are providing within the defined grammar, and with the parser provided.\nIt is implicitly sandboxed by the powers you give (or rather exclude) to your runtime via an interpreter/compiler\nI\u0027ve tried this before for a grammar I defined for searching documents, and found it to be quite good at creating valid often complex search instructions."
+                     },
+                     {
+                         "id":  47716667,
+                         "by":  "fancyraccoon",
+                         "time":  1775821660,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "Really interesting post. The \"connectors vs manuals\" framing stuck with me because I think it points at something beyond the UX argument. A Skill that papers over an API loses the signal the friction was carrying. Working with a raw interface tells you something about the design.\nThe same thing plays out at the language layer. The pain of C++ multiple inheritance drove people toward better abstractions. If LLM\u0027s absorb that friction before it reaches anyone, the signal that produces the next Go never gets felt by the people who could act on it.\nWrote about where that leads: https://blog.covet.digital/a/the_last_language_you_can_read...."
+                     },
+                     {
+                         "id":  47718961,
+                         "by":  "hasyimibhar",
+                         "time":  1775832394,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "We use MCP at work. In my team of about 6 people, everyone has Claude access, but about half of us are non-engineers. I built an MCP over our backend and Clickhouse, and setup a Claude Project with instruction (I\u0027m assuming this count as skill?). The instruction is mostly for enriching the analytics data that we have, e.g. hinting Claude to prefer certain datasets for certain questions.\nThis allows the non-engineers (and also engineers) to use Claude Desktop to do day-to-day operations (e.g. ban user X for fraud) and analytics (e.g. how much revenue we made past 7 days? Any fraud patterns?). The MCP helps to add audit, authorization, and approval layer (certain ops action like banning user will require approval)."
+                     },
+                     {
+                         "id":  47713571,
+                         "by":  "lewisjoe",
+                         "time":  1775794549,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "\u003e ChatGPT can’t run CLIs. Neither can Perplexity or the standard web version of Claude. Unless you are using a full-blown compute environment (like Perplexity Computer, Claude Cowork, Claude Code, or Codex), any skill that relies on a CLI is dead on arrival. \n \nIncorrect observation. Claude web does support skills upload. I guess claude runs code_interpreter tool and filesystem in the background to run user uploaded skills. ChatGPT business plans too allow uploading custom skills in web.\nI can see Skills becoming a standard soon. But the concern still holds. When you publish a MCP you liberate the user out of installing anything. But with skills what happens if the skill running environment don\u0027t have access to the cli binary or if it isn\u0027t in PATH?"
+                     },
+                     {
+                         "id":  47713199,
+                         "by":  "woeirua",
+                         "time":  1775791145,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "Anthropic says that Skills and MCPs are complementary, and frankly the pure Skills zealots tend to miss that in enterprise environments you’ll have chatbots or the like that don’t have access to a full CLI. It doesn’t matter if your skills tell the agent exactly what to do if they can’t execute the commands. Also, MCP is better for restricted environments because you know exactly what it can or cannot do. That’s why MCP will exist for some time still. They solve distinct problem sets."
+                     },
+                     {
+                         "id":  47721634,
+                         "by":  "bloppe",
+                         "time":  1775844195,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "Every CLI can be expressed as an API and vice versa. Thus every skill can be expressed as an MCP server and vice versa. Any argument about the technical or practical merits of one over the other is willfully ignoring the fact that you can always use exactly the same patterns in one vs. the other.\nSo it\u0027s really all about availability or preference. Personally, I don\u0027t think we needed a whole new standard with all its complexities and inevitable future breaking changes etc."
+                     },
+                     {
+                         "id":  47713076,
+                         "by":  "leonidasv",
+                         "time":  1775789808,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "This is the same as saying \"I still prefer hammer over screwdriver\"."
+                     },
+                     {
+                         "id":  47719143,
+                         "by":  "socketcluster",
+                         "time":  1775833116,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "I prefer skills with simple curl commands. It\u0027s easy. You just need to create a server with HTTP endpoints and Claude (or other LLM) can call them with the curl commands you provide in your skills files. Claude is really good with curl and it\u0027s a well known HTTP client so what Claude is doing is more transparent to the user.\nAlso, with skills, you can organize your files in a hierarchy with the parent page providing the most general overview and each child page providing a detailed explanation of each endpoint or component with all possible parameters and errors. I also made a separate page where I list all the common issues for troubleshooting. It works very well.\nI created some skills for my no-code platform so that Claude could access and make changes to the control panel via HTTP. My control panel was already designed to update in real-time so it\u0027s cool to watch it update as Claude creates the schema and adds dummy data in the background.\nI spent a huge amount of effort on refining my HTTP API to make it as LLM-friendly as possible with flexible access control.\nYou can see how I built my skills marketplace from the docs page if anyone is interested: https://saasufy.com/"
+                     },
+                     {
+                         "id":  47717662,
+                         "by":  "interpol_p",
+                         "time":  1775826834,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "We had a contention between MCP / Skills for our product and ended up offering both. We built a CLI tool that could interface with the MCP server [1]. It seems redundant but our app is a coding app on iOS (Codea), and the issue with offering a plain MCP server meant that the agentic coding harness found it harder to do its job.\nWith the CLI the agent could check out the project, work on it locally with its standard file editing / patching / reading tools, then push the work back to device. Run and debug on device, edit locally, push.\nWith MCP the agent had to query the MCP server for every read and write and was no longer operating in its normal coding loop. It still works, though, and as a user you can choose to bypass the CLI and connect directly via MCP.\nThe MCP server was valuable as it gave us a consistent and deterministic language to speak. The CLI tool + Skill was valuable for agentic coding because it allowed the coding work to happen with the standard editing tools used by agents.\nThe CLI also gave us device discovery. So the agent can simply discover nearby devices running Codea and get to work, instead of a user having to add a specific device via its IP address to their agent.\n[1] https://codea.io/cli"
+                     },
+                     {
+                         "id":  47733257,
+                         "by":  "vlucas",
+                         "time":  1775935389,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "Agreed on the MCP sentiment, and particularly remote MCPs. They keep themselves up to date with predefined tools, schemas, descriptions of how to use them, etc. where skills tend to be a mess over time, as described in the article.\nPlug: If you want to try chatting with your financial data via an MCP, give FINTECH_MCP a try: https://www.fintechmcp.app - it\u0027s got a preview mode too so you can see how it works without linking any real data."
+                     },
+                     {
+                         "id":  47714789,
+                         "by":  "s-xyz",
+                         "time":  1775806356,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "I never understood why there is a discussion about it, one or the other… both serve a different purpose and are complementary."
+                     },
+                     {
+                         "id":  47713225,
+                         "by":  "senordevnyc",
+                         "time":  1775791473,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "I love the idea of MCP, but it needs a progressive disclosure mechanism. A large MCP from a provider with hundreds or even thousands of tools can eat up a huge amount of your context window. Additionally, MCPs come in a bunch of different flavors in terms of transport and auth mechanisms, and not all harnesses support all those options well.\nI’ve gone the other way, and used MCP-CLI to define all my MCP servers and wrap them in a CLI command for agent use. This lets me easily use them both locally and in cloud agents, without worrying about the harness support for MCP or how much context window will be eaten up. I have a minimal skill for how to use MCP-CLI, with progressive disclosure in the skill for each of the tools exposed by MCP-CLI. Works great.\nAll that said, I do think MCP will probably be the standard going forward, it just has too much momentum. Just need to solve progressive disclosure (like skills have!) and standardize some of the auth and transport layer stuff."
+                     },
+                     {
+                         "id":  47728376,
+                         "by":  "fjellsystems",
+                         "time":  1775892864,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "Experimenting with something adjacent — torget.ai, idea is an agent/tool marketplace so enjoyed this discussion :)\nWhat strikes me is that MCP vs Skills vs Bespoke are all answers to ‘how does an agent use a known capability.’ How does it find one (?) is where I’m experimenting.\nDiscovery and payment at the agent layer still feels like the missing primitive.\nAlso (food for thought) the local LLM angle keeps getting underweighted in many discussions. For someone running Gemma 4 locally, there’s no tool layer at all by default. Different problem than the cloud agent angle."
+                     },
+                     {
+                         "id":  47714495,
+                         "by":  "Xenoamorphous",
+                         "time":  1775804102,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "I use both and don\u0027t feel they\u0027re mutually exclusive.\nE.g. if I have some ElasticSearch cluster, I use a skill to describe the data, and if I ask the LLM to write code that queries ElasticSearch but to test it first it can use a combination of skill + MCP to actually run a query.\nI think this model works nicely."
+                     },
+                     {
+                         "id":  47719228,
+                         "by":  "0xbadcafebee",
+                         "time":  1775833430,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "I have vibe-coded 4 different software projects recently, on multiple platforms. I added search, RAG, ticketing, notifications, voice, and more features to them, in 2 minutes. All I had to do was implement MCP client, and suddenly all that other complex functionality \"just worked\", both locally and remotely.\nSkills would have required me to 1) add all the skill files to all those projects (and maintain all those files), and 2) install software tools (some of these tools don\u0027t have CLIs) to be usable by the skills. Not to mention: the skills aren\u0027t deterministic! You have to iterate on a skill file for a while to get the LLM to reliably use it the way you want."
+                     },
+                     {
+                         "id":  47714687,
+                         "by":  "simianwords",
+                         "time":  1775805420,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "Yesterday I accidentally stumbled on a place where I could really appreciate MCP\u0027s.\nI wanted to connect my Claude account to my Notion account. Apparently all you need to do is just submit the notion MCP and log in. That\u0027s it! And I was able to interact with my Notion data from my Claude account!\nImagine how hard this would be with skills? It is literally impossible because with skills, you may need to install some local CLI which Claude honestly should not allow.\nIf not CLI, you need to interact with their API which again can\u0027t happen because you can\u0027t authenticate easily.\nMCP\u0027s fill this narrow gap in my opinion - where you don\u0027t own the runtime and you want to connect to other tools like plugins."
+                     },
+                     {
+                         "id":  47719339,
+                         "by":  "bharat1010",
+                         "time":  1775833827,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "The MCP vs skills debate feels like it\u0027s still very early days — I suspect we\u0027ll look back in a year and laugh at how much we debated this once the patterns become more obvious through real-world use."
+                     },
+                     {
+                         "id":  47714502,
+                         "by":  "simianwords",
+                         "time":  1775804132,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "SKILLS.md or AGENTS are good concepts but they miss two crucial things that will make them much more usable. I predict that this will happen.\nEach SKILLS.md will come with two hooks:\n1. first for installing the SKILL itself - maybe install the CLI or do some initial work to get it working\n2. Each skill may have dependencies on other skills - we need to install those first\nExpressing these two hooks in a formal way in skills would help me completely replace MCP\u0027s.\nMy concrete prediction is that this will happen soon.\nWrote more about it here: https://simianwords.bearblog.dev/what-agent-skills-misses-no..."
+                     },
+                     {
+                         "id":  47714981,
+                         "by":  "tomaytotomato",
+                         "time":  1775808059,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "As others have said I have found CLI tools much better\nThis is how I am structuring stuff in Claude Code\n- Ansible setup github cli, git, atlassian cli, aws-cli, terraform cli tooling\n- Claude hooks for checking these cli tools are authenticated and configured\n- Claude skills to use the CLI tooling"
+                     },
+                     {
+                         "id":  47719514,
+                         "by":  "hereme888",
+                         "time":  1775834549,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "I see the real argument is against poorly-designed MCP servers and where a skill/script would be a better fit.\nIf all you need is \"teach the model how to use an existing tool\", then use a skill, or even scripts, which are great for bulk work or teaching workflows.\nMCPs are good at giving agents a stable, app-owned interface to a system w/o making the agents having to rediscover the integration every session. There\u0027s no way a skill/script would be able to handle the stuff I do via my local MCPs for managing certain apps and databases."
+                     },
+                     {
+                         "id":  47714492,
+                         "by":  "michaelashley29",
+                         "time":  1775804083,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "100%\nMCPs truly give the agent tools and allow the agent to make better informed decisions given you can have configured the right MCP tools. Skills are good for knowledge and general guidelines. They give context to the agent, and I have seen some skills being excessively long that could into eat into the context window of the agent.\nThis tool https://protomcp.io/ helps a lot with testing MCP servers before integrating into the agent workflow. You can even see the agent call different tools in real time and view the trace."
+                     },
+                     {
+                         "id":  47715816,
+                         "by":  "chris_money202",
+                         "time":  1775815380,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "I think the worse thing is when someone takes a clearly defined list of steps to do something and writes it as a skill rather than just having AI write it as a script. It’s like people have forgot what scripting is"
+                     },
+                     {
+                         "id":  47731604,
+                         "by":  "TurtleBoxPlus",
+                         "time":  1775922697,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "Skills can be seen as custom-made MCPs that wrap them in a way readily useful for a niche audience. What is provided for in the package is not only the original service but also the business logic and workflow of the industry. So, sometimes they target audiences at different positions of the stream."
+                     },
+                     {
+                         "id":  47715886,
+                         "by":  "qrbcards",
+                         "time":  1775816009,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "The comparison to app stores is interesting but I think MCP registries solve a different problem. App stores are for humans browsing. MCP registries are for agents discovering tools at runtime based on the task at hand. The user never browses — they describe what they need and the agent finds the tool.\nThat is a meaningful distribution shift. Products no longer need to be marketed to end users if an agent can find and invoke them directly. Skills require the developer to install them ahead of time, which means someone already decided this tool was relevant."
+                     },
+                     {
+                         "id":  47718310,
+                         "by":  "jsw97",
+                         "time":  1775829678,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "From the article: \"Sandboxing: Remote MCPs are naturally sandboxed. They expose a controlled interface rather than giving the LLM raw execution power in your local environment.\"\nI think this is underappreciated. CLI access gives agents a ton of freedom and might be more effective in many applications. But if you require really fine granularity on permissions -- e.g., do lookups in this db and nothing else -- MCP is a natural fit."
+                     },
+                     {
+                         "id":  47715969,
+                         "by":  "kohlerm",
+                         "time":  1775816741,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "Yeah well. MCPs are better for use cases where remote access is required, but for development use cases what you need in the majority of use cases is to manipulate local files. Skills are just the more natural solution here. You can argue whether Skills should come with more type information (MCPs are slightly better here), but otherwise it seems pretty clear to me that if you do not need remote access then MCPs are not really needed."
+                     },
+                     {
+                         "id":  47721416,
+                         "by":  "localhost3000",
+                         "time":  1775843192,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "How I think about this:\nIf you\u0027re using an agent in a shell environment with unfettered internet access and code execution: CLI + Skills.\nIf you\u0027re using a hosted agent on a website or in an app without code execution and limited/no internet access: MCP.\nWe want both patterns. Folks who are agro about MCP do ~all of their work in the former, so it seems pointless. Most people interact with agents in the later."
+                     },
+                     {
+                         "id":  47715304,
+                         "by":  "rakamotog",
+                         "time":  1775810854,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "There is one area where MCP typically has challenges - Not a technical challenge but a practical challenge.\nImagine you are creating an asset which requires multiple API calls and your UI is designed to go through a 10-12 step setup process for that asset. In practice even if we give one tool for LLM to one-shot it, or even if we break it down into 10-12 tools the points of hallucinations are much higher.\nContrast this with \"skills\" and CLI."
+                     },
+                     {
+                         "id":  47715221,
+                         "by":  "choam2426",
+                         "time":  1775809986,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "This tracks with my experience.\nI started out building an MCP server for an internal wiki, but ended up replacing it with a simple CLI + skill because the wiki had no access control and the simpler setup was good enough in practice.\nI think that\u0027s the important boundary, though: once access control, auth, or per-user permissions enter the picture, I\u0027d much rather have MCP as the interface than rely on local tooling conventions."
+                     },
+                     {
+                         "id":  47716028,
+                         "by":  "rd42",
+                         "time":  1775817326,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "I think the key problem is that usage of MCP servers is not \u0027baked\u0027 into the LLM training - but API\u0027s and CLI\u0027s are already a part of training. So to use your MCP server, the LLM has to use additional intelligence which could have been used to do the actual work instead."
+                     },
+                     {
+                         "id":  47713541,
+                         "by":  "ok_dad",
+                         "time":  1775794284,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "People in the comments still confused about “agentic development” vs. “agentic development”. One uses the cli best, while the other cannot use a cli very well.\nThe first is using agents locally to develop.\nThe second is developing an agent. Not necessarily for coding, mind you. Not even for just text sometimes.\nThey are different cases, MCP is great for the latter."
+                     },
+                     {
+                         "id":  47731188,
+                         "by":  "LucasOe",
+                         "time":  1775919395,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "In my opinion, the biggest benefit of skills is that they encourage good CLI tooling. Even someone who doesn\u0027t use AI all that much can profit from it."
+                     },
+                     {
+                         "id":  47715405,
+                         "by":  "EugeneOZ",
+                         "time":  1775811797,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "\u003e Skills are great for pure knowledge and teaching an LLM how to use an existing tool. But for giving an LLM actual access to services, the Model Context Protocol (MCP) is the far superior\nThat\u0027s it. For some things you need MCP, for some things you need SKILLs - these things coexist."
+                     },
+                     {
+                         "id":  47716682,
+                         "by":  "coolThingsFirst",
+                         "time":  1775821753,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "Can someone more enlightened in this area explain how this is used?\nIs MCP for in-house LLMs or can it work with ChatGPT as well? As far as I know it\u0027s a server with small self-contained task scripts. But don\u0027t get how the coordination works and how it\u0027s used."
+                     },
+                     {
+                         "id":  47713592,
+                         "by":  "medbar",
+                         "time":  1775794713,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "I still use vanilla Claude Code without MCP or skills, am I in the minority? Not trying to be a luddite."
+                     },
+                     {
+                         "id":  47713412,
+                         "by":  "turlockmike",
+                         "time":  1775793196,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "Or use both. Remote MCPs are secure, CLI allows for programmatic execution. Use bash to run remote MCPs.\nI built this to solve this exact problem. \n https://github.com/turlockmike/murl"
+                     },
+                     {
+                         "id":  47717867,
+                         "by":  "Aperocky",
+                         "time":  1775827857,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "The most common mistake that I see here is people thinking only MCP can be bound to a server and store secrets and be called remotely\nNo, a CLI with RPC can do exactly that, just smaller. It goes lower in the exact same stack without the fluff."
+                     },
+                     {
+                         "id":  47722194,
+                         "by":  "uyzstvqs",
+                         "time":  1775847515,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "Within the scope of AI coding tools, they both have their place and do different things. In the much bigger picture of AI assistants, skill.md is irrelevant while MCP is set to become huge."
+                     },
+                     {
+                         "id":  47717747,
+                         "by":  "iamsaitam",
+                         "time":  1775827260,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "Don\u0027t they both solve different problems? This tribalism makes no sense."
+                     },
+                     {
+                         "id":  47714570,
+                         "by":  "qalmakka",
+                         "time":  1775804619,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "CLI is massively superior to MCP in my experience. First, because I also understand what\u0027s going on and do it myself if necessary. Second because it\u0027s so much cheaper in terms of tokens it\u0027s not even funny"
+                     },
+                     {
+                         "id":  47716000,
+                         "by":  "alienbaby",
+                         "time":  1775817070,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "Different techniques appropriate in different situations, I would decide on what\u0027s appropriate given the goals you have. Whichg is nearly always the answer to X is a better way than Y arguments."
+                     },
+                     {
+                         "id":  47715797,
+                         "by":  "anshulbhide",
+                         "time":  1775815262,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "\u003e\u003e\u003eThe core philosophy of MCP is simple: it’s an API abstraction.\nThat\u0027s exactly the problem. As agents become better and can read API documentation themselves, WHY do you need an API abstraction?"
+                     },
+                     {
+                         "id":  47720835,
+                         "by":  "the_arun",
+                         "time":  1775840048,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "Don\u0027t know if Skills \u0026 MCP are comparable. One is static \u0026 another is dynamic. It is like comparing static content vs dynamic apis. Probably we need both."
+                     },
+                     {
+                         "id":  47715635,
+                         "by":  "mantyx",
+                         "time":  1775813982,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "Having developed mantyx.io, I believe that rest apis are still champion. MCP is nothing more than rest wrappers most of the time and skills are cli wrappers which in turn are rest wrappers."
+                     },
+                     {
+                         "id":  47716837,
+                         "by":  "briznad",
+                         "time":  1775822785,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "Skills are static; MCP servers is dynamic. Skills codify info and workflows, help decrease redundant instructions, and increase consistent outcomes. MCP servers allow access to changing resources across systems.\nYou may dislike MCP, and there are certainly valid arguments to be made there, but that doesn\u0027t mean you can replace it with skills. If you could replace a given MCP server with a skill it would only indicate that someone misunderstood the assignment and chose the wrong tool in the first place. It wouldn\u0027t indicate the superiority of one thing over the other.\nThis whole article, and it\u0027s current rank on HN (#5), is making me feel like I took crazy pills this morning. A colleague suggests this Skills vs MCP discourse is big on Twitter, so maybe I lack the necessary background to appreciate this, but aren\u0027t these different tools, solving for different things, in different ways? Is this parody? Am I falling into a bot engagement trap by even responding to this? The article certainly reads like LinkedIn drivel, with vague, emphatic opinions about nothing."
+                     },
+                     {
+                         "id":  47719583,
+                         "by":  "ookblah",
+                         "time":  1775834842,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "mcp is really easy for non-techies to understand. if i own the system, can install cli tools, cli + skills beat it every time and i can tweak, etc. if you\u0027re asking someone else to do that there\u0027s real friction. i\u0027ll sometimes use mcp if i just want to get up and running am not watching context as much, then if they offer a cli i\u0027ll just move to skill + that or write my own wrapper off the api."
+                     },
+                     {
+                         "id":  47715003,
+                         "by":  "slhck",
+                         "time":  1775808236,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "Huh, I think the author might be deliberately ignoring how MCP works?\n- \"CLIs need to be published, managed, and installed\" -- same for MCP servers which you have to define in your config, and they frequently use some kind of \"npx mcp-whatever\" call.\n- \"Where do you put the API tokens required to authenticate?\" -- where does an MCP server put them? In your home folder? Some .env file? The keychain? Same like CLI tools.\n- \"Some tools support installing skills via npx skills, but that only works in Codex and Claude Code, not Claude Cowork or standard Claude\" -- sure, but you also can\u0027t universally define MCP servers for all those tools. You have to go ahead and edit the config anyway.\n- \"Using a skill often requires loading the entire SKILL.md into the LLM’s context window, rather than just exposing the single tool signature it needs\" -- yeah, but it\u0027s on-demand rather than exposing ALL MCP servers\u0027 tool signatures. Have you ever tried to use playwright MCP?\nI just don\u0027t buy the \"without any setup\" argument."
+                     },
+                     {
+                         "id":  47720173,
+                         "by":  "vamsikrishna21",
+                         "time":  1775837070,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "I do agree on this, but i think this is just for now, as models get better reasoning, why cant sklls.md take place of MCP all together?"
+                     },
+                     {
+                         "id":  47713603,
+                         "by":  "heckintime",
+                         "time":  1775794813,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "AI tools for non technical users that can work on browsers and mobile app will be super powerful. I think MCPs are currently the best way to reach this audience."
+                     },
+                     {
+                         "id":  47715527,
+                         "by":  "fedeb95",
+                         "time":  1775813113,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "I think both will stick around because they solve two different problems. 1) what are you able to do (skills) 2) which tools you have to do it (mcp)"
+                     },
+                     {
+                         "id":  47712983,
+                         "by":  "charcircuit",
+                         "time":  1775788929,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "This author does not realize that skills can call APIs. The idea that you have to build dedicated CLI apps is not true at all and invalidates the entire article."
+                     },
+                     {
+                         "id":  47713638,
+                         "by":  "latentsea",
+                         "time":  1775795213,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "Different tools for different jobs man... I prefer the right tool for the job, and both skills and MCP seem necessary. Do you also prefer forks over spoons?"
+                     },
+                     {
+                         "id":  47715292,
+                         "by":  "bachback",
+                         "time":  1775810703,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "the best agent framework in my opinion is Pi. Pi avoids MCP thats a good thing. why assume that the planet will migrate from HTTP to MCP? no, instead lets assume we have client code we can call. we already have a rich ecosystem of HTTP services and packages. and if we assume a rewrite for agents we probably wouldn\u0027t come up with MCP but something more powerful."
+                     },
+                     {
+                         "id":  47714572,
+                         "by":  "nodomain",
+                         "time":  1775804656,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "The whole article serves just to promote his SaaS."
+                     },
+                     {
+                         "id":  47714532,
+                         "by":  "pjmalandrino",
+                         "time":  1775804371,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "Not same tools, different purpose from my opinion"
+                     },
+                     {
+                         "id":  47715680,
+                         "by":  "mememememememo",
+                         "time":  1775814345,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "Like saying I prefer websites over CLI, or bicycles over canoes. Chisels over planes. Depends what you are trying to achieve."
+                     },
+                     {
+                         "id":  47714600,
+                         "by":  "baq",
+                         "time":  1775804837,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "Remote MCP solve the delivery and update issues just like saas and browsers did for human users. Not much more to it really"
+                     },
+                     {
+                         "id":  47718657,
+                         "by":  "utilize1808",
+                         "time":  1775831103,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "I think skills are just a marketing ploy. There is nothing preventing a MCP from serving skills."
+                     },
+                     {
+                         "id":  47713369,
+                         "by":  "nout",
+                         "time":  1775792712,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "Use both. These do different things."
+                     },
+                     {
+                         "id":  47724279,
+                         "by":  "upcoming-sesame",
+                         "time":  1775859051,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "I prefer CLIs over both"
+                     },
+                     {
+                         "id":  47726732,
+                         "by":  "lgas",
+                         "time":  1775874759,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "I still prefer windshield wipers over turn signals."
+                     },
+                     {
+                         "id":  47719058,
+                         "by":  "a960206",
+                         "time":  1775832786,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "I think so,I like only use Claude Code by MCP,let it connect"
+                     },
+                     {
+                         "id":  47714383,
+                         "by":  "bijowo1676",
+                         "time":  1775803090,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "MCP pollutes the context, if you dont care about wasting context token for all MCP tools, go ahead and use MCP, but you should know that cli tool+skill can perfectly replace it with less token overhead and better matching due to skill\u0027s front matter"
+                     },
+                     {
+                         "id":  47719314,
+                         "by":  "bhewes",
+                         "time":  1775833747,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "Nice someone who actual works with the systems. Thank you."
+                     },
+                     {
+                         "id":  47716210,
+                         "by":  "pjmlp",
+                         "time":  1775818799,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "Complete in synch with the author MCP and A2A for the win."
+                     },
+                     {
+                         "id":  47716244,
+                         "by":  "throwpoaster",
+                         "time":  1775819015,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "They’re different things. You can have skills using MCP."
+                     },
+                     {
+                         "id":  47719869,
+                         "by":  "vonneumannstan",
+                         "time":  1775835988,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "They seem like fundamentally different things."
+                     },
+                     {
+                         "id":  47713278,
+                         "by":  "avinashselvam",
+                         "time":  1775791899,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "skills and mcp help with entirely different things. sure most products add a skill on using their mcp so that model\u0027s tool calling works good."
+                     },
+                     {
+                         "id":  47716158,
+                         "by":  "TonyAlicea10",
+                         "time":  1775818394,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "I prefer peanut butter over jelly."
+                     },
+                     {
+                         "id":  47715037,
+                         "by":  "contextbloat",
+                         "time":  1775808470,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "\u003e Using a skill often requires loading the entire SKILL.md into the LLM’s context window, rather than just exposing the single tool signature it needs.\nIsn\u0027t this, like, the exact thing MCP is the worst at? You need to load the entire MCP into the context even if you\u0027re not using the MCP\u0027s relevant functions. Which is why some people put them on subagents, which is like, equivalent to putting the MCP behind a CLI function, at which point, why not just have the CLI function and selectively load it when yo- OH WAIT, THERE\u0027S A NAME FOR THAT!"
+                     },
+                     {
+                         "id":  47713568,
+                         "by":  "tpoacher",
+                         "time":  1775794519,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "\u003e Skills are great for pure knowledge and teaching an LLM how to use an existing tool. But for giving an LLM actual access to services, the Model Context Protocol (MCP) is the far superior, more pragmatic architectural choice.\nThere\u0027s your answer. If you want to use local tools, use Skills. If you want to use services, use MCP. Or, you know, whatever works best for your scenario."
+                     },
+                     {
+                         "id":  47716151,
+                         "by":  "raincole",
+                         "time":  1775818355,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "Seriously, the only drawback of MCP is its name. If it were named \"API discovery protocol\" (which is what it is) none of these debates would have existed.\nAPI vs MCP sounds like a real debate, but it really isn\u0027t. It\u0027s \"API vs API discovery protocol.\" See how asinine it sounds if we call things for what they are."
+                     },
+                     {
+                         "id":  47714756,
+                         "by":  "seyz",
+                         "time":  1775806003,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "MCP versus Skills -\u003e wrong debate.\nMCP versus CLI -\u003e real debate."
+                     },
+                     {
+                         "id":  47715927,
+                         "by":  "nathias",
+                         "time":  1775816425,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "MCP is too thristy"
+                     },
+                     {
+                         "id":  47722806,
+                         "by":  "darepublic",
+                         "time":  1775850495,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "This skills obsession is a Claude/anthropic fanboy thing imo. Goodbye sweet karma"
+                     },
+                     {
+                         "id":  47716942,
+                         "by":  "the_axiom",
+                         "time":  1775823372,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "this is very good and correct"
+                     },
+                     {
+                         "id":  47715442,
+                         "by":  "polyterative",
+                         "time":  1775812173,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "why not both"
+                     },
+                     {
+                         "id":  47721209,
+                         "by":  "hungryhobbit",
+                         "time":  1775842035,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "Am I the only one who doesn\u0027t trust remote servers?"
+                     },
+                     {
+                         "id":  47713330,
+                         "by":  "lyime",
+                         "time":  1775792441,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "auth"
+                     },
+                     {
+                         "id":  47715662,
+                         "by":  "lukewarm707",
+                         "time":  1775814212,
+                         "depth":  1,
+                         "parent":  47712718,
+                         "text":  "i feel like giving an agent shell access and internet is batshit crazy.\nthat\u0027s just me i guess."
+                     },
+                     {
+                         "id":  47715475,
+                         "by":  "prohobo",
+                         "time":  1775812504,
+                         "depth":  2,
+                         "parent":  47715000,
+                         "text":  "I feel like the MCP conversation conflates too many things and everyone has strong assumptions that aren\u0027t always correct. The fundamental issue is between one-off vs. persistent access across sessions:\n- If you need to interact with a local app in a one-off session, then use CLI.\n- If you need to interact with an online service in a one-off session, then use their API.\n- If you need to interact with a local app in a persistent manner, and if that app provides an MCP server, use it.\n- If you need to interact with an online service in a persistent manner, and if that app provides an MCP server, use it.\nWhether the MCP server is implemented well is a whole other question. A properly configured MCP explains to the agent how to use it without too much context bloat. Not using a proper MCP for persistent access, and instead trying to describe the interaction yourself with skill files, just doesn\u0027t make any sense. The MCP owner should be optimizing the prompts to help the agent use it effectively.\nMCP is the absolute best and most effective way to integrate external tools into your agent sessions. I don\u0027t understand what the arguments are against that statement?"
+                     },
+                     {
+                         "id":  47716806,
+                         "by":  "BatteryMountain",
+                         "time":  1775822608,
+                         "depth":  2,
+                         "parent":  47715000,
+                         "text":  "This is exactly what I do too. Works very well. I have a whole bunch of scripts and cli tools that claude can use, most of them was built by claude too. I very rarely need to use my IDE because of this, as I\u0027ve replicated some of Jetbrains refactorings so claude doens\u0027t have to burn tokens to do the same work. It also turns a 5 minute claude session into a 10 second one, as the scripts/tools are purpose made. Its reallly cool.\nedit: just want to add, i still haven\u0027t implemented a single mcp related thing. Don\u0027t see the point at all. REST + Swagger + codegen + claude + skills/tools works fine enough."
+                     },
+                     {
+                         "id":  47715893,
+                         "by":  "siva7",
+                         "time":  1775816082,
+                         "depth":  2,
+                         "parent":  47715000,
+                         "text":  "\u003e MCP adds friction, imagine doing yourself the work using the average MCP server.\nWhy on earth don\u0027t people understand that MCP and skills are complementary concepts, why? If people argue over MCP v. Skills they clearly don\u0027t understand either deeply."
+                     },
+                     {
+                         "id":  47716810,
+                         "by":  "gitgud",
+                         "time":  1775822618,
+                         "depth":  2,
+                         "parent":  47715000,
+                         "text":  "\u003e For instance it does not make sense to have an MCP to use git. \nWhat if you don’t want the AI to have any write access for a tool? I think the ability to choose what parts of the tool you expose is the biggest benefit of MCP.\nAs opposed to a READ_ONLY_TOOL_SKILL.md that states “it’s important that you must not use any edit API’s…”"
+                     },
+                     {
+                         "id":  47719275,
+                         "by":  "1minusp",
+                         "time":  1775833631,
+                         "depth":  2,
+                         "parent":  47715000,
+                         "text":  "Feels to me like the toolchain for using LLMs in various tasks is still in flux (i interpret all of this as \"stuff in different places like .md or skills or elsewhere that is appended to the context window\" (i hope that is correct)). Shouldnt this overall process be standardized/automated? That is, use some self-reflection to figure out patterns that are then dumped into the optimal place, like a .md file or a skill?"
+                     },
+                     {
+                         "id":  47718649,
+                         "by":  "morgaesis",
+                         "time":  1775831072,
+                         "depth":  2,
+                         "parent":  47715000,
+                         "text":  "This is my life motto. Progressive exploration, codifying, use your codified workflows.\n\u003e for each desired change, make the change easy (warning: this may be hard), then make the easy change\n- Kent Beck\n https://x.com/KentBeck/status/250733358307500032"
+                     },
+                     {
+                         "id":  47715285,
+                         "by":  "tomaytotomato",
+                         "time":  1775810616,
+                         "depth":  2,
+                         "parent":  47715000,
+                         "text":  "Although the author is coming from a place of security and configuration being painful with Skills, I think the future will be a mix of MCP, Agents and Skills. Maybe even a more granular defined unit below a skill - a command...\nThese commands would be well defined and standardised, maybe with a hashed value that could be used to ensure re-usability (think Docker layers).\nThen I just have a skill called:\n- github-review-slim:latest\n- github-review-security:8.0.2\nMCPs will still be relevant for those tricky monolithic services or weird business processes that aren\u0027t logged or recorded on metrics."
+                     },
+                     {
+                         "id":  47716371,
+                         "by":  "neya",
+                         "time":  1775819815,
+                         "depth":  2,
+                         "parent":  47715000,
+                         "text":  "\u003e Focus on what tool the LLM requires to do its work in the best way.\nI completely agree with you. There was a recent finding that said Agents.md outperforms skills. I\u0027m old school and I actually see best results by just directly feeding everything into the prompt context itself.\n https://vercel.com/blog/agents-md-outperforms-skills-in-our-..."
+                     },
+                     {
+                         "id":  47718406,
+                         "by":  "fny",
+                         "time":  1775830062,
+                         "depth":  2,
+                         "parent":  47715000,
+                         "text":  "This is covered well in the article too. See \"The Right Tool for the Job\" and \"Connectors vs. Manuals.\"\nPerhaps the title is just clickbait. :)"
+                     },
+                     {
+                         "id":  47715494,
+                         "by":  "ReDeiPirati",
+                         "time":  1775812815,
+                         "depth":  2,
+                         "parent":  47715000,
+                         "text":  "\u003e Don\u0027t focus on what you prefer: it does not matter. Focus on what tool the LLM requires to do its work in the best way.\nI noticed that LLMs will tend to work by default with CLIs even if there\u0027s a connected MCP, likely because a) there\u0027s an overexposure of CLIs in training data b) because they are better composable and inspectable by design so a better choice in their tool selection."
+                     },
+                     {
+                         "id":  47720153,
+                         "by":  "jFriedensreich",
+                         "time":  1775836974,
+                         "depth":  2,
+                         "parent":  47715000,
+                         "text":  "If your llm sees even a difference between local skill and remote MCP thats a leak in your abstraction and shortcoming of the agent harness and should not influence the decision how we need to build these system for the devs and end users. They way this comment thinks about building for agents would lead to a hellscape."
+                     },
+                     {
+                         "id":  47718546,
+                         "by":  "richardlblair",
+                         "time":  1775830660,
+                         "depth":  2,
+                         "parent":  47715000,
+                         "text":  "I\u0027ve found makefiles to be useful. I have a small skill that guides the LLM towards the makefile. It\u0027s been great for what you\u0027re talking about, but it\u0027s also a great way to make sure the agent is interacting with your system in a way you prefer."
+                     },
+                     {
+                         "id":  47723239,
+                         "by":  "pojzon",
+                         "time":  1775852679,
+                         "depth":  2,
+                         "parent":  47715000,
+                         "text":  "This is how I work with my agent harness. Also have skills for writing tools and skills.\nAnd I still think ppl dont understand why MCPs are still needed and when to use them.\nIts actually pretty simple."
+                     },
+                     {
+                         "id":  47716935,
+                         "by":  "the_axiom",
+                         "time":  1775823330,
+                         "depth":  2,
+                         "parent":  47715000,
+                         "text":  "this comment just assumes skills ori better without dealing with any of the arguments presented\nlow quality troll"
+                     },
+                     {
+                         "id":  47714461,
+                         "by":  "stingraycharles",
+                         "time":  1775803913,
+                         "depth":  2,
+                         "parent":  47713089,
+                         "text":  "I often just put direct curl commands in a skill, the agent uses that, and it works perfectly for custom API integrations. Agents are perfectly capable of doing these types of things, and it means the LLM just uses a flexible set of tools to achieve almost anything."
+                     },
+                     {
+                         "id":  47713422,
+                         "by":  "TheTaytay",
+                         "time":  1775793314,
+                         "depth":  2,
+                         "parent":  47713089,
+                         "text":  "I keep getting hung up on securely storing and using secrets with CLI vs MCP. With MCP, you can run the server before you run the agent, so the agent never even has the keys in its environment. That way. If the agent decides to install the wrong npm package that auto dumps every secret it can find, you are less likely to have it sitting around. I haven’t figured out a good way to guarantee that with CLIs."
+                     },
+                     {
+                         "id":  47730427,
+                         "by":  "blairharper",
+                         "time":  1775914212,
+                         "depth":  2,
+                         "parent":  47713089,
+                         "text":  "\u003e I don’t want APIs, I want agents to use the same CLI tooling I already use that is locally available.\nI do not want agents using the same elevated auth I have via my CLI tooling. One hallucination with your gh cli and the blast radius is every repo you have write (or worse, admin) access to.\nMCP lets you scope tokens down (on supported platforms), or at minimum gives you something you can revoke independently."
+                     },
+                     {
+                         "id":  47714970,
+                         "by":  "zaphirplane",
+                         "time":  1775807959,
+                         "depth":  2,
+                         "parent":  47713089,
+                         "text":  "This has been hashed to death and back. The mcp allows a separation between the agent and the world, at its most basic not giving the agent your token or changing a http header , forcing a parameter.\nWell yes you don’t need those things all the time and who knows if the inventor of mcp had this idea in mind but here we are"
+                     },
+                     {
+                         "id":  47714948,
+                         "by":  "lll-o-lll",
+                         "time":  1775807796,
+                         "depth":  2,
+                         "parent":  47713089,
+                         "text":  "Cool cool. Except.\nWhat about auth? Authn and authz. Agent should be you always? If not, every API supports keys? If so, no fears about context poisoned agents leaking those keys?\nOne thing an MCP (server) gives you is a middleware layer to control agent access. Whether you need that is use-case dependent."
+                     },
+                     {
+                         "id":  47713178,
+                         "by":  "woeirua",
+                         "time":  1775790938,
+                         "depth":  2,
+                         "parent":  47713089,
+                         "text":  "Ok, but there are still many environments where an LLM will not have access to a CLI. In those situations, skills calling CLI tools to hook into APIs are DOA."
+                     },
+                     {
+                         "id":  47715267,
+                         "by":  "rimliu",
+                         "time":  1775810467,
+                         "depth":  2,
+                         "parent":  47713089,
+                         "text":  "what you want and what works may be very different things."
+                     },
+                     {
+                         "id":  47715070,
+                         "by":  "joshwarwick15",
+                         "time":  1775808681,
+                         "depth":  2,
+                         "parent":  47715032,
+                         "text":  "Context usage is a client problem - progressive disclosure can be implemented without any spec changes (Claude/code has this built in for example). That being said the examples for creating a client could be massively expanded to show how to do this well"
+                     },
+                     {
+                         "id":  47718302,
+                         "by":  "theshrike79",
+                         "time":  1775829651,
+                         "depth":  2,
+                         "parent":  47715032,
+                         "text":  "In an organisation we can’t limit MCP access. It’s all or nothing. Everything the user can touch, the MCP can touch.\nWe can trust humans not to do stupid things. They might accidentally delete maybe two items by fat-fingering the UI.\nAn Agent can delete a thousand items in a second while doing 30 other things.\nWith bespoke CLI tools we can configure them so that they cannot access anything except specific resources, limiting the possible blast radius considerably."
+                     },
+                     {
+                         "id":  47715350,
+                         "by":  "exossho",
+                         "time":  1775811309,
+                         "depth":  2,
+                         "parent":  47715032,
+                         "text":  "agree\nI don\u0027t get this discussion anyways\nThose are two different things, and actually they work well together.."
+                     },
+                     {
+                         "id":  47713586,
+                         "by":  "Aperocky",
+                         "time":  1775794660,
+                         "depth":  2,
+                         "parent":  47713065,
+                         "text":  "MCP is just CLI wrapped in boxes.\nCLI is the same API in more concise format. At minimum, the same amount of context overhead exist for MCP, but most of the time more because the boxes have size.\nCLI can be secure, AWS CLI is doing just fine. You can also play simple tricks to hide secret in a daemon or run them remotely, and all of them are still smaller than a MCP."
+                     },
+                     {
+                         "id":  47714411,
+                         "by":  "zhdc1",
+                         "time":  1775803364,
+                         "depth":  2,
+                         "parent":  47713065,
+                         "text":  "Completely agree. I don’t see why people view this as an either or decision.\nAlso worth mentioning that some paid MCP providers offer an actual value added. Sure, I can use curl or a self hosted crawler for web searches, but is it really worth the pain?"
+                     },
+                     {
+                         "id":  47715147,
+                         "by":  "chris_ivester",
+                         "time":  1775809328,
+                         "depth":  2,
+                         "parent":  47713065,
+                         "text":  "This is exactly right, and I\u0027d add one more layer that the thread is mostly missing: this combination matters most when the agent itself is hosted in the cloud rather than running locally. Skills + MCP is the architecture for cloud-hosted agents - Skills give the agent its context and workflow, MCP tools give it reach into external services without the agent needing to manage credentials or runtime dependencies."
+                     },
+                     {
+                         "id":  47715552,
+                         "by":  "dvcrn",
+                         "time":  1775813299,
+                         "depth":  2,
+                         "parent":  47713065,
+                         "text":  "Hi, author here! I fully agree with your comment here and that’s exactly my point in the post: Different tools that work great for different tasks. If anything, the post is a take against treating Skills + CLI as a zero-sum replacement for MCP, and calling MCP dead/outdated\nEspecially portability is just not possible with Skills+CLI (yet). I can use the same MCP servers through remote MCP on my phone, web, iPad, in ChatGPT, Perplexity, Claude, Mistral and so on, which I can’t do with Skills."
+                     },
+                     {
+                         "id":  47714903,
+                         "by":  "soco",
+                         "time":  1775807337,
+                         "depth":  2,
+                         "parent":  47713065,
+                         "text":  "Also, the skills can be ignored or thwarted if the LLM feels like, while a policy at the MCP server level stays there."
+                     },
+                     {
+                         "id":  47715672,
+                         "by":  "thecupisblue",
+                         "time":  1775814269,
+                         "depth":  2,
+                         "parent":  47715515,
+                         "text":  "I am not 100% sure I follow your train of thought.\nIsn\u0027t in that case an API what they want?\nAn \"MCP for a local app\" is just an API that exposes the internal workings of the app.\nAn \"MCP for mixpanel\" is just an API that exposes Mixpanel API behind Auth. \nThere is nothing special about them for any type of user. It\u0027s just that MCP\u0027s were \"made popular\".\nFor the same type of user, I have built better and smoother solutions that included 0 MCP servers, just tools and pure API\u0027s.Define a tool standard DX and your LLM can write these tools, no need to run a server anywhere.\nThat is also what the author seems to be mistaken about - you don\u0027t need a CLI. A CLI is used because the DX is nice and easily permutable with all the preexisting bash tooling that is ingrained into every LLM\u0027s dataset. You don\u0027t need a .env file if you\u0027re using an API with a skill. A skill can include a script, or mentions of tools, and you are the one who controls these.\nAll in all, the whole \"MCP vs Skill\" debate online is mostly based on fundamental misunderstandings of LLM\u0027s and how they work, how harnesses work and how API\u0027s in general work, with a lot of it being fueled by people who have no relevant coding experience and are just youtube/twitter \"content creators\".\nSome arguments against MPC\u0027s, no matter who is the user:\n- MCP is just a noisy, hacky wrapper around an API or IPC (well, API behind IPC)\n- MCP\u0027s are too noisy for LLM\u0027s to be useful long-term, as they require a server.\n- You don\u0027t need an MCP, you need an easy accessible API with simple DX that the machine can use with as little context and decision making as required.\n- Skills are better than MCP because they basically encode the API docs/context in an LLM friendly manner. No need to run servers, just push text to system prompt."
+                     },
+                     {
+                         "id":  47715799,
+                         "by":  "vasco",
+                         "time":  1775815272,
+                         "depth":  2,
+                         "parent":  47715515,
+                         "text":  "More agronomic means shittier, eh? I guess you meant ergonomic but funny typo"
+                     },
+                     {
+                         "id":  47715566,
+                         "by":  "Oras",
+                         "time":  1775813440,
+                         "depth":  2,
+                         "parent":  47715515,
+                         "text":  "\u003e majority of users on this planet don\u0027t use AI agents like that\nSource?"
+                     },
+                     {
+                         "id":  47713400,
+                         "by":  "bikelang",
+                         "time":  1775793036,
+                         "depth":  2,
+                         "parent":  47713172,
+                         "text":  "I think many of us have been burned by the absolutely awful and unstable JIRA MCP and found that skills using `acli` actually work and view the rest of the MCP space thru that lens. Lots of early - and current! - MCP implementations were bad. So it’s an uphill battle to rebuild reputation."
+                     },
+                     {
+                         "id":  47713317,
+                         "by":  "bicx",
+                         "time":  1775792348,
+                         "depth":  2,
+                         "parent":  47713172,
+                         "text":  "I built an internal company MCP that uses Google Workspace auth and injects a mix of guidance (disguised as tools) on how we would like certain tasks to be accomplished via Claude as well as API-like capabilities for querying internal data and safely deploying small apps internally.\nI’d really love to get away from the SSE MCP endpoints we use, as the Claude desktop app can get really finicky about disconnects. I thought about distributing some CLIs with Skills instead. But, MCP can be easily updated with new tools and instructions, and it’s easy to explain how to add to Claude for non-technical people. I can’t imagine trying to make sure everyone in my company had the latest skill and CLI on their machine."
+                     },
+                     {
+                         "id":  47717336,
+                         "by":  "CuriouslyC",
+                         "time":  1775825302,
+                         "depth":  2,
+                         "parent":  47713172,
+                         "text":  "CLIs are technically better for a number of reasons.\nIf an enterprise already has internal tooling with authn/z, there\u0027s no reason to overlay on top of that.\nMCPs main value is as a structured description of an agent-usable subset of an API surface with community traction, so you can expect it to exist, be more relevant than the OpenAPI docs."
+                     },
+                     {
+                         "id":  47714425,
+                         "by":  "zhdc1",
+                         "time":  1775803600,
+                         "depth":  2,
+                         "parent":  47713172,
+                         "text":  "Or just rapidly spinning up something.\nCodex -\u003e LiteLLM -\u003e VLLM\n |____\u003e MCP\n \nTakes a couple of minutes to setup."
+                     },
+                     {
+                         "id":  47713408,
+                         "by":  "jillesvangurp",
+                         "time":  1775793103,
+                         "depth":  2,
+                         "parent":  47713172,
+                         "text":  "I\u0027ve started thinking of these systems as legacy systems. We have them. They are important and there\u0027s a lot of data in them. But they aren\u0027t optimal any more.\nHow we access them and where data lives is essentially an optimization problem. And AI changes what is optimal. Having data live in some walled garden with APIs designed to keep people out (most SAAS systems) is arguably sub optimal at this point. Sorting out these plumbing issues is actually a big obstacle for people to do productive things via agentic tools with these systems.\nBut a good way to deal with this is to apply some system thinking and figure out if you still need these systems at all. I\u0027ve started replacing a lot of these things with simple coder friendly solutions. Not because I\u0027m going to code against these things but because AI tools are very good at doing that on my behalf. If you are going to access data, it\u0027s nicer if that data is stored locally in a way that makes it easy to access that data. MCP for some SAAS thing is nice. A locally running SQL database with the data is nicer. And a lot faster to access. Processing data close to where it is stored is optimal.\nAs for MCP. I think it\u0027s not that important. Most agentic coding tools switch effortlessly between protocols and languages. In the end MCP is just another RPC protocol. Not a particularly good or optimal one even. If you had an API or cli already, it\u0027s a bit redundant to add MCP. Auth is indeed a key challenge. And largely not solved yet. I don\u0027t think MCP adds a whole lot of new elements for that."
+                     },
+                     {
+                         "id":  47715885,
+                         "by":  "nimonian",
+                         "time":  1775815999,
+                         "depth":  2,
+                         "parent":  47714794,
+                         "text":  "I\u0027m with you on this (I think). Digitising my org is much easier if I can assume my colleagues\u0027 agents will be acting on their behalf. Even if I can\u0027t convince most humans to cooperate with solutions, I can usually trust their agents to do so. MCP hides the wiring somewhat, which I enjoy."
+                     },
+                     {
+                         "id":  47713004,
+                         "by":  "ashraymalhotra",
+                         "time":  1775789094,
+                         "depth":  2,
+                         "parent":  47712816,
+                         "text":  "You could hardcode the script as a file within a skill too right? Skills can contain code, not just markdown files."
+                     }
+                 ]
+}

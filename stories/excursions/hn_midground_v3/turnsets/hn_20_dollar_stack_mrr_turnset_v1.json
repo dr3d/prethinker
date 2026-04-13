@@ -1,0 +1,99 @@
+﻿{
+    "name":  "hn_20_dollar_stack_mrr_turnset_v1",
+    "source_thread_id":  47736555,
+    "source_url":  "https://news.ycombinator.com/item?id=47736555",
+    "difficulty":  "G3",
+    "lane":  "ops_claims",
+    "utterances":  [
+                       {
+                           "utterance":  "OP (title): I run multiple $10K MRR companies on a $20/month tech stack",
+                           "source":  "op",
+                           "source_id":  47736555
+                       },
+                       {
+                           "utterance":  "hackingonempty: \u003e The enterprise mindset dictates that you need an out-of-process database server. But the truth is, a local SQLite file communicating over the C-interface or memory is orders of magnitude faster than making a TCP network hop to a remote Postgres server.\nI don\u0027t want to diss SQLite because it is awesome and more than adequate for many/most web apps but you can connect to Postgres (or any DB really) on localhost over a Unix domain socket and avoid nearly all of the overhead.\nIt\u0027s not much harder to use than SQLite, you get all of the Postgres features, it\u0027s easier to run reports or whatever on the live db from a different box, and much easier if it comes time to setup a read replica, HA, or run the DB on a different box from the app.\nI don\u0027t think running Postgres on the same box as your app is the same class of optimistic over provisioning as setting up a kubernetes cluster.",
+                           "source":  "comment",
+                           "source_id":  47737182,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "senko: If this sounds like basic advice, consider there are a lot of people out there that believe they have to start with serverless, kubernetes, fleets of servers, planet-scale databases, multi-zone high-availability setups, and many other \"best practices\".\nSaying \"you can just run things on a cheap VPS\" sounds amateurish: people are immediately out with \"Yeah but scaling\", \"Yeah but high availability\", \"Yeah but backups\", \"Yeah but now you have to maintain it\" arguments, that are basically regurgitated sales pitches for various cloud platforms. It\u0027s learned helplessness.",
+                           "source":  "comment",
+                           "source_id":  47737434,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "KronisLV: \u003e I use Linode or DigitalOcean. Pay no more than $5 to $10 a month. 1GB of RAM sounds terrifying to modern web developers, but it is plenty if you know what you are doing.\nIf you get one dedicated server for multiple separate projects, you can still keep the costs down but relax those constraints.\nFor example, look at the Hetzner server auction: https://www.hetzner.com/sb/ \nI pay about 40 EUR a month for this:\n Disk: 736G / 7.3T (11%)\n CPU: Intel Core i7-7700 @ 8x 4.2GHz [42.0°C]\n RAM: 18004MiB / 64088MiB\n \nI put Proxmox on it and can have as many VMs as the IO pressure of the OSes will permit: https://www.proxmox.com/en/ (I cared mostly about storage so got HDDs in RAID 0, others might just get a server with SSDs)\nYou could have 15 VMs each with 4 GB of RAM and it would still come out to around 2.66 EUR per month per VM. It\u0027s just way more cost efficient at any sort of scale (number of projects) when compared to regular VPSes, and as long as you don\u0027t put any trash on it, Proxmox itself is fairly stable, being a single point of failure aside.\nOf course, with refurbished gear you\u0027d want backups, but you really need those anyways.\nAside from that, Hetzner and Contabo (opinions vary about that one though) are going to be more affordable even when it comes to regular VPS hosting. I think Scaleway also had those small Stardust instances if you want something really cheap, but they go out of stock pretty quickly as well.",
+                           "source":  "comment",
+                           "source_id":  47737522,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "gobdovan: Nice list! I\u0027d say the SQLite with WAL is the biggest money saver mentioned.\nOne note: you can absolutely use Python or Node just as well as Go. There\u0027s Hetzner that offers 4GB RAM, 10TB network (then 1$/TB egress), 2CPUs machines for 5$.\nTwo disclaimers for VPS:\nIf you\u0027re using a dedicated server instead of a cloud server, just don\u0027t forget to backup DB to a Storage box often (3$ /mo for 1TB, use rsync). It\u0027s a good practice either way, but cloud instances seem more reliable to hardware faults. Also avoid their object store.\nYou are responsible for security. I saw good devs skipping basic SSH hardening and get infected by bots in \u003c1hr. My go-to move when I spin up servers is a two-stage Terraform setup: first, I set up SSH with only my IP allowed, set up Tailscale and then shutdown the public SSH IP entrypoint completely.\nTake care and have fun!",
+                           "source":  "comment",
+                           "source_id":  47737125,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "f311a: There are zero reasons to limit yourself to 1GB of RAM. By paying $20 instead of $5 you can get at least 8gb of RAM. You can use it for caches or a database that supports concurrent writes. The $15 difference won’t make any financial difference if you are trying to run a small business.\nThinking about on how to fit everything on a $5 VPS does not help your business.",
+                           "source":  "comment",
+                           "source_id":  47737244,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "taffydavid: \u003e I bought a GitHub Copilot subscription in 2023, plugged it into standard VS Code, and never left. I tried Cursor and the other fancy forks when they briefly surpassed it with agentic coding, but Copilot Chat always catches up.\n\u003e Here is the trick that you might have missed: somehow, Microsoft is able to charge per request, not per token. And a \"request\" is simply what I type into the chat box. Even if the agent spends the next 30 minutes chewing through my entire codebase, mapping dependencies, and changing hundreds of files, I still pay roughly $0.04.\n\u003e The optimal strategy is simple: write brutally detailed prompts with strict success criteria (which is best practice anyway), tell the agent to \"keep going until all errors are fixed,\" hit enter, and go make a coffee while Satya Nadella subsidizes your compute costs.\nWow. I\u0027ll definitely be investigating this!",
+                           "source":  "comment",
+                           "source_id":  47737984,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "vxsz: I learned nothing. Most of this seems like common basic advice, wrapped up in AI written paragraphs...\nInitially from the title, I thought it would be about brainstorming and launching a successful idea, and that sort of thing.",
+                           "source":  "comment",
+                           "source_id":  47737077,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "Gooblebrai: I know this article is about the stack, but I\u0027d like to point out that the success of the author has probably more to do with their marketing/sales strategy than their choice of technical infrastructure.\nSomething to remind to many tech folks on HN",
+                           "source":  "comment",
+                           "source_id":  47737716,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "aleda145: Great stack! I\u0027m doing a similar approach for my latest project (kavla.dev) but using fly.io and their suspend feature.\nScaling to zero with database persistence using litestream has cut my bill down to $0.1 per month for my backend+database.\nGranted I still don\u0027t have that many users, and they get 200ms of extra latency if the backend needs to wake up. But it\u0027s nice to never have to worry about accidental costs!",
+                           "source":  "comment",
+                           "source_id":  47737167,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "leaves83829: I quite like the websequencediagram. looks like a cool product!\nHe\u0027s mainly talking about the tech implementation which is the easy part.\nthe hard part of creating a business is finding a problem valuable enough to solve and reaching the users who need that problem solved. that\u0027s where the real value is.",
+                           "source":  "comment",
+                           "source_id":  47742620,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "t_mahmood: SQLite is fine, but I have ran Postgresql on a $20 server without any issues, and I would suggest if you have to deal with concurrent users and tasks, Postgresql is the way to go. SQLite WAL works, but sometimes it caused some issues, when you have a lot of concurrent tasks running continuously.\nAnd, not sure I\u0027m correct, but I felt Postgresql has more optimized storage if you have large text data than SQLite, at least for me I had storage full with SQLite, but same application on Postgresql never had this issue",
+                           "source":  "comment",
+                           "source_id":  47737248,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "ianpurton: When he switches from Kubernetes in the cloud to Nginx -\u003e App Binary -\u003e Sqlite he trades operations functionality for cost.\nBut, actually you can run Kubernetes and Postgres etc on a VPS.\nSee https://stack-cli.com/ where you can specify a Supabase style infra on a low cost VPS on top of K3s.",
+                           "source":  "comment",
+                           "source_id":  47737194,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "ornornor: I don’t get the copilot part.\nOpus 4.6 is a 3x multiplier as per GH pricing ( https://docs.github.com/en/copilot/concepts/billing/copilot-... ) so each request costs 0.12$ not 0.04$, and if using the fast mode opus 4.6 then it’s 30x so 1.20$/request.\nHow does the author get 0.04$ per?",
+                           "source":  "comment",
+                           "source_id":  47748153,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "nerder92: This is supposed to be a contrarian opinion yet this is a retoric yapped non-stop in the “build in public” community. Of course lean is a good approach, it makes sense, and most engineers know this. Is not a new concept, we’ve been doing this for years in every branch of engineering.\nThe invented “people start with a k8s cluster for 5 users” doesn’t really exist. This is just a story repeated ad nauseam to fit a narrative that help them justify their choices. This position is just as dogmatic, if not more, than the alleged dogma it attempts to disrupt.\nSmart technical leaders knows that technical decisions only matter in context never in absolutes. The right answer is always “it depends”.\nI can agree that there is a tendency to prematurely optimize infra, as a direct consequence of lack of measuring especially in young busy startups. One could argue that premature optimization might be the smart choice when you don’t have enough data, as in the best case scenario (your startup do well) you’ve saved some time, worst case scenario you’ve lost some money that depending on the situation might be less valuable than time spent in maintaining, and later refactoring, infra.",
+                           "source":  "comment",
+                           "source_id":  47739143,
+                           "depth":  1
+                       }
+                   ],
+    "notes":  "Auto-generated OP+14-comment turnset from HN snapshot (v3 hard pack)."
+}

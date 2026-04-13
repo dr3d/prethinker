@@ -1,0 +1,99 @@
+﻿{
+    "name":  "hn_gitbutler_series_a_git_future_turnset_v1",
+    "source_thread_id":  47712656,
+    "source_url":  "https://news.ycombinator.com/item?id=47712656",
+    "difficulty":  "G3",
+    "lane":  "startup_strategy",
+    "utterances":  [
+                       {
+                           "utterance":  "OP (title): We\u0027ve raised $17M to build what comes after Git",
+                           "source":  "op",
+                           "source_id":  47712656
+                       },
+                       {
+                           "utterance":  "trashb: \u003e The old model assumed one person, one branch, one terminal, one linear flow. Not only has the problem not been solved well for that old model, it’s now only been compounded with our new AI tools.\nA bit of a strange thing to say in my book. Git isn\u0027t SVN and I think these problems are already solved with git. I agree that the interface is not always very intuitive but Git has the infrastructure which is very much focused on supporting alternatives to \"one person, one branch, one terminal, one linear flow\".\n\u003e the problem that Git has solved for the last 20 years is overdue for a redesign.\nTo me it\u0027s not clear what the problem is that would require a redesign.",
+                           "source":  "comment",
+                           "source_id":  47719696,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "tiffanyh: A lot of people seem confused about how they raised the money, but it’s actually a pretty easy VC pitch.\n- It’s from one of GitHub’s cofounders.\n- GitHub had a $7.5B exit.\n- And the story is: AI is completely changing how software gets built, with plenty of proof points already showing up in the billions in revenue being made from things like Claude Code, Cusor, Codex, etc.\nSo the pitch is basically: back the team that can build the universal infrastructure for AI and agentic coding.",
+                           "source":  "comment",
+                           "source_id":  47713641,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "Meleagris: I recently switched to Jujutsu (jj) and it made me realize that “what comes after Git” might already exist.\nIt turns out the snapshot model is a perfect fit for AI-assisted development. I can iterate freely without thinking about commits or worrying about saving known-good versions.\nYou can just mess around and make it presentable later, which Git never really let you do nicely.\nPlus there’s essentially zero learning curve, since all the models know how to use JJ really well.",
+                           "source":  "comment",
+                           "source_id":  47713460,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "Vampyre: - leads with amount of money raised\n- mentions a16z\n- i use git every single day and have no idea what exactly the thing will do\nthey aren\u0027t building something to help you, they\u0027re building something to trap you. even if it\u0027s free, does things you like, etc., do not use it. their end goal is to screw you",
+                           "source":  "comment",
+                           "source_id":  47720343,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "factorialboy: Installed GitButler to try it out — and realized it installs malicious Git hooks to take over the git commit workflow:\n* pre-commit — The malicious one. It intercepted every `git commit` attempt and aborted it with that error message, forcing you to use `but commit` instead. Effectively a commit hijack — no way to commit to your own repo without their tool.\n* post-checkout — Fired whenever you switched branches. GitButler used it to track your branch state and sync its virtual branch model. It cleaned this one up itself when we checked out.\n* There\u0027s also typically a prepare-commit-msg hook that GitButler installs to inject its metadata into commit messages, though we didn\u0027t hit that one.\n* The pre-commit hook is the aggressive one — it\u0027s a standard git hook location, so git runs it unconditionally before every commit. GitButler installs it silently as part of \"setting up\" a repo, with no opt-in. The only escape (without their CLI) is exactly what we did: delete it manually.",
+                           "source":  "comment",
+                           "source_id":  47715106,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "nine_k: The tool that could replace git must free, ubiquitous, and arguably open-source. This is why I cannot imagine how raising $17M may pay for itself in that case, to say nothing of a 10× return.\nIt may be a great tool, but I\u0027d be very reluctant to use a closed-source solution as a cornerstone of infrastructure.",
+                           "source":  "comment",
+                           "source_id":  47720680,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "tmountain: I personally feel that:\n1) Git is fine\n2) I would not want to replace critical open source tooling with something backed by investor capital from its inception.\nSure, it will be “open source “, but with people throwing money behind it, there’s a plan to extract value from the user base from day one.\nI’m tired of being “the product”.\nCritical open source tooltips by should spring from the community, not from corporate sponsorship.",
+                           "source":  "comment",
+                           "source_id":  47714653,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "MBCook: Why does it take $17m to beat Git?\nHow will you ever get the network effects needed to get sustained users with a commercial tool?\nGiven Git was created because BitKeeper, a commercial tool, pulled their permission for kernel developers to use their tool aren’t we ignoring a lesson there?",
+                           "source":  "comment",
+                           "source_id":  47713351,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "qwery: First off, I\u0027m of course interested to see what the future infrastructure of software building next looks like.\n\u003e The hard problem is not generating change, it’s organizing, reviewing, and integrating change without creating chaos.\nSure, writing some code isn\u0027t the bottleneck. Glossed over is the part where the developer determines what changes to make , which in my experience is the most significant cost during development and it dwarfs anything to do with version control. You can spend a lot of energy on the organising, reviewing, patching, etc. stuff -- and you should be doing some amount of this, in most situations -- but if you\u0027re spending more of your development budget on metaprojects than you think you should be, I don\u0027t think optimising the metatooling is going to magically resolve that. Address the organisational issues first.\n\u003e This is what we’re doing at GitButler, this is why we’ve raised the funding to help build all of this, faster.\nThe time constraint (\"faster\") is, of course, entirely self-imposed for business reasons. There\u0027s no reason to expect that \u0027high cost + high speed\u0027 is the best or even a good way to build this sort of tooling, or anything else, for that matter.\nGit\u0027s UI has become increasingly friendly over a very long time of gradual improvements.\nYes, Mercurial was pretty much ideal out of the gate, but the development process in that case was (AFAIK) a world away from burning money and rushing to the finish.\nMaybe going slow is better?",
+                           "source":  "comment",
+                           "source_id":  47715810,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "nikolay: The only security incident I\u0027ve had in my career was due to Git Butler - it committed temporary files into GitHub without me explicitly approving it! Of course, it was a private repository, but still, it became impossible to delete those secrets because there were plenty of commits afterward. Given the large file tree and many updated files in the commit, it wasn\u0027t apparent that those folders got sneaked into the commit.\nSo, I really hope security incidents don\u0027t come after Git!",
+                           "source":  "comment",
+                           "source_id":  47714627,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "OsrsNeedsf2P: To all the salty people- the person cofounded GitHub. It\u0027s not the product that raised 17M, it\u0027s the person.",
+                           "source":  "comment",
+                           "source_id":  47713432,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "al_borland: I like what I see in the video, it would solve a lot of problems I end up having with git.\nThat said, I find the branding confusing. They say this is what comes after git, but in the name and the overall functionality, seems to just be an abstraction on top of git, not a new source control tool to replace git.",
+                           "source":  "comment",
+                           "source_id":  47712848,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "rsanheim: Wow. So much hate in the comments here. Of all the funding / equity events lately, I wonder how this one gets so much doubt and distrust from the start.\nIf this isn’t something to at least root for, in the sense of a small team, novel product, serving a real need, then I dunno what is. You can use jj or tangled and still appreciate improvements to git and vcs on the web in general. Competition amongst many players is a good thing, even if you don’t believe in this one particular vision.\nHeaven forbid it isn’t 100M going to a YC alum for yet another AI funding raise.",
+                           "source":  "comment",
+                           "source_id":  47714456,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "pu_pe: I actually believe we need to rethink Git for modern needs. Saving prompts and sessions alongside commits could become the norm for example, or I could imagine having different flags for whether a contribution was created by a human or not.\nThis doesn\u0027t seem to be the direction these guys are going though, it looks like they think Git should be more social or something.",
+                           "source":  "comment",
+                           "source_id":  47714447,
+                           "depth":  1
+                       }
+                   ],
+    "notes":  "Auto-generated OP+14-comment turnset from HN snapshot (v3 hard pack)."
+}
