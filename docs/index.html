@@ -175,6 +175,29 @@
       gap: 10px;
     }
 
+    .hero-pitch {
+      margin: 12px 0 0;
+      max-width: 980px;
+      font-size: clamp(18px, 2.3vw, 24px);
+      line-height: 1.34;
+      color: var(--ink);
+    }
+
+    .hero-subhead {
+      margin: 10px 0 0;
+      max-width: 980px;
+      color: var(--muted);
+      font-size: clamp(16px, 2vw, 19px);
+      line-height: 1.42;
+    }
+
+    .hero-status {
+      margin: 12px 0 0;
+      font-style: italic;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
     .btn {
       display: inline-block;
       text-decoration: none;
@@ -329,32 +352,6 @@
       background: color-mix(in srgb, var(--paper) 88%, transparent);
     }
 
-    .showcase-cover {
-      margin: 0 0 10px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      overflow: hidden;
-      background: color-mix(in srgb, var(--paper) 92%, transparent);
-      box-shadow: var(--shadow-soft);
-    }
-
-    .showcase-cover img {
-      display: block;
-      width: 100%;
-      height: auto;
-      max-height: 360px;
-      object-fit: cover;
-    }
-
-    .showcase-cover figcaption {
-      padding: 9px 10px;
-      border-top: 1px solid var(--border);
-      font-family: "IBM Plex Mono", Consolas, monospace;
-      font-size: 12px;
-      color: var(--muted);
-      background: color-mix(in srgb, var(--paper) 90%, transparent);
-    }
-
     .showcase-media {
       width: 100%;
       margin-top: 10px;
@@ -447,25 +444,18 @@
 
     <section class="hero">
       <h1>Prethinker Documentation Hub</h1>
-      <p class="lede">This is the front door for the semantic-parser workbench: prompt evolution, rung-by-rung validation, CE-driven clarification behavior, generated KB artifacts, and story roundtrip demos. This page now foregrounds the latest ladder frontier, progress-memory control-plane evidence, and public-facing explainer material; deep run inspection stays in Run Reports Explorer.</p>
+      <p class="hero-pitch">Prethinker is a governed write layer between natural language and a deterministic knowledge base. The LLM proposes; it does not get to commit.</p>
+      <p class="hero-subhead">Built to catch the failure mode where an LLM sounds right, writes the wrong thing, and narrates the corruption confidently.</p>
       <div class="hero-actions">
-        <a class="btn primary" href="run-reports-hub.html">Open Run Reports Explorer</a>
-        <a class="btn alt" href="rungs/index.html">Open Test Ladder</a>
-        <a class="btn" href="progress_cards.html">Open Progress Cards</a>
-        <a class="btn" href="run-learnings.md">Open Run Learnings</a>
-        <a class="btn" href="prethink_control_plane_contract.md">Open Control-Plane Contract</a>
-        <a class="btn" href="hospital-cpm-naturalized-session.md">Open Hospital CPM (Natural)</a>
-        <a class="btn" href="indie-launch-warroom-naturalized-session.md">Open Indie War Room (Natural)</a>
-        <a class="btn" href="fantasy-overlord-naturalized-session.md">Open Fantasy Overlord (Natural)</a>
-        <a class="btn" href="model-size-matrix.md">Open Model Size Matrix (3x6)</a>
-        <a class="btn" href="goldilocks-roundtrip.html">Open Goldilocks Roundtrip</a>
-        <a class="btn" href="../EXPLAINER.md">Open Explainer (X Article Draft)</a>
-        <a class="btn" href="https://github.com/dr3d/prethinker">View Repository</a>
+        <a class="btn primary" href="../EXPLAINER.md">Read The Explainer</a>
+        <a class="btn alt" href="reports/progress_memory_contamination_ablation_with_progress_20260412.html">See The Contamination Ablation</a>
+        <a class="btn" href="run-reports-hub.html">Browse Run Reports</a>
       </div>
+      <p class="hero-status">Active research project. Latest frontier checkpoint: rung_449 (multi-bind uncle query under noisy paraphrase), passing 4/4. Updated April 2026.</p>
       <div class="jump-row">
         <a class="jump" href="#start">start here</a>
-        <a class="jump" href="#showcase">showcase</a>
         <a class="jump" href="#frontier">frontier</a>
+        <a class="jump" href="#showcase">media</a>
         <a class="jump" href="#tracking">tracking</a>
         <a class="jump" href="#artifacts">artifacts</a>
         <a class="jump" href="#feeds">raw feeds</a>
@@ -497,7 +487,7 @@
     </section>
 
     <h2 id="start" class="section-title">Start Here</h2>
-    <p class="section-lede">Use these first depending on whether you want overview, drill-down diagnostics, or a narrative demo.</p>
+    <p class="section-lede">Choose one path first: architecture and pitfalls, concrete with/without evidence, or raw run-level proof.</p>
     <section class="grid">
       <article class="card half">
         <span class="label">primary surface</span>
@@ -575,27 +565,6 @@
       </article>
     </section>
 
-    <h2 id="showcase" class="section-title">Podcast Showcase</h2>
-    <p class="section-lede">Listen directly in the hub. This player auto-detects available media formats and is ready for future <code>.m4a</code> and <code>.mp4</code> drops in <code>docs/assets/</code>.</p>
-    <section class="grid">
-      <article class="card wide">
-        <span class="label">featured media</span>
-        <h3>How PRETHINKER Protects AI Database Integrity</h3>
-        <p>Current release includes MP3 audio. If matching M4A or MP4 files are added later, this section will surface them automatically without hub rewiring.</p>
-        <div class="showcase-shell">
-          <figure class="showcase-cover">
-            <img src="assets/pre-thinker-hero-cinematic.png" alt="PRETHINKER podcast cover art" loading="lazy" />
-            <figcaption>Podcast cover: PRETHINKER control-plane visual.</figcaption>
-          </figure>
-          <div id="media-availability" class="mono">Checking available podcast formats...</div>
-          <audio id="project-audio" class="showcase-media" controls preload="metadata"></audio>
-          <video id="project-video" class="showcase-media" controls preload="metadata" poster="assets/pre-thinker-hero-cinematic.png" hidden></video>
-          <div id="media-links" class="actions"></div>
-          <div class="showcase-note">Auto-discovers known podcast assets in <code>docs/assets/</code> and supports <code>.mp3</code>, <code>.m4a</code>, and <code>.mp4</code>.</div>
-        </div>
-      </article>
-    </section>
-
     <h2 id="frontier" class="section-title">Latest Frontier Wins</h2>
     <p class="section-lede">Newest stability and extension results from the latest autonomous ladder cycles (prompt ID <code>sp-1e43c641b01b</code>).</p>
     <section class="grid">
@@ -668,6 +637,23 @@
       </article>
     </section>
 
+    <h2 id="showcase" class="section-title">Video + Audio Showcase</h2>
+    <p class="section-lede">AI-generated overview media. Video is prioritized when available; otherwise the panel falls back to audio-only playback.</p>
+    <section class="grid">
+      <article class="card wide">
+        <span class="label">featured media</span>
+        <h3>How PRETHINKER Protects AI Database Integrity</h3>
+        <p>This panel auto-discovers media in <code>docs/assets/</code>. MP4 renders as video first; MP3/M4A render as audio when no video exists.</p>
+        <div class="showcase-shell">
+          <div id="media-availability" class="mono">Checking available media formats...</div>
+          <video id="project-video" class="showcase-media" controls preload="metadata" hidden></video>
+          <audio id="project-audio" class="showcase-media" controls preload="metadata" hidden></audio>
+          <div id="media-links" class="actions"></div>
+          <div class="showcase-note">Supported formats: <code>.mp3</code>, <code>.m4a</code>, <code>.mp4</code>.</div>
+        </div>
+      </article>
+    </section>
+
     <h2 id="tracking" class="section-title">Tracking Snapshot</h2>
     <p class="section-lede">Live pull from the published manifest files in this docs folder.</p>
     <section class="grid">
@@ -685,7 +671,7 @@
               </tr>
             </thead>
             <tbody id="latest-runs">
-              <tr><td colspan="4" class="mono">loading...</td></tr>
+              <tr><td colspan="4" class="mono">Live run data appears after load.</td></tr>
             </tbody>
           </table>
         </div>
@@ -705,7 +691,7 @@
               </tr>
             </thead>
             <tbody id="prompt-leaders">
-              <tr><td colspan="4" class="mono">loading...</td></tr>
+              <tr><td colspan="4" class="mono">Live prompt data appears after load.</td></tr>
             </tbody>
           </table>
         </div>
@@ -915,6 +901,10 @@
             base: "assets/How-PRETHINKER-Protects-AI-Database-Integrity"
           },
           {
+            title: "Sharp Memory Versus Mushy AI Fluency",
+            base: "assets/Sharp-Memory-Versus-Mushy-AI-Fluency"
+          },
+          {
             title: "English as a Logic Programming Language",
             base: "assets/English-as-a-Logic-Programming-Language"
           },
@@ -954,19 +944,6 @@
           audio.innerHTML = "";
           video.innerHTML = "";
 
-          if (item.audio.length) {
-            for (const c of item.audio) {
-              const source = document.createElement("source");
-              source.src = c.src;
-              source.type = c.type;
-              audio.appendChild(source);
-            }
-            audio.load();
-            audio.hidden = false;
-          } else {
-            audio.hidden = true;
-          }
-
           if (item.video.length) {
             for (const c of item.video) {
               const source = document.createElement("source");
@@ -978,6 +955,19 @@
             video.hidden = false;
           } else {
             video.hidden = true;
+          }
+
+          if (!item.video.length && item.audio.length) {
+            for (const c of item.audio) {
+              const source = document.createElement("source");
+              source.src = c.src;
+              source.type = c.type;
+              audio.appendChild(source);
+            }
+            audio.load();
+            audio.hidden = false;
+          } else {
+            audio.hidden = true;
           }
 
           const labels = [...item.audio, ...item.video].map((c) => c.label).join(", ");
@@ -1007,14 +997,15 @@
         }
 
         if (!discovered.length) {
-          availability.textContent = "No podcast media files found in docs/assets yet.";
+          availability.textContent = "No media files found in docs/assets yet.";
           audio.hidden = true;
           video.hidden = true;
           links.innerHTML = "";
           return;
         }
 
-        loadEntry(discovered[0]);
+        const preferred = discovered.find((entry) => entry.video.length) || discovered[0];
+        loadEntry(preferred);
       }
 
       async function load() {
