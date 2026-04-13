@@ -815,8 +815,14 @@
             const lowerPath = path.toLowerCase();
             if (!(lowerPath.endsWith(".md") || lowerPath.endsWith(".json"))) continue;
             resolvedHash = parsed.hash || "";
-            if (path.includes(`/${repoName}/`)) {
+            if (path.includes(`/${repoName}/docs/`)) {
               resolvedPath = path.split(`/${repoName}/`).pop() || "";
+            } else if (path.startsWith(`/${repoName}/`)) {
+              const afterRepo = path.slice(`/${repoName}/`.length);
+              resolvedPath = afterRepo.startsWith("docs/") ? afterRepo : `docs/${afterRepo}`;
+            } else if (path.includes(`/${repoName}/`)) {
+              const afterRepo = path.split(`/${repoName}/`).pop() || "";
+              resolvedPath = afterRepo.startsWith("docs/") ? afterRepo : `docs/${afterRepo}`;
             } else if (path.startsWith(repoPrefix)) {
               resolvedPath = path.slice(repoPrefix.length);
             } else {
