@@ -61,6 +61,33 @@ Use these to ramp parser complexity before acid tests:
 - Existing `acid_*` scenario names are retained as historical record.
 - New hard-rung scenarios should use `rung_<nn>_<slug>.json` going forward.
 
+## Frontier Rung Orchestration (Working Contract)
+
+Rung work is split into two explicit functions:
+
+- `Agent54` adds new frontier rungs to push logical height and language width.
+- Gate curation removes low-signal retest rungs that waste runtime below the active frontier.
+
+Authoring/curation flow:
+
+1. Add rung file:
+- create `kb_scenarios/rung_<nn>_<slug>.json` with deterministic validations.
+
+2. Register rung in track manifest:
+- add it to the intended frontier track in `kb_scenarios/tracks.json`.
+
+3. Prove signal:
+- run focused track checks and confirm the rung catches or protects a real behavior slice.
+
+4. Prune gate debt:
+- if an older rung is repeatedly redundant and covered by a harder successor, remove it from strict gate retests.
+- keep at least one anchor rung per failure class.
+
+Default prune thresholds:
+
+- no novel failures across >=3 consecutive sweeps, and
+- superseded by a harder/newer rung on the same semantic target.
+
 ## Rung Width (Language Robustness)
 
 Rungs now grow in two dimensions:
@@ -189,6 +216,57 @@ Variable-binding answer pressure:
 
 1. `rung_449_frontier_multibind_uncle_query.json`
 
+## Frontier Width V7 Add-ons
+
+Story-heavy frontier add-ons for retroactive identity correction and counterfactual-vs-actual separation:
+
+1. `rung_450_frontier_story_retroactive_identity_swap.json`
+2. `rung_451_frontier_story_counterfactual_retract_weave.json`
+
+## Excursion Pilot V1
+
+First in-the-wild pilot pair with graded language noise:
+
+1. `rung_452_excursion_hn_docker_spain_block.json` (HN middle-noise incident thread)
+2. `rung_453_excursion_reddit_security_deposit_appeal.json` (Reddit legal update timeline)
+
+Seed source bank:
+
+- `stories/excursions/SOURCE_BANK_V1.md`
+- `stories/excursions/excursion_manifest_v1.json`
+
+## Excursion Gradient Packs (v1)
+
+Cooperative lane (`G1` -> `G2`):
+
+1. `rung_454_excursion_coop_fed_policy_hold.json`
+2. `rung_455_excursion_coop_fed_revision_guard.json`
+3. `rung_456_excursion_coop_scotus_exception_logic.json`
+4. `rung_462_excursion_coop_fed_labor_inflation_balance.json`
+5. `rung_463_excursion_coop_fed_counterfactual_guard.json`
+6. `rung_464_excursion_coop_scotus_parenthetical_exception.json`
+
+HN middle-noise lane (`G3`):
+
+1. `rung_452_excursion_hn_docker_spain_block.json`
+2. `rung_457_excursion_hn_codex_claude_scope_split.json`
+3. `rung_458_excursion_hn_agents_key_policy.json`
+4. `rung_459_excursion_hn_scope_correction.json`
+
+Reddit wild lane (`G4`):
+
+1. `rung_453_excursion_reddit_security_deposit_appeal.json`
+2. `rung_460_excursion_reddit_landlord_entry_timeline.json`
+3. `rung_461_excursion_reddit_commercial_entry_dispute.json`
+
+## Failure-Promotion Guards (From Excursion Failures)
+
+These are synthetic guard rungs promoted from repeated failure patterns observed in wild excursions:
+
+1. `rung_465_frontier_failure_multiclause_scope_drop_guard.json`
+2. `rung_466_frontier_failure_exception_rule_partition.json`
+3. `rung_467_frontier_failure_question_advice_dual_intent.json`
+
 ## Demo Pack Scenarios
 
 These are presentation-oriented runnable demos (not core ladder gates):
@@ -233,6 +311,36 @@ python scripts/run_track.py --track frontier_language_width_v5
 
 # frontier width v6 sweep
 python scripts/run_track.py --track frontier_language_width_v6
+
+# frontier width v7 add-ons sweep
+python scripts/run_track.py --track frontier_language_width_v7_addons
+
+# in-the-wild excursion pilot pair
+python scripts/run_track.py --track excursion_pilot_v1
+
+# excursion cooperative lane (formal transcript style)
+python scripts/run_track.py --track excursion_cooperative_v1
+
+# excursion middle lane (HN)
+python scripts/run_track.py --track excursion_middle_hn_v1
+
+# excursion wild lane (Reddit legal narrative)
+python scripts/run_track.py --track excursion_wild_reddit_v1
+
+# full graded excursion frontier sweep
+python scripts/run_track.py --track excursion_frontier_v1 --kb-root tmp/kb_store_excursion --fail-on-under
+
+# scaled full cooperative pack (6)
+python scripts/run_track.py --track excursion_cooperative_v1_full --kb-root tmp/kb_store_excursion --fail-on-under
+
+# scaled full wild pack (6)
+python scripts/run_track.py --track excursion_wild_v1_full --kb-root tmp/kb_store_excursion --fail-on-under
+
+# scaled full excursion frontier (12 total)
+python scripts/run_track.py --track excursion_frontier_v2_full --kb-root tmp/kb_store_excursion --fail-on-under
+
+# promoted failure-class guard pack
+python scripts/run_track.py --track excursion_failure_promotions_v1 --kb-root tmp/kb_store_excursion --fail-on-under
 
 # CE probe on newest noisy rungs
 python scripts/run_track.py --track frontier_clarification_probe_v1 --clarification-eagerness 0.85 --max-clarification-rounds 3

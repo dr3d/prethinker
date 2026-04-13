@@ -1,0 +1,982 @@
+﻿{
+    "thread_id":  47736476,
+    "hn_url":  "https://news.ycombinator.com/item?id=47736476",
+    "title":  "Anthropic downgraded cache TTL on March 6th",
+    "by":  "lsdmtme",
+    "unix_time":  1775972752,
+    "score":  539,
+    "descendants":  412,
+    "difficulty":  "G2",
+    "lane":  "vendor_contract",
+    "label":  "hn_anthropic_cache_ttl_downgrade",
+    "why_selected":  "Product policy drift and pricing/contract interpretations across commenters.",
+    "op_text":  "",
+    "harvested_comment_count":  120,
+    "comment_sample_policy":  {
+                                  "traversal":  "bfs",
+                                  "max_comments":  120,
+                                  "max_depth":  3
+                              },
+    "comments":  [
+                     {
+                         "id":  47737485,
+                         "by":  "sunaurus",
+                         "time":  1775984615,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "Has anybody else noticed a pretty significant shift in sentiment when discussing Claude/Codex with other engineers since even just a few months ago? Specifically because of the secret/hidden nature of these changes.\nI keep getting the sense that people feel like they have no idea if they are getting the product that they originally paid for, or something much weaker, and this sentiment seems to be constantly spreading. Like when I hear Anthropic mentioned in the past few weeks, it\u0027s almost always in some negative context."
+                     },
+                     {
+                         "id":  47743612,
+                         "by":  "foofloobar",
+                         "time":  1776023003,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "Claude Code and the subscription are now less useful than a few months ago. Claude Code and the service seem to pick up more and more issues as time goes by: more bugs, fast quota drain, reduced quota, poor model performance, cache invalidation problems, MCP related bugs, potential model quantization and other problems.\nClaude Code was able to implement something in one shot. It was decent for a proof of concept initial implementation. It\u0027s barely able to do work now with full specs and detailed plans.\nChatGPT is also being watered down.\nIt seems obvious that Anthropic and OpenAI aren\u0027t the solution to any problem."
+                     },
+                     {
+                         "id":  47737382,
+                         "by":  "cassianoleal",
+                         "time":  1775983131,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "The title should be changed. It makes it look like they upped the TTL from 1 h to 5 months.\nThe SI symbol for minutes is \"min\", not \"M\".\nA compromise would be to use the OP notation \"m\"."
+                     },
+                     {
+                         "id":  47739420,
+                         "by":  "albert_e",
+                         "time":  1776000655,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "So a side effect of this is --  even at 1 hour caching --  ...\nIf you run out of session quota too quickly and need to wait more than an hour to resume your work ... you are paying even more penalty just to resume your work -- a penalty you wouldnt have needed if session quota was not so restrictive in first place, and which in turn causes you to burn through next session quota even faster.\nSeems like a vicious cycle that made the UX very poor. I remember Claude Code with Pro  became virtually unuseable in middle of March with session quota expiring within first hour or less for me -- which was wildly different experience from early March."
+                     },
+                     {
+                         "id":  47737425,
+                         "by":  "disillusioned",
+                         "time":  1775983786,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "It\u0027s also routinely failing the car wash question across all models now, which wasn\u0027t the case a month ago. :-/\nSeeing some things about how the effort selector isn\u0027t working as intended necessarily and the model is regressing in other ways: over-emphasizing how \"difficult\" a problem is to solve and choosing to avoid it because of the \"time\" it would take, but quoted in human effort, or suggesting the \"easier\" path forward even if it\u0027s a hack or kludge-filled solution."
+                     },
+                     {
+                         "id":  47741755,
+                         "by":  "benced",
+                         "time":  1776012232,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "Anthropic responded: https://github.com/anthropics/claude-code/issues/46829#issue..."
+                     },
+                     {
+                         "id":  47739624,
+                         "by":  "layer8",
+                         "time":  1776001768,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "From the recent-ish Dwarkesh podcast, Anthropic seems to be wary about buying/building too much compute [0]. That probably means that they have to attempt to minimize compute usage when there is a surge in demand. Following the argument in the podcast, throwing more money after them, as some in this thread are suggesting, won’t solve the issue, at least not in the short term.\n[0] https://www.dwarkesh.com/i/187852154/004620-if-agi-is-immine..."
+                     },
+                     {
+                         "id":  47737464,
+                         "by":  "davidkuennen",
+                         "time":  1775984368,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "On slightly off topic note: Codex is absolutely fantastic right now. I\u0027m constantly in awe since switching from Claude a week ago."
+                     },
+                     {
+                         "id":  47739393,
+                         "by":  "hirako2000",
+                         "time":  1776000539,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "There is a chef, he opens a restaurant. Delicious food.\nIt costs him more in ingredients alone than he charges. He even offers some pseudo unlimited buffet, combo sets, and happy hours.\nHe announced a new restaurant, apparently it will be even better, so good he\u0027s a bit worried. He makes sure to share his worries while he picks a few select enterprise for business parties and the likes.\nIn the meantime he cracks down on free buffet goers who happen to eat too much, and downgrades all ingredients without notice to finally hope to make a profit."
+                     },
+                     {
+                         "id":  47737006,
+                         "by":  "Tarcroi",
+                         "time":  1775979552,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "This coincides with Anthropic\u0027s peak-hour announcement (March 26th). Could the throttling be partly a response to infrastructure load that was itself inflated by the TTL regression?"
+                     },
+                     {
+                         "id":  47737655,
+                         "by":  "perks_12",
+                         "time":  1775986252,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "Just give us the option to get the quality back, Anthropic. I get that even a $200 subscription is not possible eventually, but give us the option to sub the $1000 tier or tell us to use the API tier, but give us some consistency."
+                     },
+                     {
+                         "id":  47745654,
+                         "by":  "zoogeny",
+                         "time":  1776037006,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "As an aside, I built a tool to manage my own chat interface over the provider APIs. I added caching because the savings are quite significant and I have a little countdown timer that shows me how much time remaining until the cache is expired.\nHowever, for the basic turn-based conversation the cache (at 5 minutes) is almost always insufficient. By the time I read the LLM response, consider my next question, write it out, etc. I frequently miss the cache.\nI imagine it is much more useful if you have a tool that has a common prefix (like a system instruction, tool specs or common set of context across many users).\nIf you can get it to work frequently enough the savings are quite worth it."
+                     },
+                     {
+                         "id":  47742434,
+                         "by":  "hattimaTim",
+                         "time":  1776016352,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "Classic scammer tactics: first, lure users in by promising a huge deal, then scam the hell out of them."
+                     },
+                     {
+                         "id":  47740039,
+                         "by":  "bsaul",
+                         "time":  1776003773,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "could it be that anthropic is experiencing a massive shortage of compute capacity, and is desperately trying to find means to overcome it ?\nAll the news i hear about this company for the past weeks made it sound like they\u0027re really desperate."
+                     },
+                     {
+                         "id":  47737673,
+                         "by":  "throwaway2027",
+                         "time":  1775986502,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "I also noticed this, just resuming something eats up your entire session. The past two weeks also felt like a substantial downgrade and made me regret renewing my subscription, it sucks because I wish I kept my Codex subscription instead and renewed that."
+                     },
+                     {
+                         "id":  47751641,
+                         "by":  "superxpro12",
+                         "time":  1776086737,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "If anyone thinks this situation doesnt end in a massive global rugpull, y\u0027all are asleep at the wheel.\nThe very instant the AI suppliers lock in a dependency on their product, prices are going through the roof."
+                     },
+                     {
+                         "id":  47744065,
+                         "by":  "par",
+                         "time":  1776025395,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "Claude code has gone down hill in a really bad way. It is often far too quick to make significant changes, and requires much higher level of hand-holding and explanation than I am used to. r/claudecode on reddit shows a litany of complaints!"
+                     },
+                     {
+                         "id":  47740466,
+                         "by":  "foobar10000",
+                         "time":  1776005763,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "So, this especially bites if your validation step (let’s say integration tests) take 1hr plus. The harness is just waiting, prefix caching should happily resume things with just a minor new prefill chunk of output from the harness, and bam - completely new prefill."
+                     },
+                     {
+                         "id":  47742429,
+                         "by":  "willworktill4pm",
+                         "time":  1776016318,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "This Friday CC wrote wall off gibberish text for me. No reason, happened twice with different gibberish text\nhttps://ibb.co/4wcVQG5k"
+                     },
+                     {
+                         "id":  47743147,
+                         "by":  "zeckalpha",
+                         "time":  1776020381,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "I find similar happening with Gemini Pro. Despite paying for Pro, it regularly locks me out, without visibility into consumption. Nothing on the plan comparison page indicates limits. https://one.google.com/about/plans\nEdit: I may have conflated these two threads. https://news.ycombinator.com/item?id=47739260"
+                     },
+                     {
+                         "id":  47745871,
+                         "by":  "almog",
+                         "time":  1776038306,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "Given how the cache eviction policy is mismatched with the 5h usage window, it might make sense to just stop at say 97% of the session max usage and keep running a script every 4 min and 50 sec that consumes a minimal number of tokens whose entire purpose is to keep the cache.\nreply"
+                     },
+                     {
+                         "id":  47737940,
+                         "by":  "throwaway2027",
+                         "time":  1775988554,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "It\u0027s absolutely ridiculous how stupid Claude is now. I sometimes notice it and last year too but it feels like it\u0027s just last year before December model."
+                     },
+                     {
+                         "id":  47745814,
+                         "by":  "jasonjmcghee",
+                         "time":  1776037937,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "All the weird stuff happening with anthropic / Claude aside- just talking about this post:\nLooking at the table with February and April- I don\u0027t get it. What am I missing?\nThe cost and number of calls look pretty aligned on all rows"
+                     },
+                     {
+                         "id":  47739459,
+                         "by":  "azuanrb",
+                         "time":  1776000901,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "As a Pro user, even though these issues and bugs are “new,” the downgrade has been noticeable since January. I’ve unsubscribed because the Pro plan is no longer usable for me.\nIt’s only making the news now because it’s affecting Max users as well ($100/$200 plans). I understand the need for change, but having zero communication about it is just wrong."
+                     },
+                     {
+                         "id":  47737513,
+                         "by":  "the_mitsuhiko",
+                         "time":  1775984933,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "Since I (until Anthropic decided to remove access for subs) used Anthropic models extensively with pi I explored the two caching options and the much higher cost of 1h caches is almost never a good tradeoff.\nSince the caching really primarily is something they can be judged at scale from across many users I can only assume that Anthropic looked at their infra load and impact and made a very intentional change."
+                     },
+                     {
+                         "id":  47741627,
+                         "by":  "motbus3",
+                         "time":  1776011578,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "The TOS basically states you need to deal with whatever they want.\nMeanwhile their \u0027best\u0027 competitor just announced they want to provide unreliable mass destruction guidance tools but they don\u0027t wanna feel said.\nHonestly speaking, we are wrong whenever we do business with this sort of people"
+                     },
+                     {
+                         "id":  47742550,
+                         "by":  "pkaye",
+                         "time":  1776017107,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "Actually I remember the change being reported in the Reddit /r/claueai chat back around that time frame. I was concerned that it would increase costs but nobody made a fuss so I presumed it was not a big deal."
+                     },
+                     {
+                         "id":  47737702,
+                         "by":  "PunchyHamster",
+                         "time":  1775986795,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "Well, how entirely expected. The money man comes to collect and they are squeezing for money"
+                     },
+                     {
+                         "id":  47744352,
+                         "by":  "espeed",
+                         "time":  1776027203,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "Does Anthropic\u0027s real time data ingestion effect its model behavior globally? Could a file read by your agent effect the behavior of mine?"
+                     },
+                     {
+                         "id":  47737392,
+                         "by":  "ikekkdcjkfke",
+                         "time":  1775983237,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "If youre reading this claude, people are willing to pay extra if you want to make more money, just please stop doing this undermining, it devreases the trust of your platform to something that cannot be relied on"
+                     },
+                     {
+                         "id":  47742040,
+                         "by":  "c16",
+                         "time":  1776013760,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "I’ve definitely noticed in evenings it stops trying as hard to solve the issue and suggests I go find the answer. Never the case in the morning."
+                     },
+                     {
+                         "id":  47738142,
+                         "by":  "poly2it",
+                         "time":  1775990216,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "One of the largest AI companies on Earth cannot figure out an algorithm for when not to drop caches in long-running sessions?"
+                     },
+                     {
+                         "id":  47742612,
+                         "by":  "snowstormsun",
+                         "time":  1776017566,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "Well, the 10x promised revenue increase must come from somewhere..."
+                     },
+                     {
+                         "id":  47746256,
+                         "by":  "srsbzns",
+                         "time":  1776041809,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "Gotta use the API directly for cache control"
+                     },
+                     {
+                         "id":  47737375,
+                         "by":  "sscaryterry",
+                         "time":  1775983074,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "Anthropic is leaving so much evidence around… proving damages and a pattern is becoming trivial"
+                     },
+                     {
+                         "id":  47741995,
+                         "by":  "lordmoma",
+                         "time":  1776013550,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "Claude Code is not performing on par since September 2025, there was already a huge backlash then, and many people just keep cheering for CC every time it made some model upgrade or TUI change, it just feels so unreal."
+                     },
+                     {
+                         "id":  47738052,
+                         "by":  "taffydavid",
+                         "time":  1775989400,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "This is the same shit openAI used to do last year, quietly downgrading their offerings while hyping the next big thing. I thought Anthropic were different but it seems they\u0027re playing the exact same long con with Mythos.\nThey can\u0027t really revolutionize AI again so they make the product worse and worse and then offer you a \"better\" one"
+                     },
+                     {
+                         "id":  47737507,
+                         "by":  "simianwords",
+                         "time":  1775984864,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "There’s a case for intelligent caching: coarse grained 1h and 5min type TTls are not optimal."
+                     },
+                     {
+                         "id":  47739007,
+                         "by":  "mrdw",
+                         "time":  1775997891,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "I noticed another limitation:\n\"An image in the conversation exceeds the dimension limit for many-image requests (2000px). Start a new session with fewer images.\"\nSo I can\u0027t continue my claude code session I started yesterday."
+                     },
+                     {
+                         "id":  47743975,
+                         "by":  "computerex",
+                         "time":  1776024929,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "Good job anthropic. You had a clear lead with all devs singing the praises of Opus. Way to lose all that by Enshittifying the experience."
+                     },
+                     {
+                         "id":  47737640,
+                         "by":  "ares623",
+                         "time":  1775986130,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "AGI finding bugs again. Actual Guys/Gals Instead."
+                     },
+                     {
+                         "id":  47743203,
+                         "by":  "yobid20",
+                         "time":  1776020829,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "i thought it was always 5 minutes? ive been telling people 5 minutes for months so i dont think this is anything new?"
+                     },
+                     {
+                         "id":  47738133,
+                         "by":  "WhereIsTheTruth",
+                         "time":  1775990108,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "Changing \"regression\" to \"Anthropic silently downgraded\" sensationalizes the story\nWhy the FUD?\nI notice some interesting public opinion weather change since Anthropic passed OpenAI wrt revenue"
+                     },
+                     {
+                         "id":  47737456,
+                         "by":  "coffinbirth",
+                         "time":  1775984237,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "Am I the only one who sees striking parallels between being a Claude Code customer and Cuckoldry (as in biology)?\nI mean, you are investing a lot (infrastructure and capital) into something that is essentially not yours. You claim credit for the offspring (the solution) simply because it resides in your workspace. You accept foreign code to make your project appear more successful and populated than you could manage alone. Your over-reliance on a surrogate for the heavy lifting leads to the loss of your own survival skills (coding and debugging). Last but not least, you handle the grunt work of territory defense (clients and environments) while the AI performs the actual act of creation (Displaced Agency)."
+                     },
+                     {
+                         "id":  47742153,
+                         "by":  "taf2",
+                         "time":  1776014446,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "I don\u0027t understand who\u0027s still using anthropic?  The model produces more bugs and agrees to solutions that are clearly wrong at a much higher rate then codex.  Codex produces significantly better code with fewer bugs and far less oversight. with /fast on codex it\u0027s not even slower then claude and consider it implements working code more reliably you have to use it less anyway.  Beside anthropic appears to be more focused on fear mongering and other types of FUD and is a more closed solution I do not understand why so many people still appear to care what anthropic does and have not already moved on?"
+                     },
+                     {
+                         "id":  47740775,
+                         "by":  "siscia",
+                         "time":  1776007310,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "Lately I am finding myself doing more and more of what I called \"ambient coding\" so that I am not directly using anymore all of those coding harnesses.\nhttps://redbeardlab.gitbook.io/acem/essays/ambient-developme...\nI basically wrote a small GitHub app and I simply create a GitHub issue, the bot read it, run an LLM loop and come up with a PR (or a design)\nThen I simply approve the pr (or the design)\nI find it much calmer and much more productive"
+                     },
+                     {
+                         "id":  47739359,
+                         "by":  "eaf7e281",
+                         "time":  1776000328,
+                         "depth":  1,
+                         "parent":  47736476,
+                         "text":  "I think they changed the quantification to save computer power for their new model. This might be why the benchmark scores look good, but the real world performance is much worse. I\u0027m wondering if they\u0027re testing the model internally and didn\u0027t find anything wrong with the new parameter.\nI canceled my subscription and switched to a codex, but it\u0027s not as good. I\u0027m tired of Anthropic changing things all the time. I use Claude because it doesn\u0027t redirect you to a different model like OpenAI does. But now it seems like both companies are doing the same thing in different way."
+                     },
+                     {
+                         "id":  47737815,
+                         "by":  "andai",
+                         "time":  1775987662,
+                         "depth":  2,
+                         "parent":  47737485,
+                         "text":  "Well, off the top of my head:\n- Banning OpenClaw users (within their rights, of course, but bad optics)\n- Banning 3rd party harnesses in general (ditto)\n(claude -p still works on the sub but I get the feeling like if I actually use it, I\u0027ll get my Anthropic acct. nuked. Would be great to get some clarity on this. If I invoke it from my Telegram bot, is that an unauthorized 3rd party harness?)\n- Lowering reasoning effort (and then showing up here saying \"we\u0027ll try to make sure the most valuable customers get the non-gimped experience\" (paraphrasing slightly xD))\n- Massively reduced usage (apparently a bug?) The other day I got 21x more usage spend on the same task for Claude vs Codex.\n- Noticed a very sharp drop in response length in the Claude app. Asked Claude about it and it mentioned several things in the system prompt related to reduced reasoning effort, keeping responses as brief as possible, etc.\nIt\u0027s all circumstantial but everything points towards \"desperately trying to cut costs\".\nI love Claude and I won\u0027t be switching any time soon (though with the usage limits I\u0027m increasingly using Codex for coding), but it\u0027s getting hard to recommend it to friends lately. I told a friend \"it was the best option, until about two weeks ago...\" Now it\u0027s up in the air."
+                     },
+                     {
+                         "id":  47737896,
+                         "by":  "zazibar",
+                         "time":  1775988234,
+                         "depth":  2,
+                         "parent":  47737485,
+                         "text":  "A month ago the company I work at with over 400 engineers decided to cancel all IDE subscriptions (Visual Studio, JetBrains, Windsurf, etc.) and move everyone over to Claude Code as a \"cost-saving measure\" (along with firing a bunch of test engineers). There was no migration plan - the EVP of Technology just gave a demo showing 2 greenfield projects he\u0027d built with Claude Opus over a weekend and told everyone to copy how he worked. A week later the EVP had to send out an email telling people to stop using Opus because they were burning through too many tokens.\nClaude seems to be getting nerfed every week since we\u0027ve switched. I wonder how our EVP is feeling now."
+                     },
+                     {
+                         "id":  47743074,
+                         "by":  "jclardy",
+                         "time":  1776019988,
+                         "depth":  2,
+                         "parent":  47737485,
+                         "text":  "Just anecdotal, but I was using Claude Code for everything a few months ago, and it seemed great. Now, it is making a ton of mistakes, doing the wrong thing, misunderstanding context, and just generally being unusable.\nI now have been using Codex and everything has been great (I still swap back and forth but generally to check things out.)\nMy theory is just that the models are great after release to get people switching, then they cut them back in capabilities slowly over time until the next major release to increase the hype cycle."
+                     },
+                     {
+                         "id":  47737676,
+                         "by":  "matheusmoreira",
+                         "time":  1775986548,
+                         "depth":  2,
+                         "parent":  47737485,
+                         "text":  "I certainly noticed a significant drop in reasoning power at some point after I subscribed to Claude. Since then I\u0027ve applied all sorts of fixes that range from disabling adaptive thinking to maxing out thinking tokens to patching system prompts with an ad-hoc shell script from a gist. Even after all this, Opus will still sometimes go round and round in illogical circles, self-correcting constantly with the telltale \"no wait\" and undoing everything until it ends up right where it started with nothing to show for it after 100k tokens spent.\nWhether it\u0027s due to bugs or actual malice, it\u0027s not a good look. I genuinely can\u0027t tell if it\u0027s buggy, if it\u0027s been intentionally degraded, if it\u0027s placebo or if it\u0027s all just an elaborate OpenAI psyop."
+                     },
+                     {
+                         "id":  47737536,
+                         "by":  "jakobnissen",
+                         "time":  1775985163,
+                         "depth":  2,
+                         "parent":  47737485,
+                         "text":  "Yeah I’ve seen this too. It’s difficult for me to tell if the complaints are due to a legitimate undisclosed nerf of Claude, or whether it’s just the initial awe of Opus 4.6 fading and people increasingly noticing its mistakes."
+                     },
+                     {
+                         "id":  47737540,
+                         "by":  "pxtail",
+                         "time":  1775985268,
+                         "depth":  2,
+                         "parent":  47737485,
+                         "text":  "There\u0027s still plenty of \"leave my fellow multbillion corp alone\" type ones,it means that corp can and should screw it\u0027s loving customer base harder."
+                     },
+                     {
+                         "id":  47744670,
+                         "by":  "jrockway",
+                         "time":  1776029076,
+                         "depth":  2,
+                         "parent":  47737485,
+                         "text":  "I have read the HN articles and seen the grumbling from coworkers, but I haven\u0027t felt it myself.  I am not really a one-shotter, though.  I kind of think about how I would refactor / write something myself and walk Claude through that, and nitpick it at each step... and the recent changes haven\u0027t really bothered me there.  Likely due to being new at it.\nSometimes Claude can be a little weird.  I was asking it about some settings in Grafana.  It gave me an answer that didn\u0027t work.  I told it that.  \"Yeah, I didn\u0027t really check, I just guessed.\" Then I said, \"please check\" and it said \"you should read the discussion forums and issue tracker\".  I said \"YOU should read the discussion forms and issue tracker\".  It consumed 35k tokens and then told me the thing I wanted was a checkbox.  It was!  I am not sure this saved me time, Claude.  I am not experienced enough to say that this is a deal breaker.  While this is burned into my mind as an amusing anecdote, it doesn\u0027t ruin the service for me.\nMy coworkers have noticed a degradation and feel vindicated by some of the posts here that I link.  A lot of them are using Cursor more now.  I have not tried it yet because I kind of like the Claude flow and /effort max + \"are you sure?\" yield good results.  For now.  I\u0027m always happy to switch if something is clearly better."
+                     },
+                     {
+                         "id":  47739877,
+                         "by":  "ruler88",
+                         "time":  1776003058,
+                         "depth":  2,
+                         "parent":  47737485,
+                         "text":  "Anthropic seems to be playing the giant-tech-rent-capture game that all of the old guards have done for the past few years. We thought that the new age of AI might bring some fresh air into the mix, but I guess that optimism quickly faded."
+                     },
+                     {
+                         "id":  47741734,
+                         "by":  "trashface",
+                         "time":  1776012117,
+                         "depth":  2,
+                         "parent":  47737485,
+                         "text":  "The $20 a month plan still seems like a pretty good deal for me (intermittent coding and not doing it for income)."
+                     },
+                     {
+                         "id":  47738012,
+                         "by":  "oezi",
+                         "time":  1775989078,
+                         "depth":  2,
+                         "parent":  47737485,
+                         "text":  "On OpenRouter token consumption is up 5x since November 2025. If this is indicative of the industries growth then I can\u0027t fathom how we will not hit resource constraints."
+                     },
+                     {
+                         "id":  47741510,
+                         "by":  "jitl",
+                         "time":  1776010999,
+                         "depth":  2,
+                         "parent":  47737485,
+                         "text":  "I saw a big hit to Claude’s intelligence w/ the 1M context window model and the change to adaptive reasoning (github issue linked elsewhere in this thread).\nI’m pretty much using 90% Codex now, although since Claude is consistently faster at answering quick questions, I still keep it open for that and for code-reviewing codex/human work before commit."
+                     },
+                     {
+                         "id":  47742170,
+                         "by":  "taf2",
+                         "time":  1776014569,
+                         "depth":  2,
+                         "parent":  47737485,
+                         "text":  "I switched off claude when they nerfed opus 4.5 in August 2025, since then codex has clearly produced better code with fewer bugs.  Opus 4.6 was more a temporary de-nerf of 4.5 but did not materially improve.  codex has now a proven track record of producing stable results while introducing far fewer bugs."
+                     },
+                     {
+                         "id":  47746471,
+                         "by":  "data-ottawa",
+                         "time":  1776043606,
+                         "depth":  2,
+                         "parent":  47737485,
+                         "text":  "I was going to do a deep analysis on this, and then I noticed that Claude Code deleted all of my sessions before March 6.\nSo yeah... I\u0027m not thrilled with that, because I had done a similar analysis in December and had plenty of logs to review.\nThe results I do have for the last month aren\u0027t great. If you\u0027re curious I did post the results on HN:\nhttps://news.ycombinator.com/item?id=47679661"
+                     },
+                     {
+                         "id":  47743188,
+                         "by":  "Papazsazsa",
+                         "time":  1776020720,
+                         "depth":  2,
+                         "parent":  47737485,
+                         "text":  "Yes. Anthropic is burning much of the goodwill they built up in contrast to OAI, and I personally am taking it as a sign to limit dependencies. Luckily for me I am not at all dependent on frontier models, and it\u0027s increasingly apparent that nobody else is too.\nIt looks like the spreadsheet-touchers over at Anthropic won out over the brand leaders, which is too bad as good will can be a trench if you don\u0027t abuse your customers."
+                     },
+                     {
+                         "id":  47747325,
+                         "by":  "lumost",
+                         "time":  1776051827,
+                         "depth":  2,
+                         "parent":  47737485,
+                         "text":  "Codex is my favored coding agent for generic \"I need an agent tasks.\" GPT-5.4 does a bit better with images compared to claude, and debugs a little bit better.\nThe UX of codex is exceptionally nice however."
+                     },
+                     {
+                         "id":  47739112,
+                         "by":  "nojs",
+                         "time":  1775998821,
+                         "depth":  2,
+                         "parent":  47737485,
+                         "text":  "My working theory is that all models are approximately the same, and the variance in quality mostly depends on how long they think for.\nSo the trick is to always set to max, and then begin every task with “this is an extremely complex task, do not complete it without extensive deep thinking and research” or whatever.\nYou’re basically fighting a battle to make the model think more, against the defaults getting more and more nerfed to save costs."
+                     },
+                     {
+                         "id":  47743399,
+                         "by":  "LunaSea",
+                         "time":  1776021874,
+                         "depth":  2,
+                         "parent":  47737485,
+                         "text":  "\u003e people feel like they have no idea if they are getting the product that they originally paid for\nThey do indeed get the product they originally paid for.\nIt\u0027s simply that they were suckers and didn\u0027t read the \"fine\" print of the product they bought.\nThe label says \"more tokens than the lower tier\"."
+                     },
+                     {
+                         "id":  47746352,
+                         "by":  "Aeolun",
+                         "time":  1776042638,
+                         "depth":  2,
+                         "parent":  47737485,
+                         "text":  "I dunno, I haven’t really felt gimped in the past few months. My last issue was somewhere after the holidays when the usage suddenly felt like it cratered, but quality has been consistent."
+                     },
+                     {
+                         "id":  47743674,
+                         "by":  "indigodaddy",
+                         "time":  1776023335,
+                         "depth":  2,
+                         "parent":  47737485,
+                         "text":  "Is it perhaps not a model problem but a Claude Code harness problem?\nFor instance on exe.dev VMs with Shelley agent/harness and Opus 4.5/4.6, I haven\u0027t noticed any deterioration.\nAny similar feedback perhaps from Opencode / GH Copilot subscription-provided Opus models?"
+                     },
+                     {
+                         "id":  47745623,
+                         "by":  "Grimblewald",
+                         "time":  1776036811,
+                         "depth":  2,
+                         "parent":  47737485,
+                         "text":  "I\u0027d say weaker, tasks claude code was aceing before it now fails with the exact same prompts, taking several rounds before it works. I\u0027m looking to jump ship."
+                     },
+                     {
+                         "id":  47739155,
+                         "by":  "drzaiusx11",
+                         "time":  1775999095,
+                         "depth":  2,
+                         "parent":  47737485,
+                         "text":  "At some point these AI companies need to pay the piper as it were and actually provide a return for their investors. Expect cost cutting attempts to continue unless backlash is great enough to pose an existential threat to these companies."
+                     },
+                     {
+                         "id":  47740175,
+                         "by":  "swasheck",
+                         "time":  1776004370,
+                         "depth":  2,
+                         "parent":  47737485,
+                         "text":  "it has been my go-to provider for things but i noticed extraordinarily high usage rate last month on a little side project i started so that i could learn about things that are interesting to me while helping my day to day responsibilities (creating an iceberg data lake from my existing parquet files). i used my month’s worth of corporate subscription allocated tokens in 3 days. never seen that before so now i’m a lot more apprehensive about getting into the weeds with claude but i’m also so much less impressed with the other available models for work in this domain."
+                     },
+                     {
+                         "id":  47739172,
+                         "by":  "AznHisoka",
+                         "time":  1775999199,
+                         "depth":  2,
+                         "parent":  47737485,
+                         "text":  "Its not just engineers, and its not just about the 3rd party/rate limiting stuff. I feel like the reasoning capabilities have deteriorated too for non-coding tasks."
+                     },
+                     {
+                         "id":  47739068,
+                         "by":  "stavros",
+                         "time":  1775998437,
+                         "depth":  2,
+                         "parent":  47737485,
+                         "text":  "It feels like I\u0027m getting less and less for my money every day. A few weeks ago I was programming all week and never getting close to the limit, yesterday half my weekly limit went away in a day. Changing the limits mid-subscription is just theft."
+                     },
+                     {
+                         "id":  47737579,
+                         "by":  "echelon",
+                         "time":  1775985544,
+                         "depth":  2,
+                         "parent":  47737485,
+                         "text":  "Anthropic isn\u0027t your friend.\nPhase 1: $200/mo prosumer engineer tool\nPhase 2: AI layoffs / \"it\u0027s just AI washing\"\nPhase 3: $20,000/mo limited release model \"too dangerous\" to use\nPhase 4: Accelerated layoffs / two person teams. Rehiring of certain personnel at lower costs.\nPhase 5: \"Our new model can decompile and rewrite any commercial software. We just wrote a new kernel after looking at Linux (bye, bye GPL!) We also decompiled the latest Zelda game, ported the engine to Rust, and made a new game with it. Source code has no value. Even compiled and obfuscated code is a breeze to clone.\"\nPhase 6: $100k/mo model that replicates entire engineering teams, only large companies can afford it. Ordinary users can\u0027t buy. More layoffs.\nPhase N: People can\u0027t afford computing anymore. Everything is thin clients and rented. It\u0027s become like the private railroad industry. End of the PC era. Like kids growing up on smartphones, there\u0027s nothing to tinker with anymore. And certainly no gradient for entrepreneurship for once-skilled labor capital.\nAnothropic used to be cool before they started gating access. Limiting Claw/OpenCode was strike one. Mythos is strike two.\nY\u0027all should have started hating on their ethics when they started complaining about being distilled. For training they conducted on materials they did not own.\nWe need open weights companies now more than ever. Too bad China seems to be giving up on the idea.\n\"You wouldn\u0027t distill an Opus.\""
+                     },
+                     {
+                         "id":  47741537,
+                         "by":  "alpha_squared",
+                         "time":  1776011098,
+                         "depth":  2,
+                         "parent":  47737485,
+                         "text":  "I\u0027m pretty sure this is an attempt by both companies to shape a reasonable finance story for their eventual IPO. They need to make this look a lot better than a pump and dump (raising on wild valuations then offloading onto public investors)."
+                     },
+                     {
+                         "id":  47738720,
+                         "by":  "estimator7292",
+                         "time":  1775995621,
+                         "depth":  2,
+                         "parent":  47737485,
+                         "text":  "I can\u0027t believe how quickly they went from riding high on anti-OpenAI sentiment post-DOD fiasco, to shooting themselves and all their users new and old in the foot.\nThe ideal time to make your product worse is probably not at the same point that all of your competitor\u0027s customers are looking. Anthropic really, really fucked up here.\nAnd beyond that, there\u0027s a ton of people who are just regular 9-5 Claude CLI users with an enterprise subscription who are getting punished with a worse model at the same price just as if we were Claw users. This kind of thing does not make one feel warm and fuzzy. I feel like I just got a boot to the teeth."
+                     },
+                     {
+                         "id":  47738383,
+                         "by":  "faangguyindia",
+                         "time":  1775992706,
+                         "depth":  2,
+                         "parent":  47737485,
+                         "text":  "This is actually great feature, you can do bait and switch with AI."
+                     },
+                     {
+                         "id":  47743266,
+                         "by":  "raincole",
+                         "time":  1776021169,
+                         "depth":  2,
+                         "parent":  47737485,
+                         "text":  "That\u0027s a seasonal phenomenon. You can save this comment and look back three to six months later. By the time people will be like \"is it just me or ChatGPT has been so bad lately?\"\nIf you don\u0027t believe me you can search HN posts about Codex/Claude six months ago."
+                     },
+                     {
+                         "id":  47740472,
+                         "by":  "wouldbecouldbe",
+                         "time":  1776005814,
+                         "depth":  2,
+                         "parent":  47737485,
+                         "text":  "Developers are a tough crowd, stubborn, know it alls."
+                     },
+                     {
+                         "id":  47741695,
+                         "by":  "motbus3",
+                         "time":  1776011891,
+                         "depth":  2,
+                         "parent":  47737485,
+                         "text":  "I think so, but more than that, the performance of those tools seems to be terribly degrading when they keep saying they have created some crap like AGI which we know is a lie.\nAnd to me, this lie is mostly a fight to see who bites the biggest chunk of the war death machine."
+                     },
+                     {
+                         "id":  47743091,
+                         "by":  "throwpoaster",
+                         "time":  1776020088,
+                         "depth":  2,
+                         "parent":  47737485,
+                         "text":  "Generally, across AI providers, I have come to interpret sudden degradation in existing capabilities as a signal that a new, more expensive, product tier is about to launch."
+                     },
+                     {
+                         "id":  47742624,
+                         "by":  "sneak",
+                         "time":  1776017661,
+                         "depth":  2,
+                         "parent":  47737485,
+                         "text":  "They broke my openclaw last week; I switched to “extra usage” and prepaid a grand for same.\nA few days later it simply stopped working again, API authentication error.  What must I do to have working, paid, premium service?\nScrewing around with it today, it works 5x slower and times out all of the time.  I\u0027m paying more and getting waaaaay less.  Why can\u0027t companies just raise prices like normal?"
+                     },
+                     {
+                         "id":  47742462,
+                         "by":  "OtomotO",
+                         "time":  1776016529,
+                         "depth":  2,
+                         "parent":  47737485,
+                         "text":  "I measured it for my specific usecases and have cancelled my Anthropic subscription (the Max x20 Plan)"
+                     },
+                     {
+                         "id":  47740606,
+                         "by":  "pstuart",
+                         "time":  1776006509,
+                         "depth":  2,
+                         "parent":  47737485,
+                         "text":  "The past two weeks I\u0027ve had code that was delivered and declared as done (it did pass tests) but failed in a review by Codex. This has looped to a painful extent. The code in question deals with concurrency issues so there\u0027s an acknowledgement that its tricker, but still, I expect more from Claude."
+                     },
+                     {
+                         "id":  47739152,
+                         "by":  "felixgallo",
+                         "time":  1775999070,
+                         "depth":  2,
+                         "parent":  47737485,
+                         "text":  "https://isitnerfed.org/"
+                     },
+                     {
+                         "id":  47745260,
+                         "by":  "blueboo",
+                         "time":  1776033379,
+                         "depth":  2,
+                         "parent":  47737485,
+                         "text":  "Wait till Codex doubles prices/halves quotas on May 31"
+                     },
+                     {
+                         "id":  47743659,
+                         "by":  "trollbridge",
+                         "time":  1776023242,
+                         "depth":  2,
+                         "parent":  47743612,
+                         "text":  "I caught up with a friend who said he\u0027s really happy with Cursor (currently using the multi-model option where it composes, and reserving use of Opus 4.6 for only when he actually needs the extra power).\nQuite interesting considering all the claims that Cursor was dead a few months ago."
+                     },
+                     {
+                         "id":  47743768,
+                         "by":  "ecocentrik",
+                         "time":  1776023766,
+                         "depth":  2,
+                         "parent":  47743612,
+                         "text":  "They are clearly straining under new demand and everyone is being served highly quantized models without notice."
+                     },
+                     {
+                         "id":  47745016,
+                         "by":  "throw_m239339",
+                         "time":  1776031215,
+                         "depth":  2,
+                         "parent":  47743612,
+                         "text":  "Every single one of these AI services are running at loss, they are subsidized. Anybody who is surprised that these services are going to get degraded and their cost go up substantially  learned nothing from the last 20 years of SAAS. It never gets cheaper."
+                     },
+                     {
+                         "id":  47737592,
+                         "by":  "PontifexMinimus",
+                         "time":  1775985712,
+                         "depth":  2,
+                         "parent":  47737382,
+                         "text":  "I agree. My first reaction was \"what the fuck\u0027s an \u0027M\u0027?\""
+                     },
+                     {
+                         "id":  47744860,
+                         "by":  "gib444",
+                         "time":  1776030173,
+                         "depth":  2,
+                         "parent":  47737382,
+                         "text":  "I love the title change that totally hides the scale of the issue. Good job poster/mods."
+                     },
+                     {
+                         "id":  47742274,
+                         "by":  "tetraodonpuffer",
+                         "time":  1776015237,
+                         "depth":  2,
+                         "parent":  47737425,
+                         "text":  "it does feel something in the hidden system prompt makes it try less hard, so many times in the past several weeks I have found divergences with what was in plan and looking back at the jsonl it\u0027s always some variant of \"doing it this way would be too complicated, let me take this hardcoded way out\". If asked to review the change, it will find it, and it will say also yeah I agree prompt said not to do this, but I did anyways, not sure why.\nAs others have said, anthropic is between a rock and a hard place, you can\u0027t scale compute as quickly, and the influx of new accounts has definitely made things tough for them: I think all the \"how is claude this session 1/2/3/4\" questions that keep coming up must be part of some a/b on just how far to quantize / lower thinking while still maintaining user satisfaction."
+                     },
+                     {
+                         "id":  47738537,
+                         "by":  "andai",
+                         "time":  1775994077,
+                         "depth":  2,
+                         "parent":  47737425,
+                         "text":  "\u003e over-emphasizing how \"difficult\" a problem is to solve and choosing to avoid it because of the \"time\" it would take\nI heard a while back Claude refused to attempt a task for days, saying it would take weeks of work. Eventually the user convinced it to try, and it one-shotted it in 30 seconds."
+                     },
+                     {
+                         "id":  47744363,
+                         "by":  "themafia",
+                         "time":  1776027317,
+                         "depth":  2,
+                         "parent":  47737425,
+                         "text":  "Step 1: Sell at a loss.\nStep 2: Panic.\nStep 3: Destroy product."
+                     },
+                     {
+                         "id":  47737571,
+                         "by":  "_blk",
+                         "time":  1775985487,
+                         "depth":  2,
+                         "parent":  47737425,
+                         "text":  "Awesome, I didn\u0027t know about the car wash question.\nTotally true, also tokens seem to burn through much faster. More parallelism could explain some of it but where I could work on 3-5 projects at once on the max plan a month ago, I can\u0027t even get one to completion now on the same Opus model before the 5h session locks me up.."
+                     },
+                     {
+                         "id":  47750197,
+                         "by":  "theshrike79",
+                         "time":  1776077087,
+                         "depth":  2,
+                         "parent":  47737425,
+                         "text":  "Am I the only one who couldn\u0027t care less if a model can answer a weird gotcha riddle or not?\nI never use it to answer questions like that, what I care about is consistent tool callig and following the prompt."
+                     },
+                     {
+                         "id":  47741621,
+                         "by":  "colechristensen",
+                         "time":  1776011549,
+                         "depth":  2,
+                         "parent":  47737425,
+                         "text":  "\u003e“idgaf about risk you coward, waste some time just do it and stop bitching”\nThe above was a successful prompt to get Claude to stop whining about effort, difficulty, and time.\nUnfortunately abusive language well placed is an effective LLM motivator."
+                     },
+                     {
+                         "id":  47742094,
+                         "by":  "supermdguy",
+                         "time":  1776014114,
+                         "depth":  2,
+                         "parent":  47741755,
+                         "text":  "Bizarre reading the thread, it feels like their Claude responding to the other posters’ Claudes"
+                     },
+                     {
+                         "id":  47744384,
+                         "by":  "TheTaytay",
+                         "time":  1776027417,
+                         "depth":  2,
+                         "parent":  47741755,
+                         "text":  "This should be the top comment. The OP misunderstands the change and has their LLM write an expose. The company responds with a well-reasoned explanation that it would actually cost MORE money if there was a global 1h default for ALL prompts. It gets downvoted and the pitchforks stay out because…I presume the words like “cache read likelihood” sounds like made up fluff to the audience, rather than an actual explanation?"
+                     },
+                     {
+                         "id":  47742417,
+                         "by":  "dnw",
+                         "time":  1776016229,
+                         "depth":  2,
+                         "parent":  47741755,
+                         "text":  "Interesting that they actually acknowledge there was a change on March 6th. Kudos to the prompt analysis work that uncovered it!"
+                     },
+                     {
+                         "id":  47753144,
+                         "by":  "jjfoooo4",
+                         "time":  1776092975,
+                         "depth":  2,
+                         "parent":  47739624,
+                         "text":  "Which I\u0027m confused about - wouldn\u0027t decreasing the cache TTL increase compute demand?"
+                     },
+                     {
+                         "id":  47743777,
+                         "by":  "shdh",
+                         "time":  1776023839,
+                         "depth":  2,
+                         "parent":  47739624,
+                         "text":  "Likely accurate\nThis tends to happen during pretraining phase of new models\nHappened with 3.x too"
+                     },
+                     {
+                         "id":  47737822,
+                         "by":  "yukIttEft",
+                         "time":  1775987735,
+                         "depth":  2,
+                         "parent":  47737464,
+                         "text":  "I\u0027m currently \"working\" on a toy 3d Vulkan Physx thingy. It has a simple raycast vehicle and I\u0027m trying to replace it with the PhysX5 built in one (https://nvidia-omniverse.github.io/PhysX/physx/5.6.1/docs/Ve...)\nI point it to example snippets and webdocumentation but the code it gens won\u0027t work at all, not even close\nOpus4.6 is a tiny bit less wrong than Codex 5.4 xhigh, but still pretty useless.\nSo, after reading all the success stories here and everywhere, I\u0027m wondering if I\u0027m holding it wrong or if it just can\u0027t solve everything yet."
+                     },
+                     {
+                         "id":  47744968,
+                         "by":  "glerk",
+                         "time":  1776031005,
+                         "depth":  2,
+                         "parent":  47737464,
+                         "text":  "Codex/GPT5.4 is just superior to Opus4.6 for coding. I swear it costs me 1/2 of the tokens to achieve the same results and it always follows through the plan to completion compared to Opus that takes shortcuts and sweeps things under the rug until I discover them through testing.\nI\u0027m not accusing anyone of foul play and I don\u0027t have financial interests in either company, but it feels like \"something\" within Code Claude/Anthropic models is optimizing to make you spend more tokens instead of helping you complete the task."
+                     },
+                     {
+                         "id":  47737566,
+                         "by":  "toenail",
+                         "time":  1775985425,
+                         "depth":  2,
+                         "parent":  47737464,
+                         "text":  "I have also switched from claude to codex a few weeks ago. After deciding to let agents only do focused work I needed less context, and the work was easier to review. Then I realized codex can deliver the same quality, and it\u0027s paid through my subscription instead of per token."
+                     },
+                     {
+                         "id":  47737517,
+                         "by":  "vidarh",
+                         "time":  1775984976,
+                         "depth":  2,
+                         "parent":  47737464,
+                         "text":  "Codex has been good quality wise, but I hit limits on the Codex team subscription so quickly it\u0027s almost more hassle that it is worth."
+                     },
+                     {
+                         "id":  47737501,
+                         "by":  "lifty",
+                         "time":  1775984765,
+                         "depth":  2,
+                         "parent":  47737464,
+                         "text":  "I made this switch months ago, ChatGPT 5.4 being a smarter model, but I’ve had subjective feelings of degradation even on 5.4 lately. There’s a lot of growth in usage right now so not sure what kind of optimizations their doing at both companies"
+                     },
+                     {
+                         "id":  47737791,
+                         "by":  "onion2k",
+                         "time":  1775987458,
+                         "depth":  2,
+                         "parent":  47737464,
+                         "text":  "I use Codex at home and Opus at work. They\u0027re both brilliant."
+                     },
+                     {
+                         "id":  47737524,
+                         "by":  "lores",
+                         "time":  1775985022,
+                         "depth":  2,
+                         "parent":  47737464,
+                         "text":  "I would switch to Codex, but Altman is such a naked sociopath and OpenAI so devoid of ethical business practices that I can\u0027t in good conscience. I\u0027m not under any illusion that Anthropic is ethical, but it is so far a step up from OpenAI."
+                     },
+                     {
+                         "id":  47741332,
+                         "by":  "MattRix",
+                         "time":  1776009915,
+                         "depth":  2,
+                         "parent":  47739393,
+                         "text":  "This is close, but the real problem isn’t that the food is underpriced, it’s that the supply of ingredients is severely limited."
+                     },
+                     {
+                         "id":  47740159,
+                         "by":  "embedding-shape",
+                         "time":  1776004306,
+                         "depth":  2,
+                         "parent":  47739393,
+                         "text":  "Pretty much capitalism in a nut shell, yeah."
+                     },
+                     {
+                         "id":  47737395,
+                         "by":  "HauntingPin",
+                         "time":  1775983288,
+                         "depth":  2,
+                         "parent":  47737006,
+                         "text":  "It would be too fucking funny if this were the case. They\u0027re vibe coding their infrastructure and they vibe coded their response to the increased load."
+                     },
+                     {
+                         "id":  47739002,
+                         "by":  "jwr",
+                         "time":  1775997851,
+                         "depth":  2,
+                         "parent":  47737655,
+                         "text":  "This. I get much more value than 90€ from my Claude Code subscription. I am willing to pay more for consistency and not having to watch my back all the time, because I might get screwed over."
+                     },
+                     {
+                         "id":  47748665,
+                         "by":  "onoesworkacct",
+                         "time":  1776063907,
+                         "depth":  2,
+                         "parent":  47745654,
+                         "text":  "give it a skill that runs a timer in the background and every 4.5 minutes says \"ping? pong!\""
+                     },
+                     {
+                         "id":  47743328,
+                         "by":  "beering",
+                         "time":  1776021480,
+                         "depth":  2,
+                         "parent":  47737673,
+                         "text":  "Are you locked into your current subscription?"
+                     },
+                     {
+                         "id":  47743320,
+                         "by":  "beering",
+                         "time":  1776021443,
+                         "depth":  2,
+                         "parent":  47742429,
+                         "text":  "maybe numerics issues after quantization? Looks like it really went off the rails"
+                     },
+                     {
+                         "id":  47739063,
+                         "by":  "config_yml",
+                         "time":  1775998421,
+                         "depth":  2,
+                         "parent":  47737940,
+                         "text":  "Feels similar to Claude last August/September. Knowing Claude some Agent probably reverted the fix from back then ^^\nhttps://www.anthropic.com/engineering/a-postmortem-of-three-..."
+                     },
+                     {
+                         "id":  47741670,
+                         "by":  "bigyabai",
+                         "time":  1776011793,
+                         "depth":  2,
+                         "parent":  47741627,
+                         "text":  "\u003e The TOS basically states you need to deal with whatever they want.\nFWIW that\u0027s what most TOSes say for the majority of online services. Some even include arbitration clauses to prevent civil suits and class-action cases."
+                     },
+                     {
+                         "id":  47738548,
+                         "by":  "andai",
+                         "time":  1775994229,
+                         "depth":  2,
+                         "parent":  47737392,
+                         "text":  "It looks like selling reputation to save money.\nBut more likely they are constrained on GPUs and can\u0027t get them fast enough.\n(My guess having no understanding of how this industry actually works.)"
+                     },
+                     {
+                         "id":  47737794,
+                         "by":  "PunchyHamster",
+                         "time":  1775987473,
+                         "depth":  2,
+                         "parent":  47737507,
+                         "text":  "Caching LLM is not like caching normal content; the longer it is the more beneficial it is and it only stops being worth when user stops current session.\nSo you\u0027d need some adaptive algorithm to decide when to keep caching and when to purge it whole, possibly on client side, but if you give client the control, people will make it use most cache possible just to chase diminishing returns. So fine grained control here isn\u0027t all that easy; other possible option is just to have cache size per account and then intelligently purge it instead of relying just on TTL"
+                     },
+                     {
+                         "id":  47744238,
+                         "by":  "sunnybeetroot",
+                         "time":  1776026488,
+                         "depth":  2,
+                         "parent":  47739007,
+                         "text":  "Double tap ESC and revert the conversation."
+                     },
+                     {
+                         "id":  47743340,
+                         "by":  "beering",
+                         "time":  1776021563,
+                         "depth":  2,
+                         "parent":  47739007,
+                         "text":  "makes sense, “a picture is worth a thousand tokens” as they say. They probably lowered the limit due to capacity issues."
+                     }
+                 ]
+}

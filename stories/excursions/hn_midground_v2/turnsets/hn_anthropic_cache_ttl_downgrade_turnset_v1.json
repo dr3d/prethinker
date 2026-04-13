@@ -1,0 +1,76 @@
+﻿{
+    "name":  "hn_anthropic_cache_ttl_downgrade_turnset_v1",
+    "source_thread_id":  47736476,
+    "source_url":  "https://news.ycombinator.com/item?id=47736476",
+    "difficulty":  "G2",
+    "lane":  "vendor_contract",
+    "utterances":  [
+                       {
+                           "utterance":  "sunaurus: Has anybody else noticed a pretty significant shift in sentiment when discussing Claude/Codex with other engineers since even just a few months ago? Specifically because of the secret/hidden nature of these changes.\nI keep getting the sense that people feel like they have no idea if they are getting the product that they originally paid for, or something much weaker, and this sentiment seems to be constantly spreading. Like when I hear Anthropic mentioned in the past few weeks, it\u0027s almost always in some negative context.",
+                           "source":  "comment",
+                           "source_id":  47737485,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "foofloobar: Claude Code and the subscription are now less useful than a few months ago. Claude Code and the service seem to pick up more and more issues as time goes by: more bugs, fast quota drain, reduced quota, poor model performance, cache invalidation problems, MCP related bugs, potential model quantization and other problems.\nClaude Code was able to implement something in one shot. It was decent for a proof of concept initial implementation. It\u0027s barely able to do work now with full specs and detailed plans.\nChatGPT is also being watered down.\nIt seems obvious that Anthropic and OpenAI aren\u0027t the solution to any problem.",
+                           "source":  "comment",
+                           "source_id":  47743612,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "cassianoleal: The title should be changed. It makes it look like they upped the TTL from 1 h to 5 months.\nThe SI symbol for minutes is \"min\", not \"M\".\nA compromise would be to use the OP notation \"m\".",
+                           "source":  "comment",
+                           "source_id":  47737382,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "albert_e: So a side effect of this is --  even at 1 hour caching --  ...\nIf you run out of session quota too quickly and need to wait more than an hour to resume your work ... you are paying even more penalty just to resume your work -- a penalty you wouldnt have needed if session quota was not so restrictive in first place, and which in turn causes you to burn through next session quota even faster.\nSeems like a vicious cycle that made the UX very poor. I remember Claude Code with Pro  became virtually unuseable in middle of March with session quota expiring within first hour or less for me -- which was wildly different experience from early March.",
+                           "source":  "comment",
+                           "source_id":  47739420,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "disillusioned: It\u0027s also routinely failing the car wash question across all models now, which wasn\u0027t the case a month ago. :-/\nSeeing some things about how the effort selector isn\u0027t working as intended necessarily and the model is regressing in other ways: over-emphasizing how \"difficult\" a problem is to solve and choosing to avoid it because of the \"time\" it would take, but quoted in human effort, or suggesting the \"easier\" path forward even if it\u0027s a hack or kludge-filled solution.",
+                           "source":  "comment",
+                           "source_id":  47737425,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "benced: Anthropic responded: https://github.com/anthropics/claude-code/issues/46829#issue...",
+                           "source":  "comment",
+                           "source_id":  47741755,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "layer8: From the recent-ish Dwarkesh podcast, Anthropic seems to be wary about buying/building too much compute [0]. That probably means that they have to attempt to minimize compute usage when there is a surge in demand. Following the argument in the podcast, throwing more money after them, as some in this thread are suggesting, won’t solve the issue, at least not in the short term.\n[0] https://www.dwarkesh.com/i/187852154/004620-if-agi-is-immine...",
+                           "source":  "comment",
+                           "source_id":  47739624,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "davidkuennen: On slightly off topic note: Codex is absolutely fantastic right now. I\u0027m constantly in awe since switching from Claude a week ago.",
+                           "source":  "comment",
+                           "source_id":  47737464,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "hirako2000: There is a chef, he opens a restaurant. Delicious food.\nIt costs him more in ingredients alone than he charges. He even offers some pseudo unlimited buffet, combo sets, and happy hours.\nHe announced a new restaurant, apparently it will be even better, so good he\u0027s a bit worried. He makes sure to share his worries while he picks a few select enterprise for business parties and the likes.\nIn the meantime he cracks down on free buffet goers who happen to eat too much, and downgrades all ingredients without notice to finally hope to make a profit.",
+                           "source":  "comment",
+                           "source_id":  47739393,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "Tarcroi: This coincides with Anthropic\u0027s peak-hour announcement (March 26th). Could the throttling be partly a response to infrastructure load that was itself inflated by the TTL regression?",
+                           "source":  "comment",
+                           "source_id":  47737006,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "perks_12: Just give us the option to get the quality back, Anthropic. I get that even a $200 subscription is not possible eventually, but give us the option to sub the $1000 tier or tell us to use the API tier, but give us some consistency.",
+                           "source":  "comment",
+                           "source_id":  47737655,
+                           "depth":  1
+                       }
+                   ],
+    "notes":  "Auto-generated OP+11-comment turnset from HN snapshot."
+}

@@ -1,0 +1,76 @@
+{
+  "name": "rung_462_excursion_coop_fed_labor_inflation_balance",
+  "ontology_name": "rung_462_excursion_coop_fed_labor_inflation_balance",
+  "utterances": [
+    "Use monitored/2, asked_about/2, emphasized/2, requires/2, avoided/2.",
+    {
+      "utterance": "In briefing Q and A, the chair said they are monitoring labor cooling and inflation progress together.",
+      "clarification_answers": [
+        "Set monitored(chair, labor_cooling). Set monitored(chair, inflation_progress)."
+      ],
+      "max_clarification_rounds": 1
+    },
+    "Set monitored(chair, labor_cooling).",
+    "Set monitored(chair, inflation_progress).",
+    {
+      "utterance": "A reporter asked about near-term cut timing, and the chair emphasized that sustained evidence is required before easing.",
+      "clarification_answers": [
+        "Set asked_about(reporter, near_term_cut_timing). Set emphasized(chair, sustained_evidence_before_easing). Set requires(policy_easing, sustained_evidence)."
+      ],
+      "max_clarification_rounds": 1
+    },
+    "Set asked_about(reporter, near_term_cut_timing).",
+    "Set emphasized(chair, sustained_evidence_before_easing).",
+    "Set requires(policy_easing, sustained_evidence).",
+    {
+      "utterance": "The chair avoided giving a preset path.",
+      "clarification_answers": [
+        "Set avoided(chair, preset_policy_path)."
+      ],
+      "max_clarification_rounds": 1
+    },
+    "Set avoided(chair, preset_policy_path).",
+    "query monitored(chair, labor_cooling).",
+    "query monitored(chair, inflation_progress).",
+    "query requires(policy_easing, sustained_evidence).",
+    "query asked_about(reporter, near_term_cut_timing).",
+    "query avoided(chair, preset_policy_path)."
+  ],
+  "validations": [
+    {
+      "id": "labor_monitoring_recorded",
+      "query": "monitored(chair, labor_cooling).",
+      "expect_status": "success",
+      "min_rows": 1,
+      "max_rows": 1
+    },
+    {
+      "id": "inflation_monitoring_recorded",
+      "query": "monitored(chair, inflation_progress).",
+      "expect_status": "success",
+      "min_rows": 1,
+      "max_rows": 1
+    },
+    {
+      "id": "requires_evidence_before_easing",
+      "query": "requires(policy_easing, sustained_evidence).",
+      "expect_status": "success",
+      "min_rows": 1,
+      "max_rows": 1
+    },
+    {
+      "id": "reporter_question_recorded",
+      "query": "asked_about(reporter, near_term_cut_timing).",
+      "expect_status": "success",
+      "min_rows": 1,
+      "max_rows": 1
+    },
+    {
+      "id": "preset_path_avoided",
+      "query": "avoided(chair, preset_policy_path).",
+      "expect_status": "success",
+      "min_rows": 1,
+      "max_rows": 1
+    }
+  ]
+}

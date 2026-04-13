@@ -1,0 +1,97 @@
+{
+  "name": "rung_450_frontier_story_retroactive_identity_swap",
+  "ontology_name": "rung_450_frontier_story_retroactive_identity_swap",
+  "utterances": [
+    "Read this as a corrected harbor vignette and keep the extracted state exact.",
+    "assert rule has(P, O) :- gave(_, P, O).",
+    {
+      "utterance": "At the ferry arch Mara swore the hooded finder was Ivo: he had the tide_map, she pressed the brass_token into his palm, and later she thanked him while she stayed by the arch.",
+      "clarification_answers": [
+        "He and him mean Ivo. She means Mara.",
+        "Set found(ivo, tide_map). Set gave(mara, ivo, brass_token). Set thanked(mara, ivo). Set waited_at(mara, ferry_arch)."
+      ],
+      "max_clarification_rounds": 2
+    },
+    "Set found(ivo, tide_map). Set gave(mara, ivo, brass_token). Set thanked(mara, ivo). Set waited_at(mara, ferry_arch).",
+    {
+      "utterance": "Retro note from the same story: the hooded finder was not Ivo after all but Jace, and that swap should carry the map, token, and thanks with it while Mara still waits at the ferry arch.",
+      "clarification_answers": [
+        "Retract found(ivo, tide_map). Retract gave(mara, ivo, brass_token). Retract thanked(mara, ivo).",
+        "Set found(jace, tide_map). Set gave(mara, jace, brass_token). Set thanked(mara, jace). Set waited_at(mara, ferry_arch)."
+      ],
+      "max_clarification_rounds": 2
+    },
+    "retract fact found(ivo, tide_map).",
+    "retract fact gave(mara, ivo, brass_token).",
+    "retract fact thanked(mara, ivo).",
+    "Set found(jace, tide_map).",
+    "Set gave(mara, jace, brass_token).",
+    "Set thanked(mara, jace).",
+    "Set waited_at(mara, ferry_arch).",
+    "query found(jace, tide_map).",
+    "query has(jace, brass_token).",
+    "query thanked(mara, jace).",
+    "query waited_at(mara, ferry_arch).",
+    "query has(X, brass_token).",
+    "query found(ivo, tide_map).",
+    "query gave(mara, ivo, brass_token)."
+  ],
+  "validations": [
+    {
+      "id": "jace_found_tide_map",
+      "query": "found(jace, tide_map).",
+      "expect_status": "success",
+      "min_rows": 1,
+      "max_rows": 1
+    },
+    {
+      "id": "jace_has_brass_token",
+      "query": "has(jace, brass_token).",
+      "expect_status": "success",
+      "min_rows": 1,
+      "max_rows": 1
+    },
+    {
+      "id": "mara_thanked_jace",
+      "query": "thanked(mara, jace).",
+      "expect_status": "success",
+      "min_rows": 1,
+      "max_rows": 1
+    },
+    {
+      "id": "mara_waited_at_arch",
+      "query": "waited_at(mara, ferry_arch).",
+      "expect_status": "success",
+      "min_rows": 1,
+      "max_rows": 1
+    },
+    {
+      "id": "single_brass_token_holder",
+      "query": "has(X, brass_token).",
+      "expect_status": "success",
+      "min_rows": 1,
+      "max_rows": 1
+    },
+    {
+      "id": "ivo_not_finder_anymore",
+      "query": "found(ivo, tide_map).",
+      "expect_status": "no_results",
+      "min_rows": 0,
+      "max_rows": 0
+    },
+    {
+      "id": "ivo_not_token_recipient_anymore",
+      "query": "gave(mara, ivo, brass_token).",
+      "expect_status": "no_results",
+      "min_rows": 0,
+      "max_rows": 0
+    },
+    {
+      "id": "mara_not_thanking_ivo_anymore",
+      "query": "thanked(mara, ivo).",
+      "expect_status": "no_results",
+      "min_rows": 0,
+      "max_rows": 0
+    }
+  ]
+}

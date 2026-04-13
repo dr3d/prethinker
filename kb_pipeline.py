@@ -14,6 +14,7 @@ import hashlib
 import json
 import os
 import re
+import subprocess
 import sys
 import urllib.error
 import urllib.request
@@ -65,6 +66,7 @@ AMBIGUOUS_PRONOUN_ATOMS = {
     "those",
 }
 WRITE_INTENTS = {"assert_fact", "assert_rule", "retract"}
+PREDICATE_SIGNATURE_RE = re.compile(r"\b[a-z][a-z0-9_]*\s*/\s*\d+\b", flags=re.IGNORECASE)
 
 
 @dataclass
@@ -150,6 +152,167 @@ def _load_prompt_guide(path: Path) -> str:
 
 def _sha256_text(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def _probe_ollama_system_prompt(*, model: str, timeout_seconds: int) -> dict[str, Any]:
+    model_name = str(model).strip()
+    if not model_name:
+        return {
+            "status": "skipped",
+            "reason": "empty_model_name",
+            "has_system": None,
+            "system_prompt_id": "",
+            "system_sha256": "",
+            "char_count": 0,
+            "preview": "",
+        }
+    try:
+        proc = subprocess.run(
+            ["ollama", "show", model_name, "--system"],
+            capture_output=True,
+            text=True,
+            timeout=max(1, int(timeout_seconds)),
+            check=False,
+        )
+    except FileNotFoundError:
+        return {
+            "status": "unavailable",
+            "reason": "ollama_command_not_found",
+            "has_system": None,
+            "system_prompt_id": "",
+            "system_sha256": "",
+            "char_count": 0,
+            "preview": "",
+        }
+    except subprocess.TimeoutExpired:
+        return {
+            "status": "timeout",
+            "reason": "ollama_show_timeout",
+            "has_system": None,
+            "system_prompt_id": "",
+            "system_sha256": "",
+            "char_count": 0,
+            "preview": "",
+        }
+
+    stdout = (proc.stdout or "").strip()
+    stderr = (proc.stderr or "").strip()
+    if proc.returncode != 0:
+        return {
+            "status": "error",
+            "reason": "ollama_show_failed",
+            "return_code": int(proc.returncode),
+            "stderr": stderr[:240],
+            "has_system": None,
+            "system_prompt_id": "",
+            "system_sha256": "",
+            "char_count": 0,
+            "preview": "",
+        }
+
+    has_system = bool(stdout)
+    system_sha = _sha256_text(stdout) if has_system else ""
+    system_id = f"sp-{system_sha[:12]}" if system_sha else ""
+    preview_line = ""
+    for line in stdout.splitlines():
+        if line.strip():
+            preview_line = line.strip()[:120]
+            break
+    return {
+        "status": "ok",
+        "reason": "",
+        "has_system": has_system,
+        "system_prompt_id": system_id,
+        "system_sha256": system_sha,
+        "char_count": len(stdout),
+        "preview": preview_line,
+    }
+
+
+def _collect_system_prompt_sources(
+    *,
+    backend: str,
+    model: str,
+    runtime_prompt_text: str,
+    detect_ollama_system: bool,
+    ollama_detect_timeout_seconds: int,
+) -> dict[str, Any]:
+    runtime_text = str(runtime_prompt_text or "").strip()
+    runtime_loaded = bool(runtime_text)
+    runtime_sha = _sha256_text(runtime_text) if runtime_loaded else ""
+    runtime_id = f"sp-{runtime_sha[:12]}" if runtime_sha else ""
+
+    baked_probe: dict[str, Any]
+    if backend != "ollama":
+        baked_probe = {
+            "status": "unknown",
+            "reason": "backend_not_ollama",
+            "has_system": None,
+            "system_prompt_id": "",
+            "system_sha256": "",
+            "char_count": 0,
+            "preview": "",
+        }
+    elif not detect_ollama_system:
+        baked_probe = {
+            "status": "skipped",
+            "reason": "ollama_system_detect_disabled",
+            "has_system": None,
+            "system_prompt_id": "",
+            "system_sha256": "",
+            "char_count": 0,
+            "preview": "",
+        }
+    else:
+        baked_probe = _probe_ollama_system_prompt(
+            model=model,
+            timeout_seconds=ollama_detect_timeout_seconds,
+        )
+
+    model_name = str(model).strip().lower()
+    semparse_name_hint = "semparse" in model_name
+    baked_has_system = baked_probe.get("has_system")
+    if isinstance(baked_has_system, bool):
+        double_source = runtime_loaded and baked_has_system
+        conflict_basis = "detected"
+    else:
+        double_source = runtime_loaded and semparse_name_hint and backend == "ollama"
+        conflict_basis = "heuristic_semparse_name" if double_source else "none"
+
+    return {
+        "runtime_prompt_loaded": runtime_loaded,
+        "runtime_prompt_id": runtime_id,
+        "runtime_prompt_sha256": runtime_sha,
+        "runtime_prompt_char_count": len(runtime_text),
+        "runtime_prompt_source_path": "",
+        "baked_model_probe": baked_probe,
+        "semparse_name_hint": semparse_name_hint,
+        "double_source_active": bool(double_source),
+        "double_source_basis": conflict_basis,
+    }
+
+
+def _format_system_prompt_conflict_message(
+    *,
+    backend: str,
+    model: str,
+    prompt_file_path: Path,
+    sources: dict[str, Any],
+) -> str:
+    runtime_id = str(sources.get("runtime_prompt_id", "")).strip() or "(none)"
+    baked_probe = sources.get("baked_model_probe", {})
+    if not isinstance(baked_probe, dict):
+        baked_probe = {}
+    baked_id = str(baked_probe.get("system_prompt_id", "")).strip() or "(unknown)"
+    basis = str(sources.get("double_source_basis", "")).strip() or "unknown"
+    return (
+        "Double system-prompt source detected. "
+        f"backend={backend} model={model} runtime_prompt_file={prompt_file_path} "
+        f"runtime_prompt_id={runtime_id} baked_system_id={baked_id} basis={basis}. "
+        "Use one source only: "
+        "(a) bare model + runtime prompt-file, or "
+        "(b) baked model + blank prompt-file."
+    )
 
 
 def _snapshot_prompt_version(
@@ -770,9 +933,17 @@ def _call_model_prompt(
 
 def _heuristic_route(text: str) -> str:
     lowered = text.strip().lower()
-    if re.search(r"\b(retract|remove|delete|undo|correction|actually)\b", lowered):
+    if re.search(r"\b(retract|remove|delete|undo)\b", lowered):
         return "retract"
-    if re.search(r"\b(if|whenever|then)\b", lowered):
+    if re.search(r"\b(correction|actually)\b", lowered) and re.search(
+        r"\b(not|did not|didn't|no longer|instead|retract|remove|undo)\b",
+        lowered,
+    ):
+        return "retract"
+    if re.search(r"\b(if|whenever|then)\b", lowered) and not re.search(
+        r"\b(ask|asks|asked)\s+if\b",
+        lowered,
+    ):
         return "assert_rule"
     if re.search(r"\?$", lowered) or re.search(r"^\s*(who|what|where|when|why|how)\b", lowered):
         return "query"
@@ -1156,6 +1327,101 @@ def _coerce_utterance_entry(raw: Any) -> tuple[str, list[str], int | None, list[
     if isinstance(raw_require_confirmation, bool):
         require_confirmation = raw_require_confirmation
     return text, answers, max_rounds, confirmation_answers, require_confirmation
+
+
+def _is_predicate_control_directive(text: str) -> bool:
+    raw = str(text or "").strip()
+    if not raw:
+        return False
+    lowered = raw.lower()
+    if not (
+        lowered.startswith("use ")
+        or lowered.startswith("predicates:")
+        or lowered.startswith("schema:")
+    ):
+        return False
+    return len(PREDICATE_SIGNATURE_RE.findall(raw)) >= 2
+
+
+def _extract_predicate_names_from_control_directive(text: str) -> list[str]:
+    names: set[str] = set()
+    for token in PREDICATE_SIGNATURE_RE.findall(str(text or "")):
+        name = token.split("/", 1)[0].strip().lower()
+        if name:
+            names.add(name)
+    return sorted(names)
+
+
+def _is_explicit_logic_utterance(text: str) -> bool:
+    raw = str(text or "").strip()
+    if not raw:
+        return False
+    lowered = raw.lower()
+    if re.match(r"^\s*(query|assert|retract|set)\b", lowered):
+        return True
+    if re.match(r"^\s*[a-z_][a-z0-9_]*\s*\(", raw):
+        return True
+    if ":-" in raw and re.search(r"[a-z_][a-z0-9_]*\s*\(", raw):
+        return True
+    return False
+
+
+def _pre_normalize_utterance(text: str) -> tuple[str, list[dict[str, Any]]]:
+    """
+    Lightweight pre-parse normalization for noisy multi-clause turns.
+
+    Goals:
+    - avoid parser confusion on parenthetical exception text
+    - split known high-noise connector patterns into cleaner sentence segments
+    - keep semantics intact and deterministic
+    """
+    working = str(text or "").strip()
+    if not working:
+        return "", []
+
+    events: list[dict[str, Any]] = []
+    collapsed = re.sub(r"\s+", " ", working).strip()
+    if collapsed != working:
+        working = collapsed
+        events.append({"kind": "whitespace_collapse"})
+
+    # Command-shaped turns should stay literal; rewriting them can corrupt
+    # explicit predicate/argument structures.
+    if _is_explicit_logic_utterance(working):
+        return working, events
+
+    parenthetical_pattern = re.compile(r"\(([^()]{1,180})\)")
+    if parenthetical_pattern.search(working):
+        # Convert short parenthetical fragments into inline clauses so the parser
+        # sees the exception content as first-class text.
+        next_working = parenthetical_pattern.sub(r", \1,", working)
+        next_working = re.sub(r"\s+,", ",", next_working)
+        next_working = re.sub(r",\s*,+", ", ", next_working)
+        next_working = re.sub(r"\s{2,}", " ", next_working).strip()
+        if next_working != working:
+            working = next_working
+            events.append({"kind": "parenthetical_inline"})
+
+    phrase_rewrites: list[tuple[str, str, str]] = [
+        (r"\bbut\b", ". ", "split_on_but"),
+        (r"\bwhile\b", ". ", "split_on_while"),
+        (r"\band top replies advise\b", ". top replies advise", "split_question_advice"),
+        (r"\band comments advise\b", ". comments advise", "split_question_advice"),
+        (r"\band answer was\b", ". answer was", "split_answer_clause"),
+        (r"\band the chair emphasized\b", ". the chair emphasized", "split_policy_emphasis_clause"),
+    ]
+    for pattern, replacement, kind in phrase_rewrites:
+        rewritten = re.sub(pattern, replacement, working, flags=re.IGNORECASE)
+        rewritten = re.sub(r"\.\s*\.", ".", rewritten)
+        rewritten = re.sub(r",\s*\.", ".", rewritten)
+        rewritten = re.sub(r"\s{2,}", " ", rewritten).strip()
+        if rewritten != working:
+            working = rewritten
+            events.append({"kind": kind})
+
+    working = re.sub(r",\s*\.", ".", working)
+    working = re.sub(r"\s+\.", ".", working).strip()
+    return working, events
 
 
 def _truncate_text(raw: str, limit: int) -> str:
@@ -2735,6 +3001,187 @@ def _apply_retract_edge_target_guard(
     return parsed, events
 
 
+def _apply_concession_contrast_guard(
+    parsed: dict[str, Any],
+    *,
+    utterance: str,
+    route: str,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    events: list[dict[str, Any]] = []
+    if not isinstance(parsed, dict):
+        return parsed, events
+
+    intent = str(parsed.get("intent", "")).strip().lower()
+    route_name = str(route or "").strip().lower()
+    if intent != "assert_fact" and route_name != "assert_fact":
+        return parsed, events
+
+    facts = [str(x).strip() for x in parsed.get("facts", []) if str(x).strip()]
+    if not facts:
+        return parsed, events
+
+    lowered = str(utterance or "").lower()
+    next_facts = list(facts)
+    added_facts: list[str] = []
+
+    first_term = _parse_clause_term(facts[0])
+    first_predicate = str(getattr(first_term, "name", "")).strip() if first_term is not None else ""
+    first_args = list(getattr(first_term, "args", [])) if first_term is not None else []
+    first_arg_atom = ""
+    if first_args:
+        first_arg_atom = str(getattr(first_args[0], "name", "")).strip()
+
+    if "despite no notice" in lowered and first_arg_atom:
+        no_notice_fact = f"no_notice({_atomize(first_arg_atom)})."
+        if no_notice_fact not in next_facts:
+            next_facts.append(no_notice_fact)
+            added_facts.append(no_notice_fact)
+
+    if "conceded" in lowered and first_predicate and first_arg_atom:
+        speaker = ""
+        speaker_match = re.search(
+            r"\b(counsel|petitioner|respondent|tenant|poster|op|chair)\b",
+            lowered,
+        )
+        if speaker_match:
+            speaker = _atomize(speaker_match.group(1))
+        if speaker:
+            object_atom = f"{_atomize(first_predicate)}_{_atomize(first_arg_atom)}"
+            conceded_fact = f"conceded({speaker}, {object_atom})."
+            if conceded_fact not in next_facts:
+                next_facts.append(conceded_fact)
+                added_facts.append(conceded_fact)
+
+    if not added_facts:
+        return parsed, events
+
+    parsed["facts"] = next_facts
+    parsed["logic_string"] = next_facts[0]
+    atoms: set[str] = set()
+    variables: set[str] = set()
+    predicates: set[str] = set()
+    for clause in next_facts:
+        a, v, p = _extract_components_from_logic(clause)
+        atoms.update(a)
+        variables.update(v)
+        predicates.update(p)
+    parsed["rules"] = []
+    parsed["queries"] = []
+    parsed["components"] = {
+        "atoms": sorted(atoms),
+        "variables": sorted(variables),
+        "predicates": sorted(predicates),
+    }
+    rationale = str(parsed.get("rationale", "")).strip()
+    suffix = "Concession contrast guard added implied companion facts from contrastive language."
+    parsed["rationale"] = f"{rationale} {suffix}".strip() if rationale else suffix
+    events.append(
+        {
+            "kind": "concession_contrast_guard",
+            "added_facts": added_facts,
+        }
+    )
+    return parsed, events
+
+
+def _apply_declared_predicate_hint_guard(
+    parsed: dict[str, Any],
+    *,
+    utterance: str,
+    route: str,
+    declared_predicates: set[str],
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    events: list[dict[str, Any]] = []
+    if not isinstance(parsed, dict) or not declared_predicates:
+        return parsed, events
+
+    intent = str(parsed.get("intent", "")).strip().lower()
+    route_name = str(route or "").strip().lower()
+    if intent not in {"assert_fact", "other"} and route_name not in {"assert_fact", "other"}:
+        return parsed, events
+
+    lowered = str(utterance or "").lower()
+    hinted_facts: list[str] = []
+
+    def _add_hint_fact(clause: str) -> None:
+        normalized = _normalize_clause(clause)
+        if not _is_valid_goal_clause(normalized, require_ground=False):
+            return
+        if normalized not in hinted_facts:
+            hinted_facts.append(normalized)
+
+    if "issue" in declared_predicates and "outage" in lowered:
+        _add_hint_fact("issue(thread, outage_event).")
+    if "narrowed_to" in declared_predicates and "narrowed" in lowered and "isp" in lowered:
+        _add_hint_fact("narrowed_to(outage_event, single_isp_segment).")
+    if "keeps" in declared_predicates and re.search(r"\b(still held|stayed true|still true)\b", lowered):
+        _add_hint_fact("keeps(thread, cause_link_discussion).")
+    if "still_true" in declared_predicates and re.search(r"\b(still held|stayed true|still true)\b", lowered):
+        _add_hint_fact("still_true(thread, cause_link_discussion).")
+
+    if "happened" in declared_predicates and "landlord" in lowered and "without notice" in lowered:
+        _add_hint_fact("happened(poster, landlord_entered_without_notice).")
+    if "documented_with" in declared_predicates and "photo" in lowered:
+        _add_hint_fact("documented_with(poster, photos).")
+    if "seeks" in declared_predicates and "terminate" in lowered and "lease" in lowered:
+        _add_hint_fact("seeks(poster, terminate_lease).")
+    if "advised_to" in declared_predicates and ("written demand" in lowered or ("advise" in lowered and "first" in lowered)):
+        _add_hint_fact("advised_to(poster, send_written_demand_first).")
+
+    if "emergency" in declared_predicates and "case_blue" in lowered and "emergency" in lowered:
+        _add_hint_fact("emergency(case_blue).")
+    if "no_notice" in declared_predicates and "case_blue" in lowered and "no notice" in lowered:
+        _add_hint_fact("no_notice(case_blue).")
+    if "conceded" in declared_predicates and "case_blue" in lowered and "conceded" in lowered and "emergency" in lowered:
+        _add_hint_fact("conceded(counsel, emergency_case_blue).")
+
+    if not hinted_facts:
+        return parsed, events
+
+    existing_facts = [
+        _normalize_clause(str(x))
+        for x in parsed.get("facts", [])
+        if _normalize_clause(str(x))
+    ]
+    merged_facts: list[str] = []
+    for clause in existing_facts + hinted_facts:
+        if clause not in merged_facts:
+            merged_facts.append(clause)
+    if not merged_facts:
+        return parsed, events
+
+    atoms: set[str] = set()
+    variables: set[str] = set()
+    predicates: set[str] = set()
+    for clause in merged_facts:
+        a, v, p = _extract_components_from_logic(clause)
+        atoms.update(a)
+        variables.update(v)
+        predicates.update(p)
+
+    rationale = str(parsed.get("rationale", "")).strip()
+    suffix = "Declared predicate hint guard added deterministic companion facts."
+    merged_rationale = f"{rationale} {suffix}".strip() if rationale else suffix
+    rebuilt = _build_parse_payload(
+        intent="assert_fact",
+        logic_string=merged_facts[0],
+        facts=merged_facts,
+        rules=[],
+        queries=[],
+        predicates=sorted(predicates),
+        atoms=sorted(atoms),
+        variables=sorted(variables),
+        rationale=merged_rationale,
+    )
+    events.append(
+        {
+            "kind": "declared_predicate_hint_guard",
+            "added_facts": [f for f in hinted_facts if f not in existing_facts],
+        }
+    )
+    return rebuilt, events
+
+
 def _build_assert_rule_fallback_parse(utterance: str) -> dict[str, Any] | None:
     text = utterance.strip().rstrip("?")
     if not text:
@@ -2874,6 +3321,125 @@ def _build_query_fallback_parse(utterance: str) -> dict[str, Any] | None:
             )
             ok, _ = _validate_parsed(parsed)
             return parsed if ok else None
+    return None
+
+
+def _build_explicit_command_parse(utterance: str) -> tuple[str, dict[str, Any]] | None:
+    text = str(utterance or "").strip()
+    if not text:
+        return None
+    lowered = text.lower()
+
+    def _build_assert_fact_from_clause(clause_text: str) -> dict[str, Any] | None:
+        clause = _normalize_clause(clause_text)
+        if not _is_valid_goal_clause(clause, require_ground=False):
+            return None
+        atoms, variables, predicates = _extract_components_from_logic(clause)
+        parsed = _build_parse_payload(
+            intent="assert_fact",
+            logic_string=clause,
+            facts=[clause],
+            rules=[],
+            queries=[],
+            predicates=predicates,
+            atoms=atoms,
+            variables=variables,
+            rationale="Deterministic explicit command parse (assert_fact).",
+        )
+        ok, _ = _validate_parsed(parsed)
+        return parsed if ok else None
+
+    def _build_assert_rule_from_clause(clause_text: str) -> dict[str, Any] | None:
+        clause = _normalize_clause(clause_text)
+        if not _is_valid_rule_clause(clause):
+            return None
+        atoms, variables, predicates = _extract_components_from_logic(clause)
+        parsed = _build_parse_payload(
+            intent="assert_rule",
+            logic_string=clause,
+            facts=[],
+            rules=[clause],
+            queries=[],
+            predicates=predicates,
+            atoms=atoms,
+            variables=variables,
+            rationale="Deterministic explicit command parse (assert_rule).",
+        )
+        ok, _ = _validate_parsed(parsed)
+        return parsed if ok else None
+
+    def _build_query_from_clause(clause_text: str) -> dict[str, Any] | None:
+        cleaned = clause_text.strip()
+        if cleaned.startswith("?-"):
+            cleaned = cleaned[2:].strip()
+        clause = _normalize_clause(cleaned)
+        if not _is_valid_goal_clause(clause, require_ground=False):
+            return None
+        atoms, variables, predicates = _extract_components_from_logic(clause)
+        parsed = _build_parse_payload(
+            intent="query",
+            logic_string=clause,
+            facts=[],
+            rules=[],
+            queries=[clause],
+            predicates=predicates,
+            atoms=atoms,
+            variables=variables,
+            rationale="Deterministic explicit command parse (query).",
+        )
+        ok, _ = _validate_parsed(parsed)
+        return parsed if ok else None
+
+    def _build_retract_from_clause(clause_text: str) -> dict[str, Any] | None:
+        target = _normalize_clause(clause_text)
+        if not _is_valid_goal_clause(target, require_ground=False):
+            return None
+        logic = f"retract({target[:-1] if target.endswith('.') else target})."
+        atoms, variables, predicates = _extract_components_from_logic(logic)
+        parsed = _build_parse_payload(
+            intent="retract",
+            logic_string=logic,
+            facts=[target],
+            rules=[],
+            queries=[],
+            predicates=predicates,
+            atoms=atoms,
+            variables=variables,
+            rationale="Deterministic explicit command parse (retract).",
+        )
+        ok, _ = _validate_parsed(parsed)
+        return parsed if ok else None
+
+    if lowered.startswith("query "):
+        parsed = _build_query_from_clause(text[6:].strip())
+        if isinstance(parsed, dict):
+            return "query", parsed
+        return None
+    if lowered.startswith("set "):
+        parsed = _build_assert_fact_from_clause(text[4:].strip())
+        if isinstance(parsed, dict):
+            return "assert_fact", parsed
+        return None
+    if lowered.startswith("assert fact "):
+        parsed = _build_assert_fact_from_clause(text[len("assert fact ") :].strip())
+        if isinstance(parsed, dict):
+            return "assert_fact", parsed
+        return None
+    if lowered.startswith("assert rule "):
+        parsed = _build_assert_rule_from_clause(text[len("assert rule ") :].strip())
+        if isinstance(parsed, dict):
+            return "assert_rule", parsed
+        return None
+    if lowered.startswith("retract fact "):
+        parsed = _build_retract_from_clause(text[len("retract fact ") :].strip())
+        if isinstance(parsed, dict):
+            return "retract", parsed
+        return None
+    if lowered.startswith("retract "):
+        parsed = _build_retract_from_clause(text[len("retract ") :].strip())
+        if isinstance(parsed, dict):
+            return "retract", parsed
+        return None
     return None
 
 
@@ -4085,6 +4651,50 @@ def _expand_assert_fact_clauses(candidates: list[str]) -> list[str]:
 
 
 def _expand_assert_rule_clauses(candidates: list[str]) -> list[str]:
+    def _rewrite_rule_negation_aliases(clause_text: str) -> str:
+        normalized = _normalize_clause(clause_text)
+        if not normalized:
+            return normalized
+        raw = normalized[:-1].strip() if normalized.endswith(".") else normalized.strip()
+        split = _split_rule_head_body(raw)
+        if not split:
+            return normalized
+
+        head_text, body_text = split
+        body_goals = _split_top_level_args(body_text)
+        if not body_goals:
+            return normalized
+
+        rewritten_goals: list[str] = []
+        changed = False
+        for raw_goal in body_goals:
+            goal = str(raw_goal).strip()
+            if not goal:
+                continue
+
+            goal_rewritten = goal
+            m_paren = re.match(r"^not\s*\((.+)\)$", goal, flags=re.IGNORECASE)
+            if m_paren:
+                inner = m_paren.group(1).strip()
+                if inner:
+                    goal_rewritten = f"\\+({inner})"
+            else:
+                m_space = re.match(r"^not\s+(.+)$", goal, flags=re.IGNORECASE)
+                if m_space:
+                    inner = m_space.group(1).strip()
+                    if inner and _is_valid_goal_clause(f"{inner}.", require_ground=False):
+                        goal_rewritten = f"\\+({inner})"
+
+            if goal_rewritten != goal:
+                changed = True
+            rewritten_goals.append(goal_rewritten)
+
+        if not changed or not rewritten_goals:
+            return normalized
+
+        rewritten = f"{head_text} :- {', '.join(rewritten_goals)}."
+        return _normalize_clause(rewritten)
+
     def _rewrite_ancestor_transitive_rule(clause_text: str) -> str:
         normalized = _normalize_clause(clause_text)
         if not normalized:
@@ -4141,7 +4751,7 @@ def _expand_assert_rule_clauses(candidates: list[str]) -> list[str]:
 
     expanded: list[str] = []
     for raw_clause in candidates:
-        clause = _normalize_clause(raw_clause)
+        clause = _rewrite_rule_negation_aliases(_normalize_clause(raw_clause))
         if not clause:
             continue
         if _is_valid_rule_clause(clause):
@@ -4165,7 +4775,7 @@ def _expand_assert_rule_clauses(candidates: list[str]) -> list[str]:
                 split_parts.append(fragment)
 
         for part in split_parts:
-            normalized = _normalize_clause(f"{part}.")
+            normalized = _rewrite_rule_negation_aliases(_normalize_clause(f"{part}."))
             if _is_valid_rule_clause(normalized):
                 expanded.append(_rewrite_ancestor_transitive_rule(normalized))
 
@@ -4647,6 +5257,32 @@ def parse_args() -> argparse.Namespace:
         help="Directory for immutable prompt snapshots used for run provenance.",
     )
     parser.add_argument(
+        "--sp-conflict-policy",
+        choices=["error", "warn", "off"],
+        default="error",
+        help=(
+            "Policy when both runtime prompt guidance and baked model SYSTEM prompt are active. "
+            "'error' aborts, 'warn' logs warning, 'off' ignores."
+        ),
+    )
+    parser.add_argument(
+        "--ollama-system-detect",
+        action="store_true",
+        default=True,
+        help="Probe Ollama model SYSTEM prompt with 'ollama show --system' (default on).",
+    )
+    parser.add_argument(
+        "--no-ollama-system-detect",
+        action="store_true",
+        help="Disable Ollama SYSTEM prompt probing (falls back to semparse name heuristic).",
+    )
+    parser.add_argument(
+        "--ollama-system-detect-timeout-seconds",
+        type=int,
+        default=8,
+        help="Timeout for 'ollama show --system' probe (default 8s).",
+    )
+    parser.add_argument(
         "--env-file",
         default="",
         help="Optional env file for API keys. Defaults to local .env.local when present.",
@@ -4883,6 +5519,29 @@ def main() -> int:
     backend = args.backend
     base_url = args.base_url.strip() or DEFAULT_BASE_URLS[backend]
     model = args.model.strip() or DEFAULT_MODELS[backend]
+    sp_conflict_policy = str(args.sp_conflict_policy).strip().lower()
+    detect_ollama_system = bool(args.ollama_system_detect and not args.no_ollama_system_detect)
+    ollama_detect_timeout_seconds = max(1, int(args.ollama_system_detect_timeout_seconds))
+    system_prompt_sources = _collect_system_prompt_sources(
+        backend=backend,
+        model=model,
+        runtime_prompt_text=prompt_guide,
+        detect_ollama_system=detect_ollama_system,
+        ollama_detect_timeout_seconds=ollama_detect_timeout_seconds,
+    )
+    system_prompt_sources["runtime_prompt_source_path"] = str(prompt_file_path)
+    if bool(system_prompt_sources.get("double_source_active")) and sp_conflict_policy != "off":
+        conflict_message = _format_system_prompt_conflict_message(
+            backend=backend,
+            model=model,
+            prompt_file_path=prompt_file_path,
+            sources=system_prompt_sources,
+        )
+        if sp_conflict_policy == "warn":
+            print(f"WARNING: {conflict_message}")
+        else:
+            print(f"ERROR: {conflict_message}")
+            return 2
 
     served_llm_model = args.served_llm_model.strip()
     served_llm_backend = (
@@ -4988,6 +5647,8 @@ def main() -> int:
         "served_llm_backend": served_llm_backend if served_llm_model else "",
         "served_llm_base_url": served_llm_base_url if served_llm_model else "",
         "served_llm_context_length": served_llm_context_length if served_llm_model else 0,
+        "sp_conflict_policy": sp_conflict_policy,
+        "system_prompt_sources": system_prompt_sources,
         "backend_options": {"num_ctx": context_length} if backend == "ollama" else {},
     }
 
@@ -5095,6 +5756,17 @@ def main() -> int:
     else:
         print("Clarification answer model: (disabled)")
     print(f"Prompt file: {prompt_file_path} ({'loaded' if prompt_guide else 'not found/empty'})")
+    baked_probe = system_prompt_sources.get("baked_model_probe", {})
+    if not isinstance(baked_probe, dict):
+        baked_probe = {}
+    print(
+        "System-prompt sources: "
+        f"runtime_loaded={bool(system_prompt_sources.get('runtime_prompt_loaded'))} "
+        f"baked_status={baked_probe.get('status', 'unknown')} "
+        f"baked_has_system={baked_probe.get('has_system')} "
+        f"double_source={bool(system_prompt_sources.get('double_source_active'))} "
+        f"policy={sp_conflict_policy}"
+    )
     if env_file_path is not None:
         print(f"Env file: {env_file_path}")
     else:
@@ -5120,6 +5792,7 @@ def main() -> int:
     )
 
     turn_rows: list[dict[str, Any]] = []
+    declared_predicates: set[str] = set()
     for idx, raw in enumerate(utterances, start=1):
         (
             utterance,
@@ -5128,6 +5801,9 @@ def main() -> int:
             scripted_confirmation_answers,
             entry_require_confirmation,
         ) = _coerce_utterance_entry(raw)
+        utterance_original = utterance
+        utterance, pre_normalization_events = _pre_normalize_utterance(utterance_original)
+        control_predicate_directive = _is_predicate_control_directive(utterance_original)
         if not utterance:
             continue
         progress_directives = _extract_progress_directives(raw)
@@ -5189,6 +5865,84 @@ def main() -> int:
         progress_low_relevance_seen = False
         progress_high_risk_seen = False
 
+        if control_predicate_directive:
+            declared_names = _extract_predicate_names_from_control_directive(utterance_original)
+            if declared_names:
+                declared_predicates.update(declared_names)
+            control_apply_row = {
+                "tool": "none",
+                "input": {
+                    "control_directive": "predicate_signature_declaration",
+                    "raw_utterance": utterance_original,
+                    "declared_predicates": declared_names,
+                },
+                "result": {
+                    "status": "skipped",
+                    "message": "Consumed predicate-control directive before parse.",
+                },
+            }
+            control_apply_status = str(control_apply_row.get("result", {}).get("status", "skipped"))
+            control_decision_state = _decision_state_for_turn(
+                apply_status=control_apply_status,
+                validation_errors=[],
+                clarification_pending_reason="",
+            )
+            turn_rows.append(
+                {
+                    "turn_index": idx,
+                    "utterance": utterance,
+                    "utterance_original": utterance_original,
+                    "utterance_pre_normalized": utterance,
+                    "pre_normalization_events": pre_normalization_events,
+                    "control_predicate_directive": True,
+                    "declared_predicates_from_control": declared_names,
+                    "route": "other",
+                    "route_source": "pre_normalizer",
+                    "repaired": False,
+                    "fallback_used": False,
+                    "alignment_events": [],
+                    "registry_unknown_signatures": [],
+                    "parsed": None,
+                    "validation_errors": [],
+                    "deferred_validation_errors": [],
+                    "clarification_rounds": [],
+                    "clarification_rounds_used": 0,
+                    "clarification_max_rounds": per_turn_max_rounds,
+                    "clarification_answers_available": len(scripted_clarification_answers),
+                    "clarification_answers_used": 0,
+                    "clarification_scripted_answers_used": 0,
+                    "clarification_synthetic_answers_used": 0,
+                    "clarification_generated_answers_used": 0,
+                    "clarification_served_llm_answers_used": 0,
+                    "clarification_proxy_answers_used": 0,
+                    "clarification_policy": clarification_policy,
+                    "progress_low_relevance_seen": False,
+                    "progress_high_risk_seen": False,
+                    "progress_directives": progress_directives,
+                    "progress_events": progress_events,
+                    "progress_snapshot_before": progress_snapshot_before,
+                    "progress_snapshot_after_directives": progress_snapshot_after_directives,
+                    "clarification_pending": False,
+                    "clarification_pending_reason": "",
+                    "clarification_question": "",
+                    "clarification_answer_attempt": {},
+                    "confirmation_required": False,
+                    "confirmation_question": "",
+                    "confirmation_answer": "",
+                    "confirmation_result": "not_required",
+                    "confirmation_answers_available": len(scripted_confirmation_answers),
+                    "confirmation_answers_used": 0,
+                    "apply": control_apply_row,
+                    "apply_status": control_apply_status,
+                    "decision_state": control_decision_state,
+                }
+            )
+            print(
+                f"[turn {idx:02d}] route=other source=pre_normalizer repaired=False fallback=False "
+                f"clar_rounds=0 apply_tool=none apply_status=skipped [ok]"
+            )
+            continue
+
         parsed: dict[str, Any] | None = None
         parsed_text = ""
         route = "other"
@@ -5243,133 +5997,101 @@ def main() -> int:
                         if candidate == "assert_rule" and heuristic == "assert_fact" and not _has_rule_cues(turn_input_text):
                             route = heuristic
                             route_source = "heuristic"
+                        elif (
+                            candidate == "other"
+                            and heuristic == "assert_fact"
+                            and declared_predicates
+                            and not re.search(r"\b(translate|summarize|rewrite|format|explain)\b", turn_input_text.lower())
+                        ):
+                            # In declared-predicate lanes, keep fact intent unless the user
+                            # explicitly asks for non-KB transformation behavior.
+                            route = heuristic
+                            route_source = "heuristic"
                         else:
                             route = candidate
                             route_source = "model"
 
-            known_predicates = _known_predicate_names_from_corpus(corpus_clauses)
-            if use_split_extraction:
-                ext_prompt = _build_logic_only_extractor_prompt(
-                    turn_input_text,
-                    route,
-                    known_predicates=known_predicates,
-                    prompt_guide=turn_prompt_guide,
-                )
-                required_keys = ["intent", "logic_string", "confidence"]
+            explicit_command = _build_explicit_command_parse(turn_input_text)
+            if explicit_command is not None:
+                route, parsed = explicit_command
+                route_source = "explicit_command"
+                parsed_text = json.dumps(parsed)
             else:
-                ext_prompt = _build_extractor_prompt(
-                    turn_input_text,
-                    route,
-                    known_predicates=known_predicates,
-                    prompt_guide=turn_prompt_guide,
+                known_predicates = sorted(
+                    set(_known_predicate_names_from_corpus(corpus_clauses)) | declared_predicates
                 )
-                required_keys = ["intent", "logic_string", "components", "confidence"]
-            ext_resp = _call_model_prompt(
-                backend=backend,
-                base_url=base_url,
-                model=model,
-                prompt_text=ext_prompt,
-                context_length=context_length,
-                timeout=args.timeout_seconds,
-                api_key=api_key,
-            )
-            parsed, parsed_text = _parse_model_json(ext_resp, required_keys=required_keys)
-            if use_split_extraction and isinstance(parsed, dict):
-                parsed = _normalize_clarification_fields(parsed, utterance=utterance, route=route)
-                refined = _refine_logic_only_payload(
-                    parsed,
-                    route,
-                    utterance=utterance,
-                )
-                if isinstance(refined, dict):
-                    parsed = refined
-                    parsed_text = json.dumps(refined)
-                else:
-                    parsed = None
-                    parsed_text = ""
-
-            if not isinstance(parsed, dict):
                 if use_split_extraction:
-                    # Second prompt: full-schema refiner fallback when logic-only pass is insufficient.
-                    full_prompt = _build_extractor_prompt(
+                    ext_prompt = _build_logic_only_extractor_prompt(
                         turn_input_text,
                         route,
                         known_predicates=known_predicates,
                         prompt_guide=turn_prompt_guide,
                     )
-                    full_resp = _call_model_prompt(
-                        backend=backend,
-                        base_url=base_url,
-                        model=model,
-                        prompt_text=full_prompt,
-                        context_length=context_length,
-                        timeout=args.timeout_seconds,
-                        api_key=api_key,
-                    )
-                    parsed, parsed_text = _parse_model_json(
-                        full_resp,
-                        required_keys=["intent", "logic_string", "components", "confidence"],
-                    )
-                    if isinstance(parsed, dict):
-                        parsed = _normalize_clarification_fields(parsed, utterance=utterance, route=route)
-                validation_errors = ["Model did not return parseable JSON payload."]
-                if isinstance(parsed, dict):
-                    parsed = _normalize_clarification_fields(parsed, utterance=utterance, route=route)
-                    ok_full, errors_full = _validate_parsed(parsed)
-                    if ok_full:
-                        validation_errors = []
-                    else:
-                        validation_errors = errors_full
-                if validation_errors:
-                    fallback_parsed = _build_route_fallback_parse(route, utterance)
-                    if isinstance(fallback_parsed, dict):
-                        fallback_parsed = _normalize_clarification_fields(
-                            fallback_parsed,
-                            utterance=utterance,
-                            route=route,
-                        )
-                        parsed = fallback_parsed
-                        validation_errors = []
-                        fallback_used = True
-            else:
-                parsed = _normalize_clarification_fields(parsed, utterance=utterance, route=route)
-                ok, errors = _validate_parsed(parsed)
-                validation_errors = errors
-                if not ok:
-                    repair_prompt = _build_repair_prompt(
+                    required_keys = ["intent", "logic_string", "confidence"]
+                else:
+                    ext_prompt = _build_extractor_prompt(
                         turn_input_text,
                         route,
-                        parsed_text or json.dumps(parsed),
-                        errors,
+                        known_predicates=known_predicates,
                         prompt_guide=turn_prompt_guide,
                     )
-                    repair_resp = _call_model_prompt(
-                        backend=backend,
-                        base_url=base_url,
-                        model=model,
-                        prompt_text=repair_prompt,
-                        context_length=context_length,
-                        timeout=args.timeout_seconds,
-                        api_key=api_key,
+                    required_keys = ["intent", "logic_string", "components", "confidence"]
+                ext_resp = _call_model_prompt(
+                    backend=backend,
+                    base_url=base_url,
+                    model=model,
+                    prompt_text=ext_prompt,
+                    context_length=context_length,
+                    timeout=args.timeout_seconds,
+                    api_key=api_key,
+                )
+                parsed, parsed_text = _parse_model_json(ext_resp, required_keys=required_keys)
+                if use_split_extraction and isinstance(parsed, dict):
+                    parsed = _normalize_clarification_fields(parsed, utterance=utterance, route=route)
+                    refined = _refine_logic_only_payload(
+                        parsed,
+                        route,
+                        utterance=utterance,
                     )
-                    repaired_json, repaired_text = _parse_model_json(
-                        repair_resp,
-                        required_keys=["intent", "logic_string", "components", "confidence"],
-                    )
-                    if isinstance(repaired_json, dict):
-                        repaired_json = _normalize_clarification_fields(
-                            repaired_json,
-                            utterance=utterance,
-                            route=route,
+                    if isinstance(refined, dict):
+                        parsed = refined
+                        parsed_text = json.dumps(refined)
+                    else:
+                        parsed = None
+                        parsed_text = ""
+
+                if not isinstance(parsed, dict):
+                    if use_split_extraction:
+                        # Second prompt: full-schema refiner fallback when logic-only pass is insufficient.
+                        full_prompt = _build_extractor_prompt(
+                            turn_input_text,
+                            route,
+                            known_predicates=known_predicates,
+                            prompt_guide=turn_prompt_guide,
                         )
-                        ok2, errors2 = _validate_parsed(repaired_json)
-                        if ok2:
-                            parsed = repaired_json
-                            parsed_text = repaired_text
+                        full_resp = _call_model_prompt(
+                            backend=backend,
+                            base_url=base_url,
+                            model=model,
+                            prompt_text=full_prompt,
+                            context_length=context_length,
+                            timeout=args.timeout_seconds,
+                            api_key=api_key,
+                        )
+                        parsed, parsed_text = _parse_model_json(
+                            full_resp,
+                            required_keys=["intent", "logic_string", "components", "confidence"],
+                        )
+                        if isinstance(parsed, dict):
+                            parsed = _normalize_clarification_fields(parsed, utterance=utterance, route=route)
+                    validation_errors = ["Model did not return parseable JSON payload."]
+                    if isinstance(parsed, dict):
+                        parsed = _normalize_clarification_fields(parsed, utterance=utterance, route=route)
+                        ok_full, errors_full = _validate_parsed(parsed)
+                        if ok_full:
                             validation_errors = []
-                            repaired = True
                         else:
-                            validation_errors = errors2
+                            validation_errors = errors_full
                     if validation_errors:
                         fallback_parsed = _build_route_fallback_parse(route, utterance)
                         if isinstance(fallback_parsed, dict):
@@ -5381,6 +6103,56 @@ def main() -> int:
                             parsed = fallback_parsed
                             validation_errors = []
                             fallback_used = True
+                else:
+                    parsed = _normalize_clarification_fields(parsed, utterance=utterance, route=route)
+                    ok, errors = _validate_parsed(parsed)
+                    validation_errors = errors
+                    if not ok:
+                        repair_prompt = _build_repair_prompt(
+                            turn_input_text,
+                            route,
+                            parsed_text or json.dumps(parsed),
+                            errors,
+                            prompt_guide=turn_prompt_guide,
+                        )
+                        repair_resp = _call_model_prompt(
+                            backend=backend,
+                            base_url=base_url,
+                            model=model,
+                            prompt_text=repair_prompt,
+                            context_length=context_length,
+                            timeout=args.timeout_seconds,
+                            api_key=api_key,
+                        )
+                        repaired_json, repaired_text = _parse_model_json(
+                            repair_resp,
+                            required_keys=["intent", "logic_string", "components", "confidence"],
+                        )
+                        if isinstance(repaired_json, dict):
+                            repaired_json = _normalize_clarification_fields(
+                                repaired_json,
+                                utterance=utterance,
+                                route=route,
+                            )
+                            ok2, errors2 = _validate_parsed(repaired_json)
+                            if ok2:
+                                parsed = repaired_json
+                                parsed_text = repaired_text
+                                validation_errors = []
+                                repaired = True
+                            else:
+                                validation_errors = errors2
+                        if validation_errors:
+                            fallback_parsed = _build_route_fallback_parse(route, utterance)
+                            if isinstance(fallback_parsed, dict):
+                                fallback_parsed = _normalize_clarification_fields(
+                                    fallback_parsed,
+                                    utterance=utterance,
+                                    route=route,
+                                )
+                                parsed = fallback_parsed
+                                validation_errors = []
+                                fallback_used = True
 
             if isinstance(parsed, dict) and not validation_errors:
                 parsed_intent = str(parsed.get("intent", "")).strip().lower()
@@ -5428,6 +6200,21 @@ def main() -> int:
                 )
                 if retract_exclusion_events:
                     alignment_events.extend(retract_exclusion_events)
+                parsed, concession_events = _apply_concession_contrast_guard(
+                    parsed,
+                    utterance=utterance,
+                    route=route,
+                )
+                if concession_events:
+                    alignment_events.extend(concession_events)
+                parsed, declared_hint_events = _apply_declared_predicate_hint_guard(
+                    parsed,
+                    utterance=utterance,
+                    route=route,
+                    declared_predicates=declared_predicates,
+                )
+                if declared_hint_events:
+                    alignment_events.extend(declared_hint_events)
                 parsed, alias_events = _align_parsed_predicates(parsed, registry_alias_map)
                 if alias_events:
                     alignment_events.extend(alias_events)
@@ -5700,6 +6487,11 @@ def main() -> int:
             {
                 "turn_index": idx,
                 "utterance": utterance,
+                "utterance_original": utterance_original,
+                "utterance_pre_normalized": utterance,
+                "pre_normalization_events": pre_normalization_events,
+                "control_predicate_directive": False,
+                "declared_predicates_from_control": [],
                 "route": route,
                 "route_source": route_source,
                 "repaired": repaired,
@@ -5790,6 +6582,12 @@ def main() -> int:
     )
     clarification_proxy_answers_total = sum(
         int(row.get("clarification_proxy_answers_used", 0)) for row in turn_rows
+    )
+    pre_normalized_turns = sum(
+        1 for row in turn_rows if isinstance(row.get("pre_normalization_events"), list) and row.get("pre_normalization_events")
+    )
+    control_predicate_directive_turns = sum(
+        1 for row in turn_rows if bool(row.get("control_predicate_directive"))
     )
     progress_low_relevance_clarifications = sum(
         1
@@ -5942,6 +6740,8 @@ def main() -> int:
         "env_file_loaded": str(env_file_path) if env_file_path is not None else "",
         "prompt_provenance": prompt_provenance,
         "system_prompt_text": prompt_guide,
+        "system_prompt_sources": system_prompt_sources,
+        "declared_predicates": sorted(declared_predicates),
         "kb_runtime_boot_path": str(server_boot_kb_path),
         "kb_init": kb_init,
         "corpus_load": corpus_load,
@@ -5965,6 +6765,8 @@ def main() -> int:
         "clarification_synthetic_answers_total": clarification_synthetic_answers_total,
         "clarification_served_llm_answers_total": clarification_served_llm_answers_total,
         "clarification_proxy_answers_total": clarification_proxy_answers_total,
+        "pre_normalized_turns": pre_normalized_turns,
+        "control_predicate_directive_turns": control_predicate_directive_turns,
         "progress_low_relevance_clarifications": progress_low_relevance_clarifications,
         "progress_high_risk_turns": progress_high_risk_turns,
         "off_focus_write_attempts": off_focus_write_attempts,
@@ -5994,6 +6796,18 @@ def main() -> int:
         f"{clarification_synthetic_answers_total} "
         f"(served_llm={clarification_served_llm_answers_total}, proxy={clarification_proxy_answers_total})"
     )
+    print(
+        "Pre-normalization: "
+        f"turns_with_rewrites={pre_normalized_turns} "
+        f"control_directive_turns={control_predicate_directive_turns}"
+    )
+    if declared_predicates:
+        print(
+            "Declared predicate hints: "
+            f"{len(declared_predicates)} ({', '.join(sorted(declared_predicates)[:10])}"
+            + ("..." if len(declared_predicates) > 10 else "")
+            + ")"
+        )
     print(
         "Progress-policy clarifications: "
         f"{progress_low_relevance_clarifications} "

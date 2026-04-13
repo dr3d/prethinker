@@ -1,8 +1,9 @@
 # Codex IDE Handoff
 
 Last updated: 2026-04-13  
-Current baseline commit: `dc6ab37`  
-Workspace status: clean
+Live repo state can drift quickly. Verify before work:
+- `git rev-parse --short HEAD`
+- `git status --short`
 
 ## What This Project Is
 

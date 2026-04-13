@@ -1,0 +1,982 @@
+﻿{
+    "thread_id":  47738978,
+    "hn_url":  "https://news.ycombinator.com/item?id=47738978",
+    "title":  "We have a 99% email reputation, but Gmail disagrees",
+    "by":  "em-bee",
+    "unix_time":  1775997745,
+    "score":  352,
+    "descendants":  298,
+    "difficulty":  "G2",
+    "lane":  "deliverability_ops",
+    "label":  "hn_email_reputation_gmail",
+    "why_selected":  "Operational claims with nuanced causal and mitigation arguments.",
+    "op_text":  "",
+    "harvested_comment_count":  120,
+    "comment_sample_policy":  {
+                                  "traversal":  "bfs",
+                                  "max_comments":  120,
+                                  "max_depth":  3
+                              },
+    "comments":  [
+                     {
+                         "id":  47739641,
+                         "by":  "Youden",
+                         "time":  1776001851,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "How do you get email addresses? Do people freely and explicitly choose to sign up to your mailing list, or is it baggage that you\u0027re forcing on them without their consent?\nI notice that when I go to https://fontawesome.com/ and click \"Start for Free\", I\u0027m asked for my email address. This isn\u0027t necessary for me to use the icons. I just need a page that tells me to add the necessary tags for cdnjs [0].\nI think your problem is dissonance between what you think your users want and what they actually want. If I had to sign up for a mailing list in order to use every frontend development library I\u0027ve ever used, and their emails actually made it past my spam filter, I\u0027d never see anything else.\nI think Google\u0027s doing the right thing here. You need to separate your newsletter and product updates from people who just want to set up the icons and move on with their lives.\n[0]: https://cdnjs.com/libraries/font-awesome"
+                     },
+                     {
+                         "id":  47747638,
+                         "by":  "jherskovic",
+                         "time":  1776054837,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "I use FontAwesome. I bought FontAwesome subscriptions for my team. Love the product.\n“We released new icons” (or a new version) is a message that has exactly zero information content for me. My workflow is “I need an icon for this,” so I open FA’s site and search. Done. Remembering that I searched for an icon that wasn’t there months ago, so that I’ll go check and see if it’s in the new release? Not going to happen.\nNo shade here. If you live, breathe, and devote your life to your product you’re going to be orders of magnitude more excited and attuned than the rest of us. Just… remember that we do not care to the level that you do. We buy it to be a tool in our toolkit, not the center of our lives.\nIf Ryobi sent me an email whenever they added a new battery-powered tool to their catalog, or upgraded a drill, I’d lose my shit. My time and attention are valuable to me. Don’t take them for granted."
+                     },
+                     {
+                         "id":  47739762,
+                         "by":  "0x3f",
+                         "time":  1776002453,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "I\u0027m a Font Awesome subscriber and yes, for the record, they spam me with annoying marketing and probably deserve their Gmail woes.\nThey also use that silly dark pattern where they alternate sending out marketing emails from {David,Harry,Sam,Janet,every other person at the company}@fontawesome.com."
+                     },
+                     {
+                         "id":  47740220,
+                         "by":  "cs02rm0",
+                         "time":  1776004546,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "\u003e At our CORE, our instinct is to only email folks when we actually have something fun to share. A big release, something we’re excited about, news worth your time. That’d probably be every couple of months, if that. Respectful. Low noise.\nLow noise for some fonts is zero emails. In the nicest way possible, users aren\u0027t excited about your big release, they\u0027re just not."
+                     },
+                     {
+                         "id":  47739629,
+                         "by":  "sho_hn",
+                         "time":  1776001802,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "If I read this right, they used their email recipient list from Font Awesome to spam people with an unrelated new product announcement.\nI get they\u0027re going for the whole \"look at big evil Google undermining this underdog\" support ticket route, but I think it will backfire in this case."
+                     },
+                     {
+                         "id":  47740155,
+                         "by":  "bar000n",
+                         "time":  1776004291,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "I can understand the frustration but let\u0027s face it: you cannot fool huge email providers such as Gmail. They have huge userbases and if their users mark some of your  messages as spam then you\u0027re screwed.\nI am email admin since 2003 and I have real email users, i don\u0027t take customers who send any sort of automated messages, and I never had any issues besides the occasional compromised mailbox once in a while, and that was way back in the day..."
+                     },
+                     {
+                         "id":  47740684,
+                         "by":  "fmx",
+                         "time":  1776006834,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "GMail disagrees with you, because GMail users disagree with you. They are clicking \"report spam\" on your emails. Whether or not you think what you\u0027re sending is spam, the recipients think it is, and that\u0027s what matters. (Based on the other comments in this thread it\u0027s not hard to see why they might think so.)"
+                     },
+                     {
+                         "id":  47740007,
+                         "by":  "airstrike",
+                         "time":  1776003615,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "As a builder, I appreciate the hustle.\nBut an e-mail every 2 months seems innocuous until you factor in how many senders one normally has, which really means lots of \"exciting news\"... that are actually only really exciting for the people who sent them.\nIn an ideal world, I\u0027d receive zero of those. I can just find out about things organically.\nI don\u0027t think I\u0027ve ever wished to receive a single e-mail about icons—or from any library I use, tbh"
+                     },
+                     {
+                         "id":  47739645,
+                         "by":  "the__alchemist",
+                         "time":  1776001856,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "#1: Was this article written by an LLM? The phrasing implies there\u0027s a high chance\n#2: Is your company sending spam emails? I don\u0027t know how Gmail\u0027s system works, but I will mark any unsolicited email from businesses as spam. Perhaps Google uses that as a heuristic?"
+                     },
+                     {
+                         "id":  47739519,
+                         "by":  "chmod775",
+                         "time":  1776001234,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "Chances are the e-mails they\u0027ve been sending so far went unread/got moved to spam by a lot of users and Gmail took that as a signal.\nI send nothing but password-reset mails and never had an issue getting anything delivered, even though people constantly whine that delivering e-mail yourself has gotten so hard nowadays.\nJust got a clean IP and don\u0027t send crap."
+                     },
+                     {
+                         "id":  47740631,
+                         "by":  "jjulius",
+                         "time":  1776006602,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "My money is on the likelihood that most GMail users started marking these emails as spam, and GMail recognized that overriding trend and began to redirect the emails accordingly on a broader scale.\nEssentially, the people FontAwesome thinks will want to hear about their new features have actually, collectively, said, \"No thanks,\" and FontAwesome is struggling to accept that."
+                     },
+                     {
+                         "id":  47741349,
+                         "by":  "oliwarner",
+                         "time":  1776010010,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "I signed up for one of their early Kickstarter campaigns and they have abused the \"project news\" system to send me updates for every subsequent project. It\u0027s unsolicited marketing. Spam.\nIf this is their global approach to communication, perhaps Google is right."
+                     },
+                     {
+                         "id":  47740488,
+                         "by":  "avaer",
+                         "time":  1776005891,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "This post rubs me the wrong way. Don\u0027t get me wrong, I\u0027m a FA customer.\nBut this makes it seem like FA feels entitled to people\u0027s attention. Google is getting in the way of that, so they are complaining about the system.\nYes, unscrupulous opportunists + Google + AI (in that order) have rotted the email system into a byzantine husk of its former useful self, especially for promotion, but I don\u0027t understand why FA is making a fuss over this or should be accorded special treatment. Email sucks for everyone, maybe find other ways to get your message out?"
+                     },
+                     {
+                         "id":  47739621,
+                         "by":  "Pikamander2",
+                         "time":  1776001748,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "Gmail\u0027s spam detection has some real headscratcher moments every now and then.\nSome days it\u0027ll mark legitimate transaction emails from major companies as spam even if you\u0027ve been receiving emails from them for years.\nAnd then right afterwards it\u0027ll allow an obvious scam email with a PDF attachment from some random Gmail account that you\u0027ve never contacted to go straight to your inbox."
+                     },
+                     {
+                         "id":  47740682,
+                         "by":  "graypegg",
+                         "time":  1776006827,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "They seem to attribute lower-than-average participation in their kickstarter campaign for Build Awesome to this: https://blogfontawesome.wpcomstaging.com/pausing-kickstarter...\nThat feels a bit weird to me. If you were sending emails about a kickstarter for a static website builder to a list that signed up for icon related news, you\u0027ll get marked as spam."
+                     },
+                     {
+                         "id":  47740028,
+                         "by":  "SAI_Peregrinus",
+                         "time":  1776003718,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "Opt-out is not consent. If I didn\u0027t opt in, I mark it as spam."
+                     },
+                     {
+                         "id":  47740998,
+                         "by":  "NelsonMinar",
+                         "time":  1776008331,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "I\u0027ve recently switched my personal email to a brand new domain and am struggling with getting it delivered. And all I\u0027m doing is ~100 emails a week hand written by me to other individuals. I\u0027ve been doing Internet email for 35 years now, I used to handwrite sendmail.cf for my college. I\u0027m worried the medium is going to fail entirely in 5-10 years because of complexity in spam fighting.\nReceiving mail: I was using Google Workspace to accept email to my domain and then forward it to my personal @gmail.com address. And Gmail was blocking emails forwarded from Google Workspace. Not because the original email was suspect, no, but because Google Workspace isn\u0027t forwarding email correctly (ARC or SRS related) and so the SPF check failed.  The solution for that was to use Cloudflare to forward my incoming email instead. They are doing ARC right, or in some other ways the signatures arrive intact so Gmail sees valid SPF instead of invalid. Now my mail gets delivered reliably.\nSending mail: I only ever send mail to Gmail. I have DKIM set up and just set up a strict p=reject policy with DMARC. This seems to be working pretty well. I did have to add Cloudlflare as another authorized DKIM source so the mail forward works, but that\u0027s OK too.\nBasically we\u0027ve shifted the trust problem from \"does this email look legit\" to \"do I trust the companies that are sending this email?\" This all works only if Gmail and Cloudflare don\u0027t screw up and allow spam. (Which is already failing: I get a lot of Gmail spam.) So email is now consolidating into the hands of a few companies. It is not working well as a peer to peer Internet medium anymore."
+                     },
+                     {
+                         "id":  47740070,
+                         "by":  "basilikum",
+                         "time":  1776003912,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "Why is this blog on a sudomain of wpcomstaging.com?\nIs this actually an official site by fontawsome? If yes, what a pack of clowns. I hope their spam emails rot in every spam filter forever."
+                     },
+                     {
+                         "id":  47739531,
+                         "by":  "rokkamokka",
+                         "time":  1776001287,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "Does anyone want these emails? Users getting them might just be marking them as spam because they\u0027re unwanted"
+                     },
+                     {
+                         "id":  47740383,
+                         "by":  "antiloper",
+                         "time":  1776005340,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "\u003eRight before we hit send on our announcement emails for our new Build Awesome Kickstarter campaign...\nThis is spam."
+                     },
+                     {
+                         "id":  47748325,
+                         "by":  "Jean-Papoulos",
+                         "time":  1776061622,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "You are spam. It doesn\u0027t get any simpler than this."
+                     },
+                     {
+                         "id":  47754730,
+                         "by":  "ozgurds",
+                         "time":  1776098852,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "This mainly depends on what is the general lifecycle of those emails and how does it interacted with users. If you are sure that you never spamed any users before , then we should think about how the google spam labeling works. For example if you send a bulk email for a mailbox of many emails and those emails were labeled as spam then it may cause this situation maybe.\nIs there a way to get life cycle of your email box from google maybe ?"
+                     },
+                     {
+                         "id":  47742631,
+                         "by":  "Scaled",
+                         "time":  1776017704,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "A lot of people blaming the poster, but I can say I\u0027ve seen the same thing on completely opt-in lists that aren\u0027t doing anything shady.  Reality is if you\u0027re only sending one email to your list a year, even when people want to receive it, it becomes really hard to send it to gmail.  Especially if you\u0027re not using a shared IP with other senders.  Gmail basically forces you to send messages on a quarterly (or better) cadence, even if you have nothing to say because otherwise it forgets who you are.  I am convinced Google has a vested interest in making it hard to send newsletters and product announcements so companies will use their advertising products instead."
+                     },
+                     {
+                         "id":  47749790,
+                         "by":  "PUSH_AX",
+                         "time":  1776073404,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "\u003e it runs its own reputation system that has absolutely nothing to do with anyone else’s opinion of you. If you don’t do certain things “correctly” (meaning Gmail’s own definition), you get marked as spam.\nGood?"
+                     },
+                     {
+                         "id":  47756648,
+                         "by":  "shye",
+                         "time":  1776107772,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "The title is misleading, as there\u0027s no such thing as a global email reputation.\nEach SMTP server admin decides what to accept or reject, there\u0027s no mandatory, world wide rules for such.\nThe closest we have to a global ranking are the scores decided by the almost-duopoly of Gmail and Outlook.com, and for the ~75% of it controlled by Gmail, the OP is definitely not at a 99% reputation."
+                     },
+                     {
+                         "id":  47747966,
+                         "by":  "proton_9",
+                         "time":  1776058112,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "I got to know about this when i was setting up my email server, I have never sent emails to people i don\u0027t personally know and yet a few did land in spam and i had to ask them to mark it as not spam, that did help with improving the reputation, i also signed up on google postmaster also outlook as well i think.\nIt\u0027s a actually a pretty easy thing to setup your own email server, i wrote about it, not the explicit details but the jist of it.\nhttps://tech.yaker.in/posts/self-hosted-e-mail-stack"
+                     },
+                     {
+                         "id":  47742389,
+                         "by":  "xzjis",
+                         "time":  1776016005,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "I set up my own mail server for my own use at home. I did everything correctly: DNS, reverse DNS, DMARC, DKIM, SPF, etc. I have the best possible reputation score everywhere. I am the sole owner and user of the IP. But Gmail\u0027s magic sauce blocks me because apparently I\u0027m not allowed to send a few emails a week to my own Gmail address from a residential IP... This situation caused by a duopoly that forces us to use either Gmail or 365 is truly a problem that only a regulator can fix."
+                     },
+                     {
+                         "id":  47747382,
+                         "by":  "reenorap",
+                         "time":  1776052326,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "So basically Gmail was right and the system is working as intended?"
+                     },
+                     {
+                         "id":  47747976,
+                         "by":  "danpalmer",
+                         "time":  1776058225,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "\u003e We have a 99% email reputation (when you exclude 90% of our deliveries)\n\u003e 60% of the time, it works every time."
+                     },
+                     {
+                         "id":  47740451,
+                         "by":  "ryandrake",
+                         "time":  1776005664,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "Reading this article, all I saw was: Spam Spam Spam Spam:\n\u003e we use SendGrid to deliver our emails\nOh oh... here we go, the music is starting...\n\u003e hit send on our announcement emails for our new Build Awesome Kickstarter campaign\nSpam.\n\u003e Now, there are definitely folks who will choose to mark some of what we send as spam.\nYup, spam.\n\u003e some of you may have missed things we were genuinely excited to share\nSpam.\n\u003e our instinct is to only email folks when we actually have something fun to share\nSpam.\n\u003e A big release, something we’re excited about, news worth your time.\nSpam.\n\u003e That’d probably be every couple of months\nSpam.\n\u003e Like, genuinely, if we could, we would only very occasionally send a big email blast to our customers.\nSpam. Spam. Spam. Spam... Just like the song. Thank you, Google for doing a great job!"
+                     },
+                     {
+                         "id":  47740179,
+                         "by":  "dwedge",
+                         "time":  1776004384,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "The reputation thing is bull by the way, you don\u0027t need to spam people continually to get your email delivered - otherwise every normal people would know this was true.\nOf course you have an A+ reputation, the service assumes people want to receive your crap"
+                     },
+                     {
+                         "id":  47753479,
+                         "by":  "acejam",
+                         "time":  1776094296,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "Even with a dedicated IP, SendGrid has always had poor deliverability.\nI switched to Postmark years ago and never looked back."
+                     },
+                     {
+                         "id":  47740124,
+                         "by":  "layer8",
+                         "time":  1776004174,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "Better link: https://blog.fontawesome.com/we-have-a-99-email-reputation-g..."
+                     },
+                     {
+                         "id":  47749717,
+                         "by":  "avian",
+                         "time":  1776072718,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "\u003e To keep a sending IP “warm” and maintain deliverability, you’re expected to send constantly. Like… all the time.\nThe article provides zero evidence for this claim except \"our low-volume (by their own measure) marketing campaign gets marked as spam by gmail\"."
+                     },
+                     {
+                         "id":  47746905,
+                         "by":  "alprado50",
+                         "time":  1776047584,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "I have seen many cases of Google doing something wrong, but maybe people dont enjoy those emails and they are reporting them as spam?"
+                     },
+                     {
+                         "id":  47739862,
+                         "by":  "apitman",
+                         "time":  1776002943,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "It\u0027s pretty amazing email hasn\u0027t been replaced, or at least joined, by an open protocol where you can\u0027t message someone without first being approved by them, either directly like Facebook messenger or through some sort of referral system."
+                     },
+                     {
+                         "id":  47750379,
+                         "by":  "duskdozer",
+                         "time":  1776078629,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "Even this article is an ad. I have a hard time believing these people don\u0027t understand why their advertising gets marked as advertising."
+                     },
+                     {
+                         "id":  47740268,
+                         "by":  "boomboomsubban",
+                         "time":  1776004790,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "Does \"report not spam\" do anything?  A local business will send me a receipt from a gmail address, and every time it\u0027s marked as spam despite it telling me future mail from this address will not be tagged as spam."
+                     },
+                     {
+                         "id":  47749560,
+                         "by":  "nkrisc",
+                         "time":  1776071245,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "The number of emails I expect from icons is zero."
+                     },
+                     {
+                         "id":  47741903,
+                         "by":  "crowcroft",
+                         "time":  1776013019,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "Sounds more like Sendgrid didn’t get the memo and their email reputation metric is a poor proxy."
+                     },
+                     {
+                         "id":  47742158,
+                         "by":  "snowwrestler",
+                         "time":  1776014509,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "If you’re going to send only occasionally, it’s probably best to use platform shared IP addresses. You’re somewhat at risk in that other people’s bad hygiene could affect you, but you’re mitigating the “cold IP” risk.\nHonestly though, these types of blog posts are frustrating to read if one actually has knowledge about email deliverability. It’s so vague. I always wonder if it’s vague on purpose, i.e. they want to complain but they don’t want to admit dumb / bad stuff they did. In my experience Gmail is demanding but it’s not totally random or capricious."
+                     },
+                     {
+                         "id":  47740510,
+                         "by":  "prmoustache",
+                         "time":  1776005990,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "Email subscriptions is and has always been the wrong way to go. If you want to provide a news subscription service, provide RSS. If you want to receive news about a particular service/company, subscribe to their RSS feeds. No reputations and delivery issue to handle for the provider, no subscriptions and unsubscriptions to manage for provider, can be managed locally by user. Providers have easy setup, users have full control. And RSS is supported by any half decent email client so people who like having stuff in the same interface do not have to use a different software.\nWhat\u0027s not to like?"
+                     },
+                     {
+                         "id":  47747503,
+                         "by":  "MichaelAP",
+                         "time":  1776053445,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "As a former Sendgrid Customer, the big thing that no one has commented on is that Sendgrid\u0027s internal \"Reputation Score\" is complete BS. We had a 98% score, and all the meanwhile our Gmail and Microsoft reputations had been tanking. It took us over a year to switch providers and rebuild a proper reputation with new IPs, and better sending patterns, unsubscribe policies, etc.\nMonitor Gmail\u0027s \u0026 Microsofts actual Postmaster tools, use a tool like MXToolbox for blacklist monitoring. Sendgrid\u0027s internal scoring is completely broken, and they don\u0027t care.\nSendgrid/Twilio has given up."
+                     },
+                     {
+                         "id":  47739797,
+                         "by":  "vachina",
+                         "time":  1776002639,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "From a user’s PoV. Gmail is awesome. Super low noise and zero phishing emails."
+                     },
+                     {
+                         "id":  47739672,
+                         "by":  "j16sdiz",
+                         "time":  1776002014,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "No. Thanks.\nYour \"fun\" email belongs to my spam box.\nI use font awesome for a few quick icons. I have no interested in using a new site engine.\nIf you are getting new icons - great. not that interesting, but this is not spam.\nIf you are doing a incompatible update - i hate this. but i need to know this. thanks for telling me.\nDoing a new kickstarter project? - no. hell no. this is not what i signed up for."
+                     },
+                     {
+                         "id":  47749177,
+                         "by":  "t312227",
+                         "time":  1776067677,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "hello,\nas always: imho (!)\nbut google/gmail is pretty open about why they deny your emails - idk ... mail authentication =?\u003e dkim/spf/... or similar technical details etc.\ninterestingly i have more \"problems\" with the other \"big\" (free)mail providers like yahoo or gmx, which are often not so \"open\" about why they reject your mail ... even google is pretty happy with my setup :))\njust my 0.02€"
+                     },
+                     {
+                         "id":  47746691,
+                         "by":  "rubinlinux",
+                         "time":  1776045845,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "I encountered this as well. If you only send a few email verification emails, the bounce rate is high. The only way to fix is to email the verified accounts regularly to push the stat on that side of the equation."
+                     },
+                     {
+                         "id":  47741310,
+                         "by":  "the__alchemist",
+                         "time":  1776009843,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "If you want to send me unsolicited marketing email and not go to spam, be funny. Otherwise I will mark it as spam."
+                     },
+                     {
+                         "id":  47748302,
+                         "by":  "jpalomaki",
+                         "time":  1776061352,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "Why not replace the SMTP with an API and explicit permissions. When registering for a newsletter, I would explicitly grant the sender right to push stuff to my inbox. At any point I could revoke this right and the sender would get clear error message when pushing.\nOld fashioned person-to-person email would work as it does. This would only apply to the app-to-user stuff, which in my case makes up \u003e99% of my emails."
+                     },
+                     {
+                         "id":  47741795,
+                         "by":  "winstonwinston",
+                         "time":  1776012459,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "\u003e Now, there are definitely folks who will choose to mark some of what we send as spam. And for them, rightly so. We get that. But this is not that.\nYour reputation depends on THAT. Other metrics you think matter, they do not."
+                     },
+                     {
+                         "id":  47740410,
+                         "by":  "quickthrowman",
+                         "time":  1776005464,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "If I did not explicitly opt-in to receiving emails, which I never do, I mark them as spam in Gmail. Stop sending unsolicited emails and you won’t be reported for spam, it’s pretty easy."
+                     },
+                     {
+                         "id":  47749093,
+                         "by":  "PunchyHamster",
+                         "time":  1776067053,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "\u003e We even have a 99% reputation score in SendGrid. Gold star. A+ student.\nWhy that would matter ? That\u0027s about as valuabe as Trump\u0027s peace prize\nuse actual google tools to see actual reputation https://postmaster.google.com/v2/sender_compliance\nYou can also add some headers to get per-campaign spam reputation and any issues"
+                     },
+                     {
+                         "id":  47742112,
+                         "by":  "exiguus",
+                         "time":  1776014186,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "No. It\u0027s not email that sucks, it is Gmail and also the people that use Gmail. Same for Microsoft. If you want to play the marketing email game, start to build relationships with employees from google and microsoft."
+                     },
+                     {
+                         "id":  47751726,
+                         "by":  "gwbas1c",
+                         "time":  1776087162,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "I need to side with GMail: Over the last year or so, email has turned into a cesspool. No one even reads it anymore.\nEvery week someone who I\u0027ve never heard of adds me to some pointless email list that I never wanted and will never read. My inbox is constantly clogged with notifications that I never asked for, and don\u0027t care about. Every time I open an app or buy something from a website they think they can send me pointless emails forever.\nThe bigger problem is a lack of regulation: Because there\u0027s no rules, everyone needs to fight to keep their email at the top of the queue of unopened emails."
+                     },
+                     {
+                         "id":  47739895,
+                         "by":  "rozumem",
+                         "time":  1776003155,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "What\u0027s your spam report rate on Google Postmaster Tools?"
+                     },
+                     {
+                         "id":  47740580,
+                         "by":  "chistev",
+                         "time":  1776006352,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "How many people here check their spam?"
+                     },
+                     {
+                         "id":  47741023,
+                         "by":  "exabrial",
+                         "time":  1776008458,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "As much as I am thankful for the innovations Google has given us, we no longer prosecute monopolies where they are toxic unfortunately. The Federal government learned awhile back that it\u0027s much easier to manipulate one large company rather than a healthy ecosystem of small companies."
+                     },
+                     {
+                         "id":  47739542,
+                         "by":  "fontain",
+                         "time":  1776001321,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "You are not penalized for sending infrequently but sending infrequently lessens the chance that your recipients will remember you and remember why they subscribed to your emails and if they don’t remember, they mark as spam.\nThe problem for Font Awesome is 2 fold:\n1. Kickstarter spam is a huge problem, seriously, it is so prevalent I expect gmail may even have specific rules around it. There is an entire cottage industry of kickstarter “promoters” that send out so much spam.\n2. Font Awesome… is not a kickstarter? They’re using their email list to advertise a new project, Build Awesome. Same team, similar ethos, sure, but it is entirely new — they are sending email about a project to people who didn’t subscribe to email about that project.\nWho knows why specifically their email performance is so bad, but this blog post doesn’t come close to providing plausible explanations."
+                     },
+                     {
+                         "id":  47746897,
+                         "by":  "dmitrygr",
+                         "time":  1776047520,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "\u003e At our CORE, our instinct is to only email folks when we actually have something fun to share. A big release, something we’re excited about, news worth your time. That’d probably be every couple of months, if that. Respectful. Low noise.\nso....you are spammers.\n\"respectful\" is zero emails, unless I requested one or purchased something and need a receipt. Anything more than that is spam, will be reported. I hope that eventually everyone who thinks that their \"exciting announcements\" are of interest to unsuspecting people get banned from the internet back into the stone age..."
+                     },
+                     {
+                         "id":  47748874,
+                         "by":  "wilg",
+                         "time":  1776065364,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "They are not being upfront about whether they are sending transactional or marketing email, which have significantly different compliance requirements for jurisdictions like Europe and also for email providers themselves."
+                     },
+                     {
+                         "id":  47740583,
+                         "by":  "nathias",
+                         "time":  1776006368,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "something is wrong with gmail filtering, I had no problems for years but now my custom domain emails go to spam when sending to people I\u0027ve been emailing all the time..."
+                     },
+                     {
+                         "id":  47739732,
+                         "by":  "powera",
+                         "time":  1776002314,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "From March, also https://blog.fontawesome.com/we-have-a-99-email-reputation-g... is the canonical URL."
+                     },
+                     {
+                         "id":  47740391,
+                         "by":  "jeffbee",
+                         "time":  1776005379,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "There is no such thing as a third party oracle of reputation. If Gmail users say your behavior is spammy, then it is spam by definition."
+                     },
+                     {
+                         "id":  47740156,
+                         "by":  "dwedge",
+                         "time":  1776004292,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "Oh man another spammer complaining about spam filters. You are the reason email sucks, the rest of us can complain about you"
+                     },
+                     {
+                         "id":  47739886,
+                         "by":  "stackghost",
+                         "time":  1776003133,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "\u003eIt’s a genuine catch-22: send too many emails and your reputation drops from complaints. Send too few and it drops from inactivity. Try to do the right thing and you get penalized either way. And. It. Is. Frustrating.\nWhat\u0027s frustrating is when companies delude themselves into thinking users want their spam in our inboxes.  Perhaps a dose of perspective is required:\nThe product is pretty icons for websites.  No offense but the unvarnished truth is that on the list of \"things that deserve my limited time and attention\", whether or not font awesome has a new update is wayyy down near the bottom.\nExpecting users to give a flying shit when Gmail blocks your spam is naive at best."
+                     },
+                     {
+                         "id":  47749555,
+                         "by":  "sylware",
+                         "time":  1776071221,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "gmail... toxic for internet now. But gmail toxicity is only the tip of the iceberg.\nI remember when I had a gmail account, when they did shutdown the classic web view (noscript/basic (x)html) to force people to use one of the \"whatng\" web engines. No netsurf/links2/lynx anymore... wow, what a bunch of animals.\nThen I moved to being self hosted (soon on RISC-V hardware of course, at the time, I could get my hands only on arm hardware, sad), then I lost my domain name. Of course the geniuses over there did the same thing than the animals at gogol: they broke classic web support (noscript/basic (x)html). Now, to pay for and book a domain name, you must have one of the \"whatng\" cartel web engines. Wow, geniuses indeed. Not even able to understand why there is an issue at depending on one of the massive and ultra-complex \"whatng\" cartel web engines.\nTo add insult to injury: spamhaus. Basically, if you do not \"pay them\", you are in their blocklist which many ultra-skilled sysadmins use without thinking twice, trusting those lists blindly. Of course, spamhaus is a nice \"company\" based in andore and switzerland... who said shabby as f?\nThen, the email standard designers were careful to have \"no DNS\" support with IPv[46] literals (which is stronger than SPF, since emails, their envelop and header, referencing a SMTP server with a different IPv[46] can be dropped without further processing). gmail is forbidding its users to send to such email addresses, and when you try to send to gmail such emails from such SMTP server, they block them due to the IPv[46] literal. The bottom of the barrel of humanity.\nThey are turning internet into a new compuserve/aol. This is pure evil."
+                     },
+                     {
+                         "id":  47747242,
+                         "by":  "guywithahat",
+                         "time":  1776051018,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "\u003e it [gmail] runs its own reputation system that has absolutely nothing to do with anyone else’s opinion of you. If you don’t do certain things “correctly” (meaning Gmail’s own definition), you get marked as spam.\nI mean that\u0027s correct; I choose email providers in part due to their spam protection. I don\u0027t want to follow what a company believes is the right amount of emails, I want to decide and if they fail they should be blocked. I wouldn\u0027t be surprised if that 99% sendgrid rating is either due to some dark pattern or because everything is already being sent to spam except for those who specifically allow it."
+                     },
+                     {
+                         "id":  47740994,
+                         "by":  "einpoklum",
+                         "time":  1776008303,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "People should really stop using GMail. Both for privacy reasons (Google is notorious on mining your email for targeted ads and for sharing data with the US government), and for anti-oligarchy/anti-trust reasons - that company controls much too muh of the activity on the Internet.\nThere are perfectly fine email providers - free + donations, for-small-fee, at-the-ISP, etc."
+                     },
+                     {
+                         "id":  47741541,
+                         "by":  "SoftTalker",
+                         "time":  1776011149,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "TLDR: Spammer wonders why their spam sent through a spam service (SendGrid) isn\u0027t getting delivered."
+                     },
+                     {
+                         "id":  47743160,
+                         "by":  "ghm2199",
+                         "time":  1776020525,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "Like it seems one needs to re-think email from first principles here. One idea is to use a the idea of \"theory of mind\"(ToM). e.g. The ToM between me and a sender would be for both to know: \"I am not as excited as you about your product launch, so sending it is a \u0027spam\u0027 from my PoV\".\nWe could use two negotiating agent, e.g. my agent that knows what I care about now/today/1-week ago and negotiates with an aspirant sender\u0027s agent before they send me any messages. e.g. I could set a policy based (my ToM) for my agent like \"Between 1-1:15PM every day I want to read about all product announcements I subscribed to for XYZ product type\". My agent would go talk to the aspirant\u0027s sender agent and gets messages right then.\nAn alternative policy could be \"I have some free time now, create a summary/gist of all announcements on products I might be interested in.\". The agents would negotiate with the sender to do the same.\nSignups emails would be to replaced by an agent which \"creates\" a ToM with sender on hard-stop dates. I would tell my agent : \"I am interested in this logging service to compare different ones, I will not be interested once ENG-123 is closed\" and mine would not just tell the sender that they are not interested when the time comes (which is  when ENG-123 is closed).\nLonger term policies would just age out any message negotiations because I don\u0027t like/care about those products anymore."
+                     },
+                     {
+                         "id":  47751432,
+                         "by":  "eloisant",
+                         "time":  1776085722,
+                         "depth":  1,
+                         "parent":  47738978,
+                         "text":  "\u003e Turns out, the email gods hate that. To keep a sending IP “warm” and maintain deliverability, you’re expected to send constantly. Like… all the time.\nThat\u0027s funny, it reminds me of the US credit history system that I discovered for the few years I lived in that strange country.\nFor me, having no debt is the gold standard of being a trustable person to lend money to. You\u0027ll be the only company I\u0027ll owe money, surely I won\u0027t have any issue paying you! But no: in the US system you need to constantly borrow money to prove that you\u0027re good at paying it back..."
+                     },
+                     {
+                         "id":  47740237,
+                         "by":  "itopaloglu83",
+                         "time":  1776004646,
+                         "depth":  2,
+                         "parent":  47739641,
+                         "text":  "I don’t know if this is true with Font Awesome, but more and more companies are spamming my inbox despite disabling any promotional emails in their settings.\nSo, I mark any unwanted email as spam in Gmail immediately, and even leave bad reviews.\nHaving my email address is not the same as having my consent. Stop trying to roofie us with malicious EULAs."
+                     },
+                     {
+                         "id":  47740706,
+                         "by":  "amluto",
+                         "time":  1776006915,
+                         "depth":  2,
+                         "parent":  47739641,
+                         "text":  "Fun quote from the OP:\n\u003e But here’s the part that really gets us. At our CORE, our instinct is to only email folks when we actually have something fun to share. A big release, something we’re excited about, news worth your time.\nI would prefer not to give my email address to a company that thinks that this should give them a good email reputation.  If you email me because you are excited and I’m not, I probably think of it as spam."
+                     },
+                     {
+                         "id":  47739939,
+                         "by":  "kodebach",
+                         "time":  1776003285,
+                         "depth":  2,
+                         "parent":  47739641,
+                         "text":  "It\u0027s actually worse. I just signed up with a dummy email and the page says they need your email to create an account so, they can store the icon kits you\u0027ve created. That kinda makes sense. But at no point do they ask you whether you want to subscribe to any form of newsletter. AFAICT not even the privacy policy mentions anything about that. You\u0027re just subscribed automatically. So by definition anything not crucial for creating the account is literal spam. I\u0027m not even sure that\u0027s legal under GDPR.\nBut the thing that might actually be killing their reputation is that their mails seemingly come from different emails all looking like bounces+18741050-ecba-jopudmulwqqsumjwub=nespj.com@email.fontawesome.com. But even worse than that, the \"confirm your email\" email and the following \"finish account setup\" email came from two different sub-domains. Maybe this is just a new attempt to get around Google\u0027s spam filter, but it seems like the worst thing you could possibly do when sending emails."
+                     },
+                     {
+                         "id":  47741732,
+                         "by":  "RobotToaster",
+                         "time":  1776012111,
+                         "depth":  2,
+                         "parent":  47739641,
+                         "text":  "So many of these \"freemium\" things will spam you relentlessly asking you to upgrade.\nThis one doesn\u0027t have the best history either, although it\u0027s officially open source, at least at one point the build system was private[0].  I\u0027ve not kept up with the drama, so I have no idea if that is still the case.\n[0] https://github.com/FortAwesome/Font-Awesome/issues/12199#iss..."
+                     },
+                     {
+                         "id":  47740819,
+                         "by":  "direwolf20",
+                         "time":  1776007487,
+                         "depth":  2,
+                         "parent":  47739641,
+                         "text":  "And I would definitely mark these emails as spam. When a company sends me emails I don\u0027t want, I mark them as spam. I don\u0027t care about the technical rules or if you tricked me into wherein. If it\u0027s unwanted non-transactional email, it\u0027s spam and you deserve to be kicked off the global email network. You may think you\u0027re sending only one email a week so you\u0027re fine. Cool, well my inbox gets one \"technically compliant\" spam email per hour and you have equal responsibility to all the rest of them."
+                     },
+                     {
+                         "id":  47756050,
+                         "by":  "thinkingtoilet",
+                         "time":  1776104865,
+                         "depth":  2,
+                         "parent":  47739641,
+                         "text":  "I no longer even unsubscribe when I get an unsolicited email. I intentionally stay subscribed but mark everything as spam. My hope is if people start doing this there will be more and more instances like this post, which is a good thing. Stop emailing me. Stop opting me in. And stop pretending like you\u0027re doing it for my benefit."
+                     },
+                     {
+                         "id":  47748832,
+                         "by":  "wilg",
+                         "time":  1776065080,
+                         "depth":  2,
+                         "parent":  47739641,
+                         "text":  "\u003e This isn\u0027t necessary for me to use the icons.\nTrue, but all the information about non-kit deployments is available lower on the page."
+                     },
+                     {
+                         "id":  47751425,
+                         "by":  "bombcar",
+                         "time":  1776085684,
+                         "depth":  2,
+                         "parent":  47747638,
+                         "text":  "People who are such fans that they want to know will find out - I refresh https://toolguyd.com/ multiple times a week because I do want to know what crazy shit Ryobi and others are up to. But I’m rare."
+                     },
+                     {
+                         "id":  47756410,
+                         "by":  "mihaaly",
+                         "time":  1776106656,
+                         "depth":  2,
+                         "parent":  47747638,
+                         "text":  "\u003e We buy it to be a tool in our toolkit, not the center of our lives.\nSomehow this thought evades almost all software providers nowadays. Distracting, and in equal amount, obstructing self promotions and unwanted hints are the norm, which is making life worse, not better. Then why paying them to annoy us? Somehow this very basic thought is not there, not a bit in most of the cases. They want to be the center of our attention. Idiotic. (I do not ask for forgiveness for this strong word. I believe that the costly - and eventually paid by us - marketing teams are dumb copycats senselessly pushing bad practices established elsewhere through time. I do not dare trying to find exceptions, it is hard.)"
+                     },
+                     {
+                         "id":  47740203,
+                         "by":  "Brybry",
+                         "time":  1776004482,
+                         "depth":  2,
+                         "parent":  47739762,
+                         "text":  "Do they have an easy-to-unsubscribe link in the marketing spam (cannot include logging into the user\u0027s account)?\nI have a generic name gmail account and people with my name frequently accidentally use my email address when signing up for stuff.\nWhen I get unsolicited mail which doesn\u0027t include a simple unsubscribe link then I just report as spam instead."
+                     },
+                     {
+                         "id":  47739855,
+                         "by":  "hirako2000",
+                         "time":  1776002893,
+                         "depth":  2,
+                         "parent":  47739762,
+                         "text":  "Wouldn\u0027t be a fringe. I get most marketing emails with a name as if a person sent it.\nCatchy subject seemingly target to me. Same for content.\nBut you are right, it\u0027s more likely enough users marked them as spam that Google algorithm decided the source is the spam."
+                     },
+                     {
+                         "id":  47741176,
+                         "by":  "arein3",
+                         "time":  1776009210,
+                         "depth":  2,
+                         "parent":  47739762,
+                         "text":  "Yeah I hate spam so much, hope everyone here reports them as spam to give them a lesson to not pretend to be the good guys when they are spammers.\nHey fontawesome and any other company that sends bullshit spam, nobody cares about whatever thing you want to spam, you\u0027re just poisoning the well for others."
+                     },
+                     {
+                         "id":  47741611,
+                         "by":  "SoftTalker",
+                         "time":  1776011519,
+                         "depth":  2,
+                         "parent":  47740220,
+                         "text":  "This is a simple case of \"we\" and \"you\" having different points of view. Sure, \"we\" think we have something fun to share, big news, we haven\u0027t emailed in a couple of months so users are probably anxious to hear from us. \"You,\" the user, is getting 20 emails a day from people who think they are sharing something fun, only emailing every couple of months. They\u0027re flagging all that as spam, and that\u0027s why Gmail won\u0027t send your spam anymore."
+                     },
+                     {
+                         "id":  47752073,
+                         "by":  "xnx",
+                         "time":  1776088712,
+                         "depth":  2,
+                         "parent":  47740220,
+                         "text":  "About the clearest case of \"It is difficult to get a man to understand something, when his salary depends on his not understanding it.\""
+                     },
+                     {
+                         "id":  47755935,
+                         "by":  "atoav",
+                         "time":  1776104364,
+                         "depth":  2,
+                         "parent":  47740220,
+                         "text":  "That is the thing. If I sign up to a fonts website, I may be interested in fonts. Finding new fonts, the history of fonts, obscure lineages, how to use them, that stuff.\nGive me that in a newsletter and I might read it. Give me some info about an \"awesome\" new \"release\" and lose me. That release is important for everybody working there, but outside of that it id irrelevant as a story.\nWanna sell a new industrial font? Write about interesting industrial fonts and then in the end tie it to yours. People that read that far may just click and buy."
+                     },
+                     {
+                         "id":  47741158,
+                         "by":  "aeturnum",
+                         "time":  1776009123,
+                         "depth":  2,
+                         "parent":  47740220,
+                         "text":  "Zero emails is not low noise - it\u0027s zero noise. I agree that I sometimes want zero noise from companies whose products I am using...and also it depends on what is in the noise? Sometimes I find unexpected signal.\nI would say that email is inherently a somewhat noisy channel. You have little meta-data about how appropriate and timely a message is, so often you are sending in the dark. There are many downsides to the protocol and its place in our lives but it does carry a lot of important communication.\nBasically...I just don\u0027t know what communication medium would allow a company that makes app icons to keep their customers in the loop about updates \u0026 concerns related to the product. Are you gonna install a Font Awesome app?"
+                     },
+                     {
+                         "id":  47740633,
+                         "by":  "daneel_w",
+                         "time":  1776006612,
+                         "depth":  2,
+                         "parent":  47740155,
+                         "text":  "In my experience they will mark your e-mails as spam for no sound reason at all. I run my own MX, for myself personally, and my e-mails to friends using Gmail regularly gets classed as spam as soon as it\u0027s been \"long enough\" since my last mail. My MX does everything by the books, ticks all the boxes, never ended up on any DNSBL etc. Their behavior is effectively a form of systemic sabotage."
+                     },
+                     {
+                         "id":  47741238,
+                         "by":  "tzs",
+                         "time":  1776009538,
+                         "depth":  2,
+                         "parent":  47740684,
+                         "text":  "Users definitely click \"report spam\" in large numbers on things that are not spam. At work we\u0027ve long had problems of getting reported for spam when the only things we send are:\n• A receipt when a person comes to our site and purchases something.\n• Their license key if what they purchased requires a license key.\n• Replies if they send email to customer support.\n• If they have purchased an automatically renewing subscription we email a receipt after it renews or a notice that it was declined if the charge does not go through. This is required by the major credit card companies.\n• If they have an automatically renewing subscription and they are on a plan other than monthly we send a reminder before it tries to renew. This is required by the major credit card companies and by the consumer protection laws in many jurisdictions."
+                     },
+                     {
+                         "id":  47754111,
+                         "by":  "IncandescentGas",
+                         "time":  1776096352,
+                         "depth":  2,
+                         "parent":  47740684,
+                         "text":  "This is not always the case.\nLast week, my monitoring system sent me 20k emails in a few hours in response to a server attack.\nWhen those hit my gmail inbox, gmail marked them all as spam. Myself, the user, did not mark them as spam. Gmail did that for me. But their reputation system is behaving as if 20k people marked 20k emails from us as spam.\nIn response to those 20k emails marked as spam, now our domain sender reputation with gmail is LOW, and our low volume of legitimate email with customers goes to their spam folders.\nThe gmail client gives me no way to unmark these messages as spam, except to click on each message, one at a time, and dig into a submenu to find the \"Not spam\" button."
+                     },
+                     {
+                         "id":  47740100,
+                         "by":  "sva_",
+                         "time":  1776004050,
+                         "depth":  2,
+                         "parent":  47739645,
+                         "text":  "Gmail has a system of reputation as you suggest. It is very likely that enough people marked their emails as spam, which the OOP could figure out on the postmaster dashboard if they were so inclined: https://postmaster.google.com/managedomains\nIt also goes the other way, if enough people click \"not spam\" and interact with your mails, your reputation gets better. I\u0027m currently trying to do that with my personal email/domain - will probably take some time though.  For now, my friends say my mails land in spam even though I get a 10/10 score on mail-tester.com and similar sites."
+                     },
+                     {
+                         "id":  47742811,
+                         "by":  "semiquaver",
+                         "time":  1776018737,
+                         "depth":  2,
+                         "parent":  47739645,
+                         "text":  "No question this was LLM. It absolutely stinks of it."
+                     },
+                     {
+                         "id":  47739997,
+                         "by":  "InsideOutSanta",
+                         "time":  1776003571,
+                         "depth":  2,
+                         "parent":  47739645,
+                         "text":  "Totally sounds like an LLM wrote it. Should have been two paragraphs instead of this verbose drivel."
+                     },
+                     {
+                         "id":  47739751,
+                         "by":  "bakugo",
+                         "time":  1776002418,
+                         "depth":  2,
+                         "parent":  47739645,
+                         "text":  "Yes, it was. Recent Claudes absolutely love to spam an endless stream of very short sentences like this."
+                     },
+                     {
+                         "id":  47744436,
+                         "by":  "trog",
+                         "time":  1776027732,
+                         "depth":  2,
+                         "parent":  47740631,
+                         "text":  "I think part of the problem is that Google has conflated the \"mark as spam\" button with \"unsubscribe\" and people just mash it as a shortcut to \"make this email go away\"."
+                     },
+                     {
+                         "id":  47754551,
+                         "by":  "projektfu",
+                         "time":  1776098025,
+                         "depth":  2,
+                         "parent":  47740488,
+                         "text":  "Something like, \"We have only good intentions!  It\u0027s not like we\u0027re selling penis pills!\""
+                     },
+                     {
+                         "id":  47740107,
+                         "by":  "meatmanek",
+                         "time":  1776004087,
+                         "depth":  2,
+                         "parent":  47739621,
+                         "text":  "Several years back when I applied for a Google internship, I missed some emails from my recruiter (soandso@google.com) because they went to my gmail spam folder."
+                     },
+                     {
+                         "id":  47739714,
+                         "by":  "ihaveajob",
+                         "time":  1776002224,
+                         "depth":  2,
+                         "parent":  47739621,
+                         "text":  "It\u0027s gotten to the point that I don\u0027t open emails from Sendgrid support because 4 out of 5 are poorly disguised phishing attempts."
+                     },
+                     {
+                         "id":  47741415,
+                         "by":  "wl",
+                         "time":  1776010358,
+                         "depth":  2,
+                         "parent":  47739621,
+                         "text":  "\u003e Some days it\u0027ll mark legitimate transaction emails from major companies as spam\nI get legitimate transactional emails intended for someone else and those senders refuse to stop them because I\u0027m not their customer and only their customer can request account updates. Those get marked as spam."
+                     },
+                     {
+                         "id":  47740717,
+                         "by":  "em-bee",
+                         "time":  1776006983,
+                         "depth":  2,
+                         "parent":  47740682,
+                         "text":  "it\u0027s not lower than average participation. it is very high participation initially, and then nothing. lower than average participation would have meant that they take a long time to reach their goal. so to me the argument seems plausible."
+                     },
+                     {
+                         "id":  47743689,
+                         "by":  "tgsovlerkhgsel",
+                         "time":  1776023415,
+                         "depth":  2,
+                         "parent":  47740028,
+                         "text":  "And for the spammers: What matters for this is whether the recipient thought they opted in. No matter how clever you think you are by pre-checking that checkbox, or hiding it in the TOS, or putting the non-mandatory spam checkbox between two other clearly-mandatory checkboxes so people think it\u0027s mandatory: If the user didn\u0027t want the mails, they\u0027re going to mark your spam as spam and you\u0027ll have the deliverability problems that you deserve."
+                     },
+                     {
+                         "id":  47746397,
+                         "by":  "krater23",
+                         "time":  1776043123,
+                         "depth":  2,
+                         "parent":  47740998,
+                         "text":  "I hear this often, but I\u0027m running my mailserver since 2005, since 2009 with a additional domain, have changed my IP at least one time. I had no issues with M$ or gmail at all."
+                     },
+                     {
+                         "id":  47740162,
+                         "by":  "layer8",
+                         "time":  1776004321,
+                         "depth":  2,
+                         "parent":  47740070,
+                         "text":  "The official blog is here: https://blog.fontawesome.com/we-have-a-99-email-reputation-g..."
+                     },
+                     {
+                         "id":  47743078,
+                         "by":  "ValentineC",
+                         "time":  1776020021,
+                         "depth":  2,
+                         "parent":  47740070,
+                         "text":  "\u003e Why is this blog on a sudomain of wpcomstaging.com?\nI find it ironic that they \"acquired\" Eleventy and are developing Build Awesome Pro [1], but can\u0027t bring themselves to dogfood it.\nThey do have an alpha version of Build Awesome Pro, right?\n[1] https://blog.fontawesome.com/pausing-kickstarter/"
+                     },
+                     {
+                         "id":  47741736,
+                         "by":  "roryirvine",
+                         "time":  1776012125,
+                         "depth":  2,
+                         "parent":  47740383,
+                         "text":  "Yes, so they collected emails from users of one product and are now spamming marketing emails about a fundraising campaign for a different product.\nThat\u0027s at least two steps removed from being merely questionable. I\u0027m really struggling to understand how they imagined that this wouldn\u0027t end up being blocked."
+                     },
+                     {
+                         "id":  47740234,
+                         "by":  "gus_massa",
+                         "time":  1776004630,
+                         "depth":  2,
+                         "parent":  47739862,
+                         "text":  "The problem is how to start a conversation.\nWe had a similar problem in the university. At the beginning of the semester, the students have to register for a Moodle server with additional material. So when they create an account, we have to send a few thousands of confirmation emails in a short period out of the blue, that makes Gmail/Yahoo/Outlook/Whatever unhappy.\nThe solution was to ask the students to send an email to the server half an hour before registering. It\u0027s not ideal, but it adds us to a secret list of known contacts of the student, so (most) emails are delivered."
+                     },
+                     {
+                         "id":  47739948,
+                         "by":  "em-bee",
+                         "time":  1776003337,
+                         "depth":  2,
+                         "parent":  47739862,
+                         "text":  "which system does that? neither telegram, nor whatsapp do it, and it annoys the hell out of me. at least whatsapp tells me that the sender doesn\u0027t get a notification until i respond or add the contact. wechat actually requires a connection request before allowing you to message someone, with all the complaints about privacy, wechat has the better UX to avoid getting spammed, linkedin requires a connection too, if you don\u0027t have a pro account. i don\u0027t know about any others."
+                     },
+                     {
+                         "id":  47739917,
+                         "by":  "0x3f",
+                         "time":  1776003231,
+                         "depth":  2,
+                         "parent":  47739862,
+                         "text":  "Well you can already do this with email, can\u0027t you?  You just use [company-name]@[yourdomain].com.  Or you+[company]@gmail.com.  Then you either block all unknown, or more practically just block companies as soon as they start spamming you."
+                     },
+                     {
+                         "id":  47746541,
+                         "by":  "krater23",
+                         "time":  1776044260,
+                         "depth":  2,
+                         "parent":  47739862,
+                         "text":  "And how should this approval look like? You think about a email that asks if you want to receive mail from buy-my-dickpicks-online-at-dp.com@dp.com?"
+                     },
+                     {
+                         "id":  47750453,
+                         "by":  "yellow_lead",
+                         "time":  1776079132,
+                         "depth":  2,
+                         "parent":  47750379,
+                         "text":  "And AI written"
+                     },
+                     {
+                         "id":  47740596,
+                         "by":  "gus_massa",
+                         "time":  1776006456,
+                         "depth":  2,
+                         "parent":  47740268,
+                         "text":  "It does add a weight to some internal classification tool. After a few times it should work, but it probably depends on a lot of other factors. (It\u0027s probably faster if other users also flag it as spam.)\nFor some annoying cases in which gmail never learns, I have filters that send them to spam directly. I also have two filters for my bank that sometimes send important stuff and other times they send a 10% discount in shavers in another city[emoji][emoji]!!"
+                     },
+                     {
+                         "id":  47740892,
+                         "by":  "NotGMan",
+                         "time":  1776007854,
+                         "depth":  2,
+                         "parent":  47740510,
+                         "text":  "Who actually uses RSS compared to email? 1% of your customers?"
+                     },
+                     {
+                         "id":  47741247,
+                         "by":  "nbernard",
+                         "time":  1776009584,
+                         "depth":  2,
+                         "parent":  47739797,
+                         "text":  "From your PoV maybe. I would be restless knowing that I may be silently losing important emails because they triggered some blackbox filter in such a way that they didn\u0027t even end up in my spam box..."
+                     },
+                     {
+                         "id":  47747540,
+                         "by":  "sevenseacat",
+                         "time":  1776053921,
+                         "depth":  2,
+                         "parent":  47739797,
+                         "text":  "I regularly get spam/phishing emails slipping through the cracks."
+                     },
+                     {
+                         "id":  47743611,
+                         "by":  "rationalist",
+                         "time":  1776022995,
+                         "depth":  2,
+                         "parent":  47741310,
+                         "text":  "That\u0027s very generous of you to even give them that opportunity.  I don\u0027t even read it to see if they\u0027re trying to be funny before I mark an unsolicited marketing email as spam."
+                     },
+                     {
+                         "id":  47740509,
+                         "by":  "em-bee",
+                         "time":  1776005989,
+                         "depth":  2,
+                         "parent":  47740410,
+                         "text":  "google marks my private emails that i send as replies to messages from gmail as spam.\ni don\u0027t send any unsolicited emails from my domain ever. i have nothing to sell. so no, it\u0027s not that easy."
+                     },
+                     {
+                         "id":  47749308,
+                         "by":  "avian",
+                         "time":  1776068932,
+                         "depth":  2,
+                         "parent":  47749093,
+                         "text":  "\u003e use actual google tools to see actual reputation\nGoogle has a v2 of the postmaster tools that are actually useful now? Awesome news! I totally missed that.\nAll v1 ever showed me as a small-time mail server admin was equivalent to \"nothing to see here\".\nBut v2 now actually shows me things like compliance status and user reported spam rate for my domains."
+                     },
+                     {
+                         "id":  47740412,
+                         "by":  "jeffbee",
+                         "time":  1776005479,
+                         "depth":  2,
+                         "parent":  47739895,
+                         "text":  "Their reputation is probably so poor that GPT won\u0027t even show them."
+                     },
+                     {
+                         "id":  47746607,
+                         "by":  "petee",
+                         "time":  1776044923,
+                         "depth":  2,
+                         "parent":  47740580,
+                         "text":  "I do frequently, but I honestly can\u0027t recall the last time a message i really wanted actually ended up there. I mostly end up hitting not-spam on marketing/updates that I\u0027ve actually subscribed to"
+                     },
+                     {
+                         "id":  47741483,
+                         "by":  "catlikesshrimp",
+                         "time":  1776010796,
+                         "depth":  2,
+                         "parent":  47740580,
+                         "text":  "all the time, unfortunately. Mostly when I have to confirm the email address when I sign up to a website account, but every couple fo weeks, too."
+                     }
+                 ]
+}

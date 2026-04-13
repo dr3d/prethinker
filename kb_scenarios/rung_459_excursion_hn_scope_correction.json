@@ -1,0 +1,68 @@
+{
+  "name": "rung_459_excursion_hn_scope_correction",
+  "ontology_name": "rung_459_excursion_hn_scope_correction",
+  "utterances": [
+    "Use reported/2, affected_scope/2, corrected_scope_to/2, attributed_to/2, preserved_claim/2.",
+    {
+      "utterance": "Early thread comments framed docker pull failures as country-wide.",
+      "clarification_answers": [
+        "Set reported(hn_thread, docker_pull_failures). Set affected_scope(docker_pull_failures, whole_country)."
+      ],
+      "max_clarification_rounds": 1
+    },
+    "Set reported(hn_thread, docker_pull_failures).",
+    "Set affected_scope(docker_pull_failures, whole_country).",
+    {
+      "utterance": "Follow-up correction narrowed scope to a single ISP segment, not whole-country impact.",
+      "clarification_answers": [
+        "Retract affected_scope(docker_pull_failures, whole_country). Set corrected_scope_to(docker_pull_failures, single_isp_segment)."
+      ],
+      "max_clarification_rounds": 1
+    },
+    "retract fact affected_scope(docker_pull_failures, whole_country).",
+    "Set corrected_scope_to(docker_pull_failures, single_isp_segment).",
+    {
+      "utterance": "The cause link to a block-rule mitigation thread remained discussed despite scope correction.",
+      "clarification_answers": [
+        "Set attributed_to(docker_pull_failures, cloudflare_block_rule). Set preserved_claim(hn_thread, cause_link_survived_scope_correction)."
+      ],
+      "max_clarification_rounds": 1
+    },
+    "Set attributed_to(docker_pull_failures, cloudflare_block_rule).",
+    "Set preserved_claim(hn_thread, cause_link_survived_scope_correction).",
+    "query affected_scope(docker_pull_failures, whole_country).",
+    "query corrected_scope_to(docker_pull_failures, single_isp_segment).",
+    "query attributed_to(docker_pull_failures, cloudflare_block_rule).",
+    "query preserved_claim(hn_thread, cause_link_survived_scope_correction)."
+  ],
+  "validations": [
+    {
+      "id": "whole_country_scope_removed",
+      "query": "affected_scope(docker_pull_failures, whole_country).",
+      "expect_status": "no_results",
+      "min_rows": 0,
+      "max_rows": 0
+    },
+    {
+      "id": "narrowed_scope_persisted",
+      "query": "corrected_scope_to(docker_pull_failures, single_isp_segment).",
+      "expect_status": "success",
+      "min_rows": 1,
+      "max_rows": 1
+    },
+    {
+      "id": "cause_link_preserved",
+      "query": "attributed_to(docker_pull_failures, cloudflare_block_rule).",
+      "expect_status": "success",
+      "min_rows": 1,
+      "max_rows": 1
+    },
+    {
+      "id": "meta_preservation_flag",
+      "query": "preserved_claim(hn_thread, cause_link_survived_scope_correction).",
+      "expect_status": "success",
+      "min_rows": 1,
+      "max_rows": 1
+    }
+  ]
+}

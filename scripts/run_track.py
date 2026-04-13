@@ -57,7 +57,14 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument("--summary-out", default="")
     p.add_argument("--backend", default="ollama")
     p.add_argument("--base-url", default="http://127.0.0.1:11434")
-    p.add_argument("--model", default="qwen35-semparse:9b")
+    p.add_argument(
+        "--model",
+        default="qwen3.5:9b",
+        help=(
+            "Parser model id. Default is bare qwen3.5:9b so runtime --prompt-file "
+            "remains the single system-prompt source."
+        ),
+    )
     p.add_argument("--runtime", default="core")
     p.add_argument("--kb-root", default="")
     p.add_argument("--prompt-file", default="")

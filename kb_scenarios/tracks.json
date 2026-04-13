@@ -172,6 +172,127 @@
         "rung_449_frontier_multibind_uncle_query"
       ],
       "required_pass_rate": 0.67
+    },
+    {
+      "id": "frontier_language_width_v7_addons",
+      "description": "Frontier width v7 add-ons: retroactive identity swap and counterfactual-retract story weave.",
+      "scenarios": [
+        "rung_450_frontier_story_retroactive_identity_swap",
+        "rung_451_frontier_story_counterfactual_retract_weave"
+      ],
+      "required_pass_rate": 1.0
+    },
+    {
+      "id": "excursion_pilot_v1",
+      "description": "In-the-wild pilot pair: one Hacker News middle-noise incident and one Reddit legal update.",
+      "scenarios": [
+        "rung_452_excursion_hn_docker_spain_block",
+        "rung_453_excursion_reddit_security_deposit_appeal"
+      ],
+      "required_pass_rate": 1.0
+    },
+    {
+      "id": "excursion_cooperative_v1",
+      "description": "Cooperative transcript lane (G1->G2): formal Q&A with controlled corrections and exception logic.",
+      "scenarios": [
+        "rung_454_excursion_coop_fed_policy_hold",
+        "rung_455_excursion_coop_fed_revision_guard",
+        "rung_456_excursion_coop_scotus_exception_logic"
+      ],
+      "required_pass_rate": 1.0
+    },
+    {
+      "id": "excursion_middle_hn_v1",
+      "description": "Middle-noise lane (G3): Hacker News narrative + scope corrections + policy tradeoffs.",
+      "scenarios": [
+        "rung_452_excursion_hn_docker_spain_block",
+        "rung_457_excursion_hn_codex_claude_scope_split",
+        "rung_458_excursion_hn_agents_key_policy",
+        "rung_459_excursion_hn_scope_correction"
+      ],
+      "required_pass_rate": 0.75
+    },
+    {
+      "id": "excursion_wild_reddit_v1",
+      "description": "Wild lane (G4): Reddit legal narratives with timeline compression and claim-vs-denial structure.",
+      "scenarios": [
+        "rung_453_excursion_reddit_security_deposit_appeal",
+        "rung_460_excursion_reddit_landlord_entry_timeline",
+        "rung_461_excursion_reddit_commercial_entry_dispute"
+      ],
+      "required_pass_rate": 0.67
+    },
+    {
+      "id": "excursion_frontier_v1",
+      "description": "Combined graded excursion frontier (cooperative + HN middle-noise + wild Reddit).",
+      "scenarios": [
+        "rung_454_excursion_coop_fed_policy_hold",
+        "rung_455_excursion_coop_fed_revision_guard",
+        "rung_456_excursion_coop_scotus_exception_logic",
+        "rung_452_excursion_hn_docker_spain_block",
+        "rung_457_excursion_hn_codex_claude_scope_split",
+        "rung_458_excursion_hn_agents_key_policy",
+        "rung_459_excursion_hn_scope_correction",
+        "rung_453_excursion_reddit_security_deposit_appeal",
+        "rung_460_excursion_reddit_landlord_entry_timeline",
+        "rung_461_excursion_reddit_commercial_entry_dispute"
+      ],
+      "required_pass_rate": 0.8
+    },
+    {
+      "id": "excursion_cooperative_v1_full",
+      "description": "Full cooperative pack (6): formal transcript-style progression across Fed and SCOTUS-style exchanges.",
+      "scenarios": [
+        "rung_454_excursion_coop_fed_policy_hold",
+        "rung_455_excursion_coop_fed_revision_guard",
+        "rung_456_excursion_coop_scotus_exception_logic",
+        "rung_462_excursion_coop_fed_labor_inflation_balance",
+        "rung_463_excursion_coop_fed_counterfactual_guard",
+        "rung_464_excursion_coop_scotus_parenthetical_exception"
+      ],
+      "required_pass_rate": 0.83
+    },
+    {
+      "id": "excursion_wild_v1_full",
+      "description": "Full wild pack (6): HN middle-noise plus Reddit legal compression/noise slices.",
+      "scenarios": [
+        "rung_452_excursion_hn_docker_spain_block",
+        "rung_457_excursion_hn_codex_claude_scope_split",
+        "rung_458_excursion_hn_agents_key_policy",
+        "rung_459_excursion_hn_scope_correction",
+        "rung_460_excursion_reddit_landlord_entry_timeline",
+        "rung_461_excursion_reddit_commercial_entry_dispute"
+      ],
+      "required_pass_rate": 0.67
+    },
+    {
+      "id": "excursion_frontier_v2_full",
+      "description": "Scaled full excursion frontier (6 cooperative + 6 wild).",
+      "scenarios": [
+        "rung_454_excursion_coop_fed_policy_hold",
+        "rung_455_excursion_coop_fed_revision_guard",
+        "rung_456_excursion_coop_scotus_exception_logic",
+        "rung_462_excursion_coop_fed_labor_inflation_balance",
+        "rung_463_excursion_coop_fed_counterfactual_guard",
+        "rung_464_excursion_coop_scotus_parenthetical_exception",
+        "rung_452_excursion_hn_docker_spain_block",
+        "rung_457_excursion_hn_codex_claude_scope_split",
+        "rung_458_excursion_hn_agents_key_policy",
+        "rung_459_excursion_hn_scope_correction",
+        "rung_460_excursion_reddit_landlord_entry_timeline",
+        "rung_461_excursion_reddit_commercial_entry_dispute"
+      ],
+      "required_pass_rate": 0.75
+    },
+    {
+      "id": "excursion_failure_promotions_v1",
+      "description": "Promoted failure-class guards from first excursion frontier run.",
+      "scenarios": [
+        "rung_465_frontier_failure_multiclause_scope_drop_guard",
+        "rung_466_frontier_failure_exception_rule_partition",
+        "rung_467_frontier_failure_question_advice_dual_intent"
+      ],
+      "required_pass_rate": 1.0
     }
   ]
 }

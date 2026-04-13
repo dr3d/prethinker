@@ -1,0 +1,55 @@
+{
+  "name": "rung_465_frontier_failure_multiclause_scope_drop_guard",
+  "ontology_name": "rung_465_frontier_failure_multiclause_scope_drop_guard",
+  "utterances": [
+    "Use issue/2, narrowed_to/2, keeps/2, asked_about/2, still_true/2.",
+    {
+      "utterance": "Thread summary: outage looked countrywide at first, but later correction narrowed it to one ISP segment, while the cause-link discussion still held.",
+      "clarification_answers": [
+        "Set issue(thread, outage_event). Set narrowed_to(outage_event, single_isp_segment). Set keeps(thread, cause_link_discussion)."
+      ],
+      "max_clarification_rounds": 2
+    },
+    {
+      "utterance": "A commenter asked whether anything stayed true after correction, and answer was yes: cause-link discussion stayed true.",
+      "clarification_answers": [
+        "Set asked_about(commenter, post_correction_truth). Set still_true(thread, cause_link_discussion)."
+      ],
+      "max_clarification_rounds": 2
+    },
+    "query issue(thread, outage_event).",
+    "query narrowed_to(outage_event, single_isp_segment).",
+    "query keeps(thread, cause_link_discussion).",
+    "query still_true(thread, cause_link_discussion)."
+  ],
+  "validations": [
+    {
+      "id": "issue_anchor_recorded",
+      "query": "issue(thread, outage_event).",
+      "expect_status": "success",
+      "min_rows": 1,
+      "max_rows": 1
+    },
+    {
+      "id": "scope_narrowing_preserved",
+      "query": "narrowed_to(outage_event, single_isp_segment).",
+      "expect_status": "success",
+      "min_rows": 1,
+      "max_rows": 1
+    },
+    {
+      "id": "cause_discussion_kept",
+      "query": "keeps(thread, cause_link_discussion).",
+      "expect_status": "success",
+      "min_rows": 1,
+      "max_rows": 1
+    },
+    {
+      "id": "cause_discussion_still_true",
+      "query": "still_true(thread, cause_link_discussion).",
+      "expect_status": "success",
+      "min_rows": 1,
+      "max_rows": 1
+    }
+  ]
+}

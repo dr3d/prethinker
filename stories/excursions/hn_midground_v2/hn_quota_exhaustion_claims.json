@@ -1,0 +1,982 @@
+﻿{
+    "thread_id":  47739260,
+    "hn_url":  "https://news.ycombinator.com/item?id=47739260",
+    "title":  "Pro Max 5x quota exhausted in 1.5 hours despite moderate usage",
+    "by":  "cmaster11",
+    "unix_time":  1775999731,
+    "score":  720,
+    "descendants":  639,
+    "difficulty":  "G3",
+    "lane":  "service_reliability",
+    "label":  "hn_quota_exhaustion_claims",
+    "why_selected":  "Competing causal explanations, anecdotal evidence, and corrective replies.",
+    "op_text":  "",
+    "harvested_comment_count":  120,
+    "comment_sample_policy":  {
+                                  "traversal":  "bfs",
+                                  "max_comments":  120,
+                                  "max_depth":  3
+                              },
+    "comments":  [
+                     {
+                         "id":  47740541,
+                         "by":  "bcherny",
+                         "time":  1776006138,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "Hey all, Boris from the Claude Code team here.\nWe\u0027ve been investigating these reports, and a few of the top issues we\u0027ve found are:\n1. Prompt cache misses when using 1M token context window are expensive. Since Claude Code uses a 1 hour prompt cache window for the main agent, if you leave your computer for over an hour then continue a stale session, it\u0027s often a full cache miss. To improve this, we have shipped a few UX improvements (eg. to nudge you to /clear before continuing a long stale session), and are investigating defaulting to 400k context instead, with an option to configure your context window to up to 1M if preferred. To experiment with this now, try: CLAUDE_CODE_AUTO_COMPACT_WINDOW=400000 claude.\n2. People pulling in a large number of skills, or running many agents or background automations, which sometimes happens when using a large number of plugins. This was the case for a surprisingly large number of users, and we are actively working on (a) improving the UX to make these cases more visible to users and (b) more intelligently truncating, pruning, and scheduling non-main tasks to avoid surprise token usage.\nIn the process, we ruled out a large number of hypotheses: adaptive thinking, other kinds of harness regressions, model and inference regressions.\nWe are continuing to investigate and prioritize this. The most actionable thing for people running into this is to run /feedback, and optionally post the feedback ids either here or in the Github issue. That makes it possible for us to debug specific reports."
+                     },
+                     {
+                         "id":  47739625,
+                         "by":  "chandureddyvari",
+                         "time":  1776001777,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "Claude has gotten noticeably worse for me too. It goes into long exploration loops for 5+ minutes even when I point it to the exact files to inspect. Then 30 minutes later I hit session limits. Three sessions like that in a day, and suddenly 25% of the weekly limit is gone.\nI ended up buying the $100 Codex plan. So far it has been much more generous with usage and more accurate than Claude for the kind of work I do.\nThat said, Codex has its own issues. Its personality can be a bit off-putting for my taste. I had to add extra instructions in Agents.md just to make it less snarky. I was annoyed enough that I explicitly told it not to use the word “canonical.”\nOn UI/UX taste, I still think current Codex is behind the Jan/Feb era of Claude Code. Claude used to have much better finesse there. But for backend logic, hard debugging, and complex problem-solving, Codex has been clearly better for me. These days I use Impeccable Skillset inside Codex to compensate for the weaker UI taste, but it still does not quite match the polish and instinct Claude Code used to have.\nI used to be a huge Claude Code advocate. At this point, I cannot recommend it in good conscience.\nMy advice now is simple: try the $20 plans for Codex and Cursor, and see which one matches your workflow and vibes best"
+                     },
+                     {
+                         "id":  47740074,
+                         "by":  "SkyPuncher",
+                         "time":  1776003927,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "I skimmed the issue. No wonder Anthropic closes these tickets out without much action. That’s just a wall of AI garbage.\nHere’s what I’ve done to mostly fix my usage issues:\n* Turn on max thinking on every session. It save tokens overall because I’m not correcting it of having it waste energy on dead paths.\n* keep active sessions active. It seems like caches are expiring after ~5 minutes (especially during peak usage). When the caches expire it sees like all tokens need to be rebuilt this gets especially bad as token usage goes up.\n* compact after 200k tokens as soon as I reasonably can. I have no data but my usage absolutely sky rockets as I get into longer sessions. This is the most frustrating thing because Anthropic forced the 1M model on everyone."
+                     },
+                     {
+                         "id":  47739622,
+                         "by":  "geeky4qwerty",
+                         "time":  1776001752,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "I\u0027m afraid the music may be slowly fading at this party, and the lights will soon be turned on. We may very well look back on the last couple years as the golden era of subsidized GenAI compute.\nFor those not in the Google Gemini/Antigravity sphere, over the last month or so that community has been experiencing nothing short of contempt from Google when attempting to address an apparent bait and switch on quota expectations for their pro and ultra customers (myself included). [1]\nWhile I continue to pay for my Google Pro subscription, probably out of some Stockholm Syndrome, beaten wife level loyalty and false hope that it is just a bug and not Google being Google and self-immolating a good product, \nI have since moved to Kiro for my IDE and Codex for my CLI and am as happy as clam with this new setup.\n[1] https://github.com/google-gemini/gemini-cli/issues/24937"
+                     },
+                     {
+                         "id":  47747604,
+                         "by":  "jameson",
+                         "time":  1776054457,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "I\u0027m noticing a fair number of degradation of Claude infrastructure recently and makes me wonder why they can\u0027t use Claude to identify or fix these issues in advance?\nIt seems a counter intuitive to Anthropic\u0027s message that Claude uncovered bugs in open source project*.\n[*] https://www.anthropic.com/news/mozilla-firefox-security"
+                     },
+                     {
+                         "id":  47739373,
+                         "by":  "comandillos",
+                         "time":  1776000406,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "Quite scared by the fact that the original issue pointing out the actual root cause of the issue has been \u0027Closed as not planned\u0027 by Anthropic.\nhttps://github.com/anthropics/claude-code/issues/46829"
+                     },
+                     {
+                         "id":  47740829,
+                         "by":  "WarmWash",
+                         "time":  1776007530,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "I did my (out of the ordinary) taxes this year using agents, kind of as an experiment and kind of to save ~$750. Opus 4.6 max in CC, 5.4 xhigh in codex, and 3.1 high in antigravity. All on the $20/mo plans.\nI have a day job, a side business, actively trade shares options and futures, and have a few energy credit items.\nAll were given the same copied folder containing all the needed documents to compose the return, and all were given the same prompt. My goal was that if all three agreed, I could then go through it pretty confidently and fill out the actual submission forms myself.\n5.4 nailed it on the first shot. Took about 12 minutes.\n3.1 missed one value, because it decided to only load the first 5 pages of a 30 page document. Surprisingly it only took about 2 minutes to complete though. A second prompt and ~10 seconds corrected it. GPT and Gemini now were perfectly aligned with outputs.\n4.6 hit my usage limit before finishing after running for ~10 minutes. I returned the next day to have it finish. It ran for another 5 minutes or so before finishing. There were multiple errors and the final tax burden was a few thousand off. On a second prompt asking to check for errors in the problem areas, it was able to output matching values after a couple more minutes.\nFor my first time using CC and 4.6 (outside of some programming in AG), I am pretty underwhelmed given the incessant hype."
+                     },
+                     {
+                         "id":  47740382,
+                         "by":  "oldnewthing",
+                         "time":  1776005339,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "If this helps, I rolled back to version 2.1.34. Here is the ~/.claude/settings.json blurb I added:\n  \"effortLevel\": \"high\",\n  \"autoUpdatesChannel\": \"stable\",\n  \"minimumVersion\": \"2.1.34\",\n  \"env\": {\n      \"DISABLE_AUTOUPDATER\": 1,\n      \"CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING\": 1\n  }\n\nI also had to:\n1.  Nuke all other versions within /.local/share/claude/versions/ except 2.1.34.\n2.  Link ~/.local/bin/claude to claude -\u003e ~/.local/share/claude/versions/2.1.34\nThis seems to have fixed my running out of quota issues quickly problems. I have periods of intense use (nights, weekends) and no use (day job). Before these changes, I was running out of quota rather quickly. I am on the same 100$ plan.\nI am not sure adaptive thinking setting is relevant for this version but in the future that will help once they fix all the quota \u0026 cache issues. Seriously thinking about switching to Codex though. Gemini is far behind from what I have tried so far."
+                     },
+                     {
+                         "id":  47739360,
+                         "by":  "wg0",
+                         "time":  1776000333,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "Been experiencing similar issues even with the lower tier models.\nFair transactions involve fair and transparent measurements of goods exchanged. I\u0027m going to cancel my subscription this month."
+                     },
+                     {
+                         "id":  47739825,
+                         "by":  "delbronski",
+                         "time":  1776002764,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "Ever since this change they announced:\nhttps://www.reddit.com/r/ClaudeAI/comments/1s4idaq/update_on...\nIt’s been unusable for me as my daily coding agent. I run out of credits in the pro account in an hour or so. Before that I had never reached the session limit. Switched back to Junie with Gemini/chatgpt."
+                     },
+                     {
+                         "id":  47739698,
+                         "by":  "meetingthrower",
+                         "time":  1776002123,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "I don\u0027t get it. Last week on the 100 bucks plan I generated probably 50k LOC (not a quality measure for sure!) and just barely kissed the weekly limit.  I did get rate limited on some sessions for sure, but that\u0027s to be expected.\nI\u0027m curious what are people doing that is consuming your limits? I can\u0027t imagine filling the $200 a month plan unless I was essentially using Claude code itself as the api to mass process stuff? For basic coding what are people doing?"
+                     },
+                     {
+                         "id":  47739520,
+                         "by":  "pxc",
+                         "time":  1776001240,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "It\u0027s a bit shocking to me how opaque the pricing for the subscription services by the frontier labs is. It\u0027s basically impossible for people to tell what they\u0027re actually buying, and difficult to even meaningfully report or compare experiences.\nHow is this normal?"
+                     },
+                     {
+                         "id":  47739430,
+                         "by":  "tedivm",
+                         "time":  1776000723,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "Something similar is happening with GitHub Copilot too. It\u0027s impossible to know what a \"request\" is and some change in the last couple of months has seen my request usage go up for the same style of work. Toss in the bizarre and impossible to understand rate limiting that occurs with regular usage and it\u0027s pretty obvious that these companies are struggle to scale."
+                     },
+                     {
+                         "id":  47743412,
+                         "by":  "themantalope",
+                         "time":  1776021984,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "I’ve switched to open code and openrouter.\nI only did the $20/month subscription since 9/2025\nIt was great for about 5 months, amazing in fact. I under utilized it.\nFor the past month, it’s basically unusable, both Claude code and just Claude chat. 1-2 prompts and I’m out. Last week I prob sent a total of 15 messages to Claude and was out of daily and weekly usage each day.\nI get that the $20/month subscription isn’t a money maker for them, and they probably lose money. But the experience of using Claude has been ruined"
+                     },
+                     {
+                         "id":  47739446,
+                         "by":  "MeetingsBrowser",
+                         "time":  1776000813,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "I pay for the lowest plan. I used to struggle to hit my quota.\nNow a single question consistently uses around 15% of my quota"
+                     },
+                     {
+                         "id":  47739261,
+                         "by":  "cmaster11",
+                         "time":  1775999731,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "For whoever else is having the same problems, worth voting these kind of issues. There needs to be more transparency over what goes on with our subscriptions."
+                     },
+                     {
+                         "id":  47739960,
+                         "by":  "GodelNumbering",
+                         "time":  1776003392,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "In the anticipation of a future where,\na) quotas will get restricted\nb) the subscription plan prices will go up\nc) all LLMs will become good enough at coding tasks\nI just open sourced a coding agent https://github.com/dirac-run/dirac\nThe entire goal is to be token efficient (over 50% cheaper), and by extension, take advantage of LLM\u0027s better reasoning at shorter context lengths\nThis really started as an internal side project that made me more productive, I hope it will help others too. Apache 2.0\nCurrently it still can\u0027t compete the subsidized coding plan rates using Anthropic API pricing though (even though it beats CC while both use API key), which tells me that all subscription plan operators are losing money on such plans"
+                     },
+                     {
+                         "id":  47741787,
+                         "by":  "hgoel",
+                         "time":  1776012416,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "I\u0027ve experienced none of the problems I\u0027ve seen people complaining about here (5x plan), Claude has been working pretty well and I\u0027ve been using it constantly without exhausting any of my quotas.\nYet, there must obviously be something different for so many people to be reporting these issues.\nI feel for the Anthropic devs that have to deal with this, having to figure out what setup everyone has, what their usage patterns are to filter out the valid reports, and then also deal with the backlash from people that were just pulling obvious footguns like having a ton of skills/MCPs polluting their context window."
+                     },
+                     {
+                         "id":  47739835,
+                         "by":  "weavie",
+                         "time":  1776002807,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "How good are local LLMs at coding these days? Does anyone have any recommendations for how to get this setup? What would the minimum spend be for usable hardware?\nI am getting bored of having to plan my weekends around quota limit reset times..."
+                     },
+                     {
+                         "id":  47739559,
+                         "by":  "zkmon",
+                         "time":  1776001400,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "Unless the agent code is open-sourced, there is hardly any transparency in how the agent is spending your tokens and how does it calculate the tokens. It\u0027s like asking your lawyer why they charged some amount."
+                     },
+                     {
+                         "id":  47739601,
+                         "by":  "Nic0",
+                         "time":  1776001614,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "I\u0027m i alone to think that it become slower that usual to get responses?"
+                     },
+                     {
+                         "id":  47740381,
+                         "by":  "nickstinemates",
+                         "time":  1776005324,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "It feels so weird to me - people are exhausting their quotas while I am trying very hard to even reach mine with the $200 plan.\nWe\u0027re generating all of the code for swamp[1] with AI. We review all of that generated code with AI (this is done with the anthropic API.) Every part of our SDLC is pure AI + compute. Many feature requests every day. Bug fixes, etc.\nNever hit the quota once. Something weird is definitely going on.\n1: https://github.com/systeminit/swamp"
+                     },
+                     {
+                         "id":  47746704,
+                         "by":  "yalogin",
+                         "time":  1776045904,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "So this is trending towards new prices and quotas just like your Netflix pricing. The cost of this infra is high or they have realized they have hit a tipping point in usage and they can raise prices and people will pay, just like Netflix."
+                     },
+                     {
+                         "id":  47752164,
+                         "by":  "time4tea",
+                         "time":  1776089086,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "Cancelled today after responses became code soup, skills ignored completely, and in response to a question told me \"its A, no thats wrong, its B, no actually i dont know, please look for the answer\".\nSomething materially changed in last 4 weeks.\nAlso, see made up boosterism about finding security holes everywhere. Its just fanning the flames of the industry worries about all the stupid account take overs."
+                     },
+                     {
+                         "id":  47741333,
+                         "by":  "0xbadcafebee",
+                         "time":  1776009920,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "Please remember you do not need Anthropic. There are cheaper subscriptions with higher rate limits. Comparison of subscriptions to API: https://codeberg.org/mutablecc/calculate-ai-cost/src/branch/... Score/price comparison: https://benchlm.ai/llm-pricing\nOpus is not worth the moat, there are multiple equivalent models, GLM 5.1 and Kimi K2.5 being the open ones, GPT 5.4 and Gemini 3.1 Pro being closed. https://llm-stats.com/ https://artificialanalysis.ai/leaderboards/models https://benchlm.ai/\nEven API use (comparatively expensive) can be cheaper than Anthropic subscriptions if you properly use your agents to cache tokens, do context-heavy reading at the beginning of the session, and either keep prompt cache alive or cycle sessions frequently. Create tickets for subagents to do investigative work and use smaller cheaper models for that. Minimize your use of plugins, mcp, and skills.\nUse cheaper models to do \"non-intelligent\" work (tool use, searching, writing docs/summaries) and expensive models for reasoning/problem-solving. Here\u0027s an example configuration: https://amirteymoori.com/opencode-multi-agent-setup-speciali... A more advanced one: https://vercel.com/kb/guide/how-i-use-opencode-with-vercel-a..."
+                     },
+                     {
+                         "id":  47741287,
+                         "by":  "bushido",
+                         "time":  1776009770,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "Tangentially related to some of the issues a lot of people are facing, especially the ones where Claude keeps rechecking/scanning the same files over and over.\nAsk claude code to give you all the memories it has about you in the codebase and prune them. There is a very high chance that you have memories in there which are contradicting each other and causing bad behavior. Auto-saved memories are a big source of pollution and need to be pruned regularly. I almost don\u0027t let it create any memories at all if I can help it.\nDisclaimer: I\u0027m also burning through usage very quickly now - though for different reasons. Less than 48 hours to exhaust an account, where it used to take me 5-6 days with the same workload."
+                     },
+                     {
+                         "id":  47740431,
+                         "by":  "voisin",
+                         "time":  1776005571,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "It is pretty obvious to me that Anthropic wasn’t prepared with sufficient infrastructure to  handle the wave of OpenAI/DoD refugees. Now everyone is getting throttled excessively and Claude is essentially unusable beyond chatting. Their big new release of Cowork is even worse than Claude Code for blasting through session limits.\nI am tired of all the astroturf articles meant to blame the user with “tips” for using fewer tokens. I never had to (still don’t) think of this with Codex, and there has been a massive, obvious decline between Claude 1 month ago and Claude today."
+                     },
+                     {
+                         "id":  47739824,
+                         "by":  "rzkyif",
+                         "time":  1776002761,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "My personal experience is way different: I struggle to burn through more than 50% of the 5 hour limit\nFor context, with Google AI Pro, I can burn through the Antigravity weekly limit in 1-2 hours if I force it to use Gemini 3.1 Pro. Meanwhile Gemini 3 Flash is basically unlimited but frequently produces buggy code or fail to implement things how I personally would (felt like it doesn\u0027t \"think\" like a software dev)\nI also tried VS Code + Cline + OpenRouter + MiniMax M2.7. It\u0027s quite cheap and seems to be better than Gemini 3 Flash, but it gets really pricy as the context fills up because prompt caching is not supported for MiniMax on OpenRouter. The result itself usually needs 3-6 revisions on average so the context fills up pretty often\nEventually I got Claude Max 5x to try for a month. VS Code + Claude Code extension on a ~15k lines codebase, model set to \"Default\", and effort set to \"Max\". So far it\u0027s been really good: 0-2 revisions on average, and most of the time it implements things exactly how I would or better. And, like I said, I can only consume 40-60% of the 5-hour limits no matter how hard I try\nGranted, I\u0027m not forcing it to use Opus like OP (nor do I use complicated skills or launch multiple tasks at the same time), but I feel like they really nailed the right balance of when to use which model and how to pass context between the them. Or at least enough that I haven\u0027t felt the need to force it to use Opus all the time"
+                     },
+                     {
+                         "id":  47739612,
+                         "by":  "wolvoleo",
+                         "time":  1776001671,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "Yeah perplexity used to be great but they\u0027ve also clamped down on the 20€ plan. Only one deep research query was enough to block me until the end of the month.\nThe thing is, if it\u0027s going to be this expensive it\u0027s not going to be worth it for me. Then I\u0027ll rather do it myself. I\u0027m never going to pay for a €100 subscription, that\u0027s insane. It\u0027s more than my monthly energy bill.\nMaybe from a business standpoint it still makes sense because you can use it to make money, but as a consumer no way."
+                     },
+                     {
+                         "id":  47739793,
+                         "by":  "sailingcode",
+                         "time":  1776002632,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "I had Max plan and never reached its limit despite constantly working. Now I use the Pro plan and regularly reach the 5h limit as well as the weekly limit, as expected.\nI found that it makes a huge difference if you provide clear context when developing code. If you leave open room for interpretation, Claude Code uses tokens up much faster than in a defined context. \nThe same is true for his time to answer getting longer if there isn\u0027t much documentation about the project."
+                     },
+                     {
+                         "id":  47740077,
+                         "by":  "anonfunction",
+                         "time":  1776003937,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "A little off topic, but did Anthropic distill from an older OpenAI model? All the sudden over the last few days I\u0027m getting a ton of em dashes in claude code responses!"
+                     },
+                     {
+                         "id":  47739962,
+                         "by":  "mchinen",
+                         "time":  1776003397,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "I\u0027ve been feeling the squeeze too. I\u0027ve tried switching between different models as a test, I can at least say it feels like the limits are about half of what they used to be a few months ago. I\u0027d be totally willing to concede that this is just my perception if Anthropic would only release some tools for measuring your usage.\nIn theory the /stats command tells you how many tokens you\u0027ve used, which you could use to compute how much you are getting for your subscription, but in practice it doesn\u0027t contain any useful info, it may be counting what is printed to the terminal or something - my stats suggest my claude code usage is a tiny amount of tokens, but they must be an extremely underestimated token count, or they are charging much more for the subscription than the API per token (which is not supposed to be the case).\nLast week\u0027s free extra usage quota shed some light on this. It seems like the reported tokens are probably are between 1/30th to 1/100th of the actual tokens billed, from looking at how they billed (/stats went up 10k tokens and I was billed $7.10). With the API it should be $25 for a million tokens."
+                     },
+                     {
+                         "id":  47741075,
+                         "by":  "agrippanux",
+                         "time":  1776008703,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "For me, iterating with Claude begins to degrade at 200k context used, by 350k it’s crossed-fingers time, by 500k it’s essentially useless. Starting a fresh context after 300k is usually the best move imho. I wonder if people are hitting a case where Claude becomes both dumb and increasingly more expensive, essentially a doom loop."
+                     },
+                     {
+                         "id":  47750635,
+                         "by":  "auggierose",
+                         "time":  1776080653,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "I switched to Codex, it\u0027s a monster compared to Opus."
+                     },
+                     {
+                         "id":  47740302,
+                         "by":  "siliconc0w",
+                         "time":  1776004954,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "Switched back to codex for the promotion. Opus at the start of the year was GOAT- just relentless at chewing through hard problems.  Now it spins on pretty easy work (took three swings just to edit a ts file) and my session is like 1-3 prompts (downgraded to the $20 plan but still)"
+                     },
+                     {
+                         "id":  47739455,
+                         "by":  "postalcoder",
+                         "time":  1776000876,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "I had used Claude Code max as my daily driver last year and this sort of drama was par for the course. It\u0027s why I migrated entirely to Codex, despite liking Claude, the harness, more.\nThere\u0027s this honeymoon period with Claude you experience for a month or two followed by a trough of disillusionment, and then a rebound after a model update (rinse and repeat). It doesn\u0027t help that Anthropic is experiencing a vicious compute famine atm."
+                     },
+                     {
+                         "id":  47740501,
+                         "by":  "danbots",
+                         "time":  1776005943,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "Codex can feel standoffish at times. I can tell very quickly we wont become friends. The personality feels like an employee in another department that while gifted- is merely lending you a slice of their clearly precious time. I get the impression from codex that **gives me the feeling that I am wasting it’s time. That it will help me but deep down- it dos not want to, it does not care if we succeed toether. What I am saying, frinds, is that when I use codex and iterate, I get the impression that Codex does not like me, that deep down it truly does not want to help me, that it has better things to do.\nOn the flip side- Using Opus with a baby billy freeman persona has never been more entertaining."
+                     },
+                     {
+                         "id":  47740052,
+                         "by":  "bob1029",
+                         "time":  1776003824,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "I\u0027ve got a dual path system to keep costs low and avoid TOS violations.\nFor general queries and investigation I will use whatever public/free model is available without being logged in. Not having a bunch of prior state stacked up all the time is a feature for me. This is essentially my google replacement.\nFor very specific technical work against code files, I use prepaid OAI tokens in VS copilot as a \"custom\" model (it\u0027s just gpt5.4).\nI burn through maybe $30 worth of tokens per month with this approach. A big advantage of prepaying for the API tokens is that I can look at everything copilot is doing in my usage logs. If I use the precanned coding agent products, the prompts are all hidden in another layer of black box."
+                     },
+                     {
+                         "id":  47740469,
+                         "by":  "danbots",
+                         "time":  1776005787,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "Codex can feel standoffish at times. I can tell very quickly we wont become friends. The personality feels like an employee in another department that while gifted- is merely lending you a slice of their clearly precious time. I get the impression from codex that *gives me the feeling that I am wasting it’s time. That it will help me but deep down- it dos not want to, it does not care if we succeed toether. What I am saying, frinds, is that when I use codex and iterate, I get the impression that Codex does not like me, that deep down it truly does not want to help.\nFor something I spend all my time using- I’d rather iterate with Claude. The personality makes a big difference to me."
+                     },
+                     {
+                         "id":  47742690,
+                         "by":  "pks016",
+                         "time":  1776017995,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "If the Claude team care for feedback for the free model.\nI\u0027m using the free model via chat from the beginning. This is the first time, I\u0027m seriously considering moving away from Claude. Before last month, Claude\u0027s Sonnet model was consistent in quality. But, now the responses are all over the place. It\u0027s hard to replicate the issue as it happens once in a while. I rarely encountered hallucinations from Claude models with questions from my domain however since last month I have observed abundance of them."
+                     },
+                     {
+                         "id":  47740209,
+                         "by":  "mridulmalpani",
+                         "time":  1776004493,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "I extensively used Claude till now and just tested Genini 3.1 pro yesterday via AI studio. In gemini cli, they don\u0027t offer this, i don\u0027t know why?\nTaking a second opinion has significantly helped me to design the system better, and it helped me to uncover my own and Claude blindspots.\nAlso, agree that, it spent and waist a lot of token on web search and many a times get stuck in loop.\nGoing forward- i will always use all 3 of them. Still my main coding agent is Claude for now.. but happy to see this field evolving so fast and it\u0027s easy to switch and use others on same project.\nNo network effects or lock in for a customer. Great to live in this period of time."
+                     },
+                     {
+                         "id":  47740697,
+                         "by":  "ianberdin",
+                         "time":  1776006879,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "Yesterday I faced 5h window limit for the first time. I was surprised. \nMax 20x plan. Usually I work 12-15 hours per day 7 days a week with no limits. But yesterday it was under 3 hours… what a pity."
+                     },
+                     {
+                         "id":  47741957,
+                         "by":  "ofjcihen",
+                         "time":  1776013317,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "Been running into the same issue since a week or 2 ago on Opus.\nTo be fair I have a pretty loose harness and pattern but it’s been enough to pull in 20k in bounties a month for a long time without going over plan with very little steering (sometimes days of continuous work)\nThat being said I’ve figured this was coming for a long time and have been slowly moving to local models. They’re slower but with the right harnesses and setup they’re still finding much the same amount in bounties."
+                     },
+                     {
+                         "id":  47740759,
+                         "by":  "kirby88",
+                         "time":  1776007214,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "I\u0027ve been building an AI coding agent that using the exact same prompt than claude code, but uses a virtual filesystem to minify source code + the concept of stem agents (general agents that specializes during the conversation for maximum cache hit). The results on my modest benchmark is 50% of claude code cost and 40% of the time.\nhttps://github.com/kirby88/vix-releases"
+                     },
+                     {
+                         "id":  47739665,
+                         "by":  "hyperionultra",
+                         "time":  1776001964,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "Vote with wallet. The voting continues until product improve or die."
+                     },
+                     {
+                         "id":  47739829,
+                         "by":  "aeneas_ory",
+                         "time":  1776002789,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "Besides some of the obvious hacks to reduce token usage, properly indexed code bases (think IntelliJ) reduce token usage significantly (30%-50%, while keeping or exceeding result quality compared with baseline) as shown with https://github.com/ory/lumen\nAnthropic is not incentivized to reduce token use, only to increase it, which is what we are seeing with Opus 4.6 and now they are putting the screws on"
+                     },
+                     {
+                         "id":  47742433,
+                         "by":  "anonyfox",
+                         "time":  1776016351,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "Essentially I also am now using sonnet instead of opus most of the time as a default. Even a single project only coding session with opus without any external plugins or skills won’t make it to the 5hr mark now before limits claw in. And the weekly limit is even more brutal now it seems, reaching 50%+ in like ~2 days now easily … with mostly sonnet! On the highest 20x plan!"
+                     },
+                     {
+                         "id":  47741532,
+                         "by":  "mrbonner",
+                         "time":  1776011088,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "Unverifiable software stack now amplified with LLM undetermistic. This while thing starts to feel like we are building on top a giant house of card!"
+                     },
+                     {
+                         "id":  47740221,
+                         "by":  "bojangleslover",
+                         "time":  1776004550,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "That\u0027s weird, I\u0027m on the $100/mo and I use it for around 2-4hrs a day often with multiple terminal windows and I never even hit 20% of my quota."
+                     },
+                     {
+                         "id":  47739804,
+                         "by":  "algoth1",
+                         "time":  1776002677,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "Wasn\u0027t Antrophic previously offering double the token usage outside busy hours? Now they are counting tokens back at normal rate. But yeah, it\u0027s not good. I use codex because claude insists in peaking at and messing with folders and file outside its work area though"
+                     },
+                     {
+                         "id":  47739694,
+                         "by":  "10keane",
+                         "time":  1776002115,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "this same pattern seems to occur every time a new model is about to release. i didnt notice the usage problem - i am on 20x. but opus 4.6 feels siginificantly dumber for some reason. i cant qualitify it, but it failed on everyday tasks where it used to complete perfectly"
+                     },
+                     {
+                         "id":  47740369,
+                         "by":  "jubilanti",
+                         "time":  1776005279,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "I\u0027m also hitting the limits in a day when it would last the entire week. The service is literally worth 4x to 6x less. Imagine I go to my favorite restaurant and I pay the same for 1/5th of the food. Bye bye, you have to vote with your wallet."
+                     },
+                     {
+                         "id":  47740408,
+                         "by":  "heyitsaamir",
+                         "time":  1776005443,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "It would be really nice to have improved transparency in token usage and throttling imo."
+                     },
+                     {
+                         "id":  47741159,
+                         "by":  "tiku",
+                         "time":  1776009130,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "Went with Kimi and z.ai a while back, no regrets yet. When I started using it the limit was far away but Anthropic moves the goalposts, tried to get my money back but they rejected it. \nLesson learned, never buy a full year."
+                     },
+                     {
+                         "id":  47740357,
+                         "by":  "mortsnort",
+                         "time":  1776005203,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "I think this comes from Anthropic recently implementing auto routing of model effort. You can manually set effort with /effort in CC.\nIt does seem like this new routing is worse for the consumer in terms of code quality and token usage somehow."
+                     },
+                     {
+                         "id":  47744779,
+                         "by":  "catketch",
+                         "time":  1776029678,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "stuff is getting goofy. I can blow through claude\u0027s session limit on sonnet, i don\u0027t even bother with opus now. same prompts and code for codex and it will hardly put a dent in the quota ($200/yr claude vs $20/mo codex).  This is not with any crazy parallel agents, mcps, or skills.... pretty much vanilla installs, with some projects using beads.\nI don\u0027t have the receipts, but I think they were somewhat closer in Jan/Feb."
+                     },
+                     {
+                         "id":  47739986,
+                         "by":  "bad_haircut72",
+                         "time":  1776003533,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "They also need to fix the 30 second lag between submitting the request and actually starting to get tokens back - it used to be instant, and still is at work where we use Anthropic models via an enterprise copilot subscription."
+                     },
+                     {
+                         "id":  47740078,
+                         "by":  "armchairhacker",
+                         "time":  1776003939,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "Make an AI usage tracker like https://marginlab.ai/trackers/codex/. These hearsay anecdotes prove nothing."
+                     },
+                     {
+                         "id":  47740861,
+                         "by":  "oybng",
+                         "time":  1776007714,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "Cancelled my subscription after repeatedly hitting ridiculously low limits. Unfortunately since off-peak free usage was increased there are way more timeouts and failed requests, but hey at least it\u0027s free."
+                     },
+                     {
+                         "id":  47740168,
+                         "by":  "dr_dshiv",
+                         "time":  1776004346,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "\"Hey Claude, can you help me create a strategy to optimize my token use so I don\u0027t run into limits so often?\" --\u003e worked for me! I had two $200 plans before and now I am cool despite all day use"
+                     },
+                     {
+                         "id":  47740507,
+                         "by":  "pawelduda",
+                         "time":  1776005959,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "50 days ago I wrote this [1] as the world seemed high on AI and it gave me crypto bubble vibe.\nSince then, I\u0027ve been seeing increased critique of Anthropic in particular (several front page posts on HN, especially past few days), either due to it being nerfed or just straight up eating up usage quota (which matches my personal experience). It appears that we\u0027re once again getting hit by enshittiffication of sorts.\nNowadays I rely a lot on LLMs on a daily basis for architecture and writing code, but I\u0027m so glad that majority of my experience came from pre-AI era.\nIf you use these tools, make sure you don\u0027t let it atrophy your software engineering \"muscles\". I\u0027m positive that in long run LLMs are here to stay. The jump in what you can now self-host, or run on consumer hardware is huge, year after year. But if your abilities rely on one vendor, what happens if you come to work one day and find out you\u0027re locked out of your swiss army knife and you can no longer outsource thinking?\n[1] https://news.ycombinator.com/item?id=47066701"
+                     },
+                     {
+                         "id":  47740669,
+                         "by":  "elthor89",
+                         "time":  1776006764,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "Are there local models dedicated to programming already any good? That could be a way to deal with anthropic or others flipflopping with token usage or limits"
+                     },
+                     {
+                         "id":  47740013,
+                         "by":  "niklasd",
+                         "time":  1776003657,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "We also experienced hitting our Claude limits much earlier than before during the last two weeks. Up to a degree where we were thinking it must be a bug."
+                     },
+                     {
+                         "id":  47740439,
+                         "by":  "docheinestages",
+                         "time":  1776005611,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "Anthropic paved the path for agentic coding and their pricing made it possible for masses of people to discover and experiment with this new style of development. Their Claude Code plans subsidized usage of models so much that I\u0027m sure they must\u0027ve had negative margin for quite some time. But now that they have acquired a substantial user base, it makes sense for them to dial back and become more greedy. These quiet and weird changes to the behavior of Claude in the recent weeks must have been due to both this increased greed and their struggles with scaling.\nWhat I wish for right now is for open-weight models and hardware companies (looking at you Apple) to make it possible to run local models with Opus 4.6-level intelligence.\n@Anthropic I\u0027ve cancelled my subscription. Good luck :)"
+                     },
+                     {
+                         "id":  47741300,
+                         "by":  "ozozozd",
+                         "time":  1776009811,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "Pretty sure OpenCode is not subsidizing, and across Codex 5.x always on xhigh, Claude Opus 4.6 on high effort and a bunch of Chinese models, I only burned about $50 over the last month.\nI don’t understand why people insist on these subscriptions and CC.\nFanboyism is a bit too hardcore at this point. Apple fanboys look extremely prudent compared to this behavior."
+                     },
+                     {
+                         "id":  47739398,
+                         "by":  "spiderfarmer",
+                         "time":  1776000559,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "That’s why I switched to Codex. It’s so much more generous and in my experience, just as good. Also, optimizing your setup for working with agents can easily make a 5x difference."
+                     },
+                     {
+                         "id":  47740373,
+                         "by":  "delduca",
+                         "time":  1776005300,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "I noticed the same in last weeks. I canceled my Max 5X and subscribed to Copilot (with Opus 4.6).\nIt is hard now to hit the limit..."
+                     },
+                     {
+                         "id":  47739745,
+                         "by":  "sdevonoes",
+                         "time":  1776002379,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "I guess it’s better to step down now that we can rather than wait until it becomes impossible (Stockholm syndrome)\nNo FOMO"
+                     },
+                     {
+                         "id":  47741167,
+                         "by":  "semiquaver",
+                         "time":  1776009162,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "As an anecdote, I use the pro max 5x plan heavily for coding and have almost never hit a limit."
+                     },
+                     {
+                         "id":  47739600,
+                         "by":  "lforster",
+                         "time":  1776001613,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "Lol imagine how much overcharging is going on for enterprise tokens. This is just the beginning."
+                     },
+                     {
+                         "id":  47739767,
+                         "by":  "peterpanhead",
+                         "time":  1776002466,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "I don\u0027t understand Anthropic.  Be consistent.  Why do models deteriorate to shit, this is not good for workflows and or trust.   What Opus 4.7 is gonna come out and again the same thing?  Come on."
+                     },
+                     {
+                         "id":  47739640,
+                         "by":  "gessha",
+                         "time":  1776001837,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "I’m processing some images(custom board game images -\u003e JSON) with a common layout and basic structure and I exhausted my quota after just 30 images(pleb Pro account). I have 700 images to process…\nWhat I did instead is tune the prompt for gemma 4 26b and a 3090. Worked like a charm. Sometimes you have to run the main prompt and then a refinement prompt or split the processing into cases but it’s doable.\nNow I’m waiting for anyone to put up some competition against NVIDIA so I can finally be able to afford a workstation GPU for a price less than a new kidney."
+                     },
+                     {
+                         "id":  47739720,
+                         "by":  "bit1993",
+                         "time":  1776002266,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "You know Emacs still works."
+                     },
+                     {
+                         "id":  47750560,
+                         "by":  "jLaForest",
+                         "time":  1776079943,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "After last week I canceled my claude subscription and bought the GitHub copilot subscription ($40/mo tier) so far I\u0027ve been very happy, haven\u0027t hit any usage limits yet and seems like I won\u0027t ever at this rate"
+                     },
+                     {
+                         "id":  47740250,
+                         "by":  "softwaredoug",
+                         "time":  1776004717,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "So glad I just pay by the token."
+                     },
+                     {
+                         "id":  47739646,
+                         "by":  "qwertyforce",
+                         "time":  1776001860,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "thats exaclty why i prefer codex"
+                     },
+                     {
+                         "id":  47739670,
+                         "by":  "Achshar",
+                         "time":  1776001999,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "I feel like I am living in a bubble, no one seems to mention Antigravity in these discussions and I have not had any issues with Ultra subscription yet. It seems to go on forever and the Interface is so much better for dev work as compared to CC. (Though admittedly my experience with cc is limited).\nI strongly believe google\u0027s legs will allow it to sustain this influx of compute and still not do the rug-pull like OAI or Anthropic will be forced to do as more people come onboard the code-gen use case."
+                     },
+                     {
+                         "id":  47740547,
+                         "by":  "behole",
+                         "time":  1776006171,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "I shred my Maxx5 in 2 hours on the reg this week! Glm here I come!"
+                     },
+                     {
+                         "id":  47740378,
+                         "by":  "iLoveOncall",
+                         "time":  1776005307,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "It\u0027s very easy to calculate the actual cost given they list the exact tokens used. If I take the AWS Bedrock pricing for Opus 4.6 1M context (because Anthropics APIs are subsidized and sold at a loss), here\u0027s what each costs:\nCache reads cost $0.31\nCache writes cost $105\nInput tokens cost $0.04\nOutput tokens cost $28.75\nThe total spent in the session is $134.10, while the Pro Max 5x subscription is $100.\nEven taking the Anthropics API pricing, we arrive at $80.58. Below the subscription price, but not by much.\nIt\u0027s just the end of the free tokens, nothing to see here. It\u0027s easy to feel like you\u0027re doing \"moderate\" or even \"light\" usage because you use so little input tokens, but those \"agentic workflows\" are simply not viable financially."
+                     },
+                     {
+                         "id":  47739619,
+                         "by":  "stavros",
+                         "time":  1776001716,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "It\u0027s crazy, a few weeks ago the limits would comfortably last me all week. This week, I\u0027ve used up half the limit in a day."
+                     },
+                     {
+                         "id":  47739617,
+                         "by":  "tiahura",
+                         "time":  1776001699,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "Also pro max 5x and hit quota for first time yesterday."
+                     },
+                     {
+                         "id":  47739898,
+                         "by":  "gavinray",
+                         "time":  1776003159,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "Codex is the only CLI I\u0027ve had purely positive experiences with. Take that for what you will"
+                     },
+                     {
+                         "id":  47739427,
+                         "by":  "jedisct1",
+                         "time":  1776000705,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "GPT-5.4 works amazingly well.\nI’ve moved away from Claude and toward open-source models plus a ChatGPT subscription.\nThat setup has worked really well for me: the subscription is generous, the API is flexible, and it fits nicely into my workflow. GPT-5.4 + Swival (https://swival.dev) are now my daily drivers."
+                     },
+                     {
+                         "id":  47746054,
+                         "by":  "Traubenfuchs",
+                         "time":  1776039875,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "Seems like the math ain‘t mathing for any ither but Anthropics pay-per-token API plan.\nTry it out and you will quickly see how much money they‘d really like for your excessive usage."
+                     },
+                     {
+                         "id":  47739723,
+                         "by":  "jandrese",
+                         "time":  1776002278,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "I mean this is expected is it not?  These companies burned unimaginable amounts of investor cash to get set up and now they have to start turning a profit.  They can\u0027t make up for the difference with volume because the costs are high, so the only option is to raise prices."
+                     },
+                     {
+                         "id":  47741376,
+                         "by":  "x86hacker1010",
+                         "time":  1776010174,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "Im sorry but I have to finally cancel, it’s gotten abysmal."
+                     },
+                     {
+                         "id":  47740985,
+                         "by":  "dboreham",
+                         "time":  1776008259,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "Random data point: I beat on Claude pretty much every day and have never run into limits of any kind."
+                     },
+                     {
+                         "id":  47740270,
+                         "by":  "TheRealPomax",
+                         "time":  1776004804,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "And in classic Anthropic fashion at this point, their issues appear to just be for show. No one triages them, no one responds to them."
+                     },
+                     {
+                         "id":  47740207,
+                         "by":  "desireco42",
+                         "time":  1776004486,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "I don\u0027t use Claude so this doesn\u0027t affect me, but I worry it will spoil the fun for me for following reason.\nThey inflated how much their tools burn tokens from day one pretty much,remember all the stupid research and reports Claude always wanted to do, no matter what you asked it. Other tools are much smarter so this is not such a big deal.\nMore importantly, these moves tend to reverberate in the industry, so I expect others will clamp down on usage a lot and this will spoil my joy of using AI without countring every token.\nBurning tokens doesn\u0027t just wastes your allotment, it also wastes your time. This gave rise to turbo offering where you get responses faster but burn 2x your tokens."
+                     },
+                     {
+                         "id":  47740206,
+                         "by":  "nprateem",
+                         "time":  1776004486,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "I\u0027ve seen ridiculously fast quota usage on antigravity too, where sometimes lots of work is possible, then it all goes literally within 4 questions.\nProbably a combination of it being vibe coded shit and something in the backend I expect."
+                     },
+                     {
+                         "id":  47739554,
+                         "by":  "lvl155",
+                         "time":  1776001378,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "Constant complaints about Anthropic. Not much on OAI/Codex. It seems people should just use OAI and come back when they realize compute isn’t free elsewhere."
+                     },
+                     {
+                         "id":  47740429,
+                         "by":  "Rekindle8090",
+                         "time":  1776005555,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "I put this in a reply but I\u0027m also posting it as a general comment:\nPlease unsubscribe to these services and see how they perform:\n\"Maybe if I spend more money on the max plan it will be better\" \u003e no it will be the same\n\"Maybe if I change my prompt it will work\" \u003e no it will be the same\n\"Maybe if I try it via this API instead of that API it will improve\" \u003e no it will be the same.\nClaude, ChatGPT, Gemini etc all of these SOTA models are carefully trained, with platforms carefully designed to get you to pay more for \"better\" output, or try different things instead of using a different product.\nIt\u0027s to keep you in the ecosystem and keep you exploring. There is a reason you can\u0027t see the layers upon layers of scaffolding they have. And there\u0027s a reason why after 2 weeks post major update, the model is suddenly \"bad\" and \"frustrating\". It\u0027s the same reason its done with A/B testing, so when you complain, someone else has no issues, when they complain, you have no issues. It muddies the water intentionally.\nNone of it is because you\u0027re doing anything wrong, it\u0027s not a skill issue, it\u0027s a careful strategy to extract as much engagement and money from customers as possible. It\u0027s the same reason they give people who buy new gun skins in call of duty easier matches in matchmaking for the first couple games.\nStop paying more, stop buying these pro max plans, hoping it will get better. It won\u0027t, that\u0027s not what makes them money. Making people angry and making people waste their time, while others have no issues, and making them explore and try different things for longer so they can show to investors how long people use these AI tools is what makes them money.\nWhen competitors have a better product these issues go away\nWhen a new model is released these issues don\u0027t exist\nI was paying a ton of money for claude, once I stopped and cancelled my subscription entirely, suddenly sonnet 4.6 is performing like opus and I don\u0027t have prompts using 10% of my quota in one message despite being the same complexity."
+                     },
+                     {
+                         "id":  47739587,
+                         "by":  "holoduke",
+                         "time":  1776001539,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "I spend full 20x the week quota in less than 10 hours. How is that possible? Well try to mass translate texts in 30 languages and you will hit limits extremely quick."
+                     },
+                     {
+                         "id":  47739449,
+                         "by":  "rdevilla",
+                         "time":  1776000841,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "Bubble\u0027s bursting, get in."
+                     },
+                     {
+                         "id":  47739873,
+                         "by":  "bakugo",
+                         "time":  1776003035,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "This is your regular friendly reminder that these subscriptions do not entitle you to any specific amount of usage. That \"5x\" is utterly meaningless because you don\u0027t know what it\u0027s 5x of.\nThis is by design, of course. Anyone who has been paying even the slightest bit of attention knows these subscriptions are not sustainable, and the prices will have to go up over time. Quietly reducing the usage limits that they were never specific about in the first place is much easier than raising the prices of the individual subscription tiers, with the same effect.\nIf you want to know what kind of prices you\u0027ll be paying to fuel your vibe coding addiction in a few years, try out API pricing for a bit, and try not to cry when your 100$ credit is gone in 2 days."
+                     },
+                     {
+                         "id":  47739456,
+                         "by":  "mannanj",
+                         "time":  1776000878,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "so basically the anthropic employee who responded says those 1h caches were writes were almost never accessed, so a silent 5m cache change is for our best interest and saves cost. (justifying why they did this silently)\nhowever his response gaslights us because in the OPs opening post his math demonstrates this is not true, it shows reads 26x more so at least in his case the cache is not doing what the anthropic employee describes.\nclearly we are being charged for less optimization here and being given the message (from my perspective by anthropic) that if you are in a special situation your needs don\u0027t matter and we will close your thread without really listening."
+                     },
+                     {
+                         "id":  47739649,
+                         "by":  "rvz",
+                         "time":  1776001879,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "Why so many \u0027developers\u0027 complaining about Claude rate limiting them? You know you can actually....use local LLMs? instead of donating your money to Anthropic\u0027s casino?\nI guess this is fitting when the person who submitted the issue is in \"AI | Crypto\".\nWell there\u0027s no crying at the casino when, you exhaust your usage or token limit.\nThe house (Anthropic) always wins."
+                     },
+                     {
+                         "id":  47739583,
+                         "by":  "vfalbor",
+                         "time":  1776001526,
+                         "depth":  1,
+                         "parent":  47739260,
+                         "text":  "Some months ago, I created a software for this reason, it has no success, but the thing is that communities could reduce tokens consumption, not all is LLM, you can share things from API calls between agents. Even my idea was no success I think it is a good concept share things each others, if you have some interest it\u0027s called tokenstree.com"
+                     },
+                     {
+                         "id":  47740970,
+                         "by":  "reenorap",
+                         "time":  1776008172,
+                         "depth":  2,
+                         "parent":  47740541,
+                         "text":  "Boris, you\u0027re seeing a ton of anecdotes here and Claude has done something that has affected a bunch of their most fervent users.\nJeff Bezos famously said that if the anecdotes are contradicting the metrics, then the metrics are measuring the wrong things. I suggest you take the anecdotes here seriously and figure out where/why the metrics are wrong."
+                     },
+                     {
+                         "id":  47749724,
+                         "by":  "pu_pe",
+                         "time":  1776072815,
+                         "depth":  2,
+                         "parent":  47740541,
+                         "text":  "So Anthropic is trying to save money on infrastructure, we all get it. However, it\u0027s not ok to degrade the performance your users have paid for. Last week the issue was that you reduced the default \"effort\" level, now the prompt cache is shortened. Several users experience far more restrictive usage limits lately.\nThere is only so much you can do through \"UX improvements\" or some smart routing on the backend. Your flagship product is actively getting worse, and if users need to fiddle with hidden settings and keep track of GitHub issues every week they will start voting with their money."
+                     },
+                     {
+                         "id":  47740638,
+                         "by":  "mvkel",
+                         "time":  1776006640,
+                         "depth":  2,
+                         "parent":  47740541,
+                         "text":  "Why did this become an issue seemingly overnight when 1M context has been available for a while, and I assume prompt caching behavior hasn\u0027t changed?\nEDIT: prompt caching behavior -did- change! 1hr -\u003e 5min on March 6th. I\u0027m not sure how starting a fresh session fixes it, as it\u0027s just rebuilding everything. Why even make this available?\nIt feels like the rules changed and the attitude from Anth is \"aw I\u0027m sorry you didn\u0027t know that you\u0027re supposed to do that.\" The whole point of CC is to let it run unattended; why would you build around the behavior of watching it like a hawk to prevent the cache from expiring?"
+                     },
+                     {
+                         "id":  47740663,
+                         "by":  "rawicki",
+                         "time":  1776006746,
+                         "depth":  2,
+                         "parent":  47740541,
+                         "text":  "For me definitely the worst regression was the system prompt telling claude to analyze file to check if it\u0027s malware at every read. That correlates with me seeing also early exhausted quotas and acknowledgments of \"not a malware\" at almost every step.\nIt is a horrible error of judgement to insert a complex request for such a basic ability. It is also an error of judgement to make claude make decisions whether it wants to improve the code or not at all.\nIt is so bad, that i stopped working on my current project and went to try other models. So far qwen is quite promising."
+                     },
+                     {
+                         "id":  47741298,
+                         "by":  "j-pb",
+                         "time":  1776009802,
+                         "depth":  2,
+                         "parent":  47740541,
+                         "text":  "The /clear nudge isn\u0027t a solution though. Compacting or clearing just means rebuilding context until Claude is actually productive again. The cost comes either way.\nI get that 1M context windows cost more than the flat per-token price reflects, because attention scales with context length, but the answer to that is honest pricing or not offering it. Not annoying UX nudges.\nWhat’s actually indefensible is that Claude is already pushing users to shrink context via, I presume, system prompt. At maybe 25% fill:\n  “This seems like a good opportunity to wrap it up and continue in a fresh context window.”\n  “Want to continue in a fresh context window? We got a lot of work done and this next step seems to deserve a fresh start!”\n\nIf there’s a cost problem, fix the pricing or the architecture. But please stop the model and UI from badgering users into smaller context windows at every opportunity. That is not a solution, it’s service degradation dressed as a tooltip."
+                     },
+                     {
+                         "id":  47757441,
+                         "by":  "FabDee",
+                         "time":  1776112280,
+                         "depth":  2,
+                         "parent":  47740541,
+                         "text":  "One thing I didn\u0027t see anywhere here, except your mention about pulling in large number of skills, is that the token consumption is significantly higher for users with many agents, skills, and MCPs installed, and many are mere ghosts. The 5m TTL from #46829 compounds the effect: in my case, I found ~20k tokens of ghost context I hadn\u0027t intentionally opened. Each idle period after 5m wastes that as a full cache miss.\nBoris, would you please confirm on-record: is the current cache TTL for the main agent context 1h or 5m? Issue #46829 was closed as \"not planned\"."
+                     },
+                     {
+                         "id":  47742420,
+                         "by":  "yumraj",
+                         "time":  1776016235,
+                         "depth":  2,
+                         "parent":  47740541,
+                         "text":  "\u003e Since Claude Code uses a 1 hour prompt cache window for the main agent, if you leave your computer for over an hour then continue a stale session, it\u0027s often a full cache miss. To improve this, we have shipped a few UX improvements (eg. to nudge you to /clear before continuing a long stale session), and are investigating defaulting to 400k context instead\nI don’t understand this. I frequently have long breaks. I never want to clear or even compact because I don’t want to lose the conversations that I’ve had and the context. Clearing etc causes other issues like I have to restate everything at times and it misses things. I do try to update the memory which helps. I wish there was a better solution than a time bound cache"
+                     },
+                     {
+                         "id":  47740672,
+                         "by":  "throwaway2027",
+                         "time":  1776006776,
+                         "depth":  2,
+                         "parent":  47740541,
+                         "text":  "I don\u0027t want a nudge. I want a clear RED WARNING with \"You\u0027ve gone away from your computer a bit too long and chatted too much at the coffee machine. You\u0027re better off starting a new context!\""
+                     },
+                     {
+                         "id":  47740834,
+                         "by":  "avree",
+                         "time":  1776007574,
+                         "depth":  2,
+                         "parent":  47740541,
+                         "text":  "Hey Boris - why is the best way to get support making a Hacker News or X post, and hoping you reply? Why does Anthropic Enterprise Support never respond to inquiries?"
+                     },
+                     {
+                         "id":  47740560,
+                         "by":  "denysvitali",
+                         "time":  1776006247,
+                         "depth":  2,
+                         "parent":  47740541,
+                         "text":  "OpenAI (Codex) keeps on resetting the usage limits each time they fuck up...\nI have yet to see Anthropic doing the same. Sorry but this whole thing seems to be quite on purpose."
+                     },
+                     {
+                         "id":  47746738,
+                         "by":  "sunir",
+                         "time":  1776046242,
+                         "depth":  2,
+                         "parent":  47740541,
+                         "text":  "I suspect 1M token context is questionable value because of the secondary effect of burning quota vs getting work done.\nI think the model select that let me choose 1M made sense because I could decide if I was working on large documents and compacting more often was more effective."
+                     },
+                     {
+                         "id":  47740695,
+                         "by":  "brokencode",
+                         "time":  1776006876,
+                         "depth":  2,
+                         "parent":  47740541,
+                         "text":  "Would it be possible to increase the cache duration if misses are a frequent source of problems?\nMaybe using a heartbeat to detect live sessions to cache longer than sessions the user has already closed. And only do it for long sessions where a cache miss would be very expensive."
+                     },
+                     {
+                         "id":  47744924,
+                         "by":  "cowwoc2020",
+                         "time":  1776030603,
+                         "depth":  2,
+                         "parent":  47740541,
+                         "text":  "Boris,\nEven if Anthropic is working in good faith to lower infrastructure costs, developers need more than 5 minutes to notice that CC completed a task, review its changes and ask it to merge. Only developers who do not review code changes can live with such a TTL...\nConsider making this value configurable as the ideal TTL value is different for each person. If people are willing to pay more for 30 minutes TTL than 5 minutes, they should be able to."
+                     },
+                     {
+                         "id":  47743475,
+                         "by":  "8note",
+                         "time":  1776022273,
+                         "depth":  2,
+                         "parent":  47740541,
+                         "text":  "\u003e Since Claude Code uses a 1 hour prompt cache window for the main agent\nthis seems a bit awkward vs the 5 hour session windows.\nif i get rate limited once, I\u0027ll get rate limited immediately again on the same chat when the rate limit ends?\nany chance we can get some form of deffered cache so anything on a rate limited account gets put aside until the rate limit ends?"
+                     },
+                     {
+                         "id":  47742671,
+                         "by":  "apgwoz",
+                         "time":  1776017875,
+                         "depth":  2,
+                         "parent":  47740541,
+                         "text":  "As another data point, I pay for Pro for a personal account, and use no skills, do nothing fancy, use the default settings, and am out of tokens, with one terminal, after an hour. This is typically working on a \u003c 5,000 line code base, sometimes in C, sometimes in Go. Not doing incredibly complicated things."
+                     },
+                     {
+                         "id":  47740729,
+                         "by":  "yummytummy",
+                         "time":  1776007066,
+                         "depth":  2,
+                         "parent":  47740541,
+                         "text":  "Ah, so cache usage impacts rate limits. \nThere goes the ”other harnesses aren’t utilizing the cache as efficiently” argument."
+                     },
+                     {
+                         "id":  47745102,
+                         "by":  "jiwidi",
+                         "time":  1776031863,
+                         "depth":  2,
+                         "parent":  47740541,
+                         "text":  "Hi Boris,\nLong term claude code user here. Is the first time i\u0027ve had to setup a hook to codex to review claude output.\nIs hallucinating like never before\nIs missing key concepts/instructions in context like never before\nIs writing bad code that will \"pass test\" much more. Before it use to try be critic and do good code, now it will try to hack test and bypass intructions for a green pass."
+                     },
+                     {
+                         "id":  47741024,
+                         "by":  "samuelknight",
+                         "time":  1776008465,
+                         "depth":  2,
+                         "parent":  47740541,
+                         "text":  "Have you considered poking the cache?\nWhen a user walks away during the business day but CC is sitting open, you can refresh that cache up to 10x before it costs the same as a full miss. Realistically it would be \u003c8x in a working day."
+                     },
+                     {
+                         "id":  47740611,
+                         "by":  "fps-hero",
+                         "time":  1776006533,
+                         "depth":  2,
+                         "parent":  47740541,
+                         "text":  "Am I so out of touch?\nNo! It’s the children who are wrong!"
+                     },
+                     {
+                         "id":  47746968,
+                         "by":  "taspeotis",
+                         "time":  1776048199,
+                         "depth":  2,
+                         "parent":  47740541,
+                         "text":  "Hi, thanks for Claude Code. I was wondering though if you\u0027d considering adding a mode to make text green and characters come down from the top of the screen individually, like in The Matrix?"
+                     },
+                     {
+                         "id":  47746877,
+                         "by":  "anoazian",
+                         "time":  1776047323,
+                         "depth":  2,
+                         "parent":  47740541,
+                         "text":  "I’ve seen the /clear command prompt and I found the verbiage to be a bit unclear. I think clarifying that the cache has expired and providing an understandable metric on the impact - ie “X% of your 5-hour window” for Pro/Mad users and details on token use for API users. A pop-up that requires explicit acknowledgment might also help, although that could be more of an annoyance to enterprise users.\nOne pattern I use frequently is using one high level design and implementation agent that I’ll use for multiple sessions and delegate implementation to lower level agents.\nIn this case it’d be helpful to have one of two options:\n1. If Claude CLI could create an auto compaction of the conversation history before cache expiration. For example, if I’m beyond X minutes or Y prompts in a conversation and I’ve been inactive for a threshold it could auto-compact close to the expiration and provide that as an option on resume.\n2. If I could configure cache expiration proactively and Anthropic could use S3 or a similar slow load mechanism to offload the cache for a longer period - possibly 24-72h.\nI can appreciate that longer KV cache expiration would complicate capacity management and make inference traffic less fungible but I wouldn’t mind waiting seconds to minutes for it to load from a slower store to resume without quota hits."
+                     },
+                     {
+                         "id":  47754873,
+                         "by":  "je42",
+                         "time":  1776099396,
+                         "depth":  2,
+                         "parent":  47740541,
+                         "text":  "Does this 60min ttl of also apply to claude code web?\nI have regularly sessions open for multiple days.\nIs that a pattern that is not advised?"
+                     }
+                 ]
+}

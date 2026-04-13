@@ -19,7 +19,7 @@ The goal is to make parser behavior inspectable, reproducible, and improvable ov
 
 ## External Critique Response Track (Now Priority 0)
 
-This track captures feedback from external review (`SUPER_CHATGPT.md`) plus DeepWiki surface review.
+This track captures feedback from external review packets plus DeepWiki surface review.
 Goal: move from "well-instrumented prototype" to "skeptically credible public evidence".
 
 ### What we already hardened (2026-04-11)
@@ -102,6 +102,26 @@ Goal: move from "well-instrumented prototype" to "skeptically credible public ev
 - Keep artifact volume practical:
   - one compact matrix summary per run
   - full per-case reports persisted mainly for failures/regressions
+
+11. De-inbreeding excursions (real-world language lanes)
+- Add two explicit excursion lanes to prevent overfitting to in-repo authored scenarios:
+  - `excursion_cooperative`: formalized, good-faith fact/relationship utterances
+  - `excursion_wild`: messy/strange real-world text (for example transcripts, forum fragments, noisy narrative)
+- Keep this policy in `ROADMAP.md` as source-of-truth (avoid proliferation of separate note files).
+- For each excursion item, capture:
+  - source URL/title/date
+  - raw text snapshot path
+  - extraction policy (`claim` vs `fact`) and validation contract
+- Current seed bank and machine manifest:
+  - `stories/excursions/SOURCE_BANK_V1.md`
+  - `stories/excursions/excursion_manifest_v1.json`
+- Never blend excursion scores into strict gate headlines; report as separate partitions.
+- Promote recurring excursion failure patterns into new `rung_*` scenarios only after repeatability is confirmed.
+- Current brick-wall baseline (2026-04-13, bare `qwen3.5:9b`):
+  - `excursion_cooperative_v1_full`: `2/6` (`33.3%`)
+  - `excursion_wild_v1_full`: `3/6` (`50.0%`)
+  - `excursion_frontier_v2_full`: `5/12` (`41.7%`)
+  - promoted failure-guard pack `excursion_failure_promotions_v1`: `0/3`
 
 ## Near-Term Objectives
 
@@ -196,6 +216,13 @@ Remaining next work (this is now the source of truth):
 - Add explicit ambiguity scenarios (pronouns, underspecified references).
 - Add a frozen holdout pack not used during prompt tuning.
 - Add paired clean/noisy variants for selected hard rungs to measure language-robustness degradation directly.
+- Add first excursion pack seeds:
+  - one cooperative transcript-style scenario (speaker trying to convey structured facts)
+  - one wild noisy scenario (real-world language roughness)
+  - implemented pilot seeds:
+    - `kb_scenarios/rung_452_excursion_hn_docker_spain_block.json`
+    - `kb_scenarios/rung_453_excursion_reddit_security_deposit_appeal.json`
+    - `kb_scenarios/tracks.json` -> `excursion_pilot_v1`
 
 ### Week 2: Behavior Upgrades + Reporting
 
@@ -223,6 +250,7 @@ Remaining next work (this is now the source of truth):
 - Clarification behavior is observable in run outputs with explicit uncertainty traces.
 - Public results clearly separate strict vs loose and assisted vs unassisted regimes.
 - At least one non-family-tree domain is benchmarked with reproducible artifacts.
+- Excursion results are partitioned and reported independently (`cooperative` vs `wild`), with no blended pass-rate headline.
 
 ## Training Track (After Prompt/Runtime Stabilization)
 

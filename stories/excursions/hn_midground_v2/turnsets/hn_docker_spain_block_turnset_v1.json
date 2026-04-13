@@ -1,0 +1,81 @@
+﻿{
+    "name":  "hn_docker_spain_block_turnset_v1",
+    "source_thread_id":  47738883,
+    "source_url":  "https://news.ycombinator.com/item?id=47738883",
+    "difficulty":  "G2",
+    "lane":  "incident_policy",
+    "utterances":  [
+                       {
+                           "utterance":  "OP: I just spent 1h+ debugging why my locally-hosted gitlab runner would fail to create pipelines. The gitlab job output would just display weird TLS errors when trying to pull a docker images. After debugging gitlab and the runner, I realized after a while I could not even run \"docker pull \" on my machine as root:\n\u003e error pulling image configuration: download failed after attempts=6: tls: failed to verify certificate: x509: certificate is not valid for any names, but wanted to match docker-images-prod.6aa30f8b08e16409b46e0173d6de2f56.r2.cloudflarestorage.com\nFirst blaming tailscale, dns configuration and all other stuff. Until I just copied that above URL into my browser on my laptop, and received a website banner:\n\u003e El acceso a la presente dirección IP ha sido bloqueado en cumplimiento de lo dispuesto en la Sentencia de 18 de diciembre de 2024, dictada por el Juzgado de lo Mercantil nº 6 de Barcelona en el marco del procedimiento ordinario (Materia mercantil art. 249.1.4)-1005/2024-H instado por la Liga Nacional de Fútbol Profesional y por Telefónica Audiovisual Digital, S.L.U.\nhttps://www.laliga.com/noticias/nota-informativa-en-relacion-con-el-bloqueo-de-ips-durante-las-ultimas-jornadas-de-laliga-ea-sports-vinculadas-a-las-practicas-ilegales-de-cloudflare\nFor those non-spanish speakers: It means there is football match on, and during that time that specific host is blocked. This is just plain madness. I guess that means my gitlab pipelines will not run when football is on. Thank you, Spain.",
+                           "source":  "op",
+                           "source_id":  47738883
+                       },
+                       {
+                           "utterance":  "danirod: Heh, lucky you, at least you get a message. My ISP just drops traffic to the affected IPs. No ping, no traceroute, just a spinner in the browser until it says \"page not found\".\nEvery response and comment from LaLiga, the football organization responsible for this, has been so far that this is a minor issue that only affects a few bunch of nerds who talk about \"docker images\" or \"github repositories\" or \"whatever that means\".\nMeanwhile, there are testimonies of smart home devices like anti-theft alarms or automatic doors, that stop working whenever there is a football match, because their backends rely on Cloudflare.\nLast week, a woman asked for help on social media, as the GPS tracking app she uses to see where her father with dementia is, went offline during a match. It was getting late and he still wasn\u0027t back home, and she couldn\u0027t locate the tag he was wearing to find him: https://www.infobae.com/america/agencias/2026/04/05/laliga-d...\nIt\u0027s hard to say this, because no one should experience an event like this, but as stressful as these are, it\u0027s the only way to make the mainstream people care about this censorship. \"I cannot pull a docker image\" will never be on nightly news, but safety and personal security is a more powerful driver for discourses.",
+                           "source":  "comment",
+                           "source_id":  47740148,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "utrack: They block the whole of Cloudflare R2, I believe the Docker hub is just (heh) a collateral.\nWhen the La Liga match starts, everything that\u0027s proxied via CF (including zero access reverse tunnels) stops working.\nThere\u0027s even a website made for checking if the match is on: https://hayahora.futbol/\nYou can check if your host is affected: https://hayahora.futbol/#comprobador\u0026domain=docker-images-pr...",
+                           "source":  "comment",
+                           "source_id":  47739575,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "madbo1: Reading this from India, where stuff like this is pretty much Tuesday business. But that’s not the problem; the problem is precisely the one hour of your life spent trying to figure out whether the issue is your DNS, your VPN, your configuration, or your programming. “The government in the country I’m accessing this from just decided to shut down my IP for the next two hours” rarely crosses your mind.\nIndia has consistently been at the top of the number of Internet blackouts anywhere in the world for years (Access Now keeps track of this through its KeepItOn project). These tend to be brief and localized, triggered by something as mundane as an exam or protest or local incident. It’s such a routine occurrence here that there’s even a reflexive response: mobile data works differently from other connectivity types, so go with that, try new DNS settings, rely on Telegram instead of WhatsApp when the latter fails you, and always have a list of mirrors.\nWhat’s fascinating about this case is that it’s identical except for who is pressing the button  LaLiga, a privately owned entity, in place of the government.",
+                           "source":  "comment",
+                           "source_id":  47748278,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "mrvaibh: This is a great example of why blanket IP blocking is such a terrible enforcement mechanism. Cloudflare hosts hundreds of thousands of services behind shared IP ranges — blocking one IP to stop a piracy stream\n  takes out everything else on that IP, including Docker registries, API endpoints, and CDNs that have nothing to do with football.\n  The real fix on your end until Spain sorts this out: set up a pull-through registry cache (e.g. registry:2 with proxy.remoteurl) on a VPS outside Spain, and point your Docker daemon\u0027s mirror config at it. Your\n  GitLab runner pulls from the cache, the cache pulls from Docker Hub via a non-blocked IP. Also insulates you from Docker Hub rate limits.\n\n  But yeah, the fact that a court order about football streaming can break docker pull for an entire country is genuinely absurd.",
+                           "source":  "comment",
+                           "source_id":  47740390,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "jjcm: Barring an Internet giant suing them in court, it really feels like this is unlikely to change as most just don’t understand the why or the effect.\nSomeone needs to write a heist movie set in Spain where a key part of the plan is they steal something while La Liga is blocking some key security route.",
+                           "source":  "comment",
+                           "source_id":  47741831,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "jcalvinowens: This is the moral equivalent of shutting the water off for a whole city because one dude\u0027s house has a leak. The harms to society clearly and obviously outweigh any possible benefits to society. But if that one dude has the power to shut it all off, and doesn\u0027t care...",
+                           "source":  "comment",
+                           "source_id":  47741313,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "redbell: This behavior of blocking some domains and IP ranges during LaLiga games has become a routine by now. You might also want to check these similar submissions:\nMy game\u0027s server is blocked in Spain whenever there\u0027s a football match on: https://news.ycombinator.com/item?id=45358433\nSpain’s LaLiga has blocked access to freedom.gov: https://news.ycombinator.com/item?id=47114235",
+                           "source":  "comment",
+                           "source_id":  47745605,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "Self-Perfection: This is far from the first time that I see on HN indignation on LaLiga blockings. Sadly all this rage does not seem to lead to any change.\nI\u0027d like to suggest some steps that might/should be followed, which I will not pursue personally but in my defense - I do not live in Spain and not affected.\n1) (first! low-effort) Somebody should create any space on the internet, where such anecdotes might shared and probably people with common goals of fixing internet access in Spain will meet. E.g. telegram group, discord channel, subreddit...\n2) probably create wiki with related research: legal framework and possible actions etc\n3) Raise public awareness. Create a resource/website with schedule of past and future \"semi-blackouts\", simple explanation of possible effects a layman may notice etc\n4) Explore legal actions that might be taken. How this issue might be forced to be discussed by politicians? For instance I know that Portugal has official mechanism to put forward petitions, that will be discussed in parliament if get enough votes [1]\nSpace of possible demands in such petitions is vast. For instance:\n- Make LaLiga compensate partly price of internet access\n- Force LaLiga to include education notice in the beginning and the of translation with title like \"Start of reduced internet connectivity\" / \"End of reduced internet connectivity\"\n[1] https://participacao.parlamento.pt/initiatives/",
+                           "source":  "comment",
+                           "source_id":  47745834,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "isodev: Very good example as to why using a single, centralised proxy globally by all services is a bad idea. Docker would never have a reason to block anything if they were simply running their own.\nFor everyone else, small and big, this is the weekly reminder to not use Cloudflare for user-facing access to anything.",
+                           "source":  "comment",
+                           "source_id":  47750264,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "torben-friis: As a Spaniard, I would be very happy it cloudflare stops serving Spain. The situation is beyond stupid and I know without international pressure and shaming we\u0027re not getting rid of this abuse.",
+                           "source":  "comment",
+                           "source_id":  47741317,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "rmonvfer: As a Spaniard, this also happens to me. You can either use a VPN or just switch DNS servers to one that doesn’t have anycast nodes in Spain.\nCloudflare’s authoritative DNS uses EDNS Client Subnet (ECS) to return different IP pools based on where the query originates. Spanish resolvers get IPs from a range that La Liga blocks. If your recursive resolver is physically outside Spain (or you use DoH/DoT to tunnel to one), Cloudflare returns a different, unblocked pool.\nAdGuard DNS works well for this.",
+                           "source":  "comment",
+                           "source_id":  47744675,
+                           "depth":  1
+                       }
+                   ],
+    "notes":  "Auto-generated OP+11-comment turnset from HN snapshot."
+}

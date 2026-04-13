@@ -1,6 +1,6 @@
 ﻿# AGENT README (Onboarding for Coding Agents)
 
-Last updated: 2026-04-09
+Last updated: 2026-04-13
 
 ## Mission
 
@@ -25,7 +25,7 @@ Primary model focus right now: `qwen3.5:9b`.
 ## First Files To Read
 
 1. `README.md`
-2. `Semantic Parsing.md`
+2. `EXPLAINER.md`
 3. `kb_pipeline.py`
 4. `modelfiles/semantic_parser_system_prompt.md`
 5. `kb_scenarios/README.md`
@@ -115,6 +115,27 @@ Hub publishing mirrors snapshots to:
 - `stage_03_transitive_chain.json`
 - acid scenarios
 
+## Frontier Orchestration Contract (Agent54 + Gate Curator)
+
+Use a two-role operating model to keep the ladder moving without bloating must-run retests.
+
+Role A: `Agent54` (Rung Author)
+- Add frontier rungs at the edge of current failures (height and/or width).
+- Ensure each new rung has deterministic validations and clear expected outcomes.
+- Register new rungs in `kb_scenarios/tracks.json` in the intended frontier lane.
+- Deliver one short "what this rung tests" note with each added rung.
+
+Role B: Gate Curator (Retest Pruner)
+- Remove low-signal rungs from strict gate retest packs when they are repeatedly redundant.
+- Keep at least one anchor rung per failure class (do not prune entire behavior classes).
+- Prefer promoting harder successor rungs and demoting older easy duplicates to non-gating tracks.
+- Maintain a lean gate set that maximizes new-signal-per-minute.
+
+Prune criteria (default)
+- No novel failures across at least 3 consecutive frontier sweeps.
+- Behavior is covered by a newer/harder rung with the same semantic target.
+- Runtime cost is materially high relative to diagnostic value.
+
 LM Studio vs Ollama operating pattern:
 
 - LM Studio: use stock model + `--prompt-file` for fast prompt iteration.
@@ -141,8 +162,9 @@ python kb_pipeline.py --backend ollama --base-url http://127.0.0.1:11434 --model
 # 4) render reports
 python scripts/render_kb_run_html.py --input kb_runs --output docs/reports --theme standard --docs-hub-link ../index.html --repo-link ./README.md
 
-# 5) rebuild hub + manifests
-python scripts/build_hub_index.py --reports-dir docs/reports --runs-dir kb_runs --kb-pages-dir docs/kb --ladder-index docs/rungs/index.html --output docs/index.html --title "Prethinker Report Hub"
+# 5) rebuild run explorer + manifests
+# (this writes docs/run-reports-hub.html; docs/index.html remains the curated landing page)
+python scripts/build_hub_index.py --reports-dir docs/reports --runs-dir kb_runs --kb-pages-dir docs/kb --ladder-index docs/rungs/index.html --output docs/run-reports-hub.html --title "Prethinker Report Hub"
 
 # 6) run propagation example
 python -m engine.propagation_runner --problem-json kb_scenarios/propagation_problem.example.json
@@ -152,7 +174,8 @@ python -m engine.propagation_runner --problem-json kb_scenarios/propagation_prob
 
 - run JSONs: `kb_runs/*.json`
 - run transcripts: `docs/reports/*.html`
-- docs index: `docs/index.html`
+- docs landing page: `docs/index.html`
+- docs run explorer: `docs/run-reports-hub.html`
 - run manifest: `docs/data/runs_manifest.json`
 - prompt manifest: `docs/data/prompt_versions.json`
 
@@ -198,7 +221,7 @@ After a folder rename, refresh rendered docs so embedded paths are coherent:
 python scripts/render_kb_run_html.py --input kb_runs --output docs/reports --recursive --theme standard --docs-hub-link ../index.html --repo-link ./README.md
 python scripts/render_kb_store_html.py --kb-root kb_store --output-dir docs/kb --title-prefix "KB Snapshot"
 python scripts/render_test_ladder_html.py --scenarios-dir kb_scenarios --runs-dir kb_runs --output-dir docs/rungs --title "Prolog Extraction Test Ladder"
-python scripts/build_hub_index.py --reports-dir docs/reports --runs-dir kb_runs --kb-pages-dir docs/kb --ladder-index docs/rungs/index.html --output docs/index.html --title "Prethinker Report Hub"
+python scripts/build_hub_index.py --reports-dir docs/reports --runs-dir kb_runs --kb-pages-dir docs/kb --ladder-index docs/rungs/index.html --output docs/run-reports-hub.html --title "Prethinker Report Hub"
 ```
 
 

@@ -1,0 +1,68 @@
+{
+  "name": "rung_454_excursion_coop_fed_policy_hold",
+  "ontology_name": "rung_454_excursion_coop_fed_policy_hold",
+  "utterances": [
+    "Use stated/2, maintained_rate/2, needs_confidence_before/2, asked_about/2, declined_to_precommit/1.",
+    {
+      "utterance": "In the press conference, the chair said inflation has moved lower, but the committee kept the policy rate unchanged and wants more confidence before easing.",
+      "clarification_answers": [
+        "Set stated(chair, inflation_moving_lower). Set maintained_rate(fomc, unchanged). Set needs_confidence_before(chair, easing_policy)."
+      ],
+      "max_clarification_rounds": 1
+    },
+    "Set stated(chair, inflation_moving_lower).",
+    "Set maintained_rate(fomc, unchanged).",
+    "Set needs_confidence_before(chair, easing_policy).",
+    {
+      "utterance": "A reporter asked about June cut timing, and the chair declined to pre-commit.",
+      "clarification_answers": [
+        "Set asked_about(reporter, june_cut_timing). Set declined_to_precommit(chair)."
+      ],
+      "max_clarification_rounds": 1
+    },
+    "Set asked_about(reporter, june_cut_timing).",
+    "Set declined_to_precommit(chair).",
+    "query stated(chair, inflation_moving_lower).",
+    "query maintained_rate(fomc, unchanged).",
+    "query needs_confidence_before(chair, easing_policy).",
+    "query asked_about(reporter, june_cut_timing).",
+    "query declined_to_precommit(chair)."
+  ],
+  "validations": [
+    {
+      "id": "chair_stated_inflation_progress",
+      "query": "stated(chair, inflation_moving_lower).",
+      "expect_status": "success",
+      "min_rows": 1,
+      "max_rows": 1
+    },
+    {
+      "id": "policy_rate_held",
+      "query": "maintained_rate(fomc, unchanged).",
+      "expect_status": "success",
+      "min_rows": 1,
+      "max_rows": 1
+    },
+    {
+      "id": "confidence_before_easing",
+      "query": "needs_confidence_before(chair, easing_policy).",
+      "expect_status": "success",
+      "min_rows": 1,
+      "max_rows": 1
+    },
+    {
+      "id": "reporter_asked_timing",
+      "query": "asked_about(reporter, june_cut_timing).",
+      "expect_status": "success",
+      "min_rows": 1,
+      "max_rows": 1
+    },
+    {
+      "id": "chair_no_precommit",
+      "query": "declined_to_precommit(chair).",
+      "expect_status": "success",
+      "min_rows": 1,
+      "max_rows": 1
+    }
+  ]
+}

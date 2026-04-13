@@ -1,0 +1,76 @@
+﻿{
+    "name":  "hn_quota_exhaustion_claims_turnset_v1",
+    "source_thread_id":  47739260,
+    "source_url":  "https://news.ycombinator.com/item?id=47739260",
+    "difficulty":  "G3",
+    "lane":  "service_reliability",
+    "utterances":  [
+                       {
+                           "utterance":  "bcherny: Hey all, Boris from the Claude Code team here.\nWe\u0027ve been investigating these reports, and a few of the top issues we\u0027ve found are:\n1. Prompt cache misses when using 1M token context window are expensive. Since Claude Code uses a 1 hour prompt cache window for the main agent, if you leave your computer for over an hour then continue a stale session, it\u0027s often a full cache miss. To improve this, we have shipped a few UX improvements (eg. to nudge you to /clear before continuing a long stale session), and are investigating defaulting to 400k context instead, with an option to configure your context window to up to 1M if preferred. To experiment with this now, try: CLAUDE_CODE_AUTO_COMPACT_WINDOW=400000 claude.\n2. People pulling in a large number of skills, or running many agents or background automations, which sometimes happens when using a large number of plugins. This was the case for a surprisingly large number of users, and we are actively working on (a) improving the UX to make these cases more visible to users and (b) more intelligently truncating, pruning, and scheduling non-main tasks to avoid surprise token usage.\nIn the process, we ruled out a large number of hypotheses: adaptive thinking, other kinds of harness regressions, model and inference regressions.\nWe are continuing to investigate and prioritize this. The most actionable thing for people running into this is to run /feedback, and optionally post the feedback ids either here or in the Github issue. That makes it possible for us to debug specific reports.",
+                           "source":  "comment",
+                           "source_id":  47740541,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "chandureddyvari: Claude has gotten noticeably worse for me too. It goes into long exploration loops for 5+ minutes even when I point it to the exact files to inspect. Then 30 minutes later I hit session limits. Three sessions like that in a day, and suddenly 25% of the weekly limit is gone.\nI ended up buying the $100 Codex plan. So far it has been much more generous with usage and more accurate than Claude for the kind of work I do.\nThat said, Codex has its own issues. Its personality can be a bit off-putting for my taste. I had to add extra instructions in Agents.md just to make it less snarky. I was annoyed enough that I explicitly told it not to use the word “canonical.”\nOn UI/UX taste, I still think current Codex is behind the Jan/Feb era of Claude Code. Claude used to have much better finesse there. But for backend logic, hard debugging, and complex problem-solving, Codex has been clearly better for me. These days I use Impeccable Skillset inside Codex to compensate for the weaker UI taste, but it still does not quite match the polish and instinct Claude Code used to have.\nI used to be a huge Claude Code advocate. At this point, I cannot recommend it in good conscience.\nMy advice now is simple: try the $20 plans for Codex and Cursor, and see which one matches your workflow and vibes best",
+                           "source":  "comment",
+                           "source_id":  47739625,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "SkyPuncher: I skimmed the issue. No wonder Anthropic closes these tickets out without much action. That’s just a wall of AI garbage.\nHere’s what I’ve done to mostly fix my usage issues:\n* Turn on max thinking on every session. It save tokens overall because I’m not correcting it of having it waste energy on dead paths.\n* keep active sessions active. It seems like caches are expiring after ~5 minutes (especially during peak usage). When the caches expire it sees like all tokens need to be rebuilt this gets especially bad as token usage goes up.\n* compact after 200k tokens as soon as I reasonably can. I have no data but my usage absolutely sky rockets as I get into longer sessions. This is the most frustrating thing because Anthropic forced the 1M model on everyone.",
+                           "source":  "comment",
+                           "source_id":  47740074,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "geeky4qwerty: I\u0027m afraid the music may be slowly fading at this party, and the lights will soon be turned on. We may very well look back on the last couple years as the golden era of subsidized GenAI compute.\nFor those not in the Google Gemini/Antigravity sphere, over the last month or so that community has been experiencing nothing short of contempt from Google when attempting to address an apparent bait and switch on quota expectations for their pro and ultra customers (myself included). [1]\nWhile I continue to pay for my Google Pro subscription, probably out of some Stockholm Syndrome, beaten wife level loyalty and false hope that it is just a bug and not Google being Google and self-immolating a good product, \nI have since moved to Kiro for my IDE and Codex for my CLI and am as happy as clam with this new setup.\n[1] https://github.com/google-gemini/gemini-cli/issues/24937",
+                           "source":  "comment",
+                           "source_id":  47739622,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "jameson: I\u0027m noticing a fair number of degradation of Claude infrastructure recently and makes me wonder why they can\u0027t use Claude to identify or fix these issues in advance?\nIt seems a counter intuitive to Anthropic\u0027s message that Claude uncovered bugs in open source project*.\n[*] https://www.anthropic.com/news/mozilla-firefox-security",
+                           "source":  "comment",
+                           "source_id":  47747604,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "comandillos: Quite scared by the fact that the original issue pointing out the actual root cause of the issue has been \u0027Closed as not planned\u0027 by Anthropic.\nhttps://github.com/anthropics/claude-code/issues/46829",
+                           "source":  "comment",
+                           "source_id":  47739373,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "WarmWash: I did my (out of the ordinary) taxes this year using agents, kind of as an experiment and kind of to save ~$750. Opus 4.6 max in CC, 5.4 xhigh in codex, and 3.1 high in antigravity. All on the $20/mo plans.\nI have a day job, a side business, actively trade shares options and futures, and have a few energy credit items.\nAll were given the same copied folder containing all the needed documents to compose the return, and all were given the same prompt. My goal was that if all three agreed, I could then go through it pretty confidently and fill out the actual submission forms myself.\n5.4 nailed it on the first shot. Took about 12 minutes.\n3.1 missed one value, because it decided to only load the first 5 pages of a 30 page document. Surprisingly it only took about 2 minutes to complete though. A second prompt and ~10 seconds corrected it. GPT and Gemini now were perfectly aligned with outputs.\n4.6 hit my usage limit before finishing after running for ~10 minutes. I returned the next day to have it finish. It ran for another 5 minutes or so before finishing. There were multiple errors and the final tax burden was a few thousand off. On a second prompt asking to check for errors in the problem areas, it was able to output matching values after a couple more minutes.\nFor my first time using CC and 4.6 (outside of some programming in AG), I am pretty underwhelmed given the incessant hype.",
+                           "source":  "comment",
+                           "source_id":  47740829,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "oldnewthing: If this helps, I rolled back to version 2.1.34. Here is the ~/.claude/settings.json blurb I added:\n  \"effortLevel\": \"high\",\n  \"autoUpdatesChannel\": \"stable\",\n  \"minimumVersion\": \"2.1.34\",\n  \"env\": {\n      \"DISABLE_AUTOUPDATER\": 1,\n      \"CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING\": 1\n  }\n\nI also had to:\n1.  Nuke all other versions within /.local/share/claude/versions/ except 2.1.34.\n2.  Link ~/.local/bin/claude to claude -\u003e ~/.local/share/claude/versions/2.1.34\nThis seems to have fixed my running out of quota issues quickly problems. I have periods of intense use (nights, weekends) and no use (day job). Before these changes, I was running out of quota rather quickly. I am on the same 100$ plan.\nI am not sure adaptive thinking setting is relevant for this version but in the future that will help once they fix all the quota \u0026 cache issues. Seriously thinking about switching to Codex though. Gemini is far behind from what I have tried so far.",
+                           "source":  "comment",
+                           "source_id":  47740382,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "wg0: Been experiencing similar issues even with the lower tier models.\nFair transactions involve fair and transparent measurements of goods exchanged. I\u0027m going to cancel my subscription this month.",
+                           "source":  "comment",
+                           "source_id":  47739360,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "delbronski: Ever since this change they announced:\nhttps://www.reddit.com/r/ClaudeAI/comments/1s4idaq/update_on...\nIt’s been unusable for me as my daily coding agent. I run out of credits in the pro account in an hour or so. Before that I had never reached the session limit. Switched back to Junie with Gemini/chatgpt.",
+                           "source":  "comment",
+                           "source_id":  47739825,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "meetingthrower: I don\u0027t get it. Last week on the 100 bucks plan I generated probably 50k LOC (not a quality measure for sure!) and just barely kissed the weekly limit.  I did get rate limited on some sessions for sure, but that\u0027s to be expected.\nI\u0027m curious what are people doing that is consuming your limits? I can\u0027t imagine filling the $200 a month plan unless I was essentially using Claude code itself as the api to mass process stuff? For basic coding what are people doing?",
+                           "source":  "comment",
+                           "source_id":  47739698,
+                           "depth":  1
+                       }
+                   ],
+    "notes":  "Auto-generated OP+11-comment turnset from HN snapshot."
+}

@@ -1,0 +1,798 @@
+﻿{
+    "thread_id":  47751781,
+    "hn_url":  "https://news.ycombinator.com/item?id=47751781",
+    "title":  "US appeals court declares 158-year-old home distilling ban unconstitutional",
+    "by":  "t-3",
+    "unix_time":  1776087453,
+    "score":  288,
+    "descendants":  214,
+    "difficulty":  "G3",
+    "lane":  "legal_reasoning",
+    "label":  "hn_distilling_ban_unconstitutional",
+    "why_selected":  "Legal interpretation thread with argument/rebuttal structure.",
+    "op_text":  "",
+    "harvested_comment_count":  97,
+    "comment_sample_policy":  {
+                                  "traversal":  "bfs",
+                                  "max_comments":  120,
+                                  "max_depth":  3
+                              },
+    "comments":  [
+                     {
+                         "id":  47753269,
+                         "by":  "bsimpson",
+                         "time":  1776093495,
+                         "depth":  1,
+                         "parent":  47751781,
+                         "text":  "Do this one next:\nhttps://en.wikipedia.org/wiki/Gonzales_v._Raich\nThe Supreme Court somehow held that the feds can regulate what you do in your own home (in this case, growing marijuana for personal use) because it could have a butterfly effect on the interstate price. (Constitutionally, the feds can only regulate _interstate_ commerce.)"
+                     },
+                     {
+                         "id":  47753132,
+                         "by":  "semiquaver",
+                         "time":  1776092940,
+                         "depth":  1,
+                         "parent":  47751781,
+                         "text":  "\u003e [Judge Edith Jones] also said that under the government’s logic, Congress could  criminalize virtually any in-home activity\n\nWell, yeah. This is essentially the holding in Wickard v. Filburn, which seems to be in tension with this decision (overturning that would be great but it’s not the role of the circuit courts of appeal to do preemptively)"
+                     },
+                     {
+                         "id":  47752706,
+                         "by":  "ryandamm",
+                         "time":  1776091285,
+                         "depth":  1,
+                         "parent":  47751781,
+                         "text":  "Missed in the previous discussion: methanol is irrelevant. Grain based ferments have essentially zero methanol.(And methanol risk is a function of its concentration relative to ethanol — the treatment for methanol poisoning is… ethanol!) even fruit based fermentations with significantly higher pectin concentrations only produce trace methanol, and it’s not all that well concentrated in a distillation due to azeotropes (which also says that throwing out the heads doesn’t help that much).\nMethanol poisoning stories in the news almost exclusively result from people trying to sell denatured or industrial alcohol. The biggest risk in home distilling is fire."
+                     },
+                     {
+                         "id":  47753397,
+                         "by":  "jcims",
+                         "time":  1776093995,
+                         "depth":  1,
+                         "parent":  47751781,
+                         "text":  "Bought and rigged up a \u0027hand sanitizer plant\u0027 about five months into COVID.  Populated the thing with thermocouples, load cells and automation with nodered on raspberry pi and a bunch of esp32s flashed with tasmota doing sensing and control.  Everything talked over mqtt.  Great little architecture and having it highly automated allowed me to focus on the parts that were less easily controlled for.\nDashboard: https://imgur.com/a/so7iZJX\nSanitizer run: https://imgur.com/a/iWDlNfb\nQuite a lot of fun actually."
+                     },
+                     {
+                         "id":  47755480,
+                         "by":  "andrewmg",
+                         "time":  1776102251,
+                         "depth":  1,
+                         "parent":  47751781,
+                         "text":  "Reposting my comment from the last thread:\nFor those wondering, the opinion[0] doesn\u0027t address the Commerce Clause power (and Wickard and Raich) becaue the government abandoned that argument. See footnote 5.\nThe Commerce Clause issue is raised in our other case[1] that\u0027s now pending before the Sixth Circuit.\n(I argued both cases.)\n[0] https://www.ca5.uscourts.gov/opinions/pub/24/24-10760-CV0.pd...\n[1] https://www.buckeyeinstitute.org/issues/detail/ream-v-us-dep..."
+                     },
+                     {
+                         "id":  47756083,
+                         "by":  "beedeebeedee",
+                         "time":  1776104989,
+                         "depth":  1,
+                         "parent":  47751781,
+                         "text":  "The best liquor I ever had was by a state police detective who had been home distilling since he was 12. It was made from rye and corn, but tasted like peaches.\nI think it is kind of magical to witness the process. I only experimented a few times, and never aged it, so every was very sharp. The best was a sharp brandy made from a bottle of wine I bought. The worst was using a leftover keg of beer, which bittered the copper pipe, so everything after tasted like gin.\nI would recommend people try it. You can make one out of copper pipe from a hardware store, a few fittings and a pressure cooker. Be safe, of course, and remember that ethanol is used as a preventative for methanol poisoning :)"
+                     },
+                     {
+                         "id":  47753304,
+                         "by":  "GenerWork",
+                         "time":  1776093637,
+                         "depth":  1,
+                         "parent":  47751781,
+                         "text":  "It\u0027s been way too long since I\u0027ve taken a political science course, but does this mean that the ban is struck down for the entire country, or just the area that the 5th Court of Appeals covers?"
+                     },
+                     {
+                         "id":  47752075,
+                         "by":  "joshstrange",
+                         "time":  1776088715,
+                         "depth":  1,
+                         "parent":  47751781,
+                         "text":  "Previous discussion: https://news.ycombinator.com/item?id=47736298"
+                     },
+                     {
+                         "id":  47753693,
+                         "by":  "superjan",
+                         "time":  1776095054,
+                         "depth":  1,
+                         "parent":  47751781,
+                         "text":  "Might as well plug this recent Criminal Podcast episode: https://thisiscriminal.com/episode-358-the-formula-3-27-2026\nTLDL: During prohibition, US government required adding 5% methanol to industrial alcohol, hoping that this would stop bootleggers from selling it as liquor. It was sold anyway, resulting in many deaths."
+                     },
+                     {
+                         "id":  47754837,
+                         "by":  "NoSalt",
+                         "time":  1776099233,
+                         "depth":  1,
+                         "parent":  47751781,
+                         "text":  "I had no idea this was even a law!!! Where do I turn myself in?"
+                     },
+                     {
+                         "id":  47755590,
+                         "by":  "tomwheeler",
+                         "time":  1776102706,
+                         "depth":  1,
+                         "parent":  47751781,
+                         "text":  "As I understand it, this only applies to the three states in that district, all of which also have statewide bans against it.\nMy state (Missouri) has the most lax home distilling state laws in the nation, which allow residents to produce up to 500 bottles per year. Well, at least theoretically, since the federal ban takes precedence."
+                     },
+                     {
+                         "id":  47757480,
+                         "by":  "lofaszvanitt",
+                         "time":  1776112520,
+                         "depth":  1,
+                         "parent":  47751781,
+                         "text":  "Do not drink, fight the calories."
+                     },
+                     {
+                         "id":  47753531,
+                         "by":  "mothballed",
+                         "time":  1776094489,
+                         "depth":  1,
+                         "parent":  47751781,
+                         "text":  "The post \u002786 machine gun ban relies on basically the exact principle overturned here."
+                     },
+                     {
+                         "id":  47758038,
+                         "by":  "DesiLurker",
+                         "time":  1776115649,
+                         "depth":  1,
+                         "parent":  47751781,
+                         "text":  "they also need to strike down the state laws restricting collection of rainwater on you own property."
+                     },
+                     {
+                         "id":  47756399,
+                         "by":  "shevy-java",
+                         "time":  1776106598,
+                         "depth":  1,
+                         "parent":  47751781,
+                         "text":  "Have a beer for that news!"
+                     },
+                     {
+                         "id":  47753578,
+                         "by":  "lenerdenator",
+                         "time":  1776094646,
+                         "depth":  1,
+                         "parent":  47751781,
+                         "text":  "It\u0027ll be interesting to see how many people get methanol poisoning from trying their hand at it without doing the research properly. That being said, so long as it\u0027s for private or non-profit use, I don\u0027t really see the harm here."
+                     },
+                     {
+                         "id":  47753084,
+                         "by":  "ChrisArchitect",
+                         "time":  1776092760,
+                         "depth":  1,
+                         "parent":  47751781,
+                         "text":  "[dupe] https://news.ycombinator.com/item?id=47736298"
+                     },
+                     {
+                         "id":  47754205,
+                         "by":  "caycep",
+                         "time":  1776096738,
+                         "depth":  1,
+                         "parent":  47751781,
+                         "text":  "how...uh...explosive...are home stills?"
+                     },
+                     {
+                         "id":  47753532,
+                         "by":  "gigatexal",
+                         "time":  1776094504,
+                         "depth":  1,
+                         "parent":  47751781,
+                         "text":  "Big beer head Kavanaugh and Kegseth are probably jumping for joy."
+                     },
+                     {
+                         "id":  47753890,
+                         "by":  "tdb7893",
+                         "time":  1776095622,
+                         "depth":  2,
+                         "parent":  47753269,
+                         "text":  "I think much more likely is that it will just be made legal federally sometime in the next decade. Marijuana legalization has majorities across ideologies (https://news.gallup.com/poll/514007/grassroots-support-legal...) and even though the inability to create federal law on something so popular seems like a good case study on how the US system doesn\u0027t always do a good job representing it\u0027s actual people, it seems to be at a critical mass where it can\u0027t be ignored for much longer. Even my parents\u0027 friends who are conservative have started doing weed."
+                     },
+                     {
+                         "id":  47754938,
+                         "by":  "codexb",
+                         "time":  1776099664,
+                         "depth":  2,
+                         "parent":  47753269,
+                         "text":  "The controlling case is Wickard v Filburn (1942).\nA farmer was told he could only grow X acres of feed on his own land; feed that he had no intention of selling and was being fed entirely to his own livestock on the same land.\nThis seems to overturn that in part, but until Wickard is overturned, and the interstate commerce clause reigned in, there will be weird side effects of it like this."
+                     },
+                     {
+                         "id":  47753346,
+                         "by":  "swiftcoder",
+                         "time":  1776093800,
+                         "depth":  2,
+                         "parent":  47753269,
+                         "text":  "I\u0027d imagine one wants to litigate Wickard v. Filburn in its entirety, rather than just the downstream Gonzales v. Raich"
+                     },
+                     {
+                         "id":  47754337,
+                         "by":  "pdonis",
+                         "time":  1776097199,
+                         "depth":  2,
+                         "parent":  47753269,
+                         "text":  "In Wickard v. Filburn, back in 1942, they said the same thing for wheat."
+                     },
+                     {
+                         "id":  47755445,
+                         "by":  "Tangurena2",
+                         "time":  1776102101,
+                         "depth":  2,
+                         "parent":  47753269,
+                         "text":  "Many American treaties (with other nations) prohibit both/either parties from decriminalizing marijuana among other drugs.\nLinks:\ndiscusses some of the treaties:\nhttps://www2.nycbar.org/pdf/InternationalDrugControlTreaties...\nHistory of illegalization of pot:\nhttps://www.congress.gov/crs-product/R44782"
+                     },
+                     {
+                         "id":  47755494,
+                         "by":  "andrewmg",
+                         "time":  1776102302,
+                         "depth":  2,
+                         "parent":  47753269,
+                         "text":  "Our companion case in the Sixth Circuit tees up the issue:\nhttps://www.buckeyeinstitute.org/issues/detail/ream-v-us-dep...\nSee the opening brief."
+                     },
+                     {
+                         "id":  47755416,
+                         "by":  "john01dav",
+                         "time":  1776101994,
+                         "depth":  2,
+                         "parent":  47753269,
+                         "text":  "I suspect that if that ruling was made, then many other drugs being made at home for personal use might become legalized, at least unless states decide to go and ban it too. Note that I am not taking a position here on if that\u0027s desirable."
+                     },
+                     {
+                         "id":  47755582,
+                         "by":  "nradov",
+                         "time":  1776102676,
+                         "depth":  2,
+                         "parent":  47753269,
+                         "text":  "Yes, regardless of that specific case I\u0027m hoping to see a series of Supreme Court decisions that will eviscerate federal government power over internal state affairs and restore the original intent of the 10th Amendment. Long live federalism."
+                     },
+                     {
+                         "id":  47753659,
+                         "by":  "tyre",
+                         "time":  1776094952,
+                         "depth":  2,
+                         "parent":  47753269,
+                         "text":  "Another case based on interstate commerce: the US ban on racial segregation. The example given, iirc, was restaurant competition across state lines."
+                     },
+                     {
+                         "id":  47755057,
+                         "by":  "laughing_man",
+                         "time":  1776100217,
+                         "depth":  2,
+                         "parent":  47753269,
+                         "text":  "If they reversed Gonzales v. Raich they\u0027d be under a lot of pressure to reverse Wickard v. Fulburn, which would have such wide ramifications I just don\u0027t see the court doing it no matter how warranted."
+                     },
+                     {
+                         "id":  47753588,
+                         "by":  "jmyeet",
+                         "time":  1776094684,
+                         "depth":  2,
+                         "parent":  47753269,
+                         "text":  "I looked at the actual decision [1] and didn\u0027t see Filburn mentioned once. I find that odd. Filburn [2] was a controversial and far-reaching decision that said that the Federal government\u0027s ability to regulate interstate commerce extended to people growing wheat on their own property for their own use. The rationale was that by growing wheat you weren\u0027t participating in the interstate wheat market. That seems like a wild interpretation to me but it\u0027s Supreme Court precedent at this point.\nSo I found this footnote:\n\u003e The government does not challenge the district court’s Commerce Clause\nanalysis on appeal. Accordingly, any such argument is forfeited, and we do not address it.\nThat\u0027s interesting. Here\u0027s a legal analysis that does bring up the Commerce Clause and Filburn [3]. I really wonder why the government didn\u0027t raise this issue.\nI knew just from the headline this was going to be a 5th Circuit decision, and it was. This is the same circuit that is perfectly fine to override \"state\u0027s  rights\" for other issues.\n[1]:https://www.ca5.uscourts.gov/opinions/pub/24/24-10760-CV0.pd...\n[2]: https://en.wikipedia.org/wiki/Wickard_v._Filburn\n[3]: https://www.yalejreg.com/nc/reviving-the-commerce-clause-one..."
+                     },
+                     {
+                         "id":  47754900,
+                         "by":  "torstenvl",
+                         "time":  1776099493,
+                         "depth":  2,
+                         "parent":  47753269,
+                         "text":  "The word \"interstate\" does not exist in the text of the Constitution.\nThere\u0027s arguably some merit to your position, but the argument that some case law is invalid because it doesn\u0027t meet the definition of a term defined in other case law is circular and incoherent."
+                     },
+                     {
+                         "id":  47754392,
+                         "by":  "999900000999",
+                         "time":  1776097431,
+                         "depth":  2,
+                         "parent":  47753269,
+                         "text":  "The problem is if you say the government can’t regulate MJ, then all drug regulations fall apart.\nOn one hand you should have a right to buy whatever you want at 21( which should be the minimum enlistment age), but I’d be concerned about Billy selling homemade GPLs or whatever."
+                     },
+                     {
+                         "id":  47755505,
+                         "by":  "webdoodle",
+                         "time":  1776102345,
+                         "depth":  2,
+                         "parent":  47753269,
+                         "text":  "The entire 10th amendment is basically being ignored because interstate commerce policies and rulings.  For that matter, the 1st, 4th and 5th aren\u0027t being upheld either."
+                     },
+                     {
+                         "id":  47755732,
+                         "by":  "saltyoldman",
+                         "time":  1776103351,
+                         "depth":  2,
+                         "parent":  47753269,
+                         "text":  "nah, 3d printed firearms next."
+                     },
+                     {
+                         "id":  47753651,
+                         "by":  "Joker_vD",
+                         "time":  1776094928,
+                         "depth":  2,
+                         "parent":  47753132,
+                         "text":  "Also, this line is quite funny on its own because while understand what she actually meant, it can be very easily reinterpreted as \"only actions committed out-of-home should be crimes; murdered someone in your home? welp, our hands are tied, have a nice day\"."
+                     },
+                     {
+                         "id":  47753337,
+                         "by":  "delichon",
+                         "time":  1776093757,
+                         "depth":  2,
+                         "parent":  47752706,
+                         "text":  "\u003e the treatment for methanol poisoning is… ethanol!\nMy grandpa drank a shot of schnapps every night and called it his medicine. I thought it was a euphemism but apparently he was actually taking an antidote prophylactically. You can\u0027t be too careful. He never once got methanol poisoning."
+                     },
+                     {
+                         "id":  47753966,
+                         "by":  "jppope",
+                         "time":  1776095885,
+                         "depth":  2,
+                         "parent":  47752706,
+                         "text":  "\u003e Methanol poisoning stories in the news almost exclusively result from people trying to sell denatured or industrial alcohol\nPretty sure this was a relic of prohibition right? The feds would contaminate ethanol with methanol to keep people from drinking it, but then they hurt a bunch of people and never faced any consequences..."
+                     },
+                     {
+                         "id":  47757640,
+                         "by":  "jasonwatkinspdx",
+                         "time":  1776113403,
+                         "depth":  2,
+                         "parent":  47752706,
+                         "text":  "\u003e even fruit based fermentations with significantly higher pectin concentrations only produce trace methanol\nWould using pectinase to break it down first reduce the risk?"
+                     },
+                     {
+                         "id":  47754266,
+                         "by":  "jbellis",
+                         "time":  1776096955,
+                         "depth":  2,
+                         "parent":  47752706,
+                         "text":  "\u003e the treatment for methanol poisoning is… ethanol!\nI looked this up, it is directionally correct but if you are in a hospital setting they have better options https://www.ncbi.nlm.nih.gov/books/NBK482121/"
+                     },
+                     {
+                         "id":  47753089,
+                         "by":  "gostsamo",
+                         "time":  1776092771,
+                         "depth":  2,
+                         "parent":  47752706,
+                         "text":  "As someone living in the Balkans, home brewing is a national passtime for every nation around. When every family has its own recipe for brewing alcohol, killing ourselves would\u0027ve been achieved many centuries ago if it was a real concern. Methanol is an issue when some dumbshit decides to cell chemically produced trash on industrial scale instead of buying the expensive ingredients."
+                     },
+                     {
+                         "id":  47752783,
+                         "by":  "cucumber3732842",
+                         "time":  1776091608,
+                         "depth":  2,
+                         "parent":  47752706,
+                         "text":  "Was it missed or intentionally downplayed/ignored because people came into the discussion with priors that they were eager to maintain?\nSeems like these sorts of \"yes it could be unsafe in theory but the reality of physics and incentives make this mostly irrelevant\" type things get missed far too often certain parts of the internet to be coincidence.\nThat said, the fact that it dropped on a weekend did it no favors the first time around."
+                     },
+                     {
+                         "id":  47758026,
+                         "by":  "jdc0589",
+                         "time":  1776115534,
+                         "depth":  2,
+                         "parent":  47753397,
+                         "text":  "I dont need to see stuff like this. I have too many hobbies already"
+                     },
+                     {
+                         "id":  47758089,
+                         "by":  "rpmisms",
+                         "time":  1776115962,
+                         "depth":  2,
+                         "parent":  47756083,
+                         "text":  "I know a few cops who moonshine. It\u0027s a natural part of my neck of the woods, and it\u0027s wonderful."
+                     },
+                     {
+                         "id":  47756623,
+                         "by":  "wiredfool",
+                         "time":  1776107689,
+                         "depth":  2,
+                         "parent":  47756083,
+                         "text":  "The best I’ve ever done was a double distilled Spanish box wine we picked up for 1eur/l. The wine was undrinkable, but the brandy was sooooo smooth.\nNext best was cheap tokaij furmint, distilled once and then mixed back into some of the undistilled wine. Basically the same thing as pineau de charante, but Hungarian and on the kitchen table."
+                     },
+                     {
+                         "id":  47756379,
+                         "by":  "01100011",
+                         "time":  1776106485,
+                         "depth":  2,
+                         "parent":  47756083,
+                         "text":  "To me, the refractive index of hot ethanol makes it sparkle like a diamond when leaving the still.\nI don\u0027t drink anymore, but man I loved distilling. It\u0027s like magic."
+                     },
+                     {
+                         "id":  47753559,
+                         "by":  "rtkwe",
+                         "time":  1776094585,
+                         "depth":  2,
+                         "parent":  47753304,
+                         "text":  "The ruling only has binding precedent in the 5th Circuit, other circuits aren\u0027t bound to follow it. Formerly this kind of ruling would come with a nationwide injunction to force the issue but now that those are severely curtailed by the Supreme Court it\u0027s only binding to the courts under the jurisdiction of the 5th circuit.\nDecisions in other circuits can be very persuasive to other circuits but they\u0027re not required to agree the same way a Supreme Court ruling is binding. Circuit splits are moderately common and usually trigger a review by the supreme court if an appeal wasn\u0027t filed for the earlier decisions."
+                     },
+                     {
+                         "id":  47754502,
+                         "by":  "bluGill",
+                         "time":  1776097840,
+                         "depth":  2,
+                         "parent":  47753304,
+                         "text":  "Only the 5th court of appeals. However if you get caught elsewhere your lawyer will have a good appeal grounds just because your area will need to decide if they agree.  If all areas eventually agree it probably never will get to the supreme court. Once several different courts hear this and make a decision if they disagree the supreme court jumps in reading all the logic of everyone below them to try to find a real answer.  (It doesn\u0027t always work this way, that is the textbook ideal way, but the real world is often different).\nNote that unless you think nothing of spending 20 million dollars on lawyers this is probably not something that you want to fight."
+                     },
+                     {
+                         "id":  47753433,
+                         "by":  "gmiller123456",
+                         "time":  1776094131,
+                         "depth":  2,
+                         "parent":  47753304,
+                         "text":  "Appeals court decisions generally only apply to their own jurisdiction. But they obviously hold a lot of weight when cited in others."
+                     },
+                     {
+                         "id":  47753403,
+                         "by":  "malfist",
+                         "time":  1776094019,
+                         "depth":  2,
+                         "parent":  47753304,
+                         "text":  "Prior to this year, the entire country. Today, thanks to SCOTUS shenanigans, it likely only applies to the states involved in the lawsuit, LA. But who knows, hard to keep up with the game of calvinball the SCOTUS is playing."
+                     },
+                     {
+                         "id":  47752416,
+                         "by":  "ckemere",
+                         "time":  1776090140,
+                         "depth":  2,
+                         "parent":  47752075,
+                         "text":  "Wasn’t great. Would love a second attempt focused on distilling not individualist v collectivist or immigration.\n(Except for relevant connections around sharing your creations with neighbors and/or internationally inspired novel spirits.)"
+                     },
+                     {
+                         "id":  47753989,
+                         "by":  "aqme28",
+                         "time":  1776095966,
+                         "depth":  2,
+                         "parent":  47753693,
+                         "text":  "To be fair, we still add 5-10% methanol to industrial alcohol. But also a bunch of bitterants to discourage use."
+                     },
+                     {
+                         "id":  47754053,
+                         "by":  "EgregiousCube",
+                         "time":  1776096171,
+                         "depth":  2,
+                         "parent":  47753531,
+                         "text":  "Yes, it\u0027d be interesting if this gets appealed and the SC gets to take a look at if $0 tax stamps are allowable under the tax and spending clause."
+                     },
+                     {
+                         "id":  47756445,
+                         "by":  "wellthisisgreat",
+                         "time":  1776106815,
+                         "depth":  2,
+                         "parent":  47753531,
+                         "text":  "Yeah, moonshine is ok but Tommy Gun isn’t? It’s roaring twenties y’all!"
+                     },
+                     {
+                         "id":  47754277,
+                         "by":  "esseph",
+                         "time":  1776096980,
+                         "depth":  2,
+                         "parent":  47753531,
+                         "text":  "Tally ho!"
+                     },
+                     {
+                         "id":  47754876,
+                         "by":  "jotux",
+                         "time":  1776099405,
+                         "depth":  2,
+                         "parent":  47753578,
+                         "text":  "\u003eIt\u0027ll be interesting to see how many people get methanol poisoning from trying their hand at it without doing the research properly.\nIf you\u0027re into home brewing or distilling, the first and only comment people completely unfamiliar with the process say is something about going blind because of methanol. It\u0027s disappointing because the process is so rich with history and really interesting problems to solve but the zeitgeist is completely poisoned by prohibition-era propaganda."
+                     },
+                     {
+                         "id":  47754657,
+                         "by":  "OkayPhysicist",
+                         "time":  1776098490,
+                         "depth":  2,
+                         "parent":  47753578,
+                         "text":  "Unless they try to make booze from woodchips, they\u0027ll be fine. Using fruit or grains or potatoes makes it really hard to end up with enough methanol to be dangerous."
+                     },
+                     {
+                         "id":  47754516,
+                         "by":  "amanaplanacanal",
+                         "time":  1776097893,
+                         "depth":  2,
+                         "parent":  47753578,
+                         "text":  "Probably none. Unless someone is intentionally adding methanol to it."
+                     },
+                     {
+                         "id":  47754990,
+                         "by":  "FergusArgyll",
+                         "time":  1776099871,
+                         "depth":  2,
+                         "parent":  47753578,
+                         "text":  "I dunno, I tried making some myself when I was quite young and I can still see. Don\u0027t know what I did wrong / right..."
+                     },
+                     {
+                         "id":  47755712,
+                         "by":  "Tangurena2",
+                         "time":  1776103264,
+                         "depth":  2,
+                         "parent":  47754205,
+                         "text":  "They\u0027re a significant fire hazard which is why ATF regulations for stills require them to be located at least 100 feet from a residence.\nI live in a city with 2 distilleries. You can smell when they\u0027re dealing with the mash because everyone in town can smell it. Also, we all get some black mold (not the really bad one) all over our siding which I think is some byproduct of the fermentation step.\nMy father worked in the oil business. As a chemical engineer, he was brewing his own moonshine (Poitín [pronounced \u0027poh-cheen\u0027] in Ireland, Sidiki [means \u0027friend\u0027] in Arabic language countries) since he was in university. In Saudi Arabia, there were frequent home fires in the western-expatriate communities. Newspapers reported them as \"unattended cooking pot\" fires. It happened several times per year in the Ras Tanura community they last lived in."
+                     },
+                     {
+                         "id":  47755033,
+                         "by":  "mynameisash",
+                         "time":  1776100085,
+                         "depth":  2,
+                         "parent":  47754205,
+                         "text":  "I would say: not explosive. I\u0027ve seen a decent number of setups, and I can think of three areas where you could be concerned with safety (not necessarily where you should be):\n1. Most use propane burners (the exact thing you\u0027d use for homebrewing which is already legal and safe, and also similar to what some large turkey fryers use) which can be risky, but some are electric (120v or 240v).\n2. Stills are an open system insofar as there is a way for pressure to escape - if you\u0027re goofing things up, you might vaporize and not recondense your ethanol (eg, because you have the heat way too high and/or aren\u0027t doing a good job of cooling down the vapors), and it\u0027s possible for that vapor to start on fire. I\u0027ve seen it happen, and it\u0027s certainly a spectacle but wasn\u0027t particularly dangerous.\n3. The distillate itself (ie, ethanol) is usually pretty potent, especially the foreshots and heads. Let\u0027s say 70%+. Especially as it\u0027s coming out, it\u0027s still prone to evaporation, and you could have a combustible/explosive risk here, but I\u0027ve never seen this to be an actual problem."
+                     },
+                     {
+                         "id":  47755202,
+                         "by":  "ravenstine",
+                         "time":  1776100927,
+                         "depth":  2,
+                         "parent":  47754205,
+                         "text":  "Not explosive, but still a potential fire hazard, especially if a still gets way too hot (coolant system fails) and alcohol vapors escape.  The risk becomes extremely minimal when using an electric still."
+                     },
+                     {
+                         "id":  47754856,
+                         "by":  "jerrysievert",
+                         "time":  1776099313,
+                         "depth":  2,
+                         "parent":  47754205,
+                         "text":  "they\u0027re really not.  they\u0027re generally not a pressure vessel, and even when I\u0027ve had leaks of ethanol, the fire went out immediately after being removed from heat.\ntoday\u0027s home stills are usually plug-in resistance heated chambers with a still head, and are very high quality.  my flame-out was from a pot still that was sealed with flour and water, not a modern still."
+                     },
+                     {
+                         "id":  47754594,
+                         "by":  "dylan604",
+                         "time":  1776098158,
+                         "depth":  2,
+                         "parent":  47754205,
+                         "text":  "less than a meth lab"
+                     },
+                     {
+                         "id":  47754903,
+                         "by":  "seanw444",
+                         "time":  1776099508,
+                         "depth":  2,
+                         "parent":  47753532,
+                         "text":  "A win against the over-application of the interstate commerce clause that benefits everybody! Quick, how can we make this partisan?"
+                     },
+                     {
+                         "id":  47756071,
+                         "by":  "BenjiWiebe",
+                         "time":  1776104946,
+                         "depth":  2,
+                         "parent":  47753532,
+                         "text":  "Doesn\u0027t apply to beer anyways."
+                     },
+                     {
+                         "id":  47754245,
+                         "by":  "cogman10",
+                         "time":  1776096886,
+                         "depth":  3,
+                         "parent":  47753890,
+                         "text":  "I think the issue is this isn\u0027t seen by politicians as a motivating vote driver.  It is, however, a motivation for someone to go out and vote against a politician.\nThat\u0027s ultimately what keeps things like MJ illegal.  There are just far too many people that will get upset about it if it were made federally legal.\nMy state, Idaho, has one such politician that is constantly bringing up and trying to find ways to keep the wacky tabacy out of the state.  Including trying to amend the state constitution for it.  He does this because he\u0027s mormon and the mormons are scared of the devil\u0027s lettuce."
+                     },
+                     {
+                         "id":  47757190,
+                         "by":  "dfxm12",
+                         "time":  1776110956,
+                         "depth":  3,
+                         "parent":  47753890,
+                         "text":  "It\u0027s been popular (with over 50% popular support) for the last decade though. The major opponents are the alcohol industry, big pharma and the prison industrial complex. Their lobbying efforts are too powerful. We (the people) don\u0027t stand a chance."
+                     },
+                     {
+                         "id":  47754316,
+                         "by":  "bsimpson",
+                         "time":  1776097133,
+                         "depth":  3,
+                         "parent":  47753890,
+                         "text":  "I don\u0027t even smoke - it just offends me deeply to see the Supreme Court rule in a direction that\u0027s so blatantly against the Constitution."
+                     },
+                     {
+                         "id":  47754099,
+                         "by":  "dmitrygr",
+                         "time":  1776096316,
+                         "depth":  3,
+                         "parent":  47753890,
+                         "text":  "You’re probably right, though I dread the possibility. I cannot stand the smell, and one of the best things about moving from California to Texas was avoiding that pervasive smell being everywhere. Negative externalities of personal behavior really need to be handled better in our society. If you want pot to be legal, fine, but only inside your own personal enclosed house."
+                     },
+                     {
+                         "id":  47755014,
+                         "by":  "semiquaver",
+                         "time":  1776099950,
+                         "depth":  3,
+                         "parent":  47754938,
+                         "text":  "Circuit courts may not overrule Supreme Court precedent. Accordingly, this decision purports to rest on the “Necessary and Proper” clause, avoiding Wickard (decided on commerce clause grounds)"
+                     },
+                     {
+                         "id":  47756537,
+                         "by":  "bell-cot",
+                         "time":  1776107271,
+                         "depth":  3,
+                         "parent":  47754938,
+                         "text":  "There\u0027s a lot of context (behind Wickard v Filburn) which would obviously not apply to anyone distilling for personal consumption:\nhttps://en.wikipedia.org/wiki/Wickard_v._Filburn"
+                     },
+                     {
+                         "id":  47754546,
+                         "by":  "gbacon",
+                         "time":  1776098012,
+                         "depth":  3,
+                         "parent":  47753346,
+                         "text":  "You have identified a root perversion. Roscoe Filburn’s wheat did not leave Ohio or even his farm. He didn’t offer it for sale; the wheat was for his own use. It was deemed to “affect interstate commerce” and thus within the scope of the interstate commerce clause. With that, a provision intended to remove power of states to tax each other’s goods and services and promote a free trade zone instead became a mechanism to nitpick and micromanage every last little detail, ossify existing practice, protect large players, give loopholes to the politically connected, and enable mass regulatory capture. It cannot be overturned quickly enough.\nhttps://supreme.justia.com/cases/federal/us/317/111/"
+                     },
+                     {
+                         "id":  47753443,
+                         "by":  "mothballed",
+                         "time":  1776094164,
+                         "depth":  3,
+                         "parent":  47753346,
+                         "text":  "That would also invalidate the civil rights act, as the (similar) 19th century CRA was already struck down because the 14th amendment binds against discrimination by public not private actors.  The reason why the modern CRAs weren\u0027t also struck is because they rested on the laurels of Wickard v Filburn declaring the CRA (this time) is about regulating \"interstate\" commerce."
+                     },
+                     {
+                         "id":  47755462,
+                         "by":  "thaumasiotes",
+                         "time":  1776102166,
+                         "depth":  3,
+                         "parent":  47754337,
+                         "text":  "You say that like interstate commerce regulation was more egregious for wheat than it was for marijuana.\nBut Raich is significantly more egregious: the theory on which the government won Wickard v. Filburn, that private consumption of wheat could affect the interstate market for wheat, doesn\u0027t even apply, because there can be no interstate market in a substance that is illegal to trade."
+                     },
+                     {
+                         "id":  47755489,
+                         "by":  "bsimpson",
+                         "time":  1776102286,
+                         "depth":  3,
+                         "parent":  47755445,
+                         "text":  "It\u0027s not about decriminalizing marijuana - it\u0027s about the absurd assertion that the federal government can regulate what you do personally because \"yadda yadda yadda…interstate commerce!\""
+                     },
+                     {
+                         "id":  47756814,
+                         "by":  "nullc",
+                         "time":  1776108763,
+                         "depth":  3,
+                         "parent":  47755494,
+                         "text":  "Thank you for your work here.  Overcoming the argument that a threat of prosecution doesn\u0027t create standing is a huge advancement for the cause of freedom-- in light of Babbitt the state never should have been arguing otherwise nor should the lower court have ruled that way but they were and that line of argument is protecting a lot of facially unconstitutional law."
+                     },
+                     {
+                         "id":  47755692,
+                         "by":  "bsimpson",
+                         "time":  1776103190,
+                         "depth":  3,
+                         "parent":  47755416,
+                         "text":  "That\u0027s arguing around the point.\nIf the law is broken, fix the law.  Don\u0027t pervert logic to pretend that the existing law dictates what you want is correct.\nIf Roe v Wade is based on faulty logic, cool - overturn it.  But it then becomes Congress\u0027s responsibility to replace it with the correct version.\nThe federal government isn\u0027t supposed to police people\u0027s personal behavior.  \"Federal\" comes from \"federation\" as in, the group of states in the union.  It\u0027s the job of the legislature to write the laws, the job of the judiciary to interpret the laws, and the job of the states to do these things for areas that don\u0027t rise to the level enumerated in the Constitution.\nWhen you get it twisted, you end up with this tug-of-war where corrupt politicians try to put biased judges on the bench to mold the rules to their whims without actually having to pass them."
+                     },
+                     {
+                         "id":  47755655,
+                         "by":  "threecheese",
+                         "time":  1776103046,
+                         "depth":  3,
+                         "parent":  47755582,
+                         "text":  "We’ve already seen states try and regulate outside their borders; TX with abortion as one example. How does a weaker federal government protect against this, or do you believe it should not? And how does this not devolve into 50 fiefdoms?"
+                     },
+                     {
+                         "id":  47753738,
+                         "by":  "tt24",
+                         "time":  1776095208,
+                         "depth":  3,
+                         "parent":  47753659,
+                         "text":  "The interstate commerce clause is just craziness. It touches everything and gives justification to regulate nearly anything."
+                     },
+                     {
+                         "id":  47753728,
+                         "by":  "Der_Einzige",
+                         "time":  1776095183,
+                         "depth":  3,
+                         "parent":  47753659,
+                         "text":  "I wouldn\u0027t be surprised if this one unironically goes given that Uber/Lyft are fully doing \"women only\" ride shares now.\nGen Z / Alpha have embraced X-\"realism\" and fully accept essentialism/reject \"intersectionality\". They\u0027re far more conservative/prudish than millennials, even at their young age."
+                     },
+                     {
+                         "id":  47753646,
+                         "by":  "gbear605",
+                         "time":  1776094906,
+                         "depth":  3,
+                         "parent":  47753588,
+                         "text":  "It\u0027s possible that the government thought that if they did try to challenge the Commerce Clause analysis, then the Supreme Court could have struck down Filburn. They\u0027d much rather lose narrowly on this specific case than have Filburn reversed entirely."
+                     },
+                     {
+                         "id":  47754028,
+                         "by":  "bee_rider",
+                         "time":  1776096101,
+                         "depth":  3,
+                         "parent":  47753588,
+                         "text":  "That seems like a pretty over-reaching interpretation. It makes sense in the context (needing to support federal economic control during WW2). But in some sense the economy is a dynamic system that touches and is touched by almost every decision we make. I made a pot of coffee this morning, should the federal government have the ability to decide whether or not I’m damaging the cafe market by not supporting my local cafe?"
+                     },
+                     {
+                         "id":  47754953,
+                         "by":  "codexb",
+                         "time":  1776099716,
+                         "depth":  3,
+                         "parent":  47754900,
+                         "text":  "It uses the phrase “regulate commerce between the states” which effectively has the same meaning."
+                     },
+                     {
+                         "id":  47754469,
+                         "by":  "dylan604",
+                         "time":  1776097726,
+                         "depth":  3,
+                         "parent":  47754392,
+                         "text":  "\u003e The problem is if you say the government can’t regulate MJ, then all drug regulations fall apart.\nNo, that\u0027s not what\u0027s being said. If you grow your own plant for personal use, there\u0027s no need for the federal government to be involved. If you grow that plant and then try to sell it, then there\u0027s some commerce which does fall under some regulation (we\u0027ll leave the interstate nuances aside). Having the fed being allowed to say you cannot grow in your house is one step away from saying you are only allowed to perform missionary position (no other positions are allowed) between the hours of 7-8pm, but not at all on Sunday."
+                     },
+                     {
+                         "id":  47754501,
+                         "by":  "MichaelDickens",
+                         "time":  1776097840,
+                         "depth":  3,
+                         "parent":  47754392,
+                         "text":  "I believe the original idea of the Constitution was that most things would be regulated at the state level.\nThis is pretty much already the case with marijuana, where it\u0027s illegal at the federal level, but in practice if it\u0027s legal in your state then it\u0027s legal."
+                     },
+                     {
+                         "id":  47754475,
+                         "by":  "davidw",
+                         "time":  1776097752,
+                         "depth":  3,
+                         "parent":  47754392,
+                         "text":  "\u003e I’d be concerned about Billy selling homemade GPLs or whatever.\nWould it be better with a BSD license?"
+                     },
+                     {
+                         "id":  47754417,
+                         "by":  "amanaplanacanal",
+                         "time":  1776097544,
+                         "depth":  3,
+                         "parent":  47753651,
+                         "text":  "I think the point is that murder is handled by the states, not Congress. This is about what the federal government can do, not all government."
+                     },
+                     {
+                         "id":  47754773,
+                         "by":  "PyWoody",
+                         "time":  1776098965,
+                         "depth":  3,
+                         "parent":  47753337,
+                         "text":  "Was his doctor Dr. McGillicuddy?"
+                     },
+                     {
+                         "id":  47755525,
+                         "by":  "thaumasiotes",
+                         "time":  1776102445,
+                         "depth":  3,
+                         "parent":  47753966,
+                         "text":  "\u003e Pretty sure this was a relic of prohibition right? The feds would contaminate ethanol with methanol to keep people from drinking it\nWe still do this now. We don\u0027t do it because alcohol is illegal, we do it because we levy higher taxes on non-poisonous alcohol, and if someone decides to drink the poisoned alcohol, they deserve what they get."
+                     },
+                     {
+                         "id":  47753697,
+                         "by":  "htx80nerd",
+                         "time":  1776095066,
+                         "depth":  3,
+                         "parent":  47753089,
+                         "text":  "almost every year there is a news story of some Western tourist visiting another country dying from bootleg methanol alcohol"
+                     },
+                     {
+                         "id":  47752957,
+                         "by":  "ch4s3",
+                         "time":  1776092262,
+                         "depth":  3,
+                         "parent":  47752783,
+                         "text":  "Speaking as a brewer, I can tell you that tons of people who should know better actually believe the methanol thing and will even quote some sciency words to make their argument. I think its a case of bad information coming from black market distilling being propagated uncritically. People who know better (licensed distillers) have no incentive to argue against it."
+                     },
+                     {
+                         "id":  47755076,
+                         "by":  "rdbl27",
+                         "time":  1776100312,
+                         "depth":  3,
+                         "parent":  47753559,
+                         "text":  "Nationwide injunctions are a very recent legal innovation -- as in, extremely rare until the 2000s, and uncommon until the 2010s.\nThey were not how this situation was handled for nearly all of the existence of the United States.\nhttps://en.wikipedia.org/wiki/Nationwide_injunction"
+                     },
+                     {
+                         "id":  47753448,
+                         "by":  "dcrazy",
+                         "time":  1776094178,
+                         "depth":  3,
+                         "parent":  47753403,
+                         "text":  "You seem to be confusing precedent-setting decisions with nationwide injunctions."
+                     },
+                     {
+                         "id":  47753107,
+                         "by":  "wing-_-nuts",
+                         "time":  1776092859,
+                         "depth":  3,
+                         "parent":  47752416,
+                         "text":  "I am not really a fan of liquor, but I do like the idea of having skills which are universally valuable.\nIf you air dropped me into a random village in Africa I doubt I could \u0027code for cassava\u0027 but I could almost certainly make a living if I knew how to set up a basic pot still and safely create booze."
+                     },
+                     {
+                         "id":  47754129,
+                         "by":  "mordae",
+                         "time":  1776096408,
+                         "depth":  3,
+                         "parent":  47753989,
+                         "text":  "Are adding it or just distill both because it\u0027s cheaper?"
+                     },
+                     {
+                         "id":  47756021,
+                         "by":  "beedeebeedee",
+                         "time":  1776104745,
+                         "depth":  3,
+                         "parent":  47755712,
+                         "text":  "Thanks for sharing your comment. I was skeptical about your claim that black mold would be a consequence of living near a distillery, but in fact, it is. It is called Whiskey Fungus and is related to the aging of the spirits.\nhttps://en.wikipedia.org/wiki/Baudoinia"
+                     },
+                     {
+                         "id":  47756631,
+                         "by":  "cs02rm0",
+                         "time":  1776107722,
+                         "depth":  3,
+                         "parent":  47755712,
+                         "text":  "Crikey. My dad (and just about every other westerner) used to brew sid down the road in Dhahran, I never heard of fires from it."
+                     }
+                 ]
+}

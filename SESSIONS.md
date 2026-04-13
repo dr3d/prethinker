@@ -13,6 +13,9 @@ Use this as the handoff doc for future agents and for repo-to-repo migration.
 - The repo folder name can change without code changes because commands are relative to repo root.
 - Existing `kb_runs/*.json`, `docs/*.html`, and prompt snapshot metadata may still show older absolute paths from when those artifacts were generated.
 - Treat those embedded paths as historical metadata, then rerender outputs after rename to refresh visible references.
+- Historical entries in this log may mention older docs-hub routing; current split is:
+  - `docs/index.html` (visitor landing page)
+  - `docs/run-reports-hub.html` (searchable run explorer)
 
 ## Scope Achieved
 
@@ -25,7 +28,148 @@ Use this as the handoff doc for future agents and for repo-to-repo migration.
 
 ## Timeline of Major Sessions
 
-## Session 11 (2026-04-13): Regression Stability + Cross-Model Probe
+## Session 32 (2026-04-13): HN Midground Harvest v2 (Real-World Transcript Bank)
+
+Outcome:
+
+- harvested a fresh Hacker News middle-ground source pack from live HN API:
+  - `stories/excursions/hn_midground_manifest_v2.json`
+  - `stories/excursions/HN_MIDGROUND_PACK_V2.md`
+  - `stories/excursions/hn_midground_v2/*.json` (OP + sampled comment transcripts)
+- selected six threads spanning incident-policy, vendor policy, reliability, deliverability, legal reasoning, and security incident lanes.
+- auto-generated ready-to-run turnsets:
+  - `stories/excursions/hn_midground_v2/turnsets/*.json`
+  - each contains `12` turns (OP + 11 sampled comments).
+
+Smoke evidence:
+
+- MITM smoke on HN turnset (`max-turns=4`):
+  - input: `stories/excursions/hn_midground_v2/turnsets/hn_docker_spain_block_turnset_v1.json`
+  - summary: `tmp/runs/mitm_sessions/20260413_214720_hn_docker_spain_block_turnset_v1/session_summary.json`
+  - observed readiness grade: `C` (useful pressure signal; materially noisier than synthetic lanes)
+
+## Session 31 (2026-04-13): In-World MITM Loop Wiring + KB Grading Harness
+
+Outcome:
+
+- added live MITM session runner:
+  - `scripts/run_mitm_session.py`
+  - runs turn-by-turn against `kb_pipeline.py` while preserving one KB namespace
+  - emits per-turn reports + transcript JSONL + session summary metrics
+  - supports served-LLM clarification loop and optional fallback sidecar replay for unresolved clarification turns
+- added KB grading utility:
+  - `scripts/grade_kb.py`
+  - strict grading from golden diff (`precision/recall/f1`, missing/extra clauses)
+  - semantic grading from source prose + candidate `kb.pl` using local model
+  - weighted overall grade output for quick frontier health checks
+- updated operator docs:
+  - `README.md` now includes MITM session and KB grading usage examples
+
+Why this matters:
+
+- closes the gap between synthetic track passes and in-world session behavior.
+- gives repeatable instrumentation for confusion-resolution loop quality and practical KB fidelity.
+
+Smoke artifacts:
+
+- MITM session summary:
+  - `tmp/runs/mitm_sessions/20260413_213944_rung_467_frontier_failure_question_advice_dual_intent/session_summary.json`
+- KB grading report:
+  - `tmp/runs/kb_grade_mitm_smoke.json`
+
+## Session 30 (2026-04-13): Failure-Promotion Recovery (2 -> 1) + Double-SP Footgun Fix
+
+Outcome:
+
+- completed the "2 then 1" loop:
+  - wired declared-predicate hint alignment into live parse flow:
+    - `_apply_declared_predicate_hint_guard(...)` now runs in the main alignment chain
+  - added deterministic rule negation canonicalization:
+    - rewrites `not goal(...)` and `not(goal(...))` into Prolog-engine native `\\+(goal(...))` during rule expansion
+- codified default track runner model to bare tuning lane:
+  - `scripts/run_track.py` default `--model` changed to `qwen3.5:9b`
+  - avoids accidental baked+runtime system-prompt dual-source runs in unattended track execution
+- updated operator docs to reflect single-source SP policy and bare-lane defaults:
+  - `README.md` (quickstart + track commands + explicit double-SP note)
+  - `docs/TRACK_SCOREBOARD.md` (recovery run reflected)
+
+Results:
+
+- direct rung verification:
+  - `rung_466_frontier_failure_exception_rule_partition`: `3/3` passed
+  - artifact: `tmp/runs/rung_466_frontier_failure_exception_rule_partition_direct_verify.json`
+- promoted-failure track after fixes (bare `qwen3.5:9b`):
+  - `excursion_failure_promotions_v1`: `3/3` (`100.0%`) vs target `100%`
+  - artifact: `tmp/runs/tracks/track_excursion_failure_promotions_v1_summary_20260413_211029.json`
+  - default-runner verification artifact: `tmp/runs/tracks/track_excursion_failure_promotions_v1_summary_20260413_211353.json`
+
+Interpretation:
+
+- pre-normalization + declared-predicate hinting fixed multi-clause and dual-intent drop classes.
+- canonical negation rewrite resolved rule-exception partition failures in the core engine path.
+- the earlier `0/3` failure slice was partly masked by a configuration footgun (double SP); default lane now matches intended tuning operation.
+
+## Session 29 (2026-04-13): GO Excursion Push + Brick-Wall Mapping
+
+Outcome:
+
+- scaled excursions from pilot into graded/full tracks and ran on bare tuning lane (`qwen3.5:9b` + runtime prompt):
+  - `excursion_cooperative_v1_full` (6 scenarios)
+  - `excursion_wild_v1_full` (6 scenarios)
+  - `excursion_frontier_v2_full` (12 scenarios)
+- promoted repeated failure patterns into explicit synthetic guard rungs:
+  - `rung_465_frontier_failure_multiclause_scope_drop_guard`
+  - `rung_466_frontier_failure_exception_rule_partition`
+  - `rung_467_frontier_failure_question_advice_dual_intent`
+  - grouped under track `excursion_failure_promotions_v1`
+
+Results (brick wall evidence):
+
+- `excursion_frontier_v2_full`: `5/12` (`41.7%`)
+- `excursion_cooperative_v1_full`: `2/6` (`33.3%`)
+- `excursion_wild_v1_full`: `3/6` (`50.0%`)
+- `excursion_failure_promotions_v1`: `0/3` (`0.0%`)
+
+Primary failure classes observed:
+
+- Multi-clause relation drop (especially `X but Y` and follow-up scope qualifiers).
+- Exception partition failures (`liable` under `not emergency` patterns in legal-style language).
+- Parenthetical legal language collapse (high parse/apply failure concentration).
+- Dual-intent compression misses (`seeks` + `advice` in one noisy sentence).
+- Metadata/control-line fragility (`Use ...` turns occasionally misrouted into invalid apply attempts).
+
+Key artifacts:
+
+- `tmp/runs/tracks/track_excursion_frontier_v2_full_summary_20260413_203539.json`
+- `tmp/runs/tracks/track_excursion_cooperative_v1_full_summary_20260413_204213.json`
+- `tmp/runs/tracks/track_excursion_wild_v1_full_summary_20260413_204213.json`
+- `tmp/runs/tracks/track_excursion_failure_promotions_v1_summary_20260413_204119.json`
+
+## Session 28 (2026-04-13): Excursion Source Harvest v1 (Cooperative + HN-Middle + Wild)
+
+Outcome:
+
+- harvested a manageable, graded real-world source bank for de-inbreeding scenario work:
+  - `stories/excursions/SOURCE_BANK_V1.md`
+  - `stories/excursions/excursion_manifest_v1.json`
+- codified two explicit packs with six items each:
+  - `excursion_cooperative_v1` (Fed + Supreme Court transcripts)
+  - `excursion_wild_v1` (Hacker News middle-noise + Reddit legal threads)
+- attached per-item difficulty grade (`G1`..`G4`) and suggested turn-window sizes for conversion.
+- added first runnable excursion pilot rungs and track:
+  - `kb_scenarios/rung_452_excursion_hn_docker_spain_block.json`
+  - `kb_scenarios/rung_453_excursion_reddit_security_deposit_appeal.json`
+  - `kb_scenarios/tracks.json` -> `excursion_pilot_v1`
+- executed pilot track on bare tuning lane (`qwen3.5:9b` + runtime prompt):
+  - result: `2/2` passed (`100%`)
+  - summary: `tmp/runs/tracks/track_excursion_pilot_v1_summary_20260413_201846.json`
+
+Why this matters:
+
+- gives us a reproducible lane for "in the wild" language without polluting strict gate metrics.
+- provides a concrete ramp from structured fact language (`G1`) through forum noise (`G4`), so we can push difficulty progressively.
+
+## Session 27 (2026-04-13): Regression Stability + Cross-Model Probe
 
 Outcome:
 
@@ -199,7 +343,7 @@ Outcome:
 - created onboarding and migration docs:
   - `AGENT-README.md`
   - this `SESSIONS.md`
-  - `NEXT-CODEX.md` (later consolidated into `AGENT-README.md`)
+  - legacy NEXT-CODEX handoff note (later consolidated into `AGENT-README.md`)
 
 ## What We Learned
 
@@ -269,7 +413,7 @@ After copying into `prolog-reasoning`, verify:
    - `system_prompt_text`
 4. `render_kb_run_html.py` shows `run_context` and annotation cards.
 5. `build_hub_index.py` generates:
-   - `docs/index.html`
+   - `docs/run-reports-hub.html`
    - `docs/data/runs_manifest.json`
    - `docs/data/prompt_versions.json`
 6. Smoke pair passes with one prompt id:
@@ -285,7 +429,7 @@ python kb_pipeline.py --backend ollama --base-url http://127.0.0.1:11434 --model
 
 # render + hub
 python scripts/render_kb_run_html.py --input kb_runs --output docs/reports --theme standard --docs-hub-link ../index.html --repo-link ./README.md
-python scripts/build_hub_index.py --reports-dir docs/reports --runs-dir kb_runs --kb-pages-dir docs/kb --ladder-index docs/rungs/index.html --output docs/index.html --title "Prethinker Report Hub"
+python scripts/build_hub_index.py --reports-dir docs/reports --runs-dir kb_runs --kb-pages-dir docs/kb --ladder-index docs/rungs/index.html --output docs/run-reports-hub.html --title "Prethinker Report Hub"
 ```
 
 ## Artifacts To Trust During Future Tuning
@@ -293,6 +437,7 @@ python scripts/build_hub_index.py --reports-dir docs/reports --runs-dir kb_runs 
 Human-facing:
 
 - `docs/index.html`
+- `docs/run-reports-hub.html`
 - `docs/reports/*.html`
 
 Machine-facing:
@@ -313,7 +458,7 @@ Run these from repo root after renaming the folder:
 python scripts/render_kb_run_html.py --input kb_runs --output docs/reports --recursive --theme standard --docs-hub-link ../index.html --repo-link ./README.md
 python scripts/render_kb_store_html.py --kb-root kb_store --output-dir docs/kb --title-prefix "KB Snapshot"
 python scripts/render_test_ladder_html.py --scenarios-dir kb_scenarios --runs-dir kb_runs --output-dir docs/rungs --title "Prolog Extraction Test Ladder"
-python scripts/build_hub_index.py --reports-dir docs/reports --runs-dir kb_runs --kb-pages-dir docs/kb --ladder-index docs/rungs/index.html --output docs/index.html --title "Prethinker Report Hub"
+python scripts/build_hub_index.py --reports-dir docs/reports --runs-dir kb_runs --kb-pages-dir docs/kb --ladder-index docs/rungs/index.html --output docs/run-reports-hub.html --title "Prethinker Report Hub"
 ``` 
 
 ## Closeout Note
@@ -341,7 +486,7 @@ Outcome:
   - moved root `.tmp*` artifacts into `tmp/`
   - updated ignore rules for `tmp/`
 - consolidated handoff docs to avoid redundancy:
-  - `NEXT-CODEX.md` renamed/removed from root workflow
+  - legacy NEXT-CODEX handoff note renamed/removed from root workflow
   - `AGENT-README.md` now carries fast-resume + onboarding role
 
 Verification notes:

@@ -1,6 +1,6 @@
 ﻿# Track Scoreboard
 
-Last updated: 2026-04-12
+Last updated: 2026-04-13
 
 ## Frontier Width Tracks (Ollama, qwen35-semparse:9b, runtime=core)
 
@@ -39,3 +39,28 @@ Historical JSON:
 - `docs/data/tracks/gate_ladder_frontier_same_model_latest.json`
 - `docs/data/tracks/examples_all_same_model_latest.json`
 - `docs/data/tracks/book_acid_goldilocks_same_model_latest.json`
+
+## Excursion Ceiling Sweep (GO Run, Bare `qwen3.5:9b`)
+
+Model/setup:
+
+- Parser: `qwen3.5:9b`
+- Prompt source: runtime `modelfiles/semantic_parser_system_prompt.md`
+- Backend: Ollama
+- Runtime: `core`
+
+| Track | Passed / Total | Pass Rate | Target | Meets Target |
+|---|---:|---:|---:|---|
+| excursion_cooperative_v1_full | 2 / 6 | 33.3% | 83% | False |
+| excursion_wild_v1_full | 3 / 6 | 50.0% | 67% | False |
+| excursion_frontier_v2_full | 5 / 12 | 41.7% | 75% | False |
+| excursion_failure_promotions_v1 | 3 / 3 | 100.0% | 100% | True |
+
+Run summary JSON (tmp artifacts):
+
+- `tmp/runs/tracks/track_excursion_cooperative_v1_full_summary_20260413_204213.json`
+- `tmp/runs/tracks/track_excursion_wild_v1_full_summary_20260413_204213.json`
+- `tmp/runs/tracks/track_excursion_frontier_v2_full_summary_20260413_203539.json`
+- `tmp/runs/tracks/track_excursion_failure_promotions_v1_summary_20260413_204119.json` (initial baseline)
+- `tmp/runs/tracks/track_excursion_failure_promotions_v1_summary_20260413_211029.json` (after pre-normalization + targeted repair pass)
+- `tmp/runs/tracks/track_excursion_failure_promotions_v1_summary_20260413_211353.json` (verified with new `run_track.py` default model)

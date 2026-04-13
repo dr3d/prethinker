@@ -1,0 +1,63 @@
+{
+  "name": "rung_464_excursion_coop_scotus_parenthetical_exception",
+  "ontology_name": "rung_464_excursion_coop_scotus_parenthetical_exception",
+  "utterances": [
+    "Use argued/2, parenthetical_note/2, exception_for/2, applies_to/2, does_not_apply_to/2.",
+    {
+      "utterance": "Counsel argued notice is required before entry (except emergency response entries), and the panel asked whether that parenthetical controls this record.",
+      "clarification_answers": [
+        "Set argued(counsel, notice_required_before_entry). Set parenthetical_note(counsel, emergency_response_exception). Set exception_for(notice_rule, emergency_response_entries)."
+      ],
+      "max_clarification_rounds": 2
+    },
+    {
+      "utterance": "Counsel then said the emergency exception applies to case_beta but does not apply to case_alpha.",
+      "clarification_answers": [
+        "Set applies_to(emergency_response_exception, case_beta). Set does_not_apply_to(emergency_response_exception, case_alpha)."
+      ],
+      "max_clarification_rounds": 2
+    },
+    "query argued(counsel, notice_required_before_entry).",
+    "query exception_for(notice_rule, emergency_response_entries).",
+    "query applies_to(emergency_response_exception, case_beta).",
+    "query does_not_apply_to(emergency_response_exception, case_alpha).",
+    "query applies_to(emergency_response_exception, case_alpha)."
+  ],
+  "validations": [
+    {
+      "id": "core_notice_argument_recorded",
+      "query": "argued(counsel, notice_required_before_entry).",
+      "expect_status": "success",
+      "min_rows": 1,
+      "max_rows": 1
+    },
+    {
+      "id": "exception_anchor_recorded",
+      "query": "exception_for(notice_rule, emergency_response_entries).",
+      "expect_status": "success",
+      "min_rows": 1,
+      "max_rows": 1
+    },
+    {
+      "id": "exception_applies_to_beta",
+      "query": "applies_to(emergency_response_exception, case_beta).",
+      "expect_status": "success",
+      "min_rows": 1,
+      "max_rows": 1
+    },
+    {
+      "id": "exception_not_for_alpha",
+      "query": "does_not_apply_to(emergency_response_exception, case_alpha).",
+      "expect_status": "success",
+      "min_rows": 1,
+      "max_rows": 1
+    },
+    {
+      "id": "alpha_not_marked_as_exception_case",
+      "query": "applies_to(emergency_response_exception, case_alpha).",
+      "expect_status": "no_results",
+      "min_rows": 0,
+      "max_rows": 0
+    }
+  ]
+}

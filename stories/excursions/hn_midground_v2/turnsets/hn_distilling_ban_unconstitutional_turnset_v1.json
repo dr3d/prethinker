@@ -1,0 +1,76 @@
+﻿{
+    "name":  "hn_distilling_ban_unconstitutional_turnset_v1",
+    "source_thread_id":  47751781,
+    "source_url":  "https://news.ycombinator.com/item?id=47751781",
+    "difficulty":  "G3",
+    "lane":  "legal_reasoning",
+    "utterances":  [
+                       {
+                           "utterance":  "bsimpson: Do this one next:\nhttps://en.wikipedia.org/wiki/Gonzales_v._Raich\nThe Supreme Court somehow held that the feds can regulate what you do in your own home (in this case, growing marijuana for personal use) because it could have a butterfly effect on the interstate price. (Constitutionally, the feds can only regulate _interstate_ commerce.)",
+                           "source":  "comment",
+                           "source_id":  47753269,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "semiquaver: \u003e [Judge Edith Jones] also said that under the government’s logic, Congress could  criminalize virtually any in-home activity\n\nWell, yeah. This is essentially the holding in Wickard v. Filburn, which seems to be in tension with this decision (overturning that would be great but it’s not the role of the circuit courts of appeal to do preemptively)",
+                           "source":  "comment",
+                           "source_id":  47753132,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "ryandamm: Missed in the previous discussion: methanol is irrelevant. Grain based ferments have essentially zero methanol.(And methanol risk is a function of its concentration relative to ethanol — the treatment for methanol poisoning is… ethanol!) even fruit based fermentations with significantly higher pectin concentrations only produce trace methanol, and it’s not all that well concentrated in a distillation due to azeotropes (which also says that throwing out the heads doesn’t help that much).\nMethanol poisoning stories in the news almost exclusively result from people trying to sell denatured or industrial alcohol. The biggest risk in home distilling is fire.",
+                           "source":  "comment",
+                           "source_id":  47752706,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "jcims: Bought and rigged up a \u0027hand sanitizer plant\u0027 about five months into COVID.  Populated the thing with thermocouples, load cells and automation with nodered on raspberry pi and a bunch of esp32s flashed with tasmota doing sensing and control.  Everything talked over mqtt.  Great little architecture and having it highly automated allowed me to focus on the parts that were less easily controlled for.\nDashboard: https://imgur.com/a/so7iZJX\nSanitizer run: https://imgur.com/a/iWDlNfb\nQuite a lot of fun actually.",
+                           "source":  "comment",
+                           "source_id":  47753397,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "andrewmg: Reposting my comment from the last thread:\nFor those wondering, the opinion[0] doesn\u0027t address the Commerce Clause power (and Wickard and Raich) becaue the government abandoned that argument. See footnote 5.\nThe Commerce Clause issue is raised in our other case[1] that\u0027s now pending before the Sixth Circuit.\n(I argued both cases.)\n[0] https://www.ca5.uscourts.gov/opinions/pub/24/24-10760-CV0.pd...\n[1] https://www.buckeyeinstitute.org/issues/detail/ream-v-us-dep...",
+                           "source":  "comment",
+                           "source_id":  47755480,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "beedeebeedee: The best liquor I ever had was by a state police detective who had been home distilling since he was 12. It was made from rye and corn, but tasted like peaches.\nI think it is kind of magical to witness the process. I only experimented a few times, and never aged it, so every was very sharp. The best was a sharp brandy made from a bottle of wine I bought. The worst was using a leftover keg of beer, which bittered the copper pipe, so everything after tasted like gin.\nI would recommend people try it. You can make one out of copper pipe from a hardware store, a few fittings and a pressure cooker. Be safe, of course, and remember that ethanol is used as a preventative for methanol poisoning :)",
+                           "source":  "comment",
+                           "source_id":  47756083,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "GenerWork: It\u0027s been way too long since I\u0027ve taken a political science course, but does this mean that the ban is struck down for the entire country, or just the area that the 5th Court of Appeals covers?",
+                           "source":  "comment",
+                           "source_id":  47753304,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "joshstrange: Previous discussion: https://news.ycombinator.com/item?id=47736298",
+                           "source":  "comment",
+                           "source_id":  47752075,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "superjan: Might as well plug this recent Criminal Podcast episode: https://thisiscriminal.com/episode-358-the-formula-3-27-2026\nTLDL: During prohibition, US government required adding 5% methanol to industrial alcohol, hoping that this would stop bootleggers from selling it as liquor. It was sold anyway, resulting in many deaths.",
+                           "source":  "comment",
+                           "source_id":  47753693,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "NoSalt: I had no idea this was even a law!!! Where do I turn myself in?",
+                           "source":  "comment",
+                           "source_id":  47754837,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "tomwheeler: As I understand it, this only applies to the three states in that district, all of which also have statewide bans against it.\nMy state (Missouri) has the most lax home distilling state laws in the nation, which allow residents to produce up to 500 bottles per year. Well, at least theoretically, since the federal ban takes precedence.",
+                           "source":  "comment",
+                           "source_id":  47755590,
+                           "depth":  1
+                       }
+                   ],
+    "notes":  "Auto-generated OP+11-comment turnset from HN snapshot."
+}

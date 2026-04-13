@@ -1,0 +1,982 @@
+﻿{
+    "thread_id":  47738883,
+    "hn_url":  "https://news.ycombinator.com/item?id=47738883",
+    "title":  "Tell HN: Docker pull fails in Spain due to football Cloudflare block",
+    "by":  "littlecranky67",
+    "unix_time":  1775996937,
+    "score":  1101,
+    "descendants":  401,
+    "difficulty":  "G2",
+    "lane":  "incident_policy",
+    "label":  "hn_docker_spain_block",
+    "why_selected":  "Policy/legal block created operational outage narrative with corrections.",
+    "op_text":  "I just spent 1h+ debugging why my locally-hosted gitlab runner would fail to create pipelines. The gitlab job output would just display weird TLS errors when trying to pull a docker images. After debugging gitlab and the runner, I realized after a while I could not even run \"docker pull \" on my machine as root:\n\u003e error pulling image configuration: download failed after attempts=6: tls: failed to verify certificate: x509: certificate is not valid for any names, but wanted to match docker-images-prod.6aa30f8b08e16409b46e0173d6de2f56.r2.cloudflarestorage.com\nFirst blaming tailscale, dns configuration and all other stuff. Until I just copied that above URL into my browser on my laptop, and received a website banner:\n\u003e El acceso a la presente dirección IP ha sido bloqueado en cumplimiento de lo dispuesto en la Sentencia de 18 de diciembre de 2024, dictada por el Juzgado de lo Mercantil nº 6 de Barcelona en el marco del procedimiento ordinario (Materia mercantil art. 249.1.4)-1005/2024-H instado por la Liga Nacional de Fútbol Profesional y por Telefónica Audiovisual Digital, S.L.U.\nhttps://www.laliga.com/noticias/nota-informativa-en-relacion-con-el-bloqueo-de-ips-durante-las-ultimas-jornadas-de-laliga-ea-sports-vinculadas-a-las-practicas-ilegales-de-cloudflare\nFor those non-spanish speakers: It means there is football match on, and during that time that specific host is blocked. This is just plain madness. I guess that means my gitlab pipelines will not run when football is on. Thank you, Spain.",
+    "harvested_comment_count":  120,
+    "comment_sample_policy":  {
+                                  "traversal":  "bfs",
+                                  "max_comments":  120,
+                                  "max_depth":  3
+                              },
+    "comments":  [
+                     {
+                         "id":  47740148,
+                         "by":  "danirod",
+                         "time":  1776004268,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "Heh, lucky you, at least you get a message. My ISP just drops traffic to the affected IPs. No ping, no traceroute, just a spinner in the browser until it says \"page not found\".\nEvery response and comment from LaLiga, the football organization responsible for this, has been so far that this is a minor issue that only affects a few bunch of nerds who talk about \"docker images\" or \"github repositories\" or \"whatever that means\".\nMeanwhile, there are testimonies of smart home devices like anti-theft alarms or automatic doors, that stop working whenever there is a football match, because their backends rely on Cloudflare.\nLast week, a woman asked for help on social media, as the GPS tracking app she uses to see where her father with dementia is, went offline during a match. It was getting late and he still wasn\u0027t back home, and she couldn\u0027t locate the tag he was wearing to find him: https://www.infobae.com/america/agencias/2026/04/05/laliga-d...\nIt\u0027s hard to say this, because no one should experience an event like this, but as stressful as these are, it\u0027s the only way to make the mainstream people care about this censorship. \"I cannot pull a docker image\" will never be on nightly news, but safety and personal security is a more powerful driver for discourses."
+                     },
+                     {
+                         "id":  47739575,
+                         "by":  "utrack",
+                         "time":  1776001463,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "They block the whole of Cloudflare R2, I believe the Docker hub is just (heh) a collateral.\nWhen the La Liga match starts, everything that\u0027s proxied via CF (including zero access reverse tunnels) stops working.\nThere\u0027s even a website made for checking if the match is on: https://hayahora.futbol/\nYou can check if your host is affected: https://hayahora.futbol/#comprobador\u0026domain=docker-images-pr..."
+                     },
+                     {
+                         "id":  47748278,
+                         "by":  "madbo1",
+                         "time":  1776061113,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "Reading this from India, where stuff like this is pretty much Tuesday business. But that’s not the problem; the problem is precisely the one hour of your life spent trying to figure out whether the issue is your DNS, your VPN, your configuration, or your programming. “The government in the country I’m accessing this from just decided to shut down my IP for the next two hours” rarely crosses your mind.\nIndia has consistently been at the top of the number of Internet blackouts anywhere in the world for years (Access Now keeps track of this through its KeepItOn project). These tend to be brief and localized, triggered by something as mundane as an exam or protest or local incident. It’s such a routine occurrence here that there’s even a reflexive response: mobile data works differently from other connectivity types, so go with that, try new DNS settings, rely on Telegram instead of WhatsApp when the latter fails you, and always have a list of mirrors.\nWhat’s fascinating about this case is that it’s identical except for who is pressing the button  LaLiga, a privately owned entity, in place of the government."
+                     },
+                     {
+                         "id":  47740390,
+                         "by":  "mrvaibh",
+                         "time":  1776005376,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "This is a great example of why blanket IP blocking is such a terrible enforcement mechanism. Cloudflare hosts hundreds of thousands of services behind shared IP ranges — blocking one IP to stop a piracy stream\n  takes out everything else on that IP, including Docker registries, API endpoints, and CDNs that have nothing to do with football.\n  The real fix on your end until Spain sorts this out: set up a pull-through registry cache (e.g. registry:2 with proxy.remoteurl) on a VPS outside Spain, and point your Docker daemon\u0027s mirror config at it. Your\n  GitLab runner pulls from the cache, the cache pulls from Docker Hub via a non-blocked IP. Also insulates you from Docker Hub rate limits.\n\n  But yeah, the fact that a court order about football streaming can break docker pull for an entire country is genuinely absurd."
+                     },
+                     {
+                         "id":  47741831,
+                         "by":  "jjcm",
+                         "time":  1776012681,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "Barring an Internet giant suing them in court, it really feels like this is unlikely to change as most just don’t understand the why or the effect.\nSomeone needs to write a heist movie set in Spain where a key part of the plan is they steal something while La Liga is blocking some key security route."
+                     },
+                     {
+                         "id":  47741313,
+                         "by":  "jcalvinowens",
+                         "time":  1776009852,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "This is the moral equivalent of shutting the water off for a whole city because one dude\u0027s house has a leak. The harms to society clearly and obviously outweigh any possible benefits to society. But if that one dude has the power to shut it all off, and doesn\u0027t care..."
+                     },
+                     {
+                         "id":  47745605,
+                         "by":  "redbell",
+                         "time":  1776036719,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "This behavior of blocking some domains and IP ranges during LaLiga games has become a routine by now. You might also want to check these similar submissions:\nMy game\u0027s server is blocked in Spain whenever there\u0027s a football match on: https://news.ycombinator.com/item?id=45358433\nSpain’s LaLiga has blocked access to freedom.gov: https://news.ycombinator.com/item?id=47114235"
+                     },
+                     {
+                         "id":  47745834,
+                         "by":  "Self-Perfection",
+                         "time":  1776038055,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "This is far from the first time that I see on HN indignation on LaLiga blockings. Sadly all this rage does not seem to lead to any change.\nI\u0027d like to suggest some steps that might/should be followed, which I will not pursue personally but in my defense - I do not live in Spain and not affected.\n1) (first! low-effort) Somebody should create any space on the internet, where such anecdotes might shared and probably people with common goals of fixing internet access in Spain will meet. E.g. telegram group, discord channel, subreddit...\n2) probably create wiki with related research: legal framework and possible actions etc\n3) Raise public awareness. Create a resource/website with schedule of past and future \"semi-blackouts\", simple explanation of possible effects a layman may notice etc\n4) Explore legal actions that might be taken. How this issue might be forced to be discussed by politicians? For instance I know that Portugal has official mechanism to put forward petitions, that will be discussed in parliament if get enough votes [1]\nSpace of possible demands in such petitions is vast. For instance:\n- Make LaLiga compensate partly price of internet access\n- Force LaLiga to include education notice in the beginning and the of translation with title like \"Start of reduced internet connectivity\" / \"End of reduced internet connectivity\"\n[1] https://participacao.parlamento.pt/initiatives/"
+                     },
+                     {
+                         "id":  47750264,
+                         "by":  "isodev",
+                         "time":  1776077743,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "Very good example as to why using a single, centralised proxy globally by all services is a bad idea. Docker would never have a reason to block anything if they were simply running their own.\nFor everyone else, small and big, this is the weekly reminder to not use Cloudflare for user-facing access to anything."
+                     },
+                     {
+                         "id":  47741317,
+                         "by":  "torben-friis",
+                         "time":  1776009857,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "As a Spaniard, I would be very happy it cloudflare stops serving Spain. The situation is beyond stupid and I know without international pressure and shaming we\u0027re not getting rid of this abuse."
+                     },
+                     {
+                         "id":  47744675,
+                         "by":  "rmonvfer",
+                         "time":  1776029108,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "As a Spaniard, this also happens to me. You can either use a VPN or just switch DNS servers to one that doesn’t have anycast nodes in Spain.\nCloudflare’s authoritative DNS uses EDNS Client Subnet (ECS) to return different IP pools based on where the query originates. Spanish resolvers get IPs from a range that La Liga blocks. If your recursive resolver is physically outside Spain (or you use DoH/DoT to tunnel to one), Cloudflare returns a different, unblocked pool.\nAdGuard DNS works well for this."
+                     },
+                     {
+                         "id":  47744308,
+                         "by":  "samgranieri",
+                         "time":  1776026938,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "This is inexcusable. Just because sports right holders are worried about piracy doesn’t give them license to break normal internet operations. Spain, get your act together and put your equivalent of the content cartel in the penalty box."
+                     },
+                     {
+                         "id":  47740043,
+                         "by":  "pjc50",
+                         "time":  1776003795,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "This is why technology businesses and professionals need to take a little bit of an active role in local politics. Otherwise you get nonsense."
+                     },
+                     {
+                         "id":  47749708,
+                         "by":  "egeres",
+                         "time":  1776072680,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "I wasn\u0027t able to pull some images and I lost 1h trying to diagnose network problems in my setup, but it didn\u0027t occur to me that \"la liga\" was the root cause . My workaround was to add \"registry-mirrors\": [\"https://mirror.gcr.io\"] in my /etc/docker/daemon.json"
+                     },
+                     {
+                         "id":  47757500,
+                         "by":  "marsxr360",
+                         "time":  1776112629,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "YES.\nIt took me a while to debug.\nWas working on mobile.\nWas not working on desktop.\nMobile was using mobile internet from the UK.\nMade a meme about it: https://x.com/marsXRobertson/status/2043789192946163734"
+                     },
+                     {
+                         "id":  47748636,
+                         "by":  "panstromek",
+                         "time":  1776063697,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "Yea, when there\u0027s a match, our app stops playing videos in Spain and we get some bad reviews. It\u0027s pretty annoying."
+                     },
+                     {
+                         "id":  47742933,
+                         "by":  "swiftcoder",
+                         "time":  1776019297,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "Hah. I have had to use a US-based VPN to access GitHub pretty much every weekend lately. La Liga\u0027s efforts to curb pirate TV streams are basically undermining the internet itself at this point.\nThis is also not new behaviour - Theo posted a YouTube about it nearly a year ago[1].\n[1]: https://www.youtube.com/watch?v=1-geGEYEw7g"
+                     },
+                     {
+                         "id":  47750118,
+                         "by":  "evilmonkey19",
+                         "time":  1776076306,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "Last weekend happened as well :/\nhttps://news.ycombinator.com/item?id=47480926\nThe situation every weekend is getting worse and worse. Honestly, I cannot understand how any goverment who wants freedom for its citizens can allow to block internet access to a whole country only because a private football company asks for it. I guess LaLiga is the 4th statement in Spain...\nA probably will get even worse the situation with Fastly entering the equation:\nhttps://www.fastly.com/press/press-releases/fastly-and-lalig..."
+                     },
+                     {
+                         "id":  47755591,
+                         "by":  "markstos",
+                         "time":  1776102713,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "It appears Cloudflare is responding to a legal requirement to implement this IP blocking.\nhttps://www.techradar.com/vpn/vpn-privacy-security/cloudflar..."
+                     },
+                     {
+                         "id":  47742343,
+                         "by":  "ordersofmag",
+                         "time":  1776015646,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "Interesting alternative.  Cloudflare (market cap $58B) buys La liga (market value $5 billion), drops suit."
+                     },
+                     {
+                         "id":  47741633,
+                         "by":  "yangm97",
+                         "time":  1776011589,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "Maybe it’s time to reflect upon the reliance on centralized services?\nNot long ago docker hub started rate limiting access and we all turned to blanket solutions like the GitLab registry cache.\nI wonder if the IPFS distributed docker registry thing still exists/works."
+                     },
+                     {
+                         "id":  47742260,
+                         "by":  "pfortuny",
+                         "time":  1776015115,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "\u003e instado por la Liga Nacional de Fútbol Profesional y por Telefónica Audiovisual Digital,\n(The trial was initiated by LaLiga and Telefonica...).\n\"Telefonica\" is the (exclusive) distributor for the rights of streaming the matches, and is only (of course?) the main consumer (and business) Telco in Spain: they are in a game they cannot lose. This is such an abuse and no government (this, past, whichever) has done anything about it."
+                     },
+                     {
+                         "id":  47745535,
+                         "by":  "Self-Perfection",
+                         "time":  1776035977,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "[Meta comment]\nHumankind is not doing well with implementing new policies. We should really strive for each new policy (like in this case - blocking access to some parts of internet during soccer games):\n- Consider running policy in small scale scenario (e.g. testing blocking in small parts of Spain before whole country rollout)\n- Implement channels to gather info from those who are faced with results of policy implementation (in this case: the op got webpage with description why the page is blocked - a bit of sanity! It would be better if it was served with HTTP code 451)\n- Policy instructions\n- When deciding on policy put a date at which policy should be reconsidered and revised using data collected during the time when it was in effect\n- ... and some more I have not thought about.\nLet\u0027s strive to cultivate this principles in all life areas where we can affect how new policies are implemented.\n(edit: linebreaks)"
+                     },
+                     {
+                         "id":  47741646,
+                         "by":  "gchamonlive",
+                         "time":  1776011661,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "Here in Brazil sometimes my ISP goes into a weird state where I can\u0027t SSH into a remote machune. Got two ISP links here and still sometimes I need to resort to Mullvad to get stable internet"
+                     },
+                     {
+                         "id":  47743971,
+                         "by":  "Chrisszz",
+                         "time":  1776024905,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "LOL this is so hilarious, blocking a portion of a web infra for a football match"
+                     },
+                     {
+                         "id":  47751782,
+                         "by":  "sam_lowry_",
+                         "time":  1776087453,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "I am walking the Camino de Santiago now, and there were piligrims complaining about random issues with their phones, e.g. an elderly German lady was totally lost as her Google Maps was not working, so we got to an albergue, asked for wi-fi and downloaded CoMaps on her phone."
+                     },
+                     {
+                         "id":  47742614,
+                         "by":  "amarant",
+                         "time":  1776017587,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "I had to Google why this happens, blocking cloudflare during football games seems.. Arbitrary, to say the least. Maybe something to do with hooligans trashing entire cities when their team loses? I could almost get behind that, if I thought it would work..\nBut no, it\u0027s apparently to stop piracy!? Turning off half the internet, and mostly the legitimate parts at that (since when do pirates use cloudflare?) seems like probably the worst method to go about it.\nSomeone ought to start streaming those games illegally without using cloudflare just to demonstrate how stupid this policy is"
+                     },
+                     {
+                         "id":  47742406,
+                         "by":  "Kamshak",
+                         "time":  1776016129,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "I\u0027m in Spain as well and it sucks a lot. What I do now is I go thorough Cloudflare 1.1.1.1 VPN (set up on my router). Fixes the issue and there is practically no latency or bandwidth impact."
+                     },
+                     {
+                         "id":  47741151,
+                         "by":  "Jare",
+                         "time":  1776009074,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "It\u0027s a disgrace, but apparently all relevant forces still consider soccer the most important thing in the country."
+                     },
+                     {
+                         "id":  47749556,
+                         "by":  "schnitzelstoat",
+                         "time":  1776071223,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "The government really needs to step in, it\u0027s surprising that the PSOE and Sumar have allowed private companies to block so much of the internet."
+                     },
+                     {
+                         "id":  47739433,
+                         "by":  "vaylian",
+                         "time":  1776000733,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "This is a know issue and it is completely fucked up:\nhttps://www.techradar.com/vpn/vpn-privacy-security/cloudflar...\nWhat Spain does is basically censorship and it\u0027s very poorly executed. The docker image registry is only one out of the many collateral victims of this stupid law."
+                     },
+                     {
+                         "id":  47739423,
+                         "by":  "sigio",
+                         "time":  1776000674,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "Time to use a VPN in your docker pipelines ;) Or run your systems outside of Spain.\nOr can this be avoided by using an alternate DNS?"
+                     },
+                     {
+                         "id":  47742915,
+                         "by":  "postepowanieadm",
+                         "time":  1776019215,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "Why are you working instead of watching the match?"
+                     },
+                     {
+                         "id":  47744640,
+                         "by":  "aftbit",
+                         "time":  1776028877,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "What\u0027s the current state of the art for VPN\u0027ing through deep packet inspection firewalls? I have imagined building something around TLS and Websockets that connects to a popular cloud provider which is \"too big to block\". Of course, if they\u0027ll block Cloudflare, or all connections outside of the country, maybe _nothing_ is too big to block. I remember some solutions to this in the 2010s, like obfsproxy and shadowsocks, but are there any newer or better options?"
+                     },
+                     {
+                         "id":  47741690,
+                         "by":  "giorgioz",
+                         "time":  1776011858,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "POSSIBLE FIX:\nI think changing your default DNS servers to Google 8.8.8.8 or Cloudflare 1.1.1.1\nmight bypass the spanish sunday ban on Cloudlflare.\nmacOS + Cloudlfare 1.1.1.1\nhttps://developers.cloudflare.com/1.1.1.1/setup/macos/\nGoogle 8.8.8.8\nhttps://developers.google.com/speed/public-dns/docs/using"
+                     },
+                     {
+                         "id":  47742682,
+                         "by":  "jesuslop",
+                         "time":  1776017953,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "Just to confirm it is true. This is LaLiga bringing down essential country-wide infrastructure on soccer hours if your internet access is through main ISPs."
+                     },
+                     {
+                         "id":  47742045,
+                         "by":  "Dibby053",
+                         "time":  1776013786,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "Going to play devil\u0027s advocate here but I suspect if Cloudflare had been more cooperative about taking down illegal content, LaLiga would not have resorted to blanket blocking individual IPs.\nI would really like to understand more about the process that they should follow but didn\u0027t / followed but didn\u0027t satisfy them / doesn\u0027t exist, in order to remove infringing websites quickly from CloudFlare."
+                     },
+                     {
+                         "id":  47747464,
+                         "by":  "krick",
+                         "time":  1776053113,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "Is it exclusively football or do they try to fight piracy this way for some other major streaming events? I am just curious, because it\u0027s just comical to go this far over some dumb ball-game."
+                     },
+                     {
+                         "id":  47745244,
+                         "by":  "zeafoamrun",
+                         "time":  1776033242,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "I don\u0027t even like televised sport but this makes me want to figure out how to pirate it at scale"
+                     },
+                     {
+                         "id":  47743976,
+                         "by":  "rcarmo",
+                         "time":  1776024939,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "Ah, so that\u0027s why my site is \"down\" there:\nhttps://hayahora.futbol/#sobre-los-bloqueos\u0026domain=taoofmac....\nThey\u0027re blocking the CDN too, not just R2."
+                     },
+                     {
+                         "id":  47750064,
+                         "by":  "christkv",
+                         "time":  1776075810,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "Companies should start suing La Liga for danaged please"
+                     },
+                     {
+                         "id":  47749725,
+                         "by":  "snickerer",
+                         "time":  1776072822,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "The Internet was originally designed to survive a nuclear war. Now we downgraded it deliberately to not survive a football game.\nDecentralised infrastructure: good\nCentralised infrastructure: bad\nGood and bad for you, of course. For the big companies selling and controlling this stuff, it\u0027s vice versa.\nJust stay alert and don\u0027t chain yourself with big tech dependencies. The reason Git is great is its decentralised nature. If you got so far, why cripple yourself by running your traffic through a single American company like Cloudflare?"
+                     },
+                     {
+                         "id":  47746454,
+                         "by":  "Robdel12",
+                         "time":  1776043464,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "How is this cloudflares problem? This is on LaLiga."
+                     },
+                     {
+                         "id":  47749238,
+                         "by":  "znnajdla",
+                         "time":  1776068214,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "How timely. I was just moving off Github to self-hosted docker registries."
+                     },
+                     {
+                         "id":  47746874,
+                         "by":  "ethin",
+                         "time":  1776047287,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "This is exactly why random corporations need to be gone from government. Or copyright needs to be abolished, one of the two. No corporation (no matter how beloved) should ever have this kind of power. IMO the more powerful an organization becomes, the deeper the scrutiny should be."
+                     },
+                     {
+                         "id":  47747197,
+                         "by":  "dlahoda",
+                         "time":  1776050630,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "Just use Nix.\n1. If nix fails to pull anything, it builds (up to and including Linux kernel and compiler).\n2. Nix has several ways to build OCI images, some even faster to assemble and slimmer output of official Docker tooling.\n3. It is allowed several providers for same artefact to resolve pull."
+                     },
+                     {
+                         "id":  47745462,
+                         "by":  "archon810",
+                         "time":  1776035279,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "I found out about this a month ago when a confused Spanish user showed me all downloads on https://apkmirror.com (powered by Cloudflare R2) are blocked in Spain during LaLiga soccer matches https://x.com/i/status/2030361569691898237. It was so idiotic, I couldn\u0027t believe it. Glad it\u0027s getting more attention now."
+                     },
+                     {
+                         "id":  47742858,
+                         "by":  "blurb4969",
+                         "time":  1776018980,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "Welcome to the club, buddies! Here, in Russia, the government doesn\u0027t care about collateral damage at all when shutting down whole Internet in cities. They turn on white list mode, when only approved sites and IPs work. Businesses stop working and start losing money? They don\u0027t care. Important IT systems stop working? They don\u0027t care. People can\u0027t communicate with each other? Don\u0027t care.\nAnd seems like it will happen everywhere else. Sad to see the whole world goes down apart."
+                     },
+                     {
+                         "id":  47756014,
+                         "by":  "laxmanclo",
+                         "time":  1776104707,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "Thats crazy"
+                     },
+                     {
+                         "id":  47739648,
+                         "by":  "jimaek",
+                         "time":  1776001869,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "Off topic but I wonder when Cloudflare is going to launch their own Docker registry as a product."
+                     },
+                     {
+                         "id":  47741643,
+                         "by":  "Magnets",
+                         "time":  1776011654,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "BT used to block the entire streamable.com site during football matches"
+                     },
+                     {
+                         "id":  47742455,
+                         "by":  "LtdJorge",
+                         "time":  1776016490,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "Thankfully, Adamo hasn’t implemented the blockade yet (if ever)."
+                     },
+                     {
+                         "id":  47743170,
+                         "by":  "thomasjudge",
+                         "time":  1776020615,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "Could you bypass this with a VPN?"
+                     },
+                     {
+                         "id":  47749188,
+                         "by":  "lloydatkinson",
+                         "time":  1776067720,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "Probably the only even slightly relevant thread I’ll ever find for this so here goes. There is a certain visitor in the “Madrid Autonomous Community” (whatever that is) which frequently requests just my homepage, no other page on my site, over and over again.\nIt comes in waves, and it’s not enough to affect anything, but it’s very weird because when I did some digging by looking at the ASN there was actually only one active IP address and if I browse to it I get someone’s Synology NAS login page.\nWhy would someone setup their NAS to randomly keep pinging my homepage?"
+                     },
+                     {
+                         "id":  47739737,
+                         "by":  "ahachete",
+                         "time":  1776002351,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "Yeah, I know. Welcome to the club :(\nhttps://x.com/ahachete/status/2035783292549755228"
+                     },
+                     {
+                         "id":  47742163,
+                         "by":  "dmitrygr",
+                         "time":  1776014552,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "The last sentence of this submission makes no sense. You are in Spain. Allegedly, the country has a representative government. That means that you should have a way to influence the government to fix this idiocy. If, in fact, you don’t, then it is not a representative government and …ahem… further steps may be warranted to remind the government whom they work for."
+                     },
+                     {
+                         "id":  47748746,
+                         "by":  "maxlin",
+                         "time":  1776064474,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "sportsball more importanter than your nerd stuff.\nregards: spanish authorities (who are watching the sportsball and so are better spaniards than you!)"
+                     },
+                     {
+                         "id":  47739926,
+                         "by":  "anthk",
+                         "time":  1776003258,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "Yea, La Liga it\u0027s crapping out as always.\nDocker needs either some I2P gateway, or a Tor service."
+                     },
+                     {
+                         "id":  47749735,
+                         "by":  "sschueller",
+                         "time":  1776072992,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "Just wait until a bank moves their 2FA to CF...\nNetblock do not work and will never work."
+                     },
+                     {
+                         "id":  47742456,
+                         "by":  "Myzel394",
+                         "time":  1776016492,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "Just use a VPN"
+                     },
+                     {
+                         "id":  47744592,
+                         "by":  "genericacct",
+                         "time":  1776028580,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "same thing happens in italy"
+                     },
+                     {
+                         "id":  47742582,
+                         "by":  "mschuster91",
+                         "time":  1776017358,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "Cloudflare could resolve this without negatively impacting fundamental services... just place all newly registered sites (e.g. \u003c30 days) on a dedicated block of IP addresses. That way, Spain\u0027s government-ordered censorship could be limited to (mostly) pirate sites. Or they could invest money in vetting customers properly.\nBut of course, Cloudflare rather prefers to hold their actual large customers (who don\u0027t have much of an alternative to CF) and everyday Spaniard users hostage."
+                     },
+                     {
+                         "id":  47741717,
+                         "by":  "breppp",
+                         "time":  1776012025,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "Vote early, vote often"
+                     },
+                     {
+                         "id":  47740449,
+                         "by":  "richwater",
+                         "time":  1776005659,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "Spain is a failing country. Their economy is in shambles and the government has ceded internet control to a private corporation who runs football games."
+                     },
+                     {
+                         "id":  47739977,
+                         "by":  "anthk",
+                         "time":  1776003497,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "CF could just sue LaLiga and the judge as interrupting and intercepting telecomms it\u0027s a really serious crime in Spain. Call the AEPD too because of consumers\u0027 right against both ISP and LaLiga\u0027s snooping. Another huge fine.\nThis is not an issue under the civil code (civilian issues), but something to be dealt under penal (criminal) code.\nIn Spanish\nhttps://www.fiscal.es/memorias/memoria2020/FISCALIA_SITE/rec...\nOh, and BTW, LaLiga has just partnered with a CF rival.\nNow CF can just sue both like hell because of unfair competition:\nhttps://nitter.tiekoetter.com/xataka/status/2042658662850724..."
+                     },
+                     {
+                         "id":  47741714,
+                         "by":  "lofaszvanitt",
+                         "time":  1776012015,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "Good. Cloudflare is the next evil entity on the internet."
+                     },
+                     {
+                         "id":  47739808,
+                         "by":  "mathfailure",
+                         "time":  1776002696,
+                         "depth":  1,
+                         "parent":  47738883,
+                         "text":  "Cloudflare is cancer. And the tumor is now too big."
+                     },
+                     {
+                         "id":  47740949,
+                         "by":  "pxc",
+                         "time":  1776008081,
+                         "depth":  2,
+                         "parent":  47740148,
+                         "text":  "\u003e Heh, lucky you, at least you get a message. My ISP just drops traffic to the affected IPs. No ping, no traceroute, just a spinner in the browser until it says \"page not found\".\nThis is generally how the GFW works in China. Instead of an overbearing nanny like a school or corporation\u0027s DNS blocker, you\u0027re left with a sense that you\u0027re on a version of the Internet that is just intermittently and somewhat mysteriously broken.\nAnd indeed, in China, a lot of things that probably aren\u0027t fully intended to be blocked are not reliably accessible. Implementation varies, so you get strange routing and peering issues. It feels like an Internet that isn\u0027t fully formed, that hasn\u0027t finished coming together yet.\nNation states and corporations obviously gain some things sometimes by having Internet censorship/blocking frameworks in place. Maybe, sometimes, ordinary people even benefit, too, if it helps shut down illegal and genuinely harmful businesses.\nBut it feels like the whole world is gradually trending towards more and more Internet censorship without realizing that we are un-building a miraculous thing that took enormous effort and cleverness and expense to build. I wish we could think about this not only in terms of freedom (and we absolutely should think about it in terms of freedom), but how we are disintegrating the infrastructure of communication and computing."
+                     },
+                     {
+                         "id":  47740413,
+                         "by":  "freetanga",
+                         "time":  1776005479,
+                         "depth":  2,
+                         "parent":  47740148,
+                         "text":  "All people affected should file a complaint with your ISP and with Oficina de Atención al Usuario de Telecomunicaciones claiming financial loss for arbitrary service censorship."
+                     },
+                     {
+                         "id":  47747471,
+                         "by":  "xp84",
+                         "time":  1776053142,
+                         "depth":  2,
+                         "parent":  47740148,
+                         "text":  "Who cares if she can’t find her elderly father? A small price to pay to preserve the stratospheric prices on football TV rights!!!!"
+                     },
+                     {
+                         "id":  47741002,
+                         "by":  "the_gipsy",
+                         "time":  1776008342,
+                         "depth":  2,
+                         "parent":  47740148,
+                         "text":  "It\u0027s ridiculous and wrong what LaLiga does. But it\u0027s also a weakeup call to consider ditching cloudflare\u0027s centralization."
+                     },
+                     {
+                         "id":  47742193,
+                         "by":  "tobz1000",
+                         "time":  1776014669,
+                         "depth":  2,
+                         "parent":  47740148,
+                         "text":  "\u003e there are testimonies of smart home devices like anti-theft alarms or automatic doors, that stop working whenever [...] because their backends rely on Cloudflare.\nThe fault here lies 100% with horribly designed IoT devices that turn into bricks when they lose internet connection."
+                     },
+                     {
+                         "id":  47747821,
+                         "by":  "matheusmoreira",
+                         "time":  1776056819,
+                         "depth":  2,
+                         "parent":  47740148,
+                         "text":  "\u003e Every response and comment from LaLiga, the football organization responsible for this, has been so far that this is a minor issue that only affects a few bunch of nerds who talk about \"docker images\" or \"github repositories\" or \"whatever that means\".\nTranslation: go away kid, we\u0027re trying to make money here."
+                     },
+                     {
+                         "id":  47741539,
+                         "by":  "boredatoms",
+                         "time":  1776011111,
+                         "depth":  2,
+                         "parent":  47740148,
+                         "text":  "Perhaps its time to put a VPN into all your CI jobs"
+                     },
+                     {
+                         "id":  47747732,
+                         "by":  "micw",
+                         "time":  1776055868,
+                         "depth":  2,
+                         "parent":  47739575,
+                         "text":  "Who exactly is blocking and on what legal base? If it\u0027s Spanish ISPs and they are massively over blocking, why are there no legal actions against them? (E.g. for not fulfilling their contracts)"
+                     },
+                     {
+                         "id":  47739994,
+                         "by":  "mr_mitm",
+                         "time":  1776003560,
+                         "depth":  2,
+                         "parent":  47739575,
+                         "text":  "Why do they do that? Sorry, I don\u0027t speak Spanish."
+                     },
+                     {
+                         "id":  47744152,
+                         "by":  "sva_",
+                         "time":  1776025918,
+                         "depth":  2,
+                         "parent":  47739575,
+                         "text":  "Ah man, that shader in the background is like a rite of passage for people including a shader on their website.\nhttps://www.shadertoy.com/view/lscczl"
+                     },
+                     {
+                         "id":  47748994,
+                         "by":  "jojobas",
+                         "time":  1776066399,
+                         "depth":  2,
+                         "parent":  47739575,
+                         "text":  "Great, time to proxy through AWS, Azure and GCP so that these muppets block Spain from everything."
+                     },
+                     {
+                         "id":  47741452,
+                         "by":  "embedding-shape",
+                         "time":  1776010635,
+                         "depth":  2,
+                         "parent":  47740390,
+                         "text":  "\u003e This is a great example of why blanket IP blocking is such a terrible enforcement mechanism\nAFAIK, they\u0027re not doing \"blanket IP blocking\", they\u0027re intercepting requests based on DNS and IP, and try to serve their own certificates and their own content. Obviously, in most cases it fails, as the certificate doesn\u0027t match the site, so the browser rejects it, but as far as I can see and tell, there is no \"blanket IP blocks\", more like \"DNS and IP interception\".\nThe difference doesn\u0027t really matter in practice, sucks regardless, but I thought I\u0027d clarify for the ones who are not experiencing these blocks themselves at least."
+                     },
+                     {
+                         "id":  47741181,
+                         "by":  "tom1337",
+                         "time":  1776009226,
+                         "depth":  2,
+                         "parent":  47740390,
+                         "text":  "just wait until they block Azure as well so the official La Liga site also stops working"
+                     },
+                     {
+                         "id":  47750890,
+                         "by":  "dnnddidiej",
+                         "time":  1776082444,
+                         "depth":  2,
+                         "parent":  47740390,
+                         "text":  "Just use a VPN at that point?"
+                     },
+                     {
+                         "id":  47749919,
+                         "by":  "flobosg",
+                         "time":  1776074537,
+                         "depth":  2,
+                         "parent":  47745605,
+                         "text":  "See https://hn.algolia.com/?dateRange=all\u0026page=0\u0026prefix=false\u0026qu... as well."
+                     },
+                     {
+                         "id":  47750932,
+                         "by":  "gempir",
+                         "time":  1776082695,
+                         "depth":  2,
+                         "parent":  47750264,
+                         "text":  "The amount of traffic that must go through the docker hub, must be insane, the images go into the gigabytes and everyone expects it to be super fast.\nCloudflare is one of the few companies who can handle that for relatively cheap, Docker could not just \"run their own\" and have it even be compareable."
+                     },
+                     {
+                         "id":  47750406,
+                         "by":  "pajamasam",
+                         "time":  1776078788,
+                         "depth":  2,
+                         "parent":  47750264,
+                         "text":  "There are multiple good reasons to use a CDN though. What’s your suggestion for an alternative?"
+                     },
+                     {
+                         "id":  47751083,
+                         "by":  "stingraycharles",
+                         "time":  1776083707,
+                         "depth":  2,
+                         "parent":  47750264,
+                         "text":  "Ah come on surely you’re not blaming Cloudflare for refusing to block individual websites without a court order? And surely you’re not blaming Cloudflare for the decision of the Spanish government to block all of Cloudflare during LaLiga?\nDocker must be handling absolute massive amounts of traffic on their (free) docker hub, Cloudflare is one of the only companies in the world willing to handle that is able to handle that cheaply. It’s no secret that Docker is struggling financially. So surely you’re not blaming Docker as well for using Cloudflare?"
+                     },
+                     {
+                         "id":  47741458,
+                         "by":  "littlecranky67",
+                         "time":  1776010660,
+                         "depth":  2,
+                         "parent":  47741317,
+                         "text":  "They should at least do a single \"awareness day\" during which they block the same IPs and sites they are ordered by court, as if there was a football match on. Ideally with a 7 days public notice announcement. Probably won\u0027t happen though, as their contractual obligation won\u0027t allow for voluntary suspension of services."
+                     },
+                     {
+                         "id":  47742355,
+                         "by":  "pier25",
+                         "time":  1776015732,
+                         "depth":  2,
+                         "parent":  47741317,
+                         "text":  "As a Spaniard I couldn\u0027t agree more. This situation is just absolutely ridiculous."
+                     },
+                     {
+                         "id":  47746153,
+                         "by":  "dabinat",
+                         "time":  1776040841,
+                         "depth":  2,
+                         "parent":  47740043,
+                         "text":  "We also need more tech-savvy politicians in office. There are a lot of politicians who are expected to legislate on important technology issues that barely know how to use a cellphone."
+                     },
+                     {
+                         "id":  47740935,
+                         "by":  "DocTomoe",
+                         "time":  1776008010,
+                         "depth":  2,
+                         "parent":  47740043,
+                         "text":  "That\u0027s an interesting euphenism for \u0027spend a massive amount of money on ~~corruption~~ lobbying\u0027,"
+                     },
+                     {
+                         "id":  47750552,
+                         "by":  "chaz6",
+                         "time":  1776079854,
+                         "depth":  2,
+                         "parent":  47749708,
+                         "text":  "This is the correct answer.\nSomething that confused me for a while was the path \"docker.io\" used for pulling containers. There is not actually a container registry at \"docker.io\" - rather docker and podman are hard coded to convert it to either \"registry-1.docker.io\" or \"index.docker.io\"."
+                     },
+                     {
+                         "id":  47750927,
+                         "by":  "matt_kantor",
+                         "time":  1776082678,
+                         "depth":  2,
+                         "parent":  47749708,
+                         "text":  "Depending on your use case, you may not require a hosted registry at all. You could instead push images to your servers from wherever they\u0027re built.\nI use a little script[0] to automate that when deploying some personal projects, but really it could be as simple as `docker save`/`scp`/`docker load` (especially for a one-off situation or when the images are small).\n[0]: https://github.com/mkantor/docker-pushmi-pullyu"
+                     },
+                     {
+                         "id":  47749247,
+                         "by":  "jeroenhd",
+                         "time":  1776068311,
+                         "depth":  2,
+                         "parent":  47748636,
+                         "text":  "At some point apps should just start pointing the finger at the cause of these problems. Linking users with Spanish IPs to a page explaining soccer internet censorship won\u0027t stop the bad reviews entirely but at least it\u0027ll be more useful than doing nothing."
+                     },
+                     {
+                         "id":  47745455,
+                         "by":  "manquer",
+                         "time":  1776035187,
+                         "depth":  2,
+                         "parent":  47742343,
+                         "text":  "Real Madrid alone is more than $5B ? Maybe you mean to say league association is worth 5B ? That seems too high the association does not have lot of margins they pass through most of their revenue to the clubs .\nThe last domestic TV deal they signed recently was worth $6B for 5 seasons or so, which is what you are proposing they buy.\nIn enterprise value terms that $1B/year growing 6 %YoY is worth a lot more than $5B.\nIn contrast Cloudflare has a $2.5B revenue albeit growing much faster but also has much smaller earnings or free cash flow, I.e. money they are not spending to make their current  revenue."
+                     },
+                     {
+                         "id":  47744868,
+                         "by":  "msully4321",
+                         "time":  1776030247,
+                         "depth":  2,
+                         "parent":  47742343,
+                         "text":  "I\u0027m not sure where that number comes from but I don\u0027t think it\u0027s right, and I don\u0027t think that\u0027s how La Liga is structured anyway. It\u0027s governed by an association of all of the teams in the top two flights of spanish football."
+                     },
+                     {
+                         "id":  47742956,
+                         "by":  "lokar",
+                         "time":  1776019399,
+                         "depth":  2,
+                         "parent":  47742343,
+                         "text":  "Set an example.  Buy them, fire everyone, shut it down and liquidate the property."
+                     },
+                     {
+                         "id":  47742604,
+                         "by":  "outside2344",
+                         "time":  1776017537,
+                         "depth":  2,
+                         "parent":  47742343,
+                         "text":  "Less headaches, free futbol matches!"
+                     },
+                     {
+                         "id":  47745325,
+                         "by":  "tabwidth",
+                         "time":  1776033905,
+                         "depth":  2,
+                         "parent":  47741633,
+                         "text":  "This isn\u0027t really about centralization. ISPs are blocking at the IP level, not Docker Hub specifically. You could self-host a registry behind Cloudflare and still run into the same thing."
+                     },
+                     {
+                         "id":  47743163,
+                         "by":  "swiftcoder",
+                         "time":  1776020584,
+                         "depth":  2,
+                         "parent":  47742260,
+                         "text":  "It is also educational to look up the overlap between Telefonica directors, LaLiga directors, and the government officials who granted the defacto monopoly"
+                     },
+                     {
+                         "id":  47744177,
+                         "by":  "sva_",
+                         "time":  1776026104,
+                         "depth":  2,
+                         "parent":  47743971,
+                         "text":  "It is somewhat funny until you realize the amount of power some copyright mafia knuckleheads have over the (local) internet.\nIt isn\u0027t even an authoritative regime censoring something, but much more silly."
+                     },
+                     {
+                         "id":  47743156,
+                         "by":  "swiftcoder",
+                         "time":  1776020496,
+                         "depth":  2,
+                         "parent":  47742614,
+                         "text":  "\u003e Someone ought to start streaming those games illegally without using cloudflare just to demonstrate how stupid this policy is\nOh, the icing on the cake is that they already do. While my whole dev stack gets shut off every weekend, my neighbour watches pirate futbol streams just fine - not only is it a stupid policy, it\u0027s an ineffective one, and the pirates bypassed the bans ages ago"
+                     },
+                     {
+                         "id":  47743694,
+                         "by":  "HDThoreaun",
+                         "time":  1776023432,
+                         "depth":  2,
+                         "parent":  47742614,
+                         "text":  "Pirates use cloudflare because it solves their biggest problem, DOS attacks. Rights owners figured out that they can shut down these sites by DDOSing them which bypasses the courts and can be done instantly, so the pirates put their sites behind cloudflare ddos protection."
+                     },
+                     {
+                         "id":  47745029,
+                         "by":  "baobabKoodaa",
+                         "time":  1776031290,
+                         "depth":  2,
+                         "parent":  47742406,
+                         "text":  "You mean 1.1.1.1. DNS? Or do they also serve a VPN through that IP?"
+                     },
+                     {
+                         "id":  47741472,
+                         "by":  "embedding-shape",
+                         "time":  1776010720,
+                         "depth":  2,
+                         "parent":  47739433,
+                         "text":  "\u003e What Spain does is basically censorship and it\u0027s very poorly executed\nBasically? It is censorship, with huge collateral damage and regardless of how much we complain or share evidence that the blocks are actually financially harming us, no one seems to care as long as La Liga gets to freely block whatever hoster of websites as they wish."
+                     },
+                     {
+                         "id":  47739695,
+                         "by":  "darkwater",
+                         "time":  1776002118,
+                         "depth":  2,
+                         "parent":  47739423,
+                         "text":  "They are planning to also block VPN providers during football matches, see https://www.techradar.com/vpn/vpn-privacy-security/la-liga-w..."
+                     },
+                     {
+                         "id":  47740036,
+                         "by":  "skgsergio",
+                         "time":  1776003767,
+                         "depth":  2,
+                         "parent":  47739423,
+                         "text":  "Alternate DNS doesn\u0027t help, they block at IP level.\nYes, they block IPs belonging to CDNs (CF including R2, BunnyCDN, CDN77, Fastly, Alibaba, Akamai even)..."
+                     },
+                     {
+                         "id":  47742891,
+                         "by":  "gred",
+                         "time":  1776019133,
+                         "depth":  2,
+                         "parent":  47739423,
+                         "text":  "\u003e run your systems outside of Spain\nSo much for digital sovereignty :-)"
+                     },
+                     {
+                         "id":  47740533,
+                         "by":  "littlecranky67",
+                         "time":  1776006098,
+                         "depth":  2,
+                         "parent":  47739423,
+                         "text":  "It is not a DNS based block, but on the IP level. Once I knew what caused the issue, I figured I use one of my Hetzner vServers as an exit node in tailscale.\nBut come on, this can\u0027t be true. I wonder how many other people in IT wasted hours on issues and tickets to find out it is due to a football match taking place. Admittedly, chances are low, as football matches are usually outside of office hours."
+                     },
+                     {
+                         "id":  47744936,
+                         "by":  "userbinator",
+                         "time":  1776030704,
+                         "depth":  2,
+                         "parent":  47742915,
+                         "text":  "That\u0027s what crossed my mind too: It\u0027s like a nationally-mandated break to watch football."
+                     },
+                     {
+                         "id":  47742075,
+                         "by":  "echoangle",
+                         "time":  1776013999,
+                         "depth":  2,
+                         "parent":  47741690,
+                         "text":  "I don’t think it’s a DNS ban, it looks like they actually ban connections to the IP range.\nBut you can just use a VPN."
+                     },
+                     {
+                         "id":  47742466,
+                         "by":  "LtdJorge",
+                         "time":  1776016541,
+                         "depth":  2,
+                         "parent":  47741690,
+                         "text":  "Nope, it’s IP ban. At least for Vodafone and Telefónica."
+                     },
+                     {
+                         "id":  47744118,
+                         "by":  "integralid",
+                         "time":  1776025744,
+                         "depth":  2,
+                         "parent":  47742045,
+                         "text":  "I work with actually malicious content (things that make people lose their life savings) and Cloudflare abuse is relatively helpful (compared to most ISPs who just don\u0027t care).\nThey just refuse to take down random things that some media company representatives send their way, without a court order or any oversight. And this is a good thing."
+                     },
+                     {
+                         "id":  47743242,
+                         "by":  "JoshTriplett",
+                         "time":  1776021072,
+                         "depth":  2,
+                         "parent":  47742045,
+                         "text":  "LaLiga wanted the right to tell Cloudflare to block specific sites without going through a court.\nCloudflare, rightfully, said that was ridiculous and unreasonable.\nA Spanish court, wrongfully, decided to let LaLiga block all of Cloudflare."
+                     },
+                     {
+                         "id":  47742979,
+                         "by":  "lokar",
+                         "time":  1776019484,
+                         "depth":  2,
+                         "parent":  47742045,
+                         "text":  "They will take down anything you get a judge to agree with."
+                     },
+                     {
+                         "id":  47748261,
+                         "by":  "sammy2255",
+                         "time":  1776061026,
+                         "depth":  2,
+                         "parent":  47747464,
+                         "text":  "It\u0027s just football. Once the game is over they revert the block"
+                     },
+                     {
+                         "id":  47746621,
+                         "by":  "danpalmer",
+                         "time":  1776045071,
+                         "depth":  2,
+                         "parent":  47746454,
+                         "text":  "It might not be Cloudflare\u0027s fault, but it is their problem. If their customers can\u0027t use their products sporadically, it doesn\u0027t really matter why. Cloudflare taking a principled approach hurts their users in the short term, so they have to make a business trade-off between pragmatism and principle. Currently they\u0027re choosing principle, so it\u0027s reasonable to be angry at them for the short term issues that causes."
+                     },
+                     {
+                         "id":  47749382,
+                         "by":  "TiredOfLife",
+                         "time":  1776069540,
+                         "depth":  2,
+                         "parent":  47749238,
+                         "text":  "Bad bot."
+                     },
+                     {
+                         "id":  47747217,
+                         "by":  "TheDong",
+                         "time":  1776050847,
+                         "depth":  2,
+                         "parent":  47747197,
+                         "text":  "\u003e 1. If nix fails to pull anything, it builds (up to and including Linux kernel and compiler).\nIf nix fails to pull things from its binary cache, it will download the \"sources\" of the derivations, which are hosted in various places and so it\u0027s even more likely an overly broad block impacts one of them.\nThis football block very well could also cover GitHub, cdn.kernel.org, and so on, so nix building things could fail just as easily.\nThe solution isn\u0027t to use something else which can download source code from 100s of sites across the internet to compile as a fallback, it\u0027s to not use internet which sporadically blocks sites hosting developer assets.\nThe solution is not technical, it\u0027s political."
+                     },
+                     {
+                         "id":  47743062,
+                         "by":  "fc417fc802",
+                         "time":  1776019934,
+                         "depth":  2,
+                         "parent":  47742858,
+                         "text":  "I think perhaps there\u0027s a difference in expectations between wartime versus a country at peace going after pirates."
+                     },
+                     {
+                         "id":  47739961,
+                         "by":  "ImJasonH",
+                         "time":  1776003392,
+                         "depth":  2,
+                         "parent":  47739648,
+                         "text":  "It\u0027s pretty easy to write your own. I made this one a while ago: https://github.com/chainguard-dev/crow-registry"
+                     },
+                     {
+                         "id":  47741386,
+                         "by":  "ai_slop_hater",
+                         "time":  1776010213,
+                         "depth":  2,
+                         "parent":  47739648,
+                         "text":  "https://github.com/cloudflare/serverless-registry"
+                     }
+                 ]
+}

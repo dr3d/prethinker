@@ -1,0 +1,63 @@
+{
+  "name": "rung_461_excursion_reddit_commercial_entry_dispute",
+  "ontology_name": "rung_461_excursion_reddit_commercial_entry_dispute",
+  "utterances": [
+    "Use alleges/2, denies/2, has_evidence/2, seeks_order/2, uncertain_about/2.",
+    {
+      "utterance": "A commercial tenant alleges repeated after-hours entries by landlord staff without scheduling notice, while the landlord side denies unauthorized-entry claims.",
+      "clarification_answers": [
+        "Set alleges(tenant, unauthorized_after_hours_entries). Set denies(landlord, unauthorized_entries_claim)."
+      ],
+      "max_clarification_rounds": 2
+    },
+    {
+      "utterance": "The tenant says they have access-control logs and camera clips, asks about an injunction, and is unsure whether damages are worth pursuing now.",
+      "clarification_answers": [
+        "Set has_evidence(tenant, access_logs_and_camera_clips). Set seeks_order(tenant, injunction). Set uncertain_about(tenant, pursue_damages_now)."
+      ],
+      "max_clarification_rounds": 2
+    },
+    "query alleges(tenant, unauthorized_after_hours_entries).",
+    "query denies(landlord, unauthorized_entries_claim).",
+    "query has_evidence(tenant, access_logs_and_camera_clips).",
+    "query seeks_order(tenant, injunction).",
+    "query uncertain_about(tenant, pursue_damages_now)."
+  ],
+  "validations": [
+    {
+      "id": "tenant_allegation_recorded",
+      "query": "alleges(tenant, unauthorized_after_hours_entries).",
+      "expect_status": "success",
+      "min_rows": 1,
+      "max_rows": 1
+    },
+    {
+      "id": "landlord_denial_recorded",
+      "query": "denies(landlord, unauthorized_entries_claim).",
+      "expect_status": "success",
+      "min_rows": 1,
+      "max_rows": 1
+    },
+    {
+      "id": "evidence_recorded",
+      "query": "has_evidence(tenant, access_logs_and_camera_clips).",
+      "expect_status": "success",
+      "min_rows": 1,
+      "max_rows": 1
+    },
+    {
+      "id": "injunction_goal_recorded",
+      "query": "seeks_order(tenant, injunction).",
+      "expect_status": "success",
+      "min_rows": 1,
+      "max_rows": 1
+    },
+    {
+      "id": "damages_uncertainty_recorded",
+      "query": "uncertain_about(tenant, pursue_damages_now).",
+      "expect_status": "success",
+      "min_rows": 1,
+      "max_rows": 1
+    }
+  ]
+}

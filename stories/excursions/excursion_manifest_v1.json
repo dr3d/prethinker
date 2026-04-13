@@ -1,0 +1,103 @@
+{
+  "manifest_id": "excursion_manifest_v1",
+  "generated_on": "2026-04-13",
+  "source_bank_path": "stories/excursions/SOURCE_BANK_V1.md",
+  "packs": [
+    {
+      "id": "excursion_cooperative_v1",
+      "lane": "cooperative",
+      "items": [
+        {
+          "id": "coop_fed_2025_03_19",
+          "difficulty": "G1",
+          "source_url": "https://www.federalreserve.gov/mediacenter/files/FOMCpresconf20250319.pdf",
+          "extraction_policy": "claim",
+          "suggested_turns": "8-12"
+        },
+        {
+          "id": "coop_fed_2024_09_18",
+          "difficulty": "G1",
+          "source_url": "https://www.federalreserve.gov/mediacenter/files/FOMCpresconf20240918.pdf",
+          "extraction_policy": "claim",
+          "suggested_turns": "8-12"
+        },
+        {
+          "id": "coop_fed_2024_01_31",
+          "difficulty": "G1",
+          "source_url": "https://www.federalreserve.gov/mediacenter/files/FOMCpresconf20240131.pdf",
+          "extraction_policy": "claim",
+          "suggested_turns": "6-10"
+        },
+        {
+          "id": "coop_scotus_2024_22_913",
+          "difficulty": "G2",
+          "source_url": "https://www.supremecourt.gov/oral_arguments/argument_transcripts/2023/22-913_9pg7.pdf",
+          "extraction_policy": "claim",
+          "suggested_turns": "10-14"
+        },
+        {
+          "id": "coop_scotus_2025_23_1197",
+          "difficulty": "G2",
+          "source_url": "https://www.supremecourt.gov/oral_arguments/argument_transcripts/2025/23-1197_c07d.pdf",
+          "extraction_policy": "claim",
+          "suggested_turns": "10-14"
+        },
+        {
+          "id": "coop_scotus_2026_25_365",
+          "difficulty": "G2",
+          "source_url": "https://www.supremecourt.gov/oral_arguments/argument_transcripts/2025/25-365_l6gn.pdf",
+          "extraction_policy": "claim",
+          "suggested_turns": "12-16"
+        }
+      ]
+    },
+    {
+      "id": "excursion_wild_v1",
+      "lane": "wild",
+      "items": [
+        {
+          "id": "wild_hn_docker_spain_block",
+          "difficulty": "G3",
+          "source_url": "https://news.ycombinator.com/item?id=47738883",
+          "extraction_policy": "claim",
+          "suggested_turns": "8-12"
+        },
+        {
+          "id": "wild_hn_codex_vs_claude",
+          "difficulty": "G3",
+          "source_url": "https://news.ycombinator.com/item?id=47750069",
+          "extraction_policy": "claim",
+          "suggested_turns": "8-12"
+        },
+        {
+          "id": "wild_hn_agents_private_keys",
+          "difficulty": "G3",
+          "source_url": "https://news.ycombinator.com/item?id=47736831",
+          "extraction_policy": "claim",
+          "suggested_turns": "6-10"
+        },
+        {
+          "id": "wild_reddit_security_deposit_appeal",
+          "difficulty": "G4",
+          "source_url": "https://www.reddit.com/r/legaladvice/comments/143pw0n/usca_update_landlord_has_not_returned_the/",
+          "extraction_policy": "claim",
+          "suggested_turns": "6-10"
+        },
+        {
+          "id": "wild_reddit_landlord_entered_furniture",
+          "difficulty": "G4",
+          "source_url": "https://www.reddit.com/r/legaladvice/comments/t2ppb8",
+          "extraction_policy": "claim",
+          "suggested_turns": "6-10"
+        },
+        {
+          "id": "wild_reddit_commercial_entry_dozens",
+          "difficulty": "G4",
+          "source_url": "https://www.reddit.com/r/legaladvice/comments/1lorwlj",
+          "extraction_policy": "claim",
+          "suggested_turns": "8-12"
+        }
+      ]
+    }
+  ]
+}

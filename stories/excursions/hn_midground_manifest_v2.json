@@ -1,0 +1,80 @@
+﻿{
+    "manifest_id":  "hn_midground_manifest_v2",
+    "generated_on":  "2026-04-13",
+    "source":  "Hacker News official Firebase API",
+    "generated_by":  "scripts ad-hoc harvest via PowerShell",
+    "pack":  [
+                 {
+                     "id":  "hn_docker_spain_block",
+                     "thread_id":  47738883,
+                     "difficulty":  "G2",
+                     "lane":  "incident_policy",
+                     "hn_url":  "https://news.ycombinator.com/item?id=47738883",
+                     "title":  "Tell HN: Docker pull fails in Spain due to football Cloudflare block",
+                     "descendants":  401,
+                     "harvested_comment_count":  120,
+                     "snapshot_path":  "stories/excursions/hn_midground_v2/hn_docker_spain_block.json",
+                     "suggested_turn_window":  "8-14"
+                 },
+                 {
+                     "id":  "hn_anthropic_cache_ttl_downgrade",
+                     "thread_id":  47736476,
+                     "difficulty":  "G2",
+                     "lane":  "vendor_contract",
+                     "hn_url":  "https://news.ycombinator.com/item?id=47736476",
+                     "title":  "Anthropic downgraded cache TTL on March 6th",
+                     "descendants":  412,
+                     "harvested_comment_count":  120,
+                     "snapshot_path":  "stories/excursions/hn_midground_v2/hn_anthropic_cache_ttl_downgrade.json",
+                     "suggested_turn_window":  "8-14"
+                 },
+                 {
+                     "id":  "hn_quota_exhaustion_claims",
+                     "thread_id":  47739260,
+                     "difficulty":  "G3",
+                     "lane":  "service_reliability",
+                     "hn_url":  "https://news.ycombinator.com/item?id=47739260",
+                     "title":  "Pro Max 5x quota exhausted in 1.5 hours despite moderate usage",
+                     "descendants":  639,
+                     "harvested_comment_count":  120,
+                     "snapshot_path":  "stories/excursions/hn_midground_v2/hn_quota_exhaustion_claims.json",
+                     "suggested_turn_window":  "8-14"
+                 },
+                 {
+                     "id":  "hn_email_reputation_gmail",
+                     "thread_id":  47738978,
+                     "difficulty":  "G2",
+                     "lane":  "deliverability_ops",
+                     "hn_url":  "https://news.ycombinator.com/item?id=47738978",
+                     "title":  "We have a 99% email reputation, but Gmail disagrees",
+                     "descendants":  298,
+                     "harvested_comment_count":  120,
+                     "snapshot_path":  "stories/excursions/hn_midground_v2/hn_email_reputation_gmail.json",
+                     "suggested_turn_window":  "8-14"
+                 },
+                 {
+                     "id":  "hn_distilling_ban_unconstitutional",
+                     "thread_id":  47751781,
+                     "difficulty":  "G3",
+                     "lane":  "legal_reasoning",
+                     "hn_url":  "https://news.ycombinator.com/item?id=47751781",
+                     "title":  "US appeals court declares 158-year-old home distilling ban unconstitutional",
+                     "descendants":  214,
+                     "harvested_comment_count":  97,
+                     "snapshot_path":  "stories/excursions/hn_midground_v2/hn_distilling_ban_unconstitutional.json",
+                     "suggested_turn_window":  "8-14"
+                 },
+                 {
+                     "id":  "hn_wordpress_plugins_backdoor",
+                     "thread_id":  47755629,
+                     "difficulty":  "G3",
+                     "lane":  "security_incident",
+                     "hn_url":  "https://news.ycombinator.com/item?id=47755629",
+                     "title":  "Someone Bought 30 WordPress Plugins and Planted a Backdoor in All of Them",
+                     "descendants":  126,
+                     "harvested_comment_count":  96,
+                     "snapshot_path":  "stories/excursions/hn_midground_v2/hn_wordpress_plugins_backdoor.json",
+                     "suggested_turn_window":  "8-14"
+                 }
+             ]
+}

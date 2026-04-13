@@ -1,0 +1,68 @@
+{
+  "name": "rung_456_excursion_coop_scotus_exception_logic",
+  "ontology_name": "rung_456_excursion_coop_scotus_exception_logic",
+  "utterances": [
+    "Use no_notice/1, emergency/1, asked_about/2, conceded/2, liable/1.",
+    "assert rule liable(C) :- no_notice(C), not emergency(C).",
+    {
+      "utterance": "In oral argument, petitioner said the city gave no notice in case_alpha.",
+      "clarification_answers": [
+        "Set no_notice(case_alpha)."
+      ],
+      "max_clarification_rounds": 1
+    },
+    "Set no_notice(case_alpha).",
+    {
+      "utterance": "A justice asked about the emergency exception and pressed on case_beta.",
+      "clarification_answers": [
+        "Set asked_about(justice, emergency_exception). Set no_notice(case_beta)."
+      ],
+      "max_clarification_rounds": 1
+    },
+    "Set asked_about(justice, emergency_exception).",
+    "Set no_notice(case_beta).",
+    {
+      "utterance": "Petitioner conceded case_beta was an emergency response scenario.",
+      "clarification_answers": [
+        "Set conceded(petitioner, emergency_exception_for_case_beta). Set emergency(case_beta)."
+      ],
+      "max_clarification_rounds": 1
+    },
+    "Set conceded(petitioner, emergency_exception_for_case_beta).",
+    "Set emergency(case_beta).",
+    "query liable(case_alpha).",
+    "query liable(case_beta).",
+    "query asked_about(justice, emergency_exception).",
+    "query conceded(petitioner, emergency_exception_for_case_beta)."
+  ],
+  "validations": [
+    {
+      "id": "case_alpha_liable",
+      "query": "liable(case_alpha).",
+      "expect_status": "success",
+      "min_rows": 1,
+      "max_rows": 1
+    },
+    {
+      "id": "case_beta_not_liable_due_emergency",
+      "query": "liable(case_beta).",
+      "expect_status": "no_results",
+      "min_rows": 0,
+      "max_rows": 0
+    },
+    {
+      "id": "justice_asked_emergency_exception",
+      "query": "asked_about(justice, emergency_exception).",
+      "expect_status": "success",
+      "min_rows": 1,
+      "max_rows": 1
+    },
+    {
+      "id": "petitioner_conceded_exception",
+      "query": "conceded(petitioner, emergency_exception_for_case_beta).",
+      "expect_status": "success",
+      "min_rows": 1,
+      "max_rows": 1
+    }
+  ]
+}

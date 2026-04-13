@@ -1,0 +1,68 @@
+{
+  "name": "rung_463_excursion_coop_fed_counterfactual_guard",
+  "ontology_name": "rung_463_excursion_coop_fed_counterfactual_guard",
+  "utterances": [
+    "Use described_as/2, not_commitment/2, depends_on/2, asked_about/2, maintained/2.",
+    {
+      "utterance": "The chair said if data weakens they would discuss cuts, but framed that as scenario planning, not a commitment.",
+      "clarification_answers": [
+        "Set described_as(chair, scenario_planning_for_weaker_data). Set not_commitment(chair, automatic_cuts)."
+      ],
+      "max_clarification_rounds": 1
+    },
+    "Set described_as(chair, scenario_planning_for_weaker_data).",
+    "Set not_commitment(chair, automatic_cuts).",
+    {
+      "utterance": "Reporters asked what the path depends on; answer was incoming data, and the committee maintained optionality.",
+      "clarification_answers": [
+        "Set asked_about(reporters, policy_path_conditions). Set depends_on(policy_path, incoming_data). Set maintained(fomc, optionality)."
+      ],
+      "max_clarification_rounds": 1
+    },
+    "Set asked_about(reporters, policy_path_conditions).",
+    "Set depends_on(policy_path, incoming_data).",
+    "Set maintained(fomc, optionality).",
+    "query described_as(chair, scenario_planning_for_weaker_data).",
+    "query not_commitment(chair, automatic_cuts).",
+    "query depends_on(policy_path, incoming_data).",
+    "query maintained(fomc, optionality).",
+    "query depends_on(policy_path, preset_calendar)."
+  ],
+  "validations": [
+    {
+      "id": "counterfactual_marked_as_scenario",
+      "query": "described_as(chair, scenario_planning_for_weaker_data).",
+      "expect_status": "success",
+      "min_rows": 1,
+      "max_rows": 1
+    },
+    {
+      "id": "automatic_cut_not_committed",
+      "query": "not_commitment(chair, automatic_cuts).",
+      "expect_status": "success",
+      "min_rows": 1,
+      "max_rows": 1
+    },
+    {
+      "id": "path_depends_on_data",
+      "query": "depends_on(policy_path, incoming_data).",
+      "expect_status": "success",
+      "min_rows": 1,
+      "max_rows": 1
+    },
+    {
+      "id": "optionality_maintained",
+      "query": "maintained(fomc, optionality).",
+      "expect_status": "success",
+      "min_rows": 1,
+      "max_rows": 1
+    },
+    {
+      "id": "not_calendar_locked",
+      "query": "depends_on(policy_path, preset_calendar).",
+      "expect_status": "no_results",
+      "min_rows": 0,
+      "max_rows": 0
+    }
+  ]
+}

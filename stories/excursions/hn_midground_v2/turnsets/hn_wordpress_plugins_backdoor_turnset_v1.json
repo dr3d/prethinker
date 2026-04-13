@@ -1,0 +1,76 @@
+﻿{
+    "name":  "hn_wordpress_plugins_backdoor_turnset_v1",
+    "source_thread_id":  47755629,
+    "source_url":  "https://news.ycombinator.com/item?id=47755629",
+    "difficulty":  "G3",
+    "lane":  "security_incident",
+    "utterances":  [
+                       {
+                           "utterance":  "chromacity: This is a perfect illustration of what cracks me up about the hyperbolic reactions to Mythos. Yes, increased automation of cutting-edge vulnerability discovery will shake things up a bit. No, it\u0027s nowhere near the top of what should be keeping you awake at night if you\u0027re working in infosec.\nWe\u0027ve built our existing tech stacks and corporate governance structures for a different era. If you want to credit one specific development for making things dramatically worse, it\u0027s cryptocurrencies, not AI. They\u0027ve turned the cottage industry of malicious hacking into a multi-billion-dollar enterprise that\u0027s attractive even to rogue nations such as North Korea. And with this much at stake, they can afford to simply buy your software dependencies, or to offer one of your employees some retirement money in exchange for making a \"mistake\".\nWe know how to write software with very few bugs (although we often choose not to). We have no good plan for keeping big enterprises secure in this reality. Autonomous LLM agents will be used by ransomware gangs and similar operations, but they don\u0027t need FreeBSD exploit-writing capabilities for that.",
+                           "source":  "comment",
+                           "source_id":  47756259,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "bradley13: Whenever I look at a web project, it starts with \"npm install\" and literally dozens of libraries get downloaded.\nThe project authors probably don\u0027t even know what libraries their project requires, because many of them are transitive dependencies. There is zero chance that they have checked those libraries for supply chain attacks.",
+                           "source":  "comment",
+                           "source_id":  47755991,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "spankalee: I really wish that the FAIR package manager project had been successful, but they recently gave up after the WordPress drama died down.\nhttps://fair.pm/\nFAIR has a very interesting architecture, inspired by atproto, that I think has the potential to mitigate some of the supply-chain attacks we\u0027ve seen recently.\nIn FAIR, there\u0027s no central package repository. Anyone can run one, like an atproto PDS. Packages have DIDs, routable across all repositories. There are aggregators that provide search, front-ends, etc. And like Bluesky, there are \"labelers\", separate from repositories and front-ends. So organizations like Socket, etc can label packages with their analysis in a first class way, visible to the whole ecosystem.\nSo you could set up your installer to ban packages flagged by Socket, or ones that recently published by a new DID, etc. You could run your own labeler with AI security analysis on the packages you care about. A specific community could build their own lint rules and label based on that (like e18e in the npm ecosystem.\nNot perfect, but far better than centralized package managers that only get the features their owner decides to pay for.",
+                           "source":  "comment",
+                           "source_id":  47756219,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "toniantunovi: The supply chain attack surface in WordPress plugins has always been particularly dangerous because the ecosystem encourages users to install many small single-purpose plugins from individual developers, most of whom aren\u0027t security-focused organizations. Buying out an established plugin with a large install base is a clever approach because you inherit years of user trust that took the original developer a long time to build.\nThe deeper structural issue is that plugin update notifications function as an implicit trust signal. Users see \"update available\" and click without questioning whether the author is still the same person. A package signing and transfer transparency system similar to what npm has been working toward would help here, but the WordPress ecosystem has historically moved slowly on security infrastructure.",
+                           "source":  "comment",
+                           "source_id":  47756498,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "cold_tom: The scariest part isn’t even the backdoor itself, it’s how normal the acquisition looked.Buying a trusted plugin and pushing an update is basically indistinguishable from legitimate maintenance. There’s no real signal for users to question it",
+                           "source":  "comment",
+                           "source_id":  47757352,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "neilv: Legal questions...\nIn browser plugins and mobile apps (and maybe WordPress plugins?), it\u0027s pretty well known that malware attackers buying those is a frequent thing, and a serious threat.  So:\n1. So is there an argument to be made that a developer/publisher/marketplace selling such software, after it has established a reputation and an installed base, may have an obligation to make some level of effort not to sell out their users to malware/criminals?\n2. Do we already have some parties developing software with the intention of selling it to malware/criminals, planning that selling it will insulate them from being considered a co-conspirator or accessory?",
+                           "source":  "comment",
+                           "source_id":  47758212,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "fblp: Hear me out. Mergers and acquisitions that substantially lesson market competition can be blocked by governments, or even require approval in certain jurisdictions.\nhttps://en.wikipedia.org/wiki/Mergers_and_acquisitions\nMaybe mergers or acquisitions that substantially impact security should require approval by marketplaces (industry governance), and notification and approval by even governments?",
+                           "source":  "comment",
+                           "source_id":  47757660,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "ashishb: WordPress was great because of the plugins.\nWordPress is now a dangerous ecosystem because of the plugins and their current security model.\nI moved to Hugo and encourage others to do so - https://ashishb.net/tech/wordpress-to-hugo/",
+                           "source":  "comment",
+                           "source_id":  47757220,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "ChuckMcM: I don\u0027t think companies appreciated just how much they gave up when they outsourced \"IT\".",
+                           "source":  "comment",
+                           "source_id":  47756398,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "antaviana: Crypto has single handedly created a very large malware industry and has also made information security a massive industry.\nBan crypto and both industries will become way, way smaller.",
+                           "source":  "comment",
+                           "source_id":  47757976,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "K0IN: At this point im not sure how we can reestablish trust in the software supply chain, especailly for small businesses.",
+                           "source":  "comment",
+                           "source_id":  47757937,
+                           "depth":  1
+                       }
+                   ],
+    "notes":  "Auto-generated OP+11-comment turnset from HN snapshot."
+}

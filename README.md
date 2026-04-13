@@ -9,12 +9,19 @@ Last updated: 2026-04-13
 - Docs hub front door now uses a visitor-first hero funnel (explainer, contamination ablation, run reports) with plain-language action notes.
 - Media showcase is now video-first with audio fallback and one-button-per-media selection.
 - Added runnable demo scenario `demo_05_time_loop_carnival` (state mutation + retract + post-change query), with published run JSON + HTML transcript.
+- Excursion stress expansion (GO run) exposed current reasoning ceiling on bare lane:
+  - `excursion_cooperative_v1_full`: `2/6` (`33.3%`)
+  - `excursion_wild_v1_full`: `3/6` (`50.0%`)
+  - `excursion_frontier_v2_full`: `5/12` (`41.7%`)
 
 ## Quick Links
 
 - docs hub: `docs/index.html`
 - run explorer: `docs/run-reports-hub.html`
 - demo playbook: `docs/DEMO_PLAYBOOK.md`
+- excursion source bank: `stories/excursions/SOURCE_BANK_V1.md`
+- out in the wild article: `docs/WILD_MODE.md`
+- wild failure isolation: `docs/WILD_FAILURE_ISOLATION.md`
 - track scoreboard: `docs/TRACK_SCOREBOARD.md`
 - explainer article: `EXPLAINER.md`
 - assembly log: `SESSIONS.md`
@@ -259,6 +266,18 @@ The ladder is now treated as two orthogonal axes:
 
 This keeps "100% on easy wording" from being confused with parser robustness.
 
+## Frontier Operating Model (How We Climb)
+
+Frontier progress uses explicit orchestration, not ad-hoc scenario growth:
+
+- `Agent54` adds new rungs at the current edge (new logical height and/or language width pressure).
+- Gate curation removes low-signal, repeatedly redundant retest rungs from strict gate packs.
+- Harder successor rungs replace easy duplicates so test time stays focused on frontier signal.
+
+Guardrail:
+
+- never prune an entire behavior class; keep at least one anchor rung per class.
+
 ### Width Lane Policy
 
 - New hard scenarios should increasingly include language-noise variants that target the same expected KB outcome.
@@ -294,7 +313,7 @@ ollama list
 2. Run rung 1 with deterministic core runtime:
 
 ```bash
-python kb_pipeline.py --backend ollama --base-url http://127.0.0.1:11434 --model qwen35-semparse:9b --runtime core --prompt-file modelfiles/semantic_parser_system_prompt.md --scenario kb_scenarios/stage_01_facts_only.json --kb-name quickstart_core --out kb_runs/quickstart_stage_01_core.json
+python kb_pipeline.py --backend ollama --base-url http://127.0.0.1:11434 --model qwen3.5:9b --runtime core --prompt-file modelfiles/semantic_parser_system_prompt.md --scenario kb_scenarios/stage_01_facts_only.json --kb-name quickstart_core --out kb_runs/quickstart_stage_01_core.json
 ```
 
 3. Success criteria:
@@ -531,31 +550,63 @@ Helpful controls:
 
 Use track manifests to fold demos/examples into repeatable grunt-work without mixing them into the strict ladder gate.
 
+Defaults:
+
+- `scripts/run_track.py` now defaults to bare `qwen3.5:9b` to keep runtime prompt injection as a single source.
+- if you explicitly run baked `qwen35-semparse:9b`, pair it with `--prompt-file modelfiles/blank_prompt.md` to avoid double system-prompt sources.
+
 ```bash
 # list available tracks
 python scripts/run_track.py --list-tracks
 
 # run core gate battery (must-pass)
-python scripts/run_track.py --track gate_ladder_frontier --backend ollama --base-url http://127.0.0.1:11434 --model qwen35-semparse:9b --prompt-file modelfiles/semantic_parser_system_prompt.md --fail-on-under
+python scripts/run_track.py --track gate_ladder_frontier --backend ollama --base-url http://127.0.0.1:11434 --model qwen3.5:9b --prompt-file modelfiles/semantic_parser_system_prompt.md --fail-on-under
 
 # run examples/demo battery (showcase + regression)
-python scripts/run_track.py --track examples_all --backend ollama --base-url http://127.0.0.1:11434 --model qwen35-semparse:9b --prompt-file modelfiles/semantic_parser_system_prompt.md
+python scripts/run_track.py --track examples_all --backend ollama --base-url http://127.0.0.1:11434 --model qwen3.5:9b --prompt-file modelfiles/semantic_parser_system_prompt.md
 
 # run book-acid battery (narrative ingestion + QA probes)
-python scripts/run_track.py --track book_acid_goldilocks --backend ollama --base-url http://127.0.0.1:11434 --model qwen35-semparse:9b --prompt-file modelfiles/semantic_parser_system_prompt.md
+python scripts/run_track.py --track book_acid_goldilocks --backend ollama --base-url http://127.0.0.1:11434 --model qwen3.5:9b --prompt-file modelfiles/semantic_parser_system_prompt.md
 
 # run book-acid with clarification answer model in-loop
-python scripts/run_track.py --track book_acid_goldilocks --backend ollama --base-url http://127.0.0.1:11434 --model qwen35-semparse:9b --prompt-file modelfiles/semantic_parser_system_prompt.md --clarification-eagerness 0.85 --max-clarification-rounds 3 --clarification-answer-model gpt-oss:20b --clarification-answer-backend ollama --clarification-answer-base-url http://127.0.0.1:11434 --clarification-answer-context-length 16384 --clarification-answer-min-confidence 0.55
+python scripts/run_track.py --track book_acid_goldilocks --backend ollama --base-url http://127.0.0.1:11434 --model qwen3.5:9b --prompt-file modelfiles/semantic_parser_system_prompt.md --clarification-eagerness 0.85 --max-clarification-rounds 3 --clarification-answer-model gpt-oss:20b --clarification-answer-backend ollama --clarification-answer-base-url http://127.0.0.1:11434 --clarification-answer-context-length 16384 --clarification-answer-min-confidence 0.55
 
 # run with an explicit served-LLM (preferred choreography path)
-python scripts/run_track.py --track book_acid_goldilocks --backend ollama --base-url http://127.0.0.1:11434 --model qwen35-semparse:9b --prompt-file modelfiles/semantic_parser_system_prompt.md --clarification-eagerness 0.85 --max-clarification-rounds 3 --served-llm-model qwen3.5:9b --served-llm-backend ollama --served-llm-base-url http://127.0.0.1:11434 --served-llm-context-length 8192 --clarification-answer-min-confidence 0.55
+python scripts/run_track.py --track book_acid_goldilocks --backend ollama --base-url http://127.0.0.1:11434 --model qwen3.5:9b --prompt-file modelfiles/semantic_parser_system_prompt.md --clarification-eagerness 0.85 --max-clarification-rounds 3 --served-llm-model qwen3.5:9b --served-llm-backend ollama --served-llm-base-url http://127.0.0.1:11434 --served-llm-context-length 8192 --clarification-answer-min-confidence 0.55
 ```
 
 Track definitions live in:
 
 - `kb_scenarios/tracks.json`
 
-### 3d) Differential Engine Validation (Vendored vs Baseline)
+### 3d) Run live MITM sessions (in-world loop)
+
+Use this to process turns one-by-one while preserving a session KB, with clarification handled by served model and optional fallback sidecar replay.
+
+```bash
+# run a live session from a scenario/turn file
+python scripts/run_mitm_session.py --turns-file kb_scenarios/rung_467_frontier_failure_question_advice_dual_intent.json --backend ollama --base-url http://127.0.0.1:11434 --model qwen3.5:9b --kb-name mitm_demo --kb-root tmp/kb_store --clarification-eagerness 0.8 --served-llm-model qwen3.5:9b --served-llm-backend ollama --served-llm-base-url http://127.0.0.1:11434 --fallback-sidecar-model qwen3.5:9b --fallback-sidecar-backend ollama --fallback-sidecar-base-url http://127.0.0.1:11434 --reset-kb
+```
+
+Outputs:
+
+- per-turn reports under `tmp/runs/mitm_sessions/<session_id>/reports/`
+- turn transcript at `session_transcript.jsonl`
+- session summary with readiness metrics/grade at `session_summary.json`
+
+### 3e) Grade KB fidelity (strict + semantic)
+
+Use this to score what is missing/wrong in `kb.pl` from both symbolic diff and prose-level semantic review.
+
+```bash
+# strict only (golden diff)
+python scripts/grade_kb.py --candidate-kb kb_store/mitm_demo/kb.pl --golden-kb goldens/kb/mitm_demo.pl
+
+# strict + semantic (source prose)
+python scripts/grade_kb.py --candidate-kb kb_store/mitm_demo/kb.pl --golden-kb goldens/kb/mitm_demo.pl --source-text-file stories/excursions/SOURCE_BANK_V1.md --backend ollama --base-url http://127.0.0.1:11434 --model qwen3.5:9b --out tmp/runs/kb_grade_mitm_demo.json
+```
+
+### 3f) Differential Engine Validation (Vendored vs Baseline)
 
 Use this to verify vendored engine behavior against the prior repo baseline engine.
 
@@ -609,7 +660,7 @@ Starter files:
 Use this when the parser asks clarification questions and you want an explicit Q&A model to answer during runs.
 
 ```bash
-python kb_pipeline.py --backend ollama --base-url http://127.0.0.1:11434 --model qwen35-semparse:9b --runtime core --scenario kb_scenarios/stage_01_facts_only.json --kb-name people_ladder --clarification-eagerness 0.95 --max-clarification-rounds 3 --clarification-answer-model gpt-oss:20b --clarification-answer-backend ollama --clarification-answer-context-length 16384 --clarification-answer-history-turns 8 --clarification-answer-kb-clause-limit 80 --clarification-answer-kb-char-budget 5000 --clarification-answer-min-confidence 0.55 --out kb_runs/stage_01_people_ladder_qamodel.json
+python kb_pipeline.py --backend ollama --base-url http://127.0.0.1:11434 --model qwen3.5:9b --runtime core --prompt-file modelfiles/semantic_parser_system_prompt.md --scenario kb_scenarios/stage_01_facts_only.json --kb-name people_ladder --clarification-eagerness 0.95 --max-clarification-rounds 3 --clarification-answer-model gpt-oss:20b --clarification-answer-backend ollama --clarification-answer-context-length 16384 --clarification-answer-history-turns 8 --clarification-answer-kb-clause-limit 80 --clarification-answer-kb-char-budget 5000 --clarification-answer-min-confidence 0.55 --out kb_runs/stage_01_people_ladder_qamodel.json
 ```
 
 Notes:

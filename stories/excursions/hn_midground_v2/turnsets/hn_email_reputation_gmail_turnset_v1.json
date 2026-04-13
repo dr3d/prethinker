@@ -1,0 +1,76 @@
+﻿{
+    "name":  "hn_email_reputation_gmail_turnset_v1",
+    "source_thread_id":  47738978,
+    "source_url":  "https://news.ycombinator.com/item?id=47738978",
+    "difficulty":  "G2",
+    "lane":  "deliverability_ops",
+    "utterances":  [
+                       {
+                           "utterance":  "Youden: How do you get email addresses? Do people freely and explicitly choose to sign up to your mailing list, or is it baggage that you\u0027re forcing on them without their consent?\nI notice that when I go to https://fontawesome.com/ and click \"Start for Free\", I\u0027m asked for my email address. This isn\u0027t necessary for me to use the icons. I just need a page that tells me to add the necessary tags for cdnjs [0].\nI think your problem is dissonance between what you think your users want and what they actually want. If I had to sign up for a mailing list in order to use every frontend development library I\u0027ve ever used, and their emails actually made it past my spam filter, I\u0027d never see anything else.\nI think Google\u0027s doing the right thing here. You need to separate your newsletter and product updates from people who just want to set up the icons and move on with their lives.\n[0]: https://cdnjs.com/libraries/font-awesome",
+                           "source":  "comment",
+                           "source_id":  47739641,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "jherskovic: I use FontAwesome. I bought FontAwesome subscriptions for my team. Love the product.\n“We released new icons” (or a new version) is a message that has exactly zero information content for me. My workflow is “I need an icon for this,” so I open FA’s site and search. Done. Remembering that I searched for an icon that wasn’t there months ago, so that I’ll go check and see if it’s in the new release? Not going to happen.\nNo shade here. If you live, breathe, and devote your life to your product you’re going to be orders of magnitude more excited and attuned than the rest of us. Just… remember that we do not care to the level that you do. We buy it to be a tool in our toolkit, not the center of our lives.\nIf Ryobi sent me an email whenever they added a new battery-powered tool to their catalog, or upgraded a drill, I’d lose my shit. My time and attention are valuable to me. Don’t take them for granted.",
+                           "source":  "comment",
+                           "source_id":  47747638,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "0x3f: I\u0027m a Font Awesome subscriber and yes, for the record, they spam me with annoying marketing and probably deserve their Gmail woes.\nThey also use that silly dark pattern where they alternate sending out marketing emails from {David,Harry,Sam,Janet,every other person at the company}@fontawesome.com.",
+                           "source":  "comment",
+                           "source_id":  47739762,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "cs02rm0: \u003e At our CORE, our instinct is to only email folks when we actually have something fun to share. A big release, something we’re excited about, news worth your time. That’d probably be every couple of months, if that. Respectful. Low noise.\nLow noise for some fonts is zero emails. In the nicest way possible, users aren\u0027t excited about your big release, they\u0027re just not.",
+                           "source":  "comment",
+                           "source_id":  47740220,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "sho_hn: If I read this right, they used their email recipient list from Font Awesome to spam people with an unrelated new product announcement.\nI get they\u0027re going for the whole \"look at big evil Google undermining this underdog\" support ticket route, but I think it will backfire in this case.",
+                           "source":  "comment",
+                           "source_id":  47739629,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "bar000n: I can understand the frustration but let\u0027s face it: you cannot fool huge email providers such as Gmail. They have huge userbases and if their users mark some of your  messages as spam then you\u0027re screwed.\nI am email admin since 2003 and I have real email users, i don\u0027t take customers who send any sort of automated messages, and I never had any issues besides the occasional compromised mailbox once in a while, and that was way back in the day...",
+                           "source":  "comment",
+                           "source_id":  47740155,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "fmx: GMail disagrees with you, because GMail users disagree with you. They are clicking \"report spam\" on your emails. Whether or not you think what you\u0027re sending is spam, the recipients think it is, and that\u0027s what matters. (Based on the other comments in this thread it\u0027s not hard to see why they might think so.)",
+                           "source":  "comment",
+                           "source_id":  47740684,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "airstrike: As a builder, I appreciate the hustle.\nBut an e-mail every 2 months seems innocuous until you factor in how many senders one normally has, which really means lots of \"exciting news\"... that are actually only really exciting for the people who sent them.\nIn an ideal world, I\u0027d receive zero of those. I can just find out about things organically.\nI don\u0027t think I\u0027ve ever wished to receive a single e-mail about icons—or from any library I use, tbh",
+                           "source":  "comment",
+                           "source_id":  47740007,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "the__alchemist: #1: Was this article written by an LLM? The phrasing implies there\u0027s a high chance\n#2: Is your company sending spam emails? I don\u0027t know how Gmail\u0027s system works, but I will mark any unsolicited email from businesses as spam. Perhaps Google uses that as a heuristic?",
+                           "source":  "comment",
+                           "source_id":  47739645,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "chmod775: Chances are the e-mails they\u0027ve been sending so far went unread/got moved to spam by a lot of users and Gmail took that as a signal.\nI send nothing but password-reset mails and never had an issue getting anything delivered, even though people constantly whine that delivering e-mail yourself has gotten so hard nowadays.\nJust got a clean IP and don\u0027t send crap.",
+                           "source":  "comment",
+                           "source_id":  47739519,
+                           "depth":  1
+                       },
+                       {
+                           "utterance":  "jjulius: My money is on the likelihood that most GMail users started marking these emails as spam, and GMail recognized that overriding trend and began to redirect the emails accordingly on a broader scale.\nEssentially, the people FontAwesome thinks will want to hear about their new features have actually, collectively, said, \"No thanks,\" and FontAwesome is struggling to accept that.",
+                           "source":  "comment",
+                           "source_id":  47740631,
+                           "depth":  1
+                       }
+                   ],
+    "notes":  "Auto-generated OP+11-comment turnset from HN snapshot."
+}
