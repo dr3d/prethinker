@@ -813,7 +813,7 @@
             const parsed = new URL(rawHref, window.location.href);
             const path = (parsed.pathname || "").replace(/\\/g, "/");
             const lowerPath = path.toLowerCase();
-            if (!(lowerPath.endsWith(".md") || lowerPath.endsWith(".json"))) continue;
+            if (!(lowerPath.endsWith(".md") || lowerPath.endsWith(".json") || lowerPath.endsWith(".pl"))) continue;
             resolvedHash = parsed.hash || "";
             if (path.includes(`/${repoName}/docs/`)) {
               resolvedPath = path.split(`/${repoName}/`).pop() || "";
