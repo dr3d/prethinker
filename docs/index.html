@@ -198,6 +198,23 @@
       font-size: 14px;
     }
 
+    .hero-action-notes {
+      margin-top: 10px;
+      display: grid;
+      gap: 6px;
+      max-width: 980px;
+    }
+
+    .hero-action-note {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .hero-action-note strong {
+      color: var(--ink);
+    }
+
     .btn {
       display: inline-block;
       text-decoration: none;
@@ -450,6 +467,11 @@
         <a class="btn primary" href="../EXPLAINER.md">Read The Explainer</a>
         <a class="btn alt" href="reports/progress_memory_contamination_ablation_with_progress_20260412.html">See The Contamination Ablation</a>
         <a class="btn" href="run-reports-hub.html">Browse Run Reports</a>
+      </div>
+      <div class="hero-action-notes">
+        <div class="hero-action-note"><strong>→ Read the explainer</strong> — Six failure modes from months of frontier runs, and the architecture that addresses them. <em>(15 min read)</em></div>
+        <div class="hero-action-note"><strong>→ See the contamination ablation</strong> — Side-by-side runs with and without the progress-memory control plane. The clearest evidence that interception matters. <em>(2 min)</em></div>
+        <div class="hero-action-note"><strong>→ Browse run reports</strong> — Full ladder of test scenarios, ablations, and frontier sweeps. For the skeptical. <em>(deep)</em></div>
       </div>
       <p class="hero-status">Active research project. Latest frontier checkpoint: rung_449 (multi-bind uncle query under noisy paraphrase), passing 4/4. Updated April 2026.</p>
       <div class="jump-row">
