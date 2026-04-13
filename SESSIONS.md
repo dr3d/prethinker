@@ -1,6 +1,6 @@
 ﻿# SESSIONS (Assembly Log and Migration Guide)
 
-Last updated: 2026-04-12
+Last updated: 2026-04-13
 
 ## Purpose
 
@@ -24,6 +24,43 @@ Use this as the handoff doc for future agents and for repo-to-repo migration.
 - Prompt/version lineage with per-run provenance and manifests
 
 ## Timeline of Major Sessions
+
+## Session 11 (2026-04-13): Regression Stability + Cross-Model Probe
+
+Outcome:
+
+- Ran a full low->frontier replay with no cache reuse:
+  - range: `rung_230_fuzzy_ce_branch_exclusion_language` -> `rung_449_frontier_multibind_uncle_query`
+  - target: `qwen35-semparse:9b` (`qwen3.5:9b`, Ollama, `Q4_K_M`)
+  - size: 43 scenarios
+- Regression result versus prior latest per scenario:
+  - `0` regressions
+  - `0` improvements
+  - `41` unchanged
+  - `2` first-time baselines (`rung_430`, `rung_431`)
+
+Cross-model experiment (ephemeral):
+
+- Ran the same range on `gemma4:26b` as a compatibility probe only (no tuning lane switch).
+- Comparative snapshot vs Qwen lane:
+  - Qwen pass count: `36/43`
+  - Gemma pass count: `31/43`
+  - mixed movement: `5` improved slices, `5` regressed slices, `33` same
+- Conclusion:
+  - current prompt/runtime tuning remains model-specific to the canonical Qwen 9B lane.
+  - other models are useful probes but not drop-in replacements for this tuned lane.
+
+Safety and hygiene actions:
+
+- Confirmed no code/prompt mutation was required for the Gemma probe.
+- Removed Gemma experiment artifacts after reporting:
+  - temporary probe run JSON files
+  - temporary probe summary
+  - temporary probe learn-log block
+- Added parser-lane safety policy to roadmap:
+  - canonical target stays Qwen 9B
+  - parallel per-model overlays allowed in isolated lanes
+  - Qwen guard packs must remain stable before promoting shared changes
 
 ## Session 1: Initial Workbench Foundation
 

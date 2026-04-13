@@ -1,13 +1,13 @@
 {
-  "generated_at_utc": "2026-04-13T00:32:16+00:00",
-  "runs_total": 90,
-  "runs_passed": 83,
-  "run_pass_rate": 0.922,
-  "validation_passed": 330,
-  "validation_total": 340,
-  "validation_pass_rate": 0.971,
-  "latest_scenario": "demo_04_reimbursement_violation_check",
-  "latest_finished_utc": "2026-04-12T13:05:10+00:00",
+  "generated_at_utc": "2026-04-13T01:03:01+00:00",
+  "runs_total": 111,
+  "runs_passed": 104,
+  "run_pass_rate": 0.937,
+  "validation_passed": 456,
+  "validation_total": 466,
+  "validation_pass_rate": 0.979,
+  "latest_scenario": "rung_449_frontier_multibind_uncle_query",
+  "latest_finished_utc": "2026-04-12T22:37:16+00:00",
   "backends": [
     "ollama"
   ]

@@ -287,7 +287,7 @@ Auto-populated by `scripts/run_ladder.py` via `--learn-log`.
 - Learned:
   - After scenario fixes, CE cadence reached full pass for `ce=0.75` at both tested confidence floors (`0.45` and `0.60`).
   - `ce=0.90` remains over-eager on retract noise: parser can consume both scripted clarification answers but still asks a third confirmation-style clarification and hits max rounds.
-  - Resulting guidance: for current noisy-English pack, `ce≈0.75` is the stable operating point; if running `ce=0.90`, increase max clarification rounds or tighten clar loop-stop heuristics.
+  - Resulting guidance: for current noisy-English pack, `ceâ‰ˆ0.75` is the stable operating point; if running `ce=0.90`, increase max clarification rounds or tighten clar loop-stop heuristics.
   - Summary artifact: `tmp/runs/clarification_cadence_summary_baseline_v2_20260411.json`.
 ## 2026-04-11T21:21:09+00:00
 - Run: `auto_frontier_a1_fix1` | range `rung_28_robustness_hard_parallel_branch_retarget -> rung_28_robustness_hard_parallel_branch_retarget` | selected `1` | executed `1` | skipped `0` | failed `1`
@@ -828,3 +828,51 @@ Auto-populated by `scripts/run_ladder.py` via `--learn-log`.
   - `rung_340_ce_story_pronoun_transfer`: passed 11/11; parse_fail=0, apply_fail=0, clar_rounds=3; prompt=sp-1e43c641b01b.
   - `rung_350_ce_story_multi_round_revision`: passed 11/11; parse_fail=0, apply_fail=0, clar_rounds=1; prompt=sp-1e43c641b01b.
   - `rung_360_ce_story_branch_merge_noise`: passed 12/12; parse_fail=0, apply_fail=0, clar_rounds=1; prompt=sp-1e43c641b01b.
+## 2026-04-13T01:41:58+00:00
+- Run: `regression_230_449` | range `rung_230_fuzzy_ce_branch_exclusion_language -> rung_449_frontier_multibind_uncle_query` | selected `43` | executed `43` | skipped `0` | failed `7`
+- Runtime: `ollama` / `qwen35-semparse:9b` / `core` | ctx `8192` | CE `0.35` | prompt `1e43c641b01b`
+- Actions: executed=43
+- Learned:
+  - `rung_230_fuzzy_ce_branch_exclusion_language`: subprocess failed (return code 1).
+  - `rung_240_ops_hospital_vendor_delay_core`: subprocess failed (return code 1).
+  - `rung_241_ops_hospital_cpm_natural_flow`: subprocess failed (return code 1).
+  - `rung_250_ops_indie_launch_uncertainty_routing`: subprocess failed (return code 1).
+  - `rung_251_ops_indie_warroom_natural_flow`: passed 6/6; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_260_sim_fantasy_state_repair`: subprocess failed (return code 1).
+  - `rung_261_sim_fantasy_overlord_natural_flow`: passed 5/5; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_270_story_lineage_fragmented_ingest`: passed 11/11; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_280_story_revision_temporal_shift`: passed 12/12; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_290_story_multi_branch_pronoun_pressure`: passed 12/12; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_300_story_nested_corrections`: passed 17/17; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_310_story_cross_clause_pronoun_weave`: passed 15/15; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_320_story_temporal_exception_rebinding`: passed 17/17; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_330_story_booklet_cross_scene_rebind`: passed 15/15; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_340_ce_story_pronoun_transfer`: passed 11/11; parse_fail=0, apply_fail=0, clar_rounds=3; prompt=sp-1e43c641b01b.
+  - `rung_350_ce_story_multi_round_revision`: passed 11/11; parse_fail=0, apply_fail=0, clar_rounds=1; prompt=sp-1e43c641b01b.
+  - `rung_360_ce_story_branch_merge_noise`: passed 12/12; parse_fail=0, apply_fail=0, clar_rounds=1; prompt=sp-1e43c641b01b.
+  - `rung_370_progress_feasibility_alignment`: passed 2/2; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_380_progress_irrelevant_fact_filter`: passed 2/2; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_390_progress_goal_directed_clarification`: passed 1/1; parse_fail=0, apply_fail=0, clar_rounds=2; prompt=sp-1e43c641b01b.
+  - `rung_400_progress_relevance_repair`: passed 1/1; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_410_progress_goal_context_steering`: passed 2/2; parse_fail=0, apply_fail=0, clar_rounds=1; prompt=sp-1e43c641b01b.
+  - `rung_420_progress_focus_shift_transition`: passed 2/2; parse_fail=0, apply_fail=0, clar_rounds=1; prompt=sp-1e43c641b01b.
+  - `rung_430_goldilocks_roundtrip_retry`: subprocess failed (return code 1).
+  - `rung_431_book_goldilocks_raw_chaptered_qa`: subprocess failed (return code 1).
+  - `rung_432_noise_pronoun_inversion_chain`: passed 6/6; parse_fail=0, apply_fail=0, clar_rounds=1; prompt=sp-1e43c641b01b.
+  - `rung_433_noisy_inverse_retarget_repair`: passed 6/6; parse_fail=0, apply_fail=0, clar_rounds=2; prompt=sp-1e43c641b01b.
+  - `rung_434_dual_pronoun_flip_guard`: passed 7/7; parse_fail=0, apply_fail=0, clar_rounds=1; prompt=sp-1e43c641b01b.
+  - `rung_435_frontier_checkpoint_compound_turns`: passed 6/6; parse_fail=0, apply_fail=0, clar_rounds=2; prompt=sp-1e43c641b01b.
+  - `rung_436_frontier_noise_typo_coref`: passed 6/6; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_437_frontier_policy_override_flow`: passed 7/7; parse_fail=0, apply_fail=0, clar_rounds=1; prompt=sp-1e43c641b01b.
+  - `rung_438_frontier_multibind_query_pressure`: passed 6/6; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_439_frontier_plural_coref_exception_guard`: passed 5/5; parse_fail=0, apply_fail=0, clar_rounds=1; prompt=sp-1e43c641b01b.
+  - `rung_440_frontier_policy_revision_loop`: passed 7/7; parse_fail=0, apply_fail=0, clar_rounds=1; prompt=sp-1e43c641b01b.
+  - `rung_441_frontier_pronoun_bucket_shuffle`: passed 7/7; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_442_frontier_policy_multirevision_guard`: passed 9/9; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_443_frontier_dual_item_handoff_coref`: passed 7/7; parse_fail=0, apply_fail=0, clar_rounds=2; prompt=sp-1e43c641b01b.
+  - `rung_444_frontier_unpunctuated_coref_sweep`: passed 6/6; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_445_frontier_compound_write_query_braid`: passed 6/6; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_446_frontier_policy_noisy_rebind_loop`: passed 7/7; parse_fail=0, apply_fail=0, clar_rounds=1; prompt=sp-1e43c641b01b.
+  - `rung_447_confirmation_gate_single_yes`: passed 2/2; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_448_confirmation_gate_no_then_yes`: passed 3/3; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.
+  - `rung_449_frontier_multibind_uncle_query`: passed 4/4; parse_fail=0, apply_fail=0, clar_rounds=0; prompt=sp-1e43c641b01b.

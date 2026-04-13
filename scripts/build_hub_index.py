@@ -95,6 +95,26 @@ def _rel_path(path: Path, base: Path) -> str:
     return Path(os.path.relpath(str(path), str(base))).as_posix()
 
 
+def _repo_rel(path: Path) -> str:
+    return Path(os.path.relpath(str(path), str(ROOT))).as_posix()
+
+
+def _repo_blob_link(repo_link: str, repo_rel_path: str) -> str:
+    rel = str(repo_rel_path or "").strip()
+    if not rel:
+        return ""
+    if rel.startswith("http://") or rel.startswith("https://"):
+        return rel
+    base = str(repo_link or "").strip()
+    if not base:
+        return rel
+    if base.endswith(".git"):
+        base = base[:-4]
+    base = base.rstrip("/")
+    rel = rel.lstrip("/")
+    return f"{base}/blob/main/{rel}"
+
+
 def _publish_prompt_snapshot(snapshot_path: Path, hub_root: Path) -> str:
     prompts_dir = (hub_root / "prompts").resolve()
     prompts_dir.mkdir(parents=True, exist_ok=True)
@@ -112,13 +132,9 @@ def _publish_prompt_snapshot(snapshot_path: Path, hub_root: Path) -> str:
     return _rel_path(target, hub_root)
 
 
-def _publish_run_json(run_json_path: Path, runs_root: Path, hub_root: Path) -> str:
-    """Copy a run JSON under docs/data/runs and return hub-relative path."""
-    rel_in_runs = Path(os.path.relpath(str(run_json_path), str(runs_root))).as_posix()
-    target = (hub_root / "data" / "runs" / rel_in_runs).resolve()
-    target.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(run_json_path, target)
-    return _rel_path(target, hub_root)
+def _run_json_repo_rel(run_json_path: Path) -> str:
+    """Return repository-relative run JSON path (no docs copy)."""
+    return _repo_rel(run_json_path.resolve())
 
 
 def _read_json(path: Path) -> dict[str, Any] | None:
@@ -169,7 +185,7 @@ def _collect_runs(runs_dir: Path, reports_dir: Path, out: Path) -> list[dict[str
         html_nested = (reports_dir / rel).with_suffix(".html").resolve()
         html_flat = (reports_dir / f"{stem}.html").resolve()
         html = html_nested if html_nested.exists() else html_flat
-        published_json_rel = _publish_run_json(p.resolve(), runs_dir.resolve(), out.parent)
+        published_json_rel = _run_json_repo_rel(p.resolve())
         rows.append(
             {
                 "run_id": str(r.get("run_id", "")).strip() or f"legacy-{stem}",
@@ -185,6 +201,7 @@ def _collect_runs(runs_dir: Path, reports_dir: Path, out: Path) -> list[dict[str
                 "prompt_id": str(pm.get("prompt_id", "")).strip() or ("legacy-file-only" if str(r.get("prompt_file", "")).strip() else "legacy-unknown"),
                 "prompt_sha256": str(pm.get("prompt_sha256", "")).strip(),
                 "prompt_snapshot_rel": snap_rel,
+                "run_json_source_rel": published_json_rel,
                 "report_json_rel": published_json_rel,
                 "report_html_rel": _rel_path(html, out.parent) if html.exists() else "",
             }
@@ -458,13 +475,25 @@ def _build_progress_cards_page(
     docs_root: Path,
     cards_output: Path,
     runs_limit: int,
+    repo_link: str,
 ) -> None:
     cards_output.parent.mkdir(parents=True, exist_ok=True)
     rows = runs[: max(1, runs_limit)]
     sections: list[str] = []
     for run in rows:
-        run_json_path = (docs_root / str(run.get("report_json_rel", ""))).resolve()
-        payload = _read_json(run_json_path)
+        run_json_ref = (
+            str(run.get("run_json_source_rel", "")).strip()
+            or str(run.get("report_json_rel", "")).strip()
+        )
+        run_json_path = None
+        if run_json_ref and not (run_json_ref.startswith("http://") or run_json_ref.startswith("https://")):
+            candidate_repo = (ROOT / run_json_ref).resolve()
+            candidate_docs = (docs_root / run_json_ref).resolve()
+            if candidate_repo.is_file():
+                run_json_path = candidate_repo
+            elif candidate_docs.is_file():
+                run_json_path = candidate_docs
+        payload = _read_json(run_json_path) if run_json_path else None
         if not payload:
             continue
         turns = payload.get("turns", [])
@@ -543,18 +572,20 @@ def _build_progress_cards_page(
 
         report_link = str(run.get("report_html_rel", "")).strip()
         run_json_rel = str(run.get("report_json_rel", "")).strip()
+        run_json_href = _repo_blob_link(repo_link, run_json_rel) if run_json_rel else ""
         prompt_id = str(run.get("prompt_id", "unknown")).strip()
         prompt_link = str(run.get("prompt_snapshot_rel", "")).strip()
+        prompt_href = _repo_blob_link(repo_link, prompt_link) if prompt_link else ""
         scenario = str(run.get("scenario", "unknown"))
         model = str(run.get("model", "unknown"))
         finished = _fmt_iso(str(run.get("finished_utc", "")))
         link_bits: list[str] = []
         if report_link:
             link_bits.append(f"<a href=\"{html.escape(report_link)}\">run transcript</a>")
-        if run_json_rel:
-            link_bits.append(f"<a href=\"{html.escape(run_json_rel)}\">run json</a>")
-        if prompt_link:
-            link_bits.append(f"<a href=\"{html.escape(prompt_link)}\">prompt snapshot</a>")
+        if run_json_href:
+            link_bits.append(f"<a href=\"{html.escape(run_json_href)}\" target=\"_blank\" rel=\"noopener noreferrer\">run json</a>")
+        if prompt_href:
+            link_bits.append(f"<a href=\"{html.escape(prompt_href)}\" target=\"_blank\" rel=\"noopener noreferrer\">prompt snapshot</a>")
         else:
             link_bits.append(html.escape(prompt_id))
         links = " | ".join(link_bits)
@@ -751,6 +782,9 @@ def main() -> int:
     prompts = _collect_prompts(runs)
     data_dir = (out.parent / "data").resolve()
     data_dir.mkdir(parents=True, exist_ok=True)
+    legacy_runs_data_dir = (data_dir / "runs").resolve()
+    if legacy_runs_data_dir.exists():
+        shutil.rmtree(legacy_runs_data_dir)
     rp, pp = data_dir / "runs_manifest.json", data_dir / "prompt_versions.json"
     rc, sp = data_dir / "runs_curated.json", data_dir / "scenario_progress.json"
     hm = data_dir / "historical_metrics.json"
@@ -787,6 +821,7 @@ def main() -> int:
         docs_root=out.parent,
         cards_output=cards_out,
         runs_limit=int(a.cards_runs_limit),
+        repo_link=str(a.repo_link),
     )
 
     pass_total = sum(1 for r in runs if r["status"] == "passed")
@@ -798,6 +833,15 @@ def main() -> int:
     m_opts = _options([str(r["model"]) for r in explorer_runs], "All models")
     st_opts = _options([str(r["status"]) for r in explorer_runs], "All statuses")
     p_opts = _options([str(r["prompt_id"]) for r in explorer_runs], "All prompts")
+    repo_json_links: dict[str, str] = {}
+    for row in explorer_runs:
+        raw = str(row.get("report_json_rel", "")).strip()
+        repo_json_links[raw] = _repo_blob_link(a.repo_link, raw)
+
+    rc_repo_href = _repo_blob_link(a.repo_link, _repo_rel(rc))
+    sp_repo_href = _repo_blob_link(a.repo_link, _repo_rel(sp))
+    pp_repo_href = _repo_blob_link(a.repo_link, _repo_rel(pp))
+    rp_repo_href = _repo_blob_link(a.repo_link, _repo_rel(rp))
     run_rows = "\n".join(
         [
             "<tr data-status=\"{status}\" data-scenario=\"{scenario}\" data-model=\"{model}\" data-prompt=\"{prompt}\" data-search=\"{search}\"><td>{finished}</td><td>{scenario}</td><td>{kb}</td><td>{backend}/{model}</td><td>{status}</td><td>{vp}/{vt}</td><td>{prompt_cell}</td><td>{report}</td><td><a href=\"{json}\">json</a></td></tr>".format(
@@ -811,9 +855,13 @@ def main() -> int:
                 backend=r["backend"],
                 vp=r["validation_passed"],
                 vt=r["validation_total"],
-                prompt_cell=(f"<a href=\"{r['prompt_snapshot_rel']}\">{r['prompt_id']}</a>" if r["prompt_snapshot_rel"] else r["prompt_id"]),
+                prompt_cell=(
+                    f"<a href=\"{_repo_blob_link(a.repo_link, r['prompt_snapshot_rel'])}\" target=\"_blank\" rel=\"noreferrer\">{r['prompt_id']}</a>"
+                    if r["prompt_snapshot_rel"]
+                    else r["prompt_id"]
+                ),
                 report=(f"<a href=\"{r['report_html_rel']}\">report</a>" if r["report_html_rel"] else "-"),
-                json=r["report_json_rel"],
+                json=repo_json_links.get(str(r.get("report_json_rel", "")).strip(), str(r.get("report_json_rel", "")).strip()),
             )
             for r in explorer_runs
         ]
@@ -864,7 +912,11 @@ def main() -> int:
     prompt_rows = "\n".join(
         [
             "<tr><td>{pid}</td><td>{runs}</td><td>{pr}%</td><td>{vr}%</td><td>{last}</td><td>{sc}</td><td>{mc}</td><td><button class=\"pbtn\" data-prompt=\"{pid_text}\">show runs</button></td></tr>".format(
-                pid=(f"<a href=\"{p['prompt_snapshot_rel']}\">{p['prompt_id']}</a>" if p["prompt_snapshot_rel"] else p["prompt_id"]),
+                pid=(
+                    f"<a href=\"{_repo_blob_link(a.repo_link, p['prompt_snapshot_rel'])}\" target=\"_blank\" rel=\"noreferrer\">{p['prompt_id']}</a>"
+                    if p["prompt_snapshot_rel"]
+                    else p["prompt_id"]
+                ),
                 pid_text=p["prompt_id"],
                 runs=p["runs_total"],
                 pr=int(float(p["pass_rate"]) * 100),
@@ -891,7 +943,7 @@ def main() -> int:
     :root{{--bg:#f6f8fb;--p:#fff;--i:#172336;--m:#607089;--b:#d8e0ea;--h:#f8fbff;--l:#0a62c6}} html[data-theme="dark"]{{--bg:#111821;--p:#1a2430;--i:#e8eef6;--m:#aab6c8;--b:#314152;--h:#212d3a;--l:#7bb6ff}} body{{margin:0;background:var(--bg);color:var(--i);font-family:Segoe UI,Arial,sans-serif}} .w{{max-width:1200px;margin:0 auto;padding:20px}} .t{{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}} .nav a,.nav button{{border:1px solid var(--b);background:var(--p);padding:7px 11px;border-radius:999px;color:var(--i);text-decoration:none;cursor:pointer}} .m{{color:var(--m);font-size:13px}} .p{{background:var(--p);border:1px solid var(--b);border-radius:12px;overflow:hidden;margin:12px 0}} .ph{{padding:10px 12px;border-bottom:1px solid var(--b);background:var(--h);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}} .c{{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr 1fr;gap:8px;padding:10px;border-bottom:1px solid var(--b)}} .c input,.c select{{border:1px solid var(--b);background:var(--p);color:var(--i);border-radius:8px;padding:7px}} table{{width:100%;border-collapse:collapse}} th,td{{padding:9px 11px;border-bottom:1px solid var(--b);font-size:13px;text-align:left;vertical-align:top}} th{{background:var(--h);color:var(--m)}} a{{color:var(--l);text-decoration:none}} a:hover{{text-decoration:underline}} .tw{{max-height:540px;overflow:auto}} .k{{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}} .s{{background:var(--p);border:1px solid var(--b);border-radius:10px;padding:8px 10px}} .s b{{font-size:20px}} .hint{{padding:8px 10px;color:var(--m);font-size:12px}}
     @media (max-width:900px){{.c{{grid-template-columns:1fr 1fr}}}} @media (max-width:620px){{.c{{grid-template-columns:1fr}}}}
     </style></head><body><div class="w">
-    <div class="t"><div><h1 style="margin:0">{a.title}</h1><div class="m">generated {dt.datetime.now(dt.timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')} | {stats} | <a href="{rc.relative_to(out.parent).as_posix()}">curated evidence</a> | <a href="{sp.relative_to(out.parent).as_posix()}">scenario progress</a> | <a href="{pp.relative_to(out.parent).as_posix()}">prompt versions</a></div><div class="m">curated manifest: <a href="{rp.relative_to(out.parent).as_posix()}">runs manifest</a></div></div><div class="nav">{docs_hub} {ladder} {cards} {repo} <a href="#prompts">Prompt Evolution</a> <button id="theme">theme</button></div></div>
+    <div class="t"><div><h1 style="margin:0">{a.title}</h1><div class="m">generated {dt.datetime.now(dt.timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')} | {stats} | <a href="{rc_repo_href}" target="_blank" rel="noreferrer">curated evidence</a> | <a href="{sp_repo_href}" target="_blank" rel="noreferrer">scenario progress</a> | <a href="{pp_repo_href}" target="_blank" rel="noreferrer">prompt versions</a></div><div class="m">curated manifest: <a href="{rp_repo_href}" target="_blank" rel="noreferrer">runs manifest</a></div></div><div class="nav">{docs_hub} {ladder} {cards} {repo} <a href="#prompts">Prompt Evolution</a> <button id="theme">theme</button></div></div>
     <div class="k"><div class="s">Runs<br/><b>{len(runs)}</b></div><div class="s">Passed<br/><b>{pass_total}</b></div><div class="s">Pass Rate<br/><b>{int(_score(pass_total, len(runs))*100)}%</b></div><div class="s">Scenarios<br/><b>{len(set([r['scenario'] for r in runs]))}</b></div><div class="s">Prompts<br/><b>{len(prompts)}</b></div></div>
     <div class="p"><div class="ph"><b>Newest Success Highlights</b><span class="m">public signal view</span></div><div class="tw"><table><thead><tr><th>Finished</th><th>Scenario</th><th>Model</th><th>Validation</th><th>Report</th></tr></thead><tbody>{success_rows}</tbody></table></div></div>
     <div class="p"><div class="ph"><b>Spot Checks</b><span class="m">curated checkpoints (not exhaustive)</span></div><div class="tw"><table><thead><tr><th>Finished</th><th>Scenario</th><th>Status</th><th>Validation</th><th>Model</th><th>Report</th></tr></thead><tbody>{spot_rows}</tbody></table></div></div>

@@ -1,6 +1,6 @@
 # Prethinker Roadmap
 
-Last updated: 2026-04-11
+Last updated: 2026-04-13
 
 ## Positioning
 
@@ -111,11 +111,68 @@ Goal: move from "well-instrumented prototype" to "skeptically credible public ev
 4. Tighten symbolic guardrails (predicate alignment and type discipline).
 5. Separate architecture storytelling from empirically proven claims in all public surfaces.
 
-## Next-Go Control Plane Track
+## Model Target Policy (Parser Lane Safety)
 
-For the next build lane focused on full pre-think interposition (`/prethink` MCP wrapper, CE source broker, short-circuit vs forward-with-facts routing), see:
+Canonical tuning target (current):
+- `qwen3.5:9b` in Ollama with `Q4_K_M` quantization (`qwen35-semparse:9b` deployment lane).
+- System-prompt tuning claims are scoped to this lane unless explicitly proven otherwise.
 
-- `NEXT_GO_PRETHINK_CONTROL_PLANE_PLAN.md`
+Parallel model experiments (allowed, but isolated):
+- Other models (for example `gemma4:26b`, `qwen3.5:27b`) can be tuned as separate lanes.
+- Use model-specific prompt overlays rather than mutating canonical prompt behavior:
+  - `modelfiles/semantic_parser_system_prompt.md` remains canonical for Qwen 9B.
+  - add per-model variants (for example `semantic_parser_system_prompt.gemma4_26b.md`) when needed.
+- Keep outputs partitioned by run label/model so comparisons are explicit and reversible.
+
+Merge/acceptance guardrails:
+- No model-side experiment should change canonical Qwen behavior by accident.
+- Promotion of shared changes requires Qwen guard packs to remain stable:
+  - `gate_ladder_frontier` must not regress.
+  - periodic low->frontier regression windows must show no new regressions.
+- Treat non-canonical model probes as compatibility data unless and until they have their own proven benchmark lane.
+
+## Control-Plane Track (Current)
+
+Implemented now (local MCP lane in this repo):
+
+1. Local `pre_think` tool surface with session controls:
+- `pre_think`
+- `set_pre_think_session`
+- `show_pre_think_state`
+- `record_clarification_answer`
+
+2. Deterministic runtime tools exposed through the same server:
+- `query_rows`
+- `assert_fact`
+- `assert_rule`
+- `retract_fact`
+
+3. Write/query gates:
+- pre-think required before gated operations
+- clarification can block query execution until recorded
+- write confirmation gate enforced before mutation
+
+4. Guardrails and observability:
+- query fallback repair for malformed multi-entity query shape
+- loop guard for repeated no-result churn
+- trace logging in `tmp/mcp_trace.log`
+
+Remaining next work (this is now the source of truth):
+
+1. True front-door interposition
+- move from served-model-compliance invocation to a dedicated ingress path where every turn is pre-thought by architecture.
+
+2. Source-aware clarification broker
+- explicit source tags in traces (`kb`, `served_llm`, `user`)
+- commit authority basis in logs (`kb_proof|user_confirmed|both`)
+- enforce rule: served LLM can assist, but cannot alone authorize certainty for write commits.
+
+3. Egress policy lane
+- optional outbound guard/check before final user-facing response.
+
+4. Control-plane benchmark pack
+- separate parser-quality rungs from control-plane routing/confirmation/clarification regressions.
+- publish compact control-plane scorecards beside parser scorecards.
 
 ## 2-Week Execution Plan
 

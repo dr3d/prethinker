@@ -1,16 +1,16 @@
 {
-  "generated_at_utc": "2026-04-13T00:32:16+00:00",
+  "generated_at_utc": "2026-04-13T01:03:01+00:00",
   "prompt_versions_total": 1,
   "prompt_versions": [
     {
       "prompt_id": "sp-1e43c641b01b",
       "prompt_sha256": "1e43c641b01b7c845b82331b521d58c1993e8010bd9283f5085dac687520159e",
       "prompt_snapshot_rel": "prompts/sp-1e43c641b01b.md",
-      "runs_total": 31,
-      "pass_rate": 0.903,
-      "avg_validation_rate": 0.948,
-      "last_seen_utc": "2026-04-12T13:05:10+00:00",
-      "scenario_count": 28,
+      "runs_total": 34,
+      "pass_rate": 0.971,
+      "avg_validation_rate": 0.971,
+      "last_seen_utc": "2026-04-12T22:37:16+00:00",
+      "scenario_count": 31,
       "model_count": 2
     }
   ]

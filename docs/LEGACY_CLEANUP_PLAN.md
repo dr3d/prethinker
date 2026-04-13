@@ -24,9 +24,10 @@ This note captures low-risk cleanup opportunities to reduce repo noise without l
 
 ## Medium-Risk Candidates (Archive First)
 
-1. `docs/data/runs/*.json` not present in current `docs/data/runs_manifest.json`
-- Problem: stale docs data beyond curated set can confuse consumers.
-- Action: archive stale extras under `docs/data/runs/history/` or delete after backup.
+1. Historical docs JSON duplication lane (resolved)
+- Previous state: run JSON was mirrored under `docs/data/runs/*.json`.
+- Current state: removed; docs now link run JSON to repo paths (`kb_runs*`) instead of docs copies.
+- Action: keep this lane disabled and avoid reintroducing docs-side run JSON mirrors.
 
 2. `docs/reports/*.html` not linked from docs hub/explorer
 - Problem: legacy report drift (`*_resume5_latest`, size-matrix one-offs, old cycle pages).
