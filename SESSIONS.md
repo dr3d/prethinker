@@ -28,6 +28,48 @@ Use this as the handoff doc for future agents and for repo-to-repo migration.
 
 ## Timeline of Major Sessions
 
+## Session 34 (2026-04-13): Product-Gateway Hardening + Front-Door Runner + Docs Media Auto-Index
+
+Outcome:
+
+- hardened UI gateway as strict MITM product surface:
+  - strict invariants in `ui_gateway/gateway/config.py` now force:
+    - `compiler_mode=strict`
+    - `served_handoff_mode=never`
+    - `require_final_confirmation=true`
+  - added UI lock control (`Apply Strict Bouncer Lock`) and safer select controls in:
+    - `ui_gateway/static/index.html`
+    - `ui_gateway/static/app.js`
+    - `ui_gateway/static/styles.css`
+
+- unified auth behavior for LM Studio + strict compiler paths:
+  - `src/mcp_server.py` now auto-loads `.env.local` and uses shared key fallback chain
+  - `ui_gateway/gateway/runtime_hooks.py` switched from `LMSTUDIO_API_KEY`-only to shared key fallback
+
+- added product-path batch runner:
+  - new script: `scripts/run_gateway_turnset.py`
+  - drives turnsets through `POST /api/prethink` and writes:
+    - `responses.json`
+    - `session_summary.json`
+    - `transcript.md`
+  - output root: `tmp/runs/gateway_sessions/`
+
+- added post-mortem session export surface:
+  - new endpoint: `GET /api/session/state?session_id=...`
+  - UI export button downloads live session trace JSON
+
+- fixed docs media indexing mismatch:
+  - root cause: `docs/index.html` used hardcoded media catalog
+  - added generated manifest: `docs/assets/media_manifest.json`
+  - `docs/index.html` now consumes manifest first, then falls back
+  - `scripts/build_hub_index.py` now auto-generates the media manifest on build
+
+Interpretation:
+
+- the gateway is now a clearer product adapter (language -> bouncer -> deterministic runtime) rather than a loose demo shell.
+- turnset testing can be migrated to `prethink:1234` without bypassing the front door, improving trace fidelity for live-human post-mortems.
+- docs media behavior is now deterministic and repeatable: new assets are discoverable via manifest generation.
+
 ## Session 33 (2026-04-13): CE Envelope Push + Hard-Wild v3 Harvest + Parity Drift Probe
 
 Outcome:

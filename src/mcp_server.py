@@ -23,7 +23,14 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from kb_pipeline import CorePrologRuntime, _call_model_prompt, _parse_model_json
+from kb_pipeline import (
+    CorePrologRuntime,
+    _call_model_prompt,
+    _get_api_key,
+    _load_env_file,
+    _parse_model_json,
+    _resolve_env_file,
+)
 
 
 def _coerce_bool(value: Any, default: bool) -> bool:
@@ -48,6 +55,19 @@ def _clip_01(value: Any, default: float = 0.75) -> float:
     if v > 1.0:
         return 1.0
     return v
+
+
+def _bootstrap_env_from_local_file(explicit_path: str = "") -> Path | None:
+    env_file = _resolve_env_file(str(explicit_path or "").strip(), None)
+    if env_file is None:
+        return None
+    _load_env_file(env_file)
+    return env_file
+
+
+# Keep MCP entrypoints and in-process callers consistent with kb_pipeline
+# behavior: auto-load local env keys when available.
+_bootstrap_env_from_local_file()
 
 
 @dataclass
@@ -102,7 +122,7 @@ class PrologMCPServer:
         self._compiler_prompt_text = ""
         self._compiler_prompt_loaded = False
         self._compiler_prompt_load_error = ""
-        self._compiler_api_key = os.getenv("LMSTUDIO_API_KEY", "").strip() or None
+        self._compiler_api_key = _get_api_key()
         self._load_compiler_prompt()
 
     def _load_compiler_prompt(self) -> None:
@@ -1407,6 +1427,11 @@ def main() -> int:
     parser.add_argument("--stdio", action="store_true", help="Use stdio transport (for LM Studio).")
     parser.add_argument("--test", action="store_true", help="Print available tools and exit.")
     parser.add_argument(
+        "--env-file",
+        default="",
+        help="Optional env file for API keys. Defaults to local .env.local when present.",
+    )
+    parser.add_argument(
         "--compiler-mode",
         choices=["strict", "auto", "heuristic"],
         default="strict",
@@ -1423,6 +1448,7 @@ def main() -> int:
         help="System prompt file used by compiler model.",
     )
     args = parser.parse_args()
+    _bootstrap_env_from_local_file(args.env_file)
 
     server = PrologMCPServer(
         kb_path=args.kb_path,

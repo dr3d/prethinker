@@ -1,0 +1,77 @@
+{
+  "generated_at_utc": "2026-04-13T23:01:47+00:00",
+  "entries": [
+    {
+      "title": "English As A Logic Programming Language",
+      "base": "assets/English-as-a-Logic-Programming-Language",
+      "variants": [
+        {
+          "src": "assets/English-as-a-Logic-Programming-Language.mp3",
+          "kind": "audio",
+          "type": "audio/mpeg",
+          "label": "MP3"
+        }
+      ]
+    },
+    {
+      "title": "Fixing AI Hallucinations With Prolog",
+      "base": "assets/Fixing-AI-Hallucinations-with-Prolog",
+      "variants": [
+        {
+          "src": "assets/Fixing-AI-Hallucinations-with-Prolog.mp3",
+          "kind": "audio",
+          "type": "audio/mpeg",
+          "label": "MP3"
+        }
+      ]
+    },
+    {
+      "title": "How PRETHINKER Protects AI Database Integrity",
+      "base": "assets/How-PRETHINKER-Protects-AI-Database-Integrity",
+      "variants": [
+        {
+          "src": "assets/How-PRETHINKER-Protects-AI-Database-Integrity.mp3",
+          "kind": "audio",
+          "type": "audio/mpeg",
+          "label": "MP3"
+        }
+      ]
+    },
+    {
+      "title": "Neuro Symbolic Architecture Stops AI Hallucinations",
+      "base": "assets/Neuro-Symbolic-Architecture-Stops-AI-Hallucinations",
+      "variants": [
+        {
+          "src": "assets/Neuro-Symbolic-Architecture-Stops-AI-Hallucinations.mp3",
+          "kind": "audio",
+          "type": "audio/mpeg",
+          "label": "MP3"
+        }
+      ]
+    },
+    {
+      "title": "Prethinker Trustworthy AI",
+      "base": "assets/Prethinker-Trustworthy-AI",
+      "variants": [
+        {
+          "src": "assets/Prethinker-Trustworthy-AI.mp4",
+          "kind": "video",
+          "type": "video/mp4",
+          "label": "MP4"
+        }
+      ]
+    },
+    {
+      "title": "Sharp Memory Versus Mushy AI Fluency",
+      "base": "assets/Sharp-Memory-Versus-Mushy-AI-Fluency",
+      "variants": [
+        {
+          "src": "assets/Sharp-Memory-Versus-Mushy-AI-Fluency.mp3",
+          "kind": "audio",
+          "type": "audio/mpeg",
+          "label": "MP3"
+        }
+      ]
+    }
+  ]
+}

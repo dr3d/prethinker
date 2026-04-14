@@ -25,6 +25,28 @@ Can the Governed Intent Compiler still hold structure when language gets noisy, 
 5. Promote repeated failure patterns into new `rung_*` scenarios.
 6. Re-run to confirm the new rung closes a real blind spot.
 
+## Live Random HN Harness (Structured, Not Ad-Hoc)
+
+To move out of ad-hoc testing, use the live random harness:
+
+- script: `scripts/run_hn_random_ingest.py`
+- flow:
+  - samples random HN stories from feed (`top/new/best`)
+  - harvests bounded OP+comment packets (BFS depth + comment caps)
+  - auto-builds turnsets and runnable scenarios
+  - runs each through `kb_pipeline.py`
+  - writes per-thread reports and aggregate summary
+
+Recommended baseline profile:
+
+- parser: `qwen3.5:9b`
+- CE answer model: same family (`qwen3.5:9b`)
+- CE settings: `clarification_eagerness=0.35`, `max_clarification_rounds=2`
+
+Optional low-VRAM profile:
+
+- CE sidecar: explicit smaller model (for example `qwen2.5:4b`) via `--ce-mode explicit --clarification-answer-model ...`
+
 ## What We Learned So Far
 
 From `track_excursion_frontier_v2_full` run `2026-04-13T20:41:10Z`:
@@ -67,6 +89,13 @@ From latest source harvest:
 - new harder pack published: `HN_MIDGROUND_PACK_V3.md`
 - six additional HN threads with deeper BFS sampling (`max_comments=140`, `max_depth=4`)
 - ready-to-run turnsets expanded to OP + 14 comments (15-turn stress format)
+
+From first live-random structured harness run (`2026-04-14T13:34:31Z`):
+
+- run dir: `tmp/runs/hn_random_ingest/hn_random_top_20260414_133343`
+- requested/selected: `2/2` random top-feed stories
+- result: `2/2` pipeline runs completed with `0` parse failures and `0` apply failures
+- note: commit density was low on one thread (`stage_provisionally` dominated), which is now measurable and can be promoted into targeted regression rungs
 
 ## What Counts As Progress
 

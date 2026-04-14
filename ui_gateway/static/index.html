@@ -1,0 +1,207 @@
+﻿<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Prethink Gateway MVP</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <button
+      id="hero-toggle"
+      class="hero-toggle"
+      type="button"
+      aria-controls="hero-drawer"
+      aria-expanded="false"
+      aria-label="Toggle prethink overview panel"
+      title="Toggle overview panel"
+    >
+      <span class="panel-glyph panel-glyph-left" aria-hidden="true"></span>
+      <span class="sr-only">Toggle Overview Panel</span>
+    </button>
+
+    <button
+      id="config-toggle"
+      class="config-toggle"
+      type="button"
+      aria-controls="config-drawer"
+      aria-expanded="false"
+      aria-label="Toggle gateway config panel"
+      title="Toggle config panel"
+    >
+      <span class="panel-glyph" aria-hidden="true"></span>
+      <span class="sr-only">Toggle Config Panel</span>
+    </button>
+
+    <div class="page-shell">
+      <main class="panel chat-panel">
+        <div class="chat-header">
+          <div>
+            <p class="eyebrow">Conversation</p>
+            <h2>Phase Trace</h2>
+          </div>
+          <div class="chat-actions">
+            <button id="export-button" class="ghost-button" type="button">Export Session</button>
+            <button id="reset-button" class="ghost-button" type="button">Reset Session</button>
+          </div>
+        </div>
+        <div id="chat-log" class="chat-log" aria-live="polite"></div>
+        <form id="chat-form" class="composer">
+          <label class="sr-only" for="utterance">Utterance</label>
+          <textarea id="utterance" name="utterance" rows="3" placeholder="Type an utterance or /help ..." required></textarea>
+          <button type="submit">Send To Front Door</button>
+        </form>
+      </main>
+    </div>
+
+    <aside id="hero-drawer" class="panel hero-panel hero-drawer" aria-hidden="true">
+      <div class="chat-header">
+        <div>
+          <p class="eyebrow">prethink:// front door</p>
+          <h1>Gateway MVP</h1>
+        </div>
+        <button id="hero-close" class="ghost-button hero-close" type="button">Close</button>
+      </div>
+      <p class="lede">
+        Local chat UI for robotic ingress, clarification, staged commit, and answer envelopes.
+      </p>
+      <div class="hero-grid">
+        <div class="mini-card">
+          <span class="mini-label">Compiler</span>
+          <strong id="compiler-model-label">qwen35-semparse:9b</strong>
+        </div>
+        <div class="mini-card">
+          <span class="mini-label">Mode</span>
+          <strong id="compiler-mode-label">strict</strong>
+        </div>
+        <div class="mini-card">
+          <span class="mini-label">Served LLM</span>
+          <strong id="served-model-label">gpt-oss:20b</strong>
+        </div>
+      </div>
+      <div class="diagram-box">
+        <p>Browser chat</p>
+        <p>↓</p>
+        <p>HTTP `/api/prethink`</p>
+        <p>↓</p>
+        <p>prethink:// gateway router</p>
+        <p>↓</p>
+        <p>clarify / stage / answer</p>
+      </div>
+    </aside>
+
+    <section id="config-drawer" class="panel config-panel config-drawer" aria-hidden="true">
+      <div class="chat-header">
+        <div>
+          <p class="eyebrow">Gateway Config</p>
+          <h2>Defaults</h2>
+        </div>
+        <button id="config-close" class="ghost-button config-close" type="button">Close</button>
+      </div>
+      <button id="strict-lock-button" class="ghost-button strict-lock-button" type="button">
+        Apply Strict Bouncer Lock
+      </button>
+      <p class="status-line compact-line">
+        Lock enforces: compiler=`strict`, served handoff=`never`, and final confirmation=`true`.
+      </p>
+      <form id="config-form" class="config-form">
+        <label>
+          Front door URI
+          <input name="front_door_uri" type="text">
+        </label>
+        <label>
+          Served LLM provider
+          <input name="served_llm_provider" type="text">
+        </label>
+        <label>
+          Served LLM model
+          <input name="served_llm_model" type="text">
+        </label>
+        <label>
+          Served LLM base URL
+          <input name="served_llm_base_url" type="text">
+        </label>
+        <label>
+          Served LLM context length
+          <input name="served_llm_context_length" type="number" min="512" step="256">
+        </label>
+        <label>
+          Served LLM timeout (seconds)
+          <input name="served_llm_timeout" type="number" min="5" step="1">
+        </label>
+        <label>
+          Served handoff mode (never|fallback_only|on_other|always)
+          <select name="served_handoff_mode">
+            <option value="never">never</option>
+            <option value="fallback_only">fallback_only</option>
+            <option value="on_other">on_other</option>
+            <option value="always">always</option>
+          </select>
+        </label>
+        <label>
+          Compiler mode
+          <select name="compiler_mode">
+            <option value="strict">strict</option>
+            <option value="auto">auto</option>
+            <option value="heuristic">heuristic</option>
+          </select>
+        </label>
+        <label>
+          Compiler prompt mode (auto|always|never)
+          <input name="compiler_prompt_mode" type="text">
+        </label>
+        <label>
+          Compiler model
+          <input name="compiler_model" type="text">
+        </label>
+        <label>
+          Compiler backend
+          <select name="compiler_backend">
+            <option value="ollama">ollama</option>
+            <option value="lmstudio">lmstudio</option>
+          </select>
+        </label>
+        <label>
+          Compiler base URL
+          <input name="compiler_base_url" type="text">
+        </label>
+        <label>
+          Compiler context length
+          <input name="compiler_context_length" type="number" min="512" step="256">
+        </label>
+        <label>
+          Compiler timeout (seconds)
+          <input name="compiler_timeout" type="number" min="5" step="1">
+        </label>
+        <label>
+          Compiler prompt file
+          <input name="compiler_prompt_file" type="text">
+        </label>
+        <label>
+          Clarification eagerness (0..1)
+          <input name="clarification_eagerness" type="number" min="0" max="1" step="0.05">
+        </label>
+        <label class="checkbox-row">
+          <input name="require_final_confirmation" type="checkbox">
+          Require final confirmation
+        </label>
+        <label class="checkbox-row">
+          <input name="strict_mode" type="checkbox">
+          Strict mode
+        </label>
+        <button type="submit">Save Config</button>
+      </form>
+      <p id="config-status" class="status-line"></p>
+    </section>
+
+    <template id="message-template">
+      <article class="message">
+        <header class="message-header"></header>
+        <div class="message-body"></div>
+        <div class="phase-list"></div>
+      </article>
+    </template>
+
+    <script src="./app.js" defer></script>
+  </body>
+</html>

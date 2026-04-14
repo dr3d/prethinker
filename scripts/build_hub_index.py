@@ -145,6 +145,56 @@ def _read_json(path: Path) -> dict[str, Any] | None:
     return v if isinstance(v, dict) else None
 
 
+def _friendly_media_title(stem: str) -> str:
+    cleaned = str(stem or "").replace("_", " ").replace("-", " ").strip()
+    if not cleaned:
+        return "Untitled Media"
+    return " ".join(token if token.isupper() else token.capitalize() for token in cleaned.split())
+
+
+def _build_media_manifest(docs_root: Path) -> Path:
+    assets_dir = (docs_root / "assets").resolve()
+    assets_dir.mkdir(parents=True, exist_ok=True)
+    out_path = (assets_dir / "media_manifest.json").resolve()
+
+    variant_meta = {
+        ".mp3": {"kind": "audio", "type": "audio/mpeg", "label": "MP3"},
+        ".m4a": {"kind": "audio", "type": "audio/mp4", "label": "M4A"},
+        ".mp4": {"kind": "video", "type": "video/mp4", "label": "MP4"},
+    }
+    buckets: dict[str, dict[str, Any]] = {}
+    for file_path in sorted(assets_dir.iterdir(), key=lambda p: p.name.lower()):
+        if not file_path.is_file():
+            continue
+        suffix = file_path.suffix.lower()
+        meta = variant_meta.get(suffix)
+        if meta is None:
+            continue
+        stem = file_path.stem
+        if not stem:
+            continue
+        row = buckets.get(stem)
+        if row is None:
+            row = {"title": _friendly_media_title(stem), "base": f"assets/{stem}", "variants": []}
+            buckets[stem] = row
+        row["variants"].append(
+            {
+                "src": _rel_path(file_path, docs_root),
+                "kind": meta["kind"],
+                "type": meta["type"],
+                "label": meta["label"],
+            }
+        )
+
+    entries = [buckets[key] for key in sorted(buckets.keys(), key=lambda x: x.lower())]
+    manifest = {
+        "generated_at_utc": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat(),
+        "entries": entries,
+    }
+    out_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+    return out_path
+
+
 def _score(num: Any, den: Any) -> float:
     try:
         n, d = float(num), float(den)
@@ -816,6 +866,7 @@ def main() -> int:
     )
     historical = _collect_historical_metrics(historical_runs_dir)
     hm.write_text(json.dumps(historical, indent=2), encoding="utf-8")
+    media_manifest = _build_media_manifest(out.parent)
     _build_progress_cards_page(
         runs=runs,
         docs_root=out.parent,
@@ -956,6 +1007,7 @@ def main() -> int:
     print(f"Wrote {out}")
     print(f"Wrote {rp}")
     print(f"Wrote {pp}")
+    print(f"Wrote {media_manifest}")
     return 0
 
 

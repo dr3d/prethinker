@@ -67,6 +67,43 @@ AMBIGUOUS_PRONOUN_ATOMS = {
 }
 WRITE_INTENTS = {"assert_fact", "assert_rule", "retract"}
 PREDICATE_SIGNATURE_RE = re.compile(r"\b[a-z][a-z0-9_]*\s*/\s*\d+\b", flags=re.IGNORECASE)
+PREDICATE_TOKEN_STOPWORDS = {
+    "a",
+    "an",
+    "and",
+    "as",
+    "at",
+    "be",
+    "for",
+    "from",
+    "in",
+    "into",
+    "is",
+    "of",
+    "on",
+    "or",
+    "that",
+    "the",
+    "to",
+    "with",
+    "without",
+}
+DECLARED_PREDICATE_HINT_TERMS: dict[str, set[str]] = {
+    "reported": {"report", "reported", "reports", "post", "posted", "says", "said"},
+    "documented_with": {"documented", "documentation", "notes", "note", "photos", "photo", "log"},
+    "moved_item": {"moved", "move", "moving"},
+    "seeks": {"seek", "seeks", "seeking", "ask", "asks", "asked", "wants", "want"},
+    "advised_to": {"advise", "advised", "advises", "recommend", "recommended", "suggest", "suggested", "replies"},
+    "applies_to": {"applies", "apply"},
+    "exception_for": {"except", "exception for"},
+    "asked_about": {"questioned", "asked what"},
+    "depends_on": {"depends", "depends on"},
+    "maintained": {"maintained", "kept", "keeps"},
+    "has_evidence": {"evidence", "proof", "logs", "camera", "clip", "clips"},
+    "uncertain_about": {"uncertain", "unsure", "unclear"},
+    "seeks_order": {"injunction", "order", "asks", "seek", "seeks"},
+    "does_not_apply_to": {"doesn't apply", "does not apply", "not apply"},
+}
 
 
 @dataclass
@@ -498,6 +535,124 @@ def _align_parsed_predicates(
             seen.add(key)
             deduped.append(row)
     return aligned, deduped
+
+
+def _collect_known_atoms_from_corpus(clauses: set[str]) -> set[str]:
+    atoms: set[str] = set()
+    for clause in clauses:
+        c_atoms, _, _ = _extract_components_from_logic(str(clause))
+        for atom in c_atoms:
+            normalized = _atomize(str(atom))
+            if normalized and re.match(r"^[a-z][a-z0-9_]*$", normalized):
+                atoms.add(normalized)
+    return atoms
+
+
+def _best_known_atom_alias(atom: str, known_atoms: set[str]) -> str:
+    normalized = _atomize(atom)
+    if not normalized or normalized in known_atoms:
+        return ""
+    base_tokens = {t for t in normalized.split("_") if t}
+    if len(base_tokens) < 2:
+        return ""
+    best = ""
+    best_score = 0.0
+    for candidate in known_atoms:
+        if candidate == normalized:
+            continue
+        cand_tokens = {t for t in candidate.split("_") if t}
+        if not cand_tokens or not base_tokens.issubset(cand_tokens):
+            continue
+        # Keep alignment conservative: allow only small specificity expansion.
+        if len(cand_tokens) - len(base_tokens) > 1:
+            continue
+        overlap = len(base_tokens & cand_tokens)
+        score = overlap / max(1, len(cand_tokens))
+        if score > best_score:
+            best = candidate
+            best_score = score
+    return best if best and best_score >= 0.5 else ""
+
+
+def _align_declared_atoms_to_known_context(
+    parsed: dict[str, Any],
+    *,
+    declared_signatures: set[str],
+    known_atoms: set[str],
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    if not isinstance(parsed, dict) or not declared_signatures or not known_atoms:
+        return parsed, []
+    declared_names = {sig.split("/", 1)[0] for sig in declared_signatures if "/" in sig}
+    aligned = json.loads(json.dumps(parsed))
+    replacements: dict[str, str] = {}
+
+    def _scan_clause(clause_text: str) -> None:
+        clause = _normalize_clause(clause_text)
+        if not clause:
+            return
+        expr = clause[:-1] if clause.endswith(".") else clause
+        for _, args in _extract_calls_with_args(expr):
+            for raw_arg in args:
+                arg = str(raw_arg).strip()
+                if not arg:
+                    continue
+                if re.match(r"^[A-Z_]", arg):
+                    continue
+                if any(ch in arg for ch in ("(", ")", "[", "]", ",", "'")):
+                    continue
+                atom = _atomize(arg)
+                if (
+                    not atom
+                    or atom in known_atoms
+                    or atom in declared_names
+                    or atom in replacements
+                ):
+                    continue
+                alias = _best_known_atom_alias(atom, known_atoms)
+                if alias:
+                    replacements[atom] = alias
+
+    logic_value = str(aligned.get("logic_string", "")).strip()
+    if logic_value:
+        _scan_clause(logic_value)
+    for key in ("facts", "rules", "queries"):
+        value = aligned.get(key, [])
+        if isinstance(value, list):
+            for raw in value:
+                _scan_clause(str(raw))
+
+    if not replacements:
+        return parsed, []
+
+    def _rewrite_text(text: str) -> str:
+        out = str(text)
+        for source, target in sorted(replacements.items(), key=lambda row: len(row[0]), reverse=True):
+            out = re.sub(rf"\b{re.escape(source)}\b", target, out)
+        return out
+
+    if logic_value:
+        aligned["logic_string"] = _rewrite_text(logic_value)
+    for key in ("facts", "rules", "queries"):
+        value = aligned.get(key, [])
+        if isinstance(value, list):
+            aligned[key] = [_rewrite_text(str(raw)) for raw in value]
+
+    components = aligned.get("components")
+    if isinstance(components, dict):
+        atoms = [str(a) for a in components.get("atoms", []) if str(a).strip()]
+        next_atoms = []
+        for atom in atoms:
+            normalized = _atomize(atom)
+            next_atoms.append(replacements.get(normalized, normalized))
+        components["atoms"] = sorted({a for a in next_atoms if a})
+
+    events = [
+        {
+            "kind": "declared_atom_context_alignment",
+            "replacements": replacements,
+        }
+    ]
+    return aligned, events
 
 
 def _build_registry_signature_set(registry: dict[str, Any]) -> set[str]:
@@ -1352,6 +1507,92 @@ def _extract_predicate_names_from_control_directive(text: str) -> list[str]:
     return sorted(names)
 
 
+def _extract_predicate_signatures_from_control_directive(text: str) -> list[str]:
+    signatures: set[str] = set()
+    for token in PREDICATE_SIGNATURE_RE.findall(str(text or "")):
+        raw = token.strip().lower().replace(" ", "")
+        if "/" not in raw:
+            continue
+        name, arity_text = raw.split("/", 1)
+        name = _atomize(name)
+        if not name:
+            continue
+        try:
+            arity = int(arity_text)
+        except ValueError:
+            continue
+        if arity < 0:
+            continue
+        signatures.add(f"{name}/{arity}")
+    return sorted(signatures)
+
+
+def _declared_name_to_arity_map(signatures: set[str]) -> dict[str, int]:
+    out: dict[str, int] = {}
+    for sig in signatures:
+        name, _, arity_text = str(sig).partition("/")
+        if not name or not arity_text:
+            continue
+        try:
+            arity = int(arity_text)
+        except ValueError:
+            continue
+        if arity < 0:
+            continue
+        # Keep first declaration to avoid unstable overwrite behavior.
+        if name not in out:
+            out[name] = arity
+    return out
+
+
+def _declared_predicates_hinted_by_utterance(
+    utterance: str,
+    *,
+    declared_name_to_arity: dict[str, int],
+) -> set[str]:
+    lowered = str(utterance or "").lower()
+    words = set(re.findall(r"[a-z][a-z0-9_]*", lowered))
+    hinted: set[str] = set()
+    for name in declared_name_to_arity:
+        tokens = [
+            token
+            for token in name.split("_")
+            if token and token not in PREDICATE_TOKEN_STOPWORDS and len(token) >= 3
+        ]
+        custom_cues = {c.strip().lower() for c in DECLARED_PREDICATE_HINT_TERMS.get(name, set()) if c.strip()}
+        custom_hit = False
+        for cue in custom_cues:
+            normalized_cue = cue.strip().lower()
+            if not normalized_cue:
+                continue
+            if " " in normalized_cue:
+                if normalized_cue in lowered:
+                    custom_hit = True
+                    break
+                continue
+            if normalized_cue in words:
+                custom_hit = True
+                break
+        if custom_hit:
+            hinted.add(name)
+            continue
+
+        token_hits = sum(1 for token in tokens if token in words)
+        if len(tokens) >= 2 and token_hits >= 2:
+            hinted.add(name)
+            continue
+
+        # Single-token fallback is intentionally conservative to avoid
+        # over-triggering broad predicates like exception_for in unrelated turns.
+        if len(tokens) == 1:
+            token = tokens[0]
+            if token in {"apply", "applies", "argued", "exception", "report", "reported", "seek", "seeks"}:
+                continue
+            if token in words:
+                hinted.add(name)
+    return hinted
+
+
 def _is_explicit_logic_utterance(text: str) -> bool:
     raw = str(text or "").strip()
     if not raw:
@@ -1962,6 +2203,56 @@ def _extract_first_explicit_goal_clause(text: str, *, require_ground: bool) -> s
         if _is_valid_goal_clause(normalized, require_ground=require_ground):
             return normalized
     return ""
+
+
+def _extract_explicit_goal_clauses_from_command(
+    text: str,
+    *,
+    require_ground: bool,
+) -> list[str]:
+    source = str(text or "").strip()
+    if not source:
+        return []
+
+    fragments: list[str] = []
+    for raw_line in source.splitlines():
+        line = raw_line.strip()
+        if not line:
+            continue
+        chunks = [c.strip() for c in line.split(".") if c.strip()]
+        if chunks:
+            fragments.extend(chunks)
+        else:
+            fragments.append(line)
+    if not fragments:
+        fragments = [source]
+
+    clauses: list[str] = []
+    for fragment in fragments:
+        parts = [fragment]
+        # Explicit command turns often compact multiple clauses with "and".
+        # Only split on "and" when a fragment looks clause-dense.
+        if fragment.count("(") > 1 and re.search(r"\band\b", fragment, flags=re.IGNORECASE):
+            split_parts = [p.strip() for p in re.split(r"\band\b", fragment, flags=re.IGNORECASE) if p.strip()]
+            if split_parts:
+                parts = split_parts
+        for part in parts:
+            clause = _extract_first_explicit_goal_clause(part, require_ground=require_ground)
+            if clause and clause not in clauses:
+                clauses.append(clause)
+    return clauses
+
+
+def _collect_components_from_clauses(clauses: list[str]) -> tuple[list[str], list[str], list[str]]:
+    atoms: set[str] = set()
+    variables: set[str] = set()
+    predicates: set[str] = set()
+    for clause in clauses:
+        c_atoms, c_variables, c_predicates = _extract_components_from_logic(clause)
+        atoms.update(c_atoms)
+        variables.update(c_variables)
+        predicates.update(c_predicates)
+    return sorted(atoms), sorted(variables), sorted(predicates)
 
 
 def _walk_term_components(term: Term, atoms: set[str], variables: set[str], predicates: set[str]) -> None:
@@ -2683,6 +2974,69 @@ def _build_assert_fact_fallback_parse(utterance: str) -> dict[str, Any] | None:
             )
             ok, _ = _validate_parsed(parsed)
             return parsed if ok else None
+
+    observed_someone = re.match(
+        r"^\s*([A-Za-z][A-Za-z0-9_'-]*(?:\s+[A-Za-z][A-Za-z0-9_'-]*)*)\s+saw\s+that\s+someone\s+had\s+(.*)\s*$",
+        text,
+        re.IGNORECASE,
+    )
+    if observed_someone:
+        observer_atom = _atomize(observed_someone.group(1))
+        tail = observed_someone.group(2).strip().lower().rstrip(".")
+        nested = ""
+        if re.fullmatch(r"tasted\s+(?:his|her|their)\s+porridge", tail):
+            nested = f"tasted(someone, porridge_of({observer_atom}))"
+        elif re.fullmatch(r"eaten(?:\s+all)?\s+(?:his|her|their)\s+porridge", tail):
+            nested = f"ate(someone, porridge_of({observer_atom}))"
+        elif re.fullmatch(r"been\s+sitting\s+in\s+(?:his|her|their)\s+chair", tail):
+            nested = f"sat_in(someone, chair_of({observer_atom}))"
+        elif re.fullmatch(r"been\s+lying\s+in\s+(?:his|her|their)\s+bed", tail):
+            nested = f"slept_in(someone, bed_of({observer_atom}))"
+        if observer_atom and nested:
+            fact = f"saw({observer_atom}, {nested})."
+            atoms, variables, predicates = _extract_components_from_logic(fact)
+            parsed = _build_parse_payload(
+                intent="assert_fact",
+                logic_string=fact,
+                facts=[fact],
+                rules=[],
+                queries=[],
+                predicates=predicates,
+                atoms=atoms,
+                variables=variables,
+                rationale="Fallback observed-event parse from 'saw that someone had ...'.",
+            )
+            ok, _ = _validate_parsed(parsed)
+            return parsed if ok else None
+
+    saw_asleep = re.match(
+        (
+            r"^\s*([A-Za-z][A-Za-z0-9_'-]*(?:\s+[A-Za-z][A-Za-z0-9_'-]*)*)\s+saw\s+"
+            r"([A-Za-z][A-Za-z0-9_'-]*(?:\s+[A-Za-z][A-Za-z0-9_'-]*)*)\s+asleep\s+in\s+"
+            r"(?:his|her|their)\s+bed\.?\s*$"
+        ),
+        text,
+        re.IGNORECASE,
+    )
+    if saw_asleep:
+        observer_atom = _atomize(saw_asleep.group(1))
+        sleeper_atom = _atomize(saw_asleep.group(2))
+        if observer_atom and sleeper_atom:
+            fact = f"saw({observer_atom}, slept_in({sleeper_atom}, bed_of({observer_atom})))."
+            atoms, variables, predicates = _extract_components_from_logic(fact)
+            parsed = _build_parse_payload(
+                intent="assert_fact",
+                logic_string=fact,
+                facts=[fact],
+                rules=[],
+                queries=[],
+                predicates=predicates,
+                atoms=atoms,
+                variables=variables,
+                rationale="Fallback observed-sleeper parse from '<observer> saw <person> asleep in bed'.",
+            )
+            ok, _ = _validate_parsed(parsed)
+            return parsed if ok else None
     return None
 
 
@@ -3001,6 +3355,137 @@ def _apply_retract_edge_target_guard(
     return parsed, events
 
 
+def _apply_retract_comma_tuple_guard(
+    parsed: dict[str, Any],
+    *,
+    utterance: str,
+    route: str,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    events: list[dict[str, Any]] = []
+    if not isinstance(parsed, dict):
+        return parsed, events
+
+    intent = str(parsed.get("intent", "")).strip().lower()
+    route_name = str(route or "").strip().lower()
+    if intent != "retract" and route_name != "retract":
+        return parsed, events
+
+    text = str(utterance or "")
+    match = re.search(
+        r"\bretract\s+([A-Za-z][A-Za-z0-9_]*)\s*,\s*([A-Za-z][A-Za-z0-9_'-]*)\s*,\s*([A-Za-z][A-Za-z0-9_'-]*)\b",
+        text,
+        flags=re.IGNORECASE,
+    )
+    if not match:
+        return parsed, events
+
+    predicate = _atomize(match.group(1))
+    left_atom = _atomize(match.group(2))
+    right_atom = _atomize(match.group(3))
+    if not predicate or not left_atom or not right_atom:
+        return parsed, events
+
+    fact = f"{predicate}({left_atom}, {right_atom})."
+    logic = f"retract({fact[:-1]})."
+    atoms, variables, predicates = _extract_components_from_logic(logic)
+    parsed["intent"] = "retract"
+    parsed["logic_string"] = logic
+    parsed["facts"] = [fact]
+    parsed["rules"] = []
+    parsed["queries"] = []
+    parsed["components"] = {
+        "atoms": sorted(set(atoms)),
+        "variables": sorted(set(variables)),
+        "predicates": sorted(set(predicates)),
+    }
+    ambiguities_raw = parsed.get("ambiguities", [])
+    ambiguities: list[str] = []
+    if isinstance(ambiguities_raw, list):
+        ambiguities = [str(item).strip() for item in ambiguities_raw if str(item).strip()]
+    parsed["ambiguities"] = ambiguities
+    parsed["needs_clarification"] = False
+    parsed["uncertainty_score"] = min(_clip_01(parsed.get("uncertainty_score"), fallback=0.22), 0.35)
+    parsed["uncertainty_label"] = "low"
+    parsed["clarification_question"] = ""
+    parsed["clarification_reason"] = ""
+    rationale = str(parsed.get("rationale", "")).strip()
+    suffix = "Retract comma-tuple guard normalized target from comma-delimited command."
+    parsed["rationale"] = f"{rationale} {suffix}".strip() if rationale else suffix
+    events.append(
+        {
+            "kind": "retract_comma_tuple_guard",
+            "target": fact,
+        }
+    )
+    return parsed, events
+
+
+def _apply_unsafe_retract_downgrade_guard(
+    parsed: dict[str, Any],
+    *,
+    utterance: str,
+    route: str,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    events: list[dict[str, Any]] = []
+    if not isinstance(parsed, dict):
+        return parsed, events
+
+    intent = str(parsed.get("intent", "")).strip().lower()
+    route_name = str(route or "").strip().lower()
+    if intent != "retract" and route_name != "retract":
+        return parsed, events
+
+    logic_text = str(parsed.get("logic_string", "")).strip()
+    parsed_facts = [str(x).strip() for x in parsed.get("facts", []) if str(x).strip()]
+    targets = _extract_retract_targets(logic_text, parsed_facts)
+    if targets:
+        return parsed, events
+
+    lowered = str(utterance or "").lower()
+    # Keep explicit retract commands on the retract lane even when malformed.
+    if "retract" in lowered:
+        return parsed, events
+
+    # Conversational "swap/nope/instead" turns are often speculative midstream edits.
+    # When no safe retract target can be derived, downgrade to non-mutating `other`.
+    if not any(token in lowered for token in ("swap", "instead", "for a sec", "for a second", "nope", "bad")):
+        return parsed, events
+
+    parsed["intent"] = "other"
+    parsed["logic_string"] = ""
+    parsed["facts"] = []
+    parsed["rules"] = []
+    parsed["queries"] = []
+    parsed["components"] = {
+        "atoms": [],
+        "variables": [],
+        "predicates": [],
+    }
+    ambiguities_raw = parsed.get("ambiguities", [])
+    ambiguities: list[str] = []
+    if isinstance(ambiguities_raw, list):
+        ambiguities = [str(item).strip() for item in ambiguities_raw if str(item).strip()]
+    note = "Unsafe retract target could not be derived from conversational swap phrase."
+    if note not in ambiguities:
+        ambiguities.append(note)
+    parsed["ambiguities"] = ambiguities
+    parsed["needs_clarification"] = False
+    parsed["uncertainty_score"] = min(_clip_01(parsed.get("uncertainty_score"), fallback=0.3), 0.45)
+    parsed["uncertainty_label"] = "medium"
+    parsed["clarification_question"] = ""
+    parsed["clarification_reason"] = ""
+    rationale = str(parsed.get("rationale", "")).strip()
+    suffix = "Unsafe retract downgrade guard staged conversational swap turn as non-mutating."
+    parsed["rationale"] = f"{rationale} {suffix}".strip() if rationale else suffix
+    events.append(
+        {
+            "kind": "unsafe_retract_downgrade_guard",
+            "reason": "no_safe_retract_targets",
+        }
+    )
+    return parsed, events
+
+
 def _apply_concession_contrast_guard(
     parsed: dict[str, Any],
     *,
@@ -3019,6 +3504,9 @@ def _apply_concession_contrast_guard(
     facts = [str(x).strip() for x in parsed.get("facts", []) if str(x).strip()]
     if not facts:
         return parsed, events
+    expanded_facts = _expand_assert_fact_clauses(facts)
+    if expanded_facts:
+        facts = expanded_facts
 
     lowered = str(utterance or "").lower()
     next_facts = list(facts)
@@ -3084,6 +3572,102 @@ def _apply_concession_contrast_guard(
     return parsed, events
 
 
+def _apply_location_move_guard(
+    parsed: dict[str, Any],
+    *,
+    utterance: str,
+    route: str,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    events: list[dict[str, Any]] = []
+    if not isinstance(parsed, dict):
+        return parsed, events
+
+    intent = str(parsed.get("intent", "")).strip().lower()
+    route_name = str(route or "").strip().lower()
+    if intent != "assert_fact" and route_name != "assert_fact":
+        return parsed, events
+
+    facts = [str(x).strip() for x in parsed.get("facts", []) if str(x).strip()]
+    if not facts:
+        return parsed, events
+    expanded_facts = _expand_assert_fact_clauses(facts)
+    if expanded_facts:
+        facts = expanded_facts
+
+    lowered = str(utterance or "").lower()
+    move_pairs: list[tuple[str, str]] = []
+    for pattern in (
+        r"\b([A-Za-z][A-Za-z0-9_'-]*)\s+(?:got\s+)?moved\s+to\s+([A-Za-z][A-Za-z0-9_'-]*)\b",
+        r"\b([A-Za-z][A-Za-z0-9_'-]*)\s+dipped\s+to\s+([A-Za-z][A-Za-z0-9_'-]*)\b",
+        r"\b([A-Za-z][A-Za-z0-9_'-]*)\s+shifted\s+to\s+([A-Za-z][A-Za-z0-9_'-]*)\b",
+    ):
+        for raw_subject, raw_target in re.findall(pattern, lowered, flags=re.IGNORECASE):
+            subject = _atomize(raw_subject)
+            target = _atomize(raw_target)
+            if subject and target:
+                move_pairs.append((subject, target))
+    if not move_pairs:
+        return parsed, events
+
+    kept_facts = list(facts)
+    removed_facts: list[str] = []
+    for subject, target in move_pairs:
+        for predicate in ("lives_in", "in_region", "at"):
+            same_subject_facts: list[tuple[str, str]] = []
+            has_target = False
+            for fact in kept_facts:
+                term = _parse_clause_term(fact)
+                if term is None:
+                    continue
+                if str(getattr(term, "name", "")).strip() != predicate:
+                    continue
+                args = list(getattr(term, "args", []))
+                if len(args) != 2:
+                    continue
+                left_name = str(getattr(args[0], "name", "")).strip().lower()
+                right_name = str(getattr(args[1], "name", "")).strip().lower()
+                if left_name != subject:
+                    continue
+                same_subject_facts.append((fact, right_name))
+                if right_name == target:
+                    has_target = True
+            if not has_target:
+                continue
+            next_facts: list[str] = []
+            for fact in kept_facts:
+                matched = next((row for row in same_subject_facts if row[0] == fact), None)
+                if matched is not None and matched[1] != target:
+                    removed_facts.append(fact)
+                    continue
+                next_facts.append(fact)
+            kept_facts = next_facts
+
+    if not removed_facts:
+        return parsed, events
+
+    parsed["facts"] = kept_facts
+    parsed["logic_string"] = kept_facts[0] if len(kept_facts) == 1 else "\n".join(kept_facts)
+    parsed["rules"] = []
+    parsed["queries"] = []
+    atoms, variables, predicates = _collect_components_from_clauses(kept_facts)
+    parsed["components"] = {
+        "atoms": atoms,
+        "variables": variables,
+        "predicates": predicates,
+    }
+    rationale = str(parsed.get("rationale", "")).strip()
+    suffix = "Location move guard dropped stale pre-move location fact(s)."
+    parsed["rationale"] = f"{rationale} {suffix}".strip() if rationale else suffix
+    events.append(
+        {
+            "kind": "location_move_guard",
+            "removed_facts": removed_facts,
+            "kept_facts": kept_facts,
+        }
+    )
+    return parsed, events
+
+
 def _apply_declared_predicate_hint_guard(
     parsed: dict[str, Any],
     *,
@@ -3092,6 +3676,9 @@ def _apply_declared_predicate_hint_guard(
     declared_predicates: set[str],
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     events: list[dict[str, Any]] = []
+    enabled = os.environ.get("PRETHINKER_ENABLE_DECLARED_HINT_GUARD", "").strip().lower()
+    if enabled not in {"1", "true", "yes", "on"}:
+        return parsed, events
     if not isinstance(parsed, dict) or not declared_predicates:
         return parsed, events
 
@@ -3180,6 +3767,545 @@ def _apply_declared_predicate_hint_guard(
         }
     )
     return rebuilt, events
+
+
+def _leading_subject_atom_and_prefix_from_utterance(utterance: str) -> tuple[str, str]:
+    lowered = str(utterance or "").strip().lower()
+    if not lowered:
+        return "", ""
+    subject_prefixes: list[tuple[str, str]] = [
+        ("goldilocks", "goldilocks"),
+        ("papa bear", "papa_bear"),
+        ("mama bear", "mama_bear"),
+        ("baby bear", "baby_bear"),
+        ("the three bears", "bears"),
+        ("three bears", "bears"),
+        ("the bears", "bears"),
+        ("bears", "bears"),
+        ("the house", "house"),
+        ("house", "house"),
+    ]
+    for prefix, atom in subject_prefixes:
+        if lowered.startswith(prefix):
+            return atom, prefix
+    return "", ""
+
+
+def _leading_subject_atom_from_utterance(utterance: str) -> str:
+    atom, _ = _leading_subject_atom_and_prefix_from_utterance(utterance)
+    return atom
+
+
+def _subject_anchor_predicates_for_utterance(
+    utterance: str,
+    *,
+    subject_prefix: str,
+) -> set[str]:
+    lowered = str(utterance or "").strip().lower()
+    if not lowered or not subject_prefix or not lowered.startswith(subject_prefix):
+        return set()
+    clause = lowered[len(subject_prefix) :].strip()
+    clause = re.sub(r"^[,\s]+", "", clause)
+    # Possessive-leading clauses (e.g., "papa bear's chair ...") are usually
+    # descriptive and should not force actor anchoring.
+    if clause.startswith("'s "):
+        return set()
+
+    predicates: set[str] = set()
+    if re.match(r"^found\b", clause):
+        predicates.add("goldilocks_found")
+    if re.match(r"^had\b", clause):
+        predicates.update({"has_porridge", "has_chair", "has_bed"})
+    if re.match(r"^tasted\b", clause):
+        predicates.add("tasted")
+    if re.match(r"^ate\b", clause):
+        predicates.add("ate")
+    if re.match(r"^sat\b", clause):
+        predicates.add("sat_in")
+    if re.match(r"^(?:lay|fell\s+asleep)\b", clause):
+        predicates.add("slept_in")
+    if re.match(r"^walked\b", clause):
+        predicates.add("walked_through_forest")
+    if re.match(r"^went\s+upstairs\b", clause):
+        predicates.add("went_upstairs")
+    if re.match(r"^returned(?:\s+home)?\b", clause):
+        predicates.add("returned_home")
+    if re.match(r"^ran\b", clause):
+        predicates.add("ran_out_of")
+    if re.match(r"^saw\b", clause) or (clause.startswith("woke up") and " saw " in clause):
+        predicates.add("saw")
+    return predicates
+
+
+def _rewrite_fact_subject_anchor(
+    clause: str,
+    *,
+    subject_atom: str,
+    predicates: set[str],
+    expected_arity: dict[str, int] | None = None,
+) -> tuple[str, bool]:
+    normalized = _normalize_clause(clause)
+    if not normalized:
+        return normalized, False
+    raw = normalized[:-1].strip() if normalized.endswith(".") else normalized.strip()
+    if not raw or ":-" in raw:
+        return normalized, False
+    match = re.fullmatch(r"([a-z][a-z0-9_]*)\((.*)\)", raw)
+    if not match:
+        return normalized, False
+    name = match.group(1)
+    if name not in predicates:
+        return normalized, False
+    args = _split_top_level_args(match.group(2))
+    if not args:
+        return normalized, False
+    if isinstance(expected_arity, dict):
+        target_arity = expected_arity.get(name)
+        if target_arity == 1 and len(args) != 1:
+            return f"{name}({subject_atom}).", True
+    first_raw = args[0].strip()
+    if not first_raw or re.match(r"^[A-Z_]", first_raw):
+        return normalized, False
+    first_atom = _normalize_entity_key(first_raw)
+    if not first_atom or first_atom == subject_atom:
+        return normalized, False
+    # If arg2 already equals the leading subject, prefer a swap so we retain
+    # the original non-subject argument rather than collapsing to duplicate args.
+    if len(args) == 2:
+        second_raw = args[1].strip()
+        second_atom = _normalize_entity_key(second_raw)
+        if second_atom == subject_atom:
+            args[0] = subject_atom
+            args[1] = first_raw
+            return f"{name}({', '.join(args)}).", True
+    args[0] = subject_atom
+    return f"{name}({', '.join(args)}).", True
+
+
+def _apply_leading_subject_anchor_guard(
+    parsed: dict[str, Any],
+    *,
+    utterance: str,
+    route: str,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    events: list[dict[str, Any]] = []
+    if not isinstance(parsed, dict):
+        return parsed, events
+
+    intent = str(parsed.get("intent", "")).strip().lower()
+    route_name = str(route or "").strip().lower()
+    if intent != "assert_fact" and route_name != "assert_fact":
+        return parsed, events
+
+    subject_atom, subject_prefix = _leading_subject_atom_and_prefix_from_utterance(utterance)
+    if not subject_atom:
+        return parsed, events
+
+    action_predicates = _subject_anchor_predicates_for_utterance(
+        utterance,
+        subject_prefix=subject_prefix,
+    )
+    if not action_predicates:
+        return parsed, events
+    expected_arity = {
+        "goldilocks_found": 2,
+        "has_porridge": 2,
+        "has_chair": 2,
+        "has_bed": 2,
+        "tasted": 2,
+        "ate": 2,
+        "sat_in": 2,
+        "slept_in": 2,
+        "saw": 2,
+        "returned_home": 1,
+        "walked_through_forest": 1,
+        "went_upstairs": 1,
+        "ran_out_of": 2,
+    }
+
+    facts_raw = parsed.get("facts", [])
+    if not isinstance(facts_raw, list) or not facts_raw:
+        return parsed, events
+
+    next_facts: list[str] = []
+    rewrites: list[dict[str, str]] = []
+    for raw_clause in facts_raw:
+        original = _normalize_clause(str(raw_clause))
+        if not original:
+            continue
+        rewritten, changed = _rewrite_fact_subject_anchor(
+            original,
+            subject_atom=subject_atom,
+            predicates=action_predicates,
+            expected_arity=expected_arity,
+        )
+        next_facts.append(rewritten)
+        if changed and rewritten != original:
+            rewrites.append({"from": original, "to": rewritten})
+
+    if not rewrites or not next_facts:
+        return parsed, events
+
+    parsed["facts"] = next_facts
+    parsed["logic_string"] = next_facts[0] if len(next_facts) == 1 else "\n".join(next_facts)
+    atoms, variables, predicates = _collect_components_from_clauses(next_facts)
+    parsed["components"] = {
+        "atoms": atoms,
+        "variables": variables,
+        "predicates": predicates,
+    }
+    rationale = str(parsed.get("rationale", "")).strip()
+    suffix = "Leading-subject anchor guard corrected actor argument drift."
+    parsed["rationale"] = f"{rationale} {suffix}".strip() if rationale else suffix
+    events.append(
+        {
+            "kind": "leading_subject_anchor_guard",
+            "subject_atom": subject_atom,
+            "predicate_scope": sorted(action_predicates),
+            "rewrites": rewrites,
+        }
+    )
+    return parsed, events
+
+
+def _apply_type_direction_guard(
+    parsed: dict[str, Any],
+    *,
+    route: str,
+    type_schema: dict[str, Any],
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    events: list[dict[str, Any]] = []
+    if not isinstance(parsed, dict) or not isinstance(type_schema, dict):
+        return parsed, events
+
+    intent = str(parsed.get("intent", "")).strip().lower()
+    route_name = str(route or "").strip().lower()
+    if intent != "assert_fact" and route_name != "assert_fact":
+        return parsed, events
+
+    predicates_raw = type_schema.get("predicates", {})
+    entities_raw = type_schema.get("entities", {})
+    if not isinstance(predicates_raw, dict) or not isinstance(entities_raw, dict):
+        return parsed, events
+
+    predicate_types: dict[tuple[str, int], list[str]] = {}
+    for signature, type_list in predicates_raw.items():
+        sig = str(signature).strip()
+        if "/" not in sig or not isinstance(type_list, list):
+            continue
+        name_raw, arity_text = sig.split("/", 1)
+        name = _atomize(name_raw)
+        try:
+            arity = int(arity_text)
+        except (TypeError, ValueError):
+            continue
+        if not name or arity <= 0:
+            continue
+        normalized_types = [_atomize(str(item)) for item in type_list]
+        if len(normalized_types) >= arity:
+            predicate_types[(name, arity)] = normalized_types
+    if not predicate_types:
+        return parsed, events
+
+    entity_types: dict[str, set[str]] = {}
+    for raw_entity, raw_type in entities_raw.items():
+        entity_key = _normalize_entity_key(str(raw_entity))
+        if not entity_key:
+            continue
+        if isinstance(raw_type, list):
+            type_values = {_atomize(str(item)) for item in raw_type if _atomize(str(item))}
+        else:
+            single = _atomize(str(raw_type))
+            type_values = {single} if single else set()
+        if type_values:
+            entity_types[entity_key] = type_values
+    if not entity_types:
+        return parsed, events
+
+    facts_raw = parsed.get("facts", [])
+    if not isinstance(facts_raw, list) or not facts_raw:
+        return parsed, events
+
+    rewrites: list[dict[str, str]] = []
+    next_facts: list[str] = []
+    for raw_clause in facts_raw:
+        original = _normalize_clause(str(raw_clause))
+        if not original:
+            continue
+        raw = original[:-1].strip() if original.endswith(".") else original.strip()
+        if not raw or ":-" in raw:
+            next_facts.append(original)
+            continue
+        match = re.fullmatch(r"([a-z][a-z0-9_]*)\((.*)\)", raw)
+        if not match:
+            next_facts.append(original)
+            continue
+        name = match.group(1)
+        args = _split_top_level_args(match.group(2))
+        if len(args) != 2:
+            next_facts.append(original)
+            continue
+        expected_types = predicate_types.get((name, 2))
+        if not expected_types or len(expected_types) < 2:
+            next_facts.append(original)
+            continue
+
+        left = args[0].strip()
+        right = args[1].strip()
+        if not left or not right or _is_variable_token(left) or _is_variable_token(right):
+            next_facts.append(original)
+            continue
+
+        left_types = entity_types.get(_normalize_entity_key(left))
+        right_types = entity_types.get(_normalize_entity_key(right))
+        if not left_types or not right_types:
+            next_facts.append(original)
+            continue
+
+        expected_left = expected_types[0]
+        expected_right = expected_types[1]
+        direct_ok = expected_left in left_types and expected_right in right_types
+        swap_ok = expected_left in right_types and expected_right in left_types
+        if direct_ok or not swap_ok:
+            next_facts.append(original)
+            continue
+
+        rewritten = f"{name}({right}, {left})."
+        next_facts.append(rewritten)
+        rewrites.append({"from": original, "to": rewritten})
+
+    if not rewrites or not next_facts:
+        return parsed, events
+
+    parsed["facts"] = next_facts
+    parsed["logic_string"] = next_facts[0] if len(next_facts) == 1 else "\n".join(next_facts)
+    atoms, variables, predicates = _collect_components_from_clauses(next_facts)
+    parsed["components"] = {
+        "atoms": atoms,
+        "variables": variables,
+        "predicates": predicates,
+    }
+    rationale = str(parsed.get("rationale", "")).strip()
+    suffix = "Type-direction guard corrected binary argument order."
+    parsed["rationale"] = f"{rationale} {suffix}".strip() if rationale else suffix
+    events.append(
+        {
+            "kind": "type_direction_guard",
+            "rewrites": rewrites,
+        }
+    )
+    return parsed, events
+
+
+def _apply_observed_someone_event_guard(
+    parsed: dict[str, Any],
+    *,
+    utterance: str,
+    route: str,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    events: list[dict[str, Any]] = []
+    if not isinstance(parsed, dict):
+        return parsed, events
+
+    intent = str(parsed.get("intent", "")).strip().lower()
+    route_name = str(route or "").strip().lower()
+    if intent != "assert_fact" and route_name != "assert_fact":
+        return parsed, events
+
+    lowered = str(utterance or "").strip().lower()
+    if "saw that someone had" not in lowered:
+        return parsed, events
+
+    observer_atom = _leading_subject_atom_from_utterance(utterance)
+    if not observer_atom:
+        return parsed, events
+
+    nested_clause = ""
+    if re.search(r"\bsaw that someone had tasted\s+(?:his|her|their)\s+porridge\b", lowered):
+        nested_clause = f"tasted(someone, porridge_of({observer_atom}))."
+    elif re.search(r"\bsaw that someone had eaten(?:\s+all)?\s+(?:his|her|their)\s+porridge\b", lowered):
+        nested_clause = f"ate(someone, porridge_of({observer_atom}))."
+    elif re.search(r"\bsaw that someone had been sitting in\s+(?:his|her|their)\s+chair\b", lowered):
+        nested_clause = f"sat_in(someone, chair_of({observer_atom}))."
+    elif re.search(r"\bsaw that someone had been lying in\s+(?:his|her|their)\s+bed\b", lowered):
+        nested_clause = f"slept_in(someone, bed_of({observer_atom}))."
+    if not nested_clause:
+        return parsed, events
+
+    saw_clause = f"saw({observer_atom}, {nested_clause[:-1]})."
+    parsed["facts"] = [saw_clause]
+    parsed["logic_string"] = saw_clause
+    parsed["rules"] = []
+    parsed["queries"] = []
+    atoms, variables, predicates = _collect_components_from_clauses([saw_clause])
+    parsed["components"] = {
+        "atoms": atoms,
+        "variables": variables,
+        "predicates": predicates,
+    }
+    rationale = str(parsed.get("rationale", "")).strip()
+    suffix = "Observed-event guard canonicalized nested someone-event under saw/2."
+    parsed["rationale"] = f"{rationale} {suffix}".strip() if rationale else suffix
+    events.append(
+        {
+            "kind": "observed_someone_event_guard",
+            "observer": observer_atom,
+            "rewritten_fact": saw_clause,
+        }
+    )
+    return parsed, events
+
+
+def _apply_observed_asleep_event_guard(
+    parsed: dict[str, Any],
+    *,
+    utterance: str,
+    route: str,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    events: list[dict[str, Any]] = []
+    if not isinstance(parsed, dict):
+        return parsed, events
+
+    intent = str(parsed.get("intent", "")).strip().lower()
+    route_name = str(route or "").strip().lower()
+    if intent != "assert_fact" and route_name != "assert_fact":
+        return parsed, events
+
+    match = re.match(
+        (
+            r"^\s*([A-Za-z][A-Za-z0-9_'-]*(?:\s+[A-Za-z][A-Za-z0-9_'-]*)*)\s+saw\s+"
+            r"([A-Za-z][A-Za-z0-9_'-]*(?:\s+[A-Za-z][A-Za-z0-9_'-]*)*)\s+asleep\s+in\s+"
+            r"(?:his|her|their)\s+bed\.?\s*$"
+        ),
+        str(utterance or ""),
+        re.IGNORECASE,
+    )
+    if not match:
+        return parsed, events
+
+    observer_atom = _atomize(match.group(1))
+    sleeper_atom = _atomize(match.group(2))
+    if not observer_atom or not sleeper_atom:
+        return parsed, events
+
+    fact = f"saw({observer_atom}, slept_in({sleeper_atom}, bed_of({observer_atom})))."
+    parsed["facts"] = [fact]
+    parsed["logic_string"] = fact
+    parsed["rules"] = []
+    parsed["queries"] = []
+    atoms, variables, predicates = _collect_components_from_clauses([fact])
+    parsed["components"] = {
+        "atoms": atoms,
+        "variables": variables,
+        "predicates": predicates,
+    }
+    rationale = str(parsed.get("rationale", "")).strip()
+    suffix = "Observed-asleep guard canonicalized sleeper event under saw/2."
+    parsed["rationale"] = f"{rationale} {suffix}".strip() if rationale else suffix
+    events.append(
+        {
+            "kind": "observed_asleep_event_guard",
+            "rewritten_fact": fact,
+        }
+    )
+    return parsed, events
+
+
+def _apply_declared_signature_coverage_guard(
+    parsed: dict[str, Any],
+    *,
+    utterance: str,
+    route: str,
+    declared_signatures: set[str],
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    events: list[dict[str, Any]] = []
+    if not isinstance(parsed, dict) or not declared_signatures:
+        return parsed, events
+
+    intent = str(parsed.get("intent", "")).strip().lower()
+    route_name = str(route or "").strip().lower()
+    if intent not in WRITE_INTENTS and route_name not in WRITE_INTENTS:
+        return parsed, events
+    coverage_enforced = intent in {"assert_fact", "assert_rule"} or route_name in {"assert_fact", "assert_rule"}
+
+    declared_map = _declared_name_to_arity_map(declared_signatures)
+    if not declared_map:
+        return parsed, events
+
+    used_signatures = set(_collect_signatures_from_parsed(parsed))
+    used_declared = {
+        sig
+        for sig in used_signatures
+        if sig.split("/", 1)[0] in declared_map
+    }
+
+    mismatched_arities: list[str] = []
+    for sig in sorted(used_signatures):
+        name, _, arity_text = sig.partition("/")
+        if name not in declared_map:
+            continue
+        expected = declared_map[name]
+        try:
+            seen_arity = int(arity_text)
+        except ValueError:
+            seen_arity = -1
+        if seen_arity != expected:
+            mismatched_arities.append(f"{name}/{seen_arity} (expected {name}/{expected})")
+
+    hinted_names = _declared_predicates_hinted_by_utterance(
+        utterance,
+        declared_name_to_arity=declared_map,
+    )
+    missing_hinted = [
+        f"{name}/{declared_map[name]}"
+        for name in sorted(hinted_names)
+        if f"{name}/{declared_map[name]}" not in used_signatures
+    ]
+
+    issues: list[str] = []
+    if mismatched_arities:
+        issues.append("Declared predicate arity mismatch: " + ", ".join(mismatched_arities))
+    if coverage_enforced and missing_hinted:
+        issues.append("Declared predicate coverage gap: " + ", ".join(missing_hinted))
+    if coverage_enforced and hinted_names and not used_declared:
+        issues.append("No declared predicate facts were extracted from a declared-lane write turn.")
+
+    if not issues:
+        return parsed, events
+
+    out = dict(parsed)
+    ambiguities_raw = out.get("ambiguities", [])
+    ambiguities: list[str] = []
+    if isinstance(ambiguities_raw, list):
+        for item in ambiguities_raw:
+            text = str(item).strip()
+            if text:
+                ambiguities.append(text)
+    for issue in issues:
+        if issue not in ambiguities:
+            ambiguities.append(issue)
+
+    reason = "Declared signature mismatch for this utterance."
+    question = (
+        "Please restate this using the declared predicate signatures only"
+        " (with exact arity) so I can commit safely."
+    )
+    out["ambiguities"] = ambiguities
+    out["needs_clarification"] = True
+    out["uncertainty_score"] = max(_clip_01(out.get("uncertainty_score"), fallback=0.24), 0.85)
+    out["uncertainty_label"] = "high"
+    out["clarification_reason"] = reason
+    out["clarification_question"] = question
+
+    events.append(
+        {
+            "kind": "declared_signature_coverage_guard",
+            "issues": issues,
+            "hinted_predicates": sorted(hinted_names),
+            "used_signatures": sorted(used_signatures),
+        }
+    )
+    return out, events
 
 
 def _build_assert_rule_fallback_parse(utterance: str) -> dict[str, Any] | None:
@@ -3331,14 +4457,19 @@ def _build_explicit_command_parse(utterance: str) -> tuple[str, dict[str, Any]] 
     lowered = text.lower()
 
     def _build_assert_fact_from_clause(clause_text: str) -> dict[str, Any] | None:
-        clause = _normalize_clause(clause_text)
-        if not _is_valid_goal_clause(clause, require_ground=False):
+        clauses = _extract_explicit_goal_clauses_from_command(clause_text, require_ground=False)
+        if not clauses:
+            clause = _normalize_clause(clause_text)
+            if _is_valid_goal_clause(clause, require_ground=False):
+                clauses = [clause]
+        if not clauses:
             return None
-        atoms, variables, predicates = _extract_components_from_logic(clause)
+        logic = clauses[0] if len(clauses) == 1 else "\n".join(clauses)
+        atoms, variables, predicates = _collect_components_from_clauses(clauses)
         parsed = _build_parse_payload(
             intent="assert_fact",
-            logic_string=clause,
-            facts=[clause],
+            logic_string=logic,
+            facts=list(clauses),
             rules=[],
             queries=[],
             predicates=predicates,
@@ -3391,15 +4522,23 @@ def _build_explicit_command_parse(utterance: str) -> tuple[str, dict[str, Any]] 
         return parsed if ok else None
 
     def _build_retract_from_clause(clause_text: str) -> dict[str, Any] | None:
-        target = _normalize_clause(clause_text)
-        if not _is_valid_goal_clause(target, require_ground=False):
+        targets = _extract_explicit_goal_clauses_from_command(clause_text, require_ground=True)
+        if not targets:
+            target = _normalize_clause(clause_text)
+            if _is_valid_goal_clause(target, require_ground=True):
+                targets = [target]
+        if not targets:
             return None
-        logic = f"retract({target[:-1] if target.endswith('.') else target})."
+        retract_clauses = [
+            f"retract({target[:-1] if target.endswith('.') else target})."
+            for target in targets
+        ]
+        logic = "\n".join(retract_clauses)
         atoms, variables, predicates = _extract_components_from_logic(logic)
         parsed = _build_parse_payload(
             intent="retract",
             logic_string=logic,
-            facts=[target],
+            facts=list(targets),
             rules=[],
             queries=[],
             predicates=predicates,
@@ -4604,6 +5743,22 @@ def _batch_status(results: list[dict[str, Any]]) -> str:
 
 
 def _expand_assert_fact_clauses(candidates: list[str]) -> list[str]:
+    def _strip_fact_command_prefix(text: str) -> str:
+        cleaned = str(text or "").strip()
+        if not cleaned:
+            return cleaned
+        # Normalize command-y fragments like "Set parent(...)" into raw clauses.
+        for pattern in (
+            r"^\s*set\s+",
+            r"^\s*assert\s+fact\s+",
+            r"^\s*add\s+",
+            r"^\s*insert\s+",
+        ):
+            next_text = re.sub(pattern, "", cleaned, flags=re.IGNORECASE).strip()
+            if next_text != cleaned:
+                cleaned = next_text
+        return cleaned
+
     expanded: list[str] = []
     for raw_clause in candidates:
         text = str(raw_clause or "").strip()
@@ -4628,7 +5783,10 @@ def _expand_assert_fact_clauses(candidates: list[str]) -> list[str]:
                 sentence_parts.append(fragment)
 
         for part in sentence_parts:
-            clause = _normalize_clause(f"{part}.")
+            normalized_part = _strip_fact_command_prefix(part)
+            if not normalized_part:
+                continue
+            clause = _normalize_clause(f"{normalized_part}.")
             if not clause:
                 continue
             raw = clause[:-1].strip() if clause.endswith(".") else clause.strip()
@@ -5793,6 +6951,7 @@ def main() -> int:
 
     turn_rows: list[dict[str, Any]] = []
     declared_predicates: set[str] = set()
+    declared_predicate_signatures: set[str] = set()
     for idx, raw in enumerate(utterances, start=1):
         (
             utterance,
@@ -5867,14 +7026,18 @@ def main() -> int:
 
         if control_predicate_directive:
             declared_names = _extract_predicate_names_from_control_directive(utterance_original)
+            declared_signatures_from_control = _extract_predicate_signatures_from_control_directive(utterance_original)
             if declared_names:
                 declared_predicates.update(declared_names)
+            if declared_signatures_from_control:
+                declared_predicate_signatures.update(declared_signatures_from_control)
             control_apply_row = {
                 "tool": "none",
                 "input": {
                     "control_directive": "predicate_signature_declaration",
                     "raw_utterance": utterance_original,
                     "declared_predicates": declared_names,
+                    "declared_signatures": declared_signatures_from_control,
                 },
                 "result": {
                     "status": "skipped",
@@ -5896,6 +7059,7 @@ def main() -> int:
                     "pre_normalization_events": pre_normalization_events,
                     "control_predicate_directive": True,
                     "declared_predicates_from_control": declared_names,
+                    "declared_predicate_signatures_from_control": declared_signatures_from_control,
                     "route": "other",
                     "route_source": "pre_normalizer",
                     "repaired": False,
@@ -5966,8 +7130,12 @@ def main() -> int:
             registry_unknown_signatures = []
 
             runtime_constraint_guide = _build_runtime_constraint_guide(
-                registry_signatures=registry_signatures,
-                strict_registry=bool(args.strict_registry),
+                registry_signatures=(
+                    registry_signatures | declared_predicate_signatures
+                    if declared_predicate_signatures
+                    else registry_signatures
+                ),
+                strict_registry=bool(args.strict_registry) or bool(declared_predicate_signatures),
                 type_schema=type_schema,
                 strict_types=bool(args.strict_types),
             )
@@ -6087,6 +7255,13 @@ def main() -> int:
                     validation_errors = ["Model did not return parseable JSON payload."]
                     if isinstance(parsed, dict):
                         parsed = _normalize_clarification_fields(parsed, utterance=utterance, route=route)
+                        parsed, prevalidate_retract_downgrade_events = _apply_unsafe_retract_downgrade_guard(
+                            parsed,
+                            utterance=utterance,
+                            route=route,
+                        )
+                        if prevalidate_retract_downgrade_events:
+                            alignment_events.extend(prevalidate_retract_downgrade_events)
                         ok_full, errors_full = _validate_parsed(parsed)
                         if ok_full:
                             validation_errors = []
@@ -6105,6 +7280,13 @@ def main() -> int:
                             fallback_used = True
                 else:
                     parsed = _normalize_clarification_fields(parsed, utterance=utterance, route=route)
+                    parsed, prevalidate_retract_downgrade_events = _apply_unsafe_retract_downgrade_guard(
+                        parsed,
+                        utterance=utterance,
+                        route=route,
+                    )
+                    if prevalidate_retract_downgrade_events:
+                        alignment_events.extend(prevalidate_retract_downgrade_events)
                     ok, errors = _validate_parsed(parsed)
                     validation_errors = errors
                     if not ok:
@@ -6193,6 +7375,13 @@ def main() -> int:
                 )
                 if retract_edge_events:
                     alignment_events.extend(retract_edge_events)
+                parsed, retract_comma_events = _apply_retract_comma_tuple_guard(
+                    parsed,
+                    utterance=utterance,
+                    route=route,
+                )
+                if retract_comma_events:
+                    alignment_events.extend(retract_comma_events)
                 parsed, retract_exclusion_events = _apply_retract_exclusion_guard(
                     parsed,
                     utterance=utterance,
@@ -6200,6 +7389,13 @@ def main() -> int:
                 )
                 if retract_exclusion_events:
                     alignment_events.extend(retract_exclusion_events)
+                parsed, retract_downgrade_events = _apply_unsafe_retract_downgrade_guard(
+                    parsed,
+                    utterance=utterance,
+                    route=route,
+                )
+                if retract_downgrade_events:
+                    alignment_events.extend(retract_downgrade_events)
                 parsed, concession_events = _apply_concession_contrast_guard(
                     parsed,
                     utterance=utterance,
@@ -6207,6 +7403,13 @@ def main() -> int:
                 )
                 if concession_events:
                     alignment_events.extend(concession_events)
+                parsed, location_move_events = _apply_location_move_guard(
+                    parsed,
+                    utterance=utterance,
+                    route=route,
+                )
+                if location_move_events:
+                    alignment_events.extend(location_move_events)
                 parsed, declared_hint_events = _apply_declared_predicate_hint_guard(
                     parsed,
                     utterance=utterance,
@@ -6218,14 +7421,87 @@ def main() -> int:
                 parsed, alias_events = _align_parsed_predicates(parsed, registry_alias_map)
                 if alias_events:
                     alignment_events.extend(alias_events)
+                parsed, atom_alignment_events = _align_declared_atoms_to_known_context(
+                    parsed,
+                    declared_signatures=declared_predicate_signatures,
+                    known_atoms=_collect_known_atoms_from_corpus(corpus_clauses),
+                )
+                if atom_alignment_events:
+                    alignment_events.extend(atom_alignment_events)
+                parsed, subject_anchor_events = _apply_leading_subject_anchor_guard(
+                    parsed,
+                    utterance=utterance,
+                    route=route,
+                )
+                if subject_anchor_events:
+                    alignment_events.extend(subject_anchor_events)
+                parsed, observed_someone_events = _apply_observed_someone_event_guard(
+                    parsed,
+                    utterance=utterance,
+                    route=route,
+                )
+                if observed_someone_events:
+                    alignment_events.extend(observed_someone_events)
+                parsed, observed_asleep_events = _apply_observed_asleep_event_guard(
+                    parsed,
+                    utterance=utterance,
+                    route=route,
+                )
+                if observed_asleep_events:
+                    alignment_events.extend(observed_asleep_events)
+                parsed, type_direction_events = _apply_type_direction_guard(
+                    parsed,
+                    route=route,
+                    type_schema=type_schema,
+                )
+                if type_direction_events:
+                    alignment_events.extend(type_direction_events)
+                parsed, declared_signature_events = _apply_declared_signature_coverage_guard(
+                    parsed,
+                    utterance=utterance,
+                    route=route,
+                    declared_signatures=declared_predicate_signatures,
+                )
+                if declared_signature_events:
+                    alignment_events.extend(declared_signature_events)
                 parsed = _normalize_clarification_fields(parsed, utterance=utterance, route=route)
                 registry_errors, unknown_signatures = _validate_parsed_against_registry(
                     parsed,
-                    allowed_signatures=registry_signatures,
-                    strict_registry=bool(args.strict_registry),
+                    allowed_signatures=(
+                        registry_signatures | declared_predicate_signatures
+                        if declared_predicate_signatures
+                        else registry_signatures
+                    ),
+                    strict_registry=bool(args.strict_registry) or bool(declared_predicate_signatures),
                 )
                 registry_unknown_signatures = unknown_signatures
                 if registry_errors:
+                    if isinstance(parsed, dict) and declared_predicate_signatures:
+                        ambiguities_raw = parsed.get("ambiguities", [])
+                        ambiguities: list[str] = []
+                        if isinstance(ambiguities_raw, list):
+                            for item in ambiguities_raw:
+                                text = str(item).strip()
+                                if text:
+                                    ambiguities.append(text)
+                        for err in registry_errors:
+                            if err not in ambiguities:
+                                ambiguities.append(err)
+                        parsed["ambiguities"] = ambiguities
+                        parsed["needs_clarification"] = True
+                        parsed["uncertainty_score"] = max(
+                            _clip_01(parsed.get("uncertainty_score"), fallback=0.24),
+                            0.88,
+                        )
+                        parsed["uncertainty_label"] = "high"
+                        if not str(parsed.get("clarification_reason", "")).strip():
+                            parsed["clarification_reason"] = "Declared predicate signature mismatch."
+                        if not str(parsed.get("clarification_question", "")).strip():
+                            parsed["clarification_question"] = (
+                                "Please restate this with the declared predicate signatures "
+                                "(including exact arity) before I commit."
+                            )
+                        parsed = _normalize_clarification_fields(parsed, utterance=utterance, route=route)
                     validation_errors.extend(registry_errors)
                 type_errors = _validate_parsed_types(
                     parsed,
@@ -6492,6 +7768,7 @@ def main() -> int:
                 "pre_normalization_events": pre_normalization_events,
                 "control_predicate_directive": False,
                 "declared_predicates_from_control": [],
+                "declared_predicate_signatures_from_control": [],
                 "route": route,
                 "route_source": route_source,
                 "repaired": repaired,
@@ -6742,6 +8019,7 @@ def main() -> int:
         "system_prompt_text": prompt_guide,
         "system_prompt_sources": system_prompt_sources,
         "declared_predicates": sorted(declared_predicates),
+        "declared_predicate_signatures": sorted(declared_predicate_signatures),
         "kb_runtime_boot_path": str(server_boot_kb_path),
         "kb_init": kb_init,
         "corpus_load": corpus_load,
@@ -6806,6 +8084,13 @@ def main() -> int:
             "Declared predicate hints: "
             f"{len(declared_predicates)} ({', '.join(sorted(declared_predicates)[:10])}"
             + ("..." if len(declared_predicates) > 10 else "")
+            + ")"
+        )
+    if declared_predicate_signatures:
+        print(
+            "Declared predicate signatures: "
+            f"{len(declared_predicate_signatures)} ({', '.join(sorted(declared_predicate_signatures)[:10])}"
+            + ("..." if len(declared_predicate_signatures) > 10 else "")
             + ")"
         )
     print(

@@ -2,162 +2,43 @@
 
 This project is a local workbench for building a high-accuracy semantic parser (Qwen 3.5 9B first) that converts natural language into Prolog-ready logic and applies it into named, persistent knowledge bases.
 
-Last updated: 2026-04-13
+Last updated: 2026-04-14
 
-## Latest Ops Update (2026-04-13)
+## Current Focus (2026-04-14)
 
-- Docs hub front door now uses a visitor-first hero funnel (explainer, contamination ablation, run reports) with plain-language action notes.
-- Media showcase is now video-first with audio fallback and one-button-per-media selection.
-- Added runnable demo scenario `demo_05_time_loop_carnival` (state mutation + retract + post-change query), with published run JSON + HTML transcript.
-- Excursion stress expansion (GO run) exposed current reasoning ceiling on bare lane:
-  - `excursion_cooperative_v1_full`: `2/6` (`33.3%`)
-  - `excursion_wild_v1_full`: `3/6` (`50.0%`)
-  - `excursion_frontier_v2_full`: `5/12` (`41.7%`)
+Prethinker is now in a phase shift from ladder-only progression to real-world language pressure.
 
-## Quick Links
+- Primary lane: real-world ingestion and stress tests (`wild mode`, excursion packs, live/random threads).
+- Ladder lane: still active, but used mainly as regression safety, not as the only definition of progress.
+- Current scientific rollup is tracked in `docs/PROGRESS.md` with concrete run deltas and known failure modes.
+
+## Current Rollups
+
+- Goldilocks roundtrip cycle (latest local strongest run):
+  - baseline: `run-20260414T132151Z-story_goldilocks_roundtr-qwen3_5_9b-33896`
+  - latest: `run-20260414T151909Z-story_goldilocks_roundtr-qwen3_5_9b-21788`
+  - headline delta: apply failures `20 -> 5`, clarification requests `20 -> 4`, clauses `21 -> 43`
+  - artifacts: `docs/goldilocks-roundtrip.html`, `docs/data/roundtrip/goldilocks_roundtrip_run.json`
+- Real-world program framing and harvest process:
+  - `docs/WILD_MODE.md`
+  - `docs/WILD_FAILURE_ISOLATION.md`
+
+## Quick Links (Current)
 
 - docs hub: `docs/index.html`
-- run explorer: `docs/run-reports-hub.html`
-- demo playbook: `docs/DEMO_PLAYBOOK.md`
-- excursion source bank: `stories/excursions/SOURCE_BANK_V1.md`
-- excursion hard pack: `stories/excursions/HN_MIDGROUND_PACK_V3.md`
+- science progress note: `docs/PROGRESS.md`
 - out in the wild article: `docs/WILD_MODE.md`
-- wild failure isolation: `docs/WILD_FAILURE_ISOLATION.md`
+- run explorer: `docs/run-reports-hub.html`
+- goldilocks roundtrip demo: `docs/goldilocks-roundtrip.html`
 - track scoreboard: `docs/TRACK_SCOREBOARD.md`
-- explainer article: `EXPLAINER.md`
 - assembly log: `SESSIONS.md`
-- codex ide handoff: `CODEX_IDE_HANDOFF.md`
 
-## Repository Status Note
+## Historical Record
 
-This repository is new. Core reasoning components (especially the Prolog engine/runtime) were migrated from prior work with an existing unit test history. Test migration is in progress; current status and run-by-run learnings are tracked in:
+Older phase notes and long-form operational history are preserved in:
 
 - `docs/run-learnings.md`
 - `SESSIONS.md`
-
-## Story Roundtrip Demo
-
-Watch the pre-thinker consume a story, then recite from captured facts and logical memory.
-
-- Demo page: `docs/goldilocks-roundtrip.html`
-- Includes:
-  - input story text
-  - expandable generated `kb.pl`
-  - reconstructed story generated from KB clauses alone
-
-## Demo Scenario Playbook
-
-Public demo concepts plus runnable starter scenarios are tracked in:
-
-- `docs/DEMO_PLAYBOOK.md`
-- `kb_scenarios/demo_01_meeting_commitment_extractor.json`
-- `kb_scenarios/demo_02_policy_stress_test_machine.json`
-- `kb_scenarios/demo_03_story_world_interrogator.json`
-- `kb_scenarios/demo_04_reimbursement_violation_check.json`
-- `kb_scenarios/demo_05_time_loop_carnival.json`
-
-## Honest Snapshot (For NSAI Readers)
-
-Prethinker is a neuro-symbolic parsing workbench, not a finished parser product.
-
-- Problem focus: map free-form language into executable symbolic operations (`assert_fact`, `assert_rule`, `query`, `retract`) and apply them deterministically to persistent KBs.
-- Core approach: hybrid pipeline where the model proposes structure, then deterministic runtime logic refines, validates, and applies through local runtime tools.
-- What is solid today: architecture, provenance, prompt/version lineage, scenario ladder, and observability (`kb_runs` + HTML docs/report views).
-- What is not proven yet: broad generalization on hard inputs (transitivity, quantifiers, negation policy, pronoun ambiguity, unseen vocabulary).
-- Current evidence level: stronger than initial smoke stage; frontier now includes story/CE and progress-memory rungs through `rung_420`, but domain breadth and long-tail language still need expansion.
-
-This is an open research effort and learning artifact, not a startup pitch.
-If you're evaluating it as a research workbench, it's useful now. If you're evaluating it as production-grade semantic parsing, it's still early.
-
-## Recent Progress (2026-04-10)
-
-- Completed an autonomous safe-mode tuning campaign (scratch/output isolated under `tmp/`).
-- Hardened system prompt rules for:
-  - interrogative routing to `query`
-  - yes/no query shape (no bare atom goals)
-  - retract shape (`retract(<fact_like_term_with_args>).`)
-- Added explicit micro-patterns for ambiguous undo/retract and yes/no status queries.
-- Latest tuned prompt provenance in those runs: `sp-e0a66d9a2fbe`.
-- In the final verification sweep (`resume5`), all targeted probes/rungs passed:
-  - `stage_00_foreign_unseen_probe`
-  - `stage_00_multilingual_probe`
-  - `stage_01_facts_only`
-  - `stage_02_rule_ingest`
-  - `stage_03_transitive_chain`
-  - `acid_03_temporal_override`
-  - `acid_04_alias_pressure`
-  - `acid_05_long_context_lineage`
-- Evidence artifacts for this cycle are currently in `tmp/runs/` (for example `tmp/runs/resume5_summary_20260410_102508.json`) and can be promoted into `kb_runs/` + docs manifests in a publish pass.
-- Fresh CE sweep (higher-target stability run) confirmed no plateau:
-  - CE values tested: `0.55`, `0.65`, `0.75`, `0.85`
-  - all 8 target scenarios passed at every CE setting
-  - clarification rounds improved at lower CE (`0.55` produced `2` total rounds vs `4` at `0.65+`)
-
-## Latest Status Rollup (2026-04-12)
-
-- Prompt provenance for this cycle remained stable at `sp-1e43c641b01b` (pipeline/runtime changes, not SP changes).
-- Frontier language-width expansion now validated through `rung_449`:
-  - `frontier_language_width_v4`: `12/12` (100%)
-  - `frontier_language_width_v5`: `15/15` (100%) after one targeted repair cycle on new noisy rungs
-  - `frontier_language_width_v6`: `16/16` (100%) including multi-bind variable-answer pressure (`uncle(scott, X)` with `min_rows=2`)
-  - summary JSON: `docs/data/tracks/frontier_language_width_v4_latest.json`, `frontier_language_width_v5_latest.json`, `frontier_language_width_v6_latest.json`
-- New probe tracks added and passing:
-  - `frontier_clarification_probe_v1`: `3/3` (100%)
-  - `frontier_confirmation_probe_v1`: `2/2` (100%)
-  - summary JSON: `docs/data/tracks/frontier_clarification_probe_v1_latest.json`, `frontier_confirmation_probe_v1_latest.json`
-- Clean-root ladder verification reached `100%` on `stage_01 -> rung_200` (`53/53` scenarios in that sweep).
-- Added and validated higher frontier story/clarification rungs:
-  - `rung_270_story_lineage_fragmented_ingest`
-  - `rung_280_story_revision_temporal_shift`
-  - `rung_290_story_multi_branch_pronoun_pressure`
-  - `rung_300_story_nested_corrections`
-  - `rung_310_story_cross_clause_pronoun_weave`
-  - `rung_320_story_temporal_exception_rebinding`
-  - `rung_330_story_booklet_cross_scene_rebind`
-  - `rung_340_ce_story_pronoun_transfer`
-  - `rung_350_ce_story_multi_round_revision`
-  - `rung_360_ce_story_branch_merge_noise`
-- New guardrails added in `kb_pipeline.py` to stabilize noisy retract turns:
-  - route-intent realignment fallback (`route=retract` cannot silently commit `intent=other`)
-  - retract arrow-edge target normalization (`x->y` style repair to `parent(x,y)`)
-  - retract exclusion handling for explicit preserves (`not x->y`, `x->y stays`, `keep x->y`)
-  - stronger lead-in normalization for fact parsing (`please record this:`, connective prefixes)
-- Post-fix stability check passes:
-  - `rung_210`: `6/6`
-  - `rung_220`: `9/9`
-  - `rung_230`: `6/6`
-- Story/CE frontier check passes:
-  - `rung_340`: `11/11`
-  - `rung_350`: `11/11`
-  - `rung_360`: `12/12`
-- Regression test status for MCP server: `14 passed` (`tests/test_mcp_server.py`).
-- MCP `pre_think` now defaults to **strict compiler-bound mode**:
-  - compiler model: `qwen35-semparse:9b`
-  - compiler prompt: `modelfiles/semantic_parser_system_prompt.md`
-  - no silent heuristic fallback when compiler is unavailable
-- Progress-Memory lane added and validated:
-  - new rungs: `rung_370`, `rung_380`, `rung_390`, `rung_400`, `rung_410`, `rung_420`
-  - new tests: `tests/test_progress_memory.py`
-  - run reports now include governance metrics:
-    - `off_focus_write_attempts`
-    - `off_focus_write_intercepts`
-    - `off_focus_write_commits`
-    - `off_focus_write_block_rate`
-    - `off_focus_write_contamination_rate`
-    - `kb_contamination_delta`
-- Fresh contamination ablation (same scenario, with/without progress memory):
-  - with progress memory: off-focus writes intercepted (`block_rate=1.0`, off-focus query results `no_results`)
-  - without progress memory: off-focus writes committed (off-focus query results `success`)
-  - parser confidence unchanged across both arms (`avg_conf=0.971`), confirming governance gain rather than confidence inflation
-- Track-based same-model sweep added (`qwen35-semparse:9b` as parser + served-LLM):
-  - `gate_ladder_frontier`: `7/8` (`87.5%`)
-  - `examples_all`: `2/7` (`28.6%`)
-  - `book_acid_goldilocks`: `0/2` (`0.0%`)
-  - score artifacts: `docs/TRACK_SCOREBOARD.md` and `docs/data/tracks/*.json`
-- Caveat: `stage_00` probes and long story roundtrip remain exploratory and are not treated as primary gating battery for the ladder frontier.
-- `scripts/run_track.py` now supports:
-  - `--require-final-confirmation` (pass-through to pipeline)
-  - `--kb-root` (temp KB routing, useful for unattended sweeps to avoid cluttering canonical `kb_store/`)
 
 ## Neuro-Symbolic Contract
 
@@ -211,9 +92,9 @@ flowchart LR
   Q --> P[Run Provenance and Reports]
 ```
 
-## Current Evidence (As of 2026-04-12)
+## Historical Evidence Snapshot (As of 2026-04-12)
 
-Latest cycle evidence is based on clean-root ladder sweeps in `tmp/runs/`:
+This section is preserved as an earlier-phase ladder snapshot. Latest current-phase rollups are tracked in `docs/PROGRESS.md`.
 
 - `stage_01 -> rung_200`: `53/53` scenarios passed (`failed_count=0`)
   - source: `tmp/runs/ladder_summary_20260411_235125.json`
@@ -500,6 +381,7 @@ Current mapping is light-touch and observational (no behavior change):
 - If LM Studio auth is enabled, set one of:
   - `LM_API_TOKEN` (LM Studio native), or
   - `LMSTUDIO_API_KEY` / `PRETHINKER_API_KEY`
+- `src/mcp_server.py` and `ui_gateway` now auto-load local `.env.local` when present and use the same API-key fallback chain as `kb_pipeline.py`.
 - No sibling repo is required for default runs (`--runtime core`, local vendored interpreter).
 
 ## Quick Start
@@ -529,7 +411,7 @@ python kb_pipeline.py --backend ollama --base-url http://127.0.0.1:11434 --model
 Use this to avoid re-running expensive rungs when nothing relevant changed.
 
 ```bash
-python scripts/run_ladder.py --backend ollama --base-url http://127.0.0.1:11434 --model qwen3.5:9b --prompt-file modelfiles/semantic_parser_system_prompt.md --start-rung stage_02_rule_ingest --end-rung acid_05_long_context_lineage --clarification-eagerness 0.75 --max-clarification-rounds 3 --clarification-answer-model gpt-oss:20b --clarification-answer-backend ollama --clarification-answer-base-url http://127.0.0.1:11434 --clarification-answer-context-length 16384
+python scripts/run_ladder.py --backend ollama --base-url http://127.0.0.1:11434 --model qwen3.5:9b --prompt-file modelfiles/semantic_parser_system_prompt.md --start-rung stage_02_rule_ingest --end-rung acid_05_long_context_lineage --clarification-eagerness 0.75 --max-clarification-rounds 3 --clarification-answer-model qwen3.5:9b --clarification-answer-backend ollama --clarification-answer-base-url http://127.0.0.1:11434 --clarification-answer-context-length 8192
 ```
 
 What gets skipped:
@@ -569,8 +451,8 @@ python scripts/run_track.py --track examples_all --backend ollama --base-url htt
 # run book-acid battery (narrative ingestion + QA probes)
 python scripts/run_track.py --track book_acid_goldilocks --backend ollama --base-url http://127.0.0.1:11434 --model qwen3.5:9b --prompt-file modelfiles/semantic_parser_system_prompt.md
 
-# run book-acid with clarification answer model in-loop
-python scripts/run_track.py --track book_acid_goldilocks --backend ollama --base-url http://127.0.0.1:11434 --model qwen3.5:9b --prompt-file modelfiles/semantic_parser_system_prompt.md --clarification-eagerness 0.85 --max-clarification-rounds 3 --clarification-answer-model gpt-oss:20b --clarification-answer-backend ollama --clarification-answer-base-url http://127.0.0.1:11434 --clarification-answer-context-length 16384 --clarification-answer-min-confidence 0.55
+# run book-acid with clarification answer model in-loop (standard: same model family)
+python scripts/run_track.py --track book_acid_goldilocks --backend ollama --base-url http://127.0.0.1:11434 --model qwen3.5:9b --prompt-file modelfiles/semantic_parser_system_prompt.md --clarification-eagerness 0.85 --max-clarification-rounds 3 --clarification-answer-model qwen3.5:9b --clarification-answer-backend ollama --clarification-answer-base-url http://127.0.0.1:11434 --clarification-answer-context-length 8192 --clarification-answer-min-confidence 0.55
 
 # run with an explicit served-LLM (preferred choreography path)
 python scripts/run_track.py --track book_acid_goldilocks --backend ollama --base-url http://127.0.0.1:11434 --model qwen3.5:9b --prompt-file modelfiles/semantic_parser_system_prompt.md --clarification-eagerness 0.85 --max-clarification-rounds 3 --served-llm-model qwen3.5:9b --served-llm-backend ollama --served-llm-base-url http://127.0.0.1:11434 --served-llm-context-length 8192 --clarification-answer-min-confidence 0.55
@@ -594,6 +476,45 @@ Outputs:
 - per-turn reports under `tmp/runs/mitm_sessions/<session_id>/reports/`
 - turn transcript at `session_transcript.jsonl`
 - session summary with readiness metrics/grade at `session_summary.json`
+
+### 3d.1) Run Through Product Front Door (`prethink://` UI Gateway)
+
+Use this when you want the exact product adapter path (`/api/prethink`) rather than direct pipeline execution.
+
+```bash
+# launch gateway (example: prethink:1234)
+python ui_gateway/main.py --host prethink --port 1234
+
+# run a turnset through the gateway front door with strict lock
+python scripts/run_gateway_turnset.py --turns stories/excursions/hn_midground_v3/turnsets/hn_signal_notification_forensics_turnset_v1.json --base-url http://prethink:1234 --strict-lock
+```
+
+Gateway artifacts:
+
+- `tmp/runs/gateway_sessions/<timestamp>_<label>/responses.json`
+- `tmp/runs/gateway_sessions/<timestamp>_<label>/session_summary.json`
+- `tmp/runs/gateway_sessions/<timestamp>_<label>/transcript.md`
+
+### 3d.2) Random Live Hacker News Ingest (anti-ad-hoc wild mode)
+
+Use this to sample random HN threads from live feed, build bounded turnsets/scenarios, run pipeline ingestion, and publish a telemetry summary.
+
+```bash
+# standard profile: same parser + clarification model family
+python scripts/run_hn_random_ingest.py --feed top --sample-size 2 --seed 54 --max-candidates 250 --min-comments 6 --max-comments 10 --max-depth 3 --backend ollama --base-url http://127.0.0.1:11434 --model qwen3.5:9b --runtime core --prompt-file modelfiles/semantic_parser_system_prompt.md --context-length 8192 --clarification-eagerness 0.35 --max-clarification-rounds 2 --ce-mode same
+
+# optional low-VRAM sidecar (example: 4b clarification model)
+python scripts/run_hn_random_ingest.py --feed top --sample-size 2 --seed 54 --ce-mode explicit --clarification-answer-model qwen2.5:4b --clarification-answer-backend ollama --clarification-answer-base-url http://127.0.0.1:11434 --clarification-answer-context-length 4096
+```
+
+Artifacts per run:
+
+- `tmp/runs/hn_random_ingest/<run_label>/source_threads/*.json`
+- `tmp/runs/hn_random_ingest/<run_label>/turnsets/*.json`
+- `tmp/runs/hn_random_ingest/<run_label>/scenarios/*.json`
+- `tmp/runs/hn_random_ingest/<run_label>/reports/*_run.json`
+- `tmp/runs/hn_random_ingest/<run_label>/summary.json`
+- `tmp/runs/hn_random_ingest/<run_label>/summary.md`
 
 ### 3e) Grade KB fidelity (strict + semantic)
 
@@ -661,12 +582,13 @@ Starter files:
 Use this when the parser asks clarification questions and you want an explicit Q&A model to answer during runs.
 
 ```bash
-python kb_pipeline.py --backend ollama --base-url http://127.0.0.1:11434 --model qwen3.5:9b --runtime core --prompt-file modelfiles/semantic_parser_system_prompt.md --scenario kb_scenarios/stage_01_facts_only.json --kb-name people_ladder --clarification-eagerness 0.95 --max-clarification-rounds 3 --clarification-answer-model gpt-oss:20b --clarification-answer-backend ollama --clarification-answer-context-length 16384 --clarification-answer-history-turns 8 --clarification-answer-kb-clause-limit 80 --clarification-answer-kb-char-budget 5000 --clarification-answer-min-confidence 0.55 --out kb_runs/stage_01_people_ladder_qamodel.json
+python kb_pipeline.py --backend ollama --base-url http://127.0.0.1:11434 --model qwen3.5:9b --runtime core --prompt-file modelfiles/semantic_parser_system_prompt.md --scenario kb_scenarios/stage_01_facts_only.json --kb-name people_ladder --clarification-eagerness 0.95 --max-clarification-rounds 3 --clarification-answer-model qwen3.5:9b --clarification-answer-backend ollama --clarification-answer-context-length 8192 --clarification-answer-history-turns 8 --clarification-answer-kb-clause-limit 80 --clarification-answer-kb-char-budget 5000 --clarification-answer-min-confidence 0.55 --out kb_runs/stage_01_people_ladder_qamodel.json
 ```
 
 Notes:
 
-- Parser model and clarification-answer model can be different.
+- Recommended baseline is same-model-family clarification (`qwen3.5:9b` with `qwen3.5:9b`) for lower orchestration drift and lower VRAM pressure than larger cross-family sidecars.
+- Parser model and clarification-answer model can still be different for explicit experiments.
 - Defaults now are `--context-length 8192` and `--clarification-answer-context-length 16384`.
 - Clarification responder is now context-grounded: pre-thinker sends a deterministic KB snapshot plus recent accepted turns, so the responder is not answering blindly.
 - Auto clarification answers below `--clarification-answer-min-confidence` are rejected and KB apply is deferred.
@@ -675,10 +597,10 @@ Notes:
 
 ### 4d) Clarification cadence sweep (CE + responder confidence)
 
-Use this to tune orchestration between parser uncertainty and `gpt-oss:20b` clarification behavior.
+Use this to tune orchestration between parser uncertainty and clarification behavior.
 
 ```bash
-python scripts/run_clarification_cadence.py --ce-values 0.55,0.75,0.90 --min-confidence-values 0.45,0.55,0.65 --model qwen3.5:9b --clarification-answer-model gpt-oss:20b --summary-out tmp/runs/clarification_cadence_summary_latest.json
+python scripts/run_clarification_cadence.py --ce-values 0.55,0.75,0.90 --min-confidence-values 0.45,0.55,0.65 --model qwen3.5:9b --clarification-answer-model qwen3.5:9b --summary-out tmp/runs/clarification_cadence_summary_latest.json
 ```
 
 This writes per-run reports plus a ranked summary with pass rate, clarification volume, and synthetic-round usage.

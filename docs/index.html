@@ -468,17 +468,19 @@
         <a class="btn alt" href="reports/progress_memory_contamination_ablation_with_progress_20260412.html">See The Contamination Ablation</a>
         <a class="btn" href="run-reports-hub.html">Browse Run Reports</a>
         <a class="btn" href="WILD_MODE.md">Read Wild Mode</a>
+        <a class="btn" href="PROGRESS.md">Read Science Progress</a>
       </div>
       <div class="hero-action-notes">
         <div class="hero-action-note"><strong>→ Read the explainer</strong> — Six failure modes from months of frontier runs, and the architecture that addresses them. <em>(15 min read)</em></div>
         <div class="hero-action-note"><strong>→ See the contamination ablation</strong> — Side-by-side runs with and without the progress-memory control plane. The clearest evidence that interception matters. <em>(2 min)</em></div>
-        <div class="hero-action-note"><strong>→ Browse run reports</strong> — Full ladder of test scenarios, ablations, and frontier sweeps. For the skeptical. <em>(deep)</em></div>
+        <div class="hero-action-note"><strong>→ Browse run reports</strong> — Full run history across wild tests, roundtrip artifacts, and regression ladder sweeps. <em>(deep)</em></div>
         <div class="hero-action-note"><strong>→ Read wild mode</strong> — Why we harvest real transcripts, what failed, and how failures become new rungs. <em>(8 min)</em></div>
+        <div class="hero-action-note"><strong>→ Read science progress</strong> — Hard metrics from the latest Goldilocks cycle, what improved, and what still breaks. <em>(8 min)</em></div>
       </div>
-      <p class="hero-status">Active research project. Latest frontier checkpoint: rung_449 (multi-bind uncle query under noisy paraphrase), passing 4/4. Updated April 2026.</p>
+      <p class="hero-status">Active research project. Current phase: real-world ingestion pressure with ladder-backed regression safety. Updated April 2026.</p>
       <div class="jump-row">
         <a class="jump" href="#start">start here</a>
-        <a class="jump" href="#frontier">frontier</a>
+        <a class="jump" href="#frontier">rollups</a>
         <a class="jump" href="#showcase">media</a>
         <a class="jump" href="#tracking">tracking</a>
         <a class="jump" href="#artifacts">artifacts</a>
@@ -511,7 +513,7 @@
     </section>
 
     <h2 id="start" class="section-title">Start Here</h2>
-    <p class="section-lede">Choose one path first: architecture and pitfalls, concrete with/without evidence, or raw run-level proof.</p>
+    <p class="section-lede">Current phase entry points: science rollups, real-world stress tests, and the latest concrete artifacts.</p>
     <section class="grid">
       <article class="card half">
         <span class="label">primary surface</span>
@@ -524,12 +526,13 @@
       </article>
 
       <article class="card half">
-        <span class="label">scenario ladder</span>
-        <h3>Rung Progression And Frontier</h3>
-        <p>Live ladder pages now include the newest story-width + CE frontier scenarios and progress-memory probes (currently through <code>rung_449</code>) with links to latest run JSON artifacts.</p>
+        <span class="label">phase status</span>
+        <h3>Real-World Program + Regression Ladder</h3>
+        <p>The ladder remains as regression infrastructure, but current discovery work is centered on real-world ingestion and hard-failure harvesting.</p>
         <div class="actions">
-          <a class="btn primary" href="rungs/index.html">Open Ladder</a>
-          <a class="btn" href="rungs/rung_449_frontier_multibind_uncle_query.html">Open rung_449</a>
+          <a class="btn primary" href="PROGRESS.md">Science Progress</a>
+          <a class="btn" href="WILD_MODE.md">Wild Mode</a>
+          <a class="btn" href="rungs/index.html">Regression Ladder</a>
         </div>
       </article>
 
@@ -559,7 +562,7 @@
         <p>Current control-plane contract and CE behavior workstream, including served-LLM clarification routing and confirmation-gated writes.</p>
         <div class="actions">
           <a class="btn primary" href="prethink_control_plane_contract.md">Control-Plane Contract</a>
-          <a class="btn" href="kb_runs/rung_170_ce_pronoun_followup_no_qmark_auto_cycle_stage1_to_rung200_clean_20260411.json">CE example run</a>
+          <a class="btn" href="data/roundtrip/goldilocks_roundtrip_run.json">Latest Goldilocks Run</a>
         </div>
       </article>
 
@@ -569,6 +572,7 @@
         <p>Current long-form explainer draft for outside readers: latest linguistic pitfalls, GIC mechanism details, memory split rationale, and autonomous ladder process.</p>
         <div class="actions">
           <a class="btn primary" href="../EXPLAINER.md">Open EXPLAINER.md</a>
+          <a class="btn" href="PROGRESS.md">Science Progress</a>
           <a class="btn" href="English-to-Prolog.md">English-to-Prolog</a>
           <a class="btn" href="assets/prethinker-control-plane-infographic-v2.png">Control-Plane Graphic</a>
         </div>
@@ -603,74 +607,43 @@
       </article>
     </section>
 
-    <h2 id="frontier" class="section-title">Latest Frontier Wins</h2>
-    <p class="section-lede">Newest stability and extension results from the latest autonomous ladder cycles (prompt ID <code>sp-1e43c641b01b</code>).</p>
+    <h2 id="frontier" class="section-title">Current Rollups</h2>
+    <p class="section-lede">Current scientific rollups and real-world pressure evidence. Ladder links are kept as regression references.</p>
     <section class="grid">
       <article class="card third">
-        <h3>rung_449</h3>
-        <p>Newest frontier checkpoint: multi-bind uncle query + noisy language constraints. Latest validation run passed <code>4/4</code>.</p>
+        <h3>Science Progress</h3>
+        <p>Latest honest scientific assessment: what improved, what still fails, and what experiments come next.</p>
         <div class="actions">
-          <a class="btn primary" href="rungs/rung_449_frontier_multibind_uncle_query.html">Rung Page</a>
-          <a class="btn" href="kb_runs/rung_449_frontier_multibind_uncle_query_frontier_language_width_v6_20260412_222723.json">Run JSON</a>
+          <a class="btn primary" href="PROGRESS.md">Open Progress</a>
+          <a class="btn" href="data/roundtrip/goldilocks_roundtrip_run.json">Latest Goldilocks Run JSON</a>
         </div>
       </article>
 
       <article class="card third">
-        <h3>rung_446</h3>
-        <p>Policy rebind loop with clarification pressure and repair resilience. Latest validation run passed <code>7/7</code>.</p>
+        <h3>Out In The Wild</h3>
+        <p>Real-world ingestion program, failure promotion loop, and hard examples harvested outside synthetic-only scenarios.</p>
         <div class="actions">
-          <a class="btn primary" href="rungs/rung_446_frontier_policy_noisy_rebind_loop.html">Rung Page</a>
-          <a class="btn" href="kb_runs/rung_446_frontier_policy_noisy_rebind_loop_frontier_language_width_v6_20260412_222723.json">Run JSON</a>
+          <a class="btn primary" href="WILD_MODE.md">Wild Mode</a>
+          <a class="btn" href="WILD_FAILURE_ISOLATION.md">Failure Isolation</a>
         </div>
       </article>
 
       <article class="card third">
-        <h3>rung_445</h3>
-        <p>Compound write/query braid under fuzzed language and CE routing. Latest validation run passed <code>6/6</code>.</p>
-        <div class="actions">
-          <a class="btn primary" href="rungs/rung_445_frontier_compound_write_query_braid.html">Rung Page</a>
-          <a class="btn" href="kb_runs/rung_445_frontier_compound_write_query_braid_frontier_language_width_v6_20260412_222723.json">Run JSON</a>
-        </div>
-      </article>
-
-      <article class="card wide">
-        <h3>Progress-Memory Control Plane (New)</h3>
-        <p>New progression rungs validate relevance gating, goal-context steering, and focus-shift transitions; fresh contamination-ablation runs show off-focus writes can be intercepted before KB mutation.</p>
-        <div class="actions">
-          <a class="btn primary" href="rungs/rung_400_progress_relevance_repair.html">rung_400</a>
-          <a class="btn" href="rungs/rung_410_progress_goal_context_steering.html">rung_410</a>
-          <a class="btn" href="rungs/rung_420_progress_focus_shift_transition.html">rung_420</a>
-          <a class="btn" href="reports/progress_memory_contamination_ablation_with_progress_20260412.html">Ablation (with progress)</a>
-          <a class="btn" href="reports/progress_memory_contamination_ablation_no_progress_20260412.html">Ablation (no progress)</a>
-        </div>
-      </article>
-
-      <article class="card wide">
-        <h3>Domain Expansion Queue</h3>
-        <p>New non-family domain rungs are now staged for hospital CPM, launch war-room, and fantasy simulation state repair.</p>
-        <div class="actions">
-          <a class="btn" href="rungs/rung_240_ops_hospital_vendor_delay_core.html">rung_240 hospital</a>
-          <a class="btn" href="rungs/rung_241_ops_hospital_cpm_natural_flow.html">rung_241 hospital natural</a>
-          <a class="btn" href="rungs/rung_250_ops_indie_launch_uncertainty_routing.html">rung_250 launch</a>
-          <a class="btn" href="rungs/rung_251_ops_indie_warroom_natural_flow.html">rung_251 launch natural</a>
-          <a class="btn" href="rungs/rung_260_sim_fantasy_state_repair.html">rung_260 fantasy</a>
-          <a class="btn" href="rungs/rung_261_sim_fantasy_overlord_natural_flow.html">rung_261 fantasy natural</a>
-        </div>
-      </article>
-
-      <article class="card wide">
-        <h3>Track Scoreboard (Frontier + Baseline)</h3>
-        <p>Latest frontier-width sweeps now include v4/v5/v6 and probe tracks (clarification + confirmation), alongside historical same-model baseline tracks.</p>
+        <h3>Track Scoreboard</h3>
+        <p>Compact pass/fail rollup across current tracked suites, including frontier and baseline slices.</p>
         <div class="actions">
           <a class="btn primary" href="TRACK_SCOREBOARD.md">Open Scoreboard</a>
-          <a class="btn" href="data/tracks/frontier_language_width_v4_latest.json">frontier v4</a>
-          <a class="btn" href="data/tracks/frontier_language_width_v5_latest.json">frontier v5</a>
-          <a class="btn" href="data/tracks/frontier_language_width_v6_latest.json">frontier v6</a>
-          <a class="btn" href="data/tracks/frontier_clarification_probe_v1_latest.json">clarification probe</a>
-          <a class="btn" href="data/tracks/frontier_confirmation_probe_v1_latest.json">confirmation probe</a>
-          <a class="btn" href="data/tracks/gate_ladder_frontier_same_model_latest.json">same-model baseline</a>
-          <a class="btn" href="run-reports-hub.html">Open full 432-449 evidence</a>
-          <a class="btn" href="LEGACY_CLEANUP_PLAN.md">Legacy cleanup plan</a>
+          <a class="btn" href="data/tracks/gate_ladder_frontier_same_model_latest.json">Latest Baseline JSON</a>
+        </div>
+      </article>
+
+      <article class="card wide">
+        <h3>Regression Ladder Archive</h3>
+        <p>Phase-1 ladder artifacts remain available for regression and forensic replay; they are no longer the only progress surface.</p>
+        <div class="actions">
+          <a class="btn primary" href="rungs/index.html">Open Ladder Index</a>
+          <a class="btn" href="rungs/rung_449_frontier_multibind_uncle_query.html">rung_449</a>
+          <a class="btn" href="run-reports-hub.html">Run Reports Explorer</a>
         </div>
       </article>
     </section>
@@ -933,7 +906,7 @@
         const links = document.getElementById("media-links");
         if (!availability || !audio || !video || !links) return;
 
-        const catalog = [
+        const fallbackCatalog = [
           {
             title: "How PRETHINKER Protects AI Database Integrity",
             base: "assets/How-PRETHINKER-Protects-AI-Database-Integrity"
@@ -956,25 +929,78 @@
           }
         ];
 
+        function inferLabel(src) {
+          const parts = String(src || "").split(".");
+          return parts.length > 1 ? parts.pop().toUpperCase() : "MEDIA";
+        }
+
+        function inferType(src, kind) {
+          const lower = String(src || "").toLowerCase();
+          if (lower.endsWith(".mp3")) return "audio/mpeg";
+          if (lower.endsWith(".m4a")) return "audio/mp4";
+          if (lower.endsWith(".mp4")) return "video/mp4";
+          return kind === "video" ? "video/mp4" : "audio/mpeg";
+        }
+
+        let manifestEntries = [];
+        try {
+          const manifestRes = await fetch("assets/media_manifest.json", { cache: "no-store" });
+          if (manifestRes.ok) {
+            const manifest = await manifestRes.json();
+            if (manifest && Array.isArray(manifest.entries)) {
+              manifestEntries = manifest.entries;
+            }
+          }
+        } catch (_) {}
+
         const discovered = [];
-        for (const entry of catalog) {
-          const audioCandidates = [
-            { src: `${entry.base}.mp3`, type: "audio/mpeg", label: "MP3" },
-            { src: `${entry.base}.m4a`, type: "audio/mp4", label: "M4A" }
-          ];
-          const videoCandidates = [
-            { src: `${entry.base}.mp4`, type: "video/mp4", label: "MP4" }
-          ];
-          const availableAudio = [];
-          for (const c of audioCandidates) {
-            if (await probeMedia(c.src, "audio")) availableAudio.push(c);
+        if (manifestEntries.length) {
+          for (const entry of manifestEntries) {
+            const variants = Array.isArray(entry.variants) ? entry.variants : [];
+            const availableAudio = variants
+              .filter((v) => String(v.kind || "").toLowerCase() === "audio")
+              .map((v) => ({
+                src: String(v.src || ""),
+                type: String(v.type || inferType(v.src, "audio")),
+                label: String(v.label || inferLabel(v.src))
+              }))
+              .filter((v) => v.src);
+            const availableVideo = variants
+              .filter((v) => String(v.kind || "").toLowerCase() === "video")
+              .map((v) => ({
+                src: String(v.src || ""),
+                type: String(v.type || inferType(v.src, "video")),
+                label: String(v.label || inferLabel(v.src))
+              }))
+              .filter((v) => v.src);
+            if (availableAudio.length || availableVideo.length) {
+              discovered.push({
+                title: String(entry.title || entry.base || "Untitled Media"),
+                audio: availableAudio,
+                video: availableVideo
+              });
+            }
           }
-          const availableVideo = [];
-          for (const c of videoCandidates) {
-            if (await probeMedia(c.src, "video")) availableVideo.push(c);
-          }
-          if (availableAudio.length || availableVideo.length) {
-            discovered.push({ title: entry.title, audio: availableAudio, video: availableVideo });
+        } else {
+          for (const entry of fallbackCatalog) {
+            const audioCandidates = [
+              { src: `${entry.base}.mp3`, type: "audio/mpeg", label: "MP3" },
+              { src: `${entry.base}.m4a`, type: "audio/mp4", label: "M4A" }
+            ];
+            const videoCandidates = [
+              { src: `${entry.base}.mp4`, type: "video/mp4", label: "MP4" }
+            ];
+            const availableAudio = [];
+            for (const c of audioCandidates) {
+              if (await probeMedia(c.src, "audio")) availableAudio.push(c);
+            }
+            const availableVideo = [];
+            for (const c of videoCandidates) {
+              if (await probeMedia(c.src, "video")) availableVideo.push(c);
+            }
+            if (availableAudio.length || availableVideo.length) {
+              discovered.push({ title: entry.title, audio: availableAudio, video: availableVideo });
+            }
           }
         }
 

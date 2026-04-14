@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en" data-theme="light">
 <head>
   <meta charset="utf-8" />
@@ -33,25 +33,33 @@
       <button id="theme-toggle" class="theme-btn">theme</button>
     </div>
     <h1>Goldilocks Roundtrip Demo</h1>
-    <div class="sub">Input story -> parsed KB -> reconstructed story from KB only.</div>
+    <div class="sub">Input story -> parsed KB -> deterministic reconstruction from latest KB.</div>
 
     <div class="card">
       <h2>Run Snapshot</h2>
       <div class="chips">
         <span class="chip fail">status: failed</span>
         <span class="chip">turns: 50</span>
-        <span class="chip">parser failures: 7</span>
-        <span class="chip">apply failures: 7</span>
-        <span class="chip">clarification rounds: 36</span>
+        <span class="chip">parser failures: 1</span>
+        <span class="chip">apply failures: 5</span>
+        <span class="chip">clarification rounds: 0</span>
+        <span class="chip">clarification requests: 4</span>
+        <span class="chip">validations: 0/0</span>
+        <span class="chip">clauses written: 43</span>
       </div>
       <p style="margin-top:10px; font:13px/1.4 system-ui, -apple-system, Segoe UI, Arial, sans-serif; color:var(--muted)">
-        run_id: run-20260410T160231Z-story_goldilocks_roundtr-qwen3_5_9b-2684
+        run_id: run-20260414T151909Z-story_goldilocks_roundtr-qwen3_5_9b-21788<br />
+        model: qwen3.5:9b (ollama)<br />
+        prompt_id: sp-1e43c641b01b<br />
+        started: 2026-04-14T15:19:09+00:00<br />
+        finished: 2026-04-14T15:23:56+00:00
       </p>
       <p style="font:13px/1.4 system-ui, -apple-system, Segoe UI, Arial, sans-serif;">
-        Artifacts: 
+        Artifacts:
         <a href="data/roundtrip/goldilocks_roundtrip_input_story.md">input story</a> |
         <a href="data/roundtrip/goldilocks_roundtrip_generated_kb.pl">generated kb.pl</a> |
-        <a href="data/roundtrip/goldilocks_roundtrip_reconstructed_story.md">reconstructed story</a>
+        <a href="data/roundtrip/goldilocks_roundtrip_reconstructed_story.md">reconstructed story</a> |
+        <a href="data/roundtrip/goldilocks_roundtrip_run.json">run json</a>
       </p>
     </div>
 
@@ -67,34 +75,34 @@ There were three bowls of porridge on the table.
 Papa Bear had a big bowl of porridge.
 Mama Bear had a medium bowl of porridge.
 Baby Bear had a small bowl of porridge.
-Goldilocks tasted Papa Bear&#x27;s porridge.
-Papa Bear&#x27;s porridge was too hot for Goldilocks.
-Goldilocks tasted Mama Bear&#x27;s porridge.
-Mama Bear&#x27;s porridge was too cold for Goldilocks.
-Goldilocks tasted Baby Bear&#x27;s porridge.
-Baby Bear&#x27;s porridge was just right for Goldilocks.
-Goldilocks ate all of Baby Bear&#x27;s porridge.
+Goldilocks tasted Papa Bear&#39;s porridge.
+Papa Bear&#39;s porridge was too hot for Goldilocks.
+Goldilocks tasted Mama Bear&#39;s porridge.
+Mama Bear&#39;s porridge was too cold for Goldilocks.
+Goldilocks tasted Baby Bear&#39;s porridge.
+Baby Bear&#39;s porridge was just right for Goldilocks.
+Goldilocks ate all of Baby Bear&#39;s porridge.
 There were three chairs in the house.
 Papa Bear had a big chair.
 Mama Bear had a medium chair.
 Baby Bear had a small chair.
-Goldilocks sat in Papa Bear&#x27;s chair.
-Papa Bear&#x27;s chair was too hard for Goldilocks.
-Goldilocks sat in Mama Bear&#x27;s chair.
-Mama Bear&#x27;s chair was too soft for Goldilocks.
-Goldilocks sat in Baby Bear&#x27;s chair.
-Baby Bear&#x27;s chair broke while Goldilocks was sitting in it.
+Goldilocks sat in Papa Bear&#39;s chair.
+Papa Bear&#39;s chair was too hard for Goldilocks.
+Goldilocks sat in Mama Bear&#39;s chair.
+Mama Bear&#39;s chair was too soft for Goldilocks.
+Goldilocks sat in Baby Bear&#39;s chair.
+Baby Bear&#39;s chair broke while Goldilocks was sitting in it.
 There were three beds upstairs.
 Papa Bear had a big bed.
 Mama Bear had a medium bed.
 Baby Bear had a small bed.
-Goldilocks lay in Papa Bear&#x27;s bed.
-Papa Bear&#x27;s bed was too hard for Goldilocks.
-Goldilocks lay in Mama Bear&#x27;s bed.
-Mama Bear&#x27;s bed was too soft for Goldilocks.
-Goldilocks lay in Baby Bear&#x27;s bed.
-Baby Bear&#x27;s bed was just right for Goldilocks.
-Goldilocks fell asleep in Baby Bear&#x27;s bed.
+Goldilocks lay in Papa Bear&#39;s bed.
+Papa Bear&#39;s bed was too hard for Goldilocks.
+Goldilocks lay in Mama Bear&#39;s bed.
+Mama Bear&#39;s bed was too soft for Goldilocks.
+Goldilocks lay in Baby Bear&#39;s bed.
+Baby Bear&#39;s bed was just right for Goldilocks.
+Goldilocks fell asleep in Baby Bear&#39;s bed.
 The three bears returned home.
 Papa Bear saw that someone had tasted his porridge.
 Mama Bear saw that someone had tasted her porridge.
@@ -114,107 +122,125 @@ Goldilocks ran back through the forest.
 
     <div class="card">
       <h2>2) Generated KB</h2>
-      <details>
-        <summary>Expand generated <code>kb.pl</code></summary>
+      <details open>
+        <summary>goldilocks_roundtrip_generated_kb.pl</summary>
         <div><pre>% Auto-generated by kb_pipeline.py
-% Updated UTC: 2026-04-10T16:17:06+00:00
+% Updated UTC: 2026-04-14T15:23:56+00:00
 
-chairs_in_house(baby_bear, baby_bear).
-chairs_in_house(chairs).
-chairs_in_house(medium).
-chairs_in_house(papa_bear_chair).
+ate(goldilocks, porridge).
+beds_in_house(three_upstairs).
+belongs_to(house, baby_bear).
+belongs_to(house, mama_bear).
+belongs_to(house, papa_bear).
+chairs_in_house(big_chair).
+chairs_in_house(chair1).
+chairs_in_house(chair2).
+chairs_in_house(chair3).
+chairs_in_house(medium_chair).
 chairs_in_house(small_chair).
 fits_goldilocks(baby_bear_bed, goldilocks).
+fits_goldilocks(porridge_of_baby_bear, goldilocks).
 goldilocks(little_girl).
-goldilocks_found(baby_bear_bed).
-goldilocks_found(goldilocks, papa_bear_porridge).
-goldilocks_found(mama_bear_bed).
-goldilocks_found(papa_bear_bed).
-goldilocks_found(small_house, forest).
-has_porridge(goldilocks, baby_bear).
-has_porridge(goldilocks, mama_bear).
-has_porridge(goldilocks, mama_bear_chair).
-has_porridge(mama_bear, medium).
-has_porridge(papa_bear).
+goldilocks_found(goldilocks, small_house).
+has_bed(baby_bear, small_bed).
+has_bed(mama_bear, medium_bed).
+has_bed(papa_bear, big_bed).
+has_porridge(baby_bear, small_bowl_of_porridge).
+has_porridge(mama_bear, medium_bowl_of_porridge).
+has_porridge(papa_bear, big_bowl_of_porridge).
+ran_out_of(goldilocks, house).
 returned_home(bears).
-returned_home(goldilocks).
-returned_home(the_three_bears).
-saw(baby_bear, goldilocks).
-saw(goldilocks, bear1).
-tasted(goldilocks, porridge_of_papa_bear).
-too_cold(goldilocks, porridge).
-too_hard(goldilocks, papa_bear_bed).
-too_hard(papa_bear_chair, goldilocks).
-too_hot(papa_bear_porridge).
-too_soft(mama_bear_bed).
+sat_in(goldilocks, chair).
+sat_in(goldilocks, chair_of_baby_bear).
+sat_in(goldilocks, mama_bear_chair).
+saw(baby_bear, ate(someone, porridge_of(baby_bear))).
+saw(baby_bear, chair).
+saw(baby_bear, slept_in(goldilocks, bed_of(baby_bear))).
+saw(goldilocks, bear).
+saw(mama_bear, sat_in(someone, chair_of(mama_bear))).
+saw(papa_bear, sat_in(someone, chair_of(papa_bear))).
+slept_in(goldilocks, baby_bear_bed).
+slept_in(goldilocks, bed).
+tasted(goldilocks, porridge).
+too_cold(mama_bear_porridge, goldilocks).
+too_hard(chair_of_papa_bear, goldilocks).
+too_hard(papa_bear_bed, goldilocks).
+too_hot(papa_bear_porridge, goldilocks).
+too_soft(mama_bear_bed, goldilocks).
 too_soft(mama_bear_chair, goldilocks).
+walked_through_forest(goldilocks).
+went_upstairs(bears).
 </pre></div>
       </details>
     </div>
 
     <div class="card">
-      <h2>3) Reconstructed Story (from KB alone)</h2>
-      <pre># Reconstructed Story From Generated KB
+      <h2>3) Deterministic Reconstruction</h2>
+      <pre># Goldilocks Roundtrip Reconstructed Story (Latest)
 
-This is a direct reconstruction from extracted clauses, not a hand-corrected story.
+This reconstruction is a deterministic clause inventory from the latest generated KB.
 
-- In the house, baby bear is linked with baby bear.
-- There was chairs in the house.
-- There was medium in the house.
-- There was papa bear chair in the house.
-- There was small chair in the house.
-- Baby Bear Bed fit Goldilocks.
-- Goldilocks is described as little girl.
-- Goldilocks found baby bear bed.
-- Goldilocks found goldilocks in papa bear porridge.
-- Goldilocks found mama bear bed.
-- Goldilocks found papa bear bed.
-- Goldilocks found small house in forest.
-- Goldilocks had baby bear.
-- Goldilocks had mama bear.
-- Goldilocks had mama bear chair.
-- Mama Bear had medium.
-- Papa Bear had porridge.
-- Bears returned home.
-- Goldilocks returned home.
-- The Three Bears returned home.
-- Baby Bear saw goldilocks.
-- Goldilocks saw bear1.
-- Goldilocks tasted porridge of papa bear.
-- Porridge was too cold for goldilocks.
-- Goldilocks was too hard for papa bear bed.
-- Papa Bear Chair was too hard for goldilocks.
-- Papa Bear Porridge was too hot.
-- Mama Bear Bed was too soft.
-- Mama Bear Chair was too soft for goldilocks.
+## Recovered Clauses
+
+- ate(goldilocks, porridge).
+- beds_in_house(three_upstairs).
+- belongs_to(house, baby_bear).
+- belongs_to(house, mama_bear).
+- belongs_to(house, papa_bear).
+- chairs_in_house(big_chair).
+- chairs_in_house(chair1).
+- chairs_in_house(chair2).
+- chairs_in_house(chair3).
+- chairs_in_house(medium_chair).
+- chairs_in_house(small_chair).
+- fits_goldilocks(baby_bear_bed, goldilocks).
+- fits_goldilocks(porridge_of_baby_bear, goldilocks).
+- goldilocks(little_girl).
+- goldilocks_found(goldilocks, small_house).
+- has_bed(baby_bear, small_bed).
+- has_bed(mama_bear, medium_bed).
+- has_bed(papa_bear, big_bed).
+- has_porridge(baby_bear, small_bowl_of_porridge).
+- has_porridge(mama_bear, medium_bowl_of_porridge).
+- has_porridge(papa_bear, big_bowl_of_porridge).
+- ran_out_of(goldilocks, house).
+- returned_home(bears).
+- sat_in(goldilocks, chair).
+- sat_in(goldilocks, chair_of_baby_bear).
+- sat_in(goldilocks, mama_bear_chair).
+- saw(baby_bear, ate(someone, porridge_of(baby_bear))).
+- saw(baby_bear, chair).
+- saw(baby_bear, slept_in(goldilocks, bed_of(baby_bear))).
+- saw(goldilocks, bear).
+- saw(mama_bear, sat_in(someone, chair_of(mama_bear))).
+- saw(papa_bear, sat_in(someone, chair_of(papa_bear))).
+- slept_in(goldilocks, baby_bear_bed).
+- slept_in(goldilocks, bed).
+- tasted(goldilocks, porridge).
+- too_cold(mama_bear_porridge, goldilocks).
+- too_hard(chair_of_papa_bear, goldilocks).
+- too_hard(papa_bear_bed, goldilocks).
+- too_hot(papa_bear_porridge, goldilocks).
+- too_soft(mama_bear_bed, goldilocks).
+- too_soft(mama_bear_chair, goldilocks).
+- walked_through_forest(goldilocks).
+- went_upstairs(bears).
 </pre>
     </div>
-
-    <p style="font:12px/1.4 system-ui, -apple-system, Segoe UI, Arial, sans-serif; color:var(--muted)">Generated 2026-04-10 18:38:29 UTC.</p>
   </div>
+
   <script>
-    (() => {
+    (function() {
+      const key = 'prethink-doc-theme';
       const root = document.documentElement;
       const btn = document.getElementById('theme-toggle');
-      const key = 'hub_theme_pref';
       const saved = localStorage.getItem(key);
-      const initial = (saved === 'dark' || saved === 'light')
-        ? saved
-        : (matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-      const sync = () => {
-        const theme = root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
-        if (btn) btn.textContent = 'theme: ' + theme;
-      };
-      root.setAttribute('data-theme', initial);
-      sync();
-      if (btn) {
-        btn.addEventListener('click', () => {
-          const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-          root.setAttribute('data-theme', next);
-          localStorage.setItem(key, next);
-          sync();
-        });
-      }
+      if (saved === 'dark' || saved === 'light') root.setAttribute('data-theme', saved);
+      btn?.addEventListener('click', () => {
+        const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-theme', next);
+        localStorage.setItem(key, next);
+      });
     })();
   </script>
 </body>

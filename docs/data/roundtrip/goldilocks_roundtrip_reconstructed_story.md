@@ -1,33 +1,49 @@
-# Reconstructed Story From Generated KB
+﻿# Goldilocks Roundtrip Reconstructed Story (Latest)
 
-This is a direct reconstruction from extracted clauses, not a hand-corrected story.
+This reconstruction is a deterministic clause inventory from the latest generated KB.
 
-- In the house, baby bear is linked with baby bear.
-- There was chairs in the house.
-- There was medium in the house.
-- There was papa bear chair in the house.
-- There was small chair in the house.
-- Baby Bear Bed fit Goldilocks.
-- Goldilocks is described as little girl.
-- Goldilocks found baby bear bed.
-- Goldilocks found goldilocks in papa bear porridge.
-- Goldilocks found mama bear bed.
-- Goldilocks found papa bear bed.
-- Goldilocks found small house in forest.
-- Goldilocks had baby bear.
-- Goldilocks had mama bear.
-- Goldilocks had mama bear chair.
-- Mama Bear had medium.
-- Papa Bear had porridge.
-- Bears returned home.
-- Goldilocks returned home.
-- The Three Bears returned home.
-- Baby Bear saw goldilocks.
-- Goldilocks saw bear1.
-- Goldilocks tasted porridge of papa bear.
-- Porridge was too cold for goldilocks.
-- Goldilocks was too hard for papa bear bed.
-- Papa Bear Chair was too hard for goldilocks.
-- Papa Bear Porridge was too hot.
-- Mama Bear Bed was too soft.
-- Mama Bear Chair was too soft for goldilocks.
+## Recovered Clauses
+
+- ate(goldilocks, porridge).
+- beds_in_house(three_upstairs).
+- belongs_to(house, baby_bear).
+- belongs_to(house, mama_bear).
+- belongs_to(house, papa_bear).
+- chairs_in_house(big_chair).
+- chairs_in_house(chair1).
+- chairs_in_house(chair2).
+- chairs_in_house(chair3).
+- chairs_in_house(medium_chair).
+- chairs_in_house(small_chair).
+- fits_goldilocks(baby_bear_bed, goldilocks).
+- fits_goldilocks(porridge_of_baby_bear, goldilocks).
+- goldilocks(little_girl).
+- goldilocks_found(goldilocks, small_house).
+- has_bed(baby_bear, small_bed).
+- has_bed(mama_bear, medium_bed).
+- has_bed(papa_bear, big_bed).
+- has_porridge(baby_bear, small_bowl_of_porridge).
+- has_porridge(mama_bear, medium_bowl_of_porridge).
+- has_porridge(papa_bear, big_bowl_of_porridge).
+- ran_out_of(goldilocks, house).
+- returned_home(bears).
+- sat_in(goldilocks, chair).
+- sat_in(goldilocks, chair_of_baby_bear).
+- sat_in(goldilocks, mama_bear_chair).
+- saw(baby_bear, ate(someone, porridge_of(baby_bear))).
+- saw(baby_bear, chair).
+- saw(baby_bear, slept_in(goldilocks, bed_of(baby_bear))).
+- saw(goldilocks, bear).
+- saw(mama_bear, sat_in(someone, chair_of(mama_bear))).
+- saw(papa_bear, sat_in(someone, chair_of(papa_bear))).
+- slept_in(goldilocks, baby_bear_bed).
+- slept_in(goldilocks, bed).
+- tasted(goldilocks, porridge).
+- too_cold(mama_bear_porridge, goldilocks).
+- too_hard(chair_of_papa_bear, goldilocks).
+- too_hard(papa_bear_bed, goldilocks).
+- too_hot(papa_bear_porridge, goldilocks).
+- too_soft(mama_bear_bed, goldilocks).
+- too_soft(mama_bear_chair, goldilocks).
+- walked_through_forest(goldilocks).
+- went_upstairs(bears).

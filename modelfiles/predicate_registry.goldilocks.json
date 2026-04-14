@@ -1,0 +1,114 @@
+{
+  "canonical_predicates": [
+    {
+      "name": "goldilocks",
+      "arity": 1,
+      "aliases": []
+    },
+    {
+      "name": "walked_through_forest",
+      "arity": 1,
+      "aliases": []
+    },
+    {
+      "name": "goldilocks_found",
+      "arity": 2,
+      "aliases": []
+    },
+    {
+      "name": "belongs_to",
+      "arity": 2,
+      "aliases": []
+    },
+    {
+      "name": "has_porridge",
+      "arity": 2,
+      "aliases": []
+    },
+    {
+      "name": "has_chair",
+      "arity": 2,
+      "aliases": []
+    },
+    {
+      "name": "has_bed",
+      "arity": 2,
+      "aliases": []
+    },
+    {
+      "name": "tasted",
+      "arity": 2,
+      "aliases": []
+    },
+    {
+      "name": "too_hot",
+      "arity": 2,
+      "aliases": []
+    },
+    {
+      "name": "too_cold",
+      "arity": 2,
+      "aliases": []
+    },
+    {
+      "name": "too_hard",
+      "arity": 2,
+      "aliases": []
+    },
+    {
+      "name": "too_soft",
+      "arity": 2,
+      "aliases": []
+    },
+    {
+      "name": "fits_goldilocks",
+      "arity": 2,
+      "aliases": []
+    },
+    {
+      "name": "ate",
+      "arity": 2,
+      "aliases": []
+    },
+    {
+      "name": "sat_in",
+      "arity": 2,
+      "aliases": []
+    },
+    {
+      "name": "slept_in",
+      "arity": 2,
+      "aliases": []
+    },
+    {
+      "name": "returned_home",
+      "arity": 1,
+      "aliases": []
+    },
+    {
+      "name": "saw",
+      "arity": 2,
+      "aliases": []
+    },
+    {
+      "name": "went_upstairs",
+      "arity": 1,
+      "aliases": []
+    },
+    {
+      "name": "ran_out_of",
+      "arity": 2,
+      "aliases": []
+    },
+    {
+      "name": "chairs_in_house",
+      "arity": 1,
+      "aliases": []
+    },
+    {
+      "name": "beds_in_house",
+      "arity": 1,
+      "aliases": []
+    }
+  ]
+}

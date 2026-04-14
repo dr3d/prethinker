@@ -1,0 +1,17 @@
+{
+  "ontology_name": "baseline_general_0414_rung_420_progress_focus_shift_transition",
+  "generated_at_utc": "2026-04-14T04:14:05+00:00",
+  "clause_count": 3,
+  "predicate_signatures": [
+    "carries/2",
+    "likes/2",
+    "tracking_maritime_handoff_custody/1"
+  ],
+  "fact_predicates": [
+    "carries/2",
+    "likes/2",
+    "tracking_maritime_handoff_custody/1"
+  ],
+  "rule_head_predicates": [],
+  "rule_body_predicates": []
+}
