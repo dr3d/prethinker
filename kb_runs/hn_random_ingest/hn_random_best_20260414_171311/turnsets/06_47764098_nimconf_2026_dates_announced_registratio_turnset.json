@@ -1,0 +1,122 @@
+{
+  "name": "hn_random_47764098_nimconf_2026_dates_announced_registratio_turnset_v1",
+  "source_thread_id": 47764098,
+  "source_url": "https://news.ycombinator.com/item?id=47764098",
+  "difficulty": "G3",
+  "lane": "hn_random_live",
+  "utterances": [
+    {
+      "utterance": "OP (title): NimConf 2026: Dates Announced, Registrations Open",
+      "source": "op",
+      "source_id": 47764098
+    },
+    {
+      "utterance": "Linked article URL: https://nim-lang.org/blog/2026/04/07/nimconf-2026.html",
+      "source": "op",
+      "source_id": 47764098
+    },
+    {
+      "utterance": "giancarlostoro: For everyone wondering who may have been unaware. It is 100% remote, so you can just show up. :)> NimConf 2026 is an online conference and it will take place on June 20th. It will be streamed for free and it doesn’t require any traveling - you will be able to participate from your home, without any travel and accommodation expenses. https://conf.nim-lang.org/",
+      "source": "comment",
+      "source_id": 47765258,
+      "depth": 1
+    },
+    {
+      "utterance": "elcritch: I should give a talk. About what however? I’ve been happy with my progress on FigDraw (1), a 2D UI scene renderer using SDFs. Even made my own neovim ui shell with it!1: https://github.com/elcritch/figdraw",
+      "source": "comment",
+      "source_id": 47764513,
+      "depth": 1
+    },
+    {
+      "utterance": "zareith: I like the nim language, but the lack of interfaces has been a bit of a turn-off for me.Do nim programmers not see the need for abstracting out behavior in a manner that different implementations can be switched somewhere else, or is there different idiomatic way to handle this?",
+      "source": "comment",
+      "source_id": 47768042,
+      "depth": 1
+    },
+    {
+      "utterance": "moigagoo: I plan to give a couple of talks this year.Can't wait for NimConf, it is way overdue.",
+      "source": "comment",
+      "source_id": 47765809,
+      "depth": 1
+    },
+    {
+      "utterance": "dhruv3006: Nim seems to be picking up a lot lately.",
+      "source": "comment",
+      "source_id": 47764503,
+      "depth": 1
+    },
+    {
+      "utterance": "repelsteeltje: Such a pity that this is an online-only conference.Does anyone know of an IRL conference or meetup on Nim, preferably in EU?",
+      "source": "comment",
+      "source_id": 47764524,
+      "depth": 1
+    },
+    {
+      "utterance": "digdugdirk: Oooo... That looks like it could make a great talk! Do you have examples of the neovim ui shell?",
+      "source": "comment",
+      "source_id": 47768128,
+      "depth": 2
+    },
+    {
+      "utterance": "moigagoo: Please do share your progress with FigDraw. Interactive demoes always look great.",
+      "source": "comment",
+      "source_id": 47767264,
+      "depth": 2
+    },
+    {
+      "utterance": "tinfoilhatter: Nim doesn't have interfaces, but concepts + parametric polymorphism gets you a long way - https://jasonbeetham.ca/writeups/codereuse.html",
+      "source": "comment",
+      "source_id": 47768232,
+      "depth": 2
+    },
+    {
+      "utterance": "summarity: It’s growing but not a lot, I have some data here: https://pierretempel.com/p/nim-usage-on-github Most code I write is still Nim though.",
+      "source": "comment",
+      "source_id": 47766294,
+      "depth": 2
+    },
+    {
+      "utterance": "poulpy123: Really ? From what I see it survives OK but there is no real progression. I like what I saw of the language, and I'm regularly impressed by the productivity of the community relative to its size so I would like to see it more successful but I'm afraid it will not happen.",
+      "source": "comment",
+      "source_id": 47764979,
+      "depth": 2
+    },
+    {
+      "utterance": "pjmlp: It is another niche language looking for a project to kick off adoption.",
+      "source": "comment",
+      "source_id": 47767508,
+      "depth": 2
+    },
+    {
+      "utterance": "shevy-java: Not sure. I think it has a problem many languages have - too small a community. There is a lot of fragmentation in the last some years, I am not sure why, not just about nim but just look at how ruby has been dropping like a hot potato in the last ~3 years or more. I am so out of the loop that I could not even tell anyone what the young people are doing. Are there more who program than before? If so where do they go?",
+      "source": "comment",
+      "source_id": 47764638,
+      "depth": 2
+    },
+    {
+      "utterance": "auxym: There are ocasionally Nim talks at FOSDEM.",
+      "source": "comment",
+      "source_id": 47767425,
+      "depth": 2
+    },
+    {
+      "utterance": "michaelsbradley: The creator has been consistently clear in his take on \"Why Nim?\" It's a general purpose systems programming language, favoring procedural style, that's superior (or aims to be) in a variety of ways compared to whatever else you've been using. Hubris? Maybe.In practice, it's turned out to be an \"expert's tool\" that's more expressive-convenient than C/++ to do all manner of things in the realm of systems programming, from embedded to HPC. And it's got great C/++ interop, so you can continue to leverage those software ecosystems.In that sense, I'd say the biggest boon, rather than a killer project, would be for a famous programmer or shop to publicly and loudly adopt it as their everyday language, shouting its name for several years and saying things like \"Wish we had started using this years ago, would have been so much better, look at all of these great apps and libraries we've been able to create and maintain more easily than if we'd stuck with C/++/Go/Rust/Swift!\"",
+      "source": "comment",
+      "source_id": 47768370,
+      "depth": 3
+    },
+    {
+      "utterance": "ModernMech: My students (18-21) are excited to learn Rust in my class I teach about programming languages. Younger students are learning Luau via Roblox -- spoke with a middle schooler on Sunday who was making games with his friends. They get introduced to Scratch in school and learn that until they move on to Java at middle and high school. I teach freshman Lua in their intro to engineering class, and they also go on to learn things like R, Matlab/Simulink, Python. Java, C, and C++ if they're a CS major.",
+      "source": "comment",
+      "source_id": 47764895,
+      "depth": 3
+    },
+    {
+      "utterance": "elcritch: Combine that most CS students learn many languages with LLMs and coding agents and the size of the ecosystem isn't quite as important as it used to be. New hires can be productive from day 1. Missing libraries are relatively easy to add. Moreover the language characteristics can be more useful than ever: fast running, fast compiling, typed, easy to read, etc.",
+      "source": "comment",
+      "source_id": 47764998,
+      "depth": 4
+    }
+  ],
+  "notes": "Auto-generated random OP+comment turnset from live Hacker News feed."
+}

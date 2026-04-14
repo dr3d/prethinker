@@ -1,0 +1,140 @@
+{
+  "name": "hn_random_47755604_tax_wrapped_2025_turnset_v1",
+  "source_thread_id": 47755604,
+  "source_url": "https://news.ycombinator.com/item?id=47755604",
+  "difficulty": "G3",
+  "lane": "hn_random_live",
+  "utterances": [
+    {
+      "utterance": "OP (title): Tax Wrapped 2025",
+      "source": "op",
+      "source_id": 47755604
+    },
+    {
+      "utterance": "Linked article URL: https://taxwrapped.com",
+      "source": "op",
+      "source_id": 47755604
+    },
+    {
+      "utterance": "wrs: Editorially, it might be good to point out that government money moves in both directions. I spent $X on interest payments on the national debt, but I also received $Y of those interest payments if I have any Treasuries in my portfolio. Similarly, I might be receiving Social Security or Medicare benefits.Maybe expand this with a second section estimating what you're receiving from the government?",
+      "source": "comment",
+      "source_id": 47758103,
+      "depth": 1
+    },
+    {
+      "utterance": "welldoneator: I _really_ enjoyed this and love the concept! Scrolling on desktop was a little odd, but worked really well otherwise.Content wise it's pretty eye opening just how much of our tax dollars go to things like social security, medicare and interest. Seeing it laid out in the exact dollar amount affecting me is pretty powerful stuff. I wonder how much voting habits would change if this was a common way to communicate the cost of federal programs. I had moments where I was thinking \"why are we not spending more on education!\" as a result as well.Awesome work!",
+      "source": "comment",
+      "source_id": 47757863,
+      "depth": 1
+    },
+    {
+      "utterance": "atonse: This is a really cool way to actually educate people about taxes and government spending.It's crazy that our interest payments are so high. I remember when Clinton actually balanced the budget (no deficit), I was a teenager and couldn't care less. But I only a few years ago started to understand how much that sounds like Sci-Fi in this day and age.",
+      "source": "comment",
+      "source_id": 47757914,
+      "depth": 1
+    },
+    {
+      "utterance": "Steve6: This is amazing and depressing. Most people will never get any benefit from this spending, definitely not of equal value to what you contributed/lost/spent. No matter where you fall on the political spectrum you should be disappointed by the federal governments reckless spending. Yet it never gets better. Likely never will.I see other people recommending taxes that are missed, but with people being taxed from every angle it's impossible to accurately measure tax burden. That's by design.\"In this world nothing can be said to be certain, except death and taxes.\"But... Even death does not save you from taxes.",
+      "source": "comment",
+      "source_id": 47758290,
+      "depth": 1
+    },
+    {
+      "utterance": "balderdash: I feel like the more interesting one is at a state and local level - besides the people on social security and medicare/aid, and when you travel, connectivity with the federal government feels trivial for the average american. on the state and local level its huge...",
+      "source": "comment",
+      "source_id": 47766107,
+      "depth": 1
+    },
+    {
+      "utterance": "CobrastanJorji: It says I contributed money to Humanitarian assistance, but is that based on the budget or based on what was actually spent? Because there's been something of a recent Constitutional problem with budget money not actually being spent on its intended targets.",
+      "source": "comment",
+      "source_id": 47758932,
+      "depth": 1
+    },
+    {
+      "utterance": "DeltaCoast: Very cool! But I think there’s a cap on social security, it said I paid much more towards that than I did.",
+      "source": "comment",
+      "source_id": 47757854,
+      "depth": 1
+    },
+    {
+      "utterance": "joshftw: The UK government creates this same breakdown (albeit without the wrapped style) for UK tax payers every year. It's called the Annual Tax Summary and similarly shows a breakdown of how taxes have been, or will be spent by the government. It's interesting to see the difference as a percentage change between how two governments allocate their receipts.",
+      "source": "comment",
+      "source_id": 47762368,
+      "depth": 1
+    },
+    {
+      "utterance": "rsingel: You can't meaningfully calculate the budget including social security. This is a trust fund that you get back depending on how much you made and how long you live. And whether the outlays are taxed or not depends on your income at payment.The whole site would be way more informative if social security was broken out.Even better if it included how much you and your employer spend on health care, because most people are literally spending more because there is no universal health care.The only thing useful in the whole thing is how much tax money goes to \"defense\"",
+      "source": "comment",
+      "source_id": 47760091,
+      "depth": 1
+    },
+    {
+      "utterance": "krackers: >See what the federal government spent with your tax dollars.Is thinking of it in this sense actually accurate? I always assumed since every government has embraced MMT they can spend whatever they want simply by printing it out of thin air. Then taxation could be understood as the only crude knob to \"destroy money\", and also has the effect of forcing USD to be the primary national currency (e.g. owning bitcoin won't do you any good if you ultimately need to pay taxes in USD).",
+      "source": "comment",
+      "source_id": 47760240,
+      "depth": 1
+    },
+    {
+      "utterance": "ed_balls: >Just like credit cards, the national debt has interest payments the government needs to pay.Something I learned a few years ago: debt is to national debt what a chair is to an electric chair[1]. Government has to increase monetary base when economy grows. National debt is a good thing, where credit cards are just awful.> Interest doesn't buy anything. It's the price of having spent money we didn't have.And where does interest go? WHERE DOES INTEREST GO? [1] or java to javascript :)",
+      "source": "comment",
+      "source_id": 47758826,
+      "depth": 1
+    },
+    {
+      "utterance": "nickvec: As an aside, the creator of this site (Riley Walz) has some other awesome projects I’d recommend checking out https://walzr.com",
+      "source": "comment",
+      "source_id": 47762057,
+      "depth": 1
+    },
+    {
+      "utterance": "vscode-rest: Should Income Security for Vets count as income security? And Healthcare for Vets, healthcare?It’d be interesting to see how different political factions might rack and stack these line items in different ways.",
+      "source": "comment",
+      "source_id": 47759542,
+      "depth": 1
+    },
+    {
+      "utterance": "silexia: It would be interesting to see the massive amounts that go to fraud and waste.",
+      "source": "comment",
+      "source_id": 47766357,
+      "depth": 1
+    },
+    {
+      "utterance": "voidfunc: We need to kill of social security. Its an absolute black hole of money and I will never see back anywhere close to the amount I paid in.",
+      "source": "comment",
+      "source_id": 47758577,
+      "depth": 1
+    },
+    {
+      "utterance": "mkhalil: So we spent more on interest for the deficit than we spent on the doubling the combined spending on all of the following:transportation\ngovernment operations\nnatural resources\ncommunity development\neducation & social services\nagriculture\ninternational affairs\nscience & space\nand energy...anxiety rises.",
+      "source": "comment",
+      "source_id": 47757938,
+      "depth": 1
+    },
+    {
+      "utterance": "pimlottc: I was half-afraid this would start with a form prompting you to upload your tax return :P",
+      "source": "comment",
+      "source_id": 47758418,
+      "depth": 1
+    },
+    {
+      "utterance": "cr125rider: This is awesome!It worked great on mobile",
+      "source": "comment",
+      "source_id": 47757773,
+      "depth": 1
+    },
+    {
+      "utterance": "foobiekr: This is very cool but completely wrong for high earners.",
+      "source": "comment",
+      "source_id": 47758229,
+      "depth": 1
+    },
+    {
+      "utterance": "Rohinator: Love this - hoping this goes viral and people actually start talking about the deficit",
+      "source": "comment",
+      "source_id": 47758774,
+      "depth": 1
+    }
+  ],
+  "notes": "Auto-generated random OP+comment turnset from live Hacker News feed."
+}

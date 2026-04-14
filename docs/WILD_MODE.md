@@ -1,6 +1,6 @@
 # Out In The Wild: Frontier Excursion Mode
 
-Last updated: 2026-04-13
+Last updated: 2026-04-14
 
 ## What This Mode Is
 
@@ -97,6 +97,31 @@ From first live-random structured harness run (`2026-04-14T13:34:31Z`):
 - result: `2/2` pipeline runs completed with `0` parse failures and `0` apply failures
 - note: commit density was low on one thread (`stage_provisionally` dominated), which is now measurable and can be promoted into targeted regression rungs
 
+From hard-profile live-random sweeps (`2026-04-14`):
+
+- baseline hard profile (`best`, deeper comment packs, CE `0.35`):
+  - `kb_runs/hn_random_ingest/hn_random_best_20260414_170829`
+  - result: `2/6`, with clustered clarification dead-ends (`10` apply failures, `9` clarification requests)
+- explicit sidecar CE (`qwen3.5:4b`) did not materially improve this wall:
+  - `kb_runs/hn_random_ingest/hn_random_best_20260414_171311`
+  - result: `2/6`
+- after speculative clarification downgrade guard in `kb_pipeline.py`:
+  - `kb_runs/hn_random_ingest/hn_random_best_20260414_172051`
+  - result: `3/6`, apply failures reduced to `4`
+- calibrated CE eagerness (`0.20`) with same-model CE:
+  - `kb_runs/hn_random_ingest/hn_random_best_20260414_172658`
+  - result: `5/6`, `1` apply failure, `0` parse failures.
+
+Interpretation:
+
+- dominant failure class is clarification-policy dead-end on speculative/opinion utterances.
+- policy calibration and downgrade guards gave bigger gains than swapping CE model family.
+- current recommended wild-ingest operating point:
+  - parser `qwen3.5:9b`
+  - CE answer model `qwen3.5:9b`
+  - `clarification_eagerness=0.20`
+  - `max_clarification_rounds=2`
+
 ## What Counts As Progress
 
 Progress is not just a higher pass rate.
@@ -111,5 +136,5 @@ Progress means:
 
 - excursion source pack: `stories/excursions/HN_MIDGROUND_PACK_V2.md`
 - harder source pack: `stories/excursions/HN_MIDGROUND_PACK_V3.md`
-- session log entry: `SESSIONS.md` (Session 33)
+- session log entry: `SESSIONS.md` (Session 27)
 - failure isolation note: `docs/WILD_FAILURE_ISOLATION.md`

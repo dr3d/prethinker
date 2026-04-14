@@ -1,0 +1,15 @@
+{
+  "ontology_name": "hn_random_live_47753689_building_a_cli_for_all_of_cloudflare",
+  "generated_at_utc": "2026-04-14T17:27:59+00:00",
+  "clause_count": 4,
+  "predicate_signatures": [
+    "auth_mode/2",
+    "dislikes/2"
+  ],
+  "fact_predicates": [
+    "auth_mode/2",
+    "dislikes/2"
+  ],
+  "rule_head_predicates": [],
+  "rule_body_predicates": []
+}

@@ -1,0 +1,133 @@
+{
+  "thread_id": 47743728,
+  "hn_url": "https://news.ycombinator.com/item?id=47743728",
+  "source_url": "https://blog.kaving.me/blog/tracking-down-a-25-regression-on-llvm-risc-v/",
+  "title": "Tracking down a 25% Regression on LLVM RISC-V",
+  "by": "luu",
+  "unix_time": 1776023578,
+  "score": 123,
+  "descendants": 25,
+  "comment_count": 15,
+  "comments": [
+    {
+      "id": 47757230,
+      "by": "LeFantome",
+      "time": 1776111169,
+      "depth": 1,
+      "parent": 47743728,
+      "text": "This could have been a story about any ISA but it warms my heart to see RISC-V optimizations like this appearing bit by bit every day.RISC-V chips that are fast enough to get used are appearing now and, when they do, the software ecosystem is going to be ready to meet it.In the past, the hardware usually came first with the software slow to appear after. This time, it is happening the other way around."
+    },
+    {
+      "id": 47758236,
+      "by": "AymanB",
+      "time": 1776116786,
+      "depth": 1,
+      "parent": 47743728,
+      "text": "Thanks for the blog, I really enjoyed it. Good work.\nThis just makes me appreciate and love compilers even more, they are a fascinating piece of software."
+    },
+    {
+      "id": 47755153,
+      "by": "szmarczak",
+      "time": 1776100688,
+      "depth": 1,
+      "parent": 47743728,
+      "text": "SVGs on Firefox are broken (like 0.1% of the size it needs to be)."
+    },
+    {
+      "id": 47755022,
+      "by": "brcmthrowaway",
+      "time": 1776099993,
+      "depth": 1,
+      "parent": 47743728,
+      "text": "This really shouldn't be free work."
+    },
+    {
+      "id": 47755822,
+      "by": "jeffbee",
+      "time": 1776103747,
+      "depth": 2,
+      "parent": 47755022,
+      "text": "Why not though? The entirety of the LLVM project is available to them, and you, for free, as is the RISC-V ISA itself. A lot of people are getting a lot of value from free and open software, and they may feel their contributions are in a like spirit."
+    },
+    {
+      "id": 47755396,
+      "by": "Jyaif",
+      "time": 1776101892,
+      "depth": 2,
+      "parent": 47755022,
+      "text": "Folks that do this work for \"free\" do it because they enjoy it.And a small observation: if you require money to do something, you usually have no chance of being as good as the folks that do it for the pleasure."
+    },
+    {
+      "id": 47757853,
+      "by": "themafia",
+      "time": 1776114605,
+      "depth": 2,
+      "parent": 47755022,
+      "text": "There should be a medal we can give out to people who do anyways."
+    },
+    {
+      "id": 47755574,
+      "by": "cjbgkagh",
+      "time": 1776102658,
+      "depth": 3,
+      "parent": 47755396,
+      "text": "I would suggest that’s an availability bias, those who do it for free are more likely to blog about it.There is a common distinction between professional and amateur with the former getting paid for their work. In general there is an understanding that someone getting paid can focus and do it full time and are expected to be better than someone who does it as a hobby.Perhaps coding is an unusual space where the best coders are often misfits who have a hard time holding down a job."
+    },
+    {
+      "id": 47758235,
+      "by": "tester756",
+      "time": 1776116783,
+      "depth": 3,
+      "parent": 47755396,
+      "text": ">And a small observation: if you require money to do something, you usually have no chance of being as good as the folks that do it for the pleasure.Usually complex things are there, where they money is - semiconductor industry, big corpos (chromium, linux, llvm, etc), AI, etc."
+    },
+    {
+      "id": 47755581,
+      "by": "kubb",
+      "time": 1776102676,
+      "depth": 3,
+      "parent": 47755396,
+      "text": "Sure but then they have to waste time working for money, rather than doing God’s work."
+    },
+    {
+      "id": 47758066,
+      "by": "mathisfun123",
+      "time": 1776115822,
+      "depth": 3,
+      "parent": 47755396,
+      "text": "> if you require money to do something, you usually have no chance of being as good as the folks that do it for the pleasure.......... o.O i guess the professional football leagues all have players who are worse than the rec leaguers? hners are delusional..."
+    },
+    {
+      "id": 47762142,
+      "by": "LoganDark",
+      "time": 1776149647,
+      "depth": 3,
+      "parent": 47757853,
+      "text": "The medal is called a corporation that makes thousands or more off their work without paying anything back."
+    },
+    {
+      "id": 47756625,
+      "by": "jcalvinowens",
+      "time": 1776107698,
+      "depth": 4,
+      "parent": 47755574,
+      "text": "> In general there is an understanding that someone getting paid can focus and do it full time and are expected to be better than someone who does it as a hobby.For something like flying airplanes, I think this is obviously true: nobody can afford to spend the required hours doing it unless somebody else is paying for the airplane, and the only way that happens is if that person is your employer. A lot of things are like that.But programming is very different, it requires almost no resources to practice except your time. You can sit at home in your pajamas with $1K worth of hardware and keep yourself busy for a lifetime through open source. Of course, you can also spend a lifetime building useless sandcastles while telling yourself you're a genius: you have to find ways to hold yourself accountable to grow.I've been fortunate to get paid to work on some interesting things... but the work I do for fun is, on average, ~100x more challenging and interesting than the work I'm paid to do. I would be a much much less capable programmer if I'd only done work I was paid to do for the past decade.I wouldn't go so far as to say \"amateurs are better than professionals\", but I think the skill…"
+    },
+    {
+      "id": 47755895,
+      "by": "luqtas",
+      "time": 1776104200,
+      "depth": 4,
+      "parent": 47755574,
+      "text": "i think you need to understand more about modern software infrastructure [0][0] https://www.fordfoundation.org/learning/library/research-rep..."
+    },
+    {
+      "id": 47765352,
+      "by": "MiguelX413",
+      "time": 1776173084,
+      "depth": 4,
+      "parent": 47755581,
+      "text": "Wonderful way to put it."
+    }
+  ]
+}

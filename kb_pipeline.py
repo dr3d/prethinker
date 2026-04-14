@@ -3486,6 +3486,93 @@ def _apply_unsafe_retract_downgrade_guard(
     return parsed, events
 
 
+def _looks_speculative_or_subjective_utterance(utterance: str) -> bool:
+    lowered = str(utterance or "").strip().lower()
+    if not lowered:
+        return False
+
+    markers = (
+        "i wonder",
+        "i think",
+        "i guess",
+        "it feels like",
+        "feels like",
+        "would be nice",
+        "seems to",
+        "seems like",
+        "maybe",
+        "probably",
+        "how long until",
+        "do you think",
+    )
+    if any(marker in lowered for marker in markers):
+        return True
+
+    if lowered.endswith("?") and any(marker in lowered for marker in ("wonder", "feels like", "seems")):
+        return True
+
+    return False
+
+
+def _apply_speculative_clarification_downgrade_guard(
+    parsed: dict[str, Any],
+    *,
+    utterance: str,
+    route: str,
+    reason: str,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    events: list[dict[str, Any]] = []
+    if not isinstance(parsed, dict):
+        return parsed, events
+
+    intent = str(parsed.get("intent", "")).strip().lower()
+    route_name = str(route or "").strip().lower()
+    if intent not in {"assert_fact", "assert_rule", "query", "retract"} and route_name not in {
+        "assert_fact",
+        "assert_rule",
+        "query",
+        "retract",
+    }:
+        return parsed, events
+
+    if not _looks_speculative_or_subjective_utterance(utterance):
+        return parsed, events
+
+    parsed["intent"] = "other"
+    parsed["logic_string"] = ""
+    parsed["facts"] = []
+    parsed["rules"] = []
+    parsed["queries"] = []
+    parsed["components"] = {
+        "atoms": [],
+        "variables": [],
+        "predicates": [],
+    }
+    ambiguities_raw = parsed.get("ambiguities", [])
+    ambiguities: list[str] = []
+    if isinstance(ambiguities_raw, list):
+        ambiguities = [str(item).strip() for item in ambiguities_raw if str(item).strip()]
+    note = "Speculative or subjective utterance staged as non-mutating after low-confidence clarification."
+    if note not in ambiguities:
+        ambiguities.append(note)
+    parsed["ambiguities"] = ambiguities
+    parsed["needs_clarification"] = False
+    parsed["uncertainty_score"] = min(_clip_01(parsed.get("uncertainty_score"), fallback=0.4), 0.55)
+    parsed["uncertainty_label"] = "medium"
+    parsed["clarification_question"] = ""
+    parsed["clarification_reason"] = ""
+    rationale = str(parsed.get("rationale", "")).strip()
+    suffix = "Speculative clarification downgrade guard routed this turn to non-mutating other."
+    parsed["rationale"] = f"{rationale} {suffix}".strip() if rationale else suffix
+    events.append(
+        {
+            "kind": "speculative_clarification_downgrade_guard",
+            "reason": reason,
+        }
+    )
+    return parsed, events
+
+
 def _apply_concession_contrast_guard(
     parsed: dict[str, Any],
     *,
@@ -7624,12 +7711,34 @@ def main() -> int:
                 if synthetic_answer:
                     answer_confidence = _clip_01(answer_meta.get("answer_confidence"), fallback=0.5)
                     if answer_confidence < clarification_answer_min_confidence:
+                        parsed, speculative_downgrade_events = _apply_speculative_clarification_downgrade_guard(
+                            parsed,
+                            utterance=utterance,
+                            route=route,
+                            reason=f"{auto_answer_label.capitalize()} confidence below threshold.",
+                        )
+                        if speculative_downgrade_events:
+                            alignment_events.extend(speculative_downgrade_events)
+                            clarification_pending = False
+                            clarification_pending_reason = ""
+                            break
                         clarification_pending = True
                         clarification_pending_reason = (
                             f"{auto_answer_label.capitalize()} confidence below threshold; KB apply deferred."
                         )
                         break
                     if _is_non_informative_clarification_answer(synthetic_answer):
+                        parsed, speculative_downgrade_events = _apply_speculative_clarification_downgrade_guard(
+                            parsed,
+                            utterance=utterance,
+                            route=route,
+                            reason=f"{auto_answer_label.capitalize()} returned non-informative answer.",
+                        )
+                        if speculative_downgrade_events:
+                            alignment_events.extend(speculative_downgrade_events)
+                            clarification_pending = False
+                            clarification_pending_reason = ""
+                            break
                         clarification_pending = True
                         clarification_pending_reason = (
                             f"{auto_answer_label.capitalize()} returned non-informative answer; KB apply deferred."

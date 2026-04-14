@@ -1,0 +1,140 @@
+{
+  "name": "hn_random_47752884_this_year_s_insane_timeline_of_hacks_turnset_v1",
+  "source_thread_id": 47752884,
+  "source_url": "https://news.ycombinator.com/item?id=47752884",
+  "difficulty": "G3",
+  "lane": "hn_random_live",
+  "utterances": [
+    {
+      "utterance": "OP (title): This year’s insane timeline of hacks",
+      "source": "op",
+      "source_id": 47752884
+    },
+    {
+      "utterance": "Linked article URL: https://ringmast4r.substack.com/p/we-may-be-living-through-the-most",
+      "source": "op",
+      "source_id": 47752884
+    },
+    {
+      "utterance": "iainctduncan: As part of my work in technical diligence, I create medium-long form content marketing material on topics germane to PE investment in tech. In the last six months I did a series (not yet published) on the state of security in the age of gen-AI.Basically, we are entering the ransomware apocalypse. It is insane what a godsend gen-AI has been to the cybercrime sector. When all you need to do is make something good enough to fool some of the people some of the time, genAI is perfect .Things that used to work reliably - like trusting google ads or sponsored links not to be malvertizing sites - are meaningless now that gangs can trivially spin up networks of thousands of fake interacting sites and linked profiles to sneak by fraud detection. Phishing attacks are ridiculously sophisticated, combining voice, text, and video impersonation. Supply chain attacks are going to mean package managers are handgrenades. Ransomware gangs are running full on SaSS services allowing script kiddies access to big gun material. Attacks that were previously only in reach of nation-state-sponsored actors are now available for peanuts. And all of this is going to worse because of everyone and their dog usin…",
+      "source": "comment",
+      "source_id": 47754766,
+      "depth": 1
+    },
+    {
+      "utterance": "ckcheng: The strangest thing I found is:> on April 7, 2026 … U.S. Treasury Secretary Scott Bessent and Federal Reserve Chair Jerome Powell convened an urgent, in-person meeting in Washington with the chief executives of [major US banks] to brief them directly on the cyber risks posed by [Anthropic’s] MythosThen a similar meeting happened with the Canadian Financial Sector Resiliency Group (i.e. the Bank of Canada, the Canadian government’s Department of Finance, the Canadian Deposit Insurance Corporation (Canada’s FDIC) and Canada’s six major banks).Multiple central banks don’t usually do that right? https://www.ctvnews.ca/sci-tech/article/anthropics-new-ai-mo...",
+      "source": "comment",
+      "source_id": 47754757,
+      "depth": 1
+    },
+    {
+      "utterance": "Animats: Almost all those events were on Hacker News. This hasn't been a secret.Companies need to get serious about levels of security. Only some things need to be protected, and you have to accept a substantial level of inconvenience and cost for those items. In my aerospace days, we had a bidding rule of thumb that running a project at SECRET doubled the cost. Running a project at TOP SECRET had an even bigger cost multiplier. A surprising amount of material was not classified at all, for cost reasons.Banks and credit card processors get this. Most other businesses don't.",
+      "source": "comment",
+      "source_id": 47756197,
+      "depth": 1
+    },
+    {
+      "utterance": "0rbiter: > Mythos had identified thousands of previously-unknown zero-day vulnerabilities in every major operating system and every major web browser, along with a range of other critical software.I think we can assume that the alphabet agencies already got their hands on this and are working to use it. No more backdoors necessary, they can crack open every computer on earth with this.Did OS/software vendors get a list of their vulnerabilities? Will they ever?",
+      "source": "comment",
+      "source_id": 47766883,
+      "depth": 1
+    },
+    {
+      "utterance": "croemer: Hard to read due to LLMisms (it's not x, it's y), just a few examples:> The silence has not broken in mainstream public discourse. It has clearly broken in private, at the top of the U.S. government, in classified briefings and emergency convenings the public is mostly not seeing.> The historian’s question is no longer whether the cyber community is being quiet. The historian’s question is why the public conversation is so thoroughly out of sync with what is clearly being discussed behind closed doors at the level of the Treasury and the Federal Reserve.> That obscurity is the part of this section that matters most. It is not the AI numbers. It is the silence around them.",
+      "source": "comment",
+      "source_id": 47765816,
+      "depth": 1
+    },
+    {
+      "utterance": "nirav72: Not too long ago, a few gigabytes of data being stolen was a big friggin deal. Now they're swiping data in the terabytes or even petabytes.",
+      "source": "comment",
+      "source_id": 47753636,
+      "depth": 1
+    },
+    {
+      "utterance": "tosser12344321: I'm a head of security, great career, did engineering into management, made a tidy living doing advanced work as a risk plumber across companies that have been relevant. I've built great teams, met and solved hard IR, delved into the real reaches of vuln research, other neckbeard things, got paid very well along the way. Seen and worked on the APT issues.More or less, I am the attractive resume, and: the game has changed folks.For what it is worth, I am taking my ball and going home in about 12 months. I've saved enough, locked in a perma-middle class lifestyle in a great nondescript city, and swapping over to offensive consulting and a AI-free, non-tech trade that won't take too long to get into - think a PA, nurse, plumber, etc.I'm not quite old enough and with the end of responsibilities as to FIRE, but I can read the writing on the wall enough to understand an AI-proof FI needs to be locked in before everyone else realizes the same. Many others in sec are feeling this.I think tech will find security pros willing to throw themselves into the fray for pay and optimism. There are others like me who are extracting their final nuts. There are others who have golden-handcuffed thems…",
+      "source": "comment",
+      "source_id": 47755570,
+      "depth": 1
+    },
+    {
+      "utterance": "__alexs: Anthropic's marketing team are terrifyingly good. I wonder if Opus came up with this plan?",
+      "source": "comment",
+      "source_id": 47754882,
+      "depth": 1
+    },
+    {
+      "utterance": "angry_octet: It really hasn't been insane, that is just recency bias. Better spam, some niche capabilities like voice cloning, some scalability to applying an exploit to more targets at once.Anthropic et al having better exploit dev is a capability which aids both sides. But regardless, most exploits use n-days not 0-days.",
+      "source": "comment",
+      "source_id": 47763961,
+      "depth": 1
+    },
+    {
+      "utterance": "jjmarr: > In August 2025, three of the most notorious financially-motivated crews on the planet, ShinyHunters, Scattered Spider, and LAPSUS$, formally combined into a coordinated alliance widely tracked as Scattered LAPSUS$ Hunters (SLH), sometimes called “the Trinity of Chaos” (Resecurity; Cyberbit; Infosecurity Magazine; The Hacker News; Computer Weekly; ReliaQuest). Scattered Spider provides initial access through highly-effective social engineering and vishing. ShinyHunters handles exfiltration, leak-site management, and extortion. LAPSUS$ contributes its own brand of identity-system compromise.Lmao that cybercriminals are closing M&A deals to create vertically integrated SaaS companies.Do you think anyone was made redundant through kinetic means?",
+      "source": "comment",
+      "source_id": 47753571,
+      "depth": 1
+    },
+    {
+      "utterance": "xtracto: A couple of days ago I was thinking about something related to this: How would the \"computing\" space look like once we get to the ultimate evolution/development of the AI/LLMs or whatever comes after it?Say in 10 years, once we have things like a Claude Mythos (or better) model running on \"real time\" at the speed of how Taalas runs ollama now.I have a feeling that \"cyberspace\" (however we want to call it) won't matter anymore. \"Computing\" won't matter anymore. Say, I want to implement a Massive Multiplayer Lemmings like game, it's done at the snap of my fingers. Say I want to find a way to \"crack\" X software? done. Say I want to find a vulnerability in Y website? easy peasy. Say I want to build a \"Powerpoint\" clone, done (not that it matters, as making a presentation will be as simple as saying \"Mythos5, make a presentation about X,Y,Z with nice and meaningful transitions\".Same with music, video, images, etc. Once everything can be created automagically... what happens? (say, \"Make me a film like the original John Wick but with the wit and style of Kingsman, make a young Sean Connery the main actor).So, ultimately cyberspace will be so chaotic with the current \"rails\", that it wil…",
+      "source": "comment",
+      "source_id": 47757368,
+      "depth": 1
+    },
+    {
+      "utterance": "ArekDymalski: >Stacked on top of each other across roughly a hundred days, these events are something a historian of computing security writing in 2050 will probably file as a turning point, regardless of what else happens between now and then.And yet, the public conversation around them has been quiet to the point of being strange.There's a lot current events that once would have been considered historical: trip around the Moon, war out of nowhere, unprecedented explosion of kleptocracy l, enormously scandals and so long. Noone of these are moving much of the needle among general public.Why? I think such indifference or rather apathy/torpor is a result of people becoming tired of constant stream of crises (either imaginary or real) that we're being flooded by. The capacity to react with something more than a shrug is finite. And I think we are being drained.",
+      "source": "comment",
+      "source_id": 47753309,
+      "depth": 1
+    },
+    {
+      "utterance": "xtracto: I wonder, how long until that certain CrowdStrike kernel level plugin that brought down a third of the world's Windows comptuers gets hijacked by a malicious actor.",
+      "source": "comment",
+      "source_id": 47758454,
+      "depth": 1
+    },
+    {
+      "utterance": "CoryOndrejka: Combine every attack being a social engineering attack plus foundational model hacking-fu and we're in a shocking interesting place. Identity itself becomes a pretty interesting opportunity/threat. Wrote an oped [1] with friends from Badge on this topic 6 months ago.[1]: https://idtechwire.com/opinion-in-an-ai-world-every-attack-i...",
+      "source": "comment",
+      "source_id": 47756568,
+      "depth": 1
+    },
+    {
+      "utterance": "john_strinlai: > And yet, the public conversation around them has been quiet to the point of being strange. i dont think its that strange. there are multiple wars raging on, with many people fearing the breakout of a global conflict. a giant pedophile ring has been exposed that no one in power seems interested in doing anything about. prices for everything are haywire. markets are an absolute rollercoaster, hinging completely on one mans late night tweets. and so on.people just dont have the bandwidth to also learn about what an npm or github is, and why a hack of it is important. news stations are going to pick the news that results in the most people tuning in to watch. that is war, not whatever a mercor is.the non-tech (and many of the tech) people in my life are also just plain tired of hearing about hacks. they have heard that their information has been stolen 10 times or whatever in the last 5 years. they have heard 100s of \"this company was hacked\" stories. \"another hack? who cares?\".",
+      "source": "comment",
+      "source_id": 47753329,
+      "depth": 1
+    },
+    {
+      "utterance": "sdevonoes: Finally we know what AI is good for! And It’s not about make mundane developers more productive",
+      "source": "comment",
+      "source_id": 47758573,
+      "depth": 1
+    },
+    {
+      "utterance": "jrm4: [flagged]",
+      "source": "comment",
+      "source_id": 47754474,
+      "depth": 1
+    },
+    {
+      "utterance": "thordenmark: Yes, AI is getting better at finding exploits and cracking software, but it will also get just as adept at defense. It will all escalate, but mostly maintain parity.",
+      "source": "comment",
+      "source_id": 47757427,
+      "depth": 1
+    },
+    {
+      "utterance": "KIFulgore: I miss the days when the big security concern was quantum breaking contemporary encryption. Air gaps and local stacks are overdue for a comeback.",
+      "source": "comment",
+      "source_id": 47756166,
+      "depth": 1
+    },
+    {
+      "utterance": "titzer: > Cisco’s private GitHub was cloned.From this, https://www.sdxcentral.com/news/cisco-source-code-breach-lea... It sounds like they were/are using GitHub to host company-private source code, presumably of high-value.While it's hard to know exactly the setup (e.g. maybe they are running their own instance of GitHub internally), this is your reminder that public clouds are not secure, no matter how much you pay the maintainers of said clouds.Internal network compromise is of course always possible, but sheesh, it sounds like this list has lots of public cloud failures.",
+      "source": "comment",
+      "source_id": 47753353,
+      "depth": 1
+    }
+  ],
+  "notes": "Auto-generated random OP+comment turnset from live Hacker News feed."
+}

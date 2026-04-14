@@ -1,0 +1,173 @@
+{
+  "thread_id": 47745284,
+  "hn_url": "https://news.ycombinator.com/item?id=47745284",
+  "source_url": "https://www.eetimes.com/taking-on-cuda-with-rocm-one-step-after-another/",
+  "title": "Taking on CUDA with ROCm: 'One Step After Another'",
+  "by": "mindcrime",
+  "unix_time": 1776033525,
+  "score": 261,
+  "descendants": 195,
+  "comment_count": 20,
+  "comments": [
+    {
+      "id": 47745792,
+      "by": "lrvick",
+      "time": 1776037787,
+      "depth": 1,
+      "parent": 47745284,
+      "text": "Just spent the last week or so porting TheRock to stagex in an effort to get ROCm built with a native musl/mimalloc toolchain and get it deterministic for high security/privacy workloads that cannot trust binaries only built with a single compiler.It has been a bit of a nightmare and had to package like 30+ deps and their heavily customized LLVM, but got the runtime to build this morning finally.Things are looking bright for high security workloads on AMD hardware due to them working fully in the open however much of a mess it may be."
+    },
+    {
+      "id": 47750862,
+      "by": "androiddrew",
+      "time": 1776082247,
+      "depth": 1,
+      "parent": 47745284,
+      "text": "I have been trying since February to get someone at AMD to shipped tuned Tensile kernels in the rcom-libs for the gfx1201. They are used by Ollama but no one on the Developer Discord knows who is responsible for that. It has been pretty frustrating and it shows that AMD has an organizational problem to overcome in addition to all the things technically that they want rocm to do."
+    },
+    {
+      "id": 47746653,
+      "by": "0xbadcafebee",
+      "time": 1776045435,
+      "depth": 1,
+      "parent": 47745284,
+      "text": "AMD has years of catching up to do with ROCm just to get their devices to work well. They don't support all their own graphics cards that can do AI, and when it is supported, it's buggy. The AMDGPU graphics driver for Linux has had continued instability since 6.6. I don't understand why they can't hire better software engineers."
+    },
+    {
+      "id": 47750667,
+      "by": "AshamedCaptain",
+      "time": 1776080888,
+      "depth": 1,
+      "parent": 47745284,
+      "text": "> Last year, AMD ran a GitHub poll for ROCm complaints and received more than 1,000 responses. Many were around supporting older hardware, which is today supported either by AMD or by the community, and one year on, all 1,000 complaints have been addressed, Elangovan said.Must have been by waiting for each of the 1000 complainers to die of old age, because I do not know what old hardware they have added support for."
+    },
+    {
+      "id": 47750349,
+      "by": "grokcodec",
+      "time": 1776078475,
+      "depth": 1,
+      "parent": 47745284,
+      "text": "The day ROCm supports EVERY AMD card on release, just like CUDA does, is the day I will actually believe this marketing hype.They really dropped the ball here,\nalso when they abandoned recently released cards (at the time) like the 400 series.\nHopefully management gets their heads out of their butts and invests more in the software stack."
+    },
+    {
+      "id": 47755187,
+      "by": "StillBored",
+      "time": 1776100867,
+      "depth": 1,
+      "parent": 47745284,
+      "text": "I just wish they would make another pass at cleaning up the stack. It should be easy to `git clone --recurse-submodules rocm` followed by a configure/make that both prints out missing dependencies and configures without them, along with choices for 'build the world' vs just build some lower level opencl/HIP/SPIRV tooling without all the libraries/etc on top in a clear way.Right now the entire source base is literally throw a bunch of crap into the rocm brand and hope it builds together vs some overarching architecture. Presumably the entire spend it also tied to \"whatever big Co's evaluation needs this week\" when it comes to developing with it."
+    },
+    {
+      "id": 47746481,
+      "by": "rdevilla",
+      "time": 1776043670,
+      "depth": 1,
+      "parent": 47745284,
+      "text": "ROCm is not supported on some very common consumer GPUs, e.g. the RX 580. Vulkan backends work just fine."
+    },
+    {
+      "id": 47748555,
+      "by": "mstaoru",
+      "time": 1776063140,
+      "depth": 1,
+      "parent": 47745284,
+      "text": "I'm team \"taking on CUDA with OpenVINO\" (and SYCL*), Intel seems really upped their game on iGPU and dGPU lately, with sane prices and fairly good software support and APIs.I'm not talking gaming CUDA, but CV and data science workloads seem to scale well on Arc and work well on Edge on Core Ultra 2/3."
+    },
+    {
+      "id": 47749703,
+      "by": "adev_",
+      "time": 1776072634,
+      "depth": 1,
+      "parent": 47745284,
+      "text": "A little feedback to AMD executives about the current status of ROCm here:(1) - Supporting only Server grade hardware and ignoring laptop/consumer grade GPU/APU for ROCm was a terrible strategical mistake.A lot of developers experiments first and foremost on their personal laptop first and scale on expensive, professional grade hardware later . In addition: some developers simply do not have the money to buy server grade hardware.By locking ROCm only to server grade GPUs, you restrict the potential list of contributors to your OSS ROCm ecosystem to few large AI users and few HPC centers... Meaning virtually nobody.A much more sensible strategy would be to provide degraded performance for ROCm on top of consummer GPUs, and this is exactly what Nvidia with CUDA is doing.This is changing but you need to send a clear message there. EVERY new released device should be properly supported by ROCm.- (2) Supporting only the two last generations of architecture is not what customers want to see. https://rocm.docs.amd.com/projects/install-on-linux/en/docs-... People with existing GPU codebase invests significant amount of effort to support ROCm.Saying them two years later: \"Sorry you are out…"
+    },
+    {
+      "id": 47746517,
+      "by": "bruce343434",
+      "time": 1776044029,
+      "depth": 1,
+      "parent": 47745284,
+      "text": "In my experience fiddling with compute shaders a long time ago, cuda and rocm and opencv are way too much hassle to set up. Usually it takes a few hours to get the toolkits and SDK up and running that is, if you CAN get it up and running. The dependencies are way too big as well, cuda is 11gb??? Either way, just use Vulkan. Vulkan \"just works\" and doesn't lock you into Nvidia/amd."
+    },
+    {
+      "id": 47746221,
+      "by": "p1esk",
+      "time": 1776041460,
+      "depth": 1,
+      "parent": 47745284,
+      "text": "Someone from AMD posted this a few minutes ago, then deleted it: \"Anush's success is due to opting out of internal bureaucracy than anything else. most Claude use at AMD goes through internal infrastructure that can take hundreds of seconds per response due to throttling. Anush got us an exemption to use Anthropic directly. he is also exempt from normal policies on open source and so I can directly contribute to projects to add AMD support. He's an effective leader and has turned ROCm into a internal startup based in California. Definitely worth joining the team even if you've heard bad things about AMD as a whole.\" This kind of bullshit is why I don't want to join AMD, even if this particular team is temporarily exempt from it."
+    },
+    {
+      "id": 47747836,
+      "by": "pjmlp",
+      "time": 1776057073,
+      "depth": 1,
+      "parent": 47745284,
+      "text": "They need lots of steps, hardware support, IDE and graphical debugging integrations , the polyglot ecosystem, having a common bytecode used by several compiler backends (CUDA is not only C++), the libraries portfolio."
+    },
+    {
+      "id": 47747485,
+      "by": "jmward01",
+      "time": 1776053243,
+      "depth": 1,
+      "parent": 47745284,
+      "text": "I really want to get to the point that I am looking online for a GPU and Nvidia isn't the requirement. I think we are really close to there. Maybe we are there and my level of trust just needs to bump up."
+    },
+    {
+      "id": 47747650,
+      "by": "suprjami",
+      "time": 1776054957,
+      "depth": 1,
+      "parent": 47745284,
+      "text": "Just in time for Vulkan tg to be faster in almost all situations, and Vulkan pp to be faster in many situations with constant improvements on the way, making ROCm obsolete for inference."
+    },
+    {
+      "id": 47745611,
+      "by": "superkuh",
+      "time": 1776036760,
+      "depth": 1,
+      "parent": 47745284,
+      "text": "AMD hasn't signaled in behavior or words that they're going to actually support ROCm on $specificdevice for more than 4-5 years after release. Sometimes it's as little as the high 3.x years for shrinks like the consumer AMD RX 580. And often the ROCm support for consumer devices isn't out until a year after release, further cutting into that window.Meanwhile nvidia just dropped CUDA/driver support for 1xxx series cards from their most recent drivers this year .For me ROCm's mayfly lifetime is a dealbreaker."
+    },
+    {
+      "id": 47748538,
+      "by": "taherchhabra",
+      "time": 1776062969,
+      "depth": 1,
+      "parent": 47745284,
+      "text": "Genuine question. After claude code, codex etc, can't this be speedup ?"
+    },
+    {
+      "id": 47746291,
+      "by": "roenxi",
+      "time": 1776042172,
+      "depth": 1,
+      "parent": 47745284,
+      "text": "> Challenger AMD’s ability to take data center GPU share from market leader Nvidia will certainly depend on the success or failure of its AI software stack, ROCm.I don't think this is true. ROCm is a huge advantage for Nvidia but as far as I can tell it is more a set of R&D libraries than anything else, so all the Hot New Stuff keeps being Nvidia first and only (to start with) as the library ecosystem for the hotness doesn't exist yet. Then eventually new libraries are created that are CUDA independent and AMD turns out to make pretty good graphics cards.I wouldn't be surprised of ROCm withered on the vine and AMD still does fine."
+    },
+    {
+      "id": 47746289,
+      "by": "hurricanepootis",
+      "time": 1776042136,
+      "depth": 1,
+      "parent": 47745284,
+      "text": "I've been using ROCm on my Radeon RX 6800 and my Ryzen AI 7 350 systems. I've only used it for GPU-accelerated rendering in Cycles, but I am glad that AMD has an option that isn't OpenCL now."
+    },
+    {
+      "id": 47756389,
+      "by": "mellosouls",
+      "time": 1776106538,
+      "depth": 1,
+      "parent": 47745284,
+      "text": "Related from Jan 2025: ROCm Device Support Wishlist (205 points, 107 comments) https://news.ycombinator.com/item?id=42772170"
+    },
+    {
+      "id": 47754534,
+      "by": "nullpoint420",
+      "time": 1776097960,
+      "depth": 1,
+      "parent": 47745284,
+      "text": "I just don’t understand how they haven’t figured this out yet. I genuinely want to know the corporate structure and politics that have lead to their inability to execute.Is it leadership? Something else?"
+    }
+  ]
+}

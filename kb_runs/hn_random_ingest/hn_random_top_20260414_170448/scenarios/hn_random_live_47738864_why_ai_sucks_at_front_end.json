@@ -1,0 +1,27 @@
+{
+  "name": "hn_random_live_47738864_why_ai_sucks_at_front_end",
+  "ontology_name": "hn_random_live_47738864_why_ai_sucks_at_front_end",
+  "utterances": [
+    "OP (title): Why AI Sucks at Front End",
+    "Linked article URL: https://nerdy.dev/why-ai-sucks-at-front-end",
+    "khasan222: Ngl I’m reading this article after having used ai to build a beautiful front end that is pixel perfect.Yes ai can’t see, it only understands numbers. So tell it to use image magick to compare the screenshot to the actual mockup, tell it to get less than 5% difference and don’t use more than 20% blur. Thank me later.I built a whole website in like 2 days with this technique.Everyone seems to have trouble telling ai how to check its work and that’s the real problem imho.Truly if you took the best dev in the world and had them write 1000 lines of code without stopping to check the result they would also get it wrong. And the machine is only made in a likeness of our image.PS. You think Christi…",
+    "feverzsj: If you are really good at something, you'll find AI sucks at everything.",
+    "Zigurd: After years of writing native code for mobile apps I'm using Flutter, and finding that, if you do things step-wise, and check in intermediate results so you can easily roll back failed experiments, agent-assisted coding can accelerate your front end coding substantially, and you can deliver more polished results instead of obviously demo grade visual results that need refinement. And that makes it easier to communicate with your non-coder colleagues.",
+    "darzu: Does this website run at 10fps for anyone else? I'm on a mac M4 w/ safari. Really doesn't help the author's point.",
+    "Gualdrapo: If AI really sucked at front end I'd have a job right now.",
+    "coder68: AI is much better at front-end than me, it has really enabled me to build visual apps as a normally backend/ML guy.",
+    "faangguyindia: Ai ain't gonna perform at level of top front end designer but you will get you halfway at significantly less cost.",
+    "rgoulter: My first instinct reading an article (especially one about LLMs) is to scroll down to see the structure..Anyway.Do people get the impression that LLMs are worse at frontend than not? I'd think it's same with other LLM uses: you benefit from having a good understanding of what you're trying to do; and it's probably decent for making a prototype quickly.",
+    "christophilus: Dunno. It’s really good with Preact + Tailwind. And I have to say that I think most problems can be solved this way and don’t require a special one-of-a-kind UI. In fact, the fewer special UIs I see, the better. I prefer standardized patterns unless they truly don’t fit a domain.",
+    "janpeuker: I don’t 100% agree with the “AI can’t see” because in a Ralph-loop against screenshots, it basically can (inefficiently). But more importantly I do find it generally curious how bad even frontier models are in spatial thinking. Say “Align these right to left unless it crosses the center” or “Keep this box always visible and collapse X to make space” and all hell break loose - maybe it might work but in an extremely slow, costly and tedious process.",
+    "fny: Aside from the obvious \"AI can't see\" criticism, AI sucks at frontend because frontend sucks. Why does frontend suck? Churn.To quote the article:1. \"It trained on ancient garbage\" which is the by product of massive churn and this attitude leads to even more churn2. \"It doesn't know WHY we do things\" because we don't either... even the paradigms used in frontend dev have needlessly churnedMy fix? I switched from React/Next to Vue/Nuxt. The React ecosystem is by far the worst offender.",
+    "eljee: Creating a CODING.md or FRONTEND.md with rules and expectations for your LLM helps tremendously. You're right AI is not great at frontend (yet), but it does lift alot of the load. Like the top commenter says, there's not a great harness for iterative frontend building. But it can get you 80% of the way there if you give it some rules, and can do the annoying bits so you can concentrate on the 20% that is about design, effective communication and pixel-perfection."
+  ],
+  "validations": [],
+  "meta": {
+    "source_thread_id": 47738864,
+    "source_url": "https://news.ycombinator.com/item?id=47738864",
+    "source_article_url": "https://nerdy.dev/why-ai-sucks-at-front-end",
+    "sample_lane": "hn_random_live"
+  }
+}

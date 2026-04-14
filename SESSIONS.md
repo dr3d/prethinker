@@ -1089,6 +1089,46 @@ Interpretation:
 - the current SP + pipeline stack remains stable under expanded width and multi-bind query pressure.
 - explicit temp KB routing is now viable as default hygiene for unattended sweeps.
 
+## Session 27: Wild HN Stress Harness Hardening (Clarification Dead-End Guard)
+
+Date: 2026-04-14 UTC
+
+Outcome:
+
+- pushed the current control-plane + UI + Goldilocks hardening snapshot to GitHub:
+  - commit: `8a4a0a1`
+- executed structured live-random HN runs with the new harness:
+  - `kb_runs/hn_random_ingest/hn_random_top_20260414_170448` -> `6/6` passed
+  - harder profile `best` feed (deeper/larger packet limits) initially exposed a failure wall:
+    - `hn_random_best_20260414_170829` -> `2/6` passed, `10` apply failures, `9` clarification requests
+    - explicit CE sidecar (`qwen3.5:4b`) did not materially improve this wall:
+      - `hn_random_best_20260414_171311` -> `2/6` passed, `9` apply failures, `8` clarification requests
+- identified dominant repeated failure mode:
+  - low-confidence clarification answers on speculative/opinion-heavy turns causing `clarification_requested` deferrals.
+
+Code changes:
+
+- `kb_pipeline.py`
+  - added `_looks_speculative_or_subjective_utterance(...)`
+  - added `_apply_speculative_clarification_downgrade_guard(...)`
+  - wired guard into low-confidence / non-informative auto-clarification branch so speculative turns downgrade to non-mutating `other` instead of hard deferral loops.
+
+Post-fix evidence:
+
+- same hard profile after guard:
+  - `kb_runs/hn_random_ingest/hn_random_best_20260414_172051` -> `3/6` passed
+  - apply failures reduced from `10 -> 4`; clarification requests reduced from `9 -> 3`.
+- calibrated run with lower clarification eagerness (`0.20`) on hard profile:
+  - `kb_runs/hn_random_ingest/hn_random_best_20260414_172658` -> `5/6` passed
+  - totals: `132` turns, `1` apply failure, `0` parse failures, `1` clarification request.
+
+Interpretation:
+
+- the main bottleneck was not parser JSON stability; it was clarification policy dead-ends on noisy speculative discourse.
+- sidecar model swap alone was weak leverage; policy + guard behavior delivered the step-change.
+- current best operating point for wild HN ingestion (hard profile) is:
+  - parser `qwen3.5:9b`, CE same-model, `clarification_eagerness=0.20`, `max_clarification_rounds=2`.
+
 
 
 

@@ -1,0 +1,31 @@
+{
+  "name": "hn_random_live_47764098_nimconf_2026_dates_announced_registratio",
+  "ontology_name": "hn_random_live_47764098_nimconf_2026_dates_announced_registratio",
+  "utterances": [
+    "OP (title): NimConf 2026: Dates Announced, Registrations Open",
+    "Linked article URL: https://nim-lang.org/blog/2026/04/07/nimconf-2026.html",
+    "giancarlostoro: For everyone wondering who may have been unaware. It is 100% remote, so you can just show up. :)> NimConf 2026 is an online conference and it will take place on June 20th. It will be streamed for free and it doesn’t require any traveling - you will be able to participate from your home, without any travel and accommodation expenses. https://conf.nim-lang.org/",
+    "zareith: I like the nim language, but the lack of interfaces has been a bit of a turn-off for me.Do nim programmers not see the need for abstracting out behavior in a manner that different implementations can be switched somewhere else, or is there different idiomatic way to handle this?",
+    "elcritch: I should give a talk. About what however? I’ve been happy with my progress on FigDraw (1), a 2D UI scene renderer using SDFs. Even made my own neovim ui shell with it!1: https://github.com/elcritch/figdraw",
+    "moigagoo: I plan to give a couple of talks this year.Can't wait for NimConf, it is way overdue.",
+    "dhruv3006: Nim seems to be picking up a lot lately.",
+    "repelsteeltje: Such a pity that this is an online-only conference.Does anyone know of an IRL conference or meetup on Nim, preferably in EU?",
+    "tinfoilhatter: Nim doesn't have interfaces, but concepts + parametric polymorphism gets you a long way - https://jasonbeetham.ca/writeups/codereuse.html",
+    "digdugdirk: Oooo... That looks like it could make a great talk! Do you have examples of the neovim ui shell?",
+    "moigagoo: Please do share your progress with FigDraw. Interactive demoes always look great.",
+    "summarity: It’s growing but not a lot, I have some data here: https://pierretempel.com/p/nim-usage-on-github Most code I write is still Nim though.",
+    "poulpy123: Really ? From what I see it survives OK but there is no real progression. I like what I saw of the language, and I'm regularly impressed by the productivity of the community relative to its size so I would like to see it more successful but I'm afraid it will not happen.",
+    "pjmlp: It is another niche language looking for a project to kick off adoption.",
+    "shevy-java: Not sure. I think it has a problem many languages have - too small a community. There is a lot of fragmentation in the last some years, I am not sure why, not just about nim but just look at how ruby has been dropping like a hot potato in the last ~3 years or more. I am so out of the loop that I could not even tell anyone what the young people are doing. Are there more who program than before? If so where do they go?",
+    "auxym: There are ocasionally Nim talks at FOSDEM.",
+    "ModernMech: My students (18-21) are excited to learn Rust in my class I teach about programming languages. Younger students are learning Luau via Roblox -- spoke with a middle schooler on Sunday who was making games with his friends. They get introduced to Scratch in school and learn that until they move on to Java at middle and high school. I teach freshman Lua in their intro to engineering class, and they also go on to learn things like R, Matlab/Simulink, Python. Java, C, and C++ if they're a CS major.",
+    "elcritch: Combine that most CS students learn many languages with LLMs and coding agents and the size of the ecosystem isn't quite as important as it used to be. New hires can be productive from day 1. Missing libraries are relatively easy to add. Moreover the language characteristics can be more useful than ever: fast running, fast compiling, typed, easy to read, etc."
+  ],
+  "validations": [],
+  "meta": {
+    "source_thread_id": 47764098,
+    "source_url": "https://news.ycombinator.com/item?id=47764098",
+    "source_article_url": "https://nim-lang.org/blog/2026/04/07/nimconf-2026.html",
+    "sample_lane": "hn_random_live"
+  }
+}

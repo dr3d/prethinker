@@ -1,0 +1,25 @@
+{
+  "ontology_name": "hn_random_live_47745284_taking_on_cuda_with_rocm_one_step_after",
+  "generated_at_utc": "2026-04-14T17:28:40+00:00",
+  "clause_count": 12,
+  "predicate_signatures": [
+    "has_buggy_support/1",
+    "has_buggy_support/2",
+    "has_catching_up_task/2",
+    "has_hiring_issue/1",
+    "has_hiring_issue/2",
+    "has_instability/1",
+    "has_instability/2"
+  ],
+  "fact_predicates": [
+    "has_buggy_support/1",
+    "has_buggy_support/2",
+    "has_catching_up_task/2",
+    "has_hiring_issue/1",
+    "has_hiring_issue/2",
+    "has_instability/1",
+    "has_instability/2"
+  ],
+  "rule_head_predicates": [],
+  "rule_body_predicates": []
+}
