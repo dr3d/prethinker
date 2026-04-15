@@ -150,6 +150,9 @@ LM Studio vs Ollama operating pattern:
 # 0) from repo root
 cd <repo-root>
 
+# quick engine regression sanity check
+python scripts/run_engine_regression.py
+
 # 1) check Ollama
 powershell -Command "Invoke-RestMethod -Method Get -Uri http://127.0.0.1:11434/api/tags"
 

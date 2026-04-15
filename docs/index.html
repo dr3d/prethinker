@@ -1,1158 +1,746 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en" data-theme="light">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Prethinker Docs Hub</title>
-  <meta name="description" content="Prethinker docs hub: run explorer, ladder artifacts, prompt evolution, and story-to-KB demos." />
+  <meta name="description" content="Results-first documentation hub for Prethinker: status, evidence, media, and research data." />
   <style>
-    @import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,800&family=IBM+Plex+Mono:wght@400;500;700&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap");
+    @import url("https://fonts.googleapis.com/css2?family=Sora:wght@500;700;800&family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap");
 
     :root {
-      --bg: #e3ddd1;
-      --bg-deep: #d6cdbf;
-      --paper: #efe8dd;
-      --ink: #1f1c17;
-      --muted: #665c4f;
-      --border: #c8bba7;
-      --brand: #9d4f31;
-      --brand-strong: #7c351f;
-      --brand-soft: #e6cdc0;
-      --accent: #2f6667;
-      --accent-soft: #c7dcdb;
-      --link: #1f5d9d;
-      --link-visited: #6a4a9a;
-      --link-hover: #157487;
-      --ok: #3a6f40;
-      --warn: #a15e1f;
-      --bad: #8a2d2d;
-      --shadow: 0 14px 30px rgba(35, 29, 20, 0.11);
-      --shadow-soft: 0 8px 18px rgba(35, 29, 20, 0.08);
+      --bg: #0c1117;
+      --bg-2: #0f1723;
+      --panel: #141e2d;
+      --panel-2: #1b2738;
+      --ink: #f2f7ff;
+      --muted: #b4c0d0;
+      --line: #2b3f59;
+      --hot: #ff7f4a;
+      --hot-2: #ffb26f;
+      --cool: #5fd0d8;
+      --ok: #72d18a;
+      --warn: #f1bd5a;
+      --bad: #f08b95;
+      --shadow: 0 18px 42px rgba(2, 8, 17, 0.48);
     }
 
-    html[data-theme="dark"] {
-      --bg: #11161d;
-      --bg-deep: #0b1016;
-      --paper: #1a212b;
-      --ink: #eaf0f6;
-      --muted: #b9c3cd;
-      --border: #334252;
-      --brand: #e08758;
-      --brand-strong: #ffb087;
-      --brand-soft: #4c2f22;
-      --accent: #6ac4c7;
-      --accent-soft: #1f3e45;
-      --link: #8fc9ff;
-      --link-visited: #c8adff;
-      --link-hover: #a9ecff;
-      --ok: #73c47e;
-      --warn: #e2b366;
-      --bad: #f49b9b;
-      --shadow: 0 16px 34px rgba(0, 0, 0, 0.42);
-      --shadow-soft: 0 10px 24px rgba(0, 0, 0, 0.28);
+    html[data-theme="light"] {
+      --bg: #f5efe5;
+      --bg-2: #efe6d8;
+      --panel: #fffaf2;
+      --panel-2: #f7efe3;
+      --ink: #1f1d1a;
+      --muted: #5e5a53;
+      --line: #d7cab6;
+      --hot: #a34f2a;
+      --hot-2: #c4713f;
+      --cool: #1f6f75;
+      --ok: #2f7a42;
+      --warn: #a87416;
+      --bad: #9f2f3a;
+      --shadow: 0 14px 30px rgba(45, 28, 6, 0.14);
     }
 
     * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      min-height: 100vh;
+      font-family: "Space Grotesk", "Segoe UI", sans-serif;
       color: var(--ink);
-      font-family: "Newsreader", Georgia, serif;
-      line-height: 1.38;
       background:
-        radial-gradient(1200px 520px at -5% -20%, color-mix(in srgb, var(--brand) 22%, transparent), transparent),
-        radial-gradient(900px 500px at 108% -10%, color-mix(in srgb, var(--accent) 24%, transparent), transparent),
-        linear-gradient(180deg, var(--bg), var(--bg-deep));
+        radial-gradient(1200px 620px at 110% -10%, color-mix(in srgb, var(--cool) 24%, transparent), transparent 55%),
+        radial-gradient(1100px 500px at -10% -30%, color-mix(in srgb, var(--hot) 20%, transparent), transparent 60%),
+        linear-gradient(180deg, var(--bg), var(--bg-2));
+      min-height: 100vh;
     }
 
-    a {
-      color: var(--link);
-      text-decoration-color: color-mix(in srgb, var(--link) 58%, transparent);
-    }
+    a { color: var(--cool); }
+    a:hover { color: var(--hot); }
 
-    a:visited {
-      color: var(--link-visited);
-      text-decoration-color: color-mix(in srgb, var(--link-visited) 58%, transparent);
-    }
-
-    a:hover {
-      color: var(--link-hover);
-      text-decoration-color: currentColor;
-    }
-
-    .container {
-      max-width: 1180px;
+    .wrap {
+      max-width: 1220px;
       margin: 0 auto;
-      padding: 26px 20px 68px;
+      padding: 22px 18px 70px;
     }
 
     .topbar {
       display: flex;
-      align-items: center;
       justify-content: space-between;
+      align-items: center;
       gap: 12px;
-      margin-bottom: 18px;
       flex-wrap: wrap;
     }
 
-    .brandline {
+    .chips {
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
-      align-items: center;
     }
 
-    .badge {
-      font-family: "IBM Plex Mono", Consolas, monospace;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
+    .chip {
+      font-family: "JetBrains Mono", Consolas, monospace;
       font-size: 11px;
-      border: 1px solid var(--border);
-      background: color-mix(in srgb, var(--paper) 90%, transparent);
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      border: 1px solid var(--line);
+      background: color-mix(in srgb, var(--panel) 92%, transparent);
       border-radius: 999px;
-      padding: 8px 12px;
+      padding: 7px 10px;
       color: var(--muted);
       text-decoration: none;
     }
 
-    .theme-btn {
-      border: 1px solid var(--border);
-      background: var(--paper);
+    .theme-toggle {
+      border: 1px solid var(--line);
+      background: var(--panel);
       color: var(--ink);
       border-radius: 10px;
-      padding: 8px 10px;
-      font-family: "IBM Plex Mono", Consolas, monospace;
+      padding: 7px 10px;
+      font-family: "JetBrains Mono", Consolas, monospace;
       font-size: 12px;
       cursor: pointer;
-      white-space: nowrap;
     }
 
     .hero {
-      position: relative;
-      overflow: hidden;
-      background: var(--paper);
-      border: 1px solid var(--border);
-      border-radius: 28px;
-      padding: 30px 28px 24px;
+      margin-top: 12px;
+      border: 1px solid var(--line);
+      background: linear-gradient(140deg, color-mix(in srgb, var(--panel) 96%, transparent), color-mix(in srgb, var(--panel-2) 94%, transparent));
+      border-radius: 24px;
+      padding: 22px;
       box-shadow: var(--shadow);
-      margin-bottom: 14px;
-      isolation: isolate;
     }
 
-    .hero::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background:
-        linear-gradient(135deg, color-mix(in srgb, var(--brand-soft) 54%, transparent), transparent 58%),
-        linear-gradient(25deg, color-mix(in srgb, var(--accent-soft) 44%, transparent), transparent 60%);
-      pointer-events: none;
-      z-index: -1;
-    }
+    h1, h2, h3 { font-family: "Sora", "Space Grotesk", sans-serif; margin: 0; letter-spacing: -0.02em; }
 
-    h1 {
-      margin: 0;
-      font-family: "Fraunces", Georgia, serif;
-      font-size: clamp(34px, 6vw, 66px);
-      line-height: 0.94;
-      letter-spacing: -0.02em;
-      max-width: 900px;
-    }
+    h1 { font-size: clamp(32px, 6vw, 56px); line-height: 0.96; max-width: 940px; }
 
-    .lede {
+    .hero p {
       margin: 12px 0 0;
-      max-width: 880px;
+      max-width: 960px;
       color: var(--muted);
-      font-size: clamp(17px, 2.25vw, 22px);
-      line-height: 1.42;
+      font-size: 18px;
+      line-height: 1.45;
     }
+
+    .hero strong { color: var(--ink); }
 
     .hero-actions {
-      margin-top: 18px;
       display: flex;
-      flex-wrap: wrap;
       gap: 10px;
-    }
-
-    .hero-pitch {
-      margin: 12px 0 0;
-      max-width: 980px;
-      font-size: clamp(18px, 2.3vw, 24px);
-      line-height: 1.34;
-      color: var(--ink);
-    }
-
-    .hero-subhead {
-      margin: 10px 0 0;
-      max-width: 980px;
-      color: var(--muted);
-      font-size: clamp(16px, 2vw, 19px);
-      line-height: 1.42;
-    }
-
-    .hero-status {
-      margin: 12px 0 0;
-      font-style: italic;
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .hero-action-notes {
-      margin-top: 10px;
-      display: grid;
-      gap: 6px;
-      max-width: 980px;
-    }
-
-    .hero-action-note {
-      font-size: 14px;
-      color: var(--muted);
-      line-height: 1.4;
-    }
-
-    .hero-action-note strong {
-      color: var(--ink);
+      flex-wrap: wrap;
+      margin-top: 16px;
     }
 
     .btn {
       display: inline-block;
       text-decoration: none;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      padding: 11px 14px;
-      font-family: "IBM Plex Mono", Consolas, monospace;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      padding: 10px 12px;
+      font-family: "JetBrains Mono", Consolas, monospace;
       font-size: 12px;
-      line-height: 1;
       color: var(--ink);
-      background: var(--paper);
+      background: var(--panel);
     }
 
     .btn.primary {
-      background: var(--brand);
-      border-color: color-mix(in srgb, var(--brand-strong) 75%, black);
+      background: linear-gradient(180deg, color-mix(in srgb, var(--hot-2) 88%, #fff), var(--hot));
       color: #fff;
+      border-color: color-mix(in srgb, var(--hot) 76%, #000);
     }
 
-    .btn.alt {
-      background: var(--accent-soft);
-      border-color: color-mix(in srgb, var(--accent) 38%, var(--border));
-    }
-
-    .jump-row {
-      margin-top: 14px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
+    .btn.cool {
+      background: color-mix(in srgb, var(--cool) 22%, var(--panel));
+      border-color: color-mix(in srgb, var(--cool) 42%, var(--line));
     }
 
     .jump {
-      border: 1px dashed color-mix(in srgb, var(--border) 85%, var(--accent));
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .jump a {
+      font-family: "JetBrains Mono", Consolas, monospace;
+      font-size: 11px;
+      color: var(--muted);
+      text-decoration: none;
+      border: 1px dashed color-mix(in srgb, var(--line) 80%, var(--cool));
       border-radius: 999px;
       padding: 6px 10px;
-      font-family: "IBM Plex Mono", Consolas, monospace;
-      font-size: 11px;
-      text-decoration: none;
-      color: var(--muted);
-      background: color-mix(in srgb, var(--paper) 90%, transparent);
+      background: color-mix(in srgb, var(--panel) 90%, transparent);
     }
 
     .metrics {
-      margin-top: 12px;
+      margin-top: 15px;
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 10px;
     }
 
     .metric {
-      border: 1px solid var(--border);
-      background: color-mix(in srgb, var(--paper) 90%, transparent);
+      border: 1px solid var(--line);
       border-radius: 14px;
-      padding: 10px;
-      box-shadow: var(--shadow-soft);
+      padding: 11px;
+      background: color-mix(in srgb, var(--panel) 92%, transparent);
     }
 
     .metric .k {
-      font-family: "IBM Plex Mono", Consolas, monospace;
-      font-size: 11px;
-      color: var(--muted);
+      font-family: "JetBrains Mono", Consolas, monospace;
       text-transform: uppercase;
       letter-spacing: 0.08em;
+      color: var(--muted);
+      font-size: 11px;
     }
 
     .metric .v {
-      margin-top: 4px;
-      font-family: "Fraunces", Georgia, serif;
-      font-size: 26px;
+      margin-top: 5px;
+      font-family: "Sora", "Space Grotesk", sans-serif;
+      font-size: 29px;
       line-height: 1;
     }
 
     .metric .hint {
-      margin-top: 4px;
+      margin-top: 5px;
+      color: var(--muted);
       font-size: 13px;
-      color: var(--muted);
     }
 
-    .section-title {
-      margin: 26px 0 10px;
-      font-family: "Fraunces", Georgia, serif;
-      font-size: clamp(24px, 3.4vw, 38px);
-      line-height: 1.05;
-      letter-spacing: -0.01em;
-    }
-
-    .section-lede {
-      margin: 0 0 10px;
-      color: var(--muted);
-      max-width: 880px;
-      font-size: 17px;
-    }
+    .section { margin-top: 30px; }
+    .section h2 { font-size: clamp(24px, 4vw, 40px); line-height: 1.04; }
+    .section .lede { margin: 8px 0 14px; color: var(--muted); max-width: 920px; font-size: 17px; }
 
     .grid {
       display: grid;
       grid-template-columns: repeat(12, minmax(0, 1fr));
-      gap: 14px;
+      gap: 12px;
     }
 
     .card {
-      background: var(--paper);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 16px;
-      box-shadow: var(--shadow-soft);
+      grid-column: span 4;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 16px;
+      padding: 14px;
     }
 
     .card.wide { grid-column: span 12; }
     .card.half { grid-column: span 6; }
-    .card.third { grid-column: span 4; }
 
-    .label {
+    .tag {
       display: inline-block;
-      margin-bottom: 8px;
-      border: 1px solid var(--border);
+      border: 1px solid var(--line);
       border-radius: 999px;
-      padding: 4px 8px;
-      font-family: "IBM Plex Mono", Consolas, monospace;
+      padding: 3px 7px;
+      font-family: "JetBrains Mono", Consolas, monospace;
       font-size: 10px;
       text-transform: uppercase;
       letter-spacing: 0.08em;
       color: var(--muted);
-      background: color-mix(in srgb, var(--paper) 86%, transparent);
+      margin-bottom: 8px;
     }
 
-    .card h3 {
-      margin: 0 0 6px;
-      font-family: "Fraunces", Georgia, serif;
-      font-size: 25px;
-      line-height: 1.08;
-    }
-
-    .card p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 16px;
-      line-height: 1.44;
-    }
+    .card h3 { font-size: 23px; line-height: 1.08; margin-bottom: 6px; }
+    .card p { margin: 0; color: var(--muted); line-height: 1.43; font-size: 15px; }
 
     .actions {
-      margin-top: 12px;
       display: flex;
-      flex-wrap: wrap;
       gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 11px;
     }
 
-    .showcase-shell {
-      margin-top: 12px;
-      border: 1px solid var(--border);
+    .media-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      gap: 12px;
+    }
+
+    .media-card {
+      border: 1px solid var(--line);
       border-radius: 14px;
       padding: 12px;
-      background: color-mix(in srgb, var(--paper) 88%, transparent);
+      background: color-mix(in srgb, var(--panel) 95%, transparent);
     }
 
-    .showcase-media {
+    .media-card h4 {
+      margin: 0 0 8px;
+      font-family: "Sora", "Space Grotesk", sans-serif;
+      font-size: 17px;
+      line-height: 1.2;
+    }
+
+    .media-card audio, .media-card video {
       width: 100%;
-      margin-top: 10px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: color-mix(in srgb, var(--paper) 94%, transparent);
-    }
-
-    .showcase-note {
       margin-top: 8px;
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .table-wrap {
-      margin-top: 10px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      overflow: hidden;
-      background: color-mix(in srgb, var(--paper) 92%, transparent);
+      border-radius: 10px;
+      background: color-mix(in srgb, var(--panel-2) 86%, transparent);
+      border: 1px solid var(--line);
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
       font-size: 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--panel);
     }
 
     th, td {
-      text-align: left;
-      border-bottom: 1px solid var(--border);
       padding: 9px 10px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
       vertical-align: top;
     }
 
     th {
-      color: var(--muted);
-      font-family: "IBM Plex Mono", Consolas, monospace;
-      font-size: 12px;
-      letter-spacing: 0.04em;
+      font-family: "JetBrains Mono", Consolas, monospace;
+      font-size: 11px;
       text-transform: uppercase;
-      background: color-mix(in srgb, var(--paper) 74%, transparent);
-    }
-
-    tbody tr:last-child td { border-bottom: none; }
-
-    .status-pass { color: var(--ok); font-weight: 600; }
-    .status-fail { color: var(--bad); font-weight: 600; }
-
-    .mono {
-      font-family: "IBM Plex Mono", Consolas, monospace;
-      font-size: 13px;
+      letter-spacing: 0.05em;
       color: var(--muted);
+      background: color-mix(in srgb, var(--panel-2) 84%, transparent);
     }
+
+    tr:last-child td { border-bottom: none; }
+
+    .status-pass { color: var(--ok); font-weight: 700; }
+    .status-fail { color: var(--bad); font-weight: 700; }
+    .mono { font-family: "JetBrains Mono", Consolas, monospace; font-size: 13px; }
 
     .footer-note {
-      margin-top: 20px;
-      border-top: 1px solid var(--border);
-      padding-top: 12px;
+      margin-top: 24px;
       color: var(--muted);
       font-size: 13px;
-      font-family: "IBM Plex Mono", Consolas, monospace;
+      line-height: 1.5;
     }
 
-    @media (max-width: 1020px) {
+    @media (max-width: 1080px) {
+      .card, .card.half { grid-column: span 12; }
       .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
 
-    @media (max-width: 900px) {
-      .card.half, .card.third { grid-column: span 12; }
-      .hero { padding: 22px 18px 20px; }
-      .container { padding: 20px 14px 44px; }
-    }
-
-    @media (max-width: 560px) {
+    @media (max-width: 640px) {
       .metrics { grid-template-columns: 1fr; }
+      .hero { padding: 16px; border-radius: 16px; }
+      .wrap { padding: 16px 10px 48px; }
     }
   </style>
 </head>
 <body>
-  <main class="container">
+  <main class="wrap">
     <div class="topbar">
-      <div class="brandline">
-        <a class="badge" href="https://github.com/dr3d/prethinker">prethinker repository</a>
-        <a class="badge" href="run-reports-hub.html">run reports explorer</a>
-        <a class="badge" href="https://dr3d.github.io/prolog-reasoning/docs-hub.html">sibling prolog-reasoning hub</a>
+      <div class="chips">
+        <a class="chip" href="https://github.com/dr3d/prethinker/blob/main/README.md">Project README</a>
+        <a class="chip" href="run-reports-hub.html">Run Reports Explorer</a>
+        <a class="chip" href="rungs/index.html">Rung Archive</a>
       </div>
-      <button id="theme-toggle" class="theme-btn" type="button" aria-label="Toggle dark and light theme">theme: light</button>
+      <button id="theme-toggle" class="theme-toggle" type="button">theme: light</button>
     </div>
 
     <section class="hero">
-      <h1>Prethinker Documentation Hub</h1>
-      <p class="hero-pitch">Prethinker is a governed write layer between natural language and a deterministic knowledge base. The LLM proposes; it does not get to commit.</p>
-      <p class="hero-subhead">Built to catch the failure mode where an LLM sounds right, writes the wrong thing, and narrates the corruption confidently.</p>
+      <h1>Prethinker Docs Hub<br />Results First, Archive Second.</h1>
+      <p>
+        This hub now prioritizes <strong>current execution reality</strong>: gate stability, shadow A/B status, and wild-story ingestion pressure.
+        Older ladder/report surfaces remain available, but they are demoted to archive.
+      </p>
+      <p class="lede" style="margin-top:6px;">
+        Note: any link to a <code>.md</code> file opens on the GitHub repo page for reliable rendering from GitHub Pages.
+      </p>
       <div class="hero-actions">
-        <a class="btn primary" href="../EXPLAINER.md">Read The Explainer</a>
-        <a class="btn alt" href="reports/progress_memory_contamination_ablation_with_progress_20260412.html">See The Contamination Ablation</a>
-        <a class="btn" href="run-reports-hub.html">Browse Run Reports</a>
-        <a class="btn" href="WILD_MODE.md">Read Wild Mode</a>
-        <a class="btn" href="PROGRESS.md">Read Science Progress</a>
+        <a class="btn primary" href="https://github.com/dr3d/prethinker/blob/main/docs/PROGRESS.md">Open PROGRESS.md</a>
+        <a class="btn cool" href="https://github.com/dr3d/prethinker/blob/main/docs/FOCUS_EXECUTION_PLAN.md">Open Focus Plan</a>
+        <a class="btn" href="research-results.html">Research Results</a>
       </div>
-      <div class="hero-action-notes">
-        <div class="hero-action-note"><strong>→ Read the explainer</strong> — Six failure modes from months of frontier runs, and the architecture that addresses them. <em>(15 min read)</em></div>
-        <div class="hero-action-note"><strong>→ See the contamination ablation</strong> — Side-by-side runs with and without the progress-memory control plane. The clearest evidence that interception matters. <em>(2 min)</em></div>
-        <div class="hero-action-note"><strong>→ Browse run reports</strong> — Full run history across wild tests, roundtrip artifacts, and regression ladder sweeps. <em>(deep)</em></div>
-        <div class="hero-action-note"><strong>→ Read wild mode</strong> — Why we harvest real transcripts, what failed, and how failures become new rungs. <em>(8 min)</em></div>
-        <div class="hero-action-note"><strong>→ Read science progress</strong> — Hard metrics from the latest Goldilocks cycle, what improved, and what still breaks. <em>(8 min)</em></div>
-      </div>
-      <p class="hero-status">Active research project. Current phase: real-world ingestion pressure with ladder-backed regression safety. Updated April 2026.</p>
-      <div class="jump-row">
-        <a class="jump" href="#start">start here</a>
-        <a class="jump" href="#frontier">rollups</a>
-        <a class="jump" href="#showcase">media</a>
-        <a class="jump" href="#tracking">tracking</a>
-        <a class="jump" href="#artifacts">artifacts</a>
-        <a class="jump" href="#feeds">raw feeds</a>
+      <div class="jump">
+        <a href="#status">Status</a>
+        <a href="#evidence">Evidence</a>
+        <a href="#media">Media</a>
+        <a href="#data">Data</a>
+        <a href="#archive">Archive</a>
       </div>
       <div class="metrics">
         <div class="metric">
-          <div class="k">Runs</div>
+          <div class="k">Focus Gate</div>
+          <div id="m-gate" class="v">-</div>
+          <div class="hint">Consecutive full-pass baseline cycles</div>
+        </div>
+        <div class="metric">
+          <div class="k">Shadow A/B</div>
+          <div id="m-shadow" class="v">-</div>
+          <div class="hint">Net-positive required before active</div>
+        </div>
+        <div class="metric">
+          <div class="k">Glitch Stress</div>
+          <div id="m-glitch" class="v">-</div>
+          <div class="hint">Raw full / paragraph / line stability</div>
+        </div>
+        <div class="metric">
+          <div class="k">Historical Runs</div>
           <div id="m-runs" class="v">-</div>
-          <div class="hint">historical captured runs</div>
-          <div id="m-runs-matrix" class="hint">matrix slice: -</div>
-        </div>
-        <div class="metric">
-          <div class="k">Pass Rate</div>
-          <div id="m-pass" class="v">-</div>
-          <div class="hint">historical run pass rate</div>
-          <div id="m-pass-matrix" class="hint">matrix slice: -</div>
-        </div>
-        <div class="metric">
-          <div class="k">Prompt Versions</div>
-          <div id="m-prompts" class="v">-</div>
-          <div class="hint">tracked system prompt IDs</div>
-        </div>
-        <div class="metric">
-          <div class="k">Latest Run</div>
-          <div id="m-latest" class="v" style="font-size:18px;">-</div>
-          <div class="hint">most recent captured scenario</div>
+          <div class="hint" id="m-runs-hint">From docs/data/historical_metrics.json</div>
         </div>
       </div>
     </section>
 
-    <h2 id="start" class="section-title">Start Here</h2>
-    <p class="section-lede">Current phase entry points: science rollups, real-world stress tests, and the latest concrete artifacts.</p>
-    <section class="grid">
-      <article class="card half">
-        <span class="label">primary surface</span>
-        <h3>Run Reports Explorer</h3>
-        <p>The old <code>docs/index.html</code> experience now lives here intact: filters, per-run report links, and prompt-evolution table.</p>
-        <div class="actions">
-          <a class="btn primary" href="run-reports-hub.html">Open Explorer</a>
-          <a class="btn" href="data/runs_manifest.json">Runs Manifest JSON</a>
-        </div>
-      </article>
-
-      <article class="card half">
-        <span class="label">phase status</span>
-        <h3>Real-World Program + Regression Ladder</h3>
-        <p>The ladder remains as regression infrastructure, but current discovery work is centered on real-world ingestion and hard-failure harvesting.</p>
-        <div class="actions">
-          <a class="btn primary" href="PROGRESS.md">Science Progress</a>
-          <a class="btn" href="WILD_MODE.md">Wild Mode</a>
-          <a class="btn" href="rungs/index.html">Regression Ladder</a>
-        </div>
-      </article>
-
-      <article class="card half">
-        <span class="label">visual snapshots</span>
-        <h3>Progress Cards And Learnings</h3>
-        <p>Compact cards for utterance to JSON/KB output, plus run-by-run notes on parser behavior, ambiguity handling, and prompt/runtime changes.</p>
-        <div class="actions">
-          <a class="btn primary" href="progress_cards.html">Open Progress Cards</a>
-          <a class="btn" href="run-learnings.md">Open Learnings Log</a>
-        </div>
-      </article>
-
-      <article class="card half">
-        <span class="label">story roundtrip</span>
-        <h3>Goldilocks Demo</h3>
-        <p>Watch a story get ingested into KB form, then reconstructed from KB content alone as a baseline roundtrip artifact.</p>
-        <div class="actions">
-          <a class="btn primary" href="goldilocks-roundtrip.html">Open Demo</a>
-          <a class="btn" href="data/roundtrip/goldilocks_roundtrip_generated_kb.pl">KB Artifact</a>
-        </div>
-      </article>
-
-      <article class="card half">
-        <span class="label">control plane</span>
-        <h3>Clarification Eagerness + Q&amp;A</h3>
-        <p>Current control-plane contract and CE behavior workstream, including served-LLM clarification routing and confirmation-gated writes.</p>
-        <div class="actions">
-          <a class="btn primary" href="prethink_control_plane_contract.md">Control-Plane Contract</a>
-          <a class="btn" href="data/roundtrip/goldilocks_roundtrip_run.json">Latest Goldilocks Run</a>
-        </div>
-      </article>
-
-      <article class="card half">
-        <span class="label">public narrative</span>
-        <h3>Founder Explainer</h3>
-        <p>Current long-form explainer draft for outside readers: latest linguistic pitfalls, GIC mechanism details, memory split rationale, and autonomous ladder process.</p>
-        <div class="actions">
-          <a class="btn primary" href="../EXPLAINER.md">Open EXPLAINER.md</a>
-          <a class="btn" href="PROGRESS.md">Science Progress</a>
-          <a class="btn" href="FOCUS_EXECUTION_PLAN.md">Focus Plan</a>
-          <a class="btn" href="KB_INTERROGATOR.md">KB Interrogator</a>
-          <a class="btn" href="English-to-Prolog.md">English-to-Prolog</a>
-          <a class="btn" href="assets/prethinker-control-plane-infographic-v2.png">Control-Plane Graphic</a>
-        </div>
-      </article>
-
-      <article class="card half">
-        <span class="label">frontier realism</span>
-        <h3>Out In The Wild Program</h3>
-        <p>How we pressure-test Prethinker with real-world discourse, what we learned from the latest excursion runs, and how repeated misses become promoted failure rungs.</p>
-        <div class="actions">
-          <a class="btn primary" href="WILD_MODE.md">Wild Mode Article</a>
-          <a class="btn" href="WILD_FAILURE_ISOLATION.md">Failure Isolation</a>
-          <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/stories/excursions/HN_MIDGROUND_PACK_V2.md">HN Midground Pack v2</a>
-          <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/stories/excursions/HN_MIDGROUND_PACK_V3.md">HN Midground Pack v3</a>
-        </div>
-      </article>
-
-      <article class="card half">
-        <span class="label">demo portfolio</span>
-        <h3>Demo Playbook (10 + merged)</h3>
-        <p>High-impact showcase scenarios: murder wall, policy stress, story interrogation, commitments extraction, plus Prethinker-native governance demos and runnable starter packs.</p>
-        <div class="actions">
-          <a class="btn primary" href="DEMO_PLAYBOOK.md">Open Demo Playbook</a>
-          <a class="btn" href="reports/demo_01_meeting_commitment_extractor.html">Demo 01 transcript</a>
-          <a class="btn" href="reports/demo_02_policy_stress_test_machine.html">Policy demo transcript</a>
-          <a class="btn" href="reports/demo_03_story_world_interrogator.html">Demo 03 transcript</a>
-          <a class="btn" href="reports/demo_04_reimbursement_violation_check.html">Demo 04 transcript</a>
-          <a class="btn" href="reports/demo_05_time_loop_carnival.html">Demo 05 transcript</a>
-          <a class="btn" href="data/demos/demo_02_policy_stress_test_machine.json">Policy demo scenario</a>
-          <a class="btn" href="data/demos/demo_05_time_loop_carnival.json">Time-loop scenario</a>
-        </div>
-      </article>
+    <section id="status" class="section">
+      <h2>Current Status</h2>
+      <p class="lede">The front door points to active work and decisions, not old experiment sprawl.</p>
+      <div class="grid">
+        <article class="card">
+          <span class="tag">Now</span>
+          <h3>Science Progress</h3>
+          <p>Latest execution deltas, wins, blockers, and concrete next moves.</p>
+          <div class="actions">
+            <a class="btn primary" href="https://github.com/dr3d/prethinker/blob/main/docs/PROGRESS.md">Open</a>
+          </div>
+        </article>
+        <article class="card">
+          <span class="tag">Process</span>
+          <h3>Focus Execution Plan</h3>
+          <p>Single command path, gate policy, shadow promotion rules, and UMLS staging plan.</p>
+          <div class="actions">
+            <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/FOCUS_EXECUTION_PLAN.md">Open</a>
+          </div>
+        </article>
+        <article class="card">
+          <span class="tag">Results</span>
+          <h3>Research Results Page</h3>
+          <p>Rollups, scenario-level tables, and direct links to the underlying research feeds.</p>
+          <div class="actions">
+            <a class="btn cool" href="research-results.html">Open</a>
+          </div>
+        </article>
+      </div>
     </section>
 
-    <h2 id="frontier" class="section-title">Current Rollups</h2>
-    <p class="section-lede">Current scientific rollups and real-world pressure evidence. Ladder links are kept as regression references.</p>
-    <section class="grid">
-      <article class="card third">
-        <h3>Science Progress</h3>
-        <p>Latest honest scientific assessment: what improved, what still fails, and what experiments come next.</p>
-        <div class="actions">
-          <a class="btn primary" href="PROGRESS.md">Open Progress</a>
-          <a class="btn" href="data/roundtrip/goldilocks_roundtrip_run.json">Latest Goldilocks Run JSON</a>
-        </div>
-      </article>
-
-      <article class="card third">
-        <h3>Out In The Wild</h3>
-        <p>Real-world ingestion program, failure promotion loop, and hard examples harvested outside synthetic-only scenarios.</p>
-        <div class="actions">
-          <a class="btn primary" href="WILD_MODE.md">Wild Mode</a>
-          <a class="btn" href="WILD_FAILURE_ISOLATION.md">Failure Isolation</a>
-        </div>
-      </article>
-
-      <article class="card third">
-        <h3>Track Scoreboard</h3>
-        <p>Compact pass/fail rollup across current tracked suites, including frontier and baseline slices.</p>
-        <div class="actions">
-          <a class="btn primary" href="TRACK_SCOREBOARD.md">Open Scoreboard</a>
-          <a class="btn" href="data/tracks/gate_ladder_frontier_same_model_latest.json">Latest Baseline JSON</a>
-        </div>
-      </article>
-
-      <article class="card wide">
-        <h3>Regression Ladder Archive</h3>
-        <p>Phase-1 ladder artifacts remain available for regression and forensic replay; they are no longer the only progress surface.</p>
-        <div class="actions">
-          <a class="btn primary" href="rungs/index.html">Open Ladder Index</a>
-          <a class="btn" href="rungs/rung_449_frontier_multibind_uncle_query.html">rung_449</a>
-          <a class="btn" href="run-reports-hub.html">Run Reports Explorer</a>
-        </div>
-      </article>
+    <section id="evidence" class="section">
+      <h2>Evidence</h2>
+      <p class="lede">High-value artifacts for understanding what works now and where the rough edges remain.</p>
+      <div class="grid">
+        <article class="card half">
+          <span class="tag">Wild Audit</span>
+          <h3>Glitch Raw Story Audit</h3>
+          <p>Raw blob -> pipeline behavior -> interrogator grading in one human-readable artifact.</p>
+          <div class="actions">
+            <a class="btn primary" href="raw-story-audit-glitch.html">Audit HTML</a>
+            <a class="btn" href="glitch-in-the-airlock-roundtrip.html">Roundtrip</a>
+            <a class="btn" href="glitch-in-the-airlock-interrogation.html">Interrogation</a>
+          </div>
+        </article>
+        <article class="card half">
+          <span class="tag">Narrative Stress</span>
+          <h3>Goldilocks Roundtrip</h3>
+          <p>Input story, generated <code>kb.pl</code>, and reconstructed narrative from KB-only evidence.</p>
+          <div class="actions">
+            <a class="btn primary" href="goldilocks-roundtrip.html">Roundtrip HTML</a>
+            <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/data/roundtrip/goldilocks_roundtrip_generated_kb.pl">KB</a>
+            <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/data/roundtrip/goldilocks_roundtrip_reconstructed_story.md">Rebuild</a>
+          </div>
+        </article>
+        <article class="card half">
+          <span class="tag">Mechanism</span>
+          <h3>Interrogator + MITM Contract</h3>
+          <p>How deterministic ingest, clarification, commit, and exam loops are wired and interpreted.</p>
+          <div class="actions">
+            <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/KB_INTERROGATOR.md">KB Interrogator</a>
+            <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/prethink_control_plane_contract.md">Control Plane Contract</a>
+          </div>
+        </article>
+        <article class="card half">
+          <span class="tag">Visual</span>
+          <h3>Control Plane Artifact</h3>
+          <p>Diagram surface for stakeholder explainers and technical onboarding.</p>
+          <div class="actions">
+            <a class="btn" href="assets/prethinker-control-plane-infographic-v2.png">PNG v2</a>
+            <a class="btn" href="assets/prethinker-control-plane-infographic.svg">SVG</a>
+          </div>
+        </article>
+      </div>
     </section>
 
-    <h2 id="showcase" class="section-title">Video + Audio Showcase</h2>
-    <p class="section-lede">AI-generated overview media. Video is prioritized when available; otherwise the panel falls back to audio-only playback.</p>
-    <section class="grid">
-      <article class="card wide">
-        <span class="label">featured media</span>
-        <h3>How PRETHINKER Protects AI Database Integrity</h3>
-        <p>This panel auto-discovers media in <code>docs/assets/</code>. MP4 renders as video first; MP3/M4A render as audio when no video exists.</p>
-        <div class="showcase-shell">
-          <div id="media-availability" class="mono">Checking available media formats...</div>
-          <video id="project-video" class="showcase-media" controls preload="metadata" hidden></video>
-          <audio id="project-audio" class="showcase-media" controls preload="metadata" hidden></audio>
-          <div id="media-links" class="actions"></div>
-          <div class="showcase-note">Supported formats: <code>.mp3</code>, <code>.m4a</code>, <code>.mp4</code>.</div>
-        </div>
-      </article>
+    <section id="media" class="section">
+      <h2>Media + Podcasts</h2>
+      <p class="lede">Manifest-driven media cards with direct embedded playback and download links.</p>
+      <div class="card wide">
+        <span class="tag">Showcase</span>
+        <h3>Asset Feed</h3>
+        <p id="media-status">Loading media from <code>assets/media_manifest.json</code>...</p>
+        <div id="media-grid" class="media-grid"></div>
+      </div>
     </section>
 
-    <h2 id="tracking" class="section-title">Tracking Snapshot</h2>
-    <p class="section-lede">Live pull from the published manifest files in this docs folder.</p>
-    <section class="grid">
-      <article class="card half">
-        <h3>Latest Runs</h3>
-        <p>Newest five runs from <code>data/runs_manifest.json</code>.</p>
-        <div class="table-wrap">
+    <section id="data" class="section">
+      <h2>Live Data Snapshot</h2>
+      <p class="lede">The latest runs and feed pointers that drive downstream analysis pages.</p>
+      <div class="grid">
+        <article class="card wide">
+          <span class="tag">Latest Runs</span>
+          <h3>Recent Manifest Rows</h3>
           <table>
             <thead>
               <tr>
                 <th>Finished (UTC)</th>
                 <th>Scenario</th>
                 <th>Status</th>
-                <th>Open</th>
+                <th>Artifact</th>
               </tr>
             </thead>
-            <tbody id="latest-runs">
-              <tr><td colspan="4" class="mono">Live run data appears after load.</td></tr>
+            <tbody id="latest-runs-body">
+              <tr><td colspan="4" class="mono">loading...</td></tr>
             </tbody>
           </table>
-        </div>
-      </article>
-
-      <article class="card half">
-        <h3>Prompt Leaders</h3>
-        <p>Top prompt versions by run count from <code>data/prompt_versions.json</code>.</p>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Prompt</th>
-                <th>Runs</th>
-                <th>Pass Rate</th>
-                <th>Open</th>
-              </tr>
-            </thead>
-            <tbody id="prompt-leaders">
-              <tr><td colspan="4" class="mono">Live prompt data appears after load.</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </article>
+          <div class="actions">
+            <a class="btn" href="research-results.html">Research Results</a>
+            <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/data/runs_manifest.json">runs_manifest.json</a>
+            <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/data/scenario_progress.json">scenario_progress.json</a>
+            <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/data/runs_curated.json">runs_curated.json</a>
+          </div>
+        </article>
+      </div>
     </section>
 
-    <h2 id="artifacts" class="section-title">Artifacts And Collections</h2>
-    <p class="section-lede">Direct collections for generated HTML artifacts and canonical JSON outputs.</p>
-    <section class="grid">
-      <article class="card third">
-        <h3>Run Explorer + JSON Corpus</h3>
-        <p>Published docs stay HTML-first while run JSON is linked from repo paths (<code>kb_runs*</code>) and summarized by historical metrics.</p>
-        <div class="actions">
-          <a class="btn primary" href="run-reports-hub.html">Open Explorer</a>
-          <a class="btn" href="data/runs_manifest.json">runs_manifest.json</a>
-          <a class="btn" href="data/scenario_progress.json">scenario_progress.json</a>
-        </div>
-      </article>
-
-      <article class="card third">
-        <h3>KB Snapshots</h3>
-        <p>Rendered KB pages used as quick inspection surfaces for named ontology stores.</p>
-        <div class="actions">
-          <a class="btn" href="kb/people_core.html">people_core</a>
-          <a class="btn" href="kb/people_ladder.html">people_ladder</a>
-          <a class="btn" href="kb/people_ladder_tune.html">people_ladder_tune</a>
-        </div>
-      </article>
-
-      <article class="card third">
-        <h3>Roundtrip Data</h3>
-        <p>Input story, generated KB, reconstructed story, and raw run JSON for narrative roundtrip analysis.</p>
-        <div class="actions">
-          <a class="btn" href="data/roundtrip/goldilocks_roundtrip_input_story.md">input</a>
-          <a class="btn" href="data/roundtrip/goldilocks_roundtrip_generated_kb.pl">kb.pl</a>
-          <a class="btn" href="data/roundtrip/goldilocks_roundtrip_reconstructed_story.md">rebuild</a>
-        </div>
-      </article>
-    </section>
-
-    <h2 id="feeds" class="section-title">Raw Feeds</h2>
-    <p class="section-lede">Source JSON feeds used by the docs rendering scripts and manual analysis.</p>
-    <section class="grid">
-      <article class="card wide">
-        <div class="actions">
-          <a class="btn primary" href="data/runs_manifest.json">runs_manifest.json</a>
-          <a class="btn alt" href="data/prompt_versions.json">prompt_versions.json</a>
-          <a class="btn" href="https://github.com/dr3d/prethinker/tree/main/kb_runs" target="_blank" rel="noreferrer">kb_runs/ directory</a>
-          <a class="btn" href="https://github.com/dr3d/prethinker/tree/main/docs/prompts" target="_blank" rel="noreferrer">prompts/ snapshots</a>
-          <a class="btn" href="https://github.com/dr3d/prethinker">repo root</a>
-        </div>
-      </article>
+    <section id="archive" class="section">
+      <h2>Archive + Tooling</h2>
+      <p class="lede">High-volume explorer surfaces and historical artifacts live here.</p>
+      <div class="grid">
+        <article class="card">
+          <span class="tag">Explorer</span>
+          <h3>Run Reports Hub</h3>
+          <p>Full run explorer across published HTML reports and prompt snapshots.</p>
+          <div class="actions"><a class="btn" href="run-reports-hub.html">Open</a></div>
+        </article>
+        <article class="card">
+          <span class="tag">Cards</span>
+          <h3>Progress Cards</h3>
+          <p>Compact per-run cards and learning notes from prior phases.</p>
+          <div class="actions"><a class="btn" href="progress_cards.html">Open</a></div>
+        </article>
+        <article class="card">
+          <span class="tag">Regression</span>
+          <h3>Rungs Archive</h3>
+          <p>Ladder artifacts retained for replay, forensic checks, and regression safety.</p>
+          <div class="actions"><a class="btn" href="rungs/index.html">Open</a></div>
+        </article>
+      </div>
     </section>
 
     <div class="footer-note">
-      GitHub Pages root for this repo: <a href="https://dr3d.github.io/prethinker/">https://dr3d.github.io/prethinker/</a><br />
-      This hub intentionally mirrors the structure of the sibling <a href="https://dr3d.github.io/prolog-reasoning/docs-hub.html">prolog-reasoning docs hub</a> while focusing on semantic-parser evaluation artifacts.
+      Docs Hub refresh: April 15, 2026. This page is now results-first and links deep data via
+      <a href="research-results.html">Research Results</a> and <code>docs/data/*.json</code>.
     </div>
   </main>
 
   <script>
     (() => {
       const root = document.documentElement;
-      const btn = document.getElementById("theme-toggle");
       const key = "prethinker_docs_theme";
-      const repoBlobBase = "https://github.com/dr3d/prethinker/blob/main/";
-      const repoBase = "https://github.com/dr3d/prethinker";
-      const repoTabTarget = "prethinker-repo";
+      const btn = document.getElementById("theme-toggle");
 
-      function apply(theme) {
-        root.setAttribute("data-theme", theme);
-        if (btn) {
-          btn.textContent = theme === "dark" ? "theme: dark" : "theme: light";
-        }
+      function setTheme(t) {
+        root.setAttribute("data-theme", t);
+        if (btn) btn.textContent = `theme: ${t}`;
       }
 
-      const stored = window.localStorage.getItem(key);
-      if (stored === "dark" || stored === "light") {
-        apply(stored);
+      const saved = localStorage.getItem(key);
+      if (saved === "dark" || saved === "light") {
+        setTheme(saved);
       } else {
         const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-        apply(prefersDark ? "dark" : "light");
+        setTheme(prefersDark ? "dark" : "light");
       }
 
       if (btn) {
         btn.addEventListener("click", () => {
           const next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
-          apply(next);
-          window.localStorage.setItem(key, next);
+          setTheme(next);
+          localStorage.setItem(key, next);
         });
       }
 
-      function rewriteRepoArtifactLinksToGitHub() {
-        const repoName = "prethinker";
-        const currentPath = window.location.pathname || "";
-        const marker = "/docs/index.html";
-        const markerIdx = currentPath.indexOf(marker);
-        const repoPrefix = markerIdx >= 0 ? currentPath.slice(0, markerIdx + 1) : "/";
-        const anchors = document.querySelectorAll("a[href]");
-        for (const anchor of anchors) {
-          const rawHref = anchor.getAttribute("href");
-          if (!rawHref) continue;
-          if (/^mailto:/i.test(rawHref) || rawHref.startsWith("#")) continue;
-          if (/^https?:/i.test(rawHref)) {
-            try {
-              const parsedAbs = new URL(rawHref, window.location.href);
-              if (parsedAbs.href.startsWith(repoBase)) {
-                anchor.target = repoTabTarget;
-                anchor.removeAttribute("rel");
-              }
-            } catch (_) {}
-            continue;
-          }
-
-          let resolvedPath = "";
-          let resolvedHash = "";
-          try {
-            const parsed = new URL(rawHref, window.location.href);
-            const path = (parsed.pathname || "").replace(/\\/g, "/");
-            const lowerPath = path.toLowerCase();
-            if (!(lowerPath.endsWith(".md") || lowerPath.endsWith(".json") || lowerPath.endsWith(".pl"))) continue;
-            resolvedHash = parsed.hash || "";
-            if (path.includes(`/${repoName}/docs/`)) {
-              resolvedPath = path.split(`/${repoName}/`).pop() || "";
-            } else if (path.startsWith(`/${repoName}/`)) {
-              const afterRepo = path.slice(`/${repoName}/`.length);
-              resolvedPath = afterRepo.startsWith("docs/") ? afterRepo : `docs/${afterRepo}`;
-            } else if (path.includes(`/${repoName}/`)) {
-              const afterRepo = path.split(`/${repoName}/`).pop() || "";
-              resolvedPath = afterRepo.startsWith("docs/") ? afterRepo : `docs/${afterRepo}`;
-            } else if (path.startsWith(repoPrefix)) {
-              resolvedPath = path.slice(repoPrefix.length);
-            } else {
-              resolvedPath = path.replace(/^\/+/, "");
-            }
-
-            // Links authored as `kb_runs/...` in docs resolve to `/docs/kb_runs/...`
-            // in the browser URL, but the repository truth is at root `kb_runs/...`.
-            if (resolvedPath.startsWith("docs/kb_runs/")) {
-              resolvedPath = resolvedPath.slice("docs/".length);
-            } else if (resolvedPath.startsWith("docs/kb_runs_published/")) {
-              resolvedPath = resolvedPath.slice("docs/".length);
-            }
-          } catch (_) {
-            continue;
-          }
-
-          if (!resolvedPath) continue;
-          anchor.href = `${repoBlobBase}${resolvedPath}${resolvedHash}`;
-          anchor.target = repoTabTarget;
-          anchor.removeAttribute("rel");
-        }
-      }
-
-      rewriteRepoArtifactLinksToGitHub();
-
-      function pct(value) {
+      function fmtPct(value) {
         if (typeof value !== "number" || Number.isNaN(value)) return "-";
         return `${Math.round(value * 100)}%`;
       }
 
-      function fmtUtc(iso) {
-        if (!iso) return "-";
-        const d = new Date(iso);
-        if (Number.isNaN(d.getTime())) return iso;
+      function fmtUtc(v) {
+        if (!v) return "-";
+        const d = new Date(v);
+        if (Number.isNaN(d.getTime())) return String(v);
         return d.toISOString().slice(0, 16).replace("T", " ");
       }
 
-      function probeMedia(url, kind) {
-        return new Promise((resolve) => {
-          const el = document.createElement(kind);
-          let done = false;
-          const finish = (ok) => {
-            if (done) return;
-            done = true;
-            try {
-              el.pause();
-              el.removeAttribute("src");
-              el.load();
-            } catch (_) {}
-            resolve(ok);
-          };
-          el.preload = "metadata";
-          el.addEventListener("loadedmetadata", () => finish(true), { once: true });
-          el.addEventListener("canplay", () => finish(true), { once: true });
-          el.addEventListener("error", () => finish(false), { once: true });
-          setTimeout(() => finish(false), 2600);
-          el.src = url;
-          try {
-            el.load();
-          } catch (_) {
-            finish(false);
-          }
-        });
+      async function safeJson(url) {
+        try {
+          const res = await fetch(url, { cache: "no-store" });
+          if (!res.ok) return null;
+          return await res.json();
+        } catch (_) {
+          return null;
+        }
       }
 
-      async function setupShowcase() {
-        const availability = document.getElementById("media-availability");
-        const audio = document.getElementById("project-audio");
-        const video = document.getElementById("project-video");
-        const links = document.getElementById("media-links");
-        if (!availability || !audio || !video || !links) return;
-
-        const fallbackCatalog = [
-          {
-            title: "How PRETHINKER Protects AI Database Integrity",
-            base: "assets/How-PRETHINKER-Protects-AI-Database-Integrity"
-          },
-          {
-            title: "Sharp Memory Versus Mushy AI Fluency",
-            base: "assets/Sharp-Memory-Versus-Mushy-AI-Fluency"
-          },
-          {
-            title: "English as a Logic Programming Language",
-            base: "assets/English-as-a-Logic-Programming-Language"
-          },
-          {
-            title: "Fixing AI Hallucinations with Prolog",
-            base: "assets/Fixing-AI-Hallucinations-with-Prolog"
-          },
-          {
-            title: "Prethinker Trustworthy AI",
-            base: "assets/Prethinker-Trustworthy-AI"
-          }
-        ];
-
-        function inferLabel(src) {
-          const parts = String(src || "").split(".");
-          return parts.length > 1 ? parts.pop().toUpperCase() : "MEDIA";
-        }
-
-        function inferType(src, kind) {
-          const lower = String(src || "").toLowerCase();
-          if (lower.endsWith(".mp3")) return "audio/mpeg";
-          if (lower.endsWith(".m4a")) return "audio/mp4";
-          if (lower.endsWith(".mp4")) return "video/mp4";
-          return kind === "video" ? "video/mp4" : "audio/mpeg";
-        }
-
-        let manifestEntries = [];
-        try {
-          const manifestRes = await fetch("assets/media_manifest.json", { cache: "no-store" });
-          if (manifestRes.ok) {
-            const manifest = await manifestRes.json();
-            if (manifest && Array.isArray(manifest.entries)) {
-              manifestEntries = manifest.entries;
-            }
-          }
-        } catch (_) {}
-
-        const discovered = [];
-        if (manifestEntries.length) {
-          for (const entry of manifestEntries) {
-            const variants = Array.isArray(entry.variants) ? entry.variants : [];
-            const availableAudio = variants
-              .filter((v) => String(v.kind || "").toLowerCase() === "audio")
+      function normalizeManifestEntries(raw) {
+        if (!raw || !Array.isArray(raw.entries)) return [];
+        return raw.entries.map((entry) => {
+          const variants = Array.isArray(entry.variants) ? entry.variants : [];
+          return {
+            title: String(entry.title || entry.base || "Untitled"),
+            variants: variants
+              .filter((v) => v && v.src)
               .map((v) => ({
-                src: String(v.src || ""),
-                type: String(v.type || inferType(v.src, "audio")),
-                label: String(v.label || inferLabel(v.src))
-              }))
-              .filter((v) => v.src);
-            const availableVideo = variants
-              .filter((v) => String(v.kind || "").toLowerCase() === "video")
-              .map((v) => ({
-                src: String(v.src || ""),
-                type: String(v.type || inferType(v.src, "video")),
-                label: String(v.label || inferLabel(v.src))
-              }))
-              .filter((v) => v.src);
-            if (availableAudio.length || availableVideo.length) {
-              discovered.push({
-                title: String(entry.title || entry.base || "Untitled Media"),
-                audio: availableAudio,
-                video: availableVideo
-              });
-            }
-          }
-        } else {
-          for (const entry of fallbackCatalog) {
-            const audioCandidates = [
-              { src: `${entry.base}.mp3`, type: "audio/mpeg", label: "MP3" },
-              { src: `${entry.base}.m4a`, type: "audio/mp4", label: "M4A" }
-            ];
-            const videoCandidates = [
-              { src: `${entry.base}.mp4`, type: "video/mp4", label: "MP4" }
-            ];
-            const availableAudio = [];
-            for (const c of audioCandidates) {
-              if (await probeMedia(c.src, "audio")) availableAudio.push(c);
-            }
-            const availableVideo = [];
-            for (const c of videoCandidates) {
-              if (await probeMedia(c.src, "video")) availableVideo.push(c);
-            }
-            if (availableAudio.length || availableVideo.length) {
-              discovered.push({ title: entry.title, audio: availableAudio, video: availableVideo });
-            }
-          }
-        }
+                src: String(v.src),
+                kind: String(v.kind || "").toLowerCase(),
+                type: String(v.type || ""),
+                label: String(v.label || "").toUpperCase() || "MEDIA",
+              })),
+          };
+        }).filter((e) => e.variants.length > 0);
+      }
 
-        function loadEntry(item) {
-          audio.innerHTML = "";
-          video.innerHTML = "";
+      const manifestFallback = {
+        entries: [
+          { title: "English As A Logic Programming Language", variants: [{ src: "assets/English-as-a-Logic-Programming-Language.mp3", kind: "audio", type: "audio/mpeg", label: "MP3" }] },
+          { title: "Fixing AI Hallucinations With Prolog", variants: [{ src: "assets/Fixing-AI-Hallucinations-with-Prolog.mp3", kind: "audio", type: "audio/mpeg", label: "MP3" }] },
+          { title: "How PRETHINKER Protects AI Database Integrity", variants: [{ src: "assets/How-PRETHINKER-Protects-AI-Database-Integrity.mp3", kind: "audio", type: "audio/mpeg", label: "MP3" }] },
+          { title: "Neuro Symbolic Architecture Stops AI Hallucinations", variants: [{ src: "assets/Neuro-Symbolic-Architecture-Stops-AI-Hallucinations.mp3", kind: "audio", type: "audio/mpeg", label: "MP3" }] },
+          { title: "Prethinker Trustworthy AI", variants: [{ src: "assets/Prethinker-Trustworthy-AI.mp4", kind: "video", type: "video/mp4", label: "MP4" }] },
+          { title: "Sharp Memory Versus Mushy AI Fluency", variants: [{ src: "assets/Sharp-Memory-Versus-Mushy-AI-Fluency.mp3", kind: "audio", type: "audio/mpeg", label: "MP3" }] },
+        ],
+      };
 
-          if (item.video.length) {
-            for (const c of item.video) {
-              const source = document.createElement("source");
-              source.src = c.src;
-              source.type = c.type;
-              video.appendChild(source);
-            }
-            video.load();
-            video.hidden = false;
-          } else {
-            video.hidden = true;
-          }
-
-          if (!item.video.length && item.audio.length) {
-            for (const c of item.audio) {
-              const source = document.createElement("source");
-              source.src = c.src;
-              source.type = c.type;
-              audio.appendChild(source);
-            }
-            audio.load();
-            audio.hidden = false;
-          } else {
-            audio.hidden = true;
-          }
-
-          const labels = [...item.audio, ...item.video].map((c) => c.label).join(", ");
-          availability.textContent = `Loaded: ${item.title} (${labels})`;
-
-          links.innerHTML = "";
-          for (const entry of discovered) {
-            const a = document.createElement("a");
-            a.className = `btn${entry.title === item.title ? " primary" : ""}`;
-            a.href = "#showcase";
-            a.textContent = entry.title;
-            a.addEventListener("click", (ev) => {
-              ev.preventDefault();
-              loadEntry(entry);
-            });
-            links.appendChild(a);
-          }
-        }
-
-        if (!discovered.length) {
-          availability.textContent = "No media files found in docs/assets yet.";
-          audio.hidden = true;
-          video.hidden = true;
-          links.innerHTML = "";
+      function renderMedia(entries) {
+        const status = document.getElementById("media-status");
+        const host = document.getElementById("media-grid");
+        if (!status || !host) return;
+        host.innerHTML = "";
+        if (!entries.length) {
+          status.textContent = "No media assets found.";
           return;
         }
+        status.textContent = `Loaded ${entries.length} media entries.`;
+        for (const entry of entries) {
+          const card = document.createElement("article");
+          card.className = "media-card";
+          const title = document.createElement("h4");
+          title.textContent = entry.title;
+          card.appendChild(title);
 
-        const preferred = discovered.find((entry) => entry.video.length) || discovered[0];
-        loadEntry(preferred);
+          const videos = entry.variants.filter((v) => v.kind === "video");
+          const audios = entry.variants.filter((v) => v.kind === "audio");
+
+          if (videos.length) {
+            const v = document.createElement("video");
+            v.controls = true;
+            v.preload = "metadata";
+            for (const item of videos) {
+              const src = document.createElement("source");
+              src.src = item.src;
+              if (item.type) src.type = item.type;
+              v.appendChild(src);
+            }
+            card.appendChild(v);
+          }
+          if (audios.length) {
+            const a = document.createElement("audio");
+            a.controls = true;
+            a.preload = "metadata";
+            for (const item of audios) {
+              const src = document.createElement("source");
+              src.src = item.src;
+              if (item.type) src.type = item.type;
+              a.appendChild(src);
+            }
+            card.appendChild(a);
+          }
+
+          const actions = document.createElement("div");
+          actions.className = "actions";
+          for (const v of entry.variants) {
+            const a = document.createElement("a");
+            a.className = "btn";
+            a.href = v.src;
+            a.textContent = `${v.label || "FILE"} File`;
+            actions.appendChild(a);
+          }
+          card.appendChild(actions);
+          host.appendChild(card);
+        }
       }
 
-      async function load() {
-        const runsRes = await fetch("data/runs_manifest.json", { cache: "no-store" });
-        const promptsRes = await fetch("data/prompt_versions.json", { cache: "no-store" });
-        const historicalRes = await fetch("data/historical_metrics.json", { cache: "no-store" });
-        const matrixRes = await fetch("data/model_size_matrix_3x6_summary.json", { cache: "no-store" });
-        const runsDoc = await runsRes.json();
-        const promptsDoc = await promptsRes.json();
-        const historicalDoc = await historicalRes.json();
-        const matrixDoc = await matrixRes.json();
+      async function loadDashboard() {
+        const [rollup, historical, runsManifest, mediaManifest] = await Promise.all([
+          safeJson("data/research_rollup_latest.json"),
+          safeJson("data/historical_metrics.json"),
+          safeJson("data/runs_manifest.json"),
+          safeJson("assets/media_manifest.json"),
+        ]);
 
-        const runs = Array.isArray(runsDoc.runs) ? runsDoc.runs : [];
-        const prompts = Array.isArray(promptsDoc.prompt_versions) ? promptsDoc.prompt_versions : [];
-        const passed = runs.filter((r) => r && r.status === "passed").length;
-        const historicalRuns = Number(historicalDoc.runs_total || 0);
-        const historicalPassRate = Number(historicalDoc.run_pass_rate || 0);
-        const historicalLatest = historicalDoc.latest_scenario || "";
-        const matrixModels = Array.isArray(matrixDoc.models) ? matrixDoc.models : [];
-        const matrixTotal = matrixModels.reduce((acc, m) => acc + Number(m.overall_total || 0), 0);
-        const matrixPassed = matrixModels.reduce((acc, m) => acc + Number(m.overall_passes || 0), 0);
+        const gate = (rollup && rollup.focus_gate) ? rollup.focus_gate : null;
+        const shadow = (rollup && rollup.shadow_ab) ? rollup.shadow_ab : null;
+        const glitch = (rollup && rollup.glitch_focus) ? rollup.glitch_focus : null;
 
-        document.getElementById("m-runs").textContent = `${historicalRuns || runs.length}`;
-        document.getElementById("m-pass").textContent = historicalRuns ? `${Math.round(historicalPassRate * 100)}%` : (runs.length ? `${Math.round((passed / runs.length) * 100)}%` : "-");
-        document.getElementById("m-prompts").textContent = `${prompts.length}`;
-        document.getElementById("m-latest").textContent = historicalLatest || (runs.length ? (runs[0].scenario || "-") : "-");
-        document.getElementById("m-runs-matrix").textContent = matrixTotal ? `matrix slice: ${matrixTotal} runs` : "matrix slice: -";
-        document.getElementById("m-pass-matrix").textContent = matrixTotal ? `matrix slice: ${Math.round((matrixPassed / matrixTotal) * 100)}%` : "matrix slice: -";
+        if (gate && gate.reproducibility && typeof gate.reproducibility.consecutive_full_pass_cycles === "number") {
+          const current = gate.reproducibility.consecutive_full_pass_cycles;
+          const target = 5;
+          document.getElementById("m-gate").textContent = `${current}/${target}`;
+        } else {
+          document.getElementById("m-gate").textContent = "-";
+        }
+        document.getElementById("m-shadow").textContent = shadow ? (shadow.active_mode_blocked ? "Blocked" : "Ready") : "-";
+        if (glitch && glitch.scenario_stats) {
+          const full = glitch.scenario_stats.glitch_raw_full;
+          const para = glitch.scenario_stats.glitch_raw_paragraph;
+          const line = glitch.scenario_stats.glitch_raw_line;
+          const txt = [full?.pipeline_pass_rate, para?.pipeline_pass_rate, line?.pipeline_pass_rate]
+            .map((x) => (typeof x === "number" ? Math.round(x * 100) : "-"))
+            .join("/");
+          document.getElementById("m-glitch").textContent = txt;
+        } else {
+          document.getElementById("m-glitch").textContent = "-";
+        }
 
-        const latestBody = document.getElementById("latest-runs");
-        if (latestBody) {
-          latestBody.innerHTML = "";
-          const latest = runs.slice(0, 5);
-          if (!latest.length) {
-            latestBody.innerHTML = '<tr><td colspan="4" class="mono">no runs found</td></tr>';
+        if (historical) {
+          document.getElementById("m-runs").textContent = `${historical.runs_total ?? "-"}`;
+          document.getElementById("m-runs-hint").textContent = `Historical pass rate: ${fmtPct(Number(historical.run_pass_rate))}`;
+        }
+
+        const body = document.getElementById("latest-runs-body");
+        if (body) {
+          body.innerHTML = "";
+          const rows = runsManifest && Array.isArray(runsManifest.runs) ? runsManifest.runs.slice(0, 8) : [];
+          if (!rows.length) {
+            body.innerHTML = '<tr><td colspan="4" class="mono">Unable to load runs_manifest.json.</td></tr>';
           } else {
-            for (const run of latest) {
+            for (const run of rows) {
               const tr = document.createElement("tr");
-              const statusClass = run.status === "passed" ? "status-pass" : "status-fail";
-              const reportHref = run.report_html_rel || run.report_json_rel || "run-reports-hub.html";
+              const status = String(run.status || "-");
+              const cls = status === "passed" ? "status-pass" : "status-fail";
+              const href = run.report_html_rel || run.report_json_rel || "run-reports-hub.html";
               tr.innerHTML = `
                 <td>${fmtUtc(run.finished_utc)}</td>
                 <td>${run.scenario || "-"}</td>
-                <td class="${statusClass}">${run.status || "-"}</td>
-                <td><a href="${reportHref}">open</a></td>
+                <td class="${cls}">${status}</td>
+                <td><a href="${href}">open</a></td>
               `;
-              latestBody.appendChild(tr);
+              body.appendChild(tr);
             }
           }
         }
 
-        const promptBody = document.getElementById("prompt-leaders");
-        if (promptBody) {
-          promptBody.innerHTML = "";
-          const leaders = [...prompts].sort((a, b) => (b.runs_total || 0) - (a.runs_total || 0)).slice(0, 5);
-          if (!leaders.length) {
-            promptBody.innerHTML = '<tr><td colspan="4" class="mono">no prompt versions found</td></tr>';
-          } else {
-            for (const p of leaders) {
-              const tr = document.createElement("tr");
-              const promptId = p.prompt_id || "-";
-              const href = p.prompt_snapshot_rel
-                ? `${repoBlobBase}docs/${String(p.prompt_snapshot_rel).replace(/^\/+/, "")}`
-                : "run-reports-hub.html#prompts";
-              tr.innerHTML = `
-                <td>${promptId}</td>
-                <td>${p.runs_total ?? "-"}</td>
-                <td>${pct(p.pass_rate)}</td>
-                <td><a href="${href}"${String(href).startsWith("http") ? ` target="${repoTabTarget}"` : ""}>open</a></td>
-              `;
-              promptBody.appendChild(tr);
-            }
-          }
-        }
+        const mediaEntries = normalizeManifestEntries(mediaManifest || manifestFallback);
+        renderMedia(mediaEntries);
       }
 
-      Promise.all([setupShowcase(), load()]).catch(() => {
-        document.getElementById("m-runs").textContent = "n/a";
-        document.getElementById("m-pass").textContent = "n/a";
-        document.getElementById("m-prompts").textContent = "n/a";
-        document.getElementById("m-latest").textContent = "n/a";
-        document.getElementById("m-runs-matrix").textContent = "matrix slice: n/a";
-        document.getElementById("m-pass-matrix").textContent = "matrix slice: n/a";
-        const latestBody = document.getElementById("latest-runs");
-        const promptBody = document.getElementById("prompt-leaders");
-        if (latestBody) latestBody.innerHTML = '<tr><td colspan="4" class="mono">unable to load runs manifest</td></tr>';
-        if (promptBody) promptBody.innerHTML = '<tr><td colspan="4" class="mono">unable to load prompt versions</td></tr>';
+      loadDashboard().catch(() => {
+        document.getElementById("media-status").textContent = "Unable to load media and telemetry feeds.";
+        renderMedia(normalizeManifestEntries(manifestFallback));
       });
     })();
   </script>
 </body>
 </html>
-

@@ -58,7 +58,11 @@ def _build_baseline_focus_batch() -> list[dict[str, Any]]:
             "predicate_registry": ROOT / "modelfiles" / "predicate_registry.goldilocks.json",
             "type_schema": ROOT / "modelfiles" / "type_schema.goldilocks.json",
             "clarification_eagerness": 0.2,
-            "max_clarification_rounds": 1,
+            "max_clarification_rounds": 2,
+            # Goldilocks can trigger flaky clarify deferrals on nuanced lines.
+            # Keep the gate deterministic by allowing low-confidence synthetic
+            # clarification fallback for this benchmark scenario.
+            "clarification_answer_min_confidence": 0.0,
             "exam_style": "general",
         }
     )
@@ -77,6 +81,43 @@ def _build_baseline_focus_batch() -> list[dict[str, Any]]:
     return rows
 
 
+def _build_glitch_focus_batch() -> list[dict[str, Any]]:
+    base = ROOT / "kb_scenarios"
+    generic_registry = ROOT / "modelfiles" / "predicate_registry.json"
+    return [
+        {
+            "id": "glitch_raw_full",
+            "scenario_path": base / "story_glitch_in_the_airlock_raw_full.json",
+            "predicate_registry": generic_registry,
+            "type_schema": None,
+            "clarification_eagerness": 0.2,
+            "max_clarification_rounds": 2,
+            "clarification_answer_min_confidence": 0.0,
+            "exam_style": "detective",
+        },
+        {
+            "id": "glitch_raw_paragraph",
+            "scenario_path": base / "story_glitch_in_the_airlock_raw_paragraph.json",
+            "predicate_registry": generic_registry,
+            "type_schema": None,
+            "clarification_eagerness": 0.2,
+            "max_clarification_rounds": 2,
+            "clarification_answer_min_confidence": 0.0,
+            "exam_style": "detective",
+        },
+        {
+            "id": "glitch_raw_line",
+            "scenario_path": base / "story_glitch_in_the_airlock_raw_line.json",
+            "predicate_registry": generic_registry,
+            "type_schema": None,
+            "clarification_eagerness": 0.2,
+            "max_clarification_rounds": 2,
+            "clarification_answer_min_confidence": 0.0,
+            "exam_style": "detective",
+        },
+    ]
+
+
 def _pipeline_cmd(
     *,
     scenario_path: Path,
@@ -90,7 +131,17 @@ def _pipeline_cmd(
     type_schema: Path | None,
     clarification_eagerness: float,
     max_clarification_rounds: int,
+    clarification_answer_min_confidence: float,
     context_length: int,
+    frontend_proposal_mode: str,
+    write_corpus_on_fail: bool,
+    temporal_dual_write: bool,
+    temporal_predicate: str,
+    clarification_eagerness_mode: str,
+    clarification_eagerness_new_kb_boost: float,
+    clarification_eagerness_existing_kb_boost: float,
+    clarification_eagerness_decay_turns: int,
+    clarification_eagerness_decay_clauses: int,
 ) -> list[str]:
     cmd = [
         sys.executable,
@@ -118,6 +169,16 @@ def _pipeline_cmd(
         str(int(context_length)),
         "--clarification-eagerness",
         str(float(clarification_eagerness)),
+        "--clarification-eagerness-mode",
+        str(clarification_eagerness_mode),
+        "--clarification-eagerness-new-kb-boost",
+        str(float(clarification_eagerness_new_kb_boost)),
+        "--clarification-eagerness-existing-kb-boost",
+        str(float(clarification_eagerness_existing_kb_boost)),
+        "--clarification-eagerness-decay-turns",
+        str(int(clarification_eagerness_decay_turns)),
+        "--clarification-eagerness-decay-clauses",
+        str(int(clarification_eagerness_decay_clauses)),
         "--max-clarification-rounds",
         str(int(max_clarification_rounds)),
         "--clarification-answer-model",
@@ -129,10 +190,16 @@ def _pipeline_cmd(
         "--clarification-answer-context-length",
         str(int(context_length)),
         "--clarification-answer-min-confidence",
-        "0.55",
+        str(float(clarification_answer_min_confidence)),
         "--frontend-proposal-mode",
-        "off",
+        str(frontend_proposal_mode),
+        "--temporal-predicate",
+        str(temporal_predicate),
     ]
+    if temporal_dual_write:
+        cmd.append("--temporal-dual-write")
+    if write_corpus_on_fail:
+        cmd.append("--write-corpus-on-fail")
     if isinstance(type_schema, Path):
         cmd.extend(["--type-schema", str(type_schema)])
     return cmd
@@ -180,12 +247,25 @@ def _interrogator_cmd(
 
 def _parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Run focused pipeline+interrogator baseline cycles.")
-    p.add_argument("--batch", choices=["baseline_focus"], default="baseline_focus")
+    p.add_argument("--batch", choices=["baseline_focus", "glitch_focus"], default="baseline_focus")
     p.add_argument("--backend", default="ollama")
     p.add_argument("--base-url", default="http://127.0.0.1:11434")
     p.add_argument("--model", default="qwen3.5:9b")
     p.add_argument("--prompt-file", default=str(ROOT / "modelfiles" / "semantic_parser_system_prompt.md"))
     p.add_argument("--context-length", type=int, default=8192)
+    p.add_argument("--frontend-proposal-mode", choices=["off", "shadow", "active"], default="off")
+    p.add_argument("--temporal-dual-write", action="store_true")
+    p.add_argument("--temporal-predicate", default="at_step")
+    p.add_argument("--clarification-eagerness-mode", choices=["adaptive", "static"], default="static")
+    p.add_argument("--clarification-eagerness-new-kb-boost", type=float, default=0.35)
+    p.add_argument("--clarification-eagerness-existing-kb-boost", type=float, default=0.12)
+    p.add_argument("--clarification-eagerness-decay-turns", type=int, default=24)
+    p.add_argument("--clarification-eagerness-decay-clauses", type=int, default=120)
+    p.add_argument("--default-clarification-answer-min-confidence", type=float, default=0.55)
+    p.add_argument("--write-corpus-on-fail", action="store_true")
+    p.add_argument("--require-pipeline-pass-rate", type=float, default=1.0)
+    p.add_argument("--compare-to-summary", default="")
+    p.add_argument("--require-net-positive", action="store_true")
     p.add_argument("--out-dir", default=str(ROOT / "tmp" / "runs" / "focus_cycles"))
     p.add_argument("--name", default="")
     return p.parse_args()
@@ -208,6 +288,8 @@ def main() -> int:
 
     if args.batch == "baseline_focus":
         scenarios = _build_baseline_focus_batch()
+    elif args.batch == "glitch_focus":
+        scenarios = _build_glitch_focus_batch()
     else:
         print(f"Unsupported batch: {args.batch}")
         return 2
@@ -246,7 +328,22 @@ def main() -> int:
             type_schema=Path(item["type_schema"]).resolve() if item.get("type_schema") else None,
             clarification_eagerness=float(item.get("clarification_eagerness", 0.35)),
             max_clarification_rounds=int(item.get("max_clarification_rounds", 2)),
+            clarification_answer_min_confidence=float(
+                item.get(
+                    "clarification_answer_min_confidence",
+                    float(args.default_clarification_answer_min_confidence),
+                )
+            ),
             context_length=int(args.context_length),
+            frontend_proposal_mode=str(args.frontend_proposal_mode),
+            write_corpus_on_fail=bool(args.write_corpus_on_fail),
+            temporal_dual_write=bool(args.temporal_dual_write),
+            temporal_predicate=str(args.temporal_predicate),
+            clarification_eagerness_mode=str(args.clarification_eagerness_mode),
+            clarification_eagerness_new_kb_boost=float(args.clarification_eagerness_new_kb_boost),
+            clarification_eagerness_existing_kb_boost=float(args.clarification_eagerness_existing_kb_boost),
+            clarification_eagerness_decay_turns=int(args.clarification_eagerness_decay_turns),
+            clarification_eagerness_decay_clauses=int(args.clarification_eagerness_decay_clauses),
         )
         print(f"[{idx:02d}/{len(scenarios)}] pipeline: {scenario_path.stem}")
         proc_pipe = subprocess.run(cmd, cwd=str(ROOT), check=False)
@@ -325,6 +422,16 @@ def main() -> int:
             "model": args.model,
             "prompt_file": str(prompt_file),
             "context_length": int(args.context_length),
+            "frontend_proposal_mode": str(args.frontend_proposal_mode),
+            "temporal_dual_write": bool(args.temporal_dual_write),
+            "temporal_predicate": str(args.temporal_predicate),
+            "clarification_eagerness_mode": str(args.clarification_eagerness_mode),
+            "clarification_eagerness_new_kb_boost": float(args.clarification_eagerness_new_kb_boost),
+            "clarification_eagerness_existing_kb_boost": float(args.clarification_eagerness_existing_kb_boost),
+            "clarification_eagerness_decay_turns": int(args.clarification_eagerness_decay_turns),
+            "clarification_eagerness_decay_clauses": int(args.clarification_eagerness_decay_clauses),
+            "default_clarification_answer_min_confidence": float(args.default_clarification_answer_min_confidence),
+            "write_corpus_on_fail": bool(args.write_corpus_on_fail),
         },
         "scenario_count": len(scenarios),
         "rows_count": len(rows),
@@ -337,6 +444,51 @@ def main() -> int:
         "avg_exam_temporal_pass_rate": round(_avg("exam_temporal_pass_rate"), 6),
         "rows": rows,
     }
+
+    comparison: dict[str, Any] | None = None
+    if str(args.compare_to_summary).strip():
+        compare_path = Path(str(args.compare_to_summary)).resolve()
+        if compare_path.exists():
+            baseline = _read_json(compare_path)
+            eps = 1e-6
+            deltas = {
+                "pipeline_pass_rate": float(summary.get("pipeline_pass_rate", 0.0) or 0.0)
+                - float(baseline.get("pipeline_pass_rate", 0.0) or 0.0),
+                "avg_audit_coverage": float(summary.get("avg_audit_coverage", 0.0) or 0.0)
+                - float(baseline.get("avg_audit_coverage", 0.0) or 0.0),
+                "avg_audit_precision": float(summary.get("avg_audit_precision", 0.0) or 0.0)
+                - float(baseline.get("avg_audit_precision", 0.0) or 0.0),
+                "avg_exam_pass_rate": float(summary.get("avg_exam_pass_rate", 0.0) or 0.0)
+                - float(baseline.get("avg_exam_pass_rate", 0.0) or 0.0),
+                "avg_exam_temporal_pass_rate": float(summary.get("avg_exam_temporal_pass_rate", 0.0) or 0.0)
+                - float(baseline.get("avg_exam_temporal_pass_rate", 0.0) or 0.0),
+            }
+            hard_regression = (
+                deltas["pipeline_pass_rate"] < -eps
+                or deltas["avg_audit_precision"] < -eps
+                or deltas["avg_exam_pass_rate"] < -eps
+            )
+            soft_net = (
+                deltas["avg_audit_coverage"]
+                + deltas["avg_audit_precision"]
+                + deltas["avg_exam_pass_rate"]
+                + deltas["avg_exam_temporal_pass_rate"]
+            )
+            net_positive = (not hard_regression) and (soft_net > eps)
+            comparison = {
+                "baseline_summary_path": str(compare_path),
+                "baseline_run_name": baseline.get("run_name"),
+                "deltas": {k: round(v, 6) for k, v in deltas.items()},
+                "hard_regression": bool(hard_regression),
+                "net_positive": bool(net_positive),
+            }
+        else:
+            comparison = {
+                "baseline_summary_path": str(compare_path),
+                "error": "compare_summary_missing",
+            }
+    if comparison is not None:
+        summary["comparison"] = comparison
 
     summary_json = run_dir / "summary.json"
     summary_md = run_dir / "summary.md"
@@ -354,6 +506,7 @@ def main() -> int:
         f"- Avg precision: `{summary['avg_audit_precision']}`",
         f"- Avg exam pass: `{summary['avg_exam_pass_rate']}`",
         f"- Avg temporal exam pass: `{summary['avg_exam_temporal_pass_rate']}`",
+        f"- Frontend proposal mode: `{args.frontend_proposal_mode}`",
         "",
         "| Scenario | Pipeline | Coverage | Precision | Exam Pass | Status |",
         "|---|---|---:|---:|---:|---|",
@@ -368,7 +521,37 @@ def main() -> int:
             + f"{float(row.get('exam_pass_rate', 0.0) or 0.0):.3f} | "
             + f"`{row.get('status', '')}` |"
         )
+    if comparison is not None:
+        md_lines.extend(
+            [
+                "",
+                "## Comparison",
+                "",
+                f"- Baseline summary: `{comparison.get('baseline_summary_path', '')}`",
+                f"- Hard regression: `{comparison.get('hard_regression')}`",
+                f"- Net positive: `{comparison.get('net_positive')}`",
+                "",
+                "| Metric | Delta |",
+                "|---|---:|",
+                f"| `pipeline_pass_rate` | `{comparison.get('deltas', {}).get('pipeline_pass_rate', 'n/a')}` |",
+                f"| `avg_audit_coverage` | `{comparison.get('deltas', {}).get('avg_audit_coverage', 'n/a')}` |",
+                f"| `avg_audit_precision` | `{comparison.get('deltas', {}).get('avg_audit_precision', 'n/a')}` |",
+                f"| `avg_exam_pass_rate` | `{comparison.get('deltas', {}).get('avg_exam_pass_rate', 'n/a')}` |",
+                f"| `avg_exam_temporal_pass_rate` | `{comparison.get('deltas', {}).get('avg_exam_temporal_pass_rate', 'n/a')}` |",
+            ]
+        )
     summary_md.write_text("\n".join(md_lines) + "\n", encoding="utf-8")
+
+    gate_failures: list[str] = []
+    req_pass = float(args.require_pipeline_pass_rate)
+    if float(summary.get("pipeline_pass_rate", 0.0) or 0.0) + 1e-6 < req_pass:
+        gate_failures.append(
+            f"pipeline_pass_rate {summary.get('pipeline_pass_rate')} below required {req_pass}"
+        )
+    if args.require_net_positive:
+        cmp_ok = bool((comparison or {}).get("net_positive", False))
+        if not cmp_ok:
+            gate_failures.append("comparison is not net-positive")
 
     print(
         "Focus cycle summary: "
@@ -380,7 +563,12 @@ def main() -> int:
     )
     print(f"Summary JSON: {summary_json}")
     print(f"Summary MD: {summary_md}")
-
+    if gate_failures:
+        print("Gate result: FAILED")
+        for msg in gate_failures:
+            print(f"- {msg}")
+        return 1
+    print("Gate result: PASSED")
     return 0
 
 

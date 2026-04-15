@@ -354,7 +354,7 @@ def _build_parser() -> argparse.ArgumentParser:
     bench.add_argument("--context-length", type=int, default=8192)
     bench.add_argument("--clarification-eagerness", type=float, default=0.0)
     bench.add_argument("--max-clarification-rounds", type=int, default=0)
-    bench.add_argument("--clarification-answer-model", default="gpt-oss:20b")
+    bench.add_argument("--clarification-answer-model", default="qwen3.5:9b")
     bench.add_argument("--clarification-answer-backend", default="ollama")
     bench.add_argument("--clarification-answer-base-url", default="http://127.0.0.1:11434")
     bench.add_argument("--clarification-answer-context-length", type=int, default=16384)
@@ -443,7 +443,7 @@ def _run_manifest(args: argparse.Namespace) -> int:
             else entry.get("max_clarification_rounds", defaults.get("max_clarification_rounds", 0))
         )
         ca_model = args.clarification_answer_model or str(
-            entry.get("clarification_answer_model", defaults.get("clarification_answer_model", "gpt-oss:20b"))
+            entry.get("clarification_answer_model", defaults.get("clarification_answer_model", "qwen3.5:9b"))
         )
         ca_backend = args.clarification_answer_backend or str(
             entry.get("clarification_answer_backend", defaults.get("clarification_answer_backend", "ollama"))

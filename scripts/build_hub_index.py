@@ -163,23 +163,25 @@ def _build_media_manifest(docs_root: Path) -> Path:
         ".mp4": {"kind": "video", "type": "video/mp4", "label": "MP4"},
     }
     buckets: dict[str, dict[str, Any]] = {}
-    for file_path in sorted(assets_dir.iterdir(), key=lambda p: p.name.lower()):
+    for file_path in sorted(assets_dir.rglob("*"), key=lambda p: str(p).lower()):
         if not file_path.is_file():
             continue
         suffix = file_path.suffix.lower()
         meta = variant_meta.get(suffix)
         if meta is None:
             continue
-        stem = file_path.stem
-        if not stem:
+        rel_src = _rel_path(file_path, docs_root)
+        rel_base = Path(rel_src).with_suffix("").as_posix()
+        title_seed = Path(rel_base).name
+        if not rel_base or not title_seed:
             continue
-        row = buckets.get(stem)
+        row = buckets.get(rel_base)
         if row is None:
-            row = {"title": _friendly_media_title(stem), "base": f"assets/{stem}", "variants": []}
-            buckets[stem] = row
+            row = {"title": _friendly_media_title(title_seed), "base": rel_base, "variants": []}
+            buckets[rel_base] = row
         row["variants"].append(
             {
-                "src": _rel_path(file_path, docs_root),
+                "src": rel_src,
                 "kind": meta["kind"],
                 "type": meta["type"],
                 "label": meta["label"],

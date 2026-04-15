@@ -101,6 +101,16 @@
       "aliases": []
     },
     {
+      "name": "broke",
+      "arity": 1,
+      "aliases": []
+    },
+    {
+      "name": "at_step",
+      "arity": 2,
+      "aliases": []
+    },
+    {
       "name": "chairs_in_house",
       "arity": 1,
       "aliases": []

@@ -4,7 +4,7 @@ Run a clarification-tuning cadence over selected scenarios.
 
 Purpose:
 - keep parser model fixed (e.g., qwen3.5:9b)
-- keep clarification responder fixed (e.g., gpt-oss:20b)
+- keep clarification responder fixed (e.g., qwen3.5:9b)
 - sweep CE and clarification confidence thresholds
 - report which setting mix gives best pass + stable clarification behavior
 """
@@ -184,7 +184,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--base-url", default="http://127.0.0.1:11434")
     p.add_argument("--model", default="qwen3.5:9b")
     p.add_argument("--runtime", choices=["core", "none", "mcp"], default="core")
-    p.add_argument("--clarification-answer-model", default="gpt-oss:20b")
+    p.add_argument("--clarification-answer-model", default="qwen3.5:9b")
     p.add_argument("--clarification-answer-backend", default="ollama")
     p.add_argument("--clarification-answer-base-url", default="http://127.0.0.1:11434")
     p.add_argument("--context-length", type=int, default=8192)

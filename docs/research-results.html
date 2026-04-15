@@ -1,0 +1,595 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Prethinker Research Results</title>
+  <meta name="description" content="Prethinker research rollups and live metrics for gate, shadow, and wild ingestion stress." />
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Sora:wght@500;700;800&family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap");
+
+    :root {
+      --bg: #0d1118;
+      --bg-2: #111a29;
+      --panel: #172233;
+      --panel-2: #1d2b40;
+      --ink: #f4f8ff;
+      --muted: #b5c3d7;
+      --line: #324a67;
+      --hot: #ff8f52;
+      --cool: #6ad6e0;
+      --ok: #79d38f;
+      --warn: #f3c264;
+      --bad: #ee8b94;
+    }
+
+    html[data-theme="light"] {
+      --bg: #f8f1e7;
+      --bg-2: #efe5d5;
+      --panel: #fffaf3;
+      --panel-2: #f7eee1;
+      --ink: #22201d;
+      --muted: #605a52;
+      --line: #d8c9b2;
+      --hot: #a4522b;
+      --cool: #1f7078;
+      --ok: #2f7a44;
+      --warn: #9f6f16;
+      --bad: #9b313a;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Space Grotesk", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(1000px 560px at 110% -10%, color-mix(in srgb, var(--cool) 20%, transparent), transparent 58%),
+        radial-gradient(900px 420px at -10% -20%, color-mix(in srgb, var(--hot) 16%, transparent), transparent 62%),
+        linear-gradient(180deg, var(--bg), var(--bg-2));
+    }
+
+    .wrap {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 22px 18px 70px;
+    }
+
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      text-decoration: none;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 7px 10px;
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      font-family: "JetBrains Mono", Consolas, monospace;
+      background: color-mix(in srgb, var(--panel) 90%, transparent);
+    }
+
+    .theme-btn {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--panel);
+      color: var(--ink);
+      cursor: pointer;
+      padding: 8px 11px;
+      font-size: 12px;
+      font-family: "JetBrains Mono", Consolas, monospace;
+    }
+
+    .hero {
+      margin-top: 12px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 22px;
+      background: linear-gradient(140deg, color-mix(in srgb, var(--panel) 96%, transparent), color-mix(in srgb, var(--panel-2) 94%, transparent));
+    }
+
+    h1, h2, h3 { margin: 0; font-family: "Sora", "Space Grotesk", sans-serif; letter-spacing: -0.02em; }
+    h1 { font-size: clamp(30px, 5vw, 50px); line-height: 0.98; }
+    h2 { font-size: clamp(23px, 3.4vw, 35px); line-height: 1.04; }
+
+    .hero p {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.44;
+      max-width: 900px;
+    }
+
+    .hero-actions {
+      margin-top: 15px;
+      display: flex;
+      gap: 9px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      text-decoration: none;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      padding: 10px 12px;
+      font-family: "JetBrains Mono", Consolas, monospace;
+      font-size: 12px;
+      color: var(--ink);
+      background: var(--panel);
+      display: inline-block;
+    }
+
+    .btn.primary {
+      background: linear-gradient(180deg, color-mix(in srgb, var(--hot) 78%, #fff), var(--hot));
+      color: #fff;
+    }
+
+    .section { margin-top: 30px; }
+    .lede { margin: 9px 0 14px; color: var(--muted); max-width: 900px; }
+
+    .metrics {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      background: color-mix(in srgb, var(--panel) 92%, transparent);
+    }
+
+    .metric .k {
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-family: "JetBrains Mono", Consolas, monospace;
+    }
+
+    .metric .v {
+      margin-top: 5px;
+      font-size: 29px;
+      line-height: 1;
+      font-family: "Sora", "Space Grotesk", sans-serif;
+    }
+
+    .metric .hint {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--panel);
+      padding: 14px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .span-6 { grid-column: span 6; }
+    .span-12 { grid-column: span 12; }
+
+    .tag {
+      display: inline-block;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 3px 7px;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-family: "JetBrains Mono", Consolas, monospace;
+      margin-bottom: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 9px 10px;
+      border-bottom: 1px solid var(--line);
+      font-size: 14px;
+      vertical-align: top;
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    th {
+      font-size: 11px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: color-mix(in srgb, var(--panel-2) 85%, transparent);
+      font-family: "JetBrains Mono", Consolas, monospace;
+    }
+
+    .status-pass { color: var(--ok); font-weight: 700; }
+    .status-fail { color: var(--bad); font-weight: 700; }
+    .mono { font-family: "JetBrains Mono", Consolas, monospace; font-size: 13px; }
+
+    .sources {
+      margin-top: 8px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 8px;
+    }
+
+    .source-item {
+      border: 1px dashed var(--line);
+      border-radius: 10px;
+      padding: 9px;
+      background: color-mix(in srgb, var(--panel) 92%, transparent);
+    }
+
+    .source-item a { color: var(--cool); text-decoration: none; }
+    .source-item a:hover { color: var(--hot); }
+
+    .footer {
+      margin-top: 26px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media (max-width: 1080px) {
+      .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .span-6 { grid-column: span 12; }
+    }
+
+    @media (max-width: 640px) {
+      .metrics { grid-template-columns: 1fr; }
+      .wrap { padding: 16px 10px 52px; }
+      .hero { padding: 16px; border-radius: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <div class="top">
+      <div class="chips">
+        <a class="chip" href="index.html">Docs Hub</a>
+        <a class="chip" href="PROGRESS.md">PROGRESS</a>
+        <a class="chip" href="FOCUS_EXECUTION_PLAN.md">Focus Plan</a>
+        <a class="chip" href="run-reports-hub.html">Run Explorer</a>
+      </div>
+      <button id="theme-btn" class="theme-btn" type="button">theme: light</button>
+    </div>
+
+    <section class="hero">
+      <h1>Prethinker Research Results</h1>
+      <p>
+        This page centralizes live execution evidence for gate stability, shadow A/B policy, and raw-story ingestion stress.
+        It is optimized for review and decision-making, not archive browsing.
+      </p>
+      <div class="hero-actions">
+        <a class="btn primary" href="raw-story-audit-glitch.html">Open Glitch Audit</a>
+        <a class="btn" href="goldilocks-roundtrip.html">Goldilocks Roundtrip</a>
+        <a class="btn" href="glitch-in-the-airlock-roundtrip.html">Glitch Roundtrip</a>
+      </div>
+      <div class="metrics">
+        <div class="metric">
+          <div class="k">Gate Consecutive</div>
+          <div id="m-gate" class="v">-</div>
+          <div class="hint">Target: 5 full-pass cycles</div>
+        </div>
+        <div class="metric">
+          <div class="k">Shadow Mode</div>
+          <div id="m-shadow" class="v">-</div>
+          <div class="hint" id="m-shadow-hint">Net-positive required for promotion</div>
+        </div>
+        <div class="metric">
+          <div class="k">Glitch Pipeline</div>
+          <div id="m-glitch" class="v">-</div>
+          <div class="hint">Avg pipeline pass across full/paragraph/line</div>
+        </div>
+        <div class="metric">
+          <div class="k">Historical Runs</div>
+          <div id="m-runs" class="v">-</div>
+          <div class="hint" id="m-runs-hint">Source: historical_metrics.json</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Gate + Shadow</h2>
+      <p class="lede">Focus gate executions and shadow comparison deltas, with enough detail to decide what gets promoted.</p>
+      <div class="grid">
+        <article class="card span-6">
+          <span class="tag">Focus Gate Runs</span>
+          <table>
+            <thead>
+              <tr>
+                <th>Run</th>
+                <th>Pipeline</th>
+                <th>Coverage</th>
+                <th>Precision</th>
+                <th>Exam</th>
+                <th>Temporal Exam</th>
+              </tr>
+            </thead>
+            <tbody id="focus-body">
+              <tr><td colspan="6" class="mono">loading...</td></tr>
+            </tbody>
+          </table>
+        </article>
+        <article class="card span-6">
+          <span class="tag">Shadow Delta</span>
+          <table>
+            <thead>
+              <tr>
+                <th>Metric</th>
+                <th>Delta</th>
+              </tr>
+            </thead>
+            <tbody id="shadow-body">
+              <tr><td colspan="2" class="mono">loading...</td></tr>
+            </tbody>
+          </table>
+          <div id="shadow-note" class="footer"></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Wild Story Stress</h2>
+      <p class="lede">Scenario-level behavior for raw full blob, paragraph split, and line split ingestion paths.</p>
+      <div class="grid">
+        <article class="card span-12">
+          <span class="tag">Scenario Stats</span>
+          <table>
+            <thead>
+              <tr>
+                <th>Scenario</th>
+                <th>Runs</th>
+                <th>Pipeline Pass</th>
+                <th>Apply Failures</th>
+                <th>Coverage</th>
+                <th>Precision</th>
+                <th>Exam</th>
+                <th>Temporal Exam</th>
+              </tr>
+            </thead>
+            <tbody id="glitch-scenario-body">
+              <tr><td colspan="8" class="mono">loading...</td></tr>
+            </tbody>
+          </table>
+        </article>
+        <article class="card span-12">
+          <span class="tag">Run Log</span>
+          <table>
+            <thead>
+              <tr>
+                <th>Run</th>
+                <th>Pipeline</th>
+                <th>Coverage</th>
+                <th>Precision</th>
+                <th>Exam</th>
+                <th>Temporal Exam</th>
+              </tr>
+            </thead>
+            <tbody id="glitch-run-body">
+              <tr><td colspan="6" class="mono">loading...</td></tr>
+            </tbody>
+          </table>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Data Sources</h2>
+      <p class="lede">Direct links to current data feeds and primary artifacts used on this page.</p>
+      <div class="sources">
+        <div class="source-item"><a href="data/research_rollup_latest.json">data/research_rollup_latest.json</a></div>
+        <div class="source-item"><a href="data/glitch_focus_stress_20260415_summary.json">data/glitch_focus_stress_20260415_summary.json</a></div>
+        <div class="source-item"><a href="data/historical_metrics.json">data/historical_metrics.json</a></div>
+        <div class="source-item"><a href="data/runs_manifest.json">data/runs_manifest.json</a></div>
+      </div>
+    </section>
+
+    <p class="footer">Research results page refreshed on April 15, 2026.</p>
+  </main>
+
+  <script>
+    (() => {
+      const root = document.documentElement;
+      const themeKey = "prethinker_docs_theme";
+      const themeBtn = document.getElementById("theme-btn");
+
+      function setTheme(next) {
+        root.setAttribute("data-theme", next);
+        if (themeBtn) themeBtn.textContent = `theme: ${next}`;
+      }
+
+      const saved = localStorage.getItem(themeKey);
+      if (saved === "dark" || saved === "light") {
+        setTheme(saved);
+      } else {
+        const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+        setTheme(prefersDark ? "dark" : "light");
+      }
+
+      if (themeBtn) {
+        themeBtn.addEventListener("click", () => {
+          const next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+          setTheme(next);
+          localStorage.setItem(themeKey, next);
+        });
+      }
+
+      function pct(v) {
+        if (typeof v !== "number" || Number.isNaN(v)) return "-";
+        return `${Math.round(v * 100)}%`;
+      }
+
+      function fixed(v, n = 3) {
+        if (typeof v !== "number" || Number.isNaN(v)) return "-";
+        return v.toFixed(n);
+      }
+
+      async function safeJson(url) {
+        try {
+          const res = await fetch(url, { cache: "no-store" });
+          if (!res.ok) return null;
+          return await res.json();
+        } catch (_) {
+          return null;
+        }
+      }
+
+      function addRows(tbody, rowsHtml, emptyCols) {
+        if (!tbody) return;
+        tbody.innerHTML = "";
+        if (!rowsHtml.length) {
+          tbody.innerHTML = `<tr><td colspan="${emptyCols}" class="mono">No data loaded.</td></tr>`;
+          return;
+        }
+        for (const html of rowsHtml) {
+          const tr = document.createElement("tr");
+          tr.innerHTML = html;
+          tbody.appendChild(tr);
+        }
+      }
+
+      async function load() {
+        const [rollup, glitchDetail, historical, runsManifest] = await Promise.all([
+          safeJson("data/research_rollup_latest.json"),
+          safeJson("data/glitch_focus_stress_20260415_summary.json"),
+          safeJson("data/historical_metrics.json"),
+          safeJson("data/runs_manifest.json"),
+        ]);
+
+        if (historical) {
+          document.getElementById("m-runs").textContent = String(historical.runs_total ?? "-");
+          document.getElementById("m-runs-hint").textContent = `Historical pass rate: ${pct(Number(historical.run_pass_rate))}`;
+        }
+
+        const focusRuns = rollup && rollup.focus_gate && Array.isArray(rollup.focus_gate.runs) ? rollup.focus_gate.runs : [];
+        const consecutive = rollup && rollup.focus_gate && rollup.focus_gate.reproducibility ? rollup.focus_gate.reproducibility.consecutive_full_pass_cycles : null;
+        if (typeof consecutive === "number") {
+          document.getElementById("m-gate").textContent = `${consecutive}/5`;
+        }
+
+        const focusRows = focusRuns.map((row) => `
+          <td>${row.run_name || "-"}</td>
+          <td>${pct(row.pipeline_pass_rate)}</td>
+          <td>${pct(row.avg_audit_coverage)}</td>
+          <td>${pct(row.avg_audit_precision)}</td>
+          <td>${pct(row.avg_exam_pass_rate)}</td>
+          <td>${pct(row.avg_exam_temporal_pass_rate)}</td>
+        `);
+        addRows(document.getElementById("focus-body"), focusRows, 6);
+
+        const shadow = rollup && rollup.shadow_ab ? rollup.shadow_ab : null;
+        if (shadow) {
+          document.getElementById("m-shadow").textContent = shadow.active_mode_blocked ? "Blocked" : "Ready";
+          document.getElementById("m-shadow-hint").textContent = shadow.active_mode_blocked ? "Blocked until net-positive delta" : "Eligible for promotion";
+        }
+
+        const shadowRows = [];
+        if (shadow && shadow.comparison && shadow.comparison.deltas) {
+          const deltas = shadow.comparison.deltas;
+          for (const [name, value] of Object.entries(deltas)) {
+            shadowRows.push(`<td>${name}</td><td>${fixed(Number(value), 6)}</td>`);
+          }
+        }
+        addRows(document.getElementById("shadow-body"), shadowRows, 2);
+        const shadowNote = document.getElementById("shadow-note");
+        if (shadowNote && shadow) {
+          const baseline = shadow.comparison && shadow.comparison.baseline_run_name ? shadow.comparison.baseline_run_name : "-";
+          shadowNote.textContent = `Shadow run: ${shadow.run_name || "-"} | Baseline: ${baseline}`;
+        }
+
+        const glitchAggregate = rollup && rollup.glitch_focus ? rollup.glitch_focus : null;
+        if (glitchAggregate) {
+          document.getElementById("m-glitch").textContent = pct(Number(glitchAggregate.avg_pipeline_pass_rate));
+        }
+
+        const scenarioStats = glitchAggregate && glitchAggregate.scenario_stats ? glitchAggregate.scenario_stats : null;
+        const scenarioRows = [];
+        if (scenarioStats) {
+          for (const key of Object.keys(scenarioStats).sort()) {
+            const row = scenarioStats[key] || {};
+            scenarioRows.push(`
+              <td>${key}</td>
+              <td>${row.count ?? "-"}</td>
+              <td>${pct(row.pipeline_pass_rate)}</td>
+              <td>${fixed(Number(row.avg_apply_failures || 0), 2)}</td>
+              <td>${pct(row.avg_coverage)}</td>
+              <td>${pct(row.avg_precision)}</td>
+              <td>${pct(row.avg_exam_pass_rate)}</td>
+              <td>${row.avg_exam_temporal_pass_rate !== undefined ? pct(Number(row.avg_exam_temporal_pass_rate)) : "-"}</td>
+            `);
+          }
+        }
+        addRows(document.getElementById("glitch-scenario-body"), scenarioRows, 8);
+
+        const detailRuns = glitchDetail && Array.isArray(glitchDetail.runs) ? glitchDetail.runs : [];
+        const runRows = detailRuns.slice(0, 12).map((run) => `
+          <td>${run.run_name || "-"}</td>
+          <td>${pct(run.pipeline_pass_rate)}</td>
+          <td>${pct(run.avg_audit_coverage)}</td>
+          <td>${pct(run.avg_audit_precision)}</td>
+          <td>${pct(run.avg_exam_pass_rate)}</td>
+          <td>${pct(run.avg_exam_temporal_pass_rate)}</td>
+        `);
+        addRows(document.getElementById("glitch-run-body"), runRows, 6);
+
+        if ((!detailRuns.length || !focusRuns.length) && runsManifest && Array.isArray(runsManifest.runs)) {
+          const fallback = runsManifest.runs.slice(0, 5).map((run) => `
+            <td>${run.run_id || run.scenario || "-"}</td>
+            <td colspan="5" class="mono">status=${run.status || "-"} scenario=${run.scenario || "-"}</td>
+          `);
+          if (!runRows.length) {
+            addRows(document.getElementById("glitch-run-body"), fallback, 6);
+          }
+        }
+      }
+
+      load().catch(() => {
+        const cells = [
+          "focus-body",
+          "shadow-body",
+          "glitch-scenario-body",
+          "glitch-run-body",
+        ];
+        for (const id of cells) {
+          const host = document.getElementById(id);
+          if (!host) continue;
+          const colspan = id === "shadow-body" ? 2 : (id === "focus-body" ? 6 : (id === "glitch-run-body" ? 6 : 8));
+          host.innerHTML = `<tr><td colspan="${colspan}" class="mono">Unable to load data feed.</td></tr>`;
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

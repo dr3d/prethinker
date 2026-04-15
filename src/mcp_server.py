@@ -93,7 +93,7 @@ class PrologMCPServer:
         compiler_mode: str = "strict",
         compiler_backend: str = "ollama",
         compiler_base_url: str = "http://127.0.0.1:11434",
-        compiler_model: str = "qwen35-semparse:9b",
+        compiler_model: str = "qwen3.5:9b",
         compiler_context_length: int = 8192,
         compiler_timeout: int = 60,
         compiler_prompt_file: str = "",
@@ -111,7 +111,7 @@ class PrologMCPServer:
             self._compiler_mode = "strict"
         self._compiler_backend = str(compiler_backend or "ollama").strip()
         self._compiler_base_url = str(compiler_base_url or "http://127.0.0.1:11434").strip()
-        self._compiler_model = str(compiler_model or "qwen35-semparse:9b").strip()
+        self._compiler_model = str(compiler_model or "qwen3.5:9b").strip()
         self._compiler_context_length = max(512, int(compiler_context_length))
         self._compiler_timeout = max(5, int(compiler_timeout))
         prompt_candidate = str(compiler_prompt_file or "").strip()
@@ -1439,7 +1439,7 @@ def main() -> int:
     )
     parser.add_argument("--compiler-backend", default="ollama", help="Compiler backend (ollama or lmstudio).")
     parser.add_argument("--compiler-base-url", default="http://127.0.0.1:11434", help="Compiler backend base URL.")
-    parser.add_argument("--compiler-model", default="qwen35-semparse:9b", help="Compiler model tag.")
+    parser.add_argument("--compiler-model", default="qwen3.5:9b", help="Compiler model tag.")
     parser.add_argument("--compiler-context-length", type=int, default=8192, help="Compiler context length.")
     parser.add_argument("--compiler-timeout", type=int, default=60, help="Compiler timeout in seconds.")
     parser.add_argument(

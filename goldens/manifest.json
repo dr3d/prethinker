@@ -21,6 +21,13 @@
       "scenario_path": "kb_scenarios/stage_01_facts_only.json",
       "probe_path": "goldens/probes/stage_01_facts_only.json",
       "golden_kb_path": "goldens/kb/stage_01_facts_only_golden.pl"
+    },
+    {
+      "id": "story_glitch_in_the_airlock_roundtrip",
+      "story_path": "stories/glitch_in_the_airlock_roundtrip.md",
+      "scenario_path": "kb_scenarios/story_glitch_in_the_airlock_roundtrip.json",
+      "probe_path": "goldens/probes/story_glitch_in_the_airlock_roundtrip.json",
+      "golden_kb_path": "goldens/kb/story_glitch_in_the_airlock_roundtrip_golden.pl"
     }
   ]
 }

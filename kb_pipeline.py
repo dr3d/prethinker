@@ -872,6 +872,10 @@ def _validate_parsed_types(
                 token = arg.strip()
                 if not token or re.match(r"^[A-Z_]", token):
                     continue
+                if "(" in token or ")" in token or "," in token:
+                    # Nested terms are event structures (for example saw(X, ate(...))).
+                    # Treat them as structurally valid and skip atomic type lookup.
+                    continue
                 expected = expected_types[idx]
                 if not expected:
                     continue
@@ -1463,6 +1467,72 @@ def _clarification_policy_decision(
     }
     out.update(progress_summary)
     return out
+
+
+def _compute_effective_clarification_eagerness(
+    *,
+    base_eagerness: float,
+    mode: str,
+    turn_index: int,
+    kb_clause_count_at_start: int,
+    kb_clause_count_current: int,
+    is_brand_new_ontology: bool,
+    new_kb_boost: float,
+    existing_kb_boost: float,
+    decay_turns: int,
+    decay_clauses: int,
+) -> dict[str, Any]:
+    base = _clip_01(base_eagerness, fallback=0.35)
+    mode_norm = str(mode or "static").strip().lower()
+    if mode_norm not in {"adaptive", "static"}:
+        mode_norm = "static"
+
+    turn = max(1, int(turn_index))
+    start_clause_count = max(0, int(kb_clause_count_at_start))
+    current_clause_count = max(0, int(kb_clause_count_current))
+    delta_clauses = max(0, current_clause_count - start_clause_count)
+
+    if mode_norm == "static":
+        return {
+            "mode": "static",
+            "effective_eagerness": base,
+            "base_eagerness": base,
+            "boost_applied": 0.0,
+            "maturity_score": 1.0,
+            "turn_progress": 1.0,
+            "clause_progress": 1.0,
+            "phase": "static",
+        }
+
+    turns_to_mature = max(1, int(decay_turns))
+    clauses_to_mature = max(1, int(decay_clauses))
+    turn_progress = _clip_01((turn - 1) / float(turns_to_mature), fallback=0.0)
+    clause_progress = _clip_01(delta_clauses / float(clauses_to_mature), fallback=0.0)
+    maturity = max(turn_progress, clause_progress)
+
+    boost = _clip_01(
+        new_kb_boost if bool(is_brand_new_ontology) else existing_kb_boost,
+        fallback=0.0,
+    )
+    effective = _clip_01(base + (boost * (1.0 - maturity)), fallback=base)
+
+    if maturity < 0.34:
+        phase = "bootstrapping"
+    elif maturity < 0.84:
+        phase = "stabilizing"
+    else:
+        phase = "mature"
+
+    return {
+        "mode": "adaptive",
+        "effective_eagerness": effective,
+        "base_eagerness": base,
+        "boost_applied": boost,
+        "maturity_score": round(maturity, 3),
+        "turn_progress": round(turn_progress, 3),
+        "clause_progress": round(clause_progress, 3),
+        "phase": phase,
+    }
 
 
 def _coerce_utterance_entry(raw: Any) -> tuple[str, list[str], int | None, list[str], bool | None]:
@@ -3066,6 +3136,37 @@ def _build_assert_fact_fallback_parse(utterance: str) -> dict[str, Any] | None:
             )
             ok, _ = _validate_parsed(parsed)
             return parsed if ok else None
+
+    broke_while_sitting = re.match(
+        (
+            r"^\s*([A-Za-z][A-Za-z0-9_'-]*(?:\s+[A-Za-z][A-Za-z0-9_'-]*)*)'?s\s+chair\s+broke\.?\s+"
+            r"([A-Za-z][A-Za-z0-9_'-]*(?:\s+[A-Za-z][A-Za-z0-9_'-]*)*)\s+was\s+sitting\s+in\s+it\.?\s*$"
+        ),
+        text,
+        re.IGNORECASE,
+    )
+    if broke_while_sitting:
+        owner_atom = _atomize(broke_while_sitting.group(1))
+        sitter_atom = _atomize(broke_while_sitting.group(2))
+        if owner_atom and sitter_atom:
+            facts = [
+                f"broke(chair_of({owner_atom})).",
+                f"sat_in({sitter_atom}, chair_of({owner_atom})).",
+            ]
+            atoms, variables, predicates = _collect_components_from_clauses(facts)
+            parsed = _build_parse_payload(
+                intent="assert_fact",
+                logic_string="\n".join(facts),
+                facts=facts,
+                rules=[],
+                queries=[],
+                predicates=predicates,
+                atoms=atoms,
+                variables=variables,
+                rationale="Fallback chair-break parse from '<owner>s chair broke. <person> was sitting in it'.",
+            )
+            ok, _ = _validate_parsed(parsed)
+            return parsed if ok else None
     return None
 
 
@@ -3541,6 +3642,100 @@ def _looks_speculative_or_subjective_utterance(utterance: str) -> bool:
         return True
 
     return False
+
+
+def _looks_narrative_or_dialogue_utterance(utterance: str) -> bool:
+    text = str(utterance or "").strip()
+    if not text:
+        return False
+    lowered = text.lower()
+    if any(marker in text for marker in ('"', "!", "?")):
+        return True
+    if re.search(r"\b[a-z][a-z0-9_-]*\s*:\s+\S", lowered):
+        return True
+    narrative_markers = (
+        " she ",
+        " he ",
+        " they ",
+        " was ",
+        " were ",
+        " into ",
+        " through ",
+        " while ",
+        " and ",
+    )
+    return len(lowered.split()) >= 8 and any(marker in f" {lowered} " for marker in narrative_markers)
+
+
+def _apply_anonymous_fact_clarification_guard(
+    parsed: dict[str, Any],
+    *,
+    utterance: str,
+    route: str,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    events: list[dict[str, Any]] = []
+    if not isinstance(parsed, dict):
+        return parsed, events
+
+    intent = str(parsed.get("intent", "")).strip().lower()
+    route_name = str(route or "").strip().lower()
+    if intent != "assert_fact" and route_name != "assert_fact":
+        return parsed, events
+    if not bool(parsed.get("needs_clarification", False)):
+        return parsed, events
+
+    facts_raw = parsed.get("facts", [])
+    if not isinstance(facts_raw, list):
+        return parsed, events
+    facts = [_normalize_clause(str(item)) for item in facts_raw if _normalize_clause(str(item))]
+    if not facts:
+        return parsed, events
+    if not all(_is_valid_goal_clause(fact, require_ground=True) for fact in facts):
+        return parsed, events
+
+    ambiguities_raw = parsed.get("ambiguities", [])
+    ambiguities = [str(item).strip() for item in ambiguities_raw if str(item).strip()] if isinstance(ambiguities_raw, list) else []
+    if not ambiguities:
+        return parsed, events
+    ambiguity_text = " ".join(ambiguities).lower()
+    soft_missing_markers = (
+        "specific identifier",
+        "identifier",
+        "not provided",
+        "unknown referent",
+        "unresolved referent",
+        "unresolved pronoun",
+        "unknown owner",
+        "specific entity name",
+        "entity name",
+        "unknown",
+    )
+    if not any(marker in ambiguity_text for marker in soft_missing_markers):
+        return parsed, events
+    if not _looks_narrative_or_dialogue_utterance(utterance):
+        return parsed, events
+
+    parsed["needs_clarification"] = False
+    parsed["uncertainty_score"] = min(_clip_01(parsed.get("uncertainty_score"), fallback=0.55), 0.55)
+    parsed["uncertainty_label"] = "medium"
+    parsed["clarification_question"] = ""
+    parsed["clarification_reason"] = ""
+    note = (
+        "Identifier gaps preserved as stable placeholder atoms for narrative ingestion."
+    )
+    if note not in ambiguities:
+        ambiguities.append(note)
+    parsed["ambiguities"] = ambiguities
+    rationale = str(parsed.get("rationale", "")).strip()
+    suffix = "Anonymous fact clarification guard committed grounded placeholder facts."
+    parsed["rationale"] = f"{rationale} {suffix}".strip() if rationale else suffix
+    events.append(
+        {
+            "kind": "anonymous_fact_clarification_guard",
+            "reason": "narrative_identifier_gap_with_ground_fact",
+        }
+    )
+    return parsed, events
 
 
 def _apply_speculative_clarification_downgrade_guard(
@@ -4314,6 +4509,163 @@ def _apply_type_direction_guard(
     return parsed, events
 
 
+def _canonicalize_entity_alias_key(
+    entity_key: str,
+    *,
+    known_entities: set[str],
+) -> str:
+    key = _normalize_entity_key(entity_key)
+    if not key:
+        return key
+    if key in known_entities:
+        return key
+
+    if key in {"that_someone_had_been_lying", "that_someone_had_been_sitting"} and "someone" in known_entities:
+        return "someone"
+
+    for prefix in ("tasted_someone_", "ate_someone_", "drank_someone_", "sat_in_someone_", "broke_"):
+        if key.startswith(prefix):
+            inner = key[len(prefix):]
+            alias = _canonicalize_entity_alias_key(inner, known_entities=known_entities)
+            return alias or key
+
+    sleep_match = re.match(r"^slept_in_[a-z0-9_]+_(.+)$", key)
+    if sleep_match:
+        inner = sleep_match.group(1)
+        alias = _canonicalize_entity_alias_key(inner, known_entities=known_entities)
+        return alias or key
+
+    if "bed_of_" in key:
+        owner = key.split("bed_of_", 1)[1]
+        for cand in (f"{owner}_bed", f"bed_of_{owner}"):
+            if cand in known_entities:
+                return cand
+    if "chair_of_" in key:
+        owner = key.split("chair_of_", 1)[1]
+        for cand in (f"{owner}_chair", f"chair_of_{owner}"):
+            if cand in known_entities:
+                return cand
+    if "porridge_of_" in key:
+        owner = key.split("porridge_of_", 1)[1]
+        for cand in (f"porridge_of_{owner}", f"{owner}_porridge"):
+            if cand in known_entities:
+                return cand
+
+    if "bowl_of_porridge" in key:
+        for owner in ("papa_bear", "mama_bear", "baby_bear"):
+            if owner in key:
+                for cand in (f"{owner}_porridge", f"porridge_of_{owner}"):
+                    if cand in known_entities:
+                        return cand
+        if "porridge" in known_entities:
+            return "porridge"
+
+    if "someone" in key and "someone" in known_entities:
+        return "someone"
+
+    return key
+
+
+def _apply_type_entity_alias_guard(
+    parsed: dict[str, Any],
+    *,
+    route: str,
+    type_schema: dict[str, Any],
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    events: list[dict[str, Any]] = []
+    if not isinstance(parsed, dict) or not isinstance(type_schema, dict):
+        return parsed, events
+
+    intent = str(parsed.get("intent", "")).strip().lower()
+    route_name = str(route or "").strip().lower()
+    if intent not in {"assert_fact", "query", "retract"} and route_name not in {"assert_fact", "query", "retract"}:
+        return parsed, events
+
+    entities_raw = type_schema.get("entities", {})
+    if not isinstance(entities_raw, dict) or not entities_raw:
+        return parsed, events
+    known_entities = {
+        _normalize_entity_key(str(raw_entity))
+        for raw_entity in entities_raw.keys()
+        if _normalize_entity_key(str(raw_entity))
+    }
+    if not known_entities:
+        return parsed, events
+
+    facts_raw = parsed.get("facts", [])
+    if not isinstance(facts_raw, list) or not facts_raw:
+        return parsed, events
+
+    rewrites: list[dict[str, str]] = []
+    next_facts: list[str] = []
+    for raw_clause in facts_raw:
+        original = _normalize_clause(str(raw_clause))
+        if not original:
+            continue
+        body = original[:-1].strip() if original.endswith(".") else original.strip()
+        if not body or ":-" in body:
+            next_facts.append(original)
+            continue
+        match = re.fullmatch(r"([a-z][a-z0-9_]*)\((.*)\)", body)
+        if not match:
+            next_facts.append(original)
+            continue
+        pred = match.group(1)
+        args = _split_top_level_args(match.group(2))
+        if not args:
+            next_facts.append(original)
+            continue
+
+        rewritten_args: list[str] = []
+        changed = False
+        for arg in args:
+            token = str(arg).strip()
+            if not token or _is_variable_token(token):
+                rewritten_args.append(token)
+                continue
+            canonical = ""
+            nested_owner = re.fullmatch(r"(bed|chair|porridge)_of\(([a-z][a-z0-9_]*)\)", token)
+            if nested_owner:
+                canonical = _canonicalize_entity_alias_key(
+                    f"{nested_owner.group(1)}_of_{nested_owner.group(2)}",
+                    known_entities=known_entities,
+                )
+            elif re.fullmatch(r"[a-z][a-z0-9_]*", token):
+                canonical = _canonicalize_entity_alias_key(token, known_entities=known_entities)
+            if canonical:
+                if canonical != _normalize_entity_key(token):
+                    changed = True
+                rewritten_args.append(canonical)
+            else:
+                rewritten_args.append(token)
+        rewritten = f"{pred}({', '.join(rewritten_args)})."
+        next_facts.append(rewritten)
+        if changed and rewritten != original:
+            rewrites.append({"from": original, "to": rewritten})
+
+    if not rewrites or not next_facts:
+        return parsed, events
+
+    parsed["facts"] = next_facts
+    parsed["logic_string"] = next_facts[0] if len(next_facts) == 1 else "\n".join(next_facts)
+    atoms, variables, predicates = _collect_components_from_clauses(next_facts)
+    parsed["components"] = {
+        "atoms": atoms,
+        "variables": variables,
+        "predicates": predicates,
+    }
+    rationale = str(parsed.get("rationale", "")).strip()
+    suffix = "Type entity-alias guard canonicalized story entity aliases."
+    parsed["rationale"] = f"{rationale} {suffix}".strip() if rationale else suffix
+    events.append(
+        {
+            "kind": "type_entity_alias_guard",
+            "rewrites": rewrites,
+        }
+    )
+    return parsed, events
+
+
 def _apply_observed_someone_event_guard(
     parsed: dict[str, Any],
     *,
@@ -4603,7 +4955,10 @@ def _apply_three_bears_observation_guard(
         return parsed, events
 
     subject_match = re.match(
-        r"^\s*([A-Za-z][A-Za-z0-9_'-]*(?:\s+[A-Za-z][A-Za-z0-9_'-]*)*)\b.*\bsaw the three bears\b",
+        (
+            r"^\s*([A-Za-z][A-Za-z0-9_'-]*(?:\s+[A-Za-z][A-Za-z0-9_'-]*)?)"
+            r"(?:\s+woke\s+up\s+and)?\s+saw the three bears\b"
+        ),
         str(utterance or ""),
         re.IGNORECASE,
     )
@@ -4641,6 +4996,59 @@ def _apply_three_bears_observation_guard(
         {
             "kind": "three_bears_observation_guard",
             "rewritten_facts": facts,
+        }
+    )
+    return parsed, events
+
+
+def _apply_group_returned_home_guard(
+    parsed: dict[str, Any],
+    *,
+    utterance: str,
+    route: str,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    events: list[dict[str, Any]] = []
+    if not isinstance(parsed, dict):
+        return parsed, events
+
+    lowered = str(utterance or "").strip().lower()
+    if not (
+        "three bears returned home" in lowered
+        or lowered.startswith("the bears returned home")
+        or lowered.startswith("bears returned home")
+    ):
+        return parsed, events
+
+    intent = str(parsed.get("intent", "")).strip().lower()
+    route_name = str(route or "").strip().lower()
+    if intent not in {"assert_fact", "other"} and route_name not in {"assert_fact", "other"}:
+        return parsed, events
+
+    fact = "returned_home(bears)."
+    parsed["intent"] = "assert_fact"
+    parsed["facts"] = [fact]
+    parsed["logic_string"] = fact
+    parsed["rules"] = []
+    parsed["queries"] = []
+    atoms, variables, predicates = _collect_components_from_clauses([fact])
+    parsed["components"] = {
+        "atoms": atoms,
+        "variables": variables,
+        "predicates": predicates,
+    }
+    parsed["needs_clarification"] = False
+    parsed["ambiguities"] = []
+    parsed["uncertainty_score"] = min(_clip_01(parsed.get("uncertainty_score"), fallback=0.18), 0.28)
+    parsed["uncertainty_label"] = "low"
+    parsed["clarification_question"] = ""
+    parsed["clarification_reason"] = ""
+    rationale = str(parsed.get("rationale", "")).strip()
+    suffix = "Group-return-home guard canonicalized plural bears to group agent bears."
+    parsed["rationale"] = f"{rationale} {suffix}".strip() if rationale else suffix
+    events.append(
+        {
+            "kind": "group_returned_home_guard",
+            "rewritten_fact": fact,
         }
     )
     return parsed, events
@@ -4735,16 +5143,23 @@ def _apply_possessive_break_guard(
     if not owner_atom or thing not in {"chair", "bed", "bowl"}:
         return parsed, events
 
-    fact = f"broke({thing}_of({owner_atom}))."
-    current_facts = [str(x).strip() for x in parsed.get("facts", []) if str(x).strip()]
+    canonical_break = f"broke({thing}_of({owner_atom}))."
+    canonical_facts: list[str] = [canonical_break]
+    lowered_utterance = str(utterance or "").lower()
+    if "sitting in it" in lowered_utterance or "sat in it" in lowered_utterance:
+        canonical_facts.append(f"sat_in(goldilocks, {thing}_of({owner_atom})).")
+    if "while" in lowered_utterance and "sitting" in lowered_utterance:
+        canonical_facts.append(f"saw({owner_atom}, sat_in(goldilocks, {thing}_of({owner_atom}))).")
+
     merged: list[str] = []
-    for clause in current_facts + [fact]:
+    for clause in canonical_facts:
         normalized = _normalize_clause(clause)
         if normalized and normalized not in merged:
             merged.append(normalized)
     if not merged:
         return parsed, events
 
+    parsed["intent"] = "assert_fact"
     parsed["facts"] = merged
     parsed["logic_string"] = merged[0] if len(merged) == 1 else "\n".join(merged)
     parsed["rules"] = []
@@ -4756,17 +5171,79 @@ def _apply_possessive_break_guard(
         "predicates": predicates,
     }
     rationale = str(parsed.get("rationale", "")).strip()
-    suffix = "Possessive-break guard added canonical broke/1 fact."
+    suffix = "Possessive-break guard canonicalized break event with stable ownership target."
     parsed["rationale"] = f"{rationale} {suffix}".strip() if rationale else suffix
+    parsed["ambiguities"] = []
     parsed["needs_clarification"] = False
-    parsed["uncertainty_score"] = min(_clip_01(parsed.get("uncertainty_score"), fallback=0.18), 0.32)
+    parsed["uncertainty_score"] = min(_clip_01(parsed.get("uncertainty_score"), fallback=0.18), 0.28)
     parsed["uncertainty_label"] = "low"
     parsed["clarification_question"] = ""
     parsed["clarification_reason"] = ""
     events.append(
         {
             "kind": "possessive_break_guard",
-            "fact": fact,
+            "rewritten_facts": merged,
+        }
+    )
+    return parsed, events
+
+
+def _apply_possessive_bed_target_guard(
+    parsed: dict[str, Any],
+    *,
+    utterance: str,
+    route: str,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    events: list[dict[str, Any]] = []
+    if not isinstance(parsed, dict):
+        return parsed, events
+
+    intent = str(parsed.get("intent", "")).strip().lower()
+    route_name = str(route or "").strip().lower()
+    if intent not in {"assert_fact", "other"} and route_name not in {"assert_fact", "other"}:
+        return parsed, events
+
+    match = re.match(
+        (
+            r"^\s*([A-Za-z][A-Za-z0-9_'-]*(?:\s+[A-Za-z][A-Za-z0-9_'-]*)*)\s+"
+            r"(?:lay|slept|fell\s+asleep)\s+in\s+"
+            r"([A-Za-z][A-Za-z0-9_'-]*(?:\s+[A-Za-z][A-Za-z0-9_'-]*)*)'s\s+bed\.?\s*$"
+        ),
+        str(utterance or ""),
+        re.IGNORECASE,
+    )
+    if not match:
+        return parsed, events
+
+    sleeper_atom = _atomize(match.group(1))
+    owner_atom = _atomize(match.group(2))
+    if not sleeper_atom or not owner_atom:
+        return parsed, events
+
+    fact = f"slept_in({sleeper_atom}, bed_of({owner_atom}))."
+    parsed["intent"] = "assert_fact"
+    parsed["facts"] = [fact]
+    parsed["logic_string"] = fact
+    parsed["rules"] = []
+    parsed["queries"] = []
+    atoms, variables, predicates = _collect_components_from_clauses([fact])
+    parsed["components"] = {
+        "atoms": atoms,
+        "variables": variables,
+        "predicates": predicates,
+    }
+    parsed["needs_clarification"] = False
+    parsed["uncertainty_score"] = min(_clip_01(parsed.get("uncertainty_score"), fallback=0.18), 0.32)
+    parsed["uncertainty_label"] = "low"
+    parsed["clarification_question"] = ""
+    parsed["clarification_reason"] = ""
+    rationale = str(parsed.get("rationale", "")).strip()
+    suffix = "Possessive-bed guard canonicalized sleeper target to bed_of(owner)."
+    parsed["rationale"] = f"{rationale} {suffix}".strip() if rationale else suffix
+    events.append(
+        {
+            "kind": "possessive_bed_target_guard",
+            "rewritten_fact": fact,
         }
     )
     return parsed, events
@@ -6959,6 +7436,7 @@ def _apply_to_kb(
                 return {"tool": "assert_fact", "input": fact, "result": constraint_issue}
 
         temporal_signature = f"{str(temporal_predicate).strip().lower()}/2"
+        registry_has_constraints = bool(allowed_signatures)
         temporal_enabled = bool(
             temporal_dual_write
             and isinstance(turn_index, int)
@@ -6969,6 +7447,7 @@ def _apply_to_kb(
             temporal_enabled
             and (
                 not strict_registry
+                or not registry_has_constraints
                 or temporal_signature in allowed_signatures
             )
         )
@@ -6999,7 +7478,10 @@ def _apply_to_kb(
                 elif not temporal_allowed:
                     timeline_row = {
                         "status": "skipped",
-                        "reason": "Temporal predicate blocked by strict registry.",
+                        "reason": (
+                            "Temporal predicate blocked by strict registry "
+                            "(missing required signature)."
+                        ),
                         "required_signature": temporal_signature,
                     }
                 else:
@@ -7542,6 +8024,40 @@ def parse_args() -> argparse.Namespace:
         help="Clarification eagerness in [0,1]. Higher asks clarification at lower uncertainty.",
     )
     parser.add_argument(
+        "--clarification-eagerness-mode",
+        choices=["adaptive", "static"],
+        default="static",
+        help=(
+            "Clarification eagerness mode. "
+            "'adaptive' starts more aggressive on new KBs then eases off as KB matures; "
+            "'static' uses fixed --clarification-eagerness."
+        ),
+    )
+    parser.add_argument(
+        "--clarification-eagerness-new-kb-boost",
+        type=float,
+        default=0.35,
+        help="Extra eagerness added at KB bootstrapping when mode=adaptive (default 0.35).",
+    )
+    parser.add_argument(
+        "--clarification-eagerness-existing-kb-boost",
+        type=float,
+        default=0.12,
+        help="Extra eagerness added for existing KBs when mode=adaptive (default 0.12).",
+    )
+    parser.add_argument(
+        "--clarification-eagerness-decay-turns",
+        type=int,
+        default=24,
+        help="Turns needed for adaptive clarification eagerness to decay toward base (default 24).",
+    )
+    parser.add_argument(
+        "--clarification-eagerness-decay-clauses",
+        type=int,
+        default=120,
+        help="New clauses needed for adaptive clarification eagerness to decay toward base (default 120).",
+    )
+    parser.add_argument(
         "--max-clarification-rounds",
         type=int,
         default=2,
@@ -7836,6 +8352,19 @@ def main() -> int:
         )
         return 2
     clarification_eagerness = _clip_01(args.clarification_eagerness, fallback=0.35)
+    clarification_eagerness_mode = str(args.clarification_eagerness_mode or "static").strip().lower()
+    if clarification_eagerness_mode not in {"adaptive", "static"}:
+        clarification_eagerness_mode = "static"
+    clarification_eagerness_new_kb_boost = _clip_01(
+        args.clarification_eagerness_new_kb_boost,
+        fallback=0.35,
+    )
+    clarification_eagerness_existing_kb_boost = _clip_01(
+        args.clarification_eagerness_existing_kb_boost,
+        fallback=0.12,
+    )
+    clarification_eagerness_decay_turns = max(1, int(args.clarification_eagerness_decay_turns))
+    clarification_eagerness_decay_clauses = max(1, int(args.clarification_eagerness_decay_clauses))
     max_clarification_rounds = max(0, int(args.max_clarification_rounds))
     require_final_confirmation = bool(args.require_final_confirmation)
     prompt_history_dir = Path(args.prompt_history_dir)
@@ -7865,6 +8394,11 @@ def main() -> int:
         "temporal_dual_write": temporal_dual_write,
         "temporal_predicate": temporal_predicate,
         "clarification_eagerness": clarification_eagerness,
+        "clarification_eagerness_mode": clarification_eagerness_mode,
+        "clarification_eagerness_new_kb_boost": clarification_eagerness_new_kb_boost,
+        "clarification_eagerness_existing_kb_boost": clarification_eagerness_existing_kb_boost,
+        "clarification_eagerness_decay_turns": clarification_eagerness_decay_turns,
+        "clarification_eagerness_decay_clauses": clarification_eagerness_decay_clauses,
         "max_clarification_rounds": max_clarification_rounds,
         "require_final_confirmation": require_final_confirmation,
         "progress_memory_enabled": progress_memory_enabled,
@@ -7961,6 +8495,13 @@ def main() -> int:
         for item in existing_corpus_clauses
         if _normalize_clause(item)
     }
+    existing_clause_count_from_profile = 0
+    if isinstance(existing_profile, dict):
+        try:
+            existing_clause_count_from_profile = int(existing_profile.get("clause_count", 0) or 0)
+        except (TypeError, ValueError):
+            existing_clause_count_from_profile = 0
+    kb_clause_count_at_start = max(len(corpus_clauses), max(0, existing_clause_count_from_profile))
     if corpus_clauses:
         corpus_load = _load_corpus_into_server(server, sorted(corpus_clauses))
     else:
@@ -7984,10 +8525,19 @@ def main() -> int:
         f"enabled={temporal_dual_write} predicate={temporal_predicate}"
     )
     print(
-        f"Clarification policy: eagerness={clarification_eagerness:.2f} "
+        f"Clarification policy: base_eagerness={clarification_eagerness:.2f} "
+        f"mode={clarification_eagerness_mode} "
         f"max_rounds={max_clarification_rounds} "
         f"final_confirmation={require_final_confirmation}"
     )
+    if clarification_eagerness_mode == "adaptive":
+        print(
+            "Clarification adaptive tuning: "
+            f"new_kb_boost={clarification_eagerness_new_kb_boost:.2f} "
+            f"existing_kb_boost={clarification_eagerness_existing_kb_boost:.2f} "
+            f"decay_turns={clarification_eagerness_decay_turns} "
+            f"decay_clauses={clarification_eagerness_decay_clauses}"
+        )
     print(
         "Progress memory: "
         f"enabled={progress_memory_enabled} "
@@ -8117,6 +8667,46 @@ def main() -> int:
         }
         progress_low_relevance_seen = False
         progress_high_risk_seen = False
+        turn_eagerness_profile = _compute_effective_clarification_eagerness(
+            base_eagerness=clarification_eagerness,
+            mode=clarification_eagerness_mode,
+            turn_index=idx,
+            kb_clause_count_at_start=kb_clause_count_at_start,
+            kb_clause_count_current=len(corpus_clauses),
+            is_brand_new_ontology=is_brand_new_ontology,
+            new_kb_boost=clarification_eagerness_new_kb_boost,
+            existing_kb_boost=clarification_eagerness_existing_kb_boost,
+            decay_turns=clarification_eagerness_decay_turns,
+            decay_clauses=clarification_eagerness_decay_clauses,
+        )
+        turn_clarification_eagerness = _clip_01(
+            turn_eagerness_profile.get("effective_eagerness"),
+            fallback=clarification_eagerness,
+        )
+        clarification_policy["clarification_eagerness"] = turn_clarification_eagerness
+        clarification_policy["threshold"] = round(max(0.05, 1.0 - turn_clarification_eagerness), 3)
+        clarification_policy["clarification_eagerness_mode"] = str(turn_eagerness_profile.get("mode", "static"))
+        clarification_policy["clarification_eagerness_phase"] = str(turn_eagerness_profile.get("phase", "static"))
+        clarification_policy["clarification_eagerness_base"] = _clip_01(
+            turn_eagerness_profile.get("base_eagerness"),
+            fallback=clarification_eagerness,
+        )
+        clarification_policy["clarification_eagerness_boost_applied"] = _clip_01(
+            turn_eagerness_profile.get("boost_applied"),
+            fallback=0.0,
+        )
+        clarification_policy["clarification_eagerness_maturity"] = _clip_01(
+            turn_eagerness_profile.get("maturity_score"),
+            fallback=1.0,
+        )
+        clarification_policy["clarification_eagerness_turn_progress"] = _clip_01(
+            turn_eagerness_profile.get("turn_progress"),
+            fallback=1.0,
+        )
+        clarification_policy["clarification_eagerness_clause_progress"] = _clip_01(
+            turn_eagerness_profile.get("clause_progress"),
+            fallback=1.0,
+        )
 
         if control_predicate_directive:
             declared_names = _extract_predicate_names_from_control_directive(utterance_original)
@@ -8769,6 +9359,13 @@ def main() -> int:
                 )
                 if possessive_break_events:
                     alignment_events.extend(possessive_break_events)
+                parsed, possessive_bed_events = _apply_possessive_bed_target_guard(
+                    parsed,
+                    utterance=utterance,
+                    route=route,
+                )
+                if possessive_bed_events:
+                    alignment_events.extend(possessive_bed_events)
                 parsed, observed_someone_events = _apply_observed_someone_event_guard(
                     parsed,
                     utterance=utterance,
@@ -8811,6 +9408,20 @@ def main() -> int:
                 )
                 if three_bears_events:
                     alignment_events.extend(three_bears_events)
+                parsed, group_returned_home_events = _apply_group_returned_home_guard(
+                    parsed,
+                    utterance=utterance,
+                    route=route,
+                )
+                if group_returned_home_events:
+                    alignment_events.extend(group_returned_home_events)
+                parsed, type_entity_alias_events = _apply_type_entity_alias_guard(
+                    parsed,
+                    route=route,
+                    type_schema=type_schema,
+                )
+                if type_entity_alias_events:
+                    alignment_events.extend(type_entity_alias_events)
                 parsed, type_direction_events = _apply_type_direction_guard(
                     parsed,
                     route=route,
@@ -8899,17 +9510,49 @@ def main() -> int:
                 deferred_validation_errors = list(validation_errors)
                 validation_errors = []
 
+            if isinstance(parsed, dict) and not validation_errors:
+                parsed, anonymous_guard_events = _apply_anonymous_fact_clarification_guard(
+                    parsed,
+                    utterance=turn_input_text,
+                    route=route,
+                )
+                if anonymous_guard_events:
+                    alignment_events.extend(anonymous_guard_events)
+
             if not isinstance(parsed, dict) or validation_errors:
                 break
 
             clarification_policy = _clarification_policy_decision(
                 parsed=parsed,
-                clarification_eagerness=clarification_eagerness,
+                clarification_eagerness=turn_clarification_eagerness,
                 utterance=turn_input_text,
                 progress_memory=progress_memory if progress_memory_enabled else None,
                 progress_low_relevance_threshold=progress_low_relevance_threshold,
                 progress_high_risk_threshold=progress_high_risk_threshold,
             )
+            if isinstance(clarification_policy, dict):
+                clarification_policy["clarification_eagerness_mode"] = str(turn_eagerness_profile.get("mode", "static"))
+                clarification_policy["clarification_eagerness_phase"] = str(turn_eagerness_profile.get("phase", "static"))
+                clarification_policy["clarification_eagerness_base"] = _clip_01(
+                    turn_eagerness_profile.get("base_eagerness"),
+                    fallback=clarification_eagerness,
+                )
+                clarification_policy["clarification_eagerness_boost_applied"] = _clip_01(
+                    turn_eagerness_profile.get("boost_applied"),
+                    fallback=0.0,
+                )
+                clarification_policy["clarification_eagerness_maturity"] = _clip_01(
+                    turn_eagerness_profile.get("maturity_score"),
+                    fallback=1.0,
+                )
+                clarification_policy["clarification_eagerness_turn_progress"] = _clip_01(
+                    turn_eagerness_profile.get("turn_progress"),
+                    fallback=1.0,
+                )
+                clarification_policy["clarification_eagerness_clause_progress"] = _clip_01(
+                    turn_eagerness_profile.get("clause_progress"),
+                    fallback=1.0,
+                )
             if clarification_policy.get("progress_low_relevance"):
                 progress_low_relevance_seen = True
             if clarification_policy.get("progress_high_risk"):

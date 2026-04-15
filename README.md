@@ -2,15 +2,16 @@
 
 This project is a local workbench for building a high-accuracy semantic parser (Qwen 3.5 9B first) that converts natural language into Prolog-ready logic and applies it into named, persistent knowledge bases.
 
-Last updated: 2026-04-14
+Last updated: 2026-04-15
 
-## Current Focus (2026-04-14)
+## Current Focus (2026-04-15)
 
-Prethinker is now in a phase shift from ladder-only progression to real-world language pressure.
+Prethinker is operating on a single gated execution spine:
 
-- Primary lane: real-world ingestion and stress tests (`wild mode`, excursion packs, live/random threads).
-- Ladder lane: still active, but used mainly as regression safety, not as the only definition of progress.
-- Current scientific rollup is tracked in `docs/PROGRESS.md` with concrete run deltas and known failure modes.
+- Raw text ingestion -> deterministic mutation/query gate -> interrogator grading.
+- Real-world/wild language pressure remains primary; ladder packs are regression anchors.
+- Same-model-family stack is the default (`qwen3.5:9b` parser + clarification path) for tighter behavior and lower VRAM pressure.
+- Current scientific rollup is tracked in [docs/PROGRESS.md](docs/PROGRESS.md), including latest sanity-cycle deltas.
 
 ## Current Rollups
 
@@ -25,15 +26,16 @@ Prethinker is now in a phase shift from ladder-only progression to real-world la
 
 ## Quick Links (Current)
 
-- docs hub: `docs/index.html`
-- science progress note: `docs/PROGRESS.md`
-- KB interrogator guide: `docs/KB_INTERROGATOR.md`
-- focus execution plan: `docs/FOCUS_EXECUTION_PLAN.md`
-- out in the wild article: `docs/WILD_MODE.md`
-- run explorer: `docs/run-reports-hub.html`
-- goldilocks roundtrip demo: `docs/goldilocks-roundtrip.html`
-- track scoreboard: `docs/TRACK_SCOREBOARD.md`
-- assembly log: `SESSIONS.md`
+- docs hub: [docs/index.html](docs/index.html)
+- science progress note: [docs/PROGRESS.md](docs/PROGRESS.md)
+- KB interrogator guide: [docs/KB_INTERROGATOR.md](docs/KB_INTERROGATOR.md)
+- runtime settings cheat sheet: [docs/RUNTIME_SETTINGS_CHEATSHEET.md](docs/RUNTIME_SETTINGS_CHEATSHEET.md)
+- focus execution plan: [docs/FOCUS_EXECUTION_PLAN.md](docs/FOCUS_EXECUTION_PLAN.md)
+- out in the wild article: [docs/WILD_MODE.md](docs/WILD_MODE.md)
+- run explorer: [docs/run-reports-hub.html](docs/run-reports-hub.html)
+- goldilocks roundtrip demo: [docs/goldilocks-roundtrip.html](docs/goldilocks-roundtrip.html)
+- track scoreboard: [docs/TRACK_SCOREBOARD.md](docs/TRACK_SCOREBOARD.md)
+- assembly log: [SESSIONS.md](SESSIONS.md)
 
 ## Historical Record
 
@@ -535,7 +537,7 @@ python scripts/grade_kb.py --candidate-kb kb_store/mitm_demo/kb.pl --golden-kb g
 Use this to verify vendored engine behavior against the prior repo baseline engine.
 
 ```bash
-python scripts/run_differential_validation.py --reference-repo ../prolog-reasoning --out docs/data/differential_validation_latest.json --fail-on-disagreement
+python scripts/run_differential_validation.py --reference-repo <path-to-engine-baseline> --out docs/data/differential_validation_latest.json --fail-on-disagreement
 ```
 
 Current differential categories:
@@ -682,14 +684,26 @@ See `kb_scenarios/README.md` for details.
 
 ## Unit Tests
 
+Engine regression one-liner (recommended for quick checks):
+
+```bash
+python scripts/run_engine_regression.py
+```
+
 ```bash
 python -m unittest discover -s tests -p "test_*.py" -v
+```
+
+Legacy engine baseline suite (ported locally):
+
+```bash
+python -m pytest tests/test_engine_baseline_suite.py -v
 ```
 
 Differential validation (stronger vendoring check):
 
 ```bash
-python scripts/run_differential_validation.py --reference-repo ../prolog-reasoning --fail-on-disagreement
+python scripts/run_differential_validation.py --reference-repo <path-to-engine-baseline> --fail-on-disagreement
 ```
 
 ## What Was Implemented In This Iteration

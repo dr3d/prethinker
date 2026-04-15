@@ -1,9 +1,9 @@
 {
   "entities": {
-    "goldilocks": ["person", "agent"],
-    "papa_bear": ["person", "agent"],
-    "mama_bear": ["person", "agent"],
-    "baby_bear": ["person", "agent"],
+    "goldilocks": ["person", "agent", "thing"],
+    "papa_bear": ["person", "agent", "thing"],
+    "mama_bear": ["person", "agent", "thing"],
+    "baby_bear": ["person", "agent", "thing"],
     "the_three_bears": ["group", "agent"],
     "bears": ["group", "agent"],
     "house": ["thing", "location"],
@@ -59,6 +59,8 @@
     "saw/2": ["agent", "thing"],
     "went_upstairs/1": ["agent"],
     "ran_out_of/2": ["person", "location"],
+    "broke/1": ["thing"],
+    "at_step/2": ["thing", "thing"],
     "chairs_in_house/1": ["thing"],
     "beds_in_house/1": ["thing"]
   }

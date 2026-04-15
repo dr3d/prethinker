@@ -71,7 +71,7 @@ class RuntimeHooks:
                 str(config.get("compiler_prompt_mode", "auto")),
                 str(config.get("compiler_backend", "ollama")),
                 str(config.get("compiler_base_url", "http://127.0.0.1:11434")),
-                str(config.get("compiler_model", "qwen35-semparse:9b")),
+                str(config.get("compiler_model", "qwen3.5:9b")),
                 str(int(config.get("compiler_context_length", 8192) or 8192)),
                 str(int(config.get("compiler_timeout", 60) or 60)),
                 prompt_path,
@@ -97,7 +97,7 @@ class RuntimeHooks:
             compiler_mode=compiler_mode,
             compiler_backend=str(config.get("compiler_backend", "ollama") or "ollama"),
             compiler_base_url=str(config.get("compiler_base_url", "http://127.0.0.1:11434") or "http://127.0.0.1:11434"),
-            compiler_model=str(config.get("compiler_model", "qwen35-semparse:9b") or "qwen35-semparse:9b"),
+            compiler_model=str(config.get("compiler_model", "qwen3.5:9b") or "qwen3.5:9b"),
             compiler_context_length=max(512, int(config.get("compiler_context_length", 8192) or 8192)),
             compiler_timeout=max(5, int(config.get("compiler_timeout", 60) or 60)),
             compiler_prompt_file=str(prompt_path) if prompt_path is not None else "",
@@ -178,7 +178,7 @@ class RuntimeHooks:
                 "front_door_uri": config["front_door_uri"],
                 "compiler": {
                     "mode": config.get("compiler_mode", "strict"),
-                    "model": config.get("compiler_model", "qwen35-semparse:9b"),
+                    "model": config.get("compiler_model", "qwen3.5:9b"),
                     "backend": config.get("compiler_backend", "ollama"),
                     "base_url": config.get("compiler_base_url", "http://127.0.0.1:11434"),
                     "strict_mode": config.get("strict_mode", True),
@@ -220,7 +220,7 @@ class RuntimeHooks:
             "front_door_uri": config["front_door_uri"],
             "compiler": {
                 "mode": config.get("compiler_mode", "strict"),
-                "model": config.get("compiler_model", "qwen35-semparse:9b"),
+                "model": config.get("compiler_model", "qwen3.5:9b"),
                 "backend": config.get("compiler_backend", "ollama"),
                 "base_url": config.get("compiler_base_url", "http://127.0.0.1:11434"),
                 "strict_mode": config.get("strict_mode", True),
@@ -270,7 +270,7 @@ class RuntimeHooks:
             response = _call_model_prompt(
                 backend=str(config.get("compiler_backend", "ollama") or "ollama"),
                 base_url=str(config.get("compiler_base_url", "http://127.0.0.1:11434") or "http://127.0.0.1:11434"),
-                model=str(config.get("compiler_model", "qwen35-semparse:9b") or "qwen35-semparse:9b"),
+                model=str(config.get("compiler_model", "qwen3.5:9b") or "qwen3.5:9b"),
                 prompt_text=extraction_prompt,
                 context_length=max(512, int(config.get("compiler_context_length", 8192) or 8192)),
                 timeout=max(5, int(config.get("compiler_timeout", 60) or 60)),
@@ -651,7 +651,7 @@ class RuntimeHooks:
         prompt = self._build_served_prompt(utterance=utterance, route=route, execution=execution)
         api_key = _get_api_key()
         backend = str(config.get("served_llm_provider", "ollama") or "ollama")
-        model = str(config.get("served_llm_model", "gpt-oss:20b") or "gpt-oss:20b")
+        model = str(config.get("served_llm_model", "qwen3.5:9b") or "qwen3.5:9b")
         base_url = str(config.get("served_llm_base_url", "http://127.0.0.1:11434") or "http://127.0.0.1:11434")
         try:
             raw = _call_model_prompt(

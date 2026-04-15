@@ -153,6 +153,33 @@ class CoreRuntimeTests(unittest.TestCase):
         temporal_query = self.runtime.query_rows("at_step(3, parent(alice, bob)).")
         self.assertEqual(temporal_query.get("status"), "no_results")
 
+    def test_apply_dual_write_allows_temporal_when_registry_strict_but_empty(self) -> None:
+        parsed = {
+            "intent": "assert_fact",
+            "logic_string": "parent(alice, bob).",
+            "facts": ["parent(alice, bob)."],
+            "rules": [],
+            "queries": [],
+        }
+        result = _apply_to_kb(
+            self.runtime,
+            parsed,
+            registry_signatures=set(),
+            strict_registry=True,
+            type_schema={"entities": {}, "predicates": {}},
+            strict_types=False,
+            turn_index=5,
+            temporal_dual_write=True,
+            temporal_predicate="at_step",
+        )
+        self.assertEqual(result.get("result", {}).get("status"), "success")
+        timeline = result.get("result", {}).get("timeline", {})
+        self.assertEqual(timeline.get("status"), "success")
+
+        temporal_query = self.runtime.query_rows("at_step(5, parent(alice, bob)).")
+        self.assertEqual(temporal_query.get("status"), "success")
+        self.assertEqual(int(temporal_query.get("num_rows", 0)), 1)
+
 
 if __name__ == "__main__":
     unittest.main()

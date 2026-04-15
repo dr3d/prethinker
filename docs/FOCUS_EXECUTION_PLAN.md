@@ -53,13 +53,27 @@ No side quests unless they improve this path.
 Run the focused baseline cycle (Goldilocks + HN middle-noise mini-pack):
 
 ```powershell
-python scripts/run_gate_cycle.py --batch baseline_focus
+python scripts/run_gate_cycle.py --batch baseline_focus --require-pipeline-pass-rate 1.0 --write-corpus-on-fail
 ```
 
 Outputs:
 - `tmp/runs/focus_cycles/<run_name>/summary.json`
 - `tmp/runs/focus_cycles/<run_name>/summary.md`
 - scenario-level pipeline + interrogator artifacts in same folder
+
+This command now hard-fails when the batch pipeline pass rate drops below `1.0`.
+
+## Shadow A/B Gate
+
+Before any `frontend_proposal_mode=active` trial, run `shadow` against a known-good `off` baseline and require net-positive metrics:
+
+```powershell
+python scripts/run_gate_cycle.py --batch baseline_focus --frontend-proposal-mode shadow --compare-to-summary <baseline_summary.json> --require-net-positive --require-pipeline-pass-rate 1.0 --write-corpus-on-fail
+```
+
+Current policy:
+- If net-positive check fails, `active` remains blocked.
+- If net-positive check passes repeatedly, only then schedule controlled `active` trial.
 
 ## Weekly Rhythm
 

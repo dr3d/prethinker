@@ -9,14 +9,14 @@ from pathlib import Path
 class GatewayConfig:
     front_door_uri: str = "prethink://local/front-door"
     served_llm_provider: str = "ollama"
-    served_llm_model: str = "gpt-oss:20b"
+    served_llm_model: str = "qwen3.5:9b"
     served_llm_base_url: str = "http://127.0.0.1:11434"
     served_llm_context_length: int = 16384
     served_llm_timeout: int = 60
     served_handoff_mode: str = "never"
     compiler_mode: str = "strict"
     compiler_prompt_mode: str = "auto"
-    compiler_model: str = "qwen35-semparse:9b"
+    compiler_model: str = "qwen3.5:9b"
     compiler_backend: str = "ollama"
     compiler_base_url: str = "http://127.0.0.1:11434"
     compiler_context_length: int = 8192
