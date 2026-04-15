@@ -27,6 +27,8 @@ Prethinker is now in a phase shift from ladder-only progression to real-world la
 
 - docs hub: `docs/index.html`
 - science progress note: `docs/PROGRESS.md`
+- KB interrogator guide: `docs/KB_INTERROGATOR.md`
+- focus execution plan: `docs/FOCUS_EXECUTION_PLAN.md`
 - out in the wild article: `docs/WILD_MODE.md`
 - run explorer: `docs/run-reports-hub.html`
 - goldilocks roundtrip demo: `docs/goldilocks-roundtrip.html`

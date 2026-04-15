@@ -1,49 +1,45 @@
-﻿# Goldilocks Roundtrip Reconstructed Story (Latest)
+# Goldilocks Roundtrip Reconstructed Story (Latest)
 
-This reconstruction is a deterministic clause inventory from the latest generated KB.
+This retelling is generated from the latest KB facts (deterministic mapping, not copied prose).
 
-## Recovered Clauses
-
-- ate(goldilocks, porridge).
-- beds_in_house(three_upstairs).
-- belongs_to(house, baby_bear).
-- belongs_to(house, mama_bear).
-- belongs_to(house, papa_bear).
-- chairs_in_house(big_chair).
-- chairs_in_house(chair1).
-- chairs_in_house(chair2).
-- chairs_in_house(chair3).
-- chairs_in_house(medium_chair).
-- chairs_in_house(small_chair).
-- fits_goldilocks(baby_bear_bed, goldilocks).
-- fits_goldilocks(porridge_of_baby_bear, goldilocks).
-- goldilocks(little_girl).
-- goldilocks_found(goldilocks, small_house).
-- has_bed(baby_bear, small_bed).
-- has_bed(mama_bear, medium_bed).
-- has_bed(papa_bear, big_bed).
-- has_porridge(baby_bear, small_bowl_of_porridge).
-- has_porridge(mama_bear, medium_bowl_of_porridge).
-- has_porridge(papa_bear, big_bowl_of_porridge).
-- ran_out_of(goldilocks, house).
-- returned_home(bears).
-- sat_in(goldilocks, chair).
-- sat_in(goldilocks, chair_of_baby_bear).
-- sat_in(goldilocks, mama_bear_chair).
-- saw(baby_bear, ate(someone, porridge_of(baby_bear))).
-- saw(baby_bear, chair).
-- saw(baby_bear, slept_in(goldilocks, bed_of(baby_bear))).
-- saw(goldilocks, bear).
-- saw(mama_bear, sat_in(someone, chair_of(mama_bear))).
-- saw(papa_bear, sat_in(someone, chair_of(papa_bear))).
-- slept_in(goldilocks, baby_bear_bed).
-- slept_in(goldilocks, bed).
-- tasted(goldilocks, porridge).
-- too_cold(mama_bear_porridge, goldilocks).
-- too_hard(chair_of_papa_bear, goldilocks).
-- too_hard(papa_bear_bed, goldilocks).
-- too_hot(papa_bear_porridge, goldilocks).
-- too_soft(mama_bear_bed, goldilocks).
-- too_soft(mama_bear_chair, goldilocks).
-- walked_through_forest(goldilocks).
-- went_upstairs(bears).
+- Goldilocks was a little girl.
+- Goldilocks walked through the forest.
+- Goldilocks found a small house in the forest.
+- The house belonged to Papa Bear, Mama Bear, and Baby Bear.
+- There were three bowls of porridge on the table.
+- Papa Bear had a big bowl of porridge.
+- Mama Bear had a medium bowl of porridge.
+- Baby Bear had a small bowl of porridge.
+- Goldilocks tasted Papa Bear's porridge.
+- Papa Bear's porridge was too hot for Goldilocks.
+- Mama Bear's porridge was too cold for Goldilocks.
+- Baby Bear's porridge was just right for Goldilocks.
+- Goldilocks ate all of Baby Bear's porridge.
+- There were three chairs in the house.
+- Papa Bear had a big chair.
+- Mama Bear had a medium chair.
+- Baby Bear had a small chair.
+- Goldilocks sat in Papa Bear's chair.
+- Papa Bear's chair was too hard for Goldilocks.
+- Goldilocks sat in Mama Bear's chair.
+- Mama Bear's chair was too soft for Goldilocks.
+- Goldilocks sat in Baby Bear's chair.
+- There were three beds upstairs.
+- Papa Bear had a big bed.
+- Mama Bear had a medium bed.
+- Baby Bear had a small bed.
+- Goldilocks lay in Papa Bear's bed.
+- Papa Bear's bed was too hard for Goldilocks.
+- Goldilocks lay in Mama Bear's bed.
+- Mama Bear's bed was too soft for Goldilocks.
+- Goldilocks lay in Baby Bear's bed.
+- Baby Bear's bed was just right for Goldilocks.
+- Goldilocks fell asleep in Baby Bear's bed.
+- The three bears returned home.
+- Papa Bear saw that someone had tasted his porridge.
+- Mama Bear saw that someone had tasted her porridge.
+- Baby Bear saw that someone had eaten all his porridge.
+- Papa Bear saw that someone had been sitting in his chair.
+- Mama Bear saw that someone had been sitting in her chair.
+- The bears went upstairs.
+- Goldilocks ran out of the house.

@@ -91,6 +91,68 @@ class CoreRuntimeTests(unittest.TestCase):
         )
         self.assertEqual(result.get("result", {}).get("status"), "constraint_error")
 
+    def test_apply_dual_writes_temporal_fact_without_changing_base_behavior(self) -> None:
+        parsed = {
+            "intent": "assert_fact",
+            "logic_string": "parent(alice, bob).",
+            "facts": ["parent(alice, bob)."],
+            "rules": [],
+            "queries": [],
+        }
+        result = _apply_to_kb(
+            self.runtime,
+            parsed,
+            registry_signatures={"parent/2", "at_step/2"},
+            strict_registry=True,
+            type_schema={"entities": {}, "predicates": {}},
+            strict_types=False,
+            turn_index=7,
+            temporal_dual_write=True,
+            temporal_predicate="at_step",
+        )
+        self.assertEqual(result.get("result", {}).get("status"), "success")
+        timeline = result.get("result", {}).get("timeline", {})
+        self.assertEqual(timeline.get("status"), "success")
+
+        base_query = self.runtime.query_rows("parent(alice, X).")
+        self.assertEqual(base_query.get("status"), "success")
+        self.assertTrue(any(row.get("X") == "bob" for row in base_query.get("rows", [])))
+
+        temporal_query = self.runtime.query_rows("at_step(7, parent(alice, bob)).")
+        self.assertEqual(temporal_query.get("status"), "success")
+        self.assertEqual(int(temporal_query.get("num_rows", 0)), 1)
+
+    def test_apply_dual_write_skips_temporal_when_registry_disallows_predicate(self) -> None:
+        parsed = {
+            "intent": "assert_fact",
+            "logic_string": "parent(alice, bob).",
+            "facts": ["parent(alice, bob)."],
+            "rules": [],
+            "queries": [],
+        }
+        result = _apply_to_kb(
+            self.runtime,
+            parsed,
+            registry_signatures={"parent/2"},
+            strict_registry=True,
+            type_schema={"entities": {}, "predicates": {}},
+            strict_types=False,
+            turn_index=3,
+            temporal_dual_write=True,
+            temporal_predicate="at_step",
+        )
+        self.assertEqual(result.get("result", {}).get("status"), "success")
+        timeline = result.get("result", {}).get("timeline", {})
+        self.assertEqual(timeline.get("status"), "skipped")
+        self.assertIn("strict registry", str(timeline.get("reason", "")).lower())
+
+        base_query = self.runtime.query_rows("parent(alice, X).")
+        self.assertEqual(base_query.get("status"), "success")
+        self.assertTrue(any(row.get("X") == "bob" for row in base_query.get("rows", [])))
+
+        temporal_query = self.runtime.query_rows("at_step(3, parent(alice, bob)).")
+        self.assertEqual(temporal_query.get("status"), "no_results")
+
 
 if __name__ == "__main__":
     unittest.main()

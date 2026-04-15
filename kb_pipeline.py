@@ -24,6 +24,7 @@ from pathlib import Path
 from typing import Any
 
 from engine.core import Clause, PrologEngine, Term
+from ingest_frontend import propose_frontend_parse
 
 PROJECT_ROOT = Path(__file__).resolve().parent
 DEFAULT_PROLOG_REPO_CANDIDATES = [
@@ -67,6 +68,7 @@ AMBIGUOUS_PRONOUN_ATOMS = {
 }
 WRITE_INTENTS = {"assert_fact", "assert_rule", "retract"}
 PREDICATE_SIGNATURE_RE = re.compile(r"\b[a-z][a-z0-9_]*\s*/\s*\d+\b", flags=re.IGNORECASE)
+PREDICATE_SYMBOL_RE = re.compile(r"^[a-z][a-z0-9_]*$")
 PREDICATE_TOKEN_STOPWORDS = {
     "a",
     "an",
@@ -5564,6 +5566,26 @@ def _normalize_clause(clause: str) -> str:
     return normalized
 
 
+def _build_temporal_fact_clause(
+    fact_clause: str,
+    *,
+    turn_index: int | None,
+    temporal_predicate: str,
+) -> str | None:
+    normalized = _normalize_clause(fact_clause)
+    if not normalized or ":-" in normalized:
+        return None
+    if turn_index is None or int(turn_index) <= 0:
+        return None
+    pred = str(temporal_predicate).strip().lower()
+    if not pred or not PREDICATE_SYMBOL_RE.fullmatch(pred):
+        return None
+    inner = normalized[:-1] if normalized.endswith(".") else normalized
+    if not inner:
+        return None
+    return f"{pred}({int(turn_index)}, {inner})."
+
+
 def _read_corpus_clauses(path: Path) -> list[str]:
     if not path.exists():
         return []
@@ -6898,6 +6920,9 @@ def _apply_to_kb(
     strict_registry: bool = False,
     type_schema: dict[str, Any] | None = None,
     strict_types: bool = False,
+    turn_index: int | None = None,
+    temporal_dual_write: bool = False,
+    temporal_predicate: str = "at_step",
 ) -> dict[str, Any]:
     allowed_signatures = registry_signatures or set()
     schema = type_schema or {"entities": {}, "predicates": {}}
@@ -6933,15 +6958,78 @@ def _apply_to_kb(
             if constraint_issue is not None:
                 return {"tool": "assert_fact", "input": fact, "result": constraint_issue}
 
+        temporal_signature = f"{str(temporal_predicate).strip().lower()}/2"
+        temporal_enabled = bool(
+            temporal_dual_write
+            and isinstance(turn_index, int)
+            and int(turn_index) > 0
+            and PREDICATE_SYMBOL_RE.fullmatch(str(temporal_predicate).strip().lower())
+        )
+        temporal_allowed = bool(
+            temporal_enabled
+            and (
+                not strict_registry
+                or temporal_signature in allowed_signatures
+            )
+        )
+
         op_results: list[dict[str, Any]] = []
         for fact in expanded_facts:
             if corpus_clauses is not None and fact in corpus_clauses:
-                op_results.append({"status": "skipped", "message": "Fact already present in corpus.", "fact": fact})
+                row: dict[str, Any] = {
+                    "status": "skipped",
+                    "message": "Fact already present in corpus.",
+                    "fact": fact,
+                }
+                if temporal_enabled:
+                    row["timeline"] = {
+                        "status": "skipped",
+                        "reason": "Base fact write skipped.",
+                    }
+                op_results.append(row)
                 continue
             result = server.assert_fact(fact)
+            row = {"status": str(result.get("status", "unknown")), "fact": fact, "raw": result}
             if corpus_clauses is not None and result.get("status") == "success":
                 corpus_clauses.add(fact)
-            op_results.append({"status": str(result.get("status", "unknown")), "fact": fact, "raw": result})
+            if temporal_enabled:
+                timeline_row: dict[str, Any]
+                if row["status"] != "success":
+                    timeline_row = {"status": "skipped", "reason": "Base fact write failed."}
+                elif not temporal_allowed:
+                    timeline_row = {
+                        "status": "skipped",
+                        "reason": "Temporal predicate blocked by strict registry.",
+                        "required_signature": temporal_signature,
+                    }
+                else:
+                    temporal_clause = _build_temporal_fact_clause(
+                        fact,
+                        turn_index=turn_index,
+                        temporal_predicate=temporal_predicate,
+                    )
+                    if not temporal_clause:
+                        timeline_row = {
+                            "status": "skipped",
+                            "reason": "Could not construct temporal clause.",
+                        }
+                    elif corpus_clauses is not None and temporal_clause in corpus_clauses:
+                        timeline_row = {
+                            "status": "skipped",
+                            "message": "Temporal fact already present in corpus.",
+                            "fact": temporal_clause,
+                        }
+                    else:
+                        temporal_result = server.assert_fact(temporal_clause)
+                        if corpus_clauses is not None and temporal_result.get("status") == "success":
+                            corpus_clauses.add(temporal_clause)
+                        timeline_row = {
+                            "status": str(temporal_result.get("status", "unknown")),
+                            "fact": temporal_clause,
+                            "raw": temporal_result,
+                        }
+                row["timeline"] = timeline_row
+            op_results.append(row)
 
         if len(expanded_facts) == 1:
             single = op_results[0]
@@ -6949,6 +7037,8 @@ def _apply_to_kb(
                 result_obj = dict(single.get("raw", {}))
             else:
                 result_obj = {"status": single.get("status", "unknown"), "message": single.get("message", "")}
+            if "timeline" in single:
+                result_obj["timeline"] = single.get("timeline")
             return {"tool": "assert_fact", "input": expanded_facts[0], "result": result_obj}
 
         status = _batch_status(op_results)
@@ -7348,6 +7438,19 @@ def parse_args() -> argparse.Namespace:
         help="Reject parsed turns when type constraints cannot be validated.",
     )
     parser.add_argument(
+        "--temporal-dual-write",
+        action="store_true",
+        help=(
+            "Dual-write asserted facts with temporal anchors (for example "
+            "at_step(T, fact(...))) while preserving base fact writes."
+        ),
+    )
+    parser.add_argument(
+        "--temporal-predicate",
+        default="at_step",
+        help="Predicate symbol used for temporal dual-write facts (default at_step).",
+    )
+    parser.add_argument(
         "--prompt-file",
         default="modelfiles/semantic_parser_system_prompt.md",
         help="Optional markdown prompt guidance file to inject into classifier/extractor/repair prompts.",
@@ -7409,6 +7512,28 @@ def parse_args() -> argparse.Namespace:
         "--no-split-extraction",
         action="store_true",
         help="Disable logic-only split extraction and use full-schema extraction directly.",
+    )
+    parser.add_argument(
+        "--frontend-proposal-mode",
+        choices=["off", "shadow", "active"],
+        default="off",
+        help=(
+            "Constrained ingestion frontend mode: "
+            "'off' disables, 'shadow' records proposals for A/B comparison, "
+            "'active' uses admitted frontend proposals before model extraction."
+        ),
+    )
+    parser.add_argument(
+        "--frontend-proposal-max-candidates",
+        type=int,
+        default=8,
+        help="Maximum ranked predicate candidates considered by constrained frontend proposal stage.",
+    )
+    parser.add_argument(
+        "--frontend-proposal-min-score",
+        type=float,
+        default=0.35,
+        help="Minimum predicate rank score required for constrained frontend parse proposal.",
     )
     parser.add_argument(
         "--clarification-eagerness",
@@ -7687,12 +7812,29 @@ def main() -> int:
 
     use_two_pass = bool(args.two_pass and not args.no_two_pass)
     use_split_extraction = bool(args.split_extraction and not args.no_split_extraction)
+    frontend_proposal_mode = str(args.frontend_proposal_mode).strip().lower() or "off"
+    if frontend_proposal_mode not in {"off", "shadow", "active"}:
+        print(
+            f"Invalid --frontend-proposal-mode '{args.frontend_proposal_mode}'. "
+            "Expected one of: off, shadow, active."
+        )
+        return 2
+    frontend_proposal_max_candidates = max(1, int(args.frontend_proposal_max_candidates))
+    frontend_proposal_min_score = _clip_01(args.frontend_proposal_min_score, fallback=0.35)
     context_length = max(512, int(args.context_length))
     classifier_context_length = (
         context_length
         if int(args.classifier_context_length) <= 0
         else max(512, int(args.classifier_context_length))
     )
+    temporal_dual_write = bool(args.temporal_dual_write)
+    temporal_predicate = str(args.temporal_predicate or "").strip().lower() or "at_step"
+    if not PREDICATE_SYMBOL_RE.fullmatch(temporal_predicate):
+        print(
+            f"Invalid --temporal-predicate '{args.temporal_predicate}'. "
+            "Expected lowercase Prolog symbol like at_step."
+        )
+        return 2
     clarification_eagerness = _clip_01(args.clarification_eagerness, fallback=0.35)
     max_clarification_rounds = max(0, int(args.max_clarification_rounds))
     require_final_confirmation = bool(args.require_final_confirmation)
@@ -7715,8 +7857,13 @@ def main() -> int:
         "runtime": runtime_mode,
         "two_pass": use_two_pass,
         "split_extraction": use_split_extraction,
+        "frontend_proposal_mode": frontend_proposal_mode,
+        "frontend_proposal_max_candidates": frontend_proposal_max_candidates,
+        "frontend_proposal_min_score": frontend_proposal_min_score,
         "strict_registry": bool(args.strict_registry),
         "strict_types": bool(args.strict_types),
+        "temporal_dual_write": temporal_dual_write,
+        "temporal_predicate": temporal_predicate,
         "clarification_eagerness": clarification_eagerness,
         "max_clarification_rounds": max_clarification_rounds,
         "require_final_confirmation": require_final_confirmation,
@@ -7832,6 +7979,10 @@ def main() -> int:
     print(f"Runtime: {runtime_mode}")
     print(f"Two-pass: {use_two_pass}")
     print(f"Split extraction: {use_split_extraction}")
+    print(
+        "Temporal dual-write: "
+        f"enabled={temporal_dual_write} predicate={temporal_predicate}"
+    )
     print(
         f"Clarification policy: eagerness={clarification_eagerness:.2f} "
         f"max_rounds={max_clarification_rounds} "
@@ -8039,6 +8190,10 @@ def main() -> int:
                     "confirmation_result": "not_required",
                     "confirmation_answers_available": len(scripted_confirmation_answers),
                     "confirmation_answers_used": 0,
+                    "frontend_proposal_mode": frontend_proposal_mode,
+                    "frontend_proposal": {"mode": frontend_proposal_mode, "status": "not_run_control_directive"},
+                    "frontend_proposal_used": False,
+                    "frontend_proposal_shadow_match": None,
                     "apply": control_apply_row,
                     "apply_status": control_apply_status,
                     "decision_state": control_decision_state,
@@ -8060,6 +8215,9 @@ def main() -> int:
         deferred_validation_errors: list[str] = []
         alignment_events: list[dict[str, Any]] = []
         registry_unknown_signatures: list[str] = []
+        frontend_proposal_row: dict[str, Any] = {"mode": frontend_proposal_mode, "status": "disabled"}
+        frontend_proposal_used = False
+        frontend_proposal_shadow_match: bool | None = None
 
         while True:
             turn_input_text = _build_clarification_context_utterance(utterance, clarification_rounds)
@@ -8071,6 +8229,9 @@ def main() -> int:
             validation_errors = []
             alignment_events = []
             registry_unknown_signatures = []
+            frontend_proposal_row = {"mode": frontend_proposal_mode, "status": "disabled"}
+            frontend_proposal_used = False
+            frontend_proposal_shadow_match = None
 
             runtime_constraint_guide = _build_runtime_constraint_guide(
                 registry_signatures=(
@@ -8144,7 +8305,74 @@ def main() -> int:
                 known_predicates = sorted(
                     set(_known_predicate_names_from_corpus(corpus_clauses)) | declared_predicates
                 )
-                if use_split_extraction:
+                if frontend_proposal_mode != "off":
+                    allowed_frontend_signatures = (
+                        registry_signatures | declared_predicate_signatures
+                        if declared_predicate_signatures
+                        else registry_signatures
+                    )
+                    frontend_known_atoms = _collect_known_atoms_from_corpus(corpus_clauses)
+                    frontend_candidate = propose_frontend_parse(
+                        utterance=turn_input_text,
+                        allowed_signatures=sorted(allowed_frontend_signatures),
+                        known_atoms=sorted(frontend_known_atoms),
+                        max_candidates=frontend_proposal_max_candidates,
+                        min_score=frontend_proposal_min_score,
+                    )
+                    frontend_candidate["mode"] = frontend_proposal_mode
+                    frontend_candidate["configured_min_score"] = frontend_proposal_min_score
+                    frontend_candidate["configured_max_candidates"] = frontend_proposal_max_candidates
+                    frontend_payload = frontend_candidate.get("parse_payload")
+                    frontend_admission_errors: list[str] = []
+                    frontend_registry_errors: list[str] = []
+                    frontend_type_errors: list[str] = []
+                    frontend_admitted_payload: dict[str, Any] | None = None
+                    if isinstance(frontend_payload, dict):
+                        candidate_norm = _normalize_clarification_fields(
+                            frontend_payload,
+                            utterance=utterance,
+                            route=str(frontend_payload.get("intent", "other")).strip() or "other",
+                        )
+                        ok_frontend, frontend_admission_errors = _validate_parsed(candidate_norm)
+                        if ok_frontend:
+                            frontend_registry_errors, _ = _validate_parsed_against_registry(
+                                candidate_norm,
+                                allowed_signatures=allowed_frontend_signatures,
+                                strict_registry=bool(args.strict_registry) or bool(declared_predicate_signatures),
+                            )
+                            if frontend_registry_errors:
+                                frontend_admission_errors.extend(frontend_registry_errors)
+                        if ok_frontend and not frontend_admission_errors:
+                            frontend_type_errors = _validate_parsed_types(
+                                candidate_norm,
+                                type_schema=type_schema,
+                                strict_types=bool(args.strict_types),
+                            )
+                            if frontend_type_errors:
+                                frontend_admission_errors.extend(frontend_type_errors)
+                        if not frontend_admission_errors:
+                            frontend_admitted_payload = candidate_norm
+                    frontend_candidate["admission"] = {
+                        "status": "admitted" if isinstance(frontend_admitted_payload, dict) else "rejected",
+                        "errors": frontend_admission_errors,
+                        "registry_errors": frontend_registry_errors,
+                        "type_errors": frontend_type_errors,
+                    }
+                    frontend_candidate["candidate_present"] = isinstance(frontend_payload, dict)
+                    frontend_candidate["admitted_payload_present"] = isinstance(frontend_admitted_payload, dict)
+                    if not isinstance(frontend_admitted_payload, dict):
+                        frontend_candidate["parse_payload"] = None
+                    frontend_proposal_row = frontend_candidate
+                    if frontend_proposal_mode == "active" and isinstance(frontend_admitted_payload, dict):
+                        parsed = frontend_admitted_payload
+                        parsed_text = json.dumps(parsed)
+                        route = str(parsed.get("intent", route)).strip() or route
+                        route_source = "frontend_proposal_active"
+                        frontend_proposal_used = True
+
+                if frontend_proposal_used:
+                    pass
+                elif use_split_extraction:
                     ext_prompt = _build_logic_only_extractor_prompt(
                         turn_input_text,
                         route,
@@ -8152,6 +8380,108 @@ def main() -> int:
                         prompt_guide=turn_prompt_guide,
                     )
                     required_keys = ["intent", "logic_string", "confidence"]
+                    ext_resp = _call_model_prompt(
+                        backend=backend,
+                        base_url=base_url,
+                        model=model,
+                        prompt_text=ext_prompt,
+                        context_length=context_length,
+                        timeout=args.timeout_seconds,
+                        api_key=api_key,
+                    )
+                    parsed, parsed_text = _parse_model_json(ext_resp, required_keys=required_keys)
+                    if use_split_extraction and isinstance(parsed, dict):
+                        parsed = _normalize_clarification_fields(parsed, utterance=utterance, route=route)
+                        refined = _refine_logic_only_payload(
+                            parsed,
+                            route,
+                            utterance=utterance,
+                        )
+                        if isinstance(refined, dict):
+                            parsed = refined
+                            parsed_text = json.dumps(refined)
+                        else:
+                            parsed = None
+                            parsed_text = ""
+
+                    if not isinstance(parsed, dict):
+                        if use_split_extraction:
+                            # Second prompt: full-schema refiner fallback when logic-only pass is insufficient.
+                            full_prompt = _build_extractor_prompt(
+                                turn_input_text,
+                                route,
+                                known_predicates=known_predicates,
+                                prompt_guide=turn_prompt_guide,
+                            )
+                            full_resp = _call_model_prompt(
+                                backend=backend,
+                                base_url=base_url,
+                                model=model,
+                                prompt_text=full_prompt,
+                                context_length=context_length,
+                                timeout=args.timeout_seconds,
+                                api_key=api_key,
+                            )
+                            parsed, parsed_text = _parse_model_json(
+                                full_resp,
+                                required_keys=["intent", "logic_string", "components", "confidence"],
+                            )
+                            if isinstance(parsed, dict):
+                                parsed = _normalize_clarification_fields(parsed, utterance=utterance, route=route)
+                        validation_errors = ["Model did not return parseable JSON payload."]
+                        if isinstance(parsed, dict):
+                            parsed = _normalize_clarification_fields(parsed, utterance=utterance, route=route)
+                            parsed, prevalidate_retract_downgrade_events = _apply_unsafe_retract_downgrade_guard(
+                                parsed,
+                                utterance=utterance,
+                                route=route,
+                            )
+                            if prevalidate_retract_downgrade_events:
+                                alignment_events.extend(prevalidate_retract_downgrade_events)
+                            ok_full, errors_full = _validate_parsed(parsed)
+                            if ok_full:
+                                validation_errors = []
+                            else:
+                                validation_errors = errors_full
+                        if validation_errors:
+                            fallback_parsed = _build_route_fallback_parse(route, utterance)
+                            if isinstance(fallback_parsed, dict):
+                                fallback_parsed = _normalize_clarification_fields(
+                                    fallback_parsed,
+                                    utterance=utterance,
+                                    route=route,
+                                )
+                                parsed = fallback_parsed
+                                validation_errors = []
+                                fallback_used = True
+                        if validation_errors and _looks_speaker_prefixed_comment(utterance):
+                            speaker_prefixed_parse_failure = _build_parse_payload(
+                                intent="other",
+                                logic_string="",
+                                facts=[],
+                                rules=[],
+                                queries=[],
+                                predicates=[],
+                                atoms=[],
+                                variables=[],
+                                rationale=(
+                                    "Speaker-prefixed parse-failure downgrade guard routed this turn "
+                                    "to non-mutating other."
+                                ),
+                            )
+                            parse_failure_note = (
+                                "Speaker-prefixed discourse turn could not be safely parsed; staged as non-mutating."
+                            )
+                            if parse_failure_note not in speaker_prefixed_parse_failure["ambiguities"]:
+                                speaker_prefixed_parse_failure["ambiguities"].append(parse_failure_note)
+                            parsed = speaker_prefixed_parse_failure
+                            validation_errors = []
+                            fallback_used = True
+                            alignment_events.append(
+                                {
+                                    "kind": "speaker_prefixed_parse_failure_downgrade_guard",
+                                }
+                            )
                 else:
                     ext_prompt = _build_extractor_prompt(
                         turn_input_text,
@@ -8160,70 +8490,18 @@ def main() -> int:
                         prompt_guide=turn_prompt_guide,
                     )
                     required_keys = ["intent", "logic_string", "components", "confidence"]
-                ext_resp = _call_model_prompt(
-                    backend=backend,
-                    base_url=base_url,
-                    model=model,
-                    prompt_text=ext_prompt,
-                    context_length=context_length,
-                    timeout=args.timeout_seconds,
-                    api_key=api_key,
-                )
-                parsed, parsed_text = _parse_model_json(ext_resp, required_keys=required_keys)
-                if use_split_extraction and isinstance(parsed, dict):
-                    parsed = _normalize_clarification_fields(parsed, utterance=utterance, route=route)
-                    refined = _refine_logic_only_payload(
-                        parsed,
-                        route,
-                        utterance=utterance,
+                    ext_resp = _call_model_prompt(
+                        backend=backend,
+                        base_url=base_url,
+                        model=model,
+                        prompt_text=ext_prompt,
+                        context_length=context_length,
+                        timeout=args.timeout_seconds,
+                        api_key=api_key,
                     )
-                    if isinstance(refined, dict):
-                        parsed = refined
-                        parsed_text = json.dumps(refined)
-                    else:
-                        parsed = None
-                        parsed_text = ""
-
-                if not isinstance(parsed, dict):
-                    if use_split_extraction:
-                        # Second prompt: full-schema refiner fallback when logic-only pass is insufficient.
-                        full_prompt = _build_extractor_prompt(
-                            turn_input_text,
-                            route,
-                            known_predicates=known_predicates,
-                            prompt_guide=turn_prompt_guide,
-                        )
-                        full_resp = _call_model_prompt(
-                            backend=backend,
-                            base_url=base_url,
-                            model=model,
-                            prompt_text=full_prompt,
-                            context_length=context_length,
-                            timeout=args.timeout_seconds,
-                            api_key=api_key,
-                        )
-                        parsed, parsed_text = _parse_model_json(
-                            full_resp,
-                            required_keys=["intent", "logic_string", "components", "confidence"],
-                        )
-                        if isinstance(parsed, dict):
-                            parsed = _normalize_clarification_fields(parsed, utterance=utterance, route=route)
-                    validation_errors = ["Model did not return parseable JSON payload."]
-                    if isinstance(parsed, dict):
-                        parsed = _normalize_clarification_fields(parsed, utterance=utterance, route=route)
-                        parsed, prevalidate_retract_downgrade_events = _apply_unsafe_retract_downgrade_guard(
-                            parsed,
-                            utterance=utterance,
-                            route=route,
-                        )
-                        if prevalidate_retract_downgrade_events:
-                            alignment_events.extend(prevalidate_retract_downgrade_events)
-                        ok_full, errors_full = _validate_parsed(parsed)
-                        if ok_full:
-                            validation_errors = []
-                        else:
-                            validation_errors = errors_full
-                    if validation_errors:
+                    parsed, parsed_text = _parse_model_json(ext_resp, required_keys=required_keys)
+                    if not isinstance(parsed, dict):
+                        validation_errors = ["Model did not return parseable JSON payload."]
                         fallback_parsed = _build_route_fallback_parse(route, utterance)
                         if isinstance(fallback_parsed, dict):
                             fallback_parsed = _normalize_clarification_fields(
@@ -8262,7 +8540,7 @@ def main() -> int:
                                 "kind": "speaker_prefixed_parse_failure_downgrade_guard",
                             }
                         )
-                else:
+                if isinstance(parsed, dict):
                     parsed = _normalize_clarification_fields(parsed, utterance=utterance, route=route)
                     parsed, prevalidate_retract_downgrade_events = _apply_unsafe_retract_downgrade_guard(
                         parsed,
@@ -8878,6 +9156,9 @@ def main() -> int:
                 strict_registry=bool(args.strict_registry),
                 type_schema=type_schema,
                 strict_types=bool(args.strict_types),
+                turn_index=idx,
+                temporal_dual_write=temporal_dual_write,
+                temporal_predicate=temporal_predicate,
             )
 
         tool_result = apply_row.get("result", {})
@@ -9139,6 +9420,8 @@ def main() -> int:
         "runtime": runtime_mode,
         "two_pass": use_two_pass,
         "split_extraction": use_split_extraction,
+        "temporal_dual_write": temporal_dual_write,
+        "temporal_predicate": temporal_predicate,
         "model_settings": model_settings,
         "prompt_file": str(prompt_file_path),
         "prompt_file_loaded": bool(prompt_guide),

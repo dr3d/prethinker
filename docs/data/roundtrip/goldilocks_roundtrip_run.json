@@ -1,7 +1,7 @@
 {
-  "run_id": "run-20260414T151909Z-story_goldilocks_roundtr-qwen3_5_9b-21788",
-  "run_started_utc": "2026-04-14T15:19:09+00:00",
-  "run_finished_utc": "2026-04-14T15:23:56+00:00",
+  "run_id": "run-20260415T044140Z-story_goldilocks_roundtr-qwen3_5_9b-21616",
+  "run_started_utc": "2026-04-15T04:41:40+00:00",
+  "run_finished_utc": "2026-04-15T04:45:47+00:00",
   "invocation": {
     "argv": [
       "kb_pipeline.py",
@@ -20,9 +20,9 @@
       "--runtime",
       "core",
       "--kb-root",
-      "tmp/kb_store_roundtrip_guarded",
+      "tmp/kb_store_roundtrip_latest",
       "--kb-name",
-      "story_goldilocks_roundtrip_guarded_v10",
+      "story_goldilocks_roundtrip_latest",
       "--force-empty-kb",
       "--prompt-file",
       "modelfiles/semantic_parser_system_prompt.md",
@@ -49,20 +49,20 @@
       "0.55",
       "--write-corpus-on-fail",
       "--out",
-      "tmp/goldilocks_roundtrip_run_guarded_v10.json"
+      "tmp/goldilocks_roundtrip_run_latest.json"
     ],
     "cwd": "D:\\_PROJECTS\\prethinker"
   },
   "scenario": "story_goldilocks_roundtrip",
   "scenario_path": "D:\\_PROJECTS\\prethinker\\kb_scenarios\\story_goldilocks_roundtrip.json",
-  "ontology_kb_name": "story_goldilocks_roundtrip_guarded_v10",
+  "ontology_kb_name": "story_goldilocks_roundtrip_latest",
   "kb_namespace": {
-    "kb_root": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store_roundtrip_guarded",
-    "kb_dir": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store_roundtrip_guarded\\story_goldilocks_roundtrip_guarded_v10",
-    "corpus_path": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store_roundtrip_guarded\\story_goldilocks_roundtrip_guarded_v10\\kb.pl",
-    "progress_path": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store_roundtrip_guarded\\story_goldilocks_roundtrip_guarded_v10\\progress.json",
-    "profile_path": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store_roundtrip_guarded\\story_goldilocks_roundtrip_guarded_v10\\ontology_profile.json",
-    "ontology_index_path": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store_roundtrip_guarded\\ontologies_index.json"
+    "kb_root": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store_roundtrip_latest",
+    "kb_dir": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store_roundtrip_latest\\story_goldilocks_roundtrip_latest",
+    "corpus_path": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store_roundtrip_latest\\story_goldilocks_roundtrip_latest\\kb.pl",
+    "progress_path": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store_roundtrip_latest\\story_goldilocks_roundtrip_latest\\progress.json",
+    "profile_path": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store_roundtrip_latest\\story_goldilocks_roundtrip_latest\\ontology_profile.json",
+    "ontology_index_path": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store_roundtrip_latest\\ontologies_index.json"
   },
   "backend": "ollama",
   "base_url": "http://127.0.0.1:11434",
@@ -70,6 +70,8 @@
   "runtime": "core",
   "two_pass": true,
   "split_extraction": true,
+  "temporal_dual_write": false,
+  "temporal_predicate": "at_step",
   "model_settings": {
     "temperature": 0,
     "context_length": 8192,
@@ -80,6 +82,8 @@
     "split_extraction": true,
     "strict_registry": true,
     "strict_types": false,
+    "temporal_dual_write": false,
+    "temporal_predicate": "at_step",
     "clarification_eagerness": 0.2,
     "max_clarification_rounds": 1,
     "require_final_confirmation": false,
@@ -161,7 +165,7 @@
   },
   "declared_predicates": [],
   "declared_predicate_signatures": [],
-  "kb_runtime_boot_path": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store_roundtrip_guarded\\story_goldilocks_roundtrip_guarded_v10\\_bootstrap_core.pl",
+  "kb_runtime_boot_path": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store_roundtrip_latest\\story_goldilocks_roundtrip_latest\\_bootstrap_core.pl",
   "kb_init": {
     "status": "success",
     "result_type": "runtime_emptied",
@@ -173,13 +177,13 @@
     "message": "No retained corpus to preload."
   },
   "corpus_write": {
-    "path": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store_roundtrip_guarded\\story_goldilocks_roundtrip_guarded_v10\\kb.pl",
+    "path": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store_roundtrip_latest\\story_goldilocks_roundtrip_latest\\kb.pl",
     "clause_count": 43,
     "status": "written"
   },
   "progress_write": {
     "status": "written",
-    "path": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store_roundtrip_guarded\\story_goldilocks_roundtrip_guarded_v10\\progress.json",
+    "path": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store_roundtrip_latest\\story_goldilocks_roundtrip_latest\\progress.json",
     "active_focus_count": 0,
     "goal_count": 0,
     "open_question_count": 0
@@ -187,8 +191,8 @@
   "progress_memory_enabled": true,
   "progress_memory": {
     "schema_version": 1,
-    "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-    "updated_at_utc": "2026-04-14T15:23:56+00:00",
+    "ontology_name": "story_goldilocks_roundtrip_latest",
+    "updated_at_utc": "2026-04-15T04:45:47+00:00",
     "active_focus": [],
     "goals": [],
     "open_questions": [],
@@ -197,27 +201,26 @@
   },
   "profile_write": {
     "status": "written",
-    "path": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store_roundtrip_guarded\\story_goldilocks_roundtrip_guarded_v10\\ontology_profile.json",
-    "predicate_signature_count": 21
+    "path": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store_roundtrip_latest\\story_goldilocks_roundtrip_latest\\ontology_profile.json",
+    "predicate_signature_count": 20
   },
   "index_write": {
     "status": "written",
-    "path": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store_roundtrip_guarded\\ontologies_index.json",
-    "ontology_count": 10
+    "path": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store_roundtrip_latest\\ontologies_index.json",
+    "ontology_count": 1
   },
   "ontology_profile": {
-    "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-    "generated_at_utc": "2026-04-14T15:23:56+00:00",
+    "ontology_name": "story_goldilocks_roundtrip_latest",
+    "generated_at_utc": "2026-04-15T04:45:47+00:00",
     "clause_count": 43,
     "predicate_signatures": [
       "ate/2",
-      "beds_in_house/1",
       "belongs_to/2",
-      "chairs_in_house/1",
       "fits_goldilocks/2",
       "goldilocks/1",
       "goldilocks_found/2",
       "has_bed/2",
+      "has_chair/2",
       "has_porridge/2",
       "ran_out_of/2",
       "returned_home/1",
@@ -234,13 +237,12 @@
     ],
     "fact_predicates": [
       "ate/2",
-      "beds_in_house/1",
       "belongs_to/2",
-      "chairs_in_house/1",
       "fits_goldilocks/2",
       "goldilocks/1",
       "goldilocks_found/2",
       "has_bed/2",
+      "has_chair/2",
       "has_porridge/2",
       "ran_out_of/2",
       "returned_home/1",
@@ -265,13 +267,12 @@
     "similarity_to_previous": 0.0,
     "added_signatures": [
       "ate/2",
-      "beds_in_house/1",
       "belongs_to/2",
-      "chairs_in_house/1",
       "fits_goldilocks/2",
       "goldilocks/1",
       "goldilocks_found/2",
       "has_bed/2",
+      "has_chair/2",
       "has_porridge/2",
       "ran_out_of/2",
       "returned_home/1",
@@ -288,158 +289,18 @@
     ],
     "removed_signatures": [],
     "previous_signature_count": 0,
-    "current_signature_count": 21
+    "current_signature_count": 20
   },
-  "known_ontology_matches": [
-    {
-      "ontology_name": "story_goldilocks_roundtrip_guarded_v6",
-      "similarity": 1.0,
-      "shared_signatures": [
-        "ate/2",
-        "beds_in_house/1",
-        "belongs_to/2",
-        "chairs_in_house/1",
-        "fits_goldilocks/2",
-        "goldilocks/1",
-        "goldilocks_found/2",
-        "has_bed/2",
-        "has_porridge/2",
-        "ran_out_of/2",
-        "returned_home/1",
-        "sat_in/2",
-        "saw/2",
-        "slept_in/2",
-        "tasted/2",
-        "too_cold/2",
-        "too_hard/2",
-        "too_hot/2",
-        "too_soft/2",
-        "walked_through_forest/1",
-        "went_upstairs/1"
-      ],
-      "other_signature_count": 21
-    },
-    {
-      "ontology_name": "story_goldilocks_roundtrip_guarded_v7",
-      "similarity": 1.0,
-      "shared_signatures": [
-        "ate/2",
-        "beds_in_house/1",
-        "belongs_to/2",
-        "chairs_in_house/1",
-        "fits_goldilocks/2",
-        "goldilocks/1",
-        "goldilocks_found/2",
-        "has_bed/2",
-        "has_porridge/2",
-        "ran_out_of/2",
-        "returned_home/1",
-        "sat_in/2",
-        "saw/2",
-        "slept_in/2",
-        "tasted/2",
-        "too_cold/2",
-        "too_hard/2",
-        "too_hot/2",
-        "too_soft/2",
-        "walked_through_forest/1",
-        "went_upstairs/1"
-      ],
-      "other_signature_count": 21
-    },
-    {
-      "ontology_name": "story_goldilocks_roundtrip_guarded_v8",
-      "similarity": 1.0,
-      "shared_signatures": [
-        "ate/2",
-        "beds_in_house/1",
-        "belongs_to/2",
-        "chairs_in_house/1",
-        "fits_goldilocks/2",
-        "goldilocks/1",
-        "goldilocks_found/2",
-        "has_bed/2",
-        "has_porridge/2",
-        "ran_out_of/2",
-        "returned_home/1",
-        "sat_in/2",
-        "saw/2",
-        "slept_in/2",
-        "tasted/2",
-        "too_cold/2",
-        "too_hard/2",
-        "too_hot/2",
-        "too_soft/2",
-        "walked_through_forest/1",
-        "went_upstairs/1"
-      ],
-      "other_signature_count": 21
-    },
-    {
-      "ontology_name": "story_goldilocks_roundtrip_guarded_v9",
-      "similarity": 1.0,
-      "shared_signatures": [
-        "ate/2",
-        "beds_in_house/1",
-        "belongs_to/2",
-        "chairs_in_house/1",
-        "fits_goldilocks/2",
-        "goldilocks/1",
-        "goldilocks_found/2",
-        "has_bed/2",
-        "has_porridge/2",
-        "ran_out_of/2",
-        "returned_home/1",
-        "sat_in/2",
-        "saw/2",
-        "slept_in/2",
-        "tasted/2",
-        "too_cold/2",
-        "too_hard/2",
-        "too_hot/2",
-        "too_soft/2",
-        "walked_through_forest/1",
-        "went_upstairs/1"
-      ],
-      "other_signature_count": 21
-    },
-    {
-      "ontology_name": "story_goldilocks_roundtrip_guarded",
-      "similarity": 0.9524,
-      "shared_signatures": [
-        "ate/2",
-        "beds_in_house/1",
-        "belongs_to/2",
-        "chairs_in_house/1",
-        "fits_goldilocks/2",
-        "goldilocks/1",
-        "goldilocks_found/2",
-        "has_bed/2",
-        "has_porridge/2",
-        "returned_home/1",
-        "sat_in/2",
-        "saw/2",
-        "slept_in/2",
-        "tasted/2",
-        "too_cold/2",
-        "too_hard/2",
-        "too_hot/2",
-        "too_soft/2",
-        "walked_through_forest/1",
-        "went_upstairs/1"
-      ],
-      "other_signature_count": 20
-    }
-  ],
+  "known_ontology_matches": [],
   "gear_change": {
     "change_level": "new",
     "detected": false,
     "requires_confirmation": false
   },
   "turns_total": 50,
-  "turn_parse_failures": 1,
-  "turn_apply_failures": 5,
-  "turns_clarification_requested": 4,
+  "turn_parse_failures": 4,
+  "turn_apply_failures": 4,
+  "turns_clarification_requested": 0,
   "turns_confirmation_requested": 0,
   "clarification_rounds_total": 0,
   "clarification_synthetic_answers_total": 0,
@@ -457,9 +318,8 @@
   "kb_contamination_delta": 0,
   "decision_state_counts": {
     "commit": 39,
-    "reject": 1,
-    "stage_provisionally": 6,
-    "ask_clarification": 4
+    "stage_provisionally": 7,
+    "reject": 4
   },
   "validation_total": 0,
   "validation_passed": 0,
@@ -549,8 +409,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -559,8 +419,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -671,8 +531,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -681,8 +541,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -796,8 +656,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -806,8 +666,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -920,8 +780,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -930,8 +790,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -1002,16 +862,41 @@
       "control_predicate_directive": false,
       "declared_predicates_from_control": [],
       "declared_predicate_signatures_from_control": [],
-      "route": "assert_fact",
-      "route_source": "model",
+      "route": "other",
+      "route_source": "heuristic",
       "repaired": false,
       "fallback_used": false,
-      "alignment_events": [],
-      "registry_unknown_signatures": [],
-      "parsed": null,
-      "validation_errors": [
-        "Model did not return parseable JSON payload."
+      "alignment_events": [
+        {
+          "kind": "other_route_passthrough"
+        }
       ],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "other",
+        "logic_string": "",
+        "components": {
+          "atoms": [],
+          "variables": [],
+          "predicates": []
+        },
+        "facts": [],
+        "rules": [],
+        "queries": [],
+        "confidence": {
+          "overall": 0.95,
+          "intent": 1.0,
+          "logic": 1.0
+        },
+        "ambiguities": [],
+        "needs_clarification": false,
+        "uncertainty_score": 0.05,
+        "uncertainty_label": "low",
+        "clarification_question": "Can you clarify this point before I apply it: The utterance is a narrative statement describing a scene (three bowls of?",
+        "clarification_reason": "The utterance is a narrative statement describing a scene (three bowls of",
+        "rationale": "The utterance is a narrative statement describing a scene (three bowls of porridge) rather than a declarative fact about a specific agent's state, a rule, or a query. It does not map to the allowed ontology predicates (e.g., has_porridge requires a person subject). Therefore, it is routed as 'other' with an empty logic string."
+      },
+      "validation_errors": [],
       "deferred_validation_errors": [],
       "clarification_rounds": [],
       "clarification_rounds_used": 0,
@@ -1025,16 +910,22 @@
       "clarification_proxy_answers_used": 0,
       "clarification_policy": {
         "clarification_eagerness": 0.2,
-        "uncertainty_score": 0.0,
-        "effective_uncertainty": 0.0,
+        "uncertainty_score": 0.05,
+        "effective_uncertainty": 0.05,
         "threshold": 0.8,
         "request_clarification": false,
         "needs_clarification_flag": false,
+        "progress_low_relevance": false,
+        "progress_high_risk": false,
+        "progress_low_relevance_threshold": 0.34,
+        "progress_high_risk_threshold": 0.18,
         "progress_memory_available": true,
         "progress_focus_present": false,
-        "progress_relevance_score": 1.0,
-        "progress_low_relevance": false,
-        "progress_high_risk": false
+        "progress_signal_term_count": 0,
+        "parsed_signal_term_count": 0,
+        "overlap_term_count": 0,
+        "progress_best_focus_overlap": 0.0,
+        "progress_relevance_score": 1.0
       },
       "progress_low_relevance_seen": false,
       "progress_high_risk_seen": false,
@@ -1042,8 +933,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -1052,8 +943,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -1062,7 +953,7 @@
       },
       "clarification_pending": false,
       "clarification_pending_reason": "",
-      "clarification_question": "",
+      "clarification_question": "Can you clarify this point before I apply it: The utterance is a narrative statement describing a scene (three bowls of?",
       "clarification_answer_attempt": {},
       "confirmation_required": false,
       "confirmation_question": "",
@@ -1074,12 +965,12 @@
         "tool": "none",
         "input": null,
         "result": {
-          "status": "validation_error",
-          "message": "Skipping KB apply due to parser validation failure."
+          "status": "skipped",
+          "message": "Intent=other; no KB mutation/query applied."
         }
       },
-      "apply_status": "validation_error",
-      "decision_state": "reject"
+      "apply_status": "skipped",
+      "decision_state": "stage_provisionally"
     },
     {
       "turn_index": 6,
@@ -1166,8 +1057,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -1176,8 +1067,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -1291,8 +1182,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -1301,8 +1192,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -1416,8 +1307,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -1426,8 +1317,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -1555,8 +1446,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -1565,8 +1456,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -1678,8 +1569,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -1688,8 +1579,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -1817,8 +1708,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -1827,8 +1718,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -1941,8 +1832,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -1951,8 +1842,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -2064,8 +1955,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -2074,8 +1965,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -2186,8 +2077,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -2196,8 +2087,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -2325,8 +2216,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -2335,8 +2226,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -2374,43 +2265,41 @@
       "control_predicate_directive": false,
       "declared_predicates_from_control": [],
       "declared_predicate_signatures_from_control": [],
-      "route": "assert_fact",
-      "route_source": "model",
+      "route": "other",
+      "route_source": "heuristic",
       "repaired": false,
       "fallback_used": false,
-      "alignment_events": [],
+      "alignment_events": [
+        {
+          "kind": "other_route_passthrough"
+        }
+      ],
       "registry_unknown_signatures": [],
       "parsed": {
-        "intent": "assert_fact",
-        "logic_string": "chairs_in_house(chair1).\nchairs_in_house(chair2).\nchairs_in_house(chair3).",
+        "intent": "other",
+        "logic_string": "",
         "components": {
-          "atoms": [
-            "chairs_in_house(chair1).\nchairs_in_house(chair2).\nchairs_in_house(chair3)"
-          ],
+          "atoms": [],
           "variables": [],
-          "predicates": [
-            "chairs_in_house"
-          ]
+          "predicates": []
         },
-        "facts": [
-          "chairs_in_house(chair1).\nchairs_in_house(chair2).\nchairs_in_house(chair3)."
-        ],
+        "facts": [],
         "rules": [],
         "queries": [],
         "confidence": {
           "overall": 0.95,
-          "intent": 1.0,
+          "intent": 0.95,
           "logic": 0.95
         },
         "ambiguities": [
-          "Specific chair identifiers (chair1, chair2, chair3) are invented to satisfy the count of three."
+          "Specific chair identifiers (chair1, chair2, chair3) are generated as placeholders since no specific names were provided."
         ],
         "needs_clarification": false,
         "uncertainty_score": 0.15,
         "uncertainty_label": "low",
-        "clarification_question": "Can you clarify this detail: Specific chair identifiers (chair1, chair2, chair3) are invented to satisfy the count of three?",
-        "clarification_reason": "The utterance asserts a count of three chairs. Since no specific identifiers",
-        "rationale": "The utterance asserts a count of three chairs. Since no specific identifiers are provided, generic variables or invented atoms (chair1, chair2, chair3) are used to represent the three distinct entities, adhering to the constraint of not emitting zero-arity forms."
+        "clarification_question": "Can you clarify this detail: Specific chair identifiers (chair1, chair2, chair3) are generated as placeholders since no specific names were provided?",
+        "clarification_reason": "The utterance asserts the existence of three chairs in the house. The",
+        "rationale": "The utterance asserts the existence of three chairs in the house. The predicate chairs_in_house/1 is used with generated variable names to represent the three distinct entities, adhering to the allowed signature."
       },
       "validation_errors": [],
       "deferred_validation_errors": [],
@@ -2449,8 +2338,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -2459,8 +2348,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -2469,7 +2358,7 @@
       },
       "clarification_pending": false,
       "clarification_pending_reason": "",
-      "clarification_question": "Can you clarify this detail: Specific chair identifiers (chair1, chair2, chair3) are invented to satisfy the count of three?",
+      "clarification_question": "Can you clarify this detail: Specific chair identifiers (chair1, chair2, chair3) are generated as placeholders since no specific names were provided?",
       "clarification_answer_attempt": {},
       "confirmation_required": false,
       "confirmation_question": "",
@@ -2478,49 +2367,15 @@
       "confirmation_answers_available": 0,
       "confirmation_answers_used": 0,
       "apply": {
-        "tool": "assert_fact_batch",
-        "input": [
-          "chairs_in_house(chair1).",
-          "chairs_in_house(chair2).",
-          "chairs_in_house(chair3)."
-        ],
+        "tool": "none",
+        "input": null,
         "result": {
-          "status": "success",
-          "result_type": "batch",
-          "applied_total": 3,
-          "operations": [
-            {
-              "status": "success",
-              "fact": "chairs_in_house(chair1).",
-              "raw": {
-                "status": "success",
-                "result_type": "fact_asserted",
-                "fact": "chairs_in_house(chair1)."
-              }
-            },
-            {
-              "status": "success",
-              "fact": "chairs_in_house(chair2).",
-              "raw": {
-                "status": "success",
-                "result_type": "fact_asserted",
-                "fact": "chairs_in_house(chair2)."
-              }
-            },
-            {
-              "status": "success",
-              "fact": "chairs_in_house(chair3).",
-              "raw": {
-                "status": "success",
-                "result_type": "fact_asserted",
-                "fact": "chairs_in_house(chair3)."
-              }
-            }
-          ]
+          "status": "skipped",
+          "message": "Intent=other; no KB mutation/query applied."
         }
       },
-      "apply_status": "success",
-      "decision_state": "commit"
+      "apply_status": "skipped",
+      "decision_state": "stage_provisionally"
     },
     {
       "turn_index": 17,
@@ -2539,18 +2394,19 @@
       "registry_unknown_signatures": [],
       "parsed": {
         "intent": "assert_fact",
-        "logic_string": "chairs_in_house(big_chair).",
+        "logic_string": "has_chair(papa_bear, big_chair).",
         "components": {
           "atoms": [
-            "big_chair"
+            "big_chair",
+            "papa_bear"
           ],
           "variables": [],
           "predicates": [
-            "chairs_in_house"
+            "has_chair"
           ]
         },
         "facts": [
-          "chairs_in_house(big_chair)."
+          "has_chair(papa_bear, big_chair)."
         ],
         "rules": [],
         "queries": [],
@@ -2566,8 +2422,8 @@
         "uncertainty_score": 0.15,
         "uncertainty_label": "low",
         "clarification_question": "Can you clarify this detail: The specific name of the chair is inferred as 'big_chair' based on the adjective 'big'?",
-        "clarification_reason": "The utterance describes a chair belonging to Papa Bear. The predicate chairs_in_house/1",
-        "rationale": "The utterance describes a chair belonging to Papa Bear. The predicate chairs_in_house/1 is used to assert the existence of a chair. The argument 'big_chair' is derived from the adjective 'big' to maintain semantic fidelity without inventing new predicates."
+        "clarification_reason": "The utterance describes an entity (Papa Bear) possessing an object (a big",
+        "rationale": "The utterance describes an entity (Papa Bear) possessing an object (a big chair). This maps to the allowed predicate 'has_chair/2'. The subject is 'papa_bear' and the object is inferred as 'big_chair' to preserve the semantic detail of 'big'."
       },
       "validation_errors": [],
       "deferred_validation_errors": [],
@@ -2606,8 +2462,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -2616,8 +2472,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -2636,11 +2492,11 @@
       "confirmation_answers_used": 0,
       "apply": {
         "tool": "assert_fact",
-        "input": "chairs_in_house(big_chair).",
+        "input": "has_chair(papa_bear, big_chair).",
         "result": {
           "status": "success",
           "result_type": "fact_asserted",
-          "fact": "chairs_in_house(big_chair)."
+          "fact": "has_chair(papa_bear, big_chair)."
         }
       },
       "apply_status": "success",
@@ -2663,18 +2519,19 @@
       "registry_unknown_signatures": [],
       "parsed": {
         "intent": "assert_fact",
-        "logic_string": "chairs_in_house(medium_chair).",
+        "logic_string": "has_chair(mama_bear, medium_chair).",
         "components": {
           "atoms": [
+            "mama_bear",
             "medium_chair"
           ],
           "variables": [],
           "predicates": [
-            "chairs_in_house"
+            "has_chair"
           ]
         },
         "facts": [
-          "chairs_in_house(medium_chair)."
+          "has_chair(mama_bear, medium_chair)."
         ],
         "rules": [],
         "queries": [],
@@ -2684,14 +2541,14 @@
           "logic": 0.95
         },
         "ambiguities": [
-          "Entity 'medium chair' mapped to atom 'medium_chair' per schema constraints."
+          "medium"
         ],
         "needs_clarification": false,
-        "uncertainty_score": 0.1,
+        "uncertainty_score": 0.15,
         "uncertainty_label": "low",
-        "clarification_question": "Can you clarify this detail: Entity 'medium chair' mapped to atom 'medium_chair' per schema constraints?",
-        "clarification_reason": "Utterance asserts existence of a medium chair belonging to Mama Bear's house.",
-        "rationale": "Utterance asserts existence of a medium chair belonging to Mama Bear's house. Mapped to chairs_in_house/1 predicate with argument 'medium_chair'."
+        "clarification_question": "Can you clarify this detail: medium?",
+        "clarification_reason": "The utterance asserts a possession relationship between 'Mama Bear' and a 'medium",
+        "rationale": "The utterance asserts a possession relationship between 'Mama Bear' and a 'medium chair'. The predicate 'has_chair/2' is used with the subject 'mama_bear' and the object 'medium_chair' (lowercased and suffixed to ensure uniqueness if necessary, though 'medium_chair' is treated as an atom here). The directionality is preserved (Subject has Object)."
       },
       "validation_errors": [],
       "deferred_validation_errors": [],
@@ -2707,7 +2564,7 @@
       "clarification_proxy_answers_used": 0,
       "clarification_policy": {
         "clarification_eagerness": 0.2,
-        "uncertainty_score": 0.1,
+        "uncertainty_score": 0.15,
         "effective_uncertainty": 0.55,
         "threshold": 0.8,
         "request_clarification": false,
@@ -2730,8 +2587,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -2740,8 +2597,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -2750,7 +2607,7 @@
       },
       "clarification_pending": false,
       "clarification_pending_reason": "",
-      "clarification_question": "Can you clarify this detail: Entity 'medium chair' mapped to atom 'medium_chair' per schema constraints?",
+      "clarification_question": "Can you clarify this detail: medium?",
       "clarification_answer_attempt": {},
       "confirmation_required": false,
       "confirmation_question": "",
@@ -2760,11 +2617,11 @@
       "confirmation_answers_used": 0,
       "apply": {
         "tool": "assert_fact",
-        "input": "chairs_in_house(medium_chair).",
+        "input": "has_chair(mama_bear, medium_chair).",
         "result": {
           "status": "success",
           "result_type": "fact_asserted",
-          "fact": "chairs_in_house(medium_chair)."
+          "fact": "has_chair(mama_bear, medium_chair)."
         }
       },
       "apply_status": "success",
@@ -2787,18 +2644,19 @@
       "registry_unknown_signatures": [],
       "parsed": {
         "intent": "assert_fact",
-        "logic_string": "chairs_in_house(small_chair).",
+        "logic_string": "has_chair(baby_bear, small_chair).",
         "components": {
           "atoms": [
+            "baby_bear",
             "small_chair"
           ],
           "variables": [],
           "predicates": [
-            "chairs_in_house"
+            "has_chair"
           ]
         },
         "facts": [
-          "chairs_in_house(small_chair)."
+          "has_chair(baby_bear, small_chair)."
         ],
         "rules": [],
         "queries": [],
@@ -2808,14 +2666,14 @@
           "logic": 0.95
         },
         "ambiguities": [
-          "The specific name of the chair is not provided; using a variable or generic atom 'small_chair'."
+          "The specific name of the chair is inferred as 'small_chair' based on the adjective 'small'."
         ],
         "needs_clarification": false,
         "uncertainty_score": 0.15,
         "uncertainty_label": "low",
-        "clarification_question": "Can you clarify this detail: The specific name of the chair is not provided; using a variable or generic atom 'small_chair'?",
-        "clarification_reason": "The utterance asserts the existence of a small chair belonging to Baby",
-        "rationale": "The utterance asserts the existence of a small chair belonging to Baby Bear. Since 'chairs_in_house/1' is the only allowed unary predicate for chairs, and the specific name is unknown, a generic atom 'small_chair' is used to represent the entity without hallucinating a specific name."
+        "clarification_question": "Can you clarify this detail: The specific name of the chair is inferred as 'small_chair' based on the adjective 'small'?",
+        "clarification_reason": "The utterance asserts a possession relationship between 'Baby Bear' and a 'small",
+        "rationale": "The utterance asserts a possession relationship between 'Baby Bear' and a 'small chair'. The predicate 'has_chair/2' is used with arguments mapped to the person and the chair entity."
       },
       "validation_errors": [],
       "deferred_validation_errors": [],
@@ -2854,8 +2712,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -2864,8 +2722,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -2874,7 +2732,7 @@
       },
       "clarification_pending": false,
       "clarification_pending_reason": "",
-      "clarification_question": "Can you clarify this detail: The specific name of the chair is not provided; using a variable or generic atom 'small_chair'?",
+      "clarification_question": "Can you clarify this detail: The specific name of the chair is inferred as 'small_chair' based on the adjective 'small'?",
       "clarification_answer_attempt": {},
       "confirmation_required": false,
       "confirmation_question": "",
@@ -2884,11 +2742,11 @@
       "confirmation_answers_used": 0,
       "apply": {
         "tool": "assert_fact",
-        "input": "chairs_in_house(small_chair).",
+        "input": "has_chair(baby_bear, small_chair).",
         "result": {
           "status": "success",
           "result_type": "fact_asserted",
-          "fact": "chairs_in_house(small_chair)."
+          "fact": "has_chair(baby_bear, small_chair)."
         }
       },
       "apply_status": "success",
@@ -2947,14 +2805,14 @@
           "logic": 0.95
         },
         "ambiguities": [
-          "Papa Bear's chair is mapped to 'chair' as a generic thing; specific identifier omitted per allowed signatures."
+          "chair"
         ],
         "needs_clarification": false,
         "uncertainty_score": 0.15,
         "uncertainty_label": "low",
-        "clarification_question": "Can you clarify this detail: Papa Bear's chair is mapped to 'chair' as a generic thing; specific identifier omitted per allowed signatures?",
+        "clarification_question": "Can you clarify this detail: chair?",
         "clarification_reason": "Mapped 'Goldilocks' to 'papa_bear' (agent) and 'Papa Bear's chair' to 'chair' (thing)",
-        "rationale": "Mapped 'Goldilocks' to 'papa_bear' (agent) and 'Papa Bear's chair' to 'chair' (thing) using allowed sat_in/2 signature. Argument order follows sat_in(agent, thing). Leading-subject anchor guard corrected actor argument drift."
+        "rationale": "Mapped 'Goldilocks' to 'papa_bear' (agent) and 'Papa Bear's chair' to 'chair' (thing) based on allowed signatures. Used 'sat_in/2' predicate. Argument order aligns with semantic subject/object roles. Leading-subject anchor guard corrected actor argument drift."
       },
       "validation_errors": [],
       "deferred_validation_errors": [],
@@ -2993,8 +2851,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -3003,8 +2861,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -3013,7 +2871,7 @@
       },
       "clarification_pending": false,
       "clarification_pending_reason": "",
-      "clarification_question": "Can you clarify this detail: Papa Bear's chair is mapped to 'chair' as a generic thing; specific identifier omitted per allowed signatures?",
+      "clarification_question": "Can you clarify this detail: chair?",
       "clarification_answer_attempt": {},
       "confirmation_required": false,
       "confirmation_question": "",
@@ -3079,7 +2937,7 @@
         "uncertainty_label": "low",
         "clarification_question": "Can you clarify this detail: Exact atom for 'Papa Bear's chair' is inferred as 'chair_of_papa_bear' based on context, but specific ontology atom may vary?",
         "clarification_reason": "The utterance describes a specific property (too hard) of a specific object",
-        "rationale": "The utterance describes a specific property (too hard) of a specific object (Papa Bear's chair) relative to a subject (Goldilocks). This maps directly to the allowed predicate 'too_hard/2' with arguments [thing, person]. The directionality is clear: the chair is the thing, Goldilocks is the person experiencing the condition."
+        "rationale": "The utterance describes a specific property (too hard) of a specific object (Papa Bear's chair) relative to a specific agent (Goldilocks). This maps directly to the allowed predicate 'too_hard/2' with arguments [thing, person]. The directionality is clear: the chair is the thing, Goldilocks is the person experiencing the hardness."
       },
       "validation_errors": [],
       "deferred_validation_errors": [],
@@ -3118,8 +2976,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -3128,8 +2986,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -3217,8 +3075,8 @@
         "uncertainty_score": 0.15,
         "uncertainty_label": "low",
         "clarification_question": "Can you clarify this detail: Mama Bear's chair is mapped to atom 'mama_bear_chair'?",
-        "clarification_reason": "Mapped 'Goldilocks' to canonical atom 'goldilocks' and 'Mama Bear's chair' to 'mama_bear_chair'.",
-        "rationale": "Mapped 'Goldilocks' to canonical atom 'goldilocks' and 'Mama Bear's chair' to 'mama_bear_chair'. Used 'sat_in/2' predicate as per allowed signatures. Argument order follows 'sat_in(Person, Thing)' type constraint. Leading-subject anchor guard corrected actor argument drift."
+        "clarification_reason": "Mapped 'Goldilocks' to canonical atom 'goldilocks'. Mapped 'Mama Bear's chair' to 'mama_bear_chair'",
+        "rationale": "Mapped 'Goldilocks' to canonical atom 'goldilocks'. Mapped 'Mama Bear's chair' to 'mama_bear_chair' as a thing. Used predicate 'sat_in/2' with arguments (thing, person) matching the utterance semantics. Leading-subject anchor guard corrected actor argument drift."
       },
       "validation_errors": [],
       "deferred_validation_errors": [],
@@ -3257,8 +3115,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -3267,8 +3125,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -3314,11 +3172,11 @@
       "registry_unknown_signatures": [],
       "parsed": {
         "intent": "assert_fact",
-        "logic_string": "too_soft(mama_bear_chair, goldilocks).",
+        "logic_string": "too_soft(chair_of_mama_bear, goldilocks).",
         "components": {
           "atoms": [
-            "goldilocks",
-            "mama_bear_chair"
+            "chair_of_mama_bear",
+            "goldilocks"
           ],
           "variables": [],
           "predicates": [
@@ -3326,22 +3184,24 @@
           ]
         },
         "facts": [
-          "too_soft(mama_bear_chair, goldilocks)."
+          "too_soft(chair_of_mama_bear, goldilocks)."
         ],
         "rules": [],
         "queries": [],
         "confidence": {
           "overall": 0.95,
           "intent": 1.0,
-          "logic": 0.95
+          "logic": 0.9
         },
-        "ambiguities": [],
+        "ambiguities": [
+          "Exact atom for 'Mama Bear's chair' is inferred as 'chair_of_mama_bear' based on context, but specific ontology atom may vary."
+        ],
         "needs_clarification": false,
-        "uncertainty_score": 0.05,
+        "uncertainty_score": 0.15,
         "uncertainty_label": "low",
-        "clarification_question": "Can you clarify this point before I apply it: The utterance describes a specific property (too soft) of a specific entity?",
-        "clarification_reason": "The utterance describes a specific property (too soft) of a specific entity",
-        "rationale": "The utterance describes a specific property (too soft) of a specific entity (Mama Bear's chair) relative to a specific agent (Goldilocks). This maps directly to the allowed predicate too_soft/2 with arguments (thing, person)."
+        "clarification_question": "Can you clarify this detail: Exact atom for 'Mama Bear's chair' is inferred as 'chair_of_mama_bear' based on context, but specific ontology atom may vary?",
+        "clarification_reason": "The utterance describes a state (too soft) of a specific object (Mama",
+        "rationale": "The utterance describes a state (too soft) of a specific object (Mama Bear's chair) relative to a subject (Goldilocks). This maps to a fact using the allowed predicate 'too_soft/2'. The first argument is the thing (chair), the second is the person (Goldilocks)."
       },
       "validation_errors": [],
       "deferred_validation_errors": [],
@@ -3357,8 +3217,8 @@
       "clarification_proxy_answers_used": 0,
       "clarification_policy": {
         "clarification_eagerness": 0.2,
-        "uncertainty_score": 0.05,
-        "effective_uncertainty": 0.05,
+        "uncertainty_score": 0.15,
+        "effective_uncertainty": 0.55,
         "threshold": 0.8,
         "request_clarification": false,
         "needs_clarification_flag": false,
@@ -3380,8 +3240,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -3390,8 +3250,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -3400,7 +3260,7 @@
       },
       "clarification_pending": false,
       "clarification_pending_reason": "",
-      "clarification_question": "Can you clarify this point before I apply it: The utterance describes a specific property (too soft) of a specific entity?",
+      "clarification_question": "Can you clarify this detail: Exact atom for 'Mama Bear's chair' is inferred as 'chair_of_mama_bear' based on context, but specific ontology atom may vary?",
       "clarification_answer_attempt": {},
       "confirmation_required": false,
       "confirmation_question": "",
@@ -3410,11 +3270,11 @@
       "confirmation_answers_used": 0,
       "apply": {
         "tool": "assert_fact",
-        "input": "too_soft(mama_bear_chair, goldilocks).",
+        "input": "too_soft(chair_of_mama_bear, goldilocks).",
         "result": {
           "status": "success",
           "result_type": "fact_asserted",
-          "fact": "too_soft(mama_bear_chair, goldilocks)."
+          "fact": "too_soft(chair_of_mama_bear, goldilocks)."
         }
       },
       "apply_status": "success",
@@ -3519,8 +3379,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -3529,8 +3389,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -3575,23 +3435,34 @@
       "route_source": "model",
       "repaired": false,
       "fallback_used": false,
-      "alignment_events": [],
-      "registry_unknown_signatures": [],
+      "alignment_events": [
+        {
+          "kind": "possessive_break_guard",
+          "fact": "broke(chair_of(baby_bear))."
+        }
+      ],
+      "registry_unknown_signatures": [
+        "broke/1"
+      ],
       "parsed": {
         "intent": "assert_fact",
-        "logic_string": "sat_in(goldilocks, chair_of_baby_bear).",
+        "logic_string": "sat_in(goldilocks, chair_of_baby_bear).\nbroke(chair_of(baby_bear)).",
         "components": {
           "atoms": [
+            "baby_bear",
             "chair_of_baby_bear",
             "goldilocks"
           ],
           "variables": [],
           "predicates": [
+            "broke",
+            "chair_of",
             "sat_in"
           ]
         },
         "facts": [
-          "sat_in(goldilocks, chair_of_baby_bear)."
+          "sat_in(goldilocks, chair_of_baby_bear).",
+          "broke(chair_of(baby_bear))."
         ],
         "rules": [],
         "queries": [],
@@ -3601,16 +3472,18 @@
           "logic": 0.95
         },
         "ambiguities": [
-          "The specific chair identifier is inferred from 'Baby Bear's chair' as 'chair_of_baby_bear'."
+          "Specific chair identifier not in allowed ontology; using generic 'chair_of_baby_bear' derived from context."
         ],
         "needs_clarification": false,
         "uncertainty_score": 0.15,
         "uncertainty_label": "low",
-        "clarification_question": "Can you clarify this detail: The specific chair identifier is inferred from 'Baby Bear's chair' as 'chair_of_baby_bear'?",
+        "clarification_question": "",
         "clarification_reason": "The utterance describes Goldilocks sitting in Baby Bear's chair. This maps to",
-        "rationale": "The utterance describes Goldilocks sitting in Baby Bear's chair. This maps to the allowed predicate sat_in/2 with arguments [person, thing]. The 'thing' argument is derived from the possessive phrase 'Baby Bear's chair'."
+        "rationale": "The utterance describes Goldilocks sitting in Baby Bear's chair. This maps to the allowed predicate sat_in/2. The first argument is the person (Goldilocks), and the second is the thing (chair). Since no specific chair atom exists in the allowed list, a descriptive atom is used to represent the specific instance mentioned. Possessive-break guard added canonical broke/1 fact."
       },
-      "validation_errors": [],
+      "validation_errors": [
+        "Predicate(s) not in registry: broke/1"
+      ],
       "deferred_validation_errors": [],
       "clarification_rounds": [],
       "clarification_rounds_used": 0,
@@ -3624,22 +3497,16 @@
       "clarification_proxy_answers_used": 0,
       "clarification_policy": {
         "clarification_eagerness": 0.2,
-        "uncertainty_score": 0.15,
-        "effective_uncertainty": 0.55,
+        "uncertainty_score": 0.0,
+        "effective_uncertainty": 0.0,
         "threshold": 0.8,
         "request_clarification": false,
         "needs_clarification_flag": false,
-        "progress_low_relevance": false,
-        "progress_high_risk": false,
-        "progress_low_relevance_threshold": 0.34,
-        "progress_high_risk_threshold": 0.18,
         "progress_memory_available": true,
         "progress_focus_present": false,
-        "progress_signal_term_count": 0,
-        "parsed_signal_term_count": 0,
-        "overlap_term_count": 0,
-        "progress_best_focus_overlap": 0.0,
-        "progress_relevance_score": 1.0
+        "progress_relevance_score": 1.0,
+        "progress_low_relevance": false,
+        "progress_high_risk": false
       },
       "progress_low_relevance_seen": false,
       "progress_high_risk_seen": false,
@@ -3647,8 +3514,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -3657,8 +3524,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -3667,7 +3534,7 @@
       },
       "clarification_pending": false,
       "clarification_pending_reason": "",
-      "clarification_question": "Can you clarify this detail: The specific chair identifier is inferred from 'Baby Bear's chair' as 'chair_of_baby_bear'?",
+      "clarification_question": "",
       "clarification_answer_attempt": {},
       "confirmation_required": false,
       "confirmation_question": "",
@@ -3676,16 +3543,15 @@
       "confirmation_answers_available": 0,
       "confirmation_answers_used": 0,
       "apply": {
-        "tool": "assert_fact",
-        "input": "sat_in(goldilocks, chair_of_baby_bear).",
+        "tool": "none",
+        "input": null,
         "result": {
-          "status": "success",
-          "result_type": "fact_asserted",
-          "fact": "sat_in(goldilocks, chair_of_baby_bear)."
+          "status": "validation_error",
+          "message": "Skipping KB apply due to parser validation failure."
         }
       },
-      "apply_status": "success",
-      "decision_state": "commit"
+      "apply_status": "validation_error",
+      "decision_state": "reject"
     },
     {
       "turn_index": 26,
@@ -3696,43 +3562,41 @@
       "control_predicate_directive": false,
       "declared_predicates_from_control": [],
       "declared_predicate_signatures_from_control": [],
-      "route": "assert_fact",
-      "route_source": "model",
+      "route": "other",
+      "route_source": "heuristic",
       "repaired": false,
       "fallback_used": false,
-      "alignment_events": [],
+      "alignment_events": [
+        {
+          "kind": "other_route_passthrough"
+        }
+      ],
       "registry_unknown_signatures": [],
       "parsed": {
-        "intent": "assert_fact",
-        "logic_string": "beds_in_house(three_upstairs).",
+        "intent": "other",
+        "logic_string": "",
         "components": {
-          "atoms": [
-            "three_upstairs"
-          ],
+          "atoms": [],
           "variables": [],
-          "predicates": [
-            "beds_in_house"
-          ]
+          "predicates": []
         },
-        "facts": [
-          "beds_in_house(three_upstairs)."
-        ],
+        "facts": [],
         "rules": [],
         "queries": [],
         "confidence": {
           "overall": 0.95,
-          "intent": 1.0,
+          "intent": 0.95,
           "logic": 0.95
         },
         "ambiguities": [
-          "The specific identifier for 'three beds' is inferred as 'three_upstairs' based on context, but a canonical entity name might be preferred if available."
+          "The specific count 'three' is treated as a descriptor for the entity 'three_upstairs'."
         ],
         "needs_clarification": false,
         "uncertainty_score": 0.15,
         "uncertainty_label": "low",
-        "clarification_question": "Can you clarify this detail: The specific identifier for 'three beds' is inferred as 'three_upstairs' based on context, but a canonical entity name might be preferred if available?",
-        "clarification_reason": "The utterance asserts the existence of three beds located upstairs. Mapped to",
-        "rationale": "The utterance asserts the existence of three beds located upstairs. Mapped to the allowed predicate 'beds_in_house/1' with an inferred argument representing the location/group."
+        "clarification_question": "Can you clarify this detail: The specific count 'three' is treated as a descriptor for the entity 'three_upstairs'?",
+        "clarification_reason": "The utterance asserts the existence of three beds upstairs. Mapped to the",
+        "rationale": "The utterance asserts the existence of three beds upstairs. Mapped to the allowed predicate beds_in_house/1 using a descriptive term for the location/count."
       },
       "validation_errors": [],
       "deferred_validation_errors": [],
@@ -3771,8 +3635,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -3781,8 +3645,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -3791,7 +3655,7 @@
       },
       "clarification_pending": false,
       "clarification_pending_reason": "",
-      "clarification_question": "Can you clarify this detail: The specific identifier for 'three beds' is inferred as 'three_upstairs' based on context, but a canonical entity name might be preferred if available?",
+      "clarification_question": "Can you clarify this detail: The specific count 'three' is treated as a descriptor for the entity 'three_upstairs'?",
       "clarification_answer_attempt": {},
       "confirmation_required": false,
       "confirmation_question": "",
@@ -3800,16 +3664,15 @@
       "confirmation_answers_available": 0,
       "confirmation_answers_used": 0,
       "apply": {
-        "tool": "assert_fact",
-        "input": "beds_in_house(three_upstairs).",
+        "tool": "none",
+        "input": null,
         "result": {
-          "status": "success",
-          "result_type": "fact_asserted",
-          "fact": "beds_in_house(three_upstairs)."
+          "status": "skipped",
+          "message": "Intent=other; no KB mutation/query applied."
         }
       },
-      "apply_status": "success",
-      "decision_state": "commit"
+      "apply_status": "skipped",
+      "decision_state": "stage_provisionally"
     },
     {
       "turn_index": 27,
@@ -3853,9 +3716,9 @@
         "needs_clarification": false,
         "uncertainty_score": 0.05,
         "uncertainty_label": "low",
-        "clarification_question": "Can you clarify this point before I apply it: The utterance 'Papa Bear had a big bed' implies possession. Mapping 'Papa?",
-        "clarification_reason": "The utterance 'Papa Bear had a big bed' implies possession. Mapping 'Papa",
-        "rationale": "The utterance 'Papa Bear had a big bed' implies possession. Mapping 'Papa Bear' to agent 'papa_bear' and 'big bed' to 'big_bed' fits the allowed predicate 'has_bed/2'. The argument order is (person, bed)."
+        "clarification_question": "Can you clarify this point before I apply it: Mapped 'Papa Bear' to agent 'papa_bear' and 'big bed' to 'big_bed'. Used?",
+        "clarification_reason": "Mapped 'Papa Bear' to agent 'papa_bear' and 'big bed' to 'big_bed'. Used",
+        "rationale": "Mapped 'Papa Bear' to agent 'papa_bear' and 'big bed' to 'big_bed'. Used canonical predicate 'has_bed/2' to represent possession. No ambiguity detected."
       },
       "validation_errors": [],
       "deferred_validation_errors": [],
@@ -3894,8 +3757,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -3904,8 +3767,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -3914,7 +3777,7 @@
       },
       "clarification_pending": false,
       "clarification_pending_reason": "",
-      "clarification_question": "Can you clarify this point before I apply it: The utterance 'Papa Bear had a big bed' implies possession. Mapping 'Papa?",
+      "clarification_question": "Can you clarify this point before I apply it: Mapped 'Papa Bear' to agent 'papa_bear' and 'big bed' to 'big_bed'. Used?",
       "clarification_answer_attempt": {},
       "confirmation_required": false,
       "confirmation_question": "",
@@ -3973,15 +3836,14 @@
           "logic": 0.95
         },
         "ambiguities": [
-          "Predicate 'has_bed/2' used for 'medium bed' (type constraint allows 'bed' for second arg, but 'medium_bed' is a specific term; assuming 'medium_bed' is the valid atom for the specific bed instance or 'medium' is a descriptor not in allowed list. Given strict allowed list, 'medium_bed' might be invalid if only 'bed' is allowed. However, 'has_bed/2' expects ['person', 'bed']. 'medium' is not a 'bed'. I must check if 'medium_bed' is a valid atom. The allowed list has 'has_bed/2' with types ['person', 'bed']. 'medium' is not 'bed'. I should probably use 'bed' as the atom if 'medium_bed' is not in the allowed list of atoms. But the prompt says 'Do not invent new predicates'. It does not explicitly ban new atoms, but implies using allowed signatures. If 'medium_bed' is not a valid atom, I cannot use it. Let's assume 'medium_bed' is the intended atom for the specific bed, or I should use 'bed' and lose the 'medium' detail? No, semantic parsing should preserve meaning. If 'medium_bed' is not in the allowed list of atoms, I cannot use it. The allowed list is for predicates. Atoms are usually lowercase. 'medium_bed' is a valid atom string. The type constraint says 'bed' for the second arg. 'medium_bed' is not 'bed'. This is a conflict. I will assume 'medium_bed' is the specific atom representing the bed, and the type constraint is a general category. Or I should use 'bed' and ignore 'medium'? No. I will use 'medium_bed' as the atom, assuming the type constraint is a schema hint, not a strict regex on atoms. Wait, the instruction says 'Type constraints (predicate arg types): ... has_bed/2: [person, bed]'. This implies the second argument must be of type 'bed'. 'medium_bed' is not 'bed'. This is a strict constraint. I should probably use 'bed' and note the ambiguity? Or assume 'medium_bed' is a valid instance of 'bed'. Given the instruction 'Do not invent new predicates', but atoms are flexible. I will use 'medium_bed' as the atom, assuming it fits the 'bed' type conceptually. If strict type checking is required, I might need to flag ambiguity. However, usually in these tasks, specific nouns like 'medium_bed' are accepted as instances. I will proceed with 'medium_bed'.",
-          "Predicate 'has_bed/2' requires second arg to be 'bed'. 'medium_bed' is used as the specific bed instance."
+          "Predicate selection: 'medium bed' implies existence of a bed owned by Mama Bear. The closest allowed predicate is 'has_bed/2'. The argument 'medium_bed' is a descriptor, fitting 'has_bed/2' type constraints."
         ],
         "needs_clarification": false,
         "uncertainty_score": 0.15,
         "uncertainty_label": "low",
-        "clarification_question": "Can you clarify this detail: Predicate 'has_bed/2' used for 'medium bed' (type constraint allows 'bed' for second arg, but 'medium_bed' is a specific term; assuming 'medium_bed' is the valid atom for the specific bed instance or 'medium' is a descriptor not in allowed list. Given strict allowed list, 'medium_bed' might be invalid if only 'bed' is allowed. However, 'has_bed/2' expects ['person', 'bed']. 'medium' is not a 'bed'. I must check if 'medium_bed' is a valid atom. The allowed list has 'has_bed/2' with types ['person', 'bed']. 'medium' is not 'bed'. I should probably use 'bed' as the atom if 'medium_bed' is not in the allowed list of atoms. But the prompt says 'Do not invent new predicates'. It does not explicitly ban new atoms, but implies using allowed signatures. If 'medium_bed' is not a valid atom, I cannot use it. Let's assume 'medium_bed' is the intended atom for the specific bed, or I should use 'bed' and lose the 'medium' detail? No, semantic parsing should preserve meaning. If 'medium_bed' is not in the allowed list of atoms, I cannot use it. The allowed list is for predicates. Atoms are usually lowercase. 'medium_bed' is a valid atom string. The type constraint says 'bed' for the second arg. 'medium_bed' is not 'bed'. This is a conflict. I will assume 'medium_bed' is the specific atom representing the bed, and the type constraint is a general category. Or I should use 'bed' and ignore 'medium'? No. I will use 'medium_bed' as the atom, assuming the type constraint is a schema hint, not a strict regex on atoms. Wait, the instruction says 'Type constraints (predicate arg types): ... has_bed/2: [person, bed]'. This implies the second argument must be of type 'bed'. 'medium_bed' is not 'bed'. This is a strict constraint. I should probably use 'bed' and note the ambiguity? Or assume 'medium_bed' is a valid instance of 'bed'. Given the instruction 'Do not invent new predicates', but atoms are flexible. I will use 'medium_bed' as the atom, assuming it fits the 'bed' type conceptually. If strict type checking is required, I might need to flag ambiguity. However, usually in these tasks, specific nouns like 'medium_bed' are accepted as instances. I will proceed with 'medium_bed'?",
-        "clarification_reason": "Mapped 'Mama Bear had a medium bed' to fact 'has_bed(mama_bear, medium_bed).' Predicate",
-        "rationale": "Mapped 'Mama Bear had a medium bed' to fact 'has_bed(mama_bear, medium_bed).' Predicate 'has_bed/2' used. 'medium_bed' treated as specific bed atom."
+        "clarification_question": "Can you clarify this detail: Predicate selection: 'medium bed' implies existence of a bed owned by Mama Bear. The closest allowed predicate is 'has_bed/2'. The argument 'medium_bed' is a descriptor, fitting 'has_bed/2' type constraints?",
+        "clarification_reason": "The utterance 'Mama Bear had a medium bed' is a declarative statement",
+        "rationale": "The utterance 'Mama Bear had a medium bed' is a declarative statement about possession. It maps to the allowed predicate 'has_bed/2' with arguments 'mama_bear' (person) and 'medium_bed' (descriptor/thing). The tense 'had' is treated as a current state for the fact base unless context implies past tense retraction, which is not indicated."
       },
       "validation_errors": [],
       "deferred_validation_errors": [],
@@ -3998,7 +3860,7 @@
       "clarification_policy": {
         "clarification_eagerness": 0.2,
         "uncertainty_score": 0.15,
-        "effective_uncertainty": 0.65,
+        "effective_uncertainty": 0.55,
         "threshold": 0.8,
         "request_clarification": false,
         "needs_clarification_flag": false,
@@ -4020,8 +3882,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -4030,8 +3892,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -4040,7 +3902,7 @@
       },
       "clarification_pending": false,
       "clarification_pending_reason": "",
-      "clarification_question": "Can you clarify this detail: Predicate 'has_bed/2' used for 'medium bed' (type constraint allows 'bed' for second arg, but 'medium_bed' is a specific term; assuming 'medium_bed' is the valid atom for the specific bed instance or 'medium' is a descriptor not in allowed list. Given strict allowed list, 'medium_bed' might be invalid if only 'bed' is allowed. However, 'has_bed/2' expects ['person', 'bed']. 'medium' is not a 'bed'. I must check if 'medium_bed' is a valid atom. The allowed list has 'has_bed/2' with types ['person', 'bed']. 'medium' is not 'bed'. I should probably use 'bed' as the atom if 'medium_bed' is not in the allowed list of atoms. But the prompt says 'Do not invent new predicates'. It does not explicitly ban new atoms, but implies using allowed signatures. If 'medium_bed' is not a valid atom, I cannot use it. Let's assume 'medium_bed' is the intended atom for the specific bed, or I should use 'bed' and lose the 'medium' detail? No, semantic parsing should preserve meaning. If 'medium_bed' is not in the allowed list of atoms, I cannot use it. The allowed list is for predicates. Atoms are usually lowercase. 'medium_bed' is a valid atom string. The type constraint says 'bed' for the second arg. 'medium_bed' is not 'bed'. This is a conflict. I will assume 'medium_bed' is the specific atom representing the bed, and the type constraint is a general category. Or I should use 'bed' and ignore 'medium'? No. I will use 'medium_bed' as the atom, assuming the type constraint is a schema hint, not a strict regex on atoms. Wait, the instruction says 'Type constraints (predicate arg types): ... has_bed/2: [person, bed]'. This implies the second argument must be of type 'bed'. 'medium_bed' is not 'bed'. This is a strict constraint. I should probably use 'bed' and note the ambiguity? Or assume 'medium_bed' is a valid instance of 'bed'. Given the instruction 'Do not invent new predicates', but atoms are flexible. I will use 'medium_bed' as the atom, assuming it fits the 'bed' type conceptually. If strict type checking is required, I might need to flag ambiguity. However, usually in these tasks, specific nouns like 'medium_bed' are accepted as instances. I will proceed with 'medium_bed'?",
+      "clarification_question": "Can you clarify this detail: Predicate selection: 'medium bed' implies existence of a bed owned by Mama Bear. The closest allowed predicate is 'has_bed/2'. The argument 'medium_bed' is a descriptor, fitting 'has_bed/2' type constraints?",
       "clarification_answer_attempt": {},
       "confirmation_required": false,
       "confirmation_question": "",
@@ -4145,8 +4007,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -4155,8 +4017,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -4198,29 +4060,15 @@
       "route_source": "model",
       "repaired": false,
       "fallback_used": false,
-      "alignment_events": [
-        {
-          "kind": "leading_subject_anchor_guard",
-          "subject_atom": "goldilocks",
-          "predicate_scope": [
-            "slept_in"
-          ],
-          "rewrites": [
-            {
-              "from": "slept_in(papa_bear, bed).",
-              "to": "slept_in(goldilocks, bed)."
-            }
-          ]
-        }
-      ],
+      "alignment_events": [],
       "registry_unknown_signatures": [],
       "parsed": {
         "intent": "assert_fact",
-        "logic_string": "slept_in(goldilocks, bed).",
+        "logic_string": "slept_in(goldilocks, papa_bear_bed).",
         "components": {
           "atoms": [
-            "bed",
-            "goldilocks"
+            "goldilocks",
+            "papa_bear_bed"
           ],
           "variables": [],
           "predicates": [
@@ -4228,7 +4076,7 @@
           ]
         },
         "facts": [
-          "slept_in(goldilocks, bed)."
+          "slept_in(goldilocks, papa_bear_bed)."
         ],
         "rules": [],
         "queries": [],
@@ -4238,14 +4086,14 @@
           "logic": 0.95
         },
         "ambiguities": [
-          "Papa Bear's bed is treated as a specific bed entity."
+          "papa_bear_bed"
         ],
         "needs_clarification": false,
         "uncertainty_score": 0.15,
         "uncertainty_label": "low",
-        "clarification_question": "Can you clarify this detail: Papa Bear's bed is treated as a specific bed entity?",
-        "clarification_reason": "The utterance 'Goldilocks lay in Papa Bear's bed' describes a state of",
-        "rationale": "The utterance 'Goldilocks lay in Papa Bear's bed' describes a state of lying/sleeping in a bed. Mapping 'lay' to the canonical predicate 'slept_in' with 'Goldilocks' as the agent and 'Papa Bear's bed' as the location (represented as 'bed' per ontology constraints) yields a valid fact. The argument order follows the schema 'slept_in(person, bed)'. Leading-subject anchor guard corrected actor argument drift."
+        "clarification_question": "Can you clarify this detail: papa_bear_bed?",
+        "clarification_reason": "Utterance describes Goldilocks lying in a specific bed. Mapped to slept_in predicate",
+        "rationale": "Utterance describes Goldilocks lying in a specific bed. Mapped to slept_in predicate with goldilocks as subject and papa_bear_bed as object. Predicate signature slept_in/2 matches allowed list."
       },
       "validation_errors": [],
       "deferred_validation_errors": [],
@@ -4284,8 +4132,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -4294,8 +4142,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -4304,7 +4152,7 @@
       },
       "clarification_pending": false,
       "clarification_pending_reason": "",
-      "clarification_question": "Can you clarify this detail: Papa Bear's bed is treated as a specific bed entity?",
+      "clarification_question": "Can you clarify this detail: papa_bear_bed?",
       "clarification_answer_attempt": {},
       "confirmation_required": false,
       "confirmation_question": "",
@@ -4314,11 +4162,11 @@
       "confirmation_answers_used": 0,
       "apply": {
         "tool": "assert_fact",
-        "input": "slept_in(goldilocks, bed).",
+        "input": "slept_in(goldilocks, papa_bear_bed).",
         "result": {
           "status": "success",
           "result_type": "fact_asserted",
-          "fact": "slept_in(goldilocks, bed)."
+          "fact": "slept_in(goldilocks, papa_bear_bed)."
         }
       },
       "apply_status": "success",
@@ -4373,14 +4221,14 @@
           "logic": 0.95
         },
         "ambiguities": [
-          "Exact bed identifier not specified; using canonical 'papa_bear_bed'."
+          "Exact bed identifier inferred from 'Papa Bear's bed'."
         ],
         "needs_clarification": false,
         "uncertainty_score": 0.15,
         "uncertainty_label": "low",
-        "clarification_question": "Can you clarify this detail: Exact bed identifier not specified; using canonical 'papa_bear_bed'?",
-        "clarification_reason": "Utterance maps to 'too_hard/2' with person 'goldilocks' and inferred bed 'papa_bear_bed'.",
-        "rationale": "Utterance maps to 'too_hard/2' with person 'goldilocks' and inferred bed 'papa_bear_bed'. Type-direction guard corrected binary argument order."
+        "clarification_question": "Can you clarify this detail: Exact bed identifier inferred from 'Papa Bear's bed'?",
+        "clarification_reason": "The utterance describes a specific state (too hard) of a specific entity",
+        "rationale": "The utterance describes a specific state (too hard) of a specific entity (Papa Bear's bed) relative to an agent (Goldilocks). This maps directly to the allowed predicate too_hard/2 with arguments [person, thing]. The entity 'Papa Bear's bed' is normalized to an atom 'papa_bear_bed'. Type-direction guard corrected binary argument order."
       },
       "validation_errors": [],
       "deferred_validation_errors": [],
@@ -4419,8 +4267,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -4429,8 +4277,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -4439,7 +4287,7 @@
       },
       "clarification_pending": false,
       "clarification_pending_reason": "",
-      "clarification_question": "Can you clarify this detail: Exact bed identifier not specified; using canonical 'papa_bear_bed'?",
+      "clarification_question": "Can you clarify this detail: Exact bed identifier inferred from 'Papa Bear's bed'?",
       "clarification_answer_attempt": {},
       "confirmation_required": false,
       "confirmation_question": "",
@@ -4481,8 +4329,8 @@
           ],
           "rewrites": [
             {
-              "from": "slept_in(mama_bear, bed).",
-              "to": "slept_in(goldilocks, bed)."
+              "from": "slept_in(mama_bear_bed, goldilocks).",
+              "to": "slept_in(goldilocks, mama_bear_bed)."
             }
           ]
         }
@@ -4490,11 +4338,11 @@
       "registry_unknown_signatures": [],
       "parsed": {
         "intent": "assert_fact",
-        "logic_string": "slept_in(goldilocks, bed).",
+        "logic_string": "slept_in(goldilocks, mama_bear_bed).",
         "components": {
           "atoms": [
-            "bed",
-            "goldilocks"
+            "goldilocks",
+            "mama_bear_bed"
           ],
           "variables": [],
           "predicates": [
@@ -4502,7 +4350,7 @@
           ]
         },
         "facts": [
-          "slept_in(goldilocks, bed)."
+          "slept_in(goldilocks, mama_bear_bed)."
         ],
         "rules": [],
         "queries": [],
@@ -4512,14 +4360,14 @@
           "logic": 0.95
         },
         "ambiguities": [
-          "bed"
+          "mama_bear_bed"
         ],
         "needs_clarification": false,
         "uncertainty_score": 0.15,
         "uncertainty_label": "low",
-        "clarification_question": "Can you clarify this detail: bed?",
-        "clarification_reason": "Utterance describes an agent (Mama Bear) in a state (laying) within a",
-        "rationale": "Utterance describes an agent (Mama Bear) in a state (laying) within a location (bed). Mapped to slept_in predicate with agent as first arg and location as second. 'Mama Bear' normalized to atom 'mama_bear'. 'bed' used as generic atom. Leading-subject anchor guard corrected actor argument drift."
+        "clarification_question": "Can you clarify this detail: mama_bear_bed?",
+        "clarification_reason": "Utterance describes Goldilocks lying in a specific bed. Mapped to slept_in predicate",
+        "rationale": "Utterance describes Goldilocks lying in a specific bed. Mapped to slept_in predicate with subject as bed and object as person per ontology signature. Leading-subject anchor guard corrected actor argument drift."
       },
       "validation_errors": [],
       "deferred_validation_errors": [],
@@ -4558,8 +4406,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -4568,8 +4416,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -4578,7 +4426,7 @@
       },
       "clarification_pending": false,
       "clarification_pending_reason": "",
-      "clarification_question": "Can you clarify this detail: bed?",
+      "clarification_question": "Can you clarify this detail: mama_bear_bed?",
       "clarification_answer_attempt": {},
       "confirmation_required": false,
       "confirmation_question": "",
@@ -4588,14 +4436,15 @@
       "confirmation_answers_used": 0,
       "apply": {
         "tool": "assert_fact",
-        "input": "slept_in(goldilocks, bed).",
+        "input": "slept_in(goldilocks, mama_bear_bed).",
         "result": {
-          "status": "skipped",
-          "message": "Fact already present in corpus."
+          "status": "success",
+          "result_type": "fact_asserted",
+          "fact": "slept_in(goldilocks, mama_bear_bed)."
         }
       },
-      "apply_status": "skipped",
-      "decision_state": "stage_provisionally"
+      "apply_status": "success",
+      "decision_state": "commit"
     },
     {
       "turn_index": 33,
@@ -4636,14 +4485,14 @@
           "logic": 0.95
         },
         "ambiguities": [
-          "Exact atom for 'Mama Bear's bed' inferred as 'mama_bear_bed' based on context."
+          "Exact bed identifier: 'Mama Bear's bed' mapped to atom 'mama_bear_bed'."
         ],
         "needs_clarification": false,
         "uncertainty_score": 0.15,
         "uncertainty_label": "low",
-        "clarification_question": "Can you clarify this detail: Exact atom for 'Mama Bear's bed' inferred as 'mama_bear_bed' based on context?",
-        "clarification_reason": "The utterance describes a state (too soft) of a specific object (Mama",
-        "rationale": "The utterance describes a state (too soft) of a specific object (Mama Bear's bed) relative to a subject (Goldilocks). This maps directly to the allowed predicate 'too_soft/2' with arguments [thing, person]."
+        "clarification_question": "Can you clarify this detail: Exact bed identifier: 'Mama Bear's bed' mapped to atom 'mama_bear_bed'?",
+        "clarification_reason": "Utterance describes a state (too soft) of a specific entity (Mama Bear's",
+        "rationale": "Utterance describes a state (too soft) of a specific entity (Mama Bear's bed) regarding a specific agent (Goldilocks). Mapped to allowed predicate too_soft/2 with arguments (thing, person)."
       },
       "validation_errors": [],
       "deferred_validation_errors": [],
@@ -4682,8 +4531,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -4692,8 +4541,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -4702,7 +4551,7 @@
       },
       "clarification_pending": false,
       "clarification_pending_reason": "",
-      "clarification_question": "Can you clarify this detail: Exact atom for 'Mama Bear's bed' inferred as 'mama_bear_bed' based on context?",
+      "clarification_question": "Can you clarify this detail: Exact bed identifier: 'Mama Bear's bed' mapped to atom 'mama_bear_bed'?",
       "clarification_answer_attempt": {},
       "confirmation_required": false,
       "confirmation_question": "",
@@ -4781,8 +4630,8 @@
         "uncertainty_score": 0.15,
         "uncertainty_label": "low",
         "clarification_question": "Can you clarify this detail: Exact bed identifier not specified; using canonical 'baby_bear_bed'?",
-        "clarification_reason": "Map 'lay in' to 'slept_in'. Subject 'Goldilocks' maps to 'baby_bear' (contextual inference",
-        "rationale": "Map 'lay in' to 'slept_in'. Subject 'Goldilocks' maps to 'baby_bear' (contextual inference from 'Baby Bear's bed'). Object 'Baby Bear's bed' maps to 'baby_bear_bed'. Ensure argument order matches predicate signature 'slept_in/2' (person, bed). Leading-subject anchor guard corrected actor argument drift."
+        "clarification_reason": "Map 'lay in' to 'slept_in'. Subject 'Goldilocks' maps to 'baby_bear' (agent). Object",
+        "rationale": "Map 'lay in' to 'slept_in'. Subject 'Goldilocks' maps to 'baby_bear' (agent). Object 'Baby Bear's bed' maps to 'baby_bear_bed' (thing). Ensure argument order matches predicate signature (person, bed). Leading-subject anchor guard corrected actor argument drift."
       },
       "validation_errors": [],
       "deferred_validation_errors": [],
@@ -4821,8 +4670,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -4831,8 +4680,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -4944,8 +4793,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -4954,8 +4803,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -5037,14 +4886,14 @@
           "logic": 0.95
         },
         "ambiguities": [
-          "The specific bed identifier is inferred as 'bed' based on the 'Baby Bear's bed' phrase, but the ontology expects a 'thing' argument. Using 'bed' as a generic term is a safe assumption for the 'thing' type constraint."
+          "The specific bed identifier is inferred as 'bed' based on the utterance 'Baby Bear's bed', but the ontology expects a 'thing' argument. Using 'bed' as a generic term is a safe assumption for the 'thing' type constraint."
         ],
         "needs_clarification": false,
         "uncertainty_score": 0.15,
         "uncertainty_label": "low",
-        "clarification_question": "Can you clarify this detail: The specific bed identifier is inferred as 'bed' based on the 'Baby Bear's bed' phrase, but the ontology expects a 'thing' argument. Using 'bed' as a generic term is a safe assumption for the 'thing' type constraint?",
+        "clarification_question": "Can you clarify this detail: The specific bed identifier is inferred as 'bed' based on the utterance 'Baby Bear's bed', but the ontology expects a 'thing' argument. Using 'bed' as a generic term is a safe assumption for the 'thing' type constraint?",
         "clarification_reason": "The utterance 'Goldilocks fell asleep in Baby Bear's bed' maps to the",
-        "rationale": "The utterance 'Goldilocks fell asleep in Baby Bear's bed' maps to the predicate 'slept_in/2'. The subject 'Goldilocks' maps to the 'person' argument, and 'Baby Bear's bed' maps to the 'thing' argument. The ontology allows 'slept_in/2' with types ['person', 'bed']. The phrase 'Baby Bear's bed' is semantically equivalent to the entity 'bed' in this context. No clarification is needed as the mapping is direct and the ontology supports the generic 'bed' term for the 'thing' slot. Leading-subject anchor guard corrected actor argument drift."
+        "rationale": "The utterance 'Goldilocks fell asleep in Baby Bear's bed' maps to the predicate 'slept_in/2'. The subject 'Goldilocks' is the agent, and the object is 'Baby Bear's bed'. The ontology requires 'slept_in(Person, Bed)'. 'Goldilocks' is the person. 'Baby Bear's bed' is the bed (thing). The argument order is (Person, Bed). Thus, 'slept_in(goldilocks, baby_bear_bed)' or similar. However, looking at the allowed predicates, 'beds_in_house/1' exists but 'slept_in/2' is also allowed. The type constraint for 'slept_in/2' is ['person', 'bed']. The object 'Baby Bear's bed' is a bed. The subject 'Goldilocks' is a person. The mapping is slept_in(goldilocks, baby_bear_bed). Wait, the allowed predicates list includes 'slept_in/2'. The type constraint says ['person', 'bed']. The utterance says 'Baby Bear's bed'. I will use 'baby_bear_bed' or just 'bed' if 'bed' is the canonical name. The prompt examples use simple atoms. Let's assume 'baby_bear_bed' is the specific thing. Or perhaps 'bed' is the generic. Given 'Baby Bear's bed', 'baby_bear_bed' is more precise. But often in these tasks, 'bed' is the atom. Let's check the type constraint again: 'slept_in/2': ['person', 'bed']. The second arg is 'bed'. So 'slept_in(goldilocks, bed)' might be too generic if 'baby_bear_bed' is the intended atom. However, without a registry of specific bed names, 'bed' is the safest canonical atom for 'a bed'. But 'Baby Bear's bed' implies a specific instance. Let's look at the 'goldilocks' predicate which takes a 'descriptor'. Maybe 'baby_bear' is the descriptor? No, 'slept_in' takes a 'thing'. Let's assume the atom is 'baby_bear_bed' or 'bed'. Given the strict instruction 'Do not invent entities', using 'bed' as the generic term for 'Baby Bear's bed' is risky if 'baby_bear_bed' is the intended entity. However, usually, if the name isn't in the registry, we use the description as the atom. Let's use 'baby_bear_bed'. Wait, the type constraint says 'bed'. Maybe the atom should be 'bed'. Let's stick to the most direct mapping: 'slept_in(goldilocks, bed)'. But 'Baby Bear's bed' is distinct. Let's try to be precise: 'slept_in(goldilocks, baby_bear_bed)'. If 'baby_bear_bed' is not in the allowed list, I must use 'bed'. The allowed list is fixed. I will use 'bed' as the atom for the bed, assuming 'Baby Bear's bed' is the description of that bed. Actually, looking at 'goldilocks/1' taking a 'descriptor', maybe 'baby_bear' is the descriptor for the bed? No, 'slept_in' takes a 'thing'. Let's assume the atom is 'bed' and the context implies which one. Or 'baby_bear_bed'. I will use 'baby_bear_bed' as it is derived from the text. Wait, 'Do not invent entities'. 'Baby Bear's bed' is an entity. 'bed' is a generic. I will use 'baby_bear_bed' as the atom representing that specific bed. If the system rejects it, it's a limitation. But 'Do not invent' usually means don't make up random names. 'baby_bear_bed' is a direct extraction. Let's refine: The type constraint says 'bed'. Maybe the atom MUST be 'bed'. Let's use 'bed' to be safe with the type constraint 'bed'. Leading-subject anchor guard corrected actor argument drift."
       },
       "validation_errors": [],
       "deferred_validation_errors": [],
@@ -5083,8 +4932,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -5093,8 +4942,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -5103,7 +4952,7 @@
       },
       "clarification_pending": false,
       "clarification_pending_reason": "",
-      "clarification_question": "Can you clarify this detail: The specific bed identifier is inferred as 'bed' based on the 'Baby Bear's bed' phrase, but the ontology expects a 'thing' argument. Using 'bed' as a generic term is a safe assumption for the 'thing' type constraint?",
+      "clarification_question": "Can you clarify this detail: The specific bed identifier is inferred as 'bed' based on the utterance 'Baby Bear's bed', but the ontology expects a 'thing' argument. Using 'bed' as a generic term is a safe assumption for the 'thing' type constraint?",
       "clarification_answer_attempt": {},
       "confirmation_required": false,
       "confirmation_question": "",
@@ -5115,12 +4964,13 @@
         "tool": "assert_fact",
         "input": "slept_in(goldilocks, bed).",
         "result": {
-          "status": "skipped",
-          "message": "Fact already present in corpus."
+          "status": "success",
+          "result_type": "fact_asserted",
+          "fact": "slept_in(goldilocks, bed)."
         }
       },
-      "apply_status": "skipped",
-      "decision_state": "stage_provisionally"
+      "apply_status": "success",
+      "decision_state": "commit"
     },
     {
       "turn_index": 37,
@@ -5174,14 +5024,14 @@
           "logic": 0.95
         },
         "ambiguities": [
-          "The predicate `returned_home/1` expects a single `agent` argument, but the utterance refers to a group ('the three bears'). The argument is constructed as a list to represent the group."
+          "The predicate `returned_home/1` expects a single `agent` argument, but the utterance refers to a group ('The three bears'). The argument is constructed as a list `[the_three_bears]` to represent the group entity within the allowed schema constraints."
         ],
         "needs_clarification": false,
         "uncertainty_score": 0.15,
         "uncertainty_label": "low",
-        "clarification_question": "Can you clarify this detail: The predicate `returned_home/1` expects a single `agent` argument, but the utterance refers to a group ('the three bears'). The argument is constructed as a list to represent the group?",
+        "clarification_question": "Can you clarify this detail: The predicate `returned_home/1` expects a single `agent` argument, but the utterance refers to a group ('The three bears'). The argument is constructed as a list `[the_three_bears]` to represent the group entity within the allowed schema constraints?",
         "clarification_reason": "The utterance describes a completed action by a specific group. This maps",
-        "rationale": "The utterance describes a completed action by a specific group. This maps to an assertion of fact. The predicate `returned_home/1` is used with a list argument to capture the plural subject, adhering to the allowed signature. Leading-subject anchor guard corrected actor argument drift."
+        "rationale": "The utterance describes a completed action by a specific group. This maps to an assertion of fact. The predicate `returned_home/1` is used with a list argument to represent the collective entity 'the three bears', adhering to the allowed signature. Leading-subject anchor guard corrected actor argument drift."
       },
       "validation_errors": [],
       "deferred_validation_errors": [],
@@ -5220,8 +5070,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -5230,8 +5080,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -5240,7 +5090,7 @@
       },
       "clarification_pending": false,
       "clarification_pending_reason": "",
-      "clarification_question": "Can you clarify this detail: The predicate `returned_home/1` expects a single `agent` argument, but the utterance refers to a group ('the three bears'). The argument is constructed as a list to represent the group?",
+      "clarification_question": "Can you clarify this detail: The predicate `returned_home/1` expects a single `agent` argument, but the utterance refers to a group ('The three bears'). The argument is constructed as a list `[the_three_bears]` to represent the group entity within the allowed schema constraints?",
       "clarification_answer_attempt": {},
       "confirmation_required": false,
       "confirmation_question": "",
@@ -5272,8 +5122,15 @@
       "route": "assert_fact",
       "route_source": "model",
       "repaired": false,
-      "fallback_used": false,
+      "fallback_used": true,
       "alignment_events": [
+        {
+          "kind": "directional_fact_guard",
+          "predicate": "saw",
+          "from": "saw(papa_bear, tasted(someone, porridge_of(papa_bear)))",
+          "to": "saw(papa_bear, tasted(someone, porridge_of(papa_bear)))",
+          "match_mode": "canonicalized"
+        },
         {
           "kind": "observed_someone_event_guard",
           "observer": "papa_bear",
@@ -5302,20 +5159,17 @@
         "rules": [],
         "queries": [],
         "confidence": {
-          "overall": 0.85,
-          "intent": 0.95,
-          "logic": 0.85
+          "overall": 0.72,
+          "intent": 0.82,
+          "logic": 0.68
         },
-        "ambiguities": [
-          "The object of 'saw' is a complex event 'tasted his porridge' rather than a simple 'thing' as per strict type constraints for saw/2 (agent, thing). Mapping to a fact string is a pragmatic deviation to capture the event semantics.",
-          "The referent 'someone' is unresolved."
-        ],
-        "needs_clarification": true,
-        "uncertainty_score": 0.75,
-        "uncertainty_label": "medium",
-        "clarification_question": "Is 'tasted his porridge' the specific thing seen, or should we identify the person who tasted it?",
-        "clarification_reason": "Event 'tasted' is not a simple 'thing' for saw/2 predicate; need to",
-        "rationale": "Utterance describes an observation of an event. Mapped to saw/2 with the event as the object term. Uncertainty arises from the complex object term violating strict type constraints for 'thing'. Observed-event guard canonicalized nested someone-event under saw/2."
+        "ambiguities": [],
+        "needs_clarification": false,
+        "uncertainty_score": 0.24,
+        "uncertainty_label": "low",
+        "clarification_question": "Can you clarify this point before I apply it: Fallback observed-event parse from 'saw that someone had ...'. Directional fact guard?",
+        "clarification_reason": "Fallback observed-event parse from 'saw that someone had ...'. Directional fact guard",
+        "rationale": "Fallback observed-event parse from 'saw that someone had ...'. Directional fact guard corrected inverted subject/object order. Observed-event guard canonicalized nested someone-event under saw/2."
       },
       "validation_errors": [],
       "deferred_validation_errors": [],
@@ -5331,11 +5185,11 @@
       "clarification_proxy_answers_used": 0,
       "clarification_policy": {
         "clarification_eagerness": 0.2,
-        "uncertainty_score": 0.75,
-        "effective_uncertainty": 0.82,
+        "uncertainty_score": 0.24,
+        "effective_uncertainty": 0.24,
         "threshold": 0.8,
-        "request_clarification": true,
-        "needs_clarification_flag": true,
+        "request_clarification": false,
+        "needs_clarification_flag": false,
         "progress_low_relevance": false,
         "progress_high_risk": false,
         "progress_low_relevance_threshold": 0.34,
@@ -5354,8 +5208,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -5364,28 +5218,18 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
         "resolved_items": [],
         "notes": []
       },
-      "clarification_pending": true,
-      "clarification_pending_reason": "Clarification answer model confidence below threshold; KB apply deferred.",
-      "clarification_question": "Is 'tasted his porridge' the specific thing seen, or should we identify the person who tasted it?",
-      "clarification_answer_attempt": {
-        "model": "qwen3.5:9b",
-        "backend": "ollama",
-        "base_url": "http://127.0.0.1:11434",
-        "answer_role": "proxy_model",
-        "answer_source_prefix": "synthetic",
-        "answer_source": "synthetic_model",
-        "answer_confidence": 0.0,
-        "answer_assumption": "Cannot determine if 'someone' is the specific object or needs identification.",
-        "answer_text": "unknown"
-      },
+      "clarification_pending": false,
+      "clarification_pending_reason": "",
+      "clarification_question": "Can you clarify this point before I apply it: Fallback observed-event parse from 'saw that someone had ...'. Directional fact guard?",
+      "clarification_answer_attempt": {},
       "confirmation_required": false,
       "confirmation_question": "",
       "confirmation_answer": "",
@@ -5393,44 +5237,16 @@
       "confirmation_answers_available": 0,
       "confirmation_answers_used": 0,
       "apply": {
-        "tool": "none",
-        "input": {
-          "clarification_question": "Is 'tasted his porridge' the specific thing seen, or should we identify the person who tasted it?",
-          "clarification_rounds_used": 0,
-          "confirmation_question": "",
-          "confirmation_answer": ""
-        },
+        "tool": "assert_fact",
+        "input": "saw(papa_bear, tasted(someone, porridge_of(papa_bear))).",
         "result": {
-          "status": "clarification_requested",
-          "message": "Clarification answer model confidence below threshold; KB apply deferred.",
-          "clarification_question": "Is 'tasted his porridge' the specific thing seen, or should we identify the person who tasted it?",
-          "clarification_policy": {
-            "clarification_eagerness": 0.2,
-            "uncertainty_score": 0.75,
-            "effective_uncertainty": 0.82,
-            "threshold": 0.8,
-            "request_clarification": true,
-            "needs_clarification_flag": true,
-            "progress_low_relevance": false,
-            "progress_high_risk": false,
-            "progress_low_relevance_threshold": 0.34,
-            "progress_high_risk_threshold": 0.18,
-            "progress_memory_available": true,
-            "progress_focus_present": false,
-            "progress_signal_term_count": 0,
-            "parsed_signal_term_count": 0,
-            "overlap_term_count": 0,
-            "progress_best_focus_overlap": 0.0,
-            "progress_relevance_score": 1.0
-          },
-          "confirmation_required": false,
-          "confirmation_question": "",
-          "confirmation_answer": "",
-          "confirmation_result": "not_required"
+          "status": "success",
+          "result_type": "fact_asserted",
+          "fact": "saw(papa_bear, tasted(someone, porridge_of(papa_bear)))."
         }
       },
-      "apply_status": "clarification_requested",
-      "decision_state": "ask_clarification"
+      "apply_status": "success",
+      "decision_state": "commit"
     },
     {
       "turn_index": 39,
@@ -5482,12 +5298,12 @@
           "The specific agent who tasted the porridge is unknown.",
           "The specific thing tasted is inferred as 'porridge' but not explicitly named in the allowed predicates as a distinct argument beyond the event."
         ],
-        "needs_clarification": true,
-        "uncertainty_score": 0.65,
-        "uncertainty_label": "medium",
-        "clarification_question": "Who is the specific agent that tasted the porridge?",
-        "clarification_reason": "Unknown agent requires variable or clarification.",
-        "rationale": "The utterance reports an observation by Mama Bear of an unspecified agent tasting porridge. The predicate `saw/2` is used. The agent is unknown, so a variable `X` is used in the `tasted/2` term within the observation. Clarification is needed to identify the agent. Observed-event guard canonicalized nested someone-event under saw/2."
+        "needs_clarification": false,
+        "uncertainty_score": 0.32,
+        "uncertainty_label": "low",
+        "clarification_question": "Can you clarify this detail: The specific agent who tasted the porridge is unknown?",
+        "clarification_reason": "Utterance describes an observation event. Mapped to saw/2. Agent is 'mama_bear'. Object",
+        "rationale": "Utterance describes an observation event. Mapped to saw/2. Agent is 'mama_bear'. Object is the event 'someone_tasted_porridge' since the specific taster is not named. Predicate 'tasted/2' exists but requires two arguments; since the taster is unknown, we cannot assert a specific tasted(X, porridge) fact without clarification, so we assert the observation of the event. Observed-event guard canonicalized nested someone-event under saw/2."
       },
       "validation_errors": [],
       "deferred_validation_errors": [],
@@ -5503,11 +5319,11 @@
       "clarification_proxy_answers_used": 0,
       "clarification_policy": {
         "clarification_eagerness": 0.2,
-        "uncertainty_score": 0.65,
-        "effective_uncertainty": 0.82,
+        "uncertainty_score": 0.32,
+        "effective_uncertainty": 0.65,
         "threshold": 0.8,
-        "request_clarification": true,
-        "needs_clarification_flag": true,
+        "request_clarification": false,
+        "needs_clarification_flag": false,
         "progress_low_relevance": false,
         "progress_high_risk": false,
         "progress_low_relevance_threshold": 0.34,
@@ -5526,8 +5342,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -5536,28 +5352,18 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
         "resolved_items": [],
         "notes": []
       },
-      "clarification_pending": true,
-      "clarification_pending_reason": "Clarification answer model confidence below threshold; KB apply deferred.",
-      "clarification_question": "Who is the specific agent that tasted the porridge?",
-      "clarification_answer_attempt": {
-        "model": "qwen3.5:9b",
-        "backend": "ollama",
-        "base_url": "http://127.0.0.1:11434",
-        "answer_role": "proxy_model",
-        "answer_source_prefix": "synthetic",
-        "answer_source": "synthetic_model",
-        "answer_confidence": 0.0,
-        "answer_assumption": "Mama Bear saw someone taste her porridge, but the agent is not specified in KB.",
-        "answer_text": "unknown"
-      },
+      "clarification_pending": false,
+      "clarification_pending_reason": "",
+      "clarification_question": "Can you clarify this detail: The specific agent who tasted the porridge is unknown?",
+      "clarification_answer_attempt": {},
       "confirmation_required": false,
       "confirmation_question": "",
       "confirmation_answer": "",
@@ -5565,44 +5371,16 @@
       "confirmation_answers_available": 0,
       "confirmation_answers_used": 0,
       "apply": {
-        "tool": "none",
-        "input": {
-          "clarification_question": "Who is the specific agent that tasted the porridge?",
-          "clarification_rounds_used": 0,
-          "confirmation_question": "",
-          "confirmation_answer": ""
-        },
+        "tool": "assert_fact",
+        "input": "saw(mama_bear, tasted(someone, porridge_of(mama_bear))).",
         "result": {
-          "status": "clarification_requested",
-          "message": "Clarification answer model confidence below threshold; KB apply deferred.",
-          "clarification_question": "Who is the specific agent that tasted the porridge?",
-          "clarification_policy": {
-            "clarification_eagerness": 0.2,
-            "uncertainty_score": 0.65,
-            "effective_uncertainty": 0.82,
-            "threshold": 0.8,
-            "request_clarification": true,
-            "needs_clarification_flag": true,
-            "progress_low_relevance": false,
-            "progress_high_risk": false,
-            "progress_low_relevance_threshold": 0.34,
-            "progress_high_risk_threshold": 0.18,
-            "progress_memory_available": true,
-            "progress_focus_present": false,
-            "progress_signal_term_count": 0,
-            "parsed_signal_term_count": 0,
-            "overlap_term_count": 0,
-            "progress_best_focus_overlap": 0.0,
-            "progress_relevance_score": 1.0
-          },
-          "confirmation_required": false,
-          "confirmation_question": "",
-          "confirmation_answer": "",
-          "confirmation_result": "not_required"
+          "status": "success",
+          "result_type": "fact_asserted",
+          "fact": "saw(mama_bear, tasted(someone, porridge_of(mama_bear)))."
         }
       },
-      "apply_status": "clarification_requested",
-      "decision_state": "ask_clarification"
+      "apply_status": "success",
+      "decision_state": "commit"
     },
     {
       "turn_index": 40,
@@ -5651,15 +5429,14 @@
           "logic": 0.95
         },
         "ambiguities": [
-          "The specific agent who ate the porridge is unknown and represented by a variable.",
-          "The exact state 'porridge_eaten' is inferred from 'eaten all his porridge'."
+          "The specific agent who ate the porridge is unknown and represented by a variable-like atom 'someone_ate_porridge'."
         ],
         "needs_clarification": false,
-        "uncertainty_score": 0.35,
-        "uncertainty_label": "medium",
-        "clarification_question": "Can you clarify this detail: The specific agent who ate the porridge is unknown and represented by a variable?",
-        "clarification_reason": "The utterance describes an observation by Baby Bear. The predicate 'saw/2' is",
-        "rationale": "The utterance describes an observation by Baby Bear. The predicate 'saw/2' is used with the agent 'baby_bear' and the observed event 'porridge_eaten'. The specific eater is unknown, so a variable or inferred state is used. Since no canonical predicate for 'porridge_eaten' exists in the allowed list, a derived term is used to capture the semantic meaning without hallucinating a specific agent. Observed-event guard canonicalized nested someone-event under saw/2."
+        "uncertainty_score": 0.32,
+        "uncertainty_label": "low",
+        "clarification_question": "Can you clarify this detail: The specific agent who ate the porridge is unknown and represented by a variable-like atom 'someone_ate_porridge'?",
+        "clarification_reason": "The utterance describes a specific event (Baby Bear saw someone eat porridge).",
+        "rationale": "The utterance describes a specific event (Baby Bear saw someone eat porridge). The predicate 'saw/2' is used with the agent 'baby_bear' and the event 'someone_ate_porridge' as the object. The exact identity of the eater is not specified in the text, so a generic term is used to preserve semantic meaning without hallucination. Observed-event guard canonicalized nested someone-event under saw/2."
       },
       "validation_errors": [],
       "deferred_validation_errors": [],
@@ -5675,8 +5452,8 @@
       "clarification_proxy_answers_used": 0,
       "clarification_policy": {
         "clarification_eagerness": 0.2,
-        "uncertainty_score": 0.35,
-        "effective_uncertainty": 0.65,
+        "uncertainty_score": 0.32,
+        "effective_uncertainty": 0.55,
         "threshold": 0.8,
         "request_clarification": false,
         "needs_clarification_flag": false,
@@ -5698,8 +5475,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -5708,8 +5485,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -5718,7 +5495,7 @@
       },
       "clarification_pending": false,
       "clarification_pending_reason": "",
-      "clarification_question": "Can you clarify this detail: The specific agent who ate the porridge is unknown and represented by a variable?",
+      "clarification_question": "Can you clarify this detail: The specific agent who ate the porridge is unknown and represented by a variable-like atom 'someone_ate_porridge'?",
       "clarification_answer_attempt": {},
       "confirmation_required": false,
       "confirmation_question": "",
@@ -5795,8 +5572,8 @@
         "needs_clarification": false,
         "uncertainty_score": 0.24,
         "uncertainty_label": "low",
-        "clarification_question": "Can you clarify this point before I apply it: Fallback observed-event parse from 'saw that someone had ...'?",
-        "clarification_reason": "Fallback observed-event parse from 'saw that someone had ...'.",
+        "clarification_question": "Can you clarify this point before I apply it: Fallback observed-event parse from 'saw that someone had ...'. Directional fact guard?",
+        "clarification_reason": "Fallback observed-event parse from 'saw that someone had ...'. Directional fact guard",
         "rationale": "Fallback observed-event parse from 'saw that someone had ...'. Directional fact guard corrected inverted subject/object order. Observed-event guard canonicalized nested someone-event under saw/2."
       },
       "validation_errors": [],
@@ -5836,8 +5613,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -5846,8 +5623,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -5856,7 +5633,7 @@
       },
       "clarification_pending": false,
       "clarification_pending_reason": "",
-      "clarification_question": "Can you clarify this point before I apply it: Fallback observed-event parse from 'saw that someone had ...'?",
+      "clarification_question": "Can you clarify this point before I apply it: Fallback observed-event parse from 'saw that someone had ...'. Directional fact guard?",
       "clarification_answer_attempt": {},
       "confirmation_required": false,
       "confirmation_question": "",
@@ -5933,8 +5710,8 @@
         "needs_clarification": false,
         "uncertainty_score": 0.24,
         "uncertainty_label": "low",
-        "clarification_question": "Can you clarify this point before I apply it: Fallback observed-event parse from 'saw that someone had ...'?",
-        "clarification_reason": "Fallback observed-event parse from 'saw that someone had ...'.",
+        "clarification_question": "Can you clarify this point before I apply it: Fallback observed-event parse from 'saw that someone had ...'. Directional fact guard?",
+        "clarification_reason": "Fallback observed-event parse from 'saw that someone had ...'. Directional fact guard",
         "rationale": "Fallback observed-event parse from 'saw that someone had ...'. Directional fact guard corrected inverted subject/object order. Observed-event guard canonicalized nested someone-event under saw/2."
       },
       "validation_errors": [],
@@ -5974,8 +5751,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -5984,8 +5761,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -5994,7 +5771,7 @@
       },
       "clarification_pending": false,
       "clarification_pending_reason": "",
-      "clarification_question": "Can you clarify this point before I apply it: Fallback observed-event parse from 'saw that someone had ...'?",
+      "clarification_question": "Can you clarify this point before I apply it: Fallback observed-event parse from 'saw that someone had ...'. Directional fact guard?",
       "clarification_answer_attempt": {},
       "confirmation_required": false,
       "confirmation_question": "",
@@ -6027,23 +5804,35 @@
       "route_source": "model",
       "repaired": false,
       "fallback_used": false,
-      "alignment_events": [],
-      "registry_unknown_signatures": [],
+      "alignment_events": [
+        {
+          "kind": "observed_possessive_broken_guard",
+          "rewritten_facts": [
+            "broke(chair_of(baby_bear)).",
+            "saw(baby_bear, broke(chair_of(baby_bear)))."
+          ]
+        }
+      ],
+      "registry_unknown_signatures": [
+        "broke/1"
+      ],
       "parsed": {
         "intent": "assert_fact",
-        "logic_string": "saw(baby_bear, chair).",
+        "logic_string": "broke(chair_of(baby_bear)).\nsaw(baby_bear, broke(chair_of(baby_bear))).",
         "components": {
           "atoms": [
-            "baby_bear",
-            "chair"
+            "baby_bear"
           ],
           "variables": [],
           "predicates": [
+            "broke",
+            "chair_of",
             "saw"
           ]
         },
         "facts": [
-          "saw(baby_bear, chair)."
+          "broke(chair_of(baby_bear)).",
+          "saw(baby_bear, broke(chair_of(baby_bear)))."
         ],
         "rules": [],
         "queries": [],
@@ -6053,16 +5842,19 @@
           "logic": 0.95
         },
         "ambiguities": [
-          "The specific chair instance is not named, so a variable or generic atom is used."
+          "The specific chair instance is unknown; using a generic atom 'chair' per allowed signatures.",
+          "The broken state is an attribute of the chair, but the allowed predicate 'saw/2' only captures the seeing event, not the state directly."
         ],
         "needs_clarification": false,
         "uncertainty_score": 0.15,
         "uncertainty_label": "low",
-        "clarification_question": "Can you clarify this detail: The specific chair instance is not named, so a variable or generic atom is used?",
-        "clarification_reason": "The utterance describes a visual perception event ('saw') involving an agent ('Baby",
-        "rationale": "The utterance describes a visual perception event ('saw') involving an agent ('Baby Bear') and an object ('chair'). The predicate 'saw/2' is used with the agent as the first argument and the object as the second, adhering to the allowed signature."
+        "clarification_question": "",
+        "clarification_reason": "The utterance describes an event where Baby Bear perceives a chair. The",
+        "rationale": "The utterance describes an event where Baby Bear perceives a chair. The allowed predicate 'saw/2' maps to 'saw(agent, thing)'. 'baby_bear' is the agent and 'chair' is the thing. The broken state is context but not directly mappable to a new predicate signature, so the core fact of seeing is asserted. Observed-broken guard canonicalized possessive broken-object observation."
       },
-      "validation_errors": [],
+      "validation_errors": [
+        "Predicate(s) not in registry: broke/1"
+      ],
       "deferred_validation_errors": [],
       "clarification_rounds": [],
       "clarification_rounds_used": 0,
@@ -6076,22 +5868,16 @@
       "clarification_proxy_answers_used": 0,
       "clarification_policy": {
         "clarification_eagerness": 0.2,
-        "uncertainty_score": 0.15,
-        "effective_uncertainty": 0.55,
+        "uncertainty_score": 0.0,
+        "effective_uncertainty": 0.0,
         "threshold": 0.8,
         "request_clarification": false,
         "needs_clarification_flag": false,
-        "progress_low_relevance": false,
-        "progress_high_risk": false,
-        "progress_low_relevance_threshold": 0.34,
-        "progress_high_risk_threshold": 0.18,
         "progress_memory_available": true,
         "progress_focus_present": false,
-        "progress_signal_term_count": 0,
-        "parsed_signal_term_count": 0,
-        "overlap_term_count": 0,
-        "progress_best_focus_overlap": 0.0,
-        "progress_relevance_score": 1.0
+        "progress_relevance_score": 1.0,
+        "progress_low_relevance": false,
+        "progress_high_risk": false
       },
       "progress_low_relevance_seen": false,
       "progress_high_risk_seen": false,
@@ -6099,8 +5885,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -6109,8 +5895,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -6119,7 +5905,7 @@
       },
       "clarification_pending": false,
       "clarification_pending_reason": "",
-      "clarification_question": "Can you clarify this detail: The specific chair instance is not named, so a variable or generic atom is used?",
+      "clarification_question": "",
       "clarification_answer_attempt": {},
       "confirmation_required": false,
       "confirmation_question": "",
@@ -6128,16 +5914,15 @@
       "confirmation_answers_available": 0,
       "confirmation_answers_used": 0,
       "apply": {
-        "tool": "assert_fact",
-        "input": "saw(baby_bear, chair).",
+        "tool": "none",
+        "input": null,
         "result": {
-          "status": "success",
-          "result_type": "fact_asserted",
-          "fact": "saw(baby_bear, chair)."
+          "status": "validation_error",
+          "message": "Skipping KB apply due to parser validation failure."
         }
       },
-      "apply_status": "success",
-      "decision_state": "commit"
+      "apply_status": "validation_error",
+      "decision_state": "reject"
     },
     {
       "turn_index": 44,
@@ -6221,8 +6006,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -6231,8 +6016,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -6279,16 +6064,23 @@
           "kind": "observed_someone_event_guard",
           "observer": "papa_bear",
           "rewritten_fact": "saw(papa_bear, slept_in(someone, bed_of(papa_bear)))."
+        },
+        {
+          "kind": "observed_in_bed_event_guard",
+          "rewritten_facts": [
+            "saw(papa_bear, that_someone_had_been_lying).",
+            "slept_in(that_someone_had_been_lying, bed_of(papa_bear))."
+          ]
         }
       ],
       "registry_unknown_signatures": [],
       "parsed": {
         "intent": "assert_fact",
-        "logic_string": "saw(papa_bear, slept_in(someone, bed_of(papa_bear))).",
+        "logic_string": "saw(papa_bear, that_someone_had_been_lying).\nslept_in(that_someone_had_been_lying, bed_of(papa_bear)).",
         "components": {
           "atoms": [
             "papa_bear",
-            "someone"
+            "that_someone_had_been_lying"
           ],
           "variables": [],
           "predicates": [
@@ -6298,7 +6090,8 @@
           ]
         },
         "facts": [
-          "saw(papa_bear, slept_in(someone, bed_of(papa_bear)))."
+          "saw(papa_bear, that_someone_had_been_lying).",
+          "slept_in(that_someone_had_been_lying, bed_of(papa_bear))."
         ],
         "rules": [],
         "queries": [],
@@ -6308,15 +6101,16 @@
           "logic": 0.85
         },
         "ambiguities": [
-          "The specific 'someone' is an indefinite pronoun; mapping to a generic variable or atom 'someone_lying_in_bed' is a safe abstraction given the lack of a specific agent name in the allowed ontology.",
-          "The phrase 'lying in his bed' implies a state of being found in a bed, which maps to the available predicate 'saw/2' with the object being the event/state, or potentially 'slept_in/2' if interpreted as a fact about the person. However, the utterance describes an observation ('saw that...'), making 'saw' the primary predicate. The object 'someone' is not a specific agent name in the ontology, so a descriptive term is used."
+          "The specific 'someone' is an indefinite pronoun; mapping to a generic variable or placeholder is required.",
+          "The phrase 'lying in his bed' implies a state of being found in a bed, which maps to the allowed predicate 'saw/2' with the object being the event or the person found, but the exact argument structure for 'someone had been lying' is abstracted to 'someone_lying_in_bed' to fit the allowed signature 'saw/2' where the second argument is a 'thing' (event/state).",
+          "The allowed predicate 'saw/2' expects the second argument to be a 'thing'. The event 'someone had been lying in his bed' is treated as a 'thing' (an observation)."
         ],
-        "needs_clarification": true,
-        "uncertainty_score": 0.65,
-        "uncertainty_label": "medium",
-        "clarification_question": "Who is the 'someone' that Papa Bear saw lying in his bed?",
-        "clarification_reason": "The referent 'someone' is unresolved and requires a specific agent name to",
-        "rationale": "The utterance describes an observation event. The predicate 'saw/2' is used. The subject is 'papa_bear'. The object is the event/state of 'someone' lying in the bed. Since 'someone' is not a specific entity, a descriptive term is used, triggering a need for clarification to identify the specific agent. Observed-event guard canonicalized nested someone-event under saw/2."
+        "needs_clarification": false,
+        "uncertainty_score": 0.32,
+        "uncertainty_label": "low",
+        "clarification_question": "Can you clarify this detail: The specific 'someone' is an indefinite pronoun; mapping to a generic variable or placeholder is required?",
+        "clarification_reason": "The utterance describes an observation event. The allowed predicate 'saw/2' is used.",
+        "rationale": "The utterance describes an observation event. The allowed predicate 'saw/2' is used. The subject is 'papa_bear'. The object is the event/state 'someone had been lying in his bed', mapped to a term fitting the 'thing' type constraint for the second argument of 'saw/2'. Uncertainty arises from the indefinite nature of 'someone'. Observed-event guard canonicalized nested someone-event under saw/2. Observed-in-bed guard canonicalized direct saw/2 and slept_in/2 facts."
       },
       "validation_errors": [],
       "deferred_validation_errors": [],
@@ -6332,11 +6126,11 @@
       "clarification_proxy_answers_used": 0,
       "clarification_policy": {
         "clarification_eagerness": 0.2,
-        "uncertainty_score": 0.65,
-        "effective_uncertainty": 0.82,
+        "uncertainty_score": 0.32,
+        "effective_uncertainty": 0.75,
         "threshold": 0.8,
-        "request_clarification": true,
-        "needs_clarification_flag": true,
+        "request_clarification": false,
+        "needs_clarification_flag": false,
         "progress_low_relevance": false,
         "progress_high_risk": false,
         "progress_low_relevance_threshold": 0.34,
@@ -6355,8 +6149,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -6365,28 +6159,18 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
         "resolved_items": [],
         "notes": []
       },
-      "clarification_pending": true,
-      "clarification_pending_reason": "Clarification answer model confidence below threshold; KB apply deferred.",
-      "clarification_question": "Who is the 'someone' that Papa Bear saw lying in his bed?",
-      "clarification_answer_attempt": {
-        "model": "qwen3.5:9b",
-        "backend": "ollama",
-        "base_url": "http://127.0.0.1:11434",
-        "answer_role": "proxy_model",
-        "answer_source_prefix": "synthetic",
-        "answer_source": "synthetic_model",
-        "answer_confidence": 0.0,
-        "answer_assumption": "No agent found lying in Papa Bear's bed in KB.",
-        "answer_text": "unknown"
-      },
+      "clarification_pending": false,
+      "clarification_pending_reason": "",
+      "clarification_question": "Can you clarify this detail: The specific 'someone' is an indefinite pronoun; mapping to a generic variable or placeholder is required?",
+      "clarification_answer_attempt": {},
       "confirmation_required": false,
       "confirmation_question": "",
       "confirmation_answer": "",
@@ -6394,44 +6178,39 @@
       "confirmation_answers_available": 0,
       "confirmation_answers_used": 0,
       "apply": {
-        "tool": "none",
-        "input": {
-          "clarification_question": "Who is the 'someone' that Papa Bear saw lying in his bed?",
-          "clarification_rounds_used": 0,
-          "confirmation_question": "",
-          "confirmation_answer": ""
-        },
+        "tool": "assert_fact_batch",
+        "input": [
+          "saw(papa_bear, that_someone_had_been_lying).",
+          "slept_in(that_someone_had_been_lying, bed_of(papa_bear))."
+        ],
         "result": {
-          "status": "clarification_requested",
-          "message": "Clarification answer model confidence below threshold; KB apply deferred.",
-          "clarification_question": "Who is the 'someone' that Papa Bear saw lying in his bed?",
-          "clarification_policy": {
-            "clarification_eagerness": 0.2,
-            "uncertainty_score": 0.65,
-            "effective_uncertainty": 0.82,
-            "threshold": 0.8,
-            "request_clarification": true,
-            "needs_clarification_flag": true,
-            "progress_low_relevance": false,
-            "progress_high_risk": false,
-            "progress_low_relevance_threshold": 0.34,
-            "progress_high_risk_threshold": 0.18,
-            "progress_memory_available": true,
-            "progress_focus_present": false,
-            "progress_signal_term_count": 0,
-            "parsed_signal_term_count": 0,
-            "overlap_term_count": 0,
-            "progress_best_focus_overlap": 0.0,
-            "progress_relevance_score": 1.0
-          },
-          "confirmation_required": false,
-          "confirmation_question": "",
-          "confirmation_answer": "",
-          "confirmation_result": "not_required"
+          "status": "success",
+          "result_type": "batch",
+          "applied_total": 2,
+          "operations": [
+            {
+              "status": "success",
+              "fact": "saw(papa_bear, that_someone_had_been_lying).",
+              "raw": {
+                "status": "success",
+                "result_type": "fact_asserted",
+                "fact": "saw(papa_bear, that_someone_had_been_lying)."
+              }
+            },
+            {
+              "status": "success",
+              "fact": "slept_in(that_someone_had_been_lying, bed_of(papa_bear)).",
+              "raw": {
+                "status": "success",
+                "result_type": "fact_asserted",
+                "fact": "slept_in(that_someone_had_been_lying, bed_of(papa_bear))."
+              }
+            }
+          ]
         }
       },
-      "apply_status": "clarification_requested",
-      "decision_state": "ask_clarification"
+      "apply_status": "success",
+      "decision_state": "commit"
     },
     {
       "turn_index": 46,
@@ -6451,16 +6230,23 @@
           "kind": "observed_someone_event_guard",
           "observer": "mama_bear",
           "rewritten_fact": "saw(mama_bear, slept_in(someone, bed_of(mama_bear)))."
+        },
+        {
+          "kind": "observed_in_bed_event_guard",
+          "rewritten_facts": [
+            "saw(mama_bear, that_someone_had_been_lying).",
+            "slept_in(that_someone_had_been_lying, bed_of(mama_bear))."
+          ]
         }
       ],
       "registry_unknown_signatures": [],
       "parsed": {
         "intent": "assert_fact",
-        "logic_string": "saw(mama_bear, slept_in(someone, bed_of(mama_bear))).",
+        "logic_string": "saw(mama_bear, that_someone_had_been_lying).\nslept_in(that_someone_had_been_lying, bed_of(mama_bear)).",
         "components": {
           "atoms": [
             "mama_bear",
-            "someone"
+            "that_someone_had_been_lying"
           ],
           "variables": [],
           "predicates": [
@@ -6470,7 +6256,8 @@
           ]
         },
         "facts": [
-          "saw(mama_bear, slept_in(someone, bed_of(mama_bear)))."
+          "saw(mama_bear, that_someone_had_been_lying).",
+          "slept_in(that_someone_had_been_lying, bed_of(mama_bear))."
         ],
         "rules": [],
         "queries": [],
@@ -6480,14 +6267,15 @@
           "logic": 0.95
         },
         "ambiguities": [
-          "The referent of 'someone' is unresolved."
+          "The referent of 'someone' is unresolved and must be represented as a variable.",
+          "The specific bed entity is not explicitly named in the utterance, though 'her bed' implies possession by 'mama_bear'."
         ],
-        "needs_clarification": true,
-        "uncertainty_score": 0.75,
-        "uncertainty_label": "high",
-        "clarification_question": "Who does 'someone' refer to?",
-        "clarification_reason": "Unresolved pronoun 'someone' requires specific entity binding.",
-        "rationale": "Mapped 'Mama Bear saw that someone had been lying in her bed' to saw(mama_bear, someone). The phrase 'lying in her bed' describes the state of the object seen, which is captured by the argument 'someone'. The predicate 'saw' is used with arguments [agent, thing] per the allowed schema. The referent 'someone' is unknown, triggering high uncertainty and a need for clarification. Observed-event guard canonicalized nested someone-event under saw/2."
+        "needs_clarification": false,
+        "uncertainty_score": 0.32,
+        "uncertainty_label": "low",
+        "clarification_question": "Can you clarify this detail: The referent of 'someone' is unresolved and must be represented as a variable?",
+        "clarification_reason": "The utterance describes an observation ('saw') by 'Mama Bear' of an event",
+        "rationale": "The utterance describes an observation ('saw') by 'Mama Bear' of an event ('someone had been lying in her bed'). The core fact is the seeing event. The predicate 'saw/2' is used with 'mama_bear' as the agent and 'someone' as the object. The phrase 'lying in her bed' describes the state of the object at the time of seeing, which is captured by the argument 'someone' in the context of the allowed ontology. Since 'someone' is an indefinite pronoun, it maps to a variable. The uncertainty arises from the need to identify the specific agent observed. Observed-event guard canonicalized nested someone-event under saw/2. Observed-in-bed guard canonicalized direct saw/2 and slept_in/2 facts."
       },
       "validation_errors": [],
       "deferred_validation_errors": [],
@@ -6503,11 +6291,11 @@
       "clarification_proxy_answers_used": 0,
       "clarification_policy": {
         "clarification_eagerness": 0.2,
-        "uncertainty_score": 0.75,
-        "effective_uncertainty": 0.82,
+        "uncertainty_score": 0.32,
+        "effective_uncertainty": 0.65,
         "threshold": 0.8,
-        "request_clarification": true,
-        "needs_clarification_flag": true,
+        "request_clarification": false,
+        "needs_clarification_flag": false,
         "progress_low_relevance": false,
         "progress_high_risk": false,
         "progress_low_relevance_threshold": 0.34,
@@ -6526,8 +6314,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -6536,28 +6324,18 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
         "resolved_items": [],
         "notes": []
       },
-      "clarification_pending": true,
-      "clarification_pending_reason": "Clarification answer model confidence below threshold; KB apply deferred.",
-      "clarification_question": "Who does 'someone' refer to?",
-      "clarification_answer_attempt": {
-        "model": "qwen3.5:9b",
-        "backend": "ollama",
-        "base_url": "http://127.0.0.1:11434",
-        "answer_role": "proxy_model",
-        "answer_source_prefix": "synthetic",
-        "answer_source": "synthetic_model",
-        "answer_confidence": 0.0,
-        "answer_assumption": "No KB fact links Mama Bear's bed to Goldilocks sleeping there.",
-        "answer_text": "unknown"
-      },
+      "clarification_pending": false,
+      "clarification_pending_reason": "",
+      "clarification_question": "Can you clarify this detail: The referent of 'someone' is unresolved and must be represented as a variable?",
+      "clarification_answer_attempt": {},
       "confirmation_required": false,
       "confirmation_question": "",
       "confirmation_answer": "",
@@ -6565,44 +6343,39 @@
       "confirmation_answers_available": 0,
       "confirmation_answers_used": 0,
       "apply": {
-        "tool": "none",
-        "input": {
-          "clarification_question": "Who does 'someone' refer to?",
-          "clarification_rounds_used": 0,
-          "confirmation_question": "",
-          "confirmation_answer": ""
-        },
+        "tool": "assert_fact_batch",
+        "input": [
+          "saw(mama_bear, that_someone_had_been_lying).",
+          "slept_in(that_someone_had_been_lying, bed_of(mama_bear))."
+        ],
         "result": {
-          "status": "clarification_requested",
-          "message": "Clarification answer model confidence below threshold; KB apply deferred.",
-          "clarification_question": "Who does 'someone' refer to?",
-          "clarification_policy": {
-            "clarification_eagerness": 0.2,
-            "uncertainty_score": 0.75,
-            "effective_uncertainty": 0.82,
-            "threshold": 0.8,
-            "request_clarification": true,
-            "needs_clarification_flag": true,
-            "progress_low_relevance": false,
-            "progress_high_risk": false,
-            "progress_low_relevance_threshold": 0.34,
-            "progress_high_risk_threshold": 0.18,
-            "progress_memory_available": true,
-            "progress_focus_present": false,
-            "progress_signal_term_count": 0,
-            "parsed_signal_term_count": 0,
-            "overlap_term_count": 0,
-            "progress_best_focus_overlap": 0.0,
-            "progress_relevance_score": 1.0
-          },
-          "confirmation_required": false,
-          "confirmation_question": "",
-          "confirmation_answer": "",
-          "confirmation_result": "not_required"
+          "status": "success",
+          "result_type": "batch",
+          "applied_total": 2,
+          "operations": [
+            {
+              "status": "success",
+              "fact": "saw(mama_bear, that_someone_had_been_lying).",
+              "raw": {
+                "status": "success",
+                "result_type": "fact_asserted",
+                "fact": "saw(mama_bear, that_someone_had_been_lying)."
+              }
+            },
+            {
+              "status": "success",
+              "fact": "slept_in(that_someone_had_been_lying, bed_of(mama_bear)).",
+              "raw": {
+                "status": "success",
+                "result_type": "fact_asserted",
+                "fact": "slept_in(that_someone_had_been_lying, bed_of(mama_bear))."
+              }
+            }
+          ]
         }
       },
-      "apply_status": "clarification_requested",
-      "decision_state": "ask_clarification"
+      "apply_status": "success",
+      "decision_state": "commit"
     },
     {
       "turn_index": 47,
@@ -6632,14 +6405,25 @@
           ]
         },
         {
+          "kind": "observed_in_bed_event_guard",
+          "rewritten_facts": [
+            "saw(baby_bear, goldilocks_asleep).",
+            "slept_in(goldilocks_asleep, bed_of(baby_bear))."
+          ]
+        },
+        {
           "kind": "observed_asleep_event_guard",
-          "rewritten_fact": "saw(baby_bear, slept_in(goldilocks, bed_of(baby_bear)))."
+          "rewritten_facts": [
+            "saw(baby_bear, goldilocks).",
+            "slept_in(goldilocks, bed_of(baby_bear)).",
+            "saw(baby_bear, slept_in(goldilocks, bed_of(baby_bear)))."
+          ]
         }
       ],
       "registry_unknown_signatures": [],
       "parsed": {
         "intent": "assert_fact",
-        "logic_string": "saw(baby_bear, slept_in(goldilocks, bed_of(baby_bear))).",
+        "logic_string": "saw(baby_bear, goldilocks).\nslept_in(goldilocks, bed_of(baby_bear)).\nsaw(baby_bear, slept_in(goldilocks, bed_of(baby_bear))).",
         "components": {
           "atoms": [
             "baby_bear",
@@ -6653,6 +6437,8 @@
           ]
         },
         "facts": [
+          "saw(baby_bear, goldilocks).",
+          "slept_in(goldilocks, bed_of(baby_bear)).",
           "saw(baby_bear, slept_in(goldilocks, bed_of(baby_bear)))."
         ],
         "rules": [],
@@ -6668,11 +6454,13 @@
         "needs_clarification": false,
         "uncertainty_score": 0.15,
         "uncertainty_label": "low",
-        "clarification_question": "Can you clarify this detail: Referent of 'Baby Bear' mapped to 'baby_bear' based on context?",
-        "clarification_reason": "Utterance describes a visual observation ('saw') by Baby Bear of Goldilocks. Mapped",
-        "rationale": "Utterance describes a visual observation ('saw') by Baby Bear of Goldilocks. Mapped to predicate saw/2 with arguments (goldilocks, baby_bear). Directionality is clear: Baby Bear is the agent (saw), Goldilocks is the object (asleep in bed). Leading-subject anchor guard corrected actor argument drift. Observed-asleep guard canonicalized sleeper event under saw/2."
+        "clarification_question": "",
+        "clarification_reason": "Utterance describes a visual observation event. Mapped to 'saw/2' predicate. Subject 'Goldilocks'",
+        "rationale": "Utterance describes a visual observation event. Mapped to 'saw/2' predicate. Subject 'Goldilocks' is the object seen, 'Baby Bear' is the agent seeing. Directionality: saw(agent, object). Leading-subject anchor guard corrected actor argument drift. Observed-in-bed guard canonicalized direct saw/2 and slept_in/2 facts. Observed-asleep guard canonicalized sleeper event and direct observer link."
       },
-      "validation_errors": [],
+      "validation_errors": [
+        "Type mismatch for entity 'goldilocks' in saw/2 arg2; expected thing, got ['agent', 'person']."
+      ],
       "deferred_validation_errors": [],
       "clarification_rounds": [],
       "clarification_rounds_used": 0,
@@ -6686,22 +6474,16 @@
       "clarification_proxy_answers_used": 0,
       "clarification_policy": {
         "clarification_eagerness": 0.2,
-        "uncertainty_score": 0.15,
-        "effective_uncertainty": 0.55,
+        "uncertainty_score": 0.0,
+        "effective_uncertainty": 0.0,
         "threshold": 0.8,
         "request_clarification": false,
         "needs_clarification_flag": false,
-        "progress_low_relevance": false,
-        "progress_high_risk": false,
-        "progress_low_relevance_threshold": 0.34,
-        "progress_high_risk_threshold": 0.18,
         "progress_memory_available": true,
         "progress_focus_present": false,
-        "progress_signal_term_count": 0,
-        "parsed_signal_term_count": 0,
-        "overlap_term_count": 0,
-        "progress_best_focus_overlap": 0.0,
-        "progress_relevance_score": 1.0
+        "progress_relevance_score": 1.0,
+        "progress_low_relevance": false,
+        "progress_high_risk": false
       },
       "progress_low_relevance_seen": false,
       "progress_high_risk_seen": false,
@@ -6709,8 +6491,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -6719,8 +6501,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -6729,7 +6511,7 @@
       },
       "clarification_pending": false,
       "clarification_pending_reason": "",
-      "clarification_question": "Can you clarify this detail: Referent of 'Baby Bear' mapped to 'baby_bear' based on context?",
+      "clarification_question": "",
       "clarification_answer_attempt": {},
       "confirmation_required": false,
       "confirmation_question": "",
@@ -6738,16 +6520,15 @@
       "confirmation_answers_available": 0,
       "confirmation_answers_used": 0,
       "apply": {
-        "tool": "assert_fact",
-        "input": "saw(baby_bear, slept_in(goldilocks, bed_of(baby_bear))).",
+        "tool": "none",
+        "input": null,
         "result": {
-          "status": "success",
-          "result_type": "fact_asserted",
-          "fact": "saw(baby_bear, slept_in(goldilocks, bed_of(baby_bear)))."
+          "status": "validation_error",
+          "message": "Skipping KB apply due to parser validation failure."
         }
       },
-      "apply_status": "success",
-      "decision_state": "commit"
+      "apply_status": "validation_error",
+      "decision_state": "reject"
     },
     {
       "turn_index": 48,
@@ -6762,15 +6543,26 @@
       "route_source": "model",
       "repaired": false,
       "fallback_used": false,
-      "alignment_events": [],
+      "alignment_events": [
+        {
+          "kind": "three_bears_observation_guard",
+          "rewritten_facts": [
+            "saw(goldilocks_woke_up_and, papa_bear).",
+            "saw(goldilocks_woke_up_and, mama_bear).",
+            "saw(goldilocks_woke_up_and, baby_bear)."
+          ]
+        }
+      ],
       "registry_unknown_signatures": [],
       "parsed": {
         "intent": "assert_fact",
-        "logic_string": "saw(goldilocks, bear).",
+        "logic_string": "saw(goldilocks_woke_up_and, papa_bear).\nsaw(goldilocks_woke_up_and, mama_bear).\nsaw(goldilocks_woke_up_and, baby_bear).",
         "components": {
           "atoms": [
-            "bear",
-            "goldilocks"
+            "baby_bear",
+            "goldilocks_woke_up_and",
+            "mama_bear",
+            "papa_bear"
           ],
           "variables": [],
           "predicates": [
@@ -6778,7 +6570,9 @@
           ]
         },
         "facts": [
-          "saw(goldilocks, bear)."
+          "saw(goldilocks_woke_up_and, papa_bear).",
+          "saw(goldilocks_woke_up_and, mama_bear).",
+          "saw(goldilocks_woke_up_and, baby_bear)."
         ],
         "rules": [],
         "queries": [],
@@ -6788,16 +6582,20 @@
           "logic": 0.95
         },
         "ambiguities": [
-          "The utterance mentions 'three bears' but the ontology predicate 'saw/2' expects a single 'thing' argument. The parse assumes 'bear' represents the collective or generic concept for the purpose of the fact, or that the specific instance is abstracted."
+          "Specific identifiers for the three bears are unknown; using generic 'bear1', 'bear2', 'bear3' variables."
         ],
         "needs_clarification": false,
         "uncertainty_score": 0.15,
         "uncertainty_label": "low",
-        "clarification_question": "Can you clarify this detail: The utterance mentions 'three bears' but the ontology predicate 'saw/2' expects a single 'thing' argument. The parse assumes 'bear' represents the collective or generic concept for the purpose of the fact, or that the specific instance is abstracted?",
-        "clarification_reason": "The utterance describes an event where Goldilocks saw bears. Mapping 'Goldilocks' to",
-        "rationale": "The utterance describes an event where Goldilocks saw bears. Mapping 'Goldilocks' to the agent 'goldilocks' and 'the three bears' to the object 'bear' (using the canonical ontology predicate 'saw/2'). The direction is Agent -> Object. No left-recursion or complex rule logic is present."
+        "clarification_question": "",
+        "clarification_reason": "The utterance describes a sequence of visual observations by Goldilocks. The predicate",
+        "rationale": "The utterance describes a sequence of visual observations by Goldilocks. The predicate 'saw/2' is used with 'goldilocks' as the agent and the three bears as objects. Since specific bear identifiers are not provided, generic variables are used to represent the distinct entities observed. Three-bears observation guard expanded canonical bear identities."
       },
-      "validation_errors": [],
+      "validation_errors": [
+        "Type mismatch for entity 'papa_bear' in saw/2 arg2; expected thing, got ['agent', 'person'].",
+        "Type mismatch for entity 'mama_bear' in saw/2 arg2; expected thing, got ['agent', 'person'].",
+        "Type mismatch for entity 'baby_bear' in saw/2 arg2; expected thing, got ['agent', 'person']."
+      ],
       "deferred_validation_errors": [],
       "clarification_rounds": [],
       "clarification_rounds_used": 0,
@@ -6811,22 +6609,16 @@
       "clarification_proxy_answers_used": 0,
       "clarification_policy": {
         "clarification_eagerness": 0.2,
-        "uncertainty_score": 0.15,
-        "effective_uncertainty": 0.55,
+        "uncertainty_score": 0.0,
+        "effective_uncertainty": 0.0,
         "threshold": 0.8,
         "request_clarification": false,
         "needs_clarification_flag": false,
-        "progress_low_relevance": false,
-        "progress_high_risk": false,
-        "progress_low_relevance_threshold": 0.34,
-        "progress_high_risk_threshold": 0.18,
         "progress_memory_available": true,
         "progress_focus_present": false,
-        "progress_signal_term_count": 0,
-        "parsed_signal_term_count": 0,
-        "overlap_term_count": 0,
-        "progress_best_focus_overlap": 0.0,
-        "progress_relevance_score": 1.0
+        "progress_relevance_score": 1.0,
+        "progress_low_relevance": false,
+        "progress_high_risk": false
       },
       "progress_low_relevance_seen": false,
       "progress_high_risk_seen": false,
@@ -6834,8 +6626,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -6844,8 +6636,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -6854,7 +6646,7 @@
       },
       "clarification_pending": false,
       "clarification_pending_reason": "",
-      "clarification_question": "Can you clarify this detail: The utterance mentions 'three bears' but the ontology predicate 'saw/2' expects a single 'thing' argument. The parse assumes 'bear' represents the collective or generic concept for the purpose of the fact, or that the specific instance is abstracted?",
+      "clarification_question": "",
       "clarification_answer_attempt": {},
       "confirmation_required": false,
       "confirmation_question": "",
@@ -6863,16 +6655,15 @@
       "confirmation_answers_available": 0,
       "confirmation_answers_used": 0,
       "apply": {
-        "tool": "assert_fact",
-        "input": "saw(goldilocks, bear).",
+        "tool": "none",
+        "input": null,
         "result": {
-          "status": "success",
-          "result_type": "fact_asserted",
-          "fact": "saw(goldilocks, bear)."
+          "status": "validation_error",
+          "message": "Skipping KB apply due to parser validation failure."
         }
       },
-      "apply_status": "success",
-      "decision_state": "commit"
+      "apply_status": "validation_error",
+      "decision_state": "reject"
     },
     {
       "turn_index": 49,
@@ -6918,7 +6709,7 @@
         "uncertainty_label": "low",
         "clarification_question": "Can you clarify this point before I apply it: The utterance 'Goldilocks ran out of the house' maps directly to the?",
         "clarification_reason": "The utterance 'Goldilocks ran out of the house' maps directly to the",
-        "rationale": "The utterance 'Goldilocks ran out of the house' maps directly to the allowed predicate 'ran_out_of/2'. The subject 'Goldilocks' is the agent, and 'the house' is the location. The direction 'out of' is semantically captured by the predicate's standard usage for leaving a location."
+        "rationale": "The utterance 'Goldilocks ran out of the house' maps directly to the allowed predicate 'ran_out_of/2'. The subject 'Goldilocks' maps to the canonical atom 'goldilocks' (type: person) and 'the house' maps to 'house' (type: location). The direction 'out of' aligns with the predicate's semantic role of exiting a location."
       },
       "validation_errors": [],
       "deferred_validation_errors": [],
@@ -6957,8 +6748,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -6967,8 +6758,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -7040,7 +6831,7 @@
         "uncertainty_label": "low",
         "clarification_question": "Can you clarify this point before I apply it: The utterance 'Goldilocks ran back through the forest' describes an agent (Goldilocks)?",
         "clarification_reason": "The utterance 'Goldilocks ran back through the forest' describes an agent (Goldilocks)",
-        "rationale": "The utterance 'Goldilocks ran back through the forest' describes an agent (Goldilocks) moving through a forest. The allowed predicate 'walked_through_forest/1' captures the traversal action. The direction 'back' is semantically compatible with the traversal action in this context. No other allowed predicates fit the 'running through forest' semantics better than the generic traversal predicate provided in the schema."
+        "rationale": "The utterance 'Goldilocks ran back through the forest' describes an agent (Goldilocks) moving through a forest. The allowed predicate 'walked_through_forest/1' is the canonical match for this action, treating 'ran' as a form of traversing the forest. The argument 'goldilocks' is derived from the subject name."
       },
       "validation_errors": [],
       "deferred_validation_errors": [],
@@ -7079,8 +6870,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -7089,8 +6880,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "story_goldilocks_roundtrip_guarded_v10",
-        "updated_at_utc": "2026-04-14T15:19:09+00:00",
+        "ontology_name": "story_goldilocks_roundtrip_latest",
+        "updated_at_utc": "2026-04-15T04:41:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
