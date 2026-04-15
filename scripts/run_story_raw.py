@@ -32,7 +32,7 @@ def _slug(text: str, *, max_len: int = 72) -> str:
 
 
 def _read_story_text(path: Path) -> str:
-    return path.read_text(encoding="utf-8", errors="replace")
+    return path.read_text(encoding="utf-8-sig", errors="replace")
 
 
 def _to_utterances(raw_text: str, *, split_mode: str) -> list[str]:
@@ -100,6 +100,11 @@ def main() -> int:
     parser.add_argument("--prompt-file", default="modelfiles/semantic_parser_system_prompt.md")
     parser.add_argument("--context-length", type=int, default=8192)
     parser.add_argument("--clarification-eagerness", type=float, default=0.2)
+    parser.add_argument("--clarification-eagerness-mode", choices=["adaptive", "static"], default="static")
+    parser.add_argument("--clarification-eagerness-new-kb-boost", type=float, default=0.35)
+    parser.add_argument("--clarification-eagerness-existing-kb-boost", type=float, default=0.05)
+    parser.add_argument("--clarification-eagerness-decay-turns", type=int, default=8)
+    parser.add_argument("--clarification-eagerness-decay-clauses", type=int, default=20)
     parser.add_argument("--max-clarification-rounds", type=int, default=1)
     parser.add_argument("--clarification-answer-model", default="qwen3.5:9b")
     parser.add_argument("--clarification-answer-backend", default="ollama")
@@ -107,6 +112,11 @@ def main() -> int:
     parser.add_argument("--clarification-answer-context-length", type=int, default=8192)
     parser.add_argument("--clarification-answer-min-confidence", type=float, default=0.55)
     parser.add_argument("--frontend-proposal-mode", default="off")
+    parser.add_argument("--temporal-dual-write", action="store_true")
+    parser.add_argument("--temporal-predicate", default="at_step")
+    parser.add_argument("--predicate-registry", default="", help="Optional predicate registry JSON path.")
+    parser.add_argument("--strict-registry", action="store_true", help="Enable strict predicate registry enforcement.")
+    parser.add_argument("--type-schema", default="", help="Optional type schema JSON path.")
     parser.add_argument(
         "--write-corpus-on-fail",
         action="store_true",
@@ -182,6 +192,16 @@ def main() -> int:
         str(int(args.context_length)),
         "--clarification-eagerness",
         str(float(args.clarification_eagerness)),
+        "--clarification-eagerness-mode",
+        str(args.clarification_eagerness_mode),
+        "--clarification-eagerness-new-kb-boost",
+        str(float(args.clarification_eagerness_new_kb_boost)),
+        "--clarification-eagerness-existing-kb-boost",
+        str(float(args.clarification_eagerness_existing_kb_boost)),
+        "--clarification-eagerness-decay-turns",
+        str(int(args.clarification_eagerness_decay_turns)),
+        "--clarification-eagerness-decay-clauses",
+        str(int(args.clarification_eagerness_decay_clauses)),
         "--max-clarification-rounds",
         str(int(args.max_clarification_rounds)),
         "--clarification-answer-model",
@@ -196,7 +216,17 @@ def main() -> int:
         str(float(args.clarification_answer_min_confidence)),
         "--frontend-proposal-mode",
         args.frontend_proposal_mode,
+        "--temporal-predicate",
+        str(args.temporal_predicate),
     ]
+    if args.temporal_dual_write:
+        cmd.append("--temporal-dual-write")
+    if str(args.predicate_registry).strip():
+        cmd.extend(["--predicate-registry", str((ROOT / args.predicate_registry).resolve())])
+    if bool(args.strict_registry):
+        cmd.append("--strict-registry")
+    if str(args.type_schema).strip():
+        cmd.extend(["--type-schema", str((ROOT / args.type_schema).resolve())])
     if args.write_corpus_on_fail:
         cmd.append("--write-corpus-on-fail")
     rc = _run(cmd)

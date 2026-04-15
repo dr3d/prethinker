@@ -209,6 +209,20 @@ python kb_pipeline.py --backend ollama --base-url http://127.0.0.1:11434 --model
 - `Apply failures: 0`
 - `Overall: passed`
 
+## Raw Story Stress Cycle (No Preprocess)
+
+Use this when you want to hammer a messy story through the same ingest stack and compare packaging + temporal configs in one shot.
+
+```bash
+python scripts/run_story_stress_cycle.py --story-file "tmp/The Glitch in the Airlock.txt" --label glitch_refresh --backend ollama --base-url http://127.0.0.1:11434 --model qwen3.5:9b --modes full,paragraph,line --temporal off,on --exam-style detective --exam-question-count 14 --exam-min-temporal-questions 2 --max-clarification-rounds 2 --clarification-answer-min-confidence 0.0
+```
+
+Outputs:
+
+- `tmp/<label>_stress_<stamp>.summary.json`
+- `tmp/<label>_stress_<stamp>.summary.md`
+- `docs/reports/<label>-stress-<stamp>.html` (human-facing audit: raw blob, KB preview, Q&A, CE events, final score)
+
 ## Goals
 
 - Build a robust semantic parser for `assert_fact`, `assert_rule`, `query`, `retract`, and `other`.

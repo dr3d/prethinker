@@ -29,6 +29,69 @@ Primary fronts and where we stand after the latest sanity cycles:
   - targeted suite: `36 passed`
   - engine regression suite: `37 passed`
 
+## Hard Story Stress Cycle (Raw Input, No Preprocess)
+
+New harness work completed:
+
+- Added `scripts/run_story_stress_cycle.py`:
+  - runs one raw story across `full|paragraph|line` and temporal `off|on`
+  - emits machine summary (`.json`), markdown scoreboard (`.md`), and human HTML audit (`docs/reports/*.html`)
+  - captures:
+    - raw input blob,
+    - generated `kb.pl` preview,
+    - interrogation Q&A table,
+    - clarification events,
+    - weighted final score per run configuration
+- Extended `scripts/run_story_raw.py` passthrough controls:
+  - temporal flags: `--temporal-dual-write`, `--temporal-predicate`
+  - strictness flags: `--predicate-registry`, `--strict-registry`, `--type-schema`
+  - CE mode knobs: `--clarification-eagerness-mode` and decay/boost controls
+- Cleaned UTF-8 BOM handling in raw story ingest/render path.
+
+### Story: The Case of the Gilded Hourglass
+
+Cycle: `full|paragraph|line x temporal(off|on)` on `qwen3.5:9b`
+
+- Pipeline pass: `3/6`
+- Avg coverage: `0.495`
+- Avg precision: `0.585`
+- Avg exam pass: `0.515568`
+- Avg temporal exam pass: `0.5`
+- Best config:
+  - `paragraph + temporal off`
+  - score: `0.8425`
+  - coverage: `0.85`
+  - precision: `0.92`
+  - exam pass: `1.0`
+
+Interpretation:
+
+- For this forensic narrative, paragraph packaging currently outperforms full-blob and line-split on end-to-end stability.
+- Temporal dual-write did not win this case yet because it introduced clarification failure pressure in the paragraph lane.
+- Adaptive CE probe (`temporal on`, paragraph+line only) regressed this lane (`0/2` pipeline pass), so static CE remains the safer default here.
+
+### Story: The Glitch in the Airlock (Refresh)
+
+Cycle: `full|paragraph|line x temporal(off|on)` on `qwen3.5:9b`
+
+- Pipeline pass: `6/6`
+- Avg coverage: `0.6`
+- Avg precision: `0.853333`
+- Avg exam pass: `0.54773`
+- Avg temporal exam pass: `0.306061`
+- Best config:
+  - `line + temporal on`
+  - score: `0.829213`
+  - coverage: `0.85`
+  - precision: `0.92`
+  - exam pass: `0.615`
+  - temporal exam pass: `0.636`
+
+Interpretation:
+
+- For Glitch, temporal dual-write is still materially beneficial in richer split modes.
+- Best split strategy is story-dependent; we now have instrumentation to select packaging by measured outcome instead of guesswork.
+
 ## Research Pipeline Sanity Check (2026-04-15 Evening)
 
 Ran a full deterministic + live-LLM sanity sweep on local Ollama using `qwen3.5:9b`:
@@ -230,6 +293,11 @@ Current-cycle key artifacts:
 - Raw matrix summary (markdown): `tmp/raw_matrix_20260415_summary.md`
 - Interrogator backfill log: `tmp/raw_matrix_20260415_interrogator_backfill.json`
 - Raw audit HTML (glitch): `docs/raw-story-audit-glitch.html`
+- Story stress harness script: `scripts/run_story_stress_cycle.py`
+- Story stress report (Glitch latest): `docs/reports/glitch_refresh-stress-latest.html`
+- Story stress report (Gilded latest): `docs/reports/gilded_hourglass-stress-latest.html`
+- Story stress summary (Glitch): `tmp/glitch_refresh_stress_20260415_193858.summary.json`
+- Story stress summary (Gilded): `tmp/gilded_hourglass_stress_20260415_193249.summary.json`
 - Command wrapper: `scripts/run_gate_cycle.py`
 - Raw story runner: `scripts/run_story_raw.py`
 - Front-end scaffold: `ingest_frontend.py`
