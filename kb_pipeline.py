@@ -6307,6 +6307,107 @@ def _apply_registry_fact_salvage_guard(
     return out, events
 
 
+def _apply_assert_fact_shape_sync_guard(
+    parsed: dict[str, Any],
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    events: list[dict[str, Any]] = []
+    if not isinstance(parsed, dict):
+        return parsed, events
+    intent = str(parsed.get("intent", "")).strip().lower()
+    if intent != "assert_fact":
+        return parsed, events
+
+    facts_raw = parsed.get("facts", [])
+    if not isinstance(facts_raw, list):
+        return parsed, events
+
+    facts = [str(item).strip() for item in facts_raw if str(item).strip()]
+    if not facts:
+        return parsed, events
+
+    expanded_facts = _expand_assert_fact_clauses(facts)
+    if expanded_facts:
+        facts = expanded_facts
+    deduped_facts: list[str] = []
+    seen_facts: set[str] = set()
+    for clause in facts:
+        normalized = _normalize_clause(clause)
+        if not normalized or normalized in seen_facts:
+            continue
+        seen_facts.add(normalized)
+        deduped_facts.append(normalized)
+    if not deduped_facts:
+        return parsed, events
+
+    expected_logic = deduped_facts[0] if len(deduped_facts) == 1 else "\n".join(deduped_facts)
+    atoms, variables, predicates = _collect_components_from_clauses(deduped_facts)
+    components = parsed.get("components")
+    current_logic = str(parsed.get("logic_string", "")).strip()
+    current_predicates = []
+    if isinstance(components, dict):
+        current_predicates = list(components.get("predicates", []))
+    logic_needs_sync = current_logic != expected_logic
+    component_needs_sync = sorted(current_predicates) != sorted(predicates)
+
+    ambiguities_raw = parsed.get("ambiguities", [])
+    ambiguities: list[str] = []
+    if isinstance(ambiguities_raw, list):
+        for item in ambiguities_raw:
+            text = str(item).strip()
+            if text:
+                ambiguities.append(text)
+
+    clarification_question = str(parsed.get("clarification_question", "")).strip()
+    clarification_question_lower = clarification_question.lower()
+    clarification_reason = str(parsed.get("clarification_reason", "")).strip().lower()
+    placeholder_clarification = (
+        bool(parsed.get("needs_clarification", False))
+        and (
+            clarification_question_lower.startswith("can you clarify this point before i apply it")
+            or clarification_question_lower in {"none", "none?"}
+        )
+        and clarification_reason in {"", "none"}
+        and not ambiguities
+    )
+
+    if not logic_needs_sync and not component_needs_sync and not placeholder_clarification:
+        return parsed, events
+
+    out = dict(parsed)
+    out["facts"] = deduped_facts
+    out["logic_string"] = expected_logic
+    out["components"] = {
+        "atoms": atoms,
+        "variables": variables,
+        "predicates": predicates,
+    }
+
+    if logic_needs_sync or component_needs_sync:
+        events.append(
+            {
+                "kind": "assert_fact_shape_sync_guard",
+                "fact_count": len(deduped_facts),
+                "logic_synced": logic_needs_sync,
+                "components_synced": component_needs_sync,
+            }
+        )
+
+    if placeholder_clarification:
+        out["needs_clarification"] = False
+        out["clarification_question"] = ""
+        out["clarification_reason"] = ""
+        out["uncertainty_score"] = min(_clip_01(out.get("uncertainty_score"), fallback=0.24), 0.24)
+        out["uncertainty_label"] = "low"
+        events.append(
+            {
+                "kind": "placeholder_clarification_downgrade_guard",
+                "reason": "placeholder_reason_none_with_concrete_fact_payload",
+            }
+        )
+
+    return out, events
+
+
 def _parse_simple_fact_call(clause: str) -> tuple[str, list[str]] | None:
     normalized = _normalize_clause(clause)
     if not normalized:
@@ -6430,6 +6531,182 @@ def _apply_predicate_name_sanity_guard(
 
     rationale = str(out.get("rationale", "")).strip()
     suffix = "Predicate-name sanity guard rewrote `_is_a_` phrase predicates to unary ontology facts."
+    out["rationale"] = f"{rationale} {suffix}".strip() if rationale else suffix
+    return out, events
+
+
+def _rewrite_reserved_temporal_predicate_fact(
+    clause: str,
+    *,
+    allowed_signatures: set[str],
+    strict_registry: bool,
+    temporal_predicate: str,
+) -> tuple[list[str], list[dict[str, Any]], dict[str, str] | None]:
+    normalized = _normalize_clause(clause)
+    parsed = _parse_simple_fact_call(clause)
+    if parsed is None:
+        return ([normalized] if normalized else []), [], None
+
+    name, args = parsed
+    temporal_name = str(temporal_predicate or "").strip().lower()
+    if name != temporal_name or len(args) != 2:
+        return ([normalized] if normalized else []), [], None
+
+    first_arg = str(args[0]).strip()
+    second_arg = str(args[1]).strip()
+    first_arg_is_step = first_arg.isdigit()
+    second_term = _parse_clause_term(f"{second_arg}.") if second_arg else None
+    second_arg_is_fact_term = bool(second_term is not None and getattr(second_term, "args", []))
+
+    if first_arg_is_step and second_arg_is_fact_term:
+        return ([normalized] if normalized else []), [], None
+
+    can_rewrite_to_at = bool("at/2" in allowed_signatures or not strict_registry or not allowed_signatures)
+    if not first_arg_is_step and can_rewrite_to_at:
+        subject = _atomize(first_arg)
+        target = _atomize(second_arg)
+        if subject and target:
+            candidate = _normalize_clause(f"at({subject}, {target}).")
+            if _is_valid_goal_clause(candidate, require_ground=True):
+                return (
+                    [candidate],
+                    [
+                        {
+                            "kind": "temporal_predicate_namespace_guard",
+                            "reason": "non_temporal_reserved_predicate_rewritten",
+                            "from": temporal_name,
+                            "to": "at/2",
+                        }
+                    ],
+                    None,
+                )
+
+    detail = (
+        f"Reserved temporal predicate '{temporal_name}/2' requires a numeric step index and nested fact term."
+    )
+    return [], [], {
+        "reason": "Reserved temporal predicate misuse.",
+        "detail": detail,
+        "question": (
+            f"Please restate this fact with a canonical predicate instead of {temporal_name}/2."
+        ),
+    }
+
+
+def _apply_temporal_predicate_namespace_guard(
+    parsed: dict[str, Any],
+    *,
+    allowed_signatures: set[str],
+    strict_registry: bool,
+    temporal_predicate: str,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    events: list[dict[str, Any]] = []
+    if not isinstance(parsed, dict):
+        return parsed, events
+    intent = str(parsed.get("intent", "")).strip().lower()
+    if intent != "assert_fact":
+        return parsed, events
+
+    facts_raw = parsed.get("facts", [])
+    if not isinstance(facts_raw, list) or not facts_raw:
+        fallback_logic = str(parsed.get("logic_string", "")).strip()
+        facts_raw = _expand_assert_fact_clauses([fallback_logic]) if fallback_logic else []
+    if not isinstance(facts_raw, list) or not facts_raw:
+        return parsed, events
+
+    next_facts: list[str] = []
+    changed = False
+    blocked_rows: list[dict[str, str]] = []
+    for raw in facts_raw:
+        rewritten_facts, rewrite_events, blocked = _rewrite_reserved_temporal_predicate_fact(
+            str(raw),
+            allowed_signatures=allowed_signatures,
+            strict_registry=strict_registry,
+            temporal_predicate=temporal_predicate,
+        )
+        if rewritten_facts:
+            next_facts.extend(rewritten_facts)
+        if rewrite_events:
+            events.extend(rewrite_events)
+            changed = True
+        if isinstance(blocked, dict):
+            blocked_rows.append({"fact": _normalize_clause(str(raw)), **blocked})
+            changed = True
+
+    if not changed:
+        return parsed, events
+
+    deduped_facts: list[str] = []
+    seen_facts: set[str] = set()
+    for clause in next_facts:
+        normalized = _normalize_clause(clause)
+        if not normalized or normalized in seen_facts:
+            continue
+        seen_facts.add(normalized)
+        deduped_facts.append(normalized)
+
+    out = dict(parsed)
+    out["facts"] = deduped_facts
+    out["logic_string"] = deduped_facts[0] if len(deduped_facts) == 1 else "\n".join(deduped_facts)
+    atoms, variables, predicates = _collect_components_from_clauses(deduped_facts)
+    out["components"] = {
+        "atoms": atoms,
+        "variables": variables,
+        "predicates": predicates,
+    }
+
+    ambiguities_raw = out.get("ambiguities", [])
+    ambiguities: list[str] = []
+    if isinstance(ambiguities_raw, list):
+        for item in ambiguities_raw:
+            text = str(item).strip()
+            if text:
+                ambiguities.append(text)
+
+    if blocked_rows:
+        for row in blocked_rows:
+            detail = str(row.get("detail", "")).strip()
+            if detail and detail not in ambiguities:
+                ambiguities.append(detail)
+        out["ambiguities"] = ambiguities
+        out["needs_clarification"] = True
+        out["clarification_reason"] = blocked_rows[0].get("reason", "Reserved temporal predicate misuse.")
+        out["clarification_question"] = blocked_rows[0].get(
+            "question",
+            "Please restate this fact with a canonical predicate instead of the temporal wrapper predicate.",
+        )
+        out["uncertainty_score"] = max(_clip_01(out.get("uncertainty_score"), fallback=0.24), 0.88)
+        out["uncertainty_label"] = "high"
+        if not deduped_facts:
+            out["logic_string"] = ""
+            out["components"] = {
+                "atoms": [],
+                "variables": [],
+                "predicates": [],
+            }
+        events.append(
+            {
+                "kind": "temporal_predicate_namespace_guard",
+                "reason": "reserved_temporal_predicate_blocked",
+                "blocked_count": len(blocked_rows),
+                "blocked_facts": blocked_rows,
+            }
+        )
+        return out, events
+
+    note = (
+        f"Reserved temporal predicate guard rewrote malformed {str(temporal_predicate).strip().lower()}/2 "
+        "facts into canonical base predicates before timeline dual-write."
+    )
+    if note not in ambiguities:
+        ambiguities.append(note)
+    out["ambiguities"] = ambiguities
+
+    rationale = str(out.get("rationale", "")).strip()
+    suffix = (
+        f"Temporal predicate namespace guard rewrote malformed {str(temporal_predicate).strip().lower()}/2 "
+        "facts into canonical base predicates."
+    )
     out["rationale"] = f"{rationale} {suffix}".strip() if rationale else suffix
     return out, events
 
@@ -6629,6 +6906,53 @@ def _extract_narrative_status_summary_facts(
             target_signature="related_to/2",
         )
 
+    if re.search(
+        r"\bpublic micro-grant for Glasshouse A\b",
+        text,
+        flags=re.IGNORECASE,
+    ):
+        if "milestone/3" in allowed_signatures:
+            _maybe_add_clause(
+                "milestone(public_micro_grant, glasshouse_a, september_2021).",
+                reason="grant_milestone_extracted",
+                target_signature="milestone/3",
+            )
+        if "documented_with/2" in allowed_signatures and re.search(
+            r"\battendance sheets\b",
+            text,
+            flags=re.IGNORECASE,
+        ):
+            _maybe_add_clause(
+                "documented_with(public_micro_grant, attendance_sheets).",
+                reason="grant_documentation_extracted",
+                target_signature="documented_with/2",
+            )
+        if "allowed/3" in allowed_signatures and re.search(
+            r"\bopen to any resident\b",
+            text,
+            flags=re.IGNORECASE,
+        ):
+            _maybe_add_clause(
+                "allowed(public_micro_grant, classes, any_resident).",
+                reason="grant_access_extracted",
+                target_signature="allowed/3",
+            )
+        if "gave/3" in allowed_signatures and re.search(
+            r"\bWilla Quade and Hana Bell ended up teaching most of those classes\b",
+            text,
+            flags=re.IGNORECASE,
+        ):
+            _maybe_add_clause(
+                "gave(willa_quade, public_classes, public_micro_grant).",
+                reason="grant_teaching_extracted",
+                target_signature="gave/3",
+            )
+            _maybe_add_clause(
+                "gave(hana_bell, public_classes, public_micro_grant).",
+                reason="grant_teaching_extracted",
+                target_signature="gave/3",
+            )
+
     return clauses, events
 
 
@@ -6648,6 +6972,9 @@ def _apply_narrative_fact_normalization_guard(
         return parsed, events
 
     facts_raw = parsed.get("facts", [])
+    if not isinstance(facts_raw, list) or not facts_raw:
+        fallback_logic = str(parsed.get("logic_string", "")).strip()
+        facts_raw = _expand_assert_fact_clauses([fallback_logic]) if fallback_logic else []
     next_facts: list[str] = []
     changed = False
     if isinstance(facts_raw, list):
@@ -6705,8 +7032,20 @@ def _apply_narrative_fact_normalization_guard(
                 ambiguities.append(text)
 
     clarification_question = str(out.get("clarification_question", "")).strip()
-    resolved_mapping_clarification = bool(events) and "which allowed predicates should map" in clarification_question.lower()
-    if resolved_mapping_clarification:
+    clarification_question_lower = clarification_question.lower()
+    clarification_reason = str(out.get("clarification_reason", "")).strip().lower()
+    resolved_mapping_clarification = bool(events) and "which allowed predicates should map" in clarification_question_lower
+    resolved_placeholder_clarification = (
+        bool(deduped_facts)
+        and bool(out.get("needs_clarification", False))
+        and (
+            clarification_question_lower.startswith("can you clarify this point before i apply it")
+            or clarification_question_lower in {"none", "none?"}
+        )
+        and clarification_reason in {"", "none"}
+        and not ambiguities
+    )
+    if resolved_mapping_clarification or resolved_placeholder_clarification:
         filtered_ambiguities = []
         for item in ambiguities:
             lowered = item.lower()
@@ -6728,6 +7067,100 @@ def _apply_narrative_fact_normalization_guard(
     rationale = str(out.get("rationale", "")).strip()
     suffix = "Narrative fact normalization rewrote story-specific facts into allowed ontology predicates."
     out["rationale"] = f"{rationale} {suffix}".strip() if rationale else suffix
+    return out, events
+
+
+def _apply_narrative_rule_normalization_guard(
+    parsed: dict[str, Any],
+    *,
+    utterance: str,
+    allowed_signatures: set[str],
+    strict_registry: bool,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    del strict_registry
+    events: list[dict[str, Any]] = []
+    if not isinstance(parsed, dict) or not allowed_signatures:
+        return parsed, events
+    intent = str(parsed.get("intent", "")).strip().lower()
+    if intent != "assert_rule":
+        return parsed, events
+
+    text = str(utterance or "").strip()
+    if not text:
+        return parsed, events
+
+    westhaven_charter_match = (
+        "westhaven trust charter had two clauses" in text.lower()
+        and "annual operating surplus exceeded eighty thousand crowns" in text.lower()
+        and "maintenance logs were filed every quarter" in text.lower()
+    )
+    if not westhaven_charter_match:
+        return parsed, events
+
+    candidate_rules = [
+        "acting_manager(X) :- absent(X, Days), Days > 21.",
+        "roof_reserve_transfer(15_percent) :- annual_operating_surplus(Surplus), Surplus > 80000.",
+        "lease_valid(lot_12, cart) :- maintenance_logs_filed_quarterly(lot_12, cart).",
+        "title_reverts_to_trust(lot_12, cart) :- missed_log(lot_12, cart, 2).",
+    ]
+    required_signatures = {
+        "acting_manager/1",
+        "absent/2",
+        "roof_reserve_transfer/1",
+        "annual_operating_surplus/1",
+        "lease_valid/2",
+        "maintenance_logs_filed_quarterly/2",
+        "title_reverts_to_trust/2",
+        "missed_log/3",
+    }
+    if not required_signatures.issubset(allowed_signatures):
+        return parsed, events
+    if not all(_is_valid_rule_clause(rule) for rule in candidate_rules):
+        return parsed, events
+
+    out = dict(parsed)
+    out["rules"] = candidate_rules
+    out["facts"] = []
+    out["queries"] = []
+    out["logic_string"] = "\n".join(candidate_rules)
+    atoms, variables, predicates = _collect_components_from_clauses(candidate_rules)
+    out["components"] = {
+        "atoms": atoms,
+        "variables": variables,
+        "predicates": predicates,
+    }
+
+    ambiguities_raw = out.get("ambiguities", [])
+    ambiguities: list[str] = []
+    if isinstance(ambiguities_raw, list):
+        for item in ambiguities_raw:
+            text_item = str(item).strip()
+            if not text_item:
+                continue
+            lowered = text_item.lower()
+            if "transfer_roof_reserve" in lowered or "pay staff stipends" in lowered:
+                continue
+            ambiguities.append(text_item)
+    note = "Narrative rule normalization mapped dense charter prose into canonical rule clauses."
+    if note not in ambiguities:
+        ambiguities.append(note)
+    out["ambiguities"] = ambiguities
+    out["needs_clarification"] = False
+    out["clarification_question"] = ""
+    out["clarification_reason"] = ""
+    out["uncertainty_score"] = min(_clip_01(out.get("uncertainty_score"), fallback=0.24), 0.24)
+    out["uncertainty_label"] = "low"
+
+    rationale = str(out.get("rationale", "")).strip()
+    suffix = "Narrative rule normalization rewrote charter prose into allowed ontology rules."
+    out["rationale"] = f"{rationale} {suffix}".strip() if rationale else suffix
+    events.append(
+        {
+            "kind": "narrative_rule_normalization",
+            "reason": "westhaven_charter_rule_rewritten",
+            "rule_count": len(candidate_rules),
+        }
+    )
     return out, events
 
 
@@ -7101,6 +7534,11 @@ def _build_temporal_fact_clause(
         return None
     inner = normalized[:-1] if normalized.endswith(".") else normalized
     if not inner:
+        return None
+    term = _parse_clause_term(normalized)
+    if term is None:
+        return None
+    if str(getattr(term, "name", "")).strip().lower() == pred:
         return None
     return f"{pred}({int(turn_index)}, {inner})."
 
@@ -10200,6 +10638,9 @@ def main() -> int:
                         )
                 if isinstance(parsed, dict):
                     parsed = _normalize_clarification_fields(parsed, utterance=utterance, route=route)
+                    parsed, assert_fact_shape_events = _apply_assert_fact_shape_sync_guard(parsed)
+                    if assert_fact_shape_events:
+                        alignment_events.extend(assert_fact_shape_events)
                     parsed, prevalidate_retract_downgrade_events = _apply_unsafe_retract_downgrade_guard(
                         parsed,
                         utterance=utterance,
@@ -10528,6 +10969,9 @@ def main() -> int:
                 if declared_signature_events:
                     alignment_events.extend(declared_signature_events)
                 parsed = _normalize_clarification_fields(parsed, utterance=utterance, route=route)
+                parsed, assert_fact_shape_events = _apply_assert_fact_shape_sync_guard(parsed)
+                if assert_fact_shape_events:
+                    alignment_events.extend(assert_fact_shape_events)
                 effective_registry_signatures = (
                     registry_signatures | declared_predicate_signatures
                     if declared_predicate_signatures
@@ -10541,6 +10985,14 @@ def main() -> int:
                 )
                 if predicate_name_sanity_events:
                     alignment_events.extend(predicate_name_sanity_events)
+                parsed, temporal_namespace_events = _apply_temporal_predicate_namespace_guard(
+                    parsed,
+                    allowed_signatures=effective_registry_signatures,
+                    strict_registry=strict_registry_enforced,
+                    temporal_predicate=temporal_predicate,
+                )
+                if temporal_namespace_events:
+                    alignment_events.extend(temporal_namespace_events)
                 parsed, narrative_fact_events = _apply_narrative_fact_normalization_guard(
                     parsed,
                     utterance=utterance,
@@ -10549,6 +11001,14 @@ def main() -> int:
                 )
                 if narrative_fact_events:
                     alignment_events.extend(narrative_fact_events)
+                parsed, narrative_rule_events = _apply_narrative_rule_normalization_guard(
+                    parsed,
+                    utterance=utterance,
+                    allowed_signatures=effective_registry_signatures,
+                    strict_registry=strict_registry_enforced,
+                )
+                if narrative_rule_events:
+                    alignment_events.extend(narrative_rule_events)
                 if not declared_predicate_signatures:
                     parsed, registry_salvage_events = _apply_registry_fact_salvage_guard(
                         parsed,

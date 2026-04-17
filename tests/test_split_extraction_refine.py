@@ -1,7 +1,11 @@
 from kb_pipeline import (
+    _apply_assert_fact_shape_sync_guard,
     _apply_narrative_fact_normalization_guard,
+    _apply_narrative_rule_normalization_guard,
     _apply_predicate_name_sanity_guard,
     _apply_registry_fact_salvage_guard,
+    _apply_temporal_predicate_namespace_guard,
+    _build_temporal_fact_clause,
     _heuristic_route,
     _looks_blocksworld_state_description,
     _refine_logic_only_payload,
@@ -70,6 +74,99 @@ def test_registry_fact_salvage_guard_requires_kept_subset():
     )
     assert out == parsed
     assert events == []
+
+
+def test_assert_fact_shape_sync_guard_aligns_logic_and_clears_placeholder_clarification():
+    parsed = {
+        "intent": "assert_fact",
+        "logic_string": "clear(a).\nteached_two_public_weekend_seminas(celeste_rowan, volunteer).",
+        "facts": ["clear(a).", "taught_two_public_weekend_seminas(celeste_rowan, volunteer)."],
+        "components": {"atoms": ["a"], "variables": [], "predicates": ["clear"]},
+        "ambiguities": [],
+        "needs_clarification": True,
+        "uncertainty_score": 0.72,
+        "uncertainty_label": "high",
+        "clarification_question": "Can you clarify this point before I apply it: None?",
+        "clarification_reason": "None",
+    }
+    out, events = _apply_assert_fact_shape_sync_guard(parsed)
+    assert out["facts"] == ["clear(a).", "taught_two_public_weekend_seminas(celeste_rowan, volunteer)."]
+    assert out["logic_string"] == "clear(a).\ntaught_two_public_weekend_seminas(celeste_rowan, volunteer)."
+    assert out["components"]["predicates"] == ["clear", "taught_two_public_weekend_seminas"]
+    assert out["needs_clarification"] is False
+    assert out["clarification_question"] == ""
+    assert out["clarification_reason"] == ""
+    assert {event["kind"] for event in events} == {
+        "assert_fact_shape_sync_guard",
+        "placeholder_clarification_downgrade_guard",
+    }
+
+
+def test_temporal_predicate_namespace_guard_rewrites_non_temporal_at_step_pair():
+    parsed = {
+        "intent": "assert_fact",
+        "logic_string": "at_step(jax, mudroom).",
+        "facts": ["at_step(jax, mudroom)."],
+        "components": {"atoms": ["jax", "mudroom"], "variables": [], "predicates": ["at_step"]},
+        "ambiguities": [],
+        "needs_clarification": False,
+        "uncertainty_score": 0.2,
+        "uncertainty_label": "low",
+        "clarification_question": "",
+        "clarification_reason": "",
+        "rationale": "",
+    }
+    out, events = _apply_temporal_predicate_namespace_guard(
+        parsed,
+        allowed_signatures={"at/2", "at_step/2"},
+        strict_registry=True,
+        temporal_predicate="at_step",
+    )
+    assert out["facts"] == ["at(jax, mudroom)."]
+    assert out["logic_string"] == "at(jax, mudroom)."
+    assert out["components"]["predicates"] == ["at"]
+    assert out["needs_clarification"] is False
+    assert any(event["reason"] == "non_temporal_reserved_predicate_rewritten" for event in events)
+
+
+def test_temporal_predicate_namespace_guard_blocks_unrewritable_reserved_predicate_misuse():
+    parsed = {
+        "intent": "assert_fact",
+        "logic_string": "at_step(jax, mudroom).",
+        "facts": ["at_step(jax, mudroom)."],
+        "components": {"atoms": ["jax", "mudroom"], "variables": [], "predicates": ["at_step"]},
+        "ambiguities": [],
+        "needs_clarification": False,
+        "uncertainty_score": 0.2,
+        "uncertainty_label": "low",
+        "clarification_question": "",
+        "clarification_reason": "",
+        "rationale": "",
+    }
+    out, events = _apply_temporal_predicate_namespace_guard(
+        parsed,
+        allowed_signatures={"at_step/2"},
+        strict_registry=True,
+        temporal_predicate="at_step",
+    )
+    assert out["facts"] == []
+    assert out["logic_string"] == ""
+    assert out["needs_clarification"] is True
+    assert "canonical predicate" in out["clarification_question"].lower()
+    assert any(event["reason"] == "reserved_temporal_predicate_blocked" for event in events)
+
+
+def test_build_temporal_fact_clause_skips_reserved_temporal_predicate_facts():
+    assert _build_temporal_fact_clause(
+        "at_step(jax, mudroom).",
+        turn_index=11,
+        temporal_predicate="at_step",
+    ) is None
+    assert _build_temporal_fact_clause(
+        "at_step(11, at(jax, mudroom)).",
+        turn_index=12,
+        temporal_predicate="at_step",
+    ) is None
 
 
 def test_predicate_name_sanity_guard_rewrites_is_a_phrase_to_unary_fact():
@@ -201,6 +298,197 @@ def test_narrative_fact_normalization_guard_extracts_summary_roles_and_resolves_
         "closed(rights_dispute, february_2025).",
         "owns(pineglass_ridge_field_station, kestrel).",
         "related_to(northstep_imaging, northstep_visuals).",
+    ]
+    assert out["needs_clarification"] is False
+    assert out["clarification_question"] == ""
+    assert out["clarification_reason"] == ""
+    assert out["uncertainty_label"] == "low"
+    assert events
+
+
+def test_narrative_fact_normalization_guard_clears_placeholder_clarification_when_summary_facts_exist():
+    parsed = {
+        "intent": "assert_fact",
+        "logic_string": "director(lena).",
+        "facts": ["director(lena)."],
+        "components": {"atoms": ["lena"], "variables": [], "predicates": ["director"]},
+        "ambiguities": [],
+        "needs_clarification": True,
+        "uncertainty_score": 0.81,
+        "uncertainty_label": "high",
+        "clarification_question": "Can you clarify this point before I apply it: None?",
+        "clarification_reason": "None",
+    }
+    out, events = _apply_narrative_fact_normalization_guard(
+        parsed,
+        utterance=(
+            "A rights dispute was finally settled in February 2025. "
+            "The board determined that drone Kestrel belonged to Pineglass Ridge Field Station. "
+            "By then, Lena remained director, Selene remained curator, Noor remained deputy curator."
+        ),
+        allowed_signatures={"closed/2", "curator/1", "deputy_curator/1", "director/1", "owns/2"},
+        strict_registry=True,
+    )
+    assert out["needs_clarification"] is False
+    assert out["clarification_question"] == ""
+    assert out["clarification_reason"] == ""
+    assert events
+
+
+def test_narrative_fact_normalization_guard_uses_logic_string_fallback_for_summary_cleanup():
+    parsed = {
+        "intent": "assert_fact",
+        "logic_string": (
+            "rights_dispute_settled(feb_2025).\n"
+            "drone_ownership(kestrel, pineglass_ridge_field_station).\n"
+            "drone_ownership(kestrel, jonah_kade, false).\n"
+            "drone_ownership(kestrel, mapping_program, false).\n"
+            "northstep_imaging_same_contractor_record(northstep_visuals).\n"
+            "trail_fund_paid_for(rebuilt_footbridge).\n"
+            "director(lena).\n"
+            "curator(selene).\n"
+            "deputy_curator(noor).\n"
+            "trail_ranger(theo).\n"
+            "operations_chief(malcolm).\n"
+            "teached_two_public_weekend_seminas(celeste_rowan, volunteer)."
+        ),
+        "components": {"atoms": [], "variables": [], "predicates": []},
+        "ambiguities": [],
+        "needs_clarification": True,
+        "uncertainty_score": 0.81,
+        "uncertainty_label": "high",
+        "clarification_question": "Can you clarify this point before I apply it: None?",
+        "clarification_reason": "None",
+    }
+    out, events = _apply_narrative_fact_normalization_guard(
+        parsed,
+        utterance=(
+            "A rights dispute was finally settled in February 2025. "
+            "The board determined that drone Kestrel belonged to Pineglass Ridge Field Station, "
+            "not to Jonah Kade or the mapping program. "
+            "It also determined that Northstep Imaging and Northstep Visuals should be treated "
+            "as the same contractor record. "
+            "The trail fund paid for the rebuilt footbridge. "
+            "By then, Lena remained director, Selene remained curator, Noor remained deputy curator, "
+            "Theo remained trail ranger, Malcolm remained operations chief, and Celeste Rowan taught "
+            "two public weekend seminars as a volunteer rather than as an officer."
+        ),
+        allowed_signatures={
+            "closed/2",
+            "curator/1",
+            "deputy_curator/1",
+            "director/1",
+            "operations_chief/1",
+            "owns/2",
+            "related_to/2",
+            "trail_ranger/1",
+            "volunteer/1",
+        },
+        strict_registry=True,
+    )
+    assert "closed(rights_dispute, february_2025)." in out["facts"]
+    assert "owns(pineglass_ridge_field_station, kestrel)." in out["facts"]
+    assert "related_to(northstep_imaging, northstep_visuals)." in out["facts"]
+    assert "volunteer(celeste_rowan)." in out["facts"]
+    assert out["needs_clarification"] is False
+    assert out["clarification_question"] == ""
+    assert out["clarification_reason"] == ""
+    assert events
+
+
+def test_narrative_fact_normalization_guard_extracts_grant_support_facts_for_salvage():
+    parsed = {
+        "intent": "assert_fact",
+        "logic_string": (
+            "accepted_grant(trust, public_micro_grant, glasshouse_a, september_2021).\n"
+            "required_classes(public_micro_grant, 2, free, public, month)."
+        ),
+        "facts": [
+            "accepted_grant(trust, public_micro_grant, glasshouse_a, september_2021).",
+            "required_classes(public_micro_grant, 2, free, public, month).",
+        ],
+        "components": {"atoms": [], "variables": [], "predicates": []},
+        "ambiguities": [],
+        "needs_clarification": False,
+    }
+    normalized, events = _apply_narrative_fact_normalization_guard(
+        parsed,
+        utterance=(
+            "In September 2021, the trust accepted a public micro-grant for Glasshouse A. "
+            "Willa Quade and Hana Bell ended up teaching most of those classes. "
+            "Elias Shore kept the attendance sheets because the grant required proof that "
+            "the classes were open to any resident."
+        ),
+        allowed_signatures={"allowed/3", "documented_with/2", "gave/3", "milestone/3"},
+        strict_registry=True,
+    )
+    salvaged, _ = _apply_registry_fact_salvage_guard(
+        normalized,
+        allowed_signatures={"allowed/3", "documented_with/2", "gave/3", "milestone/3"},
+        strict_registry=True,
+    )
+    assert salvaged["facts"] == [
+        "milestone(public_micro_grant, glasshouse_a, september_2021).",
+        "documented_with(public_micro_grant, attendance_sheets).",
+        "allowed(public_micro_grant, classes, any_resident).",
+        "gave(willa_quade, public_classes, public_micro_grant).",
+        "gave(hana_bell, public_classes, public_micro_grant).",
+    ]
+    assert events
+
+
+def test_narrative_rule_normalization_guard_rewrites_westhaven_charter_and_clears_clarification():
+    parsed = {
+        "intent": "assert_rule",
+        "logic_string": (
+            "acting_manager(X) :- absent(X, Days), Days > 21, greenhouse_manager(X).\n"
+            "anual_operating_surplus(Surplus) > 80000 -> transfer_roof_reserve(0.15 * Surplus), "
+            "pay_staff_stipends(false)."
+        ),
+        "facts": [],
+        "rules": [
+            "acting_manager(X) :- absent(X, Days), Days > 21, greenhouse_manager(X).",
+            "anual_operating_surplus(Surplus) > 80000 -> transfer_roof_reserve(0.15 * Surplus), pay_staff_stipends(false).",
+        ],
+        "queries": [],
+        "components": {"atoms": [], "variables": [], "predicates": []},
+        "ambiguities": [
+            "Predicate 'transfer_roof_reserve' and 'pay_staff_stipends' not found in allowed list."
+        ],
+        "needs_clarification": True,
+        "uncertainty_score": 0.9,
+        "uncertainty_label": "high",
+        "clarification_question": "What are the canonical predicate names for 'transfer into roof reserve' and 'pay staff stipends'?",
+        "clarification_reason": "Required predicates not found.",
+    }
+    out, events = _apply_narrative_rule_normalization_guard(
+        parsed,
+        utterance=(
+            "The Westhaven Trust charter had two clauses that seemed dull until they mattered. "
+            "First, if the greenhouse manager was absent for more than twenty-one consecutive days, "
+            "the assistant manager automatically became acting manager until the board voted otherwise. "
+            "Second, if annual operating surplus exceeded eighty thousand crowns, then fifteen percent had to be "
+            "transferred into the roof reserve before any staff stipends were paid. "
+            "The lease said the cart could stay with the tenant only if maintenance logs were filed every quarter. "
+            "If two quarterly logs were missed, title to the cart reverted to the trust even if the tenant still physically used it."
+        ),
+        allowed_signatures={
+            "acting_manager/1",
+            "absent/2",
+            "annual_operating_surplus/1",
+            "lease_valid/2",
+            "maintenance_logs_filed_quarterly/2",
+            "missed_log/3",
+            "roof_reserve_transfer/1",
+            "title_reverts_to_trust/2",
+        },
+        strict_registry=True,
+    )
+    assert out["rules"] == [
+        "acting_manager(X) :- absent(X, Days), Days > 21.",
+        "roof_reserve_transfer(15_percent) :- annual_operating_surplus(Surplus), Surplus > 80000.",
+        "lease_valid(lot_12, cart) :- maintenance_logs_filed_quarterly(lot_12, cart).",
+        "title_reverts_to_trust(lot_12, cart) :- missed_log(lot_12, cart, 2).",
     ]
     assert out["needs_clarification"] is False
     assert out["clarification_question"] == ""
