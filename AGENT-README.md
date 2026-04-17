@@ -1,6 +1,6 @@
 ﻿# AGENT README (Onboarding for Coding Agents)
 
-Last updated: 2026-04-13
+Last updated: 2026-04-17
 
 ## Mission
 
@@ -11,6 +11,14 @@ This repo is a semantic parsing workbench focused on one thing:
 - measure improvement over repeated rung/acid test runs
 
 Primary model focus right now: `qwen3.5:9b`.
+
+## Current Truth Snapshot
+
+- Read `docs/PROGRESS.md` first for the current status headline.
+- Safety gate is green (`78 passed`).
+- Strict Blocksworld is stable after the post-registry live rerun.
+- The general registry is now populated, which made the strict narrative baseline materially lower than the earlier provisional numbers.
+- Do not treat the old `0.6452` / `0.8718` narrative pack scores as current strict-lane results.
 
 ## Workspace Assumption
 
@@ -25,23 +33,27 @@ Primary model focus right now: `qwen3.5:9b`.
 ## First Files To Read
 
 1. `README.md`
-2. `EXPLAINER.md`
-3. `kb_pipeline.py`
-4. `modelfiles/semantic_parser_system_prompt.md`
-5. `kb_scenarios/README.md`
-6. `scripts/render_kb_run_html.py`
-7. `scripts/build_hub_index.py`
-8. `engine/constraint_propagation.py`
-9. `engine/propagation_runner.py`
+2. `docs/PROGRESS.md`
+3. `CODE-HANDOFF.md`
+4. `CLAUDE-WORK.md`
+5. `EXPLAINER.md`
+6. `kb_pipeline.py`
+7. `modelfiles/semantic_parser_system_prompt.md`
+8. `kb_scenarios/README.md`
+9. `scripts/render_kb_run_html.py`
+10. `scripts/build_hub_index.py`
+11. `engine/constraint_propagation.py`
+12. `engine/propagation_runner.py`
 
 ## Fast Resume (Single-Page Handoff)
 
 - Primary target model: `qwen3.5:9b` (Ollama).
 - Editable prompt source: `modelfiles/semantic_parser_system_prompt.md`.
-- First tuning loop:
-1. Run `kb_scenarios/stage_01_facts_only.json`.
-2. Run `kb_scenarios/stage_02_rule_ingest.json`.
-3. Rebuild docs hub and compare by prompt id.
+- Current baseline loop:
+1. Run `python scripts/run_safety_gate.py`.
+2. Re-read `docs/PROGRESS.md` and the latest post-registry reports before claiming improvement.
+3. Treat strict Blocksworld as the stable lane and strict narrative packs as the current recovery frontier.
+- The old higher narrative strict scores (`0.6452`, `0.8718`) are historical/provisional only.
 - Provenance fields must remain present in runs:
   - `run_id`
   - `prompt_provenance`

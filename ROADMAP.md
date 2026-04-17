@@ -1,11 +1,24 @@
 # Prethinker Roadmap
 
-Last updated: 2026-04-13
+Last updated: 2026-04-17
 
 ## Positioning
 
 Prethinker is an open, non-commercial research workbench for neuro-symbolic parsing.
 The goal is to make parser behavior inspectable, reproducible, and improvable over time.
+
+## Current Reality (2026-04-17)
+
+- Safety gate is green: `88 passed`.
+- Strict Blocksworld has a live guarded green baseline (`20/20` solve/replay, `8/8` pilot, zero-hit `0`, avg-hit gates passed).
+- The general predicate registry is no longer empty, so narrative strict runs are now actually constrained.
+- That made the narrative strict baseline materially worse than the earlier provisional numbers:
+  - mid pack: `0.6452` -> `0.3237`
+  - upper-mid pack: `0.8718` -> `0.257644`
+- Recovery since that correction is real but incomplete:
+  - mid pack: `0.3237` -> `0.3812`, still `pipeline_pass=1/3`
+  - upper-mid pack: `0.257644` -> `0.3922`, still `pipeline_pass=1/3`
+- Current priority remains recovery under honest strictness, not chasing the older inflated scores.
 
 ## Honest Baseline
 
@@ -59,6 +72,9 @@ Goal: move from "well-instrumented prototype" to "skeptically credible public ev
   - `--strict-types`
   - no clarification auto-answer
 - Promote results only when strict pack is green or transparently shows bounded failures.
+- Current state:
+  - Blocksworld strict lane is green on live rerun.
+  - Narrative strict lane is still below promotion bar and should be reported as such.
 
 4. Hero demo policy
 - Keep Goldilocks visible as stress/failure analysis unless it passes a defined quality bar.

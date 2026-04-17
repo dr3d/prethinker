@@ -35,6 +35,11 @@ if str((ROOT / "scripts").resolve()) not in sys.path:
 
 import kb_interrogator as ki  # noqa: E402
 
+try:
+    from story_registry_guard import registry_profile_mismatch_message  # noqa: E402
+except ImportError:  # pragma: no cover - import path differs for package-style test imports
+    from scripts.story_registry_guard import registry_profile_mismatch_message  # noqa: E402
+
 
 def _slug(text: str, *, max_len: int = 80) -> str:
     cleaned = "".join(ch.lower() if ch.isalnum() else "_" for ch in str(text or ""))
@@ -679,6 +684,7 @@ def main() -> int:
     p.add_argument("--context-length", type=int, default=8192)
     p.add_argument("--predicate-registry", default="")
     p.add_argument("--strict-registry", action="store_true")
+    p.add_argument("--allow-cross-domain-registry", action="store_true")
     p.add_argument("--type-schema", default="")
     p.add_argument("--max-clarification-rounds", type=int, default=2)
     p.add_argument("--clarification-answer-min-confidence", type=float, default=0.0)
@@ -762,6 +768,15 @@ def main() -> int:
     )
 
     source_story_text = story_path.read_text(encoding="utf-8-sig", errors="replace")
+    registry_mismatch = registry_profile_mismatch_message(
+        str(args.predicate_registry),
+        label=label,
+        story_path=str(story_path),
+        allow_cross_domain_registry=bool(args.allow_cross_domain_registry),
+    )
+    if registry_mismatch:
+        print(f"[gulp] {registry_mismatch}", file=sys.stderr)
+        return 2
     story_language_profile = _detect_story_language_profile(source_story_text)
     gate_profile_requested = str(args.gate_profile or "auto").strip().lower() or "auto"
     if gate_profile_requested == "auto":

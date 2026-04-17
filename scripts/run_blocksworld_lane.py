@@ -421,6 +421,18 @@ def parse_args() -> argparse.Namespace:
         default=-1,
         help="Fail the run when zero-hit case count exceeds this threshold. Use -1 to disable.",
     )
+    p.add_argument(
+        "--min-avg-init-hit",
+        type=float,
+        default=-1.0,
+        help="Fail the run when average init predicate hit ratio drops below this threshold. Use -1 to disable.",
+    )
+    p.add_argument(
+        "--min-avg-goal-hit",
+        type=float,
+        default=-1.0,
+        help="Fail the run when average goal predicate hit ratio drops below this threshold. Use -1 to disable.",
+    )
     p.add_argument("--summary-json", default="tmp/blocksworld_lane_2026-04-16.summary.json")
     p.add_argument("--summary-md", default="docs/reports/BLOCKSWORLD_LANE_2026-04-16.md")
     p.add_argument("--cases-jsonl", default="tmp/blocksworld_lane_2026-04-16.cases.jsonl")
@@ -656,6 +668,8 @@ def main() -> int:
             "strict_registry": bool(args.strict_registry),
             "type_schema": str(args.type_schema),
             "max_zero_hit": int(args.max_zero_hit),
+            "min_avg_init_hit": float(args.min_avg_init_hit),
+            "min_avg_goal_hit": float(args.min_avg_goal_hit),
         },
         "sources": {
             "planetarium_train_parquet": str(planetarium_path),
@@ -701,20 +715,62 @@ def main() -> int:
     }
 
     zero_hit_count = int(summary["prethinker_pilot"]["zero_hit_case_count"])
-    gate_enabled = int(args.max_zero_hit) >= 0
-    gate_passed = (zero_hit_count <= int(args.max_zero_hit)) if gate_enabled else True
+    avg_init_hit = float(summary["prethinker_pilot"]["avg_init_predicate_hit_ratio"])
+    avg_goal_hit = float(summary["prethinker_pilot"]["avg_goal_predicate_hit_ratio"])
+    zero_hit_gate_enabled = int(args.max_zero_hit) >= 0
+    zero_hit_gate_passed = (zero_hit_count <= int(args.max_zero_hit)) if zero_hit_gate_enabled else True
+    avg_init_gate_enabled = float(args.min_avg_init_hit) >= 0.0
+    avg_init_gate_passed = (
+        avg_init_hit >= float(args.min_avg_init_hit)
+        if avg_init_gate_enabled
+        else True
+    )
+    avg_goal_gate_enabled = float(args.min_avg_goal_hit) >= 0.0
+    avg_goal_gate_passed = (
+        avg_goal_hit >= float(args.min_avg_goal_hit)
+        if avg_goal_gate_enabled
+        else True
+    )
     summary["gates"] = {
         "zero_hit": {
-            "enabled": gate_enabled,
+            "enabled": zero_hit_gate_enabled,
             "threshold": int(args.max_zero_hit),
             "observed": zero_hit_count,
-            "passed": bool(gate_passed),
+            "passed": bool(zero_hit_gate_passed),
             "reason": (
                 ""
-                if gate_passed
+                if zero_hit_gate_passed
                 else f"zero_hit_case_count={zero_hit_count} exceeded threshold={int(args.max_zero_hit)}"
             ),
-        }
+        },
+        "avg_init_hit": {
+            "enabled": avg_init_gate_enabled,
+            "threshold": float(args.min_avg_init_hit),
+            "observed": round(avg_init_hit, 6),
+            "passed": bool(avg_init_gate_passed),
+            "reason": (
+                ""
+                if avg_init_gate_passed
+                else (
+                    f"avg_init_predicate_hit_ratio={avg_init_hit:.6f} "
+                    f"fell below threshold={float(args.min_avg_init_hit):.6f}"
+                )
+            ),
+        },
+        "avg_goal_hit": {
+            "enabled": avg_goal_gate_enabled,
+            "threshold": float(args.min_avg_goal_hit),
+            "observed": round(avg_goal_hit, 6),
+            "passed": bool(avg_goal_gate_passed),
+            "reason": (
+                ""
+                if avg_goal_gate_passed
+                else (
+                    f"avg_goal_predicate_hit_ratio={avg_goal_hit:.6f} "
+                    f"fell below threshold={float(args.min_avg_goal_hit):.6f}"
+                )
+            ),
+        },
     }
 
     summary_json = Path(str(args.summary_json))
@@ -753,6 +809,18 @@ def main() -> int:
     if isinstance(gate, dict) and bool(gate.get("enabled")):
         md_lines.append(
             f"- Zero-hit gate: `{'pass' if bool(gate.get('passed')) else 'FAIL'}` (observed `{int(gate.get('observed', 0) or 0)}` <= threshold `{int(gate.get('threshold', 0) or 0)}`)"
+        )
+    init_gate = summary.get("gates", {}).get("avg_init_hit", {})
+    if isinstance(init_gate, dict) and bool(init_gate.get("enabled")):
+        md_lines.append(
+            f"- Avg init hit gate: `{'pass' if bool(init_gate.get('passed')) else 'FAIL'}` "
+            f"(observed `{float(init_gate.get('observed', 0.0) or 0.0):.6f}` >= threshold `{float(init_gate.get('threshold', 0.0) or 0.0):.6f}`)"
+        )
+    goal_gate = summary.get("gates", {}).get("avg_goal_hit", {})
+    if isinstance(goal_gate, dict) and bool(goal_gate.get("enabled")):
+        md_lines.append(
+            f"- Avg goal hit gate: `{'pass' if bool(goal_gate.get('passed')) else 'FAIL'}` "
+            f"(observed `{float(goal_gate.get('observed', 0.0) or 0.0):.6f}` >= threshold `{float(goal_gate.get('threshold', 0.0) or 0.0):.6f}`)"
         )
     if int(ph.get("zero_hit_case_count", 0) or 0) > 0:
         zero_ids = ", ".join(str(x) for x in (ph.get("zero_hit_case_ids", []) or []))
@@ -807,12 +875,26 @@ def main() -> int:
     print(f"[blocksworld-lane] summary_md={summary_md}")
     print(f"[blocksworld-lane] cases_jsonl={cases_jsonl}")
     print(f"[blocksworld-lane] prolog_rules={prolog_out}")
-    if gate_enabled and not gate_passed:
+    if zero_hit_gate_enabled and not zero_hit_gate_passed:
         print(
             f"[blocksworld-lane] FAIL gate zero-hit: observed={zero_hit_count} threshold={int(args.max_zero_hit)}",
             file=sys.stderr,
         )
         return 10
+    if avg_init_gate_enabled and not avg_init_gate_passed:
+        print(
+            "[blocksworld-lane] FAIL gate avg-init-hit: "
+            f"observed={avg_init_hit:.6f} threshold={float(args.min_avg_init_hit):.6f}",
+            file=sys.stderr,
+        )
+        return 11
+    if avg_goal_gate_enabled and not avg_goal_gate_passed:
+        print(
+            "[blocksworld-lane] FAIL gate avg-goal-hit: "
+            f"observed={avg_goal_hit:.6f} threshold={float(args.min_avg_goal_hit):.6f}",
+            file=sys.stderr,
+        )
+        return 12
     return 0
 
 

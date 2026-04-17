@@ -1246,6 +1246,42 @@ def _call_model_prompt(
         return ModelResponse(message=message, reasoning=reasoning, raw=raw)
 
 
+def _looks_longform_narrative_blob(text: str) -> bool:
+    raw = str(text or "").strip()
+    lowered = raw.lower()
+    if not lowered:
+        return False
+    if len(raw) < 1200:
+        return False
+    if ":-" in raw or re.search(r"\b[a-z][a-z0-9_]*\s*\([^()]*\)", raw):
+        return False
+    if re.match(r"^\s*(if|when|whenever|unless|every|all|any)\b", lowered):
+        return False
+    paragraphs = [chunk.strip() for chunk in re.split(r"\n\s*\n", raw) if chunk.strip()]
+    sentence_count = len(re.findall(r"[.?!](?:\s|$)", raw))
+    temporal_markers = len(
+        re.findall(
+            r"\b(?:january|february|march|april|may|june|july|august|september|october|november|december|"
+            r"spring|summer|autumn|fall|winter|\d{4})\b",
+            lowered,
+        )
+    )
+    narrative_markers = len(
+        re.findall(
+            r"\b(?:daughter|son|spouse|family|lived|lives|moved|resigned|elected|returned|approved|"
+            r"criticized|named|asked|remained|served|used|reported)\b",
+            lowered,
+        )
+    )
+    has_paragraph_story_shape = (
+        len(paragraphs) >= 3 and sentence_count >= 8 and temporal_markers >= 3 and narrative_markers >= 4
+    )
+    has_flattened_story_shape = (
+        len(raw) >= 2400 and sentence_count >= 14 and temporal_markers >= 3 and narrative_markers >= 6
+    )
+    return has_paragraph_story_shape or has_flattened_story_shape
+
+
 def _heuristic_route(text: str) -> str:
     lowered = text.strip().lower()
     if re.match(r"^\s*chapter\s+chunk\b", lowered):
@@ -1259,6 +1295,9 @@ def _heuristic_route(text: str) -> str:
         lowered,
     ):
         return "retract"
+    # Keep full story blobs on the fact path even when they mention embedded rules.
+    if _looks_longform_narrative_blob(text):
+        return "assert_fact"
     if _has_rule_cues(lowered) and not re.search(
         r"\b(ask|asks|asked)\s+if\b",
         lowered,
@@ -6268,6 +6307,133 @@ def _apply_registry_fact_salvage_guard(
     return out, events
 
 
+def _parse_simple_fact_call(clause: str) -> tuple[str, list[str]] | None:
+    normalized = _normalize_clause(clause)
+    if not normalized:
+        return None
+    expr = normalized[:-1].strip() if normalized.endswith(".") else normalized.strip()
+    if not expr or ":-" in expr:
+        return None
+    if "(" not in expr:
+        name = _atomize(expr)
+        return (name, []) if name else None
+    name, args_raw = expr.split("(", 1)
+    name = _atomize(name)
+    if not name:
+        return None
+    args_text = args_raw[:-1] if args_raw.endswith(")") else args_raw
+    return name, _split_top_level_args(args_text)
+
+
+def _rewrite_is_a_predicate_fact(
+    clause: str,
+    *,
+    allowed_signatures: set[str],
+) -> tuple[str, dict[str, Any] | None]:
+    parsed = _parse_simple_fact_call(clause)
+    if parsed is None:
+        return _normalize_clause(clause), None
+    name, args = parsed
+    if "_is_a_" not in name:
+        return _normalize_clause(clause), None
+
+    subject, category = name.split("_is_a_", 1)
+    subject = _atomize(subject)
+    category = _atomize(category)
+    if not subject or not category:
+        return _normalize_clause(clause), None
+
+    target_signature = f"{category}/1"
+    if allowed_signatures and target_signature not in allowed_signatures:
+        return _normalize_clause(clause), None
+
+    target_arg = _atomize(str(args[0])) if args else subject
+    if not target_arg:
+        target_arg = subject
+    candidate = _normalize_clause(f"{category}({target_arg}).")
+    if not _is_valid_goal_clause(candidate, require_ground=True):
+        return _normalize_clause(clause), None
+    return (
+        candidate,
+        {
+            "kind": "predicate_name_sanity_rewrite",
+            "reason": "is_a_phrase_predicate_rewritten",
+            "from": name,
+            "to": category,
+            "target_signature": target_signature,
+        },
+    )
+
+
+def _apply_predicate_name_sanity_guard(
+    parsed: dict[str, Any],
+    *,
+    allowed_signatures: set[str],
+    strict_registry: bool,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    events: list[dict[str, Any]] = []
+    if not isinstance(parsed, dict) or not allowed_signatures:
+        return parsed, events
+    intent = str(parsed.get("intent", "")).strip().lower()
+    if intent != "assert_fact":
+        return parsed, events
+
+    facts_raw = parsed.get("facts", [])
+    if not isinstance(facts_raw, list) or not facts_raw:
+        return parsed, events
+
+    next_facts: list[str] = []
+    changed = False
+    for raw in facts_raw:
+        rewritten, event = _rewrite_is_a_predicate_fact(
+            str(raw),
+            allowed_signatures=allowed_signatures,
+        )
+        next_facts.append(rewritten)
+        if isinstance(event, dict):
+            events.append(event)
+            changed = True
+
+    if not changed:
+        return parsed, events
+
+    deduped_facts: list[str] = []
+    seen_facts: set[str] = set()
+    for clause in next_facts:
+        normalized = _normalize_clause(clause)
+        if not normalized or normalized in seen_facts:
+            continue
+        seen_facts.add(normalized)
+        deduped_facts.append(normalized)
+
+    out = dict(parsed)
+    out["facts"] = deduped_facts
+    out["logic_string"] = deduped_facts[0] if len(deduped_facts) == 1 else "\n".join(deduped_facts)
+    atoms, variables, predicates = _collect_components_from_clauses(deduped_facts)
+    out["components"] = {
+        "atoms": atoms,
+        "variables": variables,
+        "predicates": predicates,
+    }
+
+    ambiguities_raw = out.get("ambiguities", [])
+    ambiguities: list[str] = []
+    if isinstance(ambiguities_raw, list):
+        for item in ambiguities_raw:
+            text = str(item).strip()
+            if text:
+                ambiguities.append(text)
+    note = "Rewrote phrase-style `_is_a_` predicate names into registry-compatible unary facts."
+    if note not in ambiguities:
+        ambiguities.append(note)
+    out["ambiguities"] = ambiguities
+
+    rationale = str(out.get("rationale", "")).strip()
+    suffix = "Predicate-name sanity guard rewrote `_is_a_` phrase predicates to unary ontology facts."
+    out["rationale"] = f"{rationale} {suffix}".strip() if rationale else suffix
+    return out, events
+
+
 def _build_assert_rule_fallback_parse(utterance: str) -> dict[str, Any] | None:
     text = utterance.strip().rstrip("?")
     if not text:
@@ -9446,7 +9612,14 @@ def main() -> int:
                     if candidate in {"assert_fact", "assert_rule", "query", "retract", "other"}:
                         # Guard against classifier drift: only promote assert_fact -> assert_rule
                         # when the utterance has explicit rule cues.
-                        if candidate == "assert_rule" and heuristic == "assert_fact" and not _has_rule_cues(turn_input_text):
+                        if (
+                            candidate == "assert_rule"
+                            and heuristic == "assert_fact"
+                            and (
+                                not _has_rule_cues(turn_input_text)
+                                or _looks_longform_narrative_blob(turn_input_text)
+                            )
+                        ):
                             route = heuristic
                             route_source = "heuristic"
                         elif (
@@ -10064,6 +10237,13 @@ def main() -> int:
                     else registry_signatures
                 )
                 strict_registry_enforced = bool(args.strict_registry) or bool(declared_predicate_signatures)
+                parsed, predicate_name_sanity_events = _apply_predicate_name_sanity_guard(
+                    parsed,
+                    allowed_signatures=effective_registry_signatures,
+                    strict_registry=strict_registry_enforced,
+                )
+                if predicate_name_sanity_events:
+                    alignment_events.extend(predicate_name_sanity_events)
                 if not declared_predicate_signatures:
                     parsed, registry_salvage_events = _apply_registry_fact_salvage_guard(
                         parsed,

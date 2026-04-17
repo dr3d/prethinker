@@ -27,6 +27,11 @@ ROOT = Path(__file__).resolve().parents[1]
 STRESS = ROOT / "scripts" / "run_story_stress_cycle.py"
 PROGRESSIVE = ROOT / "scripts" / "run_story_progressive_gulp.py"
 
+try:
+    from story_registry_guard import registry_profile_mismatch_message
+except ImportError:  # pragma: no cover - import path differs for package-style test imports
+    from scripts.story_registry_guard import registry_profile_mismatch_message
+
 
 def _utc_iso() -> str:
     return dt.datetime.now(dt.timezone.utc).isoformat()
@@ -159,6 +164,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--context-length", type=int, default=8192)
     parser.add_argument("--predicate-registry", default="")
     parser.add_argument("--strict-registry", action="store_true")
+    parser.add_argument("--allow-cross-domain-registry", action="store_true")
     parser.add_argument("--type-schema", default="")
     parser.add_argument("--exam-style", default="detective", choices=["general", "detective", "medical"])
     parser.add_argument("--exam-question-count", type=int, default=20)
@@ -210,6 +216,7 @@ def main() -> int:
             "context_length": int(args.context_length),
             "predicate_registry": str(args.predicate_registry),
             "strict_registry": bool(args.strict_registry),
+            "allow_cross_domain_registry": bool(args.allow_cross_domain_registry),
             "type_schema": str(args.type_schema),
             "exam_style": args.exam_style,
             "exam_question_count": int(args.exam_question_count),
@@ -224,6 +231,7 @@ def main() -> int:
 
     inputs_dir = ROOT / "tmp" / "story_inputs"
     inputs_dir.mkdir(parents=True, exist_ok=True)
+    saw_registry_mismatch = False
 
     for pack_path in pack_paths:
         pack_entry: dict[str, Any] = {
@@ -245,6 +253,19 @@ def main() -> int:
         pack_name = f"{base_name}_pack"
         story_file = inputs_dir / f"{base_name}.txt"
         story_file.write_text(story_text.strip() + "\n", encoding="utf-8")
+        registry_mismatch = registry_profile_mismatch_message(
+            str(args.predicate_registry),
+            label=pack_name,
+            story_path=str(story_file),
+            allow_cross_domain_registry=bool(args.allow_cross_domain_registry),
+        )
+        if registry_mismatch:
+            pack_entry["error"] = "registry_profile_mismatch"
+            pack_entry["error_message"] = registry_mismatch
+            summary["packs"].append(pack_entry)
+            print(f"[story-pack-suite] {registry_mismatch}", file=sys.stderr)
+            saw_registry_mismatch = True
+            continue
 
         split_mode = _extract_split_mode(pack_text, default=str(args.default_progressive_split))
         percentages = _extract_percentages(pack_text, default=default_pcts)
@@ -343,6 +364,8 @@ def main() -> int:
             progressive_cmd.extend(["--predicate-registry", str(args.predicate_registry)])
         if bool(args.strict_registry):
             progressive_cmd.append("--strict-registry")
+        if bool(args.allow_cross_domain_registry):
+            progressive_cmd.append("--allow-cross-domain-registry")
         if str(args.type_schema).strip():
             progressive_cmd.extend(["--type-schema", str(args.type_schema)])
         progressive_code = _run(progressive_cmd)
@@ -382,7 +405,7 @@ def main() -> int:
 
     print(f"[story-pack-suite] summary_json={out_json}")
     print(f"[story-pack-suite] summary_md={out_md}")
-    return 0
+    return 2 if saw_registry_mismatch else 0
 
 
 if __name__ == "__main__":

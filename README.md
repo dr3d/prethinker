@@ -2,20 +2,40 @@
 
 This project is a local workbench for building a high-accuracy semantic parser (Qwen 3.5 9B first) that converts natural language into Prolog-ready logic and applies it into named, persistent knowledge bases.
 
-Last updated: 2026-04-15
+Last updated: 2026-04-17
 
-## Current Focus (2026-04-15)
+## Current Focus (2026-04-17)
 
-Prethinker is operating on a single gated execution spine:
+Prethinker is operating on one honest evaluation spine:
 
-- Raw text ingestion -> deterministic mutation/query gate -> interrogator grading.
-- Real-world/wild language pressure remains primary; ladder packs are regression anchors.
-- Same-model-family stack is the default (`qwen3.5:9b` parser + clarification path) for tighter behavior and lower VRAM pressure.
-- Current scientific rollup is tracked in [docs/PROGRESS.md](docs/PROGRESS.md), including latest sanity-cycle deltas.
+- [docs/PROGRESS.md](docs/PROGRESS.md) is the source of truth for current status; older April 13-15 notes should be treated as historical unless reaffirmed there.
+- Stable proof lanes are the safety gate and strict Blocksworld, not the broader narrative/story frontier.
+- The safety gate is currently green at `88 passed`.
+- Strict Blocksworld is currently stable under the guarded lane (`zero-hit=0`, avg-init gate passed, avg-goal gate passed).
+- The strict mid and upper-mid narrative packs are improved but still not green. Those lanes remain recovery work, not benchmark wins.
+- Same-model-family stack remains the default (`qwen3.5:9b` parser + clarification path) for tighter behavior and lower VRAM pressure.
 
 ## Current Rollups
 
-- Goldilocks roundtrip cycle (latest local strongest run):
+- Safety gate:
+  - `88 passed`
+  - command: `python scripts/run_safety_gate.py`
+- Blocksworld strict guarded lane:
+  - symbolic harness solve/replay: `20/20`
+  - prethinker pilot pass: `8/8`
+  - avg init predicate hit: `0.458334`
+  - avg goal predicate hit: `0.458334`
+  - zero-hit cases: `0`
+  - avg-hit gates: `0.45 / 0.45` both passed
+  - artifact: `docs/reports/BLOCKSWORLD_LANE_GUARDED_2026-04-17.md`
+- Narrative strict current recovery status:
+  - mid pack: post-registry baseline `0.3237` -> current best `0.3812`, `pipeline_pass=1/3`
+  - upper-mid pack: post-registry baseline `0.257644` -> current best `0.3922`, `pipeline_pass=1/3`
+  - artifacts: `docs/reports/NARRATIVE_PACKS_RECOVERY_2026-04-17.md`, `docs/reports/MID_PACK_GENERAL_STRICT_TEMPORAL_RECOVERY2_2026-04-17.md`, `docs/reports/UPPER_MID_PACK_GENERAL_STRICT_TEMPORAL_RECOVERY3_2026-04-17.md`
+
+## Historical / Exploratory References
+
+- Goldilocks roundtrip cycle (useful for failure analysis, not current strict headline):
   - baseline: `run-20260414T132151Z-story_goldilocks_roundtr-qwen3_5_9b-33896`
   - latest: `run-20260414T151909Z-story_goldilocks_roundtr-qwen3_5_9b-21788`
   - headline delta: apply failures `20 -> 5`, clarification requests `20 -> 4`, clauses `21 -> 43`
@@ -28,13 +48,18 @@ Prethinker is operating on a single gated execution spine:
 
 - docs hub: [docs/index.html](docs/index.html)
 - science progress note: [docs/PROGRESS.md](docs/PROGRESS.md)
+- current narrative recovery status: [docs/reports/NARRATIVE_PACKS_RECOVERY_2026-04-17.md](docs/reports/NARRATIVE_PACKS_RECOVERY_2026-04-17.md)
+- post-registry narrative correction: [docs/reports/NARRATIVE_PACKS_POST_REGISTRY_2026-04-17.md](docs/reports/NARRATIVE_PACKS_POST_REGISTRY_2026-04-17.md)
+- blocksworld strict guarded lane: [docs/reports/BLOCKSWORLD_LANE_GUARDED_2026-04-17.md](docs/reports/BLOCKSWORLD_LANE_GUARDED_2026-04-17.md)
 - KB interrogator guide: [docs/KB_INTERROGATOR.md](docs/KB_INTERROGATOR.md)
 - runtime settings cheat sheet: [docs/RUNTIME_SETTINGS_CHEATSHEET.md](docs/RUNTIME_SETTINGS_CHEATSHEET.md)
 - focus execution plan: [docs/FOCUS_EXECUTION_PLAN.md](docs/FOCUS_EXECUTION_PLAN.md)
+- ontology steering note: [docs/ONTOLOGY_STEERING.md](docs/ONTOLOGY_STEERING.md)
 - out in the wild article: [docs/WILD_MODE.md](docs/WILD_MODE.md)
 - run explorer: [docs/run-reports-hub.html](docs/run-reports-hub.html)
 - goldilocks roundtrip demo: [docs/goldilocks-roundtrip.html](docs/goldilocks-roundtrip.html)
 - track scoreboard: [docs/TRACK_SCOREBOARD.md](docs/TRACK_SCOREBOARD.md)
+- current handoffs: `CODE-HANDOFF.md`, `CLAUDE-WORK.md`
 - assembly log: [SESSIONS.md](SESSIONS.md)
 
 ## Historical Record
@@ -595,6 +620,10 @@ Starter files:
 - `modelfiles/predicate_registry.json`
 - `modelfiles/type_schema.example.json`
 
+Registry strategy note:
+
+- See `docs/ONTOLOGY_STEERING.md` for the current and intended architecture around ontology profiles, formal registries, field overlays, and promotion back into shipped registries.
+
 ### 4c) Optional automated clarification Q&A with a separate model
 
 Use this when the parser asks clarification questions and you want an explicit Q&A model to answer during runs.
@@ -741,9 +770,9 @@ python scripts/run_differential_validation.py --reference-repo <path-to-engine-b
 
 ## Suggested Next Steps
 
-1. Finalize and enable predicate-registry alignment (canonical names + aliases).
-2. Add multilingual stress scenarios (EN/ES/FR/DE/ZH) with strict expected outputs.
-3. Add candidate-voting mode (`N` parses + validator select) for harder utterances.
+1. Finish narrative strict recovery from the current `1/3` pack state without loosening strict admission.
+2. Add first-class registry-profile selection and overlay reporting.
+3. Add multilingual stress scenarios (EN/ES/FR/DE/ZH) with strict expected outputs.
 4. Add ontology-specific validation gates for pharma/finance/compliance domains.
 5. Build acid-test suites for transitivity, quantifiers, negation policy, and pronoun ambiguity.
 
@@ -754,6 +783,7 @@ python scripts/run_differential_validation.py --reference-repo <path-to-engine-b
 - Session/migration log: `SESSIONS.md`
 - Next-session handoff: `AGENT-README.md`
 - Execution roadmap: `ROADMAP.md`
+- Ontology steering note: `docs/ONTOLOGY_STEERING.md`
 - Pipeline: `kb_pipeline.py`
 - KB run HTML renderer: `scripts/render_kb_run_html.py`
 - Shared theme renderer: `scripts/render_dialog_json_html.py`

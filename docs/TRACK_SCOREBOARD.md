@@ -1,8 +1,28 @@
 ﻿# Track Scoreboard
 
-Last updated: 2026-04-13
+Last updated: 2026-04-17
 
-## Frontier Width Tracks (Ollama, qwen35-semparse:9b, runtime=core)
+## Read This First
+
+This file is a partitioned scoreboard, not the repo headline.
+Use `docs/PROGRESS.md` for the current source of truth.
+
+Current status after the guarded and recovery reruns:
+
+| Lane | Status | Evidence |
+|---|---|---|
+| Safety gate | green | `88 passed` |
+| Blocksworld strict guarded | green | `20/20` solve/replay, `8/8` pilot, zero-hit `0`, avg gates passed |
+| Narrative strict (mid) | improving, not green | best `0.3812`, `pipeline_pass=1/3` |
+| Narrative strict (upper-mid) | improving, not green | best `0.3922`, `pipeline_pass=1/3` |
+
+References:
+
+- `docs/PROGRESS.md`
+- `docs/reports/BLOCKSWORLD_LANE_GUARDED_2026-04-17.md`
+- `docs/reports/NARRATIVE_PACKS_RECOVERY_2026-04-17.md`
+
+## Historical Width Tracks (2026-04-13 Snapshot, Ollama, qwen35-semparse:9b, runtime=core)
 
 | Track | Passed / Total | Pass Rate | Target | Meets Target |
 |---|---:|---:|---:|---|
@@ -40,7 +60,7 @@ Historical JSON:
 - `docs/data/tracks/examples_all_same_model_latest.json`
 - `docs/data/tracks/book_acid_goldilocks_same_model_latest.json`
 
-## Excursion Ceiling Sweep (GO Run, Bare `qwen3.5:9b`)
+## Excursion Ceiling Sweep (2026-04-13 Historical GO Run, Bare `qwen3.5:9b`)
 
 Model/setup:
 

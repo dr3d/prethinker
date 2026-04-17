@@ -470,6 +470,196 @@ def _goal_signature(goal: str) -> str | None:
     return f"{name.strip()}/{arity}"
 
 
+def _parse_call_expr(expr: str) -> tuple[str, list[str]] | None:
+    text = _normalize_goal(expr).strip()
+    if not text:
+        return None
+    if "(" not in text:
+        return text, []
+    name, args_raw = text.split("(", 1)
+    name = name.strip()
+    if not name:
+        return None
+    args_text = args_raw[:-1] if args_raw.endswith(")") else args_raw
+    args = _split_top_level(args_text, ",") if args_text.strip() else []
+    return name, [str(arg).strip() for arg in args]
+
+
+def _fallback_question_candidates(
+    predicate_signatures: list[str],
+    *,
+    clauses: list[str],
+    question_count: int,
+) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    limit = max(1, int(question_count))
+    seen_queries: set[str] = set()
+
+    def _var_name(index: int) -> str:
+        base = ["X", "Y", "Z", "U", "V", "W"]
+        if index < len(base):
+            return base[index]
+        return f"V{index+1}"
+
+    def _parse_signature(sig: str) -> tuple[str, int] | None:
+        text = str(sig or "").strip().lower()
+        if not text or "/" not in text:
+            return None
+        name, arity_raw = text.rsplit("/", 1)
+        name = name.strip()
+        if not name:
+            return None
+        try:
+            arity = max(0, int(arity_raw))
+        except (TypeError, ValueError):
+            return None
+        return name, arity
+
+    def add(
+        query: str,
+        *,
+        question: str,
+        expect_status: str = "success",
+        min_rows: int | None = None,
+        max_rows: int | None = None,
+        reasoning_type: str = "retrieval",
+        temporal: bool = False,
+    ) -> None:
+        if len(rows) >= limit:
+            return
+        normalized_query = kp._normalize_clause(query)
+        if not normalized_query or normalized_query in seen_queries:
+            return
+        seen_queries.add(normalized_query)
+        rows.append(
+            {
+                "id": f"q{len(rows)+1:02d}",
+                "question": question,
+                "query": normalized_query,
+                "expect_status": expect_status,
+                "min_rows": min_rows if min_rows is not None else (1 if expect_status == "success" else None),
+                "max_rows": max_rows if max_rows is not None else (0 if expect_status == "no_results" else None),
+                "contains_row": None,
+                "reasoning_type": reasoning_type,
+                "temporal": temporal,
+                "rationale": "fallback generated",
+            }
+        )
+
+    def _query_variants_from_expr(expr: str, *, temporal: bool) -> list[str]:
+        parsed = _parse_call_expr(expr)
+        if parsed is None:
+            return [f"{expr}."]
+        name, args = parsed
+        variants: list[str] = []
+        seen_variant_queries: set[str] = set()
+
+        def push(query: str) -> None:
+            normalized_query = kp._normalize_clause(query)
+            if not normalized_query or normalized_query in seen_variant_queries:
+                return
+            seen_variant_queries.add(normalized_query)
+            variants.append(normalized_query)
+
+        base_expr = expr.strip()
+        push(f"{base_expr}.")
+        push(f"{base_expr}, 1 < 2.")
+        if not args:
+            push(f"{base_expr}, true.")
+            return variants
+
+        vars_raw = [_var_name(i) for i in range(len(args))]
+        full_var_expr = f"{name}({', '.join(vars_raw)})"
+        bindings = ", ".join(f"{vars_raw[i]} = {args[i]}" for i in range(len(args)))
+        push(f"{full_var_expr}, {bindings}.")
+        push(f"{full_var_expr}, 1 < 2, {bindings}.")
+
+        for idx, arg in enumerate(args):
+            partial_args = list(args)
+            partial_args[idx] = vars_raw[idx]
+            partial_expr = f"{name}({', '.join(partial_args)})"
+            push(f"{partial_expr}, {vars_raw[idx]} = {arg}.")
+            push(f"{partial_expr}, 1 < 2, {vars_raw[idx]} = {arg}.")
+
+        if len(args) >= 2:
+            push(f"{name}({args[0]}, {vars_raw[1]}), {vars_raw[1]} = {args[1]}.")
+            push(f"{name}({vars_raw[0]}, {args[1]}), {vars_raw[0]} = {args[0]}.")
+
+        if temporal and len(args) >= 2:
+            push(f"{name}({args[0]}, Event).")
+            push(f"{name}(Step, {args[1]}), Step = {args[0]}.")
+            push(f"{name}(Step, Event), Step = {args[0]}, Event = {args[1]}.")
+
+        return variants
+
+    for clause in clauses:
+        normalized_clause = kp._normalize_clause(str(clause or "").strip())
+        if not normalized_clause:
+            continue
+        expr = _normalize_goal(normalized_clause)
+        if not expr or ":-" in expr:
+            continue
+        signature = _goal_signature(expr) or ""
+        temporal = signature.lower() == "at_step/2" or expr.startswith("at_step(")
+        question = (
+            f"Does the KB preserve this temporal clause: `{expr}`?"
+            if temporal
+            else f"Does the KB contain this clause: `{expr}`?"
+        )
+        reasoning_type = "temporal" if temporal else "retrieval"
+        for variant in _query_variants_from_expr(expr, temporal=temporal):
+            add(
+                variant,
+                question=question,
+                reasoning_type=reasoning_type,
+                temporal=temporal,
+            )
+            if len(rows) >= limit:
+                return rows
+
+    def _query_variants(name: str, arity: int) -> list[str]:
+        temporal = name == "at_step"
+        if arity == 0:
+            return [
+                f"{name}.",
+                f"{name}, 1 < 2.",
+                f"{name}, true.",
+            ]
+        args = ", ".join(_var_name(i) for i in range(arity))
+        base = f"{name}({args})"
+        variants = [
+            f"{base}.",
+            f"{base}, {_var_name(0)} = {_var_name(0)}.",
+            f"{base}, 1 < 2.",
+        ]
+        if arity >= 2:
+            variants.append(f"{base}, {_var_name(0)} = {_var_name(0)}, {_var_name(1)} = {_var_name(1)}.")
+        if temporal:
+            variants.append(f"{base}, 1 < 2, {_var_name(0)} = {_var_name(0)}.")
+        return variants
+
+    for sig in predicate_signatures:
+        parsed = _parse_signature(sig)
+        if parsed is None:
+            continue
+        name, arity = parsed
+        temporal = name == "at_step"
+        for query in _query_variants(name, arity):
+            add(
+                query,
+                question=f"Does the KB contain solutions for `{sig}`?",
+                reasoning_type="temporal" if temporal else "retrieval",
+                temporal=temporal,
+            )
+            if len(rows) >= limit:
+                return rows
+
+    if not rows:
+        add("true.", question="Can the runtime answer a trivial query?")
+
+    return rows[:limit]
+
+
 def _is_simple_constraint_goal(goal: str) -> bool:
     text = _normalize_goal(goal).strip()
     if not text:
@@ -506,11 +696,18 @@ def _normalize_question_payload(
     payload: dict[str, Any] | None,
     *,
     fallback_signatures: list[str],
+    fallback_clauses: list[str],
     question_count: int,
+    min_temporal_questions: int,
 ) -> tuple[list[dict[str, Any]], list[str]]:
     notes: list[str] = []
+    fallback_rows = _fallback_question_candidates(
+        fallback_signatures,
+        clauses=fallback_clauses,
+        question_count=max(question_count * 3, question_count + 8),
+    )
     if not isinstance(payload, dict):
-        return _fallback_questions(fallback_signatures, question_count=question_count), ["exam_parse_error_fallback_used"]
+        return fallback_rows[: max(1, int(question_count))], ["exam_parse_error_fallback_used"]
 
     questions_raw = payload.get("questions", [])
     if not isinstance(questions_raw, list):
@@ -582,7 +779,6 @@ def _normalize_question_payload(
 
     if not normalized:
         notes.append("exam_model_returned_no_questions_fallback_used")
-        normalized = _fallback_questions(fallback_signatures, question_count=question_count)
 
     deduped: list[dict[str, Any]] = []
     seen_queries: set[str] = set()
@@ -596,12 +792,16 @@ def _normalize_question_payload(
     if len(deduped) > question_count:
         deduped = deduped[:question_count]
 
-    if len(deduped) < question_count:
-        notes.append("exam_model_returned_fewer_questions_fallback_fill_used")
-        fallback_rows = _fallback_questions(fallback_signatures, question_count=question_count)
+    def _temporal_count(rows: list[dict[str, Any]]) -> int:
+        return sum(1 for row in rows if bool(row.get("temporal")))
+
+    def _append_unique_rows(candidates: list[dict[str, Any]], *, temporal_only: bool | None = None) -> int:
         seen_ids = {str(row.get("id", "")).strip() for row in deduped}
         fallback_index = 1
-        for row in fallback_rows:
+        added = 0
+        for row in candidates:
+            if temporal_only is not None and bool(row.get("temporal")) != temporal_only:
+                continue
             if len(deduped) >= question_count:
                 break
             query = str(row.get("query", "")).strip()
@@ -616,104 +816,49 @@ def _normalize_question_payload(
             deduped.append(clone)
             seen_queries.add(query)
             seen_ids.add(clone_id)
+            added += 1
+        return added
 
-    return deduped, notes
+    temporal_target = max(0, min(int(question_count), int(min_temporal_questions)))
+    if temporal_target > 0 and _temporal_count(deduped) < temporal_target:
+        temporal_candidates = [row for row in fallback_rows if bool(row.get("temporal"))]
+        if temporal_candidates:
+            replaced = 0
+            for candidate in temporal_candidates:
+                if _temporal_count(deduped) >= temporal_target:
+                    break
+                query = str(candidate.get("query", "")).strip()
+                if not query or query in seen_queries:
+                    continue
+                replace_index = None
+                for idx in range(len(deduped) - 1, -1, -1):
+                    if not bool(deduped[idx].get("temporal")):
+                        replace_index = idx
+                        break
+                if replace_index is None:
+                    break
+                old_query = str(deduped[replace_index].get("query", "")).strip()
+                if old_query:
+                    seen_queries.discard(old_query)
+                deduped[replace_index] = dict(candidate)
+                seen_queries.add(query)
+                replaced += 1
+            appended = _append_unique_rows(temporal_candidates, temporal_only=True)
+            if replaced > 0 or appended > 0:
+                notes.append(
+                    f"exam_temporal_floor_fill_used:{_temporal_count(deduped)}/{int(min_temporal_questions)}"
+                )
 
+    if len(deduped) < question_count:
+        notes.append("exam_model_returned_fewer_questions_fallback_fill_used")
+        _append_unique_rows(fallback_rows)
 
-def _fallback_questions(predicate_signatures: list[str], *, question_count: int) -> list[dict[str, Any]]:
-    rows: list[dict[str, Any]] = []
-    limit = max(1, int(question_count))
-
-    def _var_name(index: int) -> str:
-        base = ["X", "Y", "Z", "U", "V", "W"]
-        if index < len(base):
-            return base[index]
-        return f"V{index+1}"
-
-    def _parse_signature(sig: str) -> tuple[str, int] | None:
-        text = str(sig or "").strip().lower()
-        if not text or "/" not in text:
-            return None
-        name, arity_raw = text.rsplit("/", 1)
-        name = name.strip()
-        if not name:
-            return None
-        try:
-            arity = max(0, int(arity_raw))
-        except (TypeError, ValueError):
-            return None
-        return name, arity
-
-    def _query_variants(name: str, arity: int) -> list[str]:
-        temporal = name == "at_step"
-        if arity == 0:
-            return [
-                f"{name}.",
-                f"{name}, 1 < 2.",
-                f"{name}, true.",
-            ]
-        args = ", ".join(_var_name(i) for i in range(arity))
-        base = f"{name}({args})"
-        variants = [
-            f"{base}.",
-            f"{base}, {_var_name(0)} = {_var_name(0)}.",
-            f"{base}, 1 < 2.",
-        ]
-        if arity >= 2:
-            variants.append(f"{base}, {_var_name(0)} = {_var_name(0)}, {_var_name(1)} = {_var_name(1)}.")
-        if temporal:
-            variants.append(f"{base}, 1 < 2, {_var_name(0)} = {_var_name(0)}.")
-        return variants
-
-    def add(
-        query: str,
-        *,
-        question: str,
-        expect_status: str = "success",
-        min_rows: int | None = None,
-        max_rows: int | None = None,
-        reasoning_type: str = "retrieval",
-        temporal: bool = False,
-    ) -> None:
-        if len(rows) >= limit:
-            return
-        rows.append(
-            {
-                "id": f"q{len(rows)+1:02d}",
-                "question": question,
-                "query": kp._normalize_clause(query),
-                "expect_status": expect_status,
-                "min_rows": min_rows if min_rows is not None else (1 if expect_status == "success" else None),
-                "max_rows": max_rows if max_rows is not None else (0 if expect_status == "no_results" else None),
-                "contains_row": None,
-                "reasoning_type": reasoning_type,
-                "temporal": temporal,
-                "rationale": "fallback generated",
-            }
+    if temporal_target > 0 and _temporal_count(deduped) < temporal_target:
+        notes.append(
+            f"exam_temporal_floor_unmet:{_temporal_count(deduped)}/{int(min_temporal_questions)}"
         )
 
-    for sig in predicate_signatures:
-        parsed = _parse_signature(sig)
-        if parsed is None:
-            continue
-        name, arity = parsed
-        temporal = name == "at_step"
-        for query in _query_variants(name, arity):
-            add(
-                query,
-                question=f"Does the KB contain solutions for `{sig}`?",
-                reasoning_type="temporal" if temporal else "retrieval",
-                temporal=temporal,
-            )
-            if len(rows) >= limit:
-                break
-        if len(rows) >= limit:
-            break
-
-    if not rows:
-        add("true.", question="Can the runtime answer a trivial query?")
-
-    return rows[:limit]
+    return deduped, notes
 
 
 def _evaluate_questions(runtime: kp.CorePrologRuntime, questions: list[dict[str, Any]]) -> dict[str, Any]:
@@ -1080,6 +1225,13 @@ def _render_markdown(report: dict[str, Any]) -> str:
         f"- Temporal pass: `{exam.get('temporal_pass_count', 0)}/{exam.get('temporal_question_count', 0)}` "
         f"(`{exam.get('temporal_pass_rate', 0.0)}`)"
     )
+    lines.append(
+        f"- Temporal floor: `{exam.get('temporal_question_count', 0)}`/`{exam.get('temporal_floor_required', 0)}` "
+        f"({'met' if bool(exam.get('temporal_floor_met', False)) else 'UNMET'})"
+    )
+    generation_notes = exam.get("generation_notes", [])
+    if isinstance(generation_notes, list) and generation_notes:
+        lines.append(f"- Generation notes: `{'; '.join(str(note) for note in generation_notes[:8])}`")
     lines.append("")
     lines.append("| ID | Type | Temporal | Passed | Query |")
     lines.append("|---|---|---:|---:|---|")
@@ -1218,10 +1370,22 @@ def main() -> int:
     questions, exam_notes = _normalize_question_payload(
         exam_raw,
         fallback_signatures=predicate_signatures,
+        fallback_clauses=clauses_for_model,
         question_count=int(args.exam_question_count),
+        min_temporal_questions=temporal_expected,
     )
     exam_eval = _evaluate_questions(runtime, questions)
     exam_eval["generation_notes"] = exam_notes
+    exam_eval["temporal_floor_required"] = int(temporal_expected)
+    exam_eval["temporal_floor_met"] = (
+        int(exam_eval.get("temporal_question_count", 0) or 0) >= int(temporal_expected)
+        if int(temporal_expected) > 0
+        else True
+    )
+    exam_eval["temporal_floor_shortfall"] = max(
+        0,
+        int(temporal_expected) - int(exam_eval.get("temporal_question_count", 0) or 0),
+    )
     fact_audit = _fallback_fact_audit_from_exam(
         fact_audit=fact_audit,
         exam_eval=exam_eval,
@@ -1298,6 +1462,13 @@ def main() -> int:
         print(f"Markdown report: {out_md}")
     if args.emit_exam_scenario:
         print(f"Exam scenario: {Path(args.emit_exam_scenario).resolve()}")
+    if not bool(exam_eval.get("temporal_floor_met", True)):
+        print(
+            "[kb-interrogator] warning: temporal question floor unmet "
+            f"({int(exam_eval.get('temporal_question_count', 0) or 0)}/"
+            f"{int(exam_eval.get('temporal_floor_required', 0) or 0)})",
+            file=sys.stderr,
+        )
 
     return 0
 

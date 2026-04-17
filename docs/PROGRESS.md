@@ -1,6 +1,63 @@
 # Deterministic English->Logic Compilation: Progress Note
 
-Date: 2026-04-16
+Date: 2026-04-17
+
+## Update: 2026-04-17 (Guardrail + Recovery Batch)
+
+We completed the guardrail batch, reran the live Ollama spine, and now have a cleaner current public state than the earlier post-registry correction alone.
+
+- Safety gate is now green at `88 passed`.
+- Blocksworld stayed stable under stricter guarded evaluation:
+  - symbolic harness solve/replay: `20/20`
+  - prethinker pilot pass: `8/8`
+  - avg init predicate hit: `0.458334`
+  - avg goal predicate hit: `0.458334`
+  - zero-hit cases: `0`
+  - avg-hit gates `0.45 / 0.45` both passed
+- Narrative strict packs improved from the first honest post-registry baseline, but still remain below full promotion bar:
+  - mid pack: `0.3237` -> `0.3812`, `pipeline_pass=1/3`
+  - upper-mid pack: `0.257644` -> `0.3922`, `pipeline_pass=1/3`
+
+Interpretation:
+
+- The repo is more trustworthy than it was before the registry population, and more capable than it was at the first strict rerun.
+- Stable proof is still concentrated in safety gate + Blocksworld.
+- Narrative recovery is real, but current strict narrative results should still be presented as "improving frontier work," not as a green solved lane.
+
+References:
+
+- `docs/reports/BLOCKSWORLD_LANE_GUARDED_2026-04-17.md`
+- `docs/reports/NARRATIVE_PACKS_RECOVERY_2026-04-17.md`
+- `docs/reports/MID_PACK_GENERAL_STRICT_TEMPORAL_RECOVERY2_2026-04-17.md`
+- `docs/reports/UPPER_MID_PACK_GENERAL_STRICT_TEMPORAL_RECOVERY3_2026-04-17.md`
+
+## Update: 2026-04-17 (Post-Registry Live Verification)
+
+We completed the first live Ollama rerun after populating `modelfiles/predicate_registry.json`, which means the general strict lane is now actually strict.
+
+- Blocksworld sanity check stayed stable
+  - symbolic harness solve/replay: `20/20`
+  - prethinker pilot pass: `8/8`
+  - avg init predicate hit: `0.458334`
+  - avg goal predicate hit: `0.458334`
+  - zero-hit cases: `0`
+- Narrative pack scores were corrected downward once strict admission became real
+  - mid pack: provisional `0.6452` -> post-registry `0.3237`
+  - upper-mid pack: provisional `0.8718` -> post-registry `0.257644`
+  - both packs now show `pipeline_pass=1/3` under the strict temporal rerun
+
+Interpretation:
+
+- the old pack numbers were inflated by an effectively empty general registry.
+- the new numbers are the first honest strict baseline for these two packs.
+- the immediate problem is no longer "does strict mode exist?" but "how do we recover narrative recall without fake strictness?"
+
+References:
+
+- `docs/reports/BLOCKSWORLD_LANE_POST_REGISTRY_2026-04-17.md`
+- `docs/reports/MID_PACK_GENERAL_STRICT_TEMPORAL_2026-04-17.md`
+- `docs/reports/UPPER_MID_PACK_GENERAL_STRICT_TEMPORAL_2026-04-17.md`
+- `docs/reports/NARRATIVE_PACKS_POST_REGISTRY_2026-04-17.md`
 
 ## Update: 2026-04-17 (Blocksworld Lane)
 
@@ -22,7 +79,11 @@ We completed a focused parser upgrade on the strict Blocksworld lane to improve 
 
 Reference: `docs/reports/BLOCKSWORLD_MULTI_FACT_UPGRADE_2026-04-17.md`
 
-## Update: 2026-04-17 (Gated Baseline + Pack Corrections)
+## Historical Note: 2026-04-17 (Pre-Population Pack Correction Attempt, Superseded)
+
+This section is kept as an audit trail.
+The narrative scores in it are no longer the current strict baseline because they were recorded before `modelfiles/predicate_registry.json` was populated.
+Use the post-registry live verification at the top of this document as the current truth.
 
 We added an explicit zero-hit regression gate to the Blocksworld lane runner and validated both pass/fail behavior.
 
@@ -45,14 +106,17 @@ We added an explicit zero-hit regression gate to the Blocksworld lane runner and
     - avg goal predicate hit: `0.458334`
     - zero-hit cases: `0` (gate pass at threshold `0`)
 
-- Mid/upper-mid narrative pack correction (configuration sanity)
+- Mid/upper-mid narrative pack correction (configuration sanity, now superseded)
   - we discovered an invalid comparison run where narrative packs were executed with the Blocksworld predicate registry; that run is now treated as config-mismatch diagnostic, not quality signal.
-  - corrected reruns used general registry path + strict flag:
+  - the provisional reruns below used the general registry path + strict flag before registry population was completed:
     - `tmp/mid_pack_general_strict_temporal_20260417.summary.json`
-      - `run_count=3`, `pipeline_pass=3`, `best_final_score=0.6452`
+      - provisional `run_count=3`, `pipeline_pass=3`, `best_final_score=0.6452`
     - `tmp/upper_mid_pack_general_strict_temporal_20260417.summary.json`
-      - `run_count=3`, `pipeline_pass=3`, `best_final_score=0.8718`
-  - important caveat: current `modelfiles/predicate_registry.json` contains an empty canonical set (`entries=0`), so "strict" here is effectively unconstrained until registry population is completed.
+      - provisional `run_count=3`, `pipeline_pass=3`, `best_final_score=0.8718`
+  - these values must not be used as current strict-lane headline numbers.
+  - they were replaced by the post-registry live reruns above:
+    - mid pack: `0.3237`, `pipeline_pass=1/3`
+    - upper-mid pack: `0.257644`, `pipeline_pass=1/3`
 
 References:
 - `docs/reports/BLOCKSWORLD_LANE_STRICT_MF3_GATE_2026-04-17.md`
