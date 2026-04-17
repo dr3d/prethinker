@@ -7,14 +7,14 @@ Last updated: 2026-04-17
 This file is a partitioned scoreboard, not the repo headline.
 Use `docs/PROGRESS.md` for the current source of truth.
 
-Current status after the guarded and recovery reruns:
+Current status after the latest guarded and recovery reruns:
 
 | Lane | Status | Evidence |
 |---|---|---|
-| Safety gate | green | `88 passed` |
-| Blocksworld strict guarded | green | `20/20` solve/replay, `8/8` pilot, zero-hit `0`, avg gates passed |
-| Narrative strict (mid) | improving, not green | best `0.3812`, `pipeline_pass=1/3` |
-| Narrative strict (upper-mid) | improving, not green | best `0.3922`, `pipeline_pass=1/3` |
+| Safety gate | green | `92 passed` |
+| Blocksworld strict guarded | green | `20/20` solve/replay, `8/8` pilot, zero-hit `0`, avg init `0.75`, avg goal `0.666667` |
+| Narrative strict (mid) | improving, not green | latest rerun best `0.3590`, historical best `0.3812`, `pipeline_pass=1/3` |
+| Narrative strict (upper-mid) | breakout, not green | best `0.967` in strict full mode, pack still `pipeline_pass=1/3` |
 
 References:
 

@@ -717,12 +717,25 @@ def _normalize_question_payload(
 
     known_signatures = {str(sig).strip().lower() for sig in fallback_signatures if str(sig).strip()}
     dropped_invalid_signature = 0
+    dropped_rule_queries = 0
+    repaired_truthy_contains_row = 0
+    repaired_boolean_row_bounds = 0
     normalized: list[dict[str, Any]] = []
+
+    def _query_has_variables(query_text: str) -> bool:
+        for token in re.findall(r"\b[_A-Za-z][_A-Za-z0-9]*\b", _normalize_goal(query_text)):
+            if _is_variable_token(token):
+                return True
+        return False
+
     for idx, row in enumerate(questions_raw, start=1):
         if not isinstance(row, dict):
             continue
         query = kp._normalize_clause(str(row.get("query", "")).strip())
         if not query:
+            continue
+        if ":-" in query:
+            dropped_rule_queries += 1
             continue
         if known_signatures and not _query_uses_known_signatures(query, known_signatures):
             dropped_invalid_signature += 1
@@ -752,6 +765,19 @@ def _normalize_question_payload(
             contains_row = None
         else:
             contains_row = {str(k): str(v) for k, v in contains_row.items()}
+        query_has_variables = _query_has_variables(query)
+        if contains_row and not query_has_variables and {str(key).strip().lower() for key in contains_row.keys()} == {"true"}:
+            contains_row = None
+            repaired_truthy_contains_row += 1
+
+        if expect_status == "success" and not query_has_variables:
+            desired_bound = 1
+            if min_rows_value is None or min_rows_value != desired_bound:
+                min_rows_value = desired_bound
+                repaired_boolean_row_bounds += 1
+            if max_rows_value is not None and max_rows_value != desired_bound:
+                max_rows_value = desired_bound
+                repaired_boolean_row_bounds += 1
 
         question_text = str(row.get("question", "")).strip() or f"Question {idx}"
         reasoning_type = str(row.get("reasoning_type", "")).strip().lower() or "retrieval"
@@ -776,6 +802,12 @@ def _normalize_question_payload(
 
     if dropped_invalid_signature > 0:
         notes.append(f"exam_model_invalid_signature_dropped:{dropped_invalid_signature}")
+    if dropped_rule_queries > 0:
+        notes.append(f"exam_model_rule_query_dropped:{dropped_rule_queries}")
+    if repaired_truthy_contains_row > 0:
+        notes.append(f"exam_model_truthy_contains_row_ignored:{repaired_truthy_contains_row}")
+    if repaired_boolean_row_bounds > 0:
+        notes.append(f"exam_model_boolean_row_bounds_repaired:{repaired_boolean_row_bounds}")
 
     if not normalized:
         notes.append("exam_model_returned_no_questions_fallback_used")

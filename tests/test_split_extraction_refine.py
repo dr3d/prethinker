@@ -1,4 +1,5 @@
 from kb_pipeline import (
+    _apply_narrative_fact_normalization_guard,
     _apply_predicate_name_sanity_guard,
     _apply_registry_fact_salvage_guard,
     _heuristic_route,
@@ -90,6 +91,121 @@ def test_predicate_name_sanity_guard_rewrites_is_a_phrase_to_unary_fact():
     assert out["facts"] == ["task(go_live)."]
     assert out["logic_string"] == "task(go_live)."
     assert out["components"]["predicates"] == ["task"]
+    assert events
+
+
+def test_narrative_fact_normalization_guard_rewrites_story_specific_fact_names():
+    parsed = {
+        "intent": "assert_fact",
+        "logic_string": (
+            "at_board_meeting(june_2024, elected_permanent_director(lena_ortiz, pineglass_ridge)).\n"
+            "repaired(washed_out_bridge).\n"
+            "allowed_temporary_relocation(ranger_covenant, four_months).\n"
+            "ordered_move(station, theo_marsh)."
+        ),
+        "facts": [
+            "at_board_meeting(june_2024, elected_permanent_director(lena_ortiz, pineglass_ridge)).",
+            "repaired(washed_out_bridge).",
+            "allowed_temporary_relocation(ranger_covenant, four_months).",
+            "ordered_move(station, theo_marsh).",
+        ],
+        "components": {"atoms": [], "variables": [], "predicates": []},
+        "ambiguities": [],
+        "needs_clarification": False,
+    }
+    out, events = _apply_narrative_fact_normalization_guard(
+        parsed,
+        utterance=(
+            "At the board meeting in June 2024, Lena Ortiz was elected permanent director of Pineglass Ridge. "
+            "That same summer the washed-out bridge was repaired, the ranger covenant allowed temporary relocation "
+            "under four months, and the station ordered the move."
+        ),
+        allowed_signatures={"allowed/3", "director/1", "directed/2", "elected/4", "repaired/1"},
+        strict_registry=True,
+    )
+    assert out["facts"] == [
+        "elected(lena_ortiz, director, pineglass_ridge, june_2024).",
+        "director(lena_ortiz).",
+        "repaired(washed_out_bridge).",
+        "allowed(ranger_covenant, temporary_relocation, four_months).",
+        "directed(station, theo_marsh).",
+    ]
+    assert events
+
+
+def test_narrative_fact_normalization_guard_rewrites_malformed_at_step_fact_to_at3():
+    parsed = {
+        "intent": "assert_fact",
+        "logic_string": "at_step(glasshouse_a, public_micro_grant, september_2021).",
+        "facts": ["at_step(glasshouse_a, public_micro_grant, september_2021)."],
+        "components": {"atoms": [], "variables": [], "predicates": []},
+        "ambiguities": [],
+        "needs_clarification": False,
+    }
+    out, events = _apply_narrative_fact_normalization_guard(
+        parsed,
+        utterance="In September 2021, the trust accepted a public micro-grant for Glasshouse A.",
+        allowed_signatures={"at/3"},
+        strict_registry=True,
+    )
+    assert out["facts"] == ["at(glasshouse_a, public_micro_grant, september_2021)."]
+    assert events
+
+
+def test_narrative_fact_normalization_guard_extracts_summary_roles_and_resolves_mapping_clarification():
+    parsed = {
+        "intent": "assert_fact",
+        "logic_string": "curator(selene).",
+        "facts": ["curator(selene)."],
+        "components": {"atoms": ["selene"], "variables": [], "predicates": ["curator"]},
+        "ambiguities": ["The predicate 'operations_chief' is not in the allowed list."],
+        "needs_clarification": True,
+        "uncertainty_score": 0.81,
+        "uncertainty_label": "high",
+        "clarification_question": (
+            "Which allowed predicates should map 'rights_dispute_settled', 'trail_fund_paid_for', "
+            "'operations_chief', and 'taught'?"
+        ),
+        "clarification_reason": "Predicate mapping unclear.",
+    }
+    out, events = _apply_narrative_fact_normalization_guard(
+        parsed,
+        utterance=(
+            "A rights dispute was finally settled in February 2025. "
+            "The board determined that drone Kestrel belonged to Pineglass Ridge Field Station. "
+            "It also determined that Northstep Imaging and Northstep Visuals should be treated as the same contractor record. "
+            "By then, Lena remained director, Selene remained curator, Noor remained deputy curator, "
+            "Theo remained trail ranger, Malcolm remained operations chief, and Celeste Rowan taught "
+            "two public weekend seminars as a volunteer rather than as an officer."
+        ),
+        allowed_signatures={
+            "closed/2",
+            "curator/1",
+            "deputy_curator/1",
+            "director/1",
+            "operations_chief/1",
+            "owns/2",
+            "related_to/2",
+            "trail_ranger/1",
+            "volunteer/1",
+        },
+        strict_registry=True,
+    )
+    assert out["facts"] == [
+        "curator(selene).",
+        "director(lena).",
+        "deputy_curator(noor).",
+        "trail_ranger(theo).",
+        "operations_chief(malcolm).",
+        "volunteer(celeste_rowan).",
+        "closed(rights_dispute, february_2025).",
+        "owns(pineglass_ridge_field_station, kestrel).",
+        "related_to(northstep_imaging, northstep_visuals).",
+    ]
+    assert out["needs_clarification"] is False
+    assert out["clarification_question"] == ""
+    assert out["clarification_reason"] == ""
+    assert out["uncertainty_label"] == "low"
     assert events
 
 

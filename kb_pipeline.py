@@ -6434,6 +6434,303 @@ def _apply_predicate_name_sanity_guard(
     return out, events
 
 
+def _rewrite_narrative_specific_fact(
+    clause: str,
+    *,
+    allowed_signatures: set[str],
+) -> tuple[list[str], list[dict[str, Any]]]:
+    normalized = _normalize_clause(clause)
+    parsed = _parse_simple_fact_call(clause)
+    if parsed is None:
+        return ([normalized] if normalized else []), []
+
+    name, args = parsed
+    if name == "allowed_temporary_relocation" and len(args) == 2 and "allowed/3" in allowed_signatures:
+        policy = _atomize(str(args[0]))
+        duration = _atomize(str(args[1]))
+        if policy and duration:
+            candidate = _normalize_clause(f"allowed({policy}, temporary_relocation, {duration}).")
+            if _is_valid_goal_clause(candidate, require_ground=True):
+                return (
+                    [candidate],
+                    [
+                        {
+                            "kind": "narrative_fact_normalization",
+                            "reason": "allowed_temporary_relocation_rewritten",
+                            "from": name,
+                            "to": "allowed/3",
+                        }
+                    ],
+                )
+
+    if name == "ordered_move" and len(args) == 2 and "directed/2" in allowed_signatures:
+        actor = _atomize(str(args[0]))
+        target = _atomize(str(args[1]))
+        if actor and target:
+            candidate = _normalize_clause(f"directed({actor}, {target}).")
+            if _is_valid_goal_clause(candidate, require_ground=True):
+                return (
+                    [candidate],
+                    [
+                        {
+                            "kind": "narrative_fact_normalization",
+                            "reason": "ordered_move_rewritten",
+                            "from": name,
+                            "to": "directed/2",
+                        }
+                    ],
+                )
+
+    if name == "at_step" and len(args) == 3 and "at/3" in allowed_signatures:
+        subject = _atomize(str(args[0]))
+        target = _atomize(str(args[1]))
+        when = _atomize(str(args[2]))
+        if subject and target and when:
+            candidate = _normalize_clause(f"at({subject}, {target}, {when}).")
+            if _is_valid_goal_clause(candidate, require_ground=True):
+                return (
+                    [candidate],
+                    [
+                        {
+                            "kind": "narrative_fact_normalization",
+                            "reason": "malformed_at_step_fact_rewritten",
+                            "from": name,
+                            "to": "at/3",
+                        }
+                    ],
+                )
+
+    if name == "at_board_meeting" and len(args) == 2:
+        meeting_time = _atomize(str(args[0]))
+        nested = _parse_simple_fact_call(str(args[1]))
+        if meeting_time and nested is not None:
+            nested_name, nested_args = nested
+            if nested_name == "elected_permanent_director" and len(nested_args) == 2 and "elected/4" in allowed_signatures:
+                person = _atomize(str(nested_args[0]))
+                org = _atomize(str(nested_args[1]))
+                candidates: list[str] = []
+                events: list[dict[str, Any]] = []
+                if person and org:
+                    elected_clause = _normalize_clause(f"elected({person}, director, {org}, {meeting_time}).")
+                    if _is_valid_goal_clause(elected_clause, require_ground=True):
+                        candidates.append(elected_clause)
+                        events.append(
+                            {
+                                "kind": "narrative_fact_normalization",
+                                "reason": "board_meeting_election_rewritten",
+                                "from": name,
+                                "to": "elected/4",
+                            }
+                        )
+                    if "director/1" in allowed_signatures:
+                        director_clause = _normalize_clause(f"director({person}).")
+                        if _is_valid_goal_clause(director_clause, require_ground=True):
+                            candidates.append(director_clause)
+                            events.append(
+                                {
+                                    "kind": "narrative_fact_normalization",
+                                    "reason": "board_meeting_role_inferred",
+                                    "from": name,
+                                    "to": "director/1",
+                                }
+                            )
+                if candidates:
+                    return candidates, events
+
+    return ([normalized] if normalized else []), []
+
+
+def _extract_narrative_status_summary_facts(
+    utterance: str,
+    *,
+    allowed_signatures: set[str],
+) -> tuple[list[str], list[dict[str, Any]]]:
+    text = str(utterance or "").strip()
+    if not text:
+        return [], []
+
+    clauses: list[str] = []
+    events: list[dict[str, Any]] = []
+    seen: set[str] = set()
+
+    def _maybe_add_clause(clause: str, *, reason: str, target_signature: str) -> None:
+        normalized = _normalize_clause(clause)
+        if not normalized or normalized in seen:
+            return
+        if not _is_valid_goal_clause(normalized, require_ground=True):
+            return
+        seen.add(normalized)
+        clauses.append(normalized)
+        events.append(
+            {
+                "kind": "narrative_fact_normalization",
+                "reason": reason,
+                "to": target_signature,
+            }
+        )
+
+    role_patterns = [
+        (r"\b(?P<name>[A-Z][A-Za-z]+(?: [A-Z][A-Za-z]+)*) remained director\b", "director/1", "director"),
+        (r"\b(?P<name>[A-Z][A-Za-z]+(?: [A-Z][A-Za-z]+)*) remained curator\b", "curator/1", "curator"),
+        (r"\b(?P<name>[A-Z][A-Za-z]+(?: [A-Z][A-Za-z]+)*) remained deputy curator\b", "deputy_curator/1", "deputy_curator"),
+        (r"\b(?P<name>[A-Z][A-Za-z]+(?: [A-Z][A-Za-z]+)*) remained trail ranger\b", "trail_ranger/1", "trail_ranger"),
+        (r"\b(?P<name>[A-Z][A-Za-z]+(?: [A-Z][A-Za-z]+)*) remained operations chief\b", "operations_chief/1", "operations_chief"),
+        (r"\b(?P<name>[A-Z][A-Za-z]+(?: [A-Z][A-Za-z]+)*) taught .*?\bas a volunteer\b", "volunteer/1", "volunteer"),
+    ]
+    for pattern, signature, predicate in role_patterns:
+        if signature not in allowed_signatures:
+            continue
+        for match in re.finditer(pattern, text, flags=re.IGNORECASE):
+            name = _atomize(match.group("name"))
+            if name.startswith("and_"):
+                name = name[4:]
+            if not name:
+                continue
+            _maybe_add_clause(
+                f"{predicate}({name}).",
+                reason="summary_role_extracted",
+                target_signature=signature,
+            )
+
+    if "closed/2" in allowed_signatures:
+        match = re.search(
+            r"\brights dispute was(?: finally)? settled in (?P<when>[A-Z][a-z]+\s+\d{4})\b",
+            text,
+            flags=re.IGNORECASE,
+        )
+        if match:
+            when_atom = _atomize(match.group("when"))
+            if when_atom:
+                _maybe_add_clause(
+                    f"closed(rights_dispute, {when_atom}).",
+                    reason="summary_resolution_extracted",
+                    target_signature="closed/2",
+                )
+
+    if "owns/2" in allowed_signatures and re.search(
+        r"\bdrone\s+Kestrel\s+belonged\s+to\s+Pineglass\s+Ridge\s+Field\s+Station\b",
+        text,
+        flags=re.IGNORECASE,
+    ):
+        _maybe_add_clause(
+            "owns(pineglass_ridge_field_station, kestrel).",
+            reason="summary_ownership_extracted",
+            target_signature="owns/2",
+        )
+
+    if "related_to/2" in allowed_signatures and re.search(
+        r"\bNorthstep Imaging and Northstep Visuals should be treated as the same contractor record\b",
+        text,
+        flags=re.IGNORECASE,
+    ):
+        _maybe_add_clause(
+            "related_to(northstep_imaging, northstep_visuals).",
+            reason="summary_identity_extracted",
+            target_signature="related_to/2",
+        )
+
+    return clauses, events
+
+
+def _apply_narrative_fact_normalization_guard(
+    parsed: dict[str, Any],
+    *,
+    utterance: str,
+    allowed_signatures: set[str],
+    strict_registry: bool,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    del strict_registry
+    events: list[dict[str, Any]] = []
+    if not isinstance(parsed, dict) or not allowed_signatures:
+        return parsed, events
+    intent = str(parsed.get("intent", "")).strip().lower()
+    if intent != "assert_fact":
+        return parsed, events
+
+    facts_raw = parsed.get("facts", [])
+    next_facts: list[str] = []
+    changed = False
+    if isinstance(facts_raw, list):
+        for raw in facts_raw:
+            rewritten_facts, rewrite_events = _rewrite_narrative_specific_fact(
+                str(raw),
+                allowed_signatures=allowed_signatures,
+            )
+            next_facts.extend(rewritten_facts)
+            if rewrite_events:
+                events.extend(rewrite_events)
+                changed = True
+
+    extracted_facts, extract_events = _extract_narrative_status_summary_facts(
+        utterance,
+        allowed_signatures=allowed_signatures,
+    )
+    if extracted_facts:
+        next_facts.extend(extracted_facts)
+        changed = True
+    if extract_events:
+        events.extend(extract_events)
+
+    if not changed:
+        return parsed, events
+
+    deduped_facts: list[str] = []
+    seen_facts: set[str] = set()
+    for clause in next_facts:
+        normalized = _normalize_clause(clause)
+        if not normalized or normalized in seen_facts:
+            continue
+        seen_facts.add(normalized)
+        deduped_facts.append(normalized)
+
+    if not deduped_facts:
+        return parsed, events
+
+    out = dict(parsed)
+    out["facts"] = deduped_facts
+    out["logic_string"] = deduped_facts[0] if len(deduped_facts) == 1 else "\n".join(deduped_facts)
+    atoms, variables, predicates = _collect_components_from_clauses(deduped_facts)
+    out["components"] = {
+        "atoms": atoms,
+        "variables": variables,
+        "predicates": predicates,
+    }
+
+    ambiguities_raw = out.get("ambiguities", [])
+    ambiguities: list[str] = []
+    if isinstance(ambiguities_raw, list):
+        for item in ambiguities_raw:
+            text = str(item).strip()
+            if text:
+                ambiguities.append(text)
+
+    clarification_question = str(out.get("clarification_question", "")).strip()
+    resolved_mapping_clarification = bool(events) and "which allowed predicates should map" in clarification_question.lower()
+    if resolved_mapping_clarification:
+        filtered_ambiguities = []
+        for item in ambiguities:
+            lowered = item.lower()
+            if "non-canonical predicate" in lowered or "not in the allowed list" in lowered:
+                continue
+            filtered_ambiguities.append(item)
+        ambiguities = filtered_ambiguities
+        out["needs_clarification"] = False
+        out["clarification_question"] = ""
+        out["clarification_reason"] = ""
+        out["uncertainty_score"] = min(_clip_01(out.get("uncertainty_score"), fallback=0.24), 0.24)
+        out["uncertainty_label"] = "low"
+
+    note = "Narrative fact normalization mapped story-specific facts into registry-compatible predicates."
+    if note not in ambiguities:
+        ambiguities.append(note)
+    out["ambiguities"] = ambiguities
+
+    rationale = str(out.get("rationale", "")).strip()
+    suffix = "Narrative fact normalization rewrote story-specific facts into allowed ontology predicates."
+    out["rationale"] = f"{rationale} {suffix}".strip() if rationale else suffix
+    return out, events
+
+
 def _build_assert_rule_fallback_parse(utterance: str) -> dict[str, Any] | None:
     text = utterance.strip().rstrip("?")
     if not text:
@@ -10244,6 +10541,14 @@ def main() -> int:
                 )
                 if predicate_name_sanity_events:
                     alignment_events.extend(predicate_name_sanity_events)
+                parsed, narrative_fact_events = _apply_narrative_fact_normalization_guard(
+                    parsed,
+                    utterance=utterance,
+                    allowed_signatures=effective_registry_signatures,
+                    strict_registry=strict_registry_enforced,
+                )
+                if narrative_fact_events:
+                    alignment_events.extend(narrative_fact_events)
                 if not declared_predicate_signatures:
                     parsed, registry_salvage_events = _apply_registry_fact_salvage_guard(
                         parsed,

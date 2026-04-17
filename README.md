@@ -10,28 +10,28 @@ Prethinker is operating on one honest evaluation spine:
 
 - [docs/PROGRESS.md](docs/PROGRESS.md) is the source of truth for current status; older April 13-15 notes should be treated as historical unless reaffirmed there.
 - Stable proof lanes are the safety gate and strict Blocksworld, not the broader narrative/story frontier.
-- The safety gate is currently green at `88 passed`.
+- The safety gate is currently green at `92 passed`.
 - Strict Blocksworld is currently stable under the guarded lane (`zero-hit=0`, avg-init gate passed, avg-goal gate passed).
-- The strict mid and upper-mid narrative packs are improved but still not green. Those lanes remain recovery work, not benchmark wins.
+- The strict mid and upper-mid narrative packs remain frontier work. Mid is still stubborn; upper-mid now has a strong full-mode breakout, but the pack is not fully green.
 - Same-model-family stack remains the default (`qwen3.5:9b` parser + clarification path) for tighter behavior and lower VRAM pressure.
 
 ## Current Rollups
 
 - Safety gate:
-  - `88 passed`
+  - `92 passed`
   - command: `python scripts/run_safety_gate.py`
 - Blocksworld strict guarded lane:
   - symbolic harness solve/replay: `20/20`
   - prethinker pilot pass: `8/8`
-  - avg init predicate hit: `0.458334`
-  - avg goal predicate hit: `0.458334`
+  - avg init predicate hit: `0.75`
+  - avg goal predicate hit: `0.666667`
   - zero-hit cases: `0`
   - avg-hit gates: `0.45 / 0.45` both passed
   - artifact: `docs/reports/BLOCKSWORLD_LANE_GUARDED_2026-04-17.md`
 - Narrative strict current recovery status:
-  - mid pack: post-registry baseline `0.3237` -> current best `0.3812`, `pipeline_pass=1/3`
-  - upper-mid pack: post-registry baseline `0.257644` -> current best `0.3922`, `pipeline_pass=1/3`
-  - artifacts: `docs/reports/NARRATIVE_PACKS_RECOVERY_2026-04-17.md`, `docs/reports/MID_PACK_GENERAL_STRICT_TEMPORAL_RECOVERY2_2026-04-17.md`, `docs/reports/UPPER_MID_PACK_GENERAL_STRICT_TEMPORAL_RECOVERY3_2026-04-17.md`
+  - mid pack: post-registry baseline `0.3237`, latest rerun best `0.3590`, historical best `0.3812`, `pipeline_pass=1/3`
+  - upper-mid pack: post-registry baseline `0.257644` -> current best `0.967` in strict full mode, but pack still `pipeline_pass=1/3`
+  - artifacts: `docs/reports/NARRATIVE_PACKS_RECOVERY_2026-04-17.md`, `docs/reports/MID_PACK_GENERAL_STRICT_TEMPORAL_RECOVERY4_2026-04-17.md`, `docs/reports/UPPER_MID_PACK_GENERAL_STRICT_TEMPORAL_RECOVERY5_2026-04-17.md`
 
 ## Historical / Exploratory References
 

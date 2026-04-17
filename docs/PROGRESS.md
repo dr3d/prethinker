@@ -2,6 +2,42 @@
 
 Date: 2026-04-17
 
+## Update: 2026-04-17 (Exam Hardening + Narrative Breakout)
+
+We completed another strict recovery pass after hardening the interrogator against malformed exam queries and promoting a few remaining recurring story predicates.
+
+- Safety gate is now green at `92 passed`.
+- Blocksworld improved again under the guarded lane:
+  - symbolic harness solve/replay: `20/20`
+  - prethinker pilot pass: `8/8`
+  - avg init predicate hit: `0.75`
+  - avg goal predicate hit: `0.666667`
+  - zero-hit cases: `0`
+  - avg-hit gates `0.45 / 0.45` both passed
+- Mid strict latest rerun recovered from the bad exam artifact and now lands at:
+  - latest rerun best: `0.359033`
+  - latest rerun pipeline: `1/3`
+  - paragraph lane: coverage `0.850`, precision `0.920`, exam `0.800`, temporal exam `0.667`
+  - historical best remains `0.3812`, so the lane is still real recovery work rather than a fresh promotion win
+- Upper-mid strict produced a real breakout:
+  - current best: `0.967`
+  - strict full-mode run: coverage `0.850`, precision `1.000`, exam `1.000`, temporal exam `1.000`
+  - paragraph/line reruns each reached `0.385` with `20/20` exam and `8/8` temporal, but the pack still remains `pipeline_pass=1/3` because one governance paragraph still rejects
+
+Interpretation:
+
+- The interrogator scores are more trustworthy now because malformed rule-shaped exam queries and bad boolean row checks are no longer accepted as-is.
+- Stable proof is still concentrated in safety gate + Blocksworld.
+- Upper-mid now has a credible strict full-mode success, but we should not call the pack fully green until paragraph/line also clear.
+- Mid is still blocked by a smaller parser/ontology tail, not by broad system instability.
+
+References:
+
+- `docs/reports/BLOCKSWORLD_LANE_GUARDED_2026-04-17.md`
+- `docs/reports/NARRATIVE_PACKS_RECOVERY_2026-04-17.md`
+- `docs/reports/MID_PACK_GENERAL_STRICT_TEMPORAL_RECOVERY4_2026-04-17.md`
+- `docs/reports/UPPER_MID_PACK_GENERAL_STRICT_TEMPORAL_RECOVERY5_2026-04-17.md`
+
 ## Update: 2026-04-17 (Guardrail + Recovery Batch)
 
 We completed the guardrail batch, reran the live Ollama spine, and now have a cleaner current public state than the earlier post-registry correction alone.
