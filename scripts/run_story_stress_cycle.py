@@ -83,21 +83,58 @@ def _resolve_kb_path(report: dict[str, Any]) -> Path | None:
     return None
 
 
-def _read_kb_preview(path: Path, *, max_lines: int = 240) -> tuple[str, int]:
+def _read_kb_preview(path: Path, *, max_lines: int = 240) -> tuple[str, int, int]:
     if not path.exists():
-        return "", 0
+        return "", 0, 0
     lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+    clause_count = 0
+    for raw in lines:
+        line = str(raw or "").strip()
+        if not line or line.startswith("%") or line.startswith(":-"):
+            continue
+        if line.endswith("."):
+            clause_count += 1
     shown = "\n".join(lines[: max(0, int(max_lines))])
-    return shown, len(lines)
+    return shown, len(lines), clause_count
 
 
-def _score_row(row: dict[str, Any]) -> float:
+def _score_row(
+    row: dict[str, Any],
+    *,
+    requested_exam_questions: int,
+    story_char_count: int,
+) -> float:
     pipeline_ok = 1.0 if str(row.get("pipeline_status", "")).lower() == "passed" else 0.0
     coverage = float(row.get("coverage", 0.0) or 0.0)
     precision = float(row.get("precision", 0.0) or 0.0)
     exam = float(row.get("exam_pass_rate", 0.0) or 0.0)
     temporal_exam = float(row.get("temporal_exam_pass_rate", 0.0) or 0.0)
-    score = (0.2 * pipeline_ok) + (0.25 * coverage) + (0.25 * precision) + (0.2 * exam) + (0.1 * temporal_exam)
+    clause_coverage_ratio = float(row.get("kb_clause_coverage_ratio", 0.0) or 0.0)
+    generated_questions = int(row.get("exam_question_count", 0) or 0)
+    expected_questions = max(1, int(requested_exam_questions))
+    question_count_ratio = min(1.0, float(generated_questions) / float(expected_questions))
+
+    score = (
+        (0.18 * pipeline_ok)
+        + (0.22 * coverage)
+        + (0.22 * precision)
+        + (0.14 * exam)
+        + (0.07 * temporal_exam)
+        + (0.10 * clause_coverage_ratio)
+        + (0.07 * question_count_ratio)
+    )
+
+    if question_count_ratio < 0.5:
+        score *= 0.40
+    if int(story_char_count) >= 3000 and clause_coverage_ratio < 0.25:
+        score *= 0.20
+    if int(story_char_count) >= 3000 and clause_coverage_ratio < 0.25 and question_count_ratio < 0.5:
+        score = min(score, 0.05)
+    if pipeline_ok < 1.0:
+        score *= 0.50
+    if int(story_char_count) >= 3000 and coverage < 0.10 and precision < 0.10:
+        score = min(score, 0.08)
+
     return round(max(0.0, min(1.0, score)), 6)
 
 
@@ -172,6 +209,8 @@ def _render_html_report(
             f"<td>{float(row.get('precision', 0.0) or 0.0):.3f}</td>"
             f"<td>{float(row.get('exam_pass_rate', 0.0) or 0.0):.3f}</td>"
             f"<td>{float(row.get('temporal_exam_pass_rate', 0.0) or 0.0):.3f}</td>"
+            f"<td>{float(row.get('kb_clause_coverage_ratio', 0.0) or 0.0):.3f}</td>"
+            f"<td>{float(row.get('exam_question_count_ratio', 0.0) or 0.0):.3f}</td>"
             f"<td><strong>{float(row.get('final_score', 0.0) or 0.0):.3f}</strong></td>"
             "</tr>"
         )
@@ -241,6 +280,9 @@ def _render_html_report(
     <li>Final score: <strong>{float(best_row.get("final_score", 0.0) or 0.0):.3f}</strong></li>
     <li>KB path: <code>{html.escape(str(best_row.get("kb_path", "")))}</code></li>
     <li>KB clause lines: <code>{kb_line_count}</code></li>
+    <li>KB clause count: <code>{int(best_row.get("kb_clause_count", 0) or 0)}</code></li>
+    <li>KB density ratio: <code>{float(best_row.get("kb_clause_coverage_ratio", 0.0) or 0.0):.3f}</code></li>
+    <li>Exam question ratio: <code>{float(best_row.get("exam_question_count_ratio", 0.0) or 0.0):.3f}</code></li>
   </ul>
 </div>
 
@@ -304,7 +346,7 @@ th {{ background:#1b2735; text-align:left; }}
     <thead>
       <tr>
         <th>Run</th><th>Split</th><th>Temporal</th><th>Pipeline</th><th>Parse Fails</th><th>Apply Fails</th><th>CE Req</th>
-        <th>Coverage</th><th>Precision</th><th>Exam</th><th>Temporal Exam</th><th>Final Score</th>
+        <th>Coverage</th><th>Precision</th><th>Exam</th><th>Temporal Exam</th><th>KB Density</th><th>Exam Q Ratio</th><th>Final Score</th>
       </tr>
     </thead>
     <tbody>{''.join(table_rows)}</tbody>
@@ -391,6 +433,9 @@ def main() -> int:
     )
 
     story_text = story_path.read_text(encoding="utf-8-sig", errors="replace")
+    story_char_count = len(story_text)
+    expected_min_clauses = max(1, min(120, int(story_char_count / 700)))
+    requested_exam_questions = max(1, int(args.exam_question_count))
     rows: list[dict[str, Any]] = []
     run_order = [(mode, temporal) for mode in modes for temporal in temporal_modes]
 
@@ -478,7 +523,12 @@ def main() -> int:
         fact_audit = interrogator_report.get("fact_audit") if isinstance(interrogator_report.get("fact_audit"), dict) else {}
         exam = interrogator_report.get("exam") if isinstance(interrogator_report.get("exam"), dict) else {}
         kb_path = _resolve_kb_path(pipeline_report)
-        kb_preview, kb_line_count = _read_kb_preview(kb_path) if isinstance(kb_path, Path) and kb_path.exists() else ("", 0)
+        kb_preview, kb_line_count, kb_clause_count = (
+            _read_kb_preview(kb_path) if isinstance(kb_path, Path) and kb_path.exists() else ("", 0, 0)
+        )
+        exam_question_count = int(exam.get("question_count", 0) or 0)
+        exam_question_count_ratio = min(1.0, float(exam_question_count) / float(requested_exam_questions))
+        kb_clause_coverage_ratio = min(1.0, float(kb_clause_count) / float(expected_min_clauses))
 
         row: dict[str, Any] = {
             "run_id": run_id,
@@ -498,14 +548,21 @@ def main() -> int:
             "exam_pass_rate": float(exam.get("pass_rate", 0.0) or 0.0),
             "temporal_exam_pass_rate": float(exam.get("temporal_pass_rate", 0.0) or 0.0),
             "exam_pass_count": int(exam.get("pass_count", 0) or 0),
-            "exam_question_count": int(exam.get("question_count", 0) or 0),
+            "exam_question_count": exam_question_count,
+            "exam_question_count_ratio": exam_question_count_ratio,
             "kb_path": str(kb_path) if isinstance(kb_path, Path) else "",
             "kb_line_count": kb_line_count,
+            "kb_clause_count": kb_clause_count,
+            "kb_clause_coverage_ratio": kb_clause_coverage_ratio,
             "kb_preview": kb_preview,
             "exam_questions": exam.get("questions", []) if isinstance(exam.get("questions"), list) else [],
             "ce_rows": _extract_ce_rows(pipeline_report),
         }
-        row["final_score"] = _score_row(row)
+        row["final_score"] = _score_row(
+            row,
+            requested_exam_questions=requested_exam_questions,
+            story_char_count=story_char_count,
+        )
         rows.append(row)
 
     rows_sorted = sorted(rows, key=lambda r: float(r.get("final_score", 0.0) or 0.0), reverse=True)
@@ -539,6 +596,8 @@ def main() -> int:
             "exam_style": str(args.exam_style),
             "exam_question_count": int(args.exam_question_count),
             "exam_min_temporal_questions": int(args.exam_min_temporal_questions),
+            "story_char_count": int(story_char_count),
+            "expected_min_clauses": int(expected_min_clauses),
         },
         "run_count": len(rows),
         "pipeline_pass_count": sum(1 for r in rows if str(r.get("pipeline_status", "")).lower() == "passed"),
@@ -581,9 +640,11 @@ def main() -> int:
         f"- Avg exam pass: `{summary['avg_exam_pass_rate']}`",
         f"- Avg temporal exam pass: `{summary['avg_temporal_exam_pass_rate']}`",
         f"- Best run: `{summary['best_run_id']}` (`{summary['best_final_score']}`)",
+        f"- Story chars: `{story_char_count}`",
+        f"- Expected minimum clauses (density guard): `{expected_min_clauses}`",
         "",
-        "| Run | Split | Temporal | Pipeline | Coverage | Precision | Exam | Temporal Exam | Final Score |",
-        "|---|---|---|---|---:|---:|---:|---:|---:|",
+        "| Run | Split | Temporal | Pipeline | Coverage | Precision | Exam | Temporal Exam | KB Density | Exam Q Ratio | Final Score |",
+        "|---|---|---|---|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for row in rows_sorted:
         lines.append(
@@ -596,6 +657,8 @@ def main() -> int:
             + f"{float(row.get('precision',0.0) or 0.0):.3f} | "
             + f"{float(row.get('exam_pass_rate',0.0) or 0.0):.3f} | "
             + f"{float(row.get('temporal_exam_pass_rate',0.0) or 0.0):.3f} | "
+            + f"{float(row.get('kb_clause_coverage_ratio',0.0) or 0.0):.3f} | "
+            + f"{float(row.get('exam_question_count_ratio',0.0) or 0.0):.3f} | "
             + f"{float(row.get('final_score',0.0) or 0.0):.3f} |"
         )
     summary_md.parent.mkdir(parents=True, exist_ok=True)

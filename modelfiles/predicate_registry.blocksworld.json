@@ -1,0 +1,39 @@
+{
+  "canonical_predicates": [
+    {
+      "name": "on",
+      "arity": 2,
+      "aliases": []
+    },
+    {
+      "name": "ontable",
+      "arity": 1,
+      "aliases": [
+        "on_table"
+      ]
+    },
+    {
+      "name": "clear",
+      "arity": 1,
+      "aliases": []
+    },
+    {
+      "name": "holding",
+      "arity": 1,
+      "aliases": []
+    },
+    {
+      "name": "handempty",
+      "arity": 0,
+      "aliases": [
+        "arm_empty",
+        "hand_empty"
+      ]
+    },
+    {
+      "name": "at_step",
+      "arity": 2,
+      "aliases": []
+    }
+  ]
+}

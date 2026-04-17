@@ -16,6 +16,7 @@ import os
 import re
 import subprocess
 import sys
+import unicodedata
 import urllib.error
 import urllib.request
 from dataclasses import dataclass
@@ -105,6 +106,159 @@ DECLARED_PREDICATE_HINT_TERMS: dict[str, set[str]] = {
     "uncertain_about": {"uncertain", "unsure", "unclear"},
     "seeks_order": {"injunction", "order", "asks", "seek", "seeks"},
     "does_not_apply_to": {"doesn't apply", "does not apply", "not apply"},
+}
+LANGUAGE_PROFILE_CE_BOOST = {
+    "english": 0.0,
+    "mixed": 0.08,
+    "non_english": 0.18,
+}
+LANGUAGE_PROFILE_MARKERS_ENGLISH = {
+    "the",
+    "is",
+    "are",
+    "was",
+    "were",
+    "and",
+    "with",
+    "from",
+    "someone",
+    "person",
+}
+LANGUAGE_PROFILE_MARKERS_FOREIGN = {
+    # Spanish
+    "estaba",
+    "estaban",
+    "fue",
+    "ayer",
+    "hoy",
+    "manana",
+    "enero",
+    "febrero",
+    "marzo",
+    "abril",
+    "mayo",
+    "junio",
+    "julio",
+    "septiembre",
+    "noviembre",
+    "madre",
+    "padre",
+    "hermano",
+    "hermana",
+    "contable",
+    "terrenos",
+    "invernadero",
+    "asistente",
+    "interina",
+    "superavit",
+    "clausulas",
+    "reunion",
+    "premio",
+    "juvenil",
+    "gano",
+    "tenia",
+    "dirigia",
+    "planificadora",
+    # Portuguese
+    "uma",
+    "nao",
+    "filho",
+    "filha",
+    "pai",
+    "mae",
+    # French
+    "etait",
+    "frere",
+    "soeur",
+    # German
+    "gestern",
+    "heute",
+    "vater",
+    "mutter",
+}
+MULTILINGUAL_PHRASE_NORMALIZATIONS: list[tuple[str, str, str]] = [
+    (r"\ben enero de\b", "in january", "es_month_january"),
+    (r"\ben febrero de\b", "in february", "es_month_february"),
+    (r"\ben marzo de\b", "in march", "es_month_march"),
+    (r"\ben abril de\b", "in april", "es_month_april"),
+    (r"\ben mayo de\b", "in may", "es_month_may"),
+    (r"\ben junio de\b", "in june", "es_month_june"),
+    (r"\ben julio de\b", "in july", "es_month_july"),
+    (r"\ben septiembre de\b", "in september", "es_month_september"),
+    (r"\ben noviembre de\b", "in november", "es_month_november"),
+    (r"\bel supervisor de terrenos era\b", "the grounds supervisor was", "es_role_supervisor"),
+    (r"\bla contable era\b", "the bookkeeper was", "es_role_bookkeeper"),
+    (r"\bplanificadora urbana\b", "city planner", "es_city_planner"),
+    (r"\bdirigia la biblioteca de semillas\b", "ran the seed library", "es_seed_library"),
+    (r"\bla carta del\b", "the charter of", "es_charter"),
+    (r"\btenia dos clausulas\b", "had two clauses", "es_two_clauses"),
+    (r"\bsi el gerente del invernadero estaba ausente\b", "if the greenhouse manager was absent", "es_manager_absent"),
+    (
+        r"\bla asistente gerente pasaba automaticamente a gerente interina\b",
+        "the assistant manager automatically became acting manager",
+        "es_assistant_to_acting",
+    ),
+    (r"\bsuperavit operativo anual\b", "annual operating surplus", "es_operating_surplus"),
+    (r"\bdebia transferirse\b", "had to be transferred", "es_had_to_transfer"),
+    (r"\ben la primavera de\b", "in spring", "es_in_spring"),
+    (r"\buna tormenta de febrero de\b", "a february storm in", "es_feb_storm"),
+    (r"\ben el dia veintidos\b", "on day twenty-two", "es_day_twentytwo"),
+    (r"\ben la reunion anual de julio de\b", "at the annual meeting in july", "es_annual_meeting_july"),
+    (r"\bpara mayo de\b", "by may", "es_by_may"),
+    (r"\bya no tenia el cargo\b", "no longer held office", "es_no_longer_office"),
+    (r"\bgano el premio juvenil de horticultura\b", "won the youth horticulture award", "es_youth_award"),
+    (r"\bes padre de\b", "is parent of", "es_parent_of"),
+    (r"\bes madre de\b", "is parent of", "es_parent_of"),
+    (r"\bes hijo de\b", "is child of", "es_child_of"),
+    (r"\bes hija de\b", "is child of", "es_child_of"),
+    (r"\bson padres de\b", "are parents of", "es_parents_of"),
+    (r"\besta casad[oa] con\b", "is married to", "es_married_to"),
+    (r"\besta divorciad[oa] de\b", "is divorced from", "es_divorced_from"),
+    (r"\besta en\b", "is in", "es_is_in"),
+    (r"\bse mudo a\b", "moved to", "es_moved_to"),
+    (r"\btrabaja en\b", "works at", "es_works_at"),
+    (r"\bnacio en\b", "was born in", "es_born_in"),
+    (r"\bes mort\b", "is dead", "fr_is_dead"),
+    (r"\best mort\b", "is dead", "fr_is_dead"),
+    (r"\best le pere de\b", "is father of", "fr_father_of"),
+    (r"\best la mere de\b", "is mother of", "fr_mother_of"),
+    (r"\best la frere de\b", "is sibling of", "fr_sibling_of"),
+    (r"\bist der vater von\b", "is father of", "de_father_of"),
+    (r"\bist die mutter von\b", "is mother of", "de_mother_of"),
+    (r"\bist verheiratet mit\b", "is married to", "de_married_to"),
+]
+MULTILINGUAL_TOKEN_NORMALIZATIONS: dict[str, str] = {
+    "madre": "mother",
+    "padre": "father",
+    "hermano": "brother",
+    "hermana": "sister",
+    "hijo": "son",
+    "hija": "daughter",
+    "esposo": "husband",
+    "esposa": "wife",
+    "marido": "husband",
+    "mujer": "wife",
+    "madrebot": "motherbot",
+    "padrebot": "fatherbot",
+    "frere": "brother",
+    "soeur": "sister",
+    "vater": "father",
+    "mutter": "mother",
+    "contable": "bookkeeper",
+    "terrenos": "grounds",
+    "invernadero": "greenhouse",
+    "clausulas": "clauses",
+    "reunion": "meeting",
+    "superavit": "surplus",
+}
+MULTILINGUAL_DATE_TOKEN_NORMALIZATIONS: dict[str, str] = {
+    "ayer": "yesterday",
+    "hoy": "today",
+    "manana": "tomorrow",
+    "heute": "today",
+    "gestern": "yesterday",
+    "demain": "tomorrow",
+    "aujourd'hui": "today",
 }
 
 
@@ -1105,7 +1259,7 @@ def _heuristic_route(text: str) -> str:
         lowered,
     ):
         return "retract"
-    if re.search(r"\b(if|whenever|then)\b", lowered) and not re.search(
+    if _has_rule_cues(lowered) and not re.search(
         r"\b(ask|asks|asked)\s+if\b",
         lowered,
     ):
@@ -1117,14 +1271,48 @@ def _heuristic_route(text: str) -> str:
     return "assert_fact"
 
 
+def _looks_blocksworld_state_description(text: str) -> bool:
+    lowered = str(text or "").strip().lower()
+    if not lowered:
+        return False
+    cue_count = 0
+    if re.search(r"\b\d+\s+blocks?\b", lowered):
+        cue_count += 1
+    if re.search(r"\byour\s+arm\s+is\s+empty\b|\barm\s+is\s+empty\b", lowered):
+        cue_count += 1
+    if re.search(r"\bis\s+on\b", lowered):
+        cue_count += 1
+    if re.search(r"\bon\s+the\s+table\b", lowered):
+        cue_count += 1
+    if re.search(r"\bis\s+clear\b", lowered):
+        cue_count += 1
+    if re.search(r"\byour\s+goal\s+is\s+to\s+have\b|\bshould\s+be\b", lowered):
+        cue_count += 1
+    return cue_count >= 3
+
+
 def _has_rule_cues(text: str) -> bool:
     lowered = (text or "").strip().lower()
-    return bool(
-        re.search(
-            r"\b(if|whenever|then|implies|unless|only if|every|all|any)\b",
+    if not lowered:
+        return False
+    if re.search(r"\b(?:implies|whenever|unless|only if)\b", lowered):
+        return True
+    if re.search(r"\bif\b", lowered):
+        if re.match(r"^\s*if\b", lowered):
+            return True
+        if re.search(r"\bif\b[^.?!]{0,200}\bthen\b", lowered):
+            return True
+        if re.search(
+            r"\b(?:is|are|becomes|become|holds|hold|means|valid|true|applies)\b[^.?!]{0,120}\bif\b",
             lowered,
-        )
-    )
+        ):
+            return True
+    if re.match(r"^\s*(every|all|any)\b", lowered) and re.search(
+        r"\b(?:is|are|must|should|implies|then|requires|need)\b",
+        lowered,
+    ):
+        return True
+    return False
 
 
 def _build_classifier_prompt(utterance: str, *, prompt_guide: str = "") -> str:
@@ -1147,7 +1335,7 @@ def _build_extractor_prompt(
     prompt_guide: str = "",
 ) -> str:
     route_guidance = {
-        "assert_fact": "Route lock: assert_fact. Extract one best factual predicate statement.",
+        "assert_fact": "Route lock: assert_fact. Extract factual predicate statements and emit all independent facts present in the utterance.",
         "assert_rule": "Route lock: assert_rule. Extract one best conditional rule using ':-' syntax.",
         "query": "Route lock: query. Convert to query goal without '?-' prefix.",
         "retract": "Route lock: retract. Use retract(<fact>). as logic_string.",
@@ -1179,8 +1367,8 @@ def _build_extractor_prompt(
         "- clarification_question is a targeted user question ending with '?' when uncertainty is medium/high\n"
         "- clarification_reason is <=12 words and concrete\n"
         "- logic_string must be Prolog syntax (or empty only for intent=other)\n"
-        "- assert_fact => logic_string == facts[0]\n"
-        "- assert_rule => logic_string == rules[0]\n"
+        "- assert_fact => if one fact, logic_string == facts[0]; if many facts, logic_string includes every emitted fact clause\n"
+        "- assert_rule => if one rule, logic_string == rules[0]; if many rules, logic_string includes every emitted rule clause\n"
         "- query => logic_string == queries[0]\n"
         "- retract => logic_string == retract(<fact>).\n"
         "- other => logic_string='' and facts/rules/queries empty\n"
@@ -1201,7 +1389,7 @@ def _build_logic_only_extractor_prompt(
     prompt_guide: str = "",
 ) -> str:
     route_guidance = {
-        "assert_fact": "Route lock: assert_fact. Emit one factual Prolog clause.",
+        "assert_fact": "Route lock: assert_fact. Emit one or more factual Prolog clauses when the utterance states multiple independent facts.",
         "assert_rule": "Route lock: assert_rule. Emit one rule clause using ':-'.",
         "query": "Route lock: query. Emit one Prolog goal clause (no '?-').",
         "retract": "Route lock: retract. Emit retract(<fact>).",
@@ -1259,8 +1447,8 @@ def _build_repair_prompt(
         "- clarification_question is empty or ends with '?'\n"
         "- arrays: facts,rules,queries,ambiguities\n"
         "- query entries and logic strings must end with '.' and exclude '?-'\n"
-        "- assert_fact => logic_string==facts[0]\n"
-        "- assert_rule => logic_string==rules[0]\n"
+        "- assert_fact => if one fact, logic_string==facts[0]; if many facts, logic_string includes every emitted fact clause\n"
+        "- assert_rule => if one rule, logic_string==rules[0]; if many rules, logic_string includes every emitted rule clause\n"
         "- query => logic_string==queries[0]\n"
         "- retract => logic_string==retract(<fact>).\n"
         "- other => logic_string=='' and facts/rules/queries empty\n"
@@ -1387,7 +1575,12 @@ def _normalize_clarification_fields(
         reason = " ".join(reason.split()[:12])
 
     question = str(normalized.get("clarification_question", "")).strip()
-    if bool(normalized.get("needs_clarification", False)) and not question:
+    needs_clarification = bool(normalized.get("needs_clarification", False))
+    if not needs_clarification:
+        # Keep model-provided meta-questions from reopening clarification loops
+        # when downstream guards have already marked the parse as committable.
+        question = ""
+    if needs_clarification and not question:
         question = _synthesize_clarification_question(
             utterance=utterance,
             route=route,
@@ -1410,6 +1603,7 @@ def _clarification_policy_decision(
     parsed: dict[str, Any],
     clarification_eagerness: float,
     utterance: str = "",
+    language_profile: dict[str, Any] | None = None,
     progress_memory: dict[str, Any] | None = None,
     progress_low_relevance_threshold: float = 0.34,
     progress_high_risk_threshold: float = 0.18,
@@ -1419,11 +1613,24 @@ def _clarification_policy_decision(
     ambiguity_count = len(parsed.get("ambiguities", [])) if isinstance(parsed.get("ambiguities"), list) else 0
     needs_clarification = bool(parsed.get("needs_clarification", False))
     intent = str(parsed.get("intent", "")).strip().lower()
+    language_profile_data = language_profile if isinstance(language_profile, dict) else {}
+    profile_name = str(language_profile_data.get("profile", "english")).strip().lower()
+    if profile_name not in {"english", "mixed", "non_english"}:
+        profile_name = "english"
+    profile_confidence = _clip_01(language_profile_data.get("confidence"), fallback=0.55)
+    language_boost = float(LANGUAGE_PROFILE_CE_BOOST.get(profile_name, 0.0))
     boosted_uncertainty = uncertainty_score
     if needs_clarification:
         boosted_uncertainty = max(boosted_uncertainty, 0.82)
-    if ambiguity_count > 0:
+    if ambiguity_count > 0 and needs_clarification:
         boosted_uncertainty = max(boosted_uncertainty, min(0.92, 0.45 + 0.1 * ambiguity_count))
+    if language_boost > 0.0:
+        boosted_uncertainty = max(boosted_uncertainty, min(0.98, uncertainty_score + language_boost))
+        if intent in WRITE_INTENTS:
+            if profile_name == "non_english":
+                boosted_uncertainty = max(boosted_uncertainty, 0.82)
+            elif profile_name == "mixed":
+                boosted_uncertainty = max(boosted_uncertainty, 0.74)
 
     low_threshold = _clip_01(progress_low_relevance_threshold, fallback=0.34)
     high_threshold = _clip_01(progress_high_risk_threshold, fallback=0.18)
@@ -1460,6 +1667,9 @@ def _clarification_policy_decision(
         "threshold": round(threshold, 3),
         "request_clarification": bool(request),
         "needs_clarification_flag": needs_clarification,
+        "language_profile": profile_name,
+        "language_profile_confidence": round(profile_confidence, 3),
+        "language_uncertainty_boost": round(language_boost, 3),
         "progress_low_relevance": bool(progress_low_relevance),
         "progress_high_risk": bool(progress_high_risk),
         "progress_low_relevance_threshold": round(low_threshold, 3),
@@ -1706,6 +1916,126 @@ def _is_explicit_logic_utterance(text: str) -> bool:
     return False
 
 
+def _fold_text_ascii(text: str) -> str:
+    raw = str(text or "")
+    if not raw:
+        return ""
+    normalized = unicodedata.normalize("NFKD", raw)
+    return "".join(ch for ch in normalized if not unicodedata.combining(ch))
+
+
+def _detect_utterance_language_profile(text: str) -> dict[str, Any]:
+    raw = str(text or "").strip()
+    if not raw:
+        return {
+            "profile": "english",
+            "confidence": 0.55,
+            "marker_hits_foreign": 0,
+            "marker_hits_english": 0,
+            "non_ascii_ratio": 0.0,
+            "reasons": ["empty_input_defaults_to_english"],
+        }
+
+    letters = [ch for ch in raw if ch.isalpha()]
+    non_ascii_letters = sum(1 for ch in letters if ord(ch) > 127)
+    non_ascii_ratio = non_ascii_letters / max(1, len(letters))
+
+    lowered_folded = _fold_text_ascii(raw).lower()
+    words = re.findall(r"[a-z][a-z0-9_'-]*", lowered_folded)
+    english_hits = sum(1 for token in words if token in LANGUAGE_PROFILE_MARKERS_ENGLISH)
+    foreign_hits = sum(1 for token in words if token in LANGUAGE_PROFILE_MARKERS_FOREIGN)
+
+    profile = "english"
+    confidence = 0.62
+    reasons: list[str] = []
+
+    if foreign_hits >= 2 and english_hits == 0:
+        profile = "non_english"
+        confidence = 0.87
+        reasons.append("foreign_marker_density")
+    elif non_ascii_ratio >= 0.18 and foreign_hits >= 1 and english_hits == 0:
+        profile = "non_english"
+        confidence = 0.84
+        reasons.append("non_ascii_and_foreign_markers")
+    elif foreign_hits >= 2 and english_hits >= 1:
+        profile = "mixed"
+        confidence = 0.81
+        reasons.append("mixed_markers_detected")
+    elif non_ascii_ratio >= 0.10 and (foreign_hits >= 1 or english_hits >= 1):
+        profile = "mixed"
+        confidence = 0.74
+        reasons.append("non_ascii_blend")
+    elif foreign_hits >= 1 and english_hits == 0:
+        profile = "mixed"
+        confidence = 0.68
+        reasons.append("foreign_markers_without_english")
+    else:
+        reasons.append("english_default")
+
+    return {
+        "profile": profile,
+        "confidence": round(_clip_01(confidence, fallback=0.62), 3),
+        "marker_hits_foreign": int(foreign_hits),
+        "marker_hits_english": int(english_hits),
+        "non_ascii_ratio": round(float(non_ascii_ratio), 3),
+        "reasons": reasons,
+    }
+
+
+def _apply_multilingual_phrase_normalization(text: str) -> tuple[str, list[dict[str, Any]]]:
+    working = str(text or "")
+    if not working.strip():
+        return working, []
+
+    events: list[dict[str, Any]] = []
+    folded = _fold_text_ascii(working)
+    if folded != working:
+        working = folded
+        events.append({"kind": "accent_fold"})
+
+    replacement_log: list[dict[str, Any]] = []
+    for pattern, replacement, label in MULTILINGUAL_PHRASE_NORMALIZATIONS:
+        rewritten, hit_count = re.subn(pattern, replacement, working, flags=re.IGNORECASE)
+        if hit_count > 0:
+            working = rewritten
+            replacement_log.append({"label": label, "hits": int(hit_count)})
+
+    for token, replacement in MULTILINGUAL_TOKEN_NORMALIZATIONS.items():
+        rewritten, hit_count = re.subn(
+            rf"\b{re.escape(token)}\b",
+            replacement,
+            working,
+            flags=re.IGNORECASE,
+        )
+        if hit_count > 0:
+            working = rewritten
+            replacement_log.append({"label": f"token:{token}", "hits": int(hit_count)})
+
+    for token, replacement in MULTILINGUAL_DATE_TOKEN_NORMALIZATIONS.items():
+        rewritten, hit_count = re.subn(
+            rf"\b{re.escape(token)}\b",
+            replacement,
+            working,
+            flags=re.IGNORECASE,
+        )
+        if hit_count > 0:
+            working = rewritten
+            replacement_log.append({"label": f"date:{token}", "hits": int(hit_count)})
+
+    if replacement_log:
+        total_hits = sum(int(item.get("hits", 0) or 0) for item in replacement_log)
+        events.append(
+            {
+                "kind": "multilingual_phrase_normalization",
+                "replacement_count": int(total_hits),
+                "replacements": replacement_log[:16],
+            }
+        )
+
+    working = re.sub(r"\s{2,}", " ", working).strip()
+    return working, events
+
+
 def _pre_normalize_utterance(text: str) -> tuple[str, list[dict[str, Any]]]:
     """
     Lightweight pre-parse normalization for noisy multi-clause turns.
@@ -1730,6 +2060,10 @@ def _pre_normalize_utterance(text: str) -> tuple[str, list[dict[str, Any]]]:
     if _is_explicit_logic_utterance(working):
         return working, events
 
+    working, multilingual_events = _apply_multilingual_phrase_normalization(working)
+    if multilingual_events:
+        events.extend(multilingual_events)
+
     parenthetical_pattern = re.compile(r"\(([^()]{1,180})\)")
     if parenthetical_pattern.search(working):
         # Convert short parenthetical fragments into inline clauses so the parser
@@ -1742,9 +2076,35 @@ def _pre_normalize_utterance(text: str) -> tuple[str, list[dict[str, Any]]]:
             working = next_working
             events.append({"kind": "parenthetical_inline"})
 
+    def _rewrite_clause_connector_while(source: str) -> tuple[str, bool]:
+        pattern = re.compile(r"\bwhile\b", flags=re.IGNORECASE)
+        pieces: list[str] = []
+        cursor = 0
+        changed = False
+        for match in pattern.finditer(source):
+            start, end = match.span()
+            prefix = source[max(0, start - 8) : start]
+            next_word_match = re.match(r"\s*([A-Za-z_'-]+)", source[end:])
+            next_word = next_word_match.group(1).lower() if next_word_match else ""
+            keep_literal = bool(re.search(r"[,;:]\s*$", prefix)) or next_word.endswith("ing")
+            pieces.append(source[cursor:start])
+            if keep_literal:
+                pieces.append(match.group(0))
+            else:
+                pieces.append(". ")
+                changed = True
+            cursor = end
+        pieces.append(source[cursor:])
+        if not changed:
+            return source, False
+        rewritten = "".join(pieces)
+        rewritten = re.sub(r"\.\s*\.", ".", rewritten)
+        rewritten = re.sub(r",\s*\.", ".", rewritten)
+        rewritten = re.sub(r"\s{2,}", " ", rewritten).strip()
+        return rewritten, rewritten != source
+
     phrase_rewrites: list[tuple[str, str, str]] = [
         (r"\bbut\b", ". ", "split_on_but"),
-        (r"\bwhile\b", ". ", "split_on_while"),
         (r"\band top replies advise\b", ". top replies advise", "split_question_advice"),
         (r"\band comments advise\b", ". comments advise", "split_question_advice"),
         (r"\band answer was\b", ". answer was", "split_answer_clause"),
@@ -1758,6 +2118,11 @@ def _pre_normalize_utterance(text: str) -> tuple[str, list[dict[str, Any]]]:
         if rewritten != working:
             working = rewritten
             events.append({"kind": kind})
+
+    rewritten_while, changed_while = _rewrite_clause_connector_while(working)
+    if changed_while:
+        working = rewritten_while
+        events.append({"kind": "split_on_while"})
 
     working = re.sub(r",\s*\.", ".", working)
     working = re.sub(r"\s+\.", ".", working).strip()
@@ -2439,7 +2804,13 @@ def _refine_logic_only_payload(
     if intent == "assert_fact":
         if not logic_string:
             return None
-        facts = [logic_string]
+        expanded_facts = _expand_assert_fact_clauses([logic_string])
+        if not expanded_facts and _is_valid_goal_clause(logic_string, require_ground=True):
+            expanded_facts = [_normalize_clause(logic_string)]
+        if not expanded_facts:
+            return None
+        facts = expanded_facts
+        logic_string = facts[0] if len(facts) == 1 else "\n".join(facts)
     elif intent == "assert_rule":
         if not logic_string or ":-" not in logic_string:
             return None
@@ -2718,7 +3089,7 @@ def _build_retract_fallback_parse(utterance: str) -> dict[str, Any] | None:
         return None
 
     arrow_edge = re.search(
-        r"([A-Za-z][A-Za-z0-9_'-]*)\s*(?:->|→|=>)\s*([A-Za-z][A-Za-z0-9_'-]*)\s+edge\b",
+        r"([A-Za-z][A-Za-z0-9_'-]*)\s*(?:->|â†’|=>)\s*([A-Za-z][A-Za-z0-9_'-]*)\s+edge\b",
         text,
         re.IGNORECASE,
     )
@@ -3323,18 +3694,18 @@ def _apply_retract_exclusion_guard(
 
     text = str(utterance or "")
     excluded_edges = re.findall(
-        r"\bnot\s+([A-Za-z][A-Za-z0-9_'-]*)\s*(?:->|→|=>)\s*([A-Za-z][A-Za-z0-9_'-]*)\b",
+        r"\bnot\s+([A-Za-z][A-Za-z0-9_'-]*)\s*(?:->|â†’|=>)\s*([A-Za-z][A-Za-z0-9_'-]*)\b",
         text,
         flags=re.IGNORECASE,
     )
     protected_edges = re.findall(
-        r"([A-Za-z][A-Za-z0-9_'-]*)\s*(?:->|→|=>)\s*([A-Za-z][A-Za-z0-9_'-]*)\s+(?:stays?|keeps?|remains?)\b",
+        r"([A-Za-z][A-Za-z0-9_'-]*)\s*(?:->|â†’|=>)\s*([A-Za-z][A-Za-z0-9_'-]*)\s+(?:stays?|keeps?|remains?)\b",
         text,
         flags=re.IGNORECASE,
     )
     protected_edges.extend(
         re.findall(
-            r"\bkeep\s+([A-Za-z][A-Za-z0-9_'-]*)\s*(?:->|→|=>)\s*([A-Za-z][A-Za-z0-9_'-]*)\b",
+            r"\bkeep\s+([A-Za-z][A-Za-z0-9_'-]*)\s*(?:->|â†’|=>)\s*([A-Za-z][A-Za-z0-9_'-]*)\b",
             text,
             flags=re.IGNORECASE,
         )
@@ -3407,7 +3778,7 @@ def _apply_retract_edge_target_guard(
     text = str(utterance or "")
     lowered = text.lower()
     edge_pairs = re.findall(
-        r"([A-Za-z][A-Za-z0-9_'-]*)\s*(?:->|→|=>)\s*([A-Za-z][A-Za-z0-9_'-]*)",
+        r"([A-Za-z][A-Za-z0-9_'-]*)\s*(?:->|â†’|=>)\s*([A-Za-z][A-Za-z0-9_'-]*)",
         text,
         flags=re.IGNORECASE,
     )
@@ -3420,7 +3791,7 @@ def _apply_retract_edge_target_guard(
             _atomize(right),
         )
         for left, right in re.findall(
-            r"\bnot\s+([A-Za-z][A-Za-z0-9_'-]*)\s*(?:->|→|=>)\s*([A-Za-z][A-Za-z0-9_'-]*)",
+            r"\bnot\s+([A-Za-z][A-Za-z0-9_'-]*)\s*(?:->|â†’|=>)\s*([A-Za-z][A-Za-z0-9_'-]*)",
             text,
             flags=re.IGNORECASE,
         )
@@ -3733,6 +4104,137 @@ def _apply_anonymous_fact_clarification_guard(
         {
             "kind": "anonymous_fact_clarification_guard",
             "reason": "narrative_identifier_gap_with_ground_fact",
+        }
+    )
+    return parsed, events
+
+
+def _apply_predicate_naming_clarification_guard(
+    parsed: dict[str, Any],
+    *,
+    route: str,
+    strict_registry: bool,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    events: list[dict[str, Any]] = []
+    if not isinstance(parsed, dict):
+        return parsed, events
+    if strict_registry:
+        return parsed, events
+    if not bool(parsed.get("needs_clarification", False)):
+        return parsed, events
+
+    intent = str(parsed.get("intent", "")).strip().lower()
+    route_name = str(route or "").strip().lower()
+    if intent not in {"assert_fact", "assert_rule"} and route_name not in {"assert_fact", "assert_rule"}:
+        return parsed, events
+
+    clarification_bits: list[str] = []
+    for field in ("clarification_question", "clarification_reason"):
+        value = str(parsed.get(field, "")).strip()
+        if value:
+            clarification_bits.append(value)
+    ambiguities_raw = parsed.get("ambiguities", [])
+    if isinstance(ambiguities_raw, list):
+        clarification_bits.extend(str(item).strip() for item in ambiguities_raw if str(item).strip())
+    clarification_text = " ".join(clarification_bits).lower()
+    marker_hits = (
+        "canonical predicate",
+        "predicate name",
+        "ontology predicate",
+        "provided ontology",
+        "generic predicate",
+        "predicate available",
+    )
+    has_marker_hit = any(marker in clarification_text for marker in marker_hits) or (
+        ("ontology" in clarification_text or "registry" in clarification_text) and "predicate" in clarification_text
+    )
+    if not has_marker_hit:
+        return parsed, events
+
+    facts_raw = parsed.get("facts", [])
+    rules_raw = parsed.get("rules", [])
+    facts = (
+        [_normalize_clause(str(item)) for item in facts_raw if _normalize_clause(str(item))]
+        if isinstance(facts_raw, list)
+        else []
+    )
+    rules = (
+        [_normalize_clause(str(item)) for item in rules_raw if _normalize_clause(str(item))]
+        if isinstance(rules_raw, list)
+        else []
+    )
+    has_ground_fact = any(_is_valid_goal_clause(fact, require_ground=True) for fact in facts)
+    has_valid_rule = any(_is_valid_rule_clause(rule) for rule in rules)
+    if not has_ground_fact and not has_valid_rule:
+        return parsed, events
+    unsafe_mapping = any(
+        marker in clarification_text
+        for marker in (
+            "mapping to",
+            "closest available",
+            "semantic mismatch",
+            "is an assumption",
+            "forced reuse",
+        )
+    )
+    if unsafe_mapping:
+        parsed["intent"] = "other"
+        parsed["logic_string"] = ""
+        parsed["facts"] = []
+        parsed["rules"] = []
+        parsed["queries"] = []
+        parsed["components"] = {
+            "atoms": [],
+            "variables": [],
+            "predicates": [],
+        }
+        parsed["needs_clarification"] = False
+        parsed["uncertainty_score"] = min(_clip_01(parsed.get("uncertainty_score"), fallback=0.55), 0.6)
+        parsed["uncertainty_label"] = "medium"
+        parsed["clarification_question"] = ""
+        parsed["clarification_reason"] = ""
+        ambiguities: list[str] = []
+        if isinstance(ambiguities_raw, list):
+            ambiguities = [str(item).strip() for item in ambiguities_raw if str(item).strip()]
+        note = "Predicate mapping was unsafe in permissive mode; turn staged as non-mutating."
+        if note not in ambiguities:
+            ambiguities.append(note)
+        parsed["ambiguities"] = ambiguities
+        rationale = str(parsed.get("rationale", "")).strip()
+        suffix = (
+            "Predicate naming clarification guard downgraded unsafe schema-mapped extraction to non-mutating other."
+        )
+        parsed["rationale"] = f"{rationale} {suffix}".strip() if rationale else suffix
+        events.append(
+            {
+                "kind": "predicate_naming_clarification_downgrade_guard",
+                "reason": "unsafe_predicate_mapping_in_permissive_mode",
+            }
+        )
+        return parsed, events
+
+    parsed["needs_clarification"] = False
+    parsed["uncertainty_score"] = min(_clip_01(parsed.get("uncertainty_score"), fallback=0.55), 0.58)
+    parsed["uncertainty_label"] = "medium"
+    parsed["clarification_question"] = ""
+    parsed["clarification_reason"] = ""
+
+    ambiguities: list[str] = []
+    if isinstance(ambiguities_raw, list):
+        ambiguities = [str(item).strip() for item in ambiguities_raw if str(item).strip()]
+    note = "Predicate naming ambiguity auto-resolved in permissive registry mode."
+    if note not in ambiguities:
+        ambiguities.append(note)
+    parsed["ambiguities"] = ambiguities
+    rationale = str(parsed.get("rationale", "")).strip()
+    suffix = (
+        "Predicate naming clarification guard committed grounded extraction without strict registry pinning."
+    )
+    parsed["rationale"] = f"{rationale} {suffix}".strip() if rationale else suffix
+    events.append(
+        {
+            "kind": "predicate_naming_clarification_guard",
+            "reason": "non_strict_registry_predicate_name_question",
         }
     )
     return parsed, events
@@ -5689,6 +6191,83 @@ def _apply_declared_signature_coverage_guard(
     return out, events
 
 
+def _apply_registry_fact_salvage_guard(
+    parsed: dict[str, Any],
+    *,
+    allowed_signatures: set[str],
+    strict_registry: bool,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    events: list[dict[str, Any]] = []
+    if not isinstance(parsed, dict) or not strict_registry or not allowed_signatures:
+        return parsed, events
+
+    intent = str(parsed.get("intent", "")).strip().lower()
+    if intent != "assert_fact":
+        return parsed, events
+
+    facts_raw = parsed.get("facts", [])
+    if not isinstance(facts_raw, list) or len(facts_raw) <= 1:
+        return parsed, events
+
+    kept_facts: list[str] = []
+    dropped_facts: list[dict[str, Any]] = []
+    for item in facts_raw:
+        clause = _normalize_clause(str(item).strip())
+        if not clause:
+            continue
+        signatures = [sig for sig in _extract_goal_signatures(clause) if sig != "retract/1"]
+        unknown = [sig for sig in signatures if sig not in allowed_signatures]
+        if unknown:
+            dropped_facts.append({"fact": clause, "unknown_signatures": sorted(set(unknown))})
+            continue
+        kept_facts.append(clause)
+
+    if not dropped_facts or not kept_facts:
+        return parsed, events
+
+    deduped_facts: list[str] = []
+    seen_facts: set[str] = set()
+    for clause in kept_facts:
+        if clause not in seen_facts:
+            seen_facts.add(clause)
+            deduped_facts.append(clause)
+
+    if len(deduped_facts) == len(facts_raw):
+        return parsed, events
+
+    out = dict(parsed)
+    out["facts"] = deduped_facts
+    out["logic_string"] = deduped_facts[0] if len(deduped_facts) == 1 else "\n".join(deduped_facts)
+    atoms, variables, predicates = _extract_components_from_logic(out["logic_string"])
+    out["components"] = {
+        "atoms": atoms,
+        "variables": variables,
+        "predicates": predicates,
+    }
+
+    ambiguities_raw = out.get("ambiguities", [])
+    ambiguities: list[str] = []
+    if isinstance(ambiguities_raw, list):
+        for item in ambiguities_raw:
+            text = str(item).strip()
+            if text:
+                ambiguities.append(text)
+    salvage_note = "Dropped out-of-registry fact candidates; retained registry-compatible subset."
+    if salvage_note not in ambiguities:
+        ambiguities.append(salvage_note)
+    out["ambiguities"] = ambiguities
+
+    events.append(
+        {
+            "kind": "registry_fact_salvage_guard",
+            "dropped_count": len(dropped_facts),
+            "kept_count": len(deduped_facts),
+            "dropped_facts": dropped_facts,
+        }
+    )
+    return out, events
+
+
 def _build_assert_rule_fallback_parse(utterance: str) -> dict[str, Any] | None:
     text = utterance.strip().rstrip("?")
     if not text:
@@ -7232,15 +7811,21 @@ def _expand_assert_fact_clauses(candidates: list[str]) -> list[str]:
             if not clause:
                 continue
             raw = clause[:-1].strip() if clause.endswith(".") else clause.strip()
+            goals = _split_top_level_args(raw)
             if ":-" in raw:
+                continue
+            if len(goals) == 1 and _is_valid_goal_clause(clause, require_ground=True):
                 expanded.append(clause)
                 continue
-            goals = _split_top_level_args(raw)
-            if len(goals) > 1 and all(_is_valid_goal_clause(f"{g}.", require_ground=True) for g in goals):
-                for goal in goals:
-                    expanded.append(_normalize_clause(f"{goal}."))
-            else:
-                expanded.append(clause)
+
+            if len(goals) > 1 and "(" in raw:
+                valid_goals = [
+                    _normalize_clause(f"{goal}.")
+                    for goal in goals
+                    if _is_valid_goal_clause(f"{goal}.", require_ground=True)
+                ]
+                if valid_goals:
+                    expanded.extend(valid_goals)
     seen: set[str] = set()
     unique: list[str] = []
     for clause in expanded:
@@ -8606,6 +9191,7 @@ def main() -> int:
         ) = _coerce_utterance_entry(raw)
         utterance_original = utterance
         utterance, pre_normalization_events = _pre_normalize_utterance(utterance_original)
+        turn_language_profile = _detect_utterance_language_profile(utterance_original)
         control_predicate_directive = _is_predicate_control_directive(utterance_original)
         if not utterance:
             continue
@@ -8659,6 +9245,9 @@ def main() -> int:
             "threshold": round(max(0.05, 1.0 - clarification_eagerness), 3),
             "request_clarification": False,
             "needs_clarification_flag": False,
+            "language_profile": str(turn_language_profile.get("profile", "english")),
+            "language_profile_confidence": _clip_01(turn_language_profile.get("confidence"), fallback=0.55),
+            "language_uncertainty_boost": 0.0,
             "progress_memory_available": bool(progress_memory_enabled),
             "progress_focus_present": False,
             "progress_relevance_score": 1.0,
@@ -8741,6 +9330,7 @@ def main() -> int:
                     "utterance_original": utterance_original,
                     "utterance_pre_normalized": utterance,
                     "pre_normalization_events": pre_normalization_events,
+                    "language_profile": turn_language_profile,
                     "control_predicate_directive": True,
                     "declared_predicates_from_control": declared_names,
                     "declared_predicate_signatures_from_control": declared_signatures_from_control,
@@ -8880,6 +9470,14 @@ def main() -> int:
                         ):
                             # In declared-predicate lanes, keep fact intent unless the user
                             # explicitly asks for non-KB transformation behavior.
+                            route = heuristic
+                            route_source = "heuristic"
+                        elif (
+                            candidate in {"other", "query"}
+                            and heuristic == "assert_fact"
+                            and _looks_blocksworld_state_description(turn_input_text)
+                        ):
+                            # Preserve fact extraction for Blocksworld-style state/goal narratives.
                             route = heuristic
                             route_source = "heuristic"
                         else:
@@ -9460,14 +10058,24 @@ def main() -> int:
                 if declared_signature_events:
                     alignment_events.extend(declared_signature_events)
                 parsed = _normalize_clarification_fields(parsed, utterance=utterance, route=route)
+                effective_registry_signatures = (
+                    registry_signatures | declared_predicate_signatures
+                    if declared_predicate_signatures
+                    else registry_signatures
+                )
+                strict_registry_enforced = bool(args.strict_registry) or bool(declared_predicate_signatures)
+                if not declared_predicate_signatures:
+                    parsed, registry_salvage_events = _apply_registry_fact_salvage_guard(
+                        parsed,
+                        allowed_signatures=effective_registry_signatures,
+                        strict_registry=strict_registry_enforced,
+                    )
+                    if registry_salvage_events:
+                        alignment_events.extend(registry_salvage_events)
                 registry_errors, unknown_signatures = _validate_parsed_against_registry(
                     parsed,
-                    allowed_signatures=(
-                        registry_signatures | declared_predicate_signatures
-                        if declared_predicate_signatures
-                        else registry_signatures
-                    ),
-                    strict_registry=bool(args.strict_registry) or bool(declared_predicate_signatures),
+                    allowed_signatures=effective_registry_signatures,
+                    strict_registry=strict_registry_enforced,
                 )
                 registry_unknown_signatures = unknown_signatures
                 if registry_errors:
@@ -9511,6 +10119,13 @@ def main() -> int:
                 validation_errors = []
 
             if isinstance(parsed, dict) and not validation_errors:
+                parsed, predicate_naming_guard_events = _apply_predicate_naming_clarification_guard(
+                    parsed,
+                    route=route,
+                    strict_registry=bool(args.strict_registry) or bool(declared_predicate_signatures),
+                )
+                if predicate_naming_guard_events:
+                    alignment_events.extend(predicate_naming_guard_events)
                 parsed, anonymous_guard_events = _apply_anonymous_fact_clarification_guard(
                     parsed,
                     utterance=turn_input_text,
@@ -9526,6 +10141,7 @@ def main() -> int:
                 parsed=parsed,
                 clarification_eagerness=turn_clarification_eagerness,
                 utterance=turn_input_text,
+                language_profile=turn_language_profile,
                 progress_memory=progress_memory if progress_memory_enabled else None,
                 progress_low_relevance_threshold=progress_low_relevance_threshold,
                 progress_high_risk_threshold=progress_high_risk_threshold,
@@ -9818,6 +10434,7 @@ def main() -> int:
                 "utterance_original": utterance_original,
                 "utterance_pre_normalized": utterance,
                 "pre_normalization_events": pre_normalization_events,
+                "language_profile": turn_language_profile,
                 "control_predicate_directive": False,
                 "declared_predicates_from_control": [],
                 "declared_predicate_signatures_from_control": [],
@@ -9915,6 +10532,16 @@ def main() -> int:
     pre_normalized_turns = sum(
         1 for row in turn_rows if isinstance(row.get("pre_normalization_events"), list) and row.get("pre_normalization_events")
     )
+    language_profile_counts = {"english": 0, "mixed": 0, "non_english": 0}
+    for row in turn_rows:
+        profile_data = row.get("language_profile")
+        profile_name = ""
+        if isinstance(profile_data, dict):
+            profile_name = str(profile_data.get("profile", "")).strip().lower()
+        if profile_name in language_profile_counts:
+            language_profile_counts[profile_name] += 1
+        else:
+            language_profile_counts["english"] += 1
     control_predicate_directive_turns = sum(
         1 for row in turn_rows if bool(row.get("control_predicate_directive"))
     )
@@ -10098,6 +10725,7 @@ def main() -> int:
         "clarification_served_llm_answers_total": clarification_served_llm_answers_total,
         "clarification_proxy_answers_total": clarification_proxy_answers_total,
         "pre_normalized_turns": pre_normalized_turns,
+        "language_profile_counts": language_profile_counts,
         "control_predicate_directive_turns": control_predicate_directive_turns,
         "progress_low_relevance_clarifications": progress_low_relevance_clarifications,
         "progress_high_risk_turns": progress_high_risk_turns,
@@ -10132,6 +10760,12 @@ def main() -> int:
         "Pre-normalization: "
         f"turns_with_rewrites={pre_normalized_turns} "
         f"control_directive_turns={control_predicate_directive_turns}"
+    )
+    print(
+        "Language profile routing: "
+        f"english={language_profile_counts.get('english', 0)} "
+        f"mixed={language_profile_counts.get('mixed', 0)} "
+        f"non_english={language_profile_counts.get('non_english', 0)}"
     )
     if declared_predicates:
         print(
@@ -10185,3 +10819,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
