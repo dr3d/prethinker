@@ -3,10 +3,13 @@ const state = {
   config: null,
   configOpen: false,
   heroOpen: false,
+  debugMode: false,
+  pendingClarification: null,
 };
 
 const CONFIG_OPEN_KEY = "prethink_gateway_config_open";
 const HERO_OPEN_KEY = "prethink_gateway_hero_open";
+const DEBUG_MODE_KEY = "prethink_gateway_debug_mode";
 
 const API_BASE = (() => {
   const params = new URLSearchParams(window.location.search);
@@ -50,6 +53,39 @@ function syncHero(config) {
   document.getElementById("compiler-mode-label").textContent =
     `${config.compiler_mode} / handoff=${config.served_handoff_mode}`;
   document.getElementById("served-model-label").textContent = config.served_llm_model;
+  document.getElementById("compiler-pill").textContent = `Compiler: ${config.compiler_model}`;
+  document.getElementById("strict-pill").textContent = config.strict_mode ? "Strict mode on" : "Strict mode off";
+}
+
+function syncConnectionPill(message, tone = "neutral") {
+  const pill = document.getElementById("connection-pill");
+  pill.textContent = message;
+  pill.dataset.tone = tone;
+}
+
+function updateEmptyState() {
+  const emptyState = document.getElementById("empty-state");
+  const chatLog = document.getElementById("chat-log");
+  if (!emptyState || !chatLog) {
+    return;
+  }
+  emptyState.hidden = chatLog.childElementCount > 0;
+}
+
+function updatePendingBanner() {
+  const banner = document.getElementById("pending-banner");
+  if (!banner) {
+    return;
+  }
+  if (!state.pendingClarification || !state.pendingClarification.question) {
+    banner.hidden = true;
+    banner.textContent = "";
+    return;
+  }
+  banner.hidden = false;
+  banner.textContent =
+    `Pending clarification: ${state.pendingClarification.question} ` +
+    "Reply directly, or use /cancel to drop the staged turn.";
 }
 
 function fillConfigForm(config) {
@@ -172,6 +208,94 @@ function summarizeCommitOperations(turn) {
   return lines;
 }
 
+function turnExecution(turn) {
+  const commitPhase = findTurnPhase(turn, "commit");
+  return commitPhase && typeof commitPhase.data === "object" ? commitPhase.data : {};
+}
+
+function outcomeSummary(turn) {
+  const route = String(turn?.route || "other").trim().toLowerCase();
+  const execution = turnExecution(turn);
+  const clarifyPhase = findTurnPhase(turn, "clarify");
+  const commitPhase = findTurnPhase(turn, "commit");
+  const traceSummary =
+    turn?.trace && turn.trace.summary && typeof turn.trace.summary === "object"
+      ? String(turn.trace.summary.overall || "").trim()
+      : "";
+  const operationLines = summarizeCommitOperations(turn);
+  const points = [];
+
+  if (route === "command") {
+    return {
+      badge: "Command",
+      tone: "neutral",
+      title: "Handled as a console command instead of a language turn.",
+      points: ["This bypassed the compiler and deterministic commit path."],
+    };
+  }
+
+  if (String(clarifyPhase?.status || "").trim().toLowerCase() === "required") {
+    const question = String(clarifyPhase?.data?.question || "").trim();
+    if (question) {
+      points.push(`Clarification question: ${question}`);
+    }
+    if (traceSummary) {
+      points.push(traceSummary);
+    }
+    return {
+      badge: "Needs clarification",
+      tone: "caution",
+      title: "Prethinker held this turn instead of guessing.",
+      points,
+    };
+  }
+
+  if (route === "write") {
+    const writesApplied = Number(execution?.writes_applied || operationLines.length || 0);
+    if (writesApplied > 0) {
+      points.push(`${writesApplied} deterministic mutation(s) applied.`);
+    }
+    if (traceSummary) {
+      points.push(traceSummary);
+    }
+    return {
+      badge: String(commitPhase?.status || "").trim().toLowerCase() === "applied" ? "Committed" : "Write attempt",
+      tone: String(commitPhase?.status || "").trim().toLowerCase() === "applied" ? "success" : "danger",
+      title:
+        writesApplied > 0
+          ? "Prethinker converted the utterance into structured KB updates."
+          : "Prethinker treated this as a write, but nothing was committed.",
+      points,
+    };
+  }
+
+  if (route === "query") {
+    const rows = Array.isArray(execution?.query_result?.rows) ? execution.query_result.rows.length : null;
+    if (rows !== null) {
+      points.push(rows > 0 ? `Query matched ${rows} result row(s).` : "Query matched no rows.");
+    }
+    if (traceSummary) {
+      points.push(traceSummary);
+    }
+    return {
+      badge: "Answered",
+      tone: "success",
+      title: "Prethinker treated this as a deterministic query.",
+      points,
+    };
+  }
+
+  if (traceSummary) {
+    points.push(traceSummary);
+  }
+  return {
+    badge: "Reviewed",
+    tone: String(execution?.status || "").trim().toLowerCase() === "error" ? "danger" : "neutral",
+    title: "Prethinker inspected the turn without committing a KB mutation.",
+    points,
+  };
+}
+
 function appendUserMessage(text) {
   const log = document.getElementById("chat-log");
   const article = document.createElement("article");
@@ -179,6 +303,7 @@ function appendUserMessage(text) {
   article.innerHTML = `<header class="message-header">user</header><div class="message-body">${escapeHtml(text)}</div>`;
   log.appendChild(article);
   log.scrollTop = log.scrollHeight;
+  updateEmptyState();
 }
 
 function appendGatewayTurn(turn) {
@@ -187,7 +312,6 @@ function appendGatewayTurn(turn) {
   const article = fragment.querySelector(".message");
   const header = fragment.querySelector(".message-header");
   const body = fragment.querySelector(".message-body");
-  const phaseList = fragment.querySelector(".phase-list");
   article.classList.add("gateway-turn");
 
   const turnDetails = document.createElement("details");
@@ -198,7 +322,7 @@ function appendGatewayTurn(turn) {
   turnSummary.className = "turn-summary";
   turnSummary.innerHTML = `
     <span class="turn-summary-title">${escapeHtml(`console turn ${turn.turn_index}`)}</span>
-    <span class="turn-summary-route">${escapeHtml(`route=${turn.route}`)}</span>
+    <span class="turn-summary-route">${escapeHtml(`${turn.route} route`)}</span>
   `;
 
   const turnContent = document.createElement("div");
@@ -216,6 +340,27 @@ function appendGatewayTurn(turn) {
   const replyTextEl = document.createElement("p");
   replyTextEl.className = "turn-reply-bubble";
   replyTextEl.textContent = assistantText || "(no assistant reply text)";
+  const outcome = outcomeSummary(turn);
+  const outcomeEl = document.createElement("section");
+  outcomeEl.className = `turn-outcome tone-${outcome.tone}`;
+  const outcomeBadge = document.createElement("span");
+  outcomeBadge.className = `outcome-badge tone-${outcome.tone}`;
+  outcomeBadge.textContent = outcome.badge;
+  const outcomeTitle = document.createElement("p");
+  outcomeTitle.className = "turn-outcome-title";
+  outcomeTitle.textContent = outcome.title;
+  outcomeEl.appendChild(outcomeBadge);
+  outcomeEl.appendChild(outcomeTitle);
+  if (Array.isArray(outcome.points) && outcome.points.length) {
+    const outcomeList = document.createElement("ul");
+    outcomeList.className = "turn-outcome-points";
+    for (const point of outcome.points) {
+      const item = document.createElement("li");
+      item.textContent = point;
+      outcomeList.appendChild(item);
+    }
+    outcomeEl.appendChild(outcomeList);
+  }
   const operationLines = summarizeCommitOperations(turn);
   let operationListEl = null;
   if (operationLines.length) {
@@ -252,11 +397,14 @@ function appendGatewayTurn(turn) {
   }
   chatShell.appendChild(replyLabelEl);
   chatShell.appendChild(replyTextEl);
+  chatShell.appendChild(outcomeEl);
   if (operationListEl) {
     chatShell.appendChild(operationListEl);
   }
-  chatShell.appendChild(internalsEl);
   body.appendChild(chatShell);
+  const debugStack = document.createElement("div");
+  debugStack.className = "debug-stack";
+  debugStack.appendChild(internalsEl);
 
   const turnTrace = turn && typeof turn.trace === "object" ? turn.trace : null;
   if (turnTrace) {
@@ -288,7 +436,7 @@ function appendGatewayTurn(turn) {
     traceDetails.appendChild(traceSummary);
     traceDetails.appendChild(traceBody);
     traceCard.appendChild(traceDetails);
-    turnContent.appendChild(traceCard);
+    debugStack.appendChild(traceCard);
   }
 
   for (const phase of phases) {
@@ -316,11 +464,11 @@ function appendGatewayTurn(turn) {
     phaseDetails.appendChild(phaseSummary);
     phaseDetails.appendChild(phaseBody);
     card.appendChild(phaseDetails);
-    phaseList.appendChild(card);
+    debugStack.appendChild(card);
   }
 
   turnContent.appendChild(body);
-  turnContent.appendChild(phaseList);
+  turnContent.appendChild(debugStack);
   turnDetails.appendChild(turnSummary);
   turnDetails.appendChild(turnContent);
   article.innerHTML = "";
@@ -329,6 +477,7 @@ function appendGatewayTurn(turn) {
   const chatLog = document.getElementById("chat-log");
   chatLog.appendChild(article);
   chatLog.scrollTop = chatLog.scrollHeight;
+  updateEmptyState();
   requestAnimationFrame(() => {
     chatLog.scrollTop = chatLog.scrollHeight;
     const pageBottom = Math.max(
@@ -374,8 +523,14 @@ async function submitUtterance(event) {
       }),
     });
     state.sessionId = payload.session_id;
+    state.pendingClarification = payload.pending_clarification || null;
     appendGatewayTurn(payload.turn);
+    updatePendingBanner();
+    syncConnectionPill("Connected", "success");
   } catch (error) {
+    state.pendingClarification = null;
+    updatePendingBanner();
+    syncConnectionPill("Offline", "danger");
     appendGatewayTurn({
       turn_index: 0,
       route: "error",
@@ -473,7 +628,10 @@ async function resetSession() {
       },
     });
     state.sessionId = payload.session_id;
+    state.pendingClarification = null;
     document.getElementById("chat-log").innerHTML = "";
+    updatePendingBanner();
+    updateEmptyState();
   } catch (error) {
     document.getElementById("config-status").textContent = `Reset failed: ${String(error)}`;
   }
@@ -534,6 +692,20 @@ function setHeroOpen(open) {
   }
 }
 
+function setDebugMode(enabled) {
+  state.debugMode = Boolean(enabled);
+  document.body.classList.toggle("debug-mode", state.debugMode);
+  const toggle = document.getElementById("debug-mode-toggle");
+  if (toggle) {
+    toggle.checked = state.debugMode;
+  }
+  try {
+    localStorage.setItem(DEBUG_MODE_KEY, state.debugMode ? "1" : "0");
+  } catch (_error) {
+    // localStorage can be unavailable in strict contexts
+  }
+}
+
 function initHeroDrawer() {
   let initiallyOpen = false;
   try {
@@ -572,6 +744,35 @@ function initConfigDrawer() {
   }
 }
 
+function initDebugMode() {
+  let initiallyEnabled = false;
+  try {
+    initiallyEnabled = localStorage.getItem(DEBUG_MODE_KEY) === "1";
+  } catch (_error) {
+    initiallyEnabled = false;
+  }
+  setDebugMode(initiallyEnabled);
+  const toggle = document.getElementById("debug-mode-toggle");
+  if (toggle) {
+    toggle.addEventListener("change", (event) => {
+      setDebugMode(Boolean(event.target.checked));
+    });
+  }
+}
+
+function initExampleChips() {
+  const field = document.getElementById("utterance");
+  document.querySelectorAll(".example-chip").forEach((button) => {
+    button.addEventListener("click", () => {
+      if (!field) {
+        return;
+      }
+      field.value = String(button.dataset.example || "").trim();
+      field.focus();
+    });
+  });
+}
+
 function initComposerKeyboardSubmit() {
   const utteranceField = document.getElementById("utterance");
   const chatForm = document.getElementById("chat-form");
@@ -589,6 +790,8 @@ function initComposerKeyboardSubmit() {
 window.addEventListener("DOMContentLoaded", async () => {
   initHeroDrawer();
   initConfigDrawer();
+  initDebugMode();
+  initExampleChips();
   initComposerKeyboardSubmit();
   document.getElementById("chat-form").addEventListener("submit", submitUtterance);
   document.getElementById("config-form").addEventListener("submit", saveConfig);
@@ -597,9 +800,15 @@ window.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("strict-lock-button").addEventListener("click", applyStrictBouncerLock);
   try {
     await loadConfig();
+    updatePendingBanner();
+    updateEmptyState();
+    syncConnectionPill("Connected", "success");
     document.getElementById("config-status").textContent =
       API_BASE ? `Connected to Prethinker Console at ${API_BASE}.` : "Connected to same-origin Prethinker Console.";
   } catch (error) {
+    updatePendingBanner();
+    updateEmptyState();
+    syncConnectionPill("Offline", "danger");
     document.getElementById("config-status").textContent =
       `Could not load config from ${apiUrl("/api/config")}. ` +
       "Run `python ui_gateway/main.py` to enable Prethinker Console.";

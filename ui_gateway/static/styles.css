@@ -77,12 +77,13 @@ body::before {
   top: 14px;
   left: 14px;
   z-index: 1200;
-  width: 44px;
+  min-width: 84px;
   height: 44px;
-  padding: 0;
+  padding: 0 12px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   border-radius: 12px;
   color: var(--text-strong);
   background: rgba(8, 16, 24, 0.86);
@@ -100,12 +101,13 @@ body::before {
   top: 14px;
   right: 14px;
   z-index: 1200;
-  width: 44px;
+  min-width: 78px;
   height: 44px;
-  padding: 0;
+  padding: 0 12px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   border-radius: 12px;
   color: var(--text-strong);
   background: rgba(8, 16, 24, 0.86);
@@ -123,6 +125,12 @@ body::before {
   width: 20px;
   height: 16px;
   display: inline-block;
+}
+
+.panel-toggle-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
 }
 
 .panel-glyph::before,
@@ -289,15 +297,141 @@ h2 {
 
 .chat-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
+}
+
+.console-header-copy {
+  display: grid;
+  gap: 8px;
+  max-width: 56rem;
+}
+
+.console-subhead {
+  margin: 0;
+  max-width: 64ch;
+  color: var(--text-soft);
+  line-height: 1.5;
 }
 
 .chat-actions {
   display: inline-flex;
   gap: 8px;
   align-items: center;
+  flex-wrap: wrap;
+}
+
+.status-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin: 14px 0 10px;
+}
+
+.status-pill,
+.debug-toggle {
+  border: 1px solid var(--line);
+  background: rgba(255, 243, 231, 0.06);
+  border-radius: 999px;
+  min-height: 38px;
+  padding: 0 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-soft);
+  font-size: 0.84rem;
+}
+
+.status-pill[data-tone="success"] {
+  border-color: rgba(107, 208, 154, 0.38);
+  color: #d6ffea;
+}
+
+.status-pill[data-tone="danger"] {
+  border-color: rgba(255, 135, 135, 0.34);
+  color: #ffd7d7;
+}
+
+.debug-toggle {
+  cursor: pointer;
+  user-select: none;
+}
+
+.debug-toggle input {
+  accent-color: var(--accent);
+}
+
+.pending-banner,
+.empty-state,
+.turn-outcome,
+.note-card {
+  border: 1px solid var(--line);
+  background: rgba(255, 243, 231, 0.06);
+  border-radius: 18px;
+}
+
+.pending-banner {
+  padding: 12px 14px;
+  margin: 0 0 12px;
+  color: var(--text-soft);
+  line-height: 1.45;
+}
+
+.empty-state {
+  display: grid;
+  gap: 18px;
+  padding: 18px;
+  margin-bottom: 12px;
+}
+
+.empty-state-copy h2 {
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+
+.empty-state-copy p:last-child {
+  margin-bottom: 0;
+  color: var(--text-soft);
+  line-height: 1.5;
+}
+
+.example-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.example-chip {
+  justify-content: flex-start;
+  text-align: left;
+  border-radius: 18px;
+  padding: 14px 16px;
+  color: var(--text-strong);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 214, 173, 0.24);
+}
+
+.empty-state-notes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.note-card {
+  padding: 14px;
+}
+
+.note-card strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.note-card p {
+  margin: 0;
+  color: var(--text-soft);
+  line-height: 1.45;
 }
 
 .chat-log {
@@ -399,7 +533,7 @@ h2 {
 
 .turn-chat-shell {
   display: grid;
-  gap: 4px;
+  gap: 10px;
   margin: 0 0 2px;
 }
 
@@ -416,7 +550,7 @@ h2 {
 }
 
 .turn-operation-list {
-  margin: 2px 0 4px;
+  margin: 0;
   display: grid;
   gap: 2px;
 }
@@ -432,9 +566,76 @@ h2 {
 }
 
 .turn-internals {
-  margin-top: 6px;
   display: grid;
   gap: 4px;
+}
+
+.turn-outcome {
+  padding: 14px;
+  display: grid;
+  gap: 8px;
+}
+
+.turn-outcome.tone-success {
+  border-color: rgba(107, 208, 154, 0.34);
+  background: rgba(92, 173, 124, 0.08);
+}
+
+.turn-outcome.tone-caution {
+  border-color: rgba(255, 191, 104, 0.34);
+  background: rgba(255, 185, 105, 0.08);
+}
+
+.turn-outcome.tone-danger {
+  border-color: rgba(255, 135, 135, 0.34);
+  background: rgba(255, 135, 135, 0.08);
+}
+
+.outcome-badge {
+  width: fit-content;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.outcome-badge.tone-success {
+  background: rgba(107, 208, 154, 0.16);
+  color: #d6ffea;
+}
+
+.outcome-badge.tone-caution {
+  background: rgba(255, 191, 104, 0.16);
+  color: #ffe9bf;
+}
+
+.outcome-badge.tone-danger {
+  background: rgba(255, 135, 135, 0.16);
+  color: #ffe0e0;
+}
+
+.outcome-badge.tone-neutral {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-soft);
+}
+
+.turn-outcome-title {
+  margin: 0;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.turn-outcome-points {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--text-soft);
+  line-height: 1.45;
+}
+
+.turn-outcome-points li + li {
+  margin-top: 4px;
 }
 
 .turn-internal-row {
@@ -460,6 +661,16 @@ h2 {
   font-size: 0.9rem;
   opacity: 0.9;
   overflow-wrap: anywhere;
+}
+
+.debug-stack {
+  display: none;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+body.debug-mode .debug-stack {
+  display: grid;
 }
 
 .phase-list {
@@ -558,6 +769,25 @@ pre {
 .composer textarea {
   min-height: 84px;
   resize: vertical;
+}
+
+.composer-tips {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  color: var(--text-soft);
+  font-size: 0.82rem;
+}
+
+kbd {
+  border: 1px solid rgba(255, 248, 240, 0.24);
+  border-bottom-width: 2px;
+  border-radius: 8px;
+  padding: 2px 6px;
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: 0.78rem;
+  background: rgba(255, 243, 231, 0.08);
 }
 
 button {
@@ -660,17 +890,22 @@ button {
     grid-template-columns: 1fr;
   }
 
+  .example-grid,
+  .empty-state-notes {
+    grid-template-columns: 1fr;
+  }
+
   .config-toggle {
     top: 10px;
     right: 10px;
-    width: 40px;
+    min-width: 74px;
     height: 40px;
   }
 
   .hero-toggle {
     top: 10px;
     left: 10px;
-    width: 40px;
+    min-width: 80px;
     height: 40px;
   }
 
@@ -686,5 +921,9 @@ button {
     right: 8px;
     bottom: 8px;
     width: calc(100vw - 16px);
+  }
+
+  .chat-header {
+    flex-direction: column;
   }
 }

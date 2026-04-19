@@ -215,6 +215,17 @@ Guardrail:
 | Stable local deploy | Ollama + baked tag (`qwen35-semparse:9b`) | Modelfile `SYSTEM` block | reproducible local deployment/testing | requires rebake when prompt changes |
 | Baseline control | Ollama + stock tag (`qwen3.5:9b`) | runtime `--prompt-file` injection | A/B against baked model behavior | easier to drift if launch params vary |
 
+Important parser-lane note:
+
+- Qwen thinking must stay off for Prethinker parsing.
+- Ollama enables thinking by default in the CLI for thinking-capable models.
+- Project code disables thinking explicitly at call time; raw `ollama run qwen35-semparse:9b` does not.
+- For manual CLI use, prefer:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/run_semparse_cli.ps1 -ModelTag qwen35-semparse:9b
+```
+
 ## Reproduce In 5 Minutes
 
 This is the fastest end-to-end sanity path:
@@ -332,6 +343,13 @@ ollama show qwen35-semparse:9b
 ```
 
 In `ollama show`, the `System` block should match your current semantic parser prompt pack.
+
+For interactive parser use after rebake, do not use raw `ollama run qwen35-semparse:9b` without flags.
+Use the helper instead so thinking stays off and JSON format stays enforced:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/run_semparse_cli.ps1 -ModelTag qwen35-semparse:9b
+```
 
 ## Golden KB Benchmark Workflow (Story -> Answer KB)
 

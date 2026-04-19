@@ -94,11 +94,14 @@ $promptText
   if ($RunSmokeTest) {
     Write-Host ""
     Write-Host "Smoke test:"
-    & ollama run $ModelTag $SmokeUtterance
+    & ollama run $ModelTag --think=false --format json $SmokeUtterance
   }
 
   Write-Host ""
   Write-Host "Done. Model '$ModelTag' now uses prompt from '$PromptFile'."
+  Write-Host "IMPORTANT: Ollama CLI enables thinking by default for thinking-capable models."
+  Write-Host "For Prethinker parser use, do not run raw 'ollama run $ModelTag' by itself."
+  Write-Host "Use: powershell -ExecutionPolicy Bypass -File scripts\run_semparse_cli.ps1 -ModelTag $ModelTag"
 }
 finally {
   Pop-Location

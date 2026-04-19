@@ -17,6 +17,7 @@
       title="Toggle overview panel"
     >
       <span class="panel-glyph panel-glyph-left" aria-hidden="true"></span>
+      <span class="panel-toggle-label" aria-hidden="true">Guide</span>
       <span class="sr-only">Toggle Overview Panel</span>
     </button>
 
@@ -30,25 +31,84 @@
       title="Toggle config panel"
     >
       <span class="panel-glyph" aria-hidden="true"></span>
+      <span class="panel-toggle-label" aria-hidden="true">Lab</span>
       <span class="sr-only">Toggle Config Panel</span>
     </button>
 
     <div class="page-shell">
       <main class="panel chat-panel">
         <div class="chat-header">
-          <div>
-            <p class="eyebrow">Conversation</p>
-            <h2>Decision Ledger</h2>
+          <div class="console-header-copy">
+            <p class="eyebrow">Prethinker Console</p>
+            <h1>Try plain language. See what Prethinker actually did.</h1>
+            <p class="console-subhead">
+              This console shows whether Prethinker answered, asked for clarification,
+              or committed structured knowledge to the deterministic runtime.
+            </p>
           </div>
           <div class="chat-actions">
             <button id="export-button" class="ghost-button" type="button">Export Session</button>
             <button id="reset-button" class="ghost-button" type="button">Reset Session</button>
           </div>
         </div>
+        <div class="status-strip" aria-live="polite">
+          <span id="connection-pill" class="status-pill">Connecting…</span>
+          <span id="strict-pill" class="status-pill">Strict mode</span>
+          <span id="compiler-pill" class="status-pill">Compiler</span>
+          <label class="debug-toggle" for="debug-mode-toggle">
+            <input id="debug-mode-toggle" type="checkbox">
+            <span>Debug details</span>
+          </label>
+        </div>
+        <div id="pending-banner" class="pending-banner" hidden></div>
+        <section id="empty-state" class="empty-state">
+          <div class="empty-state-copy">
+            <p class="eyebrow">Start Here</p>
+            <h2>Kick the tires with ordinary language.</h2>
+            <p>
+              Good first tests are simple facts, direct questions, and one ambiguous sentence
+              that should force clarification instead of a guess.
+            </p>
+          </div>
+          <div class="example-grid">
+            <button class="example-chip" type="button" data-example="scotts mom and dad is ann and ian.">
+              Family fact
+            </button>
+            <button class="example-chip" type="button" data-example="hope lives in salem.">
+              Simple location
+            </button>
+            <button class="example-chip" type="button" data-example="barny is freds best friend.">
+              Possessive relation
+            </button>
+            <button class="example-chip" type="button" data-example="can you make muffins with walnuts?">
+              Query after a write
+            </button>
+            <button class="example-chip" type="button" data-example="remember that it ships next week.">
+              Clarification pressure
+            </button>
+            <button class="example-chip" type="button" data-example="at 9am on friday morning fred and wilma entered the pinky penny supermarket and headed over to the turnips.">
+              Narrative sentence
+            </button>
+          </div>
+          <div class="empty-state-notes">
+            <div class="note-card">
+              <strong>What to watch for</strong>
+              <p>Prethinker should either commit facts, answer from the KB, or pause for a clarification.</p>
+            </div>
+            <div class="note-card">
+              <strong>What not to trust</strong>
+              <p>If a turn only looks good after heavy normalization, the trace will show that.</p>
+            </div>
+          </div>
+        </section>
         <div id="chat-log" class="chat-log" aria-live="polite"></div>
         <form id="chat-form" class="composer">
           <label class="sr-only" for="utterance">Utterance</label>
           <textarea id="utterance" name="utterance" rows="3" placeholder="Type an utterance or /help ..." required></textarea>
+          <div class="composer-tips">
+            <span>Plain language is fine.</span>
+            <span>Press <kbd>Enter</kbd> to send, <kbd>Shift</kbd> + <kbd>Enter</kbd> for a new line.</span>
+          </div>
           <button type="submit">Send To Front Door</button>
         </form>
       </main>
@@ -63,7 +123,8 @@
         <button id="hero-close" class="ghost-button hero-close" type="button">Close</button>
       </div>
       <p class="lede">
-        Governed Intent Compiler for robotic ingress, clarification, staged commit, and answer envelopes.
+        Paste everyday language and inspect the governed path: classify, clarify if needed, parse,
+        and deterministically answer or commit.
       </p>
       <div class="hero-grid">
         <div class="mini-card">
@@ -80,21 +141,18 @@
         </div>
       </div>
       <div class="diagram-box">
-        <p>Browser chat</p>
-        <p>↓</p>
-        <p>HTTP `/api/prethink`</p>
-        <p>↓</p>
-        <p>prethink:// gateway router</p>
-        <p>↓</p>
-        <p>clarify / stage / answer</p>
+        <p>1. You type an utterance</p>
+        <p>2. Prethinker routes it</p>
+        <p>3. It either clarifies, answers, or commits</p>
+        <p>4. You can open the trace to see what changed</p>
       </div>
     </aside>
 
     <section id="config-drawer" class="panel config-panel config-drawer" aria-hidden="true">
       <div class="chat-header">
         <div>
-          <p class="eyebrow">Console Config</p>
-          <h2>Defaults</h2>
+          <p class="eyebrow">Lab Settings</p>
+          <h2>Advanced Dials</h2>
         </div>
         <button id="config-close" class="ghost-button config-close" type="button">Close</button>
       </div>
