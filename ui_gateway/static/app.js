@@ -93,6 +93,7 @@ function summarizeTurnInternals(turn) {
   const ingestPhase = findTurnPhase(turn, "ingest");
   const clarifyPhase = findTurnPhase(turn, "clarify");
   const route = String(turn?.route || "").trim().toLowerCase();
+  const trace = turn && typeof turn.trace === "object" ? turn.trace : null;
   const ingestData = ingestPhase && typeof ingestPhase.data === "object" ? ingestPhase.data : {};
   const clarifyData = clarifyPhase && typeof clarifyPhase.data === "object" ? clarifyPhase.data : {};
 
@@ -132,10 +133,22 @@ function summarizeTurnInternals(turn) {
     clarificationText = "Not applicable (slash command).";
   }
 
+  let traceText = "Not captured.";
+  const traceSummary =
+    trace && trace.summary && typeof trace.summary === "object"
+      ? String(trace.summary.overall || "").trim()
+      : "";
+  if (traceSummary) {
+    traceText = traceSummary;
+  } else if (route === "command") {
+    traceText = "Not applicable (slash command).";
+  }
+
   return {
     ambiguity: ambiguityText,
     ambiguities: ambiguitiesText,
     clarification: clarificationText,
+    trace: traceText,
   };
 }
 
@@ -184,7 +197,7 @@ function appendGatewayTurn(turn) {
   const turnSummary = document.createElement("summary");
   turnSummary.className = "turn-summary";
   turnSummary.innerHTML = `
-    <span class="turn-summary-title">${escapeHtml(`gateway turn ${turn.turn_index}`)}</span>
+    <span class="turn-summary-title">${escapeHtml(`console turn ${turn.turn_index}`)}</span>
     <span class="turn-summary-route">${escapeHtml(`route=${turn.route}`)}</span>
   `;
 
@@ -222,6 +235,7 @@ function appendGatewayTurn(turn) {
     ["Ambiguity", internals.ambiguity],
     ["Ambiguities", internals.ambiguities],
     ["Clarification", internals.clarification],
+    ["Trace", internals.trace],
   ];
   for (const [label, value] of internalsRows) {
     const rowEl = document.createElement("p");
@@ -243,6 +257,39 @@ function appendGatewayTurn(turn) {
   }
   chatShell.appendChild(internalsEl);
   body.appendChild(chatShell);
+
+  const turnTrace = turn && typeof turn.trace === "object" ? turn.trace : null;
+  if (turnTrace) {
+    const traceCard = document.createElement("section");
+    traceCard.className = "phase-card trace-card";
+
+    const traceDetails = document.createElement("details");
+    traceDetails.className = "phase-details";
+    traceDetails.open = false;
+
+    const traceSummary = document.createElement("summary");
+    traceSummary.className = "phase-summary-row";
+    traceSummary.innerHTML = `
+      <span class="phase-name">trace</span>
+      <span class="phase-status">${escapeHtml(
+        String((turnTrace.summary && turnTrace.summary.prethink_source) || "captured")
+      )}</span>
+    `;
+
+    const traceBody = document.createElement("div");
+    traceBody.className = "phase-body";
+    traceBody.innerHTML = `
+      <p class="phase-summary">${escapeHtml(
+        String((turnTrace.summary && turnTrace.summary.overall) || "Compiler trace captured.")
+      )}</p>
+      <pre>${escapeHtml(JSON.stringify(turnTrace, null, 2))}</pre>
+    `;
+
+    traceDetails.appendChild(traceSummary);
+    traceDetails.appendChild(traceBody);
+    traceCard.appendChild(traceDetails);
+    turnContent.appendChild(traceCard);
+  }
 
   for (const phase of phases) {
     const card = document.createElement("section");
@@ -334,14 +381,14 @@ async function submitUtterance(event) {
       route: "error",
       assistant: {
         text:
-          `Gateway unavailable at ${apiUrl("/api/health")}. ` +
+          `Prethinker Console unavailable at ${apiUrl("/api/health")}. ` +
           "Run `python ui_gateway/main.py` or use ?apiBase=http://127.0.0.1:8765",
       },
       phases: [
         {
           phase: "network",
           status: "error",
-          summary: "Could not reach local gateway API.",
+          summary: "Could not reach local Prethinker Console API.",
           data: { error: String(error) },
         },
       ],
@@ -551,10 +598,10 @@ window.addEventListener("DOMContentLoaded", async () => {
   try {
     await loadConfig();
     document.getElementById("config-status").textContent =
-      API_BASE ? `Connected to gateway at ${API_BASE}.` : "Connected to same-origin gateway.";
+      API_BASE ? `Connected to Prethinker Console at ${API_BASE}.` : "Connected to same-origin Prethinker Console.";
   } catch (error) {
     document.getElementById("config-status").textContent =
       `Could not load config from ${apiUrl("/api/config")}. ` +
-      "Run `python ui_gateway/main.py` to enable live gateway.";
+      "Run `python ui_gateway/main.py` to enable Prethinker Console.";
   }
 });

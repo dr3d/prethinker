@@ -5,10 +5,13 @@ from kb_pipeline import (
     _apply_predicate_name_sanity_guard,
     _apply_registry_fact_salvage_guard,
     _apply_temporal_predicate_namespace_guard,
+    _build_longform_recovery_chunks,
     _build_temporal_fact_clause,
     _heuristic_route,
     _looks_blocksworld_state_description,
+    _maybe_recover_longform_assert_fact_payload,
     _refine_logic_only_payload,
+    _should_attempt_longform_assert_fact_recovery,
 )
 
 
@@ -167,6 +170,163 @@ def test_build_temporal_fact_clause_skips_reserved_temporal_predicate_facts():
         turn_index=12,
         temporal_predicate="at_step",
     ) is None
+
+
+def test_build_longform_recovery_chunks_prefers_rich_paragraphs():
+    utterance = (
+        "Title Only\n\n"
+        "In January 2021, Nora Lin directed the commons and lived above Market Hall.\n\n"
+        "Mateo Ruiz supervised the grounds and lived in Cedar House with Hana Bell.\n\n"
+        "In July 2024, Priya Das was elected permanent director of Westhaven Commons."
+    )
+    chunks = _build_longform_recovery_chunks(utterance)
+    assert len(chunks) == 3
+    assert all("Title Only" not in chunk for chunk in chunks)
+
+
+def test_should_attempt_longform_assert_fact_recovery_requires_sparse_longform_payload():
+    utterance = (
+        "The Greenhouse at Westhaven Commons\n\n"
+        + (
+            "In January 2021, Nora Lin directed the commons, lived above Market Hall, "
+            "and kept the project calendar near the canal office. "
+        )
+        * 12
+        + "\n\n"
+        + (
+            "Mateo Ruiz supervised the grounds, lived in Cedar House, and coordinated repairs "
+            "with Hana Bell after each storm week. "
+        )
+        * 10
+        + "\n\n"
+        + (
+            "In July 2024, Priya Das was elected permanent director of Westhaven Commons "
+            "after the annual meeting and took over the director ledger. "
+        )
+        * 8
+    )
+    sparse = {
+        "intent": "assert_fact",
+        "logic_string": "at(westhaven_commons, canal).",
+        "facts": ["at(westhaven_commons, canal)."],
+    }
+    rich = {
+        "intent": "assert_fact",
+        "logic_string": "\n".join(f"fact_{idx}(x)." for idx in range(8)),
+        "facts": [f"fact_{idx}(x)." for idx in range(8)],
+    }
+    assert _should_attempt_longform_assert_fact_recovery(sparse, utterance) is True
+    assert _should_attempt_longform_assert_fact_recovery(rich, utterance) is False
+
+
+def test_maybe_recover_longform_assert_fact_payload_harvests_paragraph_facts(monkeypatch):
+    utterance = (
+        "The Greenhouse at Westhaven Commons\n\n"
+        + (
+            "In January 2021, Nora Lin directed the commons, lived above Market Hall, "
+            "and kept the project calendar near the canal office. "
+        )
+        * 8
+        + "\n\n"
+        + (
+            "Mateo Ruiz supervised the grounds, lived in Cedar House with Hana Bell, "
+            "and tracked repair work after each storm week. "
+        )
+        * 8
+        + "\n\n"
+        + (
+            "In July 2024, Priya Das was elected permanent director of Westhaven Commons "
+            "after the annual meeting and took over the director ledger. "
+        )
+        * 7
+    )
+    parsed = {
+        "intent": "assert_fact",
+        "logic_string": "at(westhaven_commons, canal).",
+        "facts": ["at(westhaven_commons, canal)."],
+        "components": {"atoms": ["westhaven_commons", "canal"], "variables": [], "predicates": ["at"]},
+        "ambiguities": [],
+        "needs_clarification": False,
+        "uncertainty_score": 0.12,
+        "uncertainty_label": "low",
+        "clarification_question": "",
+        "clarification_reason": "",
+        "rationale": "initial",
+    }
+    recovered_payloads = iter(
+        [
+            {
+                "intent": "assert_fact",
+                "logic_string": "director(nora_lin).\nlives_in(nora_lin, market_hall_apartment).",
+                "confidence": {"overall": 0.9, "intent": 0.95, "logic": 0.9},
+                "ambiguities": [],
+                "needs_clarification": False,
+                "uncertainty_score": 0.1,
+                "uncertainty_label": "low",
+                "clarification_question": "",
+                "clarification_reason": "",
+                "rationale": "chunk 1",
+            },
+            {
+                "intent": "assert_fact",
+                "logic_string": "grounds_supervisor(mateo_ruiz).\nlives_in(mateo_ruiz, cedar_house).",
+                "confidence": {"overall": 0.9, "intent": 0.95, "logic": 0.9},
+                "ambiguities": [],
+                "needs_clarification": False,
+                "uncertainty_score": 0.1,
+                "uncertainty_label": "low",
+                "clarification_question": "",
+                "clarification_reason": "",
+                "rationale": "chunk 2",
+            },
+            {
+                "intent": "assert_fact",
+                "logic_string": "director(priya_das).",
+                "confidence": {"overall": 0.9, "intent": 0.95, "logic": 0.9},
+                "ambiguities": [],
+                "needs_clarification": False,
+                "uncertainty_score": 0.1,
+                "uncertainty_label": "low",
+                "clarification_question": "",
+                "clarification_reason": "",
+                "rationale": "chunk 3",
+            },
+        ]
+    )
+
+    def fake_call_model_prompt(**kwargs):
+        return {"raw": kwargs.get("prompt_text", "")}
+
+    def fake_parse_model_json(resp, required_keys=None):
+        return next(recovered_payloads), "{}"
+
+    monkeypatch.setattr("kb_pipeline._call_model_prompt", fake_call_model_prompt)
+    monkeypatch.setattr("kb_pipeline._parse_model_json", fake_parse_model_json)
+
+    out, events = _maybe_recover_longform_assert_fact_payload(
+        parsed,
+        utterance=utterance,
+        backend="ollama",
+        base_url="http://127.0.0.1:11434",
+        model="qwen3.5:9b",
+        context_length=8192,
+        timeout_seconds=30,
+        api_key="",
+        known_predicates=[],
+        prompt_guide="",
+    )
+    assert out["facts"] == [
+        "at(westhaven_commons, canal).",
+        "director(nora_lin).",
+        "lives_in(nora_lin, market_hall_apartment).",
+        "grounds_supervisor(mateo_ruiz).",
+        "lives_in(mateo_ruiz, cedar_house).",
+        "director(priya_das).",
+    ]
+    assert "Longform fact recovery" in out["rationale"]
+    assert events
+    assert events[0]["kind"] == "longform_assert_fact_recovery"
+    assert events[0]["recovered_fact_count"] == 5
 
 
 def test_predicate_name_sanity_guard_rewrites_is_a_phrase_to_unary_fact():

@@ -756,7 +756,7 @@ Artifacts:
 - scenario:
   - `kb_scenarios/story_goldilocks_roundtrip.json`
 - report + diagnostics:
-  - `GOLDILOCKS_ROUNDTRIP_REPORT.md`
+  - `docs/goldilocks-roundtrip.html`
   - `tmp/goldilocks_roundtrip_run.json`
   - `tmp/goldilocks_failure_ledger.json`
   - `tmp/goldilocks_reconstructed_story.md`

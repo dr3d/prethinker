@@ -2,7 +2,7 @@
 
 Date: 2026-04-17
 Author: Claude (Opus 4.6) via Cowork
-Target: Priority 1 of `CODE-HANDOFF.md` (2026-04-17)
+Target: the April 17 registry-population priority that was previously tracked in the rolling handoff notes
 
 ## 1) What changed
 

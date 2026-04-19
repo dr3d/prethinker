@@ -2,7 +2,7 @@
 
 This project is a local workbench for building a high-accuracy semantic parser (Qwen 3.5 9B first) that converts natural language into Prolog-ready logic and applies it into named, persistent knowledge bases.
 
-Last updated: 2026-04-17
+Last updated: 2026-04-19
 
 ## Current Focus (2026-04-17)
 
@@ -10,28 +10,29 @@ Prethinker is operating on one honest evaluation spine:
 
 - [docs/PROGRESS.md](docs/PROGRESS.md) is the source of truth for current status; older April 13-15 notes should be treated as historical unless reaffirmed there.
 - Stable proof lanes are the safety gate and strict Blocksworld, not the broader narrative/story frontier.
-- The safety gate is currently green at `92 passed`.
+- The safety gate is currently green at `105 passed`.
 - Strict Blocksworld is currently stable under the guarded lane (`zero-hit=0`, avg-init gate passed, avg-goal gate passed).
-- The strict mid and upper-mid narrative packs remain frontier work. Mid is still stubborn; upper-mid now has a strong full-mode breakout, but the pack is not fully green.
+- The strict mid and upper-mid narrative packs are now pipeline-green at `3/3`, with the biggest new gain in mid `full` mode.
+- Mid `full` is materially better than before, but it still has a temporal-floor caveat; the split lanes remain the strongest signal.
 - Same-model-family stack remains the default (`qwen3.5:9b` parser + clarification path) for tighter behavior and lower VRAM pressure.
 
 ## Current Rollups
 
 - Safety gate:
-  - `92 passed`
+  - `105 passed`
   - command: `python scripts/run_safety_gate.py`
 - Blocksworld strict guarded lane:
   - symbolic harness solve/replay: `20/20`
   - prethinker pilot pass: `8/8`
-  - avg init predicate hit: `0.75`
-  - avg goal predicate hit: `0.666667`
+  - avg init predicate hit: `0.458334`
+  - avg goal predicate hit: `0.458334`
   - zero-hit cases: `0`
   - avg-hit gates: `0.45 / 0.45` both passed
-  - artifact: `docs/reports/BLOCKSWORLD_LANE_GUARDED_2026-04-17.md`
+  - artifact: `docs/reports/FRONTIER_SWEEP_2026-04-17.md`
 - Narrative strict current recovery status:
-  - mid pack: post-registry baseline `0.3237`, latest rerun best `0.3590`, historical best `0.3812`, `pipeline_pass=1/3`
-  - upper-mid pack: post-registry baseline `0.257644` -> current best `0.967` in strict full mode, but pack still `pipeline_pass=1/3`
-  - artifacts: `docs/reports/NARRATIVE_PACKS_RECOVERY_2026-04-17.md`, `docs/reports/MID_PACK_GENERAL_STRICT_TEMPORAL_RECOVERY4_2026-04-17.md`, `docs/reports/UPPER_MID_PACK_GENERAL_STRICT_TEMPORAL_RECOVERY5_2026-04-17.md`
+  - mid pack: `pipeline_pass=3/3`, best `0.9284`; `full` improved from `0/20` exam to `17/20`
+  - upper-mid pack: `pipeline_pass=3/3`, best `0.956`; paragraph and line both reached `20/20`
+  - artifact: `docs/reports/FRONTIER_SWEEP_2026-04-17.md`
 
 ## Historical / Exploratory References
 
@@ -48,23 +49,26 @@ Prethinker is operating on one honest evaluation spine:
 
 - docs hub: [docs/index.html](docs/index.html)
 - science progress note: [docs/PROGRESS.md](docs/PROGRESS.md)
-- current narrative recovery status: [docs/reports/NARRATIVE_PACKS_RECOVERY_2026-04-17.md](docs/reports/NARRATIVE_PACKS_RECOVERY_2026-04-17.md)
+- current frontier sweep: [docs/reports/FRONTIER_SWEEP_2026-04-17.md](docs/reports/FRONTIER_SWEEP_2026-04-17.md)
 - post-registry narrative correction: [docs/reports/NARRATIVE_PACKS_POST_REGISTRY_2026-04-17.md](docs/reports/NARRATIVE_PACKS_POST_REGISTRY_2026-04-17.md)
 - blocksworld strict guarded lane: [docs/reports/BLOCKSWORLD_LANE_GUARDED_2026-04-17.md](docs/reports/BLOCKSWORLD_LANE_GUARDED_2026-04-17.md)
 - KB interrogator guide: [docs/KB_INTERROGATOR.md](docs/KB_INTERROGATOR.md)
 - runtime settings cheat sheet: [docs/RUNTIME_SETTINGS_CHEATSHEET.md](docs/RUNTIME_SETTINGS_CHEATSHEET.md)
 - focus execution plan: [docs/FOCUS_EXECUTION_PLAN.md](docs/FOCUS_EXECUTION_PLAN.md)
 - ontology steering note: [docs/ONTOLOGY_STEERING.md](docs/ONTOLOGY_STEERING.md)
+- console MVP note: [docs/PRETHINK_GATEWAY_MVP.md](docs/PRETHINK_GATEWAY_MVP.md)
+- console trybook: [docs/CONSOLE_TRYBOOK.md](docs/CONSOLE_TRYBOOK.md)
+- explainer article: [docs/EXPLAINER.md](docs/EXPLAINER.md)
+- orchestration notes: [docs/ORCHESTRATION.md](docs/ORCHESTRATION.md)
 - out in the wild article: [docs/WILD_MODE.md](docs/WILD_MODE.md)
 - run explorer: [docs/run-reports-hub.html](docs/run-reports-hub.html)
 - goldilocks roundtrip demo: [docs/goldilocks-roundtrip.html](docs/goldilocks-roundtrip.html)
 - track scoreboard: [docs/TRACK_SCOREBOARD.md](docs/TRACK_SCOREBOARD.md)
-- current handoffs: `CODE-HANDOFF.md`, `CLAUDE-WORK.md`
 - assembly log: [SESSIONS.md](SESSIONS.md)
 
 ## Historical Record
 
-Older phase notes and long-form operational history are preserved in:
+Older phase notes and long-form operational history are preserved in durable docs, not rolling handoff files:
 
 - `docs/run-learnings.md`
 - `SESSIONS.md`

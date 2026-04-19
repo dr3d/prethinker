@@ -1,6 +1,6 @@
 ﻿# AGENT README (Onboarding for Coding Agents)
 
-Last updated: 2026-04-17
+Last updated: 2026-04-19
 
 ## Mission
 
@@ -15,10 +15,11 @@ Primary model focus right now: `qwen3.5:9b`.
 ## Current Truth Snapshot
 
 - Read `docs/PROGRESS.md` first for the current status headline.
-- Safety gate is green (`78 passed`).
-- Strict Blocksworld is stable after the post-registry live rerun.
-- The general registry is now populated, which made the strict narrative baseline materially lower than the earlier provisional numbers.
-- Do not treat the old `0.6452` / `0.8718` narrative pack scores as current strict-lane results.
+- Safety gate is green (`105 passed`) on the latest verified sweep.
+- Strict Blocksworld is stable under the guarded lane (`20/20` solve/replay, `8/8` pilot, zero-hit `0`).
+- The general registry is populated, so strict narrative runs are now actually constrained.
+- The strict mid and upper-mid narrative packs are currently pipeline-green at `3/3`, but mid `full` still carries a temporal-floor caveat.
+- Deprecated rolling handoff files were retired; durable orientation now lives in `README.md`, `docs/`, and `SESSIONS.md`.
 
 ## Workspace Assumption
 
@@ -34,16 +35,17 @@ Primary model focus right now: `qwen3.5:9b`.
 
 1. `README.md`
 2. `docs/PROGRESS.md`
-3. `CODE-HANDOFF.md`
-4. `CLAUDE-WORK.md`
-5. `EXPLAINER.md`
-6. `kb_pipeline.py`
-7. `modelfiles/semantic_parser_system_prompt.md`
-8. `kb_scenarios/README.md`
-9. `scripts/render_kb_run_html.py`
-10. `scripts/build_hub_index.py`
-11. `engine/constraint_propagation.py`
-12. `engine/propagation_runner.py`
+3. `docs/FOCUS_EXECUTION_PLAN.md`
+4. `docs/reports/FRONTIER_SWEEP_2026-04-17.md`
+5. `docs/ONTOLOGY_STEERING.md`
+6. `docs/EXPLAINER.md`
+7. `kb_pipeline.py`
+8. `modelfiles/semantic_parser_system_prompt.md`
+9. `kb_scenarios/README.md`
+10. `scripts/render_kb_run_html.py`
+11. `scripts/build_hub_index.py`
+12. `engine/constraint_propagation.py`
+13. `engine/propagation_runner.py`
 
 ## Fast Resume (Single-Page Handoff)
 
@@ -52,8 +54,9 @@ Primary model focus right now: `qwen3.5:9b`.
 - Current baseline loop:
 1. Run `python scripts/run_safety_gate.py`.
 2. Re-read `docs/PROGRESS.md` and the latest post-registry reports before claiming improvement.
-3. Treat strict Blocksworld as the stable lane and strict narrative packs as the current recovery frontier.
+3. Treat strict Blocksworld as the stable lane and the narrative packs as the frontier that must stay honestly reported.
 - The old higher narrative strict scores (`0.6452`, `0.8718`) are historical/provisional only.
+- The current verified frontier sweep is `docs/reports/FRONTIER_SWEEP_2026-04-17.md`.
 - Provenance fields must remain present in runs:
   - `run_id`
   - `prompt_provenance`

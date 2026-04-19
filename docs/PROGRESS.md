@@ -2,6 +2,48 @@
 
 Date: 2026-04-17
 
+## Update: 2026-04-17 (Longform Full-Mode Recovery + Frontier Sweep)
+
+We completed a longform recovery pass aimed at the weakest honest lane: strict `full` story ingestion on the narrative packs.
+
+- Safety gate is now green at `105 passed`.
+- Blocksworld guarded lane remains stable:
+  - symbolic harness solve/replay: `20/20`
+  - prethinker pilot pass: `8/8`
+  - avg init predicate hit: `0.458334`
+  - avg goal predicate hit: `0.458334`
+  - zero-hit cases: `0`
+- Mid strict now clears `pipeline_pass=3/3` and, most importantly, `full` mode recovered from `0/20` exam to `17/20`.
+  - current best: `0.9284`
+  - `full`: coverage `0.850`, precision `0.850`, exam `17/20`, temporal exam floor still unmet
+  - `paragraph`: coverage `0.850`, precision `0.920`, exam `17/20`, temporal exam `4/4`
+  - `line`: coverage `0.850`, precision `0.920`, exam `17/20`, temporal exam `4/4`
+- Upper-mid strict remains strong and also clears `pipeline_pass=3/3`.
+  - current best: `0.956`
+  - `full`: coverage `0.850`, precision `0.920`, exam `16/20`, temporal exam `12/16`
+  - `paragraph`: coverage `0.920`, precision `0.880`, exam `20/20`, temporal exam `12/12`
+  - `line`: coverage `0.920`, precision `0.880`, exam `20/20`, temporal exam `12/12`
+- Glitch control stayed structurally clean after the `at_step/2` namespace fix:
+  - pipeline `1/1`
+  - coverage `0.850`
+  - precision `0.920`
+  - exam `8/14`
+  - temporal exam still `0/5`
+
+Interpretation:
+
+- The biggest win is real: `full` long-story ingestion is no longer the obvious weak link on the mid pack.
+- The stable lane stayed intact while we made that change.
+- Temporal question quality is still the main honest weakness on the Glitch control lane and the remaining caveat on mid `full`.
+
+References:
+
+- `docs/reports/FRONTIER_SWEEP_2026-04-17.md`
+- `tmp/mid_pack_general_strict_temporal_recovery_fullfix2_20260417.summary.json`
+- `tmp/upper_mid_pack_general_strict_temporal_regressioncheck2_20260417.summary.json`
+- `tmp/glitch_frontier_recovery_temporal2_20260417.summary.json`
+- `tmp/blocksworld_lane_regressioncheck_20260417.summary.json`
+
 ## Update: 2026-04-17 (Exam Hardening + Narrative Breakout)
 
 We completed another strict recovery pass after hardening the interrogator against malformed exam queries and promoting a few remaining recurring story predicates.

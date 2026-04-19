@@ -9,16 +9,16 @@ The goal is to make parser behavior inspectable, reproducible, and improvable ov
 
 ## Current Reality (2026-04-17)
 
-- Safety gate is green: `88 passed`.
+- Safety gate is green: `105 passed`.
 - Strict Blocksworld has a live guarded green baseline (`20/20` solve/replay, `8/8` pilot, zero-hit `0`, avg-hit gates passed).
 - The general predicate registry is no longer empty, so narrative strict runs are now actually constrained.
 - That made the narrative strict baseline materially worse than the earlier provisional numbers:
   - mid pack: `0.6452` -> `0.3237`
   - upper-mid pack: `0.8718` -> `0.257644`
-- Recovery since that correction is real but incomplete:
-  - mid pack: `0.3237` -> `0.3812`, still `pipeline_pass=1/3`
-  - upper-mid pack: `0.257644` -> `0.3922`, still `pipeline_pass=1/3`
-- Current priority remains recovery under honest strictness, not chasing the older inflated scores.
+- Recovery since that correction is now substantial:
+  - mid pack: `0.3237` -> `0.9284`, with `pipeline_pass=3/3` and a major `full`-mode recovery
+  - upper-mid pack: `0.257644` -> `0.956`, with `pipeline_pass=3/3`
+- Current priority is no longer basic pack recovery; it is tightening temporal evaluation honesty without losing the recovered narrative gains.
 
 ## Honest Baseline
 

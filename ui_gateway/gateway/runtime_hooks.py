@@ -30,6 +30,29 @@ class RuntimeHooks:
         self._server_signature = ""
         self._prompt_cache: dict[str, str] = {}
         self._kb_path = str((REPO_ROOT / "kb_store" / "ui_gateway_live").resolve())
+        self._registry_signatures = self._load_registry_signatures()
+
+    def _load_registry_signatures(self) -> set[tuple[str, int]]:
+        path = REPO_ROOT / "modelfiles" / "predicate_registry.json"
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            return set()
+        rows = payload.get("canonical_predicates", []) if isinstance(payload, dict) else []
+        signatures: set[tuple[str, int]] = set()
+        if not isinstance(rows, list):
+            return signatures
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            name = self._atomize_name(row.get("name", ""))
+            try:
+                arity = int(row.get("arity", -1))
+            except Exception:
+                arity = -1
+            if name and arity >= 0:
+                signatures.add((name, arity))
+        return signatures
 
     def _should_use_external_compiler_prompt(self, config: dict[str, Any]) -> bool:
         mode = str(config.get("compiler_prompt_mode", "auto") or "auto").strip().lower()
@@ -161,6 +184,33 @@ class RuntimeHooks:
             "after_count": after_count,
             "kb_path": str(before.get("kb_path", "")).strip(),
         }
+
+    def process_utterance(
+        self,
+        *,
+        utterance: str,
+        config: dict[str, Any],
+        session: dict,
+        clarification_answer: str = "",
+        prethink_id: str = "",
+    ) -> dict[str, Any]:
+        server = self._ensure_server(config)
+        result = server.process_utterance(
+            {
+                "utterance": utterance,
+                "clarification_answer": clarification_answer,
+                "prethink_id": prethink_id,
+            }
+        )
+        front_door = result.get("front_door")
+        if isinstance(front_door, dict):
+            front_door["front_door_uri"] = config["front_door_uri"]
+            front_door["session_snapshot"] = {
+                "session_id": session["session_id"],
+                "turn_count": len(session["turns"]),
+                "has_pending_clarification": bool(session["pending_clarification"]),
+            }
+        return result
 
     def front_door(self, utterance: str, config: dict, session: dict) -> dict:
         server = self._ensure_server(config)
@@ -296,6 +346,7 @@ class RuntimeHooks:
             utterance=utterance,
             clarification_answer=clarification_answer,
         )
+        parsed = self._canonicalize_subject_prefixed_predicates(parsed)
         ok, errors = _validate_parsed(parsed)
         if not ok:
             return None, "; ".join(errors)
@@ -334,6 +385,90 @@ class RuntimeHooks:
             "predicates": sorted(predicates),
         }
 
+    def _split_fact_args(self, raw_args: str) -> list[str]:
+        args: list[str] = []
+        current: list[str] = []
+        depth = 0
+        for ch in str(raw_args or ""):
+            if ch == "," and depth == 0:
+                token = "".join(current).strip()
+                if token:
+                    args.append(token)
+                current = []
+                continue
+            if ch == "(":
+                depth += 1
+            elif ch == ")" and depth > 0:
+                depth -= 1
+            current.append(ch)
+        token = "".join(current).strip()
+        if token:
+            args.append(token)
+        return args
+
+    def _canonicalize_subject_prefixed_predicates(self, parsed: dict[str, Any]) -> dict[str, Any]:
+        if not isinstance(parsed, dict):
+            return parsed
+        if str(parsed.get("intent", "")).strip().lower() != "assert_fact":
+            return parsed
+        if not self._registry_signatures:
+            return parsed
+
+        facts = [str(item).strip() for item in parsed.get("facts", []) if str(item).strip()]
+        if not facts:
+            logic = str(parsed.get("logic_string", "")).strip()
+            if logic:
+                facts = [logic]
+        if not facts:
+            return parsed
+
+        rewritten_facts: list[str] = []
+        changed = False
+        canonical_pairs: list[tuple[str, str]] = []
+        for fact in facts:
+            clause = fact if fact.endswith(".") else f"{fact}."
+            match = re.match(r"^\s*([a-z_][a-z0-9_]*)\((.*)\)\.\s*$", clause)
+            if not match:
+                rewritten_facts.append(clause)
+                continue
+            predicate = match.group(1)
+            args = self._split_fact_args(match.group(2))
+            if not args:
+                rewritten_facts.append(clause)
+                continue
+            first_atom = self._atomize_name(args[0])
+            replacement = ""
+            prefix = f"{first_atom}_"
+            if first_atom and predicate.startswith(prefix):
+                candidate = predicate[len(prefix) :]
+                if candidate and (candidate, len(args)) in self._registry_signatures:
+                    replacement = candidate
+            if replacement:
+                rewritten_facts.append(f"{replacement}({', '.join(args)}).")
+                changed = True
+                canonical_pairs.append((predicate, replacement))
+            else:
+                rewritten_facts.append(clause)
+
+        if not changed:
+            return parsed
+
+        parsed["facts"] = rewritten_facts
+        parsed["logic_string"] = rewritten_facts[0] if len(rewritten_facts) == 1 else " ".join(rewritten_facts)
+        parsed["rules"] = []
+        parsed["queries"] = []
+        parsed["components"] = self._extract_components_from_facts(rewritten_facts)
+        parsed["ambiguities"] = []
+        seen: set[str] = set()
+        pairs: list[str] = []
+        for before, after in canonical_pairs:
+            label = f"{before}->{after}"
+            if label not in seen:
+                seen.add(label)
+                pairs.append(label)
+        parsed["rationale"] = "Subject-prefixed predicate canonicalized to registry form: " + ", ".join(pairs) + "."
+        return parsed
+
     def _augment_compound_family_facts(
         self,
         *,
@@ -367,7 +502,7 @@ class RuntimeHooks:
         parent_override_facts: list[str] = []
         owner_from_parent_block = ""
         parent_block = re.search(
-            r"\b([a-z][a-z0-9_'-]*?)'?s\s+mom\s+and\s+dad\s+are\s+([a-z][a-z0-9_'-]*)\s+and\s+([a-z][a-z0-9_'-]*)\b",
+            r"\b([a-z][a-z0-9_'-]*?)'?s\s+mom\s+and\s+dad\s+(?:is|are)\s+([a-z][a-z0-9_'-]*)\s+and\s+([a-z][a-z0-9_'-]*)\b",
             lowered,
         )
         if parent_block:
@@ -403,6 +538,25 @@ class RuntimeHooks:
                 if fact not in sibling_override_facts:
                     sibling_override_facts.append(fact)
 
+        inverse_possessive_override_facts: list[str] = []
+        inverse_possessive_rationale = ""
+        inverse_possessive = re.match(
+            r"^\s*([a-z][a-z0-9_'-]*)\s+is\s+([a-z][a-z0-9_'-]*)'?s\s+([a-z][a-z0-9_'-]*(?:\s+[a-z][a-z0-9_'-]*){0,3})\.?\s*$",
+            lowered,
+            re.IGNORECASE,
+        )
+        if inverse_possessive:
+            subject_atom = self._atomize_name(inverse_possessive.group(1))
+            owner_atom = self._atomize_name(inverse_possessive.group(2))
+            relation_atom = self._atomize_name(inverse_possessive.group(3))
+            if subject_atom and owner_atom and relation_atom:
+                fact = f"{relation_atom}({subject_atom}, {owner_atom})."
+                inverse_possessive_override_facts.append(fact)
+                inverse_possessive_rationale = (
+                    "Recognized an inverse possessive relation and normalized it to "
+                    f"{relation_atom}({subject_atom}, {owner_atom})."
+                )
+
         if parent_override_facts:
             kept = [fact for fact in normalized_facts if not re.match(r"^parent\s*\(", fact)]
             normalized_facts = kept + parent_override_facts
@@ -410,6 +564,20 @@ class RuntimeHooks:
         if sibling_override_facts:
             kept = [fact for fact in normalized_facts if not re.match(r"^brother\s*\(", fact)]
             normalized_facts = kept + sibling_override_facts
+
+        if inverse_possessive_override_facts:
+            kept: list[str] = []
+            for fact in normalized_facts:
+                parsed_name = ""
+                match = re.match(r"^\s*([a-z_][a-z0-9_]*)\s*\(", fact)
+                if match:
+                    parsed_name = match.group(1)
+                if parsed_name and fact not in inverse_possessive_override_facts:
+                    continue
+                kept.append(fact)
+            normalized_facts = kept + [
+                fact for fact in inverse_possessive_override_facts if fact not in kept
+            ]
 
         if normalized_facts == original_facts or not normalized_facts:
             return parsed
@@ -421,9 +589,22 @@ class RuntimeHooks:
         parsed["rules"] = []
         parsed["queries"] = []
         parsed["components"] = self._extract_components_from_facts(normalized_facts)
-        rationale = str(parsed.get("rationale", "")).strip()
-        suffix = "Compound family statement expansion added deterministic companion facts."
-        parsed["rationale"] = f"{rationale} {suffix}".strip() if rationale else suffix
+        if parent_override_facts and owner_from_parent_block:
+            parent_atoms = [fact[len("parent(") : fact.rfind(",")] for fact in parent_override_facts if fact.startswith("parent(")]
+            normalized_owner = owner_from_parent_block.replace("_", " ")
+            normalized_parents = ", ".join(atom.replace("_", " ") for atom in parent_atoms)
+            parsed["ambiguities"] = []
+            parsed["rationale"] = (
+                f"Recognized an explicit family bundle and normalized it to parent facts for {normalized_owner}: "
+                f"{normalized_parents}."
+            )
+        elif inverse_possessive_override_facts and inverse_possessive_rationale:
+            parsed["ambiguities"] = []
+            parsed["rationale"] = inverse_possessive_rationale
+        else:
+            rationale = str(parsed.get("rationale", "")).strip()
+            suffix = "Compound family statement expansion added deterministic companion facts."
+            parsed["rationale"] = f"{rationale} {suffix}".strip() if rationale else suffix
         return parsed
 
     def _apply_parsed(self, *, parsed: dict[str, Any], prethink_id: str, server: PrologMCPServer) -> dict[str, Any]:
@@ -749,17 +930,50 @@ class RuntimeHooks:
             query_result = execution.get("query_result")
             if isinstance(query_result, dict):
                 status = str(query_result.get("status", "")).strip()
+                lowered_utterance = str(utterance or "").strip().lower()
+                yes_no_leadins = (
+                    "is ",
+                    "are ",
+                    "does ",
+                    "do ",
+                    "did ",
+                    "was ",
+                    "were ",
+                    "can ",
+                    "could ",
+                    "should ",
+                    "would ",
+                    "will ",
+                    "has ",
+                    "have ",
+                    "had ",
+                )
+                is_yes_no = lowered_utterance.endswith("?") and lowered_utterance.startswith(yes_no_leadins)
                 if status == "success":
                     rows = query_result.get("rows", [])
+                    variables = query_result.get("variables", [])
+                    num_rows = int(query_result.get("num_rows", len(rows)) or 0)
+                    if is_yes_no and isinstance(variables, list) and not variables:
+                        return {
+                            "speaker": "prethink-gateway",
+                            "text": "Yes.",
+                            "mode": "answer",
+                        }
                     preview = " | ".join(
                         [", ".join(f"{k}={v}" for k, v in row.items()) for row in rows[:5] if isinstance(row, dict)]
                     )
                     return {
                         "speaker": "prethink-gateway",
-                        "text": f"Query succeeded with {int(query_result.get('num_rows', len(rows)) or 0)} row(s). {preview}".strip(),
+                        "text": f"Query succeeded with {num_rows} row(s). {preview}".strip(),
                         "mode": "answer",
                     }
                 if status == "no_results":
+                    if is_yes_no:
+                        return {
+                            "speaker": "prethink-gateway",
+                            "text": "No.",
+                            "mode": "answer",
+                        }
                     return {
                         "speaker": "prethink-gateway",
                         "text": "Query returned no results.",

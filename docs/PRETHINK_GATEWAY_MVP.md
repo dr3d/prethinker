@@ -1,10 +1,10 @@
-﻿# Prethink Gateway MVP
+# Prethinker Console
 
-This note documents the isolated scaffold in `ui_gateway/`.
+This note documents the `Prethinker Console` front door in `ui_gateway/`.
 
 ## Purpose
 
-Provide a lightweight product embodiment of Prethinker as a front-door gateway plus chat UI without touching the existing training lane.
+Provide a lightweight product embodiment of Prethinker as a front-door console plus chat UI while still exercising the shared interactive GIC entry path.
 
 ## Current Shape
 
@@ -16,7 +16,7 @@ Provide a lightweight product embodiment of Prethinker as a front-door gateway p
   - `commit`
   - `answer`
 - config persisted in `ui_gateway/state/gateway_config.json`
-- runtime path now uses strict compiler routing plus deterministic core tool execution
+- runtime path now uses the canonical `process_utterance()` server entryway plus deterministic core tool execution
 - strict bouncer invariants now enforced when `strict_mode=true`
 
 ## Default Binding Choices

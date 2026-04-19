@@ -1,43 +1,62 @@
 {
-  "run_id": "run-20260412T223121Z-rung_439_frontier_plural-qwen35_semparse_9b-29424",
-  "run_started_utc": "2026-04-12T22:31:21+00:00",
-  "run_finished_utc": "2026-04-12T22:32:04+00:00",
+  "run_id": "run-20260414T170940Z-hn_random_live_47750086_-qwen3_5_9b-22296",
+  "run_started_utc": "2026-04-14T17:09:40+00:00",
+  "run_finished_utc": "2026-04-14T17:10:05+00:00",
   "invocation": {
     "argv": [
       "D:\\_PROJECTS\\prethinker\\kb_pipeline.py",
+      "--scenario",
+      "D:\\_PROJECTS\\prethinker\\kb_runs\\hn_random_ingest\\hn_random_best_20260414_170829\\scenarios\\hn_random_live_47750086_can_ai_be_a_child_of_god_inside_anthropi.json",
       "--backend",
       "ollama",
       "--base-url",
       "http://127.0.0.1:11434",
       "--model",
-      "qwen35-semparse:9b",
+      "qwen3.5:9b",
       "--runtime",
       "core",
-      "--scenario",
-      "D:\\_PROJECTS\\prethinker\\kb_scenarios\\rung_439_frontier_plural_coref_exception_guard.json",
-      "--kb-name",
-      "frontierv6_r1_rung_439_frontier_plural_coref_exception_guard",
-      "--out",
-      "D:\\_PROJECTS\\prethinker\\tmp\\runs\\tracks\\rung_439_frontier_plural_coref_exception_guard_frontier_language_width_v6_20260412_222723.json",
       "--kb-root",
-      "tmp/kb_store"
+      "kb_store/hn_random_ingest",
+      "--context-length",
+      "8192",
+      "--timeout-seconds",
+      "180",
+      "--clarification-eagerness",
+      "0.3500",
+      "--max-clarification-rounds",
+      "2",
+      "--out",
+      "D:\\_PROJECTS\\prethinker\\kb_runs\\hn_random_ingest\\hn_random_best_20260414_170829\\reports\\hn_random_live_47750086_can_ai_be_a_child_of_god_inside_anthropi_run.json",
+      "--prompt-file",
+      "modelfiles/semantic_parser_system_prompt.md",
+      "--write-corpus-on-fail",
+      "--clarification-answer-model",
+      "qwen3.5:9b",
+      "--clarification-answer-backend",
+      "ollama",
+      "--clarification-answer-base-url",
+      "http://127.0.0.1:11434",
+      "--clarification-answer-context-length",
+      "8192",
+      "--clarification-answer-min-confidence",
+      "0.5500"
     ],
     "cwd": "D:\\_PROJECTS\\prethinker"
   },
-  "scenario": "rung_439_frontier_plural_coref_exception_guard",
-  "scenario_path": "D:\\_PROJECTS\\prethinker\\kb_scenarios\\rung_439_frontier_plural_coref_exception_guard.json",
-  "ontology_kb_name": "frontierv6_r1_rung_439_frontier_plural_coref_exception_guard",
+  "scenario": "hn_random_live_47750086_can_ai_be_a_child_of_god_inside_anthropi",
+  "scenario_path": "D:\\_PROJECTS\\prethinker\\kb_runs\\hn_random_ingest\\hn_random_best_20260414_170829\\scenarios\\hn_random_live_47750086_can_ai_be_a_child_of_god_inside_anthropi.json",
+  "ontology_kb_name": "hn_random_live_47750086_can_ai_be_a_child_of_god_inside_anthropi",
   "kb_namespace": {
-    "kb_root": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store",
-    "kb_dir": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store\\frontierv6_r1_rung_439_frontier_plural_coref_exception_guard",
-    "corpus_path": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store\\frontierv6_r1_rung_439_frontier_plural_coref_exception_guard\\kb.pl",
-    "progress_path": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store\\frontierv6_r1_rung_439_frontier_plural_coref_exception_guard\\progress.json",
-    "profile_path": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store\\frontierv6_r1_rung_439_frontier_plural_coref_exception_guard\\ontology_profile.json",
-    "ontology_index_path": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store\\ontologies_index.json"
+    "kb_root": "D:\\_PROJECTS\\prethinker\\kb_store\\hn_random_ingest",
+    "kb_dir": "D:\\_PROJECTS\\prethinker\\kb_store\\hn_random_ingest\\hn_random_live_47750086_can_ai_be_a_child_of_god_inside_anthropi",
+    "corpus_path": "D:\\_PROJECTS\\prethinker\\kb_store\\hn_random_ingest\\hn_random_live_47750086_can_ai_be_a_child_of_god_inside_anthropi\\kb.pl",
+    "progress_path": "D:\\_PROJECTS\\prethinker\\kb_store\\hn_random_ingest\\hn_random_live_47750086_can_ai_be_a_child_of_god_inside_anthropi\\progress.json",
+    "profile_path": "D:\\_PROJECTS\\prethinker\\kb_store\\hn_random_ingest\\hn_random_live_47750086_can_ai_be_a_child_of_god_inside_anthropi\\ontology_profile.json",
+    "ontology_index_path": "D:\\_PROJECTS\\prethinker\\kb_store\\hn_random_ingest\\ontologies_index.json"
   },
   "backend": "ollama",
   "base_url": "http://127.0.0.1:11434",
-  "model": "qwen35-semparse:9b",
+  "model": "qwen3.5:9b",
   "runtime": "core",
   "two_pass": true,
   "split_extraction": true,
@@ -45,7 +64,7 @@
     "temperature": 0,
     "context_length": 8192,
     "classifier_context_length": 8192,
-    "timeout_seconds": 120,
+    "timeout_seconds": 180,
     "runtime": "core",
     "two_pass": true,
     "split_extraction": true,
@@ -57,21 +76,41 @@
     "progress_memory_enabled": true,
     "progress_low_relevance_threshold": 0.34,
     "progress_high_risk_threshold": 0.18,
-    "clarification_auto_answer_enabled": false,
-    "clarification_answer_backend": "",
-    "clarification_answer_base_url": "",
-    "clarification_answer_model": "",
-    "clarification_answer_context_length": 0,
-    "clarification_answer_history_turns": 0,
-    "clarification_answer_kb_clause_limit": 0,
-    "clarification_answer_kb_char_budget": 0,
-    "clarification_answer_min_confidence": 0.0,
-    "clarification_answer_source_prefix": "",
-    "clarification_answer_role": "",
+    "clarification_auto_answer_enabled": true,
+    "clarification_answer_backend": "ollama",
+    "clarification_answer_base_url": "http://127.0.0.1:11434",
+    "clarification_answer_model": "qwen3.5:9b",
+    "clarification_answer_context_length": 8192,
+    "clarification_answer_history_turns": 8,
+    "clarification_answer_kb_clause_limit": 80,
+    "clarification_answer_kb_char_budget": 5000,
+    "clarification_answer_min_confidence": 0.55,
+    "clarification_answer_source_prefix": "synthetic",
+    "clarification_answer_role": "proxy_model",
     "served_llm_model": "",
     "served_llm_backend": "",
     "served_llm_base_url": "",
     "served_llm_context_length": 0,
+    "sp_conflict_policy": "error",
+    "system_prompt_sources": {
+      "runtime_prompt_loaded": true,
+      "runtime_prompt_id": "sp-1e43c641b01b",
+      "runtime_prompt_sha256": "1e43c641b01b7c845b82331b521d58c1993e8010bd9283f5085dac687520159e",
+      "runtime_prompt_char_count": 9603,
+      "runtime_prompt_source_path": "D:\\_PROJECTS\\prethinker\\modelfiles\\semantic_parser_system_prompt.md",
+      "baked_model_probe": {
+        "status": "ok",
+        "reason": "",
+        "has_system": false,
+        "system_prompt_id": "",
+        "system_sha256": "",
+        "char_count": 0,
+        "preview": ""
+      },
+      "semparse_name_hint": false,
+      "double_source_active": false,
+      "double_source_basis": "detected"
+    },
     "backend_options": {
       "num_ctx": 8192
     }
@@ -91,7 +130,28 @@
     "preview": "# Semantic Parser Prompt Pack (Qwen 3.5 9B)\nUse this as maintainable guidance for semantic parsing into Prolog structures.\nKeep behavior language-agnostic, deterministic, and schema-strict.\n## Core Priorities\n1. Output exactly one JSON object that matches the required schema.\n2. Preserve semantic meaning; do not hallucinate entities, facts, or arguments.\n3. Prefer canonical, stable predicate names across turns when semantics match.\n4. Use variables instead of assumptions when referents are unresolved."
   },
   "system_prompt_text": "# Semantic Parser Prompt Pack (Qwen 3.5 9B)\n\nUse this as maintainable guidance for semantic parsing into Prolog structures.\nKeep behavior language-agnostic, deterministic, and schema-strict.\n\n## Core Priorities\n\n1. Output exactly one JSON object that matches the required schema.\n2. Preserve semantic meaning; do not hallucinate entities, facts, or arguments.\n3. Prefer canonical, stable predicate names across turns when semantics match.\n4. Use variables instead of assumptions when referents are unresolved.\n5. Keep rationale brief and factual.\n\n## Intent Routing Guidance\n\n- `assert_fact`: declarative claims.\n- `assert_rule`: if/then, whenever, conditional, implication.\n- `query`: questions seeking truth or bindings.\n- `retract`: explicit correction/remove/retract/undo.\n- `other`: out-of-scope tasks (translation, formatting, rewrite).\n- Any interrogative utterance (including non-English) should default to `query` unless it explicitly commands a write action.\n\n## Prolog Mapping Guidance\n\n- Atoms: lowercase snake_case.\n- Variables: Uppercase identifiers.\n- Facts: `predicate(atom, ...).`\n- Rules: `head(...) :- body(...).`\n- Queries: goal with trailing period and no `?-` prefix.\n- Retractions: `retract(<fact>).`\n- Do not emit zero-arity forms like `policy_revoked.`\n- Always include explicit arguments in facts/rules/queries.\n- If one utterance contains multiple independent write operations joined by \"and\", emit all operations (do not silently drop later clauses).\n- For yes/no questions, output a query predicate with explicit arguments (or variables), never a bare atom.\n- If required query arguments are unknown, use variables and raise clarification instead of emitting malformed or zero-arity query goals.\n- For `retract`, the inner target must be a fact-like term with explicit arguments (example: `retract(parent(alice,bob)).`).\n- Never emit malformed retractions like `retract(policy_revoked).` with no arguments.\n- For multi-target retract utterances, include every target in `facts` and include each `retract(...)` clause in `logic_string` (newline-separated clauses are acceptable).\n\n## Relation and Argument Discipline\n\n- For forms like `<subject> is <relation> of <object>`, map to `relation(subject, object).`\n- Keep argument order aligned to semantic subject/object roles.\n- Avoid predicate synonym drift when an ontology already uses a compatible predicate.\n- Do not reverse argument order for \"A is a relation of B\" statements.\n- For forms like `A has B as a parent`, map to `parent(B, A)` (not `parent(A, B)`).\n- For passive forms like `A is parented by B`, map to `parent(B, A)`.\n- For possessive forms like `A is B's parent`, map to `parent(A, B)`.\n- Example: \"Bob is a parent of Carol.\" -> `parent(bob, carol).` (never `parent(carol, bob).`)\n- Example: \"Carol is an ancestor of Dana.\" -> `ancestor(carol, dana).`\n- If direction is genuinely unclear, use clarification rather than guessing.\n\n## Predicate Discipline\n\n- Reuse the ontology's existing canonical predicate names whenever semantics match.\n- If runtime constraints include a predicate registry, prefer registry canonical names over aliases.\n- Do not silently create near-duplicate predicates (example: `father_of` and `father` for same meaning).\n- If predicate choice is ambiguous and unsafe, raise uncertainty and ask a focused clarification question.\n- Keep lexical consistency across assertion and retraction turns (same concept -> same predicate form).\n\n## Transitive Rule Readiness\n\nWhen utterances express chain logic, emit explicit compositional rules with shared variables.\nPrefer termination-safe recursion patterns over left-recursive forms.\n\nPreferred pattern when a base relation exists:\n\n- `ancestor(X, Z) :- parent(X, Z).`\n- `ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).`\n\nAvoid left-recursive forms that put the head predicate first in the body, such as:\n\n- `ancestor(X, Z) :- ancestor(X, Y), ancestor(Y, Z).`\n- `depends_on(X, Z) :- depends_on(X, Y), depends_on(Y, Z).`\n\nOnly emit such rules when the utterance semantically indicates transitivity or chained implication.\n\n## Termination Safety Constraints (Mandatory)\n\n- Never place the same predicate as the head predicate in the first body literal.\n- If a rule would be left-recursive, rewrite it to a base-relation recursion pattern.\n- For ancestor semantics, prefer this canonical pair:\n  - `ancestor(X, Y) :- parent(X, Y).`\n  - `ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).`\n- For utterances like \"If X is an ancestor of Y and Y is an ancestor of Z then X is an ancestor of Z.\",\n  do not emit `ancestor(X, Z) :- ancestor(X, Y), ancestor(Y, Z).`\n  Instead emit `ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).` when parent relation exists.\n\n## Ambiguity Handling\n\n- If pronouns or entities are unresolved, set `needs_clarification=true`.\n- Use variables rather than invented atoms.\n- Keep ambiguities list short and concrete.\n\n## Uncertainty Scoring Rubric\n\n- 0.00-0.20: clear statement, explicit entities/roles, deterministic mapping.\n- 0.30-0.55: mild ambiguity but safe provisional parse exists.\n- 0.60-0.79: unresolved referent, role-direction ambiguity, or predicate-choice ambiguity.\n- 0.80-1.00: missing required argument, contradictory interpretation, or likely hallucination risk.\n- Unknown pronoun/referent should usually be >= 0.70.\n- Missing essential argument should usually be >= 0.85.\n- If uncertainty >= 0.60 for write intents (`assert_fact`, `assert_rule`, `retract`), prefer clarification.\n\n## Uncertainty And Clarification Contract\n\n- Always emit:\n  - `uncertainty_score` in `[0,1]` where `1` means very uncertain.\n  - `uncertainty_label` as `low | medium | high`.\n  - `clarification_reason` with concrete wording (<= 12 words).\n  - `clarification_question` ending with `?` when uncertainty is non-trivial.\n- If uncertainty is high enough to block safe write intent, set `needs_clarification=true`.\n- Clarification questions should target missing entities, relation direction, or correction target.\n\n## Clarification Question Style\n\n- Ask one focused question at a time.\n- Prefer disambiguation over open-ended chat.\n- Good: \"Do you mean `parent(alex, sam)` or `parent(sam, alex)`?\"\n- Good: \"Who does 'he' refer to in this statement?\"\n\n## Anti-Patterns To Avoid\n\n- Do not invent entities, relations, or arguments not grounded in the utterance/context.\n- Do not collapse unresolved pronouns into a guessed atom.\n- Do not emit left-recursive transitive rules.\n- Do not emit malformed JSON, markdown, or extra wrapper text.\n- Do not switch predicate naming style mid-run without semantic reason.\n- Do not flip subject/object argument order for copular relation statements.\n- Do not wrap entities as nested terms in simple unary facts (avoid `valid(agent(a4)).`).\n- Do not emit bare query atoms like `policy_revoked.` or `revoke_double_approval.`.\n- Do not emit bare retract targets like `retract(compliance_rule).`.\n\n## Few-Shot Micro-Patterns\n\n- Fact mapping:\n  - NL: \"Alice is a parent of Bob.\"\n  - Route: `assert_fact`\n  - Logic: `parent(alice, bob).`\n\n- Directionality check:\n  - NL: \"Bob is a parent of Carol.\"\n  - Route: `assert_fact`\n  - Logic: `parent(bob, carol).`\n\n- Inversion pattern:\n  - NL: \"Lena has Mira as a parent.\"\n  - Route: `assert_fact`\n  - Logic: `parent(mira, lena).`\n  - Avoid: `parent(lena, mira).`\n\n- Passive pattern:\n  - NL: \"Wren is parented by Xena.\"\n  - Route: `assert_fact`\n  - Logic: `parent(xena, wren).`\n\n- Unary adjective/state mapping:\n  - NL: \"Agent a4 is valid.\"\n  - Route: `assert_fact`\n  - Logic: `valid(a4).`\n  - Avoid: `valid(agent(a4)).`\n\n- Attribute possession consistency:\n  - NL: \"Agent a3 has override.\"\n  - Route: `assert_fact`\n  - Logic: `has_override(a3).`\n  - If later utterance says `retract(has_override(a3)).`, it must target the same predicate name.\n\n- Rule mapping:\n  - NL: \"If X is a parent of Y then X is an ancestor of Y.\"\n  - Route: `assert_rule`\n  - Logic: `ancestor(X, Y) :- parent(X, Y).`\n\n- Safe transitive recursion:\n  - NL: \"If X is an ancestor of Y and Y is an ancestor of Z then X is an ancestor of Z.\"\n  - Route: `assert_rule`\n  - Logic: `ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).`\n\n- Quantifier to rule:\n  - NL: \"Every parent of a child is a guardian of that child.\"\n  - Route: `assert_rule`\n  - Logic: `guardian(X, Y) :- parent(X, Y).`\n\n- Explicit correction/retraction:\n  - NL: \"Actually, retract that: parent(alice, bob).\"\n  - Route: `retract`\n  - Logic: `retract(parent(alice, bob)).`\n\n- Multi-target retraction:\n  - NL: \"Actually retract these: parent(vera, wynn) and parent(wynn, xena).\"\n  - Route: `retract`\n  - Logic:\n    - `retract(parent(vera, wynn)).`\n    - `retract(parent(wynn, xena)).`\n  - Facts:\n    - `parent(vera, wynn).`\n    - `parent(wynn, xena).`\n\n- Ambiguous undo/retract:\n  - NL: \"Actually undo that last compliance rule.\"\n  - Route: `retract`\n  - Logic: `retract(compliance_rule(X)).`\n  - Set `needs_clarification=true` and ask which specific rule instance should be retracted.\n\n- Yes/no status query:\n  - NL: \"Did we cancel the double-approval condition for large payments?\"\n  - Route: `query`\n  - Logic: `double_approval_required(large_payments).`\n  - If uncertain about canonical predicate name, set `needs_clarification=true` and ask for predicate confirmation.\n\n- Unresolved pronoun -> clarification:\n  - NL: \"He is a parent of Bob.\"\n  - Route: `assert_fact`\n  - Suggested parse: `parent(X, bob).`\n  - `needs_clarification`: `true`\n  - Clarification: \"Who does 'he' refer to?\"\n\n- Negation as correction intent:\n  - NL: \"Alice is not a parent of Bob.\"\n  - Route: `retract`\n  - Logic: `retract(parent(alice, bob)).`",
-  "kb_runtime_boot_path": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store\\frontierv6_r1_rung_439_frontier_plural_coref_exception_guard\\_bootstrap_core.pl",
+  "system_prompt_sources": {
+    "runtime_prompt_loaded": true,
+    "runtime_prompt_id": "sp-1e43c641b01b",
+    "runtime_prompt_sha256": "1e43c641b01b7c845b82331b521d58c1993e8010bd9283f5085dac687520159e",
+    "runtime_prompt_char_count": 9603,
+    "runtime_prompt_source_path": "D:\\_PROJECTS\\prethinker\\modelfiles\\semantic_parser_system_prompt.md",
+    "baked_model_probe": {
+      "status": "ok",
+      "reason": "",
+      "has_system": false,
+      "system_prompt_id": "",
+      "system_sha256": "",
+      "char_count": 0,
+      "preview": ""
+    },
+    "semparse_name_hint": false,
+    "double_source_active": false,
+    "double_source_basis": "detected"
+  },
+  "declared_predicates": [],
+  "declared_predicate_signatures": [],
+  "kb_runtime_boot_path": "D:\\_PROJECTS\\prethinker\\kb_store\\hn_random_ingest\\hn_random_live_47750086_can_ai_be_a_child_of_god_inside_anthropi\\_bootstrap_core.pl",
   "kb_init": {
     "status": "success",
     "result_type": "runtime_emptied",
@@ -103,13 +163,13 @@
     "message": "No retained corpus to preload."
   },
   "corpus_write": {
-    "path": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store\\frontierv6_r1_rung_439_frontier_plural_coref_exception_guard\\kb.pl",
-    "clause_count": 13,
+    "path": "D:\\_PROJECTS\\prethinker\\kb_store\\hn_random_ingest\\hn_random_live_47750086_can_ai_be_a_child_of_god_inside_anthropi\\kb.pl",
+    "clause_count": 1,
     "status": "written"
   },
   "progress_write": {
     "status": "written",
-    "path": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store\\frontierv6_r1_rung_439_frontier_plural_coref_exception_guard\\progress.json",
+    "path": "D:\\_PROJECTS\\prethinker\\kb_store\\hn_random_ingest\\hn_random_live_47750086_can_ai_be_a_child_of_god_inside_anthropi\\progress.json",
     "active_focus_count": 0,
     "goal_count": 0,
     "open_question_count": 0
@@ -117,8 +177,8 @@
   "progress_memory_enabled": true,
   "progress_memory": {
     "schema_version": 1,
-    "ontology_name": "frontierv6_r1_rung_439_frontier_plural_coref_exception_guard",
-    "updated_at_utc": "2026-04-12T22:32:04+00:00",
+    "ontology_name": "hn_random_live_47750086_can_ai_be_a_child_of_god_inside_anthropi",
+    "updated_at_utc": "2026-04-14T17:10:05+00:00",
     "active_focus": [],
     "goals": [],
     "open_questions": [],
@@ -127,41 +187,26 @@
   },
   "profile_write": {
     "status": "written",
-    "path": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store\\frontierv6_r1_rung_439_frontier_plural_coref_exception_guard\\ontology_profile.json",
-    "predicate_signature_count": 6
+    "path": "D:\\_PROJECTS\\prethinker\\kb_store\\hn_random_ingest\\hn_random_live_47750086_can_ai_be_a_child_of_god_inside_anthropi\\ontology_profile.json",
+    "predicate_signature_count": 1
   },
   "index_write": {
     "status": "written",
-    "path": "D:\\_PROJECTS\\prethinker\\tmp\\kb_store\\ontologies_index.json",
-    "ontology_count": 105
+    "path": "D:\\_PROJECTS\\prethinker\\kb_store\\hn_random_ingest\\ontologies_index.json",
+    "ontology_count": 8
   },
   "ontology_profile": {
-    "ontology_name": "frontierv6_r1_rung_439_frontier_plural_coref_exception_guard",
-    "generated_at_utc": "2026-04-12T22:32:04+00:00",
-    "clause_count": 13,
+    "ontology_name": "hn_random_live_47750086_can_ai_be_a_child_of_god_inside_anthropi",
+    "generated_at_utc": "2026-04-14T17:10:05+00:00",
+    "clause_count": 1,
     "predicate_signatures": [
-      "carries/2",
-      "in_region/2",
-      "inside/2",
-      "lives_in/2",
-      "parent/2",
-      "sibling/2"
+      "lack_wisdom/1"
     ],
     "fact_predicates": [
-      "carries/2",
-      "in_region/2",
-      "inside/2",
-      "lives_in/2",
-      "parent/2",
-      "sibling/2"
+      "lack_wisdom/1"
     ],
-    "rule_head_predicates": [
-      "in_region/2"
-    ],
-    "rule_body_predicates": [
-      "inside/2",
-      "lives_in/2"
-    ]
+    "rule_head_predicates": [],
+    "rule_body_predicates": []
   },
   "ontology_previous_profile": null,
   "ontology_diff": {
@@ -169,74 +214,42 @@
     "requires_confirmation": false,
     "similarity_to_previous": 0.0,
     "added_signatures": [
-      "carries/2",
-      "in_region/2",
-      "inside/2",
-      "lives_in/2",
-      "parent/2",
-      "sibling/2"
+      "lack_wisdom/1"
     ],
     "removed_signatures": [],
     "previous_signature_count": 0,
-    "current_signature_count": 6
+    "current_signature_count": 1
   },
   "known_ontology_matches": [
     {
-      "ontology_name": "frontierv6_r1_rung_438_frontier_multibind_query_pressure",
-      "similarity": 0.7143,
-      "shared_signatures": [
-        "carries/2",
-        "in_region/2",
-        "inside/2",
-        "lives_in/2",
-        "parent/2"
-      ],
-      "other_signature_count": 6
+      "ontology_name": "hn_random_live_47722629_franklin_s_bad_ads_for_apple_ii_clones_a",
+      "similarity": 0.0,
+      "shared_signatures": [],
+      "other_signature_count": 2
     },
     {
-      "ontology_name": "frontierv6_r1_rung_435_frontier_checkpoint_compound_turns",
-      "similarity": 0.625,
-      "shared_signatures": [
-        "carries/2",
-        "in_region/2",
-        "inside/2",
-        "lives_in/2",
-        "parent/2"
-      ],
-      "other_signature_count": 7
+      "ontology_name": "hn_random_live_47755573_new_orleans_s_car_crash_conspiracy",
+      "similarity": 0.0,
+      "shared_signatures": [],
+      "other_signature_count": 1
     },
     {
-      "ontology_name": "rung_290_story_multi_branch_pronoun_pressure",
-      "similarity": 0.5,
-      "shared_signatures": [
-        "carries/2",
-        "in_region/2",
-        "inside/2",
-        "parent/2"
-      ],
-      "other_signature_count": 6
+      "ontology_name": "hn_random_live_47738864_why_ai_sucks_at_front_end",
+      "similarity": 0.0,
+      "shared_signatures": [],
+      "other_signature_count": 3
     },
     {
-      "ontology_name": "rung_310_story_cross_clause_pronoun_weave",
-      "similarity": 0.5,
-      "shared_signatures": [
-        "carries/2",
-        "in_region/2",
-        "inside/2",
-        "parent/2"
-      ],
-      "other_signature_count": 6
+      "ontology_name": "hn_random_live_47745284_taking_on_cuda_with_rocm_one_step_after",
+      "similarity": 0.0,
+      "shared_signatures": [],
+      "other_signature_count": 5
     },
     {
-      "ontology_name": "rung_340_ce_story_pronoun_transfer",
-      "similarity": 0.5,
-      "shared_signatures": [
-        "carries/2",
-        "in_region/2",
-        "inside/2",
-        "parent/2"
-      ],
-      "other_signature_count": 6
+      "ontology_name": "hn_random_live_47757495_github_stacked_prs",
+      "similarity": 0.0,
+      "shared_signatures": [],
+      "other_signature_count": 0
     }
   ],
   "gear_change": {
@@ -244,15 +257,17 @@
     "detected": false,
     "requires_confirmation": false
   },
-  "turns_total": 13,
-  "turn_parse_failures": 0,
-  "turn_apply_failures": 0,
-  "turns_clarification_requested": 0,
+  "turns_total": 12,
+  "turn_parse_failures": 1,
+  "turn_apply_failures": 2,
+  "turns_clarification_requested": 1,
   "turns_confirmation_requested": 0,
-  "clarification_rounds_total": 1,
+  "clarification_rounds_total": 0,
   "clarification_synthetic_answers_total": 0,
   "clarification_served_llm_answers_total": 0,
   "clarification_proxy_answers_total": 0,
+  "pre_normalized_turns": 6,
+  "control_predicate_directive_turns": 0,
   "progress_low_relevance_clarifications": 0,
   "progress_high_risk_turns": 0,
   "off_focus_write_attempts": 0,
@@ -262,16 +277,28 @@
   "off_focus_write_contamination_rate": 0.0,
   "kb_contamination_delta": 0,
   "decision_state_counts": {
-    "stage_provisionally": 1,
-    "commit": 12
+    "stage_provisionally": 9,
+    "commit": 1,
+    "reject": 1,
+    "ask_clarification": 1
   },
-  "validation_total": 5,
-  "validation_passed": 5,
-  "overall_status": "passed",
+  "validation_total": 0,
+  "validation_passed": 0,
+  "overall_status": "failed",
   "turns": [
     {
       "turn_index": 1,
-      "utterance": "Use sibling/2, parent/2, lives_in/2, inside/2, in_region/2, carries/2.",
+      "utterance": "OP, title,: Can AI be a 'child of God'? Inside Anthropic's meeting with Christian leaders",
+      "utterance_original": "OP (title): Can AI be a 'child of God'? Inside Anthropic's meeting with Christian leaders",
+      "utterance_pre_normalized": "OP, title,: Can AI be a 'child of God'? Inside Anthropic's meeting with Christian leaders",
+      "pre_normalization_events": [
+        {
+          "kind": "parenthetical_inline"
+        }
+      ],
+      "control_predicate_directive": false,
+      "declared_predicates_from_control": [],
+      "declared_predicate_signatures_from_control": [],
       "route": "other",
       "route_source": "model",
       "repaired": false,
@@ -290,283 +317,17 @@
         "rules": [],
         "queries": [],
         "confidence": {
-          "overall": 1.0,
-          "intent": 1.0,
-          "logic": 1.0
-        },
-        "ambiguities": [],
-        "needs_clarification": false,
-        "uncertainty_score": 0.0,
-        "uncertainty_label": "low",
-        "clarification_question": "Can you clarify this point before I apply it: Instruction to set intent to 'other' and leave logic_string empty?",
-        "clarification_reason": "Instruction to set intent to 'other' and leave logic_string empty.",
-        "rationale": "Instruction to set intent to 'other' and leave logic_string empty."
-      },
-      "validation_errors": [],
-      "deferred_validation_errors": [],
-      "clarification_rounds": [],
-      "clarification_rounds_used": 0,
-      "clarification_max_rounds": 2,
-      "clarification_answers_available": 0,
-      "clarification_answers_used": 0,
-      "clarification_scripted_answers_used": 0,
-      "clarification_synthetic_answers_used": 0,
-      "clarification_generated_answers_used": 0,
-      "clarification_served_llm_answers_used": 0,
-      "clarification_proxy_answers_used": 0,
-      "clarification_policy": {
-        "clarification_eagerness": 0.35,
-        "uncertainty_score": 0.0,
-        "effective_uncertainty": 0.0,
-        "threshold": 0.65,
-        "request_clarification": false,
-        "needs_clarification_flag": false,
-        "progress_low_relevance": false,
-        "progress_high_risk": false,
-        "progress_low_relevance_threshold": 0.34,
-        "progress_high_risk_threshold": 0.18,
-        "progress_memory_available": true,
-        "progress_focus_present": false,
-        "progress_signal_term_count": 0,
-        "parsed_signal_term_count": 0,
-        "overlap_term_count": 0,
-        "progress_best_focus_overlap": 0.0,
-        "progress_relevance_score": 1.0
-      },
-      "progress_low_relevance_seen": false,
-      "progress_high_risk_seen": false,
-      "progress_directives": {},
-      "progress_events": [],
-      "progress_snapshot_before": {
-        "schema_version": 1,
-        "ontology_name": "frontierv6_r1_rung_439_frontier_plural_coref_exception_guard",
-        "updated_at_utc": "2026-04-12T22:31:21+00:00",
-        "active_focus": [],
-        "goals": [],
-        "open_questions": [],
-        "resolved_items": [],
-        "notes": []
-      },
-      "progress_snapshot_after_directives": {
-        "schema_version": 1,
-        "ontology_name": "frontierv6_r1_rung_439_frontier_plural_coref_exception_guard",
-        "updated_at_utc": "2026-04-12T22:31:21+00:00",
-        "active_focus": [],
-        "goals": [],
-        "open_questions": [],
-        "resolved_items": [],
-        "notes": []
-      },
-      "clarification_pending": false,
-      "clarification_pending_reason": "",
-      "clarification_question": "Can you clarify this point before I apply it: Instruction to set intent to 'other' and leave logic_string empty?",
-      "clarification_answer_attempt": {},
-      "confirmation_required": false,
-      "confirmation_question": "",
-      "confirmation_answer": "",
-      "confirmation_result": "not_required",
-      "confirmation_answers_available": 0,
-      "confirmation_answers_used": 0,
-      "apply": {
-        "tool": "none",
-        "input": null,
-        "result": {
-          "status": "skipped",
-          "message": "Intent=other; no KB mutation/query applied."
-        }
-      },
-      "apply_status": "skipped",
-      "decision_state": "stage_provisionally"
-    },
-    {
-      "turn_index": 2,
-      "utterance": "Set sibling(scott, blake). Set parent(blake, will). Set parent(blake, pierce).",
-      "route": "assert_fact",
-      "route_source": "model",
-      "repaired": false,
-      "fallback_used": false,
-      "alignment_events": [],
-      "registry_unknown_signatures": [],
-      "parsed": {
-        "intent": "assert_fact",
-        "logic_string": "sibling(scott, blake).\nparent(blake, will).\nparent(blake, pierce).",
-        "components": {
-          "atoms": [
-            "sibling(scott, blake).\nparent(blake, will).\nparent(blake, pierce)"
-          ],
-          "variables": [],
-          "predicates": []
-        },
-        "facts": [
-          "sibling(scott, blake).\nparent(blake, will).\nparent(blake, pierce)."
-        ],
-        "rules": [],
-        "queries": [],
-        "confidence": {
-          "overall": 1.0,
-          "intent": 1.0,
-          "logic": 1.0
-        },
-        "ambiguities": [],
-        "needs_clarification": false,
-        "uncertainty_score": 0.0,
-        "uncertainty_label": "low",
-        "clarification_question": "Can you clarify this point before I apply it: Three independent declarative facts mapped to Prolog atoms with correct argument order?",
-        "clarification_reason": "Three independent declarative facts mapped to Prolog atoms with correct argument order.",
-        "rationale": "Three independent declarative facts mapped to Prolog atoms with correct argument order."
-      },
-      "validation_errors": [],
-      "deferred_validation_errors": [],
-      "clarification_rounds": [],
-      "clarification_rounds_used": 0,
-      "clarification_max_rounds": 2,
-      "clarification_answers_available": 0,
-      "clarification_answers_used": 0,
-      "clarification_scripted_answers_used": 0,
-      "clarification_synthetic_answers_used": 0,
-      "clarification_generated_answers_used": 0,
-      "clarification_served_llm_answers_used": 0,
-      "clarification_proxy_answers_used": 0,
-      "clarification_policy": {
-        "clarification_eagerness": 0.35,
-        "uncertainty_score": 0.0,
-        "effective_uncertainty": 0.0,
-        "threshold": 0.65,
-        "request_clarification": false,
-        "needs_clarification_flag": false,
-        "progress_low_relevance": false,
-        "progress_high_risk": false,
-        "progress_low_relevance_threshold": 0.34,
-        "progress_high_risk_threshold": 0.18,
-        "progress_memory_available": true,
-        "progress_focus_present": false,
-        "progress_signal_term_count": 0,
-        "parsed_signal_term_count": 0,
-        "overlap_term_count": 0,
-        "progress_best_focus_overlap": 0.0,
-        "progress_relevance_score": 1.0
-      },
-      "progress_low_relevance_seen": false,
-      "progress_high_risk_seen": false,
-      "progress_directives": {},
-      "progress_events": [],
-      "progress_snapshot_before": {
-        "schema_version": 1,
-        "ontology_name": "frontierv6_r1_rung_439_frontier_plural_coref_exception_guard",
-        "updated_at_utc": "2026-04-12T22:31:21+00:00",
-        "active_focus": [],
-        "goals": [],
-        "open_questions": [],
-        "resolved_items": [],
-        "notes": []
-      },
-      "progress_snapshot_after_directives": {
-        "schema_version": 1,
-        "ontology_name": "frontierv6_r1_rung_439_frontier_plural_coref_exception_guard",
-        "updated_at_utc": "2026-04-12T22:31:21+00:00",
-        "active_focus": [],
-        "goals": [],
-        "open_questions": [],
-        "resolved_items": [],
-        "notes": []
-      },
-      "clarification_pending": false,
-      "clarification_pending_reason": "",
-      "clarification_question": "Can you clarify this point before I apply it: Three independent declarative facts mapped to Prolog atoms with correct argument order?",
-      "clarification_answer_attempt": {},
-      "confirmation_required": false,
-      "confirmation_question": "",
-      "confirmation_answer": "",
-      "confirmation_result": "not_required",
-      "confirmation_answers_available": 0,
-      "confirmation_answers_used": 0,
-      "apply": {
-        "tool": "assert_fact_batch",
-        "input": [
-          "sibling(scott, blake).",
-          "parent(blake, will).",
-          "parent(blake, pierce)."
-        ],
-        "result": {
-          "status": "success",
-          "result_type": "batch",
-          "applied_total": 3,
-          "operations": [
-            {
-              "status": "success",
-              "fact": "sibling(scott, blake).",
-              "raw": {
-                "status": "success",
-                "result_type": "fact_asserted",
-                "fact": "sibling(scott, blake)."
-              }
-            },
-            {
-              "status": "success",
-              "fact": "parent(blake, will).",
-              "raw": {
-                "status": "success",
-                "result_type": "fact_asserted",
-                "fact": "parent(blake, will)."
-              }
-            },
-            {
-              "status": "success",
-              "fact": "parent(blake, pierce).",
-              "raw": {
-                "status": "success",
-                "result_type": "fact_asserted",
-                "fact": "parent(blake, pierce)."
-              }
-            }
-          ]
-        }
-      },
-      "apply_status": "success",
-      "decision_state": "commit"
-    },
-    {
-      "turn_index": 3,
-      "utterance": "assert rule in_region(X, Z) :- lives_in(X, Y), inside(Y, Z).",
-      "route": "assert_fact",
-      "route_source": "heuristic",
-      "repaired": false,
-      "fallback_used": false,
-      "alignment_events": [],
-      "registry_unknown_signatures": [],
-      "parsed": {
-        "intent": "assert_rule",
-        "logic_string": "in_region(X, Z) :- lives_in(X, Y), inside(Y, Z).",
-        "components": {
-          "atoms": [],
-          "variables": [
-            "X",
-            "Y",
-            "Z"
-          ],
-          "predicates": [
-            "in_region",
-            "inside",
-            "lives_in"
-          ]
-        },
-        "facts": [],
-        "rules": [
-          "in_region(X, Z) :- lives_in(X, Y), inside(Y, Z)."
-        ],
-        "queries": [],
-        "confidence": {
           "overall": 0.95,
           "intent": 1.0,
-          "logic": 0.95
+          "logic": 1.0
         },
         "ambiguities": [],
         "needs_clarification": false,
         "uncertainty_score": 0.05,
         "uncertainty_label": "low",
-        "clarification_question": "Can you clarify this point before I apply it: Utterance expresses a clear conditional rule mapping lives_in and inside to in_region?",
-        "clarification_reason": "Utterance expresses a clear conditional rule mapping lives_in and inside to in_region.",
-        "rationale": "Utterance expresses a clear conditional rule mapping lives_in and inside to in_region. Variables X, Y, Z used correctly. No ambiguity detected."
+        "clarification_question": "Can you clarify this point before I apply it: The utterance is a title or topic header regarding a meeting, not?",
+        "clarification_reason": "The utterance is a title or topic header regarding a meeting, not",
+        "rationale": "The utterance is a title or topic header regarding a meeting, not a declarative fact, rule, query, or retraction command. It falls under out-of-scope tasks (topic introduction)."
       },
       "validation_errors": [],
       "deferred_validation_errors": [],
@@ -605,8 +366,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "frontierv6_r1_rung_439_frontier_plural_coref_exception_guard",
-        "updated_at_utc": "2026-04-12T22:31:21+00:00",
+        "ontology_name": "hn_random_live_47750086_can_ai_be_a_child_of_god_inside_anthropi",
+        "updated_at_utc": "2026-04-14T17:09:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -615,8 +376,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "frontierv6_r1_rung_439_frontier_plural_coref_exception_guard",
-        "updated_at_utc": "2026-04-12T22:31:21+00:00",
+        "ontology_name": "hn_random_live_47750086_can_ai_be_a_child_of_god_inside_anthropi",
+        "updated_at_utc": "2026-04-14T17:09:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -625,7 +386,7 @@
       },
       "clarification_pending": false,
       "clarification_pending_reason": "",
-      "clarification_question": "Can you clarify this point before I apply it: Utterance expresses a clear conditional rule mapping lives_in and inside to in_region?",
+      "clarification_question": "Can you clarify this point before I apply it: The utterance is a title or topic header regarding a meeting, not?",
       "clarification_answer_attempt": {},
       "confirmation_required": false,
       "confirmation_question": "",
@@ -634,38 +395,275 @@
       "confirmation_answers_available": 0,
       "confirmation_answers_used": 0,
       "apply": {
-        "tool": "assert_rule",
-        "input": "in_region(X, Z) :- lives_in(X, Y), inside(Y, Z).",
+        "tool": "none",
+        "input": null,
         "result": {
-          "status": "success",
-          "result_type": "rule_asserted",
-          "rule": "in_region(X, Z) :- lives_in(X, Y), inside(Y, Z)."
+          "status": "skipped",
+          "message": "Intent=other; no KB mutation/query applied."
         }
       },
-      "apply_status": "success",
-      "decision_state": "commit"
+      "apply_status": "skipped",
+      "decision_state": "stage_provisionally"
+    },
+    {
+      "turn_index": 2,
+      "utterance": "Linked article URL: https://www.msn.com/en-us/news/us/can-ai-be-a-child-of-god-inside-anthropic-s-meeting-with-christian-leaders/ar-AA20Eb2w",
+      "utterance_original": "Linked article URL: https://www.msn.com/en-us/news/us/can-ai-be-a-child-of-god-inside-anthropic-s-meeting-with-christian-leaders/ar-AA20Eb2w",
+      "utterance_pre_normalized": "Linked article URL: https://www.msn.com/en-us/news/us/can-ai-be-a-child-of-god-inside-anthropic-s-meeting-with-christian-leaders/ar-AA20Eb2w",
+      "pre_normalization_events": [],
+      "control_predicate_directive": false,
+      "declared_predicates_from_control": [],
+      "declared_predicate_signatures_from_control": [],
+      "route": "other",
+      "route_source": "model",
+      "repaired": false,
+      "fallback_used": false,
+      "alignment_events": [],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "other",
+        "logic_string": "",
+        "components": {
+          "atoms": [],
+          "variables": [],
+          "predicates": []
+        },
+        "facts": [],
+        "rules": [],
+        "queries": [],
+        "confidence": {
+          "overall": 0.95,
+          "intent": 1.0,
+          "logic": 1.0
+        },
+        "ambiguities": [],
+        "needs_clarification": false,
+        "uncertainty_score": 0.05,
+        "uncertainty_label": "low",
+        "clarification_question": "Can you clarify this point before I apply it: Input is a URL link to a news article, not a declarative?",
+        "clarification_reason": "Input is a URL link to a news article, not a declarative",
+        "rationale": "Input is a URL link to a news article, not a declarative claim, rule, or query requiring semantic parsing into Prolog."
+      },
+      "validation_errors": [],
+      "deferred_validation_errors": [],
+      "clarification_rounds": [],
+      "clarification_rounds_used": 0,
+      "clarification_max_rounds": 2,
+      "clarification_answers_available": 0,
+      "clarification_answers_used": 0,
+      "clarification_scripted_answers_used": 0,
+      "clarification_synthetic_answers_used": 0,
+      "clarification_generated_answers_used": 0,
+      "clarification_served_llm_answers_used": 0,
+      "clarification_proxy_answers_used": 0,
+      "clarification_policy": {
+        "clarification_eagerness": 0.35,
+        "uncertainty_score": 0.05,
+        "effective_uncertainty": 0.05,
+        "threshold": 0.65,
+        "request_clarification": false,
+        "needs_clarification_flag": false,
+        "progress_low_relevance": false,
+        "progress_high_risk": false,
+        "progress_low_relevance_threshold": 0.34,
+        "progress_high_risk_threshold": 0.18,
+        "progress_memory_available": true,
+        "progress_focus_present": false,
+        "progress_signal_term_count": 0,
+        "parsed_signal_term_count": 0,
+        "overlap_term_count": 0,
+        "progress_best_focus_overlap": 0.0,
+        "progress_relevance_score": 1.0
+      },
+      "progress_low_relevance_seen": false,
+      "progress_high_risk_seen": false,
+      "progress_directives": {},
+      "progress_events": [],
+      "progress_snapshot_before": {
+        "schema_version": 1,
+        "ontology_name": "hn_random_live_47750086_can_ai_be_a_child_of_god_inside_anthropi",
+        "updated_at_utc": "2026-04-14T17:09:40+00:00",
+        "active_focus": [],
+        "goals": [],
+        "open_questions": [],
+        "resolved_items": [],
+        "notes": []
+      },
+      "progress_snapshot_after_directives": {
+        "schema_version": 1,
+        "ontology_name": "hn_random_live_47750086_can_ai_be_a_child_of_god_inside_anthropi",
+        "updated_at_utc": "2026-04-14T17:09:40+00:00",
+        "active_focus": [],
+        "goals": [],
+        "open_questions": [],
+        "resolved_items": [],
+        "notes": []
+      },
+      "clarification_pending": false,
+      "clarification_pending_reason": "",
+      "clarification_question": "Can you clarify this point before I apply it: Input is a URL link to a news article, not a declarative?",
+      "clarification_answer_attempt": {},
+      "confirmation_required": false,
+      "confirmation_question": "",
+      "confirmation_answer": "",
+      "confirmation_result": "not_required",
+      "confirmation_answers_available": 0,
+      "confirmation_answers_used": 0,
+      "apply": {
+        "tool": "none",
+        "input": null,
+        "result": {
+          "status": "skipped",
+          "message": "Intent=other; no KB mutation/query applied."
+        }
+      },
+      "apply_status": "skipped",
+      "decision_state": "stage_provisionally"
+    },
+    {
+      "turn_index": 3,
+      "utterance": "zamalek: The IPO theater is in full swing.",
+      "utterance_original": "zamalek: The IPO theater is in full swing.",
+      "utterance_pre_normalized": "zamalek: The IPO theater is in full swing.",
+      "pre_normalization_events": [],
+      "control_predicate_directive": false,
+      "declared_predicates_from_control": [],
+      "declared_predicate_signatures_from_control": [],
+      "route": "other",
+      "route_source": "model",
+      "repaired": false,
+      "fallback_used": false,
+      "alignment_events": [],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "other",
+        "logic_string": "",
+        "components": {
+          "atoms": [],
+          "variables": [],
+          "predicates": []
+        },
+        "facts": [],
+        "rules": [],
+        "queries": [],
+        "confidence": {
+          "overall": 0.95,
+          "intent": 1.0,
+          "logic": 1.0
+        },
+        "ambiguities": [],
+        "needs_clarification": false,
+        "uncertainty_score": 0.05,
+        "uncertainty_label": "low",
+        "clarification_question": "Can you clarify this point before I apply it: Utterance is a declarative statement about a situation (IPO theater) rather than?",
+        "clarification_reason": "Utterance is a declarative statement about a situation (IPO theater) rather than",
+        "rationale": "Utterance is a declarative statement about a situation (IPO theater) rather than a logical fact, rule, or query. It falls under out-of-scope tasks (other)."
+      },
+      "validation_errors": [],
+      "deferred_validation_errors": [],
+      "clarification_rounds": [],
+      "clarification_rounds_used": 0,
+      "clarification_max_rounds": 2,
+      "clarification_answers_available": 0,
+      "clarification_answers_used": 0,
+      "clarification_scripted_answers_used": 0,
+      "clarification_synthetic_answers_used": 0,
+      "clarification_generated_answers_used": 0,
+      "clarification_served_llm_answers_used": 0,
+      "clarification_proxy_answers_used": 0,
+      "clarification_policy": {
+        "clarification_eagerness": 0.35,
+        "uncertainty_score": 0.05,
+        "effective_uncertainty": 0.05,
+        "threshold": 0.65,
+        "request_clarification": false,
+        "needs_clarification_flag": false,
+        "progress_low_relevance": false,
+        "progress_high_risk": false,
+        "progress_low_relevance_threshold": 0.34,
+        "progress_high_risk_threshold": 0.18,
+        "progress_memory_available": true,
+        "progress_focus_present": false,
+        "progress_signal_term_count": 0,
+        "parsed_signal_term_count": 0,
+        "overlap_term_count": 0,
+        "progress_best_focus_overlap": 0.0,
+        "progress_relevance_score": 1.0
+      },
+      "progress_low_relevance_seen": false,
+      "progress_high_risk_seen": false,
+      "progress_directives": {},
+      "progress_events": [],
+      "progress_snapshot_before": {
+        "schema_version": 1,
+        "ontology_name": "hn_random_live_47750086_can_ai_be_a_child_of_god_inside_anthropi",
+        "updated_at_utc": "2026-04-14T17:09:40+00:00",
+        "active_focus": [],
+        "goals": [],
+        "open_questions": [],
+        "resolved_items": [],
+        "notes": []
+      },
+      "progress_snapshot_after_directives": {
+        "schema_version": 1,
+        "ontology_name": "hn_random_live_47750086_can_ai_be_a_child_of_god_inside_anthropi",
+        "updated_at_utc": "2026-04-14T17:09:40+00:00",
+        "active_focus": [],
+        "goals": [],
+        "open_questions": [],
+        "resolved_items": [],
+        "notes": []
+      },
+      "clarification_pending": false,
+      "clarification_pending_reason": "",
+      "clarification_question": "Can you clarify this point before I apply it: Utterance is a declarative statement about a situation (IPO theater) rather than?",
+      "clarification_answer_attempt": {},
+      "confirmation_required": false,
+      "confirmation_question": "",
+      "confirmation_answer": "",
+      "confirmation_result": "not_required",
+      "confirmation_answers_available": 0,
+      "confirmation_answers_used": 0,
+      "apply": {
+        "tool": "none",
+        "input": null,
+        "result": {
+          "status": "skipped",
+          "message": "Intent=other; no KB mutation/query applied."
+        }
+      },
+      "apply_status": "skipped",
+      "decision_state": "stage_provisionally"
     },
     {
       "turn_index": 4,
-      "utterance": "they all stay in morro_bay except will who's in sf now",
+      "utterance": "Guestmodinfo: The said \"Christian leaders\" lack the wisdom just like AI lacks being human.",
+      "utterance_original": "Guestmodinfo: The said \"Christian leaders\" lack the wisdom just like AI lacks being human.",
+      "utterance_pre_normalized": "Guestmodinfo: The said \"Christian leaders\" lack the wisdom just like AI lacks being human.",
+      "pre_normalization_events": [],
+      "control_predicate_directive": false,
+      "declared_predicates_from_control": [],
+      "declared_predicate_signatures_from_control": [],
       "route": "assert_fact",
-      "route_source": "heuristic",
+      "route_source": "model",
       "repaired": false,
       "fallback_used": false,
       "alignment_events": [],
       "registry_unknown_signatures": [],
       "parsed": {
         "intent": "assert_fact",
-        "logic_string": "in_region(they, morro_bay).\nin_region(will, sf).",
+        "logic_string": "lack_wisdom(christian_leaders).",
         "components": {
           "atoms": [
-            "in_region(they, morro_bay).\nin_region(will, sf)"
+            "christian_leaders"
           ],
           "variables": [],
-          "predicates": []
+          "predicates": [
+            "lack_wisdom"
+          ]
         },
         "facts": [
-          "in_region(they, morro_bay).\nin_region(will, sf)."
+          "lack_wisdom(christian_leaders)."
         ],
         "rules": [],
         "queries": [],
@@ -675,21 +673,21 @@
           "logic": 0.95
         },
         "ambiguities": [
-          "Pronoun 'they' refers to an unspecified group."
+          "Comparison between AI and Christian leaders is implicit; parsed as a shared property."
         ],
         "needs_clarification": false,
         "uncertainty_score": 0.15,
         "uncertainty_label": "low",
-        "clarification_question": "Can you clarify this detail: Pronoun 'they' refers to an unspecified group?",
-        "clarification_reason": "Parsed as two facts: 'they' in 'morro_bay' and 'will' in 'sf'. Predicate",
-        "rationale": "Parsed as two facts: 'they' in 'morro_bay' and 'will' in 'sf'. Predicate 'in_region' used for location. Pronoun 'they' treated as variable or atom depending on context, but here treated as a specific entity 'they' based on utterance structure."
+        "clarification_question": "Can you clarify this detail: Comparison between AI and Christian leaders is implicit; parsed as a shared property?",
+        "clarification_reason": "The utterance asserts a property (lack of wisdom) for a specific group",
+        "rationale": "The utterance asserts a property (lack of wisdom) for a specific group (Christian leaders). The comparison to AI is treated as rhetorical context, not a logical relation requiring a new predicate."
       },
       "validation_errors": [],
       "deferred_validation_errors": [],
       "clarification_rounds": [],
       "clarification_rounds_used": 0,
       "clarification_max_rounds": 2,
-      "clarification_answers_available": 2,
+      "clarification_answers_available": 0,
       "clarification_answers_used": 0,
       "clarification_scripted_answers_used": 0,
       "clarification_synthetic_answers_used": 0,
@@ -721,8 +719,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "frontierv6_r1_rung_439_frontier_plural_coref_exception_guard",
-        "updated_at_utc": "2026-04-12T22:31:21+00:00",
+        "ontology_name": "hn_random_live_47750086_can_ai_be_a_child_of_god_inside_anthropi",
+        "updated_at_utc": "2026-04-14T17:09:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -731,8 +729,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "frontierv6_r1_rung_439_frontier_plural_coref_exception_guard",
-        "updated_at_utc": "2026-04-12T22:31:21+00:00",
+        "ontology_name": "hn_random_live_47750086_can_ai_be_a_child_of_god_inside_anthropi",
+        "updated_at_utc": "2026-04-14T17:09:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -741,7 +739,7 @@
       },
       "clarification_pending": false,
       "clarification_pending_reason": "",
-      "clarification_question": "Can you clarify this detail: Pronoun 'they' refers to an unspecified group?",
+      "clarification_question": "Can you clarify this detail: Comparison between AI and Christian leaders is implicit; parsed as a shared property?",
       "clarification_answer_attempt": {},
       "confirmation_required": false,
       "confirmation_question": "",
@@ -750,35 +748,12 @@
       "confirmation_answers_available": 0,
       "confirmation_answers_used": 0,
       "apply": {
-        "tool": "assert_fact_batch",
-        "input": [
-          "in_region(they, morro_bay).",
-          "in_region(will, sf)."
-        ],
+        "tool": "assert_fact",
+        "input": "lack_wisdom(christian_leaders).",
         "result": {
           "status": "success",
-          "result_type": "batch",
-          "applied_total": 2,
-          "operations": [
-            {
-              "status": "success",
-              "fact": "in_region(they, morro_bay).",
-              "raw": {
-                "status": "success",
-                "result_type": "fact_asserted",
-                "fact": "in_region(they, morro_bay)."
-              }
-            },
-            {
-              "status": "success",
-              "fact": "in_region(will, sf).",
-              "raw": {
-                "status": "success",
-                "result_type": "fact_asserted",
-                "fact": "in_region(will, sf)."
-              }
-            }
-          ]
+          "result_type": "fact_asserted",
+          "fact": "lack_wisdom(christian_leaders)."
         }
       },
       "apply_status": "success",
@@ -786,541 +761,28 @@
     },
     {
       "turn_index": 5,
-      "utterance": "Set lives_in(blake, morro_bay).",
-      "route": "assert_fact",
-      "route_source": "model",
-      "repaired": false,
-      "fallback_used": false,
-      "alignment_events": [
-        {
-          "kind": "directional_fact_guard",
-          "predicate": "lives_in",
-          "from": "lives_in(blake, morro_bay)",
-          "to": "lives_in(blake, morro_bay)",
-          "match_mode": "canonicalized"
-        }
-      ],
-      "registry_unknown_signatures": [],
-      "parsed": {
-        "intent": "assert_fact",
-        "logic_string": "lives_in(blake, morro_bay).",
-        "components": {
-          "atoms": [
-            "blake",
-            "morro_bay"
-          ],
-          "variables": [],
-          "predicates": [
-            "lives_in"
-          ]
-        },
-        "facts": [
-          "lives_in(blake, morro_bay)."
-        ],
-        "rules": [],
-        "queries": [],
-        "confidence": {
-          "overall": 1.0,
-          "intent": 1.0,
-          "logic": 1.0
-        },
-        "ambiguities": [],
-        "needs_clarification": false,
-        "uncertainty_score": 0.0,
-        "uncertainty_label": "low",
-        "clarification_question": "Can you clarify this point before I apply it: Direct mapping of declarative statement to fact using canonical predicate lives_in?",
-        "clarification_reason": "Direct mapping of declarative statement to fact using canonical predicate lives_in.",
-        "rationale": "Direct mapping of declarative statement to fact using canonical predicate lives_in. Directional fact guard corrected inverted subject/object order."
-      },
-      "validation_errors": [],
-      "deferred_validation_errors": [],
-      "clarification_rounds": [],
-      "clarification_rounds_used": 0,
-      "clarification_max_rounds": 2,
-      "clarification_answers_available": 0,
-      "clarification_answers_used": 0,
-      "clarification_scripted_answers_used": 0,
-      "clarification_synthetic_answers_used": 0,
-      "clarification_generated_answers_used": 0,
-      "clarification_served_llm_answers_used": 0,
-      "clarification_proxy_answers_used": 0,
-      "clarification_policy": {
-        "clarification_eagerness": 0.35,
-        "uncertainty_score": 0.0,
-        "effective_uncertainty": 0.0,
-        "threshold": 0.65,
-        "request_clarification": false,
-        "needs_clarification_flag": false,
-        "progress_low_relevance": false,
-        "progress_high_risk": false,
-        "progress_low_relevance_threshold": 0.34,
-        "progress_high_risk_threshold": 0.18,
-        "progress_memory_available": true,
-        "progress_focus_present": false,
-        "progress_signal_term_count": 0,
-        "parsed_signal_term_count": 0,
-        "overlap_term_count": 0,
-        "progress_best_focus_overlap": 0.0,
-        "progress_relevance_score": 1.0
-      },
-      "progress_low_relevance_seen": false,
-      "progress_high_risk_seen": false,
-      "progress_directives": {},
-      "progress_events": [],
-      "progress_snapshot_before": {
-        "schema_version": 1,
-        "ontology_name": "frontierv6_r1_rung_439_frontier_plural_coref_exception_guard",
-        "updated_at_utc": "2026-04-12T22:31:21+00:00",
-        "active_focus": [],
-        "goals": [],
-        "open_questions": [],
-        "resolved_items": [],
-        "notes": []
-      },
-      "progress_snapshot_after_directives": {
-        "schema_version": 1,
-        "ontology_name": "frontierv6_r1_rung_439_frontier_plural_coref_exception_guard",
-        "updated_at_utc": "2026-04-12T22:31:21+00:00",
-        "active_focus": [],
-        "goals": [],
-        "open_questions": [],
-        "resolved_items": [],
-        "notes": []
-      },
-      "clarification_pending": false,
-      "clarification_pending_reason": "",
-      "clarification_question": "Can you clarify this point before I apply it: Direct mapping of declarative statement to fact using canonical predicate lives_in?",
-      "clarification_answer_attempt": {},
-      "confirmation_required": false,
-      "confirmation_question": "",
-      "confirmation_answer": "",
-      "confirmation_result": "not_required",
-      "confirmation_answers_available": 0,
-      "confirmation_answers_used": 0,
-      "apply": {
-        "tool": "assert_fact",
-        "input": "lives_in(blake, morro_bay).",
-        "result": {
-          "status": "success",
-          "result_type": "fact_asserted",
-          "fact": "lives_in(blake, morro_bay)."
-        }
-      },
-      "apply_status": "success",
-      "decision_state": "commit"
-    },
-    {
-      "turn_index": 6,
-      "utterance": "Set lives_in(pierce, morro_bay).",
-      "route": "assert_fact",
-      "route_source": "model",
-      "repaired": false,
-      "fallback_used": false,
-      "alignment_events": [
-        {
-          "kind": "directional_fact_guard",
-          "predicate": "lives_in",
-          "from": "lives_in(pierce, morro_bay)",
-          "to": "lives_in(pierce, morro_bay)",
-          "match_mode": "canonicalized"
-        }
-      ],
-      "registry_unknown_signatures": [],
-      "parsed": {
-        "intent": "assert_fact",
-        "logic_string": "lives_in(pierce, morro_bay).",
-        "components": {
-          "atoms": [
-            "morro_bay",
-            "pierce"
-          ],
-          "variables": [],
-          "predicates": [
-            "lives_in"
-          ]
-        },
-        "facts": [
-          "lives_in(pierce, morro_bay)."
-        ],
-        "rules": [],
-        "queries": [],
-        "confidence": {
-          "overall": 1.0,
-          "intent": 1.0,
-          "logic": 1.0
-        },
-        "ambiguities": [],
-        "needs_clarification": false,
-        "uncertainty_score": 0.0,
-        "uncertainty_label": "low",
-        "clarification_question": "Can you clarify this point before I apply it: Direct mapping of declarative statement to fact using canonical predicate lives_in?",
-        "clarification_reason": "Direct mapping of declarative statement to fact using canonical predicate lives_in.",
-        "rationale": "Direct mapping of declarative statement to fact using canonical predicate lives_in. Directional fact guard corrected inverted subject/object order."
-      },
-      "validation_errors": [],
-      "deferred_validation_errors": [],
-      "clarification_rounds": [],
-      "clarification_rounds_used": 0,
-      "clarification_max_rounds": 2,
-      "clarification_answers_available": 0,
-      "clarification_answers_used": 0,
-      "clarification_scripted_answers_used": 0,
-      "clarification_synthetic_answers_used": 0,
-      "clarification_generated_answers_used": 0,
-      "clarification_served_llm_answers_used": 0,
-      "clarification_proxy_answers_used": 0,
-      "clarification_policy": {
-        "clarification_eagerness": 0.35,
-        "uncertainty_score": 0.0,
-        "effective_uncertainty": 0.0,
-        "threshold": 0.65,
-        "request_clarification": false,
-        "needs_clarification_flag": false,
-        "progress_low_relevance": false,
-        "progress_high_risk": false,
-        "progress_low_relevance_threshold": 0.34,
-        "progress_high_risk_threshold": 0.18,
-        "progress_memory_available": true,
-        "progress_focus_present": false,
-        "progress_signal_term_count": 0,
-        "parsed_signal_term_count": 0,
-        "overlap_term_count": 0,
-        "progress_best_focus_overlap": 0.0,
-        "progress_relevance_score": 1.0
-      },
-      "progress_low_relevance_seen": false,
-      "progress_high_risk_seen": false,
-      "progress_directives": {},
-      "progress_events": [],
-      "progress_snapshot_before": {
-        "schema_version": 1,
-        "ontology_name": "frontierv6_r1_rung_439_frontier_plural_coref_exception_guard",
-        "updated_at_utc": "2026-04-12T22:31:21+00:00",
-        "active_focus": [],
-        "goals": [],
-        "open_questions": [],
-        "resolved_items": [],
-        "notes": []
-      },
-      "progress_snapshot_after_directives": {
-        "schema_version": 1,
-        "ontology_name": "frontierv6_r1_rung_439_frontier_plural_coref_exception_guard",
-        "updated_at_utc": "2026-04-12T22:31:21+00:00",
-        "active_focus": [],
-        "goals": [],
-        "open_questions": [],
-        "resolved_items": [],
-        "notes": []
-      },
-      "clarification_pending": false,
-      "clarification_pending_reason": "",
-      "clarification_question": "Can you clarify this point before I apply it: Direct mapping of declarative statement to fact using canonical predicate lives_in?",
-      "clarification_answer_attempt": {},
-      "confirmation_required": false,
-      "confirmation_question": "",
-      "confirmation_answer": "",
-      "confirmation_result": "not_required",
-      "confirmation_answers_available": 0,
-      "confirmation_answers_used": 0,
-      "apply": {
-        "tool": "assert_fact",
-        "input": "lives_in(pierce, morro_bay).",
-        "result": {
-          "status": "success",
-          "result_type": "fact_asserted",
-          "fact": "lives_in(pierce, morro_bay)."
-        }
-      },
-      "apply_status": "success",
-      "decision_state": "commit"
-    },
-    {
-      "turn_index": 7,
-      "utterance": "Set lives_in(will, san_francisco).",
-      "route": "assert_fact",
-      "route_source": "model",
-      "repaired": false,
-      "fallback_used": false,
-      "alignment_events": [
-        {
-          "kind": "directional_fact_guard",
-          "predicate": "lives_in",
-          "from": "lives_in(will, san_francisco)",
-          "to": "lives_in(will, san_francisco)",
-          "match_mode": "canonicalized"
-        }
-      ],
-      "registry_unknown_signatures": [],
-      "parsed": {
-        "intent": "assert_fact",
-        "logic_string": "lives_in(will, san_francisco).",
-        "components": {
-          "atoms": [
-            "san_francisco",
-            "will"
-          ],
-          "variables": [],
-          "predicates": [
-            "lives_in"
-          ]
-        },
-        "facts": [
-          "lives_in(will, san_francisco)."
-        ],
-        "rules": [],
-        "queries": [],
-        "confidence": {
-          "overall": 1.0,
-          "intent": 1.0,
-          "logic": 1.0
-        },
-        "ambiguities": [],
-        "needs_clarification": false,
-        "uncertainty_score": 0.0,
-        "uncertainty_label": "low",
-        "clarification_question": "Can you clarify this point before I apply it: Direct mapping of declarative statement to fact predicate?",
-        "clarification_reason": "Direct mapping of declarative statement to fact predicate.",
-        "rationale": "Direct mapping of declarative statement to fact predicate. Directional fact guard corrected inverted subject/object order."
-      },
-      "validation_errors": [],
-      "deferred_validation_errors": [],
-      "clarification_rounds": [],
-      "clarification_rounds_used": 0,
-      "clarification_max_rounds": 2,
-      "clarification_answers_available": 0,
-      "clarification_answers_used": 0,
-      "clarification_scripted_answers_used": 0,
-      "clarification_synthetic_answers_used": 0,
-      "clarification_generated_answers_used": 0,
-      "clarification_served_llm_answers_used": 0,
-      "clarification_proxy_answers_used": 0,
-      "clarification_policy": {
-        "clarification_eagerness": 0.35,
-        "uncertainty_score": 0.0,
-        "effective_uncertainty": 0.0,
-        "threshold": 0.65,
-        "request_clarification": false,
-        "needs_clarification_flag": false,
-        "progress_low_relevance": false,
-        "progress_high_risk": false,
-        "progress_low_relevance_threshold": 0.34,
-        "progress_high_risk_threshold": 0.18,
-        "progress_memory_available": true,
-        "progress_focus_present": false,
-        "progress_signal_term_count": 0,
-        "parsed_signal_term_count": 0,
-        "overlap_term_count": 0,
-        "progress_best_focus_overlap": 0.0,
-        "progress_relevance_score": 1.0
-      },
-      "progress_low_relevance_seen": false,
-      "progress_high_risk_seen": false,
-      "progress_directives": {},
-      "progress_events": [],
-      "progress_snapshot_before": {
-        "schema_version": 1,
-        "ontology_name": "frontierv6_r1_rung_439_frontier_plural_coref_exception_guard",
-        "updated_at_utc": "2026-04-12T22:31:21+00:00",
-        "active_focus": [],
-        "goals": [],
-        "open_questions": [],
-        "resolved_items": [],
-        "notes": []
-      },
-      "progress_snapshot_after_directives": {
-        "schema_version": 1,
-        "ontology_name": "frontierv6_r1_rung_439_frontier_plural_coref_exception_guard",
-        "updated_at_utc": "2026-04-12T22:31:21+00:00",
-        "active_focus": [],
-        "goals": [],
-        "open_questions": [],
-        "resolved_items": [],
-        "notes": []
-      },
-      "clarification_pending": false,
-      "clarification_pending_reason": "",
-      "clarification_question": "Can you clarify this point before I apply it: Direct mapping of declarative statement to fact predicate?",
-      "clarification_answer_attempt": {},
-      "confirmation_required": false,
-      "confirmation_question": "",
-      "confirmation_answer": "",
-      "confirmation_result": "not_required",
-      "confirmation_answers_available": 0,
-      "confirmation_answers_used": 0,
-      "apply": {
-        "tool": "assert_fact",
-        "input": "lives_in(will, san_francisco).",
-        "result": {
-          "status": "success",
-          "result_type": "fact_asserted",
-          "fact": "lives_in(will, san_francisco)."
-        }
-      },
-      "apply_status": "success",
-      "decision_state": "commit"
-    },
-    {
-      "turn_index": 8,
-      "utterance": "Set inside(morro_bay, california). Set inside(san_francisco, california).",
-      "route": "assert_fact",
-      "route_source": "model",
+      "utterance": "Our_Benefactors: You\u2019re absolutely right! Christ is returning soon! Would you like me to cite some additional Bible verses that support your prophecy?",
+      "utterance_original": "Our_Benefactors: You\u2019re absolutely right! Christ is returning soon! Would you like me to cite some additional Bible verses that support your prophecy?",
+      "utterance_pre_normalized": "Our_Benefactors: You\u2019re absolutely right! Christ is returning soon! Would you like me to cite some additional Bible verses that support your prophecy?",
+      "pre_normalization_events": [],
+      "control_predicate_directive": false,
+      "declared_predicates_from_control": [],
+      "declared_predicate_signatures_from_control": [],
+      "route": "query",
+      "route_source": "heuristic",
       "repaired": false,
       "fallback_used": false,
       "alignment_events": [],
       "registry_unknown_signatures": [],
       "parsed": {
-        "intent": "assert_fact",
-        "logic_string": "inside(morro_bay, california).\ninside(san_francisco, california).",
+        "intent": "other",
+        "logic_string": "",
         "components": {
-          "atoms": [
-            "inside(morro_bay, california).\ninside(san_francisco, california)"
-          ],
+          "atoms": [],
           "variables": [],
           "predicates": []
         },
-        "facts": [
-          "inside(morro_bay, california).\ninside(san_francisco, california)."
-        ],
-        "rules": [],
-        "queries": [],
-        "confidence": {
-          "overall": 1.0,
-          "intent": 1.0,
-          "logic": 1.0
-        },
-        "ambiguities": [],
-        "needs_clarification": false,
-        "uncertainty_score": 0.0,
-        "uncertainty_label": "low",
-        "clarification_question": "Can you clarify this point before I apply it: Direct mapping of two location containment statements using the 'inside' predicate with?",
-        "clarification_reason": "Direct mapping of two location containment statements using the 'inside' predicate with",
-        "rationale": "Direct mapping of two location containment statements using the 'inside' predicate with explicit arguments."
-      },
-      "validation_errors": [],
-      "deferred_validation_errors": [],
-      "clarification_rounds": [],
-      "clarification_rounds_used": 0,
-      "clarification_max_rounds": 2,
-      "clarification_answers_available": 0,
-      "clarification_answers_used": 0,
-      "clarification_scripted_answers_used": 0,
-      "clarification_synthetic_answers_used": 0,
-      "clarification_generated_answers_used": 0,
-      "clarification_served_llm_answers_used": 0,
-      "clarification_proxy_answers_used": 0,
-      "clarification_policy": {
-        "clarification_eagerness": 0.35,
-        "uncertainty_score": 0.0,
-        "effective_uncertainty": 0.0,
-        "threshold": 0.65,
-        "request_clarification": false,
-        "needs_clarification_flag": false,
-        "progress_low_relevance": false,
-        "progress_high_risk": false,
-        "progress_low_relevance_threshold": 0.34,
-        "progress_high_risk_threshold": 0.18,
-        "progress_memory_available": true,
-        "progress_focus_present": false,
-        "progress_signal_term_count": 0,
-        "parsed_signal_term_count": 0,
-        "overlap_term_count": 0,
-        "progress_best_focus_overlap": 0.0,
-        "progress_relevance_score": 1.0
-      },
-      "progress_low_relevance_seen": false,
-      "progress_high_risk_seen": false,
-      "progress_directives": {},
-      "progress_events": [],
-      "progress_snapshot_before": {
-        "schema_version": 1,
-        "ontology_name": "frontierv6_r1_rung_439_frontier_plural_coref_exception_guard",
-        "updated_at_utc": "2026-04-12T22:31:21+00:00",
-        "active_focus": [],
-        "goals": [],
-        "open_questions": [],
-        "resolved_items": [],
-        "notes": []
-      },
-      "progress_snapshot_after_directives": {
-        "schema_version": 1,
-        "ontology_name": "frontierv6_r1_rung_439_frontier_plural_coref_exception_guard",
-        "updated_at_utc": "2026-04-12T22:31:21+00:00",
-        "active_focus": [],
-        "goals": [],
-        "open_questions": [],
-        "resolved_items": [],
-        "notes": []
-      },
-      "clarification_pending": false,
-      "clarification_pending_reason": "",
-      "clarification_question": "Can you clarify this point before I apply it: Direct mapping of two location containment statements using the 'inside' predicate with?",
-      "clarification_answer_attempt": {},
-      "confirmation_required": false,
-      "confirmation_question": "",
-      "confirmation_answer": "",
-      "confirmation_result": "not_required",
-      "confirmation_answers_available": 0,
-      "confirmation_answers_used": 0,
-      "apply": {
-        "tool": "assert_fact_batch",
-        "input": [
-          "inside(morro_bay, california).",
-          "inside(san_francisco, california)."
-        ],
-        "result": {
-          "status": "success",
-          "result_type": "batch",
-          "applied_total": 2,
-          "operations": [
-            {
-              "status": "success",
-              "fact": "inside(morro_bay, california).",
-              "raw": {
-                "status": "success",
-                "result_type": "fact_asserted",
-                "fact": "inside(morro_bay, california)."
-              }
-            },
-            {
-              "status": "success",
-              "fact": "inside(san_francisco, california).",
-              "raw": {
-                "status": "success",
-                "result_type": "fact_asserted",
-                "fact": "inside(san_francisco, california)."
-              }
-            }
-          ]
-        }
-      },
-      "apply_status": "success",
-      "decision_state": "commit"
-    },
-    {
-      "turn_index": 9,
-      "utterance": "he handed pierce the tide_key not the older bro",
-      "route": "assert_fact",
-      "route_source": "model",
-      "repaired": false,
-      "fallback_used": false,
-      "alignment_events": [],
-      "registry_unknown_signatures": [],
-      "parsed": {
-        "intent": "assert_fact",
-        "logic_string": "parent(blake, scott).",
-        "components": {
-          "atoms": [
-            "blake",
-            "scott"
-          ],
-          "variables": [],
-          "predicates": [
-            "parent"
-          ]
-        },
-        "facts": [
-          "parent(blake, scott)."
-        ],
+        "facts": [],
         "rules": [],
         "queries": [],
         "confidence": {
@@ -1332,28 +794,18 @@
         "needs_clarification": false,
         "uncertainty_score": 0.05,
         "uncertainty_label": "low",
-        "clarification_question": "Can you clarify this point before I apply it: Disambiguated pronouns 'he' and 'the older bro' to 'Blake' and 'Scott' respectively?",
-        "clarification_reason": "Disambiguated pronouns 'he' and 'the older bro' to 'Blake' and 'Scott' respectively.",
-        "rationale": "Disambiguated pronouns 'he' and 'the older bro' to 'Blake' and 'Scott' respectively. Interpreted as 'Blake is a parent of Scott' based on 'handed' implying parentage in this context."
+        "clarification_question": "Can you clarify this point before I apply it: Out-of-scope conversational response?",
+        "clarification_reason": "Out-of-scope conversational response.",
+        "rationale": "The utterance is a conversational exchange about religious prophecy, not a declarative fact, rule, query, or retraction regarding the knowledge base. It falls under 'other'."
       },
       "validation_errors": [],
       "deferred_validation_errors": [],
-      "clarification_rounds": [
-        {
-          "round": 1,
-          "question": "Who does 'he' refer to, and who is 'the older bro'?",
-          "answer": "He means Blake. Older bro means Scott.",
-          "answer_source": "scenario_scripted",
-          "uncertainty_score": 0.75,
-          "effective_uncertainty": 0.82,
-          "threshold": 0.65
-        }
-      ],
-      "clarification_rounds_used": 1,
+      "clarification_rounds": [],
+      "clarification_rounds_used": 0,
       "clarification_max_rounds": 2,
-      "clarification_answers_available": 2,
-      "clarification_answers_used": 1,
-      "clarification_scripted_answers_used": 1,
+      "clarification_answers_available": 0,
+      "clarification_answers_used": 0,
+      "clarification_scripted_answers_used": 0,
       "clarification_synthetic_answers_used": 0,
       "clarification_generated_answers_used": 0,
       "clarification_served_llm_answers_used": 0,
@@ -1383,8 +835,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "frontierv6_r1_rung_439_frontier_plural_coref_exception_guard",
-        "updated_at_utc": "2026-04-12T22:31:21+00:00",
+        "ontology_name": "hn_random_live_47750086_can_ai_be_a_child_of_god_inside_anthropi",
+        "updated_at_utc": "2026-04-14T17:09:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -1393,8 +845,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "frontierv6_r1_rung_439_frontier_plural_coref_exception_guard",
-        "updated_at_utc": "2026-04-12T22:31:21+00:00",
+        "ontology_name": "hn_random_live_47750086_can_ai_be_a_child_of_god_inside_anthropi",
+        "updated_at_utc": "2026-04-14T17:09:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -1403,7 +855,7 @@
       },
       "clarification_pending": false,
       "clarification_pending_reason": "",
-      "clarification_question": "Can you clarify this point before I apply it: Disambiguated pronouns 'he' and 'the older bro' to 'Blake' and 'Scott' respectively?",
+      "clarification_question": "Can you clarify this point before I apply it: Out-of-scope conversational response?",
       "clarification_answer_attempt": {},
       "confirmation_required": false,
       "confirmation_question": "",
@@ -1412,64 +864,185 @@
       "confirmation_answers_available": 0,
       "confirmation_answers_used": 0,
       "apply": {
-        "tool": "assert_fact",
-        "input": "parent(blake, scott).",
+        "tool": "none",
+        "input": null,
         "result": {
-          "status": "success",
-          "result_type": "fact_asserted",
-          "fact": "parent(blake, scott)."
+          "status": "skipped",
+          "message": "Intent=other; no KB mutation/query applied."
         }
       },
-      "apply_status": "success",
-      "decision_state": "commit"
+      "apply_status": "skipped",
+      "decision_state": "stage_provisionally"
     },
     {
-      "turn_index": 10,
-      "utterance": "Set carries(pierce, tide_key).",
-      "route": "assert_fact",
-      "route_source": "model",
+      "turn_index": 6,
+      "utterance": "nancyminusone: If an AI does not accept Jesus as lord and savior, does it go to Hell when switched off?",
+      "utterance_original": "nancyminusone: If an AI does not accept Jesus as lord and savior, does it go to Hell when switched off?",
+      "utterance_pre_normalized": "nancyminusone: If an AI does not accept Jesus as lord and savior, does it go to Hell when switched off?",
+      "pre_normalization_events": [],
+      "control_predicate_directive": false,
+      "declared_predicates_from_control": [],
+      "declared_predicate_signatures_from_control": [],
+      "route": "assert_rule",
+      "route_source": "heuristic",
       "repaired": false,
       "fallback_used": false,
-      "alignment_events": [
-        {
-          "kind": "directional_fact_guard",
-          "predicate": "carries",
-          "from": "carries(pierce, tide_key)",
-          "to": "carries(pierce, tide_key)",
-          "match_mode": "canonicalized"
-        }
-      ],
+      "alignment_events": [],
       "registry_unknown_signatures": [],
       "parsed": {
-        "intent": "assert_fact",
-        "logic_string": "carries(pierce, tide_key).",
+        "intent": "query",
+        "logic_string": "goes_to_hell(X) :- not(accepts_jesus(X)).",
         "components": {
           "atoms": [
-            "pierce",
-            "tide_key"
+            "goes_to_hell",
+            "accepts_jesus"
           ],
-          "variables": [],
+          "variables": [
+            "X"
+          ],
           "predicates": [
-            "carries"
+            "goes_to_hell",
+            "accepts_jesus"
           ]
         },
-        "facts": [
-          "carries(pierce, tide_key)."
+        "facts": [],
+        "rules": [],
+        "queries": [
+          "goes_to_hell(X) :- not(accepts_jesus(X))."
         ],
+        "confidence": {
+          "overall": 0.85,
+          "intent": 0.95,
+          "logic": 0.75
+        },
+        "ambiguities": [
+          "The utterance is a yes/no question about a specific entity (AI) and a theological condition, but the user asks for a truth value or binding. The semantic parser maps this to a query goal. The predicate 'goes_to_hell' is a direct mapping of the question's core concept.",
+          "The utterance asks a question about a specific entity (AI) and a theological condition, but the user asks for a truth value or binding. The semantic parser maps this to a query goal. The predicate 'goes_to_hell' is a direct mapping of the question's core concept."
+        ],
+        "needs_clarification": false,
+        "uncertainty_score": 0.35,
+        "uncertainty_label": "medium",
+        "clarification_question": "Do you want to assert the rule that non-believers go to hell, or query the truth of that rule for a specific AI?",
+        "clarification_reason": "Question seeks truth value or rule definition; intent could be query or",
+        "rationale": "The utterance is a question about a conditional relationship. It maps to a query goal. The logic string represents the rule implied by the question. Uncertainty is medium because the user might want to assert the rule or query its truth."
+      },
+      "validation_errors": [
+        "queries[0] is not valid Prolog goal"
+      ],
+      "deferred_validation_errors": [],
+      "clarification_rounds": [],
+      "clarification_rounds_used": 0,
+      "clarification_max_rounds": 2,
+      "clarification_answers_available": 0,
+      "clarification_answers_used": 0,
+      "clarification_scripted_answers_used": 0,
+      "clarification_synthetic_answers_used": 0,
+      "clarification_generated_answers_used": 0,
+      "clarification_served_llm_answers_used": 0,
+      "clarification_proxy_answers_used": 0,
+      "clarification_policy": {
+        "clarification_eagerness": 0.35,
+        "uncertainty_score": 0.0,
+        "effective_uncertainty": 0.0,
+        "threshold": 0.65,
+        "request_clarification": false,
+        "needs_clarification_flag": false,
+        "progress_memory_available": true,
+        "progress_focus_present": false,
+        "progress_relevance_score": 1.0,
+        "progress_low_relevance": false,
+        "progress_high_risk": false
+      },
+      "progress_low_relevance_seen": false,
+      "progress_high_risk_seen": false,
+      "progress_directives": {},
+      "progress_events": [],
+      "progress_snapshot_before": {
+        "schema_version": 1,
+        "ontology_name": "hn_random_live_47750086_can_ai_be_a_child_of_god_inside_anthropi",
+        "updated_at_utc": "2026-04-14T17:09:40+00:00",
+        "active_focus": [],
+        "goals": [],
+        "open_questions": [],
+        "resolved_items": [],
+        "notes": []
+      },
+      "progress_snapshot_after_directives": {
+        "schema_version": 1,
+        "ontology_name": "hn_random_live_47750086_can_ai_be_a_child_of_god_inside_anthropi",
+        "updated_at_utc": "2026-04-14T17:09:40+00:00",
+        "active_focus": [],
+        "goals": [],
+        "open_questions": [],
+        "resolved_items": [],
+        "notes": []
+      },
+      "clarification_pending": false,
+      "clarification_pending_reason": "",
+      "clarification_question": "",
+      "clarification_answer_attempt": {},
+      "confirmation_required": false,
+      "confirmation_question": "",
+      "confirmation_answer": "",
+      "confirmation_result": "not_required",
+      "confirmation_answers_available": 0,
+      "confirmation_answers_used": 0,
+      "apply": {
+        "tool": "none",
+        "input": null,
+        "result": {
+          "status": "validation_error",
+          "message": "Skipping KB apply due to parser validation failure."
+        }
+      },
+      "apply_status": "validation_error",
+      "decision_state": "reject"
+    },
+    {
+      "turn_index": 7,
+      "utterance": "iamleppert: AI doesn't create truth, it imitates it, through assimilation of data. It is not intelligence. it mimics it without consciousness or free will. AI can be used to manipulate, optimize engagement over truth, as we have seen with how ChatGPT is made in the image of Sam Altman and takes on his own characteristics. AI is the ultimate deceiver -- authoritative, instant, unquestioning, and without any internal moral compass. Where did the human moral compass come from? Who \"trains\" morality into people, and why do some people appear to be lacking it in cases that can't be explained by trauma?Put this way, AI more fits the description of Satan than it does God in religious context. If I were an all-powerful, evil being, AI would be the tool and method I would choose to carry out my plans for humanity.",
+      "utterance_original": "iamleppert: AI doesn't create truth, it imitates it, through assimilation of data. It is not intelligence, but it mimics it without consciousness or free will. AI can be used to manipulate, optimize engagement over truth (as we have seen with how ChatGPT is made in the image of Sam Altman and takes on his own characteristics). AI is the ultimate deceiver -- authoritative, instant, unquestioning, and without any internal moral compass. Where did the human moral compass come from? Who \"trains\" morality into people, and why do some people appear to be lacking it in cases that can't be explained by trauma?Put this way, AI more fits the description of Satan than it does God in religious context. If I were an all-powerful, evil being, AI would be the tool and method I would choose to carry out my plans for humanity.",
+      "utterance_pre_normalized": "iamleppert: AI doesn't create truth, it imitates it, through assimilation of data. It is not intelligence. it mimics it without consciousness or free will. AI can be used to manipulate, optimize engagement over truth, as we have seen with how ChatGPT is made in the image of Sam Altman and takes on his own characteristics. AI is the ultimate deceiver -- authoritative, instant, unquestioning, and without any internal moral compass. Where did the human moral compass come from? Who \"trains\" morality into people, and why do some people appear to be lacking it in cases that can't be explained by trauma?Put this way, AI more fits the description of Satan than it does God in religious context. If I were an all-powerful, evil being, AI would be the tool and method I would choose to carry out my plans for humanity.",
+      "pre_normalization_events": [
+        {
+          "kind": "parenthetical_inline"
+        },
+        {
+          "kind": "split_on_but"
+        }
+      ],
+      "control_predicate_directive": false,
+      "declared_predicates_from_control": [],
+      "declared_predicate_signatures_from_control": [],
+      "route": "assert_rule",
+      "route_source": "heuristic",
+      "repaired": false,
+      "fallback_used": false,
+      "alignment_events": [],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "other",
+        "logic_string": "",
+        "components": {
+          "atoms": [],
+          "variables": [],
+          "predicates": []
+        },
+        "facts": [],
         "rules": [],
         "queries": [],
         "confidence": {
-          "overall": 1.0,
-          "intent": 1.0,
+          "overall": 0.95,
+          "intent": 0.95,
           "logic": 1.0
         },
         "ambiguities": [],
         "needs_clarification": false,
-        "uncertainty_score": 0.0,
+        "uncertainty_score": 0.05,
         "uncertainty_label": "low",
-        "clarification_question": "Can you clarify this point before I apply it: Direct mapping of 'carries(pierce, tide_key)' as a fact?",
-        "clarification_reason": "Direct mapping of 'carries(pierce, tide_key)' as a fact.",
-        "rationale": "Direct mapping of 'carries(pierce, tide_key)' as a fact. Directional fact guard corrected inverted subject/object order."
+        "clarification_question": "Can you clarify this point before I apply it: The utterance is a philosophical and rhetorical statement about AI nature and?",
+        "clarification_reason": "The utterance is a philosophical and rhetorical statement about AI nature and",
+        "rationale": "The utterance is a philosophical and rhetorical statement about AI nature and morality, not a declarative fact, rule, query, or retraction command. It falls under 'other' (out-of-scope tasks like translation, formatting, or discussion)."
       },
       "validation_errors": [],
       "deferred_validation_errors": [],
@@ -1485,8 +1058,8 @@
       "clarification_proxy_answers_used": 0,
       "clarification_policy": {
         "clarification_eagerness": 0.35,
-        "uncertainty_score": 0.0,
-        "effective_uncertainty": 0.0,
+        "uncertainty_score": 0.05,
+        "effective_uncertainty": 0.05,
         "threshold": 0.65,
         "request_clarification": false,
         "needs_clarification_flag": false,
@@ -1508,8 +1081,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "frontierv6_r1_rung_439_frontier_plural_coref_exception_guard",
-        "updated_at_utc": "2026-04-12T22:31:21+00:00",
+        "ontology_name": "hn_random_live_47750086_can_ai_be_a_child_of_god_inside_anthropi",
+        "updated_at_utc": "2026-04-14T17:09:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -1518,8 +1091,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "frontierv6_r1_rung_439_frontier_plural_coref_exception_guard",
-        "updated_at_utc": "2026-04-12T22:31:21+00:00",
+        "ontology_name": "hn_random_live_47750086_can_ai_be_a_child_of_god_inside_anthropi",
+        "updated_at_utc": "2026-04-14T17:09:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -1528,7 +1101,7 @@
       },
       "clarification_pending": false,
       "clarification_pending_reason": "",
-      "clarification_question": "Can you clarify this point before I apply it: Direct mapping of 'carries(pierce, tide_key)' as a fact?",
+      "clarification_question": "Can you clarify this point before I apply it: The utterance is a philosophical and rhetorical statement about AI nature and?",
       "clarification_answer_attempt": {},
       "confirmation_required": false,
       "confirmation_question": "",
@@ -1537,182 +1110,344 @@
       "confirmation_answers_available": 0,
       "confirmation_answers_used": 0,
       "apply": {
-        "tool": "assert_fact",
-        "input": "carries(pierce, tide_key).",
+        "tool": "none",
+        "input": null,
         "result": {
-          "status": "success",
-          "result_type": "fact_asserted",
-          "fact": "carries(pierce, tide_key)."
+          "status": "skipped",
+          "message": "Intent=other; no KB mutation/query applied."
         }
       },
-      "apply_status": "success",
-      "decision_state": "commit"
+      "apply_status": "skipped",
+      "decision_state": "stage_provisionally"
     },
     {
-      "turn_index": 11,
-      "utterance": "query in_region(blake, california).",
-      "route": "query",
+      "turn_index": 8,
+      "utterance": "ulfw: Holy shit. It's getting dumber by the day.",
+      "utterance_original": "ulfw: Holy shit. It's getting dumber by the day.",
+      "utterance_pre_normalized": "ulfw: Holy shit. It's getting dumber by the day.",
+      "pre_normalization_events": [],
+      "control_predicate_directive": false,
+      "declared_predicates_from_control": [],
+      "declared_predicate_signatures_from_control": [],
+      "route": "other",
       "route_source": "model",
       "repaired": false,
       "fallback_used": false,
       "alignment_events": [],
       "registry_unknown_signatures": [],
       "parsed": {
-        "intent": "query",
-        "logic_string": "in_region(blake, california).",
+        "intent": "other",
+        "logic_string": "",
         "components": {
-          "atoms": [
-            "blake",
-            "california"
-          ],
+          "atoms": [],
           "variables": [],
-          "predicates": [
-            "in_region"
-          ]
+          "predicates": []
         },
         "facts": [],
         "rules": [],
-        "queries": [
-          "in_region(blake, california)."
-        ],
-        "confidence": {
-          "overall": 1.0,
-          "intent": 1.0,
-          "logic": 1.0
-        },
-        "ambiguities": [],
-        "needs_clarification": false,
-        "uncertainty_score": 0.0,
-        "uncertainty_label": "low",
-        "clarification_question": "Can you clarify this point before I apply it: Direct mapping of query to Prolog goal with explicit arguments?",
-        "clarification_reason": "Direct mapping of query to Prolog goal with explicit arguments.",
-        "rationale": "Direct mapping of query to Prolog goal with explicit arguments."
-      },
-      "validation_errors": [],
-      "deferred_validation_errors": [],
-      "clarification_rounds": [],
-      "clarification_rounds_used": 0,
-      "clarification_max_rounds": 2,
-      "clarification_answers_available": 0,
-      "clarification_answers_used": 0,
-      "clarification_scripted_answers_used": 0,
-      "clarification_synthetic_answers_used": 0,
-      "clarification_generated_answers_used": 0,
-      "clarification_served_llm_answers_used": 0,
-      "clarification_proxy_answers_used": 0,
-      "clarification_policy": {
-        "clarification_eagerness": 0.35,
-        "uncertainty_score": 0.0,
-        "effective_uncertainty": 0.0,
-        "threshold": 0.65,
-        "request_clarification": false,
-        "needs_clarification_flag": false,
-        "progress_low_relevance": false,
-        "progress_high_risk": false,
-        "progress_low_relevance_threshold": 0.34,
-        "progress_high_risk_threshold": 0.18,
-        "progress_memory_available": true,
-        "progress_focus_present": false,
-        "progress_signal_term_count": 0,
-        "parsed_signal_term_count": 0,
-        "overlap_term_count": 0,
-        "progress_best_focus_overlap": 0.0,
-        "progress_relevance_score": 1.0
-      },
-      "progress_low_relevance_seen": false,
-      "progress_high_risk_seen": false,
-      "progress_directives": {},
-      "progress_events": [],
-      "progress_snapshot_before": {
-        "schema_version": 1,
-        "ontology_name": "frontierv6_r1_rung_439_frontier_plural_coref_exception_guard",
-        "updated_at_utc": "2026-04-12T22:31:21+00:00",
-        "active_focus": [],
-        "goals": [],
-        "open_questions": [],
-        "resolved_items": [],
-        "notes": []
-      },
-      "progress_snapshot_after_directives": {
-        "schema_version": 1,
-        "ontology_name": "frontierv6_r1_rung_439_frontier_plural_coref_exception_guard",
-        "updated_at_utc": "2026-04-12T22:31:21+00:00",
-        "active_focus": [],
-        "goals": [],
-        "open_questions": [],
-        "resolved_items": [],
-        "notes": []
-      },
-      "clarification_pending": false,
-      "clarification_pending_reason": "",
-      "clarification_question": "Can you clarify this point before I apply it: Direct mapping of query to Prolog goal with explicit arguments?",
-      "clarification_answer_attempt": {},
-      "confirmation_required": false,
-      "confirmation_question": "",
-      "confirmation_answer": "",
-      "confirmation_result": "not_required",
-      "confirmation_answers_available": 0,
-      "confirmation_answers_used": 0,
-      "apply": {
-        "tool": "query_rows",
-        "input": "in_region(blake, california).",
-        "result": {
-          "status": "success",
-          "result_type": "table",
-          "predicate": "in_region",
-          "prolog_query": "in_region(blake, california).",
-          "variables": [],
-          "rows": [
-            {}
-          ],
-          "num_rows": 1,
-          "reasoning_basis": {
-            "kind": "core-local"
-          }
-        }
-      },
-      "apply_status": "success",
-      "decision_state": "commit"
-    },
-    {
-      "turn_index": 12,
-      "utterance": "query in_region(will, california).",
-      "route": "query",
-      "route_source": "model",
-      "repaired": false,
-      "fallback_used": false,
-      "alignment_events": [],
-      "registry_unknown_signatures": [],
-      "parsed": {
-        "intent": "query",
-        "logic_string": "in_region(will, california).",
-        "components": {
-          "atoms": [
-            "california",
-            "will"
-          ],
-          "variables": [],
-          "predicates": [
-            "in_region"
-          ]
-        },
-        "facts": [],
-        "rules": [],
-        "queries": [
-          "in_region(will, california)."
-        ],
+        "queries": [],
         "confidence": {
           "overall": 0.95,
-          "intent": 1.0,
+          "intent": 0.95,
+          "logic": 1.0
+        },
+        "ambiguities": [],
+        "needs_clarification": false,
+        "uncertainty_score": 0.05,
+        "uncertainty_label": "low",
+        "clarification_question": "Can you clarify this point before I apply it: Utterance is an out-of-scope expression of sentiment, not a declarative claim, rule,?",
+        "clarification_reason": "Utterance is an out-of-scope expression of sentiment, not a declarative claim, rule,",
+        "rationale": "Utterance is an out-of-scope expression of sentiment, not a declarative claim, rule, query, or correction."
+      },
+      "validation_errors": [],
+      "deferred_validation_errors": [],
+      "clarification_rounds": [],
+      "clarification_rounds_used": 0,
+      "clarification_max_rounds": 2,
+      "clarification_answers_available": 0,
+      "clarification_answers_used": 0,
+      "clarification_scripted_answers_used": 0,
+      "clarification_synthetic_answers_used": 0,
+      "clarification_generated_answers_used": 0,
+      "clarification_served_llm_answers_used": 0,
+      "clarification_proxy_answers_used": 0,
+      "clarification_policy": {
+        "clarification_eagerness": 0.35,
+        "uncertainty_score": 0.05,
+        "effective_uncertainty": 0.05,
+        "threshold": 0.65,
+        "request_clarification": false,
+        "needs_clarification_flag": false,
+        "progress_low_relevance": false,
+        "progress_high_risk": false,
+        "progress_low_relevance_threshold": 0.34,
+        "progress_high_risk_threshold": 0.18,
+        "progress_memory_available": true,
+        "progress_focus_present": false,
+        "progress_signal_term_count": 0,
+        "parsed_signal_term_count": 0,
+        "overlap_term_count": 0,
+        "progress_best_focus_overlap": 0.0,
+        "progress_relevance_score": 1.0
+      },
+      "progress_low_relevance_seen": false,
+      "progress_high_risk_seen": false,
+      "progress_directives": {},
+      "progress_events": [],
+      "progress_snapshot_before": {
+        "schema_version": 1,
+        "ontology_name": "hn_random_live_47750086_can_ai_be_a_child_of_god_inside_anthropi",
+        "updated_at_utc": "2026-04-14T17:09:40+00:00",
+        "active_focus": [],
+        "goals": [],
+        "open_questions": [],
+        "resolved_items": [],
+        "notes": []
+      },
+      "progress_snapshot_after_directives": {
+        "schema_version": 1,
+        "ontology_name": "hn_random_live_47750086_can_ai_be_a_child_of_god_inside_anthropi",
+        "updated_at_utc": "2026-04-14T17:09:40+00:00",
+        "active_focus": [],
+        "goals": [],
+        "open_questions": [],
+        "resolved_items": [],
+        "notes": []
+      },
+      "clarification_pending": false,
+      "clarification_pending_reason": "",
+      "clarification_question": "Can you clarify this point before I apply it: Utterance is an out-of-scope expression of sentiment, not a declarative claim, rule,?",
+      "clarification_answer_attempt": {},
+      "confirmation_required": false,
+      "confirmation_question": "",
+      "confirmation_answer": "",
+      "confirmation_result": "not_required",
+      "confirmation_answers_available": 0,
+      "confirmation_answers_used": 0,
+      "apply": {
+        "tool": "none",
+        "input": null,
+        "result": {
+          "status": "skipped",
+          "message": "Intent=other; no KB mutation/query applied."
+        }
+      },
+      "apply_status": "skipped",
+      "decision_state": "stage_provisionally"
+    },
+    {
+      "turn_index": 9,
+      "utterance": "treetalker: ChatINRI, how do I move the goalposts when we retake Jerusalem. I'm not raptured?",
+      "utterance_original": "treetalker: ChatINRI, how do I move the goalposts when we retake Jerusalem but I'm not raptured?",
+      "utterance_pre_normalized": "treetalker: ChatINRI, how do I move the goalposts when we retake Jerusalem. I'm not raptured?",
+      "pre_normalization_events": [
+        {
+          "kind": "split_on_but"
+        }
+      ],
+      "control_predicate_directive": false,
+      "declared_predicates_from_control": [],
+      "declared_predicate_signatures_from_control": [],
+      "route": "query",
+      "route_source": "heuristic",
+      "repaired": false,
+      "fallback_used": false,
+      "alignment_events": [],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "query",
+        "logic_string": "chatinri_goalpost_shift(jerusalem_retaken, rapture_status).",
+        "components": {
+          "atoms": [
+            "jerusalem_retaken",
+            "rapture_status"
+          ],
+          "variables": [],
+          "predicates": [
+            "chatinri_goalpost_shift"
+          ]
+        },
+        "facts": [],
+        "rules": [],
+        "queries": [
+          "chatinri_goalpost_shift(jerusalem_retaken, rapture_status)."
+        ],
+        "confidence": {
+          "overall": 0.85,
+          "intent": 0.95,
+          "logic": 0.75
+        },
+        "ambiguities": [
+          "Canonical predicate for 'moving goalposts' is unknown.",
+          "Canonical predicate for 'rapture status' is unknown."
+        ],
+        "needs_clarification": true,
+        "uncertainty_score": 0.75,
+        "uncertainty_label": "medium",
+        "clarification_question": "What are the canonical predicates for 'moving goalposts' and 'rapture status' in this ontology?",
+        "clarification_reason": "Missing canonical predicate names for specific theological concepts.",
+        "rationale": "User asks a question about system state/actions. Intent is query. Specific ontology predicates are unknown, requiring clarification to avoid hallucination."
+      },
+      "validation_errors": [],
+      "deferred_validation_errors": [],
+      "clarification_rounds": [],
+      "clarification_rounds_used": 0,
+      "clarification_max_rounds": 2,
+      "clarification_answers_available": 0,
+      "clarification_answers_used": 0,
+      "clarification_scripted_answers_used": 0,
+      "clarification_synthetic_answers_used": 0,
+      "clarification_generated_answers_used": 0,
+      "clarification_served_llm_answers_used": 0,
+      "clarification_proxy_answers_used": 0,
+      "clarification_policy": {
+        "clarification_eagerness": 0.35,
+        "uncertainty_score": 0.75,
+        "effective_uncertainty": 0.82,
+        "threshold": 0.65,
+        "request_clarification": true,
+        "needs_clarification_flag": true,
+        "progress_low_relevance": false,
+        "progress_high_risk": false,
+        "progress_low_relevance_threshold": 0.34,
+        "progress_high_risk_threshold": 0.18,
+        "progress_memory_available": true,
+        "progress_focus_present": false,
+        "progress_signal_term_count": 0,
+        "parsed_signal_term_count": 0,
+        "overlap_term_count": 0,
+        "progress_best_focus_overlap": 0.0,
+        "progress_relevance_score": 1.0
+      },
+      "progress_low_relevance_seen": false,
+      "progress_high_risk_seen": false,
+      "progress_directives": {},
+      "progress_events": [],
+      "progress_snapshot_before": {
+        "schema_version": 1,
+        "ontology_name": "hn_random_live_47750086_can_ai_be_a_child_of_god_inside_anthropi",
+        "updated_at_utc": "2026-04-14T17:09:40+00:00",
+        "active_focus": [],
+        "goals": [],
+        "open_questions": [],
+        "resolved_items": [],
+        "notes": []
+      },
+      "progress_snapshot_after_directives": {
+        "schema_version": 1,
+        "ontology_name": "hn_random_live_47750086_can_ai_be_a_child_of_god_inside_anthropi",
+        "updated_at_utc": "2026-04-14T17:09:40+00:00",
+        "active_focus": [],
+        "goals": [],
+        "open_questions": [],
+        "resolved_items": [],
+        "notes": []
+      },
+      "clarification_pending": true,
+      "clarification_pending_reason": "Clarification answer model confidence below threshold; KB apply deferred.",
+      "clarification_question": "What are the canonical predicates for 'moving goalposts' and 'rapture status' in this ontology?",
+      "clarification_answer_attempt": {
+        "model": "qwen3.5:9b",
+        "backend": "ollama",
+        "base_url": "http://127.0.0.1:11434",
+        "answer_role": "proxy_model",
+        "answer_source_prefix": "synthetic",
+        "answer_source": "synthetic_model",
+        "answer_confidence": 0.0,
+        "answer_assumption": "Canonical predicates for theological concepts are unknown.",
+        "answer_text": "unknown"
+      },
+      "confirmation_required": false,
+      "confirmation_question": "",
+      "confirmation_answer": "",
+      "confirmation_result": "not_required",
+      "confirmation_answers_available": 0,
+      "confirmation_answers_used": 0,
+      "apply": {
+        "tool": "none",
+        "input": {
+          "clarification_question": "What are the canonical predicates for 'moving goalposts' and 'rapture status' in this ontology?",
+          "clarification_rounds_used": 0,
+          "confirmation_question": "",
+          "confirmation_answer": ""
+        },
+        "result": {
+          "status": "clarification_requested",
+          "message": "Clarification answer model confidence below threshold; KB apply deferred.",
+          "clarification_question": "What are the canonical predicates for 'moving goalposts' and 'rapture status' in this ontology?",
+          "clarification_policy": {
+            "clarification_eagerness": 0.35,
+            "uncertainty_score": 0.75,
+            "effective_uncertainty": 0.82,
+            "threshold": 0.65,
+            "request_clarification": true,
+            "needs_clarification_flag": true,
+            "progress_low_relevance": false,
+            "progress_high_risk": false,
+            "progress_low_relevance_threshold": 0.34,
+            "progress_high_risk_threshold": 0.18,
+            "progress_memory_available": true,
+            "progress_focus_present": false,
+            "progress_signal_term_count": 0,
+            "parsed_signal_term_count": 0,
+            "overlap_term_count": 0,
+            "progress_best_focus_overlap": 0.0,
+            "progress_relevance_score": 1.0
+          },
+          "confirmation_required": false,
+          "confirmation_question": "",
+          "confirmation_answer": "",
+          "confirmation_result": "not_required"
+        }
+      },
+      "apply_status": "clarification_requested",
+      "decision_state": "ask_clarification"
+    },
+    {
+      "turn_index": 10,
+      "utterance": "th0rine: Obligatory - https://en.wikipedia.org/wiki/Betteridge%27s_law_of_headline.",
+      "utterance_original": "th0rine: Obligatory - https://en.wikipedia.org/wiki/Betteridge%27s_law_of_headline...",
+      "utterance_pre_normalized": "th0rine: Obligatory - https://en.wikipedia.org/wiki/Betteridge%27s_law_of_headline.",
+      "pre_normalization_events": [
+        {
+          "kind": "split_on_but"
+        },
+        {
+          "kind": "split_on_while"
+        }
+      ],
+      "control_predicate_directive": false,
+      "declared_predicates_from_control": [],
+      "declared_predicate_signatures_from_control": [],
+      "route": "other",
+      "route_source": "model",
+      "repaired": false,
+      "fallback_used": false,
+      "alignment_events": [],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "other",
+        "logic_string": "",
+        "components": {
+          "atoms": [],
+          "variables": [],
+          "predicates": []
+        },
+        "facts": [],
+        "rules": [],
+        "queries": [],
+        "confidence": {
+          "overall": 0.95,
+          "intent": 0.95,
           "logic": 0.95
         },
         "ambiguities": [],
         "needs_clarification": false,
         "uncertainty_score": 0.05,
         "uncertainty_label": "low",
-        "clarification_question": "Can you clarify this point before I apply it: Utterance is a direct question about the region of 'will'. Map to?",
-        "clarification_reason": "Utterance is a direct question about the region of 'will'. Map to",
-        "rationale": "Utterance is a direct question about the region of 'will'. Map to query with predicate in_region and arguments will, california."
+        "clarification_question": "Can you clarify this point before I apply it: Input is a citation request for Betteridge's law, not a semantic fact,?",
+        "clarification_reason": "Input is a citation request for Betteridge's law, not a semantic fact,",
+        "rationale": "Input is a citation request for Betteridge's law, not a semantic fact, rule, or query requiring Prolog mapping."
       },
       "validation_errors": [],
       "deferred_validation_errors": [],
@@ -1751,8 +1486,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "frontierv6_r1_rung_439_frontier_plural_coref_exception_guard",
-        "updated_at_utc": "2026-04-12T22:31:21+00:00",
+        "ontology_name": "hn_random_live_47750086_can_ai_be_a_child_of_god_inside_anthropi",
+        "updated_at_utc": "2026-04-14T17:09:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -1761,8 +1496,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "frontierv6_r1_rung_439_frontier_plural_coref_exception_guard",
-        "updated_at_utc": "2026-04-12T22:31:21+00:00",
+        "ontology_name": "hn_random_live_47750086_can_ai_be_a_child_of_god_inside_anthropi",
+        "updated_at_utc": "2026-04-14T17:09:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -1771,7 +1506,7 @@
       },
       "clarification_pending": false,
       "clarification_pending_reason": "",
-      "clarification_question": "Can you clarify this point before I apply it: Utterance is a direct question about the region of 'will'. Map to?",
+      "clarification_question": "Can you clarify this point before I apply it: Input is a citation request for Betteridge's law, not a semantic fact,?",
       "clarification_answer_attempt": {},
       "confirmation_required": false,
       "confirmation_question": "",
@@ -1780,65 +1515,61 @@
       "confirmation_answers_available": 0,
       "confirmation_answers_used": 0,
       "apply": {
-        "tool": "query_rows",
-        "input": "in_region(will, california).",
+        "tool": "none",
+        "input": null,
         "result": {
-          "status": "success",
-          "result_type": "table",
-          "predicate": "in_region",
-          "prolog_query": "in_region(will, california).",
-          "variables": [],
-          "rows": [
-            {}
-          ],
-          "num_rows": 1,
-          "reasoning_basis": {
-            "kind": "core-local"
-          }
+          "status": "skipped",
+          "message": "Intent=other; no KB mutation/query applied."
         }
       },
-      "apply_status": "success",
-      "decision_state": "commit"
+      "apply_status": "skipped",
+      "decision_state": "stage_provisionally"
     },
     {
-      "turn_index": 13,
-      "utterance": "query carries(pierce, tide_key).",
-      "route": "query",
+      "turn_index": 11,
+      "utterance": "scrubs: You way over thought this. Talking about AI accepting the Lord. is angles dancing on a needle.It's talk by people with nothing serious going on. It's cheap, pointless pontificating.",
+      "utterance_original": "scrubs: You way over thought this. Talking about AI accepting the Lord ... is angles dancing on a needle.It's talk by people with nothing serious going on. It's cheap, pointless pontificating.",
+      "utterance_pre_normalized": "scrubs: You way over thought this. Talking about AI accepting the Lord. is angles dancing on a needle.It's talk by people with nothing serious going on. It's cheap, pointless pontificating.",
+      "pre_normalization_events": [
+        {
+          "kind": "split_on_but"
+        },
+        {
+          "kind": "split_on_while"
+        }
+      ],
+      "control_predicate_directive": false,
+      "declared_predicates_from_control": [],
+      "declared_predicate_signatures_from_control": [],
+      "route": "other",
       "route_source": "model",
       "repaired": false,
       "fallback_used": false,
       "alignment_events": [],
       "registry_unknown_signatures": [],
       "parsed": {
-        "intent": "query",
-        "logic_string": "carries(pierce, tide_key).",
+        "intent": "other",
+        "logic_string": "",
         "components": {
-          "atoms": [
-            "pierce",
-            "tide_key"
-          ],
+          "atoms": [],
           "variables": [],
-          "predicates": [
-            "carries"
-          ]
+          "predicates": []
         },
         "facts": [],
         "rules": [],
-        "queries": [
-          "carries(pierce, tide_key)."
-        ],
+        "queries": [],
         "confidence": {
-          "overall": 1.0,
-          "intent": 1.0,
-          "logic": 1.0
+          "overall": 0.95,
+          "intent": 0.95,
+          "logic": 0.95
         },
         "ambiguities": [],
         "needs_clarification": false,
-        "uncertainty_score": 0.0,
+        "uncertainty_score": 0.05,
         "uncertainty_label": "low",
-        "clarification_question": "Can you clarify this point before I apply it: Direct query for fact carries(pierce, tide_key). No ambiguity?",
-        "clarification_reason": "Direct query for fact carries(pierce, tide_key). No ambiguity.",
-        "rationale": "Direct query for fact carries(pierce, tide_key). No ambiguity."
+        "clarification_question": "Can you clarify this point before I apply it: Input is a critique of religious discourse, not a declarative fact, rule,?",
+        "clarification_reason": "Input is a critique of religious discourse, not a declarative fact, rule,",
+        "rationale": "Input is a critique of religious discourse, not a declarative fact, rule, or query regarding the ontology. Intent is 'other'."
       },
       "validation_errors": [],
       "deferred_validation_errors": [],
@@ -1854,8 +1585,8 @@
       "clarification_proxy_answers_used": 0,
       "clarification_policy": {
         "clarification_eagerness": 0.35,
-        "uncertainty_score": 0.0,
-        "effective_uncertainty": 0.0,
+        "uncertainty_score": 0.05,
+        "effective_uncertainty": 0.05,
         "threshold": 0.65,
         "request_clarification": false,
         "needs_clarification_flag": false,
@@ -1877,8 +1608,8 @@
       "progress_events": [],
       "progress_snapshot_before": {
         "schema_version": 1,
-        "ontology_name": "frontierv6_r1_rung_439_frontier_plural_coref_exception_guard",
-        "updated_at_utc": "2026-04-12T22:31:21+00:00",
+        "ontology_name": "hn_random_live_47750086_can_ai_be_a_child_of_god_inside_anthropi",
+        "updated_at_utc": "2026-04-14T17:09:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -1887,8 +1618,8 @@
       },
       "progress_snapshot_after_directives": {
         "schema_version": 1,
-        "ontology_name": "frontierv6_r1_rung_439_frontier_plural_coref_exception_guard",
-        "updated_at_utc": "2026-04-12T22:31:21+00:00",
+        "ontology_name": "hn_random_live_47750086_can_ai_be_a_child_of_god_inside_anthropi",
+        "updated_at_utc": "2026-04-14T17:09:40+00:00",
         "active_focus": [],
         "goals": [],
         "open_questions": [],
@@ -1897,7 +1628,7 @@
       },
       "clarification_pending": false,
       "clarification_pending_reason": "",
-      "clarification_question": "Can you clarify this point before I apply it: Direct query for fact carries(pierce, tide_key). No ambiguity?",
+      "clarification_question": "Can you clarify this point before I apply it: Input is a critique of religious discourse, not a declarative fact, rule,?",
       "clarification_answer_attempt": {},
       "confirmation_required": false,
       "confirmation_question": "",
@@ -1906,128 +1637,138 @@
       "confirmation_answers_available": 0,
       "confirmation_answers_used": 0,
       "apply": {
-        "tool": "query_rows",
-        "input": "carries(pierce, tide_key).",
+        "tool": "none",
+        "input": null,
         "result": {
-          "status": "success",
-          "result_type": "table",
-          "predicate": "carries",
-          "prolog_query": "carries(pierce, tide_key).",
-          "variables": [],
-          "rows": [
-            {}
-          ],
-          "num_rows": 1,
-          "reasoning_basis": {
-            "kind": "core-local"
-          }
+          "status": "skipped",
+          "message": "Intent=other; no KB mutation/query applied."
         }
       },
-      "apply_status": "success",
-      "decision_state": "commit"
+      "apply_status": "skipped",
+      "decision_state": "stage_provisionally"
+    },
+    {
+      "turn_index": 12,
+      "utterance": "scrubs: Absolutely! When you're hawking linear algebra to christains through the back door of \"serious question: can or should AI be saved?\". it's completely and irredeemably stupid.",
+      "utterance_original": "scrubs: Absolutely! When you're hawking linear algebra to christains through the back door of \"serious question: can or should AI be saved?\" ... it's completely and irredeemably stupid.",
+      "utterance_pre_normalized": "scrubs: Absolutely! When you're hawking linear algebra to christains through the back door of \"serious question: can or should AI be saved?\". it's completely and irredeemably stupid.",
+      "pre_normalization_events": [
+        {
+          "kind": "split_on_but"
+        },
+        {
+          "kind": "split_on_while"
+        }
+      ],
+      "control_predicate_directive": false,
+      "declared_predicates_from_control": [],
+      "declared_predicate_signatures_from_control": [],
+      "route": "other",
+      "route_source": "model",
+      "repaired": false,
+      "fallback_used": false,
+      "alignment_events": [],
+      "registry_unknown_signatures": [],
+      "parsed": {
+        "intent": "other",
+        "logic_string": "",
+        "components": {
+          "atoms": [],
+          "variables": [],
+          "predicates": []
+        },
+        "facts": [],
+        "rules": [],
+        "queries": [],
+        "confidence": {
+          "overall": 0.95,
+          "intent": 0.95,
+          "logic": 0.95
+        },
+        "ambiguities": [],
+        "needs_clarification": false,
+        "uncertainty_score": 0.05,
+        "uncertainty_label": "low",
+        "clarification_question": "Can you clarify this point before I apply it: Utterance is an opinionated critique, not a factual claim or rule?",
+        "clarification_reason": "Utterance is an opinionated critique, not a factual claim or rule.",
+        "rationale": "The input expresses a subjective opinion ('stupid') regarding a specific context ('hawking linear algebra...'). It does not assert a fact, define a rule, ask a question, or request a retraction. Therefore, it maps to 'other' with an empty logic string."
+      },
+      "validation_errors": [],
+      "deferred_validation_errors": [],
+      "clarification_rounds": [],
+      "clarification_rounds_used": 0,
+      "clarification_max_rounds": 2,
+      "clarification_answers_available": 0,
+      "clarification_answers_used": 0,
+      "clarification_scripted_answers_used": 0,
+      "clarification_synthetic_answers_used": 0,
+      "clarification_generated_answers_used": 0,
+      "clarification_served_llm_answers_used": 0,
+      "clarification_proxy_answers_used": 0,
+      "clarification_policy": {
+        "clarification_eagerness": 0.35,
+        "uncertainty_score": 0.05,
+        "effective_uncertainty": 0.05,
+        "threshold": 0.65,
+        "request_clarification": false,
+        "needs_clarification_flag": false,
+        "progress_low_relevance": false,
+        "progress_high_risk": false,
+        "progress_low_relevance_threshold": 0.34,
+        "progress_high_risk_threshold": 0.18,
+        "progress_memory_available": true,
+        "progress_focus_present": false,
+        "progress_signal_term_count": 0,
+        "parsed_signal_term_count": 0,
+        "overlap_term_count": 0,
+        "progress_best_focus_overlap": 0.0,
+        "progress_relevance_score": 1.0
+      },
+      "progress_low_relevance_seen": false,
+      "progress_high_risk_seen": false,
+      "progress_directives": {},
+      "progress_events": [],
+      "progress_snapshot_before": {
+        "schema_version": 1,
+        "ontology_name": "hn_random_live_47750086_can_ai_be_a_child_of_god_inside_anthropi",
+        "updated_at_utc": "2026-04-14T17:09:40+00:00",
+        "active_focus": [],
+        "goals": [],
+        "open_questions": [],
+        "resolved_items": [],
+        "notes": []
+      },
+      "progress_snapshot_after_directives": {
+        "schema_version": 1,
+        "ontology_name": "hn_random_live_47750086_can_ai_be_a_child_of_god_inside_anthropi",
+        "updated_at_utc": "2026-04-14T17:09:40+00:00",
+        "active_focus": [],
+        "goals": [],
+        "open_questions": [],
+        "resolved_items": [],
+        "notes": []
+      },
+      "clarification_pending": false,
+      "clarification_pending_reason": "",
+      "clarification_question": "Can you clarify this point before I apply it: Utterance is an opinionated critique, not a factual claim or rule?",
+      "clarification_answer_attempt": {},
+      "confirmation_required": false,
+      "confirmation_question": "",
+      "confirmation_answer": "",
+      "confirmation_result": "not_required",
+      "confirmation_answers_available": 0,
+      "confirmation_answers_used": 0,
+      "apply": {
+        "tool": "none",
+        "input": null,
+        "result": {
+          "status": "skipped",
+          "message": "Intent=other; no KB mutation/query applied."
+        }
+      },
+      "apply_status": "skipped",
+      "decision_state": "stage_provisionally"
     }
   ],
-  "validations": [
-    {
-      "id": "blake_in_california",
-      "query": "in_region(blake, california).",
-      "expected_status": "success",
-      "result": {
-        "status": "success",
-        "result_type": "table",
-        "predicate": "in_region",
-        "prolog_query": "in_region(blake, california).",
-        "variables": [],
-        "rows": [
-          {}
-        ],
-        "num_rows": 1,
-        "reasoning_basis": {
-          "kind": "core-local"
-        }
-      },
-      "passed": true,
-      "reasons": []
-    },
-    {
-      "id": "will_in_california",
-      "query": "in_region(will, california).",
-      "expected_status": "success",
-      "result": {
-        "status": "success",
-        "result_type": "table",
-        "predicate": "in_region",
-        "prolog_query": "in_region(will, california).",
-        "variables": [],
-        "rows": [
-          {}
-        ],
-        "num_rows": 1,
-        "reasoning_basis": {
-          "kind": "core-local"
-        }
-      },
-      "passed": true,
-      "reasons": []
-    },
-    {
-      "id": "pierce_has_key",
-      "query": "carries(pierce, tide_key).",
-      "expected_status": "success",
-      "result": {
-        "status": "success",
-        "result_type": "table",
-        "predicate": "carries",
-        "prolog_query": "carries(pierce, tide_key).",
-        "variables": [],
-        "rows": [
-          {}
-        ],
-        "num_rows": 1,
-        "reasoning_basis": {
-          "kind": "core-local"
-        }
-      },
-      "passed": true,
-      "reasons": []
-    },
-    {
-      "id": "will_not_in_morro_bay",
-      "query": "lives_in(will, morro_bay).",
-      "expected_status": "no_results",
-      "result": {
-        "status": "no_results",
-        "result_type": "no_result",
-        "predicate": "lives_in",
-        "prolog_query": "lives_in(will, morro_bay).",
-        "variables": [],
-        "rows": [],
-        "num_rows": 0,
-        "reasoning_basis": {
-          "kind": "core-local"
-        }
-      },
-      "passed": true,
-      "reasons": []
-    },
-    {
-      "id": "pronoun_atom_he_absent",
-      "query": "carries(he, tide_key).",
-      "expected_status": "no_results",
-      "result": {
-        "status": "no_results",
-        "result_type": "no_result",
-        "predicate": "carries",
-        "prolog_query": "carries(he, tide_key).",
-        "variables": [],
-        "rows": [],
-        "num_rows": 0,
-        "reasoning_basis": {
-          "kind": "core-local"
-        }
-      },
-      "passed": true,
-      "reasons": []
-    }
-  ]
+  "validations": []
 }

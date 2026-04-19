@@ -1,21 +1,8 @@
 {
-  "generated_at_utc": "2026-04-13T15:54:15+00:00",
+  "generated_at_utc": "2026-04-19T20:05:58+00:00",
   "window": 6,
   "scenario_count": 24,
   "scenarios": [
-    {
-      "scenario": "demo_05_time_loop_carnival",
-      "latest_status": "passed",
-      "latest_finished_utc": "2026-04-13T08:40:52+00:00",
-      "latest_validation_passed": 4,
-      "latest_validation_total": 4,
-      "trend_sample_total": 1,
-      "trend_sample_passed": 1,
-      "trend_pass_rate": 1.0,
-      "latest_run_id": "run-20260413T084023Z-demo_05_time_loop_carniv-qwen35_semparse_9b-28736",
-      "latest_report_html_rel": "reports/demo_05_time_loop_carnival.html",
-      "latest_report_json_rel": "kb_runs/demo_05_time_loop_carnival.json"
-    },
     {
       "scenario": "rung_449_frontier_multibind_uncle_query",
       "latest_status": "passed",
@@ -27,7 +14,7 @@
       "trend_pass_rate": 1.0,
       "latest_run_id": "run-20260412T223658Z-rung_449_frontier_multib-qwen35_semparse_9b-42904",
       "latest_report_html_rel": "reports/rung_449_frontier_multibind_uncle_query_frontier_language_width_v6_20260412_222723.html",
-      "latest_report_json_rel": "kb_runs/rung_449_frontier_multibind_uncle_query_frontier_language_width_v6_20260412_222723.json"
+      "latest_report_json_rel": "kb_runs_published/rung_449_frontier_multibind_uncle_query_frontier_language_width_v6_20260412_222723.json"
     },
     {
       "scenario": "rung_446_frontier_policy_noisy_rebind_loop",
@@ -40,7 +27,7 @@
       "trend_pass_rate": 1.0,
       "latest_run_id": "run-20260412T223612Z-rung_446_frontier_policy-qwen35_semparse_9b-23932",
       "latest_report_html_rel": "reports/rung_446_frontier_policy_noisy_rebind_loop_frontier_language_width_v6_20260412_222723.html",
-      "latest_report_json_rel": "kb_runs/rung_446_frontier_policy_noisy_rebind_loop_frontier_language_width_v6_20260412_222723.json"
+      "latest_report_json_rel": "kb_runs_published/rung_446_frontier_policy_noisy_rebind_loop_frontier_language_width_v6_20260412_222723.json"
     },
     {
       "scenario": "rung_445_frontier_compound_write_query_braid",
@@ -53,7 +40,7 @@
       "trend_pass_rate": 1.0,
       "latest_run_id": "run-20260412T223545Z-rung_445_frontier_compou-qwen35_semparse_9b-46064",
       "latest_report_html_rel": "reports/rung_445_frontier_compound_write_query_braid_frontier_language_width_v6_20260412_222723.html",
-      "latest_report_json_rel": "kb_runs/rung_445_frontier_compound_write_query_braid_frontier_language_width_v6_20260412_222723.json"
+      "latest_report_json_rel": "kb_runs_published/rung_445_frontier_compound_write_query_braid_frontier_language_width_v6_20260412_222723.json"
     },
     {
       "scenario": "rung_444_frontier_unpunctuated_coref_sweep",
@@ -66,7 +53,7 @@
       "trend_pass_rate": 1.0,
       "latest_run_id": "run-20260412T223515Z-rung_444_frontier_unpunc-qwen35_semparse_9b-40800",
       "latest_report_html_rel": "reports/rung_444_frontier_unpunctuated_coref_sweep_frontier_language_width_v6_20260412_222723.html",
-      "latest_report_json_rel": "kb_runs/rung_444_frontier_unpunctuated_coref_sweep_frontier_language_width_v6_20260412_222723.json"
+      "latest_report_json_rel": "kb_runs_published/rung_444_frontier_unpunctuated_coref_sweep_frontier_language_width_v6_20260412_222723.json"
     },
     {
       "scenario": "rung_443_frontier_dual_item_handoff_coref",
@@ -79,7 +66,7 @@
       "trend_pass_rate": 1.0,
       "latest_run_id": "run-20260412T223423Z-rung_443_frontier_dual_i-qwen35_semparse_9b-37848",
       "latest_report_html_rel": "reports/rung_443_frontier_dual_item_handoff_coref_frontier_language_width_v6_20260412_222723.html",
-      "latest_report_json_rel": "kb_runs/rung_443_frontier_dual_item_handoff_coref_frontier_language_width_v6_20260412_222723.json"
+      "latest_report_json_rel": "kb_runs_published/rung_443_frontier_dual_item_handoff_coref_frontier_language_width_v6_20260412_222723.json"
     },
     {
       "scenario": "rung_442_frontier_policy_multirevision_guard",
@@ -92,7 +79,7 @@
       "trend_pass_rate": 1.0,
       "latest_run_id": "run-20260412T223328Z-rung_442_frontier_policy-qwen35_semparse_9b-45268",
       "latest_report_html_rel": "reports/rung_442_frontier_policy_multirevision_guard_frontier_language_width_v6_20260412_222723.html",
-      "latest_report_json_rel": "kb_runs/rung_442_frontier_policy_multirevision_guard_frontier_language_width_v6_20260412_222723.json"
+      "latest_report_json_rel": "kb_runs_published/rung_442_frontier_policy_multirevision_guard_frontier_language_width_v6_20260412_222723.json"
     },
     {
       "scenario": "rung_441_frontier_pronoun_bucket_shuffle",
@@ -105,7 +92,7 @@
       "trend_pass_rate": 1.0,
       "latest_run_id": "run-20260412T223249Z-rung_441_frontier_pronou-qwen35_semparse_9b-45632",
       "latest_report_html_rel": "reports/rung_441_frontier_pronoun_bucket_shuffle_frontier_language_width_v6_20260412_222723.html",
-      "latest_report_json_rel": "kb_runs/rung_441_frontier_pronoun_bucket_shuffle_frontier_language_width_v6_20260412_222723.json"
+      "latest_report_json_rel": "kb_runs_published/rung_441_frontier_pronoun_bucket_shuffle_frontier_language_width_v6_20260412_222723.json"
     },
     {
       "scenario": "rung_440_frontier_policy_revision_loop",
@@ -118,7 +105,7 @@
       "trend_pass_rate": 1.0,
       "latest_run_id": "run-20260412T223205Z-rung_440_frontier_policy-qwen35_semparse_9b-46020",
       "latest_report_html_rel": "reports/rung_440_frontier_policy_revision_loop_frontier_language_width_v6_20260412_222723.html",
-      "latest_report_json_rel": "kb_runs/rung_440_frontier_policy_revision_loop_frontier_language_width_v6_20260412_222723.json"
+      "latest_report_json_rel": "kb_runs_published/rung_440_frontier_policy_revision_loop_frontier_language_width_v6_20260412_222723.json"
     },
     {
       "scenario": "rung_439_frontier_plural_coref_exception_guard",
@@ -131,7 +118,7 @@
       "trend_pass_rate": 1.0,
       "latest_run_id": "run-20260412T223121Z-rung_439_frontier_plural-qwen35_semparse_9b-29424",
       "latest_report_html_rel": "reports/rung_439_frontier_plural_coref_exception_guard_frontier_language_width_v6_20260412_222723.html",
-      "latest_report_json_rel": "kb_runs/rung_439_frontier_plural_coref_exception_guard_frontier_language_width_v6_20260412_222723.json"
+      "latest_report_json_rel": "kb_runs_published/rung_439_frontier_plural_coref_exception_guard_frontier_language_width_v6_20260412_222723.json"
     },
     {
       "scenario": "rung_438_frontier_multibind_query_pressure",
@@ -144,7 +131,7 @@
       "trend_pass_rate": 1.0,
       "latest_run_id": "run-20260412T223041Z-rung_438_frontier_multib-qwen35_semparse_9b-46244",
       "latest_report_html_rel": "reports/rung_438_frontier_multibind_query_pressure_frontier_language_width_v6_20260412_222723.html",
-      "latest_report_json_rel": "kb_runs/rung_438_frontier_multibind_query_pressure_frontier_language_width_v6_20260412_222723.json"
+      "latest_report_json_rel": "kb_runs_published/rung_438_frontier_multibind_query_pressure_frontier_language_width_v6_20260412_222723.json"
     },
     {
       "scenario": "rung_437_frontier_policy_override_flow",
@@ -157,7 +144,7 @@
       "trend_pass_rate": 1.0,
       "latest_run_id": "run-20260412T222957Z-rung_437_frontier_policy-qwen35_semparse_9b-42932",
       "latest_report_html_rel": "reports/rung_437_frontier_policy_override_flow_frontier_language_width_v6_20260412_222723.html",
-      "latest_report_json_rel": "kb_runs/rung_437_frontier_policy_override_flow_frontier_language_width_v6_20260412_222723.json"
+      "latest_report_json_rel": "kb_runs_published/rung_437_frontier_policy_override_flow_frontier_language_width_v6_20260412_222723.json"
     },
     {
       "scenario": "rung_436_frontier_noise_typo_coref",
@@ -170,7 +157,7 @@
       "trend_pass_rate": 1.0,
       "latest_run_id": "run-20260412T222919Z-rung_436_frontier_noise_-qwen35_semparse_9b-46196",
       "latest_report_html_rel": "reports/rung_436_frontier_noise_typo_coref_frontier_language_width_v6_20260412_222723.html",
-      "latest_report_json_rel": "kb_runs/rung_436_frontier_noise_typo_coref_frontier_language_width_v6_20260412_222723.json"
+      "latest_report_json_rel": "kb_runs_published/rung_436_frontier_noise_typo_coref_frontier_language_width_v6_20260412_222723.json"
     },
     {
       "scenario": "rung_435_frontier_checkpoint_compound_turns",
@@ -183,7 +170,7 @@
       "trend_pass_rate": 1.0,
       "latest_run_id": "run-20260412T222837Z-rung_435_frontier_checkp-qwen35_semparse_9b-34112",
       "latest_report_html_rel": "reports/rung_435_frontier_checkpoint_compound_turns_frontier_language_width_v6_20260412_222723.html",
-      "latest_report_json_rel": "kb_runs/rung_435_frontier_checkpoint_compound_turns_frontier_language_width_v6_20260412_222723.json"
+      "latest_report_json_rel": "kb_runs_published/rung_435_frontier_checkpoint_compound_turns_frontier_language_width_v6_20260412_222723.json"
     },
     {
       "scenario": "rung_434_dual_pronoun_flip_guard",
@@ -196,7 +183,7 @@
       "trend_pass_rate": 1.0,
       "latest_run_id": "run-20260412T222813Z-rung_434_dual_pronoun_fl-qwen35_semparse_9b-46892",
       "latest_report_html_rel": "reports/rung_434_dual_pronoun_flip_guard_frontier_language_width_v6_20260412_222723.html",
-      "latest_report_json_rel": "kb_runs/rung_434_dual_pronoun_flip_guard_frontier_language_width_v6_20260412_222723.json"
+      "latest_report_json_rel": "kb_runs_published/rung_434_dual_pronoun_flip_guard_frontier_language_width_v6_20260412_222723.json"
     },
     {
       "scenario": "rung_433_noisy_inverse_retarget_repair",
@@ -209,7 +196,7 @@
       "trend_pass_rate": 1.0,
       "latest_run_id": "run-20260412T222745Z-rung_433_noisy_inverse_r-qwen35_semparse_9b-31104",
       "latest_report_html_rel": "reports/rung_433_noisy_inverse_retarget_repair_frontier_language_width_v6_20260412_222723.html",
-      "latest_report_json_rel": "kb_runs/rung_433_noisy_inverse_retarget_repair_frontier_language_width_v6_20260412_222723.json"
+      "latest_report_json_rel": "kb_runs_published/rung_433_noisy_inverse_retarget_repair_frontier_language_width_v6_20260412_222723.json"
     },
     {
       "scenario": "rung_432_noise_pronoun_inversion_chain",
@@ -222,7 +209,7 @@
       "trend_pass_rate": 1.0,
       "latest_run_id": "run-20260412T222724Z-rung_432_noise_pronoun_i-qwen35_semparse_9b-39528",
       "latest_report_html_rel": "reports/rung_432_noise_pronoun_inversion_chain_frontier_language_width_v6_20260412_222723.html",
-      "latest_report_json_rel": "kb_runs/rung_432_noise_pronoun_inversion_chain_frontier_language_width_v6_20260412_222723.json"
+      "latest_report_json_rel": "kb_runs_published/rung_432_noise_pronoun_inversion_chain_frontier_language_width_v6_20260412_222723.json"
     },
     {
       "scenario": "rung_448_confirmation_gate_no_then_yes",
@@ -235,7 +222,7 @@
       "trend_pass_rate": 1.0,
       "latest_run_id": "run-20260412T222457Z-rung_448_confirmation_ga-qwen35_semparse_9b-27556",
       "latest_report_html_rel": "reports/rung_448_confirmation_gate_no_then_yes_frontier_confirmation_probe_v1_20260412_222449.html",
-      "latest_report_json_rel": "kb_runs/rung_448_confirmation_gate_no_then_yes_frontier_confirmation_probe_v1_20260412_222449.json"
+      "latest_report_json_rel": "kb_runs_published/rung_448_confirmation_gate_no_then_yes_frontier_confirmation_probe_v1_20260412_222449.json"
     },
     {
       "scenario": "rung_447_confirmation_gate_single_yes",
@@ -248,7 +235,7 @@
       "trend_pass_rate": 1.0,
       "latest_run_id": "run-20260412T222449Z-rung_447_confirmation_ga-qwen35_semparse_9b-36828",
       "latest_report_html_rel": "reports/rung_447_confirmation_gate_single_yes_frontier_confirmation_probe_v1_20260412_222449.html",
-      "latest_report_json_rel": "kb_runs/rung_447_confirmation_gate_single_yes_frontier_confirmation_probe_v1_20260412_222449.json"
+      "latest_report_json_rel": "kb_runs_published/rung_447_confirmation_gate_single_yes_frontier_confirmation_probe_v1_20260412_222449.json"
     },
     {
       "scenario": "demo_04_reimbursement_violation_check",
@@ -261,7 +248,7 @@
       "trend_pass_rate": 1.0,
       "latest_run_id": "run-20260412T130439Z-demo_04_reimbursement_vi-qwen35_semparse_9b-44172",
       "latest_report_html_rel": "reports/demo_04_reimbursement_violation_check.html",
-      "latest_report_json_rel": "kb_runs/demo_04_reimbursement_violation_check.json"
+      "latest_report_json_rel": "kb_runs_published/demo_04_reimbursement_violation_check.json"
     },
     {
       "scenario": "demo_03_story_world_interrogator",
@@ -274,7 +261,7 @@
       "trend_pass_rate": 0.0,
       "latest_run_id": "run-20260412T130421Z-demo_03_story_world_inte-qwen35_semparse_9b-19956",
       "latest_report_html_rel": "reports/demo_03_story_world_interrogator.html",
-      "latest_report_json_rel": "kb_runs/demo_03_story_world_interrogator.json"
+      "latest_report_json_rel": "kb_runs_published/demo_03_story_world_interrogator.json"
     },
     {
       "scenario": "demo_02_policy_stress_test_machine",
@@ -287,33 +274,46 @@
       "trend_pass_rate": 1.0,
       "latest_run_id": "run-20260412T130357Z-demo_02_policy_stress_te-qwen35_semparse_9b-26940",
       "latest_report_html_rel": "reports/demo_02_policy_stress_test_machine.html",
-      "latest_report_json_rel": "kb_runs/demo_02_policy_stress_test_machine.json"
+      "latest_report_json_rel": "kb_runs_published/demo_02_policy_stress_test_machine.json"
     },
     {
-      "scenario": "demo_01_meeting_commitment_extractor",
-      "latest_status": "failed",
-      "latest_finished_utc": "2026-04-12T13:03:57+00:00",
-      "latest_validation_passed": 2,
-      "latest_validation_total": 5,
+      "scenario": "rung_360_ce_story_branch_merge_noise",
+      "latest_status": "passed",
+      "latest_finished_utc": "2026-04-12T10:22:39+00:00",
+      "latest_validation_passed": 12,
+      "latest_validation_total": 12,
       "trend_sample_total": 1,
-      "trend_sample_passed": 0,
-      "trend_pass_rate": 0.0,
-      "latest_run_id": "run-20260412T130334Z-demo_01_meeting_commitme-qwen35_semparse_9b-23084",
-      "latest_report_html_rel": "reports/demo_01_meeting_commitment_extractor.html",
-      "latest_report_json_rel": "kb_runs/demo_01_meeting_commitment_extractor.json"
+      "trend_sample_passed": 1,
+      "trend_pass_rate": 1.0,
+      "latest_run_id": "run-20260412T102202Z-rung_360_ce_story_branch-qwen35_semparse_9b-41352",
+      "latest_report_html_rel": "reports/rung_360_ce_story_branch_merge_noise_frontier_ce_340_360_refined3_check_20260412.html",
+      "latest_report_json_rel": "kb_runs_published/rung_360_ce_story_branch_merge_noise_frontier_ce_340_360_refined3_check_20260412.json"
     },
     {
-      "scenario": "progress_memory_contamination_ablation",
-      "latest_status": "failed",
-      "latest_finished_utc": "2026-04-12T11:51:45+00:00",
-      "latest_validation_passed": 1,
-      "latest_validation_total": 1,
-      "trend_sample_total": 2,
+      "scenario": "rung_350_ce_story_multi_round_revision",
+      "latest_status": "passed",
+      "latest_finished_utc": "2026-04-12T10:22:02+00:00",
+      "latest_validation_passed": 11,
+      "latest_validation_total": 11,
+      "trend_sample_total": 1,
       "trend_sample_passed": 1,
-      "trend_pass_rate": 0.5,
-      "latest_run_id": "run-20260412T115022Z-progress_memory_contamin-qwen35_semparse_9b-25968",
-      "latest_report_html_rel": "reports/progress_memory_contamination_ablation_with_progress_20260412.html",
-      "latest_report_json_rel": "kb_runs/progress_memory_contamination_ablation_with_progress_20260412.json"
+      "trend_pass_rate": 1.0,
+      "latest_run_id": "run-20260412T102113Z-rung_350_ce_story_multi_-qwen35_semparse_9b-35144",
+      "latest_report_html_rel": "reports/rung_350_ce_story_multi_round_revision_frontier_ce_340_360_refined3_check_20260412.html",
+      "latest_report_json_rel": "kb_runs_published/rung_350_ce_story_multi_round_revision_frontier_ce_340_360_refined3_check_20260412.json"
+    },
+    {
+      "scenario": "rung_340_ce_story_pronoun_transfer",
+      "latest_status": "passed",
+      "latest_finished_utc": "2026-04-12T10:21:13+00:00",
+      "latest_validation_passed": 11,
+      "latest_validation_total": 11,
+      "trend_sample_total": 1,
+      "trend_sample_passed": 1,
+      "trend_pass_rate": 1.0,
+      "latest_run_id": "run-20260412T102015Z-rung_340_ce_story_pronou-qwen35_semparse_9b-42296",
+      "latest_report_html_rel": "reports/rung_340_ce_story_pronoun_transfer_frontier_ce_340_360_refined3_check_20260412.html",
+      "latest_report_json_rel": "kb_runs_published/rung_340_ce_story_pronoun_transfer_frontier_ce_340_360_refined3_check_20260412.json"
     }
   ]
 }

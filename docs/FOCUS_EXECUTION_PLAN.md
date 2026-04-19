@@ -12,11 +12,12 @@ No side quests unless they improve this path, and no headline claim unless it su
 
 ## Current Reality
 
-- `scripts/run_safety_gate.py` is green (`88 passed`).
+- `scripts/run_safety_gate.py` is green (`105 passed`).
 - Strict Blocksworld is the current stable proof lane.
 - `modelfiles/predicate_registry.json` is now populated, so the general strict lane is actually strict.
 - The guarded Blocksworld lane is currently stable at `20/20`, `8/8`, zero-hit `0`, avg-hit `0.458334 / 0.458334`.
-- The mid and upper-mid narrative packs are improved but currently not green (`pipeline_pass=1/3` in both packs).
+- The mid and upper-mid narrative packs are now pipeline-green at `3/3`.
+- The main remaining caveat is not pipeline fragility; it is evaluation honesty around temporal coverage, especially on mid `full` and the Glitch control lane.
 
 ## Default Operating Stack
 
@@ -36,9 +37,9 @@ No side quests unless they improve this path, and no headline claim unless it su
 - Do not trade stable-lane honesty for frontier optimism.
 
 2. Recover narrative strict lane
-- Compare against the latest honest recovery baselines (`0.3812` mid, `0.3922` upper-mid) while keeping the post-registry correction as the audit floor.
-- Improve recall/coverage without loosening strict admission.
-- Promote fixes only when the narrative strict reruns return to `pipeline_pass=3/3`.
+- Compare against the latest honest recovery baselines (`0.9284` mid best, `0.956` upper-mid best) while keeping the post-registry correction as the audit floor.
+- Improve temporal coverage and query honesty without loosening strict admission.
+- Treat mid `full` temporal floor and Glitch temporal reasoning as the current sharpest open fixes.
 
 3. Real-world pressure
 - Resume broader HN/story pressure only after item 2 is stable.

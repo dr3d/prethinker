@@ -1,6 +1,6 @@
-﻿# Prethink Gateway MVP
+# Prethinker Console
 
-This folder contains an isolated local MVP for a product-style front door to Prethinker. It adds:
+This folder contains a local MVP for a product-style front door to Prethinker. It adds:
 
 - a local web chat UI
 - a backend endpoint that represents `prethink://` ingress
@@ -8,7 +8,7 @@ This folder contains an isolated local MVP for a product-style front door to Pre
 - runtime hooks bound to real pre-think + deterministic core runtime tools
 - one-click session export for post-mortem JSON traces
 
-The scaffold is intentionally separate from the existing training lane.
+The UI is now wired to the canonical interactive utterance entryway in `src/mcp_server.py`, so manual console turns exercise the same shared server path instead of a UI-only parser fork.
 
 ## Run
 
@@ -23,6 +23,8 @@ Then open:
 ```text
 http://127.0.0.1:8765
 ```
+
+For a ready-made manual test script, see [CONSOLE_TRYBOOK.md](../docs/CONSOLE_TRYBOOK.md).
 
 Direct file-open also works now:
 
@@ -49,7 +51,7 @@ Or bind localhost and map `prethink` in your hosts file.
 
 ## Strict Bouncer Mode
 
-The UI now supports a strict-lock preset (button: `Apply Strict Bouncer Lock`), and strict mode invariants are enforced server-side.
+Prethinker Console supports a strict-lock preset (button: `Apply Strict Bouncer Lock`), and strict mode invariants are enforced server-side.
 
 When strict mode is on:
 
@@ -57,7 +59,7 @@ When strict mode is on:
 - `served_handoff_mode` is forced to `never`
 - `require_final_confirmation` is forced to `true`
 
-This keeps the gateway as a hard MITM bouncer and prevents served-LLM bypass paths during controlled Q&A/clarification loops.
+This keeps the console as a hard MITM bouncer and prevents served-LLM bypass paths during controlled Q&A/clarification loops.
 
 ## What It Does
 
@@ -65,7 +67,7 @@ This keeps the gateway as a hard MITM bouncer and prevents served-LLM bypass pat
   - accepts `{ "session_id": "...", "utterance": "..." }`
   - returns a phaseful envelope: `ingest`, `clarify`, `commit`, `answer`
 - `GET /api/config`
-  - returns current local gateway config
+  - returns current local console config
 - `POST /api/config`
   - persists config to `ui_gateway/state/gateway_config.json`
 - `GET /api/session/reset`
@@ -112,29 +114,29 @@ browser chat UI
 ```text
 user> Remember that it ships next week.
 
-gateway ingest> route=write ambiguity=0.79 reasons=[pronoun_reference_detected]
-gateway clarify> Clarify before commit: name the concrete subject, predicate, and object for 'Remember that it ships next week.'
-gateway commit> blocked
-gateway answer> Clarify before commit: name the concrete subject, predicate, and object for 'Remember that it ships next week.'
+console ingest> route=write ambiguity=0.79 reasons=[pronoun_reference_detected]
+console clarify> Clarify before commit: name the concrete subject, predicate, and object for 'Remember that it ships next week.'
+console commit> blocked
+console answer> Clarify before commit: name the concrete subject, predicate, and object for 'Remember that it ships next week.'
 
 user> The launch plan ships next week.
 
-gateway ingest> clarification follow-up received
-gateway clarify> resolved via reframed
-gateway commit> applied
-gateway answer> Deterministic commit complete: 1 mutation(s) applied.
+console ingest> clarification follow-up received
+console clarify> resolved via reframed
+console commit> applied
+console answer> Deterministic commit complete: 1 mutation(s) applied.
 
 user> Is the launch plan delayed?
 
-gateway ingest> route=query ambiguity=0.18
-gateway clarify> skipped
-gateway commit> skipped
-gateway answer> Query succeeded with 1 row(s).
+console ingest> route=query ambiguity=0.18
+console clarify> skipped
+console commit> skipped
+console answer> Query succeeded with 1 row(s).
 ```
 
-## Batch Testing Through The Gateway
+## Batch Testing Through The Console
 
-Use the new runner to execute a turnset through the same HTTP front door used by the UI:
+Use the runner to execute a turnset through the same HTTP front door used by the UI:
 
 ```powershell
 python scripts/run_gateway_turnset.py `

@@ -13,7 +13,9 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
+from copy import deepcopy
 from datetime import datetime, timezone
 from dataclasses import dataclass
 from pathlib import Path
@@ -24,12 +26,18 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from kb_pipeline import (
+    _build_classifier_prompt,
     CorePrologRuntime,
+    _build_extractor_prompt,
     _call_model_prompt,
+    _extract_retract_targets,
     _get_api_key,
     _load_env_file,
+    _normalize_clarification_fields,
     _parse_model_json,
     _resolve_env_file,
+    _synthesize_clarification_question,
+    _validate_parsed,
 )
 
 
@@ -123,6 +131,10 @@ class PrologMCPServer:
         self._compiler_prompt_loaded = False
         self._compiler_prompt_load_error = ""
         self._compiler_api_key = _get_api_key()
+        self._registry_signatures = self._load_registry_signatures()
+        self._last_prethink_trace: dict[str, Any] = {}
+        self._last_prethink_fallback_trace: dict[str, Any] = {}
+        self._last_parse_trace: dict[str, Any] = {}
         self._load_compiler_prompt()
 
     def _load_compiler_prompt(self) -> None:
@@ -139,6 +151,800 @@ class PrologMCPServer:
             self._compiler_prompt_text = ""
             self._compiler_prompt_loaded = False
             self._compiler_prompt_load_error = str(exc)
+
+    def _load_registry_signatures(self) -> set[tuple[str, int]]:
+        path = REPO_ROOT / "modelfiles" / "predicate_registry.json"
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            return set()
+        rows = payload.get("canonical_predicates", []) if isinstance(payload, dict) else []
+        signatures: set[tuple[str, int]] = set()
+        if not isinstance(rows, list):
+            return signatures
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            name = self._atomize_name(row.get("name", ""))
+            try:
+                arity = int(row.get("arity", -1))
+            except Exception:
+                arity = -1
+            if name and arity >= 0:
+                signatures.add((name, arity))
+        return signatures
+
+    def _clone_trace_payload(self, value: Any) -> Any:
+        try:
+            return deepcopy(value)
+        except Exception:
+            return value
+
+    def _trace_step(self, *, name: str, before: Any, after: Any, summary: str) -> dict[str, Any]:
+        return {
+            "name": name,
+            "applied": before != after,
+            "summary": summary,
+        }
+
+    def _summarize_prethink_trace(self, trace: dict[str, Any]) -> dict[str, Any]:
+        source = str(trace.get("source", "unknown")).strip() or "unknown"
+        rescues = [
+            str(item.get("name", "")).strip()
+            for item in trace.get("rescues", [])
+            if isinstance(item, dict) and bool(item.get("applied"))
+        ]
+        if rescues:
+            overall = f"prethink={source}; adjusted via {', '.join(rescues)}"
+        elif source == "primary":
+            overall = "prethink=primary; raw routing packet accepted"
+        elif source == "fallback_classifier":
+            overall = "prethink=fallback_classifier; compact classifier supplied routing"
+        elif source == "heuristic":
+            overall = "prethink=heuristic; model compiler was bypassed"
+        elif source == "external_or_stubbed":
+            overall = "prethink=external_or_stubbed; trace synthesized from final packet"
+        elif source == "failed":
+            overall = "prethink=failed; compiler did not produce a valid routing packet"
+        else:
+            overall = f"prethink={source}"
+        return {
+            "source": source,
+            "rescues": rescues,
+            "overall": overall,
+        }
+
+    def _summarize_parse_trace(self, trace: dict[str, Any]) -> dict[str, Any]:
+        rescues = [
+            str(item.get("name", "")).strip()
+            for item in trace.get("rescues", [])
+            if isinstance(item, dict) and bool(item.get("applied"))
+        ]
+        validation_errors = list(trace.get("validation_errors", []))
+        raw_matches_admitted = bool(trace.get("raw_matches_admitted", False))
+        if validation_errors:
+            overall = "parse=failed validation; see validation_errors"
+        elif rescues:
+            overall = f"parse adjusted via {', '.join(rescues)}"
+        elif raw_matches_admitted:
+            overall = "parse raw output admitted unchanged"
+        else:
+            overall = "parse normalized without additional rescue"
+        return {
+            "rescues": rescues,
+            "raw_matches_admitted": raw_matches_admitted,
+            "validation_error_count": len(validation_errors),
+            "overall": overall,
+        }
+
+    def _summarize_compiler_trace(
+        self,
+        *,
+        prethink_trace: dict[str, Any] | None,
+        parse_trace: dict[str, Any] | None,
+    ) -> dict[str, Any]:
+        prethink_summary = (
+            dict(prethink_trace.get("summary", {}))
+            if isinstance(prethink_trace, dict) and isinstance(prethink_trace.get("summary"), dict)
+            else {}
+        )
+        parse_summary = (
+            dict(parse_trace.get("summary", {}))
+            if isinstance(parse_trace, dict) and isinstance(parse_trace.get("summary"), dict)
+            else {}
+        )
+        parts = [
+            str(prethink_summary.get("overall", "")).strip(),
+            str(parse_summary.get("overall", "")).strip(),
+        ]
+        overall = "; ".join(part for part in parts if part)
+        if not overall:
+            overall = "No compiler trace captured."
+        return {
+            "overall": overall,
+            "prethink_source": str(prethink_summary.get("source", "")).strip(),
+            "parse_rescues": list(parse_summary.get("rescues", [])),
+        }
+
+    def _ensure_prethink_trace(
+        self,
+        *,
+        utterance: str,
+        compiled: dict[str, Any] | None,
+        compile_error: str,
+        packet: dict[str, Any] | None,
+    ) -> dict[str, Any]:
+        trace = self._clone_trace_payload(self._last_prethink_trace)
+        if not isinstance(trace, dict) or str(trace.get("utterance", "")).strip() != utterance:
+            if self._compiler_mode == "heuristic" and compiled is None:
+                source = "heuristic"
+            elif compiled is None:
+                source = "failed"
+            else:
+                source = "external_or_stubbed"
+            trace = {
+                "utterance": utterance,
+                "source": source,
+                "compiler_mode": self._compiler_mode,
+                "model": self._compiler_model,
+                "prompt_path": str(self._compiler_prompt_path) if self._compiler_prompt_enabled else "",
+                "primary": {
+                    "raw_message": "",
+                    "reasoning": "",
+                    "parsed": None,
+                    "normalized_before_sanitize": None,
+                    "final_normalized": self._clone_trace_payload(compiled),
+                    "error": str(compile_error or "").strip(),
+                },
+                "fallback": {
+                    "used": False,
+                    "raw_message": "",
+                    "reasoning": "",
+                    "parsed": None,
+                    "normalized": None,
+                    "error": "",
+                },
+                "rescues": [],
+                "final": self._clone_trace_payload(compiled),
+            }
+        trace["packet"] = self._clone_trace_payload(packet) if isinstance(packet, dict) else None
+        trace["summary"] = self._summarize_prethink_trace(trace)
+        return trace
+
+    def _ensure_parse_trace(
+        self,
+        *,
+        utterance: str,
+        compiler_intent: str,
+        clarification_answer: str,
+        parsed: dict[str, Any] | None,
+        error: str,
+    ) -> dict[str, Any]:
+        trace = self._clone_trace_payload(self._last_parse_trace)
+        if not isinstance(trace, dict) or str(trace.get("utterance", "")).strip() != utterance:
+            trace = {
+                "utterance": utterance,
+                "compiler_intent": compiler_intent,
+                "clarification_answer": clarification_answer,
+                "extractor": {
+                    "raw_message": "",
+                    "reasoning": "",
+                    "parsed": None,
+                    "error": str(error or "").strip(),
+                },
+                "normalized": None,
+                "rescues": [],
+                "admitted": self._clone_trace_payload(parsed),
+                "validation_errors": [str(error or "").strip()] if error else [],
+                "raw_matches_admitted": False,
+            }
+        trace["summary"] = self._summarize_parse_trace(trace)
+        return trace
+
+    def _atomize_name(self, raw: str) -> str:
+        lowered = str(raw or "").strip().lower()
+        if not lowered:
+            return ""
+        return re.sub(r"[^a-z0-9_]+", "_", lowered).strip("_")
+
+    def _extract_components_from_facts(self, facts: list[str]) -> dict[str, list[str]]:
+        atoms: set[str] = set()
+        variables: set[str] = set()
+        predicates: set[str] = set()
+
+        for clause in facts:
+            text = str(clause or "").strip()
+            match = re.match(r"^([a-z_][a-z0-9_]*)\((.*)\)\.$", text)
+            if not match:
+                continue
+            predicates.add(match.group(1))
+            raw_args = [part.strip() for part in match.group(2).split(",")]
+            for arg in raw_args:
+                if not arg:
+                    continue
+                if re.match(r"^[A-Z_][A-Za-z0-9_]*$", arg):
+                    variables.add(arg)
+                elif re.match(r"^[a-z_][a-z0-9_]*$", arg):
+                    atoms.add(arg)
+
+        return {
+            "atoms": sorted(atoms),
+            "variables": sorted(variables),
+            "predicates": sorted(predicates),
+        }
+
+    def _split_fact_args(self, raw_args: str) -> list[str]:
+        args: list[str] = []
+        current: list[str] = []
+        depth = 0
+        for ch in str(raw_args or ""):
+            if ch == "," and depth == 0:
+                token = "".join(current).strip()
+                if token:
+                    args.append(token)
+                current = []
+                continue
+            if ch == "(":
+                depth += 1
+            elif ch == ")" and depth > 0:
+                depth -= 1
+            current.append(ch)
+        token = "".join(current).strip()
+        if token:
+            args.append(token)
+        return args
+
+    def _canonicalize_subject_prefixed_predicates(self, parsed: dict[str, Any]) -> dict[str, Any]:
+        if not isinstance(parsed, dict):
+            return parsed
+        if str(parsed.get("intent", "")).strip().lower() != "assert_fact":
+            return parsed
+        if not self._registry_signatures:
+            return parsed
+
+        facts = [str(item).strip() for item in parsed.get("facts", []) if str(item).strip()]
+        if not facts:
+            logic = str(parsed.get("logic_string", "")).strip()
+            if logic:
+                facts = [logic]
+        if not facts:
+            return parsed
+
+        rewritten_facts: list[str] = []
+        changed = False
+        canonical_pairs: list[tuple[str, str]] = []
+        for fact in facts:
+            clause = fact if fact.endswith(".") else f"{fact}."
+            match = re.match(r"^\s*([a-z_][a-z0-9_]*)\((.*)\)\.\s*$", clause)
+            if not match:
+                rewritten_facts.append(clause)
+                continue
+            predicate = match.group(1)
+            args = self._split_fact_args(match.group(2))
+            if not args:
+                rewritten_facts.append(clause)
+                continue
+            first_atom = self._atomize_name(args[0])
+            replacement = ""
+            prefix = f"{first_atom}_"
+            if first_atom and predicate.startswith(prefix):
+                candidate = predicate[len(prefix) :]
+                if candidate and (candidate, len(args)) in self._registry_signatures:
+                    replacement = candidate
+            if replacement:
+                rewritten_facts.append(f"{replacement}({', '.join(args)}).")
+                changed = True
+                canonical_pairs.append((predicate, replacement))
+            else:
+                rewritten_facts.append(clause)
+
+        if not changed:
+            return parsed
+
+        parsed["facts"] = rewritten_facts
+        parsed["logic_string"] = rewritten_facts[0] if len(rewritten_facts) == 1 else " ".join(rewritten_facts)
+        parsed["rules"] = []
+        parsed["queries"] = []
+        parsed["components"] = self._extract_components_from_facts(rewritten_facts)
+        parsed["ambiguities"] = []
+        seen: set[str] = set()
+        pairs: list[str] = []
+        for before, after in canonical_pairs:
+            label = f"{before}->{after}"
+            if label not in seen:
+                seen.add(label)
+                pairs.append(label)
+        parsed["rationale"] = "Subject-prefixed predicate canonicalized to registry form: " + ", ".join(pairs) + "."
+        return parsed
+
+    def _canonicalize_make_with_query(self, parsed: dict[str, Any], *, utterance: str) -> dict[str, Any]:
+        if not isinstance(parsed, dict):
+            return parsed
+        if str(parsed.get("intent", "")).strip().lower() != "query":
+            return parsed
+
+        lowered = str(utterance or "").strip().lower()
+        if not lowered:
+            return parsed
+        match = re.match(
+            r"^\s*can\s+you\s+make\s+([a-z][a-z0-9_'-]*(?:\s+[a-z][a-z0-9_'-]*){0,3})\s+with\s+([a-z][a-z0-9_'-]*(?:\s+[a-z][a-z0-9_'-]*){0,3})\s*\?\s*$",
+            lowered,
+        )
+        if not match:
+            return parsed
+
+        subject_atom = self._atomize_name(match.group(1))
+        ingredient_atom = self._atomize_name(match.group(2))
+        if not subject_atom or not ingredient_atom:
+            return parsed
+
+        query = f"made_with({subject_atom}, {ingredient_atom})."
+        parsed["logic_string"] = query
+        parsed["queries"] = [query]
+        parsed["facts"] = []
+        parsed["rules"] = []
+        parsed["components"] = {
+            "atoms": sorted({subject_atom, ingredient_atom}),
+            "variables": [],
+            "predicates": ["made_with"],
+        }
+        parsed["ambiguities"] = []
+        parsed["needs_clarification"] = False
+        parsed["clarification_question"] = ""
+        parsed["clarification_reason"] = ""
+        parsed["uncertainty_score"] = 0.05
+        parsed["uncertainty_label"] = "low"
+        parsed["rationale"] = (
+            "Mapped capability wording onto the stored ingredient relation "
+            f"made_with({subject_atom}, {ingredient_atom})."
+        )
+        return parsed
+
+    def _augment_compound_family_facts(
+        self,
+        *,
+        parsed: dict[str, Any],
+        utterance: str,
+        clarification_answer: str,
+    ) -> dict[str, Any]:
+        if not isinstance(parsed, dict):
+            return parsed
+        if str(parsed.get("intent", "")).strip().lower() != "assert_fact":
+            return parsed
+
+        facts = [str(item).strip() for item in parsed.get("facts", []) if str(item).strip()]
+        if not facts:
+            logic = str(parsed.get("logic_string", "")).strip()
+            if logic:
+                facts = [logic]
+
+        normalized_facts: list[str] = []
+        for fact in facts:
+            clause = fact if fact.endswith(".") else f"{fact}."
+            if clause not in normalized_facts:
+                normalized_facts.append(clause)
+        original_facts = list(normalized_facts)
+
+        lowered = str(utterance or "").strip().lower()
+        if not lowered:
+            return parsed
+        clar_atom = self._atomize_name(clarification_answer)
+
+        parent_override_facts: list[str] = []
+        owner_from_parent_block = ""
+        parent_block = re.search(
+            r"\b([a-z][a-z0-9_'-]*?)'?s\s+mom\s+and\s+dad\s+(?:is|are)\s+([a-z][a-z0-9_'-]*)\s+and\s+([a-z][a-z0-9_'-]*)\b",
+            lowered,
+        )
+        if parent_block:
+            owner_from_parent_block = self._atomize_name(parent_block.group(1))
+            mom_atom = self._atomize_name(parent_block.group(2))
+            dad_atom = self._atomize_name(parent_block.group(3))
+            if owner_from_parent_block and mom_atom:
+                fact = f"parent({mom_atom}, {owner_from_parent_block})."
+                if fact not in parent_override_facts:
+                    parent_override_facts.append(fact)
+            if owner_from_parent_block and dad_atom:
+                fact = f"parent({dad_atom}, {owner_from_parent_block})."
+                if fact not in parent_override_facts:
+                    parent_override_facts.append(fact)
+
+        sibling_override_facts: list[str] = []
+        sibling_block = re.search(
+            r"\b((?:[a-z][a-z0-9_'-]*?)'?s|his|her|their)\s+brother\s+is\s+([a-z][a-z0-9_'-]*)\b",
+            lowered,
+        )
+        if sibling_block:
+            owner_token = sibling_block.group(1)
+            sibling_atom = self._atomize_name(sibling_block.group(2))
+            owner_atom = ""
+            if owner_token in {"his", "her", "their"}:
+                owner_atom = clar_atom or owner_from_parent_block
+            else:
+                owner_match = re.match(r"^([a-z][a-z0-9_'-]*?)'?s$", owner_token)
+                if owner_match:
+                    owner_atom = self._atomize_name(owner_match.group(1))
+            if owner_atom and sibling_atom:
+                fact = f"brother({sibling_atom}, {owner_atom})."
+                if fact not in sibling_override_facts:
+                    sibling_override_facts.append(fact)
+
+        explicit_sibling_name_rationale = ""
+        sibling_name_block = re.search(
+            r"\b([a-z][a-z0-9_'-]*)\s+has\s+a\s+brother\s+and\s+his\s+brother'?s\s+name\s+is\s+([a-z][a-z0-9_'-]*)\b",
+            lowered,
+        )
+        if sibling_name_block:
+            owner_atom = self._atomize_name(sibling_name_block.group(1))
+            sibling_atom = self._atomize_name(sibling_name_block.group(2))
+            if owner_atom and sibling_atom:
+                sibling_override_facts = [f"brother({sibling_atom}, {owner_atom})."]
+                explicit_sibling_name_rationale = (
+                    "Recognized an explicit sibling naming pattern and normalized it to "
+                    f"brother({sibling_atom}, {owner_atom})."
+                )
+
+        inverse_possessive_override_facts: list[str] = []
+        inverse_possessive_rationale = ""
+        inverse_possessive = re.match(
+            r"^\s*([a-z][a-z0-9_'-]*)\s+is\s+([a-z][a-z0-9_'-]*)'?s\s+([a-z][a-z0-9_'-]*(?:\s+[a-z][a-z0-9_'-]*){0,3})\.?\s*$",
+            lowered,
+            re.IGNORECASE,
+        )
+        if inverse_possessive:
+            subject_atom = self._atomize_name(inverse_possessive.group(1))
+            owner_atom = self._atomize_name(inverse_possessive.group(2))
+            relation_atom = self._atomize_name(inverse_possessive.group(3))
+            if subject_atom and owner_atom and relation_atom:
+                fact = f"{relation_atom}({subject_atom}, {owner_atom})."
+                inverse_possessive_override_facts.append(fact)
+                inverse_possessive_rationale = (
+                    "Recognized an inverse possessive relation and normalized it to "
+                    f"{relation_atom}({subject_atom}, {owner_atom})."
+                )
+
+        if parent_override_facts:
+            kept = [fact for fact in normalized_facts if not re.match(r"^parent\s*\(", fact)]
+            normalized_facts = kept + parent_override_facts
+
+        if sibling_override_facts:
+            kept = [fact for fact in normalized_facts if not re.match(r"^brother\s*\(", fact)]
+            normalized_facts = kept + sibling_override_facts
+
+        if inverse_possessive_override_facts:
+            kept: list[str] = []
+            for fact in normalized_facts:
+                parsed_name = ""
+                match = re.match(r"^\s*([a-z_][a-z0-9_]*)\s*\(", fact)
+                if match:
+                    parsed_name = match.group(1)
+                if parsed_name and fact not in inverse_possessive_override_facts:
+                    continue
+                kept.append(fact)
+            normalized_facts = kept + [
+                fact for fact in inverse_possessive_override_facts if fact not in kept
+            ]
+
+        if normalized_facts == original_facts or not normalized_facts:
+            return parsed
+
+        parsed["facts"] = normalized_facts
+        parsed["logic_string"] = (
+            normalized_facts[0] if len(normalized_facts) == 1 else " ".join(normalized_facts)
+        )
+        parsed["rules"] = []
+        parsed["queries"] = []
+        parsed["components"] = self._extract_components_from_facts(normalized_facts)
+        if parent_override_facts and owner_from_parent_block:
+            parent_atoms = [fact[len("parent(") : fact.rfind(",")] for fact in parent_override_facts if fact.startswith("parent(")]
+            normalized_owner = owner_from_parent_block.replace("_", " ")
+            normalized_parents = ", ".join(atom.replace("_", " ") for atom in parent_atoms)
+            parsed["ambiguities"] = []
+            parsed["rationale"] = (
+                f"Recognized an explicit family bundle and normalized it to parent facts for {normalized_owner}: "
+                f"{normalized_parents}."
+            )
+        elif sibling_override_facts and explicit_sibling_name_rationale:
+            parsed["ambiguities"] = []
+            parsed["rationale"] = explicit_sibling_name_rationale
+        elif inverse_possessive_override_facts and inverse_possessive_rationale:
+            parsed["ambiguities"] = []
+            parsed["rationale"] = inverse_possessive_rationale
+        else:
+            rationale = str(parsed.get("rationale", "")).strip()
+            suffix = "Compound family statement expansion added deterministic companion facts."
+            parsed["rationale"] = f"{rationale} {suffix}".strip() if rationale else suffix
+        return parsed
+
+    def _compile_apply_parse(
+        self,
+        *,
+        utterance: str,
+        compiler_intent: str,
+        clarification_question: str = "",
+        clarification_answer: str = "",
+    ) -> tuple[dict[str, Any] | None, str]:
+        if not self._compiler_prompt_loaded:
+            reason = self._compiler_prompt_load_error or "compiler prompt unavailable"
+            return None, f"Compiler prompt not loaded: {reason}"
+        self._last_parse_trace = {}
+
+        effective = utterance
+        if clarification_question or clarification_answer:
+            effective = (
+                f"{utterance}\n"
+                f"Clarification question: {clarification_question}\n"
+                f"Clarification answer: {clarification_answer}"
+            ).strip()
+
+        extraction_prompt = _build_extractor_prompt(
+            effective,
+            compiler_intent if compiler_intent in {"assert_fact", "assert_rule", "query", "retract", "other"} else "other",
+            known_predicates=[],
+            prompt_guide=self._compiler_prompt_text,
+        )
+        trace = {
+            "utterance": utterance,
+            "effective_utterance": effective,
+            "compiler_intent": compiler_intent,
+            "clarification_answer": clarification_answer,
+            "model": self._compiler_model,
+            "prompt_path": str(self._compiler_prompt_path) if self._compiler_prompt_enabled else "",
+            "extractor": {
+                "raw_message": "",
+                "reasoning": "",
+                "parsed": None,
+                "error": "",
+            },
+            "normalized": None,
+            "rescues": [],
+            "admitted": None,
+            "validation_errors": [],
+            "raw_matches_admitted": False,
+        }
+
+        try:
+            response = _call_model_prompt(
+                backend=self._compiler_backend,
+                base_url=self._compiler_base_url,
+                model=self._compiler_model,
+                prompt_text=extraction_prompt,
+                context_length=self._compiler_context_length,
+                timeout=self._compiler_timeout,
+                api_key=self._compiler_api_key,
+            )
+        except Exception as exc:
+            trace["extractor"]["error"] = f"Compiler parse call failed: {exc}"
+            trace["validation_errors"] = [trace["extractor"]["error"]]
+            trace["summary"] = self._summarize_parse_trace(trace)
+            self._last_parse_trace = trace
+            return None, f"Compiler parse call failed: {exc}"
+        trace["extractor"]["raw_message"] = str(response.message or "")
+        trace["extractor"]["reasoning"] = str(response.reasoning or "")
+
+        parsed, _ = _parse_model_json(
+            response,
+            required_keys=["intent", "logic_string", "components", "confidence"],
+        )
+        if not isinstance(parsed, dict):
+            trace["extractor"]["error"] = "Compiler parse payload was not valid JSON."
+            trace["validation_errors"] = [trace["extractor"]["error"]]
+            trace["summary"] = self._summarize_parse_trace(trace)
+            self._last_parse_trace = trace
+            return None, "Compiler parse payload was not valid JSON."
+        raw_parsed = self._clone_trace_payload(parsed)
+        trace["extractor"]["parsed"] = raw_parsed
+
+        normalized = _normalize_clarification_fields(
+            self._clone_trace_payload(parsed),
+            utterance=effective,
+            route=compiler_intent,
+        )
+        trace["normalized"] = self._clone_trace_payload(normalized)
+        trace["rescues"].append(
+            self._trace_step(
+                name="clarification_fields_normalized",
+                before=raw_parsed,
+                after=normalized,
+                summary="Normalized clarification fields onto the parse schema.",
+            )
+        )
+        after_make_with = self._canonicalize_make_with_query(
+            self._clone_trace_payload(normalized),
+            utterance=utterance,
+        )
+        trace["rescues"].append(
+            self._trace_step(
+                name="make_with_query_canonicalization",
+                before=normalized,
+                after=after_make_with,
+                summary="Mapped capability wording onto the stored ingredient relation.",
+            )
+        )
+        family_input = self._clone_trace_payload(after_make_with)
+        after_family = self._augment_compound_family_facts(
+            parsed=family_input,
+            utterance=utterance,
+            clarification_answer=clarification_answer,
+        )
+        trace["rescues"].append(
+            self._trace_step(
+                name="compound_family_augmentation",
+                before=after_make_with,
+                after=after_family,
+                summary="Expanded or corrected explicit family bundle statements.",
+            )
+        )
+        subject_prefix_input = self._clone_trace_payload(after_family)
+        admitted = self._canonicalize_subject_prefixed_predicates(subject_prefix_input)
+        trace["rescues"].append(
+            self._trace_step(
+                name="subject_prefixed_predicate_canonicalization",
+                before=after_family,
+                after=admitted,
+                summary="Canonicalized subject-prefixed predicates into registry form.",
+            )
+        )
+        trace["admitted"] = self._clone_trace_payload(admitted)
+        trace["raw_matches_admitted"] = raw_parsed == admitted
+        ok, errors = _validate_parsed(admitted)
+        trace["validation_errors"] = list(errors)
+        trace["summary"] = self._summarize_parse_trace(trace)
+        self._last_parse_trace = trace
+        if not ok:
+            return None, "; ".join(errors)
+        return admitted, ""
+
+    def _apply_compiled_parse(self, *, parsed: dict[str, Any], prethink_id: str) -> dict[str, Any]:
+        intent = str(parsed.get("intent", "")).strip()
+        operations: list[dict[str, Any]] = []
+        writes_applied = 0
+        query_result: dict[str, Any] | None = None
+        errors: list[str] = []
+
+        if intent == "assert_fact":
+            clauses = [str(item).strip() for item in parsed.get("facts", []) if str(item).strip()]
+            if not clauses:
+                clause = str(parsed.get("logic_string", "")).strip()
+                if clause:
+                    clauses = [clause]
+            for clause in clauses:
+                result = self.tools_call(
+                    "assert_fact",
+                    {"clause": clause, "prethink_id": prethink_id, "confirm": True},
+                )
+                operations.append({"tool": "assert_fact", "clause": clause, "result": result})
+                if str(result.get("status", "")).strip() == "success":
+                    writes_applied += 1
+                else:
+                    errors.append(f"assert_fact failed for {clause}")
+
+        elif intent == "assert_rule":
+            clauses = [str(item).strip() for item in parsed.get("rules", []) if str(item).strip()]
+            if not clauses:
+                clause = str(parsed.get("logic_string", "")).strip()
+                if clause:
+                    clauses = [clause]
+            for clause in clauses:
+                result = self.tools_call(
+                    "assert_rule",
+                    {"clause": clause, "prethink_id": prethink_id, "confirm": True},
+                )
+                operations.append({"tool": "assert_rule", "clause": clause, "result": result})
+                if str(result.get("status", "")).strip() == "success":
+                    writes_applied += 1
+                else:
+                    errors.append(f"assert_rule failed for {clause}")
+
+        elif intent == "retract":
+            targets = _extract_retract_targets(
+                str(parsed.get("logic_string", "")).strip(),
+                [str(item).strip() for item in parsed.get("facts", []) if str(item).strip()],
+            )
+            for target in targets:
+                clause = target if str(target).strip().endswith(".") else f"{target}."
+                result = self.tools_call(
+                    "retract_fact",
+                    {"clause": clause, "prethink_id": prethink_id, "confirm": True},
+                )
+                operations.append({"tool": "retract_fact", "clause": clause, "result": result})
+                if str(result.get("status", "")).strip() == "success":
+                    writes_applied += 1
+                else:
+                    errors.append(f"retract_fact failed for {clause}")
+
+        elif intent == "query":
+            queries = [str(item).strip() for item in parsed.get("queries", []) if str(item).strip()]
+            query = queries[0] if queries else str(parsed.get("logic_string", "")).strip()
+            result = self.tools_call(
+                "query_rows",
+                {"query": query, "prethink_id": prethink_id},
+            )
+            query_result = result
+            operations.append({"tool": "query_rows", "query": query, "result": result})
+            status = str(result.get("status", "")).strip()
+            if status not in {"success", "no_results"}:
+                errors.append(f"query_rows failed for {query}")
+
+        else:
+            operations.append({"tool": "none", "result": {"status": "skipped", "message": "Intent=other"}})
+
+        return {
+            "status": "success" if not errors else "error",
+            "intent": intent,
+            "writes_applied": writes_applied,
+            "operations": operations,
+            "query_result": query_result,
+            "parse": parsed,
+            "errors": errors,
+        }
+
+    def _front_door_from_packet(
+        self,
+        *,
+        packet: dict[str, Any],
+        prethink: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        signals = packet.get("signals", {}) if isinstance(packet.get("signals"), dict) else {}
+        compiler = packet.get("compiler", {}) if isinstance(packet.get("compiler"), dict) else {}
+        clar = packet.get("clarification", {}) if isinstance(packet.get("clarification"), dict) else {}
+        compiler_intent = str(
+            signals.get("compiler_intent") or compiler.get("intent") or "other"
+        ).strip()
+        route = "query" if compiler_intent == "query" else (
+            "write" if compiler_intent in {"assert_fact", "assert_rule", "retract"} else "other"
+        )
+        ambiguity = float(signals.get("compiler_uncertainty_score") or 0.0)
+        reason = str(clar.get("reason", "")).strip() or "compiler_decision"
+        return {
+            "route": route,
+            "compiler_intent": compiler_intent,
+            "looks_like_query": route == "query",
+            "looks_like_write": route == "write",
+            "ambiguity_score": round(ambiguity, 2),
+            "needs_clarification": bool(clar.get("required_before_query")),
+            "reasons": [reason],
+            "clarification_question": str(clar.get("question", "")).strip(),
+            "prethink_id": str(packet.get("prethink_id", "")).strip(),
+            "compiler": {
+                "mode": self._compiler_mode,
+                "model": self._compiler_model,
+                "backend": self._compiler_backend,
+                "base_url": self._compiler_base_url,
+                "strict_mode": self._compiler_mode == "strict",
+                "used": bool(compiler.get("used", True)),
+                "error": str(compiler.get("error", "")).strip(),
+            },
+            "session_snapshot": {
+                "pending_prethink": self._pending_prethink_summary(),
+            },
+            "prethink": prethink or {"status": "success", "result_type": "pre_think_packet", "packet": packet},
+        }
+
+    def _front_door_from_pending(self) -> dict[str, Any]:
+        pending = self._pending_prethink or {}
+        packet = {
+            "prethink_id": str(pending.get("prethink_id", "")).strip(),
+            "signals": {
+                "compiler_intent": str(pending.get("compiler_intent", "other")).strip() or "other",
+                "compiler_uncertainty_score": float(pending.get("compiler_uncertainty_score", 0.0) or 0.0),
+            },
+            "compiler": {
+                "mode": self._compiler_mode,
+                "backend": self._compiler_backend,
+                "base_url": self._compiler_base_url,
+                "model": self._compiler_model,
+                "used": self._compiler_mode != "heuristic",
+                "error": "",
+                "intent": str(pending.get("compiler_intent", "other")).strip() or "other",
+            },
+            "clarification": {
+                "required_before_query": bool(pending.get("clarification_required_before_query", False)),
+                "question": str(pending.get("clarification_question", "")).strip(),
+                "reason": str(pending.get("clarification_reason", "")).strip(),
+            },
+        }
+        return self._front_door_from_packet(packet=packet)
 
     # Direct runtime methods used by kb_pipeline with --runtime mcp
     def empty_kb(self) -> dict[str, Any]:
@@ -213,6 +1019,19 @@ class PrologMCPServer:
                             "confirmed": {"type": "boolean"},
                         },
                         "required": ["prethink_id", "answer"],
+                    },
+                },
+                {
+                    "name": "process_utterance",
+                    "description": "Canonical Prethinker utterance entryway: pre-think, clarify if needed, parse, and deterministically execute.",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "utterance": {"type": "string"},
+                            "clarification_answer": {"type": "string"},
+                            "prethink_id": {"type": "string"},
+                        },
+                        "required": ["utterance"],
                     },
                 },
                 {
@@ -296,6 +1115,10 @@ class PrologMCPServer:
             return result
         if tool == "record_clarification_answer":
             result = self.record_clarification_answer(args)
+            self._trace("tools_call_end", {"tool": tool, "result": result})
+            return result
+        if tool == "process_utterance":
+            result = self.process_utterance(args)
             self._trace("tools_call_end", {"tool": tool, "result": result})
             return result
         if tool == "query_rows":
@@ -382,17 +1205,339 @@ class PrologMCPServer:
             "- intent must be one of: assert_fact,assert_rule,query,retract,other\n"
             "- needs_clarification must be boolean\n"
             "- uncertainty_score must be numeric in [0,1]\n"
-            "- clarification_question may be empty string if not needed\n"
-            "- clarification_reason should be short and concrete\n"
+            "- clarification_question must be empty string unless clarification is needed\n"
+            "- clarification_reason must be empty string unless clarification is needed\n"
+            "- rationale must be one short sentence (<=16 words)\n"
+            "- do not explain alternatives or deliberate\n"
             "- no markdown, no prose wrappers\n"
             f"USER_UTTERANCE:\n{utterance}\n"
         )
+
+    def _coerce_prethink_compiler_payload_base(
+        self,
+        parsed: dict[str, Any],
+    ) -> tuple[dict[str, Any] | None, str]:
+        if not isinstance(parsed, dict):
+            return None, "Compiler returned non-parseable JSON payload."
+
+        intent_raw = str(parsed.get("intent", "")).strip().lower()
+        intent_aliases = {
+            "informative": "assert_fact",
+            "information": "assert_fact",
+            "statement": "assert_fact",
+            "fact": "assert_fact",
+            "question": "query",
+            "ask": "query",
+            "remove": "retract",
+            "delete": "retract",
+        }
+        intent = intent_aliases.get(intent_raw, intent_raw)
+        if intent not in {"assert_fact", "assert_rule", "query", "retract", "other"}:
+            return None, f"Compiler returned invalid intent: {intent_raw or intent}"
+
+        out = dict(parsed)
+        out["intent"] = intent
+        out["needs_clarification"] = _coerce_bool(out.get("needs_clarification"), False)
+        out["uncertainty_score"] = _clip_01(out.get("uncertainty_score"), 0.0)
+        out["clarification_question"] = str(out.get("clarification_question") or "").strip()
+        out["clarification_reason"] = str(out.get("clarification_reason") or "").strip()
+        out["rationale"] = str(out.get("rationale") or "").strip()
+        if not out["needs_clarification"]:
+            out["clarification_question"] = ""
+            out["clarification_reason"] = ""
+        return out, ""
+
+    def _normalize_prethink_compiler_payload(
+        self,
+        parsed: dict[str, Any],
+        *,
+        utterance: str,
+    ) -> tuple[dict[str, Any] | None, str]:
+        out, error = self._coerce_prethink_compiler_payload_base(parsed)
+        if out is None:
+            return None, error
+        out = self._sanitize_compiler_clarification(
+            utterance=utterance,
+            compiled=out,
+        )
+        return out, ""
+
+    def _compile_prethink_classifier_fallback(self, utterance: str) -> tuple[dict[str, Any] | None, str]:
+        self._last_prethink_fallback_trace = {
+            "used": False,
+            "raw_message": "",
+            "reasoning": "",
+            "parsed": None,
+            "normalized": None,
+            "error": "",
+        }
+        prompt = _build_classifier_prompt(utterance)
+        try:
+            response = _call_model_prompt(
+                backend=self._compiler_backend,
+                base_url=self._compiler_base_url,
+                model=self._compiler_model,
+                prompt_text=prompt,
+                context_length=max(512, min(self._compiler_context_length, 4096)),
+                timeout=self._compiler_timeout,
+                api_key=self._compiler_api_key,
+            )
+            self._last_prethink_fallback_trace["raw_message"] = str(response.message or "")
+            self._last_prethink_fallback_trace["reasoning"] = str(response.reasoning or "")
+            parsed, _ = _parse_model_json(
+                response,
+                required_keys=["route", "needs_clarification", "ambiguity_risk", "reason"],
+            )
+        except Exception as exc:
+            self._last_prethink_fallback_trace["error"] = str(exc)
+            return None, str(exc)
+        if not isinstance(parsed, dict):
+            self._last_prethink_fallback_trace["error"] = "Fallback classifier returned non-parseable JSON payload."
+            return None, "Fallback classifier returned non-parseable JSON payload."
+        self._last_prethink_fallback_trace["parsed"] = self._clone_trace_payload(parsed)
+
+        route_raw = str(parsed.get("route", "")).strip().lower()
+        route_aliases = {
+            "informative": "assert_fact",
+            "information": "assert_fact",
+            "statement": "assert_fact",
+            "fact": "assert_fact",
+            "question": "query",
+            "ask": "query",
+            "delete": "retract",
+            "remove": "retract",
+        }
+        route = route_aliases.get(route_raw, route_raw)
+        if route not in {"assert_fact", "assert_rule", "query", "retract", "other"}:
+            self._last_prethink_fallback_trace["error"] = (
+                f"Fallback classifier returned invalid route: {route_raw or route}"
+            )
+            return None, f"Fallback classifier returned invalid route: {route_raw or route}"
+
+        risk = str(parsed.get("ambiguity_risk", "")).strip().lower()
+        score_map = {"low": 0.15, "medium": 0.55, "high": 0.85}
+        uncertainty = score_map.get(risk, 0.55)
+        needs_clarification = _coerce_bool(parsed.get("needs_clarification"), False)
+        reason = str(parsed.get("reason") or "").strip()
+        question = (
+            _synthesize_clarification_question(
+                utterance=utterance,
+                route=route,
+                ambiguities=[],
+                reason=reason or "Needs clarification",
+            )
+            if needs_clarification
+            else ""
+        )
+        fallback_payload = {
+            "intent": route,
+            "needs_clarification": needs_clarification,
+            "uncertainty_score": uncertainty,
+            "clarification_question": question,
+            "clarification_reason": reason if needs_clarification else "",
+            "rationale": f"Fallback classifier routed utterance as {route}.",
+        }
+        normalized, error = self._normalize_prethink_compiler_payload(
+            fallback_payload,
+            utterance=utterance,
+        )
+        self._last_prethink_fallback_trace["used"] = normalized is not None
+        self._last_prethink_fallback_trace["normalized"] = self._clone_trace_payload(normalized)
+        self._last_prethink_fallback_trace["error"] = str(error or "").strip()
+        return normalized, error
+
+    def _compile_shadow_parse(self, utterance: str, route: str) -> tuple[dict[str, Any] | None, str]:
+        if not self._compiler_prompt_loaded:
+            reason = self._compiler_prompt_load_error or "compiler prompt unavailable"
+            return None, f"Compiler prompt not loaded: {reason}"
+        effective_route = str(route or "other").strip().lower()
+        if effective_route not in {"assert_fact", "assert_rule", "query", "retract", "other"}:
+            effective_route = "other"
+        extraction_prompt = _build_extractor_prompt(
+            utterance,
+            effective_route,
+            known_predicates=[],
+            prompt_guide=self._compiler_prompt_text,
+        )
+        try:
+            response = _call_model_prompt(
+                backend=self._compiler_backend,
+                base_url=self._compiler_base_url,
+                model=self._compiler_model,
+                prompt_text=extraction_prompt,
+                context_length=self._compiler_context_length,
+                timeout=self._compiler_timeout,
+                api_key=self._compiler_api_key,
+            )
+            parsed, _ = _parse_model_json(
+                response,
+                required_keys=["intent", "logic_string", "components", "confidence"],
+            )
+        except Exception as exc:
+            return None, str(exc)
+        if not isinstance(parsed, dict):
+            return None, "Shadow parse returned non-parseable JSON payload."
+        normalized = _normalize_clarification_fields(
+            parsed,
+            utterance=utterance,
+            route=effective_route,
+        )
+        ok, errors = _validate_parsed(normalized)
+        if not ok:
+            return None, "; ".join(errors)
+        return normalized, ""
+
+    def _clarification_family_relation_drift(
+        self,
+        *,
+        utterance: str,
+        question: str,
+        reason: str,
+    ) -> bool:
+        utterance_terms = set(re.findall(r"[a-z][a-z0-9_'-]*", str(utterance or "").lower()))
+        clarification_terms = set(
+            re.findall(r"[a-z][a-z0-9_'-]*", f"{question} {reason}".lower())
+        )
+        family_terms = {
+            "parent",
+            "parents",
+            "mother",
+            "father",
+            "mom",
+            "dad",
+            "child",
+            "children",
+            "son",
+            "sons",
+            "daughter",
+            "daughters",
+            "ancestor",
+            "ancestors",
+            "guardian",
+            "guardians",
+        }
+        return bool(clarification_terms & family_terms) and not bool(utterance_terms & family_terms)
+
+    def _utterance_has_explicit_family_bundle(self, utterance: str) -> bool:
+        lowered = str(utterance or "").strip().lower()
+        if not lowered:
+            return False
+        patterns = [
+            r"\b([a-z][a-z0-9_'-]*?)'?s\s+mom\s+and\s+dad\s+(?:is|are)\s+[a-z][a-z0-9_'-]*\s+and\s+[a-z][a-z0-9_'-]*\b",
+            r"\b([a-z][a-z0-9_'-]*?)'?s\s+mother\s+and\s+father\s+(?:is|are)\s+[a-z][a-z0-9_'-]*\s+and\s+[a-z][a-z0-9_'-]*\b",
+            r"\b[a-z][a-z0-9_'-]*\s+has\s+a\s+brother\s+and\s+his\s+brother'?s\s+name\s+is\s+[a-z][a-z0-9_'-]*\b",
+        ]
+        return any(re.search(pattern, lowered) for pattern in patterns)
+
+    def _is_internal_predicate_mapping_clarification(
+        self,
+        *,
+        question: str,
+        reason: str,
+    ) -> bool:
+        text = f"{question} {reason}".strip().lower()
+        if not text:
+            return False
+        signals = (
+            "intended prolog predicate",
+            "canonical predicate mapping",
+            "predicate mapping",
+            "canonical predicate",
+            "what is the intended prolog predicate",
+        )
+        return any(token in text for token in signals)
+
+    def _sanitize_compiler_clarification(
+        self,
+        *,
+        utterance: str,
+        compiled: dict[str, Any],
+    ) -> dict[str, Any]:
+        if not isinstance(compiled, dict):
+            return compiled
+        out = dict(compiled)
+        intent = str(out.get("intent", "")).strip().lower()
+        if intent not in {"assert_fact", "assert_rule", "query", "retract", "other"}:
+            return out
+        out = _normalize_clarification_fields(out, utterance=utterance, route=intent)
+        question = str(out.get("clarification_question", "")).strip()
+        reason = str(out.get("clarification_reason", "")).strip()
+        if not bool(out.get("needs_clarification", False)):
+            return out
+        family_drift = self._clarification_family_relation_drift(
+            utterance=utterance,
+            question=question,
+            reason=reason,
+        )
+        explicit_family_bundle = self._utterance_has_explicit_family_bundle(utterance)
+        internal_predicate_mapping = self._is_internal_predicate_mapping_clarification(
+            question=question,
+            reason=reason,
+        )
+        if not family_drift and not explicit_family_bundle and not internal_predicate_mapping:
+            return out
+
+        shadow_parse, _shadow_error = self._compile_shadow_parse(utterance, intent)
+        if isinstance(shadow_parse, dict):
+            shadow_intent = str(shadow_parse.get("intent", "")).strip().lower()
+            shadow_uncertainty = _clip_01(shadow_parse.get("uncertainty_score"), default=1.0)
+            same_family = shadow_intent == intent or (
+                intent in {"assert_fact", "assert_rule", "retract"}
+                and shadow_intent in {"assert_fact", "assert_rule", "retract"}
+            )
+            if same_family and not bool(shadow_parse.get("needs_clarification", False)) and shadow_uncertainty <= 0.35:
+                out["needs_clarification"] = False
+                out["clarification_question"] = ""
+                out["clarification_reason"] = ""
+                out["uncertainty_score"] = shadow_uncertainty
+                out["uncertainty_label"] = str(shadow_parse.get("uncertainty_label", "low")).strip() or "low"
+                rationale = str(shadow_parse.get("rationale", "")).strip()
+                if rationale:
+                    out["rationale"] = rationale
+                return out
+
+        if family_drift or internal_predicate_mapping:
+            out["clarification_question"] = _synthesize_clarification_question(
+                utterance=utterance,
+                route=intent,
+                ambiguities=[],
+                reason="Action or relation needs clarification",
+            )
+            out["clarification_reason"] = "Action or relation needs clarification"
+        return out
 
     def _compile_prethink_semantics(self, utterance: str) -> tuple[dict[str, Any] | None, str]:
         if not self._compiler_prompt_loaded:
             reason = self._compiler_prompt_load_error or "compiler prompt unavailable"
             return None, f"Compiler prompt not loaded: {reason}"
+        self._last_prethink_trace = {}
+        self._last_prethink_fallback_trace = {}
         prompt = self._build_compiler_prompt(utterance)
+        trace = {
+            "utterance": utterance,
+            "source": "primary",
+            "compiler_mode": self._compiler_mode,
+            "model": self._compiler_model,
+            "prompt_path": str(self._compiler_prompt_path) if self._compiler_prompt_enabled else "",
+            "primary": {
+                "raw_message": "",
+                "reasoning": "",
+                "parsed": None,
+                "normalized_before_sanitize": None,
+                "final_normalized": None,
+                "error": "",
+            },
+            "fallback": {
+                "used": False,
+                "raw_message": "",
+                "reasoning": "",
+                "parsed": None,
+                "normalized": None,
+                "error": "",
+            },
+            "rescues": [],
+            "final": None,
+        }
         try:
             response = _call_model_prompt(
                 backend=self._compiler_backend,
@@ -403,18 +1548,94 @@ class PrologMCPServer:
                 timeout=self._compiler_timeout,
                 api_key=self._compiler_api_key,
             )
+            trace["primary"]["raw_message"] = str(response.message or "")
+            trace["primary"]["reasoning"] = str(response.reasoning or "")
             parsed, _ = _parse_model_json(
                 response,
                 required_keys=["intent", "needs_clarification", "uncertainty_score"],
             )
-            if not isinstance(parsed, dict):
-                return None, "Compiler returned non-parseable JSON payload."
-            intent = str(parsed.get("intent", "")).strip()
-            if intent not in {"assert_fact", "assert_rule", "query", "retract", "other"}:
-                return None, f"Compiler returned invalid intent: {intent}"
-            return parsed, ""
+            trace["primary"]["parsed"] = self._clone_trace_payload(parsed)
+            normalized_before_sanitize, normalize_error = self._coerce_prethink_compiler_payload_base(
+                parsed,
+            )
+            trace["primary"]["normalized_before_sanitize"] = self._clone_trace_payload(
+                normalized_before_sanitize
+            )
+            if normalized_before_sanitize is not None:
+                normalized = self._sanitize_compiler_clarification(
+                    utterance=utterance,
+                    compiled=self._clone_trace_payload(normalized_before_sanitize),
+                )
+                clarification_changed = (
+                    (
+                        bool(normalized_before_sanitize.get("needs_clarification", False))
+                        or bool(normalized.get("needs_clarification", False))
+                    )
+                    and (
+                        bool(normalized_before_sanitize.get("needs_clarification", False))
+                        != bool(normalized.get("needs_clarification", False))
+                        or str(normalized_before_sanitize.get("clarification_question", "")).strip()
+                        != str(normalized.get("clarification_question", "")).strip()
+                        or str(normalized_before_sanitize.get("clarification_reason", "")).strip()
+                        != str(normalized.get("clarification_reason", "")).strip()
+                        or _clip_01(normalized_before_sanitize.get("uncertainty_score"), 0.0)
+                        != _clip_01(normalized.get("uncertainty_score"), 0.0)
+                    )
+                )
+                trace["primary"]["final_normalized"] = self._clone_trace_payload(normalized)
+                trace["primary"]["error"] = ""
+                trace["rescues"].append(
+                    {
+                        "name": "clarification_sanitized",
+                        "applied": clarification_changed,
+                        "summary": "Suppressed or tightened unsafe clarification behavior.",
+                    }
+                )
+                trace["final"] = self._clone_trace_payload(normalized)
+                trace["summary"] = self._summarize_prethink_trace(trace)
+                self._last_prethink_trace = trace
+                return normalized, ""
+            trace["primary"]["error"] = str(normalize_error or "").strip()
+            fallback, fallback_error = self._compile_prethink_classifier_fallback(utterance)
+            trace["fallback"] = self._clone_trace_payload(self._last_prethink_fallback_trace)
+            if fallback is not None:
+                trace["source"] = "fallback_classifier"
+                trace["rescues"].append(
+                    {
+                        "name": "fallback_classifier",
+                        "applied": True,
+                        "summary": "Primary routing packet failed; compact classifier supplied the route.",
+                    }
+                )
+                trace["final"] = self._clone_trace_payload(fallback)
+                trace["summary"] = self._summarize_prethink_trace(trace)
+                self._last_prethink_trace = trace
+                return fallback, ""
+            trace["source"] = "failed"
+            trace["summary"] = self._summarize_prethink_trace(trace)
+            self._last_prethink_trace = trace
+            return None, f"{normalize_error} | Fallback classifier failed: {fallback_error}"
         except Exception as exc:
-            return None, str(exc)
+            fallback, fallback_error = self._compile_prethink_classifier_fallback(utterance)
+            trace["primary"]["error"] = str(exc)
+            trace["fallback"] = self._clone_trace_payload(self._last_prethink_fallback_trace)
+            if fallback is not None:
+                trace["source"] = "fallback_classifier"
+                trace["rescues"].append(
+                    {
+                        "name": "fallback_classifier",
+                        "applied": True,
+                        "summary": "Primary routing packet failed; compact classifier supplied the route.",
+                    }
+                )
+                trace["final"] = self._clone_trace_payload(fallback)
+                trace["summary"] = self._summarize_prethink_trace(trace)
+                self._last_prethink_trace = trace
+                return fallback, ""
+            trace["source"] = "failed"
+            trace["summary"] = self._summarize_prethink_trace(trace)
+            self._last_prethink_trace = trace
+            return None, f"{exc} | Fallback classifier failed: {fallback_error}"
 
     def pre_think(self, arguments: dict[str, Any] | None = None) -> dict[str, Any]:
         args = arguments or {}
@@ -427,12 +1648,18 @@ class PrologMCPServer:
         if self._compiler_mode != "heuristic":
             compiled, compile_error = self._compile_prethink_semantics(utterance)
             if compiled is None and self._compiler_mode == "strict":
+                failure_trace = self._ensure_prethink_trace(
+                    utterance=utterance,
+                    compiled=compiled,
+                    compile_error=compile_error,
+                    packet=None,
+                )
                 return {
                     "status": "blocked",
-                    "result_type": "compiler_unavailable",
+                    "result_type": "compiler_failed",
                     "message": (
-                        "Pre-think compiler is strict-bound and unavailable. "
-                        f"Configure {self._compiler_model} or switch compiler_mode."
+                        "Pre-think compiler failed in strict mode. "
+                        f"Fix the compiler response or switch compiler_mode."
                     ),
                     "details": {
                         "compiler_mode": self._compiler_mode,
@@ -442,6 +1669,7 @@ class PrologMCPServer:
                         "compiler_prompt_path": str(self._compiler_prompt_path),
                         "error": compile_error,
                     },
+                    "trace": failure_trace,
                 }
 
         lower = utterance.lower()
@@ -506,6 +1734,7 @@ class PrologMCPServer:
                 "prompt_enabled": bool(self._compiler_prompt_enabled),
                 "prompt_path": str(self._compiler_prompt_path) if self._compiler_prompt_enabled else "",
                 "used": compiled is not None,
+                "source": "",
                 "error": compile_error,
                 "intent": intent,
                 "needs_clarification": compiler_needs_clarification,
@@ -534,12 +1763,22 @@ class PrologMCPServer:
             "source_of_truth": "prolog_kb",
             "note": note,
         }
+        prethink_trace = self._ensure_prethink_trace(
+            utterance=utterance,
+            compiled=compiled,
+            compile_error=compile_error,
+            packet=packet,
+        )
+        packet["compiler"]["source"] = str(
+            ((prethink_trace.get("summary", {}) if isinstance(prethink_trace, dict) else {}) or {}).get("source", "")
+        ).strip()
         self._pending_prethink = {
             "prethink_id": packet["prethink_id"],
             "mode": packet["mode"],
             "utterance": utterance,
             "clarification_required_before_query": clarification_required,
             "clarification_question": clarification_question,
+            "clarification_reason": compiler_clarification_reason,
             "compiler_intent": intent,
             "compiler_uncertainty_score": uncertainty,
             "clarification_answer": "",
@@ -551,11 +1790,13 @@ class PrologMCPServer:
             "no_result_streak": 0,
             "last_query": "",
             "last_query_status": "",
+            "compiler_trace": self._clone_trace_payload(prethink_trace),
         }
         return {
             "status": "success",
             "result_type": "pre_think_packet",
             "packet": packet,
+            "trace": prethink_trace,
             "state": self._serialize_state(),
         }
 
@@ -598,6 +1839,170 @@ class PrologMCPServer:
             "result_type": "clarification_recorded",
             "prethink_id": expected_id,
             "answer": answer,
+            "state": self._serialize_state(),
+        }
+
+    def process_utterance(self, arguments: dict[str, Any] | None = None) -> dict[str, Any]:
+        args = arguments or {}
+        utterance = str(args.get("utterance", "")).strip()
+        clarification_answer = str(args.get("clarification_answer", "")).strip()
+        provided_prethink_id = str(args.get("prethink_id", "")).strip()
+        if not utterance:
+            return {"status": "validation_error", "message": "utterance is required"}
+
+        prethink: dict[str, Any] | None = None
+        prethink_trace: dict[str, Any] | None = None
+        if clarification_answer:
+            pending = self._pending_prethink
+            if pending is None:
+                return {
+                    "status": "blocked",
+                    "result_type": "pre_think_required",
+                    "message": "No active pre-think turn. Call process_utterance without clarification first.",
+                    "state": self._serialize_state(),
+                }
+            expected_id = str(pending.get("prethink_id", "")).strip()
+            if provided_prethink_id and provided_prethink_id != expected_id:
+                return {
+                    "status": "blocked",
+                    "result_type": "pre_think_id_mismatch",
+                    "message": "Provided prethink_id does not match active turn.",
+                    "required": {"prethink_id": expected_id},
+                    "state": self._serialize_state(),
+                }
+            clarified = self.record_clarification_answer(
+                {
+                    "prethink_id": expected_id,
+                    "answer": clarification_answer,
+                    "confirmed": True,
+                }
+            )
+            if str(clarified.get("status", "")).strip() != "success":
+                return clarified
+            front_door = self._front_door_from_pending()
+            front_door["needs_clarification"] = False
+            front_door["clarification_question"] = ""
+            front_door["reasons"] = ["clarification_resolved"]
+            prethink_trace = self._clone_trace_payload(pending.get("compiler_trace", {}))
+        else:
+            prethink = self.pre_think({"utterance": utterance})
+            if str(prethink.get("status", "")).strip() != "success":
+                prethink_message = str(prethink.get("message", "pre_think failed")).strip() or "pre_think failed"
+                failure_prethink_trace = self._clone_trace_payload(prethink.get("trace", {}))
+                compiler_trace = {
+                    "prethink": failure_prethink_trace,
+                    "summary": self._summarize_compiler_trace(
+                        prethink_trace=failure_prethink_trace if isinstance(failure_prethink_trace, dict) else None,
+                        parse_trace=None,
+                    ),
+                }
+                return {
+                    "status": str(prethink.get("status", "")).strip() or "error",
+                    "result_type": str(prethink.get("result_type", "prethink_failed")).strip() or "prethink_failed",
+                    "message": prethink_message,
+                    "front_door": {
+                        "route": "other",
+                        "compiler_intent": "other",
+                        "looks_like_query": False,
+                        "looks_like_write": False,
+                        "ambiguity_score": 1.0,
+                        "needs_clarification": True,
+                        "reasons": [prethink_message],
+                        "clarification_question": "Compiler failed to produce a valid routing packet. Retry or inspect the compiler error.",
+                        "prethink_id": "",
+                        "compiler": {
+                            "mode": self._compiler_mode,
+                            "model": self._compiler_model,
+                            "backend": self._compiler_backend,
+                            "base_url": self._compiler_base_url,
+                            "strict_mode": self._compiler_mode == "strict",
+                            "used": False,
+                            "error": prethink_message,
+                        },
+                        "session_snapshot": {
+                            "pending_prethink": self._pending_prethink_summary(),
+                        },
+                        "prethink": prethink,
+                    },
+                    "execution": None,
+                    "compiler_trace": compiler_trace,
+                    "state": self._serialize_state(),
+                }
+            packet = prethink.get("packet", {}) if isinstance(prethink.get("packet"), dict) else {}
+            prethink_trace = self._clone_trace_payload(prethink.get("trace", {}))
+            front_door = self._front_door_from_packet(packet=packet, prethink=prethink)
+            if bool(front_door.get("needs_clarification")):
+                compiler_trace = {
+                    "prethink": prethink_trace,
+                    "summary": self._summarize_compiler_trace(
+                        prethink_trace=prethink_trace if isinstance(prethink_trace, dict) else None,
+                        parse_trace=None,
+                    ),
+                }
+                return {
+                    "status": "clarification_required",
+                    "result_type": "clarification_required",
+                    "front_door": front_door,
+                    "clarification": {
+                        "question": str(front_door.get("clarification_question", "")).strip(),
+                        "reasons": list(front_door.get("reasons", [])),
+                    },
+                    "execution": None,
+                    "compiler_trace": compiler_trace,
+                    "state": self._serialize_state(),
+                }
+
+        prethink_id = str(front_door.get("prethink_id", "")).strip() or str(
+            (self._pending_prethink or {}).get("prethink_id", "")
+        ).strip()
+        compiler_intent = str(front_door.get("compiler_intent", "other")).strip() or "other"
+        parsed, error = self._compile_apply_parse(
+            utterance=utterance,
+            compiler_intent=compiler_intent,
+            clarification_question=str(front_door.get("clarification_question", "")).strip(),
+            clarification_answer=clarification_answer,
+        )
+        parse_trace = self._ensure_parse_trace(
+            utterance=utterance,
+            compiler_intent=compiler_intent,
+            clarification_answer=clarification_answer,
+            parsed=parsed if isinstance(parsed, dict) else None,
+            error=error,
+        )
+        compiler_trace = {
+            "prethink": prethink_trace if isinstance(prethink_trace, dict) else None,
+            "parse": parse_trace,
+            "summary": self._summarize_compiler_trace(
+                prethink_trace=prethink_trace if isinstance(prethink_trace, dict) else None,
+                parse_trace=parse_trace,
+            ),
+        }
+        if not isinstance(parsed, dict):
+            execution = {
+                "status": "error",
+                "intent": compiler_intent,
+                "writes_applied": 0,
+                "operations": [],
+                "query_result": None,
+                "parse": {},
+                "errors": [error or "parse failed"],
+            }
+            return {
+                "status": "error",
+                "result_type": "parse_failed",
+                "front_door": front_door,
+                "execution": execution,
+                "compiler_trace": compiler_trace,
+                "state": self._serialize_state(),
+            }
+
+        execution = self._apply_compiled_parse(parsed=parsed, prethink_id=prethink_id)
+        return {
+            "status": str(execution.get("status", "")).strip() or "success",
+            "result_type": "utterance_processed",
+            "front_door": front_door,
+            "execution": execution,
+            "compiler_trace": compiler_trace,
             "state": self._serialize_state(),
         }
 

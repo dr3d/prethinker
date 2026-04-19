@@ -27,6 +27,7 @@ def process_turn(
     phases: list[dict] = []
     execution: dict | None = None
     clarification: dict | None = None
+    compiler_trace: dict | None = None
     route = "other"
 
     slash_result = _handle_slash_command(
@@ -80,6 +81,7 @@ def process_turn(
             "route": "command",
             "phases": phases,
             "assistant": slash_result["answer"],
+            "trace": None,
         }
         session.turns.append(turn)
         return {
@@ -142,14 +144,29 @@ def process_turn(
                     },
                 )
             )
-            front_door = pending.get("front_door") if isinstance(pending.get("front_door"), dict) else {}
-            route = str(front_door.get("route", "other")).strip() or "other"
-            execution = runtime.execute_turn(
+            process_result = runtime.process_utterance(
                 utterance=str(pending.get("original_utterance", "")).strip(),
-                front_door=front_door,
                 config=config,
+                session={
+                    "session_id": session.session_id,
+                    "turns": session.turns,
+                    "pending_clarification": session.pending_clarification,
+                },
                 clarification_answer=utterance,
+                prethink_id=str(pending.get("prethink_id", "")).strip(),
             )
+            compiler_trace = (
+                process_result.get("compiler_trace")
+                if isinstance(process_result.get("compiler_trace"), dict)
+                else None
+            )
+            front_door = process_result.get("front_door") if isinstance(process_result.get("front_door"), dict) else {}
+            route = str(front_door.get("route", "other")).strip() or "other"
+            execution = process_result.get("execution") if isinstance(process_result.get("execution"), dict) else {
+                "status": "error",
+                "intent": "other",
+                "errors": [str(process_result.get("message", "utterance processing failed")).strip() or "utterance processing failed"],
+            }
             phases.append(
                 _phase(
                     "commit",
@@ -162,7 +179,7 @@ def process_turn(
             )
             session.pending_clarification = None
     else:
-        front_door = runtime.front_door(
+        process_result = runtime.process_utterance(
             utterance=utterance,
             config=config,
             session={
@@ -171,6 +188,17 @@ def process_turn(
                 "pending_clarification": session.pending_clarification,
             },
         )
+        compiler_trace = (
+            process_result.get("compiler_trace")
+            if isinstance(process_result.get("compiler_trace"), dict)
+            else None
+        )
+        front_door = process_result.get("front_door") if isinstance(process_result.get("front_door"), dict) else {
+            "route": "other",
+            "reasons": [str(process_result.get("message", "utterance processing failed")).strip() or "utterance processing failed"],
+            "clarification_question": "",
+            "needs_clarification": False,
+        }
         route = front_door["route"]
         phases.append(
             _phase(
@@ -180,7 +208,7 @@ def process_turn(
                 front_door,
             )
         )
-        if front_door["needs_clarification"]:
+        if str(process_result.get("status", "")).strip() == "clarification_required" and front_door["needs_clarification"]:
             question = _clarification_question(front_door, utterance)
             clarification = {
                 "question": question,
@@ -206,6 +234,7 @@ def process_turn(
                 "question": question,
                 "original_utterance": utterance,
                 "front_door": front_door,
+                "prethink_id": str(front_door.get("prethink_id", "")).strip(),
             }
         else:
             phases.append(
@@ -216,11 +245,11 @@ def process_turn(
                     {"reason": "confidence_above_threshold"},
                 )
             )
-            execution = runtime.execute_turn(
-                utterance=utterance,
-                front_door=front_door,
-                config=config,
-            )
+            execution = process_result.get("execution") if isinstance(process_result.get("execution"), dict) else {
+                "status": "error",
+                "intent": str(front_door.get("compiler_intent", "other")).strip() or "other",
+                "errors": [str(process_result.get("message", "utterance processing failed")).strip() or "utterance processing failed"],
+            }
             if route == "write":
                 phases.append(
                     _phase(
@@ -265,6 +294,7 @@ def process_turn(
         "route": route,
         "phases": phases,
         "assistant": answer,
+        "trace": compiler_trace,
     }
     session.turns.append(turn)
     return {

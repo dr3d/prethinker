@@ -1282,6 +1282,124 @@ def _looks_longform_narrative_blob(text: str) -> bool:
     return has_paragraph_story_shape or has_flattened_story_shape
 
 
+def _build_longform_recovery_chunks(text: str) -> list[str]:
+    raw = str(text or "").strip()
+    if not raw:
+        return []
+    paragraphs = [chunk.strip() for chunk in re.split(r"\n\s*\n", raw) if chunk.strip()]
+    rich_paragraphs = [chunk for chunk in paragraphs if len(chunk.split()) >= 8]
+    if len(rich_paragraphs) >= 3:
+        return rich_paragraphs
+
+    sentence_parts = [
+        chunk.strip()
+        for chunk in re.split(r"(?<=[.?!])\s+(?=[A-Z\"'])", raw)
+        if chunk.strip()
+    ]
+    windows: list[str] = []
+    current: list[str] = []
+    current_words = 0
+    for part in sentence_parts:
+        current.append(part)
+        current_words += len(part.split())
+        if len(current) >= 3 or current_words >= 80:
+            windows.append(" ".join(current).strip())
+            current = []
+            current_words = 0
+    if current:
+        windows.append(" ".join(current).strip())
+    return [chunk for chunk in windows if len(chunk.split()) >= 8]
+
+
+def _extract_assert_fact_payload_clauses(parsed: dict[str, Any]) -> list[str]:
+    if not isinstance(parsed, dict):
+        return []
+    facts_raw = parsed.get("facts", [])
+    if not isinstance(facts_raw, list) or not facts_raw:
+        fallback_logic = str(parsed.get("logic_string", "")).strip()
+        facts_raw = _expand_assert_fact_clauses([fallback_logic]) if fallback_logic else []
+    out: list[str] = []
+    seen: set[str] = set()
+    for raw in facts_raw:
+        normalized = _normalize_clause(str(raw))
+        if not normalized or normalized in seen:
+            continue
+        if not _is_valid_goal_clause(normalized, require_ground=True):
+            continue
+        seen.add(normalized)
+        out.append(normalized)
+    return out
+
+
+def _should_attempt_longform_assert_fact_recovery(parsed: dict[str, Any], utterance: str) -> bool:
+    if not isinstance(parsed, dict):
+        return False
+    if str(parsed.get("intent", "")).strip().lower() != "assert_fact":
+        return False
+    if not _looks_longform_narrative_blob(utterance):
+        return False
+    if len(_extract_assert_fact_payload_clauses(parsed)) > 6:
+        return False
+    return len(_build_longform_recovery_chunks(utterance)) >= 3
+
+
+def _merge_assert_fact_payload_clauses(
+    parsed: dict[str, Any],
+    recovered_clauses: list[str],
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    if not isinstance(parsed, dict):
+        return parsed, []
+    base_clauses = _extract_assert_fact_payload_clauses(parsed)
+    next_clauses: list[str] = []
+    seen: set[str] = set()
+    for clause in list(base_clauses) + list(recovered_clauses):
+        normalized = _normalize_clause(clause)
+        if not normalized or normalized in seen:
+            continue
+        if not _is_valid_goal_clause(normalized, require_ground=True):
+            continue
+        seen.add(normalized)
+        next_clauses.append(normalized)
+    if len(next_clauses) <= len(base_clauses):
+        return parsed, []
+
+    out = dict(parsed)
+    out["facts"] = next_clauses
+    out["logic_string"] = next_clauses[0] if len(next_clauses) == 1 else "\n".join(next_clauses)
+    atoms, variables, predicates = _collect_components_from_clauses(next_clauses)
+    out["components"] = {
+        "atoms": atoms,
+        "variables": variables,
+        "predicates": predicates,
+    }
+    ambiguities_raw = out.get("ambiguities", [])
+    ambiguities: list[str] = []
+    if isinstance(ambiguities_raw, list):
+        for item in ambiguities_raw:
+            text = str(item).strip()
+            if text:
+                ambiguities.append(text)
+    note = "Longform fact recovery harvested additional paragraph-level facts."
+    if note not in ambiguities:
+        ambiguities.append(note)
+    out["ambiguities"] = ambiguities
+    rationale = str(out.get("rationale", "")).strip()
+    suffix = "Longform fact recovery merged additional paragraph-level facts into the final payload."
+    out["rationale"] = f"{rationale} {suffix}".strip() if rationale else suffix
+    if not bool(out.get("needs_clarification", False)):
+        out["clarification_question"] = ""
+        out["clarification_reason"] = ""
+    return out, [
+        {
+            "kind": "longform_assert_fact_recovery",
+            "reason": "paragraph_fact_harvest_merged",
+            "base_fact_count": len(base_clauses),
+            "merged_fact_count": len(next_clauses),
+            "recovered_fact_count": len(next_clauses) - len(base_clauses),
+        }
+    ]
+
+
 def _heuristic_route(text: str) -> str:
     lowered = text.strip().lower()
     if re.match(r"^\s*chapter\s+chunk\b", lowered):
@@ -2913,6 +3031,67 @@ def _refine_logic_only_payload(
     refined = _normalize_clarification_fields(refined, utterance=utterance, route=route)
     ok, _ = _validate_parsed(refined)
     return refined if ok else None
+
+
+def _maybe_recover_longform_assert_fact_payload(
+    parsed: dict[str, Any],
+    *,
+    utterance: str,
+    backend: str,
+    base_url: str,
+    model: str,
+    context_length: int,
+    timeout_seconds: int,
+    api_key: str,
+    known_predicates: list[str] | None = None,
+    prompt_guide: str = "",
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    if not _should_attempt_longform_assert_fact_recovery(parsed, utterance):
+        return parsed, []
+
+    recovered_clauses: list[str] = []
+    recovered_chunks = 0
+    for chunk in _build_longform_recovery_chunks(utterance):
+        ext_prompt = _build_logic_only_extractor_prompt(
+            chunk,
+            "assert_fact",
+            known_predicates=known_predicates,
+            prompt_guide=prompt_guide,
+        )
+        ext_resp = _call_model_prompt(
+            backend=backend,
+            base_url=base_url,
+            model=model,
+            prompt_text=ext_prompt,
+            context_length=context_length,
+            timeout=timeout_seconds,
+            api_key=api_key,
+        )
+        chunk_parsed, _ = _parse_model_json(
+            ext_resp,
+            required_keys=["intent", "logic_string", "confidence"],
+        )
+        if not isinstance(chunk_parsed, dict):
+            continue
+        chunk_parsed = _normalize_clarification_fields(chunk_parsed, utterance=chunk, route="assert_fact")
+        refined = _refine_logic_only_payload(
+            chunk_parsed,
+            "assert_fact",
+            utterance=chunk,
+        )
+        if not isinstance(refined, dict):
+            continue
+        chunk_facts = _extract_assert_fact_payload_clauses(refined)
+        if not chunk_facts:
+            continue
+        recovered_chunks += 1
+        recovered_clauses.extend(chunk_facts)
+
+    merged, merge_events = _merge_assert_fact_payload_clauses(parsed, recovered_clauses)
+    if merge_events:
+        merge_events[0]["chunk_count"] = len(_build_longform_recovery_chunks(utterance))
+        merge_events[0]["chunks_with_facts"] = recovered_chunks
+    return merged, merge_events
 
 
 def _validate_parsed(parsed: dict[str, Any]) -> tuple[bool, list[str]]:
@@ -10720,6 +10899,21 @@ def main() -> int:
                             )
                         elif errors_fb:
                             validation_errors.extend(errors_fb)
+            if isinstance(parsed, dict) and not validation_errors:
+                parsed, longform_recovery_events = _maybe_recover_longform_assert_fact_payload(
+                    parsed,
+                    utterance=turn_input_text,
+                    backend=backend,
+                    base_url=base_url,
+                    model=model,
+                    context_length=context_length,
+                    timeout_seconds=args.timeout_seconds,
+                    api_key=api_key,
+                    known_predicates=known_predicates,
+                    prompt_guide=turn_prompt_guide,
+                )
+                if longform_recovery_events:
+                    alignment_events.extend(longform_recovery_events)
 
             if isinstance(parsed, dict) and validation_errors:
                 validation_snapshot = list(validation_errors)

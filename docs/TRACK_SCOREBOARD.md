@@ -11,16 +11,15 @@ Current status after the latest guarded and recovery reruns:
 
 | Lane | Status | Evidence |
 |---|---|---|
-| Safety gate | green | `92 passed` |
-| Blocksworld strict guarded | green | `20/20` solve/replay, `8/8` pilot, zero-hit `0`, avg init `0.75`, avg goal `0.666667` |
-| Narrative strict (mid) | improving, not green | latest rerun best `0.3590`, historical best `0.3812`, `pipeline_pass=1/3` |
-| Narrative strict (upper-mid) | breakout, not green | best `0.967` in strict full mode, pack still `pipeline_pass=1/3` |
+| Safety gate | green | `105 passed` |
+| Blocksworld strict guarded | green | `20/20` solve/replay, `8/8` pilot, zero-hit `0`, avg init `0.458334`, avg goal `0.458334` |
+| Narrative strict (mid) | recovered, with caveat | `pipeline_pass=3/3`, best `0.9284`; `full` improved to `17/20` but still misses temporal floor |
+| Narrative strict (upper-mid) | strong | `pipeline_pass=3/3`, best `0.956`; paragraph and line both reached `20/20` |
 
 References:
 
 - `docs/PROGRESS.md`
-- `docs/reports/BLOCKSWORLD_LANE_GUARDED_2026-04-17.md`
-- `docs/reports/NARRATIVE_PACKS_RECOVERY_2026-04-17.md`
+- `docs/reports/FRONTIER_SWEEP_2026-04-17.md`
 
 ## Historical Width Tracks (2026-04-13 Snapshot, Ollama, qwen35-semparse:9b, runtime=core)
 
