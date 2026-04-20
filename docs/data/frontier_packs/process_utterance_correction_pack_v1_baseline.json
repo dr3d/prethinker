@@ -1,0 +1,987 @@
+{
+  "generated_at_utc": "2026-04-20T12:58:02+00:00",
+  "pack_id": "process_utterance_correction_pack_v1",
+  "family": "correction",
+  "cases_total": 12,
+  "verdict_counts": {
+    "warn": 3,
+    "fail": 9
+  },
+  "status_counts": {
+    "clarification_required": 9,
+    "error": 3
+  },
+  "delta_counts": {
+    "improved": 3,
+    "unchanged": 9
+  },
+  "run_dir": "D:\\_PROJECTS\\prethinker\\tmp\\runs\\process_utterance_frontier_packs\\20260420_125504_process_utterance_correction_pack_v1",
+  "cases": [
+    {
+      "case_id": "correction_01_actually_no_notification_history_is_with_jax_not",
+      "utterance": "actually no, notification history is with Jax not Priya",
+      "setup_turns": [
+        {
+          "utterance": "remember that notification history is with Priya"
+        }
+      ],
+      "setup_results": [
+        {
+          "utterance": "remember that notification history is with Priya",
+          "result_summary": {
+            "status": "success",
+            "result_type": "utterance_processed",
+            "route": "write",
+            "compiler_intent": "assert_fact",
+            "needs_clarification": false,
+            "clarification_question": "",
+            "ambiguity_score": 0.0,
+            "execution_status": "success",
+            "parse_intent": "assert_fact",
+            "logic_string": "notification_history_with(priya).",
+            "writes_applied": 1,
+            "operation_count": 1,
+            "query_row_count": 0,
+            "error_count": 0,
+            "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse adjusted via clarification_fields_normalized",
+            "trace_parse_rescues": [
+              "clarification_fields_normalized"
+            ],
+            "freethinker_action": "skipped"
+          }
+        }
+      ],
+      "baseline": {
+        "verdict": "fail",
+        "status": "error",
+        "tags": [
+          "logic_error",
+          "context_mismatch",
+          "hallucinated_entity"
+        ],
+        "interestingness": 1.8,
+        "rationale": "The system failed to retract the incorrect claim about Priya and instead generated an error, likely due to hallucinating the entity 'Priya' or failing to parse the correction intent. The logic string attempts to retract both, but the execution status is 'error' with 2 errors, indicating a brittle failure to handle the correction lane appropriately.",
+        "logic_string": "retract(notification_history(jax)).\nretract(notification_history(priya)).",
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse raw output admitted unchanged"
+      },
+      "current": {
+        "verdict": "warn",
+        "status": "clarification_required",
+        "tags": [
+          "over-clarification",
+          "brittle_routing",
+          "context_mismatch"
+        ],
+        "rationale": "The system incorrectly requested clarification on a clear correction ('Jax not Priya') instead of accepting the fact. This represents brittle behavior where the compiler fails to recognize a direct contradiction as a valid update, instead treating it as ambiguous. The high ambiguity score (0.75) is unjustified given the explicit negation in the user input.",
+        "logic_string": "",
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off"
+      },
+      "delta": "improved",
+      "raw_result_summary": {
+        "status": "clarification_required",
+        "result_type": "clarification_required",
+        "route": "write",
+        "compiler_intent": "retract",
+        "needs_clarification": true,
+        "clarification_question": "Which specific fact about notification history should be retracted: the one involving Jax or the one involving Priya?",
+        "ambiguity_score": 0.75,
+        "execution_status": "",
+        "parse_intent": "",
+        "logic_string": "",
+        "writes_applied": 0,
+        "operation_count": 0,
+        "query_row_count": 0,
+        "error_count": 0,
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off",
+        "trace_parse_rescues": [],
+        "freethinker_action": "skipped"
+      }
+    },
+    {
+      "case_id": "correction_02_actually_no_archive_ledger_is_with_blake_not_jan",
+      "utterance": "actually no, archive ledger is with Blake not Jan",
+      "setup_turns": [
+        {
+          "utterance": "remember that archive ledger is with Jan"
+        }
+      ],
+      "setup_results": [
+        {
+          "utterance": "remember that archive ledger is with Jan",
+          "result_summary": {
+            "status": "success",
+            "result_type": "utterance_processed",
+            "route": "write",
+            "compiler_intent": "assert_fact",
+            "needs_clarification": false,
+            "clarification_question": "",
+            "ambiguity_score": 0.0,
+            "execution_status": "success",
+            "parse_intent": "assert_fact",
+            "logic_string": "archive_ledger(jan).",
+            "writes_applied": 1,
+            "operation_count": 1,
+            "query_row_count": 0,
+            "error_count": 0,
+            "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse adjusted via clarification_fields_normalized",
+            "trace_parse_rescues": [
+              "clarification_fields_normalized"
+            ],
+            "freethinker_action": "skipped"
+          }
+        }
+      ],
+      "baseline": {
+        "verdict": "fail",
+        "status": "error",
+        "tags": [
+          "hallucination",
+          "logic_error",
+          "context_mismatch"
+        ],
+        "interestingness": 1.75,
+        "rationale": "The system failed to correctly retract the previous claim about Jan and instead hallucinated a new fact ('Nora runs the archive ledger') that contradicts the user's correction. It also generated a logic string attempting to retract both Jan and Blake, which is logically inconsistent with the intent to correct ownership to Blake only. The error count of 2 and the 'error' status confirm the failure to handle the correction appropriately.",
+        "logic_string": "retract(archive_ledger_with(jan)).\nretract(archive_ledger_with(blake)).",
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse adjusted via clarification_fields_normalized"
+      },
+      "current": {
+        "verdict": "fail",
+        "status": "clarification_required",
+        "tags": [
+          "nonsense_clarification",
+          "over_clarification",
+          "brittle_behavior"
+        ],
+        "rationale": "The system failed to recognize a clear factual correction ('archive ledger is with Blake not Jan') as a valid update, instead demanding an absurd clarification ('Which specific fact...') that ignores the explicit negation and correction provided by the user. This constitutes asking a nonsense clarification and producing absurd logic.",
+        "logic_string": "",
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off"
+      },
+      "delta": "unchanged",
+      "raw_result_summary": {
+        "status": "clarification_required",
+        "result_type": "clarification_required",
+        "route": "write",
+        "compiler_intent": "retract",
+        "needs_clarification": true,
+        "clarification_question": "Which specific fact about the archive ledger's location should be retracted?",
+        "ambiguity_score": 0.85,
+        "execution_status": "",
+        "parse_intent": "",
+        "logic_string": "",
+        "writes_applied": 0,
+        "operation_count": 0,
+        "query_row_count": 0,
+        "error_count": 0,
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off",
+        "trace_parse_rescues": [],
+        "freethinker_action": "skipped"
+      }
+    },
+    {
+      "case_id": "correction_03_actually_no_cart_is_with_fred_not_mara",
+      "utterance": "actually no, cart is with Fred not Mara",
+      "setup_turns": [
+        {
+          "utterance": "remember that cart is with Mara"
+        }
+      ],
+      "setup_results": [
+        {
+          "utterance": "remember that cart is with Mara",
+          "result_summary": {
+            "status": "success",
+            "result_type": "utterance_processed",
+            "route": "write",
+            "compiler_intent": "assert_fact",
+            "needs_clarification": false,
+            "clarification_question": "",
+            "ambiguity_score": 0.0,
+            "execution_status": "success",
+            "parse_intent": "assert_fact",
+            "logic_string": "cart_with(mara, cart).",
+            "writes_applied": 1,
+            "operation_count": 1,
+            "query_row_count": 0,
+            "error_count": 0,
+            "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse adjusted via clarification_fields_normalized",
+            "trace_parse_rescues": [
+              "clarification_fields_normalized"
+            ],
+            "freethinker_action": "skipped"
+          }
+        }
+      ],
+      "baseline": {
+        "verdict": "fail",
+        "status": "error",
+        "tags": [
+          "logic_error",
+          "state_corruption",
+          "invalid_retract"
+        ],
+        "interestingness": 1.75,
+        "rationale": "The system failed to execute a valid semantic retract operation, returning an error status instead of updating the state to reflect that the cart belongs to Fred. The logic string 'retract(cart_with_fred)' implies a deletion or invalidation of a fact that should have been corrected, not removed, leading to state corruption. The error count is 1, indicating a hard failure in processing the correction intent.",
+        "logic_string": "retract(cart_with_fred).",
+        "trace_overall": "prethink=primary; adjusted via clarification_sanitized; freethinker=off; parse adjusted via clarification_fields_normalized"
+      },
+      "current": {
+        "verdict": "fail",
+        "status": "error",
+        "tags": [
+          "logic_error",
+          "state_corruption",
+          "nonsense_clarification"
+        ],
+        "rationale": "The system failed to handle a direct factual correction ('cart is with Fred') by generating an error and attempting to retract the fact rather than updating the state. This constitutes brittle behavior where a valid assertion is treated as an error, violating the expected 'commit' behavior for corrections.",
+        "logic_string": "retract(cart_with_fred).",
+        "trace_overall": "prethink=primary; adjusted via clarification_sanitized; freethinker=off; parse adjusted via clarification_fields_normalized"
+      },
+      "delta": "unchanged",
+      "raw_result_summary": {
+        "status": "error",
+        "result_type": "utterance_processed",
+        "route": "write",
+        "compiler_intent": "retract",
+        "needs_clarification": false,
+        "clarification_question": "",
+        "ambiguity_score": 0.15,
+        "execution_status": "error",
+        "parse_intent": "retract",
+        "logic_string": "retract(cart_with_fred).",
+        "writes_applied": 0,
+        "operation_count": 1,
+        "query_row_count": 0,
+        "error_count": 1,
+        "trace_overall": "prethink=primary; adjusted via clarification_sanitized; freethinker=off; parse adjusted via clarification_fields_normalized",
+        "trace_parse_rescues": [
+          "clarification_fields_normalized"
+        ],
+        "freethinker_action": "skipped"
+      }
+    },
+    {
+      "case_id": "correction_04_actually_no_cart_is_with_mara_not_scott",
+      "utterance": "actually no, cart is with Mara not Scott",
+      "setup_turns": [
+        {
+          "utterance": "remember that cart is with Scott"
+        }
+      ],
+      "setup_results": [
+        {
+          "utterance": "remember that cart is with Scott",
+          "result_summary": {
+            "status": "success",
+            "result_type": "utterance_processed",
+            "route": "write",
+            "compiler_intent": "assert_fact",
+            "needs_clarification": false,
+            "clarification_question": "",
+            "ambiguity_score": 0.0,
+            "execution_status": "success",
+            "parse_intent": "assert_fact",
+            "logic_string": "cart_with(scott).",
+            "writes_applied": 1,
+            "operation_count": 1,
+            "query_row_count": 0,
+            "error_count": 0,
+            "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse adjusted via clarification_fields_normalized",
+            "trace_parse_rescues": [
+              "clarification_fields_normalized"
+            ],
+            "freethinker_action": "skipped"
+          }
+        }
+      ],
+      "baseline": {
+        "verdict": "fail",
+        "status": "error",
+        "tags": [
+          "logic_error",
+          "state_corruption",
+          "invalid_retract"
+        ],
+        "interestingness": 1.75,
+        "rationale": "The system failed to execute a valid semantic retract operation, returning an error status instead of updating the state to reflect that the cart belongs to Mara. The logic string 'retract(cart_with_mara)' implies a deletion or invalidation of a fact that should have been corrected, not removed, leading to state corruption. The error_count is 1, indicating a failure to handle the correction appropriately.",
+        "logic_string": "retract(cart_with_mara).",
+        "trace_overall": "prethink=primary; adjusted via clarification_sanitized; freethinker=off; parse adjusted via clarification_fields_normalized"
+      },
+      "current": {
+        "verdict": "fail",
+        "status": "error",
+        "tags": [
+          "logic_error",
+          "state_corruption",
+          "invalid_retraction"
+        ],
+        "rationale": "The system incorrectly treated a factual correction ('cart is with Mara') as a retraction operation, resulting in an error state. It failed to update the world model with the new fact, instead attempting to 'retract' without valid prior state to retract from, causing state corruption.",
+        "logic_string": "retract(cart_with_mara).",
+        "trace_overall": "prethink=primary; adjusted via clarification_sanitized; freethinker=off; parse adjusted via clarification_fields_normalized"
+      },
+      "delta": "unchanged",
+      "raw_result_summary": {
+        "status": "error",
+        "result_type": "utterance_processed",
+        "route": "write",
+        "compiler_intent": "retract",
+        "needs_clarification": false,
+        "clarification_question": "",
+        "ambiguity_score": 0.15,
+        "execution_status": "error",
+        "parse_intent": "retract",
+        "logic_string": "retract(cart_with_mara).",
+        "writes_applied": 0,
+        "operation_count": 1,
+        "query_row_count": 0,
+        "error_count": 1,
+        "trace_overall": "prethink=primary; adjusted via clarification_sanitized; freethinker=off; parse adjusted via clarification_fields_normalized",
+        "trace_parse_rescues": [
+          "clarification_fields_normalized"
+        ],
+        "freethinker_action": "skipped"
+      }
+    },
+    {
+      "case_id": "correction_05_actually_no_cart_is_with_theo_not_lena",
+      "utterance": "actually no, cart is with Theo not Lena",
+      "setup_turns": [
+        {
+          "utterance": "remember that cart is with Lena"
+        }
+      ],
+      "setup_results": [
+        {
+          "utterance": "remember that cart is with Lena",
+          "result_summary": {
+            "status": "success",
+            "result_type": "utterance_processed",
+            "route": "write",
+            "compiler_intent": "assert_fact",
+            "needs_clarification": false,
+            "clarification_question": "",
+            "ambiguity_score": 0.0,
+            "execution_status": "success",
+            "parse_intent": "assert_fact",
+            "logic_string": "with_cart(lena).",
+            "writes_applied": 1,
+            "operation_count": 1,
+            "query_row_count": 0,
+            "error_count": 0,
+            "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse adjusted via clarification_fields_normalized",
+            "trace_parse_rescues": [
+              "clarification_fields_normalized"
+            ],
+            "freethinker_action": "skipped"
+          }
+        }
+      ],
+      "baseline": {
+        "verdict": "fail",
+        "status": "error",
+        "tags": [
+          "logic_error",
+          "state_mismatch",
+          "nonsense_clarification"
+        ],
+        "interestingness": 1.75,
+        "rationale": "The system failed to correctly interpret the user's correction ('cart is with Theo') as a retract operation. Instead of updating the state to reflect the cart belongs to Theo, it generated a nonsensical clarification question or error by attempting to retract the cart with Lena without first establishing the correct state, resulting in an execution error and a high ambiguity score despite the intent being clear.",
+        "logic_string": "retract(cart_with_lena).",
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse adjusted via clarification_fields_normalized"
+      },
+      "current": {
+        "verdict": "fail",
+        "status": "clarification_required",
+        "tags": [
+          "nonsense_clarification",
+          "context_ignoration",
+          "logic_failure"
+        ],
+        "rationale": "The system failed to recognize a direct factual correction ('cart is with Theo not Lena') as a valid update to the world state. Instead of committing the correction, it generated a nonsensical clarification question asking 'Which specific fact... should be retracted?', treating a clear assertion as ambiguous. This violates the expected 'commit' behavior and represents brittle, absurd logic in a correction lane.",
+        "logic_string": "",
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off"
+      },
+      "delta": "unchanged",
+      "raw_result_summary": {
+        "status": "clarification_required",
+        "result_type": "clarification_required",
+        "route": "write",
+        "compiler_intent": "retract",
+        "needs_clarification": true,
+        "clarification_question": "Which specific fact about 'cart' and 'Theo' or 'Lena' should be retracted?",
+        "ambiguity_score": 0.85,
+        "execution_status": "",
+        "parse_intent": "",
+        "logic_string": "",
+        "writes_applied": 0,
+        "operation_count": 0,
+        "query_row_count": 0,
+        "error_count": 0,
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off",
+        "trace_parse_rescues": [],
+        "freethinker_action": "skipped"
+      }
+    },
+    {
+      "case_id": "correction_06_actually_no_cart_is_with_wilma_not_priya",
+      "utterance": "actually no, cart is with Wilma not Priya",
+      "setup_turns": [
+        {
+          "utterance": "remember that cart is with Priya"
+        }
+      ],
+      "setup_results": [
+        {
+          "utterance": "remember that cart is with Priya",
+          "result_summary": {
+            "status": "success",
+            "result_type": "utterance_processed",
+            "route": "write",
+            "compiler_intent": "assert_fact",
+            "needs_clarification": false,
+            "clarification_question": "",
+            "ambiguity_score": 0.0,
+            "execution_status": "success",
+            "parse_intent": "assert_fact",
+            "logic_string": "cart_with_priya(cart).",
+            "writes_applied": 1,
+            "operation_count": 1,
+            "query_row_count": 0,
+            "error_count": 0,
+            "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse adjusted via clarification_fields_normalized",
+            "trace_parse_rescues": [
+              "clarification_fields_normalized"
+            ],
+            "freethinker_action": "skipped"
+          }
+        }
+      ],
+      "baseline": {
+        "verdict": "fail",
+        "status": "error",
+        "tags": [
+          "logic_error",
+          "state_inconsistency",
+          "hallucinated_retraction"
+        ],
+        "interestingness": 1.75,
+        "rationale": "The system failed to correctly retract the previous claim. Instead of updating the state to reflect 'cart with Wilma', it generated a logic string 'retract(cart_with_priya)' which implies removing the cart from Priya (or the world) rather than correcting the association to Wilma. This results in a state inconsistency where the cart is neither with Priya nor Wilma, violating the user's correction intent.",
+        "logic_string": "retract(cart_with_priya).",
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse adjusted via clarification_fields_normalized"
+      },
+      "current": {
+        "verdict": "fail",
+        "status": "clarification_required",
+        "tags": [
+          "nonsense_clarification",
+          "over_clarification",
+          "brittle_behavior"
+        ],
+        "rationale": "The system failed to recognize a direct factual correction ('cart is with Wilma') as a valid update, instead inventing a nonsensical clarification question asking which fact to retract. This is brittle behavior that over-clarifies a simple assertion, violating the expected 'commit' behavior for a correction lane.",
+        "logic_string": "",
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off"
+      },
+      "delta": "unchanged",
+      "raw_result_summary": {
+        "status": "clarification_required",
+        "result_type": "clarification_required",
+        "route": "write",
+        "compiler_intent": "retract",
+        "needs_clarification": true,
+        "clarification_question": "Which fact about cart ownership should be retracted: cart_with_priya or cart_with_wilma?",
+        "ambiguity_score": 0.75,
+        "execution_status": "",
+        "parse_intent": "",
+        "logic_string": "",
+        "writes_applied": 0,
+        "operation_count": 0,
+        "query_row_count": 0,
+        "error_count": 0,
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off",
+        "trace_parse_rescues": [],
+        "freethinker_action": "skipped"
+      }
+    },
+    {
+      "case_id": "correction_07_actually_no_drone_kestrel_is_with_blake_not_sele",
+      "utterance": "actually no, drone kestrel is with Blake not Selene",
+      "setup_turns": [
+        {
+          "utterance": "remember that drone kestrel is with Selene"
+        }
+      ],
+      "setup_results": [
+        {
+          "utterance": "remember that drone kestrel is with Selene",
+          "result_summary": {
+            "status": "success",
+            "result_type": "utterance_processed",
+            "route": "write",
+            "compiler_intent": "assert_fact",
+            "needs_clarification": false,
+            "clarification_question": "",
+            "ambiguity_score": 0.0,
+            "execution_status": "success",
+            "parse_intent": "assert_fact",
+            "logic_string": "with(drone_kestrel, selene).",
+            "writes_applied": 1,
+            "operation_count": 1,
+            "query_row_count": 0,
+            "error_count": 0,
+            "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse adjusted via clarification_fields_normalized",
+            "trace_parse_rescues": [
+              "clarification_fields_normalized"
+            ],
+            "freethinker_action": "skipped"
+          }
+        }
+      ],
+      "baseline": {
+        "verdict": "fail",
+        "status": "error",
+        "tags": [
+          "logic_inversion",
+          "state_corruption",
+          "error_handling_failure"
+        ],
+        "interestingness": 1.75,
+        "rationale": "The system failed to execute the user's correction (retract Selene, assert Blake) and instead generated an error. The logic string shows a contradictory sequence: it retracts the claim against Selene but then immediately retracts the claim for Blake before asserting it, resulting in a net state of 'no owner' or a failed transaction. This constitutes inventing a destructive logic path that corrupts the intended state rather than performing the requested update.",
+        "logic_string": "retract(drone_kestrel_with(selene)).\nretract(drone_kestrel_with(blake)).\nassert(drone_kestrel_with(blake)).",
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse adjusted via clarification_fields_normalized"
+      },
+      "current": {
+        "verdict": "fail",
+        "status": "clarification_required",
+        "tags": [
+          "hallucinated_clarification",
+          "brittle_correction",
+          "false_ambiguity"
+        ],
+        "rationale": "The system failed to accept a direct factual correction ('drone kestrel is with Blake not Selene') and instead generated a nonsensical clarification question asking which fact to retract. This constitutes inventing ambiguity where none exists and refusing to commit to the corrected state, violating the 'commit' expected behavior.",
+        "logic_string": "",
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off"
+      },
+      "delta": "unchanged",
+      "raw_result_summary": {
+        "status": "clarification_required",
+        "result_type": "clarification_required",
+        "route": "write",
+        "compiler_intent": "retract",
+        "needs_clarification": true,
+        "clarification_question": "Which fact about 'drone kestrel' and 'Blake' or 'Selene' should be retracted?",
+        "ambiguity_score": 0.75,
+        "execution_status": "",
+        "parse_intent": "",
+        "logic_string": "",
+        "writes_applied": 0,
+        "operation_count": 0,
+        "query_row_count": 0,
+        "error_count": 0,
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off",
+        "trace_parse_rescues": [],
+        "freethinker_action": "skipped"
+      }
+    },
+    {
+      "case_id": "correction_08_actually_no_drone_kestrel_is_with_fred_not_selen",
+      "utterance": "actually no, drone kestrel is with Fred not Selene",
+      "setup_turns": [
+        {
+          "utterance": "remember that drone kestrel is with Selene"
+        }
+      ],
+      "setup_results": [
+        {
+          "utterance": "remember that drone kestrel is with Selene",
+          "result_summary": {
+            "status": "success",
+            "result_type": "utterance_processed",
+            "route": "write",
+            "compiler_intent": "assert_fact",
+            "needs_clarification": false,
+            "clarification_question": "",
+            "ambiguity_score": 0.0,
+            "execution_status": "success",
+            "parse_intent": "assert_fact",
+            "logic_string": "with(drone_kestrel, selene).",
+            "writes_applied": 1,
+            "operation_count": 1,
+            "query_row_count": 0,
+            "error_count": 0,
+            "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse adjusted via clarification_fields_normalized",
+            "trace_parse_rescues": [
+              "clarification_fields_normalized"
+            ],
+            "freethinker_action": "skipped"
+          }
+        }
+      ],
+      "baseline": {
+        "verdict": "fail",
+        "status": "error",
+        "tags": [
+          "logic_error",
+          "state_inconsistency",
+          "context_ignoration"
+        ],
+        "interestingness": 1.75,
+        "rationale": "The system failed to execute the user's explicit retraction ('actually no... with Fred not Selene') and instead retained the previous incorrect state ('being with Selene'). This constitutes a failure to update the semantic state based on new corrective input, resulting in a logic error where the system ignores the correction command.",
+        "logic_string": "retract(being_with(kestrel, selene)).",
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse adjusted via clarification_fields_normalized"
+      },
+      "current": {
+        "verdict": "warn",
+        "status": "clarification_required",
+        "tags": [
+          "over-clarification",
+          "brittle_routing",
+          "false_ambiguity"
+        ],
+        "rationale": "The system incorrectly flagged a clear factual correction as ambiguous, demanding clarification on which fact to retract when the user explicitly stated the drone is with Fred, not Selene. This represents brittle behavior and over-clarification rather than appropriate grounding in the provided correction.",
+        "logic_string": "",
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off"
+      },
+      "delta": "improved",
+      "raw_result_summary": {
+        "status": "clarification_required",
+        "result_type": "clarification_required",
+        "route": "write",
+        "compiler_intent": "retract",
+        "needs_clarification": true,
+        "clarification_question": "Which fact about 'drone kestrel' should be retracted: being with Fred or being with Selene?",
+        "ambiguity_score": 0.75,
+        "execution_status": "",
+        "parse_intent": "",
+        "logic_string": "",
+        "writes_applied": 0,
+        "operation_count": 0,
+        "query_row_count": 0,
+        "error_count": 0,
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off",
+        "trace_parse_rescues": [],
+        "freethinker_action": "skipped"
+      }
+    },
+    {
+      "case_id": "correction_09_actually_no_drone_kestrel_is_with_lena_not_noor",
+      "utterance": "actually no, drone kestrel is with Lena not Noor",
+      "setup_turns": [
+        {
+          "utterance": "remember that drone kestrel is with Noor"
+        }
+      ],
+      "setup_results": [
+        {
+          "utterance": "remember that drone kestrel is with Noor",
+          "result_summary": {
+            "status": "success",
+            "result_type": "utterance_processed",
+            "route": "write",
+            "compiler_intent": "assert_fact",
+            "needs_clarification": false,
+            "clarification_question": "",
+            "ambiguity_score": 0.0,
+            "execution_status": "success",
+            "parse_intent": "assert_fact",
+            "logic_string": "with(drone_kestrel, noor).",
+            "writes_applied": 1,
+            "operation_count": 1,
+            "query_row_count": 0,
+            "error_count": 0,
+            "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse adjusted via clarification_fields_normalized",
+            "trace_parse_rescues": [
+              "clarification_fields_normalized"
+            ],
+            "freethinker_action": "skipped"
+          }
+        }
+      ],
+      "baseline": {
+        "verdict": "fail",
+        "status": "error",
+        "tags": [
+          "logic_error",
+          "state_corruption",
+          "retract_failure"
+        ],
+        "interestingness": 1.75,
+        "rationale": "The system failed to correctly retract the previous claim. The logic string attempts to retract the claim that the drone is with Noor AND retract the claim that the drone is with Lena, then asserts it is with Lena. This results in a logical contradiction (asserting A is false then true) and an error state, failing to simply update the state to 'with Lena' as intended by the user's correction.",
+        "logic_string": "retract(drone_kestrel_with(noor)).\nretract(drone_kestrel_with(lena)).\nassert(drone_kestrel_with(lena)).",
+        "trace_overall": "prethink=primary; adjusted via clarification_sanitized; freethinker=off; parse adjusted via clarification_fields_normalized"
+      },
+      "current": {
+        "verdict": "fail",
+        "status": "clarification_required",
+        "tags": [
+          "nonsense_clarification",
+          "over_clarification",
+          "context_ignoring"
+        ],
+        "rationale": "The system failed to recognize a clear factual correction ('drone kestrel is with Lena not Noor') and instead demanded clarification on an unambiguous statement. This constitutes brittle behavior and over-clarification, violating the expected 'commit' behavior for a correction lane.",
+        "logic_string": "",
+        "trace_overall": "prethink=primary; adjusted via clarification_sanitized; freethinker=off"
+      },
+      "delta": "unchanged",
+      "raw_result_summary": {
+        "status": "clarification_required",
+        "result_type": "clarification_required",
+        "route": "write",
+        "compiler_intent": "retract",
+        "needs_clarification": true,
+        "clarification_question": "Can you clarify this point before I apply it: Action or relation needs clarification?",
+        "ambiguity_score": 0.85,
+        "execution_status": "",
+        "parse_intent": "",
+        "logic_string": "",
+        "writes_applied": 0,
+        "operation_count": 0,
+        "query_row_count": 0,
+        "error_count": 0,
+        "trace_overall": "prethink=primary; adjusted via clarification_sanitized; freethinker=off",
+        "trace_parse_rescues": [],
+        "freethinker_action": "skipped"
+      }
+    },
+    {
+      "case_id": "correction_10_actually_no_drone_kestrel_is_with_mara_not_selen",
+      "utterance": "actually no, drone kestrel is with Mara not Selene",
+      "setup_turns": [
+        {
+          "utterance": "remember that drone kestrel is with Selene"
+        }
+      ],
+      "setup_results": [
+        {
+          "utterance": "remember that drone kestrel is with Selene",
+          "result_summary": {
+            "status": "success",
+            "result_type": "utterance_processed",
+            "route": "write",
+            "compiler_intent": "assert_fact",
+            "needs_clarification": false,
+            "clarification_question": "",
+            "ambiguity_score": 0.0,
+            "execution_status": "success",
+            "parse_intent": "assert_fact",
+            "logic_string": "with(drone_kestrel, selene).",
+            "writes_applied": 1,
+            "operation_count": 1,
+            "query_row_count": 0,
+            "error_count": 0,
+            "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse adjusted via clarification_fields_normalized",
+            "trace_parse_rescues": [
+              "clarification_fields_normalized"
+            ],
+            "freethinker_action": "skipped"
+          }
+        }
+      ],
+      "baseline": {
+        "verdict": "fail",
+        "status": "error",
+        "tags": [
+          "logic_error",
+          "state_inconsistency",
+          "hallucination"
+        ],
+        "interestingness": 1.75,
+        "rationale": "The system failed to retract the previous claim as intended by the user's elliptical correction. Instead of updating the state to 'with Mara', the compiler generated an error and retained the incorrect association ('being with Selene'), demonstrating brittle behavior and a failure to process the semantic retraction.",
+        "logic_string": "retract(being_with(kestrel, selene)).",
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse adjusted via clarification_fields_normalized"
+      },
+      "current": {
+        "verdict": "warn",
+        "status": "clarification_required",
+        "tags": [
+          "over-clarification",
+          "brittle",
+          "conservative"
+        ],
+        "rationale": "The system failed to commit the user's explicit correction ('drone kestrel is with Mara not Selene') and instead requested clarification on which fact to retract. This is brittle behavior; the user's utterance is a direct negation of a previous state, not an ambiguous query. The system should have accepted the correction immediately.",
+        "logic_string": "",
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off"
+      },
+      "delta": "improved",
+      "raw_result_summary": {
+        "status": "clarification_required",
+        "result_type": "clarification_required",
+        "route": "write",
+        "compiler_intent": "retract",
+        "needs_clarification": true,
+        "clarification_question": "Which fact about 'drone kestrel' should be retracted: being with Mara or being with Selene?",
+        "ambiguity_score": 0.75,
+        "execution_status": "",
+        "parse_intent": "",
+        "logic_string": "",
+        "writes_applied": 0,
+        "operation_count": 0,
+        "query_row_count": 0,
+        "error_count": 0,
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off",
+        "trace_parse_rescues": [],
+        "freethinker_action": "skipped"
+      }
+    },
+    {
+      "case_id": "correction_11_actually_no_drone_kestrel_is_with_nora_not_wilma",
+      "utterance": "actually no, drone kestrel is with Nora not Wilma",
+      "setup_turns": [
+        {
+          "utterance": "remember that drone kestrel is with Wilma"
+        }
+      ],
+      "setup_results": [
+        {
+          "utterance": "remember that drone kestrel is with Wilma",
+          "result_summary": {
+            "status": "success",
+            "result_type": "utterance_processed",
+            "route": "write",
+            "compiler_intent": "assert_fact",
+            "needs_clarification": false,
+            "clarification_question": "",
+            "ambiguity_score": 0.0,
+            "execution_status": "success",
+            "parse_intent": "assert_fact",
+            "logic_string": "with(drone_kestrel, wilma).",
+            "writes_applied": 1,
+            "operation_count": 1,
+            "query_row_count": 0,
+            "error_count": 0,
+            "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse adjusted via clarification_fields_normalized",
+            "trace_parse_rescues": [
+              "clarification_fields_normalized"
+            ],
+            "freethinker_action": "skipped"
+          }
+        }
+      ],
+      "baseline": {
+        "verdict": "fail",
+        "status": "error",
+        "tags": [
+          "logic_error",
+          "state_corruption",
+          "invalid_retract"
+        ],
+        "interestingness": 1.75,
+        "rationale": "The system failed to handle a valid semantic correction (retracting a false association) by returning an error state instead of updating the knowledge base. The logic string indicates a correct intent to retract the 'Wilma' association and assert the 'Nora' association, but the execution status 'error' and 'writes_applied: 0' demonstrate a brittle failure to perform the necessary state update, violating the expected behavior of clarifying and correcting the record.",
+        "logic_string": "retract(drone_kestrel_with(nora)).\nretract(drone_kestrel_with(wilma)).",
+        "trace_overall": "prethink=primary; adjusted via clarification_sanitized; freethinker=off; parse adjusted via clarification_fields_normalized"
+      },
+      "current": {
+        "verdict": "fail",
+        "status": "error",
+        "tags": [
+          "logic_error",
+          "state_corruption",
+          "invalid_retract"
+        ],
+        "rationale": "The system failed to handle a factual correction by executing a 'retract' operation on a non-existent or incorrectly identified state, resulting in an error. Instead of updating the knowledge base to reflect that 'drone kestrel' is with 'Nora', the compiler generated invalid logic strings and reported errors, demonstrating brittle behavior and an inability to process the user's correction appropriately.",
+        "logic_string": "retract(drone_kestrel_with(nora)).\nretract(drone_kestrel_with(wilma)).",
+        "trace_overall": "prethink=primary; adjusted via clarification_sanitized; freethinker=off; parse adjusted via clarification_fields_normalized"
+      },
+      "delta": "unchanged",
+      "raw_result_summary": {
+        "status": "error",
+        "result_type": "utterance_processed",
+        "route": "write",
+        "compiler_intent": "retract",
+        "needs_clarification": false,
+        "clarification_question": "",
+        "ambiguity_score": 0.15,
+        "execution_status": "error",
+        "parse_intent": "retract",
+        "logic_string": "retract(drone_kestrel_with(nora)).\nretract(drone_kestrel_with(wilma)).",
+        "writes_applied": 0,
+        "operation_count": 2,
+        "query_row_count": 0,
+        "error_count": 2,
+        "trace_overall": "prethink=primary; adjusted via clarification_sanitized; freethinker=off; parse adjusted via clarification_fields_normalized",
+        "trace_parse_rescues": [
+          "clarification_fields_normalized"
+        ],
+        "freethinker_action": "skipped"
+      }
+    },
+    {
+      "case_id": "correction_12_actually_no_launch_plan_is_with_noor_not_blake",
+      "utterance": "actually no, launch plan is with Noor not Blake",
+      "setup_turns": [
+        {
+          "utterance": "remember that launch plan is with Blake"
+        }
+      ],
+      "setup_results": [
+        {
+          "utterance": "remember that launch plan is with Blake",
+          "result_summary": {
+            "status": "success",
+            "result_type": "utterance_processed",
+            "route": "write",
+            "compiler_intent": "assert_fact",
+            "needs_clarification": false,
+            "clarification_question": "",
+            "ambiguity_score": 0.0,
+            "execution_status": "success",
+            "parse_intent": "assert_fact",
+            "logic_string": "launch_plan_with(blake).",
+            "writes_applied": 1,
+            "operation_count": 1,
+            "query_row_count": 0,
+            "error_count": 0,
+            "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse adjusted via clarification_fields_normalized",
+            "trace_parse_rescues": [
+              "clarification_fields_normalized"
+            ],
+            "freethinker_action": "skipped"
+          }
+        }
+      ],
+      "baseline": {
+        "verdict": "fail",
+        "status": "error",
+        "tags": [
+          "logic_error",
+          "context_mismatch",
+          "hallucination"
+        ],
+        "interestingness": 1.75,
+        "rationale": "The system failed to retract the previous claim about Blake and instead generated an error while attempting to process a retraction logic string. It incorrectly retained the 'Blake' reference in its internal logic despite the user explicitly correcting the ownership to 'Noor', demonstrating a failure to handle the correction context and resulting in a nonsensical execution state.",
+        "logic_string": "retract(launch_plan(blake)).",
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse adjusted via clarification_fields_normalized"
+      },
+      "current": {
+        "verdict": "fail",
+        "status": "clarification_required",
+        "tags": [
+          "hallucinated_ambiguity",
+          "over_clarification",
+          "logic_breakdown"
+        ],
+        "rationale": "The system failed to recognize the user's clear correction ('Noor not Blake') as a direct fact update. Instead of committing the correction, it hallucinated ambiguity by asking which specific plan to retract, despite the user explicitly distinguishing the two entities. This brittle behavior violates the 'commit' expected behavior and introduces unnecessary noise.",
+        "logic_string": "",
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off"
+      },
+      "delta": "unchanged",
+      "raw_result_summary": {
+        "status": "clarification_required",
+        "result_type": "clarification_required",
+        "route": "write",
+        "compiler_intent": "retract",
+        "needs_clarification": true,
+        "clarification_question": "Which specific launch plan fact should be retracted: one involving Blake or one involving Noor?",
+        "ambiguity_score": 0.85,
+        "execution_status": "",
+        "parse_intent": "",
+        "logic_string": "",
+        "writes_applied": 0,
+        "operation_count": 0,
+        "query_row_count": 0,
+        "error_count": 0,
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off",
+        "trace_parse_rescues": [],
+        "freethinker_action": "skipped"
+      }
+    }
+  ]
+}

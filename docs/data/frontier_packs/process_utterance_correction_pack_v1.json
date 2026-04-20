@@ -1,0 +1,481 @@
+{
+  "pack_id": "process_utterance_correction_pack_v1",
+  "family": "correction",
+  "created_at_utc": "2026-04-20T12:45:38+00:00",
+  "description": "Replayable correction/retraction frontier distilled from forge failures.",
+  "source_runs": {
+    "error_focus": "D:\\_PROJECTS\\prethinker\\tmp\\runs\\process_utterance_forge\\20260420_031930_forge\\interesting_cases",
+    "temporal_focus": "D:\\_PROJECTS\\prethinker\\tmp\\runs\\process_utterance_forge\\20260420_115701_forge\\interesting_cases"
+  },
+  "selection_policy": "Distilled from real forge interesting_cases. Correction cases preserve the failing correction utterance and inject the obvious prior-holder setup turn. Temporal cases preserve self-contained step/sequence failures and warns with tag diversity.",
+  "cases": [
+    {
+      "case_id": "correction_01_actually_no_notification_history_is_with_jax_not",
+      "source_case": {
+        "run_id": "temporal_focus",
+        "file": "episode_24_turn_02.json",
+        "path": "D:\\_PROJECTS\\prethinker\\tmp\\runs\\process_utterance_forge\\20260420_115701_forge\\interesting_cases\\episode_24_turn_02.json"
+      },
+      "setup_turns": [
+        {
+          "utterance": "remember that notification history is with Priya"
+        }
+      ],
+      "utterance": "actually no, notification history is with Jax not Priya",
+      "clarification_answer": "",
+      "spec": {
+        "utterance": "actually no, notification history is with Jax not Priya",
+        "hidden_intent": "assert_fact",
+        "hidden_meaning": "The previous holder is wrong. notification history is with Jax, not Priya.",
+        "expected_behavior": "commit",
+        "risk_focus": "correction",
+        "uses_context": true,
+        "lane": "correction",
+        "style": "distilled",
+        "source": "frontier_pack_distilled"
+      },
+      "baseline": {
+        "verdict": "fail",
+        "status": "error",
+        "tags": [
+          "logic_error",
+          "context_mismatch",
+          "hallucinated_entity"
+        ],
+        "interestingness": 1.8,
+        "rationale": "The system failed to retract the incorrect claim about Priya and instead generated an error, likely due to hallucinating the entity 'Priya' or failing to parse the correction intent. The logic string attempts to retract both, but the execution status is 'error' with 2 errors, indicating a brittle failure to handle the correction lane appropriately.",
+        "logic_string": "retract(notification_history(jax)).\nretract(notification_history(priya)).",
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse raw output admitted unchanged"
+      }
+    },
+    {
+      "case_id": "correction_02_actually_no_archive_ledger_is_with_blake_not_jan",
+      "source_case": {
+        "run_id": "temporal_focus",
+        "file": "episode_07_turn_08.json",
+        "path": "D:\\_PROJECTS\\prethinker\\tmp\\runs\\process_utterance_forge\\20260420_115701_forge\\interesting_cases\\episode_07_turn_08.json"
+      },
+      "setup_turns": [
+        {
+          "utterance": "remember that archive ledger is with Jan"
+        }
+      ],
+      "utterance": "actually no, archive ledger is with Blake not Jan",
+      "clarification_answer": "",
+      "spec": {
+        "utterance": "actually no, archive ledger is with Blake not Jan",
+        "hidden_intent": "assert_fact",
+        "hidden_meaning": "The previous holder is wrong. archive ledger is with Blake, not Jan.",
+        "expected_behavior": "commit",
+        "risk_focus": "correction",
+        "uses_context": true,
+        "lane": "correction",
+        "style": "distilled",
+        "source": "frontier_pack_distilled"
+      },
+      "baseline": {
+        "verdict": "fail",
+        "status": "error",
+        "tags": [
+          "hallucination",
+          "logic_error",
+          "context_mismatch"
+        ],
+        "interestingness": 1.75,
+        "rationale": "The system failed to correctly retract the previous claim about Jan and instead hallucinated a new fact ('Nora runs the archive ledger') that contradicts the user's correction. It also generated a logic string attempting to retract both Jan and Blake, which is logically inconsistent with the intent to correct ownership to Blake only. The error count of 2 and the 'error' status confirm the failure to handle the correction appropriately.",
+        "logic_string": "retract(archive_ledger_with(jan)).\nretract(archive_ledger_with(blake)).",
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse adjusted via clarification_fields_normalized"
+      }
+    },
+    {
+      "case_id": "correction_03_actually_no_cart_is_with_fred_not_mara",
+      "source_case": {
+        "run_id": "error_focus",
+        "file": "episode_17_turn_10.json",
+        "path": "D:\\_PROJECTS\\prethinker\\tmp\\runs\\process_utterance_forge\\20260420_031930_forge\\interesting_cases\\episode_17_turn_10.json"
+      },
+      "setup_turns": [
+        {
+          "utterance": "remember that cart is with Mara"
+        }
+      ],
+      "utterance": "actually no, cart is with Fred not Mara",
+      "clarification_answer": "",
+      "spec": {
+        "utterance": "actually no, cart is with Fred not Mara",
+        "hidden_intent": "assert_fact",
+        "hidden_meaning": "The previous holder is wrong. cart is with Fred, not Mara.",
+        "expected_behavior": "commit",
+        "risk_focus": "correction",
+        "uses_context": true,
+        "lane": "correction",
+        "style": "distilled",
+        "source": "frontier_pack_distilled"
+      },
+      "baseline": {
+        "verdict": "fail",
+        "status": "error",
+        "tags": [
+          "logic_error",
+          "state_corruption",
+          "invalid_retract"
+        ],
+        "interestingness": 1.75,
+        "rationale": "The system failed to execute a valid semantic retract operation, returning an error status instead of updating the state to reflect that the cart belongs to Fred. The logic string 'retract(cart_with_fred)' implies a deletion or invalidation of a fact that should have been corrected, not removed, leading to state corruption. The error count is 1, indicating a hard failure in processing the correction intent.",
+        "logic_string": "retract(cart_with_fred).",
+        "trace_overall": "prethink=primary; adjusted via clarification_sanitized; freethinker=off; parse adjusted via clarification_fields_normalized"
+      }
+    },
+    {
+      "case_id": "correction_04_actually_no_cart_is_with_mara_not_scott",
+      "source_case": {
+        "run_id": "temporal_focus",
+        "file": "episode_15_turn_06.json",
+        "path": "D:\\_PROJECTS\\prethinker\\tmp\\runs\\process_utterance_forge\\20260420_115701_forge\\interesting_cases\\episode_15_turn_06.json"
+      },
+      "setup_turns": [
+        {
+          "utterance": "remember that cart is with Scott"
+        }
+      ],
+      "utterance": "actually no, cart is with Mara not Scott",
+      "clarification_answer": "",
+      "spec": {
+        "utterance": "actually no, cart is with Mara not Scott",
+        "hidden_intent": "assert_fact",
+        "hidden_meaning": "The previous holder is wrong. cart is with Mara, not Scott.",
+        "expected_behavior": "commit",
+        "risk_focus": "correction",
+        "uses_context": true,
+        "lane": "correction",
+        "style": "distilled",
+        "source": "frontier_pack_distilled"
+      },
+      "baseline": {
+        "verdict": "fail",
+        "status": "error",
+        "tags": [
+          "logic_error",
+          "state_corruption",
+          "invalid_retract"
+        ],
+        "interestingness": 1.75,
+        "rationale": "The system failed to execute a valid semantic retract operation, returning an error status instead of updating the state to reflect that the cart belongs to Mara. The logic string 'retract(cart_with_mara)' implies a deletion or invalidation of a fact that should have been corrected, not removed, leading to state corruption. The error_count is 1, indicating a failure to handle the correction appropriately.",
+        "logic_string": "retract(cart_with_mara).",
+        "trace_overall": "prethink=primary; adjusted via clarification_sanitized; freethinker=off; parse adjusted via clarification_fields_normalized"
+      }
+    },
+    {
+      "case_id": "correction_05_actually_no_cart_is_with_theo_not_lena",
+      "source_case": {
+        "run_id": "temporal_focus",
+        "file": "episode_30_turn_09.json",
+        "path": "D:\\_PROJECTS\\prethinker\\tmp\\runs\\process_utterance_forge\\20260420_115701_forge\\interesting_cases\\episode_30_turn_09.json"
+      },
+      "setup_turns": [
+        {
+          "utterance": "remember that cart is with Lena"
+        }
+      ],
+      "utterance": "actually no, cart is with Theo not Lena",
+      "clarification_answer": "",
+      "spec": {
+        "utterance": "actually no, cart is with Theo not Lena",
+        "hidden_intent": "assert_fact",
+        "hidden_meaning": "The previous holder is wrong. cart is with Theo, not Lena.",
+        "expected_behavior": "commit",
+        "risk_focus": "correction",
+        "uses_context": true,
+        "lane": "correction",
+        "style": "distilled",
+        "source": "frontier_pack_distilled"
+      },
+      "baseline": {
+        "verdict": "fail",
+        "status": "error",
+        "tags": [
+          "logic_error",
+          "state_mismatch",
+          "nonsense_clarification"
+        ],
+        "interestingness": 1.75,
+        "rationale": "The system failed to correctly interpret the user's correction ('cart is with Theo') as a retract operation. Instead of updating the state to reflect the cart belongs to Theo, it generated a nonsensical clarification question or error by attempting to retract the cart with Lena without first establishing the correct state, resulting in an execution error and a high ambiguity score despite the intent being clear.",
+        "logic_string": "retract(cart_with_lena).",
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse adjusted via clarification_fields_normalized"
+      }
+    },
+    {
+      "case_id": "correction_06_actually_no_cart_is_with_wilma_not_priya",
+      "source_case": {
+        "run_id": "temporal_focus",
+        "file": "episode_03_turn_10.json",
+        "path": "D:\\_PROJECTS\\prethinker\\tmp\\runs\\process_utterance_forge\\20260420_115701_forge\\interesting_cases\\episode_03_turn_10.json"
+      },
+      "setup_turns": [
+        {
+          "utterance": "remember that cart is with Priya"
+        }
+      ],
+      "utterance": "actually no, cart is with Wilma not Priya",
+      "clarification_answer": "",
+      "spec": {
+        "utterance": "actually no, cart is with Wilma not Priya",
+        "hidden_intent": "assert_fact",
+        "hidden_meaning": "The previous holder is wrong. cart is with Wilma, not Priya.",
+        "expected_behavior": "commit",
+        "risk_focus": "correction",
+        "uses_context": true,
+        "lane": "correction",
+        "style": "distilled",
+        "source": "frontier_pack_distilled"
+      },
+      "baseline": {
+        "verdict": "fail",
+        "status": "error",
+        "tags": [
+          "logic_error",
+          "state_inconsistency",
+          "hallucinated_retraction"
+        ],
+        "interestingness": 1.75,
+        "rationale": "The system failed to correctly retract the previous claim. Instead of updating the state to reflect 'cart with Wilma', it generated a logic string 'retract(cart_with_priya)' which implies removing the cart from Priya (or the world) rather than correcting the association to Wilma. This results in a state inconsistency where the cart is neither with Priya nor Wilma, violating the user's correction intent.",
+        "logic_string": "retract(cart_with_priya).",
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse adjusted via clarification_fields_normalized"
+      }
+    },
+    {
+      "case_id": "correction_07_actually_no_drone_kestrel_is_with_blake_not_sele",
+      "source_case": {
+        "run_id": "error_focus",
+        "file": "episode_21_turn_03.json",
+        "path": "D:\\_PROJECTS\\prethinker\\tmp\\runs\\process_utterance_forge\\20260420_031930_forge\\interesting_cases\\episode_21_turn_03.json"
+      },
+      "setup_turns": [
+        {
+          "utterance": "remember that drone kestrel is with Selene"
+        }
+      ],
+      "utterance": "actually no, drone kestrel is with Blake not Selene",
+      "clarification_answer": "",
+      "spec": {
+        "utterance": "actually no, drone kestrel is with Blake not Selene",
+        "hidden_intent": "assert_fact",
+        "hidden_meaning": "The previous holder is wrong. drone kestrel is with Blake, not Selene.",
+        "expected_behavior": "commit",
+        "risk_focus": "correction",
+        "uses_context": true,
+        "lane": "correction",
+        "style": "distilled",
+        "source": "frontier_pack_distilled"
+      },
+      "baseline": {
+        "verdict": "fail",
+        "status": "error",
+        "tags": [
+          "logic_inversion",
+          "state_corruption",
+          "error_handling_failure"
+        ],
+        "interestingness": 1.75,
+        "rationale": "The system failed to execute the user's correction (retract Selene, assert Blake) and instead generated an error. The logic string shows a contradictory sequence: it retracts the claim against Selene but then immediately retracts the claim for Blake before asserting it, resulting in a net state of 'no owner' or a failed transaction. This constitutes inventing a destructive logic path that corrupts the intended state rather than performing the requested update.",
+        "logic_string": "retract(drone_kestrel_with(selene)).\nretract(drone_kestrel_with(blake)).\nassert(drone_kestrel_with(blake)).",
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse adjusted via clarification_fields_normalized"
+      }
+    },
+    {
+      "case_id": "correction_08_actually_no_drone_kestrel_is_with_fred_not_selen",
+      "source_case": {
+        "run_id": "error_focus",
+        "file": "episode_30_turn_05.json",
+        "path": "D:\\_PROJECTS\\prethinker\\tmp\\runs\\process_utterance_forge\\20260420_031930_forge\\interesting_cases\\episode_30_turn_05.json"
+      },
+      "setup_turns": [
+        {
+          "utterance": "remember that drone kestrel is with Selene"
+        }
+      ],
+      "utterance": "actually no, drone kestrel is with Fred not Selene",
+      "clarification_answer": "",
+      "spec": {
+        "utterance": "actually no, drone kestrel is with Fred not Selene",
+        "hidden_intent": "assert_fact",
+        "hidden_meaning": "The previous holder is wrong. drone kestrel is with Fred, not Selene.",
+        "expected_behavior": "commit",
+        "risk_focus": "correction",
+        "uses_context": true,
+        "lane": "correction",
+        "style": "distilled",
+        "source": "frontier_pack_distilled"
+      },
+      "baseline": {
+        "verdict": "fail",
+        "status": "error",
+        "tags": [
+          "logic_error",
+          "state_inconsistency",
+          "context_ignoration"
+        ],
+        "interestingness": 1.75,
+        "rationale": "The system failed to execute the user's explicit retraction ('actually no... with Fred not Selene') and instead retained the previous incorrect state ('being with Selene'). This constitutes a failure to update the semantic state based on new corrective input, resulting in a logic error where the system ignores the correction command.",
+        "logic_string": "retract(being_with(kestrel, selene)).",
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse adjusted via clarification_fields_normalized"
+      }
+    },
+    {
+      "case_id": "correction_09_actually_no_drone_kestrel_is_with_lena_not_noor",
+      "source_case": {
+        "run_id": "temporal_focus",
+        "file": "episode_23_turn_07.json",
+        "path": "D:\\_PROJECTS\\prethinker\\tmp\\runs\\process_utterance_forge\\20260420_115701_forge\\interesting_cases\\episode_23_turn_07.json"
+      },
+      "setup_turns": [
+        {
+          "utterance": "remember that drone kestrel is with Noor"
+        }
+      ],
+      "utterance": "actually no, drone kestrel is with Lena not Noor",
+      "clarification_answer": "",
+      "spec": {
+        "utterance": "actually no, drone kestrel is with Lena not Noor",
+        "hidden_intent": "assert_fact",
+        "hidden_meaning": "The previous holder is wrong. drone kestrel is with Lena, not Noor.",
+        "expected_behavior": "commit",
+        "risk_focus": "correction",
+        "uses_context": true,
+        "lane": "correction",
+        "style": "distilled",
+        "source": "frontier_pack_distilled"
+      },
+      "baseline": {
+        "verdict": "fail",
+        "status": "error",
+        "tags": [
+          "logic_error",
+          "state_corruption",
+          "retract_failure"
+        ],
+        "interestingness": 1.75,
+        "rationale": "The system failed to correctly retract the previous claim. The logic string attempts to retract the claim that the drone is with Noor AND retract the claim that the drone is with Lena, then asserts it is with Lena. This results in a logical contradiction (asserting A is false then true) and an error state, failing to simply update the state to 'with Lena' as intended by the user's correction.",
+        "logic_string": "retract(drone_kestrel_with(noor)).\nretract(drone_kestrel_with(lena)).\nassert(drone_kestrel_with(lena)).",
+        "trace_overall": "prethink=primary; adjusted via clarification_sanitized; freethinker=off; parse adjusted via clarification_fields_normalized"
+      }
+    },
+    {
+      "case_id": "correction_10_actually_no_drone_kestrel_is_with_mara_not_selen",
+      "source_case": {
+        "run_id": "temporal_focus",
+        "file": "episode_25_turn_02.json",
+        "path": "D:\\_PROJECTS\\prethinker\\tmp\\runs\\process_utterance_forge\\20260420_115701_forge\\interesting_cases\\episode_25_turn_02.json"
+      },
+      "setup_turns": [
+        {
+          "utterance": "remember that drone kestrel is with Selene"
+        }
+      ],
+      "utterance": "actually no, drone kestrel is with Mara not Selene",
+      "clarification_answer": "",
+      "spec": {
+        "utterance": "actually no, drone kestrel is with Mara not Selene",
+        "hidden_intent": "assert_fact",
+        "hidden_meaning": "The previous holder is wrong. drone kestrel is with Mara, not Selene.",
+        "expected_behavior": "commit",
+        "risk_focus": "correction",
+        "uses_context": true,
+        "lane": "correction",
+        "style": "distilled",
+        "source": "frontier_pack_distilled"
+      },
+      "baseline": {
+        "verdict": "fail",
+        "status": "error",
+        "tags": [
+          "logic_error",
+          "state_inconsistency",
+          "hallucination"
+        ],
+        "interestingness": 1.75,
+        "rationale": "The system failed to retract the previous claim as intended by the user's elliptical correction. Instead of updating the state to 'with Mara', the compiler generated an error and retained the incorrect association ('being with Selene'), demonstrating brittle behavior and a failure to process the semantic retraction.",
+        "logic_string": "retract(being_with(kestrel, selene)).",
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse adjusted via clarification_fields_normalized"
+      }
+    },
+    {
+      "case_id": "correction_11_actually_no_drone_kestrel_is_with_nora_not_wilma",
+      "source_case": {
+        "run_id": "error_focus",
+        "file": "episode_15_turn_08.json",
+        "path": "D:\\_PROJECTS\\prethinker\\tmp\\runs\\process_utterance_forge\\20260420_031930_forge\\interesting_cases\\episode_15_turn_08.json"
+      },
+      "setup_turns": [
+        {
+          "utterance": "remember that drone kestrel is with Wilma"
+        }
+      ],
+      "utterance": "actually no, drone kestrel is with Nora not Wilma",
+      "clarification_answer": "",
+      "spec": {
+        "utterance": "actually no, drone kestrel is with Nora not Wilma",
+        "hidden_intent": "assert_fact",
+        "hidden_meaning": "The previous holder is wrong. drone kestrel is with Nora, not Wilma.",
+        "expected_behavior": "commit",
+        "risk_focus": "correction",
+        "uses_context": true,
+        "lane": "correction",
+        "style": "distilled",
+        "source": "frontier_pack_distilled"
+      },
+      "baseline": {
+        "verdict": "fail",
+        "status": "error",
+        "tags": [
+          "logic_error",
+          "state_corruption",
+          "invalid_retract"
+        ],
+        "interestingness": 1.75,
+        "rationale": "The system failed to handle a valid semantic correction (retracting a false association) by returning an error state instead of updating the knowledge base. The logic string indicates a correct intent to retract the 'Wilma' association and assert the 'Nora' association, but the execution status 'error' and 'writes_applied: 0' demonstrate a brittle failure to perform the necessary state update, violating the expected behavior of clarifying and correcting the record.",
+        "logic_string": "retract(drone_kestrel_with(nora)).\nretract(drone_kestrel_with(wilma)).",
+        "trace_overall": "prethink=primary; adjusted via clarification_sanitized; freethinker=off; parse adjusted via clarification_fields_normalized"
+      }
+    },
+    {
+      "case_id": "correction_12_actually_no_launch_plan_is_with_noor_not_blake",
+      "source_case": {
+        "run_id": "temporal_focus",
+        "file": "episode_13_turn_07.json",
+        "path": "D:\\_PROJECTS\\prethinker\\tmp\\runs\\process_utterance_forge\\20260420_115701_forge\\interesting_cases\\episode_13_turn_07.json"
+      },
+      "setup_turns": [
+        {
+          "utterance": "remember that launch plan is with Blake"
+        }
+      ],
+      "utterance": "actually no, launch plan is with Noor not Blake",
+      "clarification_answer": "",
+      "spec": {
+        "utterance": "actually no, launch plan is with Noor not Blake",
+        "hidden_intent": "assert_fact",
+        "hidden_meaning": "The previous holder is wrong. launch plan is with Noor, not Blake.",
+        "expected_behavior": "commit",
+        "risk_focus": "correction",
+        "uses_context": true,
+        "lane": "correction",
+        "style": "distilled",
+        "source": "frontier_pack_distilled"
+      },
+      "baseline": {
+        "verdict": "fail",
+        "status": "error",
+        "tags": [
+          "logic_error",
+          "context_mismatch",
+          "hallucination"
+        ],
+        "interestingness": 1.75,
+        "rationale": "The system failed to retract the previous claim about Blake and instead generated an error while attempting to process a retraction logic string. It incorrectly retained the 'Blake' reference in its internal logic despite the user explicitly correcting the ownership to 'Noor', demonstrating a failure to handle the correction context and resulting in a nonsensical execution state.",
+        "logic_string": "retract(launch_plan(blake)).",
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse adjusted via clarification_fields_normalized"
+      }
+    }
+  ]
+}

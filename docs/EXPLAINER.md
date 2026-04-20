@@ -77,6 +77,10 @@ Its job is to:
 - pass that object through deterministic validation and normalization
 - allow or deny KB mutation
 
+If you want the code-level technical version of this story, see:
+
+- [GIC English Input Pipeline](./GIC_ENGLISH_INPUT_PIPELINE.md)
+
 Prethinker is the authority boundary.
 
 It is intentionally caged:
@@ -248,11 +252,13 @@ That is also why the repo is careful about honesty:
 
 ## What We Know Today
 
-As of April 19, 2026:
+As of April 20, 2026:
 
-- the safety gate is green at `120 passed`
-- strict Blocksworld remains the stable proof lane
-- strict narrative packs are materially stronger than their first honest post-registry baseline
+- the safety gate is green at `142 passed`
+- strict Blocksworld remains the last verified stable proof lane
+- the canonical interactive path now has frozen frontier packs instead of just ad hoc examples
+- the correction frontier is `10/12` pass with only `2` failures left
+- the temporal frontier is `8/12` pass, `4/12` warn, and `0/12` fail
 - the console is now the canonical interactive front door
 - Freethinker is a real design-track capability, but still policy-off by default
 

@@ -1,6 +1,6 @@
 ﻿# AGENT README (Onboarding for Coding Agents)
 
-Last updated: 2026-04-19
+Last updated: 2026-04-20
 
 ## Mission
 
@@ -15,8 +15,11 @@ Primary model focus right now: `qwen3.5:9b`.
 ## Current Truth Snapshot
 
 - Read `docs/PROGRESS.md` first for the current status headline.
-- Safety gate is green (`120 passed`) on the latest verified sweep.
-- Strict Blocksworld is stable under the guarded lane (`20/20` solve/replay, `8/8` pilot, zero-hit `0`).
+- Safety gate is green (`142 passed`) on the latest verified batch.
+- Strict Blocksworld remains the last verified stable proof lane (`20/20` solve/replay, `8/8` pilot, zero-hit `0`).
+- Frozen `process_utterance()` frontier packs now exist for the hardest interactive families.
+- Correction frontier is currently `10/12` pass with `2/12` failures left.
+- Temporal frontier is currently `8/12` pass, `4/12` warn, `0/12` fail.
 - The general registry is populated, so strict narrative runs are now actually constrained.
 - The strict mid and upper-mid narrative packs are currently pipeline-green at `3/3`.
 - The temporal interrogator recovery narrowed the earlier mid `full` caveat; Glitch temporal remains the clearest active frontier weakness.
@@ -58,14 +61,16 @@ Best short description:
 6. `docs/ONTOLOGY_STEERING.md`
 7. `docs/PROGRESS.md`
 8. `docs/FOCUS_EXECUTION_PLAN.md`
-9. `docs/reports/FRONTIER_SWEEP_2026-04-17.md`
-10. `kb_pipeline.py`
-11. `modelfiles/semantic_parser_system_prompt.md`
-12. `kb_scenarios/README.md`
-13. `scripts/render_kb_run_html.py`
-14. `scripts/build_hub_index.py`
-15. `engine/constraint_propagation.py`
-16. `engine/propagation_runner.py`
+9. `docs/PROCESS_UTTERANCE_FRONTIER_PACKS.md`
+10. `docs/reports/PROCESS_UTTERANCE_PIPELINE_BATCH_2026-04-20.md`
+11. `kb_pipeline.py`
+12. `src/mcp_server.py`
+13. `modelfiles/semantic_parser_system_prompt.md`
+14. `kb_scenarios/README.md`
+15. `scripts/render_kb_run_html.py`
+16. `scripts/build_hub_index.py`
+17. `engine/constraint_propagation.py`
+18. `engine/propagation_runner.py`
 
 ## Fast Resume (Single-Page Handoff)
 
@@ -80,7 +85,8 @@ Best short description:
 2. Treat `ui_gateway/` as the manual test cockpit for that entryway.
 3. Treat `Freethinker` as optional and currently non-authoritative.
 - The old higher narrative strict scores (`0.6452`, `0.8718`) are historical/provisional only.
-- The current verified frontier sweep is `docs/reports/FRONTIER_SWEEP_2026-04-17.md`.
+- The current verified interactive frontier batch is `docs/reports/PROCESS_UTTERANCE_PIPELINE_BATCH_2026-04-20.md`.
+- The current verified frontier-pack contract is `docs/PROCESS_UTTERANCE_FRONTIER_PACKS.md`.
 - The current verified temporal interrogator recovery is `docs/reports/TEMPORAL_INTERROGATOR_RECOVERY_2026-04-19.md`.
 - Provenance fields must remain present in runs:
   - `run_id`
@@ -254,7 +260,7 @@ When reporting progress, include:
 
 ## Porting Note
 
-If this work is moved back into `prolog-reasoning`, use `SESSIONS.md` as the migration playbook and checklist.
+If this work is moved into another repo, use `SESSIONS.md` as the migration playbook and checklist.
 
 ## Post-Rename Refresh
 

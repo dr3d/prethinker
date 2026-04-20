@@ -71,7 +71,7 @@ Keep the same system prompt and change only the `FROM` line:
 - `FROM qwen3.5:14b` (if available)
 - `FROM qwen3.5:27b` (slower, usually stronger extraction)
 
-## Local LM Studio Notes (from `prolog-reasoning`)
+## Local LM Studio Notes
 
 - Base URL used by pre-thinker tooling: `http://127.0.0.1:1234`
 - Chat endpoint used by tooling: `/api/v1/chat`

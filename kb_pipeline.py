@@ -30,9 +30,6 @@ from ingest_frontend import propose_frontend_parse
 PROJECT_ROOT = Path(__file__).resolve().parent
 DEFAULT_PROLOG_REPO_CANDIDATES = [
     PROJECT_ROOT,
-    PROJECT_ROOT / "vendor" / "prolog-reasoning",
-    PROJECT_ROOT / ".runtime" / "prolog-reasoning",
-    PROJECT_ROOT / "prolog-reasoning",
 ]
 DEFAULT_BACKEND = "ollama"
 DEFAULT_KB_ROOT = Path("kb_store")
@@ -9911,7 +9908,7 @@ def main() -> int:
     if runtime_mode == "mcp":
         prolog_repo = _resolve_prolog_repo(args.prolog_repo)
         if prolog_repo is None:
-            print("runtime=mcp requested but no Prolog MCP repo was found.")
+            print("runtime=mcp requested but no Prolog MCP server repo was found.")
             print(
                 "Provide --prolog-repo (containing src/mcp_server.py), "
                 "set PRETHINKER_PROLOG_REPO, or run with --runtime core."
@@ -10104,7 +10101,7 @@ def main() -> int:
         assert prolog_repo is not None
         src_path = prolog_repo / "src"
         if not src_path.exists():
-            print(f"prolog-reasoning src not found: {src_path}")
+            print(f"Prolog MCP src not found: {src_path}")
             return 2
         if str(src_path) not in sys.path:
             sys.path.insert(0, str(src_path))

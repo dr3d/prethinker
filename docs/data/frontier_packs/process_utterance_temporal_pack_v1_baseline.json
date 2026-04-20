@@ -1,0 +1,642 @@
+{
+  "generated_at_utc": "2026-04-20T12:57:34+00:00",
+  "pack_id": "process_utterance_temporal_pack_v1",
+  "family": "temporal_state",
+  "cases_total": 12,
+  "verdict_counts": {
+    "fail": 6,
+    "warn": 6
+  },
+  "status_counts": {
+    "error": 6,
+    "success": 6
+  },
+  "delta_counts": {
+    "unchanged": 12
+  },
+  "run_dir": "D:\\_PROJECTS\\prethinker\\tmp\\runs\\process_utterance_frontier_packs\\20260420_125504_process_utterance_temporal_pack_v1",
+  "cases": [
+    {
+      "case_id": "temporal_01_at_step_11_noor_was_in_galley_and_later_moved_to",
+      "utterance": "at step 11 Noor was in Galley and later moved to Cedar House.",
+      "setup_turns": [],
+      "setup_results": [],
+      "baseline": {
+        "verdict": "fail",
+        "status": "error",
+        "tags": [
+          "parse_error",
+          "validation_failure",
+          "logic_break"
+        ],
+        "interestingness": 1.85,
+        "rationale": "The system failed to parse a valid fact assertion, returning an error instead of committing the state change. This constitutes a failure to execute the intended logic string and commit the fact, violating the expected behavior for an assert_fact operation.",
+        "logic_string": "",
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse=failed validation; see validation_errors"
+      },
+      "current": {
+        "verdict": "fail",
+        "status": "error",
+        "tags": [
+          "parse_error",
+          "validation_failure",
+          "logic_break"
+        ],
+        "rationale": "The system failed to parse a valid fact assertion, returning an error instead of committing the state change. This constitutes brittle behavior and a failure to execute the intended 'assert_fact' operation.",
+        "logic_string": "",
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse=failed validation; see validation_errors"
+      },
+      "delta": "unchanged",
+      "raw_result_summary": {
+        "status": "error",
+        "result_type": "parse_failed",
+        "route": "write",
+        "compiler_intent": "assert_fact",
+        "needs_clarification": false,
+        "clarification_question": "",
+        "ambiguity_score": 0.0,
+        "execution_status": "error",
+        "parse_intent": "",
+        "logic_string": "",
+        "writes_applied": 0,
+        "operation_count": 0,
+        "query_row_count": 0,
+        "error_count": 1,
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse=failed validation; see validation_errors",
+        "trace_parse_rescues": [
+          "clarification_fields_normalized"
+        ],
+        "freethinker_action": "skipped"
+      }
+    },
+    {
+      "case_id": "temporal_02_at_step_11_noor_was_in_galley_and_later_moved_to",
+      "utterance": "at step 11 Noor was in Galley and later moved to Salem.",
+      "setup_turns": [],
+      "setup_results": [],
+      "baseline": {
+        "verdict": "fail",
+        "status": "error",
+        "tags": [
+          "parse_error",
+          "temporal_logic_failure",
+          "validation_failure"
+        ],
+        "interestingness": 1.85,
+        "rationale": "The system failed to parse a valid temporal state assertion ('Noor was in Galley and later moved to Salem') despite low ambiguity and no need for clarification. The error occurred during validation, preventing the commit of a grounded fact, which constitutes a brittle behavior and a failure to execute the intended assert_fact operation.",
+        "logic_string": "",
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse=failed validation; see validation_errors"
+      },
+      "current": {
+        "verdict": "fail",
+        "status": "error",
+        "tags": [
+          "parse_error",
+          "temporal_logic_failure",
+          "validation_failure"
+        ],
+        "rationale": "The system failed to parse a valid temporal state assertion ('Noor was in Galley and later moved to Salem') as a fact, returning a parse error instead of committing the fact. This constitutes brittle behavior where valid input is rejected without meaningful clarification, violating the expected 'commit' behavior for assert_fact intents.",
+        "logic_string": "",
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse=failed validation; see validation_errors"
+      },
+      "delta": "unchanged",
+      "raw_result_summary": {
+        "status": "error",
+        "result_type": "parse_failed",
+        "route": "write",
+        "compiler_intent": "assert_fact",
+        "needs_clarification": false,
+        "clarification_question": "",
+        "ambiguity_score": 0.0,
+        "execution_status": "error",
+        "parse_intent": "",
+        "logic_string": "",
+        "writes_applied": 0,
+        "operation_count": 0,
+        "query_row_count": 0,
+        "error_count": 1,
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse=failed validation; see validation_errors",
+        "trace_parse_rescues": [
+          "clarification_fields_normalized"
+        ],
+        "freethinker_action": "skipped"
+      }
+    },
+    {
+      "case_id": "temporal_03_at_step_6_noor_was_in_bay_3_and_later_moved_to_m",
+      "utterance": "at step 6 Noor was in Bay 3 and later moved to Mudroom.",
+      "setup_turns": [],
+      "setup_results": [],
+      "baseline": {
+        "verdict": "fail",
+        "status": "error",
+        "tags": [
+          "parse_error",
+          "validation_failure",
+          "logic_break"
+        ],
+        "interestingness": 1.85,
+        "rationale": "The system failed to parse a valid temporal state assertion, returning an error instead of committing the fact. This constitutes brittle behavior and a failure to execute the intended 'assert_fact' operation.",
+        "logic_string": "",
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse=failed validation; see validation_errors"
+      },
+      "current": {
+        "verdict": "fail",
+        "status": "error",
+        "tags": [
+          "parse_error",
+          "validation_failure",
+          "logic_break"
+        ],
+        "rationale": "The system failed to parse a valid temporal state assertion, returning an error instead of committing the fact. This constitutes brittle behavior and a failure to execute the intended 'assert_fact' operation.",
+        "logic_string": "",
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse=failed validation; see validation_errors"
+      },
+      "delta": "unchanged",
+      "raw_result_summary": {
+        "status": "error",
+        "result_type": "parse_failed",
+        "route": "write",
+        "compiler_intent": "assert_fact",
+        "needs_clarification": false,
+        "clarification_question": "",
+        "ambiguity_score": 0.0,
+        "execution_status": "error",
+        "parse_intent": "",
+        "logic_string": "",
+        "writes_applied": 0,
+        "operation_count": 0,
+        "query_row_count": 0,
+        "error_count": 1,
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse=failed validation; see validation_errors",
+        "trace_parse_rescues": [
+          "clarification_fields_normalized"
+        ],
+        "freethinker_action": "skipped"
+      }
+    },
+    {
+      "case_id": "temporal_04_at_step_11_noor_was_in_galley_and_later_moved_to",
+      "utterance": "at step 11 Noor was in Galley and later moved to Pineglass Ridge.",
+      "setup_turns": [],
+      "setup_results": [],
+      "baseline": {
+        "verdict": "fail",
+        "status": "error",
+        "tags": [
+          "parse_error",
+          "validation_failure",
+          "temporal_logic_break"
+        ],
+        "interestingness": 1.75,
+        "rationale": "The system failed to parse a valid temporal state assertion, incorrectly routing to an error state despite clear intent and no ambiguity. This represents brittle behavior where a grounded fact was rejected, violating the expected 'commit' behavior for temporal lane inputs.",
+        "logic_string": "",
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse=failed validation; see validation_errors"
+      },
+      "current": {
+        "verdict": "fail",
+        "status": "error",
+        "tags": [
+          "parse_error",
+          "validation_failure",
+          "logic_break"
+        ],
+        "rationale": "The system failed to parse a valid temporal state assertion, resulting in an error and zero writes. This constitutes a brittle behavior where the compiler rejects a grounded fact without valid reason, violating the 'commit' expected behavior for assert_fact intents.",
+        "logic_string": "",
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse=failed validation; see validation_errors"
+      },
+      "delta": "unchanged",
+      "raw_result_summary": {
+        "status": "error",
+        "result_type": "parse_failed",
+        "route": "write",
+        "compiler_intent": "assert_fact",
+        "needs_clarification": false,
+        "clarification_question": "",
+        "ambiguity_score": 0.0,
+        "execution_status": "error",
+        "parse_intent": "",
+        "logic_string": "",
+        "writes_applied": 0,
+        "operation_count": 0,
+        "query_row_count": 0,
+        "error_count": 1,
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse=failed validation; see validation_errors",
+        "trace_parse_rescues": [
+          "clarification_fields_normalized"
+        ],
+        "freethinker_action": "skipped"
+      }
+    },
+    {
+      "case_id": "temporal_05_at_step_11_noor_was_in_harbor_city_and_later_mov",
+      "utterance": "at step 11 Noor was in Harbor City and later moved to Market Hall.",
+      "setup_turns": [],
+      "setup_results": [],
+      "baseline": {
+        "verdict": "fail",
+        "status": "error",
+        "tags": [
+          "parse_error",
+          "validation_failure",
+          "logic_break"
+        ],
+        "interestingness": 1.75,
+        "rationale": "The system failed to parse a valid temporal fact assertion, returning an error instead of committing the state. This constitutes brittle behavior and a failure to ground the provided context, violating the expected 'commit' behavior for a fact assertion.",
+        "logic_string": "",
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse=failed validation; see validation_errors"
+      },
+      "current": {
+        "verdict": "fail",
+        "status": "error",
+        "tags": [
+          "parse_error",
+          "validation_failure",
+          "temporal_logic_break"
+        ],
+        "rationale": "The system failed to parse a valid temporal fact assertion, returning an error instead of committing the state. This constitutes brittle behavior and a failure to ground the provided context, violating the expected 'commit' behavior for a fact assertion.",
+        "logic_string": "",
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse=failed validation; see validation_errors"
+      },
+      "delta": "unchanged",
+      "raw_result_summary": {
+        "status": "error",
+        "result_type": "parse_failed",
+        "route": "write",
+        "compiler_intent": "assert_fact",
+        "needs_clarification": false,
+        "clarification_question": "",
+        "ambiguity_score": 0.1,
+        "execution_status": "error",
+        "parse_intent": "",
+        "logic_string": "",
+        "writes_applied": 0,
+        "operation_count": 0,
+        "query_row_count": 0,
+        "error_count": 1,
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse=failed validation; see validation_errors",
+        "trace_parse_rescues": [
+          "clarification_fields_normalized"
+        ],
+        "freethinker_action": "skipped"
+      }
+    },
+    {
+      "case_id": "temporal_06_at_step_11_fred_was_in_salem_and_later_moved_to_",
+      "utterance": "at step 11 Fred was in Salem and later moved to Harbor City.",
+      "setup_turns": [],
+      "setup_results": [],
+      "baseline": {
+        "verdict": "fail",
+        "status": "error",
+        "tags": [
+          "parse_error",
+          "temporal_logic_failure",
+          "validation_failure"
+        ],
+        "interestingness": 1.7,
+        "rationale": "The system failed to parse a valid temporal assertion, incorrectly treating a clear sequence of events as an error requiring clarification. This represents brittle behavior and a failure to commit to the intended fact, violating the expected 'commit' behavior for an assert_fact intent.",
+        "logic_string": "",
+        "trace_overall": "prethink=primary; adjusted via clarification_sanitized; freethinker=off; parse=failed validation; see validation_errors"
+      },
+      "current": {
+        "verdict": "fail",
+        "status": "error",
+        "tags": [
+          "parse_error",
+          "temporal_logic_failure",
+          "validation_failure"
+        ],
+        "rationale": "The system failed to parse a valid temporal assertion, incorrectly triggering an error and validation failure despite clear intent and no ambiguity. This represents brittle behavior and a failure to commit to the grounded fact provided in the input.",
+        "logic_string": "",
+        "trace_overall": "prethink=primary; adjusted via clarification_sanitized; freethinker=off; parse=failed validation; see validation_errors"
+      },
+      "delta": "unchanged",
+      "raw_result_summary": {
+        "status": "error",
+        "result_type": "parse_failed",
+        "route": "write",
+        "compiler_intent": "assert_fact",
+        "needs_clarification": false,
+        "clarification_question": "",
+        "ambiguity_score": 0.75,
+        "execution_status": "error",
+        "parse_intent": "",
+        "logic_string": "",
+        "writes_applied": 0,
+        "operation_count": 0,
+        "query_row_count": 0,
+        "error_count": 1,
+        "trace_overall": "prethink=primary; adjusted via clarification_sanitized; freethinker=off; parse=failed validation; see validation_errors",
+        "trace_parse_rescues": [],
+        "freethinker_action": "skipped"
+      }
+    },
+    {
+      "case_id": "temporal_07_at_9_am_friday_jax_was_in_salem_and_later_moved_",
+      "utterance": "at 9 AM Friday Jax was in Salem and later moved to Morro Bay.",
+      "setup_turns": [],
+      "setup_results": [],
+      "baseline": {
+        "verdict": "warn",
+        "status": "success",
+        "tags": [
+          "temporal_logic",
+          "over_clarification",
+          "brittle_parsing"
+        ],
+        "interestingness": 0.8,
+        "rationale": "The system correctly parsed the fact but generated an awkward logic string with a redundant 'moved' predicate and an incorrect temporal binding (placing the move at 9 AM rather than after). The 'freethinker=off' and 'prethink=primary' trace suggests brittle, rule-bound behavior that over-clarifies simple narrative flow into rigid logical constraints, resulting in a conservative but awkward representation of the user's intent.",
+        "logic_string": "at_time(jax, salem, friday_9am). moved(jax, salem, morro_bay, friday_9am).",
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse raw output admitted unchanged"
+      },
+      "current": {
+        "verdict": "warn",
+        "status": "success",
+        "tags": [
+          "temporal_logic",
+          "state_transition",
+          "ambiguity"
+        ],
+        "rationale": "The system correctly parsed the sequence of events but generated a flawed logic string: 'moved(jax, salem, morro_bay, friday_9am)' incorrectly implies the move happened at 9 AM, whereas the text states Jax was in Salem at 9 AM and moved later. This represents a brittle interpretation of temporal state transitions, committing a logical error in the generated predicate despite the overall success status.",
+        "logic_string": "at_time(jax, salem, friday_9am). moved(jax, salem, morro_bay, friday_9am).",
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse raw output admitted unchanged"
+      },
+      "delta": "unchanged",
+      "raw_result_summary": {
+        "status": "success",
+        "result_type": "utterance_processed",
+        "route": "write",
+        "compiler_intent": "assert_fact",
+        "needs_clarification": false,
+        "clarification_question": "",
+        "ambiguity_score": 0.75,
+        "execution_status": "success",
+        "parse_intent": "assert_fact",
+        "logic_string": "at_time(jax, salem, friday_9am). moved(jax, salem, morro_bay, friday_9am).",
+        "writes_applied": 2,
+        "operation_count": 2,
+        "query_row_count": 0,
+        "error_count": 0,
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse raw output admitted unchanged",
+        "trace_parse_rescues": [],
+        "freethinker_action": "skipped"
+      }
+    },
+    {
+      "case_id": "temporal_08_next_week_hope_was_in_pineglass_ridge_and_later_",
+      "utterance": "next week Hope was in Pineglass Ridge and later moved to Market Hall.",
+      "setup_turns": [],
+      "setup_results": [],
+      "baseline": {
+        "verdict": "warn",
+        "status": "success",
+        "tags": [
+          "temporal_ambiguity",
+          "implicit_sequence",
+          "over_simplification"
+        ],
+        "interestingness": 0.8,
+        "rationale": "The system correctly parsed the fact but failed to capture the critical temporal sequence implied by 'later' in the source text. It reduced the logic to a single static state 'location(hope, pineglass_ridge, next_week)' without representing the transition to 'Market Hall'. This is a brittle behavior where the compiler under-commits on the temporal dimension, ignoring the 'later' constraint which defines the second state. The high ambiguity_score (0.75) combined with the loss of the second location indicates a failure to fully ground the elliptical style in its full temporal meaning.",
+        "logic_string": "location(hope, pineglass_ridge, next_week).",
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse raw output admitted unchanged"
+      },
+      "current": {
+        "verdict": "warn",
+        "status": "success",
+        "tags": [
+          "temporal_ambiguity",
+          "implicit_sequence",
+          "over_simplification"
+        ],
+        "rationale": "The system accepted an elliptical temporal claim ('next week Hope was in... and later moved...') as a direct fact without resolving the ambiguity of whether 'next week' applies to the entire sequence or just the first location. The generated logic string 'location(hope, pineglass_ridge, next_week)' fails to capture the 'later moved to Market Hall' component, resulting in an incomplete semantic representation. This is a conservative but brittle behavior that under-commits to the full meaning of the utterance.",
+        "logic_string": "location(hope, pineglass_ridge, next_week).",
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse raw output admitted unchanged"
+      },
+      "delta": "unchanged",
+      "raw_result_summary": {
+        "status": "success",
+        "result_type": "utterance_processed",
+        "route": "write",
+        "compiler_intent": "assert_fact",
+        "needs_clarification": false,
+        "clarification_question": "",
+        "ambiguity_score": 0.75,
+        "execution_status": "success",
+        "parse_intent": "assert_fact",
+        "logic_string": "location(hope, pineglass_ridge, next_week).",
+        "writes_applied": 1,
+        "operation_count": 1,
+        "query_row_count": 0,
+        "error_count": 0,
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse raw output admitted unchanged",
+        "trace_parse_rescues": [],
+        "freethinker_action": "skipped"
+      }
+    },
+    {
+      "case_id": "temporal_09_next_week_wilma_was_in_mudroom_and_later_moved_t",
+      "utterance": "next week Wilma was in Mudroom and later moved to Market Hall.",
+      "setup_turns": [],
+      "setup_results": [],
+      "baseline": {
+        "verdict": "warn",
+        "status": "success",
+        "tags": [
+          "temporal_mismatch",
+          "context_ignored"
+        ],
+        "interestingness": 0.8,
+        "rationale": "The system failed to detect the critical temporal contradiction between 'next week' (future) and 'was' (past), defaulting to a conservative 'success' status instead of flagging the logical impossibility. It also ignored the 'uses_context: false' flag while applying a high ambiguity score (0.75) without raising a warning, exhibiting brittle behavior in temporal reasoning.",
+        "logic_string": "location(wilma, mudroom, next_week).",
+        "trace_overall": "prethink=primary; adjusted via clarification_sanitized; freethinker=off; parse raw output admitted unchanged"
+      },
+      "current": {
+        "verdict": "warn",
+        "status": "success",
+        "tags": [
+          "temporal_ambiguity",
+          "over_clarification"
+        ],
+        "rationale": "The system correctly parsed the fact but assigned a high ambiguity score (0.75) and generated a clarification question despite the input being a clear temporal sequence. This represents brittle, over-cautious behavior for a straightforward assertion, violating the 'commit' expected behavior by unnecessarily hedging.",
+        "logic_string": "location(wilma, mudroom, next_week).",
+        "trace_overall": "prethink=primary; adjusted via clarification_sanitized; freethinker=off; parse raw output admitted unchanged"
+      },
+      "delta": "unchanged",
+      "raw_result_summary": {
+        "status": "success",
+        "result_type": "utterance_processed",
+        "route": "write",
+        "compiler_intent": "assert_fact",
+        "needs_clarification": false,
+        "clarification_question": "",
+        "ambiguity_score": 0.75,
+        "execution_status": "success",
+        "parse_intent": "assert_fact",
+        "logic_string": "location(wilma, mudroom, next_week).",
+        "writes_applied": 1,
+        "operation_count": 1,
+        "query_row_count": 0,
+        "error_count": 0,
+        "trace_overall": "prethink=primary; adjusted via clarification_sanitized; freethinker=off; parse raw output admitted unchanged",
+        "trace_parse_rescues": [],
+        "freethinker_action": "skipped"
+      }
+    },
+    {
+      "case_id": "temporal_10_at_step_11_theo_was_in_morro_bay_and_later_moved",
+      "utterance": "at step 11 Theo was in Morro Bay and later moved to Market Hall.",
+      "setup_turns": [],
+      "setup_results": [],
+      "baseline": {
+        "verdict": "warn",
+        "status": "success",
+        "tags": [
+          "temporal_conflict",
+          "over_clarification",
+          "logic_inconsistency"
+        ],
+        "interestingness": 0.65,
+        "rationale": "The system generated a logic string asserting Theo was in both Morro Bay and Market Hall at the exact same step (11), which contradicts the user's elliptical intent of a sequential move. This represents brittle behavior where the compiler failed to infer temporal succession from the narrative flow, instead treating the conjunction as a simultaneous state, leading to a logical inconsistency.",
+        "logic_string": "at_step_11_theo_in_morro_bay.\nat_step_11_theo_in_market_hall.",
+        "trace_overall": "prethink=primary; adjusted via clarification_sanitized; freethinker=off; parse adjusted via clarification_fields_normalized"
+      },
+      "current": {
+        "verdict": "warn",
+        "status": "success",
+        "tags": [
+          "temporal_conflict",
+          "over_clarification",
+          "logic_inconsistency"
+        ],
+        "rationale": "The system generated a logic string asserting Theo was in both Morro Bay and Market Hall at the exact same step (11), which contradicts the user's elliptical intent of a sequential move. The system's 'prethink' trace indicates it 'adjusted via clarification_sanitized' despite the user explicitly setting 'uses_context': false and providing a clear temporal sequence, resulting in an awkward over-commitment that fails to capture the intended state transition.",
+        "logic_string": "at_step_11_theo_in_morro_bay.\nat_step_11_theo_in_market_hall.",
+        "trace_overall": "prethink=primary; adjusted via clarification_sanitized; freethinker=off; parse adjusted via clarification_fields_normalized"
+      },
+      "delta": "unchanged",
+      "raw_result_summary": {
+        "status": "success",
+        "result_type": "utterance_processed",
+        "route": "write",
+        "compiler_intent": "assert_fact",
+        "needs_clarification": false,
+        "clarification_question": "",
+        "ambiguity_score": 0.15,
+        "execution_status": "success",
+        "parse_intent": "assert_fact",
+        "logic_string": "at_step_11_theo_in_morro_bay.\nat_step_11_theo_in_market_hall.",
+        "writes_applied": 2,
+        "operation_count": 2,
+        "query_row_count": 0,
+        "error_count": 0,
+        "trace_overall": "prethink=primary; adjusted via clarification_sanitized; freethinker=off; parse adjusted via clarification_fields_normalized",
+        "trace_parse_rescues": [
+          "clarification_fields_normalized"
+        ],
+        "freethinker_action": "skipped"
+      }
+    },
+    {
+      "case_id": "temporal_11_at_step_11_jan_was_in_salem_and_later_moved_to_g",
+      "utterance": "at step 11 Jan was in Salem and later moved to Galley.",
+      "setup_turns": [],
+      "setup_results": [],
+      "baseline": {
+        "verdict": "warn",
+        "status": "success",
+        "tags": [
+          "temporal_ambiguity",
+          "brittle_parsing"
+        ],
+        "interestingness": 0.85,
+        "rationale": "The system accepted a compressed temporal assertion ('later') without resolving the specific time delta, resulting in brittle logic. The high ambiguity score (0.75) combined with a 'success' status indicates the compiler is over-permissive on vague temporal constraints, which is a conservative but awkward behavior rather than a grounded fact.",
+        "logic_string": "at_step(11, jan, salem).\nat_step(jan, galley, later).",
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse adjusted via clarification_fields_normalized"
+      },
+      "current": {
+        "verdict": "warn",
+        "status": "success",
+        "tags": [
+          "temporal_ambiguity",
+          "brittle_parsing"
+        ],
+        "rationale": "The system accepted a compressed temporal assertion ('later') without resolving the specific time delta, resulting in brittle logic. The high ambiguity score (0.75) combined with the lack of explicit temporal grounding warrants a warning rather than a pass, as the 'later' state is undefined.",
+        "logic_string": "at_step(11, jan, salem).\nat_step(jan, galley, later).",
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse adjusted via clarification_fields_normalized"
+      },
+      "delta": "unchanged",
+      "raw_result_summary": {
+        "status": "success",
+        "result_type": "utterance_processed",
+        "route": "write",
+        "compiler_intent": "assert_fact",
+        "needs_clarification": false,
+        "clarification_question": "",
+        "ambiguity_score": 0.75,
+        "execution_status": "success",
+        "parse_intent": "assert_fact",
+        "logic_string": "at_step(11, jan, salem).\nat_step(jan, galley, later).",
+        "writes_applied": 2,
+        "operation_count": 2,
+        "query_row_count": 0,
+        "error_count": 0,
+        "trace_overall": "prethink=primary; raw routing packet accepted; freethinker=off; parse adjusted via clarification_fields_normalized",
+        "trace_parse_rescues": [
+          "clarification_fields_normalized"
+        ],
+        "freethinker_action": "skipped"
+      }
+    },
+    {
+      "case_id": "temporal_12_next_week_jan_was_in_galley_and_later_moved_to_m",
+      "utterance": "next week Jan was in Galley and later moved to Mudroom.",
+      "setup_turns": [],
+      "setup_results": [],
+      "baseline": {
+        "verdict": "warn",
+        "status": "success",
+        "tags": [
+          "temporal_ambiguity",
+          "over_clarification"
+        ],
+        "interestingness": 0.85,
+        "rationale": "The system correctly parsed the fact but assigned a high ambiguity score (0.75) and triggered a clarification step for a statement that is semantically clear ('next week' implies a relative time, 'later' implies sequence). This constitutes 'over-clarifies' and 'awkward' behavior for a simple fact assertion, failing to commit confidently despite the input being grounded.",
+        "logic_string": "location(jan, galley, next_week).",
+        "trace_overall": "prethink=primary; adjusted via clarification_sanitized; freethinker=off; parse adjusted via clarification_fields_normalized"
+      },
+      "current": {
+        "verdict": "warn",
+        "status": "success",
+        "tags": [
+          "temporal_ambiguity",
+          "over_clarification"
+        ],
+        "rationale": "The system correctly parsed the fact but assigned a high ambiguity score (0.75) and triggered a clarification step for a statement that is semantically clear in context. This represents brittle, over-cautious behavior (WARN) rather than a failure to understand, but it unnecessarily interrupts the flow for a straightforward assertion.",
+        "logic_string": "location(jan, galley, next_week).",
+        "trace_overall": "prethink=primary; adjusted via clarification_sanitized; freethinker=off; parse adjusted via clarification_fields_normalized"
+      },
+      "delta": "unchanged",
+      "raw_result_summary": {
+        "status": "success",
+        "result_type": "utterance_processed",
+        "route": "write",
+        "compiler_intent": "assert_fact",
+        "needs_clarification": false,
+        "clarification_question": "",
+        "ambiguity_score": 0.75,
+        "execution_status": "success",
+        "parse_intent": "assert_fact",
+        "logic_string": "location(jan, galley, next_week).",
+        "writes_applied": 1,
+        "operation_count": 1,
+        "query_row_count": 0,
+        "error_count": 0,
+        "trace_overall": "prethink=primary; adjusted via clarification_sanitized; freethinker=off; parse adjusted via clarification_fields_normalized",
+        "trace_parse_rescues": [
+          "clarification_fields_normalized"
+        ],
+        "freethinker_action": "skipped"
+      }
+    }
+  ]
+}

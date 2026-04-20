@@ -372,7 +372,7 @@
       <div class="metrics">
         <div class="metric">
           <div class="k">Safety Gate</div>
-          <div id="m-gate" class="v">120</div>
+          <div id="m-gate" class="v">142</div>
           <div class="hint">Latest verified full gate</div>
         </div>
         <div class="metric">
@@ -381,9 +381,9 @@
           <div class="hint">Solve/replay green; pilot 8/8</div>
         </div>
         <div class="metric">
-          <div class="k">Narrative Strict</div>
-          <div id="m-glitch" class="v">3/3</div>
-          <div class="hint">Mid and upper-mid packs pipeline-green</div>
+          <div class="k">Temporal Pack</div>
+          <div id="m-glitch" class="v">8/12</div>
+          <div class="hint">Frozen pack now has 0 fail; correction is 10/12</div>
         </div>
         <div class="metric">
           <div class="k">Historical Runs</div>
@@ -464,10 +464,11 @@
       <div class="grid">
         <article class="card half">
           <span class="tag">Frontier</span>
-          <h3>Frontier Sweep</h3>
-          <p>Broad verified status pass across the main frontiers, including Blocksworld, narrative packs, and the Glitch lane.</p>
+          <h3>Process Utterance Pipeline Batch</h3>
+          <p>The current highest-signal interactive frontier report: correction and temporal pack results on the canonical `process_utterance()` path.</p>
           <div class="actions">
-            <a class="btn primary" href="https://github.com/dr3d/prethinker/blob/main/docs/reports/FRONTIER_SWEEP_2026-04-17.md">Open</a>
+            <a class="btn primary" href="https://github.com/dr3d/prethinker/blob/main/docs/reports/PROCESS_UTTERANCE_PIPELINE_BATCH_2026-04-20.md">Open</a>
+            <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/PROCESS_UTTERANCE_FRONTIER_PACKS.md">Pack Contract</a>
           </div>
         </article>
         <article class="card half">
@@ -475,13 +476,13 @@
           <h3>Blocksworld Guarded Lane</h3>
           <p>The strict green baseline with zero-hit gating and average-hit floors.</p>
           <div class="actions">
-            <a class="btn primary" href="https://github.com/dr3d/prethinker/blob/main/docs/reports/BLOCKSWORLD_LANE_GUARDED_2026-04-17.md">Open</a>
+            <a class="btn primary" href="https://github.com/dr3d/prethinker/blob/main/docs/reports/BLOCKSWORLD_LANE_GUARDED_2026-04-19.md">Open</a>
           </div>
         </article>
         <article class="card half">
           <span class="tag">Narrative</span>
           <h3>Narrative Recovery</h3>
-          <p>The corrected post-registry story: strict narrative runs recovered hard, but with caveats that are now documented honestly.</p>
+          <p>The last verified strict narrative sweep and temporal-interrogator recovery, kept here as broader-lane context rather than the newest interactive headline.</p>
           <div class="actions">
             <a class="btn primary" href="https://github.com/dr3d/prethinker/blob/main/docs/reports/NARRATIVE_PACKS_RECOVERY_2026-04-17.md">Open</a>
             <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/PROGRESS.md">Status Note</a>
@@ -591,7 +592,7 @@
     </section>
 
     <div class="footer-note">
-      Docs Hub refresh: April 19, 2026. This page now favors durable operator docs, current verified status,
+      Docs Hub refresh: April 20, 2026. This page now favors durable operator docs, current verified status,
       and curated evidence over retired handoff clutter.
     </div>
   </main>
@@ -665,6 +666,7 @@
 
       const manifestFallback = {
         entries: [
+          { title: "The Governed Pipeline", variants: [{ src: "assets/The_Governed_Pipeline.mp4", kind: "video", type: "video/mp4", label: "MP4" }] },
           { title: "English As A Logic Programming Language", variants: [{ src: "assets/English-as-a-Logic-Programming-Language.mp3", kind: "audio", type: "audio/mpeg", label: "MP3" }] },
           { title: "Fixing AI Hallucinations With Prolog", variants: [{ src: "assets/Fixing-AI-Hallucinations-with-Prolog.mp3", kind: "audio", type: "audio/mpeg", label: "MP3" }] },
           { title: "How PRETHINKER Protects AI Database Integrity", variants: [{ src: "assets/How-PRETHINKER-Protects-AI-Database-Integrity.mp3", kind: "audio", type: "audio/mpeg", label: "MP3" }] },

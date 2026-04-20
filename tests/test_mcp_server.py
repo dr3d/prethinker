@@ -876,6 +876,350 @@ class LocalMcpServerTests(unittest.TestCase):
         self.assertEqual(freethinker.get("action"), "queued")
         self.assertEqual(freethinker.get("reason"), "not_implemented_yet")
 
+    def test_rescue_explicit_with_correction_reuses_positive_shadow_parses(self) -> None:
+        strict_server = PrologMCPServer(compiler_mode="strict")
+        parsed = {
+            "intent": "assert_fact",
+            "logic_string": "retract(cart_with_fred).",
+            "components": {
+                "atoms": ["cart_with_fred"],
+                "variables": [],
+                "predicates": ["retract"],
+            },
+            "facts": ["retract(cart_with_fred)."],
+            "rules": [],
+            "queries": [],
+            "confidence": {"overall": 0.9, "intent": 0.9, "logic": 0.9},
+            "ambiguities": [],
+            "needs_clarification": False,
+            "uncertainty_score": 0.35,
+            "uncertainty_label": "medium",
+            "clarification_question": "",
+            "clarification_reason": "",
+            "rationale": "Temporary parser rationale.",
+        }
+        new_parse = {
+            "intent": "assert_fact",
+            "logic_string": "cart_with(fred, cart).",
+            "components": {
+                "atoms": ["fred", "cart"],
+                "variables": [],
+                "predicates": ["cart_with"],
+            },
+            "facts": ["cart_with(fred, cart)."],
+            "rules": [],
+            "queries": [],
+            "confidence": {"overall": 0.95, "intent": 0.95, "logic": 0.95},
+            "ambiguities": [],
+            "needs_clarification": False,
+            "uncertainty_score": 0.05,
+            "uncertainty_label": "low",
+            "clarification_question": "",
+            "clarification_reason": "",
+            "rationale": "Positive assert parse for Fred.",
+        }
+        old_parse = {
+            "intent": "assert_fact",
+            "logic_string": "cart_with(mara, cart).",
+            "components": {
+                "atoms": ["mara", "cart"],
+                "variables": [],
+                "predicates": ["cart_with"],
+            },
+            "facts": ["cart_with(mara, cart)."],
+            "rules": [],
+            "queries": [],
+            "confidence": {"overall": 0.95, "intent": 0.95, "logic": 0.95},
+            "ambiguities": [],
+            "needs_clarification": False,
+            "uncertainty_score": 0.05,
+            "uncertainty_label": "low",
+            "clarification_question": "",
+            "clarification_reason": "",
+            "rationale": "Positive assert parse for Mara.",
+        }
+
+        with patch.object(
+            strict_server,
+            "_compile_shadow_parse",
+            side_effect=[(new_parse, ""), (old_parse, "")],
+        ):
+            rescued = strict_server._rescue_explicit_with_correction(
+                parsed=parsed,
+                utterance="actually no, cart is with Fred not Mara",
+                compiler_intent="assert_fact",
+            )
+
+        self.assertEqual(rescued.get("facts"), ["cart_with(fred, cart)."])
+        self.assertEqual(
+            rescued.get("correction_retract_clauses"),
+            ["cart_with(mara, cart)."],
+        )
+        self.assertEqual(rescued.get("uncertainty_score"), 0.05)
+        self.assertFalse(rescued.get("needs_clarification"))
+
+    def test_sanitize_compiler_clarification_normalizes_explicit_with_correction(self) -> None:
+        strict_server = PrologMCPServer(compiler_mode="strict")
+        compiled = {
+            "intent": "retract",
+            "needs_clarification": True,
+            "uncertainty_score": 0.85,
+            "clarification_question": "Which fact should be retracted?",
+            "clarification_reason": "Correction may refer to either entity.",
+            "rationale": "Compiler treated the utterance as a retraction.",
+        }
+
+        sanitized = strict_server._sanitize_compiler_clarification(
+            utterance="actually no, cart is with Fred not Mara",
+            compiled=compiled,
+        )
+
+        self.assertEqual(sanitized.get("intent"), "assert_fact")
+        self.assertFalse(sanitized.get("needs_clarification"))
+        self.assertEqual(sanitized.get("clarification_question"), "")
+        self.assertEqual(sanitized.get("clarification_reason"), "")
+        self.assertEqual(sanitized.get("uncertainty_score"), 0.15)
+
+    def test_sanitize_compiler_clarification_normalizes_explicit_step_sequence(self) -> None:
+        strict_server = PrologMCPServer(compiler_mode="strict")
+        compiled = {
+            "intent": "assert_fact",
+            "needs_clarification": True,
+            "uncertainty_score": 0.85,
+            "clarification_question": "What is the predicate name for 'was in' and 'moved to'?",
+            "clarification_reason": "Missing canonical predicate names for location and movement events.",
+            "rationale": "Utterance describes location change but lacks explicit predicate definitions.",
+        }
+
+        sanitized = strict_server._sanitize_compiler_clarification(
+            utterance="at step 11 Fred was in Salem and later moved to Harbor City",
+            compiled=compiled,
+        )
+
+        self.assertEqual(sanitized.get("intent"), "assert_fact")
+        self.assertFalse(sanitized.get("needs_clarification"))
+        self.assertEqual(sanitized.get("clarification_question"), "")
+        self.assertEqual(sanitized.get("clarification_reason"), "")
+        self.assertEqual(sanitized.get("uncertainty_score"), 0.15)
+
+    def test_extract_explicit_step_sequence_accepts_digit_bearing_locations(self) -> None:
+        strict_server = PrologMCPServer(compiler_mode="strict")
+
+        extracted = strict_server._extract_explicit_step_sequence(
+            "at step 6 Noor was in Bay 3 and later moved to Mudroom."
+        )
+
+        self.assertEqual(
+            extracted,
+            {
+                "step": 6,
+                "entity_atom": "noor",
+                "origin_atom": "bay_3",
+                "destination_atom": "mudroom",
+            },
+        )
+
+    def test_rescue_explicit_step_sequence_rewrites_invalid_step_predicates(self) -> None:
+        strict_server = PrologMCPServer(compiler_mode="strict")
+        parsed = {
+            "intent": "assert_fact",
+            "logic_string": "at_step_11(Noor, Galley). at_step_12(Noor, Cedar_House).",
+            "components": {
+                "atoms": ["Noor", "Galley", "Cedar_House"],
+                "variables": [],
+                "predicates": ["at_step_11", "at_step_12"],
+            },
+            "facts": [
+                "at_step_11(Noor, Galley).",
+                "at_step_12(Noor, Cedar_House).",
+            ],
+            "rules": [],
+            "queries": [],
+            "confidence": {"overall": 0.95, "intent": 0.95, "logic": 0.95},
+            "ambiguities": [],
+            "needs_clarification": False,
+            "uncertainty_score": 0.1,
+            "uncertainty_label": "low",
+            "clarification_question": "",
+            "clarification_reason": "",
+            "rationale": "Temporary parser rationale.",
+        }
+
+        rescued = strict_server._rescue_explicit_step_sequence(
+            parsed=parsed,
+            utterance="at step 11 Noor was in Galley and later moved to Cedar House.",
+            compiler_intent="assert_fact",
+        )
+
+        self.assertEqual(
+            rescued.get("facts"),
+            [
+                "at_step(11, at(noor, galley)).",
+                "at_step(12, at(noor, cedar_house)).",
+            ],
+        )
+        self.assertFalse(rescued.get("needs_clarification"))
+        self.assertEqual(rescued.get("uncertainty_score"), 0.1)
+
+    def test_apply_compiled_parse_handles_explicit_with_correction_as_state_replacement(self) -> None:
+        server = PrologMCPServer(compiler_mode="heuristic")
+        initial = server.assert_fact("cart_with(mara, cart).")
+        self.assertEqual(initial.get("status"), "success")
+        packet = server.tools_call("pre_think", {"utterance": "cart is with Fred"})
+        self.assertEqual(packet.get("status"), "success")
+        prethink_id = packet.get("packet", {}).get("prethink_id")
+        self.assertTrue(prethink_id)
+
+        parsed = {
+            "intent": "assert_fact",
+            "logic_string": "cart_with(fred, cart).",
+            "components": {
+                "atoms": ["fred", "cart", "mara"],
+                "variables": [],
+                "predicates": ["cart_with"],
+            },
+            "facts": ["cart_with(fred, cart)."],
+            "rules": [],
+            "queries": [],
+            "confidence": {"overall": 0.95, "intent": 0.95, "logic": 0.95},
+            "ambiguities": [],
+            "needs_clarification": False,
+            "uncertainty_score": 0.05,
+            "uncertainty_label": "low",
+            "clarification_question": "",
+            "clarification_reason": "",
+            "rationale": "Recovered explicit correction.",
+            "correction_retract_clauses": ["cart_with(mara, cart)."],
+        }
+
+        execution = server._apply_compiled_parse(parsed=parsed, prethink_id=prethink_id)
+
+        self.assertEqual(execution.get("status"), "success")
+        operations = execution.get("operations", [])
+        self.assertEqual([op.get("tool") for op in operations[:2]], ["retract_fact", "assert_fact"])
+        query = server.query_rows("cart_with(X, cart).")
+        self.assertEqual(query.get("status"), "success")
+        rows = query.get("rows", [])
+        self.assertEqual({row.get("X") for row in rows}, {"fred"})
+
+    def test_process_utterance_recovers_explicit_step_sequence_in_canonical_path(self) -> None:
+        strict_server = PrologMCPServer(compiler_mode="strict")
+        compiled = {
+            "intent": "assert_fact",
+            "needs_clarification": False,
+            "uncertainty_score": 0.0,
+            "clarification_question": "",
+            "clarification_reason": "",
+            "rationale": "Write-like utterance.",
+        }
+        parsed = {
+            "intent": "assert_fact",
+            "logic_string": "at_step_11(Noor, Galley).\nat_step_12(Noor, Cedar_House).",
+            "components": {
+                "atoms": ["Noor", "Galley", "Cedar_House"],
+                "variables": [],
+                "predicates": ["at_step_11", "at_step_12"],
+            },
+            "facts": [
+                "at_step_11(Noor, Galley).",
+                "at_step_12(Noor, Cedar_House).",
+            ],
+            "rules": [],
+            "queries": [],
+            "confidence": {"overall": 0.95, "intent": 0.95, "logic": 0.95},
+            "ambiguities": [],
+            "needs_clarification": False,
+            "uncertainty_score": 0.1,
+            "uncertainty_label": "low",
+            "clarification_question": "",
+            "clarification_reason": "",
+            "rationale": "Temporary parser rationale.",
+        }
+
+        with (
+            patch.object(strict_server, "_compile_prethink_semantics", return_value=(compiled, "")),
+            patch(
+                "src.mcp_server._call_model_prompt",
+                return_value=ModelResponse(message=json.dumps(parsed), reasoning="", raw={}),
+            ),
+        ):
+            result = strict_server.process_utterance(
+                {"utterance": "at step 11 Noor was in Galley and later moved to Cedar House."}
+            )
+
+        self.assertEqual(result.get("status"), "success")
+        execution = result.get("execution", {})
+        self.assertEqual(
+            execution.get("parse", {}).get("facts"),
+            [
+                "at_step(11, at(noor, galley)).",
+                "at_step(12, at(noor, cedar_house)).",
+            ],
+        )
+        trace = result.get("compiler_trace", {})
+        self.assertIn(
+            "explicit_step_sequence_rescue",
+            trace.get("summary", {}).get("parse_rescues", []),
+        )
+
+    def test_process_utterance_recovers_digit_bearing_step_sequence_in_canonical_path(self) -> None:
+        strict_server = PrologMCPServer(compiler_mode="strict")
+        compiled = {
+            "intent": "assert_fact",
+            "needs_clarification": False,
+            "uncertainty_score": 0.0,
+            "clarification_question": "",
+            "clarification_reason": "",
+            "rationale": "Write-like utterance.",
+        }
+        parsed = {
+            "intent": "assert_fact",
+            "logic_string": "at_step_6(Noor, Bay3).\nat_step_7(Noor, Mudroom).",
+            "components": {
+                "atoms": ["Noor", "Bay3", "Mudroom"],
+                "variables": [],
+                "predicates": ["at_step_6", "at_step_7"],
+            },
+            "facts": [
+                "at_step_6(Noor, Bay3).",
+                "at_step_7(Noor, Mudroom).",
+            ],
+            "rules": [],
+            "queries": [],
+            "confidence": {"overall": 0.95, "intent": 0.95, "logic": 0.95},
+            "ambiguities": [],
+            "needs_clarification": False,
+            "uncertainty_score": 0.15,
+            "uncertainty_label": "low",
+            "clarification_question": "",
+            "clarification_reason": "",
+            "rationale": "Parsed temporal sequence as two distinct facts with inferred step indices based on 'later'.",
+        }
+        with patch.object(
+            strict_server,
+            "_compile_prethink_semantics",
+            return_value=(compiled, ""),
+        ), patch("src.mcp_server._call_model_prompt") as call_model:
+            call_model.return_value = ModelResponse(message=json.dumps(parsed), reasoning="", raw={})
+            result = strict_server.process_utterance(
+                {"utterance": "at step 6 Noor was in Bay 3 and later moved to Mudroom."}
+            )
+
+        self.assertEqual(result.get("status"), "success")
+        execution = result.get("execution") or {}
+        self.assertEqual(
+            execution.get("parse", {}).get("facts"),
+            [
+                "at_step(6, at(noor, bay_3)).",
+                "at_step(7, at(noor, mudroom)).",
+            ],
+        )
+        trace = result.get("compiler_trace", {})
+        self.assertIn(
+            "explicit_step_sequence_rescue",
+            trace.get("summary", {}).get("parse_rescues", []),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

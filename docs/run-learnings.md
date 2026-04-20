@@ -5,7 +5,7 @@ Auto-populated by `scripts/run_ladder.py` via `--learn-log`.
 
 ## 2026-04-11T13:42:06+00:00
 - Run: `differential_validation_baseline`
-- Runtime: vendored `engine/core.py` vs baseline `../prolog-reasoning/src/engine/core.py`
+- Runtime: vendored `engine/core.py` vs legacy external reference engine
 - Source: `docs/data/differential_validation_latest.json`
 - Learned:
   - Differential agreement is `10/10` cases (`100%`).

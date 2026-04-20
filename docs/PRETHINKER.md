@@ -127,13 +127,15 @@ Both roles can be backed by the same underlying `qwen3.5:9b` weights with differ
 
 ## Current Reality
 
-As of April 19, 2026:
+As of April 20, 2026:
 
 - the canonical interactive entryway is `process_utterance()` in [src/mcp_server.py](/D:/_PROJECTS/prethinker/src/mcp_server.py)
 - the console in [ui_gateway/](/D:/_PROJECTS/prethinker/ui_gateway) is the main manual test cockpit
-- the safety gate is green at `120 passed`
-- strict Blocksworld is the stable proof lane
-- strict narrative packs are materially improved and pipeline-green
+- the safety gate is green at `142 passed`
+- strict Blocksworld remains the last verified stable proof lane
+- frozen `process_utterance()` frontier packs now anchor the hardest interactive families
+- correction is down to `2/12` remaining failures
+- temporal is now `8/12` pass, `4/12` warn, and `0/12` fail on the frozen pack
 - Freethinker is still defaulted to `off`
 
 That means the repo already supports the governed compiler shape directly.

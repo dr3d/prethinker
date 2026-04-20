@@ -766,6 +766,172 @@ class PrologMCPServer:
             parsed["rationale"] = f"{rationale} {suffix}".strip() if rationale else suffix
         return parsed
 
+    def _extract_explicit_with_correction(
+        self,
+        utterance: str,
+    ) -> dict[str, str] | None:
+        lowered = str(utterance or "").strip()
+        if not lowered:
+            return None
+        match = re.match(
+            r"^\s*(?:actually\s+no[, ]+)?(?P<subject>.+?)\s+is\s+with\s+(?P<new_holder>[a-z][a-z0-9_'-]*)\s+not\s+(?P<old_holder>[a-z][a-z0-9_'-]*)[.?!]?\s*$",
+            lowered,
+            re.IGNORECASE,
+        )
+        if not match:
+            return None
+        subject = str(match.group("subject") or "").strip(" ,")
+        new_holder = str(match.group("new_holder") or "").strip()
+        old_holder = str(match.group("old_holder") or "").strip()
+        if not subject or not new_holder or not old_holder:
+            return None
+        return {
+            "subject": subject,
+            "new_holder": new_holder,
+            "old_holder": old_holder,
+        }
+
+    def _extract_explicit_step_sequence(
+        self,
+        utterance: str,
+    ) -> dict[str, Any] | None:
+        text = str(utterance or "").strip()
+        if not text:
+            return None
+        match = re.match(
+            r"^\s*at\s+step\s+(?P<step>\d+)\s+(?P<entity>[a-z][a-z0-9_'-]*(?:\s+[a-z][a-z0-9_'-]*){0,3})\s+was\s+in\s+(?P<origin>[a-z0-9][a-z0-9_'-]*(?:\s+[a-z0-9][a-z0-9_'-]*){0,5})\s+and\s+later\s+moved\s+to\s+(?P<destination>[a-z0-9][a-z0-9_'-]*(?:\s+[a-z0-9][a-z0-9_'-]*){0,5})[.?!]?\s*$",
+            text,
+            re.IGNORECASE,
+        )
+        if not match:
+            return None
+        try:
+            step = int(match.group("step"))
+        except Exception:
+            return None
+        entity_atom = self._atomize_name(match.group("entity"))
+        origin_atom = self._atomize_name(match.group("origin"))
+        destination_atom = self._atomize_name(match.group("destination"))
+        if step < 0 or not entity_atom or not origin_atom or not destination_atom:
+            return None
+        return {
+            "step": step,
+            "entity_atom": entity_atom,
+            "origin_atom": origin_atom,
+            "destination_atom": destination_atom,
+        }
+
+    def _extract_fact_clauses(self, parsed: dict[str, Any]) -> list[str]:
+        clauses = [str(item).strip() for item in parsed.get("facts", []) if str(item).strip()]
+        if not clauses:
+            clause = str(parsed.get("logic_string", "")).strip()
+            if clause:
+                clauses = [clause]
+        normalized: list[str] = []
+        for clause in clauses:
+            cleaned = clause if clause.endswith(".") else f"{clause}."
+            if cleaned not in normalized:
+                normalized.append(cleaned)
+        return normalized
+
+    def _rescue_explicit_with_correction(
+        self,
+        *,
+        parsed: dict[str, Any],
+        utterance: str,
+        compiler_intent: str,
+    ) -> dict[str, Any]:
+        if not isinstance(parsed, dict):
+            return parsed
+        if str(compiler_intent or "").strip().lower() != "assert_fact":
+            return parsed
+        correction = self._extract_explicit_with_correction(utterance)
+        if correction is None:
+            return parsed
+
+        subject = correction["subject"]
+        new_holder = correction["new_holder"]
+        old_holder = correction["old_holder"]
+        new_parse, new_error = self._compile_shadow_parse(
+            f"{subject} is with {new_holder}.",
+            "assert_fact",
+        )
+        old_parse, old_error = self._compile_shadow_parse(
+            f"{subject} is with {old_holder}.",
+            "assert_fact",
+        )
+        if not isinstance(new_parse, dict) or not isinstance(old_parse, dict):
+            return parsed
+        if new_error or old_error:
+            return parsed
+
+        new_facts = self._extract_fact_clauses(new_parse)
+        old_facts = self._extract_fact_clauses(old_parse)
+        if not new_facts or not old_facts:
+            return parsed
+
+        rescued = self._clone_trace_payload(new_parse)
+        rescued["correction_retract_clauses"] = old_facts
+        rescued["needs_clarification"] = False
+        rescued["clarification_question"] = ""
+        rescued["clarification_reason"] = ""
+        rescued["uncertainty_score"] = min(
+            _clip_01(rescued.get("uncertainty_score"), 0.15),
+            0.15,
+        )
+        rescued["uncertainty_label"] = "low"
+        rescued["ambiguities"] = []
+        rescued["rationale"] = (
+            "Recognized an explicit holder correction and converted it into a "
+            f"retract-old/assert-new state update for {self._atomize_name(subject)}."
+        )
+        return rescued
+
+    def _rescue_explicit_step_sequence(
+        self,
+        *,
+        parsed: dict[str, Any],
+        utterance: str,
+        compiler_intent: str,
+    ) -> dict[str, Any]:
+        if not isinstance(parsed, dict):
+            return parsed
+        if str(compiler_intent or "").strip().lower() != "assert_fact":
+            return parsed
+        sequence = self._extract_explicit_step_sequence(utterance)
+        if sequence is None:
+            return parsed
+
+        step = int(sequence["step"])
+        entity_atom = str(sequence["entity_atom"])
+        origin_atom = str(sequence["origin_atom"])
+        destination_atom = str(sequence["destination_atom"])
+        facts = [
+            f"at_step({step}, at({entity_atom}, {origin_atom})).",
+            f"at_step({step + 1}, at({entity_atom}, {destination_atom})).",
+        ]
+        rescued = self._clone_trace_payload(parsed)
+        rescued["intent"] = "assert_fact"
+        rescued["facts"] = facts
+        rescued["logic_string"] = " ".join(facts)
+        rescued["rules"] = []
+        rescued["queries"] = []
+        rescued["components"] = self._extract_components_from_facts(facts)
+        rescued["ambiguities"] = []
+        rescued["needs_clarification"] = False
+        rescued["clarification_question"] = ""
+        rescued["clarification_reason"] = ""
+        rescued["uncertainty_score"] = min(
+            _clip_01(rescued.get("uncertainty_score"), 0.1),
+            0.1,
+        )
+        rescued["uncertainty_label"] = "low"
+        rescued["rationale"] = (
+            "Recognized an explicit step sequence and normalized it into valid "
+            "at_step(Integer, Fact) temporal wrappers."
+        )
+        return rescued
+
     def _compile_apply_parse(
         self,
         *,
@@ -885,12 +1051,40 @@ class PrologMCPServer:
                 summary="Expanded or corrected explicit family bundle statements.",
             )
         )
-        subject_prefix_input = self._clone_trace_payload(after_family)
+        correction_input = self._clone_trace_payload(after_family)
+        after_correction = self._rescue_explicit_with_correction(
+            parsed=correction_input,
+            utterance=utterance,
+            compiler_intent=compiler_intent,
+        )
+        trace["rescues"].append(
+            self._trace_step(
+                name="explicit_with_correction_rescue",
+                before=after_family,
+                after=after_correction,
+                summary="Recovered explicit holder corrections into retract-old/assert-new updates.",
+            )
+        )
+        step_sequence_input = self._clone_trace_payload(after_correction)
+        after_step_sequence = self._rescue_explicit_step_sequence(
+            parsed=step_sequence_input,
+            utterance=utterance,
+            compiler_intent=compiler_intent,
+        )
+        trace["rescues"].append(
+            self._trace_step(
+                name="explicit_step_sequence_rescue",
+                before=after_correction,
+                after=after_step_sequence,
+                summary="Recovered explicit step-sequence narration into valid temporal wrappers.",
+            )
+        )
+        subject_prefix_input = self._clone_trace_payload(after_step_sequence)
         admitted = self._canonicalize_subject_prefixed_predicates(subject_prefix_input)
         trace["rescues"].append(
             self._trace_step(
                 name="subject_prefixed_predicate_canonicalization",
-                before=after_family,
+                before=after_step_sequence,
                 after=admitted,
                 summary="Canonicalized subject-prefixed predicates into registry form.",
             )
@@ -913,6 +1107,25 @@ class PrologMCPServer:
         errors: list[str] = []
 
         if intent == "assert_fact":
+            correction_retracts = [
+                str(item).strip()
+                for item in parsed.get("correction_retract_clauses", [])
+                if str(item).strip()
+            ]
+            for clause in correction_retracts:
+                normalized_clause = clause if clause.endswith(".") else f"{clause}."
+                result = self.tools_call(
+                    "retract_fact",
+                    {"clause": normalized_clause, "prethink_id": prethink_id, "confirm": True},
+                )
+                operations.append(
+                    {"tool": "retract_fact", "clause": normalized_clause, "result": result}
+                )
+                status = str(result.get("status", "")).strip()
+                if status == "success":
+                    writes_applied += 1
+                elif status not in {"no_results", "no_result"}:
+                    errors.append(f"retract_fact failed for {normalized_clause}")
             clauses = [str(item).strip() for item in parsed.get("facts", []) if str(item).strip()]
             if not clauses:
                 clause = str(parsed.get("logic_string", "")).strip()
@@ -1570,6 +1783,37 @@ class PrologMCPServer:
         if intent not in {"assert_fact", "assert_rule", "query", "retract", "other"}:
             return out
         out = _normalize_clarification_fields(out, utterance=utterance, route=intent)
+        explicit_with_correction = self._extract_explicit_with_correction(utterance)
+        if explicit_with_correction is not None and intent in {"assert_fact", "retract"}:
+            out["intent"] = "assert_fact"
+            out["needs_clarification"] = False
+            out["clarification_question"] = ""
+            out["clarification_reason"] = ""
+            out["uncertainty_score"] = min(
+                _clip_01(out.get("uncertainty_score"), 0.15),
+                0.15,
+            )
+            out["uncertainty_label"] = "low"
+            out["rationale"] = (
+                "Recognized an explicit holder correction and normalized it to an assert_fact "
+                "state update."
+            )
+            return out
+        explicit_step_sequence = self._extract_explicit_step_sequence(utterance)
+        if explicit_step_sequence is not None and intent == "assert_fact":
+            out["needs_clarification"] = False
+            out["clarification_question"] = ""
+            out["clarification_reason"] = ""
+            out["uncertainty_score"] = min(
+                _clip_01(out.get("uncertainty_score"), 0.15),
+                0.15,
+            )
+            out["uncertainty_label"] = "low"
+            out["rationale"] = (
+                "Recognized an explicit step sequence and deferred canonical temporal "
+                "normalization to the parse layer."
+            )
+            return out
         question = str(out.get("clarification_question", "")).strip()
         reason = str(out.get("clarification_reason", "")).strip()
         if not bool(out.get("needs_clarification", False)):

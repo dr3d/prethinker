@@ -1,24 +1,28 @@
 ﻿# Track Scoreboard
 
-Last updated: 2026-04-19
+Last updated: 2026-04-20
 
 ## Read This First
 
 This file is a partitioned scoreboard, not the repo headline.
 Use `docs/PROGRESS.md` for the current source of truth.
 
-Current status after the latest guarded and recovery reruns:
+Current status after the latest verified frontier-pack and gate reruns:
 
 | Lane | Status | Evidence |
 |---|---|---|
-| Safety gate | green | `120 passed` |
-| Blocksworld strict guarded | green | `20/20` solve/replay, `8/8` pilot, zero-hit `0`, avg init `0.458334`, avg goal `0.458334` |
-| Narrative strict (mid) | recovered | `pipeline_pass=3/3`, best `0.9284`; temporal interrogator recovery restored a real `full` temporal floor |
-| Narrative strict (upper-mid) | strong | `pipeline_pass=3/3`, best `0.956`; paragraph and line both reached `20/20` |
+| Safety gate | green | `142 passed` |
+| Blocksworld strict guarded | green | last verified stable lane: `20/20` solve/replay, `8/8` pilot, zero-hit `0`, avg init `0.458334`, avg goal `0.458334` |
+| `process_utterance()` correction pack | improved | `10/12` pass, `2/12` fail |
+| `process_utterance()` temporal pack | improved | `8/12` pass, `4/12` warn, `0/12` fail |
+| Narrative strict (mid, last verified Apr 19) | recovered | `pipeline_pass=3/3`, best `0.9284`; temporal interrogator recovery restored a real `full` temporal floor |
+| Narrative strict (upper-mid, last verified Apr 19) | strong | `pipeline_pass=3/3`, best `0.956`; paragraph and line both reached `20/20` |
 
 References:
 
 - `docs/PROGRESS.md`
+- `docs/reports/PROCESS_UTTERANCE_PIPELINE_BATCH_2026-04-20.md`
+- `docs/PROCESS_UTTERANCE_FRONTIER_PACKS.md`
 - `docs/reports/FRONTIER_SWEEP_2026-04-17.md`
 - `docs/reports/TEMPORAL_INTERROGATOR_RECOVERY_2026-04-19.md`
 

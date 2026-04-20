@@ -1,6 +1,42 @@
 # Deterministic English->Logic Compilation: Progress Note
 
-Date: 2026-04-17
+Date: 2026-04-20
+
+## Update: 2026-04-20 (Process Utterance Pipeline Batch)
+
+We completed a focused shared-server batch against the frozen `process_utterance()` frontier packs.
+
+- Safety gate is now green at `142 passed`.
+- The main code changes are in `src/mcp_server.py`:
+  - explicit correction normalization for `actually no, X is with A not B`
+  - explicit step-sequence normalization for `at step N ... and later moved ...`
+  - digit-bearing location support in the step-sequence detector (`Bay 3`)
+- New regression coverage was added in `tests/test_mcp_server.py`.
+
+Measured live improvements:
+
+- Correction frontier pack:
+  - `0/12` baseline pass -> `10/12` pass
+  - only `2/12` failures remain
+- Temporal frontier pack:
+  - `6/12` hard fail baseline -> `0/12` fail
+  - current state: `8/12` pass, `4/12` warn
+  - the red step-sequence core is gone
+
+Interpretation:
+
+- This is a real pipeline lift on the canonical interactive entry path, not just a scoring or reporting cleanup.
+- The remaining temporal weakness is now yellow-quality semantics:
+  - relative-time under-capture
+  - over-cautious ambiguity handling
+- The remaining correction weakness is now narrow parse-shape residue rather than broad retract confusion.
+
+References:
+
+- `docs/reports/PROCESS_UTTERANCE_PIPELINE_BATCH_2026-04-20.md`
+- `docs/PROCESS_UTTERANCE_FRONTIER_PACKS.md`
+- `tmp/runs/process_utterance_frontier_packs/correction_after_temporal_frontdoor_refine.summary.json`
+- `tmp/runs/process_utterance_frontier_packs/temporal_after_temporal_frontdoor_refine.summary.json`
 
 ## Update: 2026-04-19 (Temporal Interrogator Recovery)
 

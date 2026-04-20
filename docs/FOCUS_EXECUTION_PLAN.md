@@ -1,6 +1,6 @@
 # Focus Execution Plan
 
-Last updated: 2026-04-19
+Last updated: 2026-04-20
 
 ## Objective
 
@@ -12,12 +12,15 @@ No side quests unless they improve this path, and no headline claim unless it su
 
 ## Current Reality
 
-- `scripts/run_safety_gate.py` is green (`120 passed`).
-- Strict Blocksworld is the current stable proof lane.
+- `scripts/run_safety_gate.py` is green (`142 passed`).
+- Strict Blocksworld is the last verified stable proof lane.
+- Frozen `process_utterance()` frontier packs now exist for the hardest interactive families.
+- Correction frontier is currently `10/12` pass with `2/12` failures left.
+- Temporal frontier is currently `8/12` pass, `4/12` warn, `0/12` fail.
 - `modelfiles/predicate_registry.json` is now populated, so the general strict lane is actually strict.
 - The guarded Blocksworld lane is currently stable at `20/20`, `8/8`, zero-hit `0`, avg-hit `0.458334 / 0.458334`.
 - The mid and upper-mid narrative packs are now pipeline-green at `3/3`.
-- The main remaining caveat is no longer a hollow mid `full` temporal floor; it is the remaining temporal/query weakness on the Glitch control lane and broader evaluation honesty on wild narrative material.
+- The main remaining caveat on the canonical interactive path is no longer hard step-sequence breakage; it is relative-time temporal under-capture and a couple of residual correction parse oddities.
 
 ## Default Operating Stack
 
@@ -75,11 +78,15 @@ python scripts/run_safety_gate.py
 ```
 
 ```powershell
-python scripts/run_blocksworld_lane.py --sample-size 20 --max-objects 4 --planner-depth 12 --run-prethinker --prethinker-cases 8 --backend ollama --base-url http://127.0.0.1:11434 --model qwen3.5:9b --prompt-file modelfiles/semantic_parser_system_prompt.md --context-length 8192 --prethinker-split-mode full --predicate-registry modelfiles/predicate_registry.blocksworld.json --strict-registry --max-zero-hit 0 --min-avg-init-hit 0.45 --min-avg-goal-hit 0.45 --summary-json tmp/blocksworld_lane_guarded_20260417.summary.json --summary-md docs/reports/BLOCKSWORLD_LANE_GUARDED_2026-04-17.md
+python scripts/run_process_utterance_frontier_pack.py --pack docs/data/frontier_packs/process_utterance_correction_pack_v1.json --out-dir tmp/runs/process_utterance_frontier_packs/correction_check --summary-out tmp/runs/process_utterance_frontier_packs/correction_check.summary.json --summary-md tmp/runs/process_utterance_frontier_packs/correction_check.summary.md --compiler-mode strict --compiler-backend ollama --compiler-base-url http://127.0.0.1:11434 --compiler-model qwen3.5:9b --compiler-context-length 8192 --compiler-prompt-file modelfiles/semantic_parser_system_prompt.md --freethinker-resolution-policy off
 ```
 
 ```powershell
-python scripts/run_story_stress_cycle.py --story-file tmp/story_inputs/<mid_or_upper_mid>.txt --label <pack_label> --modes full,paragraph,line --temporal on --backend ollama --base-url http://127.0.0.1:11434 --model qwen3.5:9b --prompt-file modelfiles/semantic_parser_system_prompt.md --context-length 8192 --predicate-registry modelfiles/predicate_registry.json --strict-registry --exam-style detective --exam-question-count 20 --exam-min-temporal-questions 4 --summary-json tmp/<pack_label>.summary.json --summary-md docs/reports/<PACK_REPORT>.md
+python scripts/run_process_utterance_frontier_pack.py --pack docs/data/frontier_packs/process_utterance_temporal_pack_v1.json --out-dir tmp/runs/process_utterance_frontier_packs/temporal_check --summary-out tmp/runs/process_utterance_frontier_packs/temporal_check.summary.json --summary-md tmp/runs/process_utterance_frontier_packs/temporal_check.summary.md --compiler-mode strict --compiler-backend ollama --compiler-base-url http://127.0.0.1:11434 --compiler-model qwen3.5:9b --compiler-context-length 8192 --compiler-prompt-file modelfiles/semantic_parser_system_prompt.md --freethinker-resolution-policy off
+```
+
+```powershell
+python scripts/run_blocksworld_lane.py --sample-size 20 --max-objects 4 --planner-depth 12 --run-prethinker --prethinker-cases 8 --backend ollama --base-url http://127.0.0.1:11434 --model qwen3.5:9b --prompt-file modelfiles/semantic_parser_system_prompt.md --context-length 8192 --prethinker-split-mode full --predicate-registry modelfiles/predicate_registry.blocksworld.json --strict-registry --max-zero-hit 0 --min-avg-init-hit 0.45 --min-avg-goal-hit 0.45 --summary-json tmp/blocksworld_lane_guarded.summary.json --summary-md docs/reports/BLOCKSWORLD_LANE_GUARDED_2026-04-19.md
 ```
 
 `scripts/run_gate_cycle.py` is still useful as an experiment wrapper, but it should not be treated as the sole project headline until it matches the current evidence spine above.

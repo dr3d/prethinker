@@ -2,35 +2,42 @@
 
 This project is a local workbench for building a high-accuracy semantic parser (Qwen 3.5 9B first) that converts natural language into Prolog-ready logic and applies it into named, persistent knowledge bases.
 
-Last updated: 2026-04-19
+Last updated: 2026-04-20
 
-## Current Focus (2026-04-19)
+## Current Focus (2026-04-20)
 
 Prethinker is operating on one honest evaluation spine:
 
 - [docs/PROGRESS.md](docs/PROGRESS.md) is the source of truth for current status; older April 13-15 notes should be treated as historical unless reaffirmed there.
 - Stable proof lanes are the safety gate and strict Blocksworld, not the broader narrative/story frontier.
-- The safety gate is currently green at `120 passed`.
-- Strict Blocksworld is currently stable under the guarded lane (`zero-hit=0`, avg-init gate passed, avg-goal gate passed).
-- The strict mid and upper-mid narrative packs are now pipeline-green at `3/3`, with the biggest new gain in mid `full` mode.
-- The temporal interrogator pass narrowed the biggest remaining honest caveat: mid `full` now clears a real temporal floor, while Glitch temporal remains an active frontier.
+- The safety gate is currently green at `142 passed`.
+- Strict Blocksworld remains the last verified stable proof lane (`20/20` solve/replay, `8/8` pilot, zero-hit `0`).
+- The canonical interactive frontier now has frozen `process_utterance()` packs instead of just anecdotes.
+- The correction pack is now `10/12` pass with only `2/12` failures left.
+- The temporal pack is now `8/12` pass, `4/12` warn, and `0/12` fail; the red step-sequence core is gone.
+- The next honest weakness is no longer hard temporal breakage; it is relative-time semantic under-capture and a couple of residual correction parse holdouts.
 - Same-model-family stack remains the default (`qwen3.5:9b` parser + clarification path) for tighter behavior and lower VRAM pressure.
 - The console is now the canonical interactive front door, and `Freethinker` exists as a design-track clarification sidecar with policy defaulted to `off`.
 
 ## Current Rollups
 
 - Safety gate:
-  - `120 passed`
+  - `142 passed`
   - command: `python scripts/run_safety_gate.py`
 - Blocksworld strict guarded lane:
+  - last verified stable lane
   - symbolic harness solve/replay: `20/20`
   - prethinker pilot pass: `8/8`
   - avg init predicate hit: `0.458334`
   - avg goal predicate hit: `0.458334`
   - zero-hit cases: `0`
   - avg-hit gates: `0.45 / 0.45` both passed
-  - artifact: `docs/reports/FRONTIER_SWEEP_2026-04-17.md`
-- Narrative strict current recovery status:
+  - artifact: `docs/reports/BLOCKSWORLD_LANE_GUARDED_2026-04-19.md`
+- Process-utterance frontier packs:
+  - correction pack: `10/12` pass, `2/12` fail
+  - temporal pack: `8/12` pass, `4/12` warn, `0/12` fail
+  - artifacts: `docs/reports/PROCESS_UTTERANCE_PIPELINE_BATCH_2026-04-20.md`, `docs/PROCESS_UTTERANCE_FRONTIER_PACKS.md`
+- Narrative strict last verified status:
   - mid pack: `pipeline_pass=3/3`, best `0.9284`; `full` improved from `0/20` exam to `17/20` and now clears an `8/8` temporal floor after interrogator recovery
   - upper-mid pack: `pipeline_pass=3/3`, best `0.956`; paragraph and line both reached `20/20`
   - artifacts: `docs/reports/FRONTIER_SWEEP_2026-04-17.md`, `docs/reports/TEMPORAL_INTERROGATOR_RECOVERY_2026-04-19.md`
@@ -51,6 +58,8 @@ Prethinker is operating on one honest evaluation spine:
 - docs hub: [docs/index.html](docs/index.html)
 - system design overview: [docs/PRETHINKER.md](docs/PRETHINKER.md)
 - science progress note: [docs/PROGRESS.md](docs/PROGRESS.md)
+- process_utterance pipeline batch: [docs/reports/PROCESS_UTTERANCE_PIPELINE_BATCH_2026-04-20.md](docs/reports/PROCESS_UTTERANCE_PIPELINE_BATCH_2026-04-20.md)
+- process_utterance frontier packs: [docs/PROCESS_UTTERANCE_FRONTIER_PACKS.md](docs/PROCESS_UTTERANCE_FRONTIER_PACKS.md)
 - current frontier sweep: [docs/reports/FRONTIER_SWEEP_2026-04-17.md](docs/reports/FRONTIER_SWEEP_2026-04-17.md)
 - temporal interrogator recovery: [docs/reports/TEMPORAL_INTERROGATOR_RECOVERY_2026-04-19.md](docs/reports/TEMPORAL_INTERROGATOR_RECOVERY_2026-04-19.md)
 - post-registry narrative correction: [docs/reports/NARRATIVE_PACKS_POST_REGISTRY_2026-04-17.md](docs/reports/NARRATIVE_PACKS_POST_REGISTRY_2026-04-17.md)
@@ -63,6 +72,7 @@ Prethinker is operating on one honest evaluation spine:
 - freethinker sidecar design: [docs/FREETHINKER_DESIGN.md](docs/FREETHINKER_DESIGN.md)
 - console trybook: [docs/CONSOLE_TRYBOOK.md](docs/CONSOLE_TRYBOOK.md)
 - explainer article: [docs/EXPLAINER.md](docs/EXPLAINER.md)
+- technical GIC ingest walkthrough: [docs/GIC_ENGLISH_INPUT_PIPELINE.md](docs/GIC_ENGLISH_INPUT_PIPELINE.md)
 - orchestration notes: [docs/ORCHESTRATION.md](docs/ORCHESTRATION.md)
 - out in the wild article: [docs/WILD_MODE.md](docs/WILD_MODE.md)
 - run explorer: [docs/run-reports-hub.html](docs/run-reports-hub.html)
