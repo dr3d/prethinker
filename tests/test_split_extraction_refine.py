@@ -7,6 +7,7 @@ from kb_pipeline import (
     _apply_temporal_predicate_namespace_guard,
     _build_longform_recovery_chunks,
     _build_temporal_fact_clause,
+    _extract_first_explicit_goal_clause,
     _heuristic_route,
     _looks_blocksworld_state_description,
     _maybe_recover_longform_assert_fact_payload,
@@ -694,3 +695,16 @@ def test_heuristic_route_keeps_explicit_rule_on_rule_path():
         "the deputy curator becomes acting curator until the board votes otherwise."
     )
     assert _heuristic_route(text) == "assert_rule"
+
+
+def test_extract_first_explicit_goal_clause_keeps_real_clause_shape():
+    text = "Please retract parent(alice, bob)."
+    assert _extract_first_explicit_goal_clause(text, require_ground=True) == "parent(alice, bob)."
+
+
+def test_extract_first_explicit_goal_clause_ignores_title_case_parenthetical_aside():
+    text = (
+        "End to End Encrypted Messaging in the News: "
+        "An Editorial Usability Case Study (my article)"
+    )
+    assert _extract_first_explicit_goal_clause(text, require_ground=True) == ""

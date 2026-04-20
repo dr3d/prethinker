@@ -2790,14 +2790,14 @@ def _extract_first_explicit_goal_clause(text: str, *, require_ground: bool) -> s
         first = source[start]
         if first < "a" or first > "z":
             continue
+        if start > 0 and (source[start - 1].isalnum() or source[start - 1] == "_"):
+            continue
         name_end = start + 1
         while name_end < length and (source[name_end].isalnum() or source[name_end] == "_"):
             name_end += 1
-        cursor = name_end
-        while cursor < length and source[cursor].isspace():
-            cursor += 1
-        if cursor >= length or source[cursor] != "(":
+        if name_end >= length or source[name_end] != "(":
             continue
+        cursor = name_end
 
         depth = 0
         close_idx = -1
