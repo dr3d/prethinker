@@ -1,6 +1,6 @@
 # Prethinker Orchestration (Codex + Agent54)
 
-Last updated: 2026-04-13
+Last updated: 2026-04-19
 
 ## Purpose
 
@@ -12,6 +12,8 @@ This document defines exactly how we move up the ladder autonomously when you sa
 - repeat until a clear stop condition
 
 This is the operating contract for current and future Codex agents.
+
+It also clarifies what does and does not change as the `Freethinker` sidecar design matures.
 
 ## Core Intent
 
@@ -41,6 +43,22 @@ We are building a `Governed Intent Compiler` (GIC), not a chatbot.
 - Focuses on creativity and adversarial language design.
 - Produces deterministic scenario JSONs with validations.
 
+## Product-Shape Note
+
+The product vision is broader than the autonomous frontier harness:
+
+- `Prethinker` is the governed compiler
+- `Freethinker` is the bounded clarification liaison
+- the console/UI is the manual front door where humans will feel that split first
+
+But the autonomous development loop must remain baseline-preserving.
+
+That means:
+
+- the frontier harness still runs on the strict `Prethinker` baseline by default
+- sidecar experiments must be explicit and traceable
+- no new clarification helper should silently replace the current evidence spine
+
 ## Model/Prompt Lane Policy
 
 ### Tuning lane (default)
@@ -61,6 +79,25 @@ One system-prompt source per run. Never double-source.
 `kb_pipeline.py` enforces this with:
 
 - `--sp-conflict-policy error` (default)
+
+## Freethinker Policy For Autonomous Runs
+
+Current rule:
+
+- `Freethinker` is effectively `off` for the baseline autonomous regimen
+
+Why:
+
+- we need sidecar-off control lanes to preserve comparability
+- the current helper-model clarification path in `kb_pipeline.py` already exists for autonomous work
+- the console-side Freethinker design is still being proven in UI-first form
+
+If Freethinker is ever introduced into the autonomous regimen, it must be done as an explicit experimental lane with:
+
+- a sidecar-off control
+- a written policy setting
+- separate artifacts
+- separate summary reporting
 
 ## What `GO` Means
 
@@ -89,6 +126,7 @@ No additional prompting should be required.
   - apply/validation failure
   - clarification/escalation loop
   - semantic preservation/retraction miss
+  - temporal interrogator miss
 
 ### Step 3: Frontier expansion by Agent54
 
@@ -123,6 +161,19 @@ No additional prompting should be required.
 - Update track manifests/docs where needed.
 - Log what changed and why.
 
+### Optional Step 8: Sidecar experiment lane
+
+Only when explicitly requested or when the campaign goal is clarification architecture work:
+
+- clone the impacted slice with `Freethinker` policy enabled
+- keep the baseline slice unchanged
+- compare:
+  - clarification count
+  - bad commit count
+  - pipeline pass
+  - interrogator/exam scores
+  - user-visible question quality if using the console path
+
 ## Height + Width Rung Design Standard
 
 Each new rung should stress at least one of:
@@ -156,6 +207,7 @@ Campaign stops when any one triggers:
    - no net frontier gain across 2 consecutive full cycles
 4. Time budget reached (default long-run window can be hours when requested).
 5. Infrastructure instability prevents meaningful signal.
+6. Sidecar experiment cannot beat or safely match the simpler baseline and only adds hair.
 
 ## GPU Long-Run Mode
 
@@ -183,15 +235,25 @@ Every cycle should produce:
 
 This preserves longitudinal comparability.
 
+For any sidecar experiment, artifacts must additionally record:
+
+- whether `Freethinker` was enabled
+- which policy was used
+- whether a clarification was:
+  - user-answered
+  - helper-answered
+  - advisory-only rewritten
+
 ## Handoff Rules for Future Codex
 
 If a new Codex resumes:
 
 1. read this file, `AGENT-README.md`, `kb_scenarios/README.md`, and `tracks.json`
 2. enforce single-SP-source policy
-3. treat Agent54 as rung author (`gpt-5.4`)
-4. keep curator role separate from author role
-5. maintain artifact consistency and stop conditions
+3. treat `Freethinker` as optional and baseline-off unless the run is explicitly a sidecar experiment
+4. treat Agent54 as rung author (`gpt-5.4`)
+5. keep curator role separate from author role
+6. maintain artifact consistency and stop conditions
 
 ## Quick `GO` Checklist
 
@@ -204,4 +266,3 @@ When user says `GO`, execute:
 5. rerun impacted tracks
 6. prune one redundant low-signal rung if justified
 7. report results and whether stop condition hit
-

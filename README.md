@@ -4,22 +4,23 @@ This project is a local workbench for building a high-accuracy semantic parser (
 
 Last updated: 2026-04-19
 
-## Current Focus (2026-04-17)
+## Current Focus (2026-04-19)
 
 Prethinker is operating on one honest evaluation spine:
 
 - [docs/PROGRESS.md](docs/PROGRESS.md) is the source of truth for current status; older April 13-15 notes should be treated as historical unless reaffirmed there.
 - Stable proof lanes are the safety gate and strict Blocksworld, not the broader narrative/story frontier.
-- The safety gate is currently green at `105 passed`.
+- The safety gate is currently green at `120 passed`.
 - Strict Blocksworld is currently stable under the guarded lane (`zero-hit=0`, avg-init gate passed, avg-goal gate passed).
 - The strict mid and upper-mid narrative packs are now pipeline-green at `3/3`, with the biggest new gain in mid `full` mode.
-- Mid `full` is materially better than before, but it still has a temporal-floor caveat; the split lanes remain the strongest signal.
+- The temporal interrogator pass narrowed the biggest remaining honest caveat: mid `full` now clears a real temporal floor, while Glitch temporal remains an active frontier.
 - Same-model-family stack remains the default (`qwen3.5:9b` parser + clarification path) for tighter behavior and lower VRAM pressure.
+- The console is now the canonical interactive front door, and `Freethinker` exists as a design-track clarification sidecar with policy defaulted to `off`.
 
 ## Current Rollups
 
 - Safety gate:
-  - `105 passed`
+  - `120 passed`
   - command: `python scripts/run_safety_gate.py`
 - Blocksworld strict guarded lane:
   - symbolic harness solve/replay: `20/20`
@@ -30,9 +31,9 @@ Prethinker is operating on one honest evaluation spine:
   - avg-hit gates: `0.45 / 0.45` both passed
   - artifact: `docs/reports/FRONTIER_SWEEP_2026-04-17.md`
 - Narrative strict current recovery status:
-  - mid pack: `pipeline_pass=3/3`, best `0.9284`; `full` improved from `0/20` exam to `17/20`
+  - mid pack: `pipeline_pass=3/3`, best `0.9284`; `full` improved from `0/20` exam to `17/20` and now clears an `8/8` temporal floor after interrogator recovery
   - upper-mid pack: `pipeline_pass=3/3`, best `0.956`; paragraph and line both reached `20/20`
-  - artifact: `docs/reports/FRONTIER_SWEEP_2026-04-17.md`
+  - artifacts: `docs/reports/FRONTIER_SWEEP_2026-04-17.md`, `docs/reports/TEMPORAL_INTERROGATOR_RECOVERY_2026-04-19.md`
 
 ## Historical / Exploratory References
 
@@ -48,8 +49,10 @@ Prethinker is operating on one honest evaluation spine:
 ## Quick Links (Current)
 
 - docs hub: [docs/index.html](docs/index.html)
+- system design overview: [docs/PRETHINKER.md](docs/PRETHINKER.md)
 - science progress note: [docs/PROGRESS.md](docs/PROGRESS.md)
 - current frontier sweep: [docs/reports/FRONTIER_SWEEP_2026-04-17.md](docs/reports/FRONTIER_SWEEP_2026-04-17.md)
+- temporal interrogator recovery: [docs/reports/TEMPORAL_INTERROGATOR_RECOVERY_2026-04-19.md](docs/reports/TEMPORAL_INTERROGATOR_RECOVERY_2026-04-19.md)
 - post-registry narrative correction: [docs/reports/NARRATIVE_PACKS_POST_REGISTRY_2026-04-17.md](docs/reports/NARRATIVE_PACKS_POST_REGISTRY_2026-04-17.md)
 - blocksworld strict guarded lane: [docs/reports/BLOCKSWORLD_LANE_GUARDED_2026-04-17.md](docs/reports/BLOCKSWORLD_LANE_GUARDED_2026-04-17.md)
 - KB interrogator guide: [docs/KB_INTERROGATOR.md](docs/KB_INTERROGATOR.md)
@@ -57,6 +60,7 @@ Prethinker is operating on one honest evaluation spine:
 - focus execution plan: [docs/FOCUS_EXECUTION_PLAN.md](docs/FOCUS_EXECUTION_PLAN.md)
 - ontology steering note: [docs/ONTOLOGY_STEERING.md](docs/ONTOLOGY_STEERING.md)
 - console MVP note: [docs/PRETHINK_GATEWAY_MVP.md](docs/PRETHINK_GATEWAY_MVP.md)
+- freethinker sidecar design: [docs/FREETHINKER_DESIGN.md](docs/FREETHINKER_DESIGN.md)
 - console trybook: [docs/CONSOLE_TRYBOOK.md](docs/CONSOLE_TRYBOOK.md)
 - explainer article: [docs/EXPLAINER.md](docs/EXPLAINER.md)
 - orchestration notes: [docs/ORCHESTRATION.md](docs/ORCHESTRATION.md)
@@ -72,6 +76,55 @@ Older phase notes and long-form operational history are preserved in durable doc
 
 - `docs/run-learnings.md`
 - `SESSIONS.md`
+
+## Product Direction
+
+Prethinker is not just a parser workbench; the product direction is a governed adapter that can sit in front of a user's chatbot of choice.
+
+In that shape:
+
+- the chatbot remains the conversational engine
+- `Prethinker` listens to the interaction stream and compiles eligible turns into symbolic state
+- the KB becomes durable, interrogable memory instead of hidden conversational drift
+- the user can see what was committed, what was blocked, and why
+
+The right metaphor is not "autonomous smart assistant." It is "governed stenographer and compiler."
+
+It watches, formalizes, and gates.
+It does not get to mutate state by vibes.
+
+## Prethinker And Freethinker
+
+The intended architectural split is now explicit:
+
+- `Prethinker`
+  - the strict Governed Intent Compiler
+  - schema-bound
+  - deterministic gate before mutation
+  - the only component allowed to authorize KB commits
+- `Freethinker`
+  - a bounded clarification liaison
+  - context-aware and conversationally looser
+  - consulted only when `Prethinker` hesitates
+  - not allowed to write to the KB directly
+
+This split is about authority, not model family. Both roles can use the same underlying `qwen3.5:9b` weights with different prompts and permissions.
+
+Current implementation status:
+
+- `Prethinker` path is live in the console and batch runners.
+- `Freethinker` is currently a design-track capability with trace scaffolding and config surfaces in place, but live resolution policy remains `off` by default.
+
+## Documentation Spine
+
+If you want the design in a logical order, read:
+
+1. [docs/PRETHINKER.md](docs/PRETHINKER.md) for the full system view
+2. [docs/EXPLAINER.md](docs/EXPLAINER.md) for the product and trust-boundary story
+3. [docs/PRETHINK_GATEWAY_MVP.md](docs/PRETHINK_GATEWAY_MVP.md) for the current UI/front-door shape
+4. [docs/FREETHINKER_DESIGN.md](docs/FREETHINKER_DESIGN.md) for the clarification sidecar design
+5. [docs/ONTOLOGY_STEERING.md](docs/ONTOLOGY_STEERING.md) for registry/profile architecture
+6. [docs/ORCHESTRATION.md](docs/ORCHESTRATION.md) for autonomous frontier operation
 
 ## Neuro-Symbolic Contract
 

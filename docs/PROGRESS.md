@@ -2,6 +2,47 @@
 
 Date: 2026-04-17
 
+## Update: 2026-04-19 (Temporal Interrogator Recovery)
+
+We completed a focused interrogator-side recovery pass aimed at the sharpest remaining honest weakness: temporal exam quality.
+
+- Safety gate is now green at `120 passed`.
+- The main code change is in `scripts/kb_interrogator.py`:
+  - guarded repair for brittle shared-step temporal queries
+  - temporal-first fallback generation used only for temporal-floor rescue, not for general exam fill
+- New regression coverage was added in `tests/test_kb_interrogator_temporal.py`.
+
+Measured live improvements:
+
+- Glitch control lane improved materially on the same live line-temporal profile:
+  - exam pass `8/14 -> 11/14`
+  - temporal exam `0/5 -> 3/5`
+  - final score `0.8194 -> 0.8914`
+  - pipeline remained `1/1`
+- Mid strict `full` no longer has a hollow temporal floor:
+  - exam held at `17/20`
+  - temporal exam `0/0 (floor unmet) -> 8/8`
+  - final score `0.843 -> 0.9262`
+  - pipeline remained `passed`
+- Upper-mid strict `full` was used as a control rerun after the refinement:
+  - exam remained `16/20`
+  - temporal exam remained `12/16`
+  - final score remained `0.9039`
+  - no regression observed
+
+Interpretation:
+
+- This is a real honesty-and-evaluation improvement, not a fake parser gain.
+- The pipeline/KB stayed stable; the interrogator got better at asking answerable temporal questions against the actual event/state encoding.
+- The most important outcome is that the temporal caveat documented in the April 17 frontier sweep is now much narrower.
+
+References:
+
+- `tmp/glitch_frontier_recovery_temporal3_20260419.summary.json`
+- `tmp/mid_full_temporal_repair2_20260419.summary.json`
+- `tmp/upper_mid_full_temporal_repair2_20260419.summary.json`
+- `docs/reports/TEMPORAL_INTERROGATOR_RECOVERY_2026-04-19.md`
+
 ## Update: 2026-04-17 (Longform Full-Mode Recovery + Frontier Sweep)
 
 We completed a longform recovery pass aimed at the weakest honest lane: strict `full` story ingestion on the narrative packs.

@@ -8,6 +8,7 @@ Use it when you want to compare the current front door to direct GIC interaction
 
 - Start the console from [ui_gateway/main.py](../ui_gateway/main.py).
 - Keep `Apply Strict Bouncer Lock` enabled unless you are intentionally testing looser behavior.
+- Leave `Debug details` off for first-pass product feel checks; turn it on when you want to inspect trace, ambiguity rows, and phase internals.
 - Use `Reset Session` before each scenario block unless the script says to keep the same session.
 - After interesting turns, use `/state` and `/kb 50`.
 - Export the session when a run is especially good or especially bad.

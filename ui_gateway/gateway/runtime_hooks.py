@@ -99,6 +99,13 @@ class RuntimeHooks:
                 str(int(config.get("compiler_timeout", 60) or 60)),
                 prompt_path,
                 str(round(float(config.get("clarification_eagerness", 0.75) or 0.75), 3)),
+                str(config.get("freethinker_resolution_policy", "off")),
+                str(config.get("freethinker_backend", "ollama")),
+                str(config.get("freethinker_base_url", "http://127.0.0.1:11434")),
+                str(config.get("freethinker_model", "qwen3.5:9b")),
+                str(int(config.get("freethinker_context_length", 16384) or 16384)),
+                str(int(config.get("freethinker_timeout", 60) or 60)),
+                str(config.get("freethinker_prompt_file", "modelfiles/freethinker_system_prompt.md")),
                 str(bool(config.get("require_final_confirmation", True))),
                 str(bool(config.get("strict_mode", True))),
             ]
@@ -125,6 +132,20 @@ class RuntimeHooks:
             compiler_timeout=max(5, int(config.get("compiler_timeout", 60) or 60)),
             compiler_prompt_file=str(prompt_path) if prompt_path is not None else "",
             compiler_prompt_enabled=prompt_enabled,
+            freethinker_resolution_policy=str(
+                config.get("freethinker_resolution_policy", "off") or "off"
+            ),
+            freethinker_backend=str(config.get("freethinker_backend", "ollama") or "ollama"),
+            freethinker_base_url=str(
+                config.get("freethinker_base_url", "http://127.0.0.1:11434") or "http://127.0.0.1:11434"
+            ),
+            freethinker_model=str(config.get("freethinker_model", "qwen3.5:9b") or "qwen3.5:9b"),
+            freethinker_context_length=max(512, int(config.get("freethinker_context_length", 16384) or 16384)),
+            freethinker_timeout=max(5, int(config.get("freethinker_timeout", 60) or 60)),
+            freethinker_prompt_file=str(
+                config.get("freethinker_prompt_file", "modelfiles/freethinker_system_prompt.md")
+                or "modelfiles/freethinker_system_prompt.md"
+            ),
         )
         self._server.tools_call(
             "set_pre_think_session",

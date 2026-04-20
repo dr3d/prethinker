@@ -1,10 +1,51 @@
 # Prethinker Console
 
-This note documents the `Prethinker Console` front door in `ui_gateway/`.
+This note documents the current UI/front-door shape for Prethinker.
 
-## Purpose
+It is both:
 
-Provide a lightweight product embodiment of Prethinker as a front-door console plus chat UI while still exercising the shared interactive GIC entry path.
+- a practical manual test cockpit for the real interactive GIC path
+- the early product embodiment of Prethinker as a governed adapter in front of conversational AI
+
+## What The Console Is For
+
+The console is where a human should be able to:
+
+- type ordinary language
+- see what Prethinker thinks the turn means
+- see whether it committed, queried, or blocked
+- inspect the symbolic ledger when desired
+
+It is not meant to be a fake demo shell with its own parallel semantics.
+
+The design goal is:
+
+- same core interactive entry path
+- friendlier UI
+- optional debug visibility
+
+## Canonical Entry Path
+
+The console should be understood as a presentation layer over the canonical interactive entryway:
+
+- [src/mcp_server.py](/D:/_PROJECTS/prethinker/src/mcp_server.py) `process_utterance()`
+
+That means the console is supposed to be a truthful way to test Prethinker itself, not "something close enough."
+
+## Product Direction
+
+The larger product vision is that this UI, or a future descendant of it, can become the adapter layer in front of a user's chatbot of choice.
+
+In that shape:
+
+- the chatbot remains the fluent conversational surface
+- Prethinker watches the interaction stream
+- durable facts, rules, and queries are compiled into symbolic memory
+- the user gets an inspectable ledger instead of hidden state drift
+
+So the console is not just a developer toy.
+
+It is the first place where the product behavior becomes legible.
 
 ## Current Shape
 
@@ -16,26 +57,90 @@ Provide a lightweight product embodiment of Prethinker as a front-door console p
   - `commit`
   - `answer`
 - config persisted in `ui_gateway/state/gateway_config.json`
-- runtime path now uses the canonical `process_utterance()` server entryway plus deterministic core tool execution
-- strict bouncer invariants now enforced when `strict_mode=true`
+- runtime path uses the canonical `process_utterance()` server entryway plus deterministic core tool execution
+
+## Newbie-Friendly Surface
+
+The console should feel usable to tire-kickers before they know anything about the runtime internals.
+
+Current UI direction:
+
+- plain-language onboarding copy
+- empty-state example prompts
+- clear turn outcome cards
+- pending-clarification banner
+- friendly default view with internals hidden
+
+## Debug Mode
+
+The console now also supports a debug-oriented experience.
+
+By default, internals stay mostly hidden.
+
+When `Debug details` is enabled, the user can inspect:
+
+- compiler trace summary
+- raw/normalized/admitted path
+- ambiguity rows
+- phase cards
+- mutation details
+
+This is important because the same UI needs to serve two audiences:
+
+- newcomers evaluating the product shape
+- us, when we need to see whether success came from the raw model, wrapper discipline, or runtime rescue logic
 
 ## Default Binding Choices
 
-- compiler model: `qwen35-semparse:9b`
+- compiler model: `qwen3.5:9b` or baked local equivalent
 - compiler mode: `strict`
 - compiler backend: `ollama`
 - compiler base URL: `http://127.0.0.1:11434`
 - served handoff mode in strict mode: `never`
+- Freethinker sidecar policy: `off`
 
-## MITM Status
+## Freethinker Status
 
-- `RuntimeHooks.front_door()` uses real `pre_think`.
-- deterministic tool path is live (`assert_fact`, `assert_rule`, `retract_fact`, `query_rows`).
-- served-LLM handoff exists but is intentionally disabled in strict mode.
-- session trace export is available at `GET /api/session/state?session_id=...`.
-- batch runner is available: `scripts/run_gateway_turnset.py`.
+Freethinker exists as a design-track capability, not as a default behavioral change.
+
+Current state:
+
+- config surface exists
+- trace slot exists
+- default policy is `off`
+- no live Freethinker resolution is currently changing commits in the console
+
+Near-term intended path:
+
+- UI-first
+- advisory only at first
+- improve clarification behavior before attempting write unblocking
+
+Reference:
+
+- [docs/FREETHINKER_DESIGN.md](/D:/_PROJECTS/prethinker/docs/FREETHINKER_DESIGN.md)
 
 ## Deliberate Limits
 
-- No auth, persistence, or streaming yet
-- No multi-user isolation guarantees yet (single local process MVP)
+This is still an MVP.
+
+What it does not claim yet:
+
+- auth
+- durable multi-user persistence
+- production streaming UX
+- a fully polished handoff into arbitrary external chatbots
+- broad field robustness across every language style
+
+## Why This Matters
+
+The console is where the project stops being only a backend experiment.
+
+If the UI can show:
+
+- what was understood
+- what was committed
+- what was blocked
+- what clarification is needed
+
+in a way that feels honest rather than magical, then Prethinker starts to become a real product surface instead of only a tuning harness.

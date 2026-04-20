@@ -23,6 +23,13 @@ class GatewayConfig:
     compiler_timeout: int = 60
     compiler_prompt_file: str = "modelfiles/semantic_parser_system_prompt.md"
     clarification_eagerness: float = 0.75
+    freethinker_resolution_policy: str = "off"
+    freethinker_model: str = "qwen3.5:9b"
+    freethinker_backend: str = "ollama"
+    freethinker_base_url: str = "http://127.0.0.1:11434"
+    freethinker_context_length: int = 16384
+    freethinker_timeout: int = 60
+    freethinker_prompt_file: str = "modelfiles/freethinker_system_prompt.md"
     require_final_confirmation: bool = True
     strict_mode: bool = True
 
@@ -66,6 +73,16 @@ class ConfigStore:
                 sanitized["compiler_timeout"] = max(5, int(sanitized["compiler_timeout"]))
             except Exception:
                 sanitized.pop("compiler_timeout", None)
+        if "freethinker_context_length" in sanitized:
+            try:
+                sanitized["freethinker_context_length"] = max(512, int(sanitized["freethinker_context_length"]))
+            except Exception:
+                sanitized.pop("freethinker_context_length", None)
+        if "freethinker_timeout" in sanitized:
+            try:
+                sanitized["freethinker_timeout"] = max(5, int(sanitized["freethinker_timeout"]))
+            except Exception:
+                sanitized.pop("freethinker_timeout", None)
         if "served_llm_timeout" in sanitized:
             try:
                 sanitized["served_llm_timeout"] = max(5, int(sanitized["served_llm_timeout"]))
@@ -86,6 +103,11 @@ class ConfigStore:
             if backend not in {"ollama", "lmstudio"}:
                 backend = "ollama"
             sanitized["compiler_backend"] = backend
+        if "freethinker_backend" in sanitized:
+            backend = str(sanitized["freethinker_backend"]).strip().lower()
+            if backend not in {"ollama", "lmstudio"}:
+                backend = "ollama"
+            sanitized["freethinker_backend"] = backend
         if "clarification_eagerness" in sanitized:
             try:
                 value = float(sanitized["clarification_eagerness"])
@@ -105,6 +127,11 @@ class ConfigStore:
             if mode not in {"auto", "always", "never"}:
                 mode = "auto"
             sanitized["compiler_prompt_mode"] = mode
+        if "freethinker_resolution_policy" in sanitized:
+            mode = str(sanitized["freethinker_resolution_policy"]).strip().lower()
+            if mode not in {"off", "advisory_only", "grounded_reference", "conservative_contextual"}:
+                mode = "off"
+            sanitized["freethinker_resolution_policy"] = mode
         return sanitized
 
     def _enforce_invariants(self, payload: dict) -> dict:

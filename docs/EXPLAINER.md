@@ -1,138 +1,299 @@
-﻿# Prethinker Explainer
+# Prethinker Explainer
 
-This is the public explainer for what Prethinker is, what it does well today, and where it still fails.
+This is the plain-language explanation of what Prethinker is trying to become, what it already does well, and where the boundaries still are.
 
-## Failure Modes We Kept Hitting (And Why They Matter)
+## The Short Version
 
-The core discovery is this: most parser failures do not look like ignorance. They look like **near-correctness**.
+Prethinker is a governed adapter that can sit in front of a conversational model and turn parts of a dialogue into auditable symbolic state.
 
-The model often sounds right while still writing the wrong thing.
+It is not trying to be "a smarter chatbot."
+
+It is trying to do something narrower and, in some settings, more useful:
+
+- watch language as it happens
+- decide which turns are safe to formalize
+- compile those turns into Prolog-style facts, rules, queries, or retracts
+- keep that state deterministic and inspectable
+
+The right metaphor is not just "memory."
+
+It is closer to a governed stenographer and compiler.
+
+## Why This Exists
+
+Ordinary chat systems are good at sounding coherent across a conversation, but they are weak at durable state discipline.
+
+They often:
+
+- forget
+- blur revisions into summaries
+- lose argument direction
+- answer confidently from fuzzy context
+- mutate their implied world model without leaving an audit trail
+
+Prethinker exists to intercept that problem.
+
+Instead of letting "whatever the model currently thinks" become the hidden state of the interaction, it tries to create:
+
+- explicit symbolic memory
+- explicit ambiguity handling
+- explicit mutation authority
+- explicit evidence for why a state change happened
+
+## The Product Vision
+
+The long-term product shape is a UI or adapter layer that can sit in front of a user's chatbot of choice.
+
+In that shape:
+
+- the chatbot remains the conversational engine
+- Prethinker watches the interaction stream
+- eligible turns get compiled into symbolic operations
+- the resulting KB becomes durable, queryable memory outside the chatbot's private context window
+
+So yes, Prethinker can be thought of as a kind of stenographer.
+
+But not a passive stenographer.
+
+It is a governed stenographer:
+
+- it does not record everything verbatim as durable truth
+- it does not commit uncertain meaning automatically
+- it can ask for clarification
+- it can refuse a write
+- it can show exactly what it believes was committed
+
+## The Two Roles We Care About
+
+### Prethinker
+
+`Prethinker` is the strict role.
+
+Its job is to:
+
+- read the current utterance
+- classify the intent
+- emit a structured compiler object
+- pass that object through deterministic validation and normalization
+- allow or deny KB mutation
+
+Prethinker is the authority boundary.
+
+It is intentionally caged:
+
+- schema-bound
+- guarded
+- allergic to guessing
+
+### Freethinker
+
+`Freethinker` is the planned clarification liaison.
+
+Its job is not to write to the KB.
+
+Its job is to help when Prethinker hesitates.
+
+Freethinker can:
+
+- watch recent context
+- track likely referents across turns
+- propose a better clarification question
+- sometimes suggest a grounded referential resolution
+- abstain when weak
+
+Freethinker is not a second authority.
+
+The constitutional rule is:
+
+- Freethinker may suggest.
+- Prethinker decides.
+
+## Why Not Just One Bigger Model?
+
+This is the obvious question, and it is a good one.
+
+Why not just give one `qwen3.5:9b` a larger context window, a strong prompt, and let it do both the compiling and the clarification work?
+
+That may turn out to be enough for some slices, but the jobs pull in different directions:
+
+- the compiler role should be narrow, auditable, and conservative
+- the clarification role should be softer, more contextual, and better at discourse continuity
+
+When one role must both "never guess" and "use context intelligently," drift starts to creep in.
+
+So the split is not really "two different intelligences."
+
+It is:
+
+- one authority role
+- one advisory role
+
+Even if both are backed by the same underlying 9B model family.
+
+## What The System Actually Does On A Turn
+
+At a high level:
+
+`utterance -> proposed operation -> deterministic gate -> apply/query -> evidence`
+
+More concretely:
+
+1. A turn arrives.
+2. Prethinker classifies it as a write, query, rule, retract, or `other`.
+3. The parser proposes a structured operation.
+4. The runtime checks schema, shape, registry/type rules, and ambiguity policy.
+5. If accepted, the deterministic runtime mutates or queries the KB.
+6. The result is recorded with provenance and can be inspected later.
+
+That means the LLM is allowed to propose structure.
+
+It is not allowed to become the authority on state.
+
+## Where The System Gets Strong
+
+Prethinker is strongest when the task is:
+
+- stateful
+- inspectable
+- mutation-sensitive
+- queryable after the fact
+
+Examples:
+
+- "Remember that Scott runs the bakery."
+- "Actually, Blake runs it now."
+- "Who runs the bakery?"
+- "Keep the prior timeline but retract the false transfer."
+
+Those are the kinds of turns where deterministic memory discipline matters more than conversational style.
+
+## Failure Modes That Still Matter
+
+The failures that matter most are not usually total collapse.
+
+They are near-correctness.
 
 ### 1. Argument direction illusions
-English form is a poor predictor of Prolog argument order.
+
+English form is a bad guide to Prolog argument order.
 
 - "A is B's parent"
 - "A has B as a parent"
 - "A is parented by B"
 
-These are close in wording and different in logic direction. Easy declaratives can pass while these fail.
+These sound similar and can map to different logical direction.
 
-### 2. Compound turns are a different problem, not just longer turns
-"Assert this, retract that, then query lineage" can be semantically understood but serialized as one malformed logic blob.
+### 2. Multi-clause turns that sound easy
 
-Multi-clause language must be unpacked explicitly.
+Longer turns are not just bigger turns.
 
-### 3. Natural-language retracts are under-specified
-Humans do not say `retract(parent(x,y))`.
-They say "undo that branch," "keep this edge," "swap the middle one."
+They often contain:
 
-Without a correction normalization layer, the system retracts the wrong thing or misses the retract.
+- multiple facts
+- corrections
+- sequencing
+- query intent mixed with write intent
 
-### 4. Exclusion language is a silent killer
-"not", "stays", "keep", "except" often indicate preserved structure, not removal.
+The system can semantically "understand" them while still serializing them badly.
 
-A naive repair can wipe the branch that should have been protected.
+### 3. Clarification that either helps or annoys
 
-### 5. Clarification can help or hurt
-The question is not "ask more" vs "ask less."
+The right question is not "ask more" versus "ask less."
 
-Clarification helps when referents/write targets are unresolved.
-Clarification hurts when the parse is already deterministic.
+It is whether clarification is being used at the right moments.
 
-Good policy is selective friction.
+Clarification helps when:
 
-### 6. Failures move as the system improves
-Early failures were routing and schema shape.
-Later failures are timing, branch preservation, correction semantics, and long-turn consistency.
+- referents are unresolved
+- predicate direction is genuinely unclear
+- the write would otherwise be speculative
 
-That shift is progress, but still hard.
+Clarification hurts when:
 
-## How Prethinker Gets High Accuracy
+- the parse is already deterministic
+- the system is asking internal ontology questions a user should never see
+- the model is being starved of obvious local context
 
-Prethinker is a **governed intent compiler**: language can propose actions, but proposals do not get commit authority by default.
+### 4. Narrative compression
 
-### Proposal is not authority
-Natural language can suggest writes, queries, and repairs.
-Durable state mutation is allowed only after policy and deterministic checks.
+Long-form inputs can still "pass" while under-capturing the story.
 
-### Two memories, two jobs
+That is why the project measures:
 
-1. **Sharp memory** (deterministic KB)
-- retained named Prolog corpora
-- exact queryability
-- provenance-backed state
-- only authoritative memory
+- coverage
+- precision
+- exam quality
+- temporal exam quality
 
-2. **Mushy memory** (served LLM context)
-- useful for phrasing, pronouns, and candidate clarifications
-- probabilistic and advisory
-- never a source of truth by itself
+not just whether the pipeline technically completed.
 
-### Interception point (control plane)
-Every turn is intercepted before write execution.
+## What Makes This More Than Prompt Theater
 
-The compiler classifies intent, normalizes structure, decides commit/stage/escalate/reject, and only then permits runtime apply.
+The project does not rely only on one system prompt and vibes.
 
-### Clarification is intentionally asymmetric
+The working stack is:
 
-- **User clarification**: authoritative for intended meaning.
-- **Served-LLM clarification**: advisory helper only.
+- shared prompt doctrine
+- per-pass schema wrappers
+- deterministic validation and normalization
+- optional registry/type gates
+- persistent KB state
+- interrogator-style scoring and report generation
 
-A served model can suggest a likely interpretation. It cannot independently manufacture certainty for uncertain writes.
+That is also why the repo is careful about honesty:
 
-### Why the clarification voice sounds robotic
-This is intentional safety design.
+- stable proof lanes are not the same thing as frontier wins
+- historical good-looking scores are not reused if the constraints were not real
+- docs are expected to follow the evidence, not flatter it
 
-When requesting write authority, the system should sound instrument-like, not socially persuasive. A narrow, mechanical tone reduces the chance that fluency hides uncertainty.
+## What We Know Today
 
-## How We Tune It
+As of April 19, 2026:
 
-We tune with a ladder that has two dimensions.
+- the safety gate is green at `120 passed`
+- strict Blocksworld remains the stable proof lane
+- strict narrative packs are materially stronger than their first honest post-registry baseline
+- the console is now the canonical interactive front door
+- Freethinker is a real design-track capability, but still policy-off by default
 
-### Height: logical difficulty
-facts -> rules -> chains -> retractions -> branch repair -> exclusion language -> story revisions -> clarification pressure.
+The important subtlety is this:
 
-### Width: language noise at fixed logic target
-clean phrasing -> passive/inversion -> pronouns -> typos -> hedging -> missing punctuation -> mixed ingest/query turns.
+the system is stronger today as a governed parser stack than it is as a broad raw-language front door.
 
-Most systems look strong on height and weak on width. We track both.
-
-### One concrete case shape
-A typical case is:
-
-1. establish world facts in plain English
-2. ask baseline queries (expected true state)
-3. apply state churn (add, retract, correct, exclude)
-4. ask post-mutation queries
-5. verify both new truth and preserved branches
-
-That pattern catches "sounds-right, writes-wrong" behavior quickly.
-
-### Why instrumentation matters
-Run campaigns are expensive in wall-clock and review time. The main bottleneck is not launching runs; it is interpreting failures correctly.
-
-That is why this repo emphasizes:
-
-- prompt/version lineage
-- run manifests and scoreboards
-- reproducible scenario packs
-- explicit failure retention, not only success screenshots
+That is real progress.
+It is not the same as universal robustness.
 
 ## What This Does Not Claim
 
-Prethinker does not claim universal semantic parsing.
+Prethinker does not claim:
 
-It claims something narrower and more useful today:
+- universal semantic parsing
+- freeform conversational reasoning as authority
+- zero-error open-domain understanding
+- production readiness across legal, medical, and arbitrary wild language all at once
+
+What it does claim is narrower:
 
 - deterministic memory discipline
-- explicit trust boundaries
 - auditable language-to-logic mutation
-- transparent failure reporting as the system improves
+- explicit trust boundaries
+- a measurable path for improvement
 
 ## Why This Is Interesting
 
-If English can be compiled into deterministic state under governance, you can narrate a world, mutate it over time, and query consequences without giving raw commit authority to a probabilistic model.
+If language can be compiled into durable symbolic state under governance, then a user can:
 
-That is the product direction: not "chat that sounds smart," but **stateful reasoning you can inspect**.
+- narrate a world
+- revise it
+- query it
+- inspect the record of how it changed
 
-![Prethinker control plane: natural-language input flows through interception, normalization, clarification/confirmation gates, then deterministic KB mutation](assets/prethinker-control-plane-infographic-v2.png)
+without giving a probabilistic conversational model silent authority over the world state.
+
+That is the interesting bet here.
+
+Not "a chatbot that sounds smarter."
+
+A conversation-adjacent system that makes stateful reasoning inspectable.
+
+![Prethinker control plane: natural-language input flows through interception, normalization, clarification/confirmation gates, then deterministic KB mutation](D:/_PROJECTS/prethinker/docs/assets/prethinker-control-plane-infographic-v2.png)

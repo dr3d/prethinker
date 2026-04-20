@@ -10,6 +10,8 @@ Last updated: 2026-04-09
 - `qwen35-9b-findings.md` (observed 9B behavior and recommended guardrails)
 - `test-lmstudio-semparse.ps1` (2-pass validator for LM Studio and Ollama)
 - `semantic_parser_system_prompt.md` (human-editable prompt pack used by `kb_pipeline.py`)
+- `semantic_parser_system_prompt_candidate.md` (staging candidate for future prompt A/B work; not active by default)
+- `freethinker_system_prompt.md` (staging sidecar prompt for future clarification-liaison work; inactive while policy is `off`)
 - `history/prompts/*.md` (immutable prompt snapshots keyed by `prompt_id`)
 
 ## Build (Ollama)

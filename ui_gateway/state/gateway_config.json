@@ -15,6 +15,13 @@
   "compiler_timeout": 60,
   "compiler_prompt_file": "modelfiles/semantic_parser_system_prompt.md",
   "clarification_eagerness": 0.75,
+  "freethinker_resolution_policy": "off",
+  "freethinker_model": "qwen3.5:9b",
+  "freethinker_backend": "ollama",
+  "freethinker_base_url": "http://127.0.0.1:11434",
+  "freethinker_context_length": 16384,
+  "freethinker_timeout": 60,
+  "freethinker_prompt_file": "modelfiles/freethinker_system_prompt.md",
   "require_final_confirmation": true,
   "strict_mode": true
 }

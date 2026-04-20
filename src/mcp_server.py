@@ -65,6 +65,13 @@ def _clip_01(value: Any, default: float = 0.75) -> float:
     return v
 
 
+def _normalize_freethinker_resolution_policy(value: Any, default: str = "off") -> str:
+    mode = str(value or default).strip().lower()
+    if mode not in {"off", "advisory_only", "grounded_reference", "conservative_contextual"}:
+        mode = str(default or "off").strip().lower() or "off"
+    return mode
+
+
 def _bootstrap_env_from_local_file(explicit_path: str = "") -> Path | None:
     env_file = _resolve_env_file(str(explicit_path or "").strip(), None)
     if env_file is None:
@@ -106,6 +113,13 @@ class PrologMCPServer:
         compiler_timeout: int = 60,
         compiler_prompt_file: str = "",
         compiler_prompt_enabled: bool = True,
+        freethinker_resolution_policy: str = "off",
+        freethinker_backend: str = "ollama",
+        freethinker_base_url: str = "http://127.0.0.1:11434",
+        freethinker_model: str = "qwen3.5:9b",
+        freethinker_context_length: int = 16384,
+        freethinker_timeout: int = 60,
+        freethinker_prompt_file: str = "",
     ) -> None:
         self._runtime = CorePrologRuntime()
         self._kb_path = str(Path(kb_path).resolve()) if str(kb_path).strip() else ""
@@ -131,11 +145,29 @@ class PrologMCPServer:
         self._compiler_prompt_loaded = False
         self._compiler_prompt_load_error = ""
         self._compiler_api_key = _get_api_key()
+        self._freethinker_resolution_policy = _normalize_freethinker_resolution_policy(
+            freethinker_resolution_policy,
+            "off",
+        )
+        self._freethinker_backend = str(freethinker_backend or "ollama").strip()
+        self._freethinker_base_url = str(freethinker_base_url or "http://127.0.0.1:11434").strip()
+        self._freethinker_model = str(freethinker_model or "qwen3.5:9b").strip()
+        self._freethinker_context_length = max(512, int(freethinker_context_length))
+        self._freethinker_timeout = max(5, int(freethinker_timeout))
+        freethinker_prompt_candidate = str(freethinker_prompt_file or "").strip()
+        if not freethinker_prompt_candidate:
+            freethinker_prompt_candidate = str(REPO_ROOT / "modelfiles" / "freethinker_system_prompt.md")
+        self._freethinker_prompt_path = Path(freethinker_prompt_candidate)
+        self._freethinker_prompt_text = ""
+        self._freethinker_prompt_loaded = False
+        self._freethinker_prompt_load_error = ""
+        self._freethinker_api_key = _get_api_key()
         self._registry_signatures = self._load_registry_signatures()
         self._last_prethink_trace: dict[str, Any] = {}
         self._last_prethink_fallback_trace: dict[str, Any] = {}
         self._last_parse_trace: dict[str, Any] = {}
         self._load_compiler_prompt()
+        self._load_freethinker_prompt()
 
     def _load_compiler_prompt(self) -> None:
         if not self._compiler_prompt_enabled:
@@ -151,6 +183,16 @@ class PrologMCPServer:
             self._compiler_prompt_text = ""
             self._compiler_prompt_loaded = False
             self._compiler_prompt_load_error = str(exc)
+
+    def _load_freethinker_prompt(self) -> None:
+        try:
+            self._freethinker_prompt_text = self._freethinker_prompt_path.read_text(encoding="utf-8")
+            self._freethinker_prompt_loaded = bool(self._freethinker_prompt_text.strip())
+            self._freethinker_prompt_load_error = ""
+        except Exception as exc:
+            self._freethinker_prompt_text = ""
+            self._freethinker_prompt_loaded = False
+            self._freethinker_prompt_load_error = str(exc)
 
     def _load_registry_signatures(self) -> set[tuple[str, int]]:
         path = REPO_ROOT / "modelfiles" / "predicate_registry.json"
@@ -237,15 +279,80 @@ class PrologMCPServer:
             "overall": overall,
         }
 
+    def _build_freethinker_trace(
+        self,
+        *,
+        utterance: str,
+        action: str,
+        reason: str,
+        used: bool = False,
+        confidence: float = 0.0,
+        grounding: str = "",
+        proposed_answer: str = "",
+        proposed_question: str = "",
+    ) -> dict[str, Any]:
+        action_clean = str(action or "skipped").strip().lower() or "skipped"
+        reason_clean = str(reason or "").strip()
+        grounding_clean = str(grounding or "").strip()
+        trace = {
+            "utterance": utterance,
+            "policy": self._freethinker_resolution_policy,
+            "used": bool(used),
+            "action": action_clean,
+            "reason": reason_clean,
+            "confidence": _clip_01(confidence, 0.0),
+            "grounding": grounding_clean,
+            "proposed_answer": str(proposed_answer or "").strip(),
+            "proposed_question": str(proposed_question or "").strip(),
+            "model": self._freethinker_model,
+            "backend": self._freethinker_backend,
+            "base_url": self._freethinker_base_url,
+            "context_length": self._freethinker_context_length,
+            "prompt_path": str(self._freethinker_prompt_path),
+            "prompt_loaded": bool(self._freethinker_prompt_loaded),
+            "prompt_error": str(self._freethinker_prompt_load_error or "").strip(),
+        }
+        trace["summary"] = self._summarize_freethinker_trace(trace)
+        return trace
+
+    def _summarize_freethinker_trace(self, trace: dict[str, Any]) -> dict[str, Any]:
+        policy = _normalize_freethinker_resolution_policy(trace.get("policy"), "off")
+        used = bool(trace.get("used", False))
+        action = str(trace.get("action", "")).strip().lower() or "skipped"
+        reason = str(trace.get("reason", "")).strip()
+        grounding = str(trace.get("grounding", "")).strip()
+        if policy == "off":
+            overall = "freethinker=off"
+        elif not used:
+            suffix = f" ({reason})" if reason else ""
+            overall = f"freethinker=idle{suffix}"
+        elif grounding:
+            overall = f"freethinker={action} via {grounding}"
+        else:
+            overall = f"freethinker={action}"
+        return {
+            "policy": policy,
+            "used": used,
+            "action": action,
+            "grounding": grounding,
+            "overall": overall,
+        }
+
     def _summarize_compiler_trace(
         self,
         *,
         prethink_trace: dict[str, Any] | None,
         parse_trace: dict[str, Any] | None,
+        freethinker_trace: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         prethink_summary = (
             dict(prethink_trace.get("summary", {}))
             if isinstance(prethink_trace, dict) and isinstance(prethink_trace.get("summary"), dict)
+            else {}
+        )
+        freethinker_summary = (
+            dict(freethinker_trace.get("summary", {}))
+            if isinstance(freethinker_trace, dict) and isinstance(freethinker_trace.get("summary"), dict)
             else {}
         )
         parse_summary = (
@@ -255,6 +362,7 @@ class PrologMCPServer:
         )
         parts = [
             str(prethink_summary.get("overall", "")).strip(),
+            str(freethinker_summary.get("overall", "")).strip(),
             str(parse_summary.get("overall", "")).strip(),
         ]
         overall = "; ".join(part for part in parts if part)
@@ -263,6 +371,8 @@ class PrologMCPServer:
         return {
             "overall": overall,
             "prethink_source": str(prethink_summary.get("source", "")).strip(),
+            "freethinker_policy": str(freethinker_summary.get("policy", "")).strip(),
+            "freethinker_action": str(freethinker_summary.get("action", "")).strip(),
             "parse_rescues": list(parse_summary.get("rescues", [])),
         }
 
@@ -1637,6 +1747,34 @@ class PrologMCPServer:
             self._last_prethink_trace = trace
             return None, f"{exc} | Fallback classifier failed: {fallback_error}"
 
+    def _freethinker_trace_for_front_door(
+        self,
+        *,
+        utterance: str,
+        front_door: dict[str, Any] | None,
+    ) -> dict[str, Any]:
+        needs_clarification = bool((front_door or {}).get("needs_clarification", False))
+        if self._freethinker_resolution_policy == "off":
+            return self._build_freethinker_trace(
+                utterance=utterance,
+                action="skipped",
+                reason="policy_off",
+                used=False,
+            )
+        if not needs_clarification:
+            return self._build_freethinker_trace(
+                utterance=utterance,
+                action="skipped",
+                reason="not_needed",
+                used=False,
+            )
+        return self._build_freethinker_trace(
+            utterance=utterance,
+            action="queued",
+            reason="not_implemented_yet",
+            used=False,
+        )
+
     def pre_think(self, arguments: dict[str, Any] | None = None) -> dict[str, Any]:
         args = arguments or {}
         utterance = str(args.get("utterance", "")).strip()
@@ -1852,6 +1990,7 @@ class PrologMCPServer:
 
         prethink: dict[str, Any] | None = None
         prethink_trace: dict[str, Any] | None = None
+        freethinker_trace: dict[str, Any] | None = None
         if clarification_answer:
             pending = self._pending_prethink
             if pending is None:
@@ -1884,16 +2023,28 @@ class PrologMCPServer:
             front_door["clarification_question"] = ""
             front_door["reasons"] = ["clarification_resolved"]
             prethink_trace = self._clone_trace_payload(pending.get("compiler_trace", {}))
+            freethinker_trace = self._freethinker_trace_for_front_door(
+                utterance=utterance,
+                front_door=front_door,
+            )
         else:
             prethink = self.pre_think({"utterance": utterance})
             if str(prethink.get("status", "")).strip() != "success":
                 prethink_message = str(prethink.get("message", "pre_think failed")).strip() or "pre_think failed"
                 failure_prethink_trace = self._clone_trace_payload(prethink.get("trace", {}))
+                freethinker_trace = self._build_freethinker_trace(
+                    utterance=utterance,
+                    action="skipped",
+                    reason="prethink_failed",
+                    used=False,
+                )
                 compiler_trace = {
                     "prethink": failure_prethink_trace,
+                    "freethinker": freethinker_trace,
                     "summary": self._summarize_compiler_trace(
                         prethink_trace=failure_prethink_trace if isinstance(failure_prethink_trace, dict) else None,
                         parse_trace=None,
+                        freethinker_trace=freethinker_trace,
                     ),
                 }
                 return {
@@ -1931,12 +2082,18 @@ class PrologMCPServer:
             packet = prethink.get("packet", {}) if isinstance(prethink.get("packet"), dict) else {}
             prethink_trace = self._clone_trace_payload(prethink.get("trace", {}))
             front_door = self._front_door_from_packet(packet=packet, prethink=prethink)
+            freethinker_trace = self._freethinker_trace_for_front_door(
+                utterance=utterance,
+                front_door=front_door,
+            )
             if bool(front_door.get("needs_clarification")):
                 compiler_trace = {
                     "prethink": prethink_trace,
+                    "freethinker": freethinker_trace,
                     "summary": self._summarize_compiler_trace(
                         prethink_trace=prethink_trace if isinstance(prethink_trace, dict) else None,
                         parse_trace=None,
+                        freethinker_trace=freethinker_trace,
                     ),
                 }
                 return {
@@ -1971,10 +2128,12 @@ class PrologMCPServer:
         )
         compiler_trace = {
             "prethink": prethink_trace if isinstance(prethink_trace, dict) else None,
+            "freethinker": freethinker_trace,
             "parse": parse_trace,
             "summary": self._summarize_compiler_trace(
                 prethink_trace=prethink_trace if isinstance(prethink_trace, dict) else None,
                 parse_trace=parse_trace,
+                freethinker_trace=freethinker_trace,
             ),
         }
         if not isinstance(parsed, dict):

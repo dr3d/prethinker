@@ -1,6 +1,6 @@
 ﻿# Track Scoreboard
 
-Last updated: 2026-04-17
+Last updated: 2026-04-19
 
 ## Read This First
 
@@ -11,15 +11,16 @@ Current status after the latest guarded and recovery reruns:
 
 | Lane | Status | Evidence |
 |---|---|---|
-| Safety gate | green | `105 passed` |
+| Safety gate | green | `120 passed` |
 | Blocksworld strict guarded | green | `20/20` solve/replay, `8/8` pilot, zero-hit `0`, avg init `0.458334`, avg goal `0.458334` |
-| Narrative strict (mid) | recovered, with caveat | `pipeline_pass=3/3`, best `0.9284`; `full` improved to `17/20` but still misses temporal floor |
+| Narrative strict (mid) | recovered | `pipeline_pass=3/3`, best `0.9284`; temporal interrogator recovery restored a real `full` temporal floor |
 | Narrative strict (upper-mid) | strong | `pipeline_pass=3/3`, best `0.956`; paragraph and line both reached `20/20` |
 
 References:
 
 - `docs/PROGRESS.md`
 - `docs/reports/FRONTIER_SWEEP_2026-04-17.md`
+- `docs/reports/TEMPORAL_INTERROGATOR_RECOVERY_2026-04-19.md`
 
 ## Historical Width Tracks (2026-04-13 Snapshot, Ollama, qwen35-semparse:9b, runtime=core)
 

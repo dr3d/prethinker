@@ -829,6 +829,53 @@ class LocalMcpServerTests(unittest.TestCase):
         query_payload = execution.get("query_result", {})
         self.assertEqual(query_payload.get("status"), "success")
 
+    def test_process_utterance_traces_freethinker_as_off_by_default(self) -> None:
+        strict_server = PrologMCPServer(compiler_mode="strict")
+        compiled = {
+            "intent": "assert_fact",
+            "needs_clarification": True,
+            "uncertainty_score": 0.8,
+            "clarification_question": "Who does 'he' refer to?",
+            "clarification_reason": "Unresolved pronoun.",
+            "rationale": "Write-like utterance blocked on reference.",
+        }
+
+        with patch.object(strict_server, "_compile_prethink_semantics", return_value=(compiled, "")):
+            result = strict_server.process_utterance({"utterance": "He lives in Salem."})
+
+        self.assertEqual(result.get("status"), "clarification_required")
+        trace = result.get("compiler_trace", {})
+        freethinker = trace.get("freethinker", {})
+        self.assertEqual(freethinker.get("policy"), "off")
+        self.assertFalse(freethinker.get("used"))
+        self.assertEqual(freethinker.get("action"), "skipped")
+        self.assertEqual(trace.get("summary", {}).get("freethinker_policy"), "off")
+
+    def test_process_utterance_records_queued_freethinker_when_policy_enabled(self) -> None:
+        strict_server = PrologMCPServer(
+            compiler_mode="strict",
+            freethinker_resolution_policy="grounded_reference",
+        )
+        compiled = {
+            "intent": "assert_fact",
+            "needs_clarification": True,
+            "uncertainty_score": 0.8,
+            "clarification_question": "Who does 'he' refer to?",
+            "clarification_reason": "Unresolved pronoun.",
+            "rationale": "Write-like utterance blocked on reference.",
+        }
+
+        with patch.object(strict_server, "_compile_prethink_semantics", return_value=(compiled, "")):
+            result = strict_server.process_utterance({"utterance": "He lives in Salem."})
+
+        self.assertEqual(result.get("status"), "clarification_required")
+        trace = result.get("compiler_trace", {})
+        freethinker = trace.get("freethinker", {})
+        self.assertEqual(freethinker.get("policy"), "grounded_reference")
+        self.assertFalse(freethinker.get("used"))
+        self.assertEqual(freethinker.get("action"), "queued")
+        self.assertEqual(freethinker.get("reason"), "not_implemented_yet")
+
 
 if __name__ == "__main__":
     unittest.main()

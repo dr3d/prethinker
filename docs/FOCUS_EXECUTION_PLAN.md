@@ -1,6 +1,6 @@
 # Focus Execution Plan
 
-Last updated: 2026-04-17
+Last updated: 2026-04-19
 
 ## Objective
 
@@ -12,12 +12,12 @@ No side quests unless they improve this path, and no headline claim unless it su
 
 ## Current Reality
 
-- `scripts/run_safety_gate.py` is green (`105 passed`).
+- `scripts/run_safety_gate.py` is green (`120 passed`).
 - Strict Blocksworld is the current stable proof lane.
 - `modelfiles/predicate_registry.json` is now populated, so the general strict lane is actually strict.
 - The guarded Blocksworld lane is currently stable at `20/20`, `8/8`, zero-hit `0`, avg-hit `0.458334 / 0.458334`.
 - The mid and upper-mid narrative packs are now pipeline-green at `3/3`.
-- The main remaining caveat is not pipeline fragility; it is evaluation honesty around temporal coverage, especially on mid `full` and the Glitch control lane.
+- The main remaining caveat is no longer a hollow mid `full` temporal floor; it is the remaining temporal/query weakness on the Glitch control lane and broader evaluation honesty on wild narrative material.
 
 ## Default Operating Stack
 
@@ -28,6 +28,7 @@ No side quests unless they improve this path, and no headline claim unless it su
 - Type schema: scenario-specific where available (Goldilocks profile for Goldilocks)
 - Clarification: enabled with bounded rounds
 - Frontend proposal: `off` during baseline stabilization
+- Freethinker policy: `off` for baseline runs
 
 ## Phases
 
@@ -39,7 +40,7 @@ No side quests unless they improve this path, and no headline claim unless it su
 2. Recover narrative strict lane
 - Compare against the latest honest recovery baselines (`0.9284` mid best, `0.956` upper-mid best) while keeping the post-registry correction as the audit floor.
 - Improve temporal coverage and query honesty without loosening strict admission.
-- Treat mid `full` temporal floor and Glitch temporal reasoning as the current sharpest open fixes.
+- Treat Glitch temporal reasoning and broader wild-material evaluation honesty as the current sharpest open fixes.
 
 3. Real-world pressure
 - Resume broader HN/story pressure only after item 2 is stable.

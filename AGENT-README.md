@@ -15,11 +15,28 @@ Primary model focus right now: `qwen3.5:9b`.
 ## Current Truth Snapshot
 
 - Read `docs/PROGRESS.md` first for the current status headline.
-- Safety gate is green (`105 passed`) on the latest verified sweep.
+- Safety gate is green (`120 passed`) on the latest verified sweep.
 - Strict Blocksworld is stable under the guarded lane (`20/20` solve/replay, `8/8` pilot, zero-hit `0`).
 - The general registry is populated, so strict narrative runs are now actually constrained.
-- The strict mid and upper-mid narrative packs are currently pipeline-green at `3/3`, but mid `full` still carries a temporal-floor caveat.
+- The strict mid and upper-mid narrative packs are currently pipeline-green at `3/3`.
+- The temporal interrogator recovery narrowed the earlier mid `full` caveat; Glitch temporal remains the clearest active frontier weakness.
 - Deprecated rolling handoff files were retired; durable orientation now lives in `README.md`, `docs/`, and `SESSIONS.md`.
+- The console is the canonical interactive front door.
+- `Freethinker` is a design-track clarification sidecar with live config/trace scaffolding, but policy remains `off` by default.
+
+## Product Vision
+
+The long-term product shape is:
+
+- a UI or adapter layer in front of a user's chatbot of choice
+- `Prethinker` watching the interaction stream
+- eligible turns compiled into Prolog facts, rules, queries, and retracts
+- deterministic symbolic memory retained outside the chatbot's hidden context window
+
+Best short description:
+
+- `Prethinker` is a governed stenographer and compiler.
+- `Freethinker` is a bounded clarification liaison.
 
 ## Workspace Assumption
 
@@ -34,18 +51,21 @@ Primary model focus right now: `qwen3.5:9b`.
 ## First Files To Read
 
 1. `README.md`
-2. `docs/PROGRESS.md`
-3. `docs/FOCUS_EXECUTION_PLAN.md`
-4. `docs/reports/FRONTIER_SWEEP_2026-04-17.md`
-5. `docs/ONTOLOGY_STEERING.md`
-6. `docs/EXPLAINER.md`
-7. `kb_pipeline.py`
-8. `modelfiles/semantic_parser_system_prompt.md`
-9. `kb_scenarios/README.md`
-10. `scripts/render_kb_run_html.py`
-11. `scripts/build_hub_index.py`
-12. `engine/constraint_propagation.py`
-13. `engine/propagation_runner.py`
+2. `docs/PRETHINKER.md`
+3. `docs/EXPLAINER.md`
+4. `docs/PRETHINK_GATEWAY_MVP.md`
+5. `docs/FREETHINKER_DESIGN.md`
+6. `docs/ONTOLOGY_STEERING.md`
+7. `docs/PROGRESS.md`
+8. `docs/FOCUS_EXECUTION_PLAN.md`
+9. `docs/reports/FRONTIER_SWEEP_2026-04-17.md`
+10. `kb_pipeline.py`
+11. `modelfiles/semantic_parser_system_prompt.md`
+12. `kb_scenarios/README.md`
+13. `scripts/render_kb_run_html.py`
+14. `scripts/build_hub_index.py`
+15. `engine/constraint_propagation.py`
+16. `engine/propagation_runner.py`
 
 ## Fast Resume (Single-Page Handoff)
 
@@ -55,8 +75,13 @@ Primary model focus right now: `qwen3.5:9b`.
 1. Run `python scripts/run_safety_gate.py`.
 2. Re-read `docs/PROGRESS.md` and the latest post-registry reports before claiming improvement.
 3. Treat strict Blocksworld as the stable lane and the narrative packs as the frontier that must stay honestly reported.
+- Current product-shape loop:
+1. Treat `src/mcp_server.py` `process_utterance()` as the canonical interactive entryway.
+2. Treat `ui_gateway/` as the manual test cockpit for that entryway.
+3. Treat `Freethinker` as optional and currently non-authoritative.
 - The old higher narrative strict scores (`0.6452`, `0.8718`) are historical/provisional only.
 - The current verified frontier sweep is `docs/reports/FRONTIER_SWEEP_2026-04-17.md`.
+- The current verified temporal interrogator recovery is `docs/reports/TEMPORAL_INTERROGATOR_RECOVERY_2026-04-19.md`.
 - Provenance fields must remain present in runs:
   - `run_id`
   - `prompt_provenance`

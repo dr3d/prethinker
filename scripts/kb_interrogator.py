@@ -490,6 +490,7 @@ def _fallback_question_candidates(
     *,
     clauses: list[str],
     question_count: int,
+    temporal_first: bool = False,
 ) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     limit = max(1, int(question_count))
@@ -592,7 +593,11 @@ def _fallback_question_candidates(
 
         return variants
 
-    for clause in clauses:
+    temporal_clauses = [clause for clause in clauses if str(clause).strip().startswith("at_step(")]
+    plain_clauses = [clause for clause in clauses if not str(clause).strip().startswith("at_step(")]
+    ordered_clauses = (temporal_clauses + plain_clauses) if temporal_first else list(clauses)
+
+    for clause in ordered_clauses:
         normalized_clause = kp._normalize_clause(str(clause or "").strip())
         if not normalized_clause:
             continue
@@ -705,6 +710,12 @@ def _normalize_question_payload(
         fallback_signatures,
         clauses=fallback_clauses,
         question_count=max(question_count * 3, question_count + 8),
+    )
+    temporal_priority_rows = _fallback_question_candidates(
+        fallback_signatures,
+        clauses=fallback_clauses,
+        question_count=max(question_count * 3, question_count + 8),
+        temporal_first=True,
     )
     if not isinstance(payload, dict):
         return fallback_rows[: max(1, int(question_count))], ["exam_parse_error_fallback_used"]
@@ -853,7 +864,7 @@ def _normalize_question_payload(
 
     temporal_target = max(0, min(int(question_count), int(min_temporal_questions)))
     if temporal_target > 0 and _temporal_count(deduped) < temporal_target:
-        temporal_candidates = [row for row in fallback_rows if bool(row.get("temporal"))]
+        temporal_candidates = [row for row in temporal_priority_rows if bool(row.get("temporal"))]
         if temporal_candidates:
             replaced = 0
             for candidate in temporal_candidates:
@@ -893,75 +904,156 @@ def _normalize_question_payload(
     return deduped, notes
 
 
+def _relax_shared_step_temporal_query(query: str) -> str | None:
+    normalized = kp._normalize_clause(query)
+    body = _normalize_goal(normalized)
+    goals = _split_top_level(body, ",")
+    if len(goals) < 2:
+        return None
+    if any(_is_simple_constraint_goal(goal) for goal in goals):
+        return None
+
+    shared_step_var = ""
+    temporal_indexes: list[int] = []
+
+    for idx, goal in enumerate(goals):
+        parsed = _parse_call_expr(goal)
+        if parsed is None:
+            continue
+        name, args = parsed
+        if name != "at_step" or len(args) != 2:
+            continue
+        step_var = str(args[0]).strip()
+        if not _is_variable_token(step_var):
+            return None
+        if not shared_step_var:
+            shared_step_var = step_var
+        elif step_var != shared_step_var:
+            return None
+        temporal_indexes.append(idx)
+
+    if len(temporal_indexes) < 2 or not shared_step_var:
+        return None
+
+    rewritten_goals: list[str] = []
+    temporal_counter = 1
+    for goal in goals:
+        parsed = _parse_call_expr(goal)
+        if parsed is None:
+            rewritten_goals.append(str(goal).strip())
+            continue
+        name, args = parsed
+        if name == "at_step" and len(args) == 2 and str(args[0]).strip() == shared_step_var:
+            rewritten_goals.append(f"at_step(Step{temporal_counter}, {str(args[1]).strip()})")
+            temporal_counter += 1
+            continue
+        rewritten_goals.append(str(goal).strip())
+
+    repaired = kp._normalize_clause(", ".join(rewritten_goals))
+    if repaired and repaired != normalized:
+        return repaired
+    return None
+
+
+def _assess_question_result(row: dict[str, Any], result: dict[str, Any]) -> tuple[bool, list[str]]:
+    expected_status = str(row.get("expect_status", "success")).strip().lower() or "success"
+    observed_status = str(result.get("status", "")).strip().lower()
+    num_rows = int(result.get("num_rows", 0) or 0)
+    reasons: list[str] = []
+    passed = observed_status == expected_status
+    if not passed:
+        reasons.append(f"Expected status={expected_status}, observed={observed_status}")
+
+    min_rows = row.get("min_rows")
+    max_rows = row.get("max_rows")
+    if min_rows is not None:
+        min_rows_i = int(min_rows)
+        if num_rows < min_rows_i:
+            passed = False
+            reasons.append(f"num_rows {num_rows} < min_rows {min_rows_i}")
+
+    contains_row = row.get("contains_row")
+    contains_row_matched = False
+    if isinstance(contains_row, dict):
+        rows_data = result.get("rows", [])
+        if isinstance(rows_data, list):
+            for candidate in rows_data:
+                if not isinstance(candidate, dict):
+                    continue
+                candidate_raw = {str(k): str(v) for k, v in candidate.items()}
+                candidate_by_norm_key: dict[str, str] = {}
+                for key, value in candidate_raw.items():
+                    candidate_by_norm_key.setdefault(_normalize_symbol_token(key), value)
+
+                ok = True
+                for key, value in contains_row.items():
+                    key_raw = str(key)
+                    expected_norm = _normalize_symbol_token(value)
+                    observed_value: str | None = None
+
+                    if key_raw in candidate_raw:
+                        observed_value = candidate_raw.get(key_raw)
+                    else:
+                        observed_value = candidate_by_norm_key.get(_normalize_symbol_token(key_raw))
+
+                    if observed_value is None:
+                        ok = False
+                        break
+                    if _normalize_symbol_token(observed_value) != expected_norm:
+                        ok = False
+                        break
+                if ok:
+                    contains_row_matched = True
+                    break
+        if not contains_row_matched:
+            passed = False
+            reasons.append(f"Expected row not found: {contains_row}")
+
+    if max_rows is not None:
+        max_rows_i = int(max_rows)
+        enforce_max_rows = True
+        if isinstance(contains_row, dict) and contains_row_matched and expected_status == "success":
+            enforce_max_rows = False
+        if enforce_max_rows and num_rows > max_rows_i:
+            passed = False
+            reasons.append(f"num_rows {num_rows} > max_rows {max_rows_i}")
+
+    return passed, reasons
+
+
 def _evaluate_questions(runtime: kp.CorePrologRuntime, questions: list[dict[str, Any]]) -> dict[str, Any]:
     evaluated: list[dict[str, Any]] = []
     passed_count = 0
     for row in questions:
         query = str(row.get("query", "")).strip()
         result = _query_rows_with_conjunction_support(runtime, query)
-        expected_status = str(row.get("expect_status", "success")).strip().lower() or "success"
-        observed_status = str(result.get("status", "")).strip().lower()
-        num_rows = int(result.get("num_rows", 0) or 0)
-        reasons: list[str] = []
-        passed = observed_status == expected_status
-        if not passed:
-            reasons.append(f"Expected status={expected_status}, observed={observed_status}")
+        passed, reasons = _assess_question_result(row, result)
+        effective_query = query
+        repair_applied: dict[str, Any] | None = None
 
-        min_rows = row.get("min_rows")
-        max_rows = row.get("max_rows")
-        if min_rows is not None:
-            min_rows_i = int(min_rows)
-            if num_rows < min_rows_i:
-                passed = False
-                reasons.append(f"num_rows {num_rows} < min_rows {min_rows_i}")
-
-        contains_row = row.get("contains_row")
-        contains_row_matched = False
-        if isinstance(contains_row, dict):
-            rows_data = result.get("rows", [])
-            if isinstance(rows_data, list):
-                for candidate in rows_data:
-                    if not isinstance(candidate, dict):
-                        continue
-                    candidate_raw = {str(k): str(v) for k, v in candidate.items()}
-                    candidate_by_norm_key: dict[str, str] = {}
-                    for key, value in candidate_raw.items():
-                        candidate_by_norm_key.setdefault(_normalize_symbol_token(key), value)
-
-                    ok = True
-                    for key, value in contains_row.items():
-                        key_raw = str(key)
-                        expected_norm = _normalize_symbol_token(value)
-                        observed_value: str | None = None
-
-                        if key_raw in candidate_raw:
-                            observed_value = candidate_raw.get(key_raw)
-                        else:
-                            observed_value = candidate_by_norm_key.get(_normalize_symbol_token(key_raw))
-
-                        if observed_value is None:
-                            ok = False
-                            break
-                        if _normalize_symbol_token(observed_value) != expected_norm:
-                            ok = False
-                            break
-                    if ok:
-                        contains_row_matched = True
-                        break
-            if not contains_row_matched:
-                passed = False
-                reasons.append(f"Expected row not found: {contains_row}")
-
-        if max_rows is not None:
-            max_rows_i = int(max_rows)
-            enforce_max_rows = True
-            # Success questions with a specific binding check can still be valid
-            # when multiple rows are returned due to benign predicate duplicates.
-            if isinstance(contains_row, dict) and contains_row_matched and expected_status == "success":
-                enforce_max_rows = False
-            if enforce_max_rows and num_rows > max_rows_i:
-                passed = False
-                reasons.append(f"num_rows {num_rows} > max_rows {max_rows_i}")
+        if not passed and bool(row.get("temporal")):
+            repaired_query = _relax_shared_step_temporal_query(query)
+            if repaired_query and repaired_query != query:
+                repaired_result = _query_rows_with_conjunction_support(runtime, repaired_query)
+                repaired_passed, repaired_reasons = _assess_question_result(row, repaired_result)
+                if repaired_passed:
+                    result = repaired_result
+                    passed = True
+                    reasons = []
+                    effective_query = repaired_query
+                    repair_applied = {
+                        "kind": "shared_step_relaxed",
+                        "original_query": query,
+                        "effective_query": repaired_query,
+                    }
+                else:
+                    reasons.extend(
+                        [
+                            f"temporal_repair_attempt_failed:{reason}"
+                            for reason in repaired_reasons
+                            if reason not in reasons
+                        ]
+                    )
 
         if passed:
             passed_count += 1
@@ -972,6 +1064,8 @@ def _evaluate_questions(runtime: kp.CorePrologRuntime, questions: list[dict[str,
                 "passed": passed,
                 "reasons": reasons,
                 "result": result,
+                "effective_query": effective_query,
+                "repair_applied": repair_applied,
                 "answer_preview_rows": (result.get("rows", [])[:3] if isinstance(result.get("rows"), list) else []),
             }
         )

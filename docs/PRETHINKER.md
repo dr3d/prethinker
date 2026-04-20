@@ -1,259 +1,176 @@
-# PRETHINKER
+# Prethinker
 
-Date: 2026-04-15
-Author: CTO Report (Codex)
+This is the stable design overview for the project.
 
-## Executive Summary
+If you want live metrics, read [docs/PROGRESS.md](/D:/_PROJECTS/prethinker/docs/PROGRESS.md).
 
-PRETHINKER is a governed intent compiler for language-to-logic execution.
+If you want the product story in plainer language, read [docs/EXPLAINER.md](/D:/_PROJECTS/prethinker/docs/EXPLAINER.md).
 
-It does one thing with discipline:
+## One-Sentence Definition
 
-1. read natural language,
-2. propose symbolic operations,
-3. validate and gate those operations deterministically,
-4. mutate/query a persistent Prolog-style knowledge base,
-5. grade the result with an interrogation layer.
+Prethinker is a governed intent compiler that sits between natural language and durable symbolic state.
 
-The key strategic choice is this:
+## The Core Bet
 
-- neural model for interpretation,
-- deterministic runtime for authority.
+The project is built on one architectural bet:
 
-That split is why this can work in sensitive domains where auditability matters.
+- neural models are useful for interpretation
+- deterministic systems should retain authority over state
 
-## What PRETHINKER Is
+That means:
 
-PRETHINKER is not a chatbot. It is a compiler-like system for turning language into controlled knowledge operations.
+- the model may propose
+- the runtime may decide
 
-Core operation intents:
+Prethinker is valuable only if that trust boundary stays legible.
 
-- `assert_fact`
-- `assert_rule`
-- `retract`
-- `query`
-- `other`
+## The System Shape
 
-Core outcome:
+At a high level:
 
-- durable, interrogable symbolic state instead of hidden conversational drift.
+`language -> compiler proposal -> deterministic gate -> KB mutation/query -> evidence`
 
-## Why We Built It
+In practice that means:
 
-General LLM answers are often fluent but ungrounded. PRETHINKER exists to prevent "plausible but wrong" from becoming system state.
+1. A user utterance arrives.
+2. The compiler classifies it as a write, query, retract, rule, or `other`.
+3. A parser proposal is emitted in a strict machine-readable schema.
+4. Deterministic validation and normalization decide whether it is admissible.
+5. The runtime either:
+   - commits a mutation
+   - answers a query
+   - requests clarification
+   - rejects the operation
+6. The run is logged with prompt/model provenance and can be graded later.
 
-Design goals:
+## What Prethinker Is
 
-- determinism at commit time,
-- explicit ambiguity handling,
-- reproducible evidence for every run,
-- progressive hardening via regression packs and wild-language stress.
+Prethinker is:
 
-## How PRETHINKER Was Made
+- a governed adapter for language-to-logic interaction
+- a persistent symbolic memory layer
+- a front-door compiler for controlled KB mutation
+- a research and evaluation harness for improving that compiler honestly
 
-PRETHINKER was built in phases, each phase reducing uncertainty in a different part of the stack.
+## What Prethinker Is Not
 
-Phase 1: deterministic engine baseline
+Prethinker is not:
 
-- established core term/unification/resolution behavior,
-- validated runtime mutation and query correctness,
-- added stable unit/regression harnesses.
+- a general chatbot
+- a freeform reasoning engine with silent state authority
+- a passive transcript logger
+- a production-ready universal parser for every domain and language style
 
-Phase 2: intent parsing and guarded mutation
+## Why "Governed" Matters
 
-- added two-pass parse and route decisions,
-- added strict predicate registry and optional type-schema checks,
-- blocked invalid or unsafe writes before runtime apply.
+The project is designed to resist a very specific failure mode:
 
-Phase 3: clarification orchestration
+language that sounds right while writing the wrong thing.
 
-- added bounded clarification rounds,
-- added confidence and uncertainty controls,
-- added explicit confirmation paths for higher-risk commits.
+The whole stack exists to narrow that gap.
 
-Phase 4: evidence and grading
+That is why the system leans on:
 
-- added run manifests and report generation,
-- added KB interrogator to score coverage, precision, and exam performance,
-- made quality measurable per scenario, not anecdotal.
+- schema discipline
+- optional registry/type constraints
+- clarification policy
+- deterministic runtime apply/query
+- artifact-backed evaluation
 
-Phase 5: wild ingestion and temporal semantics
+## Product Direction
 
-- shifted from synthetic-only ladder pressure toward raw internet-style text,
-- added temporal dual-write (`fact(...)` plus `at_step(T, fact(...))`) for narrative state tracking,
-- verified temporal indexing improves interrogation outcomes on story-like workloads.
+The product direction is a UI or adapter layer that can sit in front of a user's chatbot of choice.
 
-## How It Works
+In that shape:
 
-Operational spine:
+- the chatbot remains the fluent conversational surface
+- Prethinker listens to the interaction stream
+- eligible turns become facts, rules, retracts, and queries
+- the KB becomes durable, inspectable memory
 
-`raw text -> parser proposal -> deterministic gate -> runtime apply/query -> interrogator grading`
+So the best metaphor is:
 
-Detailed path:
+- not "memory plugin"
+- not "another chatbot"
+- but "governed stenographer and compiler"
 
-1. Ingest
+It records selectively.
+It formalizes carefully.
+It refuses when needed.
 
-- Input enters as raw text with no hidden "smart cleanup".
-- Parser proposes operation intent + logic string candidates.
+## The Two-Rail Future
 
-2. Gate
+The design now distinguishes two roles:
 
-- Validates clause shape and intent schema.
-- Applies registry/type constraints when configured.
-- Applies ambiguity and clarification policy.
-- Can stage, defer, or commit.
+### Prethinker
 
-3. Runtime
+The strict compiler.
 
-- Deterministic core applies accepted facts/rules/retractions.
-- Queries run against current KB state.
-- Writes are durable in named KB namespaces.
+- schema-bound
+- mutation-aware
+- clarification-capable
+- the only role allowed to authorize KB writes
 
-4. Evidence
+### Freethinker
 
-- Every run emits machine-readable artifacts and human-readable reports.
-- Interrogator grades extraction quality against source text.
+The bounded clarification liaison.
 
-5. Feedback loop
+- context-aware
+- non-authoritative
+- consulted only when Prethinker hesitates
+- may suggest a clarification answer or a better clarification question
+- may not write to the KB directly
 
-- Repeated failure patterns become scenarios/rungs.
-- Scenarios become regression gates.
-- System improves by closing measured gaps.
+This split is about permissions, not necessarily different model families.
 
-## Current State (As Of 2026-04-15)
+Both roles can be backed by the same underlying `qwen3.5:9b` weights with different prompts and policies.
 
-Latest measured scorecard:
+## Current Reality
 
-- Baseline gate reliability (`baseline_focus`)
-  - pipeline pass: `5/5`
-  - audit coverage: `0.865`
-  - audit precision: `0.974`
-  - exam pass: `0.793333`
-  - temporal exam pass: `0.4`
-- Wild story ingest (`glitch_focus`, non-temporal)
-  - pipeline pass: `3/3`
-  - audit coverage: `0.583333`
-  - audit precision: `0.8`
-  - exam pass: `0.608333`
-  - temporal exam pass: `0.333333`
-- Wild story ingest (`glitch_focus`, temporal dual-write enabled)
-  - pipeline pass: `3/3`
-  - audit coverage: `0.65`
-  - audit precision: `0.906667`
-  - exam pass: `0.933333`
-  - temporal exam pass: `0.921296`
-  - deltas vs non-temporal:
-    - coverage `+0.067`
-    - precision `+0.107`
-    - exam `+0.325`
-    - temporal exam `+0.588`
-- Deterministic health
-  - targeted suite: `36 passed`
-  - engine regression suite: `37 passed`
+As of April 19, 2026:
 
-Interpretation:
+- the canonical interactive entryway is `process_utterance()` in [src/mcp_server.py](/D:/_PROJECTS/prethinker/src/mcp_server.py)
+- the console in [ui_gateway/](/D:/_PROJECTS/prethinker/ui_gateway) is the main manual test cockpit
+- the safety gate is green at `120 passed`
+- strict Blocksworld is the stable proof lane
+- strict narrative packs are materially improved and pipeline-green
+- Freethinker is still defaulted to `off`
 
-- System stability is now strong in core gate runs.
-- Temporal sequencing is a real quality multiplier on narrative material.
-- We still need better non-temporal performance on fragmented noisy packaging.
+That means the repo already supports the governed compiler shape directly.
 
-## Why I Think We Can Be Successful
+The clarification-liaison shape is partially scaffolded and intentionally not yet allowed to change baseline behavior.
 
-Reason 1: the architecture is correctly split
+## Why The Repo Looks The Way It Does
 
-- LLM handles uncertain language.
-- Deterministic runtime controls truth mutation.
-- This prevents silent drift and keeps state auditable.
+The codebase has three different kinds of artifacts because they serve different jobs:
 
-Reason 2: we measure what matters
+- runtime code
+  - `kb_pipeline.py`
+  - `src/mcp_server.py`
+  - `ui_gateway/`
+- evidence and reports
+  - `kb_runs/`
+  - `docs/reports/`
+  - `docs/PROGRESS.md`
+- design notes
+  - `docs/EXPLAINER.md`
+  - `docs/FREETHINKER_DESIGN.md`
+  - `docs/ONTOLOGY_STEERING.md`
+  - `docs/ORCHESTRATION.md`
 
-- not just "did it run",
-- but coverage, precision, exam pass, temporal reasoning, and mutation quality.
+The point is not just to build a parser.
 
-Reason 3: we have a functioning improvement loop
+It is to build a parser whose progress can be inspected without self-deception.
 
-- failure discovery -> scenario formalization -> regression gate -> re-measure.
+## Design Rule
 
-Reason 4: we are now testing in realistic language
+Prethinker should become broader by architecture, not looser by authority.
 
-- synthetic ladders remain for regression,
-- wild/noisy corpora now pressure real ingestion behavior.
+That means:
 
-Reason 5: we have clear promotion thresholds
+- more coverage through better context handling and better ontology steering
+- not through quieter trust boundaries
 
-- precision target `>= 0.90`
-- coverage target `>= 0.85`
-- exam target `>= 0.80`
-- temporal exam target `>= 0.70`
-- incorrect mutation target `<= 0.02`
+If the project succeeds, it will not be because the model became magically trustworthy.
 
-This is what "engineering a compiler" looks like, not prompt theater.
-
-## How PRETHINKER Will Get Better
-
-Near-term improvements already defined:
-
-1. Keep one mandatory command path for baseline gates.
-2. Keep temporal dual-write on narrative stress packs while collecting more A/B evidence.
-3. Expand wild corpora and preserve raw-input discipline.
-4. Bring constrained frontend proposal mode (`shadow`) to statistically net-positive before any active promotion.
-5. Build stronger interrogator packs for contradiction, causality, and temporal consistency.
-
-Mid-term improvements:
-
-1. Add stronger ontology alignment controls for open-domain ingestion.
-2. Improve pronoun and possession disambiguation under noisy syntax.
-3. Add dynamic clarification behavior tuned by KB maturity and recent confidence history.
-4. Prepare medical lane onboarding (UMLS-backed schema + targeted tests).
-
-Long-term improvements:
-
-1. Domain packs for legal/medical/operational logs.
-2. Higher-fidelity temporal reasoning with robust persistence rules.
-3. Better admission control for low-confidence novel predicates.
-4. Continued reduction of false commits under adversarial language.
-
-## Risk Register (Honest)
-
-Risk: semantic overgeneralization
-
-- Mitigation: stricter registry/type gating, stronger interrogator probes, and scenario promotion of failure modes.
-
-Risk: narrative state collapse without time index
-
-- Mitigation: temporal dual-write now operational and should remain default for story-like material.
-
-Risk: good ingestion but weak retelling fidelity
-
-- Mitigation: emphasize interrogator scoring and targeted query packs, not only pipeline pass.
-
-Risk: overfitting to canonical stories
-
-- Mitigation: wild corpus ingestion and formalized excursions as first-class test lanes.
-
-Risk: docs drift from runtime reality
-
-- Mitigation: tie documentation updates to run artifacts and scorecard refresh cadence.
-
-## Recommended Operating Posture
-
-- Treat PRETHINKER as a controlled compiler, not a free-form assistant.
-- Favor measurable improvements over aesthetic prompt changes.
-- Promote only on aggregate metrics, not one-off wins.
-- Keep all claims backed by artifact paths and reproducible command lines.
-
-## Bottom Line
-
-PRETHINKER is now beyond concept stage.
-
-It has:
-
-- a coherent architecture,
-- deterministic authority at commit time,
-- reproducible quality gates,
-- measurable gains from temporal semantics,
-- and a credible path to higher-stakes domains.
-
-Success is not guaranteed, but it is engineering-plausible and increasingly evidence-backed.
-
-If we keep the current discipline, this project can deliver a practical, auditable language-to-logic system that is materially better than unconstrained LLM workflows for stateful reasoning tasks.
+It will be because the system became better at converting language into inspectable, governed state.
