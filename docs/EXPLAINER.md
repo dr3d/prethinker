@@ -171,6 +171,44 @@ Examples:
 
 Those are the kinds of turns where deterministic memory discipline matters more than conversational style.
 
+## Domain Fit And Necessary Brittleness
+
+There is a sober constraint at the center of the project:
+
+it is hard to be precise when the language is not precise.
+
+Prethinker is trying to turn language into durable symbolic state. That means it cannot quietly absorb ambiguity the way an ordinary chatbot can.
+
+So some of the brittleness people feel is not just "the model being bad."
+
+It is the system refusing to pretend that vague language is precise enough for authoritative memory.
+
+That makes Prethinker a much better fit for:
+
+- household/admin memory with explicit facts
+- project and commitment tracking
+- family/property/role/timeline records
+- semi-formal operational conversations
+- domains where clarification is acceptable
+
+And it makes Prethinker a worse fit for:
+
+- loose banter
+- high-pronoun topic drift
+- implied social meaning
+- jokes, hedges, and half-formed statements
+- "remember my life from ordinary chat" without confirmation pressure
+
+So the likely `v1` truth is:
+
+- casual conversational English may remain only partially capturable
+- higher confirmation eagerness can improve correctness but will cost UX
+- clearer conversational domains are where the governed approach is most defensible
+
+That is not a retreat from the project.
+
+It is the honest boundary of a system that prefers clarification, confirmation, or abstention over silent bad writes.
+
 ## Failure Modes That Still Matter
 
 The failures that matter most are not usually total collapse.

@@ -1223,3 +1223,187 @@ class LocalMcpServerTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+def test_normalize_possessive_family_bundle_utterance_rewrites_plain_owner_token():
+    import src.mcp_server as mcp_server_module
+
+    utterance = (
+        "scotts mom and dad were ann and ian and scotts brother is blake "
+        "and blake lives in morro bay with his wife jan"
+    )
+
+    normalized = mcp_server_module._normalize_possessive_family_bundle_utterance(utterance)
+
+    assert normalized == (
+        "scott's mom and dad were ann and ian and scott's brother is blake "
+        "and blake lives in morro bay with his wife jan"
+    )
+
+
+def test_process_utterance_rewrites_possessive_family_bundle_before_canonical_path():
+    from unittest.mock import patch
+
+    import src.mcp_server as mcp_server_module
+
+    server = mcp_server_module.PrologMCPServer()
+    utterance = (
+        "scotts mom and dad were ann and ian and scotts brother is blake "
+        "and blake lives in morro bay with his wife jan"
+    )
+
+    with patch("src.mcp_server._ORIGINAL_PROCESS_UTTERANCE", autospec=True) as original:
+        original.return_value = {"status": "ok"}
+
+        result = server.process_utterance({"utterance": utterance})
+
+    assert result == {"status": "ok"}
+    forwarded_payload = original.call_args.args[1]
+    assert forwarded_payload["utterance"] == (
+        "scott's mom and dad were ann and ian and scott's brother is blake "
+        "and blake lives in morro bay with blake's wife jan"
+    )
+
+
+def test_normalize_possessive_family_bundle_utterance_does_not_corrupt_his_wife_phrase():
+    import src.mcp_server as mcp_server_module
+
+    utterance = "blake lives in morro bay with his wife jan"
+
+    normalized = mcp_server_module._normalize_possessive_family_bundle_utterance(utterance)
+
+    assert normalized == utterance
+
+
+def test_normalize_same_utterance_family_anchor_pronouns_rewrites_his_brother_to_owner():
+    import src.mcp_server as mcp_server_module
+
+    utterance = "scotts mom is ann and his brother is blake"
+
+    normalized = mcp_server_module._normalize_same_utterance_family_anchor_pronouns(utterance)
+
+    assert normalized == "scott's mom is ann and scott's brother is blake"
+
+
+def test_process_utterance_rewrites_same_utterance_family_anchor_pronouns_before_canonical_path():
+    from unittest.mock import patch
+
+    import src.mcp_server as mcp_server_module
+
+    server = mcp_server_module.PrologMCPServer()
+    utterance = "scotts mom is ann and his brother is blake"
+
+    with patch(
+        "src.mcp_server._PROCESS_UTTERANCE_WITH_FAMILY_ANCHOR_PRONOUN_BASE",
+        autospec=True,
+    ) as original:
+        original.return_value = {"status": "ok"}
+
+        result = server.process_utterance({"utterance": utterance})
+
+    assert result == {"status": "ok"}
+    forwarded_payload = original.call_args.args[1]
+    assert forwarded_payload["utterance"] == "scott's mom is ann and scott's brother is blake"
+
+
+def test_normalize_possessive_family_bundle_utterance_rewrites_missing_possessive_friend_phrase():
+    import src.mcp_server as mcp_server_module
+
+    utterance = "scott friend is brian and brians sister is maryann"
+
+    normalized = mcp_server_module._normalize_possessive_family_bundle_utterance(utterance)
+
+    assert normalized == "scott's friend is brian and brian's sister is maryann"
+
+
+def test_process_utterance_rewrites_missing_possessive_friend_phrase_before_canonical_path():
+    from unittest.mock import patch
+
+    import src.mcp_server as mcp_server_module
+
+    server = mcp_server_module.PrologMCPServer()
+    utterance = "scott friend is brian and brians sister is maryann"
+
+    with patch("src.mcp_server._ORIGINAL_PROCESS_UTTERANCE", autospec=True) as original:
+        original.return_value = {"status": "ok"}
+
+        result = server.process_utterance({"utterance": utterance})
+
+    assert result == {"status": "ok"}
+    forwarded_payload = original.call_args.args[1]
+    assert forwarded_payload["utterance"] == "scott's friend is brian and brian's sister is maryann"
+def test_normalize_possessive_family_bundle_utterance_rewrites_plain_owner_token():
+    import src.mcp_server as mcp_server_module
+
+    utterance = (
+        "scotts mom and dad were ann and ian and scotts brother is blake "
+        "and blake lives in morro bay with his wife jan"
+    )
+
+    normalized = mcp_server_module._normalize_possessive_family_bundle_utterance(utterance)
+
+    assert normalized == (
+        "scott's mom and dad were ann and ian and scott's brother is blake "
+        "and blake lives in morro bay with his wife jan"
+    )
+
+
+def test_process_utterance_rewrites_possessive_family_bundle_before_canonical_path():
+    from unittest.mock import patch
+
+    import src.mcp_server as mcp_server_module
+
+    server = mcp_server_module.PrologMCPServer()
+    utterance = (
+        "scotts mom and dad were ann and ian and scotts brother is blake "
+        "and blake lives in morro bay with his wife jan"
+    )
+
+    with patch("src.mcp_server._ORIGINAL_PROCESS_UTTERANCE", autospec=True) as original:
+        original.return_value = {"status": "ok"}
+
+        result = server.process_utterance({"utterance": utterance})
+
+    assert result == {"status": "ok"}
+    forwarded_payload = original.call_args.args[1]
+    assert forwarded_payload["utterance"] == (
+        "scott's mom and dad were ann and ian and scott's brother is blake "
+        "and blake lives in morro bay with blake's wife jan"
+    )
+def test_same_clause_spouse_phrase_normalization_rewrites_grounded_local_spouse():
+    from src import mcp_server
+
+    utterance = "blake lives in morro bay with his wife jan"
+
+    assert (
+        mcp_server._normalize_same_clause_spouse_phrase_utterance(utterance)
+        == "blake lives in morro bay with blake's wife jan"
+    )
+
+
+def test_process_utterance_forwards_same_clause_spouse_normalized_utterance():
+    from unittest.mock import patch
+
+    from src import mcp_server
+
+    captured = {}
+
+    def fake_original(self, payload):
+        captured["payload"] = payload
+        return {"status": "ok"}
+
+    server = object.__new__(mcp_server.PrologMCPServer)
+    utterance = "blake lives in morro bay with his wife jan"
+
+    with patch.object(
+        mcp_server,
+        "_PROCESS_UTTERANCE_WITH_FAMILY_NORMALIZATION",
+        fake_original,
+    ):
+        result = mcp_server.PrologMCPServer.process_utterance(
+            server,
+            {"utterance": utterance},
+        )
+
+    assert result == {"status": "ok"}
+    assert captured["payload"]["utterance"] == (
+        "blake lives in morro bay with blake's wife jan"
+    )

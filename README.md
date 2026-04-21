@@ -103,6 +103,37 @@ The right metaphor is not "autonomous smart assistant." It is "governed stenogra
 It watches, formalizes, and gates.
 It does not get to mutate state by vibes.
 
+## Domain Fit
+
+Prethinker is not equally compatible with every style of language.
+
+The sober truth is:
+
+- it is hard to be precise when the language is not precise
+- and this system is trying to write precise, durable state
+
+That means some brittleness is not just an implementation flaw. It is partly the cost of governed mutation.
+
+Best-fit settings are the ones where users already speak with some discipline:
+
+- operational and administrative conversations
+- family, property, role, and timeline tracking
+- project and commitment memory
+- semi-formal domains where clarification is acceptable
+
+Poorer-fit settings are the ones where language stays highly implicit:
+
+- casual banter
+- pronoun-heavy topic drift
+- elliptical social conversation
+- jokes, hedges, and half-statements treated as authoritative memory
+
+So the likely `v1` shape is:
+
+- strongest in English-first, semi-formal and formal conversational domains
+- usable in casual chat only with higher confirmation/clarification pressure
+- intentionally willing to clarify, confirm, or abstain rather than silently harden ambiguity into KB state
+
 ## Prethinker And Freethinker
 
 The intended architectural split is now explicit:

@@ -3313,5 +3313,154 @@ def main() -> int:
     return 0
 
 
+_POSSESSIVE_FAMILY_ROLE_STEM_RE = re.compile(
+    r"\b(?P<owner>[A-Za-z][A-Za-z0-9_-]*?)(?:'s|s)\s+"
+    r"(?P<role>mom and dad|mom|dad|mother|father|parents?|brother|sister|wife|husband|friend)\b",
+    re.IGNORECASE,
+)
+
+_BARE_OWNER_FRIEND_RE = re.compile(
+    r"\b(?P<owner>[A-Za-z][A-Za-z0-9_-]*)\s+friend\b(?=\s+is\b)",
+    re.IGNORECASE,
+)
+
+
+def _normalize_possessive_family_bundle_utterance(utterance: str) -> str:
+    if not isinstance(utterance, str) or not utterance:
+        return utterance
+
+    # Keep this lane intentionally narrow: true possessive stems like
+    # "scotts mom"/"brians sister" plus the obvious missing-marked social phrase
+    # "scott friend is brian". Do not reinterpret pronoun phrases like "his wife".
+    blocked_owners = {"hi", "his", "it", "its", "her", "their", "your", "our", "my", "whose"}
+
+    def _rewrite_stem(match: re.Match[str]) -> str:
+        owner = match.group("owner")
+        role = match.group("role")
+        if owner.lower() in blocked_owners:
+            return match.group(0)
+        return f"{owner}'s {role}"
+
+    normalized = _POSSESSIVE_FAMILY_ROLE_STEM_RE.sub(_rewrite_stem, utterance)
+
+    def _rewrite_bare_friend(match: re.Match[str]) -> str:
+        owner = match.group("owner")
+        if owner.lower() in blocked_owners:
+            return match.group(0)
+        return f"{owner}'s friend"
+
+    return _BARE_OWNER_FRIEND_RE.sub(_rewrite_bare_friend, normalized)
+
+
+_ORIGINAL_PROCESS_UTTERANCE = PrologMCPServer.process_utterance
+
+
+def _process_utterance_with_possessive_family_bundle_normalization(self, payload):
+    if isinstance(payload, dict):
+        utterance = payload.get("utterance")
+        normalized = _normalize_possessive_family_bundle_utterance(utterance)
+        if normalized != utterance:
+            payload = dict(payload)
+            payload["utterance"] = normalized
+    return _ORIGINAL_PROCESS_UTTERANCE(self, payload)
+
+
+PrologMCPServer.process_utterance = _process_utterance_with_possessive_family_bundle_normalization
+
+
+_SAME_CLAUSE_SPOUSE_PHRASE_RE = re.compile(
+    r"\b(?P<subject>[A-Za-z][A-Za-z0-9_-]*)\s+"
+    r"(?P<verb>is|was|were|lives|live|lived|works|work|worked|stays|stay|stayed|"
+    r"resides|reside|resided|moved|move|migrate|migrated)\b"
+    r"(?P<middle>(?:(?!\band\b).){0,80}?)"
+    r"\bwith\s+(?P<pronoun>his|her)\s+(?P<role>wife|husband)\s+(?P<spouse>[A-Za-z][A-Za-z0-9_-]*)\b",
+    re.IGNORECASE,
+)
+
+
+def _normalize_same_clause_spouse_phrase_utterance(utterance: str) -> str:
+    if not utterance:
+        return utterance
+
+    def _rewrite(match: re.Match[str]) -> str:
+        pronoun = match.group("pronoun").lower()
+        role = match.group("role").lower()
+        if (pronoun, role) not in {("his", "wife"), ("her", "husband")}:
+            return match.group(0)
+        subject = match.group("subject")
+        verb = match.group("verb")
+        middle = (match.group("middle") or "").rstrip()
+        spouse = match.group("spouse")
+        return f"{subject} {verb}{middle} with {subject}'s {role} {spouse}"
+
+    return _SAME_CLAUSE_SPOUSE_PHRASE_RE.sub(_rewrite, utterance)
+
+
+_PROCESS_UTTERANCE_WITH_FAMILY_NORMALIZATION = PrologMCPServer.process_utterance
+
+
+def _process_utterance_with_same_clause_spouse_normalization(
+    self: PrologMCPServer, payload: Dict[str, Any]
+) -> Dict[str, Any]:
+    if not isinstance(payload, dict):
+        return _PROCESS_UTTERANCE_WITH_FAMILY_NORMALIZATION(self, payload)
+    request = dict(payload)
+    utterance = request.get("utterance")
+    if isinstance(utterance, str):
+        normalized_utterance = _normalize_same_clause_spouse_phrase_utterance(utterance)
+        if normalized_utterance != utterance:
+            request["utterance"] = normalized_utterance
+    return _PROCESS_UTTERANCE_WITH_FAMILY_NORMALIZATION(self, request)
+
+
+PrologMCPServer.process_utterance = (
+    _process_utterance_with_same_clause_spouse_normalization
+)
+
+
+_SAME_UTTERANCE_FAMILY_ANCHOR_PRONOUN_RE = re.compile(
+    r"\b(?P<owner>[A-Za-z][A-Za-z0-9_-]*)(?:'s|s)\s+"
+    r"(?P<anchor_role>mom and dad|mom|dad|mother|father|parents?|brother|sister)\b"
+    r"(?P<middle>[^.?!;]{0,160}?)"
+    r"\s*\band\s+(?P<pronoun>his|her)\s+"
+    r"(?P<role>brother|sister|mom|dad|mother|father)\b",
+    re.IGNORECASE,
+)
+
+
+def _normalize_same_utterance_family_anchor_pronouns(utterance: str) -> str:
+    if not isinstance(utterance, str) or not utterance:
+        return utterance
+
+    blocked_owners = {"hi", "his", "her", "their", "our", "your", "my", "whose"}
+
+    def _rewrite(match: re.Match[str]) -> str:
+        owner = match.group("owner")
+        if owner.lower() in blocked_owners:
+            return match.group(0)
+        anchor_role = match.group("anchor_role")
+        middle = (match.group("middle") or "").rstrip()
+        role = match.group("role")
+        return f"{owner}'s {anchor_role}{middle} and {owner}'s {role}"
+
+    return _SAME_UTTERANCE_FAMILY_ANCHOR_PRONOUN_RE.sub(_rewrite, utterance)
+
+
+_PROCESS_UTTERANCE_WITH_FAMILY_ANCHOR_PRONOUN_BASE = PrologMCPServer.process_utterance
+
+
+def _process_utterance_with_family_anchor_pronoun_normalization(self, payload):
+    if isinstance(payload, dict):
+        utterance = payload.get("utterance")
+        normalized = _normalize_same_utterance_family_anchor_pronouns(utterance)
+        if normalized != utterance:
+            payload = dict(payload)
+            payload["utterance"] = normalized
+    return _PROCESS_UTTERANCE_WITH_FAMILY_ANCHOR_PRONOUN_BASE(self, payload)
+
+
+PrologMCPServer.process_utterance = _process_utterance_with_family_anchor_pronoun_normalization
+
+
 if __name__ == "__main__":
     raise SystemExit(main())

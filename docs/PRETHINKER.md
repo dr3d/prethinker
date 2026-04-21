@@ -98,6 +98,30 @@ It records selectively.
 It formalizes carefully.
 It refuses when needed.
 
+## Domain Fit
+
+Prethinker should be judged against domains where governed mutation is actually compatible with the language people use.
+
+The key constraint is simple:
+
+- precise state requires sufficiently precise language
+
+When language stays highly implicit, the system has only three options:
+
+- clarify
+- abstain
+- guess
+
+Because Prethinker is designed as a governed compiler, it should usually prefer the first two over the third.
+
+That means:
+
+- semi-formal and formal conversational domains are the best fit
+- casual conversational English is a weaker fit unless confirmation pressure is higher
+- some perceived brittleness is the expected cost of refusing silent bad writes
+
+In other words, the project should become broader by architecture and domain tuning, not by pretending ambiguous chat is already precise enough for durable KB mutation.
+
 ## The Two-Rail Future
 
 The design now distinguishes two roles:
