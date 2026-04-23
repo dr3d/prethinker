@@ -48,6 +48,12 @@ Examples of ontology profiles:
 - `medical`
 - `operations`
 
+The repo now has its first concrete bounded medical profile scaffold:
+
+- `modelfiles/profile.medical.v0.json`
+- `modelfiles/predicate_registry.medical.json`
+- `modelfiles/type_schema.medical.example.json`
+
 The active profile should determine:
 
 - which predicate registry is in force

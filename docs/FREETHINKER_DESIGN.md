@@ -20,9 +20,12 @@ Freethinker is a liaison, not an authority.
 
 Current implementation status:
 
-- config fields and trace scaffolding exist in the canonical console path
-- default resolution policy is `off`
-- no live Freethinker model call is currently changing commit behavior
+- the canonical console path now has a live bounded Freethinker model call
+- default resolution policy is still `off`
+- `advisory_only` is the first intended active rollout mode
+- Freethinker has separate model/runtime settings, including temperature and think on/off
+- advisory mode already improves some generic pronoun clarification holds into named confirmation questions when recent context yields exactly one grounded candidate
+- Freethinker still does not write directly to the KB or bypass Prethinker
 
 ## Why This Exists
 

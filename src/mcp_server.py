@@ -65,6 +65,18 @@ def _clip_01(value: Any, default: float = 0.75) -> float:
     return v
 
 
+def _clip_temperature(value: Any, default: float = 0.0) -> float:
+    try:
+        v = float(value)
+    except Exception:
+        return default
+    if v < 0.0:
+        return 0.0
+    if v > 2.0:
+        return 2.0
+    return v
+
+
 def _normalize_freethinker_resolution_policy(value: Any, default: str = "off") -> str:
     mode = str(value or default).strip().lower()
     if mode not in {"off", "advisory_only", "grounded_reference", "conservative_contextual"}:
@@ -120,6 +132,8 @@ class PrologMCPServer:
         freethinker_context_length: int = 16384,
         freethinker_timeout: int = 60,
         freethinker_prompt_file: str = "",
+        freethinker_temperature: float = 0.2,
+        freethinker_thinking: bool = False,
     ) -> None:
         self._runtime = CorePrologRuntime()
         self._kb_path = str(Path(kb_path).resolve()) if str(kb_path).strip() else ""
@@ -154,6 +168,8 @@ class PrologMCPServer:
         self._freethinker_model = str(freethinker_model or "qwen3.5:9b").strip()
         self._freethinker_context_length = max(512, int(freethinker_context_length))
         self._freethinker_timeout = max(5, int(freethinker_timeout))
+        self._freethinker_temperature = _clip_temperature(freethinker_temperature, 0.2)
+        self._freethinker_thinking = bool(freethinker_thinking)
         freethinker_prompt_candidate = str(freethinker_prompt_file or "").strip()
         if not freethinker_prompt_candidate:
             freethinker_prompt_candidate = str(REPO_ROOT / "modelfiles" / "freethinker_system_prompt.md")
@@ -166,6 +182,8 @@ class PrologMCPServer:
         self._last_prethink_trace: dict[str, Any] = {}
         self._last_prethink_fallback_trace: dict[str, Any] = {}
         self._last_parse_trace: dict[str, Any] = {}
+        self._recent_accepted_turns: list[dict[str, Any]] = []
+        self._recent_committed_logic: list[str] = []
         self._load_compiler_prompt()
         self._load_freethinker_prompt()
 
@@ -290,6 +308,13 @@ class PrologMCPServer:
         grounding: str = "",
         proposed_answer: str = "",
         proposed_question: str = "",
+        notes: str = "",
+        prompt_text: str = "",
+        response_text: str = "",
+        parsed: dict[str, Any] | None = None,
+        context_pack: dict[str, Any] | None = None,
+        error: str = "",
+        decision_action: str = "",
     ) -> dict[str, Any]:
         action_clean = str(action or "skipped").strip().lower() or "skipped"
         reason_clean = str(reason or "").strip()
@@ -304,13 +329,22 @@ class PrologMCPServer:
             "grounding": grounding_clean,
             "proposed_answer": str(proposed_answer or "").strip(),
             "proposed_question": str(proposed_question or "").strip(),
+            "notes": str(notes or "").strip(),
             "model": self._freethinker_model,
             "backend": self._freethinker_backend,
             "base_url": self._freethinker_base_url,
             "context_length": self._freethinker_context_length,
+            "temperature": self._freethinker_temperature,
+            "thinking": bool(self._freethinker_thinking),
             "prompt_path": str(self._freethinker_prompt_path),
             "prompt_loaded": bool(self._freethinker_prompt_loaded),
             "prompt_error": str(self._freethinker_prompt_load_error or "").strip(),
+            "prompt_text": str(prompt_text or ""),
+            "response_text": str(response_text or ""),
+            "parsed": self._clone_trace_payload(parsed) if isinstance(parsed, dict) else None,
+            "context_pack": self._clone_trace_payload(context_pack) if isinstance(context_pack, dict) else None,
+            "error": str(error or "").strip(),
+            "decision_action": str(decision_action or "").strip(),
         }
         trace["summary"] = self._summarize_freethinker_trace(trace)
         return trace
@@ -375,6 +409,296 @@ class PrologMCPServer:
             "freethinker_action": str(freethinker_summary.get("action", "")).strip(),
             "parse_rescues": list(parse_summary.get("rescues", [])),
         }
+
+    def _kb_snapshot_clauses(self, limit: int = 24) -> list[str]:
+        runtime = getattr(self, "_runtime", None)
+        engine = getattr(runtime, "engine", None) if runtime is not None else None
+        raw_clauses = getattr(engine, "clauses", []) if engine is not None else []
+        if not isinstance(raw_clauses, list):
+            return []
+        snapshot: list[str] = []
+        seen: set[str] = set()
+        for row in reversed(raw_clauses):
+            text = str(row).strip()
+            if not text:
+                continue
+            if not text.endswith("."):
+                text = f"{text}."
+            if text in seen:
+                continue
+            seen.add(text)
+            snapshot.append(text)
+            if len(snapshot) >= max(1, int(limit or 24)):
+                break
+        snapshot.reverse()
+        return snapshot
+
+    def _extract_entities_from_parse(self, parsed: dict[str, Any] | None) -> list[str]:
+        if not isinstance(parsed, dict):
+            return []
+        components = parsed.get("components", {}) if isinstance(parsed.get("components"), dict) else {}
+        atoms = [str(item).strip() for item in components.get("atoms", []) if str(item).strip()]
+        blocked = {"he", "she", "they", "it", "him", "her", "them", "his", "hers", "their", "person", "patient"}
+        entities: list[str] = []
+        for atom in atoms:
+            if atom.lower() in blocked:
+                continue
+            entities = self._append_unique(entities, atom)
+        return entities
+
+    def _remember_turn_outcome(
+        self,
+        *,
+        utterance: str,
+        front_door: dict[str, Any],
+        execution: dict[str, Any],
+    ) -> None:
+        status = str(execution.get("status", "")).strip().lower()
+        if status not in {"success", "no_results"}:
+            return
+        parse = execution.get("parse", {}) if isinstance(execution.get("parse"), dict) else {}
+        operations = execution.get("operations", []) if isinstance(execution.get("operations"), list) else []
+        entities = self._extract_entities_from_parse(parse)
+        operation_preview: list[str] = []
+        for op in operations:
+            if not isinstance(op, dict):
+                continue
+            tool = str(op.get("tool", "")).strip()
+            clause = str(op.get("clause", "") or op.get("query", "")).strip()
+            if tool and clause:
+                operation_preview.append(f"{tool}: {clause}")
+            elif tool:
+                operation_preview.append(tool)
+            if tool in {"assert_fact", "assert_rule", "retract_fact"}:
+                result = op.get("result", {}) if isinstance(op.get("result"), dict) else {}
+                if str(result.get("status", "")).strip() == "success" and clause:
+                    if clause not in self._recent_committed_logic:
+                        self._recent_committed_logic.append(clause)
+        self._recent_committed_logic = self._recent_committed_logic[-6:]
+
+        entry = {
+            "utterance": utterance,
+            "route": str(front_door.get("route", "")).strip(),
+            "intent": str(front_door.get("compiler_intent", "")).strip(),
+            "entities": entities[:8],
+            "name_mentions": self._name_mentions_for_freethinker(utterance=utterance)[:4],
+            "operations": operation_preview[:6],
+            "query": str(((execution.get("query_result") or {}) if isinstance(execution.get("query_result"), dict) else {}).get("prolog_query", "")).strip(),
+        }
+        self._recent_accepted_turns.append(entry)
+        self._recent_accepted_turns = self._recent_accepted_turns[-4:]
+
+    def _active_entities_for_freethinker(
+        self,
+        *,
+        utterance: str,
+        front_door: dict[str, Any],
+    ) -> list[str]:
+        entities: list[str] = []
+        coreference = self._build_coreference_hint(utterance)
+        for binding in coreference.get("pronoun_bindings", []):
+            if not isinstance(binding, dict):
+                continue
+            for item in binding.get("effective_entities", []):
+                entities = self._append_unique(entities, str(item).strip())
+        pending = self._pending_prethink or {}
+        for item in pending.get("segments", []):
+            if not isinstance(item, dict):
+                continue
+            for token in self._tokenize_words(str(item.get("text", "")).strip()):
+                if self._is_name_token(token):
+                    entities = self._append_unique(entities, token)
+        for turn in self._recent_accepted_turns[-4:]:
+            if not isinstance(turn, dict):
+                continue
+            for item in turn.get("entities", []):
+                entities = self._append_unique(entities, str(item).strip())
+        return entities[:8]
+
+    def _name_mentions_for_freethinker(self, *, utterance: str) -> list[str]:
+        names: list[str] = []
+        for token in self._tokenize_words(utterance):
+            if self._is_name_token(token):
+                names = self._append_unique(names, token)
+        return names
+
+    def _recent_name_candidates_for_freethinker(self, context_pack: dict[str, Any]) -> list[str]:
+        if not isinstance(context_pack, dict):
+            return []
+        names: list[str] = []
+        for turn in context_pack.get("recent_accepted_turns", []):
+            if not isinstance(turn, dict):
+                continue
+            for item in turn.get("name_mentions", []):
+                names = self._append_unique(names, str(item).strip())
+            if not names:
+                names = self._append_unique(
+                    names,
+                    *self._name_mentions_for_freethinker(utterance=str(turn.get("utterance", "")).strip()),
+                )
+        return names[:4]
+
+    def _build_freethinker_context_pack(
+        self,
+        *,
+        utterance: str,
+        front_door: dict[str, Any],
+    ) -> dict[str, Any]:
+        pending = self._pending_prethink or {}
+        recent_turns = [self._clone_trace_payload(turn) for turn in self._recent_accepted_turns[-4:]]
+        committed_logic = [str(item).strip() for item in self._recent_committed_logic[-6:] if str(item).strip()]
+        clarification_question = str(front_door.get("clarification_question", "")).strip()
+        clarification_reason = ""
+        reasons = front_door.get("reasons", [])
+        if isinstance(reasons, list) and reasons:
+            clarification_reason = str(reasons[0]).strip()
+        current_parse_signals = {
+            "route": str(front_door.get("route", "")).strip(),
+            "compiler_intent": str(front_door.get("compiler_intent", "")).strip(),
+            "ambiguity_score": float(front_door.get("ambiguity_score", 0.0) or 0.0),
+            "looks_like_query": bool(front_door.get("looks_like_query", False)),
+            "looks_like_write": bool(front_door.get("looks_like_write", False)),
+        }
+        pending_transcript = {}
+        if pending:
+            pending_transcript = {
+                "clarification_question": str(pending.get("clarification_question", "")).strip(),
+                "clarification_answer": str(pending.get("clarification_answer", "")).strip(),
+                "clarification_required_before_query": bool(
+                    pending.get("clarification_required_before_query", False)
+                ),
+            }
+        return {
+            "prethink_id": str(front_door.get("prethink_id", "")).strip(),
+            "resolution_policy": self._freethinker_resolution_policy,
+            "current_utterance": utterance,
+            "compiler_intent": str(front_door.get("compiler_intent", "")).strip(),
+            "compiler_uncertainty_score": float(front_door.get("ambiguity_score", 0.0) or 0.0),
+            "clarification_question": clarification_question,
+            "clarification_reason": clarification_reason,
+            "current_parse_signals": current_parse_signals,
+            "pending_clarification_transcript": pending_transcript,
+            "recent_accepted_turns": recent_turns,
+            "recent_committed_logic": committed_logic,
+            "active_entities": self._active_entities_for_freethinker(utterance=utterance, front_door=front_door),
+            "small_kb_snapshot": self._kb_snapshot_clauses(limit=24),
+            "source_of_truth_note": "Only the deterministic Prolog KB is authoritative. Resolve reference conservatively.",
+        }
+
+    def _build_freethinker_prompt(self, *, utterance: str, context_pack: dict[str, Any]) -> str:
+        sections = ["/no_think"]
+        if self._freethinker_prompt_text.strip():
+            sections.append(self._freethinker_prompt_text.strip())
+        sections.append(
+            "FREETHINKER_CONTEXT_JSON:\n"
+            + json.dumps(context_pack, ensure_ascii=True, indent=2)
+        )
+        sections.append(f"CURRENT_UTTERANCE:\n{utterance}")
+        return "\n\n".join(section for section in sections if section.strip())
+
+    def _normalize_freethinker_decision(self, parsed: dict[str, Any]) -> dict[str, Any]:
+        allowed_actions = {"resolve_from_context", "ask_user_this", "abstain"}
+        allowed_grounding = {
+            "pending_clarification",
+            "recent_turn",
+            "kb_clause",
+            "active_entities",
+            "multi_source",
+            "weak_inference",
+            "none",
+        }
+        action = str(parsed.get("action", "")).strip().lower()
+        if action not in allowed_actions:
+            action = "abstain"
+        grounding = str(parsed.get("grounding", "")).strip().lower()
+        if grounding not in allowed_grounding:
+            grounding = "none"
+        confidence = _clip_01(parsed.get("confidence"), 0.0)
+        proposed_answer = str(parsed.get("proposed_answer", "")).strip()
+        proposed_question = str(parsed.get("proposed_question", "")).strip()
+        notes = str(parsed.get("notes", "")).strip()
+        if action != "resolve_from_context":
+            proposed_answer = ""
+        if action != "ask_user_this":
+            proposed_question = ""
+        return {
+            "action": action,
+            "confidence": confidence,
+            "grounding": grounding,
+            "proposed_answer": proposed_answer,
+            "proposed_question": proposed_question,
+            "notes": notes,
+        }
+
+    def _freethinker_confirmation_question(self, answer: str, fallback: str) -> str:
+        proposed = str(answer or "").strip()
+        if proposed:
+            return f'Do you mean "{proposed}"?'
+        return str(fallback or "").strip()
+
+    def _freethinker_specific_question(
+        self,
+        *,
+        utterance: str,
+        proposed_question: str,
+        context_pack: dict[str, Any] | None,
+    ) -> str:
+        question = str(proposed_question or "").strip()
+        if not question:
+            return ""
+        lower = question.lower()
+        pronoun_match = re.search(r"'(he|she|they|him|her|them)'", question, re.IGNORECASE)
+        if not pronoun_match:
+            return question
+        if not (lower.startswith("who does ") and "refer to" in lower):
+            return question
+        candidates = self._recent_name_candidates_for_freethinker(context_pack or {})
+        if len(candidates) != 1:
+            return question
+        pronoun = pronoun_match.group(1).lower()
+        candidate = candidates[0]
+        return f"Do you mean {candidate} when you say '{pronoun}'?"
+
+    def _freethinker_can_auto_resolve(self, *, policy: str, confidence: float, grounding: str) -> bool:
+        if grounding in {"weak_inference", "none"}:
+            return False
+        threshold = 0.9 if policy == "grounded_reference" else 0.78
+        return confidence >= threshold
+
+    def _apply_freethinker_front_door(
+        self,
+        *,
+        front_door: dict[str, Any],
+        freethinker_trace: dict[str, Any] | None,
+    ) -> tuple[dict[str, Any], str]:
+        updated = dict(front_door)
+        if not isinstance(freethinker_trace, dict):
+            return updated, ""
+        effective_question = str(freethinker_trace.get("effective_question", "")).strip()
+        effective_answer = str(freethinker_trace.get("effective_answer", "")).strip()
+        action = str(freethinker_trace.get("action", "")).strip().lower()
+        reasons = [str(item).strip() for item in updated.get("reasons", []) if str(item).strip()]
+
+        if effective_question:
+            updated["clarification_question"] = effective_question
+            reasons = self._append_unique(reasons, "freethinker_question_refined")
+        if action == "resolve_from_context" and effective_answer:
+            updated["needs_clarification"] = False
+            updated["clarification_question"] = ""
+            reasons = self._append_unique(reasons, "freethinker_resolved_from_context")
+        updated["reasons"] = reasons
+
+        pending = self._pending_prethink
+        if pending is not None:
+            expected_id = str(pending.get("prethink_id", "")).strip()
+            actual_id = str(updated.get("prethink_id", "")).strip()
+            if expected_id and actual_id and expected_id == actual_id:
+                if effective_question:
+                    pending["clarification_question"] = effective_question
+                if action == "resolve_from_context" and effective_answer:
+                    pending["clarification_required_before_query"] = False
+                    pending["clarification_answer"] = effective_answer
+        return updated, effective_answer
 
     def _ensure_prethink_trace(
         self,
@@ -541,13 +865,28 @@ class PrologMCPServer:
                 continue
             first_atom = self._atomize_name(args[0])
             replacement = ""
+            rewritten_args = list(args)
             prefix = f"{first_atom}_"
             if first_atom and predicate.startswith(prefix):
                 candidate = predicate[len(prefix) :]
                 if candidate and (candidate, len(args)) in self._registry_signatures:
                     replacement = candidate
+            if not replacement and "_" in predicate:
+                candidate, embedded_subject = predicate.rsplit("_", 1)
+                embedded_subject = self._atomize_name(embedded_subject)
+                if (
+                    (predicate, len(args)) not in self._registry_signatures
+                    and
+                    candidate
+                    and embedded_subject
+                    and embedded_subject[:1].isalpha()
+                    and (candidate, len(args) + 1) in self._registry_signatures
+                    and embedded_subject.lower() not in {self._atomize_name(arg).lower() for arg in args if self._atomize_name(arg)}
+                ):
+                    replacement = candidate
+                    rewritten_args = [embedded_subject, *args]
             if replacement:
-                rewritten_facts.append(f"{replacement}({', '.join(args)}).")
+                rewritten_facts.append(f"{replacement}({', '.join(rewritten_args)}).")
                 changed = True
                 canonical_pairs.append((predicate, replacement))
             else:
@@ -2040,12 +2379,137 @@ class PrologMCPServer:
                 reason="not_needed",
                 used=False,
             )
-        return self._build_freethinker_trace(
+        if not self._freethinker_prompt_loaded or not self._freethinker_prompt_text.strip():
+            return self._build_freethinker_trace(
+                utterance=utterance,
+                action="skipped",
+                reason="prompt_unavailable",
+                used=False,
+                error=str(self._freethinker_prompt_load_error or "").strip(),
+            )
+
+        context_pack = self._build_freethinker_context_pack(
             utterance=utterance,
-            action="queued",
-            reason="not_implemented_yet",
-            used=False,
+            front_door=front_door or {},
         )
+        prompt_text = self._build_freethinker_prompt(
+            utterance=utterance,
+            context_pack=context_pack,
+        )
+        required_keys = [
+            "action",
+            "confidence",
+            "grounding",
+            "proposed_answer",
+            "proposed_question",
+            "notes",
+        ]
+        try:
+            response = _call_model_prompt(
+                backend=self._freethinker_backend,
+                base_url=self._freethinker_base_url,
+                model=self._freethinker_model,
+                prompt_text=prompt_text,
+                context_length=self._freethinker_context_length,
+                timeout=self._freethinker_timeout,
+                api_key=self._freethinker_api_key,
+                response_format="json",
+                temperature=self._freethinker_temperature,
+                think_enabled=self._freethinker_thinking,
+            )
+        except Exception as exc:
+            return self._build_freethinker_trace(
+                utterance=utterance,
+                action="error",
+                reason="model_call_failed",
+                used=True,
+                prompt_text=prompt_text,
+                context_pack=context_pack,
+                error=str(exc),
+            )
+
+        parsed, _ = _parse_model_json(response, required_keys)
+        response_text = str((response.message or "").strip() or (response.reasoning or "").strip())
+        if not isinstance(parsed, dict):
+            return self._build_freethinker_trace(
+                utterance=utterance,
+                action="abstain",
+                reason="invalid_json",
+                used=True,
+                prompt_text=prompt_text,
+                response_text=response_text,
+                context_pack=context_pack,
+                error="Freethinker did not return a valid JSON decision object.",
+            )
+
+        decision = self._normalize_freethinker_decision(parsed)
+        policy = self._freethinker_resolution_policy
+        raw_action = decision["action"]
+        effective_action = raw_action
+        effective_question = ""
+        effective_answer = ""
+        reason = "decision_applied"
+        specific_question = self._freethinker_specific_question(
+            utterance=utterance,
+            proposed_question=str(decision["proposed_question"]).strip(),
+            context_pack=context_pack,
+        )
+
+        if raw_action == "ask_user_this":
+            effective_question = specific_question or decision["proposed_question"]
+            if not effective_question:
+                effective_action = "abstain"
+                reason = "empty_question"
+        elif raw_action == "resolve_from_context":
+            proposed_answer = decision["proposed_answer"]
+            if policy == "advisory_only":
+                effective_question = self._freethinker_confirmation_question(
+                    proposed_answer,
+                    str((front_door or {}).get("clarification_question", "")).strip(),
+                )
+                if effective_question:
+                    effective_action = "ask_user_this"
+                    reason = "confirmation_required_by_policy"
+                else:
+                    effective_action = "abstain"
+                    reason = "confirmation_question_unavailable"
+            elif proposed_answer and self._freethinker_can_auto_resolve(
+                policy=policy,
+                confidence=float(decision["confidence"]),
+                grounding=str(decision["grounding"]).strip(),
+            ):
+                effective_answer = proposed_answer
+                effective_action = "resolve_from_context"
+                reason = "resolved_from_context"
+            elif decision["proposed_question"]:
+                effective_question = specific_question or decision["proposed_question"]
+                effective_action = "ask_user_this"
+                reason = "resolution_below_threshold"
+            else:
+                effective_action = "abstain"
+                reason = "resolution_below_threshold"
+        else:
+            reason = "abstained"
+
+        trace = self._build_freethinker_trace(
+            utterance=utterance,
+            action=effective_action,
+            reason=reason,
+            used=True,
+            confidence=float(decision["confidence"]),
+            grounding=str(decision["grounding"]).strip(),
+            proposed_answer=str(decision["proposed_answer"]).strip(),
+            proposed_question=effective_question or str(decision["proposed_question"]).strip(),
+            notes=str(decision["notes"]).strip(),
+            prompt_text=prompt_text,
+            response_text=response_text,
+            parsed=parsed,
+            context_pack=context_pack,
+            decision_action=raw_action,
+        )
+        trace["effective_question"] = effective_question
+        trace["effective_answer"] = effective_answer
+        return trace
 
     def pre_think(self, arguments: dict[str, Any] | None = None) -> dict[str, Any]:
         args = arguments or {}
@@ -2256,6 +2720,7 @@ class PrologMCPServer:
         args = arguments or {}
         utterance = str(args.get("utterance", "")).strip()
         clarification_answer = str(args.get("clarification_answer", "")).strip()
+        effective_clarification_answer = clarification_answer
         provided_prethink_id = str(args.get("prethink_id", "")).strip()
         if not utterance:
             return {"status": "validation_error", "message": "utterance is required"}
@@ -2299,6 +2764,12 @@ class PrologMCPServer:
                 utterance=utterance,
                 front_door=front_door,
             )
+            front_door, freethinker_answer = self._apply_freethinker_front_door(
+                front_door=front_door,
+                freethinker_trace=freethinker_trace,
+            )
+            if freethinker_answer:
+                effective_clarification_answer = freethinker_answer
         else:
             prethink = self.pre_think({"utterance": utterance})
             if str(prethink.get("status", "")).strip() != "success":
@@ -2358,6 +2829,12 @@ class PrologMCPServer:
                 utterance=utterance,
                 front_door=front_door,
             )
+            front_door, freethinker_answer = self._apply_freethinker_front_door(
+                front_door=front_door,
+                freethinker_trace=freethinker_trace,
+            )
+            if freethinker_answer:
+                effective_clarification_answer = freethinker_answer
             if bool(front_door.get("needs_clarification")):
                 compiler_trace = {
                     "prethink": prethink_trace,
@@ -2389,12 +2866,12 @@ class PrologMCPServer:
             utterance=utterance,
             compiler_intent=compiler_intent,
             clarification_question=str(front_door.get("clarification_question", "")).strip(),
-            clarification_answer=clarification_answer,
+            clarification_answer=effective_clarification_answer,
         )
         parse_trace = self._ensure_parse_trace(
             utterance=utterance,
             compiler_intent=compiler_intent,
-            clarification_answer=clarification_answer,
+            clarification_answer=effective_clarification_answer,
             parsed=parsed if isinstance(parsed, dict) else None,
             error=error,
         )
@@ -2428,6 +2905,11 @@ class PrologMCPServer:
             }
 
         execution = self._apply_compiled_parse(parsed=parsed, prethink_id=prethink_id)
+        self._remember_turn_outcome(
+            utterance=utterance,
+            front_door=front_door,
+            execution=execution,
+        )
         return {
             "status": str(execution.get("status", "")).strip() or "success",
             "result_type": "utterance_processed",
@@ -3078,6 +3560,16 @@ class PrologMCPServer:
             "compiler_context_length": self._compiler_context_length,
             "compiler_prompt_path": str(self._compiler_prompt_path),
             "compiler_prompt_loaded": bool(self._compiler_prompt_loaded),
+            "freethinker_resolution_policy": self._freethinker_resolution_policy,
+            "freethinker_backend": self._freethinker_backend,
+            "freethinker_base_url": self._freethinker_base_url,
+            "freethinker_model": self._freethinker_model,
+            "freethinker_context_length": self._freethinker_context_length,
+            "freethinker_timeout": self._freethinker_timeout,
+            "freethinker_temperature": self._freethinker_temperature,
+            "freethinker_thinking": bool(self._freethinker_thinking),
+            "freethinker_prompt_path": str(self._freethinker_prompt_path),
+            "freethinker_prompt_loaded": bool(self._freethinker_prompt_loaded),
             "pending_prethink": self._pending_prethink_summary(),
         }
         if self._kb_path:

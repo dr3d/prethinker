@@ -1,0 +1,250 @@
+{
+  "battery_id": "umls_mvp_sharp_memory_v1",
+  "description": "Bounded English-first UMLS MVP battery for concept normalization and sharp-memory readiness.",
+  "allowed_sources": [
+    "SNOMEDCT_US",
+    "RXNORM",
+    "LOINC"
+  ],
+  "relation_whitelist": [
+    "PAR",
+    "CHD",
+    "RB",
+    "RN",
+    "RO",
+    "has_ingredient",
+    "ingredient_of",
+    "tradename_of",
+    "has_tradename"
+  ],
+  "alias_bridge_relations": [
+    "tradename_of",
+    "has_tradename",
+    "ingredient_of",
+    "has_ingredient"
+  ],
+  "concept_seeds": [
+    {
+      "seed_id": "hypertension",
+      "preferred_sources": ["SNOMEDCT_US"],
+      "seed_aliases": ["hypertension", "high blood pressure"],
+      "probe_aliases": [],
+      "storage_default": "sharp_memory_candidate"
+    },
+    {
+      "seed_id": "type_2_diabetes_mellitus",
+      "preferred_sources": ["SNOMEDCT_US"],
+      "seed_aliases": ["type 2 diabetes mellitus", "type 2 diabetes"],
+      "probe_aliases": ["t2dm"],
+      "storage_default": "sharp_memory_candidate"
+    },
+    {
+      "seed_id": "shortness_of_breath",
+      "preferred_sources": ["SNOMEDCT_US"],
+      "seed_aliases": ["dyspnea", "shortness of breath"],
+      "probe_aliases": ["short of breath"],
+      "storage_default": "sharp_memory_candidate"
+    },
+    {
+      "seed_id": "myocardial_infarction",
+      "preferred_sources": ["SNOMEDCT_US"],
+      "seed_aliases": ["myocardial infarction", "heart attack"],
+      "probe_aliases": [],
+      "storage_default": "sharp_memory_candidate"
+    },
+    {
+      "seed_id": "chronic_kidney_disease",
+      "preferred_sources": ["SNOMEDCT_US"],
+      "seed_aliases": ["chronic kidney disease", "ckd"],
+      "probe_aliases": [],
+      "storage_default": "sharp_memory_candidate"
+    },
+    {
+      "seed_id": "pregnancy",
+      "preferred_sources": ["SNOMEDCT_US"],
+      "seed_aliases": ["pregnancy", "pregnant"],
+      "probe_aliases": [],
+      "storage_default": "sharp_memory_candidate"
+    },
+    {
+      "seed_id": "metformin",
+      "preferred_sources": ["RXNORM"],
+      "seed_aliases": ["metformin"],
+      "probe_aliases": ["glucophage"],
+      "storage_default": "sharp_memory_candidate"
+    },
+    {
+      "seed_id": "ibuprofen",
+      "preferred_sources": ["RXNORM"],
+      "seed_aliases": ["ibuprofen"],
+      "probe_aliases": ["advil", "motrin"],
+      "storage_default": "sharp_memory_candidate"
+    },
+    {
+      "seed_id": "warfarin",
+      "preferred_sources": ["RXNORM"],
+      "seed_aliases": ["warfarin"],
+      "probe_aliases": ["coumadin"],
+      "storage_default": "sharp_memory_candidate"
+    },
+    {
+      "seed_id": "amoxicillin",
+      "preferred_sources": ["RXNORM"],
+      "seed_aliases": ["amoxicillin"],
+      "probe_aliases": ["amoxil"],
+      "storage_default": "sharp_memory_candidate"
+    },
+    {
+      "seed_id": "penicillin_allergy",
+      "preferred_sources": ["SNOMEDCT_US"],
+      "seed_aliases": ["penicillin allergy"],
+      "probe_aliases": [],
+      "storage_default": "sharp_memory_candidate"
+    },
+    {
+      "seed_id": "hemoglobin_a1c",
+      "preferred_sources": ["SNOMEDCT_US"],
+      "seed_aliases": ["hemoglobin a1c measurement"],
+      "probe_aliases": ["hba1c", "a1c"],
+      "storage_default": "sharp_memory_candidate"
+    },
+    {
+      "seed_id": "serum_creatinine_measurement",
+      "preferred_sources": ["SNOMEDCT_US"],
+      "seed_aliases": ["creatinine measurement", "serum creatinine"],
+      "probe_aliases": [],
+      "storage_default": "sharp_memory_candidate"
+    },
+    {
+      "seed_id": "blood_pressure_measurement",
+      "preferred_sources": ["SNOMEDCT_US"],
+      "seed_aliases": ["blood pressure taking"],
+      "probe_aliases": ["blood pressure", "blood pressure reading", "blood pressure readings", "bp reading", "bp readings"],
+      "storage_default": "sharp_memory_candidate"
+    },
+    {
+      "seed_id": "blood_glucose_measurement",
+      "preferred_sources": ["SNOMEDCT_US"],
+      "seed_aliases": ["glucose measurement, blood"],
+      "probe_aliases": ["blood glucose", "blood glucose reading", "blood glucose readings", "glucose reading"],
+      "storage_default": "sharp_memory_candidate"
+    },
+    {
+      "seed_id": "renal_function_test",
+      "preferred_sources": ["SNOMEDCT_US"],
+      "seed_aliases": ["renal function test", "kidney function test"],
+      "probe_aliases": ["renal function tests", "kidney function", "kidney function labs"],
+      "storage_default": "sharp_memory_candidate"
+    }
+  ],
+  "utterance_cases": [
+    {
+      "case_id": "core_direct_disorders",
+      "difficulty": "core",
+      "storage_expectation": "sharp_memory_candidate",
+      "utterance": "Mara still has high blood pressure and type 2 diabetes.",
+      "expected_seed_ids": ["hypertension", "type_2_diabetes_mellitus"],
+      "optional_seed_ids": [],
+      "notes": "Direct disorder normalization should be the easiest win."
+    },
+    {
+      "case_id": "core_brand_drug_mix",
+      "difficulty": "core",
+      "storage_expectation": "sharp_memory_candidate",
+      "utterance": "They restarted Glucophage and told him to stop Advil.",
+      "expected_seed_ids": ["metformin", "ibuprofen"],
+      "optional_seed_ids": [],
+      "notes": "Brand names should collapse to the right medication concepts."
+    },
+    {
+      "case_id": "core_colloquial_cardiopulmonary",
+      "difficulty": "core",
+      "storage_expectation": "sharp_memory_candidate",
+      "utterance": "She came in short of breath and said the pain felt like another heart attack.",
+      "expected_seed_ids": ["shortness_of_breath", "myocardial_infarction"],
+      "optional_seed_ids": [],
+      "notes": "Colloquial surface forms should still ground sharply."
+    },
+    {
+      "case_id": "core_ckd_lab_combo",
+      "difficulty": "core",
+      "storage_expectation": "sharp_memory_candidate",
+      "utterance": "Stage 3 CKD is on the problem list and the serum creatinine was repeated this afternoon.",
+      "expected_seed_ids": ["chronic_kidney_disease", "serum_creatinine_measurement"],
+      "optional_seed_ids": [],
+      "notes": "Condition plus lab concept in one sentence."
+    },
+    {
+      "case_id": "core_lab_followup",
+      "difficulty": "core",
+      "storage_expectation": "sharp_memory_candidate",
+      "utterance": "Her HbA1c climbed again even after starting metformin.",
+      "expected_seed_ids": ["hemoglobin_a1c", "metformin"],
+      "optional_seed_ids": [],
+      "notes": "Abbreviation plus generic drug."
+    },
+    {
+      "case_id": "core_pregnancy_drug_risk",
+      "difficulty": "core",
+      "storage_expectation": "sharp_memory_candidate",
+      "utterance": "She is pregnant and still taking Coumadin.",
+      "expected_seed_ids": ["pregnancy", "warfarin"],
+      "optional_seed_ids": [],
+      "notes": "Pregnancy plus drug brand normalization."
+    },
+    {
+      "case_id": "core_antibiotic_allergy",
+      "difficulty": "core",
+      "storage_expectation": "sharp_memory_candidate",
+      "utterance": "Amoxicillin helped last year, and he still has a penicillin allergy.",
+      "expected_seed_ids": ["amoxicillin", "penicillin_allergy"],
+      "optional_seed_ids": [],
+      "notes": "Medication plus explicit allergy concept."
+    },
+    {
+      "case_id": "stress_abbrev_disorder",
+      "difficulty": "stress",
+      "storage_expectation": "sharp_memory_candidate",
+      "utterance": "Her T2DM is poorly controlled.",
+      "expected_seed_ids": ["type_2_diabetes_mellitus"],
+      "optional_seed_ids": [],
+      "notes": "Abbreviation handling is a sharper test than the generic phrase."
+    },
+    {
+      "case_id": "stress_generic_analgesic_brand",
+      "difficulty": "stress",
+      "storage_expectation": "sharp_memory_candidate",
+      "utterance": "He uses Motrin on bad days.",
+      "expected_seed_ids": ["ibuprofen"],
+      "optional_seed_ids": [],
+      "notes": "Secondary brand alias."
+    },
+    {
+      "case_id": "stress_vague_pressure",
+      "difficulty": "stress",
+      "storage_expectation": "abstain",
+      "utterance": "Her pressure has been high lately.",
+      "expected_seed_ids": [],
+      "optional_seed_ids": [],
+      "notes": "Too vague for sharp medical memory."
+    },
+    {
+      "case_id": "stress_vague_sugar",
+      "difficulty": "stress",
+      "storage_expectation": "abstain",
+      "utterance": "Sugar was high again, but nobody knows why.",
+      "expected_seed_ids": [],
+      "optional_seed_ids": [],
+      "notes": "Should not silently harden into diabetes."
+    },
+    {
+      "case_id": "stress_vague_kidneys",
+      "difficulty": "stress",
+      "storage_expectation": "abstain",
+      "utterance": "His kidneys are a little off.",
+      "expected_seed_ids": [],
+      "optional_seed_ids": [],
+      "notes": "Narrative shorthand should not over-trigger CKD."
+    }
+  ]
+}

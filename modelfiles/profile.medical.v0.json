@@ -1,0 +1,69 @@
+{
+  "profile_id": "medical@v0",
+  "status": "bounded_mvp",
+  "description": "Bounded medical profile focused on sharp structured memory, normalization, and clarification-aware capture rather than broad clinical reasoning.",
+  "predicate_registry": "modelfiles/predicate_registry.medical.json",
+  "type_schema_example": "modelfiles/type_schema.medical.example.json",
+  "prompt_supplement": "modelfiles/medical_compiler_prompt_supplement.md",
+  "ontology_prospector_prompt": "modelfiles/medical_ontology_prospector_prompt.md",
+  "recommended_settings": {
+    "compiler_mode": "strict",
+    "strict_registry": true,
+    "strict_types": false,
+    "clarification_eagerness": 0.8,
+    "freethinker_resolution_policy": "advisory_only"
+  },
+  "canonical_palette": [
+    {
+      "signature": "taking/2",
+      "arguments": ["person", "medication"],
+      "notes": "Medication exposure or ongoing use."
+    },
+    {
+      "signature": "has_condition/2",
+      "arguments": ["person", "condition"],
+      "notes": "Diagnosed conditions, not vague symptoms or shorthand."
+    },
+    {
+      "signature": "has_symptom/2",
+      "arguments": ["person", "symptom"],
+      "notes": "Symptoms and findings distinct from durable diagnoses."
+    },
+    {
+      "signature": "has_allergy/2",
+      "arguments": ["person", "allergy_or_substance"],
+      "notes": "Explicit allergy history."
+    },
+    {
+      "signature": "underwent_lab_test/2",
+      "arguments": ["person", "lab_test"],
+      "notes": "A lab event or repeated measurement occurred."
+    },
+    {
+      "signature": "lab_result_high/2",
+      "arguments": ["person", "lab_test"],
+      "notes": "A clarified or explicit high reading/result."
+    },
+    {
+      "signature": "lab_result_rising/2",
+      "arguments": ["person", "lab_test"],
+      "notes": "A trend upward across lab results."
+    },
+    {
+      "signature": "lab_result_abnormal/2",
+      "arguments": ["person", "lab_test"],
+      "notes": "Abnormal but underspecified lab/function result."
+    },
+    {
+      "signature": "pregnant/1",
+      "arguments": ["person"],
+      "notes": "Unary pregnancy state."
+    }
+  ],
+  "evidence": {
+    "umls_mvp_probe": "docs/reports/UMLS_MVP_PROBE_2026-04-23.md",
+    "medical_prompt_probe": "docs/reports/MEDICAL_PROMPT_PROBE_2026-04-23.md",
+    "medical_clarification_probe": "docs/reports/MEDICAL_CLARIFICATION_PROBE_2026-04-23.md",
+    "ontology_prospector": "docs/reports/MEDICAL_ONTOLOGY_PROSPECTOR_2026-04-23.md"
+  }
+}

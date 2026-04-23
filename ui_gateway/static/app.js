@@ -510,6 +510,8 @@ function splitPromptSections(promptText, kind, sharedPromptReference = "") {
   const utteranceMarkers =
     kind === "routing"
       ? ["\nUSER_UTTERANCE:\n", "\nUtterance:\n"]
+      : kind === "freethinker"
+        ? ["\nCURRENT_UTTERANCE:\n", "\nUtterance:\n", "\nUSER_UTTERANCE:\n"]
       : ["\nUtterance:\n", "\nUSER_UTTERANCE:\n"];
   let utterance = "";
   let promptBody = body;
@@ -525,6 +527,8 @@ function splitPromptSections(promptText, kind, sharedPromptReference = "") {
   const wrapperMarkers =
     kind === "parse"
       ? ["Route lock:", "Known ontology predicates:", "Return JSON only with exactly these keys:"]
+      : kind === "freethinker"
+        ? ["FREETHINKER_CONTEXT_JSON:"]
       : kind === "served"
         ? [
             "You are the served assistant behind a governed pre-think gateway.",
@@ -569,12 +573,14 @@ function splitPromptSections(promptText, kind, sharedPromptReference = "") {
 
   if (taskWrapperText) {
     parts.push({
-      label:
-        kind === "parse"
-          ? "Parse wrapper / schema"
-          : kind === "served"
-            ? "Served handoff wrapper"
-            : "Routing wrapper / schema",
+        label:
+          kind === "parse"
+            ? "Parse wrapper / schema"
+            : kind === "freethinker"
+              ? "Freethinker wrapper / schema"
+            : kind === "served"
+              ? "Served handoff wrapper"
+              : "Routing wrapper / schema",
       text: taskWrapperText,
     });
   }
@@ -619,6 +625,16 @@ function collectModelContextBlocks(turn) {
     blocks.push({ label: "Parse Prompt", parts: decomposed.parts });
   }
 
+  const freethinkerPrompt = String(
+    ((((turnTrace || {}).freethinker || {}).prompt_text) || "")
+  ).trim();
+  if (freethinkerPrompt) {
+    blocks.push({
+      label: "Freethinker Prompt",
+      parts: splitPromptSections(freethinkerPrompt, "freethinker").parts,
+    });
+  }
+
   const servedPrompt = String(
     ((((turn || {}).assistant || {}).served_llm || {}).prompt_text || "")
   ).trim();
@@ -647,6 +663,11 @@ function collectCompilerJsonBlocks(turnTrace) {
   const parseJson = (((turnTrace || {}).parse || {}).extractor || {}).parsed;
   if (parseJson && typeof parseJson === "object") {
     blocks.push({ label: "Parse JSON", text: prettyJson(parseJson) });
+  }
+
+  const freethinkerJson = ((turnTrace || {}).freethinker || {}).parsed;
+  if (freethinkerJson && typeof freethinkerJson === "object") {
+    blocks.push({ label: "Freethinker JSON", text: prettyJson(freethinkerJson) });
   }
 
   return blocks;
@@ -981,6 +1002,9 @@ async function saveConfig(event) {
     "served_llm_timeout",
     "compiler_context_length",
     "compiler_timeout",
+    "freethinker_context_length",
+    "freethinker_timeout",
+    "freethinker_temperature",
     "clarification_eagerness",
   ]);
 
@@ -993,6 +1017,7 @@ async function saveConfig(event) {
   }
   payload.strict_mode = form.elements.namedItem("strict_mode").checked;
   payload.require_final_confirmation = form.elements.namedItem("require_final_confirmation").checked;
+  payload.freethinker_thinking = form.elements.namedItem("freethinker_thinking").checked;
 
   try {
     const response = await getJson("/api/config", {
@@ -1027,6 +1052,23 @@ function servedChatPayload(baseConfig) {
     strict_mode: false,
     served_handoff_mode: "always",
     compiler_mode: "auto",
+  };
+}
+
+function freethinkerAdvisoryPayload(baseConfig) {
+  return {
+    ...baseConfig,
+    freethinker_resolution_policy: "advisory_only",
+    freethinker_temperature: Number(baseConfig?.freethinker_temperature ?? 0.2) || 0.2,
+    freethinker_thinking: Boolean(baseConfig?.freethinker_thinking),
+    freethinker_model: String(baseConfig?.freethinker_model || "qwen3.5:9b"),
+    freethinker_backend: String(baseConfig?.freethinker_backend || "ollama"),
+    freethinker_base_url: String(baseConfig?.freethinker_base_url || "http://127.0.0.1:11434"),
+    freethinker_context_length: Number(baseConfig?.freethinker_context_length || 16384),
+    freethinker_timeout: Number(baseConfig?.freethinker_timeout || 60),
+    freethinker_prompt_file: String(
+      baseConfig?.freethinker_prompt_file || "modelfiles/freethinker_system_prompt.md"
+    ),
   };
 }
 
@@ -1065,6 +1107,25 @@ async function applyServedChatPreference() {
       "Served chat preference applied (strict off, served handoff always, compiler auto).";
   } catch (error) {
     document.getElementById("config-status").textContent = `Served chat preset failed: ${String(error)}`;
+  }
+}
+
+async function applyFreethinkerAdvisory() {
+  try {
+    const payload = freethinkerAdvisoryPayload(state.config || {});
+    const response = await getJson("/api/config", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+    state.config = response.config;
+    fillConfigForm(state.config);
+    document.getElementById("config-status").textContent =
+      "Freethinker advisory enabled (watcher active for clarification refinement).";
+  } catch (error) {
+    document.getElementById("config-status").textContent = `Freethinker preset failed: ${String(error)}`;
   }
 }
 
@@ -1253,6 +1314,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("reset-button").addEventListener("click", resetSession);
   document.getElementById("export-button").addEventListener("click", exportSession);
   document.getElementById("strict-lock-button").addEventListener("click", applyStrictBouncerLock);
+  document.getElementById("freethinker-advisory-button").addEventListener("click", applyFreethinkerAdvisory);
   document.getElementById("served-chat-button").addEventListener("click", applyServedChatPreference);
   try {
     await loadConfig();

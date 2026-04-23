@@ -112,6 +112,38 @@ class RuntimeHooksFamilyBundleTests(unittest.TestCase):
         self.assertEqual(out.get("ambiguities"), [])
         self.assertIn("registry form", str(out.get("rationale", "")).lower())
 
+    def test_canonicalize_subject_suffixed_predicate_uses_registry_form(self) -> None:
+        hooks = RuntimeHooks()
+        parsed = {
+            "intent": "assert_fact",
+            "logic_string": "runs_scott(bakery).",
+            "facts": [
+                "runs_scott(bakery).",
+            ],
+            "rules": [],
+            "queries": [],
+            "components": {
+                "atoms": ["bakery"],
+                "variables": [],
+                "predicates": ["runs_scott"],
+            },
+            "ambiguities": [],
+            "rationale": "Temporary parser rationale.",
+        }
+
+        out = hooks._canonicalize_subject_prefixed_predicates(parsed)
+
+        self.assertEqual(
+            out.get("facts"),
+            ["runs(scott, bakery)."],
+        )
+        self.assertEqual(
+            out.get("logic_string"),
+            "runs(scott, bakery).",
+        )
+        self.assertEqual(out.get("ambiguities"), [])
+        self.assertIn("registry form", str(out.get("rationale", "")).lower())
+
     def test_answer_uses_yes_for_grounded_yes_no_query(self) -> None:
         hooks = RuntimeHooks()
         execution = {

@@ -1149,14 +1149,25 @@ def _call_model_prompt(
     timeout: int,
     api_key: str | None,
     response_format: str = "json",
+    temperature: float = 0.0,
+    think_enabled: bool = False,
 ) -> ModelResponse:
+    try:
+        temperature_value = float(temperature)
+    except Exception:
+        temperature_value = 0.0
+    if temperature_value < 0.0:
+        temperature_value = 0.0
+    if temperature_value > 2.0:
+        temperature_value = 2.0
+
     if backend == "ollama":
         payload = {
             "model": model,
             "stream": False,
-            "think": False,
+            "think": bool(think_enabled),
             "messages": [{"role": "user", "content": prompt_text}],
-            "options": {"temperature": 0, "num_ctx": context_length},
+            "options": {"temperature": temperature_value, "num_ctx": context_length},
         }
         if str(response_format or "json").strip().lower() == "json":
             payload["format"] = "json"
@@ -1182,7 +1193,7 @@ def _call_model_prompt(
     openai_payload = {
         "model": model,
         "messages": [{"role": "user", "content": prompt_text}],
-        "temperature": 0,
+        "temperature": temperature_value,
         "stream": False,
         "max_tokens": 1024,
         "context_length": context_length,
@@ -1220,7 +1231,7 @@ def _call_model_prompt(
         legacy_payload = {
             "model": model,
             "input": prompt_text,
-            "temperature": 0,
+            "temperature": temperature_value,
             "context_length": context_length,
         }
         raw = _post_json(

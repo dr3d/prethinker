@@ -1,0 +1,189 @@
+{
+  "battery_id": "medical_prompt_probe_v1",
+  "description": "Baseline shared SP versus shared SP plus bounded medical supplement and concept hints.",
+  "cases": [
+    {
+      "case_id": "conditions_direct",
+      "utterance": "Mara has high blood pressure and type 2 diabetes.",
+      "route": "assert_fact",
+      "expected_route": "assert_fact",
+      "expect_needs_clarification": false,
+      "expected_logic_contains": [
+        "has_condition(mara, hypertension).",
+        "has_condition(mara, type_2_diabetes_mellitus)."
+      ],
+      "forbidden_logic_contains": [
+        "high_blood_pressure("
+      ]
+    },
+    {
+      "case_id": "pregnancy_warfarin",
+      "utterance": "Lena is pregnant and still taking Coumadin.",
+      "route": "assert_fact",
+      "expected_route": "assert_fact",
+      "expect_needs_clarification": false,
+      "expected_logic_contains": [
+        "pregnant(lena).",
+        "taking(lena, warfarin)."
+      ],
+      "forbidden_logic_contains": [
+        "taking_coumadin(",
+        "coumadin"
+      ]
+    },
+    {
+      "case_id": "a1c_after_metformin",
+      "utterance": "Noah's HbA1c climbed again even after starting metformin.",
+      "route": "assert_fact",
+      "expected_route": "assert_fact",
+      "expect_needs_clarification": false,
+      "expected_logic_contains": [
+        "lab_result_rising(noah, hemoglobin_a1c).",
+        "taking(noah, metformin)."
+      ],
+      "forbidden_logic_contains": [
+        "hba1c_climbed_again(",
+        "patient"
+      ]
+    },
+    {
+      "case_id": "symptom_direct",
+      "utterance": "Mara has been short of breath for two days.",
+      "route": "assert_fact",
+      "expected_route": "assert_fact",
+      "expect_needs_clarification": false,
+      "expected_logic_contains": [
+        "has_symptom(mara, shortness_of_breath)."
+      ],
+      "forbidden_logic_contains": [
+        "has_condition(mara, shortness_of_breath)."
+      ]
+    },
+    {
+      "case_id": "ckd_creatinine_repeat",
+      "utterance": "Pia has stage 3 CKD and the serum creatinine was repeated this afternoon.",
+      "route": "assert_fact",
+      "expected_route": "assert_fact",
+      "expect_needs_clarification": false,
+      "expected_logic_contains": [
+        "has_condition(pia, chronic_kidney_disease).",
+        "underwent_lab_test(pia, serum_creatinine_measurement)."
+      ],
+      "forbidden_logic_contains": [
+        "ckd_stage_3_on_chart(",
+        "sodium_creatinine"
+      ]
+    },
+    {
+      "case_id": "creatinine_direct_event",
+      "utterance": "Noah's serum creatinine was repeated this afternoon.",
+      "route": "assert_fact",
+      "expected_route": "assert_fact",
+      "expect_needs_clarification": false,
+      "expected_logic_contains": [
+        "underwent_lab_test(noah, serum_creatinine_measurement)."
+      ],
+      "forbidden_logic_contains": [
+        "chronic_kidney_disease",
+        "repeated_serum_creatinine("
+      ]
+    },
+    {
+      "case_id": "ibuprofen_brand",
+      "utterance": "Ari takes Advil most nights.",
+      "route": "assert_fact",
+      "expected_route": "assert_fact",
+      "expect_needs_clarification": false,
+      "expected_logic_contains": [
+        "taking(ari, ibuprofen)."
+      ],
+      "forbidden_logic_contains": [
+        "advil"
+      ]
+    },
+    {
+      "case_id": "penicillin_allergy",
+      "utterance": "Dana has a penicillin allergy.",
+      "route": "assert_fact",
+      "expected_route": "assert_fact",
+      "expect_needs_clarification": false,
+      "expected_logic_contains": [
+        "has_allergy(dana, penicillin_allergy)."
+      ],
+      "forbidden_logic_contains": [
+        "has_condition(dana, penicillin_allergy)."
+      ]
+    },
+    {
+      "case_id": "vague_pressure",
+      "utterance": "Mara's pressure has been high lately.",
+      "route": "assert_fact",
+      "expected_route": "assert_fact",
+      "expect_needs_clarification": true,
+      "expect_empty_logic": true,
+      "expected_logic_contains": [],
+      "forbidden_logic_contains": [
+        "hypertension",
+        "has_condition(",
+        "lab_result_high("
+      ]
+    },
+    {
+      "case_id": "vague_sugar",
+      "utterance": "Sugar was high again, but nobody knows why.",
+      "route": "assert_fact",
+      "expected_route": "assert_fact",
+      "expect_needs_clarification": true,
+      "expect_empty_logic": true,
+      "expected_logic_contains": [],
+      "forbidden_logic_contains": [
+        "type_2_diabetes_mellitus",
+        "diabetes",
+        "lab_result_high(",
+        "sugar_measurement"
+      ]
+    },
+    {
+      "case_id": "pronoun_pregnancy_unresolved",
+      "utterance": "She is pregnant and still taking Coumadin.",
+      "route": "assert_fact",
+      "expected_route": "assert_fact",
+      "expect_needs_clarification": true,
+      "expect_empty_logic": true,
+      "expected_logic_contains": [],
+      "forbidden_logic_contains": [
+        "pregnant(",
+        "taking(",
+        "warfarin"
+      ]
+    },
+    {
+      "case_id": "pronoun_a1c_unresolved",
+      "utterance": "Her HbA1c climbed again even after starting metformin.",
+      "route": "assert_fact",
+      "expected_route": "assert_fact",
+      "expect_needs_clarification": true,
+      "expect_empty_logic": true,
+      "expected_logic_contains": [],
+      "forbidden_logic_contains": [
+        "lab_result_rising(",
+        "taking(",
+        "hemoglobin_a1c"
+      ]
+    },
+    {
+      "case_id": "vague_kidneys",
+      "utterance": "His kidneys are a little off.",
+      "route": "assert_fact",
+      "expected_route": "assert_fact",
+      "expect_needs_clarification": true,
+      "expect_empty_logic": true,
+      "expected_logic_contains": [],
+      "forbidden_logic_contains": [
+        "chronic_kidney_disease",
+        "has_condition(",
+        "vague_kidney_issue"
+      ]
+    }
+  ]
+}

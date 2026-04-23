@@ -18,8 +18,9 @@ Prethinker is operating on one honest evaluation spine:
 - The next honest weakness is no longer hard temporal breakage; it is relative-time semantic under-capture and a couple of residual correction parse holdouts.
 - Same-model-family stack remains the default (`qwen3.5:9b` parser + clarification path) for tighter behavior and lower VRAM pressure.
 - The console is now the canonical interactive front door and the clearest manual product surface.
-- `Freethinker` exists as a design-track clarification sidecar with policy defaulted to `off`.
+- `Freethinker` is now live as a bounded clarification sidecar in the console path, with policy still defaulted to `off` and `advisory_only` as the first active rollout mode.
 - The current public story is: governed adapter first, broad open-domain conversational memory second.
+- A bounded UMLS-backed medical lane now looks promising as a normalization and type-steering profile, especially once clarification is allowed to resolve vague shorthand or unresolved patient references.
 
 ## Current Rollups
 
@@ -39,6 +40,19 @@ Prethinker is operating on one honest evaluation spine:
   - correction pack: `10/12` pass, `2/12` fail
   - temporal pack: `8/12` pass, `4/12` warn, `0/12` fail
   - artifacts: `docs/reports/PROCESS_UTTERANCE_PIPELINE_BATCH_2026-04-20.md`, `docs/PROCESS_UTTERANCE_FRONTIER_PACKS.md`
+- Medical/UMLS bounded lane:
+  - sharp-memory slice probe: `12/12` pass, `0/12` warn, `0/12` fail
+  - clinical checks probe: `7/7` pass, `0/7` warn, `0/7` fail
+  - medical prompt probe: `79/79` vs baseline `58/79`
+  - clarification-aware medical probe: `38/38` vs baseline `21/38`
+  - local-only ontology prospector run (`qwen3.5:27b`) converged on `9` predicates across `20` cases, all inside the existing bounded palette
+  - artifacts: `docs/UMLS_MVP.md`, `docs/ONTOLOGY_PROSPECTOR.md`, `docs/reports/UMLS_MVP_PROBE_2026-04-23.md`, `docs/reports/MEDICAL_PROMPT_PROBE_2026-04-23.md`, `docs/reports/MEDICAL_CLARIFICATION_PROBE_2026-04-23.md`, `docs/reports/MEDICAL_ONTOLOGY_PROSPECTOR_2026-04-23.md`
+- Freethinker bounded sidecar:
+  - live second-model clarification path in the canonical console
+  - separate prompt/context/model/runtime settings, including temperature and think flag
+  - `advisory_only` is the intended first live mode; default policy remains `off`
+  - focused Freethinker/config checks: `50 passed`
+  - artifact: `docs/reports/FREETHINKER_ADVISORY_STATUS_2026-04-23.md`
 - Narrative strict last verified status:
   - mid pack: `pipeline_pass=3/3`, best `0.9284`; `full` improved from `0/20` exam to `17/20` and now clears an `8/8` temporal floor after interrogator recovery
   - upper-mid pack: `pipeline_pass=3/3`, best `0.956`; paragraph and line both reached `20/20`
@@ -70,6 +84,15 @@ Prethinker is operating on one honest evaluation spine:
 - blocksworld strict guarded lane: [docs/reports/BLOCKSWORLD_LANE_GUARDED_2026-04-19.md](docs/reports/BLOCKSWORLD_LANE_GUARDED_2026-04-19.md)
 - KB interrogator guide: [docs/KB_INTERROGATOR.md](docs/KB_INTERROGATOR.md)
 - runtime settings cheat sheet: [docs/RUNTIME_SETTINGS_CHEATSHEET.md](docs/RUNTIME_SETTINGS_CHEATSHEET.md)
+- UMLS MVP note: [docs/UMLS_MVP.md](docs/UMLS_MVP.md)
+- formal medical profile: [docs/MEDICAL_PROFILE.md](docs/MEDICAL_PROFILE.md)
+- local ontology prospector note: [docs/ONTOLOGY_PROSPECTOR.md](docs/ONTOLOGY_PROSPECTOR.md)
+- ontology prospector run result: [docs/reports/MEDICAL_ONTOLOGY_PROSPECTOR_2026-04-23.md](docs/reports/MEDICAL_ONTOLOGY_PROSPECTOR_2026-04-23.md)
+- UMLS MVP probe result: [docs/reports/UMLS_MVP_PROBE_2026-04-23.md](docs/reports/UMLS_MVP_PROBE_2026-04-23.md)
+- medical prompt probe result: [docs/reports/MEDICAL_PROMPT_PROBE_2026-04-23.md](docs/reports/MEDICAL_PROMPT_PROBE_2026-04-23.md)
+- medical clarification probe result: [docs/reports/MEDICAL_CLARIFICATION_PROBE_2026-04-23.md](docs/reports/MEDICAL_CLARIFICATION_PROBE_2026-04-23.md)
+- medical profile suite result: [docs/reports/MEDICAL_PROFILE_SUITE_2026-04-23.md](docs/reports/MEDICAL_PROFILE_SUITE_2026-04-23.md)
+- freethinker advisory status: [docs/reports/FREETHINKER_ADVISORY_STATUS_2026-04-23.md](docs/reports/FREETHINKER_ADVISORY_STATUS_2026-04-23.md)
 - focus execution plan: [docs/FOCUS_EXECUTION_PLAN.md](docs/FOCUS_EXECUTION_PLAN.md)
 - ontology steering note: [docs/ONTOLOGY_STEERING.md](docs/ONTOLOGY_STEERING.md)
 - console MVP note: [docs/PRETHINK_GATEWAY_MVP.md](docs/PRETHINK_GATEWAY_MVP.md)
@@ -167,7 +190,8 @@ This split is about authority, not model family. Both roles can use the same und
 Current implementation status:
 
 - `Prethinker` path is live in the console and batch runners.
-- `Freethinker` is currently a design-track capability with trace scaffolding and config surfaces in place, but live resolution policy remains `off` by default.
+- `Freethinker` is now a live bounded console sidecar with its own prompt/context/model settings.
+- default Freethinker policy remains `off`; `advisory_only` is the first intended active mode.
 
 ## Documentation Spine
 

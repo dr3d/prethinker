@@ -12,6 +12,8 @@ class GatewayConfigTests(unittest.TestCase):
             config = store.get().to_dict()
             self.assertEqual(config.get("freethinker_resolution_policy"), "off")
             self.assertEqual(config.get("freethinker_model"), "qwen3.5:9b")
+            self.assertEqual(config.get("freethinker_temperature"), 0.2)
+            self.assertFalse(config.get("freethinker_thinking"))
             self.assertEqual(
                 config.get("freethinker_prompt_file"),
                 "modelfiles/freethinker_system_prompt.md",
@@ -26,12 +28,16 @@ class GatewayConfigTests(unittest.TestCase):
                     "freethinker_backend": "unknown",
                     "freethinker_context_length": 128,
                     "freethinker_timeout": 0,
+                    "freethinker_temperature": 9,
+                    "freethinker_thinking": 1,
                 }
             ).to_dict()
             self.assertEqual(updated.get("freethinker_resolution_policy"), "off")
             self.assertEqual(updated.get("freethinker_backend"), "ollama")
             self.assertEqual(updated.get("freethinker_context_length"), 512)
             self.assertEqual(updated.get("freethinker_timeout"), 5)
+            self.assertEqual(updated.get("freethinker_temperature"), 2.0)
+            self.assertTrue(updated.get("freethinker_thinking"))
 
     def test_invalid_served_provider_is_sanitized(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

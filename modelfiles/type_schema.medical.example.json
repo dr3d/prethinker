@@ -1,0 +1,38 @@
+{
+  "entities": {
+    "ari": ["person"],
+    "dana": ["person"],
+    "lena": ["person"],
+    "mara": ["person"],
+    "noah": ["person"],
+    "pia": ["person"],
+    "priya": ["person"],
+    "warfarin": ["medication"],
+    "ibuprofen": ["medication"],
+    "metformin": ["medication"],
+    "coumadin": ["medication"],
+    "advil": ["medication"],
+    "hypertension": ["condition"],
+    "type_2_diabetes_mellitus": ["condition"],
+    "chronic_kidney_disease": ["condition"],
+    "shortness_of_breath": ["symptom"],
+    "penicillin_allergy": ["allergy_or_substance"],
+    "penicillin": ["allergy_or_substance"],
+    "hemoglobin_a1c": ["lab_test"],
+    "serum_creatinine_measurement": ["lab_test"],
+    "blood_pressure_measurement": ["lab_test"],
+    "blood_glucose_measurement": ["lab_test"],
+    "renal_function_test": ["lab_test"]
+  },
+  "predicates": {
+    "taking/2": ["person", "medication"],
+    "has_condition/2": ["person", "condition"],
+    "has_symptom/2": ["person", "symptom"],
+    "has_allergy/2": ["person", "allergy_or_substance"],
+    "underwent_lab_test/2": ["person", "lab_test"],
+    "lab_result_high/2": ["person", "lab_test"],
+    "lab_result_rising/2": ["person", "lab_test"],
+    "lab_result_abnormal/2": ["person", "lab_test"],
+    "pregnant/1": ["person"]
+  }
+}

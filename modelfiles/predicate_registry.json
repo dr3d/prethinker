@@ -6,6 +6,7 @@
     { "name": "inside", "arity": 2, "aliases": [] },
     { "name": "in_region", "arity": 2, "aliases": [] },
     { "name": "lives_in", "arity": 2, "aliases": [] },
+    { "name": "runs", "arity": 2, "aliases": [] },
     { "name": "man", "arity": 1, "aliases": [] },
     { "name": "approver", "arity": 2, "aliases": [] },
     { "name": "requester", "arity": 2, "aliases": [] },

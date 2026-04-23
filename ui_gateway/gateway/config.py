@@ -29,6 +29,8 @@ class GatewayConfig:
     freethinker_base_url: str = "http://127.0.0.1:11434"
     freethinker_context_length: int = 16384
     freethinker_timeout: int = 60
+    freethinker_temperature: float = 0.2
+    freethinker_thinking: bool = False
     freethinker_prompt_file: str = "modelfiles/freethinker_system_prompt.md"
     require_final_confirmation: bool = True
     strict_mode: bool = True
@@ -83,6 +85,16 @@ class ConfigStore:
                 sanitized["freethinker_timeout"] = max(5, int(sanitized["freethinker_timeout"]))
             except Exception:
                 sanitized.pop("freethinker_timeout", None)
+        if "freethinker_temperature" in sanitized:
+            try:
+                value = float(sanitized["freethinker_temperature"])
+                if value < 0.0:
+                    value = 0.0
+                if value > 2.0:
+                    value = 2.0
+                sanitized["freethinker_temperature"] = value
+            except Exception:
+                sanitized.pop("freethinker_temperature", None)
         if "served_llm_timeout" in sanitized:
             try:
                 sanitized["served_llm_timeout"] = max(5, int(sanitized["served_llm_timeout"]))
@@ -127,6 +139,8 @@ class ConfigStore:
             sanitized["strict_mode"] = bool(sanitized["strict_mode"])
         if "require_final_confirmation" in sanitized:
             sanitized["require_final_confirmation"] = bool(sanitized["require_final_confirmation"])
+        if "freethinker_thinking" in sanitized:
+            sanitized["freethinker_thinking"] = bool(sanitized["freethinker_thinking"])
         if "compiler_prompt_mode" in sanitized:
             mode = str(sanitized["compiler_prompt_mode"]).strip().lower()
             if mode not in {"auto", "always", "never"}:

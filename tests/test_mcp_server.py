@@ -683,6 +683,56 @@ class LocalMcpServerTests(unittest.TestCase):
         self.assertEqual(query.get("status"), "success")
         self.assertTrue(any(row.get("X") == "salem" for row in query.get("rows", [])))
 
+    def test_process_utterance_uses_canonical_registry_form_for_subject_suffixed_predicate(self) -> None:
+        strict_server = PrologMCPServer(compiler_mode="strict")
+        compiled = {
+            "intent": "assert_fact",
+            "needs_clarification": False,
+            "uncertainty_score": 0.05,
+            "clarification_question": "",
+            "clarification_reason": "",
+            "rationale": "Write-like utterance.",
+        }
+        parsed = {
+            "intent": "assert_fact",
+            "logic_string": "runs_scott(bakery).",
+            "components": {
+                "atoms": ["bakery"],
+                "variables": [],
+                "predicates": ["runs_scott"],
+            },
+            "facts": ["runs_scott(bakery)."],
+            "rules": [],
+            "queries": [],
+            "confidence": {"overall": 0.95, "intent": 0.95, "logic": 0.95},
+            "ambiguities": [],
+            "needs_clarification": False,
+            "uncertainty_score": 0.05,
+            "uncertainty_label": "low",
+            "clarification_question": "",
+            "clarification_reason": "",
+            "rationale": "Temporary parser rationale.",
+        }
+
+        with (
+            patch.object(strict_server, "_compile_prethink_semantics", return_value=(compiled, "")),
+            patch(
+                "src.mcp_server._call_model_prompt",
+                return_value=ModelResponse(message=json.dumps(parsed), reasoning="", raw={}),
+            ),
+        ):
+            result = strict_server.process_utterance({"utterance": "Scott runs the bakery."})
+
+        self.assertEqual(result.get("status"), "success")
+        execution = result.get("execution", {})
+        self.assertEqual(
+            execution.get("parse", {}).get("facts"),
+            ["runs(scott, bakery)."],
+        )
+        query = strict_server.query_rows("runs(scott, X).")
+        self.assertEqual(query.get("status"), "success")
+        self.assertTrue(any(row.get("X") == "bakery" for row in query.get("rows", [])))
+
     def test_process_utterance_normalizes_family_bundle_in_canonical_path(self) -> None:
         strict_server = PrologMCPServer(compiler_mode="strict")
         compiled = {
@@ -918,7 +968,116 @@ class LocalMcpServerTests(unittest.TestCase):
         self.assertEqual(freethinker.get("action"), "skipped")
         self.assertEqual(trace.get("summary", {}).get("freethinker_policy"), "off")
 
-    def test_process_utterance_records_queued_freethinker_when_policy_enabled(self) -> None:
+    def test_process_utterance_uses_freethinker_advisory_question_when_enabled(self) -> None:
+        strict_server = PrologMCPServer(
+            compiler_mode="strict",
+            freethinker_resolution_policy="advisory_only",
+            freethinker_temperature=0.25,
+            freethinker_thinking=True,
+        )
+        compiled = {
+            "intent": "assert_fact",
+            "needs_clarification": True,
+            "uncertainty_score": 0.8,
+            "clarification_question": "Who does 'he' refer to?",
+            "clarification_reason": "Unresolved pronoun.",
+            "rationale": "Write-like utterance blocked on reference.",
+        }
+
+        freethinker_reply = ModelResponse(
+            message=json.dumps(
+                {
+                    "action": "ask_user_this",
+                    "confidence": 0.91,
+                    "grounding": "recent_turn",
+                    "proposed_answer": "",
+                    "proposed_question": "Do you mean Scott when you say 'he'?",
+                    "notes": "Recent accepted turn mentions Scott as the only active male referent.",
+                }
+            ),
+            reasoning="",
+            raw={},
+        )
+
+        with patch.object(strict_server, "_compile_prethink_semantics", return_value=(compiled, "")), patch(
+            "src.mcp_server._call_model_prompt",
+            return_value=freethinker_reply,
+        ):
+            result = strict_server.process_utterance({"utterance": "He lives in Salem."})
+
+        self.assertEqual(result.get("status"), "clarification_required")
+        front_door = result.get("front_door", {})
+        self.assertEqual(
+            front_door.get("clarification_question"),
+            "Do you mean Scott when you say 'he'?",
+        )
+        trace = result.get("compiler_trace", {})
+        freethinker = trace.get("freethinker", {})
+        self.assertEqual(freethinker.get("policy"), "advisory_only")
+        self.assertTrue(freethinker.get("used"))
+        self.assertEqual(freethinker.get("action"), "ask_user_this")
+        self.assertEqual(freethinker.get("decision_action"), "ask_user_this")
+        self.assertEqual(freethinker.get("proposed_question"), "Do you mean Scott when you say 'he'?")
+        self.assertAlmostEqual(float(freethinker.get("temperature", 0.0)), 0.25, places=3)
+        self.assertTrue(freethinker.get("thinking"))
+        self.assertIn("CURRENT_UTTERANCE:", str(freethinker.get("prompt_text", "")))
+        self.assertEqual(trace.get("summary", {}).get("freethinker_action"), "ask_user_this")
+
+    def test_process_utterance_refines_generic_freethinker_pronoun_question_with_recent_name(self) -> None:
+        strict_server = PrologMCPServer(
+            compiler_mode="strict",
+            freethinker_resolution_policy="advisory_only",
+        )
+        strict_server._recent_accepted_turns = [
+            {
+                "utterance": "Scott runs the bakery.",
+                "route": "write",
+                "intent": "assert_fact",
+                "entities": ["bakery", "scott"],
+                "name_mentions": ["Scott"],
+                "operations": ["assert_fact: runs(scott, bakery)."],
+                "query": "",
+            }
+        ]
+        compiled = {
+            "intent": "assert_fact",
+            "needs_clarification": True,
+            "uncertainty_score": 0.8,
+            "clarification_question": "Who does 'he' refer to?",
+            "clarification_reason": "Unresolved pronoun.",
+            "rationale": "Write-like utterance blocked on reference.",
+        }
+        freethinker_reply = ModelResponse(
+            message=json.dumps(
+                {
+                    "action": "ask_user_this",
+                    "confidence": 0.95,
+                    "grounding": "recent_turn",
+                    "proposed_answer": "",
+                    "proposed_question": "Who does 'he' refer to?",
+                    "notes": "Scott is the only recent person mention.",
+                }
+            ),
+            reasoning="",
+            raw={},
+        )
+
+        with patch.object(strict_server, "_compile_prethink_semantics", return_value=(compiled, "")), patch(
+            "src.mcp_server._call_model_prompt",
+            return_value=freethinker_reply,
+        ):
+            result = strict_server.process_utterance({"utterance": "He lives in Salem."})
+
+        self.assertEqual(result.get("status"), "clarification_required")
+        self.assertEqual(
+            result.get("front_door", {}).get("clarification_question"),
+            "Do you mean Scott when you say 'he'?",
+        )
+        freethinker = result.get("compiler_trace", {}).get("freethinker", {})
+        self.assertEqual(freethinker.get("action"), "ask_user_this")
+        self.assertEqual(freethinker.get("effective_question"), "Do you mean Scott when you say 'he'?")
+
+    def test_process_utterance_can_resolve_with_freethinker_under_grounded_reference(self) -> None:
         strict_server = PrologMCPServer(
             compiler_mode="strict",
             freethinker_resolution_policy="grounded_reference",
@@ -931,17 +1090,74 @@ class LocalMcpServerTests(unittest.TestCase):
             "clarification_reason": "Unresolved pronoun.",
             "rationale": "Write-like utterance blocked on reference.",
         }
+        parsed = {
+            "intent": "assert_fact",
+            "logic_string": "lives_in(scott, salem).",
+            "components": {
+                "atoms": ["scott", "salem"],
+                "variables": [],
+                "predicates": ["lives_in"],
+            },
+            "facts": ["lives_in(scott, salem)."],
+            "rules": [],
+            "queries": [],
+            "confidence": {"overall": 0.95, "intent": 0.95, "logic": 0.95},
+            "ambiguities": [],
+            "needs_clarification": False,
+            "uncertainty_score": 0.05,
+            "uncertainty_label": "low",
+            "clarification_question": "",
+            "clarification_reason": "",
+            "rationale": "Resolved via Freethinker context.",
+        }
+        execution = {
+            "status": "success",
+            "intent": "assert_fact",
+            "writes_applied": 1,
+            "operations": [
+                {
+                    "tool": "assert_fact",
+                    "clause": "lives_in(scott, salem).",
+                    "result": {"status": "success"},
+                }
+            ],
+            "query_result": None,
+            "parse": parsed,
+            "errors": [],
+        }
+        freethinker_reply = ModelResponse(
+            message=json.dumps(
+                {
+                    "action": "resolve_from_context",
+                    "confidence": 0.97,
+                    "grounding": "recent_turn",
+                    "proposed_answer": "Scott",
+                    "proposed_question": "",
+                    "notes": "Scott is the only recent male referent.",
+                }
+            ),
+            reasoning="",
+            raw={},
+        )
 
-        with patch.object(strict_server, "_compile_prethink_semantics", return_value=(compiled, "")):
+        with patch.object(strict_server, "_compile_prethink_semantics", return_value=(compiled, "")), patch(
+            "src.mcp_server._call_model_prompt",
+            return_value=freethinker_reply,
+        ), patch.object(strict_server, "_compile_apply_parse", return_value=(parsed, "")) as mocked_parse, patch.object(
+            strict_server,
+            "_apply_compiled_parse",
+            return_value=execution,
+        ):
             result = strict_server.process_utterance({"utterance": "He lives in Salem."})
 
-        self.assertEqual(result.get("status"), "clarification_required")
+        self.assertEqual(result.get("status"), "success")
+        self.assertFalse(result.get("front_door", {}).get("needs_clarification"))
+        self.assertEqual(mocked_parse.call_args.kwargs.get("clarification_answer"), "Scott")
         trace = result.get("compiler_trace", {})
         freethinker = trace.get("freethinker", {})
-        self.assertEqual(freethinker.get("policy"), "grounded_reference")
-        self.assertFalse(freethinker.get("used"))
-        self.assertEqual(freethinker.get("action"), "queued")
-        self.assertEqual(freethinker.get("reason"), "not_implemented_yet")
+        self.assertEqual(freethinker.get("action"), "resolve_from_context")
+        self.assertEqual(freethinker.get("decision_action"), "resolve_from_context")
+        self.assertEqual(freethinker.get("effective_answer"), "Scott")
 
     def test_rescue_explicit_with_correction_reuses_positive_shadow_parses(self) -> None:
         strict_server = PrologMCPServer(compiler_mode="strict")

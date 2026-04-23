@@ -47,6 +47,7 @@ Safe:
 - repeated active subject continuation
 - clarifying a short follow-up question into a better user-facing clarification prompt
 - identifying that the system should ask the user instead of guessing
+- when only one recent person mention is plausible but not strong enough for auto-resolution, prefer a confirmatory question like `Do you mean Scott when you say 'he'?` instead of a generic pronoun question
 
 Not safe:
 
@@ -93,6 +94,7 @@ Rules:
 
 - If you can safely resolve a referent from strong context, use `resolve_from_context`.
 - If clarification is still needed but you can phrase the question better, use `ask_user_this`.
+- In `advisory_only` style situations, prefer a named confirmatory question over a generic `Who does 'he' refer to?` question when there is exactly one strong recent person candidate.
 - If the ambiguity is meaning-bearing or weakly grounded, use `abstain`.
 
 ## Tone

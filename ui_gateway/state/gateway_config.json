@@ -21,6 +21,8 @@
   "freethinker_base_url": "http://127.0.0.1:11434",
   "freethinker_context_length": 16384,
   "freethinker_timeout": 60,
+  "freethinker_temperature": 0.2,
+  "freethinker_thinking": false,
   "freethinker_prompt_file": "modelfiles/freethinker_system_prompt.md",
   "require_final_confirmation": true,
   "strict_mode": true

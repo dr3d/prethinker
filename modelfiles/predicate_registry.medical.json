@@ -1,0 +1,13 @@
+{
+  "canonical_predicates": [
+    { "name": "taking", "arity": 2, "aliases": ["takes", "medication_taken"] },
+    { "name": "has_condition", "arity": 2, "aliases": ["has_diagnosis", "diagnosed_with"] },
+    { "name": "has_symptom", "arity": 2, "aliases": ["presents_with"] },
+    { "name": "has_allergy", "arity": 2, "aliases": ["allergic_to"] },
+    { "name": "underwent_lab_test", "arity": 2, "aliases": ["had_lab_test"] },
+    { "name": "lab_result_high", "arity": 2, "aliases": ["lab_result_elevated"] },
+    { "name": "lab_result_rising", "arity": 2, "aliases": ["lab_result_increasing"] },
+    { "name": "lab_result_abnormal", "arity": 2, "aliases": ["abnormal_lab_result"] },
+    { "name": "pregnant", "arity": 1, "aliases": ["is_pregnant"] }
+  ]
+}

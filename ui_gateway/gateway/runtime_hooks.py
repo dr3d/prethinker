@@ -105,6 +105,8 @@ class RuntimeHooks:
                 str(config.get("freethinker_model", "qwen3.5:9b")),
                 str(int(config.get("freethinker_context_length", 16384) or 16384)),
                 str(int(config.get("freethinker_timeout", 60) or 60)),
+                str(round(float(config.get("freethinker_temperature", 0.2) or 0.2), 3)),
+                str(bool(config.get("freethinker_thinking", False))),
                 str(config.get("freethinker_prompt_file", "modelfiles/freethinker_system_prompt.md")),
                 str(bool(config.get("require_final_confirmation", True))),
                 str(bool(config.get("strict_mode", True))),
@@ -142,6 +144,8 @@ class RuntimeHooks:
             freethinker_model=str(config.get("freethinker_model", "qwen3.5:9b") or "qwen3.5:9b"),
             freethinker_context_length=max(512, int(config.get("freethinker_context_length", 16384) or 16384)),
             freethinker_timeout=max(5, int(config.get("freethinker_timeout", 60) or 60)),
+            freethinker_temperature=max(0.0, min(2.0, float(config.get("freethinker_temperature", 0.2) or 0.2))),
+            freethinker_thinking=bool(config.get("freethinker_thinking", False)),
             freethinker_prompt_file=str(
                 config.get("freethinker_prompt_file", "modelfiles/freethinker_system_prompt.md")
                 or "modelfiles/freethinker_system_prompt.md"
@@ -459,13 +463,28 @@ class RuntimeHooks:
                 continue
             first_atom = self._atomize_name(args[0])
             replacement = ""
+            rewritten_args = list(args)
             prefix = f"{first_atom}_"
             if first_atom and predicate.startswith(prefix):
                 candidate = predicate[len(prefix) :]
                 if candidate and (candidate, len(args)) in self._registry_signatures:
                     replacement = candidate
+            if not replacement and "_" in predicate:
+                candidate, embedded_subject = predicate.rsplit("_", 1)
+                embedded_subject = self._atomize_name(embedded_subject)
+                if (
+                    (predicate, len(args)) not in self._registry_signatures
+                    and
+                    candidate
+                    and embedded_subject
+                    and embedded_subject[:1].isalpha()
+                    and (candidate, len(args) + 1) in self._registry_signatures
+                    and embedded_subject.lower() not in {self._atomize_name(arg).lower() for arg in args if self._atomize_name(arg)}
+                ):
+                    replacement = candidate
+                    rewritten_args = [embedded_subject, *args]
             if replacement:
-                rewritten_facts.append(f"{replacement}({', '.join(args)}).")
+                rewritten_facts.append(f"{replacement}({', '.join(rewritten_args)}).")
                 changed = True
                 canonical_pairs.append((predicate, replacement))
             else:

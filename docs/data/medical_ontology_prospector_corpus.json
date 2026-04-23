@@ -1,0 +1,113 @@
+{
+  "corpus_id": "medical_ontology_prospector_corpus_v1",
+  "description": "Bounded medical English cases for offline ontology mining. Clarification answers are included when they materially sharpen the intended relation shape.",
+  "cases": [
+    {
+      "case_id": "conditions_direct",
+      "source": "medical_prompt_probe",
+      "utterance": "Mara has high blood pressure and type 2 diabetes."
+    },
+    {
+      "case_id": "pregnancy_warfarin",
+      "source": "medical_prompt_probe",
+      "utterance": "Lena is pregnant and still taking Coumadin."
+    },
+    {
+      "case_id": "a1c_after_metformin",
+      "source": "medical_prompt_probe",
+      "utterance": "Noah's HbA1c climbed again even after starting metformin."
+    },
+    {
+      "case_id": "symptom_direct",
+      "source": "medical_prompt_probe",
+      "utterance": "Mara has been short of breath for two days."
+    },
+    {
+      "case_id": "ckd_creatinine_repeat",
+      "source": "medical_prompt_probe",
+      "utterance": "Pia has stage 3 CKD and the serum creatinine was repeated this afternoon."
+    },
+    {
+      "case_id": "creatinine_direct_event",
+      "source": "medical_prompt_probe",
+      "utterance": "Noah's serum creatinine was repeated this afternoon."
+    },
+    {
+      "case_id": "ibuprofen_brand",
+      "source": "medical_prompt_probe",
+      "utterance": "Ari takes Advil most nights."
+    },
+    {
+      "case_id": "penicillin_allergy",
+      "source": "medical_prompt_probe",
+      "utterance": "Dana has a penicillin allergy."
+    },
+    {
+      "case_id": "vague_pressure",
+      "source": "medical_prompt_probe",
+      "utterance": "Mara's pressure has been high lately."
+    },
+    {
+      "case_id": "vague_sugar",
+      "source": "medical_prompt_probe",
+      "utterance": "Sugar was high again, but nobody knows why."
+    },
+    {
+      "case_id": "pronoun_pregnancy_unresolved",
+      "source": "medical_prompt_probe",
+      "utterance": "She is pregnant and still taking Coumadin."
+    },
+    {
+      "case_id": "pronoun_a1c_unresolved",
+      "source": "medical_prompt_probe",
+      "utterance": "Her HbA1c climbed again even after starting metformin."
+    },
+    {
+      "case_id": "vague_kidneys",
+      "source": "medical_prompt_probe",
+      "utterance": "His kidneys are a little off."
+    },
+    {
+      "case_id": "pressure_clarified_measurement",
+      "source": "medical_clarification_probe",
+      "utterance": "Mara's pressure has been high lately.",
+      "clarification_answer": "I mean her blood pressure readings have been high, not that she has a hypertension diagnosis."
+    },
+    {
+      "case_id": "sugar_clarified_measurement",
+      "source": "medical_clarification_probe",
+      "utterance": "Sugar was high again, but nobody knows why.",
+      "clarification_answer": "I mean Mara's blood glucose reading was high again."
+    },
+    {
+      "case_id": "kidneys_clarified_labs",
+      "source": "medical_clarification_probe",
+      "utterance": "His kidneys are a little off.",
+      "clarification_answer": "I mean Noah, and I mean his kidney function labs were abnormal."
+    },
+    {
+      "case_id": "creatinine_pronoun_clarified",
+      "source": "medical_clarification_probe",
+      "utterance": "His serum creatinine was repeated this afternoon.",
+      "clarification_answer": "I mean Noah."
+    },
+    {
+      "case_id": "pregnancy_warfarin_pronoun_clarified",
+      "source": "medical_clarification_probe",
+      "utterance": "She is pregnant and still taking Coumadin.",
+      "clarification_answer": "I mean Lena."
+    },
+    {
+      "case_id": "short_of_breath_pronoun_clarified",
+      "source": "medical_clarification_probe",
+      "utterance": "She has been short of breath for two days.",
+      "clarification_answer": "I mean Mara."
+    },
+    {
+      "case_id": "a1c_pronoun_clarified",
+      "source": "medical_clarification_probe",
+      "utterance": "Her HbA1c climbed again even after starting metformin.",
+      "clarification_answer": "I mean Noah."
+    }
+  ]
+}

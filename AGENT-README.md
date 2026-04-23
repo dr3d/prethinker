@@ -26,7 +26,7 @@ Primary model focus right now: `qwen3.5:9b`.
 - Deprecated rolling handoff files were retired; durable orientation now lives in `README.md`, `docs/`, and `SESSIONS.md`.
 - The console is the canonical interactive front door.
 - The console UI is also the clearest current manual product surface.
-- `Freethinker` is a design-track clarification sidecar with live config/trace scaffolding, but policy remains `off` by default.
+- `Freethinker` is now a live bounded clarification sidecar with its own prompt/runtime settings; policy still defaults to `off`, with `advisory_only` as the first intended active mode.
 - The public docs spine is now the main orientation path; use `SESSIONS.md` as archive, not as the primary handoff.
 
 ## Product Vision

@@ -1,0 +1,80 @@
+{
+  "battery_id": "umls_mvp_clinical_checks_v1",
+  "description": "Tiny auditable clinical-check battery built on top of the bounded UMLS MVP concept slice.",
+  "checks": [
+    {
+      "check_id": "pregnancy_warfarin_risk",
+      "label": "Pregnancy plus warfarin exposure",
+      "required_seed_ids": ["pregnancy", "warfarin"],
+      "kind": "medication_risk"
+    },
+    {
+      "check_id": "diabetes_monitoring_context",
+      "label": "Diabetes plus HbA1c monitoring context",
+      "required_seed_ids": ["type_2_diabetes_mellitus", "hemoglobin_a1c"],
+      "kind": "monitoring_context"
+    },
+    {
+      "check_id": "renal_monitoring_context",
+      "label": "CKD plus creatinine monitoring context",
+      "required_seed_ids": ["chronic_kidney_disease", "serum_creatinine_measurement"],
+      "kind": "monitoring_context"
+    },
+    {
+      "check_id": "cardiopulmonary_red_flag",
+      "label": "Shortness of breath plus heart attack language",
+      "required_seed_ids": ["shortness_of_breath", "myocardial_infarction"],
+      "kind": "acute_context"
+    },
+    {
+      "check_id": "beta_lactam_allergy_context",
+      "label": "Penicillin allergy mentioned with amoxicillin exposure",
+      "required_seed_ids": ["amoxicillin", "penicillin_allergy"],
+      "kind": "allergy_context"
+    }
+  ],
+  "cases": [
+    {
+      "case_id": "pregnancy_warfarin_direct",
+      "utterance": "She is pregnant and still taking Coumadin.",
+      "expected_checks": ["pregnancy_warfarin_risk"],
+      "notes": "Strong positive."
+    },
+    {
+      "case_id": "diabetes_a1c_direct",
+      "utterance": "Her T2DM is poorly controlled and her HbA1c climbed again.",
+      "expected_checks": ["diabetes_monitoring_context"],
+      "notes": "Abbreviation-heavy but still bounded."
+    },
+    {
+      "case_id": "renal_monitoring_direct",
+      "utterance": "Stage 3 CKD is on the chart and the serum creatinine was repeated this afternoon.",
+      "expected_checks": ["renal_monitoring_context"],
+      "notes": "Known current weak seam."
+    },
+    {
+      "case_id": "cardiopulmonary_direct",
+      "utterance": "She came in short of breath and said the pain felt like another heart attack.",
+      "expected_checks": ["cardiopulmonary_red_flag"],
+      "notes": "Colloquial symptom plus event phrase."
+    },
+    {
+      "case_id": "allergy_direct",
+      "utterance": "Amoxicillin helped last year, and he still has a penicillin allergy.",
+      "expected_checks": ["beta_lactam_allergy_context"],
+      "notes": "Medication plus allergy concept."
+    },
+    {
+      "case_id": "negative_vague_pressure",
+      "utterance": "Her pressure has been high lately.",
+      "expected_checks": [],
+      "notes": "Should not trigger a medical check."
+    },
+    {
+      "case_id": "negative_vague_sugar",
+      "utterance": "Sugar was high again, but nobody knows why.",
+      "expected_checks": [],
+      "notes": "Should stay out of sharp medical inference."
+    }
+  ]
+}
