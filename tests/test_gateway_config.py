@@ -33,6 +33,27 @@ class GatewayConfigTests(unittest.TestCase):
             self.assertEqual(updated.get("freethinker_context_length"), 512)
             self.assertEqual(updated.get("freethinker_timeout"), 5)
 
+    def test_invalid_served_provider_is_sanitized(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            store = ConfigStore(Path(tmpdir) / "gateway_config.json")
+            updated = store.update({"served_llm_provider": "mystery"}).to_dict()
+            self.assertEqual(updated.get("served_llm_provider"), "ollama")
+
+    def test_strict_mode_invariants_override_related_fields(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            store = ConfigStore(Path(tmpdir) / "gateway_config.json")
+            updated = store.update(
+                {
+                    "strict_mode": True,
+                    "compiler_mode": "auto",
+                    "served_handoff_mode": "always",
+                    "require_final_confirmation": False,
+                }
+            ).to_dict()
+            self.assertEqual(updated.get("compiler_mode"), "strict")
+            self.assertEqual(updated.get("served_handoff_mode"), "never")
+            self.assertTrue(updated.get("require_final_confirmation"))
+
 
 if __name__ == "__main__":
     unittest.main()

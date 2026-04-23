@@ -10,6 +10,11 @@ const state = {
 const CONFIG_OPEN_KEY = "prethink_gateway_config_open";
 const HERO_OPEN_KEY = "prethink_gateway_hero_open";
 const DEBUG_MODE_KEY = "prethink_gateway_debug_mode";
+const STRICT_LOCKED_CONFIG_FIELDS = new Set([
+  "compiler_mode",
+  "served_handoff_mode",
+  "require_final_confirmation",
+]);
 
 const API_BASE = (() => {
   const params = new URLSearchParams(window.location.search);
@@ -101,12 +106,58 @@ function fillConfigForm(config) {
       field.value = value;
     }
   }
+  updateConfigFormAffordances(config);
   syncHero(config);
+}
+
+function updateConfigFormAffordances(config) {
+  const form = document.getElementById("config-form");
+  if (!form) {
+    return;
+  }
+  const strictMode = Boolean(config?.strict_mode);
+  for (const name of STRICT_LOCKED_CONFIG_FIELDS) {
+    const field = form.elements.namedItem(name);
+    if (!field) {
+      continue;
+    }
+    field.disabled = strictMode;
+    const wrapper = field.closest(".config-field, .config-flag");
+    if (wrapper) {
+      wrapper.classList.toggle("is-locked", strictMode);
+    }
+  }
 }
 
 function findTurnPhase(turn, phaseName) {
   const phases = Array.isArray(turn?.phases) ? turn.phases : [];
   return phases.find((phase) => phase && phase.phase === phaseName) || null;
+}
+
+function turnExecutionProtocol(turn) {
+  const packet =
+    ((((turn || {}).trace || {}).prethink || {}).packet) || {};
+  return packet && typeof packet.execution_protocol === "object"
+    ? packet.execution_protocol
+    : null;
+}
+
+function turnSegmentsByPhase(turn, phaseName) {
+  const protocol = turnExecutionProtocol(turn);
+  const segments = Array.isArray(protocol?.segments) ? protocol.segments : [];
+  return segments.filter((segment) => {
+    if (!segment || typeof segment !== "object") {
+      return false;
+    }
+    return String(segment.phase || "").trim().toLowerCase() === phaseName;
+  });
+}
+
+function formatSegmentText(text) {
+  return String(text || "")
+    .replace(/\s*\n+\s*/g, " / ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function describeAmbiguity(score) {
@@ -141,14 +192,14 @@ function summarizeTurnInternals(turn) {
     ambiguityText = "Not applicable (slash command).";
   }
 
-  let ambiguitiesText = "None reported.";
+  let noteText = "None reported.";
   const reasons = Array.isArray(ingestData.reasons)
     ? ingestData.reasons.map((item) => String(item || "").trim()).filter(Boolean)
     : [];
   if (reasons.length) {
-    ambiguitiesText = reasons.join("; ");
+    noteText = reasons.join("; ");
   } else if (route === "command") {
-    ambiguitiesText = "Not applicable (slash command).";
+    noteText = "Not applicable (slash command).";
   }
 
   let clarificationText = "Not required.";
@@ -169,22 +220,40 @@ function summarizeTurnInternals(turn) {
     clarificationText = "Not applicable (slash command).";
   }
 
-  let traceText = "Not captured.";
+  let compilerPathText = "";
   const traceSummary =
     trace && trace.summary && typeof trace.summary === "object"
-      ? String(trace.summary.overall || "").trim()
-      : "";
-  if (traceSummary) {
-    traceText = traceSummary;
+      ? trace.summary
+      : {};
+  const prethinkSource = String(traceSummary.prethink_source || "").trim();
+  const freethinkerAction = String(traceSummary.freethinker_action || "").trim().toLowerCase();
+  const parseRescues = Array.isArray(traceSummary.parse_rescues)
+    ? traceSummary.parse_rescues.map((item) => String(item || "").trim()).filter(Boolean)
+    : [];
+  const meaningfulParseRescues = parseRescues.filter(
+    (item) => item !== "clarification_fields_normalized"
+  );
+  const compilerPathParts = [];
+  if (prethinkSource && prethinkSource !== "primary") {
+    compilerPathParts.push(`routing=${prethinkSource}`);
+  }
+  if (freethinkerAction && freethinkerAction !== "skipped") {
+    compilerPathParts.push(`freethinker=${freethinkerAction}`);
+  }
+  if (meaningfulParseRescues.length) {
+    compilerPathParts.push(`parse adjusted via ${meaningfulParseRescues.join(", ")}`);
+  }
+  if (compilerPathParts.length) {
+    compilerPathText = compilerPathParts.join("; ");
   } else if (route === "command") {
-    traceText = "Not applicable (slash command).";
+    compilerPathText = "Not applicable (slash command).";
   }
 
   return {
     ambiguity: ambiguityText,
-    ambiguities: ambiguitiesText,
+    note: noteText,
     clarification: clarificationText,
-    trace: traceText,
+    compilerPath: compilerPathText,
   };
 }
 
@@ -201,8 +270,34 @@ function summarizeCommitOperations(turn) {
     const result = op.result && typeof op.result === "object" ? op.result : {};
     const resultType = String(result.result_type || "").trim();
     const opLabel = String(op.tool || "").trim() || resultType || "operation";
-    const fact = String(result.fact || "").trim() || "-";
-    lines.push(`${opLabel} :: ${fact}`);
+    const clause =
+      String(
+        result.fact ||
+        result.rule ||
+        result.query ||
+        result.prolog_query ||
+        op.clause ||
+        op.query ||
+        ""
+      ).trim() || "-";
+    lines.push(`${opLabel} :: ${clause}`);
+  }
+
+  const querySegments = turnSegmentsByPhase(turn, "query");
+  const executedQueryCount = operations.filter((op) => {
+    if (!op || typeof op !== "object") {
+      return false;
+    }
+    return String(op.tool || "").trim() === "query_rows";
+  }).length;
+  if (querySegments.length > executedQueryCount) {
+    for (const segment of querySegments.slice(executedQueryCount)) {
+      const text = formatSegmentText(segment?.text || "");
+      if (!text) {
+        continue;
+      }
+      lines.push(`query_segment :: ${text} [detected, not executed]`);
+    }
   }
 
   return lines;
@@ -213,16 +308,71 @@ function turnExecution(turn) {
   return commitPhase && typeof commitPhase.data === "object" ? commitPhase.data : {};
 }
 
+function countSuccessfulOperations(execution, toolName) {
+  const operations = Array.isArray(execution?.operations) ? execution.operations : [];
+  return operations.filter((op) => {
+    if (!op || typeof op !== "object") {
+      return false;
+    }
+    if (String(op.tool || "").trim() !== toolName) {
+      return false;
+    }
+    const status = String((op.result && op.result.status) || "").trim().toLowerCase();
+    return status === "success";
+  }).length;
+}
+
+function describeExecutedQuery(execution, utterance) {
+  const queryResult = execution?.query_result;
+  if (!queryResult || typeof queryResult !== "object") {
+    return "";
+  }
+  const status = String(queryResult.status || "").trim().toLowerCase();
+  const loweredUtterance = String(utterance || "").trim().toLowerCase();
+  const yesNoLeadins = [
+    "is ",
+    "are ",
+    "does ",
+    "do ",
+    "did ",
+    "was ",
+    "were ",
+    "can ",
+    "could ",
+    "should ",
+    "would ",
+    "will ",
+    "has ",
+    "have ",
+    "had ",
+  ];
+  const isYesNo = loweredUtterance.endsWith("?") && yesNoLeadins.some((prefix) => loweredUtterance.includes(` ${prefix}`) || loweredUtterance.startsWith(prefix));
+  if (status === "success") {
+    const variables = Array.isArray(queryResult.variables) ? queryResult.variables : [];
+    const rows = Array.isArray(queryResult.rows) ? queryResult.rows : [];
+    const numRows = Number(queryResult.num_rows ?? rows.length ?? 0);
+    if (isYesNo && !variables.length) {
+      return "Final query resolved true.";
+    }
+    return `Final query matched ${numRows} row(s).`;
+  }
+  if (status === "no_results") {
+    return isYesNo ? "Final query resolved false." : "Final query matched no rows.";
+  }
+  return "Final query did not complete cleanly.";
+}
+
 function outcomeSummary(turn) {
   const route = String(turn?.route || "other").trim().toLowerCase();
   const execution = turnExecution(turn);
   const clarifyPhase = findTurnPhase(turn, "clarify");
   const commitPhase = findTurnPhase(turn, "commit");
-  const traceSummary =
-    turn?.trace && turn.trace.summary && typeof turn.trace.summary === "object"
-      ? String(turn.trace.summary.overall || "").trim()
-      : "";
   const operationLines = summarizeCommitOperations(turn);
+  const ingestSegments = turnSegmentsByPhase(turn, "ingest");
+  const querySegments = turnSegmentsByPhase(turn, "query");
+  const executedQueryCount = Array.isArray(execution?.operations)
+    ? execution.operations.filter((op) => String(op?.tool || "").trim() === "query_rows").length
+    : 0;
   const points = [];
 
   if (route === "command") {
@@ -239,9 +389,6 @@ function outcomeSummary(turn) {
     if (question) {
       points.push(`Clarification question: ${question}`);
     }
-    if (traceSummary) {
-      points.push(traceSummary);
-    }
     return {
       badge: "Needs clarification",
       tone: "caution",
@@ -251,12 +398,44 @@ function outcomeSummary(turn) {
   }
 
   if (route === "write") {
-    const writesApplied = Number(execution?.writes_applied || operationLines.length || 0);
+    const writesApplied = Number(
+      execution?.writes_applied ||
+        (countSuccessfulOperations(execution, "assert_fact") +
+          countSuccessfulOperations(execution, "assert_rule") +
+          countSuccessfulOperations(execution, "retract_fact")) ||
+        0
+    );
     if (writesApplied > 0) {
       points.push(`${writesApplied} deterministic mutation(s) applied.`);
     }
-    if (traceSummary) {
-      points.push(traceSummary);
+    const factWrites = countSuccessfulOperations(execution, "assert_fact");
+    const ruleWrites = countSuccessfulOperations(execution, "assert_rule");
+    const retractWrites = countSuccessfulOperations(execution, "retract_fact");
+    if (factWrites > 0) {
+      points.push(`${factWrites} fact assertion(s) applied.`);
+    }
+    if (ruleWrites > 0) {
+      points.push(`${ruleWrites} rule assertion(s) applied.`);
+    }
+    if (retractWrites > 0) {
+      points.push(`${retractWrites} retraction(s) applied.`);
+    }
+    const querySummary = describeExecutedQuery(execution, turn?.utterance || "");
+    if (querySummary) {
+      points.push(querySummary);
+    }
+    if (querySegments.length) {
+      const ingestCount = ingestSegments.length;
+      const queryCount = querySegments.length;
+      points.push(
+        `Segment plan detected ${ingestCount} ingest segment(s) and ${queryCount} query segment(s).`
+      );
+      if (executedQueryCount < queryCount) {
+        const missingCount = queryCount - executedQueryCount;
+        points.push(
+          `${missingCount} query segment(s) were detected but not executed by the current pipeline.`
+        );
+      }
     }
     return {
       badge: String(commitPhase?.status || "").trim().toLowerCase() === "applied" ? "Committed" : "Write attempt",
@@ -274,9 +453,6 @@ function outcomeSummary(turn) {
     if (rows !== null) {
       points.push(rows > 0 ? `Query matched ${rows} result row(s).` : "Query matched no rows.");
     }
-    if (traceSummary) {
-      points.push(traceSummary);
-    }
     return {
       badge: "Answered",
       tone: "success",
@@ -285,9 +461,6 @@ function outcomeSummary(turn) {
     };
   }
 
-  if (traceSummary) {
-    points.push(traceSummary);
-  }
   return {
     badge: "Reviewed",
     tone: String(execution?.status || "").trim().toLowerCase() === "error" ? "danger" : "neutral",
@@ -304,6 +477,233 @@ function appendUserMessage(text) {
   log.appendChild(article);
   log.scrollTop = log.scrollHeight;
   updateEmptyState();
+}
+
+function prettyJson(value) {
+  return JSON.stringify(value, null, 2);
+}
+
+function findFirstMarkerIndex(text, markers) {
+  let bestIndex = -1;
+  for (const marker of markers) {
+    const index = text.indexOf(marker);
+    if (index >= 0 && (bestIndex < 0 || index < bestIndex)) {
+      bestIndex = index;
+    }
+  }
+  return bestIndex;
+}
+
+function splitPromptSections(promptText, kind, sharedPromptReference = "") {
+  const trimmed = String(promptText || "").trim();
+  if (!trimmed) {
+    return { parts: [], sharedPromptText: "" };
+  }
+
+  const parts = [];
+  let body = trimmed;
+  if (body.startsWith("/no_think")) {
+    parts.push({ label: "Mode directive", text: "/no_think" });
+    body = body.slice("/no_think".length).replace(/^\s+/, "");
+  }
+
+  const utteranceMarkers =
+    kind === "routing"
+      ? ["\nUSER_UTTERANCE:\n", "\nUtterance:\n"]
+      : ["\nUtterance:\n", "\nUSER_UTTERANCE:\n"];
+  let utterance = "";
+  let promptBody = body;
+  const utteranceMarkerIndex = findFirstMarkerIndex(body, utteranceMarkers);
+  if (utteranceMarkerIndex >= 0) {
+    const matchedMarker = utteranceMarkers.find(
+      (marker) => body.indexOf(marker) === utteranceMarkerIndex
+    );
+    utterance = body.slice(utteranceMarkerIndex + matchedMarker.length).trim();
+    promptBody = body.slice(0, utteranceMarkerIndex).trim();
+  }
+
+  const wrapperMarkers =
+    kind === "parse"
+      ? ["Route lock:", "Known ontology predicates:", "Return JSON only with exactly these keys:"]
+      : kind === "served"
+        ? [
+            "You are the served assistant behind a governed pre-think gateway.",
+            "Follow these rules:",
+            "GATEWAY_NOTE:",
+            "DETERMINISTIC_SUMMARY_JSON:",
+          ]
+        : ["You are compiling a PRE-THINK routing packet.", "Return minified JSON only:"];
+
+  let sharedPromptText = "";
+  let taskWrapperText = promptBody;
+  const guidancePrefix = "Additional guidance:\n";
+  if (promptBody.startsWith(guidancePrefix)) {
+    const guidanceBody = promptBody.slice(guidancePrefix.length);
+    const wrapperIndex = findFirstMarkerIndex(guidanceBody, wrapperMarkers);
+    if (wrapperIndex >= 0) {
+      sharedPromptText = guidanceBody.slice(0, wrapperIndex).trim();
+      taskWrapperText = guidanceBody.slice(wrapperIndex).trim();
+    } else {
+      sharedPromptText = guidanceBody.trim();
+      taskWrapperText = "";
+    }
+  } else {
+    const wrapperIndex = findFirstMarkerIndex(promptBody, wrapperMarkers);
+    if (wrapperIndex > 0) {
+      sharedPromptText = promptBody.slice(0, wrapperIndex).trim();
+      taskWrapperText = promptBody.slice(wrapperIndex).trim();
+    } else {
+      taskWrapperText = promptBody.trim();
+    }
+  }
+
+  if (sharedPromptText) {
+    parts.push({
+      label: "Shared system prompt",
+      text:
+        sharedPromptReference && sharedPromptText === sharedPromptReference
+          ? "Same shared system prompt as Routing Prompt."
+          : sharedPromptText,
+    });
+  }
+
+  if (taskWrapperText) {
+    parts.push({
+      label:
+        kind === "parse"
+          ? "Parse wrapper / schema"
+          : kind === "served"
+            ? "Served handoff wrapper"
+            : "Routing wrapper / schema",
+      text: taskWrapperText,
+    });
+  }
+
+  if (utterance) {
+    parts.push({ label: "Utterance", text: utterance });
+  }
+
+  return { parts, sharedPromptText };
+}
+
+function collectModelContextBlocks(turn) {
+  const turnTrace = turn && typeof turn.trace === "object" ? turn.trace : null;
+  const blocks = [];
+  let routingSharedPrompt = "";
+  const prethinkPrimaryPrompt = String(
+    ((((turnTrace || {}).prethink || {}).primary || {}).prompt_text || "")
+  ).trim();
+  if (prethinkPrimaryPrompt) {
+    const decomposed = splitPromptSections(prethinkPrimaryPrompt, "routing");
+    routingSharedPrompt = decomposed.sharedPromptText;
+    blocks.push({ label: "Routing Prompt", parts: decomposed.parts });
+  }
+
+  const prethinkFallbackPrompt = String(
+    ((((turnTrace || {}).prethink || {}).fallback || {}).prompt_text || "")
+  ).trim();
+  if (prethinkFallbackPrompt) {
+    const decomposed = splitPromptSections(
+      prethinkFallbackPrompt,
+      "routing",
+      routingSharedPrompt
+    );
+    blocks.push({ label: "Fallback Classifier Prompt", parts: decomposed.parts });
+  }
+
+  const parsePrompt = String(
+    ((((turnTrace || {}).parse || {}).extractor || {}).prompt_text || "")
+  ).trim();
+  if (parsePrompt) {
+    const decomposed = splitPromptSections(parsePrompt, "parse", routingSharedPrompt);
+    blocks.push({ label: "Parse Prompt", parts: decomposed.parts });
+  }
+
+  const servedPrompt = String(
+    ((((turn || {}).assistant || {}).served_llm || {}).prompt_text || "")
+  ).trim();
+  if (servedPrompt) {
+    blocks.push({
+      label: "Served LLM Prompt",
+      parts: splitPromptSections(servedPrompt, "served").parts,
+    });
+  }
+
+  return blocks;
+}
+
+function collectCompilerJsonBlocks(turnTrace) {
+  const blocks = [];
+  const routingJson = (((turnTrace || {}).prethink || {}).primary || {}).parsed;
+  if (routingJson && typeof routingJson === "object") {
+    blocks.push({ label: "Routing JSON", text: prettyJson(routingJson) });
+  }
+
+  const fallbackJson = (((turnTrace || {}).prethink || {}).fallback || {}).parsed;
+  if (fallbackJson && typeof fallbackJson === "object") {
+    blocks.push({ label: "Fallback Routing JSON", text: prettyJson(fallbackJson) });
+  }
+
+  const parseJson = (((turnTrace || {}).parse || {}).extractor || {}).parsed;
+  if (parseJson && typeof parseJson === "object") {
+    blocks.push({ label: "Parse JSON", text: prettyJson(parseJson) });
+  }
+
+  return blocks;
+}
+
+function buildDebugBubble({ title, summary, blocks, variantClass }) {
+  if (!Array.isArray(blocks) || !blocks.length) {
+    return null;
+  }
+  const card = document.createElement("section");
+  card.className = `phase-card debug-bubble-card ${variantClass}`.trim();
+
+  const details = document.createElement("details");
+  details.className = "phase-details debug-bubble-details";
+  details.open = false;
+
+  const bubbleSummary = document.createElement("summary");
+  bubbleSummary.className = "phase-summary-row debug-bubble-summary";
+  bubbleSummary.innerHTML = `
+    <span class="phase-name">${escapeHtml(title)}</span>
+    <span class="phase-status">${escapeHtml(summary)}</span>
+  `;
+
+  const body = document.createElement("div");
+  body.className = "phase-body debug-bubble-body";
+  for (const block of blocks) {
+    const section = document.createElement("section");
+    section.className = "debug-block";
+    const heading = document.createElement("p");
+    heading.className = "debug-block-label";
+    heading.textContent = block.label;
+    section.appendChild(heading);
+    if (Array.isArray(block.parts) && block.parts.length) {
+      for (const part of block.parts) {
+        const subSection = document.createElement("section");
+        subSection.className = "debug-subblock";
+        const subHeading = document.createElement("p");
+        subHeading.className = "debug-subblock-label";
+        subHeading.textContent = part.label;
+        const pre = document.createElement("pre");
+        pre.textContent = String(part.text || "").trim();
+        subSection.appendChild(subHeading);
+        subSection.appendChild(pre);
+        section.appendChild(subSection);
+      }
+    } else {
+      const pre = document.createElement("pre");
+      pre.textContent = String(block.text || "").trim();
+      section.appendChild(pre);
+    }
+    body.appendChild(section);
+  }
+
+  details.appendChild(bubbleSummary);
+  details.appendChild(body);
+  card.appendChild(details);
+  return card;
 }
 
 function appendGatewayTurn(turn) {
@@ -378,10 +778,12 @@ function appendGatewayTurn(turn) {
   internalsEl.className = "turn-internals";
   const internalsRows = [
     ["Ambiguity", internals.ambiguity],
-    ["Ambiguities", internals.ambiguities],
+    ["Compiler note", internals.note],
     ["Clarification", internals.clarification],
-    ["Trace", internals.trace],
   ];
+  if (String(internals.compilerPath || "").trim()) {
+    internalsRows.push(["Compiler path", internals.compilerPath]);
+  }
   for (const [label, value] of internalsRows) {
     const rowEl = document.createElement("p");
     rowEl.className = "turn-internal-row";
@@ -407,6 +809,24 @@ function appendGatewayTurn(turn) {
   debugStack.appendChild(internalsEl);
 
   const turnTrace = turn && typeof turn.trace === "object" ? turn.trace : null;
+  const modelContextBubble = buildDebugBubble({
+    title: "model context",
+    summary: "what the 9b saw",
+    blocks: collectModelContextBlocks(turn),
+    variantClass: "debug-bubble-context",
+  });
+  if (modelContextBubble) {
+    debugStack.appendChild(modelContextBubble);
+  }
+  const compilerJsonBubble = buildDebugBubble({
+    title: "compiler json",
+    summary: "raw model output",
+    blocks: collectCompilerJsonBlocks(turnTrace),
+    variantClass: "debug-bubble-json",
+  });
+  if (compilerJsonBubble) {
+    debugStack.appendChild(compilerJsonBubble);
+  }
   if (turnTrace) {
     const traceCard = document.createElement("section");
     traceCard.className = "phase-card trace-card";
@@ -601,6 +1021,15 @@ function strictBouncerPayload(baseConfig) {
   };
 }
 
+function servedChatPayload(baseConfig) {
+  return {
+    ...baseConfig,
+    strict_mode: false,
+    served_handoff_mode: "always",
+    compiler_mode: "auto",
+  };
+}
+
 async function applyStrictBouncerLock() {
   try {
     const payload = strictBouncerPayload(state.config || {});
@@ -617,6 +1046,25 @@ async function applyStrictBouncerLock() {
       "Strict bouncer lock applied (compiler strict, handoff never, confirmation required).";
   } catch (error) {
     document.getElementById("config-status").textContent = `Strict lock failed: ${String(error)}`;
+  }
+}
+
+async function applyServedChatPreference() {
+  try {
+    const payload = servedChatPayload(state.config || {});
+    const response = await getJson("/api/config", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+    state.config = response.config;
+    fillConfigForm(state.config);
+    document.getElementById("config-status").textContent =
+      "Served chat preference applied (strict off, served handoff always, compiler auto).";
+  } catch (error) {
+    document.getElementById("config-status").textContent = `Served chat preset failed: ${String(error)}`;
   }
 }
 
@@ -742,6 +1190,13 @@ function initConfigDrawer() {
   if (close) {
     close.addEventListener("click", () => setConfigOpen(false));
   }
+  const form = document.getElementById("config-form");
+  const strictModeField = form?.elements?.namedItem("strict_mode");
+  if (strictModeField) {
+    strictModeField.addEventListener("change", () => {
+      updateConfigFormAffordances({ strict_mode: strictModeField.checked });
+    });
+  }
 }
 
 function initDebugMode() {
@@ -798,6 +1253,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("reset-button").addEventListener("click", resetSession);
   document.getElementById("export-button").addEventListener("click", exportSession);
   document.getElementById("strict-lock-button").addEventListener("click", applyStrictBouncerLock);
+  document.getElementById("served-chat-button").addEventListener("click", applyServedChatPreference);
   try {
     await loadConfig();
     updatePendingBanner();

@@ -399,6 +399,7 @@ class PrologMCPServer:
                 "model": self._compiler_model,
                 "prompt_path": str(self._compiler_prompt_path) if self._compiler_prompt_enabled else "",
                 "primary": {
+                    "prompt_text": "",
                     "raw_message": "",
                     "reasoning": "",
                     "parsed": None,
@@ -408,6 +409,7 @@ class PrologMCPServer:
                 },
                 "fallback": {
                     "used": False,
+                    "prompt_text": "",
                     "raw_message": "",
                     "reasoning": "",
                     "parsed": None,
@@ -417,6 +419,8 @@ class PrologMCPServer:
                 "rescues": [],
                 "final": self._clone_trace_payload(compiled),
             }
+        if isinstance(trace.get("primary"), dict) and not str(trace["primary"].get("prompt_text", "")).strip():
+            trace["primary"]["prompt_text"] = self._build_compiler_prompt(utterance)
         trace["packet"] = self._clone_trace_payload(packet) if isinstance(packet, dict) else None
         trace["summary"] = self._summarize_prethink_trace(trace)
         return trace
@@ -437,6 +441,7 @@ class PrologMCPServer:
                 "compiler_intent": compiler_intent,
                 "clarification_answer": clarification_answer,
                 "extractor": {
+                    "prompt_text": "",
                     "raw_message": "",
                     "reasoning": "",
                     "parsed": None,
@@ -967,6 +972,7 @@ class PrologMCPServer:
             "model": self._compiler_model,
             "prompt_path": str(self._compiler_prompt_path) if self._compiler_prompt_enabled else "",
             "extractor": {
+                "prompt_text": extraction_prompt,
                 "raw_message": "",
                 "reasoning": "",
                 "parsed": None,
@@ -1106,7 +1112,7 @@ class PrologMCPServer:
         query_result: dict[str, Any] | None = None
         errors: list[str] = []
 
-        if intent == "assert_fact":
+        if intent in {"assert_fact", "assert_rule"}:
             correction_retracts = [
                 str(item).strip()
                 for item in parsed.get("correction_retract_clauses", [])
@@ -1126,12 +1132,20 @@ class PrologMCPServer:
                     writes_applied += 1
                 elif status not in {"no_results", "no_result"}:
                     errors.append(f"retract_fact failed for {normalized_clause}")
-            clauses = [str(item).strip() for item in parsed.get("facts", []) if str(item).strip()]
-            if not clauses:
+
+            fact_clauses = [str(item).strip() for item in parsed.get("facts", []) if str(item).strip()]
+            rule_clauses = [str(item).strip() for item in parsed.get("rules", []) if str(item).strip()]
+
+            if intent == "assert_fact" and not fact_clauses:
                 clause = str(parsed.get("logic_string", "")).strip()
                 if clause:
-                    clauses = [clause]
-            for clause in clauses:
+                    fact_clauses = [clause]
+            if intent == "assert_rule" and not rule_clauses:
+                clause = str(parsed.get("logic_string", "")).strip()
+                if clause:
+                    rule_clauses = [clause]
+
+            for clause in fact_clauses:
                 result = self.tools_call(
                     "assert_fact",
                     {"clause": clause, "prethink_id": prethink_id, "confirm": True},
@@ -1142,13 +1156,7 @@ class PrologMCPServer:
                 else:
                     errors.append(f"assert_fact failed for {clause}")
 
-        elif intent == "assert_rule":
-            clauses = [str(item).strip() for item in parsed.get("rules", []) if str(item).strip()]
-            if not clauses:
-                clause = str(parsed.get("logic_string", "")).strip()
-                if clause:
-                    clauses = [clause]
-            for clause in clauses:
+            for clause in rule_clauses:
                 result = self.tools_call(
                     "assert_rule",
                     {"clause": clause, "prethink_id": prethink_id, "confirm": True},
@@ -1158,6 +1166,19 @@ class PrologMCPServer:
                     writes_applied += 1
                 else:
                     errors.append(f"assert_rule failed for {clause}")
+
+            queries = [str(item).strip() for item in parsed.get("queries", []) if str(item).strip()]
+            if queries:
+                query = queries[0]
+                result = self.tools_call(
+                    "query_rows",
+                    {"query": query, "prethink_id": prethink_id},
+                )
+                query_result = result
+                operations.append({"tool": "query_rows", "query": query, "result": result})
+                status = str(result.get("status", "")).strip()
+                if status not in {"success", "no_results"}:
+                    errors.append(f"query_rows failed for {query}")
 
         elif intent == "retract":
             targets = _extract_retract_targets(
@@ -1588,6 +1609,7 @@ class PrologMCPServer:
     def _compile_prethink_classifier_fallback(self, utterance: str) -> tuple[dict[str, Any] | None, str]:
         self._last_prethink_fallback_trace = {
             "used": False,
+            "prompt_text": "",
             "raw_message": "",
             "reasoning": "",
             "parsed": None,
@@ -1595,6 +1617,7 @@ class PrologMCPServer:
             "error": "",
         }
         prompt = _build_classifier_prompt(utterance)
+        self._last_prethink_fallback_trace["prompt_text"] = prompt
         try:
             response = _call_model_prompt(
                 backend=self._compiler_backend,
@@ -1767,6 +1790,9 @@ class PrologMCPServer:
             "predicate mapping",
             "canonical predicate",
             "what is the intended prolog predicate",
+            "what specific facts about",
+            "facts to assert",
+            "lacks explicit predicates or facts to assert",
         )
         return any(token in text for token in signals)
 
@@ -1874,6 +1900,7 @@ class PrologMCPServer:
             "model": self._compiler_model,
             "prompt_path": str(self._compiler_prompt_path) if self._compiler_prompt_enabled else "",
             "primary": {
+                "prompt_text": prompt,
                 "raw_message": "",
                 "reasoning": "",
                 "parsed": None,
@@ -1883,6 +1910,7 @@ class PrologMCPServer:
             },
             "fallback": {
                 "used": False,
+                "prompt_text": "",
                 "raw_message": "",
                 "reasoning": "",
                 "parsed": None,

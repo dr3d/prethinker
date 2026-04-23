@@ -2,9 +2,9 @@
 
 This project is a local workbench for building a high-accuracy semantic parser (Qwen 3.5 9B first) that converts natural language into Prolog-ready logic and applies it into named, persistent knowledge bases.
 
-Last updated: 2026-04-20
+Last updated: 2026-04-23
 
-## Current Focus (2026-04-20)
+## Current Focus (2026-04-23)
 
 Prethinker is operating on one honest evaluation spine:
 
@@ -17,7 +17,9 @@ Prethinker is operating on one honest evaluation spine:
 - The temporal pack is now `8/12` pass, `4/12` warn, and `0/12` fail; the red step-sequence core is gone.
 - The next honest weakness is no longer hard temporal breakage; it is relative-time semantic under-capture and a couple of residual correction parse holdouts.
 - Same-model-family stack remains the default (`qwen3.5:9b` parser + clarification path) for tighter behavior and lower VRAM pressure.
-- The console is now the canonical interactive front door, and `Freethinker` exists as a design-track clarification sidecar with policy defaulted to `off`.
+- The console is now the canonical interactive front door and the clearest manual product surface.
+- `Freethinker` exists as a design-track clarification sidecar with policy defaulted to `off`.
+- The current public story is: governed adapter first, broad open-domain conversational memory second.
 
 ## Current Rollups
 
@@ -58,12 +60,14 @@ Prethinker is operating on one honest evaluation spine:
 - docs hub: [docs/index.html](docs/index.html)
 - system design overview: [docs/PRETHINKER.md](docs/PRETHINKER.md)
 - science progress note: [docs/PROGRESS.md](docs/PROGRESS.md)
+- plain-language product explainer: [docs/EXPLAINER.md](docs/EXPLAINER.md)
+- technical GIC ingest walkthrough: [docs/GIC_ENGLISH_INPUT_PIPELINE.md](docs/GIC_ENGLISH_INPUT_PIPELINE.md)
 - process_utterance pipeline batch: [docs/reports/PROCESS_UTTERANCE_PIPELINE_BATCH_2026-04-20.md](docs/reports/PROCESS_UTTERANCE_PIPELINE_BATCH_2026-04-20.md)
 - process_utterance frontier packs: [docs/PROCESS_UTTERANCE_FRONTIER_PACKS.md](docs/PROCESS_UTTERANCE_FRONTIER_PACKS.md)
 - current frontier sweep: [docs/reports/FRONTIER_SWEEP_2026-04-17.md](docs/reports/FRONTIER_SWEEP_2026-04-17.md)
 - temporal interrogator recovery: [docs/reports/TEMPORAL_INTERROGATOR_RECOVERY_2026-04-19.md](docs/reports/TEMPORAL_INTERROGATOR_RECOVERY_2026-04-19.md)
 - post-registry narrative correction: [docs/reports/NARRATIVE_PACKS_POST_REGISTRY_2026-04-17.md](docs/reports/NARRATIVE_PACKS_POST_REGISTRY_2026-04-17.md)
-- blocksworld strict guarded lane: [docs/reports/BLOCKSWORLD_LANE_GUARDED_2026-04-17.md](docs/reports/BLOCKSWORLD_LANE_GUARDED_2026-04-17.md)
+- blocksworld strict guarded lane: [docs/reports/BLOCKSWORLD_LANE_GUARDED_2026-04-19.md](docs/reports/BLOCKSWORLD_LANE_GUARDED_2026-04-19.md)
 - KB interrogator guide: [docs/KB_INTERROGATOR.md](docs/KB_INTERROGATOR.md)
 - runtime settings cheat sheet: [docs/RUNTIME_SETTINGS_CHEATSHEET.md](docs/RUNTIME_SETTINGS_CHEATSHEET.md)
 - focus execution plan: [docs/FOCUS_EXECUTION_PLAN.md](docs/FOCUS_EXECUTION_PLAN.md)
@@ -71,14 +75,23 @@ Prethinker is operating on one honest evaluation spine:
 - console MVP note: [docs/PRETHINK_GATEWAY_MVP.md](docs/PRETHINK_GATEWAY_MVP.md)
 - freethinker sidecar design: [docs/FREETHINKER_DESIGN.md](docs/FREETHINKER_DESIGN.md)
 - console trybook: [docs/CONSOLE_TRYBOOK.md](docs/CONSOLE_TRYBOOK.md)
-- explainer article: [docs/EXPLAINER.md](docs/EXPLAINER.md)
-- technical GIC ingest walkthrough: [docs/GIC_ENGLISH_INPUT_PIPELINE.md](docs/GIC_ENGLISH_INPUT_PIPELINE.md)
 - orchestration notes: [docs/ORCHESTRATION.md](docs/ORCHESTRATION.md)
 - out in the wild article: [docs/WILD_MODE.md](docs/WILD_MODE.md)
 - run explorer: [docs/run-reports-hub.html](docs/run-reports-hub.html)
 - goldilocks roundtrip demo: [docs/goldilocks-roundtrip.html](docs/goldilocks-roundtrip.html)
 - track scoreboard: [docs/TRACK_SCOREBOARD.md](docs/TRACK_SCOREBOARD.md)
 - assembly log: [SESSIONS.md](SESSIONS.md)
+
+## Public Reading Order
+
+If you want the clean public story without digging through historical logs:
+
+1. [docs/EXPLAINER.md](docs/EXPLAINER.md)
+2. [docs/PRETHINKER.md](docs/PRETHINKER.md)
+3. [docs/GIC_ENGLISH_INPUT_PIPELINE.md](docs/GIC_ENGLISH_INPUT_PIPELINE.md)
+4. [docs/PRETHINK_GATEWAY_MVP.md](docs/PRETHINK_GATEWAY_MVP.md)
+5. [docs/PROGRESS.md](docs/PROGRESS.md)
+6. [docs/PROCESS_UTTERANCE_FRONTIER_PACKS.md](docs/PROCESS_UTTERANCE_FRONTIER_PACKS.md)
 
 ## Historical Record
 

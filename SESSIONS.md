@@ -1,12 +1,31 @@
 ﻿# SESSIONS (Assembly Log and Migration Guide)
 
-Last updated: 2026-04-13
+Last updated: 2026-04-23
+
+Historical note: the "migration guide" wording in the title is lineage. Treat this file as the archive log first.
 
 ## Purpose
 
-This file documents how the current `prethinker` workbench was assembled, what changed, what worked, what failed, and how to pull this work back into `prolog-reasoning` with minimal friction.
+This file documents how the current `prethinker` workbench was assembled, what changed, what worked, and what failed across the major build phases.
 
-Use this as the handoff doc for future agents and for repo-to-repo migration.
+Use this as the archival assembly log, not as the primary orientation page.
+
+For the current public-facing story, read:
+
+- `README.md`
+- `docs/EXPLAINER.md`
+- `docs/PRETHINKER.md`
+- `docs/GIC_ENGLISH_INPUT_PIPELINE.md`
+- `docs/PROGRESS.md`
+
+## Current Orientation (2026-04-23)
+
+- The canonical interactive entry path is `process_utterance()` in `src/mcp_server.py`.
+- The console in `ui_gateway/` is the current manual product surface and front-door test cockpit.
+- The clearest stable proof lanes remain the safety gate and strict Blocksworld.
+- The clearest active interactive frontier is the frozen `process_utterance()` correction/temporal pack family.
+- `Freethinker` remains design-track and non-authoritative by default.
+- Historical references to moving this work back into `prolog-reasoning` should be read as lineage, not as the current repo mission.
 
 ## Folder Rename Note
 
@@ -25,6 +44,8 @@ Use this as the handoff doc for future agents and for repo-to-repo migration.
 - Human-readable run reporting (themed transcripts + annotation cards)
 - Hub UX for large run sets (search/filter/grouping)
 - Prompt/version lineage with per-run provenance and manifests
+- A shared interactive front door (`process_utterance()`) with console UI and turn-level traces
+- Public docs spine for product framing, domain-fit boundaries, and governed-adapter explanation
 
 ## Timeline of Major Sessions
 

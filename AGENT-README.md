@@ -1,6 +1,6 @@
 ﻿# AGENT README (Onboarding for Coding Agents)
 
-Last updated: 2026-04-20
+Last updated: 2026-04-23
 
 ## Mission
 
@@ -25,7 +25,9 @@ Primary model focus right now: `qwen3.5:9b`.
 - The temporal interrogator recovery narrowed the earlier mid `full` caveat; Glitch temporal remains the clearest active frontier weakness.
 - Deprecated rolling handoff files were retired; durable orientation now lives in `README.md`, `docs/`, and `SESSIONS.md`.
 - The console is the canonical interactive front door.
+- The console UI is also the clearest current manual product surface.
 - `Freethinker` is a design-track clarification sidecar with live config/trace scaffolding, but policy remains `off` by default.
+- The public docs spine is now the main orientation path; use `SESSIONS.md` as archive, not as the primary handoff.
 
 ## Product Vision
 

@@ -69,6 +69,10 @@
               Good first tests are simple facts, direct questions, and one ambiguous sentence
               that should force clarification instead of a guess.
             </p>
+            <div class="empty-state-guidance">
+              <p><strong>What to watch for:</strong> Prethinker should either commit facts, answer from the KB, or pause for a clarification.</p>
+              <p><strong>What not to trust:</strong> If a turn only looks good after heavy normalization, the trace will show that.</p>
+            </div>
           </div>
           <div class="example-grid">
             <button class="example-chip" type="button" data-example="scotts mom and dad is ann and ian.">
@@ -89,16 +93,6 @@
             <button class="example-chip" type="button" data-example="at 9am on friday morning fred and wilma entered the pinky penny supermarket and headed over to the turnips.">
               Narrative sentence
             </button>
-          </div>
-          <div class="empty-state-notes">
-            <div class="note-card">
-              <strong>What to watch for</strong>
-              <p>Prethinker should either commit facts, answer from the KB, or pause for a clarification.</p>
-            </div>
-            <div class="note-card">
-              <strong>What not to trust</strong>
-              <p>If a turn only looks good after heavy normalization, the trace will show that.</p>
-            </div>
           </div>
         </section>
         <div id="chat-log" class="chat-log" aria-live="polite"></div>
@@ -156,100 +150,122 @@
         </div>
         <button id="config-close" class="ghost-button config-close" type="button">Close</button>
       </div>
-      <button id="strict-lock-button" class="ghost-button strict-lock-button" type="button">
-        Apply Strict Bouncer Lock
-      </button>
-      <p class="status-line compact-line">
-        Lock enforces: compiler=`strict`, served handoff=`never`, and final confirmation=`true`.
-      </p>
-      <form id="config-form" class="config-form">
-        <label>
-          Front door URI
-          <input name="front_door_uri" type="text">
-        </label>
-        <label>
-          Served LLM provider
-          <input name="served_llm_provider" type="text">
-        </label>
-        <label>
-          Served LLM model
-          <input name="served_llm_model" type="text">
-        </label>
-        <label>
-          Served LLM base URL
-          <input name="served_llm_base_url" type="text">
-        </label>
-        <label>
-          Served LLM context length
-          <input name="served_llm_context_length" type="number" min="512" step="256">
-        </label>
-        <label>
-          Served LLM timeout (seconds)
-          <input name="served_llm_timeout" type="number" min="5" step="1">
-        </label>
-        <label>
-          Served handoff mode (never|fallback_only|on_other|always)
-          <select name="served_handoff_mode">
-            <option value="never">never</option>
-            <option value="fallback_only">fallback_only</option>
-            <option value="on_other">on_other</option>
-            <option value="always">always</option>
-          </select>
-        </label>
-        <label>
-          Compiler mode
-          <select name="compiler_mode">
-            <option value="strict">strict</option>
-            <option value="auto">auto</option>
-            <option value="heuristic">heuristic</option>
-          </select>
-        </label>
-        <label>
-          Compiler prompt mode (auto|always|never)
-          <input name="compiler_prompt_mode" type="text">
-        </label>
-        <label>
-          Compiler model
-          <input name="compiler_model" type="text">
-        </label>
-        <label>
-          Compiler backend
-          <select name="compiler_backend">
-            <option value="ollama">ollama</option>
-            <option value="lmstudio">lmstudio</option>
-          </select>
-        </label>
-        <label>
-          Compiler base URL
-          <input name="compiler_base_url" type="text">
-        </label>
-        <label>
-          Compiler context length
-          <input name="compiler_context_length" type="number" min="512" step="256">
-        </label>
-        <label>
-          Compiler timeout (seconds)
-          <input name="compiler_timeout" type="number" min="5" step="1">
-        </label>
-        <label>
-          Compiler prompt file
-          <input name="compiler_prompt_file" type="text">
-        </label>
-        <label>
-          Clarification eagerness (0..1)
-          <input name="clarification_eagerness" type="number" min="0" max="1" step="0.05">
-        </label>
-        <label class="checkbox-row">
-          <input name="require_final_confirmation" type="checkbox">
-          Require final confirmation
-        </label>
-        <label class="checkbox-row">
-          <input name="strict_mode" type="checkbox">
-          Strict mode
-        </label>
-        <button type="submit">Save Config</button>
-      </form>
-      <p id="config-status" class="status-line"></p>
+      <div class="config-toolbar">
+        <div class="config-toolbar-actions">
+          <button id="strict-lock-button" class="ghost-button strict-lock-button" type="button">
+            Apply Strict Bouncer Lock
+          </button>
+          <button id="served-chat-button" class="ghost-button served-chat-button" type="button">
+            Prefer Served Chat
+          </button>
+        </div>
+        <p class="status-line compact-line">
+          Strict lock enforces compiler=`strict`, served handoff=`never`, and final confirmation=`true`.
+          Served chat keeps fact compilation on, but lets uncertain turns fall through to the served model.
+        </p>
+      </div>
+      <div class="config-scroll">
+        <form id="config-form" class="config-form">
+          <p class="config-section-title">Gateway</p>
+          <label class="config-field">
+            <span>Front door URI</span>
+            <input name="front_door_uri" type="text">
+          </label>
+          <label class="config-field">
+            <span>Served LLM provider</span>
+            <select name="served_llm_provider">
+              <option value="ollama">ollama</option>
+              <option value="lmstudio">lmstudio</option>
+            </select>
+          </label>
+          <label class="config-field">
+            <span>Served LLM model</span>
+            <input name="served_llm_model" type="text">
+          </label>
+          <label class="config-field">
+            <span>Served LLM base URL</span>
+            <input name="served_llm_base_url" type="text">
+          </label>
+          <label class="config-field">
+            <span>Served LLM context length</span>
+            <input name="served_llm_context_length" type="number" min="512" step="256">
+          </label>
+          <label class="config-field">
+            <span>Served LLM timeout (seconds)</span>
+            <input name="served_llm_timeout" type="number" min="5" step="1">
+          </label>
+          <label class="config-field">
+            <span>Served handoff mode</span>
+            <select name="served_handoff_mode">
+              <option value="never">never</option>
+              <option value="fallback_only">fallback_only</option>
+              <option value="on_other">on_other</option>
+              <option value="always">always</option>
+            </select>
+          </label>
+          <p class="config-section-title">Compiler</p>
+          <label class="config-field">
+            <span>Compiler mode</span>
+            <select name="compiler_mode">
+              <option value="strict">strict</option>
+              <option value="auto">auto</option>
+              <option value="heuristic">heuristic</option>
+            </select>
+          </label>
+          <label class="config-field">
+            <span>Compiler prompt mode</span>
+            <select name="compiler_prompt_mode">
+              <option value="auto">auto</option>
+              <option value="always">always</option>
+              <option value="never">never</option>
+            </select>
+          </label>
+          <label class="config-field">
+            <span>Compiler model</span>
+            <input name="compiler_model" type="text">
+          </label>
+          <label class="config-field">
+            <span>Compiler backend</span>
+            <select name="compiler_backend">
+              <option value="ollama">ollama</option>
+              <option value="lmstudio">lmstudio</option>
+            </select>
+          </label>
+          <label class="config-field">
+            <span>Compiler base URL</span>
+            <input name="compiler_base_url" type="text">
+          </label>
+          <label class="config-field">
+            <span>Compiler context length</span>
+            <input name="compiler_context_length" type="number" min="512" step="256">
+          </label>
+          <label class="config-field">
+            <span>Compiler timeout (seconds)</span>
+            <input name="compiler_timeout" type="number" min="5" step="1">
+          </label>
+          <label class="config-field">
+            <span>Compiler prompt file</span>
+            <input name="compiler_prompt_file" type="text">
+          </label>
+          <p class="config-section-title">Policy</p>
+          <label class="config-field">
+            <span>Clarification eagerness</span>
+            <input name="clarification_eagerness" type="number" min="0" max="1" step="0.05">
+          </label>
+          <label class="config-field config-flag">
+            <span>Require final confirmation</span>
+            <input name="require_final_confirmation" type="checkbox">
+          </label>
+          <label class="config-field config-flag">
+            <span>Strict mode</span>
+            <input name="strict_mode" type="checkbox">
+          </label>
+          <div class="config-footer">
+            <button type="submit">Save Config</button>
+            <p id="config-status" class="status-line"></p>
+          </div>
+        </form>
+      </div>
     </section>
 
     <template id="message-template">

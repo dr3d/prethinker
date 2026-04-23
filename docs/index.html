@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Prethinker Docs Hub</title>
-  <meta name="description" content="Results-first documentation hub for Prethinker: status, evidence, media, and research data." />
+  <meta name="description" content="Public documentation hub for Prethinker: current status, governed adapter design, front-door evidence, and media." />
   <style>
     @import url("https://fonts.googleapis.com/css2?family=Sora:wght@500;700;800&family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap");
 
@@ -346,23 +346,24 @@
     </div>
 
     <section class="hero">
-      <h1>Prethinker Docs Hub<br />Current Truth, Operator Paths, And Evidence.</h1>
+      <h1>Prethinker Docs Hub<br />Current Truth, Product Shape, And Evidence.</h1>
       <p>
-        This hub now prioritizes <strong>current verified status</strong>, the live <strong>Prethinker Console</strong> front door,
-        and the durable design notes that survived the repo cleanup. Historical experiment surfaces remain available, but they are explicitly archive material.
+        This hub prioritizes <strong>current verified status</strong>, the <strong>Prethinker Console</strong> as the manual front door,
+        and the durable design notes that describe the product as a <strong>governed adapter</strong> rather than just a parser lab.
       </p>
       <p class="lede" style="margin-top:6px;">
-        Note: any link to a <code>.md</code> file opens on the GitHub repo page for reliable rendering from GitHub Pages.
+        Read this as a public snapshot: what is stable, what is frontier, what the UI is for, and where the honest boundaries still are.
       </p>
       <div class="hero-actions">
         <a class="btn primary" href="https://github.com/dr3d/prethinker/blob/main/README.md">Open README</a>
         <a class="btn primary" href="https://github.com/dr3d/prethinker/blob/main/docs/PROGRESS.md">Open PROGRESS.md</a>
         <a class="btn cool" href="https://github.com/dr3d/prethinker/blob/main/docs/PRETHINKER.md">Open System Design</a>
-        <a class="btn cool" href="https://github.com/dr3d/prethinker/blob/main/docs/PRETHINK_GATEWAY_MVP.md">Open Console MVP Note</a>
-        <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/FOCUS_EXECUTION_PLAN.md">Open Focus Plan</a>
+        <a class="btn cool" href="https://github.com/dr3d/prethinker/blob/main/docs/EXPLAINER.md">Open Explainer</a>
+        <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/GIC_ENGLISH_INPUT_PIPELINE.md">Open GIC Pipeline</a>
       </div>
       <div class="jump">
         <a href="#status">Status</a>
+        <a href="#start">Start Here</a>
         <a href="#console">Console</a>
         <a href="#evidence">Evidence</a>
         <a href="#media">Media</a>
@@ -427,9 +428,40 @@
       </div>
     </section>
 
+    <section id="start" class="section">
+      <h2>Start Here</h2>
+      <p class="lede">If you are new to the repo, these are the best pages to read in order before digging into reports or archived run history.</p>
+      <div class="grid">
+        <article class="card">
+          <span class="tag">1</span>
+          <h3>Explainer</h3>
+          <p>The plain-language product story: governed adapter, symbolic memory, and the honest domain-fit limits.</p>
+          <div class="actions">
+            <a class="btn primary" href="https://github.com/dr3d/prethinker/blob/main/docs/EXPLAINER.md">Open</a>
+          </div>
+        </article>
+        <article class="card">
+          <span class="tag">2</span>
+          <h3>System Design</h3>
+          <p>The stable system view: authority boundary, runtime contract, and why Prethinker is not just another chatbot shell.</p>
+          <div class="actions">
+            <a class="btn cool" href="https://github.com/dr3d/prethinker/blob/main/docs/PRETHINKER.md">Open</a>
+          </div>
+        </article>
+        <article class="card">
+          <span class="tag">3</span>
+          <h3>GIC Pipeline</h3>
+          <p>The technical walkthrough of what happens to an English utterance from the front door through deterministic apply/query.</p>
+          <div class="actions">
+            <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/GIC_ENGLISH_INPUT_PIPELINE.md">Open</a>
+          </div>
+        </article>
+      </div>
+    </section>
+
     <section id="console" class="section">
       <h2>Prethinker Console</h2>
-      <p class="lede">The console is the operator cockpit for testing the governed intent compiler through the shared interactive entry path.</p>
+      <p class="lede">The console is the operator cockpit and current manual product surface for testing the governed intent compiler through the shared interactive entry path.</p>
       <div class="grid">
         <article class="card">
           <span class="tag">Front Door</span>
@@ -453,6 +485,14 @@
           <p>Run instructions, strict lock behavior, endpoints, slash commands, and batch turnset support.</p>
           <div class="actions">
             <a class="btn cool" href="https://github.com/dr3d/prethinker/blob/main/ui_gateway/README.md">Open</a>
+          </div>
+        </article>
+        <article class="card">
+          <span class="tag">Mechanism</span>
+          <h3>English Input Pipeline</h3>
+          <p>A detailed follow-through of the current GIC path from user utterance to routing packet, parse, runtime gate, and KB effect.</p>
+          <div class="actions">
+            <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/GIC_ENGLISH_INPUT_PIPELINE.md">Open</a>
           </div>
         </article>
       </div>
@@ -592,8 +632,8 @@
     </section>
 
     <div class="footer-note">
-      Docs Hub refresh: April 20, 2026. This page now favors durable operator docs, current verified status,
-      and curated evidence over retired handoff clutter.
+      Docs Hub refresh: April 23, 2026. This page favors current verified status, public product framing,
+      and curated evidence over retired handoff clutter or rolling migration notes.
     </div>
   </main>
 

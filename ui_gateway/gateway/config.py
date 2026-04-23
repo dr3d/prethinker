@@ -93,6 +93,11 @@ class ConfigStore:
             if mode not in {"never", "fallback_only", "on_other", "always"}:
                 mode = "fallback_only"
             sanitized["served_handoff_mode"] = mode
+        if "served_llm_provider" in sanitized:
+            backend = str(sanitized["served_llm_provider"]).strip().lower()
+            if backend not in {"ollama", "lmstudio"}:
+                backend = "ollama"
+            sanitized["served_llm_provider"] = backend
         if "compiler_mode" in sanitized:
             mode = str(sanitized["compiler_mode"]).strip().lower()
             if mode not in {"strict", "auto", "heuristic"}:

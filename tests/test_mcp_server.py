@@ -514,6 +514,61 @@ class LocalMcpServerTests(unittest.TestCase):
         self.assertEqual(sanitized.get("clarification_reason"), "")
         self.assertEqual(sanitized.get("uncertainty_score"), 0.15)
 
+    def test_sanitize_compiler_clarification_suppresses_generic_event_fact_request_when_shadow_parse_is_clean(self) -> None:
+        strict_server = PrologMCPServer(compiler_mode="strict")
+        compiled = {
+            "intent": "assert_fact",
+            "needs_clarification": True,
+            "uncertainty_score": 0.75,
+            "clarification_question": "What specific facts about Fred, Wilma, or the turnips should be asserted?",
+            "clarification_reason": "Utterance describes an event but lacks explicit predicates or facts to assert.",
+            "rationale": "Event description requires clarification on intended ontology predicates.",
+        }
+        shadow_parse = {
+            "intent": "assert_fact",
+            "logic_string": (
+                "entered(fred, pinky_penny_supermarket, 9am, friday_morning).\n"
+                "entered(wilma, pinky_penny_supermarket, 9am, friday_morning).\n"
+                "headed_over(fred, turnips, pinky_penny_supermarket).\n"
+                "headed_over(wilma, turnips, pinky_penny_supermarket)."
+            ),
+            "components": {
+                "atoms": ["fred", "wilma", "pinky_penny_supermarket", "turnips", "9am", "friday_morning"],
+                "variables": [],
+                "predicates": ["entered", "headed_over"],
+            },
+            "facts": [
+                "entered(fred, pinky_penny_supermarket, 9am, friday_morning).",
+                "entered(wilma, pinky_penny_supermarket, 9am, friday_morning).",
+                "headed_over(fred, turnips, pinky_penny_supermarket).",
+                "headed_over(wilma, turnips, pinky_penny_supermarket).",
+            ],
+            "rules": [],
+            "queries": [],
+            "confidence": {"overall": 0.95, "intent": 0.95, "logic": 0.95},
+            "ambiguities": ["Canonical predicate names for the event verbs are not yet fixed in the ontology."],
+            "needs_clarification": False,
+            "uncertainty_score": 0.15,
+            "uncertainty_label": "low",
+            "clarification_question": "",
+            "clarification_reason": "",
+            "rationale": "Shadow parse recognized a stable action/location interpretation.",
+        }
+
+        with patch.object(strict_server, "_compile_shadow_parse", return_value=(shadow_parse, "")):
+            sanitized = strict_server._sanitize_compiler_clarification(
+                utterance=(
+                    "at 9am on friday morning fred and wilma entered the pinky penny supermarket "
+                    "and headed over to the turnips"
+                ),
+                compiled=compiled,
+            )
+
+        self.assertFalse(sanitized.get("needs_clarification"))
+        self.assertEqual(sanitized.get("clarification_question"), "")
+        self.assertEqual(sanitized.get("clarification_reason"), "")
+        self.assertEqual(sanitized.get("uncertainty_score"), 0.15)
+
     def test_sanitize_compiler_clarification_suppresses_explicit_sibling_naming_when_shadow_parse_is_clean(self) -> None:
         strict_server = PrologMCPServer(compiler_mode="strict")
         compiled = {
@@ -602,6 +657,18 @@ class LocalMcpServerTests(unittest.TestCase):
         self.assertEqual(result.get("status"), "success")
         trace = result.get("compiler_trace", {})
         self.assertIsInstance(trace.get("prethink"), dict)
+        self.assertIn(
+            "USER_UTTERANCE:",
+            str((((trace.get("prethink") or {}).get("primary") or {}).get("prompt_text", ""))),
+        )
+        self.assertIn(
+            "Return JSON only with exactly these keys:",
+            str((((trace.get("parse") or {}).get("extractor") or {}).get("prompt_text", ""))),
+        )
+        self.assertEqual(
+            ((trace.get("parse") or {}).get("extractor") or {}).get("parsed"),
+            parsed,
+        )
         self.assertIn(
             "subject_prefixed_predicate_canonicalization",
             trace.get("summary", {}).get("parse_rescues", []),
@@ -1101,6 +1168,50 @@ class LocalMcpServerTests(unittest.TestCase):
         self.assertEqual(query.get("status"), "success")
         rows = query.get("rows", [])
         self.assertEqual({row.get("X") for row in rows}, {"fred"})
+
+    def test_apply_compiled_parse_executes_mixed_rule_fact_and_query_bundle(self) -> None:
+        server = PrologMCPServer(compiler_mode="heuristic")
+        packet = server.tools_call(
+            "pre_think",
+            {"utterance": "If Alice is a parent of Bob then Alice is an ancestor of Bob."},
+        )
+        self.assertEqual(packet.get("status"), "success")
+        prethink_id = packet.get("packet", {}).get("prethink_id")
+        self.assertTrue(prethink_id)
+
+        parsed = {
+            "intent": "assert_rule",
+            "logic_string": "ancestor(X, Y) :- parent(X, Y).",
+            "components": {
+                "atoms": ["alice", "bob"],
+                "variables": ["X", "Y"],
+                "predicates": ["parent", "ancestor"],
+            },
+            "facts": ["parent(alice, bob)."],
+            "rules": ["ancestor(X, Y) :- parent(X, Y)."],
+            "queries": ["ancestor(alice, bob)."],
+            "confidence": {"overall": 0.95, "intent": 0.95, "logic": 0.95},
+            "ambiguities": [],
+            "needs_clarification": False,
+            "uncertainty_score": 0.05,
+            "uncertainty_label": "low",
+            "clarification_question": "",
+            "clarification_reason": "",
+            "rationale": "Parsed mixed write/query bundle.",
+        }
+
+        execution = server._apply_compiled_parse(parsed=parsed, prethink_id=prethink_id)
+
+        self.assertEqual(execution.get("status"), "success")
+        self.assertEqual(execution.get("writes_applied"), 2)
+        operations = execution.get("operations", [])
+        self.assertEqual(
+            [op.get("tool") for op in operations],
+            ["assert_fact", "assert_rule", "query_rows"],
+        )
+        query_result = execution.get("query_result", {})
+        self.assertEqual(query_result.get("status"), "success")
+        self.assertEqual(query_result.get("num_rows"), 1)
 
     def test_process_utterance_recovers_explicit_step_sequence_in_canonical_path(self) -> None:
         strict_server = PrologMCPServer(compiler_mode="strict")

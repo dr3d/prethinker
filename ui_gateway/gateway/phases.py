@@ -209,33 +209,63 @@ def process_turn(
             )
         )
         if str(process_result.get("status", "")).strip() == "clarification_required" and front_door["needs_clarification"]:
-            question = _clarification_question(front_door, utterance)
-            clarification = {
-                "question": question,
-                "reasons": front_door["reasons"],
-            }
-            phases.append(
-                _phase(
-                    "clarify",
-                    "required",
-                    "Strict gateway is holding the turn for clarification.",
-                    clarification,
+            if runtime.should_handoff_instead_of_clarify(route=route, config=config):
+                phases.append(
+                    _phase(
+                        "clarify",
+                        "skipped",
+                        "Clarification suppressed; forwarding the turn to the served assistant.",
+                        {
+                            "reason": "served_handoff_instead_of_clarify",
+                            "served_handoff_mode": str(config.get("served_handoff_mode", "")).strip(),
+                        },
+                    )
                 )
-            )
-            phases.append(
-                _phase(
-                    "commit",
-                    "blocked",
-                    "Commit blocked until clarification resolves.",
-                    {"reason": "needs_clarification"},
+                execution = {
+                    "status": "success",
+                    "intent": str(front_door.get("compiler_intent", "other")).strip() or "other",
+                    "writes_applied": 0,
+                    "operations": [],
+                    "query_result": None,
+                    "parse": {},
+                    "errors": [],
+                }
+                phases.append(
+                    _phase(
+                        "commit",
+                        "skipped",
+                        "Deterministic commit skipped; unresolved turn will be handled by served LLM.",
+                        {"reason": "served_handoff_instead_of_clarify"},
+                    )
                 )
-            )
-            session.pending_clarification = {
-                "question": question,
-                "original_utterance": utterance,
-                "front_door": front_door,
-                "prethink_id": str(front_door.get("prethink_id", "")).strip(),
-            }
+            else:
+                question = _clarification_question(front_door, utterance)
+                clarification = {
+                    "question": question,
+                    "reasons": front_door["reasons"],
+                }
+                phases.append(
+                    _phase(
+                        "clarify",
+                        "required",
+                        "Strict gateway is holding the turn for clarification.",
+                        clarification,
+                    )
+                )
+                phases.append(
+                    _phase(
+                        "commit",
+                        "blocked",
+                        "Commit blocked until clarification resolves.",
+                        {"reason": "needs_clarification"},
+                    )
+                )
+                session.pending_clarification = {
+                    "question": question,
+                    "original_utterance": utterance,
+                    "front_door": front_door,
+                    "prethink_id": str(front_door.get("prethink_id", "")).strip(),
+                }
         else:
             phases.append(
                 _phase(

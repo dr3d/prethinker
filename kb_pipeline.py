@@ -1148,16 +1148,18 @@ def _call_model_prompt(
     context_length: int,
     timeout: int,
     api_key: str | None,
+    response_format: str = "json",
 ) -> ModelResponse:
     if backend == "ollama":
         payload = {
             "model": model,
             "stream": False,
             "think": False,
-            "format": "json",
             "messages": [{"role": "user", "content": prompt_text}],
             "options": {"temperature": 0, "num_ctx": context_length},
         }
+        if str(response_format or "json").strip().lower() == "json":
+            payload["format"] = "json"
         raw = _post_json(
             f"{base_url.rstrip('/')}/api/chat",
             payload,

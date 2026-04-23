@@ -635,13 +635,20 @@ class RuntimeHooks:
         query_result: dict[str, Any] | None = None
         errors: list[str] = []
 
-        if intent == "assert_fact":
-            clauses = [str(item).strip() for item in parsed.get("facts", []) if str(item).strip()]
-            if not clauses:
+        if intent in {"assert_fact", "assert_rule"}:
+            fact_clauses = [str(item).strip() for item in parsed.get("facts", []) if str(item).strip()]
+            rule_clauses = [str(item).strip() for item in parsed.get("rules", []) if str(item).strip()]
+
+            if intent == "assert_fact" and not fact_clauses:
                 clause = str(parsed.get("logic_string", "")).strip()
                 if clause:
-                    clauses = [clause]
-            for clause in clauses:
+                    fact_clauses = [clause]
+            if intent == "assert_rule" and not rule_clauses:
+                clause = str(parsed.get("logic_string", "")).strip()
+                if clause:
+                    rule_clauses = [clause]
+
+            for clause in fact_clauses:
                 result = server.tools_call(
                     "assert_fact",
                     {"clause": clause, "prethink_id": prethink_id, "confirm": True},
@@ -652,13 +659,7 @@ class RuntimeHooks:
                 else:
                     errors.append(f"assert_fact failed for {clause}")
 
-        elif intent == "assert_rule":
-            clauses = [str(item).strip() for item in parsed.get("rules", []) if str(item).strip()]
-            if not clauses:
-                clause = str(parsed.get("logic_string", "")).strip()
-                if clause:
-                    clauses = [clause]
-            for clause in clauses:
+            for clause in rule_clauses:
                 result = server.tools_call(
                     "assert_rule",
                     {"clause": clause, "prethink_id": prethink_id, "confirm": True},
@@ -668,6 +669,19 @@ class RuntimeHooks:
                     writes_applied += 1
                 else:
                     errors.append(f"assert_rule failed for {clause}")
+
+            queries = [str(item).strip() for item in parsed.get("queries", []) if str(item).strip()]
+            if queries:
+                query = queries[0]
+                result = server.tools_call(
+                    "query_rows",
+                    {"query": query, "prethink_id": prethink_id},
+                )
+                query_result = result
+                operations.append({"tool": "query_rows", "query": query, "result": result})
+                status = str(result.get("status", "")).strip()
+                if status not in {"success", "no_results"}:
+                    errors.append(f"query_rows failed for {query}")
 
         elif intent == "retract":
             targets = _extract_retract_targets(
@@ -815,6 +829,21 @@ class RuntimeHooks:
         # No query payload and no writes means this was effectively a no-op/other turn.
         return True
 
+    def should_handoff_instead_of_clarify(
+        self,
+        *,
+        route: str,
+        config: dict[str, Any],
+    ) -> bool:
+        if bool(config.get("strict_mode", True)):
+            return False
+        mode = self._served_handoff_mode(config)
+        if mode == "always":
+            return True
+        if mode == "on_other":
+            return str(route or "").strip().lower() == "other"
+        return False
+
     def _build_served_prompt(
         self,
         *,
@@ -829,11 +858,24 @@ class RuntimeHooks:
             "query_result": execution.get("query_result"),
             "parse": execution.get("parse", {}),
         }
+        route_norm = str(route or "").strip().lower()
+        query_result = summary.get("query_result")
+        if route_norm == "other" and summary["writes_applied"] <= 0 and not isinstance(query_result, dict):
+            return (
+                "You are the served assistant behind a governed pre-think gateway.\n"
+                "The gateway reviewed this turn and chose not to commit anything to the KB.\n"
+                "Reply naturally in plain text as a helpful conversational assistant.\n"
+                "Do not return JSON, key-value wrappers, or markdown.\n"
+                "Do not mention deterministic summaries, KB state, or 'no data found' unless the user asks.\n\n"
+                f"USER_UTTERANCE: {utterance}\n"
+                "GATEWAY_NOTE: No KB mutation was committed for this turn.\n"
+            )
         return (
             "You are the served assistant behind a governed pre-think gateway.\n"
             "Follow these rules:\n"
             "- The deterministic pre-think/runtime result is the source of truth.\n"
-            "- If deterministic query returned no rows, say that clearly, then offer a helpful next question.\n"
+            "- Return plain text only. Never JSON, key-value wrappers, or markdown.\n"
+            "- Only say a query found no data when query_result.status is exactly 'no_results'.\n"
             "- Do not claim KB mutations unless stated in the deterministic summary.\n"
             "- Keep response concise and plain.\n\n"
             f"ROUTE: {route}\n"
@@ -841,6 +883,21 @@ class RuntimeHooks:
             "DETERMINISTIC_SUMMARY_JSON:\n"
             f"{json.dumps(summary, ensure_ascii=True)}\n"
         )
+
+    def _normalize_served_text(self, text: str) -> str:
+        raw = str(text or "").strip()
+        if not raw:
+            return ""
+        try:
+            parsed = json.loads(raw)
+        except json.JSONDecodeError:
+            return raw
+        if isinstance(parsed, dict):
+            for key in ("response", "answer", "text", "message", "content"):
+                value = parsed.get(key)
+                if isinstance(value, str) and value.strip():
+                    return value.strip()
+        return raw
 
     def _served_handoff_response(
         self,
@@ -864,6 +921,7 @@ class RuntimeHooks:
                 context_length=max(512, int(config.get("served_llm_context_length", 16384) or 16384)),
                 timeout=max(5, int(config.get("served_llm_timeout", 60) or 60)),
                 api_key=api_key,
+                response_format="text",
             )
             message_text = ""
             reasoning_text = ""
@@ -871,7 +929,7 @@ class RuntimeHooks:
                 message_text = str(getattr(raw, "message", "") or "").strip()
             if hasattr(raw, "reasoning"):
                 reasoning_text = str(getattr(raw, "reasoning", "") or "").strip()
-            text = message_text or reasoning_text or str(raw or "").strip()
+            text = self._normalize_served_text(message_text or reasoning_text or str(raw or "").strip())
             if not text:
                 text = "Served model returned an empty response."
             return {
@@ -883,6 +941,7 @@ class RuntimeHooks:
                     "model": model,
                     "base_url": base_url,
                     "handoff_mode": self._served_handoff_mode(config),
+                    "prompt_text": prompt,
                 },
             }
         except Exception as exc:
@@ -895,6 +954,7 @@ class RuntimeHooks:
                     "model": model,
                     "base_url": base_url,
                     "handoff_mode": self._served_handoff_mode(config),
+                    "prompt_text": prompt,
                     "error": str(exc),
                 },
             }
