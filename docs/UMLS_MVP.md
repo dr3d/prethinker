@@ -232,6 +232,36 @@ If the answer is no, we stop there.
 
 If the answer is yes, then we add a tightly filtered relation layer.
 
+## Current Bridge
+
+The local slice builder now writes two Prolog-facing files:
+
+- `sharp_memory_seed_facts.pl`: human-readable seed, alias, semantic type, and relation facts
+- `umls_bridge_facts.pl`: normalized concept, alias-atom, semantic-group, and relation-label facts
+
+The bridge keeps UMLS in the role where it is strongest for this repo: concept normalization and bounded type steering.
+
+It maps selected UMLS semantic types into the small `medical@v0` profile vocabulary:
+
+- `medication`
+- `condition`
+- `symptom_or_finding`
+- `allergy`
+- `lab_or_procedure`
+- `physiologic_state`
+
+That gives the runtime a deterministic substrate for questions like "is this mention drug-like, diagnosis-like, symptom-like, or lab-like?" without promoting every UMLS concept into a new predicate.
+
+The fast preflight for that bridge is:
+
+```powershell
+python scripts/run_umls_bridge_admission_probe.py
+```
+
+Latest local result: `9/9` pass.
+
+It should pass before longer `medical@v0` model-backed suites or offline 27B ontology review runs. See [docs/reports/MEDICAL_UMLS_BRIDGE_RUNTIME_2026-04-24.md](reports/MEDICAL_UMLS_BRIDGE_RUNTIME_2026-04-24.md) for the runtime checkpoint.
+
 ## Storage Guidance
 
 For now:

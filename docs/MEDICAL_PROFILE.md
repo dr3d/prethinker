@@ -1,6 +1,6 @@
 # Medical Profile (`medical@v0`)
 
-Date: 2026-04-23
+Date: 2026-04-24
 
 `medical@v0` is the first formal bounded medical ontology package for Prethinker.
 
@@ -21,6 +21,7 @@ It is a profile for:
 - type schema example: [modelfiles/type_schema.medical.example.json](../modelfiles/type_schema.medical.example.json)
 - ontology prospector prompt: [modelfiles/medical_ontology_prospector_prompt.md](../modelfiles/medical_ontology_prospector_prompt.md)
 - manifest-driven suite runner: [scripts/run_medical_profile_suite.py](../scripts/run_medical_profile_suite.py)
+- local UMLS bridge generator: [scripts/build_umls_mvp_slice.py](../scripts/build_umls_mvp_slice.py)
 
 ## Canonical Predicate Palette
 
@@ -42,6 +43,7 @@ Latest manifest-driven suite result:
 
 - sharp-memory: `12/12` pass, `0` warn, `0` fail
 - clinical checks: `7/7` pass, `0` warn, `0` fail
+- UMLS bridge admission preflight: `9/9` pass, `0` fail
 - prompt probe: `79/79` vs baseline `58/79`
 - clarification probe: `38/38` vs baseline `21/38`
 
@@ -49,7 +51,7 @@ This set is not arbitrary.
 
 It is reinforced by:
 
-- the bounded UMLS MVP probes
+- the bounded UMLS MVP probes and bridge admission preflight
 - the medical prompt probe
 - the clarification-aware medical probe
 - the local `qwen3.5:27b` ontology prospector run
@@ -57,6 +59,7 @@ It is reinforced by:
 See:
 
 - [docs/UMLS_MVP.md](UMLS_MVP.md)
+- [docs/reports/MEDICAL_UMLS_BRIDGE_RUNTIME_2026-04-24.md](reports/MEDICAL_UMLS_BRIDGE_RUNTIME_2026-04-24.md)
 - [docs/reports/MEDICAL_PROMPT_PROBE_2026-04-23.md](reports/MEDICAL_PROMPT_PROBE_2026-04-23.md)
 - [docs/reports/MEDICAL_CLARIFICATION_PROBE_2026-04-23.md](reports/MEDICAL_CLARIFICATION_PROBE_2026-04-23.md)
 - [docs/reports/MEDICAL_ONTOLOGY_PROSPECTOR_2026-04-23.md](reports/MEDICAL_ONTOLOGY_PROSPECTOR_2026-04-23.md)
@@ -95,6 +98,10 @@ The current type schema path still expects concrete entity atoms.
 
 That makes the included type schema best understood as a **seed example** for argument discipline and evaluation, not as a universal strict-type gate for arbitrary patient names.
 
+The bounded UMLS slice now emits a local `umls_bridge_facts.pl` file with normalized alias atoms and medical-profile semantic groups such as `medication`, `condition`, `symptom_or_finding`, `allergy`, `lab_or_procedure`, and `physiologic_state`.
+
+Those bridge facts are intended for routing, validation, and clarification pressure. They are not intended to expand the nine-predicate palette.
+
 ## Example Command
 
 For batch experiments, the current stack can already use the profile assets explicitly:
@@ -112,7 +119,7 @@ python kb_pipeline.py `
   --prompt-file modelfiles/semantic_parser_system_prompt.md
 ```
 
-The supplement is not auto-selected by runtime profile id yet, so prompt/profile coupling is still explicit and manual.
+In the canonical MCP/gateway path, `active_profile=medical@v0` now loads the profile assets and UMLS bridge automatically. Batch experiments can still pass assets explicitly when they need controlled comparisons.
 
 The profile can now also be exercised as one manifest-driven package with:
 
@@ -127,22 +134,30 @@ That suite rolls up:
 - medical prompt probe
 - clarification-aware medical probe
 
+Before model-backed runs, the bridge admission layer can be checked quickly with:
+
+```powershell
+python scripts/run_umls_bridge_admission_probe.py
+```
+
+That probe is deterministic and validates alias hits, vague medical surface forms, and predicate/type compatibility before spending time on local model runs.
+
 ## What Is Still Missing
 
 `medical@v0` is a real profile package, but the stack is not yet fully profile-native.
 
 Still missing:
 
-- first-class `registry-profile` selection across the whole stack
-- automatic profile asset loading by profile id
+- first-class `registry-profile` selection across every batch runner and legacy entrypoint
+- automatic profile asset loading outside the canonical MCP/gateway path
 - versioned overlay support
 - cleaner type handling for arbitrary new patient names
 
 So `medical@v0` is best understood as:
 
 - a formal bounded ontology package
-- plus explicit runtime assets
-- not yet a one-flag end-to-end profile switch
+- plus live MCP/gateway runtime assets
+- not yet a one-flag switch across every historical runner
 
 ## Bottom Line
 

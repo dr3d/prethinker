@@ -31,10 +31,20 @@ def test_canonical_predicate_signatures_follow_profile_manifest():
 
 
 def test_build_medical_profile_guide_mentions_palette_and_pronoun_guard():
+    bridge = {
+        "loaded": True,
+        "concepts": {
+            "metformin": {
+                "semantic_groups": ["medication"],
+                "aliases": ["metformin", "glucophage"],
+            }
+        },
+    }
     guide = medical_profile.build_medical_profile_guide(
         shared_prompt="BASE",
         supplement="SUPPLEMENT",
         concepts=[],
+        umls_bridge=bridge,
         known_predicates=["taking/2", "pregnant/1"],
     )
     assert "taking/2" in guide
@@ -42,6 +52,82 @@ def test_build_medical_profile_guide_mentions_palette_and_pronoun_guard():
     assert "Do not invent a patient identity from unresolved pronouns." in guide
     assert "only sources of patient identity" in guide
     assert "not discourse context" in guide
+    assert "MEDICAL_UMLS_BRIDGE_HINTS" in guide
+    assert "metformin" in guide
+    assert "Do not create new predicates from UMLS concept names" in guide
+
+
+def test_load_umls_bridge_facts_indexes_concepts_aliases_and_groups(tmp_path):
+    bridge_path = tmp_path / "umls_bridge_facts.pl"
+    bridge_path.write_text(
+        "\n".join(
+            [
+                "umls_concept(metformin, 'C0025598').",
+                "umls_preferred_atom(metformin, metformin).",
+                "umls_semantic_group(metformin, medication).",
+                "umls_alias_norm(metformin, glucophage).",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    bridge = medical_profile.load_umls_bridge_facts(bridge_path)
+    assert bridge["loaded"] is True
+    assert bridge["concepts"]["metformin"]["cui"] == "C0025598"
+    assert bridge["concepts"]["metformin"]["semantic_groups"] == ["medication"]
+    assert bridge["aliases"]["glucophage"] == "metformin"
+
+
+def test_bridge_admission_guidance_matches_aliases_and_vague_terms(tmp_path):
+    bridge_path = tmp_path / "umls_bridge_facts.pl"
+    bridge_path.write_text(
+        "umls_concept(metformin, 'C0025598').\n"
+        "umls_semantic_group(metformin, medication).\n"
+        "umls_alias_norm(metformin, glucophage).\n",
+        encoding="utf-8",
+    )
+    bridge = medical_profile.load_umls_bridge_facts(bridge_path)
+    guided = medical_profile.bridge_admission_guidance("Mara takes Glucophage.", bridge)
+    assert guided["mentions"][0]["seed_id"] == "metformin"
+    assert guided["mentions"][0]["semantic_groups"] == ["medication"]
+    vague = medical_profile.bridge_admission_guidance("Mara's pressure is bad.", bridge)
+    assert vague["needs_clarification"] is True
+    assert vague["vague_surfaces"][0]["surface"] == "pressure"
+
+
+def test_sanitize_medical_parse_for_bridge_clears_incompatible_fact(tmp_path):
+    bridge_path = tmp_path / "umls_bridge_facts.pl"
+    bridge_path.write_text(
+        "umls_concept(blood_pressure_measurement, 'C0005824').\n"
+        "umls_semantic_group(blood_pressure_measurement, lab_or_procedure).\n"
+        "umls_alias_norm(blood_pressure_measurement, blood_pressure).\n",
+        encoding="utf-8",
+    )
+    bridge = medical_profile.load_umls_bridge_facts(bridge_path)
+    parsed = {
+        "intent": "assert_fact",
+        "needs_clarification": False,
+        "logic_string": "has_condition(mara, blood_pressure_measurement).",
+        "facts": ["has_condition(mara, blood_pressure_measurement)."],
+        "rules": [],
+        "queries": [],
+        "ambiguities": [],
+        "clarification_question": "",
+        "clarification_reason": "",
+        "rationale": "Mapped pressure to a condition.",
+        "uncertainty_score": 0.1,
+        "uncertainty_label": "low",
+    }
+    sanitized = medical_profile.sanitize_medical_parse_for_bridge(
+        parsed,
+        utterance="Mara's blood pressure has been high.",
+        bridge=bridge,
+    )
+    assert sanitized is not None
+    assert sanitized["needs_clarification"] is True
+    assert sanitized["logic_string"] == ""
+    assert sanitized["facts"] == []
+    assert "UMLS bridge type steering" in sanitized["clarification_reason"]
 
 
 def test_medical_profile_suite_render_summary_mentions_profile_and_rollups():

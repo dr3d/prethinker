@@ -66,6 +66,42 @@ def test_render_sharp_memory_facts_includes_seed_aliases_and_types():
     assert "umls_semantic_type(metformin, 'T121', 'Pharmacologic Substance')." in facts
 
 
+def test_semantic_group_for_tui_maps_umls_types_to_profile_groups():
+    assert umls_mvp.semantic_group_for_tui("T195", "Antibiotic") == "medication"
+    assert umls_mvp.semantic_group_for_tui("T047", "Disease or Syndrome") == "condition"
+    assert umls_mvp.semantic_group_for_tui("T184", "Sign or Symptom") == "symptom_or_finding"
+    assert umls_mvp.semantic_group_for_tui("T059", "Laboratory Procedure") == "lab_or_procedure"
+
+
+def test_concept_semantic_groups_adds_bounded_seed_overrides():
+    groups = umls_mvp.concept_semantic_groups(
+        {
+            "seed_id": "penicillin_allergy",
+            "semantic_types": [{"tui": "T047", "sty": "Disease or Syndrome"}],
+        }
+    )
+    assert groups == ["condition", "allergy"]
+
+
+def test_render_umls_bridge_facts_includes_normalized_aliases_and_groups():
+    facts = umls_mvp.render_umls_bridge_facts(
+        [
+            {
+                "seed_id": "metformin",
+                "cui": "C0025598",
+                "preferred_name": "Metformin",
+                "semantic_types": [{"tui": "T121", "sty": "Pharmacologic Substance"}],
+                "aliases": [{"text": "Glucophage"}],
+            }
+        ],
+        [],
+    )
+    assert "umls_concept(metformin, 'C0025598')." in facts
+    assert "umls_preferred_atom(metformin, metformin)." in facts
+    assert "umls_semantic_group(metformin, medication)." in facts
+    assert "umls_alias_norm(metformin, glucophage)." in facts
+
+
 def test_seed_alias_map_includes_probe_aliases():
     mapping = umls_mvp.seed_alias_map(
         {

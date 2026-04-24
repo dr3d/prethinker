@@ -375,6 +375,10 @@ def build_slice(meta_dir: Path, battery_path: Path, out_dir: Path) -> dict[str, 
         umls_mvp.render_sharp_memory_facts(concepts, relations),
         encoding="utf-8",
     )
+    (out_dir / "umls_bridge_facts.pl").write_text(
+        umls_mvp.render_umls_bridge_facts(concepts, relations),
+        encoding="utf-8",
+    )
     return manifest
 
 

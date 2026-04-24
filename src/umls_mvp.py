@@ -22,6 +22,39 @@ TTY_PRIORITY = {
     "FN": 56,
 }
 
+SEMANTIC_GROUP_ORDER = [
+    "medication",
+    "condition",
+    "symptom_or_finding",
+    "allergy",
+    "lab_or_procedure",
+    "physiologic_state",
+]
+
+SEMANTIC_GROUPS_BY_TUI = {
+    "T046": ("condition",),  # Pathologic Function
+    "T047": ("condition",),  # Disease or Syndrome
+    "T048": ("condition",),  # Mental or Behavioral Dysfunction
+    "T058": ("lab_or_procedure",),  # Health Care Activity
+    "T059": ("lab_or_procedure",),  # Laboratory Procedure
+    "T060": ("lab_or_procedure",),  # Diagnostic Procedure
+    "T061": ("lab_or_procedure",),  # Therapeutic or Preventive Procedure
+    "T109": ("medication",),  # Organic Chemical
+    "T121": ("medication",),  # Pharmacologic Substance
+    "T122": ("medication",),  # Biomedical or Dental Material
+    "T123": ("medication",),  # Biologically Active Substance
+    "T125": ("medication",),  # Hormone
+    "T184": ("symptom_or_finding",),  # Sign or Symptom
+    "T191": ("condition",),  # Neoplastic Process
+    "T195": ("medication",),  # Antibiotic
+    "T200": ("medication",),  # Clinical Drug
+}
+
+SEMANTIC_GROUP_OVERRIDES_BY_SEED = {
+    "penicillin_allergy": ("allergy",),
+    "pregnancy": ("physiologic_state",),
+}
+
 
 def normalize_lookup_text(text: str) -> str:
     lowered = str(text or "").casefold()
@@ -35,6 +68,51 @@ def atomize(text: str) -> str:
     lowered = _NON_ALNUM_RE.sub("_", lowered)
     lowered = re.sub(r"_+", "_", lowered).strip("_")
     return lowered or "unknown"
+
+
+def _prolog_quote(text: str) -> str:
+    return str(text or "").replace("'", "\\'")
+
+
+def semantic_group_for_tui(tui: str, sty: str = "") -> str | None:
+    token = str(tui or "").strip().upper()
+    groups = SEMANTIC_GROUPS_BY_TUI.get(token)
+    if groups:
+        return groups[0]
+
+    sty_token = normalize_lookup_text(sty)
+    if "allergy" in sty_token:
+        return "allergy"
+    if "sign or symptom" in sty_token or "finding" in sty_token:
+        return "symptom_or_finding"
+    return None
+
+
+def concept_semantic_groups(concept: dict[str, Any]) -> list[str]:
+    groups: list[str] = []
+    seen: set[str] = set()
+
+    def _add(group: str | None) -> None:
+        if not group or group in seen:
+            return
+        groups.append(group)
+        seen.add(group)
+
+    seed_atom = atomize(concept.get("seed_id", ""))
+    for group in SEMANTIC_GROUP_OVERRIDES_BY_SEED.get(seed_atom, ()):
+        _add(group)
+    if "allergy" in seed_atom:
+        _add("allergy")
+
+    for sty in concept.get("semantic_types", []) or []:
+        tui = str(sty.get("tui", "")).strip()
+        sty_name = str(sty.get("sty", "")).strip()
+        for group in SEMANTIC_GROUPS_BY_TUI.get(tui.upper(), ()):
+            _add(group)
+        _add(semantic_group_for_tui(tui, sty_name))
+
+    order = {group: index for index, group in enumerate(SEMANTIC_GROUP_ORDER)}
+    return sorted(groups, key=lambda group: (order.get(group, len(order)), group))
 
 
 def iter_rrf_rows(path: Path) -> Iterable[list[str]]:
@@ -300,6 +378,44 @@ def write_jsonl(path: Path, rows: Iterable[dict[str, Any]]) -> None:
             handle.write(json.dumps(row, ensure_ascii=True) + "\n")
 
 
+def render_umls_bridge_facts(
+    concepts: list[dict[str, Any]],
+    relations: list[dict[str, Any]],
+) -> str:
+    lines: list[str] = [
+        "% Derived from licensed UMLS content. Keep this file local unless licensing is reviewed.",
+        "% Normalized bridge facts for bounded medical-profile routing and validation.",
+        "",
+    ]
+    for concept in concepts:
+        seed_atom = atomize(concept.get("seed_id", ""))
+        cui = str(concept.get("cui", "")).strip()
+        preferred_atom = atomize(concept.get("preferred_name", "") or concept.get("seed_id", ""))
+        lines.append(f"umls_concept({seed_atom}, '{_prolog_quote(cui)}').")
+        lines.append(f"umls_preferred_atom({seed_atom}, {preferred_atom}).")
+        for group in concept_semantic_groups(concept):
+            lines.append(f"umls_semantic_group({seed_atom}, {atomize(group)}).")
+
+        alias_atoms: list[str] = []
+        seen_alias_atoms: set[str] = set()
+        for alias_row in concept.get("aliases", []) or []:
+            alias_atom = atomize(normalize_lookup_text(alias_row.get("text", "")))
+            if not alias_atom or alias_atom == "unknown" or alias_atom in seen_alias_atoms:
+                continue
+            alias_atoms.append(alias_atom)
+            seen_alias_atoms.add(alias_atom)
+        for alias_atom in alias_atoms:
+            lines.append(f"umls_alias_norm({seed_atom}, {alias_atom}).")
+        lines.append("")
+
+    for relation in relations:
+        src = atomize(relation.get("seed_id_1", ""))
+        dst = atomize(relation.get("seed_id_2", ""))
+        rel = atomize(relation.get("relation_label", "related_to"))
+        lines.append(f"umls_relation_label({src}, {rel}, {dst}).")
+    return "\n".join(lines).rstrip() + "\n"
+
+
 def render_sharp_memory_facts(
     concepts: list[dict[str, Any]],
     relations: list[dict[str, Any]],
@@ -311,15 +427,15 @@ def render_sharp_memory_facts(
     for concept in concepts:
         seed_atom = atomize(concept.get("seed_id", ""))
         cui = str(concept.get("cui", "")).strip()
-        pref = str(concept.get("preferred_name", "")).replace("'", "\\'")
+        pref = _prolog_quote(concept.get("preferred_name", ""))
         lines.append(f"umls_seed({seed_atom}, '{cui}').")
         lines.append(f"umls_pref_name({seed_atom}, '{pref}').")
         for sty in concept.get("semantic_types", []) or []:
             tui = str(sty.get("tui", "")).strip()
-            sty_name = str(sty.get("sty", "")).replace("'", "\\'")
+            sty_name = _prolog_quote(sty.get("sty", ""))
             lines.append(f"umls_semantic_type({seed_atom}, '{tui}', '{sty_name}').")
         for alias_row in concept.get("aliases", []) or []:
-            alias_text = str(alias_row.get("text", "")).replace("'", "\\'")
+            alias_text = _prolog_quote(alias_row.get("text", ""))
             lines.append(f"umls_alias({seed_atom}, '{alias_text}').")
         lines.append("")
 

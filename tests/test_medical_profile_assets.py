@@ -42,6 +42,8 @@ def test_medical_profile_manifest_points_to_existing_assets():
         rel = str(manifest.get(key, "")).strip()
         assert rel
         assert (ROOT / rel).exists()
+    assert str(manifest.get("umls_slice_dir", "")).strip()
+    assert str(manifest.get("umls_bridge_facts", "")).strip().endswith("umls_bridge_facts.pl")
     settings = manifest.get("recommended_settings", {})
     assert settings.get("strict_registry") is True
     assert settings.get("strict_types") is False

@@ -39,6 +39,16 @@ from kb_pipeline import (
     _synthesize_clarification_question,
     _validate_parsed,
 )
+from src.medical_profile import (
+    build_medical_profile_guide,
+    canonical_predicate_signatures,
+    load_profile_concepts,
+    load_umls_bridge_facts,
+    load_profile_manifest,
+    resolve_profile_paths,
+    sanitize_medical_parse_for_bridge,
+    sanitize_medical_parse_for_clarification,
+)
 
 
 def _coerce_bool(value: Any, default: bool) -> bool:
@@ -84,6 +94,17 @@ def _normalize_freethinker_resolution_policy(value: Any, default: str = "off") -
     return mode
 
 
+def _normalize_active_profile(value: Any, default: str = "general") -> str:
+    aliases = {
+        "default": "general",
+        "general": "general",
+        "medical": "medical@v0",
+        "medical@v0": "medical@v0",
+    }
+    requested = str(value or default).strip().lower()
+    return aliases.get(requested, aliases.get(str(default or "general").strip().lower(), "general"))
+
+
 def _bootstrap_env_from_local_file(explicit_path: str = "") -> Path | None:
     env_file = _resolve_env_file(str(explicit_path or "").strip(), None)
     if env_file is None:
@@ -117,6 +138,7 @@ class PrologMCPServer:
         self,
         kb_path: str = "",
         *,
+        active_profile: str = "general",
         compiler_mode: str = "strict",
         compiler_backend: str = "ollama",
         compiler_base_url: str = "http://127.0.0.1:11434",
@@ -142,6 +164,7 @@ class PrologMCPServer:
         self._prethink_counter = 1
         self._pending_prethink: dict[str, Any] | None = None
         self._trace_path = REPO_ROOT / "tmp" / "mcp_trace.log"
+        self._active_profile = _normalize_active_profile(active_profile, "general")
         self._compiler_mode = str(compiler_mode or "strict").strip().lower()
         if self._compiler_mode not in {"strict", "auto", "heuristic"}:
             self._compiler_mode = "strict"
@@ -178,6 +201,14 @@ class PrologMCPServer:
         self._freethinker_prompt_loaded = False
         self._freethinker_prompt_load_error = ""
         self._freethinker_api_key = _get_api_key()
+        self._profile_manifest: dict[str, Any] = {}
+        self._profile_paths: dict[str, Path] = {}
+        self._profile_prompt_supplement = ""
+        self._profile_known_predicates: list[str] = []
+        self._profile_concepts: list[dict[str, Any]] = []
+        self._profile_umls_bridge: dict[str, Any] = {}
+        self._profile_load_error = ""
+        self._load_profile_assets()
         self._registry_signatures = self._load_registry_signatures()
         self._last_prethink_trace: dict[str, Any] = {}
         self._last_prethink_fallback_trace: dict[str, Any] = {}
@@ -187,14 +218,77 @@ class PrologMCPServer:
         self._load_compiler_prompt()
         self._load_freethinker_prompt()
 
+    def _default_medical_slice_dir(self) -> Path:
+        return (REPO_ROOT / "tmp" / "licensed" / "umls" / "2025AB" / "prethinker_mvp").resolve()
+
+    def _load_profile_assets(self) -> None:
+        self._profile_manifest = {}
+        self._profile_paths = {}
+        self._profile_prompt_supplement = ""
+        self._profile_known_predicates = []
+        self._profile_concepts = []
+        self._profile_umls_bridge = {}
+        self._profile_load_error = ""
+        if self._active_profile != "medical@v0":
+            return
+        try:
+            manifest = load_profile_manifest()
+            profile_paths = resolve_profile_paths()
+            supplement_path = profile_paths.get("prompt_supplement", Path())
+            supplement = (
+                supplement_path.read_text(encoding="utf-8")
+                if isinstance(supplement_path, Path) and supplement_path.exists()
+                else ""
+            )
+            slice_dir = self._default_medical_slice_dir()
+            concepts = load_profile_concepts(slice_dir) if slice_dir.exists() else []
+            bridge_path = profile_paths.get("umls_bridge_facts", Path())
+            if not isinstance(bridge_path, Path) or not str(bridge_path).strip():
+                bridge_path = slice_dir / "umls_bridge_facts.pl"
+            bridge = load_umls_bridge_facts(bridge_path)
+            self._profile_manifest = manifest
+            self._profile_paths = profile_paths
+            self._profile_prompt_supplement = supplement
+            self._profile_known_predicates = canonical_predicate_signatures(manifest)
+            self._profile_concepts = concepts
+            self._profile_umls_bridge = bridge
+        except Exception as exc:
+            self._profile_load_error = str(exc)
+
+    def _compose_profile_prompt_guide(self, base_prompt_text: str) -> str:
+        base = str(base_prompt_text or "").strip()
+        if self._active_profile != "medical@v0":
+            return base
+        if not self._profile_manifest:
+            return base
+        return build_medical_profile_guide(
+            shared_prompt=base,
+            supplement=self._profile_prompt_supplement,
+            concepts=self._profile_concepts,
+            umls_bridge=self._profile_umls_bridge,
+            known_predicates=self._profile_known_predicates,
+        )
+
+    def _apply_active_profile_parse_guard(self, *, parsed: dict[str, Any], utterance: str) -> dict[str, Any]:
+        if self._active_profile == "medical@v0":
+            guarded = sanitize_medical_parse_for_clarification(parsed, utterance=utterance)
+            guarded = sanitize_medical_parse_for_bridge(
+                guarded if isinstance(guarded, dict) else parsed,
+                utterance=utterance,
+                bridge=self._profile_umls_bridge,
+            )
+            return guarded if isinstance(guarded, dict) else parsed
+        return parsed
+
     def _load_compiler_prompt(self) -> None:
         if not self._compiler_prompt_enabled:
-            self._compiler_prompt_text = ""
+            self._compiler_prompt_text = self._compose_profile_prompt_guide("")
             self._compiler_prompt_loaded = True
             self._compiler_prompt_load_error = ""
             return
         try:
-            self._compiler_prompt_text = self._compiler_prompt_path.read_text(encoding="utf-8")
+            base_prompt_text = self._compiler_prompt_path.read_text(encoding="utf-8")
+            self._compiler_prompt_text = self._compose_profile_prompt_guide(base_prompt_text)
             self._compiler_prompt_loaded = bool(self._compiler_prompt_text.strip())
             self._compiler_prompt_load_error = ""
         except Exception as exc:
@@ -214,14 +308,14 @@ class PrologMCPServer:
 
     def _load_registry_signatures(self) -> set[tuple[str, int]]:
         path = REPO_ROOT / "modelfiles" / "predicate_registry.json"
+        signatures: set[tuple[str, int]] = set()
         try:
             payload = json.loads(path.read_text(encoding="utf-8"))
         except Exception:
-            return set()
+            payload = {}
         rows = payload.get("canonical_predicates", []) if isinstance(payload, dict) else []
-        signatures: set[tuple[str, int]] = set()
         if not isinstance(rows, list):
-            return signatures
+            rows = []
         for row in rows:
             if not isinstance(row, dict):
                 continue
@@ -232,6 +326,11 @@ class PrologMCPServer:
                 arity = -1
             if name and arity >= 0:
                 signatures.add((name, arity))
+        for signature in self._profile_known_predicates:
+            match = re.match(r"^([a-z_][a-z0-9_]*)/(\d+)$", str(signature or "").strip())
+            if not match:
+                continue
+            signatures.add((match.group(1), int(match.group(2))))
         return signatures
 
     def _clone_trace_payload(self, value: Any) -> Any:
@@ -786,6 +885,32 @@ class PrologMCPServer:
             return ""
         return re.sub(r"[^a-z0-9_]+", "_", lowered).strip("_")
 
+    def _normalize_clarification_answer(
+        self,
+        *,
+        clarification_question: str,
+        clarification_answer: str,
+    ) -> str:
+        answer = str(clarification_answer or "").strip()
+        question = str(clarification_question or "").strip()
+        if not answer or not question:
+            return answer
+
+        owner_choices = re.findall(r"([A-Z][A-Za-z0-9_'-]*)'s brother", question)
+        if owner_choices:
+            lowered_answer = answer.lower()
+            for owner in owner_choices:
+                lowered_owner = owner.lower()
+                accepted = {
+                    lowered_owner,
+                    f"{lowered_owner}'s",
+                    f"{lowered_owner}s",
+                }
+                if lowered_answer in accepted:
+                    return owner
+
+        return answer
+
     def _extract_components_from_facts(self, facts: list[str]) -> dict[str, list[str]]:
         atoms: set[str] = set()
         variables: set[str] = set()
@@ -984,6 +1109,14 @@ class PrologMCPServer:
             return parsed
         clar_atom = self._atomize_name(clarification_answer)
 
+        def _resolve_brother_owner(owner_token: str) -> str:
+            if owner_token in {"his", "her", "their"}:
+                return clar_atom or owner_from_parent_block
+            owner_match = re.match(r"^([a-z][a-z0-9_'-]*?)'?s$", owner_token)
+            if owner_match:
+                return self._atomize_name(owner_match.group(1))
+            return ""
+
         parent_override_facts: list[str] = []
         owner_from_parent_block = ""
         parent_block = re.search(
@@ -1011,17 +1144,34 @@ class PrologMCPServer:
         if sibling_block:
             owner_token = sibling_block.group(1)
             sibling_atom = self._atomize_name(sibling_block.group(2))
-            owner_atom = ""
-            if owner_token in {"his", "her", "their"}:
-                owner_atom = clar_atom or owner_from_parent_block
-            else:
-                owner_match = re.match(r"^([a-z][a-z0-9_'-]*?)'?s$", owner_token)
-                if owner_match:
-                    owner_atom = self._atomize_name(owner_match.group(1))
+            owner_atom = _resolve_brother_owner(owner_token)
             if owner_atom and sibling_atom:
                 fact = f"brother({sibling_atom}, {owner_atom})."
                 if fact not in sibling_override_facts:
                     sibling_override_facts.append(fact)
+
+        sibling_location_override_facts: list[str] = []
+        sibling_location_rationale = ""
+        sibling_location_block = re.match(
+            r"^\s*((?:[a-z][a-z0-9_'-]*?)'?s|his|her|their)\s+brother\s+is\s+in\s+([a-z][a-z0-9_'-]*(?:\s+[a-z][a-z0-9_'-]*){0,3})\.?\s*$",
+            lowered,
+            re.IGNORECASE,
+        )
+        if sibling_location_block:
+            owner_token = str(sibling_location_block.group(1) or "").strip().lower()
+            place_atom = self._atomize_name(sibling_location_block.group(2))
+            owner_atom = _resolve_brother_owner(owner_token)
+            if owner_atom and place_atom:
+                sibling_atom = f"brother_of_{owner_atom}"
+                sibling_location_override_facts = [
+                    f"brother({sibling_atom}, {owner_atom}).",
+                    f"lives_in({sibling_atom}, {place_atom}).",
+                ]
+                sibling_location_rationale = (
+                    "Clarification resolved the owner of an unnamed brother, so the statement "
+                    f"was normalized into brother({sibling_atom}, {owner_atom}) and "
+                    f"lives_in({sibling_atom}, {place_atom})."
+                )
 
         explicit_sibling_name_rationale = ""
         sibling_name_block = re.search(
@@ -1065,6 +1215,9 @@ class PrologMCPServer:
             kept = [fact for fact in normalized_facts if not re.match(r"^brother\s*\(", fact)]
             normalized_facts = kept + sibling_override_facts
 
+        if sibling_location_override_facts:
+            normalized_facts = list(sibling_location_override_facts)
+
         if inverse_possessive_override_facts:
             kept: list[str] = []
             for fact in normalized_facts:
@@ -1101,6 +1254,9 @@ class PrologMCPServer:
         elif sibling_override_facts and explicit_sibling_name_rationale:
             parsed["ambiguities"] = []
             parsed["rationale"] = explicit_sibling_name_rationale
+        elif sibling_location_override_facts and sibling_location_rationale:
+            parsed["ambiguities"] = []
+            parsed["rationale"] = sibling_location_rationale
         elif inverse_possessive_override_facts and inverse_possessive_rationale:
             parsed["ambiguities"] = []
             parsed["rationale"] = inverse_possessive_rationale
@@ -1300,7 +1456,7 @@ class PrologMCPServer:
         extraction_prompt = _build_extractor_prompt(
             effective,
             compiler_intent if compiler_intent in {"assert_fact", "assert_rule", "query", "retract", "other"} else "other",
-            known_predicates=[],
+            known_predicates=self._profile_known_predicates,
             prompt_guide=self._compiler_prompt_text,
         )
         trace = {
@@ -1425,13 +1581,26 @@ class PrologMCPServer:
             )
         )
         subject_prefix_input = self._clone_trace_payload(after_step_sequence)
-        admitted = self._canonicalize_subject_prefixed_predicates(subject_prefix_input)
+        after_subject_prefix = self._canonicalize_subject_prefixed_predicates(subject_prefix_input)
         trace["rescues"].append(
             self._trace_step(
                 name="subject_prefixed_predicate_canonicalization",
                 before=after_step_sequence,
-                after=admitted,
+                after=after_subject_prefix,
                 summary="Canonicalized subject-prefixed predicates into registry form.",
+            )
+        )
+        profile_guard_input = self._clone_trace_payload(after_subject_prefix)
+        admitted = self._apply_active_profile_parse_guard(
+            parsed=profile_guard_input,
+            utterance=utterance,
+        )
+        trace["rescues"].append(
+            self._trace_step(
+                name="active_profile_parse_guard",
+                before=after_subject_prefix,
+                after=admitted,
+                summary="Applied active profile clarification and argument guardrails.",
             )
         )
         trace["admitted"] = self._clone_trace_payload(admitted)
@@ -2041,7 +2210,7 @@ class PrologMCPServer:
         extraction_prompt = _build_extractor_prompt(
             utterance,
             effective_route,
-            known_predicates=[],
+            known_predicates=self._profile_known_predicates,
             prompt_guide=self._compiler_prompt_text,
         )
         try:
@@ -2066,6 +2235,10 @@ class PrologMCPServer:
             parsed,
             utterance=utterance,
             route=effective_route,
+        )
+        normalized = self._apply_active_profile_parse_guard(
+            parsed=normalized,
+            utterance=utterance,
         )
         ok, errors = _validate_parsed(normalized)
         if not ok:
@@ -2738,6 +2911,11 @@ class PrologMCPServer:
                     "state": self._serialize_state(),
                 }
             expected_id = str(pending.get("prethink_id", "")).strip()
+            pending_question = str(pending.get("clarification_question", "")).strip()
+            effective_clarification_answer = self._normalize_clarification_answer(
+                clarification_question=pending_question,
+                clarification_answer=clarification_answer,
+            )
             if provided_prethink_id and provided_prethink_id != expected_id:
                 return {
                     "status": "blocked",
@@ -2749,7 +2927,7 @@ class PrologMCPServer:
             clarified = self.record_clarification_answer(
                 {
                     "prethink_id": expected_id,
-                    "answer": clarification_answer,
+                    "answer": effective_clarification_answer,
                     "confirmed": True,
                 }
             )
@@ -3560,6 +3738,11 @@ class PrologMCPServer:
             "compiler_context_length": self._compiler_context_length,
             "compiler_prompt_path": str(self._compiler_prompt_path),
             "compiler_prompt_loaded": bool(self._compiler_prompt_loaded),
+            "active_profile": self._active_profile,
+            "profile_known_predicates": list(self._profile_known_predicates),
+            "profile_umls_bridge_loaded": bool(self._profile_umls_bridge.get("loaded")),
+            "profile_umls_bridge_concepts": len(self._profile_umls_bridge.get("concepts", {}) or {}),
+            "profile_load_error": str(self._profile_load_error or "").strip(),
             "freethinker_resolution_policy": self._freethinker_resolution_policy,
             "freethinker_backend": self._freethinker_backend,
             "freethinker_base_url": self._freethinker_base_url,

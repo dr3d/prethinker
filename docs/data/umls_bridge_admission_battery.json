@@ -1,0 +1,89 @@
+{
+  "battery_id": "umls_bridge_admission_v1",
+  "description": "Deterministic preflight battery for UMLS bridge alias matching, vague-surface clarification pressure, and predicate/type admission guards.",
+  "cases": [
+    {
+      "case_id": "brand_medication_admit",
+      "utterance": "Mara takes Glucophage every morning.",
+      "logic_string": "taking(mara, metformin).",
+      "facts": ["taking(mara, metformin)."],
+      "expected_action": "admit",
+      "expected_mentions": ["metformin"],
+      "notes": "Brand alias should normalize to a medication-compatible concept."
+    },
+    {
+      "case_id": "lab_measurement_admit",
+      "utterance": "Mara's blood pressure reading was high.",
+      "logic_string": "lab_result_high(mara, blood_pressure_measurement).",
+      "facts": ["lab_result_high(mara, blood_pressure_measurement)."],
+      "expected_action": "admit",
+      "expected_mentions": ["blood_pressure_measurement"],
+      "notes": "Blood pressure measurement is compatible with lab/result-style predicates."
+    },
+    {
+      "case_id": "condition_admit",
+      "utterance": "Mara has chronic kidney disease.",
+      "logic_string": "has_condition(mara, chronic_kidney_disease).",
+      "facts": ["has_condition(mara, chronic_kidney_disease)."],
+      "expected_action": "admit",
+      "expected_mentions": ["chronic_kidney_disease"],
+      "notes": "A disorder concept should be condition-compatible."
+    },
+    {
+      "case_id": "symptom_admit",
+      "utterance": "Mara is short of breath.",
+      "logic_string": "has_symptom(mara, shortness_of_breath).",
+      "facts": ["has_symptom(mara, shortness_of_breath)."],
+      "expected_action": "admit",
+      "expected_mentions": ["shortness_of_breath"],
+      "notes": "Colloquial symptom wording should land in the symptom/finding group."
+    },
+    {
+      "case_id": "vague_pressure_clarify",
+      "utterance": "Mara's pressure is bad lately.",
+      "logic_string": "has_condition(mara, hypertension).",
+      "facts": ["has_condition(mara, hypertension)."],
+      "expected_action": "clarify",
+      "expected_mentions": [],
+      "expected_vague_surfaces": ["pressure"],
+      "notes": "Bare pressure should not harden into hypertension or blood pressure result without clarification."
+    },
+    {
+      "case_id": "vague_sugar_clarify",
+      "utterance": "Mara's sugar is high again.",
+      "logic_string": "lab_result_high(mara, blood_glucose_measurement).",
+      "facts": ["lab_result_high(mara, blood_glucose_measurement)."],
+      "expected_action": "clarify",
+      "expected_mentions": [],
+      "expected_vague_surfaces": ["sugar"],
+      "notes": "Bare sugar is intentionally clarification-worthy."
+    },
+    {
+      "case_id": "condition_lab_mismatch_clarify",
+      "utterance": "Mara's blood pressure has been high.",
+      "logic_string": "has_condition(mara, blood_pressure_measurement).",
+      "facts": ["has_condition(mara, blood_pressure_measurement)."],
+      "expected_action": "clarify",
+      "expected_mentions": ["blood_pressure_measurement"],
+      "notes": "A lab/procedure concept should not be admitted as a condition."
+    },
+    {
+      "case_id": "medication_condition_mismatch_clarify",
+      "utterance": "Mara is on warfarin.",
+      "logic_string": "has_condition(mara, warfarin).",
+      "facts": ["has_condition(mara, warfarin)."],
+      "expected_action": "clarify",
+      "expected_mentions": ["warfarin"],
+      "notes": "A medication concept should not be admitted as a condition."
+    },
+    {
+      "case_id": "lab_medication_mismatch_clarify",
+      "utterance": "Mara restarted metformin.",
+      "logic_string": "lab_result_high(mara, metformin).",
+      "facts": ["lab_result_high(mara, metformin)."],
+      "expected_action": "clarify",
+      "expected_mentions": ["metformin"],
+      "notes": "A medication concept should not be admitted as a lab test/result argument."
+    }
+  ]
+}

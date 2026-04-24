@@ -2,9 +2,9 @@
 
 This project is a local workbench for building a high-accuracy semantic parser (Qwen 3.5 9B first) that converts natural language into Prolog-ready logic and applies it into named, persistent knowledge bases.
 
-Last updated: 2026-04-23
+Last updated: 2026-04-24
 
-## Current Focus (2026-04-23)
+## Current Focus (2026-04-24)
 
 Prethinker is operating on one honest evaluation spine:
 
@@ -21,6 +21,7 @@ Prethinker is operating on one honest evaluation spine:
 - `Freethinker` is now live as a bounded clarification sidecar in the console path, with policy still defaulted to `off` and `advisory_only` as the first active rollout mode.
 - The current public story is: governed adapter first, broad open-domain conversational memory second.
 - A bounded UMLS-backed medical lane now looks promising as a normalization and type-steering profile, especially once clarification is allowed to resolve vague shorthand or unresolved patient references.
+- `medical@v0` is now a first-class live console profile instead of only a batch-side asset bundle.
 
 ## Current Rollups
 
@@ -43,10 +44,11 @@ Prethinker is operating on one honest evaluation spine:
 - Medical/UMLS bounded lane:
   - sharp-memory slice probe: `12/12` pass, `0/12` warn, `0/12` fail
   - clinical checks probe: `7/7` pass, `0/7` warn, `0/7` fail
+  - deterministic UMLS bridge admission preflight: `9/9` pass
   - medical prompt probe: `79/79` vs baseline `58/79`
   - clarification-aware medical probe: `38/38` vs baseline `21/38`
   - local-only ontology prospector run (`qwen3.5:27b`) converged on `9` predicates across `20` cases, all inside the existing bounded palette
-  - artifacts: `docs/UMLS_MVP.md`, `docs/ONTOLOGY_PROSPECTOR.md`, `docs/reports/UMLS_MVP_PROBE_2026-04-23.md`, `docs/reports/MEDICAL_PROMPT_PROBE_2026-04-23.md`, `docs/reports/MEDICAL_CLARIFICATION_PROBE_2026-04-23.md`, `docs/reports/MEDICAL_ONTOLOGY_PROSPECTOR_2026-04-23.md`
+  - artifacts: `docs/UMLS_MVP.md`, `docs/ONTOLOGY_PROSPECTOR.md`, `docs/reports/MEDICAL_UMLS_BRIDGE_RUNTIME_2026-04-24.md`, `docs/reports/UMLS_MVP_PROBE_2026-04-23.md`, `docs/reports/MEDICAL_PROMPT_PROBE_2026-04-23.md`, `docs/reports/MEDICAL_CLARIFICATION_PROBE_2026-04-23.md`, `docs/reports/MEDICAL_ONTOLOGY_PROSPECTOR_2026-04-23.md`
 - Freethinker bounded sidecar:
   - live second-model clarification path in the canonical console
   - separate prompt/context/model/runtime settings, including temperature and think flag
@@ -87,6 +89,7 @@ Prethinker is operating on one honest evaluation spine:
 - UMLS MVP note: [docs/UMLS_MVP.md](docs/UMLS_MVP.md)
 - formal medical profile: [docs/MEDICAL_PROFILE.md](docs/MEDICAL_PROFILE.md)
 - local ontology prospector note: [docs/ONTOLOGY_PROSPECTOR.md](docs/ONTOLOGY_PROSPECTOR.md)
+- medical UMLS bridge runtime checkpoint: [docs/reports/MEDICAL_UMLS_BRIDGE_RUNTIME_2026-04-24.md](docs/reports/MEDICAL_UMLS_BRIDGE_RUNTIME_2026-04-24.md)
 - ontology prospector run result: [docs/reports/MEDICAL_ONTOLOGY_PROSPECTOR_2026-04-23.md](docs/reports/MEDICAL_ONTOLOGY_PROSPECTOR_2026-04-23.md)
 - UMLS MVP probe result: [docs/reports/UMLS_MVP_PROBE_2026-04-23.md](docs/reports/UMLS_MVP_PROBE_2026-04-23.md)
 - medical prompt probe result: [docs/reports/MEDICAL_PROMPT_PROBE_2026-04-23.md](docs/reports/MEDICAL_PROMPT_PROBE_2026-04-23.md)

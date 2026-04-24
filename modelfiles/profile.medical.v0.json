@@ -6,6 +6,8 @@
   "type_schema_example": "modelfiles/type_schema.medical.example.json",
   "prompt_supplement": "modelfiles/medical_compiler_prompt_supplement.md",
   "ontology_prospector_prompt": "modelfiles/medical_ontology_prospector_prompt.md",
+  "umls_slice_dir": "tmp/licensed/umls/2025AB/prethinker_mvp",
+  "umls_bridge_facts": "tmp/licensed/umls/2025AB/prethinker_mvp/umls_bridge_facts.pl",
   "recommended_settings": {
     "compiler_mode": "strict",
     "strict_registry": true,

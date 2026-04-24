@@ -165,6 +165,16 @@ class LocalMcpServerTests(unittest.TestCase):
         self.assertIn("signals", inner)
         self.assertIn("coreference", inner)
 
+    def test_medical_profile_loads_compiler_guide_and_palette(self) -> None:
+        server = PrologMCPServer(compiler_mode="heuristic", active_profile="medical@v0")
+        self.assertEqual(server._active_profile, "medical@v0")
+        self.assertIn("MEDICAL_CONCEPT_HINTS:", server._compiler_prompt_text)
+        self.assertIn("taking/2", server._compiler_prompt_text)
+        self.assertIn(
+            "Do not invent a patient identity from unresolved pronouns.",
+            server._compiler_prompt_text,
+        )
+
     def test_pre_think_they_coreference_group_with_exception(self) -> None:
         utterance = (
             "I am Scott. my brother is Blake. his wife is Jan. "
@@ -1734,3 +1744,54 @@ def test_process_utterance_forwards_same_clause_spouse_normalized_utterance():
     assert captured["payload"]["utterance"] == (
         "blake lives in morro bay with blake's wife jan"
     )
+
+
+def test_normalize_clarification_answer_maps_possessive_owner_choice_to_owner_name():
+    server = PrologMCPServer()
+
+    normalized = server._normalize_clarification_answer(
+        clarification_question="Do you mean Scott's brother or Priya's brother when you say 'his brother'?",
+        clarification_answer="scotts",
+    )
+
+    assert normalized == "Scott"
+
+
+def test_augment_compound_family_facts_rescues_unnamed_brother_location_after_owner_clarification():
+    server = PrologMCPServer()
+    parsed = {
+        "intent": "assert_fact",
+        "logic_string": "brother(in, scotts).",
+        "components": {
+            "atoms": ["in", "scotts"],
+            "variables": [],
+            "predicates": ["brother"],
+        },
+        "facts": ["brother(in, scotts)."],
+        "rules": [],
+        "queries": [],
+        "confidence": {"overall": 0.7, "intent": 0.7, "logic": 0.2},
+        "ambiguities": ["Family/location parse was unstable."],
+        "needs_clarification": False,
+        "uncertainty_score": 0.6,
+        "uncertainty_label": "medium",
+        "clarification_question": "",
+        "clarification_reason": "",
+        "rationale": "Temporary parser rationale.",
+    }
+
+    rescued = server._augment_compound_family_facts(
+        parsed=parsed,
+        utterance="his brother is in california",
+        clarification_answer="Scott",
+    )
+
+    assert rescued.get("facts") == [
+        "brother(brother_of_scott, scott).",
+        "lives_in(brother_of_scott, california).",
+    ]
+    assert rescued.get("logic_string") == (
+        "brother(brother_of_scott, scott). lives_in(brother_of_scott, california)."
+    )
+    assert rescued.get("ambiguities") == []
+    assert "unnamed brother" in str(rescued.get("rationale", "")).lower()
