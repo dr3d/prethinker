@@ -5,9 +5,34 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 
 
+def _normalize_active_profile(value: object, default: str = "general") -> str:
+    aliases = {
+        "default": "general",
+        "general": "general",
+        "medical": "medical@v0",
+        "medical@v0": "medical@v0",
+    }
+    requested = str(value or default).strip().lower()
+    return aliases.get(requested, aliases.get(str(default or "general").strip().lower(), "general"))
+
+
+def _normalize_reply_surface_policy(value: object, default: str = "deterministic_template") -> str:
+    allowed = {
+        "deterministic",
+        "deterministic_template",
+        "freethinker_humanize",
+    }
+    requested = str(value or default).strip().lower()
+    if requested not in allowed:
+        requested = str(default or "deterministic_template").strip().lower() or "deterministic_template"
+    return requested
+
+
 @dataclass
 class GatewayConfig:
     front_door_uri: str = "prethink://local/front-door"
+    active_profile: str = "general"
+    reply_surface_policy: str = "deterministic_template"
     served_llm_provider: str = "ollama"
     served_llm_model: str = "qwen3.5:9b"
     served_llm_base_url: str = "http://127.0.0.1:11434"
@@ -60,6 +85,12 @@ class ConfigStore:
     def _sanitize(self, payload: dict) -> dict:
         allowed = GatewayConfig().__dict__.keys()
         sanitized = {key: payload[key] for key in allowed if key in payload}
+        if "active_profile" in sanitized:
+            sanitized["active_profile"] = _normalize_active_profile(sanitized["active_profile"])
+        if "reply_surface_policy" in sanitized:
+            sanitized["reply_surface_policy"] = _normalize_reply_surface_policy(
+                sanitized["reply_surface_policy"]
+            )
         if "compiler_context_length" in sanitized:
             try:
                 sanitized["compiler_context_length"] = max(512, int(sanitized["compiler_context_length"]))

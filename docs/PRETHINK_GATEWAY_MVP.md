@@ -58,6 +58,7 @@ It is the first place where the product behavior becomes legible.
   - `answer`
 - config persisted in `ui_gateway/state/gateway_config.json`
 - runtime path uses the canonical `process_utterance()` server entryway plus deterministic core tool execution
+- the live dials surface can now expose bounded runtime profiles such as `medical@v0`, not just raw model/backend settings
 
 ## Newbie-Friendly Surface
 

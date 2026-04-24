@@ -10,6 +10,8 @@ class GatewayConfigTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdir:
             store = ConfigStore(Path(tmpdir) / "gateway_config.json")
             config = store.get().to_dict()
+            self.assertEqual(config.get("active_profile"), "general")
+            self.assertEqual(config.get("reply_surface_policy"), "deterministic_template")
             self.assertEqual(config.get("freethinker_resolution_policy"), "off")
             self.assertEqual(config.get("freethinker_model"), "qwen3.5:9b")
             self.assertEqual(config.get("freethinker_temperature"), 0.2)
@@ -38,6 +40,18 @@ class GatewayConfigTests(unittest.TestCase):
             self.assertEqual(updated.get("freethinker_timeout"), 5)
             self.assertEqual(updated.get("freethinker_temperature"), 2.0)
             self.assertTrue(updated.get("freethinker_thinking"))
+
+    def test_invalid_active_profile_is_sanitized(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            store = ConfigStore(Path(tmpdir) / "gateway_config.json")
+            updated = store.update({"active_profile": "wizard-doctor"}).to_dict()
+            self.assertEqual(updated.get("active_profile"), "general")
+
+    def test_invalid_reply_surface_policy_is_sanitized(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            store = ConfigStore(Path(tmpdir) / "gateway_config.json")
+            updated = store.update({"reply_surface_policy": "poetic"}).to_dict()
+            self.assertEqual(updated.get("reply_surface_policy"), "deterministic_template")
 
     def test_invalid_served_provider_is_sanitized(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

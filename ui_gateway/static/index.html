@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Prethinker Console</title>
-    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="./styles.css?v=ledger-path">
   </head>
   <body>
     <button
@@ -54,6 +54,7 @@
         <div class="status-strip" aria-live="polite">
           <span id="connection-pill" class="status-pill">Connecting…</span>
           <span id="strict-pill" class="status-pill">Strict mode</span>
+          <span id="profile-pill" class="status-pill">Profile</span>
           <span id="compiler-pill" class="status-pill">Compiler</span>
           <label class="debug-toggle" for="debug-mode-toggle">
             <input id="debug-mode-toggle" type="checkbox">
@@ -61,17 +62,44 @@
           </label>
         </div>
         <div id="pending-banner" class="pending-banner" hidden></div>
+        <section id="path-strip" class="path-strip" aria-live="polite">
+          <div id="path-profile-card" class="path-card tone-neutral">
+            <span class="path-label">Profile</span>
+            <strong id="path-profile-value">general</strong>
+            <span id="path-profile-meta">strict</span>
+          </div>
+          <div id="path-route-card" class="path-card tone-neutral">
+            <span class="path-label">Route</span>
+            <strong id="path-route-value">Waiting</strong>
+            <span id="path-route-meta">No turn yet</span>
+          </div>
+          <div id="path-gate-card" class="path-card tone-neutral">
+            <span class="path-label">Gate</span>
+            <strong id="path-gate-value">Idle</strong>
+            <span id="path-gate-meta">No pending hold</span>
+          </div>
+          <div id="path-action-card" class="path-card tone-neutral">
+            <span class="path-label">Action</span>
+            <strong id="path-action-value">None</strong>
+            <span id="path-action-meta">No runtime call</span>
+          </div>
+          <div id="path-ledger-card" class="path-card tone-neutral">
+            <span class="path-label">Ledger</span>
+            <strong id="path-ledger-value">0 facts</strong>
+            <span id="path-ledger-meta">console stream</span>
+          </div>
+        </section>
         <section id="empty-state" class="empty-state">
           <div class="empty-state-copy">
             <p class="eyebrow">Start Here</p>
-            <h2>Kick the tires with ordinary language.</h2>
-            <p>
+            <h2 id="empty-state-title">Kick the tires with ordinary language.</h2>
+            <p id="empty-state-description">
               Good first tests are simple facts, direct questions, and one ambiguous sentence
               that should force clarification instead of a guess.
             </p>
             <div class="empty-state-guidance">
-              <p><strong>What to watch for:</strong> Prethinker should either commit facts, answer from the KB, or pause for a clarification.</p>
-              <p><strong>What not to trust:</strong> If a turn only looks good after heavy normalization, the trace will show that.</p>
+              <p id="empty-state-watch"><strong>What to watch for:</strong> Prethinker should either commit facts, answer from the KB, or pause for a clarification.</p>
+              <p id="empty-state-caution"><strong>What not to trust:</strong> If a turn only looks good after heavy normalization, the trace will show that.</p>
             </div>
           </div>
           <div class="example-grid">
@@ -106,6 +134,71 @@
           <button type="submit">Send To Front Door</button>
         </form>
       </main>
+
+      <aside id="ledger-panel" class="panel ledger-panel" aria-live="polite">
+        <div class="ledger-header">
+          <div>
+            <p class="eyebrow">Knowledge Being Built</p>
+            <h2>Live memory ledger</h2>
+          </div>
+          <p id="ledger-profile-note" class="ledger-profile-note">Watching the current session in general mode.</p>
+        </div>
+
+        <div class="ledger-stats">
+          <div class="ledger-stat-card">
+            <span class="ledger-stat-label">Entities</span>
+            <strong id="ledger-entity-count">0</strong>
+          </div>
+          <div class="ledger-stat-card">
+            <span class="ledger-stat-label">Facts</span>
+            <strong id="ledger-fact-count">0</strong>
+          </div>
+          <div class="ledger-stat-card">
+            <span class="ledger-stat-label">Rules</span>
+            <strong id="ledger-rule-count">0</strong>
+          </div>
+          <div class="ledger-stat-card">
+            <span class="ledger-stat-label">Queries</span>
+            <strong id="ledger-query-count">0</strong>
+          </div>
+        </div>
+
+        <section id="ledger-latest-card" class="ledger-latest-card tone-neutral">
+          <span id="ledger-latest-badge" class="ledger-latest-badge tone-neutral">Waiting</span>
+          <p id="ledger-latest-title" class="ledger-latest-title">No structured memory has been built in this session yet.</p>
+          <p id="ledger-latest-detail" class="ledger-latest-detail">Send a turn and this panel will show what Prethinker actually stored, held, or queried.</p>
+        </section>
+
+        <section class="ledger-section">
+          <div class="ledger-section-heading">
+            <h3>Entities</h3>
+            <span id="ledger-entity-summary" class="ledger-section-summary">No stored facts yet.</span>
+          </div>
+          <div id="ledger-entity-list" class="ledger-entity-list">
+            <p class="ledger-empty">No structured facts have been committed in this session yet.</p>
+          </div>
+        </section>
+
+        <section class="ledger-section">
+          <div class="ledger-section-heading">
+            <h3>Rules</h3>
+            <span id="ledger-rule-summary" class="ledger-section-summary">No active rules.</span>
+          </div>
+          <div id="ledger-rule-list" class="ledger-rule-list">
+            <p class="ledger-empty">No rules have been asserted in this session yet.</p>
+          </div>
+        </section>
+
+        <section class="ledger-section">
+          <div class="ledger-section-heading">
+            <h3>Recent queries</h3>
+            <span id="ledger-query-summary" class="ledger-section-summary">No query history yet.</span>
+          </div>
+          <div id="ledger-query-list" class="ledger-query-list">
+            <p class="ledger-empty">Queries answered from the current session memory will appear here.</p>
+          </div>
+        </section>
+      </aside>
     </div>
 
     <aside id="hero-drawer" class="panel hero-panel hero-drawer" aria-hidden="true">
@@ -120,10 +213,14 @@
         Paste everyday language and inspect the governed path: classify, clarify if needed, parse,
         and deterministically answer or commit.
       </p>
-      <div class="hero-grid">
-        <div class="mini-card">
-          <span class="mini-label">Compiler</span>
-          <strong id="compiler-model-label">qwen3.5:9b</strong>
+        <div class="hero-grid">
+          <div class="mini-card">
+            <span class="mini-label">Profile</span>
+            <strong id="profile-label">general</strong>
+          </div>
+          <div class="mini-card">
+            <span class="mini-label">Compiler</span>
+            <strong id="compiler-model-label">qwen3.5:9b</strong>
         </div>
         <div class="mini-card">
           <span class="mini-label">Mode</span>
@@ -158,6 +255,9 @@
           <button id="freethinker-advisory-button" class="ghost-button freethinker-advisory-button" type="button">
             Enable Freethinker Advisory
           </button>
+          <button id="medical-profile-button" class="ghost-button medical-profile-button" type="button">
+            Use medical@v0
+          </button>
           <button id="served-chat-button" class="ghost-button served-chat-button" type="button">
             Prefer Served Chat
           </button>
@@ -170,6 +270,14 @@
       </div>
       <div class="config-scroll">
         <form id="config-form" class="config-form">
+          <p class="config-section-title">Profile</p>
+          <label class="config-field">
+            <span>Active profile</span>
+            <select name="active_profile">
+              <option value="general">general</option>
+              <option value="medical@v0">medical@v0</option>
+            </select>
+          </label>
           <p class="config-section-title">Gateway</p>
           <label class="config-field">
             <span>Front door URI</span>
@@ -298,6 +406,14 @@
           </label>
           <p class="config-section-title">Policy</p>
           <label class="config-field">
+            <span>Reply surface</span>
+            <select name="reply_surface_policy">
+              <option value="deterministic">deterministic</option>
+              <option value="deterministic_template">deterministic_template</option>
+              <option value="freethinker_humanize">freethinker_humanize (experimental)</option>
+            </select>
+          </label>
+          <label class="config-field">
             <span>Clarification eagerness</span>
             <input name="clarification_eagerness" type="number" min="0" max="1" step="0.05">
           </label>
@@ -325,6 +441,6 @@
       </article>
     </template>
 
-    <script src="./app.js" defer></script>
+    <script src="./app.js?v=ledger-path" defer></script>
   </body>
 </html>

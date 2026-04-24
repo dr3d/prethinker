@@ -90,6 +90,7 @@ class RuntimeHooks:
         prompt_path = str(prompt_path_obj) if prompt_path_obj else ""
         return "|".join(
             [
+                str(config.get("active_profile", "general")),
                 str(config.get("compiler_mode", "strict")),
                 str(config.get("compiler_prompt_mode", "auto")),
                 str(config.get("compiler_backend", "ollama")),
@@ -126,6 +127,7 @@ class RuntimeHooks:
         prompt_enabled = prompt_path is not None
         self._server = PrologMCPServer(
             kb_path=self._kb_path,
+            active_profile=str(config.get("active_profile", "general") or "general"),
             compiler_mode=compiler_mode,
             compiler_backend=str(config.get("compiler_backend", "ollama") or "ollama"),
             compiler_base_url=str(config.get("compiler_base_url", "http://127.0.0.1:11434") or "http://127.0.0.1:11434"),
@@ -918,6 +920,114 @@ class RuntimeHooks:
                     return value.strip()
         return raw
 
+    def _reply_surface_policy(self, config: dict[str, Any]) -> str:
+        mode = str(
+            config.get("reply_surface_policy", "deterministic_template") or "deterministic_template"
+        ).strip().lower()
+        if mode not in {"deterministic", "deterministic_template", "freethinker_humanize"}:
+            mode = "deterministic_template"
+        return mode
+
+    def _split_clause_args(self, raw_args: str) -> list[str]:
+        args: list[str] = []
+        current: list[str] = []
+        depth = 0
+        for ch in str(raw_args or ""):
+            if ch == "," and depth == 0:
+                token = "".join(current).strip()
+                if token:
+                    args.append(token)
+                current = []
+                continue
+            if ch == "(":
+                depth += 1
+            elif ch == ")" and depth > 0:
+                depth -= 1
+            current.append(ch)
+        token = "".join(current).strip()
+        if token:
+            args.append(token)
+        return args
+
+    def _humanize_term(self, atom: str, *, person: bool = False) -> str:
+        text = str(atom or "").strip().strip(".")
+        if not text:
+            return ""
+        text = text.replace("_measurement", "")
+        words = [part for part in text.split("_") if part]
+        if not words:
+            return text
+        if person:
+            return " ".join(word.capitalize() for word in words)
+        return " ".join(words)
+
+    def _parse_fact_clause(self, clause: str) -> tuple[str, list[str]] | None:
+        text = str(clause or "").strip()
+        match = re.match(r"^([a-z_][a-z0-9_]*)\((.*)\)\.$", text)
+        if not match:
+            return None
+        predicate = match.group(1)
+        args = self._split_clause_args(match.group(2))
+        return predicate, args
+
+    def _render_medical_fact_sentence(self, clause: str) -> str:
+        parsed = self._parse_fact_clause(clause)
+        if not parsed:
+            return ""
+        predicate, args = parsed
+        if predicate == "taking" and len(args) == 2:
+            return f"{self._humanize_term(args[0], person=True)} is taking {self._humanize_term(args[1])}."
+        if predicate == "pregnant" and len(args) == 1:
+            return f"{self._humanize_term(args[0], person=True)} is pregnant."
+        if predicate == "has_condition" and len(args) == 2:
+            return f"{self._humanize_term(args[0], person=True)} has {self._humanize_term(args[1])}."
+        if predicate == "has_symptom" and len(args) == 2:
+            return f"{self._humanize_term(args[0], person=True)} has the symptom {self._humanize_term(args[1])}."
+        if predicate == "has_allergy" and len(args) == 2:
+            return f"{self._humanize_term(args[0], person=True)} has an allergy to {self._humanize_term(args[1])}."
+        if predicate == "underwent_lab_test" and len(args) == 2:
+            return f"{self._humanize_term(args[0], person=True)} underwent a {self._humanize_term(args[1])} lab test."
+        if predicate == "lab_result_high" and len(args) == 2:
+            return f"{self._humanize_term(args[0], person=True)} had a high {self._humanize_term(args[1])} result."
+        if predicate == "lab_result_rising" and len(args) == 2:
+            return f"{self._humanize_term(args[0], person=True)} had a rising {self._humanize_term(args[1])} result."
+        if predicate == "lab_result_abnormal" and len(args) == 2:
+            return f"{self._humanize_term(args[0], person=True)} had an abnormal {self._humanize_term(args[1])} result."
+        return ""
+
+    def _render_write_answer(self, *, execution: dict[str, Any], config: dict[str, Any]) -> str:
+        writes = int(execution.get("writes_applied", 0) or 0)
+        surface = self._reply_surface_policy(config)
+        if surface == "deterministic":
+            return f"Deterministic commit complete: {writes} mutation(s) applied."
+        profile = str(config.get("active_profile", "general") or "general").strip().lower()
+        if profile != "medical@v0":
+            return f"Deterministic commit complete: {writes} mutation(s) applied."
+
+        operations = execution.get("operations", [])
+        fact_sentences: list[str] = []
+        if isinstance(operations, list):
+            for op in operations:
+                if not isinstance(op, dict):
+                    continue
+                if str(op.get("tool", "")).strip() != "assert_fact":
+                    continue
+                result = op.get("result", {}) if isinstance(op.get("result"), dict) else {}
+                clause = str(result.get("fact") or op.get("clause") or "").strip()
+                if not clause:
+                    continue
+                sentence = self._render_medical_fact_sentence(clause)
+                if sentence:
+                    fact_sentences.append(sentence)
+        fact_sentences = fact_sentences[:3]
+        if not fact_sentences:
+            return f"Stored {writes} medical update(s)."
+        if len(fact_sentences) == 1:
+            return f"Stored: {fact_sentences[0]}"
+        if len(fact_sentences) == 2:
+            return f"Stored: {fact_sentences[0]} {fact_sentences[1]}"
+        return f"Stored: {fact_sentences[0]} {fact_sentences[1]} {fact_sentences[2]}"
+
     def _served_handoff_response(
         self,
         *,
@@ -1019,10 +1129,9 @@ class RuntimeHooks:
 
         intent = str(execution.get("intent", "")).strip()
         if intent in {"assert_fact", "assert_rule", "retract"}:
-            writes = int(execution.get("writes_applied", 0) or 0)
             return {
                 "speaker": "prethink-gateway",
-                "text": f"Deterministic commit complete: {writes} mutation(s) applied.",
+                "text": self._render_write_answer(execution=execution, config=config),
                 "mode": "answer",
             }
 

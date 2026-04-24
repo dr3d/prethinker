@@ -5,6 +5,7 @@ const state = {
   heroOpen: false,
   debugMode: false,
   pendingClarification: null,
+  turns: [],
 };
 
 const CONFIG_OPEN_KEY = "prethink_gateway_config_open";
@@ -27,6 +28,80 @@ const API_BASE = (() => {
   }
   return "";
 })();
+
+const PROFILE_EXAMPLES = {
+  general: {
+    title: "Kick the tires with ordinary language.",
+    description:
+      "Good first tests are simple facts, direct questions, and one ambiguous sentence that should force clarification instead of a guess.",
+    watch:
+      "Prethinker should either commit facts, answer from the KB, or pause for a clarification.",
+    caution:
+      "If a turn only looks good after heavy normalization, the trace will show that.",
+    chips: [
+      {
+        label: "Family fact",
+        example: "scotts mom and dad is ann and ian.",
+      },
+      {
+        label: "Simple location",
+        example: "hope lives in salem.",
+      },
+      {
+        label: "Possessive relation",
+        example: "barny is freds best friend.",
+      },
+      {
+        label: "Query after a write",
+        example: "can you make muffins with walnuts?",
+      },
+      {
+        label: "Clarification pressure",
+        example: "remember that it ships next week.",
+      },
+      {
+        label: "Narrative sentence",
+        example:
+          "at 9am on friday morning fred and wilma entered the pinky penny supermarket and headed over to the turnips.",
+      },
+    ],
+  },
+  "medical@v0": {
+    title: "Try bounded medical language.",
+    description:
+      "Good first tests name the patient explicitly, use concrete drugs, symptoms, or labs, and include one shorthand or pronoun turn that should trigger clarification.",
+    watch:
+      "Prethinker should normalize onto the bounded medical palette, keep the patient explicit when possible, and pause instead of inventing identity or diagnosis.",
+    caution:
+      "Do not trust vague shorthand or unresolved patient references to be silently sharpened into durable medical state.",
+    chips: [
+      {
+        label: "Medication fact",
+        example: "Priya is taking warfarin.",
+      },
+      {
+        label: "Brand to generic",
+        example: "Priya is taking Coumadin.",
+      },
+      {
+        label: "Symptom fact",
+        example: "Mira is short of breath.",
+      },
+      {
+        label: "Lab event",
+        example: "Priya's serum creatinine was repeated this afternoon.",
+      },
+      {
+        label: "Pronoun clarification",
+        example: "His serum creatinine was repeated this afternoon.",
+      },
+      {
+        label: "Bounded safety check",
+        example: "Priya is taking warfarin and she is pregnant.",
+      },
+    ],
+  },
+};
 
 function apiUrl(path) {
   return `${API_BASE}${path}`;
@@ -54,12 +129,55 @@ function downloadTextFile(text, filename, mimeType = "text/plain") {
 }
 
 function syncHero(config) {
+  const activeProfile = config.active_profile || "general";
+  document.getElementById("profile-label").textContent = activeProfile;
   document.getElementById("compiler-model-label").textContent = config.compiler_model;
   document.getElementById("compiler-mode-label").textContent =
     `${config.compiler_mode} / handoff=${config.served_handoff_mode}`;
   document.getElementById("served-model-label").textContent = config.served_llm_model;
+  document.getElementById("profile-pill").textContent = `Profile: ${activeProfile}`;
   document.getElementById("compiler-pill").textContent = `Compiler: ${config.compiler_model}`;
   document.getElementById("strict-pill").textContent = config.strict_mode ? "Strict mode on" : "Strict mode off";
+  const ledgerProfileNote = document.getElementById("ledger-profile-note");
+  if (ledgerProfileNote) {
+    ledgerProfileNote.textContent = `Watching the current session in ${activeProfile} mode.`;
+  }
+}
+
+function activeProfileExamples(config) {
+  const profileId = String(config?.active_profile || "general").trim().toLowerCase();
+  return PROFILE_EXAMPLES[profileId] || PROFILE_EXAMPLES.general;
+}
+
+function syncProfileExamples(config) {
+  const profile = activeProfileExamples(config);
+  const title = document.getElementById("empty-state-title");
+  const description = document.getElementById("empty-state-description");
+  const watch = document.getElementById("empty-state-watch");
+  const caution = document.getElementById("empty-state-caution");
+  if (title) {
+    title.textContent = profile.title;
+  }
+  if (description) {
+    description.textContent = profile.description;
+  }
+  if (watch) {
+    watch.innerHTML = `<strong>What to watch for:</strong> ${escapeHtml(profile.watch)}`;
+  }
+  if (caution) {
+    caution.innerHTML = `<strong>What not to trust:</strong> ${escapeHtml(profile.caution)}`;
+  }
+  const chips = Array.from(document.querySelectorAll(".example-chip"));
+  chips.forEach((button, index) => {
+    const item = profile.chips[index];
+    if (!item) {
+      button.hidden = true;
+      return;
+    }
+    button.hidden = false;
+    button.textContent = item.label;
+    button.dataset.example = item.example;
+  });
 }
 
 function syncConnectionPill(message, tone = "neutral") {
@@ -93,6 +211,18 @@ function updatePendingBanner() {
     "Reply directly, or use /cancel to drop the staged turn.";
 }
 
+function collapseChatExpandos() {
+  const chatLog = document.getElementById("chat-log");
+  if (!chatLog) {
+    return;
+  }
+  chatLog
+    .querySelectorAll(".phase-details[open], .debug-text-details[open]")
+    .forEach((details) => {
+    details.open = false;
+  });
+}
+
 function fillConfigForm(config) {
   const form = document.getElementById("config-form");
   for (const [key, value] of Object.entries(config)) {
@@ -108,6 +238,7 @@ function fillConfigForm(config) {
   }
   updateConfigFormAffordances(config);
   syncHero(config);
+  syncProfileExamples(config);
 }
 
 function updateConfigFormAffordances(config) {
@@ -257,6 +388,22 @@ function summarizeTurnInternals(turn) {
   };
 }
 
+function operationClauseText(op) {
+  if (!op || typeof op !== "object") {
+    return "";
+  }
+  const result = op.result && typeof op.result === "object" ? op.result : {};
+  return String(
+    result.fact ||
+      result.rule ||
+      result.query ||
+      result.prolog_query ||
+      op.clause ||
+      op.query ||
+      ""
+  ).trim();
+}
+
 function summarizeCommitOperations(turn) {
   const commitPhase = findTurnPhase(turn, "commit");
   const commitData = commitPhase && typeof commitPhase.data === "object" ? commitPhase.data : {};
@@ -270,16 +417,7 @@ function summarizeCommitOperations(turn) {
     const result = op.result && typeof op.result === "object" ? op.result : {};
     const resultType = String(result.result_type || "").trim();
     const opLabel = String(op.tool || "").trim() || resultType || "operation";
-    const clause =
-      String(
-        result.fact ||
-        result.rule ||
-        result.query ||
-        result.prolog_query ||
-        op.clause ||
-        op.query ||
-        ""
-      ).trim() || "-";
+    const clause = operationClauseText(op) || "-";
     lines.push(`${opLabel} :: ${clause}`);
   }
 
@@ -360,6 +498,666 @@ function describeExecutedQuery(execution, utterance) {
     return isYesNo ? "Final query resolved false." : "Final query matched no rows.";
   }
   return "Final query did not complete cleanly.";
+}
+
+function splitClauseArgs(rawArgs) {
+  const args = [];
+  let current = "";
+  let depth = 0;
+  for (const ch of String(rawArgs || "")) {
+    if (ch === "," && depth === 0) {
+      const token = current.trim();
+      if (token) {
+        args.push(token);
+      }
+      current = "";
+      continue;
+    }
+    if (ch === "(") {
+      depth += 1;
+    } else if (ch === ")" && depth > 0) {
+      depth -= 1;
+    }
+    current += ch;
+  }
+  const token = current.trim();
+  if (token) {
+    args.push(token);
+  }
+  return args;
+}
+
+function parseClauseText(clause) {
+  const text = String(clause || "").trim();
+  const match = /^([a-z_][a-z0-9_]*)\((.*)\)\.$/i.exec(text);
+  if (!match) {
+    return null;
+  }
+  return {
+    predicate: match[1],
+    args: splitClauseArgs(match[2]),
+  };
+}
+
+function cleanLedgerToken(token) {
+  return String(token || "")
+    .trim()
+    .replace(/^['"]+|['"]+$/g, "")
+    .replace(/\.$/, "");
+}
+
+function isLikelyVariable(token) {
+  const cleaned = cleanLedgerToken(token);
+  return /^[A-Z_]/.test(cleaned);
+}
+
+function humanizeLedgerAtom(atom, { person = false } = {}) {
+  const cleaned = cleanLedgerToken(atom);
+  if (!cleaned) {
+    return "";
+  }
+  const words = cleaned
+    .replace(/_measurement$/i, "")
+    .split("_")
+    .filter(Boolean);
+  if (!words.length) {
+    return cleaned;
+  }
+  if (person) {
+    return words
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  }
+  return words.join(" ");
+}
+
+function predicateLabel(predicate) {
+  return String(predicate || "")
+    .trim()
+    .replaceAll("_", " ");
+}
+
+function summarizeFactBody(predicate, args) {
+  if (!predicate) {
+    return "";
+  }
+  if (!Array.isArray(args) || !args.length) {
+    return predicateLabel(predicate);
+  }
+  const object = (index, options = {}) => humanizeLedgerAtom(args[index], options);
+  switch (predicate) {
+    case "taking":
+      return args.length >= 2 ? `taking ${object(1)}` : "taking";
+    case "pregnant":
+      return "pregnant";
+    case "allergic_to":
+      return args.length >= 2 ? `allergic to ${object(1)}` : "allergic";
+    case "has_condition":
+      return args.length >= 2 ? `has ${object(1)}` : "has condition";
+    case "has_symptom":
+      return args.length >= 2 ? `has symptom ${object(1)}` : "has symptom";
+    case "underwent_lab_test":
+      return args.length >= 2 ? `underwent ${object(1)}` : "underwent lab test";
+    case "lab_result_high":
+      return args.length >= 2 ? `${object(1)} high` : "lab result high";
+    case "lab_result_rising":
+      return args.length >= 2 ? `${object(1)} rising` : "lab result rising";
+    case "lab_result_abnormal":
+      return args.length >= 2 ? `${object(1)} abnormal` : "lab result abnormal";
+    case "lives_in":
+      return args.length >= 2 ? `lives in ${object(1, { person: true })}` : "lives somewhere";
+    case "parent":
+      return args.length >= 2 ? `parent of ${object(1, { person: true })}` : "parent";
+    case "brother":
+      return args.length >= 2 ? `brother of ${object(1, { person: true })}` : "brother";
+    case "sister":
+      return args.length >= 2 ? `sister of ${object(1, { person: true })}` : "sister";
+    case "manager":
+      return args.length >= 2 ? `manager of ${object(1, { person: true })}` : "manager";
+    case "entered":
+      return args.length >= 3
+        ? `entered ${object(1, { person: true })} at ${object(2)}${args[3] ? ` ${object(3)}` : ""}`
+        : "entered";
+    case "headed_over":
+      return args.length >= 2
+        ? `headed over to ${object(1)}${args[2] ? ` from ${object(2)}` : ""}`
+        : "headed over";
+    default:
+      if (args.length === 1) {
+        return predicateLabel(predicate);
+      }
+      const remainder = args
+        .slice(1)
+        .map((token) => humanizeLedgerAtom(token, { person: true }))
+        .join(", ");
+      return `${predicateLabel(predicate)} ${remainder}`.trim();
+  }
+}
+
+function deriveFactEntityKey(args) {
+  if (!Array.isArray(args) || !args.length) {
+    return "_session";
+  }
+  const first = cleanLedgerToken(args[0]);
+  if (!first || isLikelyVariable(first)) {
+    return "_session";
+  }
+  return first.toLowerCase();
+}
+
+function deriveEntityLabel(entityKey) {
+  if (!entityKey || entityKey === "_session") {
+    return "Session / global";
+  }
+  return humanizeLedgerAtom(entityKey, { person: true });
+}
+
+function deriveTouchedEntities(execution) {
+  const operations = Array.isArray(execution?.operations) ? execution.operations : [];
+  const labels = new Set();
+  for (const op of operations) {
+    const tool = String(op?.tool || "").trim();
+    if (!["assert_fact", "retract_fact"].includes(tool)) {
+      continue;
+    }
+    const clause = operationClauseText(op);
+    const parsed = parseClauseText(clause);
+    if (!parsed) {
+      continue;
+    }
+    labels.add(deriveEntityLabel(deriveFactEntityKey(parsed.args)));
+  }
+  return Array.from(labels);
+}
+
+function buildQueryLedgerEntry({ turn, execution, clauseText }) {
+  return {
+    turnIndex: Number(turn?.turn_index || 0),
+    utterance: String(turn?.utterance || "").trim(),
+    clause: String(clauseText || turn?.utterance || "").trim(),
+    summary: describeExecutedQuery(execution, turn?.utterance || "") || "Query recorded.",
+  };
+}
+
+function buildLedgerState(turns) {
+  const facts = new Map();
+  const rules = new Map();
+  const queryEntries = [];
+  const latestTurn = Array.isArray(turns) && turns.length ? turns[turns.length - 1] : null;
+
+  for (const turn of Array.isArray(turns) ? turns : []) {
+    if (!turn || typeof turn !== "object") {
+      continue;
+    }
+    const execution = turnExecution(turn);
+    const operations = Array.isArray(execution?.operations) ? execution.operations : [];
+    let sawQueryOp = false;
+    for (const op of operations) {
+      if (!op || typeof op !== "object") {
+        continue;
+      }
+      const tool = String(op.tool || "").trim();
+      const clause = operationClauseText(op);
+      if (tool === "assert_fact" && clause) {
+        const parsed = parseClauseText(clause);
+        const entityKey = parsed ? deriveFactEntityKey(parsed.args) : "_session";
+        facts.set(clause, {
+          clause,
+          predicate: parsed?.predicate || "",
+          args: parsed?.args || [],
+          entityKey,
+          entityLabel: deriveEntityLabel(entityKey),
+          summary: parsed ? summarizeFactBody(parsed.predicate, parsed.args) : clause,
+          turnIndex: Number(turn.turn_index || 0),
+        });
+      } else if (tool === "retract_fact" && clause) {
+        facts.delete(clause);
+      } else if (tool === "assert_rule" && clause) {
+        rules.set(clause, {
+          clause,
+          turnIndex: Number(turn.turn_index || 0),
+        });
+      } else if (tool === "query_rows") {
+        sawQueryOp = true;
+        queryEntries.push(buildQueryLedgerEntry({ turn, execution, clauseText: clause }));
+      }
+    }
+    if (!sawQueryOp && execution?.query_result && String(turn?.route || "").trim() === "query") {
+      queryEntries.push(buildQueryLedgerEntry({ turn, execution, clauseText: turn?.utterance || "" }));
+    }
+  }
+
+  const entities = new Map();
+  for (const fact of facts.values()) {
+    if (!entities.has(fact.entityKey)) {
+      entities.set(fact.entityKey, {
+        key: fact.entityKey,
+        label: fact.entityLabel,
+        facts: [],
+        latestTurnIndex: 0,
+      });
+    }
+    const group = entities.get(fact.entityKey);
+    group.facts.push(fact);
+    group.latestTurnIndex = Math.max(group.latestTurnIndex, fact.turnIndex);
+  }
+
+  const entityGroups = Array.from(entities.values())
+    .map((group) => ({
+      ...group,
+      facts: group.facts.sort((a, b) => b.turnIndex - a.turnIndex || a.clause.localeCompare(b.clause)),
+    }))
+    .sort((a, b) => {
+      if (a.key === "_session") {
+        return 1;
+      }
+      if (b.key === "_session") {
+        return -1;
+      }
+      return b.latestTurnIndex - a.latestTurnIndex || a.label.localeCompare(b.label);
+    });
+
+  const ruleEntries = Array.from(rules.values()).sort(
+    (a, b) => b.turnIndex - a.turnIndex || a.clause.localeCompare(b.clause)
+  );
+  const recentQueries = queryEntries
+    .sort((a, b) => b.turnIndex - a.turnIndex || a.clause.localeCompare(b.clause))
+    .slice(0, 6);
+
+  return {
+    latestTurn,
+    latestTurnIndex: Number(latestTurn?.turn_index || 0),
+    entityGroups,
+    ruleEntries,
+    recentQueries,
+    entityCount: entityGroups.length,
+    factCount: facts.size,
+    ruleCount: ruleEntries.length,
+    queryCount: queryEntries.length,
+  };
+}
+
+function summarizeLatestLedgerChange(turn) {
+  if (!turn || typeof turn !== "object") {
+    return {
+      badge: "Waiting",
+      tone: "neutral",
+      title: "No structured memory has been built in this session yet.",
+      detail: "Send a turn and this panel will show what Prethinker actually stored, held, or queried.",
+    };
+  }
+  const route = String(turn.route || "other").trim().toLowerCase();
+  const execution = turnExecution(turn);
+  const clarifyPhase = findTurnPhase(turn, "clarify");
+  if (String(clarifyPhase?.status || "").trim().toLowerCase() === "required") {
+    const question = String(clarifyPhase?.data?.question || "").trim();
+    return {
+      badge: "Held",
+      tone: "caution",
+      title: "Latest turn paused before changing durable memory.",
+      detail: question ? `Clarification needed: ${question}` : "Clarification was required before Prethinker could continue.",
+    };
+  }
+  if (route === "write") {
+    const facts = countSuccessfulOperations(execution, "assert_fact");
+    const rules = countSuccessfulOperations(execution, "assert_rule");
+    const retracts = countSuccessfulOperations(execution, "retract_fact");
+    const parts = [];
+    if (facts) {
+      parts.push(`${facts} fact${facts === 1 ? "" : "s"}`);
+    }
+    if (rules) {
+      parts.push(`${rules} rule${rules === 1 ? "" : "s"}`);
+    }
+    if (retracts) {
+      parts.push(`${retracts} retraction${retracts === 1 ? "" : "s"}`);
+    }
+    const touchedEntities = deriveTouchedEntities(execution);
+    return {
+      badge: parts.length ? "Committed" : "Write attempt",
+      tone: parts.length ? "success" : "neutral",
+      title: parts.length
+        ? `Latest turn committed ${parts.join(", ")}.`
+        : "Latest turn was treated as a write, but nothing durable changed.",
+      detail: touchedEntities.length
+        ? `Updated ${touchedEntities.join(", ")}.`
+        : describeExecutedQuery(execution, turn.utterance || "") || "No new entity bucket was changed.",
+    };
+  }
+  if (route === "query") {
+    return {
+      badge: "Query",
+      tone: "success",
+      title: "Latest turn queried the current session memory.",
+      detail: describeExecutedQuery(execution, turn.utterance || "") || "Query completed without changing durable memory.",
+    };
+  }
+  return {
+    badge: "Reviewed",
+    tone: String(execution?.status || "").trim().toLowerCase() === "error" ? "danger" : "neutral",
+    title: "Latest turn did not change durable memory.",
+    detail: String((turn.assistant && turn.assistant.text) || "Prethinker reviewed the turn without a durable mutation.").trim(),
+  };
+}
+
+function setPathCard(kind, { value, meta, tone = "neutral" }) {
+  const card = document.getElementById(`path-${kind}-card`);
+  const valueNode = document.getElementById(`path-${kind}-value`);
+  const metaNode = document.getElementById(`path-${kind}-meta`);
+  if (card) {
+    card.className = `path-card tone-${tone}`;
+  }
+  if (valueNode) {
+    valueNode.textContent = value;
+  }
+  if (metaNode) {
+    metaNode.textContent = meta;
+  }
+}
+
+function renderPathStrip(ledger) {
+  const latestTurn = ledger?.latestTurn || null;
+  const execution = turnExecution(latestTurn);
+  const route = String(latestTurn?.route || "").trim().toLowerCase();
+  const frontDoor = findTurnPhase(latestTurn, "ingest")?.data || {};
+  const clarifyPhase = findTurnPhase(latestTurn, "clarify");
+  const commitPhase = findTurnPhase(latestTurn, "commit");
+  const activeProfile = String(state.config?.active_profile || "general").trim() || "general";
+  const strictMode = Boolean(state.config?.strict_mode);
+  const freethinkerPolicy = String(state.config?.freethinker_resolution_policy || "off").trim();
+  const compilerIntent = String(frontDoor.compiler_intent || execution?.intent || route || "").trim();
+
+  setPathCard("profile", {
+    value: activeProfile,
+    meta: `${strictMode ? "strict" : "open"} | Freethinker ${freethinkerPolicy}`,
+    tone: activeProfile === "medical@v0" ? "success" : "neutral",
+  });
+
+  if (!latestTurn) {
+    setPathCard("route", { value: "Waiting", meta: "No turn yet", tone: "neutral" });
+    setPathCard("gate", { value: "Idle", meta: "No pending hold", tone: "neutral" });
+    setPathCard("action", { value: "None", meta: "No runtime call", tone: "neutral" });
+  } else {
+    setPathCard("route", {
+      value: route || "other",
+      meta: compilerIntent ? `compiler intent: ${compilerIntent}` : "slash or fallback path",
+      tone: route === "write" || route === "query" ? "success" : "neutral",
+    });
+
+    const clarifyStatus = String(clarifyPhase?.status || "").trim().toLowerCase();
+    const executionStatus = String(execution?.status || "").trim().toLowerCase();
+    if (clarifyStatus === "required" || state.pendingClarification) {
+      const question = String(
+        clarifyPhase?.data?.question || state.pendingClarification?.question || ""
+      ).trim();
+      setPathCard("gate", {
+        value: "Holding",
+        meta: question || "Clarification required",
+        tone: "caution",
+      });
+    } else if (executionStatus === "error" || String(commitPhase?.status || "").trim().toLowerCase() === "failed") {
+      setPathCard("gate", {
+        value: "Failed",
+        meta: "Runtime or parse error",
+        tone: "danger",
+      });
+    } else {
+      setPathCard("gate", {
+        value: "Clear",
+        meta: clarifyStatus === "resolved" ? "Clarification resolved" : "No hold",
+        tone: "success",
+      });
+    }
+
+    const factWrites = countSuccessfulOperations(execution, "assert_fact");
+    const ruleWrites = countSuccessfulOperations(execution, "assert_rule");
+    const retractWrites = countSuccessfulOperations(execution, "retract_fact");
+    const queryOps = Array.isArray(execution?.operations)
+      ? execution.operations.filter((op) => String(op?.tool || "").trim() === "query_rows").length
+      : 0;
+    const mutationCount = factWrites + ruleWrites + retractWrites;
+    if (mutationCount > 0) {
+      setPathCard("action", {
+        value: `${mutationCount} mutation${mutationCount === 1 ? "" : "s"}`,
+        meta: `${factWrites} fact | ${ruleWrites} rule | ${retractWrites} retract`,
+        tone: "success",
+      });
+    } else if (queryOps > 0 || execution?.query_result) {
+      setPathCard("action", {
+        value: "Query",
+        meta: describeExecutedQuery(execution, latestTurn?.utterance || "") || "Runtime query",
+        tone: "success",
+      });
+    } else if (clarifyStatus === "required") {
+      setPathCard("action", {
+        value: "Paused",
+        meta: "No mutation",
+        tone: "caution",
+      });
+    } else {
+      setPathCard("action", {
+        value: "No mutation",
+        meta: route === "command" ? "Console command" : "Reviewed only",
+        tone: executionStatus === "error" ? "danger" : "neutral",
+      });
+    }
+  }
+
+  const factCount = Number(ledger?.factCount || 0);
+  const ruleCount = Number(ledger?.ruleCount || 0);
+  const queryCount = Number(ledger?.queryCount || 0);
+  setPathCard("ledger", {
+    value: `${factCount} fact${factCount === 1 ? "" : "s"}`,
+    meta: `${ruleCount} rule${ruleCount === 1 ? "" : "s"} | ${queryCount} quer${queryCount === 1 ? "y" : "ies"} | console stream`,
+    tone: factCount || ruleCount || queryCount ? "success" : "neutral",
+  });
+}
+
+function clearElement(element) {
+  if (element) {
+    element.innerHTML = "";
+  }
+}
+
+function renderLedger() {
+  const ledger = buildLedgerState(state.turns);
+  renderPathStrip(ledger);
+  const activeProfile = String(state.config?.active_profile || "general").trim() || "general";
+  const profileNote = document.getElementById("ledger-profile-note");
+  if (profileNote) {
+    profileNote.textContent = `Watching the current session in ${activeProfile} mode.`;
+  }
+
+  const setText = (id, text) => {
+    const node = document.getElementById(id);
+    if (node) {
+      node.textContent = text;
+    }
+  };
+
+  setText("ledger-entity-count", String(ledger.entityCount));
+  setText("ledger-fact-count", String(ledger.factCount));
+  setText("ledger-rule-count", String(ledger.ruleCount));
+  setText("ledger-query-count", String(ledger.queryCount));
+  setText(
+    "ledger-entity-summary",
+    ledger.factCount
+      ? `${ledger.factCount} stored fact${ledger.factCount === 1 ? "" : "s"} across ${ledger.entityCount} bucket${ledger.entityCount === 1 ? "" : "s"}.`
+      : "No stored facts yet."
+  );
+  setText(
+    "ledger-rule-summary",
+    ledger.ruleCount
+      ? `${ledger.ruleCount} active rule${ledger.ruleCount === 1 ? "" : "s"}.`
+      : "No active rules."
+  );
+  setText(
+    "ledger-query-summary",
+    ledger.queryCount
+      ? `${ledger.queryCount} query event${ledger.queryCount === 1 ? "" : "s"} in this session.`
+      : "No query history yet."
+  );
+
+  const latest = summarizeLatestLedgerChange(ledger.latestTurn);
+  const latestCard = document.getElementById("ledger-latest-card");
+  const latestBadge = document.getElementById("ledger-latest-badge");
+  const latestTitle = document.getElementById("ledger-latest-title");
+  const latestDetail = document.getElementById("ledger-latest-detail");
+  if (latestCard) {
+    latestCard.className = `ledger-latest-card tone-${latest.tone}`;
+  }
+  if (latestBadge) {
+    latestBadge.className = `ledger-latest-badge tone-${latest.tone}`;
+    latestBadge.textContent = latest.badge;
+  }
+  if (latestTitle) {
+    latestTitle.textContent = latest.title;
+  }
+  if (latestDetail) {
+    latestDetail.textContent = latest.detail;
+  }
+
+  const entityList = document.getElementById("ledger-entity-list");
+  clearElement(entityList);
+  if (entityList) {
+    if (!ledger.entityGroups.length) {
+      const empty = document.createElement("p");
+      empty.className = "ledger-empty";
+      empty.textContent = "No structured facts have been committed in this session yet.";
+      entityList.appendChild(empty);
+    } else {
+      const fragment = document.createDocumentFragment();
+      for (const group of ledger.entityGroups) {
+        const card = document.createElement("section");
+        card.className = "ledger-entity-card";
+        const header = document.createElement("div");
+        header.className = "ledger-entity-header";
+        const title = document.createElement("p");
+        title.className = "ledger-entity-title";
+        title.textContent = group.label;
+        const meta = document.createElement("p");
+        meta.className = "ledger-entity-meta";
+        meta.textContent = `${group.facts.length} fact${group.facts.length === 1 ? "" : "s"}`;
+        header.appendChild(title);
+        header.appendChild(meta);
+        card.appendChild(header);
+
+        const facts = document.createElement("div");
+        facts.className = "ledger-fact-list";
+        for (const fact of group.facts) {
+          const item = document.createElement("div");
+          item.className = "ledger-fact-item";
+          if (fact.turnIndex === ledger.latestTurnIndex && ledger.latestTurnIndex > 0) {
+            item.classList.add("is-fresh");
+          }
+          const head = document.createElement("div");
+          head.className = "ledger-item-head";
+          const summary = document.createElement("p");
+          summary.className = "ledger-item-title";
+          summary.textContent =
+            fact.summary.charAt(0).toUpperCase() + fact.summary.slice(1);
+          head.appendChild(summary);
+          if (fact.turnIndex === ledger.latestTurnIndex && ledger.latestTurnIndex > 0) {
+            const badge = document.createElement("span");
+            badge.className = "ledger-item-badge";
+            badge.textContent = "new";
+            head.appendChild(badge);
+          }
+          const clause = document.createElement("p");
+          clause.className = "ledger-clause";
+          clause.textContent = fact.clause;
+          item.appendChild(head);
+          item.appendChild(clause);
+          facts.appendChild(item);
+        }
+        card.appendChild(facts);
+        fragment.appendChild(card);
+      }
+      entityList.appendChild(fragment);
+    }
+  }
+
+  const ruleList = document.getElementById("ledger-rule-list");
+  clearElement(ruleList);
+  if (ruleList) {
+    if (!ledger.ruleEntries.length) {
+      const empty = document.createElement("p");
+      empty.className = "ledger-empty";
+      empty.textContent = "No rules have been asserted in this session yet.";
+      ruleList.appendChild(empty);
+    } else {
+      const fragment = document.createDocumentFragment();
+      for (const rule of ledger.ruleEntries) {
+        const item = document.createElement("div");
+        item.className = "ledger-rule-item";
+        if (rule.turnIndex === ledger.latestTurnIndex && ledger.latestTurnIndex > 0) {
+          item.classList.add("is-fresh");
+        }
+        const head = document.createElement("div");
+        head.className = "ledger-item-head";
+        const title = document.createElement("p");
+        title.className = "ledger-item-title";
+        title.textContent = "Rule in session memory";
+        head.appendChild(title);
+        if (rule.turnIndex === ledger.latestTurnIndex && ledger.latestTurnIndex > 0) {
+          const badge = document.createElement("span");
+          badge.className = "ledger-item-badge";
+          badge.textContent = "new";
+          head.appendChild(badge);
+        }
+        const clause = document.createElement("p");
+        clause.className = "ledger-clause";
+        clause.textContent = rule.clause;
+        item.appendChild(head);
+        item.appendChild(clause);
+        fragment.appendChild(item);
+      }
+      ruleList.appendChild(fragment);
+    }
+  }
+
+  const queryList = document.getElementById("ledger-query-list");
+  clearElement(queryList);
+  if (queryList) {
+    if (!ledger.recentQueries.length) {
+      const empty = document.createElement("p");
+      empty.className = "ledger-empty";
+      empty.textContent = "Queries answered from the current session memory will appear here.";
+      queryList.appendChild(empty);
+    } else {
+      const fragment = document.createDocumentFragment();
+      for (const query of ledger.recentQueries) {
+        const item = document.createElement("div");
+        item.className = "ledger-query-item";
+        if (query.turnIndex === ledger.latestTurnIndex && ledger.latestTurnIndex > 0) {
+          item.classList.add("is-fresh");
+        }
+        const head = document.createElement("div");
+        head.className = "ledger-item-head";
+        const title = document.createElement("p");
+        title.className = "ledger-item-title";
+        title.textContent = query.summary;
+        head.appendChild(title);
+        if (query.turnIndex === ledger.latestTurnIndex && ledger.latestTurnIndex > 0) {
+          const badge = document.createElement("span");
+          badge.className = "ledger-item-badge";
+          badge.textContent = "new";
+          head.appendChild(badge);
+        }
+        const detail = document.createElement("p");
+        detail.className = "ledger-item-subline";
+        detail.textContent = query.utterance || query.clause;
+        const clause = document.createElement("p");
+        clause.className = "ledger-clause";
+        clause.textContent = query.clause;
+        item.appendChild(head);
+        item.appendChild(detail);
+        item.appendChild(clause);
+        fragment.appendChild(item);
+      }
+      queryList.appendChild(fragment);
+    }
+  }
 }
 
 function outcomeSummary(turn) {
@@ -673,6 +1471,50 @@ function collectCompilerJsonBlocks(turnTrace) {
   return blocks;
 }
 
+function shouldCollapseDebugText(text) {
+  const normalized = String(text || "").trim();
+  if (!normalized) {
+    return false;
+  }
+  if (normalized.length > 420) {
+    return true;
+  }
+  return normalized.split(/\r?\n/).length > 8;
+}
+
+function buildExpandableDebugText(text, { nested = false } = {}) {
+  const normalized = String(text || "").trim();
+  if (!shouldCollapseDebugText(normalized)) {
+    const pre = document.createElement("pre");
+    pre.textContent = normalized;
+    return pre;
+  }
+
+  const lineCount = normalized.split(/\r?\n/).length;
+  const shell = document.createElement("section");
+  shell.className = `debug-text-shell${nested ? " nested" : ""}`;
+
+  const preview = document.createElement("div");
+  preview.className = `debug-text-preview${nested ? " nested" : ""}`;
+  preview.textContent = normalized;
+  shell.appendChild(preview);
+
+  const details = document.createElement("details");
+  details.className = `debug-text-details${nested ? " nested" : ""}`;
+
+  const summary = document.createElement("summary");
+  summary.className = "debug-text-summary";
+  summary.textContent = `Show full text (${lineCount} lines)`;
+
+  const pre = document.createElement("pre");
+  pre.textContent = normalized;
+
+  details.appendChild(summary);
+  details.appendChild(pre);
+  shell.appendChild(details);
+  return shell;
+}
+
 function buildDebugBubble({ title, summary, blocks, variantClass }) {
   if (!Array.isArray(blocks) || !blocks.length) {
     return null;
@@ -707,16 +1549,16 @@ function buildDebugBubble({ title, summary, blocks, variantClass }) {
         const subHeading = document.createElement("p");
         subHeading.className = "debug-subblock-label";
         subHeading.textContent = part.label;
-        const pre = document.createElement("pre");
-        pre.textContent = String(part.text || "").trim();
         subSection.appendChild(subHeading);
-        subSection.appendChild(pre);
+        subSection.appendChild(
+          buildExpandableDebugText(part.text, {
+            nested: true,
+          })
+        );
         section.appendChild(subSection);
       }
     } else {
-      const pre = document.createElement("pre");
-      pre.textContent = String(block.text || "").trim();
-      section.appendChild(pre);
+      section.appendChild(buildExpandableDebugText(block.text));
     }
     body.appendChild(section);
   }
@@ -867,12 +1709,13 @@ function appendGatewayTurn(turn) {
 
     const traceBody = document.createElement("div");
     traceBody.className = "phase-body";
-    traceBody.innerHTML = `
-      <p class="phase-summary">${escapeHtml(
-        String((turnTrace.summary && turnTrace.summary.overall) || "Compiler trace captured.")
-      )}</p>
-      <pre>${escapeHtml(JSON.stringify(turnTrace, null, 2))}</pre>
-    `;
+    const traceSummaryText = document.createElement("p");
+    traceSummaryText.className = "phase-summary";
+    traceSummaryText.textContent = String(
+      (turnTrace.summary && turnTrace.summary.overall) || "Compiler trace captured."
+    );
+    traceBody.appendChild(traceSummaryText);
+    traceBody.appendChild(buildExpandableDebugText(JSON.stringify(turnTrace, null, 2)));
 
     traceDetails.appendChild(traceSummary);
     traceDetails.appendChild(traceBody);
@@ -897,10 +1740,11 @@ function appendGatewayTurn(turn) {
 
     const phaseBody = document.createElement("div");
     phaseBody.className = "phase-body";
-    phaseBody.innerHTML = `
-      <p class="phase-summary">${escapeHtml(phase.summary)}</p>
-      <pre>${escapeHtml(JSON.stringify(phase.data, null, 2))}</pre>
-    `;
+    const phaseSummaryText = document.createElement("p");
+    phaseSummaryText.className = "phase-summary";
+    phaseSummaryText.textContent = phase.summary;
+    phaseBody.appendChild(phaseSummaryText);
+    phaseBody.appendChild(buildExpandableDebugText(JSON.stringify(phase.data, null, 2)));
 
     phaseDetails.appendChild(phaseSummary);
     phaseDetails.appendChild(phaseBody);
@@ -940,6 +1784,7 @@ async function loadConfig() {
   const payload = await getJson("/api/config");
   state.config = payload.config;
   fillConfigForm(state.config);
+  renderLedger();
 }
 
 async function submitUtterance(event) {
@@ -949,6 +1794,7 @@ async function submitUtterance(event) {
   if (!utterance) {
     return;
   }
+  collapseChatExpandos();
   appendUserMessage(utterance);
   field.value = "";
 
@@ -965,7 +1811,9 @@ async function submitUtterance(event) {
     });
     state.sessionId = payload.session_id;
     state.pendingClarification = payload.pending_clarification || null;
+    state.turns.push(payload.turn);
     appendGatewayTurn(payload.turn);
+    renderLedger();
     updatePendingBanner();
     syncConnectionPill("Connected", "success");
   } catch (error) {
@@ -989,6 +1837,7 @@ async function submitUtterance(event) {
         },
       ],
     });
+    renderLedger();
   }
 }
 
@@ -1072,6 +1921,30 @@ function freethinkerAdvisoryPayload(baseConfig) {
   };
 }
 
+function medicalProfilePayload(baseConfig) {
+  return {
+    ...baseConfig,
+    active_profile: "medical@v0",
+    reply_surface_policy: "deterministic_template",
+    strict_mode: true,
+    compiler_mode: "strict",
+    served_handoff_mode: "never",
+    require_final_confirmation: true,
+    clarification_eagerness: Math.max(0.8, Number(baseConfig?.clarification_eagerness || 0)),
+    freethinker_resolution_policy: "advisory_only",
+    freethinker_temperature: Number(baseConfig?.freethinker_temperature ?? 0.2) || 0.2,
+    freethinker_thinking: Boolean(baseConfig?.freethinker_thinking),
+    freethinker_model: String(baseConfig?.freethinker_model || "qwen3.5:9b"),
+    freethinker_backend: String(baseConfig?.freethinker_backend || "ollama"),
+    freethinker_base_url: String(baseConfig?.freethinker_base_url || "http://127.0.0.1:11434"),
+    freethinker_context_length: Number(baseConfig?.freethinker_context_length || 16384),
+    freethinker_timeout: Number(baseConfig?.freethinker_timeout || 60),
+    freethinker_prompt_file: String(
+      baseConfig?.freethinker_prompt_file || "modelfiles/freethinker_system_prompt.md"
+    ),
+  };
+}
+
 async function applyStrictBouncerLock() {
   try {
     const payload = strictBouncerPayload(state.config || {});
@@ -1129,6 +2002,25 @@ async function applyFreethinkerAdvisory() {
   }
 }
 
+async function applyMedicalProfilePreset() {
+  try {
+    const payload = medicalProfilePayload(state.config || {});
+    const response = await getJson("/api/config", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+    state.config = response.config;
+    fillConfigForm(state.config);
+    document.getElementById("config-status").textContent =
+      "medical@v0 applied (strict compiler, medical prompt profile, clarification and Freethinker posture tightened).";
+  } catch (error) {
+    document.getElementById("config-status").textContent = `medical@v0 preset failed: ${String(error)}`;
+  }
+}
+
 async function resetSession() {
   try {
     const payload = await getJson("/api/session/reset", {
@@ -1137,10 +2029,12 @@ async function resetSession() {
       },
     });
     state.sessionId = payload.session_id;
+    state.turns = [];
     state.pendingClarification = null;
     document.getElementById("chat-log").innerHTML = "";
     updatePendingBanner();
     updateEmptyState();
+    renderLedger();
   } catch (error) {
     document.getElementById("config-status").textContent = `Reset failed: ${String(error)}`;
   }
@@ -1258,6 +2152,22 @@ function initConfigDrawer() {
       updateConfigFormAffordances({ strict_mode: strictModeField.checked });
     });
   }
+
+  document.addEventListener("click", (event) => {
+    if (!state.configOpen) {
+      return;
+    }
+    const drawer = document.getElementById("config-drawer");
+    const toggleButton = document.getElementById("config-toggle");
+    const target = event.target;
+    if (!(target instanceof Node)) {
+      return;
+    }
+    if (drawer?.contains(target) || toggleButton?.contains(target)) {
+      return;
+    }
+    setConfigOpen(false);
+  });
 }
 
 function initDebugMode() {
@@ -1315,17 +2225,20 @@ window.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("export-button").addEventListener("click", exportSession);
   document.getElementById("strict-lock-button").addEventListener("click", applyStrictBouncerLock);
   document.getElementById("freethinker-advisory-button").addEventListener("click", applyFreethinkerAdvisory);
+  document.getElementById("medical-profile-button").addEventListener("click", applyMedicalProfilePreset);
   document.getElementById("served-chat-button").addEventListener("click", applyServedChatPreference);
   try {
     await loadConfig();
     updatePendingBanner();
     updateEmptyState();
+    renderLedger();
     syncConnectionPill("Connected", "success");
     document.getElementById("config-status").textContent =
       API_BASE ? `Connected to Prethinker Console at ${API_BASE}.` : "Connected to same-origin Prethinker Console.";
   } catch (error) {
     updatePendingBanner();
     updateEmptyState();
+    renderLedger();
     syncConnectionPill("Offline", "danger");
     document.getElementById("config-status").textContent =
       `Could not load config from ${apiUrl("/api/config")}. ` +

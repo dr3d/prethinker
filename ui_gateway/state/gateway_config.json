@@ -1,5 +1,7 @@
 {
   "front_door_uri": "prethink://local/front-door",
+  "active_profile": "medical@v0",
+  "reply_surface_policy": "freethinker_humanize",
   "served_llm_provider": "ollama",
   "served_llm_model": "gpt-oss:20b",
   "served_llm_base_url": "http://127.0.0.1:11434",
@@ -15,7 +17,7 @@
   "compiler_timeout": 60,
   "compiler_prompt_file": "modelfiles/semantic_parser_system_prompt.md",
   "clarification_eagerness": 0.75,
-  "freethinker_resolution_policy": "off",
+  "freethinker_resolution_policy": "grounded_reference",
   "freethinker_model": "qwen3.5:9b",
   "freethinker_backend": "ollama",
   "freethinker_base_url": "http://127.0.0.1:11434",

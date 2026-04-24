@@ -290,6 +290,90 @@ class RuntimeHooksFamilyBundleTests(unittest.TestCase):
         self.assertIn("prompt_text", answer["served_llm"])
         self.assertIn("USER_UTTERANCE:", str(answer["served_llm"]["prompt_text"]))
 
+    def test_ensure_server_passes_active_profile(self) -> None:
+        hooks = RuntimeHooks()
+        with patch("ui_gateway.gateway.runtime_hooks.PrologMCPServer") as mocked:
+            mocked.return_value = SimpleNamespace(
+                tools_call=lambda *args, **kwargs: {"status": "success"},
+            )
+            hooks._server = None
+            hooks._server_signature = ""
+            hooks._ensure_server({"active_profile": "medical@v0"})
+
+        self.assertEqual(mocked.call_args.kwargs["active_profile"], "medical@v0")
+
+    def test_answer_uses_less_robotic_medical_write_summary(self) -> None:
+        hooks = RuntimeHooks()
+        answer = hooks.answer(
+            utterance="Priya is taking warfarin and she is pregnant.",
+            route="write",
+            execution={
+                "status": "success",
+                "intent": "assert_fact",
+                "writes_applied": 2,
+                "operations": [
+                    {
+                        "tool": "assert_fact",
+                        "clause": "taking(priya, warfarin).",
+                        "result": {"status": "success", "fact": "taking(priya, warfarin)."},
+                    },
+                    {
+                        "tool": "assert_fact",
+                        "clause": "pregnant(priya).",
+                        "result": {"status": "success", "fact": "pregnant(priya)."},
+                    },
+                ],
+                "query_result": None,
+                "parse": {},
+                "errors": [],
+            },
+            clarification=None,
+            config={"active_profile": "medical@v0", "served_handoff_mode": "never"},
+        )
+
+        self.assertEqual(
+            answer.get("text"),
+            "Stored: Priya is taking warfarin. Priya is pregnant.",
+        )
+
+    def test_answer_uses_deterministic_write_summary_when_policy_demands_it(self) -> None:
+        hooks = RuntimeHooks()
+        answer = hooks.answer(
+            utterance="Priya is taking warfarin and she is pregnant.",
+            route="write",
+            execution={
+                "status": "success",
+                "intent": "assert_fact",
+                "writes_applied": 2,
+                "operations": [
+                    {
+                        "tool": "assert_fact",
+                        "clause": "taking(priya, warfarin).",
+                        "result": {"status": "success", "fact": "taking(priya, warfarin)."},
+                    },
+                    {
+                        "tool": "assert_fact",
+                        "clause": "pregnant(priya).",
+                        "result": {"status": "success", "fact": "pregnant(priya)."},
+                    },
+                ],
+                "query_result": None,
+                "parse": {},
+                "errors": [],
+            },
+            clarification=None,
+            config={
+                "active_profile": "medical@v0",
+                "reply_surface_policy": "deterministic",
+                "served_handoff_mode": "never",
+            },
+        )
+
+        self.assertEqual(
+            answer.get("text"),
+            "Deterministic commit complete: 2 mutation(s) applied.",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
