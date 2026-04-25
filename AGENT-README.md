@@ -42,4 +42,4 @@ python -m pytest tests/test_umls_mvp.py tests/test_umls_semantic_network_builder
 python -m pytest -q
 ```
 
-The last known full-suite result before the docs cleanup was `214 passed`.
+The last known full-suite result was `215 passed`.

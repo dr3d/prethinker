@@ -9,7 +9,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural parsing pr
 ## Current Center
 
 - Runtime: `src/mcp_server.py`, especially `process_utterance()`.
-- UI: `ui_gateway/`, served locally with `uvicorn`.
+- UI: `ui_gateway/`, served locally by `python ui_gateway/main.py` using the stdlib `ThreadingHTTPServer`.
 - Active profile: `medical@v0`.
 - Active research asset: local UMLS Semantic Network KB built from `sn_current.tgz`.
 - Current demonstration surface: prompt-book UI plus live ledger cards showing route, clarification, blocked execution, and KB mutation outcomes.
@@ -58,9 +58,9 @@ This is the next useful layer for type steering and explanation. It should suppo
 
 ## Verification Snapshot
 
-Recent verified results before docs compaction:
+Recent verified results:
 
-- Full suite: `214 passed`
+- Full suite: `215 passed`
 - Focused medical/UI/runtime hooks: `25 passed`
 - Python compile check for touched runtime files passed
 

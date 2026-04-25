@@ -32,10 +32,21 @@ The short version:
 
 ```powershell
 python -m pytest -q
-python -m uvicorn ui_gateway.gateway.server:app --host 127.0.0.1 --port 8765
+python ui_gateway/main.py
 ```
 
 Open `http://127.0.0.1:8765` for the live console.
+
+## Reproducibility Notes
+
+The public repo currently tracks `29` pytest files under [tests/](https://github.com/dr3d/prethinker/tree/main/tests). The latest local verification before this update was:
+
+```powershell
+python -m pytest -q
+# 215 passed
+```
+
+The UMLS Semantic Network and Metathesaurus-derived runtime assets are intentionally not committed because they depend on licensed source data. The public repo includes the builders, tests, docs, and profile code; outside reproduction of the UMLS lane requires obtaining the licensed UMLS files separately.
 
 ## Repository Hygiene
 
