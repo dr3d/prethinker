@@ -101,6 +101,67 @@ class _FailingClarificationRuntime:
         }
 
 
+class _MedicalClarificationRuntime:
+    def process_utterance(self, *, utterance, config, session, clarification_answer=None, prethink_id=None):
+        if clarification_answer:
+            return {
+                "status": "ok",
+                "front_door": {
+                    "route": "write",
+                    "compiler_intent": "assert_fact",
+                    "needs_clarification": False,
+                    "reasons": ["medical_clarification_resolved"],
+                    "clarification_question": "",
+                    "prethink_id": prethink_id or "pt-medical",
+                },
+                "execution": {
+                    "status": "success",
+                    "intent": "assert_fact",
+                    "writes_applied": 1,
+                    "operations": [
+                        {
+                            "tool": "assert_fact",
+                            "status": "success",
+                            "clause": "lab_result_high(mara, blood_pressure_measurement).",
+                        }
+                    ],
+                    "query_result": None,
+                    "parse": {
+                        "intent": "assert_fact",
+                        "facts": ["lab_result_high(mara, blood_pressure_measurement)."],
+                    },
+                    "errors": [],
+                },
+                "compiler_trace": {"summary": {"overall": "medical clarification rescued"}},
+            }
+        return {
+            "status": "clarification_required",
+            "front_door": {
+                "route": "query",
+                "compiler_intent": "query",
+                "looks_like_query": True,
+                "looks_like_write": False,
+                "ambiguity_score": 0.9,
+                "needs_clarification": True,
+                "reasons": ["vague_medical_surface"],
+                "clarification_question": "Which specific blood pressure measurement is bad for Mara?",
+                "prethink_id": "pt-medical",
+            },
+            "execution": None,
+            "compiler_trace": {"summary": {"overall": "hold"}},
+        }
+
+    def should_handoff_instead_of_clarify(self, *, route, config):
+        return False
+
+    def answer(self, *, utterance, route, execution, clarification, config):
+        return {
+            "speaker": "prethink-gateway",
+            "text": "Stored: Mara had a high blood pressure result.",
+            "mode": "answer",
+        }
+
+
 class GatewayPhasesTests(unittest.TestCase):
     def test_process_turn_uses_served_handoff_when_clarification_is_suppressed(self) -> None:
         runtime = _FakeRuntime()
@@ -162,6 +223,44 @@ class GatewayPhasesTests(unittest.TestCase):
         self.assertEqual(
             second["pending_clarification"]["original_utterance"],
             "Mara's pressure is bad lately.",
+        )
+
+    def test_medical_clarification_followup_can_commit_original_staged_turn(self) -> None:
+        runtime = _MedicalClarificationRuntime()
+        session = SessionState(session_id="session-medical")
+        config = {
+            "front_door_uri": "prethink://local/front-door",
+            "served_handoff_mode": "never",
+            "strict_mode": True,
+            "active_profile": "medical@v0",
+        }
+
+        first = process_turn(
+            utterance="Mara's pressure is bad lately.",
+            session=session,
+            config=config,
+            runtime=runtime,
+            config_store=None,
+        )
+        self.assertIsNotNone(first["pending_clarification"])
+
+        second = process_turn(
+            utterance="Mara's blood pressure reading was high.",
+            session=session,
+            config=config,
+            runtime=runtime,
+            config_store=None,
+        )
+
+        self.assertIsNone(second["pending_clarification"])
+        turn = second["turn"]
+        self.assertEqual(turn["route"], "write")
+        commit_phase = next(phase for phase in turn["phases"] if phase["phase"] == "commit")
+        self.assertEqual(commit_phase["status"], "applied")
+        self.assertEqual(commit_phase["data"]["writes_applied"], 1)
+        self.assertEqual(
+            commit_phase["data"]["operations"][0]["clause"],
+            "lab_result_high(mara, blood_pressure_measurement).",
         )
 
 

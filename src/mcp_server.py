@@ -1609,12 +1609,12 @@ class PrologMCPServer:
         )
         admitted = self._apply_active_profile_parse_guard(
             parsed=after_medical_clarification_rescue,
-            utterance=utterance,
+            utterance=effective,
         )
         trace["rescues"].append(
             self._trace_step(
                 name="active_profile_parse_guard",
-                before=after_subject_prefix,
+                before=after_medical_clarification_rescue,
                 after=admitted,
                 summary="Applied active profile clarification and argument guardrails.",
             )

@@ -1557,6 +1557,63 @@ class LocalMcpServerTests(unittest.TestCase):
             trace.get("summary", {}).get("parse_rescues", []),
         )
 
+    def test_process_utterance_rescues_clarified_medical_lab_result_in_canonical_path(self) -> None:
+        strict_server = PrologMCPServer(compiler_mode="strict", active_profile="medical@v0")
+        strict_server._pending_prethink = {
+            "prethink_id": "pt-medical",
+            "utterance": "Mara's pressure is bad lately.",
+            "compiler_intent": "query",
+            "compiler_uncertainty_score": 0.85,
+            "clarification_required_before_query": True,
+            "clarification_question": "Which specific lab test is bad for Mara?",
+            "clarification_reason": "vague_medical_surface",
+            "compiler_trace": {},
+        }
+        parsed = {
+            "intent": "query",
+            "logic_string": "",
+            "components": {"atoms": [], "variables": [], "predicates": []},
+            "facts": [],
+            "rules": [],
+            "queries": [],
+            "confidence": {"overall": 0.5, "intent": 0.5, "logic": 0.5},
+            "ambiguities": [],
+            "needs_clarification": False,
+            "uncertainty_score": 0.5,
+            "uncertainty_label": "medium",
+            "clarification_question": "",
+            "clarification_reason": "",
+            "rationale": "Extractor left the clarified lab result empty.",
+        }
+
+        with patch(
+            "src.mcp_server._call_model_prompt",
+            return_value=ModelResponse(message=json.dumps(parsed), reasoning="", raw={}),
+        ):
+            result = strict_server.process_utterance(
+                {
+                    "utterance": "Mara's pressure is bad lately.",
+                    "clarification_answer": "Mara's blood pressure reading was high.",
+                    "prethink_id": "pt-medical",
+                }
+            )
+
+        self.assertEqual(result.get("status"), "success")
+        execution = result.get("execution") or {}
+        self.assertEqual(execution.get("intent"), "assert_fact")
+        self.assertEqual(execution.get("writes_applied"), 1)
+        self.assertEqual(
+            execution.get("parse", {}).get("facts"),
+            ["lab_result_high(mara, blood_pressure_measurement)."],
+        )
+        operations = execution.get("operations") or []
+        self.assertEqual(operations[0].get("clause"), "lab_result_high(mara, blood_pressure_measurement).")
+        trace = result.get("compiler_trace", {})
+        self.assertIn(
+            "medical_clarified_lab_result_rescue",
+            trace.get("summary", {}).get("parse_rescues", []),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

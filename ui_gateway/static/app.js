@@ -589,6 +589,14 @@ function countSuccessfulMutations(execution) {
 function effectiveTurnRoute(turn) {
   const route = String(turn?.route || "other").trim().toLowerCase();
   const execution = turnExecution(turn);
+  const executionStatus = String(execution?.status || "").trim().toLowerCase();
+  const executionIntent = String(execution?.intent || "").trim().toLowerCase();
+  if (executionStatus === "error") {
+    if (["assert_fact", "assert_rule", "retract", "retract_fact", "write"].includes(executionIntent)) {
+      return "write";
+    }
+    return route;
+  }
   if (countSuccessfulMutations(execution) > 0) {
     return "write";
   }
@@ -1056,7 +1064,13 @@ function renderPathStrip(ledger) {
       ? execution.operations.filter((op) => String(op?.tool || "").trim() === "query_rows").length
       : 0;
     const mutationCount = factWrites + ruleWrites + retractWrites;
-    if (mutationCount > 0) {
+    if (executionStatus === "error" || String(commitPhase?.status || "").trim().toLowerCase() === "failed") {
+      setPathCard("action", {
+        value: "Blocked",
+        meta: "No mutation",
+        tone: "danger",
+      });
+    } else if (mutationCount > 0) {
       setPathCard("action", {
         value: `${mutationCount} mutation${mutationCount === 1 ? "" : "s"}`,
         meta: `${factWrites} fact | ${ruleWrites} rule | ${retractWrites} retract`,
@@ -1331,6 +1345,22 @@ function outcomeSummary(turn) {
       badge: "Needs clarification",
       tone: "caution",
       title: "Prethinker held this turn instead of guessing.",
+      points,
+    };
+  }
+
+  if (
+    String(execution?.status || "").trim().toLowerCase() === "error" ||
+    String(commitPhase?.status || "").trim().toLowerCase() === "failed"
+  ) {
+    const errors = Array.isArray(execution?.errors)
+      ? execution.errors.map((item) => String(item || "").trim()).filter(Boolean)
+      : [];
+    points.push(...errors);
+    return {
+      badge: "Blocked",
+      tone: "danger",
+      title: "Deterministic execution failed; no KB mutation was committed.",
       points,
     };
   }
