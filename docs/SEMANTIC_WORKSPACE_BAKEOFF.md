@@ -182,3 +182,36 @@ bad-commit flag, missing clarification flag, and latency.
 The architectural question for the next phase is not "can the LLM replace the
 gate?" It is whether a model sidecar can reduce bad commits and improve
 clarification quality while the deterministic runtime keeps final authority.
+
+## Semantic IR Prompt Iteration
+
+A separate prompt iteration fixed `qwen3.6:35b` as the general sidecar candidate
+and tested `semantic_ir_v1` prompts on a wilder utterance pack. The first prompt
+pass produced valid JSON but wrapped the IR under a `schema_contract` key. After
+tightening the system prompt to require `schema_version` and `decision` at the
+root, all variants produced valid top-level IR.
+
+The current best candidate is `best_guarded_v2`, documented in
+`docs/prompts/SEMANTIC_IR_V1.md`.
+
+Controls:
+
+- model: `qwen3.6:35b`
+- temperature: `0.0`
+- top_p: `0.82`
+- top_k: `20`
+- think: `false`
+
+Wild-pack result:
+
+| Variant | JSON OK | Schema OK | Decision OK | Avg rough score | Avg latency |
+|---|---:|---:|---:|---:|---:|
+| `best_guarded_v2` | 12/12 | 12/12 | 7/12 | 0.88 | 5.8s |
+
+Qualitative read: the prompt is now good enough to demonstrate rich semantic
+workspace behavior. It handles vague pressure, active-context lab follow-up,
+cart correction, mixed rule/query turns, typo-heavy pronoun ambiguity, and
+allergy-versus-side-effect better than the earlier Prolog-ish extraction style.
+The remaining weakness is decision-label calibration: it sometimes chooses
+`mixed` when the deterministic policy should probably force `reject`,
+`quarantine`, `clarify`, or `commit`.
