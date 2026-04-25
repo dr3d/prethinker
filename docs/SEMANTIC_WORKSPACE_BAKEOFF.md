@@ -78,6 +78,37 @@ stable, but the richer thinking modes produced empty `content` on several 9B
 calls because useful text landed in Ollama's `thinking` channel instead of the
 JSON response body.
 
+## Gemma4 26B Check
+
+A follow-up run added `gemma4:26b` on the same seven compact scenarios.
+
+| Model | Mode | JSON OK | Avg rough score | Avg latency |
+|---|---:|---:|---:|---:|
+| `gemma4:26b` | `semantic_workspace` | 5/7 | 0.66 | 17.8s |
+| `gemma4:26b` | `ambiguity_critic` | 4/7 | 0.59 | 20.2s |
+| `gemma4:26b` | `strict_compiler` | 7/7 | 0.75 | 6.1s |
+
+Gemma4 26B is worth keeping in the candidate pool, especially as a strict
+compiler or structured IR emitter. It handled temporal false claims, pronoun
+ambiguity, recursive rule creation, and allergy-versus-intolerance reasonably
+well when it returned parseable JSON.
+
+The concern is reliability under richer `think=true` prompts. Several rich
+analysis calls either timed out or returned non-JSON output, and two correction
+or ambiguity cases produced long stalls before the run resumed. That makes it
+less attractive than `qwen3.6:35b` for the first smart sidecar, but it may still
+be useful in a non-thinking decision-contract sweep.
+
+Current model read:
+
+- First sidecar candidate: `qwen3.6:35b`, because it gave strong JSON reliability
+  and much better latency than dense 27B in rich mode.
+- Deep adjudicator candidate: `qwen3.6:27b`, because its rich semantic workspace
+  was strongest but slow.
+- Fast strict baseline: `qwen3.5:9b`.
+- Worth further testing: `gemma4:26b`, but probably with `think=false` and a
+  smaller decision-contract output.
+
 ## Caveats
 
 - The scorer is keyword-based and can over-credit or under-credit semantically
