@@ -136,5 +136,5 @@ Progress means:
 
 - excursion source pack: `stories/excursions/HN_MIDGROUND_PACK_V2.md`
 - harder source pack: `stories/excursions/HN_MIDGROUND_PACK_V3.md`
-- session log entry: `SESSIONS.md` (Session 27)
+- historical session notes live in Git history; current orientation is [PROJECT_STATE.md](../PROJECT_STATE.md)
 - failure isolation note: `docs/WILD_FAILURE_ISOLATION.md`

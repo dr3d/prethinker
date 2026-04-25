@@ -64,9 +64,7 @@ It is:
 - it should earn trust in narrow stages
 - it should not begin life as a broad write-unblocking agent
 
-Reference:
-
-- [docs/reports/FREETHINKER_ARCHITECTURE_PROBE_2026-04-19.md](/D:/_PROJECTS/prethinker/docs/reports/FREETHINKER_ARCHITECTURE_PROBE_2026-04-19.md)
+Historical probe reports were pruned from the forward-facing tree after their conclusions were distilled here and in [PROJECT_STATE.md](/D:/_PROJECTS/prethinker/PROJECT_STATE.md).
 
 ## Current State
 

@@ -13,7 +13,8 @@ The forge is still where we discover new weirdness. The packs are where we pin t
 
 - [process_utterance_correction_pack_v1_baseline.json](</D:/_PROJECTS/prethinker/docs/data/frontier_packs/process_utterance_correction_pack_v1_baseline.json>)
 - [process_utterance_temporal_pack_v1_baseline.json](</D:/_PROJECTS/prethinker/docs/data/frontier_packs/process_utterance_temporal_pack_v1_baseline.json>)
-- [PROCESS_UTTERANCE_FRONTIER_BASELINES_2026-04-20.md](</D:/_PROJECTS/prethinker/docs/reports/PROCESS_UTTERANCE_FRONTIER_BASELINES_2026-04-20.md>)
+
+Historical dated baseline reports were pruned from the forward-facing tree; rerun the pack runner to regenerate fresh local reports when needed.
 
 ## What They Are For
 

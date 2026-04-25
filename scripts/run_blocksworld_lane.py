@@ -434,7 +434,7 @@ def parse_args() -> argparse.Namespace:
         help="Fail the run when average goal predicate hit ratio drops below this threshold. Use -1 to disable.",
     )
     p.add_argument("--summary-json", default="tmp/blocksworld_lane_2026-04-16.summary.json")
-    p.add_argument("--summary-md", default="docs/reports/BLOCKSWORLD_LANE_2026-04-16.md")
+    p.add_argument("--summary-md", default="tmp/reports/BLOCKSWORLD_LANE.md")
     p.add_argument("--cases-jsonl", default="tmp/blocksworld_lane_2026-04-16.cases.jsonl")
     p.add_argument("--prolog-rules-out", default="tmp/blocksworld_governor_rules_2026-04-16.pl")
     return p.parse_args()

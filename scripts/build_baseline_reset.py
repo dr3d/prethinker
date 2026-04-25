@@ -193,7 +193,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--packs", default=",".join(DEFAULT_PACKS))
     p.add_argument("--model", default="qwen3.5:9b")
     p.add_argument("--summary-json", default="tmp/baseline_reset_2026-04-16.summary.json")
-    p.add_argument("--report-md", default="docs/reports/BASELINE_RESET_2026-04-16.md")
+    p.add_argument("--report-md", default="tmp/reports/BASELINE_RESET.md")
     return p.parse_args()
 
 
@@ -235,4 +235,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

@@ -2,7 +2,7 @@
 
 This is the stable design overview for the project.
 
-If you want live metrics, read [docs/PROGRESS.md](/D:/_PROJECTS/prethinker/docs/PROGRESS.md).
+If you want the current project snapshot, read [PROJECT_STATE.md](/D:/_PROJECTS/prethinker/PROJECT_STATE.md).
 
 If you want the product story in plainer language, read [docs/EXPLAINER.md](/D:/_PROJECTS/prethinker/docs/EXPLAINER.md).
 
@@ -151,16 +151,14 @@ Both roles can be backed by the same underlying `qwen3.5:9b` weights with differ
 
 ## Current Reality
 
-As of April 20, 2026:
+As of April 25, 2026:
 
 - the canonical interactive entryway is `process_utterance()` in [src/mcp_server.py](/D:/_PROJECTS/prethinker/src/mcp_server.py)
 - the console in [ui_gateway/](/D:/_PROJECTS/prethinker/ui_gateway) is the main manual test cockpit
-- the safety gate is green at `142 passed`
-- strict Blocksworld remains the last verified stable proof lane
-- frozen `process_utterance()` frontier packs now anchor the hardest interactive families
-- correction is down to `2/12` remaining failures
-- temporal is now `8/12` pass, `4/12` warn, and `0/12` fail on the frozen pack
-- Freethinker is still defaulted to `off`
+- the prompt-book UI and ledger telemetry are the primary live demonstration surface
+- `medical@v0` is the most active bounded profile
+- UMLS Semantic Network assets are built locally for type/relation explanation
+- Freethinker remains optional and non-authoritative
 
 That means the repo already supports the governed compiler shape directly.
 
@@ -174,11 +172,12 @@ The codebase has three different kinds of artifacts because they serve different
   - `kb_pipeline.py`
   - `src/mcp_server.py`
   - `ui_gateway/`
-- evidence and reports
+- local evidence and run artifacts
   - `kb_runs/`
-  - `docs/reports/`
-  - `docs/PROGRESS.md`
+  - `tmp/`
+  - generated reports when explicitly rendered
 - design notes
+  - `PROJECT_STATE.md`
   - `docs/EXPLAINER.md`
   - `docs/FREETHINKER_DESIGN.md`
   - `docs/ONTOLOGY_STEERING.md`

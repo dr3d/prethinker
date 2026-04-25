@@ -2,17 +2,16 @@
 
 This folder contains a tuned Modelfile for turning Qwen 3.5 9B into a strict semantic parser for Prolog-style structures.
 
-Last updated: 2026-04-09
+Last updated: 2026-04-25
 
 ## Included
 
 - `qwen35-9b-semantic-parser.Modelfile`
-- `qwen35-9b-findings.md` (observed 9B behavior and recommended guardrails)
 - `test-lmstudio-semparse.ps1` (2-pass validator for LM Studio and Ollama)
 - `semantic_parser_system_prompt.md` (human-editable prompt pack used by `kb_pipeline.py`)
 - `semantic_parser_system_prompt_candidate.md` (staging candidate for future prompt A/B work; not active by default)
 - `freethinker_system_prompt.md` (staging sidecar prompt for future clarification-liaison work; inactive while policy is `off`)
-- `history/prompts/*.md` (immutable prompt snapshots keyed by `prompt_id`)
+- `history/prompts/*.md` (generated local prompt snapshots keyed by `prompt_id`; not part of the current docs spine)
 
 ## Build (Ollama)
 

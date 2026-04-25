@@ -572,7 +572,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--label", default="smart_latest", help="Suffix used in output report filenames.")
     p.add_argument(
         "--learn-log",
-        default="docs/run-learnings.md",
+        default="tmp/run-learnings.md",
         help="Append concise run learnings to this Markdown log (empty string disables).",
     )
     p.add_argument(
