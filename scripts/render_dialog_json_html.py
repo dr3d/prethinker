@@ -728,7 +728,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--docs-hub-link",
-        default="../index.html",
+        default="https://dr3d.github.io/prethinker/",
         help="Top-nav docs hub link.",
     )
     parser.add_argument(

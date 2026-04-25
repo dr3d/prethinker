@@ -2,9 +2,9 @@
 
 This is the stable design overview for the project.
 
-If you want the current project snapshot, read [PROJECT_STATE.md](/D:/_PROJECTS/prethinker/PROJECT_STATE.md).
+If you want the current project snapshot, read [PROJECT_STATE.md](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md).
 
-If you want the product story in plainer language, read [docs/EXPLAINER.md](/D:/_PROJECTS/prethinker/docs/EXPLAINER.md).
+If you want the product story in plainer language, read [docs/EXPLAINER.md](https://github.com/dr3d/prethinker/blob/main/docs/EXPLAINER.md).
 
 ## One-Sentence Definition
 

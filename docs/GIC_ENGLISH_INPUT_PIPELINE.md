@@ -118,7 +118,7 @@ In practice the model receives a **single wrapped prompt** for each pass:
 
 The active shared semantic doctrine lives here:
 
-- [modelfiles/semantic_parser_system_prompt.md](../modelfiles/semantic_parser_system_prompt.md)
+- [modelfiles/semantic_parser_system_prompt.md](https://github.com/dr3d/prethinker/blob/main/modelfiles/semantic_parser_system_prompt.md)
 
 This shared prompt is the stable constitutional guidance:
 

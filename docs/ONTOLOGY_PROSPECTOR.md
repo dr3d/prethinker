@@ -36,7 +36,7 @@ It writes local reports under `tmp/...`, not into the public KB.
 
 ## Tracked Inputs
 
-- prompt: [modelfiles/medical_ontology_prospector_prompt.md](../modelfiles/medical_ontology_prospector_prompt.md)
+- prompt: [modelfiles/medical_ontology_prospector_prompt.md](https://github.com/dr3d/prethinker/blob/main/modelfiles/medical_ontology_prospector_prompt.md)
 - corpus: [docs/data/medical_ontology_prospector_corpus.json](data/medical_ontology_prospector_corpus.json)
 - runner: [scripts/run_medical_ontology_prospector.py](../scripts/run_medical_ontology_prospector.py)
 

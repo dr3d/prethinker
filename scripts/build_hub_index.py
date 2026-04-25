@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
+PAGES_BASE = "https://dr3d.github.io/prethinker/"
 
 
 def parse_args() -> argparse.Namespace:
@@ -93,6 +94,11 @@ def _resolve(path_text: str) -> Path:
 
 def _rel_path(path: Path, base: Path) -> str:
     return Path(os.path.relpath(str(path), str(base))).as_posix()
+
+
+def _pages_link(path: Path) -> str:
+    rel = Path(os.path.relpath(str(path), str(ROOT / "docs"))).as_posix()
+    return PAGES_BASE + rel.lstrip("./")
 
 
 def _repo_rel(path: Path) -> str:
@@ -255,7 +261,7 @@ def _collect_runs(runs_dir: Path, reports_dir: Path, out: Path) -> list[dict[str
                 "prompt_snapshot_rel": snap_rel,
                 "run_json_source_rel": published_json_rel,
                 "report_json_rel": published_json_rel,
-                "report_html_rel": _rel_path(html, out.parent) if html.exists() else "",
+                "report_html_rel": _pages_link(html) if html.exists() else "",
             }
         )
     rows.sort(key=lambda x: (x["finished_utc"], x["run_id"]), reverse=True)
@@ -655,7 +661,7 @@ def _build_progress_cards_page(
 
     body = "\n".join(sections) or "<p>No run cards available.</p>"
     generated = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
-    index_rel = _rel_path(docs_root / "index.html", cards_output.parent)
+    index_rel = PAGES_BASE
     page = f"""<!doctype html>
 <html lang="en" data-theme="light">
 <head>
@@ -983,13 +989,13 @@ def main() -> int:
     ) or "<tr><td colspan=\"8\">No prompt versions.</td></tr>"
     kb_rows = "\n".join(
         [
-            f"<tr><td><a href=\"{_rel_path(p, out.parent)}\">{p.name}</a></td><td>{dt.datetime.fromtimestamp(p.stat().st_mtime).strftime('%Y-%m-%d %H:%M')}</td><td>{max(1,int(p.stat().st_size/1024))} KB</td></tr>"
+            f"<tr><td><a href=\"{_pages_link(p)}\">{p.name}</a></td><td>{dt.datetime.fromtimestamp(p.stat().st_mtime).strftime('%Y-%m-%d %H:%M')}</td><td>{max(1,int(p.stat().st_size/1024))} KB</td></tr>"
             for p in sorted([x for x in kb_dir.rglob('*.html') if x.is_file() and x.name.lower()!='index.html'], key=lambda x: x.name.lower())
         ]
     ) or "<tr><td colspan=\"3\">No KB snapshots.</td></tr>"
-    docs_hub = "<a href=\"index.html\">Docs Hub</a>"
-    ladder = f"<a href=\"{_rel_path(ladder_idx, out.parent)}\">View Test Ladder</a>" if ladder_idx.exists() else ""
-    cards = f"<a href=\"{_rel_path(cards_out, out.parent)}\">Progress Cards</a>" if cards_out.exists() else ""
+    docs_hub = f"<a href=\"{PAGES_BASE}\">Docs Hub</a>"
+    ladder = f"<a href=\"{_pages_link(ladder_idx)}\">View Test Ladder</a>" if ladder_idx.exists() else ""
+    cards = f"<a href=\"{_pages_link(cards_out)}\">Progress Cards</a>" if cards_out.exists() else ""
     repo = f"<a href=\"{html.escape(a.repo_link)}\" target=\"_blank\" rel=\"noreferrer\">Repository</a>" if str(a.repo_link).strip() else ""
 
     page_html = f"""<!doctype html><html lang="en" data-theme="light"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>{a.title}</title><style>

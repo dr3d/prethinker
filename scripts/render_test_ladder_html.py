@@ -19,6 +19,7 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
+PAGES_BASE = "https://dr3d.github.io/prethinker/"
 
 
 def parse_args() -> argparse.Namespace:
@@ -133,13 +134,13 @@ def _render_rung_page(
         run_file_link = f"../../kb_runs/{run_file}" if run_file else "#"
         report_html_name = latest_run_path.with_suffix(".html").name if latest_run_path else ""
         report_html_path = ROOT / "docs" / "reports" / report_html_name
-        report_html_link = f"../reports/{report_html_name}" if report_html_path.exists() else ""
+        report_html_link = f"{PAGES_BASE}reports/{report_html_name}" if report_html_path.exists() else ""
         kb_page_link = ""
         kb_name = str(latest_run.get("ontology_kb_name", "")).strip()
         if kb_name:
             kb_page = ROOT / "docs" / "kb" / f"{kb_name}.html"
             if kb_page.exists():
-                kb_page_link = f"../kb/{kb_name}.html"
+                kb_page_link = f"{PAGES_BASE}kb/{kb_name}.html"
 
         links: list[str] = [f"<a href=\"{html.escape(run_file_link)}\">raw run json</a>"]
         if report_html_link:
@@ -236,7 +237,7 @@ def _render_rung_page(
       </div>
       <button id="theme-toggle" class="theme-btn" aria-label="Toggle theme">theme</button>
     </div>
-    <p class="muted">Generated {generated} | <a href="./index.html">Back to ladder index</a> | <a href="../index.html">Back to docs</a></p>
+    <p class="muted">Generated {generated} | <a href="https://dr3d.github.io/prethinker/rungs/">Back to ladder index</a> | <a href="https://dr3d.github.io/prethinker/">Back to docs</a></p>
 
     <section class="panel">
       <h2>Latest Run Summary</h2>
@@ -338,7 +339,7 @@ def _render_index_page(
     <div class="topbar">
       <div>
         <h1>{html.escape(title)}</h1>
-        <p class="muted">Generated {generated} | <a href="../index.html">Back to docs</a></p>
+        <p class="muted">Generated {generated} | <a href="https://dr3d.github.io/prethinker/">Back to docs</a></p>
       </div>
       <button id="theme-toggle" class="theme-btn" aria-label="Toggle theme">theme</button>
     </div>

@@ -6,7 +6,7 @@ Current center: a live `ui_gateway` console backed by `src/mcp_server.py`, with 
 
 ## Current State
 
-Read [PROJECT_STATE.md](PROJECT_STATE.md) first. It is the compact, current orientation document for the repo.
+Read [PROJECT_STATE.md](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md) first. It is the compact, current orientation document for the repo.
 
 The short version:
 
@@ -19,14 +19,14 @@ The short version:
 
 ## Useful Entry Points
 
-- [PROJECT_STATE.md](PROJECT_STATE.md) - current architecture, demo status, and next frontiers.
-- [AGENT-README.md](AGENT-README.md) - fast onboarding for coding agents.
-- [docs/PRETHINK_GATEWAY_MVP.md](docs/PRETHINK_GATEWAY_MVP.md) - live gateway shape.
-- [docs/UMLS_MVP.md](docs/UMLS_MVP.md) - UMLS bridge and Semantic Network work.
-- [docs/MEDICAL_PROFILE.md](docs/MEDICAL_PROFILE.md) - bounded medical profile.
-- [docs/FREETHINKER_DESIGN.md](docs/FREETHINKER_DESIGN.md) - optional clarification sidecar.
-- [docs/CONSOLE_TRYBOOK.md](docs/CONSOLE_TRYBOOK.md) - prompts for manual demos.
-- [ui_gateway/README.md](ui_gateway/README.md) - UI gateway notes.
+- [PROJECT_STATE.md](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md) - current architecture, demo status, and next frontiers.
+- [AGENT-README.md](https://github.com/dr3d/prethinker/blob/main/AGENT-README.md) - fast onboarding for coding agents.
+- [docs/PRETHINK_GATEWAY_MVP.md](https://github.com/dr3d/prethinker/blob/main/docs/PRETHINK_GATEWAY_MVP.md) - live gateway shape.
+- [docs/UMLS_MVP.md](https://github.com/dr3d/prethinker/blob/main/docs/UMLS_MVP.md) - UMLS bridge and Semantic Network work.
+- [docs/MEDICAL_PROFILE.md](https://github.com/dr3d/prethinker/blob/main/docs/MEDICAL_PROFILE.md) - bounded medical profile.
+- [docs/FREETHINKER_DESIGN.md](https://github.com/dr3d/prethinker/blob/main/docs/FREETHINKER_DESIGN.md) - optional clarification sidecar.
+- [docs/CONSOLE_TRYBOOK.md](https://github.com/dr3d/prethinker/blob/main/docs/CONSOLE_TRYBOOK.md) - prompts for manual demos.
+- [ui_gateway/README.md](https://github.com/dr3d/prethinker/blob/main/ui_gateway/README.md) - UI gateway notes.
 
 ## Run It
 

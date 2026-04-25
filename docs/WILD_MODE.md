@@ -136,5 +136,5 @@ Progress means:
 
 - excursion source pack: `stories/excursions/HN_MIDGROUND_PACK_V2.md`
 - harder source pack: `stories/excursions/HN_MIDGROUND_PACK_V3.md`
-- historical session notes live in Git history; current orientation is [PROJECT_STATE.md](../PROJECT_STATE.md)
+- historical session notes live in Git history; current orientation is [PROJECT_STATE.md](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md)
 - failure isolation note: `docs/WILD_FAILURE_ISOLATION.md`

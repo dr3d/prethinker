@@ -64,7 +64,7 @@ It is:
 - it should earn trust in narrow stages
 - it should not begin life as a broad write-unblocking agent
 
-Historical probe reports were pruned from the forward-facing tree after their conclusions were distilled here and in [PROJECT_STATE.md](/D:/_PROJECTS/prethinker/PROJECT_STATE.md).
+Historical probe reports were pruned from the forward-facing tree after their conclusions were distilled here and in [PROJECT_STATE.md](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md).
 
 ## Current State
 

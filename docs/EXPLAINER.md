@@ -79,7 +79,7 @@ Its job is to:
 
 If you want the code-level technical version of this story, see:
 
-- [GIC English Input Pipeline](./GIC_ENGLISH_INPUT_PIPELINE.md)
+- [GIC English Input Pipeline](https://github.com/dr3d/prethinker/blob/main/docs/GIC_ENGLISH_INPUT_PIPELINE.md)
 
 Prethinker is the authority boundary.
 

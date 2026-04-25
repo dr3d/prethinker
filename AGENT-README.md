@@ -4,13 +4,13 @@ This is the short handoff for coding agents working in Prethinker.
 
 ## First Read
 
-1. [PROJECT_STATE.md](PROJECT_STATE.md)
-2. [README.md](README.md)
-3. [docs/PRETHINK_GATEWAY_MVP.md](docs/PRETHINK_GATEWAY_MVP.md)
-4. [docs/UMLS_MVP.md](docs/UMLS_MVP.md)
-5. [docs/MEDICAL_PROFILE.md](docs/MEDICAL_PROFILE.md)
-6. [docs/FREETHINKER_DESIGN.md](docs/FREETHINKER_DESIGN.md)
-7. [ui_gateway/README.md](ui_gateway/README.md)
+1. [PROJECT_STATE.md](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md)
+2. [README.md](https://github.com/dr3d/prethinker/blob/main/README.md)
+3. [docs/PRETHINK_GATEWAY_MVP.md](https://github.com/dr3d/prethinker/blob/main/docs/PRETHINK_GATEWAY_MVP.md)
+4. [docs/UMLS_MVP.md](https://github.com/dr3d/prethinker/blob/main/docs/UMLS_MVP.md)
+5. [docs/MEDICAL_PROFILE.md](https://github.com/dr3d/prethinker/blob/main/docs/MEDICAL_PROFILE.md)
+6. [docs/FREETHINKER_DESIGN.md](https://github.com/dr3d/prethinker/blob/main/docs/FREETHINKER_DESIGN.md)
+7. [ui_gateway/README.md](https://github.com/dr3d/prethinker/blob/main/ui_gateway/README.md)
 
 Treat older reports and prompt snapshots as Git history, not live guidance.
 

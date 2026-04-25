@@ -24,7 +24,7 @@ Then open:
 http://127.0.0.1:8765
 ```
 
-For a ready-made manual test script, see [CONSOLE_TRYBOOK.md](../docs/CONSOLE_TRYBOOK.md).
+For a ready-made manual test script, see [CONSOLE_TRYBOOK.md](https://github.com/dr3d/prethinker/blob/main/docs/CONSOLE_TRYBOOK.md).
 
 Direct file-open also works now:
 

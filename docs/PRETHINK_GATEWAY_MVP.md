@@ -120,7 +120,7 @@ Near-term intended path:
 
 Reference:
 
-- [docs/FREETHINKER_DESIGN.md](/D:/_PROJECTS/prethinker/docs/FREETHINKER_DESIGN.md)
+- [docs/FREETHINKER_DESIGN.md](https://github.com/dr3d/prethinker/blob/main/docs/FREETHINKER_DESIGN.md)
 
 ## Deliberate Limits
 
