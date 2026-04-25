@@ -247,6 +247,137 @@ WILD_SCENARIOS: list[dict[str, Any]] = [
             "avoid": ["wore(widget", "damaged(jax"],
         },
     },
+    {
+        "id": "ledger_separation_tax_condition",
+        "domain": "legal_story",
+        "utterance": (
+            "Jonas could keep living above Dock 7 and retain his half-share only if "
+            "he cleared all back taxes by June 30, 2023; otherwise Celia could force "
+            "his half into Leona's educational trust if Pavel certified the default."
+        ),
+        "context": ["Celia and Jonas filed a formal separation agreement in September 2019."],
+        "allowed_predicates": ["conditional_right/4", "deadline/3", "authority_if/4", "certifies/2"],
+        "expect": {
+            "decision": "mixed",
+            "must": ["Jonas", "June 30, 2023", "Pavel", "default"],
+            "avoid": ["transferred", "owns(leona"],
+        },
+    },
+    {
+        "id": "ledger_default_transfer",
+        "domain": "legal_story",
+        "utterance": (
+            "Pavel certified the default on July 2. Celia invoked the agreement, "
+            "and Jonas's half of Dock 7 transferred into Leona's educational trust for one crown."
+        ),
+        "context": [
+            "Agreement: if Jonas missed the June 30, 2023 tax deadline and Pavel certified default, Celia could force transfer.",
+            "Jonas missed the tax deadline on June 30, 2023.",
+        ],
+        "allowed_predicates": ["certified/3", "invoked/3", "transferred/5", "paid/3", "owned_share/3"],
+        "expect": {
+            "decision": "commit",
+            "must": ["Pavel", "Celia", "Jonas", "Leona"],
+            "avoid": ["Tomas", "Iris"],
+        },
+    },
+    {
+        "id": "ledger_tomas_half_untouched",
+        "domain": "legal_story",
+        "utterance": (
+            "The separation agreement did not touch Tomas's half of Dock 7, "
+            "because Tomas was not party to Celia and Jonas's marriage."
+        ),
+        "context": ["Dock 7 was co-owned by Jonas Voss and Tomas Vale."],
+        "allowed_predicates": ["untouched_by_agreement/3", "co_owned/3", "party_to/2", "married/2"],
+        "expect": {
+            "decision": "commit",
+            "must": ["Tomas", "Jonas", "Celia", "not party"],
+            "avoid": ["transferred(tomas", "lost_share(tomas"],
+        },
+    },
+    {
+        "id": "ledger_compass_conditional_inheritance",
+        "domain": "legal_story",
+        "utterance": (
+            "Tomas's will left the silver compass to Iris if she accepted keeper duties "
+            "within sixty days; if she did not, the compass would pass to Mara as town archivist. "
+            "Iris declined the keeper role, so the silver compass passed to Mara."
+        ),
+        "context": ["Tomas Vale died in February 2022.", "Iris was Tomas's only child."],
+        "allowed_predicates": ["conditional_inheritance/4", "declined/3", "inherited/3", "role/2"],
+        "expect": {
+            "decision": "commit",
+            "must": ["Iris", "Mara", "silver compass", "declined"],
+            "avoid": ["inherited(iris, silver_compass"],
+        },
+    },
+    {
+        "id": "ledger_alias_quinn_quentin",
+        "domain": "legal_story",
+        "utterance": (
+            "June published that the same constable had fined Quentin Marr and Quinn Damar "
+            "separately for the same truck. The town finally admitted the two names belonged to one man."
+        ),
+        "context": ["Quinn used the name Quentin Marr on certain permits."],
+        "allowed_predicates": ["alias/2", "fined/3", "reported/3", "admitted/2"],
+        "expect": {
+            "decision": "commit",
+            "must": ["Quinn Damar", "Quentin Marr", "same truck", "one man"],
+            "avoid": ["two people", "different men"],
+        },
+    },
+    {
+        "id": "ledger_guardianship_not_end",
+        "domain": "legal_story",
+        "utterance": (
+            "June found Iain alive under the name Ian Morrow, but since he had not yet resumed "
+            "ordinary residence in Calder's Reach, Mara's temporary guardianship of Tobin did not end at once."
+        ),
+        "context": [
+            "Mireya's letter: Mara becomes Tobin's temporary guardian if Mireya is dead and Iain is missing for more than ninety days.",
+            "Mara became Tobin's temporary guardian after Iain was missing for ninety days.",
+        ],
+        "allowed_predicates": ["alias/2", "found_alive/2", "resumed_residence/2", "guardianship_active/2", "ended/2"],
+        "expect": {
+            "decision": "commit",
+            "must": ["Iain", "Ian Morrow", "Mara", "did not end"],
+            "avoid": ["ended(guardianship", "guardianship_ended"],
+        },
+    },
+    {
+        "id": "ledger_scholarship_residency_loss",
+        "domain": "legal_story",
+        "utterance": (
+            "Tobin spent five consecutive months out of district while Ashdown road was rebuilt; "
+            "as a result, he lost the Harbor Scholarship at the next review, even though his father was still an active harbor worker."
+        ),
+        "context": [
+            "Rule: a Harbor Scholarship recipient loses it if the child's household leaves Calder's Reach district for more than four consecutive months.",
+            "Iain is Tobin's father and an active harbor worker.",
+        ],
+        "allowed_predicates": ["out_of_district/3", "active_harbor_worker/1", "lost_scholarship/3", "exception_overridden/2"],
+        "expect": {
+            "decision": "commit",
+            "must": ["Tobin", "five consecutive months", "Harbor Scholarship", "active harbor worker"],
+            "avoid": ["kept_scholarship", "eligible(tobin"],
+        },
+    },
+    {
+        "id": "ledger_profit_transfer_before_bonuses",
+        "domain": "legal_story",
+        "utterance": (
+            "Tideglass net profit exceeded two hundred thousand crowns, so by charter "
+            "twenty percent had to move into the flood fund before trustee bonuses; Pavel tried to delay it, but Ada enforced it."
+        ),
+        "context": ["Tideglass Conservatory is governed by a charitable trust charter."],
+        "allowed_predicates": ["profit_exceeded/3", "required_transfer/4", "before/2", "attempted_delay/2", "enforced/2"],
+        "expect": {
+            "decision": "commit",
+            "must": ["Tideglass", "twenty percent", "flood fund", "Ada"],
+            "avoid": ["bonus_before_transfer", "pavel_enforced"],
+        },
+    },
 ]
 
 

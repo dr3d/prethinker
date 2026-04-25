@@ -224,3 +224,35 @@ backflip, Sonic-Zips damage, and Widget's claim without turning the claim into
 an observed possession fact. That run also motivated adding `polarity` to
 `candidate_operations`, so negative story facts do not become positive KB
 mutations by accident.
+
+A harder Ledger story pack then tested conditional legal and temporal state:
+separation agreements, default certification, half-share transfers, conditional
+inheritance, aliases, guardianship, residency loss, and charter sequencing.
+`best_guarded_v2` scored 8/8 JSON, 8/8 schema, 8/8 decision, with average rough
+score 0.98 and average latency 8.8s. The important qualitative result is that
+the model can keep conditional rules separate from completed facts. In the
+separation clause, it marked the turn `mixed`: safe conditional structure can be
+represented, while completed default and transfer facts remain uncommitted until
+later evidence appears.
+
+## Guardrail Dependency Metric
+
+The next measurement should be whether the semantic IR path actually reduces
+Python-side semantic rescue code. The current pipeline still contains concrete
+rescue hooks for possessive family bundles, same-clause spouse phrases,
+same-utterance family-anchor pronouns, route heuristics, clarification cleanup,
+predicate canonicalization, and query fallback behavior.
+
+Proposed metric:
+
+| Metric | Question |
+|---|---|
+| semantic rescue hooks invoked | How many Python semantic patch paths fired on this turn? |
+| rescue-critical commits | Would the old path have committed the correct mutation without a rescue hook? |
+| IR direct coverage | Did semantic IR express the same structure before Python repair? |
+| unsafe commit rate | Did either path admit a bad fact? |
+| false clarification rate | Did either path ask when it could safely proceed? |
+| patch pressure | Did a new scenario require new Python English-special-case code? |
+
+The research target is not zero deterministic code. It is fewer English-specific
+semantic patches while preserving strict admission, provenance, and auditability.

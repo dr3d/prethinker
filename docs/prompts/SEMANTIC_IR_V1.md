@@ -192,3 +192,33 @@ The run did not repeat the old Unit-Alpha-as-salvager error. It also surfaced an
 important IR schema fix: `candidate_operations` needs `polarity` so negative
 story facts like "Widget never saw who did it" do not become positive `saw/2`
 facts. The schema now carries operation polarity explicitly.
+
+## Ledger Story Pack
+
+The next stress pack moves from story roles into conditional legal and temporal
+state. It is meant to probe whether the model can hold conditional rights,
+defaults, aliases, guardianship status, and eligibility changes in the semantic
+workspace before any KB mutation is admitted.
+
+Scenarios:
+
+- conditional residence and ownership under a separation agreement
+- certified default transferring Jonas's half-share into Leona's trust
+- Tomas's half-share staying untouched by Jonas's agreement
+- conditional inheritance of a silver compass after Iris declines keeper duties
+- alias evidence around Quentin Marr and Quinn Damar
+- guardianship continuing because Iain/Ian has not resumed residence
+- scholarship loss after five consecutive months out of district
+- charter-mandated transfer before manager bonuses
+
+Result:
+
+| Variant | JSON OK | Schema OK | Decision OK | Avg rough score | Avg latency |
+|---|---:|---:|---:|---:|---:|
+| `best_guarded_v2` | 8/8 | 8/8 | 8/8 | 0.98 | 8.8s |
+
+The most useful finding is that the prompt can distinguish rule/state
+boundaries. For example, the separation clause is `mixed`: the condition and
+authority rule can be represented, but completed default and transfer facts
+should remain uncommitted until later evidence appears. This is exactly the
+kind of distinction the old Python rescue path struggled to express cleanly.
