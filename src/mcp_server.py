@@ -45,6 +45,7 @@ from src.medical_profile import (
     load_profile_concepts,
     load_umls_bridge_facts,
     load_profile_manifest,
+    rescue_medical_clarified_lab_result,
     resolve_profile_paths,
     sanitize_medical_parse_for_bridge,
     sanitize_medical_parse_for_clarification,
@@ -1591,8 +1592,23 @@ class PrologMCPServer:
             )
         )
         profile_guard_input = self._clone_trace_payload(after_subject_prefix)
+        after_medical_clarification_rescue = profile_guard_input
+        if self._active_profile == "medical@v0":
+            after_medical_clarification_rescue = rescue_medical_clarified_lab_result(
+                profile_guard_input,
+                utterance=utterance,
+                clarification_answer=clarification_answer,
+            )
+        trace["rescues"].append(
+            self._trace_step(
+                name="medical_clarified_lab_result_rescue",
+                before=profile_guard_input,
+                after=after_medical_clarification_rescue,
+                summary="Recovered clarified medical lab-result restatements into bounded profile facts.",
+            )
+        )
         admitted = self._apply_active_profile_parse_guard(
-            parsed=profile_guard_input,
+            parsed=after_medical_clarification_rescue,
             utterance=utterance,
         )
         trace["rescues"].append(
@@ -1804,6 +1820,25 @@ class PrologMCPServer:
         if self._kb_path:
             result["knowledge_base_path"] = self._kb_path
         return result
+
+    def reset_conversation_state(self, *, clear_kb: bool = True) -> dict[str, Any]:
+        kb_result: dict[str, Any] | None = None
+        if clear_kb:
+            kb_result = self.empty_kb()
+        self._pending_prethink = None
+        self._recent_accepted_turns.clear()
+        self._recent_committed_logic.clear()
+        self._last_prethink_trace = {}
+        self._last_prethink_fallback_trace = {}
+        self._last_parse_trace = {}
+        self._prethink_counter = 1
+        return {
+            "status": "success",
+            "result_type": "conversation_state_reset",
+            "kb_cleared": bool(clear_kb),
+            "kb_result": kb_result,
+            "state": self._serialize_state(),
+        }
 
     def assert_fact(self, clause: str) -> dict[str, Any]:
         result = self._runtime.assert_fact(clause)

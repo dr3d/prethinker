@@ -102,6 +102,73 @@ def test_render_umls_bridge_facts_includes_normalized_aliases_and_groups():
     assert "umls_alias_norm(metformin, glucophage)." in facts
 
 
+def test_load_semantic_network_reads_srdef_srstr_and_inherited_relations(tmp_path):
+    (tmp_path / "SRDEF").write_text(
+        "\n".join(
+            [
+                "STY|T047|Disease or Syndrome|B2.2.1.2.1|A condition.|Disease example|Use note|N|dsyn|",
+                "STY|T033|Finding|A2.2|An observation.|Finding example|Use note|N|fndg|",
+                "RL|T186|isa|R1|Hierarchical relation.||||isa|inverse_isa",
+                "RL|T151|affects|R3|Affects relation.||||affects|affected_by",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "SRSTR").write_text(
+        "\n".join(
+            [
+                "Finding|isa||D",
+                "Disease or Syndrome|isa|Finding|D",
+                "Disease or Syndrome|affects|Organism|D",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "SRSTRE2").write_text(
+        "Disease or Syndrome|affects|Organism|\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "SRSTRE1").write_text(
+        "T047|T151|T001|\n",
+        encoding="utf-8",
+    )
+
+    network = umls_mvp.load_semantic_network(tmp_path)
+
+    assert [row["ui"] for row in network["semantic_types"]] == ["T033", "T047"]
+    assert [row["name"] for row in network["semantic_relations"]] == ["affects", "isa"]
+    assert any(row["source"] == "Disease or Syndrome" and row["target"] == "Finding" for row in network["structure"])
+    assert network["inherited_ui_relations"][0]["source"] == "T047"
+    assert network["inherited_name_relations"][0]["relation_atom"] == "affects"
+
+
+def test_render_semantic_network_facts_includes_roots_parents_and_relations(tmp_path):
+    (tmp_path / "SRDEF").write_text(
+        "STY|T047|Disease or Syndrome|B2.2.1.2.1|A condition.||||dsyn|\n"
+        "RL|T151|affects|R3|Affects relation.||||affects|affected_by\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "SRSTR").write_text(
+        "Disease or Syndrome|isa|Finding|D\n"
+        "Entity|isa||D\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "SRSTRE1").write_text(
+        "T047|T151|T001|\n",
+        encoding="utf-8",
+    )
+    network = umls_mvp.load_semantic_network(tmp_path)
+    facts = umls_mvp.render_semantic_network_facts(network)
+
+    assert "umls_semantic_type_def('T047', disease_or_syndrome, 'Disease or Syndrome', 'B2.2.1.2.1')." in facts
+    assert "umls_semantic_relation_def('T151', affects, 'affects', 'affected_by')." in facts
+    assert "umls_semantic_parent(disease_or_syndrome, finding, 'D')." in facts
+    assert "umls_semantic_root(entity)." in facts
+    assert "umls_semantic_inherited_ui_relation('T047', 'T151', 'T001')." in facts
+
+
 def test_seed_alias_map_includes_probe_aliases():
     mapping = umls_mvp.seed_alias_map(
         {

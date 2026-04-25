@@ -49,6 +49,58 @@ class _FakeRuntime:
         }
 
 
+class _FailingClarificationRuntime:
+    def process_utterance(self, *, utterance, config, session, clarification_answer=None, prethink_id=None):
+        if clarification_answer:
+            return {
+                "status": "ok",
+                "front_door": {
+                    "route": "write",
+                    "compiler_intent": "assert_fact",
+                    "needs_clarification": False,
+                    "reasons": ["clarification_resolved"],
+                    "clarification_question": "",
+                    "prethink_id": prethink_id or "pt-123",
+                },
+                "execution": {
+                    "status": "error",
+                    "intent": "assert_fact",
+                    "writes_applied": 0,
+                    "operations": [],
+                    "query_result": None,
+                    "parse": {},
+                    "errors": ["assert_fact requires facts[0]"],
+                },
+                "compiler_trace": {"summary": {"overall": "parse failed"}},
+            }
+        return {
+            "status": "clarification_required",
+            "front_door": {
+                "route": "write",
+                "compiler_intent": "assert_fact",
+                "looks_like_query": False,
+                "looks_like_write": True,
+                "ambiguity_score": 0.9,
+                "needs_clarification": True,
+                "reasons": ["needs_clarification"],
+                "clarification_question": "Which exact fact should be stored?",
+                "prethink_id": "pt-123",
+            },
+            "execution": None,
+            "compiler_trace": {"summary": {"overall": "hold"}},
+        }
+
+    def should_handoff_instead_of_clarify(self, *, route, config):
+        return False
+
+    def answer(self, *, utterance, route, execution, clarification, config):
+        return {
+            "speaker": "prethink-gateway",
+            "text": "Execution blocked.",
+            "mode": "answer",
+        }
+
+
 class GatewayPhasesTests(unittest.TestCase):
     def test_process_turn_uses_served_handoff_when_clarification_is_suppressed(self) -> None:
         runtime = _FakeRuntime()
@@ -78,6 +130,38 @@ class GatewayPhasesTests(unittest.TestCase):
         self.assertEqual(
             clarify_phase["data"]["reason"],
             "served_handoff_instead_of_clarify",
+        )
+
+    def test_failed_clarification_resolution_keeps_pending_turn(self) -> None:
+        runtime = _FailingClarificationRuntime()
+        session = SessionState(session_id="session-test")
+        config = {
+            "front_door_uri": "prethink://local/front-door",
+            "served_handoff_mode": "never",
+            "strict_mode": True,
+        }
+
+        first = process_turn(
+            utterance="Mara's pressure is bad lately.",
+            session=session,
+            config=config,
+            runtime=runtime,
+            config_store=None,
+        )
+        self.assertIsNotNone(first["pending_clarification"])
+
+        second = process_turn(
+            utterance="Mara's blood pressure reading was high.",
+            session=session,
+            config=config,
+            runtime=runtime,
+            config_store=None,
+        )
+
+        self.assertIsNotNone(second["pending_clarification"])
+        self.assertEqual(
+            second["pending_clarification"]["original_utterance"],
+            "Mara's pressure is bad lately.",
         )
 
 

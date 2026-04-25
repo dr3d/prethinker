@@ -455,15 +455,17 @@ def sanitize_medical_parse_for_clarification(
 
     out = deepcopy(parsed)
     out["needs_clarification"] = True
-    if not str(out.get("clarification_question", "")).strip():
-        match = _MEDICAL_PRONOUN_RE.search(str(utterance or ""))
-        if match:
-            pronoun = match.group(1).lower()
+    question = str(out.get("clarification_question", "")).strip()
+    match = _MEDICAL_PRONOUN_RE.search(str(utterance or ""))
+    if match:
+        pronoun = match.group(1).lower()
+        question_lower = question.casefold()
+        if not question or not ("who does" in question_lower and "refer" in question_lower):
             out["clarification_question"] = f"Who does '{pronoun}' refer to?"
             out["clarification_reason"] = f"Pronoun '{pronoun}' is unresolved."
-        else:
-            out["clarification_question"] = "Which patient does this refer to?"
-            out["clarification_reason"] = "Patient identity is unresolved."
+    elif not question:
+        out["clarification_question"] = "Which patient does this refer to?"
+        out["clarification_reason"] = "Patient identity is unresolved."
     out["logic_string"] = ""
     out["facts"] = []
     out["rules"] = []
@@ -482,4 +484,60 @@ def sanitize_medical_parse_for_clarification(
     rationale = str(out.get("rationale", "")).strip()
     suffix = "Medical profile guard kept logic empty because patient identity is unresolved."
     out["rationale"] = f"{rationale} {suffix}".strip() if rationale else suffix
+    return out
+
+
+def rescue_medical_clarified_lab_result(
+    parsed: dict[str, Any] | None,
+    *,
+    utterance: str = "",
+    clarification_answer: str = "",
+) -> dict[str, Any] | None:
+    if not isinstance(parsed, dict):
+        return parsed
+    answer = str(clarification_answer or "").strip()
+    if not answer:
+        return parsed
+    combined = f"{utterance} {answer}".casefold()
+    if "blood pressure" not in combined:
+        return parsed
+    if not re.search(r"\b(reading|readings|measurement|measurements|result|results)\b", combined):
+        return parsed
+    if not re.search(r"\b(high|bad|elevated)\b", combined):
+        return parsed
+
+    patient_match = re.search(
+        r"\b([A-Z][A-Za-z0-9_-]*)'?s\s+blood\s+pressure\b",
+        f"{answer} {utterance}",
+    )
+    if not patient_match:
+        patient_match = re.search(
+            r"\b(?:for|patient)\s+([A-Z][A-Za-z0-9_-]*)\b",
+            f"{answer} {utterance}",
+        )
+    if not patient_match:
+        return parsed
+
+    patient = umls_mvp.atomize(patient_match.group(1))
+    if not patient:
+        return parsed
+    fact = f"lab_result_high({patient}, blood_pressure_measurement)."
+    out = deepcopy(parsed)
+    out["intent"] = "assert_fact"
+    out["logic_string"] = fact
+    out["facts"] = [fact]
+    out["rules"] = []
+    out["queries"] = []
+    out["needs_clarification"] = False
+    out["clarification_question"] = ""
+    out["clarification_reason"] = ""
+    out["uncertainty_score"] = min(float(out.get("uncertainty_score", 0.2) or 0.2), 0.25)
+    out["uncertainty_label"] = "low"
+    out["components"] = {
+        "atoms": [patient, "blood_pressure_measurement"],
+        "variables": [],
+        "predicates": ["lab_result_high"],
+    }
+    out["ambiguities"] = []
+    out["rationale"] = "Resolved clarified blood pressure reading as a high lab result."
     return out

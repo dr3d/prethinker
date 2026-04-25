@@ -187,3 +187,53 @@ def test_sanitize_medical_parse_for_clarification_clears_logic_on_unresolved_pat
     assert sanitized["logic_string"] == ""
     assert sanitized["facts"] == []
     assert sanitized["clarification_question"] == "Who does 'his' refer to?"
+
+
+def test_sanitize_medical_parse_for_clarification_replaces_leading_example_patient_question():
+    parsed = {
+        "intent": "assert_fact",
+        "needs_clarification": True,
+        "logic_string": "",
+        "facts": [],
+        "rules": [],
+        "queries": [],
+        "ambiguities": ["Patient identity 'his' is unresolved; using canonical example patient."],
+        "clarification_question": "Do you mean Priya when you say 'His'?",
+        "clarification_reason": "Patient identity is unresolved.",
+        "rationale": "Used example patient to maintain schema compliance.",
+        "uncertainty_score": 0.8,
+        "uncertainty_label": "high",
+    }
+    sanitized = medical_profile.sanitize_medical_parse_for_clarification(
+        parsed,
+        utterance="His serum creatinine was repeated this afternoon.",
+    )
+    assert sanitized is not None
+    assert sanitized["needs_clarification"] is True
+    assert sanitized["clarification_question"] == "Who does 'his' refer to?"
+    assert "Priya" not in sanitized["clarification_question"]
+
+
+def test_rescue_medical_clarified_lab_result_recovers_blood_pressure_restatement():
+    parsed = {
+        "intent": "query",
+        "logic_string": "",
+        "facts": [],
+        "rules": [],
+        "queries": [],
+        "needs_clarification": False,
+        "clarification_question": "",
+        "clarification_reason": "",
+        "uncertainty_score": 0.5,
+        "uncertainty_label": "medium",
+        "components": {"atoms": [], "variables": [], "predicates": []},
+    }
+    rescued = medical_profile.rescue_medical_clarified_lab_result(
+        parsed,
+        utterance="Mara's pressure is bad lately.",
+        clarification_answer="Mara's blood pressure reading was high.",
+    )
+    assert rescued is not None
+    assert rescued["intent"] == "assert_fact"
+    assert rescued["facts"] == ["lab_result_high(mara, blood_pressure_measurement)."]
+    assert rescued["needs_clarification"] is False

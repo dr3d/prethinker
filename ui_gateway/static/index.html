@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Prethinker Console</title>
-    <link rel="stylesheet" href="./styles.css?v=ledger-path">
+    <link rel="stylesheet" href="./styles.css?v=fixed-panel-widths">
   </head>
   <body>
     <button
@@ -143,6 +143,17 @@
           </div>
           <p id="ledger-profile-note" class="ledger-profile-note">Watching the current session in general mode.</p>
         </div>
+
+        <section class="prompt-book" aria-labelledby="prompt-book-title">
+          <div class="prompt-book-header">
+            <div>
+              <p class="eyebrow">Prompt Book</p>
+              <h3 id="prompt-book-title">Demo rail</h3>
+            </div>
+            <span id="prompt-book-profile" class="prompt-book-profile">general</span>
+          </div>
+          <div id="prompt-book-list" class="prompt-book-list"></div>
+        </section>
 
         <div class="ledger-stats">
           <div class="ledger-stat-card">
@@ -441,6 +452,6 @@
       </article>
     </template>
 
-    <script src="./app.js?v=ledger-path" defer></script>
+    <script src="./app.js?v=route-labels" defer></script>
   </body>
 </html>

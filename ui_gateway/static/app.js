@@ -103,6 +103,69 @@ const PROFILE_EXAMPLES = {
   },
 };
 
+const PROMPT_BOOKS = {
+  general: [
+    {
+      title: "Clarification beats guessing",
+      setup: "Start a fresh session in general mode.",
+      utterance: "Remember that it ships next week.",
+      watch:
+        "The route should hold for clarification because the subject is unresolved; no durable fact should appear in the ledger yet.",
+    },
+    {
+      title: "Correction becomes a state update",
+      setup: "First store: The launch plan ships next week.",
+      utterance: "Actually, the launch plan ships in two weeks.",
+      watch:
+        "The compiler should treat this as a correction path instead of adding two conflicting launch dates.",
+    },
+    {
+      title: "Ask after memory, not from vibes",
+      setup: "First store: Hope lives in Salem.",
+      utterance: "Where does Hope live?",
+      watch:
+        "The route should be query-like, and the answer should come from the deterministic KB rather than a fresh model guess.",
+    },
+  ],
+  "medical@v0": [
+    {
+      title: "Brand name collapses to a drug concept",
+      setup: "Apply the medical@v0 preset, then reset the session.",
+      utterance: "Priya is taking Coumadin.",
+      watch:
+        "The ledger should store a medication fact using the bounded palette, with Coumadin normalized toward warfarin.",
+    },
+    {
+      title: "Vague shorthand triggers the brakes",
+      setup: "Keep medical@v0 active.",
+      utterance: "Mara's pressure is bad lately.",
+      watch:
+        "The front door should ask for clarification instead of silently turning pressure into hypertension or a lab result.",
+    },
+    {
+      title: "Lab wording lands as a result",
+      setup: "Keep medical@v0 active and name the patient explicitly.",
+      utterance: "Mara's blood pressure reading was high.",
+      watch:
+        "The route should admit a lab/result-shaped fact, not a diagnosis-shaped condition.",
+    },
+    {
+      title: "Pronouns are not patient identities",
+      setup: "Keep medical@v0 active.",
+      utterance: "His serum creatinine was repeated this afternoon.",
+      watch:
+        "The medical guard should hold the write until the patient identity is clarified.",
+    },
+    {
+      title: "Bounded safety context, not broad advice",
+      setup: "Keep medical@v0 active.",
+      utterance: "Priya is taking warfarin and she is pregnant.",
+      watch:
+        "The ledger should show bounded structured facts; this is context capture, not open-ended clinical recommendation.",
+    },
+  ],
+};
+
 function apiUrl(path) {
   return `${API_BASE}${path}`;
 }
@@ -178,6 +241,61 @@ function syncProfileExamples(config) {
     button.textContent = item.label;
     button.dataset.example = item.example;
   });
+  renderPromptBook(config);
+}
+
+function activePromptBook(config) {
+  const profileId = String(config?.active_profile || "general").trim().toLowerCase();
+  return PROMPT_BOOKS[profileId] || PROMPT_BOOKS.general;
+}
+
+function loadPromptBookUtterance(utterance) {
+  const field = document.getElementById("utterance");
+  if (!field) {
+    return;
+  }
+  field.value = String(utterance || "").trim();
+  field.focus();
+}
+
+function renderPromptBook(config) {
+  const list = document.getElementById("prompt-book-list");
+  const profileLabel = document.getElementById("prompt-book-profile");
+  if (!list) {
+    return;
+  }
+  const activeProfile = String(config?.active_profile || "general").trim() || "general";
+  if (profileLabel) {
+    profileLabel.textContent = activeProfile;
+  }
+  clearElement(list);
+  for (const item of activePromptBook(config)) {
+    const card = document.createElement("article");
+    card.className = "prompt-book-card";
+
+    const title = document.createElement("h4");
+    title.textContent = item.title;
+    card.appendChild(title);
+
+    const setup = document.createElement("p");
+    setup.className = "prompt-book-setup";
+    setup.textContent = `Try first: ${item.setup}`;
+    card.appendChild(setup);
+
+    const utterance = document.createElement("button");
+    utterance.className = "prompt-book-utterance";
+    utterance.type = "button";
+    utterance.textContent = item.utterance;
+    utterance.addEventListener("click", () => loadPromptBookUtterance(item.utterance));
+    card.appendChild(utterance);
+
+    const watch = document.createElement("p");
+    watch.className = "prompt-book-watch";
+    watch.textContent = item.watch;
+    card.appendChild(watch);
+
+    list.appendChild(card);
+  }
 }
 
 function syncConnectionPill(message, tone = "neutral") {
@@ -460,6 +578,28 @@ function countSuccessfulOperations(execution, toolName) {
   }).length;
 }
 
+function countSuccessfulMutations(execution) {
+  return (
+    countSuccessfulOperations(execution, "assert_fact") +
+    countSuccessfulOperations(execution, "assert_rule") +
+    countSuccessfulOperations(execution, "retract_fact")
+  );
+}
+
+function effectiveTurnRoute(turn) {
+  const route = String(turn?.route || "other").trim().toLowerCase();
+  const execution = turnExecution(turn);
+  if (countSuccessfulMutations(execution) > 0) {
+    return "write";
+  }
+  const operations = Array.isArray(execution?.operations) ? execution.operations : [];
+  const hasQueryOperation = operations.some((op) => String(op?.tool || "").trim() === "query_rows");
+  if (hasQueryOperation || execution?.query_result) {
+    return "query";
+  }
+  return route;
+}
+
 function describeExecutedQuery(execution, utterance) {
   const queryResult = execution?.query_result;
   if (!queryResult || typeof queryResult !== "object") {
@@ -722,7 +862,7 @@ function buildLedgerState(turns) {
         queryEntries.push(buildQueryLedgerEntry({ turn, execution, clauseText: clause }));
       }
     }
-    if (!sawQueryOp && execution?.query_result && String(turn?.route || "").trim() === "query") {
+    if (!sawQueryOp && execution?.query_result && effectiveTurnRoute(turn) === "query") {
       queryEntries.push(buildQueryLedgerEntry({ turn, execution, clauseText: turn?.utterance || "" }));
     }
   }
@@ -786,7 +926,7 @@ function summarizeLatestLedgerChange(turn) {
       detail: "Send a turn and this panel will show what Prethinker actually stored, held, or queried.",
     };
   }
-  const route = String(turn.route || "other").trim().toLowerCase();
+  const route = effectiveTurnRoute(turn);
   const execution = turnExecution(turn);
   const clarifyPhase = findTurnPhase(turn, "clarify");
   if (String(clarifyPhase?.status || "").trim().toLowerCase() === "required") {
@@ -858,7 +998,7 @@ function setPathCard(kind, { value, meta, tone = "neutral" }) {
 function renderPathStrip(ledger) {
   const latestTurn = ledger?.latestTurn || null;
   const execution = turnExecution(latestTurn);
-  const route = String(latestTurn?.route || "").trim().toLowerCase();
+  const route = latestTurn ? effectiveTurnRoute(latestTurn) : "";
   const frontDoor = findTurnPhase(latestTurn, "ingest")?.data || {};
   const clarifyPhase = findTurnPhase(latestTurn, "clarify");
   const commitPhase = findTurnPhase(latestTurn, "commit");
@@ -1161,7 +1301,7 @@ function renderLedger() {
 }
 
 function outcomeSummary(turn) {
-  const route = String(turn?.route || "other").trim().toLowerCase();
+  const route = effectiveTurnRoute(turn);
   const execution = turnExecution(turn);
   const clarifyPhase = findTurnPhase(turn, "clarify");
   const commitPhase = findTurnPhase(turn, "commit");
@@ -1583,9 +1723,10 @@ function appendGatewayTurn(turn) {
 
   const turnSummary = document.createElement("summary");
   turnSummary.className = "turn-summary";
+  const displayRoute = effectiveTurnRoute(turn);
   turnSummary.innerHTML = `
     <span class="turn-summary-title">${escapeHtml(`console turn ${turn.turn_index}`)}</span>
-    <span class="turn-summary-route">${escapeHtml(`${turn.route} route`)}</span>
+    <span class="turn-summary-route">${escapeHtml(`${displayRoute} route`)}</span>
   `;
 
   const turnContent = document.createElement("div");

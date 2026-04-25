@@ -59,6 +59,7 @@ It is the first place where the product behavior becomes legible.
 - config persisted in `ui_gateway/state/gateway_config.json`
 - runtime path uses the canonical `process_utterance()` server entryway plus deterministic core tool execution
 - the live dials surface can now expose bounded runtime profiles such as `medical@v0`, not just raw model/backend settings
+- the console now has a profile-aware prompt-book rail for repeatable demos that pair a setup move, an utterance, and the expected reasoning behavior to watch
 
 ## Newbie-Friendly Surface
 

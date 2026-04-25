@@ -43,7 +43,15 @@ class GatewayHandler(SimpleHTTPRequestHandler):
         if parsed.path == "/api/session/reset":
             session_id = self.headers.get("X-Session-Id")
             state = session_store.reset(session_id)
-            self._send_json({"status": "ok", "session_id": state.session_id, "turns": []})
+            runtime_reset = runtime_hooks.reset_session_runtime(config=config_store.get().to_dict())
+            self._send_json(
+                {
+                    "status": "ok",
+                    "session_id": state.session_id,
+                    "turns": [],
+                    "runtime_reset": runtime_reset,
+                }
+            )
             return
         if parsed.path == "/api/session/state":
             session_id = self._resolve_session_id(parsed)

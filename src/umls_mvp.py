@@ -168,6 +168,38 @@ def parse_mrrel_row(cols: list[str]) -> dict[str, Any]:
     }
 
 
+def parse_srdef_row(cols: list[str]) -> dict[str, Any]:
+    return {
+        "rt": cols[0] if len(cols) > 0 else "",
+        "ui": cols[1] if len(cols) > 1 else "",
+        "name": cols[2] if len(cols) > 2 else "",
+        "tree_number": cols[3] if len(cols) > 3 else "",
+        "definition": cols[4] if len(cols) > 4 else "",
+        "examples": cols[5] if len(cols) > 5 else "",
+        "usage_note": cols[6] if len(cols) > 6 else "",
+        "non_human": cols[7] if len(cols) > 7 else "",
+        "abbreviation": cols[8] if len(cols) > 8 else "",
+        "inverse": cols[9] if len(cols) > 9 else "",
+    }
+
+
+def parse_srstr_row(cols: list[str]) -> dict[str, Any]:
+    return {
+        "source": cols[0] if len(cols) > 0 else "",
+        "relation": cols[1] if len(cols) > 1 else "",
+        "target": cols[2] if len(cols) > 2 else "",
+        "link_status": cols[3] if len(cols) > 3 else "",
+    }
+
+
+def parse_srstre_row(cols: list[str]) -> dict[str, Any]:
+    return {
+        "source": cols[0] if len(cols) > 0 else "",
+        "relation": cols[1] if len(cols) > 1 else "",
+        "target": cols[2] if len(cols) > 2 else "",
+    }
+
+
 def is_active_row(suppress: str) -> bool:
     token = str(suppress or "").strip().upper()
     return token in {"", "N"}
@@ -360,6 +392,167 @@ def extract_grounded_mentions(text: str, alias_records: list[dict[str, Any]]) ->
         matches.append(row)
     matches.sort(key=lambda row: row["seed_id"])
     return matches
+
+
+def load_semantic_network(net_dir: Path) -> dict[str, Any]:
+    source_dir = Path(net_dir)
+    srdef_path = source_dir / "SRDEF"
+    srstr_path = source_dir / "SRSTR"
+    srstre1_path = source_dir / "SRSTRE1"
+    srstre2_path = source_dir / "SRSTRE2"
+    if not srdef_path.exists():
+        srdef_path = source_dir / "SRDEF.RRF"
+    if not srstr_path.exists():
+        srstr_path = source_dir / "SRSTR.RRF"
+    if not srstre1_path.exists():
+        srstre1_path = source_dir / "SRSTRE1.RRF"
+    if not srstre2_path.exists():
+        srstre2_path = source_dir / "SRSTRE2.RRF"
+
+    semantic_types: dict[str, dict[str, Any]] = {}
+    semantic_relations: dict[str, dict[str, Any]] = {}
+    if srdef_path.exists():
+        for cols in iter_rrf_rows(srdef_path):
+            row = parse_srdef_row(cols)
+            rt = str(row.get("rt", "")).strip()
+            ui = str(row.get("ui", "")).strip()
+            name = str(row.get("name", "")).strip()
+            if not ui or not name:
+                continue
+            item = {
+                "ui": ui,
+                "name": name,
+                "atom": atomize(name),
+                "tree_number": str(row.get("tree_number", "")).strip(),
+                "definition": str(row.get("definition", "")).strip(),
+                "abbreviation": str(row.get("abbreviation", "")).strip(),
+                "inverse": str(row.get("inverse", "")).strip(),
+            }
+            if rt == "STY":
+                semantic_types[ui] = item
+            elif rt == "RL":
+                semantic_relations[ui] = item
+
+    structure: list[dict[str, Any]] = []
+    if srstr_path.exists():
+        for cols in iter_rrf_rows(srstr_path):
+            row = parse_srstr_row(cols)
+            source = str(row.get("source", "")).strip()
+            relation = str(row.get("relation", "")).strip()
+            target = str(row.get("target", "")).strip()
+            if not source or not relation:
+                continue
+            structure.append(
+                {
+                    "source": source,
+                    "source_atom": atomize(source),
+                    "relation": relation,
+                    "relation_atom": atomize(relation),
+                    "target": target,
+                    "target_atom": atomize(target) if target else "",
+                    "link_status": str(row.get("link_status", "")).strip(),
+                }
+            )
+
+    inherited_ui_relations: list[dict[str, str]] = []
+    if srstre1_path.exists():
+        for cols in iter_rrf_rows(srstre1_path):
+            row = parse_srstre_row(cols)
+            if row["source"] and row["relation"] and row["target"]:
+                inherited_ui_relations.append(
+                    {
+                        "source": str(row["source"]).strip(),
+                        "relation": str(row["relation"]).strip(),
+                        "target": str(row["target"]).strip(),
+                    }
+                )
+
+    inherited_name_relations: list[dict[str, str]] = []
+    if srstre2_path.exists():
+        for cols in iter_rrf_rows(srstre2_path):
+            row = parse_srstre_row(cols)
+            if row["source"] and row["relation"] and row["target"]:
+                inherited_name_relations.append(
+                    {
+                        "source": str(row["source"]).strip(),
+                        "source_atom": atomize(row["source"]),
+                        "relation": str(row["relation"]).strip(),
+                        "relation_atom": atomize(row["relation"]),
+                        "target": str(row["target"]).strip(),
+                        "target_atom": atomize(row["target"]),
+                    }
+                )
+
+    return {
+        "net_dir": str(source_dir),
+        "files": {
+            "srdef": str(srdef_path) if srdef_path.exists() else "",
+            "srstr": str(srstr_path) if srstr_path.exists() else "",
+            "srstre1": str(srstre1_path) if srstre1_path.exists() else "",
+            "srstre2": str(srstre2_path) if srstre2_path.exists() else "",
+        },
+        "semantic_types": sorted(semantic_types.values(), key=lambda row: row["ui"]),
+        "semantic_relations": sorted(semantic_relations.values(), key=lambda row: row["ui"]),
+        "structure": sorted(structure, key=lambda row: (row["source_atom"], row["relation_atom"], row["target_atom"])),
+        "inherited_ui_relations": inherited_ui_relations,
+        "inherited_name_relations": sorted(
+            inherited_name_relations,
+            key=lambda row: (row["source_atom"], row["relation_atom"], row["target_atom"]),
+        ),
+    }
+
+
+def render_semantic_network_facts(network: dict[str, Any]) -> str:
+    lines: list[str] = [
+        "% Derived from licensed UMLS Semantic Network content. Keep local unless licensing is reviewed.",
+        "",
+    ]
+    for row in network.get("semantic_types", []) or []:
+        ui = _prolog_quote(row.get("ui", ""))
+        atom = atomize(row.get("name", ""))
+        name = _prolog_quote(row.get("name", ""))
+        tree_number = _prolog_quote(row.get("tree_number", ""))
+        lines.append(f"umls_semantic_type_def('{ui}', {atom}, '{name}', '{tree_number}').")
+    if network.get("semantic_types"):
+        lines.append("")
+
+    for row in network.get("semantic_relations", []) or []:
+        ui = _prolog_quote(row.get("ui", ""))
+        atom = atomize(row.get("name", ""))
+        name = _prolog_quote(row.get("name", ""))
+        inverse = _prolog_quote(row.get("inverse", ""))
+        lines.append(f"umls_semantic_relation_def('{ui}', {atom}, '{name}', '{inverse}').")
+    if network.get("semantic_relations"):
+        lines.append("")
+
+    for row in network.get("structure", []) or []:
+        source = atomize(row.get("source", ""))
+        relation = atomize(row.get("relation", ""))
+        target = atomize(row.get("target", ""))
+        link_status = _prolog_quote(row.get("link_status", ""))
+        if not row.get("target"):
+            lines.append(f"umls_semantic_root({source}).")
+        elif relation == "isa":
+            lines.append(f"umls_semantic_parent({source}, {target}, '{link_status}').")
+        else:
+            lines.append(f"umls_semantic_relation({source}, {relation}, {target}, '{link_status}').")
+    if network.get("structure"):
+        lines.append("")
+
+    for row in network.get("inherited_ui_relations", []) or []:
+        source = _prolog_quote(row.get("source", ""))
+        relation = _prolog_quote(row.get("relation", ""))
+        target = _prolog_quote(row.get("target", ""))
+        lines.append(f"umls_semantic_inherited_ui_relation('{source}', '{relation}', '{target}').")
+    if network.get("inherited_ui_relations"):
+        lines.append("")
+
+    for row in network.get("inherited_name_relations", []) or []:
+        source = atomize(row.get("source", ""))
+        relation = atomize(row.get("relation", ""))
+        target = atomize(row.get("target", ""))
+        lines.append(f"umls_semantic_inherited_relation({source}, {relation}, {target}).")
+    return "\n".join(lines).rstrip() + "\n"
 
 
 def load_json(path: Path) -> Any:

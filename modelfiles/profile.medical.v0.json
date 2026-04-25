@@ -63,9 +63,9 @@
     }
   ],
   "evidence": {
-    "umls_mvp_probe": "docs/reports/UMLS_MVP_PROBE_2026-04-23.md",
-    "medical_prompt_probe": "docs/reports/MEDICAL_PROMPT_PROBE_2026-04-23.md",
-    "medical_clarification_probe": "docs/reports/MEDICAL_CLARIFICATION_PROBE_2026-04-23.md",
-    "ontology_prospector": "docs/reports/MEDICAL_ONTOLOGY_PROSPECTOR_2026-04-23.md"
+    "project_state": "PROJECT_STATE.md",
+    "umls_mvp": "docs/UMLS_MVP.md",
+    "medical_profile": "docs/MEDICAL_PROFILE.md",
+    "ontology_prospector": "docs/ONTOLOGY_PROSPECTOR.md"
   }
 }

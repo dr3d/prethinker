@@ -212,6 +212,25 @@ class RuntimeHooks:
             "kb_path": str(before.get("kb_path", "")).strip(),
         }
 
+    def reset_session_runtime(self, *, config: dict[str, Any]) -> dict[str, Any]:
+        server = self._ensure_server(config)
+        if hasattr(server, "reset_conversation_state"):
+            return server.reset_conversation_state(clear_kb=True)
+
+        result = server.empty_kb()
+        if hasattr(server, "_pending_prethink"):
+            server._pending_prethink = None
+        for attr in ("_recent_accepted_turns", "_recent_committed_logic"):
+            value = getattr(server, attr, None)
+            if isinstance(value, list):
+                value.clear()
+        return {
+            "status": "success",
+            "result_type": "conversation_state_reset",
+            "kb_cleared": True,
+            "kb_result": result,
+        }
+
     def process_utterance(
         self,
         *,

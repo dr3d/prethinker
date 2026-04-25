@@ -177,7 +177,8 @@ def process_turn(
                     execution,
                 )
             )
-            session.pending_clarification = None
+            if str(execution.get("status", "")).strip() == "success":
+                session.pending_clarification = None
     else:
         process_result = runtime.process_utterance(
             utterance=utterance,

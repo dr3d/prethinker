@@ -220,6 +220,25 @@ class RuntimeHooksFamilyBundleTests(unittest.TestCase):
         self.assertEqual(query_result.get("status"), "success")
         self.assertEqual(query_result.get("num_rows"), 1)
 
+    def test_reset_session_runtime_clears_kb_and_discourse_buffers(self) -> None:
+        hooks = RuntimeHooks()
+        config = {"compiler_mode": "heuristic", "active_profile": "medical@v0"}
+        server = PrologMCPServer(compiler_mode="heuristic", active_profile="medical@v0")
+        hooks._server = server
+        hooks._server_signature = hooks._server_config_signature(config)
+        server.assert_fact("taking(priya, warfarin).")
+        server._pending_prethink = {"prethink_id": "pt-old", "clarification_question": "Who?"}
+        server._recent_accepted_turns.append({"entities": ["Priya"], "name_mentions": ["Priya"]})
+        server._recent_committed_logic.append("taking(priya, warfarin).")
+
+        result = hooks.reset_session_runtime(config=config)
+
+        self.assertEqual(result.get("status"), "success")
+        self.assertEqual(server._pending_prethink, None)
+        self.assertEqual(server._recent_accepted_turns, [])
+        self.assertEqual(server._recent_committed_logic, [])
+        self.assertEqual(hooks.inspect_kb(config=config, limit=10).get("clauses"), [])
+
     def test_should_handoff_instead_of_clarify_when_served_mode_is_always_and_not_strict(self) -> None:
         hooks = RuntimeHooks()
 

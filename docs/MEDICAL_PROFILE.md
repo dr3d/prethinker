@@ -1,6 +1,6 @@
 # Medical Profile (`medical@v0`)
 
-Date: 2026-04-24
+Date: 2026-04-25
 
 `medical@v0` is the first formal bounded medical ontology package for Prethinker.
 
@@ -22,6 +22,7 @@ It is a profile for:
 - ontology prospector prompt: [modelfiles/medical_ontology_prospector_prompt.md](../modelfiles/medical_ontology_prospector_prompt.md)
 - manifest-driven suite runner: [scripts/run_medical_profile_suite.py](../scripts/run_medical_profile_suite.py)
 - local UMLS bridge generator: [scripts/build_umls_mvp_slice.py](../scripts/build_umls_mvp_slice.py)
+- local UMLS Semantic Network builder: [scripts/build_umls_semantic_network_kb.py](../scripts/build_umls_semantic_network_kb.py)
 
 ## Canonical Predicate Palette
 
@@ -59,11 +60,8 @@ It is reinforced by:
 See:
 
 - [docs/UMLS_MVP.md](UMLS_MVP.md)
-- [docs/reports/MEDICAL_UMLS_BRIDGE_RUNTIME_2026-04-24.md](reports/MEDICAL_UMLS_BRIDGE_RUNTIME_2026-04-24.md)
-- [docs/reports/MEDICAL_PROMPT_PROBE_2026-04-23.md](reports/MEDICAL_PROMPT_PROBE_2026-04-23.md)
-- [docs/reports/MEDICAL_CLARIFICATION_PROBE_2026-04-23.md](reports/MEDICAL_CLARIFICATION_PROBE_2026-04-23.md)
-- [docs/reports/MEDICAL_ONTOLOGY_PROSPECTOR_2026-04-23.md](reports/MEDICAL_ONTOLOGY_PROSPECTOR_2026-04-23.md)
-- [docs/reports/MEDICAL_PROFILE_SUITE_2026-04-23.md](reports/MEDICAL_PROFILE_SUITE_2026-04-23.md)
+- [docs/ONTOLOGY_PROSPECTOR.md](ONTOLOGY_PROSPECTOR.md)
+- [PROJECT_STATE.md](../PROJECT_STATE.md)
 
 ## Why The Palette Stays Small
 
@@ -101,6 +99,8 @@ That makes the included type schema best understood as a **seed example** for ar
 The bounded UMLS slice now emits a local `umls_bridge_facts.pl` file with normalized alias atoms and medical-profile semantic groups such as `medication`, `condition`, `symptom_or_finding`, `allergy`, `lab_or_procedure`, and `physiologic_state`.
 
 Those bridge facts are intended for routing, validation, and clarification pressure. They are not intended to expand the nine-predicate palette.
+
+The Semantic Network KB builder is now scaffolded for `SRDEF`, `SRSTR`, and optional `SRSTRE1`/`SRSTRE2` files. It should remain a local type/relation spine until the medical lane has tests that justify consuming more of it at runtime.
 
 ## Example Command
 

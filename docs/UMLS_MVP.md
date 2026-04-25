@@ -1,6 +1,6 @@
 # UMLS MVP
 
-Date: 2026-04-23
+Date: 2026-04-25
 
 This note turns the newly staged UMLS 2025AB Metathesaurus data into a concrete go/no-go plan for Prethinker.
 
@@ -12,26 +12,19 @@ The goal is to answer one narrower question:
 
 ## What We Have Now
 
-Local licensed data now exists under:
+Local licensed-derived working assets now exist under:
 
-- `tmp/licensed/umls/2025AB/META/`
+- `tmp/licensed/umls/2025AB/prethinker_mvp/`
+- `tmp/licensed/umls/2025AB/NET/`
+- `tmp/licensed/umls/2025AB/semantic_network_kb/`
 
-Key tables present:
+The full Metathesaurus zip and extracted `META/` working tree were intentionally removed during cleanup. They are reproducible from external source storage and should not live in the repo.
 
-- `MRCONSO.RRF`
-- `MRREL.RRF`
-- `MRSTY.RRF`
-- `MRDEF.RRF`
-- `MRSAB.RRF`
-- `MRDOC.RRF`
-- `MRFILES.RRF`
-- `MRCOLS.RRF`
+The retained local assets are enough to demonstrate:
 
-Important clarification:
-
-- there is only one extracted `MRCONSO.RRF` in the working tree
-- the other copy is inside the compressed archive `tmp/umls-2025AB-metathesaurus-full.zip`
-- so there is no duplicate extracted `MRCONSO.RRF` to delete right now
+- the bounded MVP medical bridge
+- the UMLS Semantic Network spine
+- generated local Prolog facts for type/relation explanation
 
 ## Current Status
 
@@ -43,11 +36,9 @@ The first bounded MVP is now built locally.
 - challenge battery: `docs/data/umls_mvp_sharp_memory_battery.json`
 - ontology prospector corpus: `docs/data/medical_ontology_prospector_corpus.json`
 - formal profile note: [docs/MEDICAL_PROFILE.md](MEDICAL_PROFILE.md)
-- dated result: [docs/reports/UMLS_MVP_PROBE_2026-04-23.md](docs/reports/UMLS_MVP_PROBE_2026-04-23.md)
 - clinical checks probe: `scripts/run_umls_mvp_clinical_probe.py`
-- medical prompt probe: [docs/reports/MEDICAL_PROMPT_PROBE_2026-04-23.md](docs/reports/MEDICAL_PROMPT_PROBE_2026-04-23.md)
-- medical clarification probe: [docs/reports/MEDICAL_CLARIFICATION_PROBE_2026-04-23.md](docs/reports/MEDICAL_CLARIFICATION_PROBE_2026-04-23.md)
 - local ontology mining note: [docs/ONTOLOGY_PROSPECTOR.md](ONTOLOGY_PROSPECTOR.md)
+- current compact status: [PROJECT_STATE.md](../PROJECT_STATE.md)
 
 Current measured result on the first local probe:
 
@@ -258,16 +249,73 @@ The fast preflight for that bridge is:
 python scripts/run_umls_bridge_admission_probe.py
 ```
 
-Latest local result: `9/9` pass.
+Latest local result before docs compaction: `9/9` pass.
 
-It should pass before longer `medical@v0` model-backed suites or offline 27B ontology review runs. See [docs/reports/MEDICAL_UMLS_BRIDGE_RUNTIME_2026-04-24.md](reports/MEDICAL_UMLS_BRIDGE_RUNTIME_2026-04-24.md) for the runtime checkpoint.
+It should pass before longer `medical@v0` model-backed suites or offline 27B ontology review runs.
+
+## Semantic Network Spine
+
+The next local build target is the UMLS Semantic Network spine.
+
+Expected local drop path:
+
+```text
+tmp/licensed/umls/2025AB/NET/
+```
+
+Required files from the UMLS Semantic Network relational release:
+
+- `SRDEF`: semantic type and semantic relation definitions
+- `SRSTR`: direct network structure
+
+Optional but useful:
+
+- `SRSTRE1`: fully inherited relations by UI
+- `SRSTRE2`: fully inherited relations by name
+
+Build command:
+
+```powershell
+python scripts/build_umls_semantic_network_kb.py
+```
+
+Local output path:
+
+```text
+tmp/licensed/umls/2025AB/semantic_network_kb/
+```
+
+Main local artifacts:
+
+- `manifest.json`
+- `semantic_network.json`
+- `semantic_network_facts.pl`
+
+The generated Prolog spine uses facts such as:
+
+- `umls_semantic_type_def/4`
+- `umls_semantic_relation_def/4`
+- `umls_semantic_root/1`
+- `umls_semantic_parent/3`
+- `umls_semantic_relation/4`
+- `umls_semantic_inherited_relation/3`
+
+These are local licensed-derived artifacts and should stay out of the public repo unless licensing is reviewed.
+
+Current local build counts:
+
+- 127 semantic types
+- 54 semantic relations
+- 597 structural relation rows
+- 6,217 inherited UI relation facts
+- 6,217 inherited name relation facts
 
 ## Storage Guidance
 
 For now:
 
-- keep the full zip as the canonical local source archive
-- keep the extracted `META` folder as the working raw source
+- keep only the local derived assets needed for active work
+- reacquire the full source zip or extracted `META` externally when needed
 - do not commit licensed UMLS data into the public repo
 
 If we later generate a tiny derived slice, we should decide separately whether that slice is safe and appropriate to keep in-repo.
