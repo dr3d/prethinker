@@ -51,6 +51,12 @@ from src.medical_profile import (
     sanitize_medical_parse_for_bridge,
     sanitize_medical_parse_for_clarification,
 )
+from src.semantic_ir import (
+    SemanticIRCallConfig,
+    call_semantic_ir,
+    semantic_ir_to_legacy_parse,
+    semantic_ir_to_prethink_payload,
+)
 
 
 def _coerce_bool(value: Any, default: bool) -> bool:
@@ -158,6 +164,14 @@ class PrologMCPServer:
         freethinker_prompt_file: str = "",
         freethinker_temperature: float = 0.2,
         freethinker_thinking: bool = False,
+        semantic_ir_enabled: bool = False,
+        semantic_ir_model: str = "qwen3.6:35b",
+        semantic_ir_context_length: int = 16384,
+        semantic_ir_timeout: int = 120,
+        semantic_ir_temperature: float = 0.0,
+        semantic_ir_top_p: float = 0.82,
+        semantic_ir_top_k: int = 20,
+        semantic_ir_thinking: bool = False,
     ) -> None:
         self._runtime = CorePrologRuntime()
         self._kb_path = str(Path(kb_path).resolve()) if str(kb_path).strip() else ""
@@ -184,6 +198,25 @@ class PrologMCPServer:
         self._compiler_prompt_loaded = False
         self._compiler_prompt_load_error = ""
         self._compiler_api_key = _get_api_key()
+        self._semantic_ir_enabled = bool(semantic_ir_enabled)
+        self._semantic_ir_model = str(semantic_ir_model or "qwen3.6:35b").strip()
+        self._semantic_ir_context_length = max(512, int(semantic_ir_context_length))
+        self._semantic_ir_timeout = max(5, int(semantic_ir_timeout))
+        self._semantic_ir_temperature = _clip_temperature(semantic_ir_temperature, 0.0)
+        try:
+            self._semantic_ir_top_p = float(semantic_ir_top_p)
+        except Exception:
+            self._semantic_ir_top_p = 0.82
+        if self._semantic_ir_top_p < 0.0:
+            self._semantic_ir_top_p = 0.0
+        if self._semantic_ir_top_p > 1.0:
+            self._semantic_ir_top_p = 1.0
+        try:
+            self._semantic_ir_top_k = max(1, int(semantic_ir_top_k))
+        except Exception:
+            self._semantic_ir_top_k = 20
+        self._semantic_ir_thinking = bool(semantic_ir_thinking)
+        self._last_semantic_ir_trace: dict[str, Any] = {}
         self._freethinker_resolution_policy = _normalize_freethinker_resolution_policy(
             freethinker_resolution_policy,
             "off",
@@ -1442,6 +1475,13 @@ class PrologMCPServer:
         clarification_question: str = "",
         clarification_answer: str = "",
     ) -> tuple[dict[str, Any] | None, str]:
+        if self._semantic_ir_enabled:
+            return self._compile_apply_parse_with_semantic_ir(
+                utterance=utterance,
+                compiler_intent=compiler_intent,
+                clarification_question=clarification_question,
+                clarification_answer=clarification_answer,
+            )
         if not self._compiler_prompt_loaded:
             reason = self._compiler_prompt_load_error or "compiler prompt unavailable"
             return None, f"Compiler prompt not loaded: {reason}"
@@ -1630,6 +1670,133 @@ class PrologMCPServer:
             return None, "; ".join(errors)
         return admitted, ""
 
+    def _semantic_ir_call_config(self) -> SemanticIRCallConfig:
+        return SemanticIRCallConfig(
+            backend=self._compiler_backend,
+            base_url=self._compiler_base_url,
+            model=self._semantic_ir_model,
+            context_length=self._semantic_ir_context_length,
+            timeout=self._semantic_ir_timeout,
+            temperature=self._semantic_ir_temperature,
+            top_p=self._semantic_ir_top_p,
+            top_k=self._semantic_ir_top_k,
+            think_enabled=self._semantic_ir_thinking,
+        )
+
+    def _semantic_ir_allowed_predicates(self) -> list[str]:
+        signatures = sorted(self._registry_signatures)
+        return [f"{name}/{arity}" for name, arity in signatures]
+
+    def _semantic_ir_context(self) -> list[str]:
+        context: list[str] = []
+        for clause in self._recent_committed_logic[-16:]:
+            text = str(clause).strip()
+            if text:
+                context.append(text)
+        pending = self._pending_prethink or {}
+        pending_utterance = str(pending.get("utterance", "")).strip()
+        if pending_utterance:
+            context.append(f"pending_utterance: {pending_utterance}")
+        return context
+
+    def _compile_semantic_ir(self, utterance: str) -> tuple[dict[str, Any] | None, str]:
+        trace = {
+            "enabled": True,
+            "utterance": utterance,
+            "model": self._semantic_ir_model,
+            "backend": self._compiler_backend,
+            "base_url": self._compiler_base_url,
+            "parsed": None,
+            "raw_message": "",
+            "latency_ms": 0,
+            "error": "",
+        }
+        try:
+            result = call_semantic_ir(
+                utterance=utterance,
+                config=self._semantic_ir_call_config(),
+                context=self._semantic_ir_context(),
+                allowed_predicates=self._semantic_ir_allowed_predicates(),
+                domain=self._active_profile if self._active_profile != "general" else "runtime",
+            )
+        except Exception as exc:
+            trace["error"] = str(exc)
+            self._last_semantic_ir_trace = trace
+            return None, str(exc)
+        trace["raw_message"] = str(result.get("content", "")).strip()
+        trace["latency_ms"] = int(result.get("latency_ms", 0) or 0)
+        parsed = result.get("parsed")
+        if not isinstance(parsed, dict):
+            trace["error"] = "semantic_ir_v1 payload was not valid JSON."
+            self._last_semantic_ir_trace = trace
+            return None, trace["error"]
+        trace["parsed"] = self._clone_trace_payload(parsed)
+        self._last_semantic_ir_trace = trace
+        return parsed, ""
+
+    def _compile_apply_parse_with_semantic_ir(
+        self,
+        *,
+        utterance: str,
+        compiler_intent: str,
+        clarification_question: str = "",
+        clarification_answer: str = "",
+    ) -> tuple[dict[str, Any] | None, str]:
+        self._last_parse_trace = {}
+        effective = utterance
+        if clarification_question or clarification_answer:
+            effective = (
+                f"{utterance}\n"
+                f"Clarification question: {clarification_question}\n"
+                f"Clarification answer: {clarification_answer}"
+            ).strip()
+
+        cached_trace = self._last_semantic_ir_trace if isinstance(self._last_semantic_ir_trace, dict) else {}
+        cached_ir = cached_trace.get("parsed") if str(cached_trace.get("utterance", "")).strip() == effective else None
+        if isinstance(cached_ir, dict):
+            ir, error = self._clone_trace_payload(cached_ir), ""
+        else:
+            ir, error = self._compile_semantic_ir(effective)
+        trace = {
+            "utterance": utterance,
+            "effective_utterance": effective,
+            "compiler_intent": compiler_intent,
+            "clarification_answer": clarification_answer,
+            "model": self._semantic_ir_model,
+            "semantic_ir_enabled": True,
+            "semantic_ir": self._clone_trace_payload(self._last_semantic_ir_trace),
+            "normalized": None,
+            "rescues": [],
+            "admitted": None,
+            "validation_errors": [],
+            "raw_matches_admitted": True,
+        }
+        if not isinstance(ir, dict):
+            trace["validation_errors"] = [error or "semantic_ir_v1 failed"]
+            trace["summary"] = self._summarize_parse_trace(trace)
+            self._last_parse_trace = trace
+            return None, error or "semantic_ir_v1 failed"
+
+        parsed, warnings = semantic_ir_to_legacy_parse(ir)
+        trace["normalized"] = self._clone_trace_payload(parsed)
+        trace["rescues"].append(
+            {
+                "name": "semantic_ir_mapper",
+                "applied": True,
+                "summary": "Mapped safe semantic_ir_v1 operations directly to runtime parse without English rescue passes.",
+                "warnings": list(warnings),
+            }
+        )
+        admitted = self._apply_active_profile_parse_guard(parsed=parsed, utterance=effective)
+        trace["admitted"] = self._clone_trace_payload(admitted)
+        ok, errors = _validate_parsed(admitted)
+        trace["validation_errors"] = list(errors)
+        trace["summary"] = self._summarize_parse_trace(trace)
+        self._last_parse_trace = trace
+        if not ok:
+            return None, "; ".join(errors)
+        return admitted, ""
+
     def _apply_compiled_parse(self, *, parsed: dict[str, Any], prethink_id: str) -> dict[str, Any]:
         intent = str(parsed.get("intent", "")).strip()
         operations: list[dict[str, Any]] = []
@@ -1777,12 +1944,14 @@ class PrologMCPServer:
             "prethink_id": str(packet.get("prethink_id", "")).strip(),
             "compiler": {
                 "mode": self._compiler_mode,
-                "model": self._compiler_model,
+                "model": str(compiler.get("model", "")).strip()
+                or (self._semantic_ir_model if self._semantic_ir_enabled else self._compiler_model),
                 "backend": self._compiler_backend,
                 "base_url": self._compiler_base_url,
                 "strict_mode": self._compiler_mode == "strict",
                 "used": bool(compiler.get("used", True)),
                 "error": str(compiler.get("error", "")).strip(),
+                "semantic_ir_enabled": bool(compiler.get("semantic_ir_enabled", self._semantic_ir_enabled)),
             },
             "session_snapshot": {
                 "pending_prethink": self._pending_prethink_summary(),
@@ -1802,10 +1971,11 @@ class PrologMCPServer:
                 "mode": self._compiler_mode,
                 "backend": self._compiler_backend,
                 "base_url": self._compiler_base_url,
-                "model": self._compiler_model,
+                "model": self._semantic_ir_model if self._semantic_ir_enabled else self._compiler_model,
                 "used": self._compiler_mode != "heuristic",
                 "error": "",
                 "intent": str(pending.get("compiler_intent", "other")).strip() or "other",
+                "semantic_ir_enabled": bool(self._semantic_ir_enabled),
             },
             "clarification": {
                 "required_before_query": bool(pending.get("clarification_required_before_query", False)),
@@ -1832,6 +2002,7 @@ class PrologMCPServer:
         self._last_prethink_trace = {}
         self._last_prethink_fallback_trace = {}
         self._last_parse_trace = {}
+        self._last_semantic_ir_trace = {}
         self._prethink_counter = 1
         return {
             "status": "success",
@@ -2502,6 +2673,8 @@ class PrologMCPServer:
         return out
 
     def _compile_prethink_semantics(self, utterance: str) -> tuple[dict[str, Any] | None, str]:
+        if self._semantic_ir_enabled:
+            return self._compile_prethink_semantics_with_semantic_ir(utterance)
         if not self._compiler_prompt_loaded:
             reason = self._compiler_prompt_load_error or "compiler prompt unavailable"
             return None, f"Compiler prompt not loaded: {reason}"
@@ -2633,6 +2806,37 @@ class PrologMCPServer:
             trace["summary"] = self._summarize_prethink_trace(trace)
             self._last_prethink_trace = trace
             return None, f"{exc} | Fallback classifier failed: {fallback_error}"
+
+    def _compile_prethink_semantics_with_semantic_ir(self, utterance: str) -> tuple[dict[str, Any] | None, str]:
+        self._last_prethink_trace = {}
+        self._last_prethink_fallback_trace = {}
+        ir, error = self._compile_semantic_ir(utterance)
+        trace = {
+            "utterance": utterance,
+            "source": "semantic_ir_v1",
+            "compiler_mode": self._compiler_mode,
+            "model": self._semantic_ir_model,
+            "semantic_ir": self._clone_trace_payload(self._last_semantic_ir_trace),
+            "rescues": [],
+            "final": None,
+        }
+        if not isinstance(ir, dict):
+            trace["source"] = "failed"
+            trace["summary"] = self._summarize_prethink_trace(trace)
+            self._last_prethink_trace = trace
+            return None, error or "semantic_ir_v1 failed"
+        compiled = semantic_ir_to_prethink_payload(ir)
+        trace["final"] = self._clone_trace_payload(compiled)
+        trace["rescues"].append(
+            {
+                "name": "semantic_ir_prethink_projection",
+                "applied": True,
+                "summary": "Projected semantic_ir_v1 decision into the pre-think routing packet.",
+            }
+        )
+        trace["summary"] = self._summarize_prethink_trace(trace)
+        self._last_prethink_trace = trace
+        return compiled, ""
 
     def _freethinker_trace_for_front_door(
         self,
@@ -2879,8 +3083,8 @@ class PrologMCPServer:
                 "mode": self._compiler_mode,
                 "backend": self._compiler_backend,
                 "base_url": self._compiler_base_url,
-                "model": self._compiler_model,
-                "context_length": self._compiler_context_length,
+                "model": self._semantic_ir_model if self._semantic_ir_enabled else self._compiler_model,
+                "context_length": self._semantic_ir_context_length if self._semantic_ir_enabled else self._compiler_context_length,
                 "prompt_enabled": bool(self._compiler_prompt_enabled),
                 "prompt_path": str(self._compiler_prompt_path) if self._compiler_prompt_enabled else "",
                 "used": compiled is not None,
@@ -2889,6 +3093,7 @@ class PrologMCPServer:
                 "intent": intent,
                 "needs_clarification": compiler_needs_clarification,
                 "clarification_reason": compiler_clarification_reason,
+                "semantic_ir_enabled": bool(self._semantic_ir_enabled),
             },
             "execution_protocol": {
                 "strategy": "segment_checkpoint_pipeline",
@@ -3841,6 +4046,14 @@ class PrologMCPServer:
             "compiler_context_length": self._compiler_context_length,
             "compiler_prompt_path": str(self._compiler_prompt_path),
             "compiler_prompt_loaded": bool(self._compiler_prompt_loaded),
+            "semantic_ir_enabled": bool(self._semantic_ir_enabled),
+            "semantic_ir_model": self._semantic_ir_model,
+            "semantic_ir_context_length": self._semantic_ir_context_length,
+            "semantic_ir_timeout": self._semantic_ir_timeout,
+            "semantic_ir_temperature": self._semantic_ir_temperature,
+            "semantic_ir_top_p": self._semantic_ir_top_p,
+            "semantic_ir_top_k": self._semantic_ir_top_k,
+            "semantic_ir_thinking": bool(self._semantic_ir_thinking),
             "active_profile": self._active_profile,
             "profile_known_predicates": list(self._profile_known_predicates),
             "profile_umls_bridge_loaded": bool(self._profile_umls_bridge.get("loaded")),

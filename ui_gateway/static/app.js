@@ -2174,6 +2174,11 @@ async function saveConfig(event) {
     "served_llm_timeout",
     "compiler_context_length",
     "compiler_timeout",
+    "semantic_ir_context_length",
+    "semantic_ir_timeout",
+    "semantic_ir_temperature",
+    "semantic_ir_top_p",
+    "semantic_ir_top_k",
     "freethinker_context_length",
     "freethinker_timeout",
     "freethinker_temperature",
@@ -2189,6 +2194,8 @@ async function saveConfig(event) {
   }
   payload.strict_mode = form.elements.namedItem("strict_mode").checked;
   payload.require_final_confirmation = form.elements.namedItem("require_final_confirmation").checked;
+  payload.semantic_ir_enabled = form.elements.namedItem("semantic_ir_enabled").checked;
+  payload.semantic_ir_thinking = form.elements.namedItem("semantic_ir_thinking").checked;
   payload.freethinker_thinking = form.elements.namedItem("freethinker_thinking").checked;
 
   try {

@@ -12,6 +12,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural parsing pr
 - UI: `ui_gateway/`, served locally by `python ui_gateway/main.py` using the stdlib `ThreadingHTTPServer`.
 - Active profile: `medical@v0`.
 - Active research asset: local UMLS Semantic Network KB built from `sn_current.tgz`.
+- Active sidecar experiment: opt-in `semantic_ir_v1` compiler path using `qwen3.6:35b`.
 - Current demonstration surface: prompt-book UI plus live ledger cards showing route, clarification, blocked execution, and KB mutation outcomes.
 
 ## What Works Now
@@ -22,6 +23,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural parsing pr
 - Session reset now clears pending clarification, recent runtime memory, trace state, and runtime KB state.
 - The UI can demonstrate write routes, query/clarification routes, mutation telemetry, and prompt-book-driven examples.
 - The UMLS Semantic Network builder produces local Prolog facts for semantic types, semantic relations, structural rows, and inherited relation closures.
+- The opt-in semantic IR runtime path can route and commit safe direct assertions without running the legacy parse-side English rescue chain.
 
 ## Local UMLS Assets
 
@@ -55,13 +57,14 @@ This is the next useful layer for type steering and explanation. It should suppo
 - Wire more Semantic Network explanations into the UI, especially type ancestry and relation paths.
 - Keep improving reset/session hygiene so first utterances after reset cannot inherit stale entity context.
 - Expand the medical profile only when the new predicate earns its place through tests and a clear demo.
+- Measure guardrail dependency directly: compare old pipeline rescue-hook use against semantic IR direct coverage on Glitch, Ledger, medical ambiguity, and temporal packs.
 
 ## Verification Snapshot
 
 Recent verified results:
 
-- Full suite: `215 passed`
-- Focused medical/UI/runtime hooks: `25 passed`
+- Full suite: `218 passed`
+- Focused semantic IR/config/runtime hooks: `25 passed`
 - Python compile check for touched runtime files passed
 
 Rerun the full suite before committing a new stopping point.

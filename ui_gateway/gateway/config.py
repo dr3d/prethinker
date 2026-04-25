@@ -47,6 +47,14 @@ class GatewayConfig:
     compiler_context_length: int = 8192
     compiler_timeout: int = 60
     compiler_prompt_file: str = "modelfiles/semantic_parser_system_prompt.md"
+    semantic_ir_enabled: bool = False
+    semantic_ir_model: str = "qwen3.6:35b"
+    semantic_ir_context_length: int = 16384
+    semantic_ir_timeout: int = 120
+    semantic_ir_temperature: float = 0.0
+    semantic_ir_top_p: float = 0.82
+    semantic_ir_top_k: int = 20
+    semantic_ir_thinking: bool = False
     clarification_eagerness: float = 0.75
     freethinker_resolution_policy: str = "off"
     freethinker_model: str = "qwen3.5:9b"
@@ -106,6 +114,41 @@ class ConfigStore:
                 sanitized["compiler_timeout"] = max(5, int(sanitized["compiler_timeout"]))
             except Exception:
                 sanitized.pop("compiler_timeout", None)
+        if "semantic_ir_context_length" in sanitized:
+            try:
+                sanitized["semantic_ir_context_length"] = max(512, int(sanitized["semantic_ir_context_length"]))
+            except Exception:
+                sanitized.pop("semantic_ir_context_length", None)
+        if "semantic_ir_timeout" in sanitized:
+            try:
+                sanitized["semantic_ir_timeout"] = max(5, int(sanitized["semantic_ir_timeout"]))
+            except Exception:
+                sanitized.pop("semantic_ir_timeout", None)
+        if "semantic_ir_temperature" in sanitized:
+            try:
+                value = float(sanitized["semantic_ir_temperature"])
+                if value < 0.0:
+                    value = 0.0
+                if value > 2.0:
+                    value = 2.0
+                sanitized["semantic_ir_temperature"] = value
+            except Exception:
+                sanitized.pop("semantic_ir_temperature", None)
+        if "semantic_ir_top_p" in sanitized:
+            try:
+                value = float(sanitized["semantic_ir_top_p"])
+                if value < 0.0:
+                    value = 0.0
+                if value > 1.0:
+                    value = 1.0
+                sanitized["semantic_ir_top_p"] = value
+            except Exception:
+                sanitized.pop("semantic_ir_top_p", None)
+        if "semantic_ir_top_k" in sanitized:
+            try:
+                sanitized["semantic_ir_top_k"] = max(1, int(sanitized["semantic_ir_top_k"]))
+            except Exception:
+                sanitized.pop("semantic_ir_top_k", None)
         if "freethinker_context_length" in sanitized:
             try:
                 sanitized["freethinker_context_length"] = max(512, int(sanitized["freethinker_context_length"]))
@@ -172,6 +215,10 @@ class ConfigStore:
             sanitized["require_final_confirmation"] = bool(sanitized["require_final_confirmation"])
         if "freethinker_thinking" in sanitized:
             sanitized["freethinker_thinking"] = bool(sanitized["freethinker_thinking"])
+        if "semantic_ir_enabled" in sanitized:
+            sanitized["semantic_ir_enabled"] = bool(sanitized["semantic_ir_enabled"])
+        if "semantic_ir_thinking" in sanitized:
+            sanitized["semantic_ir_thinking"] = bool(sanitized["semantic_ir_thinking"])
         if "compiler_prompt_mode" in sanitized:
             mode = str(sanitized["compiler_prompt_mode"]).strip().lower()
             if mode not in {"auto", "always", "never"}:

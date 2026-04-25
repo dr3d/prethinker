@@ -222,3 +222,26 @@ boundaries. For example, the separation clause is `mixed`: the condition and
 authority rule can be represented, but completed default and transfer facts
 should remain uncommitted until later evidence appears. This is exactly the
 kind of distinction the old Python rescue path struggled to express cleanly.
+
+## Runtime Integration
+
+`semantic_ir_v1` is now available as an opt-in compiler path in the canonical
+runtime:
+
+- `semantic_ir_enabled=true`
+- default semantic IR model: `qwen3.6:35b`
+- default controls: temperature `0.0`, top-p `0.82`, top-k `20`, thinking off
+
+When enabled, pre-think routing is projected from the semantic IR decision and
+the parse step maps safe `candidate_operations` directly into the legacy runtime
+parse shape. This intentionally bypasses the old parse-side English rescue chain.
+The deterministic gate still owns admission and execution.
+
+Current mapper policy:
+
+- safe positive direct `assert` operations may become facts
+- safe `query` operations may become queries
+- `reject`, `quarantine`, and `clarify` decisions do not commit writes
+- negative mutations are skipped until an explicit negation representation is
+  chosen
+- rule operations require an explicit rule clause before admission

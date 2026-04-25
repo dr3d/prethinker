@@ -370,6 +370,39 @@
             <span>Compiler prompt file</span>
             <input name="compiler_prompt_file" type="text">
           </label>
+          <p class="config-section-title">Semantic IR</p>
+          <label class="config-field config-flag">
+            <span>Semantic IR compiler</span>
+            <input name="semantic_ir_enabled" type="checkbox">
+          </label>
+          <label class="config-field">
+            <span>Semantic IR model</span>
+            <input name="semantic_ir_model" type="text">
+          </label>
+          <label class="config-field">
+            <span>Semantic IR context length</span>
+            <input name="semantic_ir_context_length" type="number" min="512" step="256">
+          </label>
+          <label class="config-field">
+            <span>Semantic IR timeout (seconds)</span>
+            <input name="semantic_ir_timeout" type="number" min="5" step="1">
+          </label>
+          <label class="config-field">
+            <span>Semantic IR temperature</span>
+            <input name="semantic_ir_temperature" type="number" min="0" max="2" step="0.05">
+          </label>
+          <label class="config-field">
+            <span>Semantic IR top-p</span>
+            <input name="semantic_ir_top_p" type="number" min="0" max="1" step="0.01">
+          </label>
+          <label class="config-field">
+            <span>Semantic IR top-k</span>
+            <input name="semantic_ir_top_k" type="number" min="1" step="1">
+          </label>
+          <label class="config-field config-flag">
+            <span>Semantic IR thinking</span>
+            <input name="semantic_ir_thinking" type="checkbox">
+          </label>
           <p class="config-section-title">Freethinker</p>
           <label class="config-field">
             <span>Freethinker policy</span>

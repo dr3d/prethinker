@@ -16,6 +16,11 @@ class GatewayConfigTests(unittest.TestCase):
             self.assertEqual(config.get("freethinker_model"), "qwen3.5:9b")
             self.assertEqual(config.get("freethinker_temperature"), 0.2)
             self.assertFalse(config.get("freethinker_thinking"))
+            self.assertFalse(config.get("semantic_ir_enabled"))
+            self.assertEqual(config.get("semantic_ir_model"), "qwen3.6:35b")
+            self.assertEqual(config.get("semantic_ir_temperature"), 0.0)
+            self.assertEqual(config.get("semantic_ir_top_p"), 0.82)
+            self.assertEqual(config.get("semantic_ir_top_k"), 20)
             self.assertEqual(
                 config.get("freethinker_prompt_file"),
                 "modelfiles/freethinker_system_prompt.md",
@@ -40,6 +45,28 @@ class GatewayConfigTests(unittest.TestCase):
             self.assertEqual(updated.get("freethinker_timeout"), 5)
             self.assertEqual(updated.get("freethinker_temperature"), 2.0)
             self.assertTrue(updated.get("freethinker_thinking"))
+
+    def test_invalid_semantic_ir_settings_are_sanitized(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            store = ConfigStore(Path(tmpdir) / "gateway_config.json")
+            updated = store.update(
+                {
+                    "semantic_ir_enabled": 1,
+                    "semantic_ir_context_length": 128,
+                    "semantic_ir_timeout": 0,
+                    "semantic_ir_temperature": 9,
+                    "semantic_ir_top_p": 4,
+                    "semantic_ir_top_k": 0,
+                    "semantic_ir_thinking": 1,
+                }
+            ).to_dict()
+            self.assertTrue(updated.get("semantic_ir_enabled"))
+            self.assertEqual(updated.get("semantic_ir_context_length"), 512)
+            self.assertEqual(updated.get("semantic_ir_timeout"), 5)
+            self.assertEqual(updated.get("semantic_ir_temperature"), 2.0)
+            self.assertEqual(updated.get("semantic_ir_top_p"), 1.0)
+            self.assertEqual(updated.get("semantic_ir_top_k"), 1)
+            self.assertTrue(updated.get("semantic_ir_thinking"))
 
     def test_invalid_active_profile_is_sanitized(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

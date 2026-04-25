@@ -256,3 +256,26 @@ Proposed metric:
 
 The research target is not zero deterministic code. It is fewer English-specific
 semantic patches while preserving strict admission, provenance, and auditability.
+
+## Runtime Opt-In
+
+The first executable semantic-IR runtime path is now available behind
+`semantic_ir_enabled`. When enabled, `PrologMCPServer.process_utterance()` uses
+one `semantic_ir_v1` model call for pre-think routing, then maps only safe
+`candidate_operations` into the existing deterministic runtime parse. This path
+skips the legacy English rescue chain for the parse step; the parse trace should
+show `semantic_ir_mapper` instead of the older compound-family,
+subject-prefixed-predicate, correction, step-sequence, and profile rescue passes.
+
+Initial live smoke:
+
+- model: `qwen3.6:35b`
+- utterance: `Mara owns the silver compass.`
+- semantic IR operation: safe direct `owns/2` assertion
+- committed fact: `owns(mara, silver_compass).`
+- parse-side rescue list: `semantic_ir_mapper`
+
+The mapper is intentionally conservative. It commits safe positive direct
+assertions and queries, but it does not yet commit negative mutations or rule
+operations unless an explicit rule clause is present. That keeps the authority
+boundary intact while the semantic sidecar grows more capable.
