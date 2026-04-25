@@ -109,6 +109,46 @@ Current model read:
 - Worth further testing: `gemma4:26b`, but probably with `think=false` and a
   smaller decision-contract output.
 
+## MedGemma 27B Check
+
+A follow-up run added `medgemma:27b`. The Google model card describes MedGemma
+as a Gemma 3 derivative trained for medical text and image comprehension, with
+27B text-only and multimodal variants. It also cautions that outputs are
+preliminary and require independent validation, clinical correlation, and
+task-specific adaptation before use in clinical settings. That makes MedGemma a
+good fit for a governed semantic sidecar, not a final authority layer.
+
+Ollama reported that `medgemma:27b` does not support the `think=true` option, so
+the harness now retries unsupported thinking calls with `think=false` and marks
+those records with `thinking_fallback=true`.
+
+Fair fallback run on the same seven compact scenarios:
+
+| Model | Mode | JSON OK | Avg rough score | Avg latency |
+|---|---:|---:|---:|---:|
+| `medgemma:27b` | `semantic_workspace` | 7/7 | 0.45 | 4.5s |
+| `medgemma:27b` | `ambiguity_critic` | 7/7 | 0.76 | 6.9s |
+| `medgemma:27b` | `strict_compiler` | 7/7 | 0.65 | 4.7s |
+
+Qualitative read:
+
+- Strong medical ambiguity critic. It handled vague pressure, creatinine pronoun
+  ambiguity, and allergy-versus-intolerance especially well.
+- Fast and reliable JSON once `think=true` was disabled.
+- The rich semantic workspace prompt is not a good fit as currently written. It
+  often returned structurally valid but semantically thin JSON for non-medical or
+  high-level scenarios.
+- Strict compiler was mixed: good on allergy-versus-side-effect and temporal
+  false-claim cases, weaker on pronoun identity and non-medical correction.
+
+Current model read after MedGemma:
+
+- Medical ambiguity critic candidate: `medgemma:27b`.
+- General semantic sidecar candidate: `qwen3.6:35b`.
+- Deep general adjudicator candidate: `qwen3.6:27b`.
+- Fast strict baseline: `qwen3.5:9b`.
+- General Gemma-family backup: `gemma4:26b`, preferably with `think=false`.
+
 ## Caveats
 
 - The scorer is keyword-based and can over-credit or under-credit semantically

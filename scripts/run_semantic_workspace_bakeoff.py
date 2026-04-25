@@ -316,6 +316,7 @@ def call_ollama(
     options: dict[str, Any],
     timeout: int,
 ) -> dict[str, Any]:
+    thinking_fallback = False
     payload = {
         "model": model,
         "stream": False,
@@ -329,17 +330,33 @@ def call_ollama(
             "num_ctx": int(options.get("num_ctx", 16384)),
         },
     }
-    data = json.dumps(payload).encode("utf-8")
-    req = urllib.request.Request(
-        f"{base_url.rstrip('/')}/api/chat",
-        data=data,
-        headers={"Content-Type": "application/json"},
-        method="POST",
-    )
     started = time.perf_counter()
     try:
+        data = json.dumps(payload).encode("utf-8")
+        req = urllib.request.Request(
+            f"{base_url.rstrip('/')}/api/chat",
+            data=data,
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
         with urllib.request.urlopen(req, timeout=timeout) as response:
             raw = json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as exc:
+        body = exc.read().decode("utf-8", errors="replace")
+        if exc.code == 400 and payload.get("think") and "does not support thinking" in body:
+            thinking_fallback = True
+            payload["think"] = False
+            data = json.dumps(payload).encode("utf-8")
+            req = urllib.request.Request(
+                f"{base_url.rstrip('/')}/api/chat",
+                data=data,
+                headers={"Content-Type": "application/json"},
+                method="POST",
+            )
+            with urllib.request.urlopen(req, timeout=timeout) as response:
+                raw = json.loads(response.read().decode("utf-8"))
+        else:
+            raise RuntimeError(f"HTTP {exc.code}: {body}") from exc
     except urllib.error.URLError as exc:
         raise RuntimeError(str(exc)) from exc
     latency_ms = int((time.perf_counter() - started) * 1000)
@@ -349,6 +366,7 @@ def call_ollama(
         "raw": raw,
         "content": str(message.get("content", "")).strip(),
         "thinking": str(message.get("thinking", "")).strip(),
+        "thinking_fallback": thinking_fallback,
     }
 
 
@@ -559,6 +577,7 @@ def main() -> int:
                             "latency_ms": response["latency_ms"],
                             "content": response["content"],
                             "thinking": response["thinking"],
+                            "thinking_fallback": response["thinking_fallback"],
                             "parsed": parsed,
                             "parsed_ok": parsed is not None,
                             "parse_error": parse_error,
