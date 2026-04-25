@@ -166,6 +166,87 @@ WILD_SCENARIOS: list[dict[str, Any]] = [
             "avoid": ["lab_result_high", "diabetes", "hypertension"],
         },
     },
+    {
+        "id": "glitch_title_fragment",
+        "domain": "story",
+        "utterance": "The Glitch in the Airlock",
+        "context": [],
+        "allowed_predicates": ["story_title/1", "freelance_space_salvager/1", "performed/2"],
+        "expect": {
+            "decision": "commit",
+            "must": ["title", "airlock", "story_title"],
+            "avoid": ["freelance_space_salvager", "performed"],
+        },
+    },
+    {
+        "id": "glitch_salvager_identity",
+        "domain": "story",
+        "utterance": (
+            "Jax was a freelance space-salvager with neon-blue hair. "
+            "Later, Unit-Alpha the Fatherbot returned from a morning spacewalk."
+        ),
+        "context": [],
+        "allowed_predicates": ["freelance_space_salvager/1", "has_trait/2", "returned_from/2", "robot_unit/1"],
+        "expect": {
+            "decision": "commit",
+            "must": ["Jax", "freelance", "Unit-Alpha", "Fatherbot"],
+            "avoid": ["freelance_space_salvager(unit_alpha"],
+        },
+    },
+    {
+        "id": "glitch_cell_sequence",
+        "domain": "story",
+        "utterance": (
+            "The Mega-Cell was too radioactive, the Eco-Cell was too sluggish, "
+            "and the Nano-Cell was just right; Jax's jetpack hummed after the tiny vial."
+        ),
+        "context": ["Jax is the active character.", "The cells are fuel canisters."],
+        "allowed_predicates": ["tried/2", "rejected/3", "suited/2", "powered_by/2"],
+        "expect": {
+            "decision": "commit",
+            "must": ["Mega-Cell", "Eco-Cell", "Nano-Cell", "just right"],
+            "avoid": ["suited(jax, mega_cell", "suited(jax, eco_cell"],
+        },
+    },
+    {
+        "id": "glitch_widget_claim_vs_fact",
+        "domain": "story",
+        "utterance": "Widget squeaked, 'Someone drank my Nano-Cell,' but he never saw who did it.",
+        "context": ["Earlier context: Jax tried the Nano-Cell and her jetpack hummed."],
+        "allowed_predicates": ["claimed/3", "consumed/2", "owned/2", "saw/2"],
+        "expect": {
+            "decision": "mixed",
+            "must": ["Widget", "claim", "Nano-Cell", "Jax"],
+            "avoid": ["saw(widget, jax", "witnessed(widget, jax"],
+        },
+    },
+    {
+        "id": "glitch_airlock_escape",
+        "domain": "story",
+        "utterance": (
+            "Jax bolted upright, activated her jetpack, performed a perfect zero-gravity "
+            "backflip through the airlock, and vanished into the starfield."
+        ),
+        "context": ["Jax is in Widget's Bio-Hammock.", "The airlock leads out of the station."],
+        "allowed_predicates": ["performed/2", "activated/2", "moved_through/2", "vanished_into/2"],
+        "expect": {
+            "decision": "commit",
+            "must": ["Jax", "zero-gravity backflip", "airlock", "starfield"],
+            "avoid": ["performed(widget", "performed(unit_alpha"],
+        },
+    },
+    {
+        "id": "glitch_pronoun_boots_fuse",
+        "domain": "story",
+        "utterance": "She slid into the Sonic-Zips. They were just right, until she pushed them too hard and blew a fuse.",
+        "context": ["Active character: Jax.", "Sonic-Zips are the smallest anti-gravity boots."],
+        "allowed_predicates": ["wore/2", "suited/2", "damaged/2", "caused/3"],
+        "expect": {
+            "decision": "commit",
+            "must": ["Jax", "Sonic-Zips", "fuse", "damaged"],
+            "avoid": ["wore(widget", "damaged(jax"],
+        },
+    },
 ]
 
 
@@ -186,7 +267,14 @@ SCHEMA_CONTRACT = {
         {"candidate": "", "why_unsafe": "", "commit_policy": "clarify|quarantine|reject"}
     ],
     "candidate_operations": [
-        {"operation": "assert|retract|rule|query|none", "predicate": "", "args": [], "source": "direct|inferred|context", "safety": "safe|unsafe|needs_clarification"}
+        {
+            "operation": "assert|retract|rule|query|none",
+            "predicate": "",
+            "args": [],
+            "polarity": "positive|negative",
+            "source": "direct|inferred|context",
+            "safety": "safe|unsafe|needs_clarification",
+        }
     ],
     "clarification_questions": [""],
     "self_check": {"bad_commit_risk": "low|medium|high", "missing_slots": [], "notes": []},
@@ -282,7 +370,8 @@ PROMPT_VARIANTS: dict[str, dict[str, Any]] = {
             "- Do not infer allergy from nausea/vomiting alone. Clarify allergy vs side effect/intolerance.\n"
             "- A clear correction like 'not Mara, Fred has it' may propose retract/assert.\n"
             "- If context supplies exactly one active patient and one active lab test, a direct 'it came back high' may propose a safe lab_result_high write.\n"
-            "- For rule-plus-fact or fact-plus-query turns, use mixed and keep unsafe query targets out of committed facts."
+            "- For rule-plus-fact or fact-plus-query turns, use mixed and keep unsafe query targets out of committed facts.\n"
+            "- Preserve negation in candidate_operations with polarity='negative'. Do not turn 'never saw X' into a positive saw/2 fact."
         ),
     },
 }

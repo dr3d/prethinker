@@ -215,3 +215,12 @@ allergy-versus-side-effect better than the earlier Prolog-ish extraction style.
 The remaining weakness is decision-label calibration: it sometimes chooses
 `mixed` when the deterministic policy should probably force `reject`,
 `quarantine`, `clarify`, or `commit`.
+
+A follow-up "Glitch in the Airlock" story pack tested the old story-state
+failure mode directly. `best_guarded_v2` scored 6/6 JSON, 6/6 schema, 6/6
+decision, with average rough score 0.98 and average latency 6.3s. The run did
+not repeat the old Unit-Alpha-as-salvager error, and it captured the airlock
+backflip, Sonic-Zips damage, and Widget's claim without turning the claim into
+an observed possession fact. That run also motivated adding `polarity` to
+`candidate_operations`, so negative story facts do not become positive KB
+mutations by accident.

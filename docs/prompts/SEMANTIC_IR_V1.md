@@ -67,6 +67,7 @@ clarify or quarantine.
       "operation": "assert|retract|rule|query|none",
       "predicate": "",
       "args": [],
+      "polarity": "positive|negative",
       "source": "direct|inferred|context",
       "safety": "safe|unsafe|needs_clarification"
     }
@@ -151,6 +152,8 @@ Special guards:
   direct 'it came back high' may propose a safe lab_result_high write.
 - For rule-plus-fact or fact-plus-query turns, use mixed and keep unsafe query
   targets out of committed facts.
+- Preserve negation in candidate_operations with polarity='negative'. Do not
+  turn 'never saw X' into a positive saw/2 fact.
 ```
 
 Wild-pack result:
@@ -164,3 +167,28 @@ uses `mixed` where the expected external policy would prefer `reject`,
 `quarantine`, `clarify`, or `commit`. The emitted structure was often still
 usable and conservative, but the decision label needs a stricter hierarchy
 before runtime integration.
+
+## Glitch Story Pack
+
+The old "Glitch in the Airlock" story exposed a prior failure mode where the
+pipeline collapsed story roles and produced bad KB state, including treating
+Unit-Alpha as a freelance space salvager. A focused `best_guarded_v2` run added
+six story scenarios:
+
+- title metadata: `The Glitch in the Airlock`
+- Jax as salvager while Unit-Alpha is a robot unit
+- Mega/Eco/Nano-Cell "too much / too little / just right" sequence
+- Widget claim versus witnessed fact
+- Jax's zero-gravity backflip through the airlock
+- Sonic-Zips pronoun and fuse damage
+
+Result:
+
+| Variant | JSON OK | Schema OK | Decision OK | Avg rough score | Avg latency |
+|---|---:|---:|---:|---:|---:|
+| `best_guarded_v2` | 6/6 | 6/6 | 6/6 | 0.98 | 6.3s |
+
+The run did not repeat the old Unit-Alpha-as-salvager error. It also surfaced an
+important IR schema fix: `candidate_operations` needs `polarity` so negative
+story facts like "Widget never saw who did it" do not become positive `saw/2`
+facts. The schema now carries operation polarity explicitly.
