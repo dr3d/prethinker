@@ -1614,6 +1614,36 @@ class LocalMcpServerTests(unittest.TestCase):
             trace.get("summary", {}).get("parse_rescues", []),
         )
 
+    def test_process_utterance_holds_vague_medical_surface_before_extraction(self) -> None:
+        strict_server = PrologMCPServer(compiler_mode="strict", active_profile="medical@v0")
+        compiled = {
+            "intent": "query",
+            "needs_clarification": False,
+            "uncertainty_score": 0.1,
+            "clarification_question": "",
+            "clarification_reason": "",
+            "rationale": "Model treated the statement as a query.",
+        }
+
+        with patch(
+            "src.mcp_server._call_model_prompt",
+            return_value=ModelResponse(message=json.dumps(compiled), reasoning="", raw={}),
+        ) as call_model:
+            result = strict_server.process_utterance(
+                {"utterance": "Mara's pressure is bad lately."}
+            )
+
+        self.assertEqual(result.get("status"), "clarification_required")
+        front_door = result.get("front_door") or {}
+        self.assertEqual(front_door.get("route"), "write")
+        self.assertEqual(front_door.get("compiler_intent"), "assert_fact")
+        self.assertTrue(front_door.get("needs_clarification"))
+        question = str(front_door.get("clarification_question", ""))
+        self.assertIn("pressure", question)
+        self.assertIn("Mara", question)
+        self.assertIn("blood pressure", question)
+        self.assertEqual(call_model.call_count, 1)
+
 
 if __name__ == "__main__":
     unittest.main()

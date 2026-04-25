@@ -40,6 +40,7 @@ from kb_pipeline import (
     _validate_parsed,
 )
 from src.medical_profile import (
+    bridge_admission_guidance,
     build_medical_profile_guide,
     canonical_predicate_signatures,
     load_profile_concepts,
@@ -2343,6 +2344,55 @@ class PrologMCPServer:
         )
         return any(token in text for token in signals)
 
+    def _medical_vague_surface_clarification(self, utterance: str) -> dict[str, str]:
+        if self._active_profile != "medical@v0":
+            return {}
+        guidance = bridge_admission_guidance(utterance, self._profile_umls_bridge)
+        if not guidance.get("needs_clarification"):
+            return {}
+        surfaces = [
+            str(row.get("surface", "")).strip()
+            for row in guidance.get("vague_surfaces", [])
+            if isinstance(row, dict) and str(row.get("surface", "")).strip()
+        ]
+        if not surfaces:
+            return {}
+        surface = surfaces[0]
+        patient = ""
+        patient_match = re.search(
+            rf"\b([A-Z][A-Za-z0-9_-]*)'?s\s+{re.escape(surface)}\b",
+            str(utterance or ""),
+        )
+        if patient_match:
+            patient = patient_match.group(1)
+        patient_phrase = f" for {patient}" if patient else ""
+        if surface == "pressure":
+            question = (
+                f"Which medical meaning of 'pressure' is bad{patient_phrase}: "
+                "blood pressure reading, chest pressure symptom, stress, or something else?"
+            )
+        elif surface == "sugar":
+            question = (
+                f"Which medical meaning of 'sugar' is bad{patient_phrase}: "
+                "blood glucose result, diabetes, diet, or something else?"
+            )
+        elif surface in {"kidney", "kidneys"}:
+            question = (
+                f"Which kidney-related meaning should be stored{patient_phrase}: "
+                "condition, symptom, lab result, or procedure?"
+            )
+        else:
+            question = f"Which medical meaning of '{surface}' should be stored{patient_phrase}?"
+        reasons = [
+            str(row.get("reason", "")).strip()
+            for row in guidance.get("vague_surfaces", [])
+            if isinstance(row, dict) and str(row.get("reason", "")).strip()
+        ]
+        return {
+            "question": question,
+            "reason": reasons[0] if reasons else f"Vague medical surface: {surface}.",
+        }
+
     def _sanitize_compiler_clarification(
         self,
         *,
@@ -2356,6 +2406,24 @@ class PrologMCPServer:
         if intent not in {"assert_fact", "assert_rule", "query", "retract", "other"}:
             return out
         out = _normalize_clarification_fields(out, utterance=utterance, route=intent)
+        medical_vague = self._medical_vague_surface_clarification(utterance)
+        if medical_vague:
+            lowered = str(utterance or "").strip().lower()
+            if not (
+                str(out.get("intent", "")).strip().lower() == "query"
+                and (
+                    str(utterance or "").strip().endswith("?")
+                    or lowered.startswith(("is ", "are ", "does ", "do "))
+                )
+            ):
+                out["intent"] = "assert_fact"
+            out["needs_clarification"] = True
+            out["clarification_question"] = medical_vague["question"]
+            out["clarification_reason"] = medical_vague["reason"]
+            out["uncertainty_score"] = max(_clip_01(out.get("uncertainty_score"), 0.0), 0.85)
+            out["uncertainty_label"] = "high"
+            out["rationale"] = "Medical profile held a vague surface form before extraction."
+            return out
         explicit_with_correction = self._extract_explicit_with_correction(utterance)
         if explicit_with_correction is not None and intent in {"assert_fact", "retract"}:
             out["intent"] = "assert_fact"
