@@ -144,16 +144,16 @@
           <p id="ledger-profile-note" class="ledger-profile-note">Watching the current session in general mode.</p>
         </div>
 
-        <section class="prompt-book" aria-labelledby="prompt-book-title">
-          <div class="prompt-book-header">
+        <details class="prompt-book" aria-labelledby="prompt-book-title">
+          <summary class="prompt-book-summary">
             <div>
               <p class="eyebrow">Prompt Book</p>
               <h3 id="prompt-book-title">Demo rail</h3>
             </div>
             <span id="prompt-book-profile" class="prompt-book-profile">general</span>
-          </div>
+          </summary>
           <div id="prompt-book-list" class="prompt-book-list"></div>
-        </section>
+        </details>
 
         <div class="ledger-stats">
           <div class="ledger-stat-card">
@@ -452,6 +452,6 @@
       </article>
     </template>
 
-    <script src="./app.js?v=route-labels" defer></script>
+    <script src="./app.js?v=prompt-book-expando" defer></script>
   </body>
 </html>

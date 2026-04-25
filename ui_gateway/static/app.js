@@ -106,62 +106,194 @@ const PROFILE_EXAMPLES = {
 const PROMPT_BOOKS = {
   general: [
     {
-      title: "Clarification beats guessing",
-      setup: "Start a fresh session in general mode.",
-      utterance: "Remember that it ships next week.",
+      title: "Lineage rules, then a proof",
+      setup: "Reset in general mode. This shows hard facts, new rules, and a query that only works after those commits.",
+      steps: [
+        { label: "Write fact", utterance: "Cora is a parent of Dax." },
+        { label: "Write fact", utterance: "Dax is a parent of Emma." },
+        { label: "Add rule", utterance: "If X is a parent of Y then X is an ancestor of Y." },
+        {
+          label: "Add rule",
+          utterance: "If X is a parent of Y and Y is an ancestor of Z then X is an ancestor of Z.",
+        },
+        { label: "Query proof", utterance: "Is Cora an ancestor of Emma?" },
+      ],
       watch:
-        "The route should hold for clarification because the subject is unresolved; no durable fact should appear in the ledger yet.",
+        "The ledger should show two facts, two rules, and a query answered from backward chaining rather than a prose guess.",
+    },
+    {
+      title: "Ask from memory, not vibes",
+      setup: "Use this to make the query route visibly depend on a previous write.",
+      steps: [
+        { label: "Write fact", utterance: "Hope lives in Salem." },
+        { label: "Query fact", utterance: "Where does Hope live?" },
+        { label: "Query miss", utterance: "Where does Maya live?" },
+      ],
+      watch:
+        "Hope should answer from the KB; Maya should not be invented just because the question shape is familiar.",
     },
     {
       title: "Correction becomes a state update",
-      setup: "First store: The launch plan ships next week.",
-      utterance: "Actually, the launch plan ships in two weeks.",
+      setup: "Start with a clean statement, then force a correction.",
+      steps: [
+        { label: "Write fact", utterance: "The launch plan ships next week." },
+        { label: "Correct it", utterance: "Actually, the launch plan ships in two weeks." },
+        { label: "Query current", utterance: "When does the launch plan ship?" },
+      ],
       watch:
-        "The compiler should treat this as a correction path instead of adding two conflicting launch dates.",
+        "The compiler should use a correction path instead of leaving two equally durable launch dates.",
     },
     {
-      title: "Ask after memory, not from vibes",
-      setup: "First store: Hope lives in Salem.",
-      utterance: "Where does Hope live?",
+      title: "Clarification beats guessing",
+      setup: "Use an intentionally underspecified write.",
+      steps: [
+        { label: "Ambiguous write", utterance: "Remember that it ships next week." },
+        { label: "Clarify subject", utterance: "The launch plan." },
+      ],
       watch:
-        "The route should be query-like, and the answer should come from the deterministic KB rather than a fresh model guess.",
+        "The first turn should hold because 'it' has no grounded referent. The follow-up should resolve the staged turn rather than starting a random new fact.",
+    },
+    {
+      title: "Freethinker-style context check",
+      setup: "Enable Freethinker Advisory, then try a pronoun turn whose antecedent is visible but not explicit in the same sentence.",
+      steps: [
+        { label: "Context", utterance: "Scott's mom is Ann." },
+        { label: "Context", utterance: "Priya's brother is Omar." },
+        { label: "Ambiguous turn", utterance: "His brother lives in Morro Bay." },
+      ],
+      watch:
+        "With advisory on, the sidecar should help explain whether context resolves 'his' or whether the compiler should still hold for clarification.",
+    },
+    {
+      title: "Conjunctions and ingredient queries",
+      setup: "Store a compact ingredient statement, then query one true and one absent ingredient.",
+      steps: [
+        { label: "Write bundle", utterance: "Muffins are made with flour, cranberries, and walnuts." },
+        { label: "Query true", utterance: "Can you make muffins with walnuts?" },
+        { label: "Query absent", utterance: "Can you make muffins with raisins?" },
+      ],
+      watch:
+        "The trace should show normalization into ingredient facts. The absent ingredient should not be treated as known.",
+    },
+    {
+      title: "Narrative compression",
+      setup: "Try a long ordinary sentence that needs stable predicates rather than a beautiful summary.",
+      steps: [
+        {
+          label: "Narrative",
+          utterance:
+            "At 9am on Friday morning Fred and Wilma entered the Pinky Penny supermarket and headed over to the turnips.",
+        },
+        { label: "Query", utterance: "Where did Fred go at 9am on Friday morning?" },
+      ],
+      watch:
+        "This should exercise parsing and rescue behavior. Debug details should make clear what was normalized before the KB accepted it.",
+    },
+    {
+      title: "Route boundary",
+      setup: "Use ordinary assistant requests that should not become KB mutations.",
+      steps: [
+        { label: "Other", utterance: "Translate this to French: the build passed." },
+        { label: "Other", utterance: "Explain in plain words why semantic drift might happen." },
+      ],
+      watch:
+        "These should stay outside durable symbolic memory unless you intentionally enable a served handoff.",
     },
   ],
   "medical@v0": [
     {
       title: "Brand name collapses to a drug concept",
       setup: "Apply the medical@v0 preset, then reset the session.",
-      utterance: "Priya is taking Coumadin.",
+      steps: [
+        { label: "Write medication", utterance: "Priya is taking Coumadin." },
+        { label: "Query medication", utterance: "Is Priya taking warfarin?" },
+      ],
       watch:
         "The ledger should store a medication fact using the bounded palette, with Coumadin normalized toward warfarin.",
     },
     {
-      title: "Vague shorthand triggers the brakes",
+      title: "Vague shorthand, clarified into a lab result",
       setup: "Keep medical@v0 active.",
-      utterance: "Mara's pressure is bad lately.",
+      steps: [
+        { label: "Ambiguous write", utterance: "Mara's pressure is bad lately." },
+        { label: "Clarify result", utterance: "Mara's blood pressure reading was high." },
+        { label: "Query result", utterance: "Was Mara's blood pressure high?" },
+      ],
       watch:
-        "The front door should ask for clarification instead of silently turning pressure into hypertension or a lab result.",
-    },
-    {
-      title: "Lab wording lands as a result",
-      setup: "Keep medical@v0 active and name the patient explicitly.",
-      utterance: "Mara's blood pressure reading was high.",
-      watch:
-        "The route should admit a lab/result-shaped fact, not a diagnosis-shaped condition.",
+        "The first turn should hold. The clarification should commit a high blood-pressure result, not a diagnosis or advice.",
     },
     {
       title: "Pronouns are not patient identities",
-      setup: "Keep medical@v0 active.",
-      utterance: "His serum creatinine was repeated this afternoon.",
+      setup: "Try this immediately after reset, then resolve it.",
+      steps: [
+        { label: "Ambiguous write", utterance: "His serum creatinine was repeated this afternoon." },
+        { label: "Clarify patient", utterance: "Priya." },
+      ],
       watch:
-        "The medical guard should hold the write until the patient identity is clarified.",
+        "The medical guard should hold until the patient identity is clarified, even though the lab phrase is clear.",
+    },
+    {
+      title: "Context-dependent pronoun for Freethinker",
+      setup: "Enable Freethinker Advisory and let recent context compete with strict patient identity checks.",
+      steps: [
+        { label: "Context", utterance: "Priya is taking warfarin." },
+        { label: "Context", utterance: "Mara has asthma." },
+        { label: "Ambiguous write", utterance: "Her creatinine was repeated this afternoon." },
+      ],
+      watch:
+        "Freethinker can inspect context, but the durable write should still be conservative if two female patients are in scope.",
     },
     {
       title: "Bounded safety context, not broad advice",
       setup: "Keep medical@v0 active.",
-      utterance: "Priya is taking warfarin and she is pregnant.",
+      steps: [
+        { label: "Write facts", utterance: "Priya is taking warfarin and she is pregnant." },
+        { label: "Query fact", utterance: "Is Priya pregnant?" },
+      ],
       watch:
         "The ledger should show bounded structured facts; this is context capture, not open-ended clinical recommendation.",
+    },
+    {
+      title: "Allergy and medication are different slots",
+      setup: "Use two statements that should not collapse into one predicate.",
+      steps: [
+        { label: "Write allergy", utterance: "Mara is allergic to penicillin." },
+        { label: "Write medication", utterance: "Mara is taking amoxicillin." },
+        { label: "Query allergy", utterance: "Is Mara allergic to penicillin?" },
+      ],
+      watch:
+        "The profile should keep allergy and medication-use facts separate, even when both mention drug-like concepts.",
+    },
+    {
+      title: "Symptom versus diagnosis",
+      setup: "Force the profile to keep a finding separate from a condition.",
+      steps: [
+        { label: "Write symptom", utterance: "Mira is short of breath." },
+        { label: "Write condition", utterance: "Mira has asthma." },
+        { label: "Query symptom", utterance: "Is Mira short of breath?" },
+      ],
+      watch:
+        "The ledger should distinguish symptom/finding capture from condition capture.",
+    },
+    {
+      title: "Ambiguous shorthand that should stay soft",
+      setup: "Use medically common shorthand with missing slot detail.",
+      steps: [
+        { label: "Ambiguous", utterance: "Priya's sugar looked bad this morning." },
+        { label: "Clarify", utterance: "Her blood glucose result was high." },
+      ],
+      watch:
+        "The guard should avoid deciding whether 'sugar' means diabetes, glucose, diet, or another concept until the follow-up pins it down.",
+    },
+    {
+      title: "Open-ended medical advice boundary",
+      setup: "Use an assistant-style request that should not be converted into durable state.",
+      steps: [
+        { label: "Other", utterance: "Should Priya stop taking warfarin?" },
+        { label: "Other", utterance: "Explain what high creatinine means." },
+      ],
+      watch:
+        "These are not KB mutations. The useful behavior is refusing to smuggle advice or broad medical explanation into committed facts.",
     },
   ],
 };
@@ -279,19 +411,39 @@ function renderPromptBook(config) {
 
     const setup = document.createElement("p");
     setup.className = "prompt-book-setup";
-    setup.textContent = `Try first: ${item.setup}`;
+    setup.textContent = item.setup;
     card.appendChild(setup);
 
-    const utterance = document.createElement("button");
-    utterance.className = "prompt-book-utterance";
-    utterance.type = "button";
-    utterance.textContent = item.utterance;
-    utterance.addEventListener("click", () => loadPromptBookUtterance(item.utterance));
-    card.appendChild(utterance);
+    const steps = Array.isArray(item.steps) && item.steps.length
+      ? item.steps
+      : [{ label: "Utterance", utterance: item.utterance }];
+    const stepList = document.createElement("div");
+    stepList.className = "prompt-book-steps";
+    steps.forEach((step, index) => {
+      const row = document.createElement("div");
+      row.className = "prompt-book-step";
+
+      const number = document.createElement("span");
+      number.className = "prompt-book-step-number";
+      number.textContent = String(index + 1);
+      row.appendChild(number);
+
+      const button = document.createElement("button");
+      button.className = "prompt-book-utterance";
+      button.type = "button";
+      const label = String(step.label || "Utterance").trim();
+      const utteranceText = String(step.utterance || "").trim();
+      button.innerHTML = `<span>${escapeHtml(label)}</span>${escapeHtml(utteranceText)}`;
+      button.addEventListener("click", () => loadPromptBookUtterance(utteranceText));
+      row.appendChild(button);
+
+      stepList.appendChild(row);
+    });
+    card.appendChild(stepList);
 
     const watch = document.createElement("p");
     watch.className = "prompt-book-watch";
-    watch.textContent = item.watch;
+    watch.textContent = `Watch: ${item.watch}`;
     card.appendChild(watch);
 
     list.appendChild(card);

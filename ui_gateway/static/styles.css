@@ -411,14 +411,34 @@ h2 {
   background: rgba(255, 243, 231, 0.045);
 }
 
-.prompt-book-header {
+.prompt-book-summary {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 10px;
+  cursor: pointer;
+  list-style: none;
 }
 
-.prompt-book-header h3 {
+.prompt-book-summary::-webkit-details-marker {
+  display: none;
+}
+
+.prompt-book-summary::before {
+  content: ">";
+  flex: 0 0 auto;
+  color: var(--accent);
+  font-size: 0.9rem;
+  line-height: 1;
+  transform: translateY(1px);
+  transition: transform 140ms ease;
+}
+
+.prompt-book[open] .prompt-book-summary::before {
+  transform: rotate(90deg) translateX(1px);
+}
+
+.prompt-book-summary h3 {
   margin: 0;
 }
 
@@ -434,6 +454,10 @@ h2 {
 .prompt-book-list {
   display: grid;
   gap: 10px;
+}
+
+.prompt-book:not([open]) .prompt-book-list {
+  display: none;
 }
 
 .prompt-book-card {
@@ -455,6 +479,33 @@ h2 {
   line-height: 1.4;
 }
 
+.prompt-book-steps {
+  display: grid;
+  gap: 7px;
+}
+
+.prompt-book-step {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  gap: 7px;
+  align-items: stretch;
+}
+
+.prompt-book-step-number {
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: start;
+  border: 1px solid rgba(255, 214, 170, 0.2);
+  border-radius: 50%;
+  color: var(--text-soft);
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
 .prompt-book-utterance {
   display: block;
   width: 100%;
@@ -469,6 +520,16 @@ h2 {
   line-height: 1.35;
   text-align: left;
   overflow-wrap: anywhere;
+}
+
+.prompt-book-utterance span {
+  display: block;
+  margin: 0 0 4px;
+  color: var(--accent);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .prompt-book-utterance:hover {
