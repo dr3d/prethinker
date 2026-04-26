@@ -47,6 +47,7 @@ Initial `qwen/qwen3.6-35b-a3b` LM Studio result:
 | Pack | Runs | JSON OK | Schema OK | Decision OK | Avg rough score |
 |---|---:|---:|---:|---:|---:|
 | rule + mutation conflict | 10 | 10/10 | 10/10 | 7/10 | 0.89 |
+| rule + mutation conflict after rule-clause schema | 10 | 10/10 | 10/10 | 9/10 | 0.96 |
 
 Strong cases: direct Horn rule recognition, recursive ancestor-rule shape, pure
 context-rule query without writing the context rule, explicit retract/assert
@@ -56,6 +57,26 @@ Weak cases: exception rules with `unless`, unmarked current-state replacement
 such as `lives_in(mara, salem)` over an existing current location, and
 rule-derived conflicts such as asserting `cannot_ship(crate12)` when existing
 facts plus rules imply `may_ship(crate12)`.
+
+The schema change matters: `operation="rule"` now has an optional executable
+`clause` field. Before that, LM Studio structured output could recognize a rule
+but could not legally provide the rule body that the mapper requires. After the
+change, the 35B model emitted executable clauses such as:
+
+```prolog
+ancestor(X, Y) :- parent(X, Y).
+ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).
+```
+
+Runtime A/B on the same pack:
+
+| Runs | Legacy decision OK | Semantic decision OK | Legacy avg score | Semantic avg score | Semantic non-mapper rescues |
+|---:|---:|---:|---:|---:|---:|
+| 10 | 6/10 | 9/10 | 0.808 | 0.883 | 0 |
+
+The remaining miss is still the hard one: rule-derived contradiction admission.
+The model can notice the collision, but deterministic runtime policy does not
+yet generally prove that a new write contradicts consequences of existing rules.
 
 ## Results
 

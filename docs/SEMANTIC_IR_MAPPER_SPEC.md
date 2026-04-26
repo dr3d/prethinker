@@ -96,6 +96,7 @@ Only `candidate_operations` may become executable clauses.
 | `operation=assert`, negative polarity, non-event predicate | Skip operation | The runtime does not yet have a general negative-fact semantics. |
 | `operation=assert`, negative polarity, denial/speech event predicate | Admit | `denied(...)` records a speech/event fact, not logical negation. |
 | `operation=retract` | Emit retract variants | Numbered aliases like `crate12`/`crate_12` are structural term normalization. |
+| `operation=rule` with explicit `clause` | Admit if the rule clause normalizes | The model may propose a rule only when it has already compiled the executable rule shape. |
 | `operation=rule` without explicit rule clause | Skip operation | The mapper does not synthesize durable Prolog rules from prose. |
 | Quantified group assertion without individual expansion | Skip operation | Prevents fake facts like `submitted_form(residents)`. |
 

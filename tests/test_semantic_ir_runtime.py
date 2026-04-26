@@ -130,6 +130,28 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         ]
         self.assertEqual(skipped[0]["skip_reason"], "ungrounded_argument_atom")
 
+    def test_mapper_admits_rule_operation_with_explicit_clause(self) -> None:
+        ir = _ir(
+            decision="commit",
+            turn_type="rule_update",
+            candidate_operations=[
+                {
+                    "operation": "rule",
+                    "predicate": "ancestor",
+                    "args": [],
+                    "clause": "ancestor(X, Y) :- parent(X, Y).",
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                }
+            ],
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(ir)
+        self.assertEqual(warnings, [])
+        self.assertEqual(parsed["intent"], "assert_rule")
+        self.assertEqual(parsed["rules"], ["ancestor(X, Y) :- parent(X, Y)."])
+        self.assertEqual(parsed["admission_diagnostics"]["admitted_count"], 1)
+
     def test_mapper_allows_negative_polarity_retract_as_retraction(self) -> None:
         ir = _ir(
             candidate_operations=[

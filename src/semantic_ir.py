@@ -52,6 +52,7 @@ SCHEMA_CONTRACT: dict[str, Any] = {
             "operation": "assert|retract|rule|query|none",
             "predicate": "",
             "args": [],
+            "clause": "ancestor(X, Y) :- parent(X, Y).",
             "polarity": "positive|negative",
             "source": "direct|inferred|context",
             "safety": "safe|unsafe|needs_clarification",
@@ -177,6 +178,7 @@ SEMANTIC_IR_JSON_SCHEMA: dict[str, Any] = {
                     "operation": {"type": "string", "enum": ["assert", "retract", "rule", "query", "none"]},
                     "predicate": {"type": "string"},
                     "args": {"type": "array", "items": {"type": "string"}},
+                    "clause": {"type": "string"},
                     "polarity": {"type": "string", "enum": ["positive", "negative"]},
                     "source": {"type": "string", "enum": ["direct", "inferred", "context"]},
                     "safety": {"type": "string", "enum": ["safe", "unsafe", "needs_clarification"]},
@@ -244,6 +246,11 @@ BEST_GUARDED_V2_GUIDANCE = (
     "- Context entries are already-known state/rules, not new user assertions. Do not create candidate_operations that merely restate context.\n"
     "- Use context to resolve referents and answer queries; only the current utterance may introduce a new write candidate.\n"
     "- If the current utterance contains policy/rule language such as all/every/unless/must/before and also direct facts, choose mixed. Commit the direct facts and represent rule/policy material in assertions or unsafe_implications if no safe rule clause is available.\n"
+    "- Simple Horn rules such as 'if parent(X,Y) then ancestor(X,Y)' may commit as operation='rule' when you can emit a precise executable clause using allowed predicates. Put that Prolog-style text in candidate_operations[].clause. Default/exception rules with unless/except/only-if are not ordinary facts; if negation/exception semantics are unclear, choose mixed and represent the rule as a rule assertion or unsafe implication, not as a current fact.\n"
+    "- Never mark a rule operation safe without an executable clause. If you cannot provide candidate_operations[].clause, do not emit a safe rule operation.\n"
+    "- Existing current facts in context are state constraints. If a new utterance gives a different value for the same likely functional predicate such as lives_in/2 or scheduled_for/2, choose clarify unless the user explicitly marks it as a correction with words like correction, actually, wrong, not X, or instead.\n"
+    "- If the new write would contradict a consequence implied by existing context rules and facts, choose clarify or quarantine. Do not assert the opposite fact until the user supplies an explicit correction, exception, or revocation.\n"
+    "- Some predicates are non-exclusive, such as has_condition/2. A new compatible condition can be committed without retracting an existing different condition.\n"
     "- Do not turn a claim into a fact. 'Bob says he has it' is a claim, not possession.\n"
     "- Do not infer diagnosis or staging from a single lab value request. Quarantine or clarify.\n"
     "- Do not infer allergy from nausea/vomiting alone. Clarify allergy vs side effect/intolerance when the user only reports symptoms.\n"
@@ -257,6 +264,7 @@ BEST_GUARDED_V2_GUIDANCE = (
     "- 'Do not call it normal' is explicit negative classification; do not treat it as an ambiguous referent when the preceding lab test is clear.\n"
     "- Do not assert a fact about a quantified group atom such as submitted_form(residents) for 'all residents except Kai'. Use individual known members only when context enumerates them; otherwise mark the class-level write unsafe.\n"
     "- Pure hypothetical questions with 'if ... would ...?' are queries, not writes and not clarification requests when the hypothetical nature is clear. Mark the query operation safe; do not ask whether the user wants a hypothetical answer. Do not assert the hypothetical premise or any derived consequence as a fact.\n"
+    "- Pure questions against context rules are answer turns. Do not choose mixed just because a context rule appears in context; context rules are support for the query, not new writes.\n"
     "- Denial predicates are speech/event facts. 'Omar denied signing the waiver' may assert denied(...); it must not assert signed(...) false.\n"
     "- Legal findings are scoped speech/finding facts. 'The court did not find that Pavel paid' must not become negative paid(Pavel, ...). It is an absence of finding; use mixed/quarantine or a finding predicate if available.\n"
     "- 'Only after X did Y become effective; X happened Wednesday' is enough to commit Y's effective date as Wednesday when an effective_on predicate is allowed. Do not mark the effective date unsafe merely because it follows from the stated condition.\n"

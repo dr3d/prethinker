@@ -67,6 +67,7 @@ clarify or quarantine.
       "operation": "assert|retract|rule|query|none",
       "predicate": "",
       "args": [],
+      "clause": "",
       "polarity": "positive|negative",
       "source": "direct|inferred|context",
       "safety": "safe|unsafe|needs_clarification"
@@ -241,12 +242,22 @@ Current mapper policy:
 
 - safe positive direct `assert` operations may become facts
 - safe `query` operations may become queries
+- safe `rule` operations may become rules only when the operation includes an
+  explicit executable `clause`
 - `reject`, `quarantine`, and `clarify` decisions do not commit writes
 - negative `assert` operations are skipped until an explicit negation
   representation is chosen
 - `retract` operations are treated as retractions even when the model marks the
   operation polarity as negative
 - rule operations require an explicit rule clause before admission
+
+Rule-clause contract:
+
+- `predicate` is still the predicate name for diagnostics;
+- `clause` is the executable Prolog-style rule body/head text admitted by the
+  mapper;
+- rule recognition without a `clause` remains useful semantic evidence, but it
+  is not a durable rule mutation.
 
 Current structured-output schema limits live arrays to keep local models from
 looping or over-explaining:

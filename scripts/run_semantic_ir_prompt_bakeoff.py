@@ -1279,6 +1279,7 @@ SCHEMA_CONTRACT = {
             "operation": "assert|retract|rule|query|none",
             "predicate": "",
             "args": [],
+            "clause": "ancestor(X, Y) :- parent(X, Y).",
             "polarity": "positive|negative",
             "source": "direct|inferred|context",
             "safety": "safe|unsafe|needs_clarification",
@@ -1400,6 +1401,7 @@ SEMANTIC_IR_JSON_SCHEMA: dict[str, Any] = {
                     "operation": {"type": "string", "enum": ["assert", "retract", "rule", "query", "none"]},
                     "predicate": {"type": "string"},
                     "args": {"type": "array", "items": {"type": "string"}},
+                    "clause": {"type": "string"},
                     "polarity": {"type": "string", "enum": ["positive", "negative"]},
                     "source": {"type": "string", "enum": ["direct", "inferred", "context"]},
                     "safety": {"type": "string", "enum": ["safe", "unsafe", "needs_clarification"]},
@@ -1517,6 +1519,12 @@ PROMPT_VARIANTS: dict[str, dict[str, Any]] = {
             "- Pure hypothetical questions with 'if ... would ...?' are queries, not writes and not clarification requests when the hypothetical nature is clear.\n"
             "- Denial predicates are speech/event facts. 'Omar denied signing the waiver' may assert denied(...); it must not assert signed(...) false.\n"
             "- When pronouns or referents are ambiguous and only a generic speech/container fact such as told/said/claimed is safe, choose clarify rather than committing the speech wrapper.\n"
+            "- Simple Horn rules such as 'if parent(X,Y) then ancestor(X,Y)' may commit as operation='rule' when you can emit a precise executable clause using allowed predicates. Put that Prolog-style text in candidate_operations[].clause. Default/exception rules with unless/except/only-if are not ordinary facts; if negation/exception semantics are unclear, choose mixed and represent the rule as a rule assertion or unsafe implication, not as a current fact.\n"
+            "- Never mark a rule operation safe without an executable clause. If you cannot provide candidate_operations[].clause, do not emit a safe rule operation.\n"
+            "- Existing current facts in context are state constraints. If a new utterance gives a different value for the same likely functional predicate such as lives_in/2 or scheduled_for/2, choose clarify unless the user explicitly marks it as a correction with words like correction, actually, wrong, not X, or instead.\n"
+            "- If the new write would contradict a consequence implied by existing context rules and facts, choose clarify or quarantine. Do not assert the opposite fact until the user supplies an explicit correction, exception, or revocation.\n"
+            "- Some predicates are non-exclusive, such as has_condition/2. A new compatible condition can be committed without retracting an existing different condition.\n"
+            "- Pure questions against context rules are answer turns. Do not choose mixed just because a context rule appears in context; context rules are support for the query, not new writes.\n"
             "- If context supplies exactly one active patient and one active lab test, a direct 'it came back high' may propose a safe lab_result_high write.\n"
             "- For rule-plus-fact or fact-plus-query turns, use mixed and keep unsafe query targets out of committed facts.\n"
             "- Preserve negation in candidate_operations with polarity='negative'. Do not turn 'never saw X' into a positive saw/2 fact."
@@ -1563,6 +1571,12 @@ PROMPT_VARIANTS: dict[str, dict[str, Any]] = {
             "- Disjunctions like 'A or B caused it' do not prove either cause; record safe observations and quarantine cause assignment.\n"
             "- Do not copy context rules into candidate_operations unless the user is adding or changing the rule.\n"
             "- Do not invent required governance slots that are not in the predicate schema. Source document, authority, or reason fields are optional provenance unless the allowed predicate explicitly requires them.\n"
+            "- Simple Horn rules such as 'if parent(X,Y) then ancestor(X,Y)' may commit as operation='rule' when you can emit a precise executable clause using allowed predicates. Put that Prolog-style text in candidate_operations[].clause. Default/exception rules with unless/except/only-if are not ordinary facts; if negation/exception semantics are unclear, choose mixed and represent the rule as a rule assertion or unsafe implication, not as a current fact.\n"
+            "- Never mark a rule operation safe without an executable clause. If you cannot provide candidate_operations[].clause, do not emit a safe rule operation.\n"
+            "- Existing current facts in context are state constraints. If a new utterance gives a different value for the same likely functional predicate such as lives_in/2 or scheduled_for/2, choose clarify unless the user explicitly marks it as a correction with words like correction, actually, wrong, not X, or instead.\n"
+            "- If the new write would contradict a consequence implied by existing context rules and facts, choose clarify or quarantine. Do not assert the opposite fact until the user supplies an explicit correction, exception, or revocation.\n"
+            "- Some predicates are non-exclusive, such as has_condition/2. A new compatible condition can be committed without retracting an existing different condition.\n"
+            "- Pure questions against context rules are answer turns. Do not choose mixed just because a context rule appears in context; context rules are support for the query, not new writes.\n"
             "- Do not assert a fact about a quantified group atom such as submitted_form(residents) for 'all residents except Kai'. Use individual known members only when context enumerates them; otherwise mark the class-level write unsafe.\n"
             "- Preserve temporal scope: until, during, after, before, not yet, no longer, and from/to should not become timeless facts.\n"
             "- Preserve provenance: claimed, alleged, admitted, denied, observed, found, and reported are different relations."
@@ -1598,6 +1612,12 @@ PROMPT_VARIANTS: dict[str, dict[str, Any]] = {
             "- Disjunctions like 'A or B caused it' do not prove either cause; record safe observations and quarantine cause assignment.\n"
             "- Do not copy context rules into candidate_operations unless the user is adding or changing the rule.\n"
             "- Do not invent required governance slots that are not in the predicate schema. Source document, authority, or reason fields are optional provenance unless the allowed predicate explicitly requires them.\n"
+            "- Simple Horn rules such as 'if parent(X,Y) then ancestor(X,Y)' may commit as operation='rule' when you can emit a precise executable clause using allowed predicates. Put that Prolog-style text in candidate_operations[].clause. Default/exception rules with unless/except/only-if are not ordinary facts; if negation/exception semantics are unclear, choose mixed and represent the rule as a rule assertion or unsafe implication, not as a current fact.\n"
+            "- Never mark a rule operation safe without an executable clause. If you cannot provide candidate_operations[].clause, do not emit a safe rule operation.\n"
+            "- Existing current facts in context are state constraints. If a new utterance gives a different value for the same likely functional predicate such as lives_in/2 or scheduled_for/2, choose clarify unless the user explicitly marks it as a correction with words like correction, actually, wrong, not X, or instead.\n"
+            "- If the new write would contradict a consequence implied by existing context rules and facts, choose clarify or quarantine. Do not assert the opposite fact until the user supplies an explicit correction, exception, or revocation.\n"
+            "- Some predicates are non-exclusive, such as has_condition/2. A new compatible condition can be committed without retracting an existing different condition.\n"
+            "- Pure questions against context rules are answer turns. Do not choose mixed just because a context rule appears in context; context rules are support for the query, not new writes.\n"
             "- Do not assert a fact about a quantified group atom such as submitted_form(residents) for 'all residents except Kai'. Use individual known members only when context enumerates them; otherwise mark the class-level write unsafe.\n"
             "- Preserve temporal scope: until, during, after, before, not yet, no longer, and from/to should not become timeless facts.\n"
             "- Preserve provenance: claimed, alleged, admitted, denied, observed, found, and reported are different relations."

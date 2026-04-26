@@ -29,6 +29,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 - Silverton probate packs are intentionally hard frontier batteries for claim/fact separation, identity ambiguity, temporal intervals, noisy spelling, multilingual fragments, and policy-label calibration. They are pressure gauges, not polished demo headlines yet.
 - `medical@v0` now owns its UMLS semantic-group argument contracts in the profile manifest, so medical type steering stays profile-specific instead of leaking into the generic semantic IR mapper.
 - The semantic IR mapper now has a structural placeholder-argument guard for writes and a minimal temporal fact vocabulary for dates, intervals, and temporal corrections.
+- The semantic IR contract now allows `operation=rule` candidates to carry an executable `clause`, which lets structured-output model runs produce durable Prolog rules instead of only recognizing rule-like language.
 
 ## Local UMLS Assets
 
@@ -66,6 +67,7 @@ This is the next useful layer for type steering and explanation. It should suppo
 - Push the remaining mapper frontier: durable rule admission for quantified exception language, better decision-label calibration for safe partial commits, and cleaner nested event predicate shapes.
 - Represent temporal facts durably enough that extracted dates, intervals, corrections, and relative-time anchors can support real KB queries instead of staying only in the semantic workspace.
 - Keep profile contracts out of the generic mapper: profile packages should own domain type/grounding policy, while the mapper stays structural and auditable.
+- Build a deterministic stored-logic conflict admission layer: current-state overwrites and contradictions against rule-derived consequences should be caught by runtime policy, not only by the model's semantic workspace.
 
 ## Verification Snapshot
 
@@ -77,6 +79,7 @@ Recent verified results:
 - Weak-edge runtime A/B: semantic IR `10/10` decision labels, `1.000` avg score, `0` non-mapper parse rescues
 - Silverton noisy temporal pack: semantic IR `2/8` decision labels, `0.729` avg score; useful evidence that noisy language is less of a blocker than policy labels and temporal admission
 - Focused profile/semantic mapper battery after profile-contract work: `39 passed`
+- Rule/mutation conflict semantic IR pack: raw 35B prompt bakeoff `9/10` decisions, `0.96` average rough score; runtime A/B semantic IR `9/10` decisions versus legacy `6/10`, with `0` non-mapper rescues
 - Python compile check for touched runtime files passed
 
 Rerun the full suite before committing a new stopping point.
