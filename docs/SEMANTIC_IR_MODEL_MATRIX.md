@@ -36,6 +36,13 @@ external benchmark.
 | `google/gemma-4-26b-a4b` | 10/10, avg 0.917 | 10/10, avg 0.983 | 19/20, avg 0.959 |
 | `nvidia/nemotron-3-nano` | 4/10, avg 0.652 | 4/10, avg 0.692 | not run |
 
+Noisy Silverton probate runs remain hard:
+
+| Model | Silverton Noisy |
+| --- | ---: |
+| `qwen/qwen3.6-35b-a3b` | 3/8, avg 0.760 |
+| `google/gemma-4-26b-a4b` | 3/8, avg 0.750 |
+
 ## Read
 
 Structured output is doing real work. Even the 9B Qwen model stays schema-clean
@@ -60,6 +67,12 @@ Qwen 35B remains a strong default. It is more proven in the project history and
 has good behavior on the same architecture, but it is not automatically the
 winner on every local battery. The model matrix says we should keep the harness
 model-agnostic and avoid overfitting the prompt to one family.
+
+The noisy Silverton pack is a different story. Gemma and Qwen 35B both stalled
+around `3/8`. Those misses are less about raw model intelligence and more about
+the next formal frontier: temporal policy labels, mixed-language spelling,
+relative-date grounding, and whether a safe temporal correction should still be
+`mixed` because unsafe legal consequences ride alongside it.
 
 ## Current Best Bets
 
@@ -100,6 +113,8 @@ Recent local artifacts:
 - `tmp/guardrail_dependency_ab/guardrail_dependency_ab_20260426T181801755453Z_weak-edges_qwen-qwen3-6-27b_pid50688.jsonl`
 - `tmp/guardrail_dependency_ab/guardrail_dependency_ab_20260426T182512980833Z_edge_google-gemma-4-26b-a4b_pid44316.jsonl`
 - `tmp/guardrail_dependency_ab/guardrail_dependency_ab_20260426T183753729830Z_edge_qwen-qwen3-6-35b-a3b_pid45200.jsonl`
+- `tmp/guardrail_dependency_ab/guardrail_dependency_ab_20260426T185356411787Z_silverton-noisy_google-gemma-4-26b-a4b_pid19856.jsonl`
+- `tmp/guardrail_dependency_ab/guardrail_dependency_ab_20260426T185825798091Z_silverton-noisy_qwen-qwen3-6-35b-a3b_pid46608.jsonl`
 
 ## Next Work
 
@@ -107,6 +122,9 @@ Recent local artifacts:
   stable.
 - Add a few multilingual/noisy packs to test whether the Semantic IR direction
   really escapes English-only patching.
+- Split the noisy Silverton score into semantic extraction, policy label, and
+  final KB safety. Current one-number scoring hides cases where the model reads
+  the sentence but chooses the wrong administrative label.
 - Score "safe-block equivalent" separately from exact decision labels, because
   `clarify`, `quarantine`, and `mixed` can all avoid bad commits while implying
   different product behavior.

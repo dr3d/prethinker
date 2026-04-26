@@ -84,6 +84,7 @@ Recent verified results:
 - Focused profile/semantic mapper battery after profile-contract work: `39 passed`
 - Rule/mutation conflict semantic IR pack: raw 35B prompt bakeoff `9/10` decisions, `0.95` average rough score; runtime A/B semantic IR `10/10` decisions versus legacy `6/10`, `0.917` average rough score, with `0` non-mapper rescues
 - Model matrix snapshot: `google/gemma-4-26b-a4b` reached rule/mutation `10/10`, weak edges `10/10`, and hard edge `19/20`; latest `qwen/qwen3.6-35b-a3b` hard-edge rerun reached `17/20`; `nvidia/nemotron-3-nano` reached only `4/10` on rule/mutation and weak edges
+- Noisy Silverton remains a real frontier: Gemma 26B and Qwen 35B both reached only `3/8`, suggesting temporal policy and noisy/multilingual grounding need better IR/scoring treatment, not just a different model.
 - Python compile check for touched runtime files passed
 
 Rerun the full suite before committing a new stopping point.
