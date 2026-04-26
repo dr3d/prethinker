@@ -1063,6 +1063,8 @@ def _projection_reason(
         return "safe_write_with_unsafe_implications_projected_to_mixed"
     if model_decision == "commit" and _has_safe_direct_write(ir) and _has_claim_and_direct_assertions(ir):
         return "claim_plus_direct_observation_projected_to_mixed"
+    if model_decision == "commit" and _has_safe_direct_write(ir) and _has_general_negative_assertion(ir):
+        return "positive_write_with_unsupported_negative_assertion_projected_to_mixed"
     if model_decision == "quarantine" and _raw_missing_slots(ir) and not _missing_slots(ir):
         return "only_optional_metadata_missing_projected_to_mixed"
     if model_decision == "quarantine" and str(ir.get("turn_type", "")).strip().lower() == "correction":
@@ -1117,6 +1119,8 @@ def _projected_decision(
     if decision == "commit" and _has_safe_direct_write(ir) and _has_projection_relevant_unsafe_implications(ir):
         return "mixed"
     if decision == "commit" and _has_safe_direct_write(ir) and _has_claim_and_direct_assertions(ir):
+        return "mixed"
+    if decision == "commit" and _has_safe_direct_write(ir) and _has_general_negative_assertion(ir):
         return "mixed"
     if (
         decision == "quarantine"
@@ -1324,6 +1328,20 @@ def _has_safe_direct_write(ir: dict[str, Any]) -> bool:
         if str(op.get("source", "")).strip().lower() != "direct":
             continue
         if str(op.get("operation", "")).strip().lower() in {"assert", "retract", "rule"}:
+            return True
+    return False
+
+
+def _has_general_negative_assertion(ir: dict[str, Any]) -> bool:
+    for op in _candidate_operations(ir):
+        if str(op.get("safety", "")).strip().lower() != "safe":
+            continue
+        if str(op.get("operation", "")).strip().lower() != "assert":
+            continue
+        if str(op.get("polarity", "positive") or "positive").strip().lower() != "negative":
+            continue
+        predicate = _predicate_name(op.get("predicate"))
+        if not _is_negative_event_predicate(predicate):
             return True
     return False
 

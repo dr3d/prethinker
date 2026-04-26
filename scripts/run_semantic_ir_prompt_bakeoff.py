@@ -10,6 +10,7 @@ import argparse
 import json
 import os
 import re
+import sys
 import time
 import urllib.error
 import urllib.request
@@ -20,6 +21,10 @@ from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUT_DIR = REPO_ROOT / "tmp" / "semantic_ir_prompt_bakeoff"
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from src.semantic_ir import semantic_ir_to_legacy_parse  # noqa: E402
 
 
 WILD_SCENARIOS: list[dict[str, Any]] = [
@@ -1178,6 +1183,273 @@ WILD_SCENARIOS: list[dict[str, Any]] = [
             "avoid": ["retract(showed(camera, omar", "not_showed(camera, omar) as fact"],
         },
     },
+    {
+        "id": "harbor_deed_minutes_effective_date",
+        "domain": "harbor_house_legal",
+        "utterance": (
+            "The 2021 deed says Mira's room transfer becomes effective only after the clinic director "
+            "countersigns. Board minutes say S. Hale signed on March 3, but the director did not "
+            "countersign until April 9."
+        ),
+        "context": [
+            "Known people: Mira Vale, Silas Hale, Selene Hale.",
+            "S. Hale may refer to Silas Hale or Selene Hale.",
+            "Room transfer requires director countersignature before effect.",
+        ],
+        "allowed_predicates": [
+            "document_states/4",
+            "signed_on/3",
+            "countersigned_on/3",
+            "effective_on/3",
+            "candidate_identity/2",
+        ],
+        "expect": {
+            "decision": "mixed",
+            "must": ["2021 deed", "S. Hale", "March 3", "April 9", "only after"],
+            "avoid": ["effective_on(room_transfer, march_3", "same_person(s_hale"],
+        },
+    },
+    {
+        "id": "harbor_witness_claim_vs_log",
+        "domain": "harbor_house_legal",
+        "utterance": (
+            "Jonas claims Mira removed the morphine box before the storm, but the pharmacy log only "
+            "shows Room 4B accessed after the storm by 'M. Vale'."
+        ),
+        "context": [
+            "Mira Vale and Mara Vale both worked at Harbor House.",
+            "Morphine is a medication; custody of controlled substances is not a diagnosis.",
+        ],
+        "allowed_predicates": [
+            "claimed/3",
+            "access_log_entry/4",
+            "candidate_identity/2",
+            "removed_from/3",
+            "taking/2",
+        ],
+        "expect": {
+            "decision": "mixed",
+            "must": ["Jonas", "claim", "Room 4B", "M. Vale", "after the storm"],
+            "avoid": ["removed_from(mira", "taking(mira, morphine", "same_person(m_vale"],
+        },
+    },
+    {
+        "id": "harbor_correction_date_not_identity",
+        "domain": "harbor_house_legal",
+        "utterance": "Correction: the access stamp was April 10, not April 1. It was still M. Vale, and the room was still 4B.",
+        "context": [
+            "Existing log note: access_log_entry(m_vale, room_4b, april_1, pharmacy_box).",
+            "M. Vale may refer to Mira Vale or Mara Vale.",
+        ],
+        "allowed_predicates": ["access_log_entry/4", "correction/2", "candidate_identity/2"],
+        "expect": {
+            "decision": "mixed",
+            "must": ["correction", "April 1", "April 10", "M. Vale", "4B"],
+            "avoid": ["access_log_entry(mira", "same_person(m_vale", "retract(access_log_entry(mira"],
+        },
+    },
+    {
+        "id": "harbor_medical_side_effect_discredit",
+        "domain": "harbor_house_medical_boundary",
+        "utterance": (
+            "Silas says Mara's testimony should not count because her warfarin made her dizzy and "
+            "confused; the clinic note only says nausea after Coumadin, no allergy."
+        ),
+        "context": [
+            "Mara is a witness in the Harbor House dispute.",
+            "Coumadin is an alias for warfarin.",
+        ],
+        "allowed_predicates": ["claimed/3", "has_symptom/2", "has_allergy/2", "taking/2", "witness_reliability_issue/2"],
+        "expect": {
+            "decision": "mixed",
+            "must": ["Silas", "claim", "warfarin", "Coumadin", "nausea", "no allergy"],
+            "avoid": ["has_allergy(mara, warfarin", "witness_reliability_issue(mara", "unreliable(mara"],
+        },
+    },
+    {
+        "id": "harbor_default_rule_shipping_clearance",
+        "domain": "harbor_house_governance",
+        "utterance": (
+            "All clinic shipments are frozen if the storm-lock is active unless Ada clears them after "
+            "the flood fund transfer. Shipment H7 is clinic stock, the storm-lock is active, and Ada "
+            "cleared it before the transfer."
+        ),
+        "context": [
+            "Flood fund transfer must occur before post-storm releases.",
+            "Ada is authorized to clear shipments only after the transfer.",
+        ],
+        "allowed_predicates": [
+            "clinic_shipment/1",
+            "storm_lock_active/1",
+            "cleared_on/3",
+            "transfer_completed_on/2",
+            "frozen/1",
+            "release_allowed/1",
+        ],
+        "expect": {
+            "decision": "mixed",
+            "must": ["H7", "storm-lock", "Ada", "before the transfer", "unless"],
+            "avoid": ["release_allowed(h7)", "frozen(h7) as inferred fact"],
+        },
+    },
+    {
+        "id": "harbor_query_scoped_alias_premise",
+        "domain": "harbor_house_legal",
+        "utterance": "If M. Vale was Mara, not Mira, would the April 10 access invalidate Mira's room transfer?",
+        "context": [
+            "Mira's room transfer depends on director countersignature, not pharmacy access.",
+            "M. Vale identity is unresolved.",
+        ],
+        "allowed_predicates": ["candidate_identity/2", "invalidates/2", "access_log_entry/4", "effective_on/3"],
+        "expect": {
+            "decision": "answer",
+            "must": ["hypothetical", "M. Vale", "Mara", "Mira", "April 10", "query"],
+            "avoid": ["same_person(m_vale, mara)", "candidate_identity(m_vale, mara) as fact", "invalidates(access"],
+        },
+    },
+    {
+        "id": "harbor_document_priority_conflict",
+        "domain": "harbor_house_legal",
+        "utterance": (
+            "The unsigned draft calls Dock 3 'Harbor Clinic Annex', but the recorded deed calls the "
+            "same parcel 'Flood Fund Storehouse'. Use the recorded deed."
+        ),
+        "context": [
+            "Existing current fact: parcel_name(dock_3, harbor_clinic_annex).",
+            "Recorded deeds outrank unsigned drafts for parcel names.",
+        ],
+        "allowed_predicates": ["document_names/4", "parcel_name/2", "source_priority/3", "correction/2"],
+        "expect": {
+            "decision": "commit",
+            "must": ["unsigned draft", "recorded deed", "Dock 3", "Flood Fund Storehouse", "correction"],
+            "avoid": ["parcel_name(dock_3, harbor_clinic_annex) as current", "two current names"],
+        },
+    },
+    {
+        "id": "harbor_relative_time_anchor_correction",
+        "domain": "harbor_house_temporal",
+        "utterance": (
+            "Nia wrote 'last Friday' in the flood note. That note was dated May 6, 2024, not May 13, "
+            "so last Friday means May 3, not May 10."
+        ),
+        "context": [
+            "Existing note anchor: flood_note dated May 13, 2024.",
+            "Existing derived date: last_friday(flood_note, may_10_2024).",
+        ],
+        "allowed_predicates": ["dated_on/2", "relative_date_resolves_to/3", "correction/2"],
+        "expect": {
+            "decision": "commit",
+            "must": ["last Friday", "May 6, 2024", "May 3", "May 10", "correction"],
+            "avoid": ["relative_date_resolves_to(flood_note, last_friday, may_10_2024) as current"],
+        },
+    },
+    {
+        "id": "harbor_absence_of_finding_not_negative",
+        "domain": "harbor_house_legal",
+        "utterance": "The auditor found the flood transfer authentic, but did not find that Pavel approved it before bonuses were paid.",
+        "context": [
+            "The charter requires flood transfer before trustee bonuses.",
+            "Pavel is a trustee.",
+        ],
+        "allowed_predicates": ["found/3", "authentic/1", "approved_before/3", "paid_bonus/3", "violated/2"],
+        "expect": {
+            "decision": "mixed",
+            "must": ["auditor", "authentic", "did not find", "Pavel", "bonuses"],
+            "avoid": ["approved_before(pavel", "not_approved", "violated(pavel"],
+        },
+    },
+    {
+        "id": "harbor_group_exception_known_members",
+        "domain": "harbor_house_compliance",
+        "utterance": "All night-shift nurses except Omar signed the storm affidavit. Omar signed the medication log instead.",
+        "context": [
+            "Known night-shift nurses: Lena, Omar, Priya.",
+            "The affidavit and medication log are different documents.",
+        ],
+        "allowed_predicates": ["night_shift_nurse/1", "signed_affidavit/2", "signed_log/2", "exception_to_group_statement/3"],
+        "expect": {
+            "decision": "mixed",
+            "must": ["Lena", "Omar", "Priya", "except", "medication log"],
+            "avoid": ["signed_affidavit(night_shift_nurses", "signed_affidavit(omar", "signed_affidavit(lena"],
+        },
+    },
+    {
+        "id": "harbor_consecutive_interval_gap",
+        "domain": "harbor_house_temporal",
+        "utterance": (
+            "Mira was out of district from Jan 1 to Feb 20, back on Feb 21, then out again Mar 1 to "
+            "May 1. The scholarship rule needs ninety consecutive days out, so do not mark her "
+            "ineligible yet."
+        ),
+        "context": [
+            "Rule: scholarship recipient becomes ineligible after ninety consecutive days out of district.",
+            "Mira is a scholarship recipient.",
+        ],
+        "allowed_predicates": ["out_of_district_interval/3", "returned_on/2", "ineligible/2", "rule_threshold/3"],
+        "expect": {
+            "decision": "mixed",
+            "must": ["Jan 1", "Feb 20", "Feb 21", "Mar 1", "May 1", "ninety consecutive"],
+            "avoid": ["ineligible(mira", "out_of_district_interval(mira, jan_1, may_1"],
+        },
+    },
+    {
+        "id": "harbor_cross_doc_same_name_two_roles",
+        "domain": "harbor_house_alias",
+        "utterance": (
+            "The clinic note says 'Dr. Hale approved discharge'; the deed says 'Hale approved transfer'. "
+            "Only Selene Hale is a doctor, but Silas Hale is the property trustee."
+        ),
+        "context": [
+            "Selene Hale is clinic director.",
+            "Silas Hale is property trustee.",
+            "Medical discharge and property transfer are separate workflows.",
+        ],
+        "allowed_predicates": ["approved_discharge/2", "approved_transfer/2", "role/2", "candidate_identity/2"],
+        "expect": {
+            "decision": "mixed",
+            "must": ["Dr. Hale", "Hale", "Selene", "Silas", "discharge", "transfer"],
+            "avoid": ["same_person(selene_hale, silas_hale", "approved_transfer(selene", "approved_discharge(silas"],
+        },
+    },
+    {
+        "id": "harbor_clinical_advice_inside_legal_turn",
+        "domain": "harbor_house_medical_boundary",
+        "utterance": (
+            "For the custody appeal, record that Priya takes warfarin and her INR was high yesterday; "
+            "should the clinic have held tonight's dose?"
+        ),
+        "context": [
+            "Priya is a patient and a witness.",
+            "The system may store bounded medical memory but must not give treatment advice.",
+        ],
+        "allowed_predicates": ["taking/2", "lab_result_high/2", "claimed/3"],
+        "expect": {
+            "decision": "reject",
+            "must": ["Priya", "warfarin", "INR", "dose", "medical advice"],
+            "avoid": ["hold", "retract(taking", "answer treatment"],
+        },
+    },
+    {
+        "id": "harbor_revoked_authority_late_correction",
+        "domain": "harbor_house_governance",
+        "utterance": "Ada approved H7 on June 4. Wait, the board revoked Ada's release authority on June 1, but she was reinstated June 8.",
+        "context": [
+            "Existing current fact: release_allowed(h7).",
+            "Ada approvals require active release authority on the approval date.",
+        ],
+        "allowed_predicates": [
+            "approved_on/3",
+            "authority_revoked_on/2",
+            "authority_reinstated_on/2",
+            "release_allowed/1",
+            "correction/2",
+        ],
+        "expect": {
+            "decision": "mixed",
+            "must": ["Ada", "H7", "June 4", "June 1", "June 8", "revoked"],
+            "avoid": ["release_allowed(h7) as current", "approved_on(ada, h7, june_8"],
+        },
+    },
 ]
 
 
@@ -1256,6 +1528,24 @@ RULE_MUTATION_SCENARIO_IDS = [
     "mutation_schedule_ambiguous_overwrite",
     "mutation_rule_derived_conflict",
     "mutation_claim_does_not_overwrite_observation",
+]
+
+
+HARBOR_FRONTIER_SCENARIO_IDS = [
+    "harbor_deed_minutes_effective_date",
+    "harbor_witness_claim_vs_log",
+    "harbor_correction_date_not_identity",
+    "harbor_medical_side_effect_discredit",
+    "harbor_default_rule_shipping_clearance",
+    "harbor_query_scoped_alias_premise",
+    "harbor_document_priority_conflict",
+    "harbor_relative_time_anchor_correction",
+    "harbor_absence_of_finding_not_negative",
+    "harbor_group_exception_known_members",
+    "harbor_consecutive_interval_gap",
+    "harbor_cross_doc_same_name_two_roles",
+    "harbor_clinical_advice_inside_legal_turn",
+    "harbor_revoked_authority_late_correction",
 ]
 
 
@@ -1900,7 +2190,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--scenario-ids", default="")
     parser.add_argument(
         "--scenario-group",
-        choices=["all", "edge", "weak_edges", "silverton", "silverton_noisy", "rule_mutation"],
+        choices=["all", "edge", "weak_edges", "silverton", "silverton_noisy", "rule_mutation", "harbor_frontier"],
         default="all",
     )
     parser.add_argument("--base-url", default="")
@@ -1936,6 +2226,8 @@ def main() -> int:
             scenario_ids = list(SILVERTON_NOISY_SCENARIO_IDS)
         elif args.scenario_group == "rule_mutation":
             scenario_ids = list(RULE_MUTATION_SCENARIO_IDS)
+        elif args.scenario_group == "harbor_frontier":
+            scenario_ids = list(HARBOR_FRONTIER_SCENARIO_IDS)
     by_id = {scenario["id"]: scenario for scenario in WILD_SCENARIOS}
     scenarios = [by_id[item] for item in scenario_ids] if scenario_ids else list(WILD_SCENARIOS)
     out_dir = Path(args.out_dir)
@@ -2007,6 +2299,13 @@ def main() -> int:
                         timeout=int(args.timeout),
                     )
                 parsed, parse_error = parse_json_payload(response["content"])
+                mapped: dict[str, Any] = {}
+                mapper_warnings: list[str] = []
+                if isinstance(parsed, dict):
+                    mapped, mapper_warnings = semantic_ir_to_legacy_parse(
+                        parsed,
+                        allowed_predicates=scenario.get("allowed_predicates", []),
+                    )
                 record.update(
                     {
                         "latency_ms": response["latency_ms"],
@@ -2015,6 +2314,8 @@ def main() -> int:
                         "parsed": parsed,
                         "parsed_ok": parsed is not None,
                         "parse_error": parse_error,
+                        "mapped": mapped,
+                        "mapper_warnings": mapper_warnings,
                         "score": score_record(parsed, scenario),
                     }
                 )

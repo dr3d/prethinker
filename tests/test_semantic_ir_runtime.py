@@ -130,6 +130,42 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         ]
         self.assertEqual(skipped[0]["skip_reason"], "ungrounded_argument_atom")
 
+    def test_projection_marks_positive_write_plus_unsupported_negative_assertion_mixed(self) -> None:
+        ir = _ir(
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "authentic",
+                    "args": ["flood transfer"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "assert",
+                    "predicate": "approved_before",
+                    "args": ["Pavel", "flood transfer", "trustee bonuses"],
+                    "polarity": "negative",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+            ]
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=["authentic/1", "approved_before/3"],
+        )
+        self.assertTrue(any("negative assertion" in warning for warning in warnings))
+        diagnostics = parsed["admission_diagnostics"]
+        self.assertEqual(diagnostics["projected_decision"], "mixed")
+        self.assertEqual(
+            diagnostics["projection_reason"],
+            "positive_write_with_unsupported_negative_assertion_projected_to_mixed",
+        )
+        self.assertEqual(parsed["facts"], ["authentic(flood_transfer)."])
+        skipped = [row for row in diagnostics["operations"] if not row["admitted"]]
+        self.assertEqual(skipped[0]["skip_reason"], "negative_fact_semantics_not_supported")
+
     def test_mapper_admits_rule_operation_with_explicit_clause(self) -> None:
         ir = _ir(
             decision="commit",

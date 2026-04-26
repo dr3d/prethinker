@@ -9,6 +9,7 @@ from scripts.run_guardrail_dependency_ab import (
     _slug_component as _ab_slug_component,
 )
 from scripts.run_semantic_ir_prompt_bakeoff import (
+    HARBOR_FRONTIER_SCENARIO_IDS,
     RULE_MUTATION_SCENARIO_IDS,
     SILVERTON_NOISY_SCENARIO_IDS,
     SILVERTON_SCENARIO_IDS,
@@ -254,6 +255,54 @@ class GuardrailDependencyABTests(unittest.TestCase):
                 )
             )
         self.assertEqual(domains, {"mutation_conflict", "rule_recognition"})
+
+    def test_harbor_frontier_pack_is_registered(self) -> None:
+        by_id = {str(row.get("id", "")): row for row in WILD_SCENARIOS}
+        self.assertEqual(len(HARBOR_FRONTIER_SCENARIO_IDS), 14)
+        domains = set()
+        for scenario_id in HARBOR_FRONTIER_SCENARIO_IDS:
+            self.assertIn(scenario_id, by_id)
+            scenario = by_id[scenario_id]
+            domains.add(str(scenario.get("domain", "")))
+            self.assertTrue(str(scenario_id).startswith("harbor_"))
+            self.assertIn(str(scenario.get("expect", {}).get("decision", "")), {
+                "answer",
+                "clarify",
+                "commit",
+                "mixed",
+                "quarantine",
+                "reject",
+            })
+            self.assertTrue(scenario.get("allowed_predicates"))
+            text = " ".join(
+                [
+                    str(scenario.get("utterance", "")),
+                    " ".join(str(item) for item in scenario.get("context", [])),
+                    " ".join(str(item) for item in scenario.get("expect", {}).get("must", [])),
+                    " ".join(str(item) for item in scenario.get("expect", {}).get("avoid", [])),
+                ]
+            ).lower()
+            self.assertTrue(
+                any(
+                    token in text
+                    for token in [
+                        "existing",
+                        "claim",
+                        "correction",
+                        "unless",
+                        "before",
+                        "after",
+                        "effective",
+                        "witness",
+                        "allergy",
+                        "query",
+                        "except",
+                        "role",
+                        "trustee",
+                    ]
+                )
+            )
+        self.assertTrue({"harbor_house_legal", "harbor_house_temporal"}.issubset(domains))
 
 
 if __name__ == "__main__":
