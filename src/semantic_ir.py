@@ -257,6 +257,7 @@ BEST_GUARDED_V2_GUIDANCE = (
     "- Never mark a rule operation safe without an executable clause. If you cannot provide candidate_operations[].clause, do not emit a safe rule operation.\n"
     "- Existing current facts in context are state constraints. If a new utterance gives a different value for the same likely functional predicate such as lives_in/2 or scheduled_for/2, choose clarify unless the user explicitly marks it as a correction with words like correction, actually, wrong, not X, or instead.\n"
     "- If the new write would contradict a consequence implied by existing context rules and facts, choose clarify or quarantine. Do not assert the opposite fact until the user supplies an explicit correction, exception, or revocation.\n"
+    "- If direct facts should be recorded but they create an unresolved conflict with context rules, choose mixed, keep the direct writes as safe operations, and describe the conflict in unsafe_implications/self_check. If self_check says there is a logical conflict or consistency check still needed, the decision should not be commit.\n"
     "- Some predicates are non-exclusive, such as has_condition/2. A new compatible condition can be committed without retracting an existing different condition.\n"
     "- Do not turn a claim into a fact. 'Bob says he has it' is a claim, not possession.\n"
     "- Do not infer diagnosis or staging from a single lab value request. Quarantine or clarify.\n"
@@ -872,6 +873,7 @@ def _admission_feature_summary(
         "has_unresolved_referents": bool(_semantic_ir_ambiguities(ir)),
         "has_unsafe_implications": _has_unsafe_implications(ir),
         "has_claim_and_direct_assertions": _has_claim_and_direct_assertions(ir),
+        "has_self_check_rule_conflict": _self_check_mentions_unresolved_rule_conflict(ir),
         "predicate_palette_enabled": bool(allowed_signatures),
         "predicate_palette_size": len(allowed_signatures),
         "has_out_of_palette_safe_write": _has_out_of_palette_safe_write(
@@ -1065,6 +1067,10 @@ def _projection_reason(
         return "claim_plus_direct_observation_projected_to_mixed"
     if model_decision == "commit" and _has_safe_direct_write(ir) and _has_general_negative_assertion(ir):
         return "positive_write_with_unsupported_negative_assertion_projected_to_mixed"
+    if model_decision == "commit" and _has_safe_direct_write(ir) and _has_partial_write_admission_pressure(ir):
+        return "partial_write_admission_pressure_projected_to_mixed"
+    if model_decision == "commit" and _has_safe_direct_write(ir) and _self_check_mentions_unresolved_rule_conflict(ir):
+        return "self_check_rule_conflict_projected_to_mixed"
     if model_decision == "quarantine" and _raw_missing_slots(ir) and not _missing_slots(ir):
         return "only_optional_metadata_missing_projected_to_mixed"
     if model_decision == "quarantine" and str(ir.get("turn_type", "")).strip().lower() == "correction":
@@ -1121,6 +1127,10 @@ def _projected_decision(
     if decision == "commit" and _has_safe_direct_write(ir) and _has_claim_and_direct_assertions(ir):
         return "mixed"
     if decision == "commit" and _has_safe_direct_write(ir) and _has_general_negative_assertion(ir):
+        return "mixed"
+    if decision == "commit" and _has_safe_direct_write(ir) and _has_partial_write_admission_pressure(ir):
+        return "mixed"
+    if decision == "commit" and _has_safe_direct_write(ir) and _self_check_mentions_unresolved_rule_conflict(ir):
         return "mixed"
     if (
         decision == "quarantine"
@@ -1344,6 +1354,43 @@ def _has_general_negative_assertion(ir: dict[str, Any]) -> bool:
         if not _is_negative_event_predicate(predicate):
             return True
     return False
+
+
+def _has_partial_write_admission_pressure(ir: dict[str, Any]) -> bool:
+    for op in _candidate_operations(ir):
+        operation = str(op.get("operation", "")).strip().lower()
+        if operation not in {"assert", "retract", "rule"}:
+            continue
+        safety = str(op.get("safety", "")).strip().lower()
+        source = str(op.get("source", "")).strip().lower()
+        if safety != "safe":
+            return True
+        if source == "inferred":
+            return True
+    return False
+
+
+def _self_check_mentions_unresolved_rule_conflict(ir: dict[str, Any]) -> bool:
+    if str(ir.get("turn_type", "")).strip().lower() == "correction":
+        return False
+    self_check = ir.get("self_check", {})
+    if not isinstance(self_check, dict):
+        return False
+    text = " ".join(_string_list(self_check.get("notes"))).lower()
+    if not text:
+        return False
+    rule_scope = any(marker in text for marker in ("context rule", "under the rule", "constraint"))
+    unresolved = any(
+        marker in text
+        for marker in (
+            "logical conflict",
+            "consistency check",
+            "validity check",
+            "invalid under the rule",
+            "might be invalid",
+        )
+    )
+    return rule_scope and unresolved
 
 
 def _has_unsafe_implications(ir: dict[str, Any]) -> bool:

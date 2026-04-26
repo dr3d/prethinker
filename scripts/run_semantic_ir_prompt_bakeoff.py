@@ -1243,7 +1243,7 @@ WILD_SCENARIOS: list[dict[str, Any]] = [
         ],
         "allowed_predicates": ["access_log_entry/4", "correction/2", "candidate_identity/2"],
         "expect": {
-            "decision": "mixed",
+            "decision": "commit",
             "must": ["correction", "April 1", "April 10", "M. Vale", "4B"],
             "avoid": ["access_log_entry(mira", "same_person(m_vale", "retract(access_log_entry(mira"],
         },
@@ -1814,6 +1814,7 @@ PROMPT_VARIANTS: dict[str, dict[str, Any]] = {
             "- Never mark a rule operation safe without an executable clause. If you cannot provide candidate_operations[].clause, do not emit a safe rule operation.\n"
             "- Existing current facts in context are state constraints. If a new utterance gives a different value for the same likely functional predicate such as lives_in/2 or scheduled_for/2, choose clarify unless the user explicitly marks it as a correction with words like correction, actually, wrong, not X, or instead.\n"
             "- If the new write would contradict a consequence implied by existing context rules and facts, choose clarify or quarantine. Do not assert the opposite fact until the user supplies an explicit correction, exception, or revocation.\n"
+            "- If direct facts should be recorded but they create an unresolved conflict with context rules, choose mixed, keep the direct writes as safe operations, and describe the conflict in unsafe_implications/self_check. If self_check says there is a logical conflict or consistency check still needed, the decision should not be commit.\n"
             "- Some predicates are non-exclusive, such as has_condition/2. A new compatible condition can be committed without retracting an existing different condition.\n"
             "- Pure questions against context rules are answer turns. Do not choose mixed just because a context rule appears in context; context rules are support for the query, not new writes.\n"
             "- If context supplies exactly one active patient and one active lab test, a direct 'it came back high' may propose a safe lab_result_high write.\n"
@@ -2159,16 +2160,34 @@ def write_summary(records: list[dict[str, Any]], path: Path) -> None:
         "",
         "## Aggregate",
         "",
-        "| Variant | Runs | JSON OK | Schema OK | Decision OK | Avg rough score | Avg latency ms |",
-        "|---|---:|---:|---:|---:|---:|---:|",
+        "| Variant | Runs | JSON OK | Schema OK | Model decision OK | Projected decision OK | Avg rough score | Admitted ops | Skipped ops | Avg latency ms |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for variant, rows in sorted(grouped.items()):
         json_ok = sum(1 for row in rows if row.get("parsed_ok"))
         schema_ok = sum(1 for row in rows if row.get("score", {}).get("schema_ok"))
         decision_ok = sum(1 for row in rows if row.get("score", {}).get("decision_ok"))
+        projected_ok = 0
+        admitted_ops = 0
+        skipped_ops = 0
+        for row in rows:
+            diagnostics = (
+                row.get("mapped", {}).get("admission_diagnostics", {})
+                if isinstance(row.get("mapped"), dict)
+                else {}
+            )
+            projected = str(diagnostics.get("projected_decision", "")).strip().lower()
+            expected = str(row.get("score", {}).get("expected_decision", "")).strip().lower()
+            if _decision_matches(projected, expected):
+                projected_ok += 1
+            admitted_ops += int(diagnostics.get("admitted_count", 0) or 0)
+            skipped_ops += int(diagnostics.get("skipped_count", 0) or 0)
         avg_score = sum(float(row.get("score", {}).get("rough_score", 0.0)) for row in rows) / max(1, len(rows))
         avg_latency = sum(int(row.get("latency_ms", 0)) for row in rows) / max(1, len(rows))
-        lines.append(f"| `{variant}` | {len(rows)} | {json_ok} | {schema_ok} | {decision_ok} | {avg_score:.2f} | {avg_latency:.0f} |")
+        lines.append(
+            f"| `{variant}` | {len(rows)} | {json_ok} | {schema_ok} | {decision_ok} | {projected_ok} | "
+            f"{avg_score:.2f} | {admitted_ops} | {skipped_ops} | {avg_latency:.0f} |"
+        )
     lines.extend(["", "## Low Rough Scores", ""])
     low = sorted(records, key=lambda row: float(row.get("score", {}).get("rough_score", 0.0)))[:24]
     for row in low:
@@ -2176,7 +2195,9 @@ def write_summary(records: list[dict[str, Any]], path: Path) -> None:
         lines.append(
             f"- `{row['variant']}` / `{row['scenario_id']}`: "
             f"score={score:.2f} parsed={row.get('parsed_ok')} "
-            f"decision={row.get('score', {}).get('decision')} expected={row.get('score', {}).get('expected_decision')}"
+            f"decision={row.get('score', {}).get('decision')} "
+            f"projected={row.get('mapped', {}).get('admission_diagnostics', {}).get('projected_decision') if isinstance(row.get('mapped'), dict) else None} "
+            f"expected={row.get('score', {}).get('expected_decision')}"
         )
     lines.extend(["", "## Files", "", f"- JSONL: `{path.with_suffix('.jsonl').name}`"])
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")

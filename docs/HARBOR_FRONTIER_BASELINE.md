@@ -55,12 +55,74 @@ The trace renderer can inspect the run with:
 python scripts\render_semantic_ir_trace.py <harbor_jsonl> --out tmp\semantic_ir_trace_views\harbor_frontier.trace.md
 ```
 
+## Variant Probe
+
+A follow-up run compared the existing prompt variants on the same Harbor pack:
+
+| Variant | Model decision | Mapper-projected decision | Avg score | Admitted ops | Skipped ops |
+|---|---:|---:|---:|---:|---:|
+| `best_guarded_v2` | 11/14 | 11/14 | 0.920 | 18 | 16 |
+| `best_guarded_v3` | 10/14 | 12/14 | 0.898 | 25 | 16 |
+| `edge_compiler_v1` | 11/14 | 11/14 | 0.923 | 24 | 10 |
+
+This is a useful warning for evaluation: raw model decision labels are not the
+whole story. The mapper-projected decision is closer to the runtime outcome and
+should be shown in Harbor summaries.
+
+One expectation was also refined after trace inspection:
+`harbor_correction_date_not_identity` can be a safe `commit` when it corrects
+the date on the unresolved alias atom `m_vale` without resolving that alias to
+Mira or Mara. The old expectation treated unresolved identity as enough to force
+`mixed`, but the safer interpretation is alias-preserving correction.
+
+## Improved Pass
+
+A later `best_guarded_v3` pass added two important refinements:
+
+- direct interval facts may be admitted while a rule consequence remains
+  unsafe, so `harbor_consecutive_interval_gap` is correctly `mixed` when the
+  workspace preserves `ineligible(...)` as an unsafe/query target;
+- if `self_check` identifies an unresolved rule/constraint validity problem,
+  the mapper projects a raw `commit` label to `mixed` while still admitting the
+  safe direct facts.
+
+Latest local run:
+
+```powershell
+python scripts\run_semantic_ir_prompt_bakeoff.py `
+  --backend lmstudio `
+  --model qwen/qwen3.6-35b-a3b `
+  --scenario-group harbor_frontier `
+  --variants best_guarded_v3 `
+  --timeout 300 `
+  --num-ctx 16384 `
+  --max-tokens 4096
+```
+
+| Metric | Result |
+|---|---:|
+| Scenarios | 14 |
+| JSON valid | 14/14 |
+| Schema valid | 14/14 |
+| Raw model decision labels | 10/14 |
+| Mapper-projected decision labels | 14/14 |
+| Average rough score | 0.89 |
+| Admitted ops | 23 |
+| Skipped ops | 11 |
+| Average latency | 6.2s |
+
+Rendered trace:
+
+```powershell
+python scripts\render_semantic_ir_trace.py `
+  tmp\semantic_ir_prompt_bakeoff\<harbor_jsonl> `
+  --out tmp\semantic_ir_trace_views\harbor_frontier_best_guarded_v3_20260426_improved.trace.md `
+  --html `
+  --raw-chars 0
+```
+
 ## What Broke Usefully
 
-- `harbor_correction_date_not_identity`: the model committed a correction using
-  the unresolved alias atom `m_vale` instead of over-grounding to Mira or Mara.
-  This may be acceptable, but the pack currently expects `mixed` until alias
-  mutation policy is made explicit.
 - `harbor_absence_of_finding_not_negative`: the model proposed one safe positive
   fact and one unsupported negative assertion. The mapper now projects this
   shape to `mixed`, because only the positive fact can be admitted.
@@ -68,6 +130,10 @@ python scripts\render_semantic_ir_trace.py <harbor_jsonl> --out tmp\semantic_ir_
   nurses except Omar" into individual writes. This is the next hard policy
   question: whether enumerated-context group expansion is admissible, and under
   what provenance/quantifier contract.
+- `harbor_revoked_authority_late_correction`: the model noticed that the
+  approval might be invalid under a context rule, but still labeled the turn
+  `commit`. The mapper now treats that self-check signal as admission pressure
+  and projects to `mixed`.
 
 ## Immediate Design Lesson
 

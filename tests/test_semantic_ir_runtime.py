@@ -166,6 +166,83 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         skipped = [row for row in diagnostics["operations"] if not row["admitted"]]
         self.assertEqual(skipped[0]["skip_reason"], "negative_fact_semantics_not_supported")
 
+    def test_projection_marks_partial_write_admission_pressure_mixed(self) -> None:
+        ir = _ir(
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "signed_log",
+                    "args": ["Omar", "medication log"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "assert",
+                    "predicate": "signed_affidavit",
+                    "args": ["Lena", "storm affidavit"],
+                    "polarity": "positive",
+                    "source": "inferred",
+                    "safety": "safe",
+                },
+            ]
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=["signed_log/2", "signed_affidavit/2"],
+        )
+        self.assertTrue(any("inferred safe operation" in warning for warning in warnings))
+        diagnostics = parsed["admission_diagnostics"]
+        self.assertEqual(diagnostics["projected_decision"], "mixed")
+        self.assertEqual(
+            diagnostics["projection_reason"],
+            "partial_write_admission_pressure_projected_to_mixed",
+        )
+        self.assertEqual(parsed["facts"], ["signed_log(omar, medication_log)."])
+
+    def test_projection_marks_self_check_rule_conflict_mixed(self) -> None:
+        ir = _ir(
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "approved_on",
+                    "args": ["Ada", "H7", "June 4"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "assert",
+                    "predicate": "authority_revoked_on",
+                    "args": ["Ada", "June 1"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+            ],
+            self_check={
+                "bad_commit_risk": "low",
+                "missing_slots": [],
+                "notes": [
+                    "Context rule requires active authority on approval date. "
+                    "The approval might be invalid under the rule; runtime validity check is still needed."
+                ],
+            },
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=["approved_on/3", "authority_revoked_on/2"],
+        )
+        self.assertEqual(warnings, [])
+        diagnostics = parsed["admission_diagnostics"]
+        self.assertEqual(diagnostics["projected_decision"], "mixed")
+        self.assertEqual(
+            diagnostics["projection_reason"],
+            "self_check_rule_conflict_projected_to_mixed",
+        )
+        self.assertEqual(diagnostics["features"]["has_self_check_rule_conflict"], True)
+        self.assertEqual(len(parsed["facts"]), 2)
+
     def test_mapper_admits_rule_operation_with_explicit_clause(self) -> None:
         ir = _ir(
             decision="commit",
