@@ -79,6 +79,12 @@ The A/B runners now include scenario group, model slug, process ID, and
 microseconds in output filenames. This avoids evidence loss when AFK sweeps run
 in parallel or start in the same second.
 
+The comparison table can be regenerated from local JSONL artifacts with:
+
+```text
+python scripts/summarize_semantic_ir_model_matrix.py tmp/guardrail_dependency_ab/*.jsonl
+```
+
 Recent local artifacts:
 
 - `tmp/guardrail_dependency_ab/guardrail_dependency_ab_20260426T170337Z.jsonl`
@@ -97,8 +103,6 @@ Recent local artifacts:
 
 ## Next Work
 
-- Add a small matrix summarizer so future runs produce one comparative table
-  without manual copying.
 - Repeat the hard-edge battery for top models before treating any ranking as
   stable.
 - Add a few multilingual/noisy packs to test whether the Semantic IR direction
