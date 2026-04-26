@@ -1,6 +1,8 @@
 # Prethinker
 
-Prethinker is a local research workbench for turning natural-language turns into governed Prolog knowledge-base updates. The LLM proposes structured semantic workspaces; deterministic code validates, maps, and applies only the parts that survive policy, schema, and consistency checks.
+Prethinker is a governed semantic-intake layer for turning natural-language claims into auditable symbolic state.
+
+More concretely, it is a local research workbench for governed Prolog knowledge-base updates. The LLM proposes structured semantic workspaces; deterministic code validates, maps, and applies only the parts that survive policy, schema, and consistency checks.
 
 Current center: a live `ui_gateway` console backed by `src/mcp_server.py`, the `semantic_ir_v1` runtime path with `qwen3.6:35b-a3b`, the bounded `medical@v0` profile, and local UMLS Semantic Network assets.
 

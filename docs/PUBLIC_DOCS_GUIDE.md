@@ -7,6 +7,24 @@ trail; these docs should describe the project as it sits now.
 
 ![Prethinker semantic IR workspace](assets/prethinker-semantic-ir-workspace.png)
 
+## Main Invention
+
+Prethinker is a governed semantic-intake layer for turning natural-language
+claims into auditable symbolic state.
+
+Use the project terms this way:
+
+- **Prethinker**: the overall system and strict authority boundary.
+- **Semantic IR**: the model-produced workspace where meaning is represented
+  before truth is admitted.
+- **Mapper**: deterministic code that admits, skips, clarifies, quarantines, or
+  rejects candidate operations.
+- **Prolog KB**: the durable symbolic state after admission.
+- **Freethinker**: optional non-authoritative clarification sidecar.
+- **Console**: the live cockpit for watching the process.
+- **Medical/UMLS**: the current bounded domain lane, not a general clinical
+  reasoning claim.
+
 ## Current Front Door
 
 Read these first:
