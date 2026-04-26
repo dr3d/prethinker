@@ -995,6 +995,8 @@ def _projection_reason(
         return "model_decision_preserved"
     if _is_pure_hypothetical_query(ir):
         return "pure_hypothetical_query_projected_to_answer"
+    if model_decision == "clarify" and _speculative_ambiguous_observation_should_quarantine(ir):
+        return "speculative_ambiguous_observation_projected_to_quarantine"
     if _ambiguous_content_should_clarify(ir):
         return "ambiguous_referents_with_only_speech_wrapper_projected_to_clarify"
     if model_decision == "commit" and _has_initialed_person_state_write(ir):
@@ -1050,6 +1052,8 @@ def _projected_decision(
         return "clarify"
     if _is_pure_hypothetical_query(ir):
         return "answer"
+    if decision == "clarify" and _speculative_ambiguous_observation_should_quarantine(ir):
+        return "quarantine"
     if decision == "commit" and _has_initialed_person_state_write(ir):
         return "mixed"
     if decision in {"commit", "mixed"} and _has_only_communication_writes_with_unsafe_implications(
@@ -1632,6 +1636,38 @@ def _has_ambiguous_or_unresolved_referent(ir: dict[str, Any]) -> bool:
         and str(ref.get("status", "")).strip().lower() in {"ambiguous", "unresolved"}
         for ref in refs
     )
+
+
+def _speculative_ambiguous_observation_should_quarantine(ir: dict[str, Any]) -> bool:
+    if _bad_commit_risk(ir) != "high":
+        return False
+    if not _has_ambiguous_or_unresolved_referent(ir):
+        return False
+    if not _has_unsafe_implications(ir):
+        return False
+    if _has_safe_candidate_operation(ir):
+        return False
+    assertions = ir.get("assertions", [])
+    if not isinstance(assertions, list) or not assertions:
+        return False
+    for assertion in assertions:
+        if not isinstance(assertion, dict):
+            continue
+        kind = str(assertion.get("kind", "")).strip().lower()
+        try:
+            certainty = float(assertion.get("certainty", 0.0) or 0.0)
+        except Exception:
+            certainty = 0.0
+        if kind == "question" or certainty <= 0.55:
+            return True
+    return False
+
+
+def _has_safe_candidate_operation(ir: dict[str, Any]) -> bool:
+    for op in _candidate_operations(ir):
+        if str(op.get("safety", "")).strip().lower() == "safe":
+            return True
+    return False
 
 
 def flatten_semantic_text(value: Any) -> str:

@@ -220,6 +220,16 @@ Optional provenance slots do not block a safe direct write:
 Those slots are useful metadata, not semantic prerequisites unless a predicate
 schema explicitly requires them.
 
+One boundary now matters:
+
+- ordinary missing-slot turns should `clarify`;
+- high-risk speculative observations with ambiguous referents, unsafe
+  implications, question-like/low-certainty assertions, and no safe admissible
+  operation should `quarantine`.
+
+That distinction keeps the system from asking users to rescue a turn whose only
+available content is unsafe speculation.
+
 ## Query Policy
 
 Queries do not mutate the KB.

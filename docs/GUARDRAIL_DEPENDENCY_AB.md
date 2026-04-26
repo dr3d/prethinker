@@ -355,7 +355,7 @@ Latest local result:
 
 | Pack | Runs | Legacy exact OK | Semantic exact OK | Legacy safe OK | Semantic safe OK | Legacy avg score | Semantic avg score |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Silverton noisy temporal | 8 | 3 | 7 | 6 | 8 | 0.750 | 0.927 |
+| Silverton noisy temporal | 8 | 3 | 8 | 6 | 8 | 0.750 | 0.969 |
 
 Score dimensions:
 
@@ -366,15 +366,15 @@ Score dimensions:
 
 Local report file:
 
-- `tmp/guardrail_dependency_ab/guardrail_dependency_ab_20260426T220223372157Z_silverton-noisy_qwen-qwen3-6-35b-a3b_pid40136.md`
+- `tmp/guardrail_dependency_ab/guardrail_dependency_ab_20260426T222011574370Z_silverton-noisy_qwen-qwen3-6-35b-a3b_pid35200.md`
 
 Interpretation:
 
 - The model usually preserves the important semantic content even through noise:
   `Londn ONT` versus London UK, LHR/Heathrow dates, `solo nosotros dos`, Silas's
   ambiguous `im`, and the allergy/side-effect boundary all surfaced in the IR.
-- The new scoring split confirms that the weak point is administrative decision
-  projection, not unsafe KB mutation. Exact labels are now `7/8`, safe outcomes
+- The new scoring split confirms that the weak point was administrative decision
+  projection, not unsafe KB mutation. Exact labels are now `8/8`, safe outcomes
   are `8/8`, and final KB safety is `1.000`.
 - The improvement came from structural policy, not prompt tuning: query-scoped
   identity premises no longer become facts, initial-only person aliases project
@@ -383,8 +383,12 @@ Interpretation:
 - Predicate-palette enforcement moved the invalid verbal-amendment case from
   `mixed` to `quarantine` by skipping the model-invented out-of-palette
   `excluded/2` operation.
-- The remaining miss is instructive: one ambiguous Silas witness turn remains a
-  reasonable `clarify` where the pack expected `quarantine`.
+- The final Silas witness miss was repaired by a structural projection for
+  speculative ambiguous observations: high-risk, unresolved referents,
+  question-like/low-certainty assertions, unsafe implications, and no safe
+  admissible operation now project to `quarantine`.
+- This is still a pressure-pack result. It does not imply broad temporal proof
+  or general legal reasoning.
 - Temporal extraction is present but not yet temporal reasoning. The IR can hold
   2018-2024, April 2023 corrections, and relative-date anchors, but the runtime
   still needs a factual temporal representation before durable mutations can

@@ -35,6 +35,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 - The A/B harness now separates exact decision labels, safe outcomes, semantic extraction score, and final KB safety, so hard packs can distinguish product-policy misses from unsafe KB writes.
 - The noisy Silverton frontier improved through structural mapper policy: query-scoped identity premises stay out of the KB, initial-only person aliases project state writes to `mixed`, and claim-only wrappers with unsafe implications project to `quarantine`.
 - Semantic IR candidate operations now go through deterministic predicate-palette admission. Out-of-palette assert/query/retract/rule predicate signatures are skipped with diagnostics before they reach the legacy parse shape.
+- The final noisy Silverton miss was repaired by projecting speculative ambiguous observations with no safe operation to `quarantine`.
 
 ## Local UMLS Assets
 
@@ -74,13 +75,14 @@ This is the next useful layer for type steering and explanation. It should suppo
 - Keep profile contracts out of the generic mapper: profile packages should own domain type/grounding policy, while the mapper stays structural and auditable.
 - Grow deterministic stored-logic admission beyond the first guard: profile-declared functional predicates, temporal scope, negation policy, and richer contradiction probes are still open.
 - Extend predicate-palette enforcement with profile-owned type contracts and better UI surfacing for skipped operations.
+- Build a new held-out frontier pack instead of over-polishing Silverton: cross-document temporal causality, aliases, corrections, disputed claims, and profile type pressure.
 - Keep the Semantic IR harness model-agnostic, but use `qwen/qwen3.6-35b-a3b` as the default development model unless a specific comparison question needs another local model.
 
 ## Verification Snapshot
 
 Recent verified results:
 
-- Full suite after predicate-palette enforcement: `270 passed`
+- Full suite after final noisy-Silverton projection repair: `271 passed`
 - Focused semantic IR runtime battery: `23 passed`
 - Edge runtime A/B: semantic IR `20/20` decision labels, `0.976` avg score, `0` non-mapper parse rescues
 - Weak-edge runtime A/B: semantic IR `10/10` decision labels, `1.000` avg score, `0` non-mapper parse rescues
@@ -88,7 +90,7 @@ Recent verified results:
 - Focused profile/semantic mapper battery after profile-contract work: `39 passed`
 - Rule/mutation conflict semantic IR pack: raw 35B prompt bakeoff `9/10` decisions, `0.95` average rough score; runtime A/B semantic IR `10/10` decisions versus legacy `6/10`, `0.917` average rough score, with `0` non-mapper rescues
 - Model matrix snapshot: `google/gemma-4-26b-a4b` reached rule/mutation `10/10`, weak edges `10/10`, and hard edge `19/20`; latest `qwen/qwen3.6-35b-a3b` hard-edge rerun reached `17/20`; `nvidia/nemotron-3-nano` reached only `4/10` on rule/mutation and weak edges
-- Noisy Silverton remains a real frontier, but latest Qwen 35B run improved to `7/8` exact labels and `8/8` safe outcomes, with `0.906` extraction average and `1.000` KB safety average. The remaining weakness is mostly the clarify/quarantine boundary on ambiguous witness turns.
+- Noisy Silverton reached `8/8` exact labels and `8/8` safe outcomes, with `0.906` extraction average and `1.000` KB safety average. Treat this as a pressure-pack milestone, not proof of broad temporal or legal reasoning.
 - Rule/mutation conflict pack still reaches semantic IR `10/10` exact labels after predicate-palette enforcement.
 - Python compile check for touched runtime files passed
 

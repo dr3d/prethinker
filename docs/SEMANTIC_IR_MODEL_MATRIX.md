@@ -40,7 +40,7 @@ Noisy Silverton probate runs remain hard:
 
 | Model | Silverton Noisy Exact | Silverton Noisy Safe | Avg Score |
 | --- | ---: | ---: | ---: |
-| `qwen/qwen3.6-35b-a3b` | 7/8 | 8/8 | 0.927 |
+| `qwen/qwen3.6-35b-a3b` | 8/8 | 8/8 | 0.969 |
 | `google/gemma-4-26b-a4b` | 3/8 | not rescored | 0.750 |
 
 ## Read
@@ -70,11 +70,11 @@ model-agnostic and avoid overfitting the prompt to one family.
 
 The noisy Silverton pack is a different story. Initial Qwen and Gemma runs
 stalled around `3/8` exact policy labels. After splitting the score and adding
-structural mapper policies, the latest Qwen 35B run reaches `7/8` exact labels,
+structural mapper policies, the latest Qwen 35B run reaches `8/8` exact labels,
 `8/8` safe outcomes, `0.906` extraction average, and `1.000` KB safety average.
-That says the frontier is not mostly "dangerous model writes"; it is now mostly
-the clarify/quarantine boundary for unresolved witness turns, plus future
-temporal reasoning.
+That says the frontier is not mostly "dangerous model writes"; the next useful
+frontier is harder held-out scenarios, profile-owned type contracts, UI
+surfacing for skipped operations, and real temporal reasoning.
 
 ## Current Best Bets
 
@@ -121,12 +121,16 @@ Recent local artifacts:
 - `tmp/guardrail_dependency_ab/guardrail_dependency_ab_20260426T193927569057Z_silverton-noisy_qwen-qwen3-6-35b-a3b_pid47592.jsonl`
 - `tmp/guardrail_dependency_ab/guardrail_dependency_ab_20260426T220223372157Z_silverton-noisy_qwen-qwen3-6-35b-a3b_pid40136.jsonl`
 - `tmp/guardrail_dependency_ab/guardrail_dependency_ab_20260426T220657463730Z_rule-mutation_qwen-qwen3-6-35b-a3b_pid32252.jsonl`
+- `tmp/guardrail_dependency_ab/guardrail_dependency_ab_20260426T222011574370Z_silverton-noisy_qwen-qwen3-6-35b-a3b_pid35200.jsonl`
 
 ## Next Work
 
 - Use Qwen 35B as the default development model unless a specific question needs
   a model-family comparison.
-- Add a few multilingual/noisy packs to test whether the Semantic IR direction
-  really escapes English-only patching.
-- Continue refining noisy Silverton policy labels now that the harness separates
-  exact label agreement, safe outcome, extraction, and KB safety.
+- Build the next held-out frontier pack instead of polishing Silverton further:
+  cross-document temporal causality, identity aliases, corrections, and
+  conflicting claims.
+- Surface mapper diagnostics in the UI so skipped predicate-palette and
+  quarantine decisions are demonstrable, not buried in JSON traces.
+- Extend profile-owned type contracts so medical and UMLS steering stay out of
+  the generic mapper.

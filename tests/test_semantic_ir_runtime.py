@@ -406,6 +406,62 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         self.assertTrue(payload["needs_clarification"])
         self.assertIn("decision=clarify", payload["rationale"])
 
+    def test_speculative_ambiguous_observation_projects_to_quarantine(self) -> None:
+        ir = _ir(
+            decision="clarify",
+            turn_type="query",
+            referents=[
+                {
+                    "surface": "him",
+                    "status": "ambiguous",
+                    "candidates": ["arthur", "alfred"],
+                    "chosen": None,
+                }
+            ],
+            assertions=[
+                {
+                    "kind": "question",
+                    "subject": "Silas",
+                    "relation_concept": "saw",
+                    "object": "him",
+                    "polarity": "positive",
+                    "certainty": 0.5,
+                }
+            ],
+            unsafe_implications=[
+                {
+                    "candidate": "resided_in(arthur, england, 2022)",
+                    "why_unsafe": "Speculative ambiguous witness memory cannot ground residence.",
+                    "commit_policy": "clarify",
+                }
+            ],
+            candidate_operations=[
+                {
+                    "operation": "query",
+                    "predicate": "saw",
+                    "args": ["Silas", "unknown", "pond"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "needs_clarification",
+                }
+            ],
+            clarification_questions=["Who does 'him' refer to?"],
+            self_check={"bad_commit_risk": "high", "missing_slots": [], "notes": []},
+        )
+        payload = semantic_ir_to_prethink_payload(ir)
+        self.assertEqual(payload["intent"], "other")
+        self.assertFalse(payload["needs_clarification"])
+        self.assertIn("decision=quarantine", payload["rationale"])
+        parsed, warnings = semantic_ir_to_legacy_parse(ir, allowed_predicates=["saw/3", "resided_in/3"])
+        self.assertEqual(warnings, [])
+        self.assertEqual(parsed["intent"], "other")
+        diagnostics = parsed["admission_diagnostics"]
+        self.assertEqual(diagnostics["projected_decision"], "quarantine")
+        self.assertEqual(
+            diagnostics["projection_reason"],
+            "speculative_ambiguous_observation_projected_to_quarantine",
+        )
+
     def test_mapper_allows_inferred_query_for_pure_hypothetical(self) -> None:
         ir = _ir(
             decision="mixed",
