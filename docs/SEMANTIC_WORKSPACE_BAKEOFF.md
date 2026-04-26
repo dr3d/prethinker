@@ -296,3 +296,20 @@ The main finding is that the model is now strong enough that the weak points are
 mostly schema and mapper boundaries: hypothetical queries, safe correction
 labeling, medical negation policy, durable negation, and full rule admission.
 See `docs/SEMANTIC_IR_EDGE_EXPLORATION.md` for the detailed read.
+
+## Guardrail A/B Snapshot
+
+The first runtime A/B harness compares the legacy `qwen35-semparse:9b` parser
+plus Python rescue chain against `qwen3.6:35b` semantic IR plus the mapper.
+
+Full edge-battery result:
+
+| Runs | Legacy decision OK | Semantic decision OK | Legacy avg score | Semantic avg score | Legacy parse rescues | Semantic non-mapper rescues |
+|---:|---:|---:|---:|---:|---:|---:|
+| 20 | 10 | 13 | 0.743 | 0.854 | 7 | 0 |
+
+This is the first concrete evidence that the new path can reduce parse-side
+Python rescue dependency while improving final-state quality. It also found the
+next mapper weaknesses: hypothetical queries, quantified exception rules,
+medical negation, nested denial events, and entity normalization for retractions.
+See `docs/GUARDRAIL_DEPENDENCY_AB.md`.

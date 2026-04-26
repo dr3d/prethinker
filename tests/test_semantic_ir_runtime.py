@@ -79,6 +79,35 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         self.assertEqual(parsed["intent"], "retract")
         self.assertEqual(parsed["correction_retract_clauses"], ["owns(mara, silver_compass)."])
 
+    def test_mapper_correction_retract_assert_validates_with_assert_logic_string(self) -> None:
+        ir = _ir(
+            candidate_operations=[
+                {
+                    "operation": "retract",
+                    "predicate": "owns",
+                    "args": ["e1", "e2"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "assert",
+                    "predicate": "owns",
+                    "args": ["Oskar", "silver compass"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+            ]
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(ir)
+        self.assertEqual(warnings, [])
+        self.assertEqual(parsed["intent"], "assert_fact")
+        self.assertEqual(parsed["logic_string"], "owns(oskar, silver_compass).")
+        self.assertEqual(parsed["correction_retract_clauses"], ["owns(mara, silver_compass)."])
+        ok, errors = _validate_parsed(parsed)
+        self.assertTrue(ok, errors)
+
     def test_prethink_payload_uses_clarify_for_missing_slot(self) -> None:
         ir = _ir(
             decision="clarify",

@@ -25,6 +25,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural parsing pr
 - The UMLS Semantic Network builder produces local Prolog facts for semantic types, semantic relations, structural rows, and inherited relation closures.
 - The opt-in semantic IR runtime path can route and commit safe direct assertions without running the legacy parse-side English rescue chain.
 - The first 20-case semantic IR edge battery shows `qwen3.6:35b` holding difficult provenance, temporal, exception, correction, and counterfactual distinctions with 20/20 JSON/schema and 17/20 decision labels under `best_guarded_v2`.
+- The first runtime guardrail A/B run shows semantic IR improving edge-battery score from 0.743 to 0.854 and reducing non-mapper parse rescues from 7 to 0 over 20 cases.
 
 ## Local UMLS Assets
 
@@ -59,6 +60,7 @@ This is the next useful layer for type steering and explanation. It should suppo
 - Keep improving reset/session hygiene so first utterances after reset cannot inherit stale entity context.
 - Expand the medical profile only when the new predicate earns its place through tests and a clear demo.
 - Measure guardrail dependency directly: compare old pipeline rescue-hook use against semantic IR direct coverage on Glitch, Ledger, medical ambiguity, and temporal packs.
+- Fix the mapper weaknesses surfaced by A/B: hypothetical query handling, quantified exception rules, medical negation, nested denial events, and entity normalization for retractions.
 
 ## Verification Snapshot
 
@@ -79,8 +81,9 @@ Rerun the full suite before committing a new stopping point.
 5. `docs/MEDICAL_PROFILE.md`
 6. `docs/FREETHINKER_DESIGN.md`
 7. `docs/SEMANTIC_IR_EDGE_EXPLORATION.md`
-8. `docs/CONSOLE_TRYBOOK.md`
-9. `ui_gateway/README.md`
+8. `docs/GUARDRAIL_DEPENDENCY_AB.md`
+9. `docs/CONSOLE_TRYBOOK.md`
+10. `ui_gateway/README.md`
 
 ## What Was Pruned
 
