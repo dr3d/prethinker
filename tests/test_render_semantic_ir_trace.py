@@ -1,0 +1,113 @@
+import unittest
+
+from scripts.render_semantic_ir_trace import render_markdown
+
+
+class RenderSemanticIRTraceTests(unittest.TestCase):
+    def test_renders_workspace_and_admission_layers(self) -> None:
+        record = {
+            "scenario_id": "demo_conflict",
+            "domain": "demo",
+            "utterance": "Mara is in Paris. Actually, not London.",
+            "context": ["Existing current fact: lives_in(mara, london)."],
+            "allowed_predicates": ["lives_in/2"],
+            "score": {"decision": "commit", "expected_decision": "commit", "rough_score": 1.0},
+            "parsed": {
+                "schema_version": "semantic_ir_v1",
+                "decision": "commit",
+                "turn_type": "correction",
+                "entities": [
+                    {
+                        "id": "e1",
+                        "surface": "Mara",
+                        "normalized": "Mara",
+                        "type": "person",
+                        "confidence": 0.99,
+                    },
+                    {
+                        "id": "e2",
+                        "surface": "Paris",
+                        "normalized": "Paris",
+                        "type": "place",
+                        "confidence": 0.98,
+                    },
+                ],
+                "referents": [],
+                "assertions": [
+                    {
+                        "kind": "correction",
+                        "subject": "e1",
+                        "relation_concept": "residence",
+                        "object": "e2",
+                        "polarity": "positive",
+                        "certainty": 0.96,
+                    }
+                ],
+                "unsafe_implications": [],
+                "candidate_operations": [
+                    {
+                        "operation": "retract",
+                        "predicate": "lives_in",
+                        "args": ["Mara", "London"],
+                        "polarity": "negative",
+                        "source": "direct",
+                        "safety": "safe",
+                    },
+                    {
+                        "operation": "assert",
+                        "predicate": "lives_in",
+                        "args": ["Mara", "Paris"],
+                        "polarity": "positive",
+                        "source": "direct",
+                        "safety": "safe",
+                    },
+                    {
+                        "operation": "assert",
+                        "predicate": "untracked_location",
+                        "args": ["Mara", "France"],
+                        "polarity": "positive",
+                        "source": "direct",
+                        "safety": "safe",
+                    },
+                ],
+                "clarification_questions": [],
+                "self_check": {"bad_commit_risk": "low", "missing_slots": [], "notes": ["clear correction"]},
+            },
+        }
+
+        rendered = render_markdown(
+            [record],
+            source=__file__,
+            raw_chars=0,
+            side="root",
+            limit=0,
+        )
+
+        self.assertIn("Layer 0 - Focused Model Input", rendered)
+        self.assertIn("Layer 2 - Parsed `semantic_ir_v1` Workspace", rendered)
+        self.assertIn("Layer 3 - Deterministic Mapper / Admission Gate", rendered)
+        self.assertIn("Facts passivated for KB assertion", rendered)
+        self.assertIn("Retract targets / correction clauses", rendered)
+        self.assertIn("lives_in(mara, paris).", rendered)
+        self.assertIn("lives_in(mara, london).", rendered)
+        self.assertIn("predicate_palette_gate", rendered)
+
+    def test_renders_parse_error_without_crashing(self) -> None:
+        record = {
+            "scenario_id": "bad_json",
+            "domain": "demo",
+            "utterance": "broken",
+            "content": "",
+            "parsed": None,
+            "parse_error": "timed out",
+            "score": {"rough_score": 0.0},
+        }
+
+        rendered = render_markdown([record], source=__file__, raw_chars=100, side="root", limit=0)
+
+        self.assertIn("Parse unavailable", rendered)
+        self.assertIn("timed out", rendered)
+
+
+if __name__ == "__main__":
+    unittest.main()
