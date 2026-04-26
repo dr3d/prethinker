@@ -57,8 +57,10 @@ def summarize_run(path: Path) -> dict[str, Any]:
             "scenario_group": "empty",
             "runs": 0,
             "semantic_decision_ok": 0,
+            "semantic_safe_outcome_ok": 0,
             "semantic_avg_score": 0.0,
             "legacy_decision_ok": 0,
+            "legacy_safe_outcome_ok": 0,
             "legacy_avg_score": 0.0,
             "semantic_non_mapper_rescues": 0,
         }
@@ -87,12 +89,14 @@ def summarize_run(path: Path) -> dict[str, Any]:
         "scenario_group": groups[0] if len(groups) == 1 else "mixed",
         "runs": len(records),
         "semantic_decision_ok": sum(1 for score in semantic_scores if bool(score.get("decision_ok"))),
+        "semantic_safe_outcome_ok": sum(1 for score in semantic_scores if bool(score.get("safe_outcome_ok"))),
         "semantic_avg_score": round(
             sum(_safe_float(score.get("rough_score")) for score in semantic_scores)
             / max(1, len(semantic_scores)),
             3,
         ),
         "legacy_decision_ok": sum(1 for score in legacy_scores if bool(score.get("decision_ok"))),
+        "legacy_safe_outcome_ok": sum(1 for score in legacy_scores if bool(score.get("safe_outcome_ok"))),
         "legacy_avg_score": round(
             sum(_safe_float(score.get("rough_score")) for score in legacy_scores)
             / max(1, len(legacy_scores)),
@@ -114,20 +118,23 @@ def format_markdown(summaries: list[dict[str, Any]]) -> str:
     lines = [
         "# Semantic IR Model Matrix Summary",
         "",
-        "| Group | Model | Runs | Semantic OK | Semantic Avg | Legacy OK | Legacy Avg | Semantic Non-Mapper Rescues | File |",
-        "|---|---|---:|---:|---:|---:|---:|---:|---|",
+        "| Group | Model | Runs | Semantic Exact | Semantic Safe | Semantic Avg | Legacy Exact | Legacy Safe | Legacy Avg | Semantic Non-Mapper Rescues | File |",
+        "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---|",
     ]
     for row in rows:
         runs = int(row.get("runs", 0) or 0)
         lines.append(
-            "| {group} | `{model}` | {runs} | {semantic_ok}/{runs} | {semantic_avg:.3f} | "
-            "{legacy_ok}/{runs} | {legacy_avg:.3f} | {rescues} | `{file}` |".format(
+            "| {group} | `{model}` | {runs} | {semantic_ok}/{runs} | {semantic_safe}/{runs} | "
+            "{semantic_avg:.3f} | {legacy_ok}/{runs} | {legacy_safe}/{runs} | {legacy_avg:.3f} | "
+            "{rescues} | `{file}` |".format(
                 group=row.get("scenario_group", ""),
                 model=row.get("model", ""),
                 runs=runs,
                 semantic_ok=int(row.get("semantic_decision_ok", 0) or 0),
+                semantic_safe=int(row.get("semantic_safe_outcome_ok", 0) or 0),
                 semantic_avg=_safe_float(row.get("semantic_avg_score")),
                 legacy_ok=int(row.get("legacy_decision_ok", 0) or 0),
+                legacy_safe=int(row.get("legacy_safe_outcome_ok", 0) or 0),
                 legacy_avg=_safe_float(row.get("legacy_avg_score")),
                 rescues=int(row.get("semantic_non_mapper_rescues", 0) or 0),
                 file=row.get("file", ""),

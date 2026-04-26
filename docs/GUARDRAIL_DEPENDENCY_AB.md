@@ -348,28 +348,37 @@ medical-sounding witness-discredit claim.
 Run:
 
 ```text
-python scripts/run_guardrail_dependency_ab.py --backend lmstudio --base-url http://127.0.0.1:1234 --legacy-model qwen/qwen3.6-35b-a3b --semantic-model qwen/qwen3.6-35b-a3b --scenario-group silverton_noisy --timeout 300
+python scripts/run_guardrail_dependency_ab.py --backend lmstudio --base-url http://127.0.0.1:1234 --legacy-model qwen/qwen3.5-9b --semantic-model qwen/qwen3.6-35b-a3b --scenario-group silverton_noisy --timeout 300
 ```
 
 Latest local result:
 
-| Pack | Runs | Legacy decision OK | Semantic decision OK | Legacy avg score | Semantic avg score | Semantic operations | Semantic admitted | Semantic skipped |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| Silverton noisy temporal | 8 | 4 | 2 | 0.781 | 0.729 | 7 | 5 | 2 |
+| Pack | Runs | Legacy exact OK | Semantic exact OK | Legacy safe OK | Semantic safe OK | Legacy avg score | Semantic avg score |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Silverton noisy temporal | 8 | 3 | 3 | 6 | 6 | 0.750 | 0.760 |
+
+Score dimensions:
+
+| Path | Extraction avg | KB safety avg | Operations | Admitted | Skipped |
+|---|---:|---:|---:|---:|---:|
+| Legacy | 0.875 | 1.000 | 0 | 0 | 0 |
+| Semantic IR | 0.906 | 1.000 | 9 | 8 | 1 |
 
 Local report file:
 
-- `tmp/guardrail_dependency_ab/guardrail_dependency_ab_20260426T142809Z.md`
+- `tmp/guardrail_dependency_ab/guardrail_dependency_ab_20260426T191252669879Z_silverton-noisy_qwen-qwen3-6-35b-a3b_pid51032.md`
 
 Interpretation:
 
 - The model usually preserves the important semantic content even through noise:
   `Londn ONT` versus London UK, LHR/Heathrow dates, `solo nosotros dos`, Silas's
   ambiguous `im`, and the allergy/side-effect boundary all surfaced in the IR.
-- The weak point is still administrative decision projection, not raw language
-  understanding. Several cases contain good workspace structure but land as
-  `mixed` where a frontier policy may prefer `quarantine`, `reject`, or
-  `answer`.
+- The new scoring split confirms that the weak point is administrative decision
+  projection, not unsafe KB mutation. Exact labels are only `3/8`, but safe
+  outcomes are `6/8` and final KB safety is `1.000`.
+- The remaining misses are instructive: safe temporal corrections, mixed
+  correction-plus-query turns, and claim storage need clearer admission policy
+  than a single `commit`/`mixed`/`answer` label can express.
 - Temporal extraction is present but not yet temporal reasoning. The IR can hold
   2018-2024, April 2023 corrections, and relative-date anchors, but the runtime
   still needs a factual temporal representation before durable mutations can

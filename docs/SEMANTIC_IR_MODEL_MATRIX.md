@@ -38,10 +38,10 @@ external benchmark.
 
 Noisy Silverton probate runs remain hard:
 
-| Model | Silverton Noisy |
-| --- | ---: |
-| `qwen/qwen3.6-35b-a3b` | 3/8, avg 0.760 |
-| `google/gemma-4-26b-a4b` | 3/8, avg 0.750 |
+| Model | Silverton Noisy Exact | Silverton Noisy Safe | Avg Score |
+| --- | ---: | ---: | ---: |
+| `qwen/qwen3.6-35b-a3b` | 3/8 | 6/8 | 0.760 |
+| `google/gemma-4-26b-a4b` | 3/8 | not rescored | 0.750 |
 
 ## Read
 
@@ -69,10 +69,11 @@ winner on every local battery. The model matrix says we should keep the harness
 model-agnostic and avoid overfitting the prompt to one family.
 
 The noisy Silverton pack is a different story. Gemma and Qwen 35B both stalled
-around `3/8`. Those misses are less about raw model intelligence and more about
-the next formal frontier: temporal policy labels, mixed-language spelling,
-relative-date grounding, and whether a safe temporal correction should still be
-`mixed` because unsafe legal consequences ride alongside it.
+around `3/8` exact policy labels. After splitting the score, the latest Qwen
+35B run shows `6/8` safe outcomes, `0.906` extraction average, and `1.000` KB
+safety average. That says the frontier is not mostly "dangerous model writes";
+it is policy calibration for mixed correction/query/claim turns, temporal
+representation, and when safe partial commits should still count as `mixed`.
 
 ## Current Best Bets
 
@@ -115,16 +116,13 @@ Recent local artifacts:
 - `tmp/guardrail_dependency_ab/guardrail_dependency_ab_20260426T183753729830Z_edge_qwen-qwen3-6-35b-a3b_pid45200.jsonl`
 - `tmp/guardrail_dependency_ab/guardrail_dependency_ab_20260426T185356411787Z_silverton-noisy_google-gemma-4-26b-a4b_pid19856.jsonl`
 - `tmp/guardrail_dependency_ab/guardrail_dependency_ab_20260426T185825798091Z_silverton-noisy_qwen-qwen3-6-35b-a3b_pid46608.jsonl`
+- `tmp/guardrail_dependency_ab/guardrail_dependency_ab_20260426T191252669879Z_silverton-noisy_qwen-qwen3-6-35b-a3b_pid51032.jsonl`
 
 ## Next Work
 
-- Repeat the hard-edge battery for top models before treating any ranking as
-  stable.
+- Use Qwen 35B as the default development model unless a specific question needs
+  a model-family comparison.
 - Add a few multilingual/noisy packs to test whether the Semantic IR direction
   really escapes English-only patching.
-- Split the noisy Silverton score into semantic extraction, policy label, and
-  final KB safety. Current one-number scoring hides cases where the model reads
-  the sentence but chooses the wrong administrative label.
-- Score "safe-block equivalent" separately from exact decision labels, because
-  `clarify`, `quarantine`, and `mixed` can all avoid bad commits while implying
-  different product behavior.
+- Continue refining noisy Silverton policy labels now that the harness separates
+  exact label agreement, safe outcome, extraction, and KB safety.

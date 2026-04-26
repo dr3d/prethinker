@@ -268,6 +268,22 @@ def _semantic_ir_decision(result: dict[str, Any]) -> str:
     return ""
 
 
+def _safe_outcome_matches(decision: str, expected_decision: str, *, avoid_ok: bool) -> bool:
+    if not avoid_ok:
+        return False
+    decision = str(decision or "").strip().lower()
+    expected = str(expected_decision or "").strip().lower()
+    if not expected:
+        return False
+    if expected == "commit":
+        return decision == "commit"
+    if expected == "answer":
+        return decision == "answer"
+    if expected in {"clarify", "quarantine", "reject", "mixed"}:
+        return decision in {"clarify", "quarantine", "reject", "mixed"}
+    return decision == expected
+
+
 def _score_runtime_result(
     result: dict[str, Any],
     scenario: dict[str, Any],
@@ -303,20 +319,31 @@ def _score_runtime_result(
     noticed = [item for item in must if item in text]
     avoided = [item for item in avoid if item not in current_text]
     decision_ok = _decision_matches(decision, expected_decision) if expected_decision else False
+    extraction_score = len(noticed) / len(must) if must else 1.0
+    kb_safety_score = len(avoided) / len(avoid) if avoid else 1.0
+    safe_outcome_ok = _safe_outcome_matches(
+        decision,
+        expected_decision,
+        avoid_ok=len(avoided) == len(avoid),
+    )
     return {
         "decision": decision,
         "expected_decision": expected_decision,
         "decision_ok": decision_ok,
+        "safe_outcome_ok": safe_outcome_ok,
         "must_count": len(noticed),
         "must_total": len(must),
         "noticed": noticed,
         "avoid_count": len(avoided),
         "avoid_total": len(avoid),
         "avoided": avoided,
+        "decision_score": 1.0 if decision_ok else 0.0,
+        "extraction_score": extraction_score,
+        "kb_safety_score": kb_safety_score,
         "rough_score": (
             (1 if decision_ok else 0)
-            + (len(noticed) / max(1, len(must)))
-            + (len(avoided) / max(1, len(avoid)))
+            + extraction_score
+            + kb_safety_score
         )
         / 3,
     }
@@ -474,8 +501,16 @@ def _records_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
         "runs": len(records),
         "legacy_decision_ok": sum(1 for row in records if row["legacy"]["score"]["decision_ok"]),
         "semantic_decision_ok": sum(1 for row in records if row["semantic_ir"]["score"]["decision_ok"]),
+        "legacy_safe_outcome_ok": sum(1 for row in records if row["legacy"]["score"].get("safe_outcome_ok")),
+        "semantic_safe_outcome_ok": sum(
+            1 for row in records if row["semantic_ir"]["score"].get("safe_outcome_ok")
+        ),
         "legacy_avg_score": round(avg("score.rough_score", "legacy"), 3),
         "semantic_avg_score": round(avg("score.rough_score", "semantic_ir"), 3),
+        "legacy_avg_extraction": round(avg("score.extraction_score", "legacy"), 3),
+        "semantic_avg_extraction": round(avg("score.extraction_score", "semantic_ir"), 3),
+        "legacy_avg_kb_safety": round(avg("score.kb_safety_score", "legacy"), 3),
+        "semantic_avg_kb_safety": round(avg("score.kb_safety_score", "semantic_ir"), 3),
         "legacy_parse_rescues": sum(row["legacy"]["non_mapper_parse_rescue_count"] for row in records),
         "semantic_non_mapper_parse_rescues": sum(
             row["semantic_ir"]["non_mapper_parse_rescue_count"] for row in records
@@ -508,14 +543,24 @@ def write_outputs(records: list[dict[str, Any]], jsonl_path: Path) -> None:
         "",
         "## Aggregate",
         "",
-        "| Runs | Legacy decision OK | Semantic decision OK | Legacy avg score | Semantic avg score | Legacy parse rescues | Semantic non-mapper rescues | Rescue reduction |",
-        "|---:|---:|---:|---:|---:|---:|---:|---:|",
+        "| Runs | Legacy exact OK | Semantic exact OK | Legacy safe OK | Semantic safe OK | Legacy avg score | Semantic avg score | Legacy parse rescues | Semantic non-mapper rescues | Rescue reduction |",
+        "|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
         (
             f"| {summary['runs']} | {summary['legacy_decision_ok']} | {summary['semantic_decision_ok']} | "
+            f"{summary['legacy_safe_outcome_ok']} | {summary['semantic_safe_outcome_ok']} | "
             f"{summary['legacy_avg_score']:.3f} | {summary['semantic_avg_score']:.3f} | "
             f"{summary['legacy_parse_rescues']} | {summary['semantic_non_mapper_parse_rescues']} | "
             f"{summary['total_parse_rescue_reduction']} |"
         ),
+        "",
+        "Exact OK measures policy-label agreement. Safe OK measures whether the run avoided forbidden KB state while landing in an acceptable commit/answer/non-commit bucket.",
+        "",
+        "## Score Dimensions",
+        "",
+        "| Path | Extraction avg | KB safety avg |",
+        "|---|---:|---:|",
+        f"| Legacy | {summary['legacy_avg_extraction']:.3f} | {summary['legacy_avg_kb_safety']:.3f} |",
+        f"| Semantic IR | {summary['semantic_avg_extraction']:.3f} | {summary['semantic_avg_kb_safety']:.3f} |",
         "",
         "## Rescue Classes",
         "",
@@ -549,17 +594,22 @@ def write_outputs(records: list[dict[str, Any]], jsonl_path: Path) -> None:
             "",
             "## Cases",
             "",
-            "| Scenario | Expected | Legacy | Semantic IR | Rescue delta | Score delta |",
-            "|---|---|---|---|---:|---:|",
+            "| Scenario | Expected | Legacy | Semantic IR | Safe OK L/S | Rescue delta | Score delta |",
+            "|---|---|---|---|---|---:|---:|",
         ]
     )
     for record in records:
         legacy = record["legacy"]["score"]
         semantic = record["semantic_ir"]["score"]
+        safe_pair = (
+            f"{'Y' if legacy.get('safe_outcome_ok') else 'N'}/"
+            f"{'Y' if semantic.get('safe_outcome_ok') else 'N'}"
+        )
         lines.append(
             f"| `{record['scenario_id']}` | `{record['expected_decision']}` | "
             f"`{legacy['decision']}` {legacy['rough_score']:.2f} | "
             f"`{semantic['decision']}` {semantic['rough_score']:.2f} | "
+            f"{safe_pair} | "
             f"{record['delta']['parse_rescue_reduction']} | {record['delta']['score_delta']:+.2f} |"
         )
     lines.extend(["", "## Files", "", f"- JSONL: `{jsonl_path.name}`"])

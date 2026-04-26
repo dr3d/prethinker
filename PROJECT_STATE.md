@@ -32,6 +32,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 - The semantic IR contract now allows `operation=rule` candidates to carry an executable `clause`, which lets structured-output model runs produce durable Prolog rules instead of only recognizing rule-like language.
 - Runtime admission now has a first stored-logic conflict guard: likely-functional current-state overwrites and simple `may_*`/`cannot_*` modal contradictions are blocked before mutation.
 - Local model-family testing now shows model choice still matters even with LM Studio structured output: Qwen 9B remains a strong small baseline, Nemotron underfits the current contract, and Gemma 26B is a serious different-family challenger.
+- The A/B harness now separates exact decision labels, safe outcomes, semantic extraction score, and final KB safety, so hard packs can distinguish product-policy misses from unsafe KB writes.
 
 ## Local UMLS Assets
 
@@ -70,13 +71,13 @@ This is the next useful layer for type steering and explanation. It should suppo
 - Represent temporal facts durably enough that extracted dates, intervals, corrections, and relative-time anchors can support real KB queries instead of staying only in the semantic workspace.
 - Keep profile contracts out of the generic mapper: profile packages should own domain type/grounding policy, while the mapper stays structural and auditable.
 - Grow deterministic stored-logic admission beyond the first guard: profile-declared functional predicates, temporal scope, negation policy, and richer contradiction probes are still open.
-- Keep the Semantic IR harness model-agnostic. Use `qwen/qwen3.6-35b-a3b`, `qwen/qwen3.5-9b`, and `google/gemma-4-26b-a4b` as the current local comparison set.
+- Keep the Semantic IR harness model-agnostic, but use `qwen/qwen3.6-35b-a3b` as the default development model unless a specific comparison question needs another local model.
 
 ## Verification Snapshot
 
 Recent verified results:
 
-- Full suite after latest noisy-pack work: `248 passed`
+- Full suite after latest scoring split: `264 passed`
 - Focused semantic IR runtime battery: `23 passed`
 - Edge runtime A/B: semantic IR `20/20` decision labels, `0.976` avg score, `0` non-mapper parse rescues
 - Weak-edge runtime A/B: semantic IR `10/10` decision labels, `1.000` avg score, `0` non-mapper parse rescues
@@ -84,7 +85,7 @@ Recent verified results:
 - Focused profile/semantic mapper battery after profile-contract work: `39 passed`
 - Rule/mutation conflict semantic IR pack: raw 35B prompt bakeoff `9/10` decisions, `0.95` average rough score; runtime A/B semantic IR `10/10` decisions versus legacy `6/10`, `0.917` average rough score, with `0` non-mapper rescues
 - Model matrix snapshot: `google/gemma-4-26b-a4b` reached rule/mutation `10/10`, weak edges `10/10`, and hard edge `19/20`; latest `qwen/qwen3.6-35b-a3b` hard-edge rerun reached `17/20`; `nvidia/nemotron-3-nano` reached only `4/10` on rule/mutation and weak edges
-- Noisy Silverton remains a real frontier: Gemma 26B and Qwen 35B both reached only `3/8`, suggesting temporal policy and noisy/multilingual grounding need better IR/scoring treatment, not just a different model.
+- Noisy Silverton remains a real frontier: latest Qwen 35B run reached `3/8` exact labels but `6/8` safe outcomes, with `0.906` extraction average and `1.000` KB safety average. The current weakness is policy calibration for mixed correction/query/claim cases more than dangerous fact admission.
 - Python compile check for touched runtime files passed
 
 Rerun the full suite before committing a new stopping point.

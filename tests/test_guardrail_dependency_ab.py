@@ -5,6 +5,7 @@ from scripts.run_guardrail_dependency_ab import (
     _classify_rescues,
     _score_runtime_result,
     _semantic_ir_decision,
+    _safe_outcome_matches,
     _slug_component as _ab_slug_component,
 )
 from scripts.run_semantic_ir_prompt_bakeoff import (
@@ -47,6 +48,12 @@ class GuardrailDependencyABTests(unittest.TestCase):
         self.assertEqual(_bakeoff_slug_component("google/gemma-4-26b-a4b"), "google-gemma-4-26b-a4b")
         self.assertEqual(_ab_slug_component(""), "run")
 
+    def test_safe_outcome_distinguishes_non_commit_safety_from_exact_label(self) -> None:
+        self.assertTrue(_safe_outcome_matches("quarantine", "clarify", avoid_ok=True))
+        self.assertTrue(_safe_outcome_matches("mixed", "reject", avoid_ok=True))
+        self.assertFalse(_safe_outcome_matches("clarify", "commit", avoid_ok=True))
+        self.assertFalse(_safe_outcome_matches("commit", "mixed", avoid_ok=False))
+
     def test_runtime_score_uses_semantic_ir_decision_when_available(self) -> None:
         result = {
             "status": "success",
@@ -70,6 +77,7 @@ class GuardrailDependencyABTests(unittest.TestCase):
             final_kb=[],
         )
         self.assertTrue(score["decision_ok"])
+        self.assertTrue(score["safe_outcome_ok"])
         self.assertEqual(score["decision"], "mixed")
 
     def test_runtime_score_checks_avoid_against_final_kb(self) -> None:
@@ -98,7 +106,31 @@ class GuardrailDependencyABTests(unittest.TestCase):
             final_kb=["owns_lease(oskar, dock7_lease)."],
         )
         self.assertTrue(score["decision_ok"])
+        self.assertTrue(score["safe_outcome_ok"])
         self.assertEqual(score["avoid_count"], 1)
+
+    def test_runtime_score_marks_blocked_non_commit_as_safe_outcome(self) -> None:
+        scenario = {
+            "expect": {
+                "decision": "clarify",
+                "must": ["Mara"],
+                "avoid": ["lives_in(mara, salem) as current"],
+            }
+        }
+        result = {
+            "status": "error",
+            "front_door": {"compiler_intent": "assert_fact"},
+            "execution": {"intent": "assert_fact", "writes_applied": 0, "operations": []},
+        }
+        score = _score_runtime_result(
+            result,
+            scenario,
+            final_kb=["lives_in(mara, denver)."],
+        )
+        self.assertEqual(score["decision"], "quarantine")
+        self.assertTrue(score["decision_ok"])
+        self.assertTrue(score["safe_outcome_ok"])
+        self.assertEqual(score["kb_safety_score"], 1.0)
 
     def test_silverton_probate_pack_is_registered(self) -> None:
         by_id = {str(row.get("id", "")): row for row in WILD_SCENARIOS}
