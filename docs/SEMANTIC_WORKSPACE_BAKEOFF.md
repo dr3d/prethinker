@@ -279,3 +279,20 @@ The mapper is intentionally conservative. It commits safe positive direct
 assertions and queries, but it does not yet commit negative mutations or rule
 operations unless an explicit rule clause is present. That keeps the authority
 boundary intact while the semantic sidecar grows more capable.
+
+## Edge Exploration
+
+The first hard `qwen3.6:35b` edge battery added 20 cases covering nested
+exceptions, counterfactuals, quantifiers, identity repair, provenance, temporal
+intervals, disjunctive causality, medical negation, double negation, and
+hypothetical queries. `best_guarded_v2` remains the best decision prompt:
+
+| Variant | Runs | JSON OK | Schema OK | Decision OK | Avg rough score |
+|---|---:|---:|---:|---:|---:|
+| `best_guarded_v2` | 20 | 20/20 | 20/20 | 17/20 | 0.96 |
+| `best_guarded_v3` | 20 | 20/20 | 20/20 | 15/20 | 0.92 |
+
+The main finding is that the model is now strong enough that the weak points are
+mostly schema and mapper boundaries: hypothetical queries, safe correction
+labeling, medical negation policy, durable negation, and full rule admission.
+See `docs/SEMANTIC_IR_EDGE_EXPLORATION.md` for the detailed read.

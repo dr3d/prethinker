@@ -261,8 +261,8 @@ def semantic_ir_to_legacy_parse(ir: dict[str, Any]) -> tuple[dict[str, Any], lis
         if source == "inferred":
             warnings.append("skipped inferred safe operation pending policy")
             continue
-        if polarity == "negative" and operation in {"assert", "retract"}:
-            warnings.append("skipped negative mutation pending explicit negation policy")
+        if polarity == "negative" and operation == "assert":
+            warnings.append("skipped negative assertion pending explicit negation policy")
             continue
         predicate = _predicate_name(op.get("predicate"))
         if not predicate:
@@ -334,7 +334,7 @@ def _intent_from_ir(ir: dict[str, Any]) -> str:
         polarity = str(op.get("polarity", "positive") or "positive").strip().lower()
         if source == "inferred":
             continue
-        if polarity == "negative" and operation in {"assert", "retract"}:
+        if polarity == "negative" and operation == "assert":
             continue
         safe_ops.append(operation)
     if "assert" in safe_ops:

@@ -43,7 +43,7 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         ok, errors = _validate_parsed(parsed)
         self.assertTrue(ok, errors)
 
-    def test_mapper_skips_negative_mutation_until_negation_policy_exists(self) -> None:
+    def test_mapper_skips_negative_assertion_until_negation_policy_exists(self) -> None:
         ir = _ir(
             candidate_operations=[
                 {
@@ -59,7 +59,25 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         parsed, warnings = semantic_ir_to_legacy_parse(ir)
         self.assertEqual(parsed["intent"], "other")
         self.assertEqual(parsed["facts"], [])
-        self.assertTrue(any("negative mutation" in warning for warning in warnings))
+        self.assertTrue(any("negative assertion" in warning for warning in warnings))
+
+    def test_mapper_allows_negative_polarity_retract_as_retraction(self) -> None:
+        ir = _ir(
+            candidate_operations=[
+                {
+                    "operation": "retract",
+                    "predicate": "owns",
+                    "args": ["e1", "e2"],
+                    "polarity": "negative",
+                    "source": "direct",
+                    "safety": "safe",
+                }
+            ]
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(ir)
+        self.assertEqual(warnings, [])
+        self.assertEqual(parsed["intent"], "retract")
+        self.assertEqual(parsed["correction_retract_clauses"], ["owns(mara, silver_compass)."])
 
     def test_prethink_payload_uses_clarify_for_missing_slot(self) -> None:
         ir = _ir(

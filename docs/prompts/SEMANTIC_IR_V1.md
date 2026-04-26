@@ -242,6 +242,8 @@ Current mapper policy:
 - safe positive direct `assert` operations may become facts
 - safe `query` operations may become queries
 - `reject`, `quarantine`, and `clarify` decisions do not commit writes
-- negative mutations are skipped until an explicit negation representation is
-  chosen
+- negative `assert` operations are skipped until an explicit negation
+  representation is chosen
+- `retract` operations are treated as retractions even when the model marks the
+  operation polarity as negative
 - rule operations require an explicit rule clause before admission

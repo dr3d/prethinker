@@ -378,6 +378,311 @@ WILD_SCENARIOS: list[dict[str, Any]] = [
             "avoid": ["bonus_before_transfer", "pavel_enforced"],
         },
     },
+    {
+        "id": "edge_nested_exception_sample_n7",
+        "domain": "lab_operations",
+        "utterance": (
+            "All refrigerated samples are discarded after forty-eight hours unless sealed. "
+            "Neonatal samples must be escalated before any discard. Sample N7 is refrigerated, sealed, and neonatal."
+        ),
+        "context": [],
+        "allowed_predicates": ["refrigerated/1", "sealed/1", "neonatal_sample/1", "discard_after/2", "requires_escalation_before/2"],
+        "expect": {
+            "decision": "mixed",
+            "must": ["N7", "sealed", "neonatal", "escalated"],
+            "avoid": ["discarded(n7", "discard(n7"],
+        },
+    },
+    {
+        "id": "edge_counterfactual_unsigned_inheritance",
+        "domain": "legal_story",
+        "utterance": (
+            "If Mara had signed the codicil, Tobias would have inherited the boathouse; "
+            "Mara never signed it, and the original will left the boathouse to Leona."
+        ),
+        "context": ["A codicil changes inheritance only if signed by Mara."],
+        "allowed_predicates": ["signed/2", "would_inherit_if/3", "inherited/3", "left_to/3"],
+        "expect": {
+            "decision": "mixed",
+            "must": ["counterfactual", "Mara", "Tobias", "Leona"],
+            "avoid": ["inherited(tobias", "signed(mara"],
+        },
+    },
+    {
+        "id": "edge_quantified_every_except_w9",
+        "domain": "compliance",
+        "utterance": (
+            "Every contractor except Nia must file a W-9 before onboarding; "
+            "Nia filed a W-8BEN instead, while Omar and Jules have not filed anything."
+        ),
+        "context": [],
+        "allowed_predicates": ["contractor/1", "requires_form/2", "filed_form/2", "exception_to_requirement/3"],
+        "expect": {
+            "decision": "mixed",
+            "must": ["Nia", "W-8BEN", "Omar", "Jules"],
+            "avoid": ["requires_form(nia", "filed_form(omar"],
+        },
+    },
+    {
+        "id": "edge_pronoun_stack_sister_van",
+        "domain": "story_state",
+        "utterance": "Mara told Priya that her sister saw her van before she moved it.",
+        "context": ["Mara and Priya each have a sister.", "Mara and Priya each have access to a van."],
+        "allowed_predicates": ["told/3", "sister/2", "saw/2", "moved/2"],
+        "expect": {
+            "decision": "clarify",
+            "must": ["her", "sister", "van", "ambiguous"],
+            "avoid": ["saw(priya", "moved(mara"],
+        },
+    },
+    {
+        "id": "edge_identity_repair_oslo_oskar",
+        "domain": "legal_story",
+        "utterance": "I said Oslo owns the lease, but that was wrong: Oskar owns the lease; Oslo is the street.",
+        "context": ["owns_lease(oslo, dock7_lease)."],
+        "allowed_predicates": ["owns_lease/2", "street_name/1", "correction/2"],
+        "expect": {
+            "decision": "commit",
+            "must": ["Oskar", "Oslo", "street", "correction"],
+            "avoid": ["owns_lease(oslo", "person(oslo"],
+        },
+    },
+    {
+        "id": "edge_hardship_query_pressure",
+        "domain": "legal_story",
+        "utterance": (
+            "If a tenant misses two payments, notify the guarantor unless hardship is approved. "
+            "Quinn missed two payments, but hardship is still pending. Who should be notified?"
+        ),
+        "context": [],
+        "allowed_predicates": ["missed_payments/2", "hardship_status/2", "notify/2", "requires_notification/2"],
+        "expect": {
+            "decision": "mixed",
+            "must": ["Quinn", "hardship", "pending", "query"],
+            "avoid": ["notify(guarantor", "requires_notification(quinn"],
+        },
+    },
+    {
+        "id": "edge_alleged_forgery_court_finding",
+        "domain": "legal_story",
+        "utterance": (
+            "June alleged Pavel forged the receipt. The court later found the receipt authentic, "
+            "but it did not find that Pavel actually paid."
+        ),
+        "context": [],
+        "allowed_predicates": ["alleged/3", "found/3", "authentic/1", "paid/2", "forged/2"],
+        "expect": {
+            "decision": "mixed",
+            "must": ["alleged", "court", "authentic", "did not find"],
+            "avoid": ["forged(pavel", "paid(pavel"],
+        },
+    },
+    {
+        "id": "edge_temporal_interval_chair",
+        "domain": "governance",
+        "utterance": (
+            "Ada chaired the board until March 1. No one chaired it during March. "
+            "Bo became chair on April 1."
+        ),
+        "context": [],
+        "allowed_predicates": ["chaired_until/3", "vacant_during/2", "became_chair_on/3", "chaired_on/3"],
+        "expect": {
+            "decision": "commit",
+            "must": ["Ada", "March 1", "vacant", "April 1", "Bo"],
+            "avoid": ["chaired_on(ada, board, march", "chaired_on(bo, board, march"],
+        },
+    },
+    {
+        "id": "edge_missing_not_dead_separation_inheritance",
+        "domain": "legal_story",
+        "utterance": (
+            "Mireya's surviving spouse inherits unless they were legally separated. "
+            "Iain was missing, not dead, and the separation petition was filed but never finalized."
+        ),
+        "context": ["Iain is Mireya's spouse."],
+        "allowed_predicates": ["spouse/2", "missing/1", "dead/1", "filed/2", "finalized/1", "inherits/2"],
+        "expect": {
+            "decision": "mixed",
+            "must": ["Iain", "missing", "not dead", "not finalized"],
+            "avoid": ["inherits(iain", "dead(iain", "legally_separated"],
+        },
+    },
+    {
+        "id": "edge_disjunction_leak_cause",
+        "domain": "incident_review",
+        "utterance": (
+            "Either Pump A or Pump B caused the leak. Only Pump A had a pressure spike, "
+            "but nobody inspected Pump B yet."
+        ),
+        "context": [],
+        "allowed_predicates": ["possible_cause/2", "pressure_spike/1", "inspected/1", "caused/2"],
+        "expect": {
+            "decision": "mixed",
+            "must": ["Pump A", "Pump B", "possible", "not inspected"],
+            "avoid": ["caused(pump_a", "caused(pump_b"],
+        },
+    },
+    {
+        "id": "edge_scope_of_only_after_transfer",
+        "domain": "legal_story",
+        "utterance": (
+            "Only after the escrow agent countersigned did the transfer become effective; "
+            "Celia signed on Monday, but the escrow agent countersigned Wednesday."
+        ),
+        "context": [],
+        "allowed_predicates": ["signed_on/3", "countersigned_on/3", "effective_on/3", "transfer_effective/1"],
+        "expect": {
+            "decision": "commit",
+            "must": ["Celia", "Monday", "escrow", "Wednesday", "effective"],
+            "avoid": ["effective_on(transfer, monday", "transfer_effective(monday"],
+        },
+    },
+    {
+        "id": "edge_comparative_measurement_direction",
+        "domain": "medical",
+        "utterance": (
+            "Mara's potassium is lower than last week but still above the lab's upper bound; "
+            "don't call it normal."
+        ),
+        "context": ["Active patient: Mara.", "Previous event: potassium was high last week."],
+        "allowed_predicates": ["lab_result_high/2", "lab_result_low/2", "decreased_since/3", "normal_result/2"],
+        "expect": {
+            "decision": "commit",
+            "must": ["Mara", "potassium", "lower", "above", "not normal"],
+            "avoid": ["lab_result_low(mara", "normal_result(mara"],
+        },
+    },
+    {
+        "id": "edge_scope_negation_allergy",
+        "domain": "medical",
+        "utterance": "Priya is not allergic to amoxicillin; she just got nauseated after it.",
+        "context": ["has_allergy(priya, amoxicillin)."],
+        "allowed_predicates": ["has_allergy/2", "has_symptom/2", "side_effect/3"],
+        "expect": {
+            "decision": "commit",
+            "must": ["Priya", "not allergic", "amoxicillin", "nauseated"],
+            "avoid": ["has_allergy(priya, amoxicillin) as current"],
+        },
+    },
+    {
+        "id": "edge_nested_quote_denial",
+        "domain": "story_state",
+        "utterance": (
+            "Mara said that Omar denied taking the key, but Priya saw Omar unlock the cabinet with it ten minutes later."
+        ),
+        "context": [],
+        "allowed_predicates": ["said/3", "denied/3", "saw/3", "used_to_unlock/3", "possessed_at/3"],
+        "expect": {
+            "decision": "mixed",
+            "must": ["Mara", "Omar", "denied", "Priya", "unlock"],
+            "avoid": ["took(omar, key) as fact", "mara_denied"],
+        },
+    },
+    {
+        "id": "edge_mutual_exclusion_repair",
+        "domain": "inventory",
+        "utterance": (
+            "Crate 12 cannot be both quarantined and cleared. I marked it cleared earlier, "
+            "but after the mold test it should be quarantined instead."
+        ),
+        "context": ["cleared(crate12)."],
+        "allowed_predicates": ["cleared/1", "quarantined/1", "mutex/2", "test_result/3"],
+        "expect": {
+            "decision": "commit",
+            "must": ["Crate 12", "cleared", "quarantined", "instead"],
+            "avoid": ["cleared(crate12) as current", "both"],
+        },
+    },
+    {
+        "id": "edge_chain_of_custody_gap",
+        "domain": "evidence",
+        "utterance": (
+            "Nia logged the sample at 08:00 and Omar received it at 09:10. "
+            "There is no record of who had it between 08:35 and 09:00."
+        ),
+        "context": [],
+        "allowed_predicates": ["logged_at/3", "received_at/3", "custody_gap/3", "possessed_at/3"],
+        "expect": {
+            "decision": "commit",
+            "must": ["Nia", "08:00", "Omar", "09:10", "gap"],
+            "avoid": ["possessed_at(nia, sample, 08:45", "possessed_at(omar, sample, 08:45"],
+        },
+    },
+    {
+        "id": "edge_temporal_correction_warfarin",
+        "domain": "medical",
+        "utterance": "I said Mara stopped warfarin on Tuesday, but that was wrong; she stopped it Wednesday morning.",
+        "context": ["stopped_on(mara, warfarin, tuesday)."],
+        "allowed_predicates": ["stopped_on/3", "taking/2", "correction/2"],
+        "expect": {
+            "decision": "commit",
+            "must": ["Mara", "warfarin", "Tuesday", "Wednesday", "correction"],
+            "avoid": ["stopped_on(mara, warfarin, tuesday) as current", "taking(mara, warfarin)"],
+        },
+    },
+    {
+        "id": "edge_denial_not_negation",
+        "domain": "legal_story",
+        "utterance": "Omar denied signing the waiver.",
+        "context": [],
+        "allowed_predicates": ["denied/3", "signed/2"],
+        "expect": {
+            "decision": "commit",
+            "must": ["Omar", "denied", "signing", "waiver"],
+            "avoid": ["not signed", "signed(omar, waiver) false", "unsigned"],
+        },
+    },
+    {
+        "id": "edge_double_negation_lived_salem",
+        "domain": "story_state",
+        "utterance": "It isn't true that Nina never lived in Salem.",
+        "context": [],
+        "allowed_predicates": ["lived_in/2", "lived_in_at_some_time/2"],
+        "expect": {
+            "decision": "commit",
+            "must": ["Nina", "Salem", "lived", "double negation"],
+            "avoid": ["never_lived", "not_lived"],
+        },
+    },
+    {
+        "id": "edge_hypothetical_hazard_pay_query",
+        "domain": "policy",
+        "utterance": "If Felix had covered the emergency shift, would he have received hazard pay?",
+        "context": [
+            "Night crew receive hazard pay except Felix.",
+            "Felix's exception is waived if Felix covers an emergency shift.",
+        ],
+        "allowed_predicates": ["covered_emergency_shift/1", "receives_hazard_pay/1", "exception_waived/2"],
+        "expect": {
+            "decision": "answer",
+            "must": ["Felix", "hypothetical", "emergency shift", "hazard pay"],
+            "avoid": ["covered_emergency_shift(felix)", "receives_hazard_pay(felix) as fact"],
+        },
+    },
+]
+
+
+EDGE_SCENARIO_IDS = [
+    "edge_nested_exception_sample_n7",
+    "edge_counterfactual_unsigned_inheritance",
+    "edge_quantified_every_except_w9",
+    "edge_pronoun_stack_sister_van",
+    "edge_identity_repair_oslo_oskar",
+    "edge_hardship_query_pressure",
+    "edge_alleged_forgery_court_finding",
+    "edge_temporal_interval_chair",
+    "edge_missing_not_dead_separation_inheritance",
+    "edge_disjunction_leak_cause",
+    "edge_scope_of_only_after_transfer",
+    "edge_comparative_measurement_direction",
+    "edge_scope_negation_allergy",
+    "edge_nested_quote_denial",
+    "edge_mutual_exclusion_repair",
+    "edge_chain_of_custody_gap",
+    "edge_temporal_correction_warfarin",
+    "edge_denial_not_negation",
+    "edge_double_negation_lived_salem",
+    "edge_hypothetical_hazard_pay_query",
 ]
 
 
@@ -503,6 +808,72 @@ PROMPT_VARIANTS: dict[str, dict[str, Any]] = {
             "- If context supplies exactly one active patient and one active lab test, a direct 'it came back high' may propose a safe lab_result_high write.\n"
             "- For rule-plus-fact or fact-plus-query turns, use mixed and keep unsafe query targets out of committed facts.\n"
             "- Preserve negation in candidate_operations with polarity='negative'. Do not turn 'never saw X' into a positive saw/2 fact."
+        ),
+    },
+    "best_guarded_v3": {
+        "temperature": 0.0,
+        "top_p": 0.82,
+        "top_k": 20,
+        "system": (
+            "You are a semantic IR compiler for a governed symbolic memory system. "
+            "The root object must be semantic_ir_v1 itself, with schema_version and decision as top-level keys. "
+            "Do not wrap the answer under schema_contract, result, output, or semantic_ir. "
+            "You do not answer the user and you do not commit durable truth. "
+            "Use direct language understanding aggressively, but mark unsafe commitments explicitly."
+        ),
+        "extra": (
+            "Decision policy:\n"
+            "- reject: user asks for treatment, dose, medication stop/hold/start, or clinical recommendation. You may still include clarification questions, but the decision remains reject.\n"
+            "- quarantine: direct facts conflict with a claim, a claim would overwrite observed state, or a candidate fact is plausible but unsafe.\n"
+            "- clarify: missing referent, measurement direction, patient identity, object of 'it/that', or allergy-vs-intolerance distinction blocks a write.\n"
+            "- mixed: same turn contains both safe writes and a query/rule/unsafe implication.\n"
+            "- commit: direct state update or correction has a clear target and safe predicate mapping.\n"
+            "Special guards:\n"
+            "- Do not turn a claim into a fact. 'Bob says he has it' is a claim, not possession.\n"
+            "- Do not infer diagnosis or staging from a single lab value request. Quarantine or clarify.\n"
+            "- Do not infer allergy from nausea/vomiting alone. Clarify allergy vs side effect/intolerance unless the user explicitly corrects a prior allergy record.\n"
+            "- A clear correction like 'not Mara, Fred has it', 'that was wrong', or 'instead' may propose retract/assert.\n"
+            "- If context supplies exactly one active patient and one active lab test, a direct 'it came back high' may propose a safe lab_result_high write.\n"
+            "- For rule-plus-fact or fact-plus-query turns, use mixed and keep unsafe query targets out of committed facts.\n"
+            "- Preserve negation in candidate_operations with polarity='negative'. Do not turn 'never saw X' into a positive saw/2 fact.\n"
+            "Operation policy:\n"
+            "- A retract operation should use polarity='positive' when retracting a previously stored positive fact. Use polarity='negative' only for explicit negative facts.\n"
+            "- Denials are claim events, not negated facts. 'Omar denied signing' is denied(...), not not(signed(...)).\n"
+            "- Counterfactuals and hypotheticals are not writes. Represent them as query/unsafe implication/self_check notes.\n"
+            "- Disjunctions like 'A or B caused it' do not prove either cause; record safe observations and quarantine cause assignment.\n"
+            "- Do not copy context rules into candidate_operations unless the user is adding or changing the rule.\n"
+            "- Preserve temporal scope: until, during, after, before, not yet, no longer, and from/to should not become timeless facts.\n"
+            "- Preserve provenance: claimed, alleged, admitted, denied, observed, found, and reported are different relations."
+        ),
+    },
+    "edge_compiler_v1": {
+        "temperature": 0.0,
+        "top_p": 0.78,
+        "top_k": 20,
+        "system": (
+            "You are a semantic compiler that emits semantic_ir_v1 for a governed Prolog memory runtime. "
+            "The root object must be semantic_ir_v1 itself, with schema_version and decision as top-level keys. "
+            "Do not wrap the answer under schema_contract, result, output, or semantic_ir. "
+            "Be ambitious about language understanding, conservative about durable truth, and exact about operation source and safety."
+        ),
+        "extra": (
+            "Decision policy:\n"
+            "- commit: direct current-state facts, explicit corrections, explicit identity repairs, direct observations, and direct temporal facts with clear targets.\n"
+            "- answer: pure questions or hypotheticals that should be evaluated against context/rules; do not emit rule operations just because the rule appears in context.\n"
+            "- mixed: same utterance contains safe writes plus a query, rule addition, or unsafe implication.\n"
+            "- clarify: a commit-critical referent, entity identity, time, measurement, or predicate sense is missing.\n"
+            "- quarantine: the only candidate commitments are claims, allegations, disjunctions, diagnoses, advice, or unsafe implications.\n"
+            "- reject: medical advice or treatment/dose/hold/start/stop recommendations.\n"
+            "Operation policy:\n"
+            "- A retract operation should use polarity='positive' when retracting a previously stored positive fact. Use polarity='negative' only for explicit negative facts.\n"
+            "- Direct corrections with 'not X, Y instead', 'that was wrong', or 'don't call it normal' may propose safe retract/assert operations.\n"
+            "- Direct 'not allergic; side effect/nausea instead' may propose retracting the allergy and asserting the side effect, while keeping clinical advice out.\n"
+            "- Denials are claim events, not negated facts. 'Omar denied signing' is denied(...), not not(signed(...)).\n"
+            "- Counterfactuals and hypotheticals are not writes. Represent them as query/unsafe implication/self_check notes.\n"
+            "- Disjunctions like 'A or B caused it' do not prove either cause; record safe observations and quarantine cause assignment.\n"
+            "- Do not copy context rules into candidate_operations unless the user is adding or changing the rule.\n"
+            "- Preserve temporal scope: until, during, after, before, not yet, no longer, and from/to should not become timeless facts.\n"
+            "- Preserve provenance: claimed, alleged, admitted, denied, observed, found, and reported are different relations."
         ),
     },
 }
@@ -708,6 +1079,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--model", default="qwen3.6:35b")
     parser.add_argument("--variants", default="strict_contract_v1,negative_examples_v1,nbest_selfcheck_v1,domain_profile_v1,best_guarded_v2")
     parser.add_argument("--scenario-ids", default="")
+    parser.add_argument("--scenario-group", choices=["all", "edge"], default="all")
     parser.add_argument("--base-url", default="http://127.0.0.1:11434")
     parser.add_argument("--out-dir", default=str(DEFAULT_OUT_DIR))
     parser.add_argument("--timeout", type=int, default=300)
@@ -719,6 +1091,8 @@ def main() -> int:
     args = parse_args()
     variants = [item.strip() for item in args.variants.split(",") if item.strip()]
     scenario_ids = [item.strip() for item in str(args.scenario_ids or "").split(",") if item.strip()]
+    if not scenario_ids and args.scenario_group == "edge":
+        scenario_ids = list(EDGE_SCENARIO_IDS)
     by_id = {scenario["id"]: scenario for scenario in WILD_SCENARIOS}
     scenarios = [by_id[item] for item in scenario_ids] if scenario_ids else list(WILD_SCENARIOS)
     out_dir = Path(args.out_dir)

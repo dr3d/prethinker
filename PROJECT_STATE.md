@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: 2026-04-25
+Last updated: 2026-04-26
 
 ## One-Sentence Shape
 
@@ -24,6 +24,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural parsing pr
 - The UI can demonstrate write routes, query/clarification routes, mutation telemetry, and prompt-book-driven examples.
 - The UMLS Semantic Network builder produces local Prolog facts for semantic types, semantic relations, structural rows, and inherited relation closures.
 - The opt-in semantic IR runtime path can route and commit safe direct assertions without running the legacy parse-side English rescue chain.
+- The first 20-case semantic IR edge battery shows `qwen3.6:35b` holding difficult provenance, temporal, exception, correction, and counterfactual distinctions with 20/20 JSON/schema and 17/20 decision labels under `best_guarded_v2`.
 
 ## Local UMLS Assets
 
@@ -77,8 +78,9 @@ Rerun the full suite before committing a new stopping point.
 4. `docs/UMLS_MVP.md`
 5. `docs/MEDICAL_PROFILE.md`
 6. `docs/FREETHINKER_DESIGN.md`
-7. `docs/CONSOLE_TRYBOOK.md`
-8. `ui_gateway/README.md`
+7. `docs/SEMANTIC_IR_EDGE_EXPLORATION.md`
+8. `docs/CONSOLE_TRYBOOK.md`
+9. `ui_gateway/README.md`
 
 ## What Was Pruned
 
