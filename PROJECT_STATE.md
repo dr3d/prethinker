@@ -31,6 +31,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 - The semantic IR mapper now has a structural placeholder-argument guard for writes and a minimal temporal fact vocabulary for dates, intervals, and temporal corrections.
 - The semantic IR contract now allows `operation=rule` candidates to carry an executable `clause`, which lets structured-output model runs produce durable Prolog rules instead of only recognizing rule-like language.
 - Runtime admission now has a first stored-logic conflict guard: likely-functional current-state overwrites and simple `may_*`/`cannot_*` modal contradictions are blocked before mutation.
+- Local model-family testing now shows model choice still matters even with LM Studio structured output: Qwen 9B remains a strong small baseline, Nemotron underfits the current contract, and Gemma 26B is a serious different-family challenger.
 
 ## Local UMLS Assets
 
@@ -69,6 +70,7 @@ This is the next useful layer for type steering and explanation. It should suppo
 - Represent temporal facts durably enough that extracted dates, intervals, corrections, and relative-time anchors can support real KB queries instead of staying only in the semantic workspace.
 - Keep profile contracts out of the generic mapper: profile packages should own domain type/grounding policy, while the mapper stays structural and auditable.
 - Grow deterministic stored-logic admission beyond the first guard: profile-declared functional predicates, temporal scope, negation policy, and richer contradiction probes are still open.
+- Keep the Semantic IR harness model-agnostic. Use `qwen/qwen3.6-35b-a3b`, `qwen/qwen3.5-9b`, and `google/gemma-4-26b-a4b` as the current local comparison set.
 
 ## Verification Snapshot
 
@@ -81,6 +83,7 @@ Recent verified results:
 - Silverton noisy temporal pack: semantic IR `2/8` decision labels, `0.729` avg score; useful evidence that noisy language is less of a blocker than policy labels and temporal admission
 - Focused profile/semantic mapper battery after profile-contract work: `39 passed`
 - Rule/mutation conflict semantic IR pack: raw 35B prompt bakeoff `9/10` decisions, `0.95` average rough score; runtime A/B semantic IR `10/10` decisions versus legacy `6/10`, `0.917` average rough score, with `0` non-mapper rescues
+- Model matrix snapshot: `google/gemma-4-26b-a4b` reached rule/mutation `10/10`, weak edges `10/10`, and hard edge `19/20`; latest `qwen/qwen3.6-35b-a3b` hard-edge rerun reached `17/20`; `nvidia/nemotron-3-nano` reached only `4/10` on rule/mutation and weak edges
 - Python compile check for touched runtime files passed
 
 Rerun the full suite before committing a new stopping point.
@@ -93,12 +96,13 @@ Rerun the full suite before committing a new stopping point.
 4. `docs/PUBLIC_DOCS_GUIDE.md`
 5. `docs/SEMANTIC_IR_RESEARCH_DIRECTION_REPORT.md`
 6. `docs/SEMANTIC_IR_MAPPER_SPEC.md`
-7. `docs/GUARDRAIL_DEPENDENCY_AB.md`
-8. `docs/UMLS_MVP.md`
-9. `docs/MEDICAL_PROFILE.md`
-10. `docs/FREETHINKER_DESIGN.md`
-11. `docs/CONSOLE_TRYBOOK.md`
-12. `ui_gateway/README.md`
+7. `docs/SEMANTIC_IR_MODEL_MATRIX.md`
+8. `docs/GUARDRAIL_DEPENDENCY_AB.md`
+9. `docs/UMLS_MVP.md`
+10. `docs/MEDICAL_PROFILE.md`
+11. `docs/FREETHINKER_DESIGN.md`
+12. `docs/CONSOLE_TRYBOOK.md`
+13. `ui_gateway/README.md`
 
 ## What Was Pruned
 

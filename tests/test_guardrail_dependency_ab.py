@@ -5,12 +5,14 @@ from scripts.run_guardrail_dependency_ab import (
     _classify_rescues,
     _score_runtime_result,
     _semantic_ir_decision,
+    _slug_component as _ab_slug_component,
 )
 from scripts.run_semantic_ir_prompt_bakeoff import (
     RULE_MUTATION_SCENARIO_IDS,
     SILVERTON_NOISY_SCENARIO_IDS,
     SILVERTON_SCENARIO_IDS,
     WILD_SCENARIOS,
+    _slug_component as _bakeoff_slug_component,
 )
 
 
@@ -39,6 +41,11 @@ class GuardrailDependencyABTests(unittest.TestCase):
             _avoid_probe("owns_lease(oslo, dock7_lease) as current"),
             "owns_lease(oslo, dock7_lease)",
         )
+
+    def test_output_slug_components_are_filename_safe(self) -> None:
+        self.assertEqual(_ab_slug_component("qwen/qwen3.6-35b-a3b"), "qwen-qwen3-6-35b-a3b")
+        self.assertEqual(_bakeoff_slug_component("google/gemma-4-26b-a4b"), "google-gemma-4-26b-a4b")
+        self.assertEqual(_ab_slug_component(""), "run")
 
     def test_runtime_score_uses_semantic_ir_decision_when_available(self) -> None:
         result = {

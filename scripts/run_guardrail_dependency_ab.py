@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 from datetime import datetime, timezone
@@ -48,6 +49,11 @@ DEFAULT_EDGE_SAMPLE = [
 
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+
+def _slug_component(value: Any, *, fallback: str = "run") -> str:
+    slug = re.sub(r"[^a-zA-Z0-9]+", "-", str(value or "").strip()).strip("-").lower()
+    return slug or fallback
 
 
 def _looks_like_clause(text: str) -> bool:
@@ -601,7 +607,11 @@ def main() -> int:
     by_id = {str(scenario.get("id", "")): scenario for scenario in WILD_SCENARIOS}
     scenarios = [by_id[item] for item in scenario_ids] if scenario_ids else list(WILD_SCENARIOS)
 
-    run_slug = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    run_slug = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
+    run_slug = (
+        f"{run_slug}_{_slug_component(args.scenario_group)}_"
+        f"{_slug_component(args.semantic_model)}_pid{os.getpid()}"
+    )
     jsonl_path = Path(args.out_dir) / f"guardrail_dependency_ab_{run_slug}.jsonl"
     records: list[dict[str, Any]] = []
     for scenario in scenarios:

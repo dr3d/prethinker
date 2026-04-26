@@ -189,6 +189,8 @@ New structural guardrails added during this pass:
 
 - LM Studio JSON-schema structured output support for runtime semantic IR
 - rescue taxonomy in the A/B harness
+- collision-resistant run artifact names that include scenario group, model,
+  process ID, and microseconds
 - projected semantic decision scoring for `mixed` and hypothetical cases
 - inferred query admission for pure hypothetical questions
 - duplicate unsafe-implication cleanup when the same operation is admitted safe

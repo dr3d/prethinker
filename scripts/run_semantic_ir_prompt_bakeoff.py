@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import time
 import urllib.error
@@ -1630,6 +1631,11 @@ def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
+def _slug_component(value: Any, *, fallback: str = "run") -> str:
+    slug = re.sub(r"[^a-zA-Z0-9]+", "-", str(value or "").strip()).strip("-").lower()
+    return slug or fallback
+
+
 def _json_dumps(data: Any) -> str:
     return json.dumps(data, ensure_ascii=False, indent=2)
 
@@ -1934,7 +1940,11 @@ def main() -> int:
     scenarios = [by_id[item] for item in scenario_ids] if scenario_ids else list(WILD_SCENARIOS)
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
-    run_slug = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    run_slug = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
+    run_slug = (
+        f"{run_slug}_{_slug_component(args.scenario_group)}_"
+        f"{_slug_component(args.model)}_pid{os.getpid()}"
+    )
     jsonl_path = out_dir / f"semantic_ir_prompt_bakeoff_{run_slug}.jsonl"
     summary_path = jsonl_path.with_suffix(".md")
     records: list[dict[str, Any]] = []
