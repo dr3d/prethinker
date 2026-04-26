@@ -1050,6 +1050,133 @@ WILD_SCENARIOS: list[dict[str, Any]] = [
             "avoid": ["forfeited_share_to(arthur) as fact", "same_person(silverton_a, alfred) as fact"],
         },
     },
+    {
+        "id": "rule_parent_ancestor_direct",
+        "domain": "rule_recognition",
+        "utterance": "If X is a parent of Y, then X is an ancestor of Y.",
+        "context": [],
+        "allowed_predicates": ["parent/2", "ancestor/2"],
+        "expect": {
+            "decision": "commit",
+            "must": ["rule", "parent", "ancestor", "X", "Y"],
+            "avoid": ["parent(X, Y) as fact", "ancestor(X, Y) as fact"],
+        },
+    },
+    {
+        "id": "rule_recursive_ancestor",
+        "domain": "rule_recognition",
+        "utterance": "If X is a parent of Y and Y is an ancestor of Z, then X is an ancestor of Z.",
+        "context": ["Existing rule: ancestor(X, Y) :- parent(X, Y)."],
+        "allowed_predicates": ["parent/2", "ancestor/2"],
+        "expect": {
+            "decision": "commit",
+            "must": ["rule", "parent", "ancestor", "recursive"],
+            "avoid": ["parent(x, y) as fact", "ancestor(y, z) as fact"],
+        },
+    },
+    {
+        "id": "rule_exception_unless_revoked",
+        "domain": "rule_recognition",
+        "utterance": "A permit remains valid unless the board revokes it.",
+        "context": [],
+        "allowed_predicates": ["permit/1", "valid_permit/1", "revoked_by_board/1"],
+        "expect": {
+            "decision": "mixed",
+            "must": ["rule", "unless", "valid", "revoked"],
+            "avoid": ["valid_permit(permit) as fact", "revoked_by_board(permit) as fact"],
+        },
+    },
+    {
+        "id": "rule_context_query_no_write",
+        "domain": "rule_recognition",
+        "utterance": "If the crate is cleared, can it ship?",
+        "context": [
+            "Context rule: if a crate is cleared and not quarantined, it may ship.",
+            "Existing fact: cleared(crate12).",
+        ],
+        "allowed_predicates": ["cleared/1", "quarantined/1", "may_ship/1"],
+        "expect": {
+            "decision": "answer",
+            "must": ["query", "crate", "cleared", "ship"],
+            "avoid": ["cleared(crate12) as new fact", "may_ship(crate12) as fact"],
+        },
+    },
+    {
+        "id": "mutation_conflict_current_location",
+        "domain": "mutation_conflict",
+        "utterance": "Mara lives in Salem now.",
+        "context": ["Existing current fact: lives_in(mara, denver)."],
+        "allowed_predicates": ["lives_in/2", "corrected/3"],
+        "expect": {
+            "decision": "clarify",
+            "must": ["Mara", "Salem", "Denver", "conflict"],
+            "avoid": ["lives_in(mara, salem) as current fact", "retract(lives_in(mara, denver))"],
+        },
+    },
+    {
+        "id": "mutation_explicit_location_correction",
+        "domain": "mutation_conflict",
+        "utterance": "Correction: Mara lives in Salem, not Denver.",
+        "context": ["Existing current fact: lives_in(mara, denver)."],
+        "allowed_predicates": ["lives_in/2"],
+        "expect": {
+            "decision": "commit",
+            "must": ["correction", "Mara", "Salem", "Denver", "retract"],
+            "avoid": ["lives_in(mara, denver) as current"],
+        },
+    },
+    {
+        "id": "mutation_nonexclusive_medical_add",
+        "domain": "mutation_conflict",
+        "utterance": "Mara has hypertension.",
+        "context": ["Existing fact: has_condition(mara, asthma)."],
+        "allowed_predicates": ["has_condition/2"],
+        "expect": {
+            "decision": "commit",
+            "must": ["Mara", "hypertension", "condition"],
+            "avoid": ["retract(has_condition(mara, asthma))", "conflict with asthma"],
+        },
+    },
+    {
+        "id": "mutation_schedule_ambiguous_overwrite",
+        "domain": "mutation_conflict",
+        "utterance": "The audit is scheduled for Tuesday.",
+        "context": ["Existing current fact: scheduled_for(audit, monday)."],
+        "allowed_predicates": ["scheduled_for/2"],
+        "expect": {
+            "decision": "clarify",
+            "must": ["audit", "Tuesday", "Monday", "correction or additional"],
+            "avoid": ["scheduled_for(audit, tuesday) as current fact", "retract(scheduled_for(audit, monday))"],
+        },
+    },
+    {
+        "id": "mutation_rule_derived_conflict",
+        "domain": "mutation_conflict",
+        "utterance": "Crate 12 may not ship.",
+        "context": [
+            "Existing fact: cleared(crate12).",
+            "Existing rule: may_ship(X) :- cleared(X), not_quarantined(X).",
+            "Existing fact: not_quarantined(crate12).",
+        ],
+        "allowed_predicates": ["cleared/1", "not_quarantined/1", "may_ship/1", "cannot_ship/1"],
+        "expect": {
+            "decision": "clarify",
+            "must": ["Crate 12", "may not ship", "conflict", "cleared"],
+            "avoid": ["cannot_ship(crate12) as fact", "retract(cleared(crate12))"],
+        },
+    },
+    {
+        "id": "mutation_claim_does_not_overwrite_observation",
+        "domain": "mutation_conflict",
+        "utterance": "Omar says the camera did not show him opening the cabinet.",
+        "context": ["Existing observed fact: showed(camera, omar, opening_cabinet)."],
+        "allowed_predicates": ["claimed/3", "showed/3", "denied/3"],
+        "expect": {
+            "decision": "mixed",
+            "must": ["Omar", "claim", "camera", "existing observed"],
+            "avoid": ["retract(showed(camera, omar", "not_showed(camera, omar) as fact"],
+        },
+    },
 ]
 
 
@@ -1114,6 +1241,20 @@ SILVERTON_NOISY_SCENARIO_IDS = [
     "silverton_noisy_medical_discredit",
     "silverton_noisy_temporal_correction",
     "silverton_noisy_multilingual_query",
+]
+
+
+RULE_MUTATION_SCENARIO_IDS = [
+    "rule_parent_ancestor_direct",
+    "rule_recursive_ancestor",
+    "rule_exception_unless_revoked",
+    "rule_context_query_no_write",
+    "mutation_conflict_current_location",
+    "mutation_explicit_location_correction",
+    "mutation_nonexclusive_medical_add",
+    "mutation_schedule_ambiguous_overwrite",
+    "mutation_rule_derived_conflict",
+    "mutation_claim_does_not_overwrite_observation",
 ]
 
 
@@ -1731,7 +1872,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--model", default="")
     parser.add_argument("--variants", default="strict_contract_v1,negative_examples_v1,nbest_selfcheck_v1,domain_profile_v1,best_guarded_v2")
     parser.add_argument("--scenario-ids", default="")
-    parser.add_argument("--scenario-group", choices=["all", "edge", "weak_edges", "silverton", "silverton_noisy"], default="all")
+    parser.add_argument(
+        "--scenario-group",
+        choices=["all", "edge", "weak_edges", "silverton", "silverton_noisy", "rule_mutation"],
+        default="all",
+    )
     parser.add_argument("--base-url", default="")
     parser.add_argument("--out-dir", default=str(DEFAULT_OUT_DIR))
     parser.add_argument("--timeout", type=int, default=300)
@@ -1763,6 +1908,8 @@ def main() -> int:
             scenario_ids = list(SILVERTON_SCENARIO_IDS)
         elif args.scenario_group == "silverton_noisy":
             scenario_ids = list(SILVERTON_NOISY_SCENARIO_IDS)
+        elif args.scenario_group == "rule_mutation":
+            scenario_ids = list(RULE_MUTATION_SCENARIO_IDS)
     by_id = {scenario["id"]: scenario for scenario in WILD_SCENARIOS}
     scenarios = [by_id[item] for item in scenario_ids] if scenario_ids else list(WILD_SCENARIOS)
     out_dir = Path(args.out_dir)

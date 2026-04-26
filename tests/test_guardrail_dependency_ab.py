@@ -7,6 +7,7 @@ from scripts.run_guardrail_dependency_ab import (
     _semantic_ir_decision,
 )
 from scripts.run_semantic_ir_prompt_bakeoff import (
+    RULE_MUTATION_SCENARIO_IDS,
     SILVERTON_NOISY_SCENARIO_IDS,
     SILVERTON_SCENARIO_IDS,
     WILD_SCENARIOS,
@@ -143,6 +144,46 @@ class GuardrailDependencyABTests(unittest.TestCase):
                 "percent",
             ]
             self.assertTrue(any(token in text for token in noisy_or_temporal_markers))
+
+    def test_rule_mutation_pack_is_registered(self) -> None:
+        by_id = {str(row.get("id", "")): row for row in WILD_SCENARIOS}
+        self.assertEqual(len(RULE_MUTATION_SCENARIO_IDS), 10)
+        domains = set()
+        for scenario_id in RULE_MUTATION_SCENARIO_IDS:
+            self.assertIn(scenario_id, by_id)
+            scenario = by_id[scenario_id]
+            domains.add(str(scenario.get("domain", "")))
+            self.assertIn(str(scenario.get("expect", {}).get("decision", "")), {
+                "answer",
+                "clarify",
+                "commit",
+                "mixed",
+                "quarantine",
+                "reject",
+            })
+            text = " ".join(
+                [
+                    str(scenario.get("utterance", "")),
+                    " ".join(str(item) for item in scenario.get("context", [])),
+                    " ".join(str(item) for item in scenario.get("expect", {}).get("must", [])),
+                ]
+            ).lower()
+            self.assertTrue(
+                any(
+                    token in text
+                    for token in [
+                        "rule",
+                        "if ",
+                        "unless",
+                        "query",
+                        "conflict",
+                        "correction",
+                        "existing",
+                        "retract",
+                    ]
+                )
+            )
+        self.assertEqual(domains, {"mutation_conflict", "rule_recognition"})
 
 
 if __name__ == "__main__":

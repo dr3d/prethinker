@@ -226,6 +226,33 @@ dates, intervals, and corrections without pretending the runtime can already
 prove every temporal consequence. A future temporal reasoner can consume these
 facts for duration, ordering, overlap, and consecutive-interval checks.
 
+## Stored-Logic Conflict Policy
+
+Some writes are dangerous because they look like ordinary additions but may
+change the meaning of existing state:
+
+- `lives_in(mara, salem)` when the current KB already has
+  `lives_in(mara, denver)`;
+- `scheduled_for(audit, tuesday)` when the current KB already has a current
+  schedule for Monday;
+- `cannot_ship(crate12)` when committed rules and facts imply
+  `may_ship(crate12)`;
+- a claim that contradicts an observed fact.
+
+The intended policy is:
+
+- explicit corrections may propose retract/assert operations;
+- non-exclusive additions, such as a second condition, may commit;
+- ambiguous current-state replacements should clarify before mutating;
+- claims that contradict observations may be stored as claims, but must not
+  erase observed facts;
+- rule-derived conflicts should be surfaced as admission pressure until the
+  runtime has a general contradiction checker.
+
+This is not an English patch. It is a KB-state admission question: "does this
+operation safely add knowledge, or does it silently rewrite what the KB already
+means?"
+
 ## Trace Obligations
 
 Every structural intervention should be visible in traces or warnings.

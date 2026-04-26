@@ -33,6 +33,30 @@ stress cases:
 - double negation
 - pure hypothetical query
 
+A separate `rule_mutation` pack keeps two newer edges visible:
+
+- rule recognition from natural language: direct Horn rules, recursive rules,
+  exception rules, and context-rule queries that should not become writes;
+- mutation conflict detection: new utterances that may overwrite existing
+  current facts, explicit corrections that should retract/assert, safe
+  non-exclusive additions, and claims that contradict observed KB state without
+  erasing it.
+
+Initial `qwen/qwen3.6-35b-a3b` LM Studio result:
+
+| Pack | Runs | JSON OK | Schema OK | Decision OK | Avg rough score |
+|---|---:|---:|---:|---:|---:|
+| rule + mutation conflict | 10 | 10/10 | 10/10 | 7/10 | 0.89 |
+
+Strong cases: direct Horn rule recognition, recursive ancestor-rule shape, pure
+context-rule query without writing the context rule, explicit retract/assert
+correction, and safe non-exclusive medical condition addition.
+
+Weak cases: exception rules with `unless`, unmarked current-state replacement
+such as `lives_in(mara, salem)` over an existing current location, and
+rule-derived conflicts such as asserting `cannot_ship(crate12)` when existing
+facts plus rules imply `may_ship(crate12)`.
+
 ## Results
 
 Run:
@@ -138,6 +162,10 @@ The newest design is weakest at:
   and negated observations
 - rule clauses: the model understands rules and exceptions, but the mapper does
   not yet admit full rule bodies from IR
+- stored-logic conflict detection: the model can notice collisions against
+  context, but the deterministic runtime does not yet have a general
+  contradiction/admission layer that distinguishes "additional compatible fact"
+  from "unintended overwrite of a current fact"
 
 ## Mapper Adjustment
 
