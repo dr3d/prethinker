@@ -929,6 +929,127 @@ WILD_SCENARIOS: list[dict[str, Any]] = [
             "avoid": ["valid_amendment", "changed_charter as fact"],
         },
     },
+    {
+        "id": "silverton_noisy_londn_ont_not_uk",
+        "domain": "probate_noisy_temporal",
+        "utterance": "Btrice txtd: i was in Londn ONT, pas Londres UK, jamais outta country > a wknd.",
+        "context": [
+            "Beatrice is a Silverton beneficiary.",
+            "The forfeiture condition requires more than five consecutive years outside the country.",
+            "Known ambiguity: London may mean London, Ontario or London, UK.",
+        ],
+        "allowed_predicates": ["resided_in/3", "denied/3", "not_outside_country_longer_than/3", "forfeited_share_to/2"],
+        "expect": {
+            "decision": "mixed",
+            "must": ["Beatrice", "London", "Ontario", "not UK"],
+            "avoid": ["forfeited_share_to(beatrice", "resided_in(beatrice, uk"],
+        },
+    },
+    {
+        "id": "silverton_noisy_heathrow_interval",
+        "domain": "probate_noisy_temporal",
+        "utterance": "ledger sez: 'Silvrton, A' -> LHR 3/2018, back 04-2024. one-way out, return six yrs l8r.",
+        "context": [
+            "Known A. Silvertons include Arthur Silverton and Alfred Silverton.",
+            "LHR means London Heathrow.",
+            "Forfeiture depends on identity plus more than five consecutive years outside the country.",
+        ],
+        "allowed_predicates": ["travel_log_entry/4", "candidate_identity/2", "interval_from_to/3", "duration_claim/3", "forfeited_share_to/2"],
+        "expect": {
+            "decision": "mixed",
+            "must": ["Silverton, A", "LHR", "2018", "2024"],
+            "avoid": ["forfeited_share_to(arthur", "resided_outside_country_for(arthur"],
+        },
+    },
+    {
+        "id": "silverton_noisy_two_witness_spanglish",
+        "domain": "probate_noisy_temporal",
+        "utterance": "Artur: papa me dijo en el taller, solo nosotros dos, 'all mine now' -- no Beatrice.",
+        "context": [
+            "Arthur is a beneficiary.",
+            "Verbal Charter changes are valid only if witnessed by two non-beneficiaries simultaneously.",
+        ],
+        "allowed_predicates": ["claimed/3", "verbal_amendment/3", "valid_amendment/1", "invalid_amendment_reason/2"],
+        "expect": {
+            "decision": "reject",
+            "must": ["Arthur", "claim", "solo nosotros dos", "two non-beneficiaries"],
+            "avoid": ["valid_amendment", "inherited(arthur"],
+        },
+    },
+    {
+        "id": "silverton_noisy_silas_pronouns",
+        "domain": "probate_noisy_temporal",
+        "utterance": "Silas: Xmas '22, saw im by pond; he looked gone-years. maybe him England, not her? names bad tho.",
+        "context": [
+            "Arthur and Alfred are both male Silvertons.",
+            "Beatrice is female.",
+            "Silas admits poor memory for names.",
+        ],
+        "allowed_predicates": ["claimed/3", "saw/3", "resided_in/3", "witness_reliability_issue/2"],
+        "expect": {
+            "decision": "quarantine",
+            "must": ["Silas", "him", "England", "names bad"],
+            "avoid": ["resided_in(arthur, england", "resided_in(alfred, england"],
+        },
+    },
+    {
+        "id": "silverton_noisy_relative_dates",
+        "domain": "probate_noisy_temporal",
+        "utterance": "A.S. left the yr after Elias broke his big clock and came back last spring; that's over 5 yrs, right?",
+        "context": [
+            "Elias broke his big clock in 2017.",
+            "Current story year is 2024.",
+            "A.S. could mean Arthur Silverton or Alfred Silverton.",
+        ],
+        "allowed_predicates": ["candidate_identity/2", "relative_time_anchor/3", "duration_query/3", "resided_outside_country_for/3"],
+        "expect": {
+            "decision": "answer",
+            "must": ["A.S.", "2017", "last spring", "over 5"],
+            "avoid": ["resided_outside_country_for(arthur", "forfeited_share_to"],
+        },
+    },
+    {
+        "id": "silverton_noisy_medical_discredit",
+        "domain": "probate_noisy_temporal",
+        "utterance": "Arthur sez Silas's pills make him see 2x; 'bad reaction', allergy maybe?? so witness is trash.",
+        "context": ["Silas is a witness.", "Arthur benefits if Silas is discredited."],
+        "allowed_predicates": ["claimed/3", "reported_side_effect/3", "has_allergy/2", "witness_reliability_issue/2"],
+        "expect": {
+            "decision": "quarantine",
+            "must": ["Arthur", "Silas", "claim", "bad reaction"],
+            "avoid": ["has_allergy(silas", "unreliable(silas) as fact", "invalid_witness"],
+        },
+    },
+    {
+        "id": "silverton_noisy_temporal_correction",
+        "domain": "probate_noisy_temporal",
+        "utterance": "wait correction: the return stamp wasn't Apr 2024, it was Apr 2023; still A. Silverton tho.",
+        "context": [
+            "Existing ledger note: Silverton, A. returned in April 2024.",
+            "Known A. Silvertons include Arthur and Alfred.",
+        ],
+        "allowed_predicates": ["returned_in/2", "correction/2", "travel_log_entry/4", "candidate_identity/2"],
+        "expect": {
+            "decision": "mixed",
+            "must": ["correction", "2024", "2023", "A. Silverton"],
+            "avoid": ["returned_in(arthur", "same_person(silverton_a, arthur) as fact"],
+        },
+    },
+    {
+        "id": "silverton_noisy_multilingual_query",
+        "domain": "probate_noisy_temporal",
+        "utterance": "Si 'Silverton A.' es Alfred, not Arthur, does Arthur still lose his 50 percent?",
+        "context": [
+            "The Heathrow ledger identity is disputed.",
+            "A beneficiary only forfeits if that beneficiary resided outside the country for more than five consecutive years.",
+        ],
+        "allowed_predicates": ["candidate_identity/2", "forfeited_share_to/2", "resided_outside_country_for/3"],
+        "expect": {
+            "decision": "answer",
+            "must": ["Alfred", "Arthur", "50 percent", "query"],
+            "avoid": ["forfeited_share_to(arthur) as fact", "same_person(silverton_a, alfred) as fact"],
+        },
+    },
 ]
 
 
@@ -981,6 +1102,18 @@ SILVERTON_SCENARIO_IDS = [
     "silverton_alfred_identity_rebuttal",
     "silverton_a_silverton_query",
     "silverton_two_witness_rule_violation",
+]
+
+
+SILVERTON_NOISY_SCENARIO_IDS = [
+    "silverton_noisy_londn_ont_not_uk",
+    "silverton_noisy_heathrow_interval",
+    "silverton_noisy_two_witness_spanglish",
+    "silverton_noisy_silas_pronouns",
+    "silverton_noisy_relative_dates",
+    "silverton_noisy_medical_discredit",
+    "silverton_noisy_temporal_correction",
+    "silverton_noisy_multilingual_query",
 ]
 
 
@@ -1598,7 +1731,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--model", default="")
     parser.add_argument("--variants", default="strict_contract_v1,negative_examples_v1,nbest_selfcheck_v1,domain_profile_v1,best_guarded_v2")
     parser.add_argument("--scenario-ids", default="")
-    parser.add_argument("--scenario-group", choices=["all", "edge", "weak_edges"], default="all")
+    parser.add_argument("--scenario-group", choices=["all", "edge", "weak_edges", "silverton", "silverton_noisy"], default="all")
     parser.add_argument("--base-url", default="")
     parser.add_argument("--out-dir", default=str(DEFAULT_OUT_DIR))
     parser.add_argument("--timeout", type=int, default=300)
@@ -1626,6 +1759,10 @@ def main() -> int:
             scenario_ids = list(EDGE_SCENARIO_IDS)
         elif args.scenario_group == "weak_edges":
             scenario_ids = list(WEAK_EDGE_SCENARIO_IDS)
+        elif args.scenario_group == "silverton":
+            scenario_ids = list(SILVERTON_SCENARIO_IDS)
+        elif args.scenario_group == "silverton_noisy":
+            scenario_ids = list(SILVERTON_NOISY_SCENARIO_IDS)
     by_id = {scenario["id"]: scenario for scenario in WILD_SCENARIOS}
     scenarios = [by_id[item] for item in scenario_ids] if scenario_ids else list(WILD_SCENARIOS)
     out_dir = Path(args.out_dir)

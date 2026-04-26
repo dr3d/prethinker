@@ -805,10 +805,10 @@ def _normalize_decision(value: Any) -> str:
 
 def _projected_decision(ir: dict[str, Any]) -> str:
     decision = _normalize_decision(ir.get("decision"))
-    if _is_pure_hypothetical_query(ir):
-        return "answer"
     if _ambiguous_content_should_clarify(ir):
         return "clarify"
+    if _is_pure_hypothetical_query(ir):
+        return "answer"
     if decision == "commit" and _has_only_context_writes_with_unsafe_implications(ir):
         return "mixed"
     if decision == "commit" and _has_safe_direct_write(ir) and _has_projection_relevant_unsafe_implications(ir):
@@ -1115,15 +1115,7 @@ COMMUNICATION_CONTAINER_PREDICATES = {
 def _ambiguous_content_should_clarify(ir: dict[str, Any]) -> bool:
     if _normalize_decision(ir.get("decision")) not in {"commit", "mixed"}:
         return False
-    refs = ir.get("referents", [])
-    if not isinstance(refs, list):
-        return False
-    has_ambiguous_ref = any(
-        isinstance(ref, dict)
-        and str(ref.get("status", "")).strip().lower() in {"ambiguous", "unresolved"}
-        for ref in refs
-    )
-    if not has_ambiguous_ref:
+    if not _has_ambiguous_or_unresolved_referent(ir):
         return False
     if not _string_list(ir.get("clarification_questions")):
         return False
@@ -1179,6 +1171,8 @@ def _operation_targets_quantified_set(op: dict[str, Any], entity_meta: dict[str,
 
 
 def _is_pure_hypothetical_query(ir: dict[str, Any]) -> bool:
+    if _has_ambiguous_or_unresolved_referent(ir):
+        return False
     turn_type = str(ir.get("turn_type", "")).strip().lower()
     if turn_type not in {"query", "unknown"} and _normalize_decision(ir.get("decision")) != "answer":
         text = " ".join(
@@ -1211,6 +1205,17 @@ def _is_pure_hypothetical_query(ir: dict[str, Any]) -> bool:
         return False
     text = flatten_semantic_text(ir)
     return "hypothetical" in text or "counterfactual" in text or "if " in text or "would" in text
+
+
+def _has_ambiguous_or_unresolved_referent(ir: dict[str, Any]) -> bool:
+    refs = ir.get("referents", [])
+    if not isinstance(refs, list):
+        return False
+    return any(
+        isinstance(ref, dict)
+        and str(ref.get("status", "")).strip().lower() in {"ambiguous", "unresolved"}
+        for ref in refs
+    )
 
 
 def flatten_semantic_text(value: Any) -> str:

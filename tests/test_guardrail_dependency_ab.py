@@ -6,7 +6,11 @@ from scripts.run_guardrail_dependency_ab import (
     _score_runtime_result,
     _semantic_ir_decision,
 )
-from scripts.run_semantic_ir_prompt_bakeoff import SILVERTON_SCENARIO_IDS, WILD_SCENARIOS
+from scripts.run_semantic_ir_prompt_bakeoff import (
+    SILVERTON_NOISY_SCENARIO_IDS,
+    SILVERTON_SCENARIO_IDS,
+    WILD_SCENARIOS,
+)
 
 
 class GuardrailDependencyABTests(unittest.TestCase):
@@ -103,6 +107,42 @@ class GuardrailDependencyABTests(unittest.TestCase):
                 "quarantine",
                 "reject",
             })
+
+    def test_silverton_noisy_temporal_pack_is_registered(self) -> None:
+        by_id = {str(row.get("id", "")): row for row in WILD_SCENARIOS}
+        self.assertEqual(len(SILVERTON_NOISY_SCENARIO_IDS), 8)
+        for scenario_id in SILVERTON_NOISY_SCENARIO_IDS:
+            self.assertIn(scenario_id, by_id)
+            scenario = by_id[scenario_id]
+            self.assertEqual(scenario.get("domain"), "probate_noisy_temporal")
+            text = " ".join(
+                [
+                    str(scenario.get("utterance", "")),
+                    " ".join(str(item) for item in scenario.get("expect", {}).get("must", [])),
+                ]
+            ).lower()
+            noisy_or_temporal_markers = [
+                "2018",
+                "2024",
+                "2023",
+                "londn",
+                "londres",
+                "wknd",
+                "silvrton",
+                "l8r",
+                "artur",
+                "papa",
+                "solo",
+                "xmas",
+                " im ",
+                "spring",
+                "sez",
+                "2x",
+                "maybe",
+                "si ",
+                "percent",
+            ]
+            self.assertTrue(any(token in text for token in noisy_or_temporal_markers))
 
 
 if __name__ == "__main__":

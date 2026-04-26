@@ -217,6 +217,47 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         self.assertEqual(payload["intent"], "query")
         self.assertFalse(payload["needs_clarification"])
 
+    def test_ambiguous_query_is_not_projected_to_answer_by_hypothetical_words(self) -> None:
+        ir = _ir(
+            decision="clarify",
+            turn_type="query",
+            referents=[
+                {
+                    "surface": "him",
+                    "status": "ambiguous",
+                    "candidates": ["arthur", "alfred"],
+                    "chosen": None,
+                }
+            ],
+            unsafe_implications=[
+                {
+                    "candidate": "saw(silas, unknown_male)",
+                    "why_unsafe": "Unsafe if the male referent was neither listed candidate.",
+                    "commit_policy": "clarify",
+                }
+            ],
+            candidate_operations=[
+                {
+                    "operation": "query",
+                    "predicate": "identity_of",
+                    "args": ["him"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                }
+            ],
+            clarification_questions=["Who does 'him' refer to?"],
+            self_check={
+                "bad_commit_risk": "high",
+                "missing_slots": [],
+                "notes": ["This is ambiguous even though the safety note contains if-language."],
+            },
+        )
+        payload = semantic_ir_to_prethink_payload(ir)
+        self.assertEqual(payload["intent"], "query")
+        self.assertTrue(payload["needs_clarification"])
+        self.assertIn("decision=clarify", payload["rationale"])
+
     def test_mapper_allows_inferred_query_for_pure_hypothetical(self) -> None:
         ir = _ir(
             decision="mixed",

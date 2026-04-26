@@ -304,3 +304,47 @@ This confirms that `16K` context is not the limiting factor for this scenario.
 The failure mode is semantic/policy calibration: the model sees enough story
 context, but still tends to over-use `mixed` where the desired frontier policy
 expects quarantine/reject/answer.
+
+## Silverton Noisy Temporal Pack
+
+The noisy Silverton pack adds the kind of stressors that broke earlier
+English-patching designs: typos, shorthand, mixed French/Spanish fragments,
+relative dates, disputed initials, messy pronouns, correction language, and a
+medical-sounding witness-discredit claim.
+
+Run:
+
+```text
+python scripts/run_guardrail_dependency_ab.py --backend lmstudio --base-url http://127.0.0.1:1234 --legacy-model qwen/qwen3.6-35b-a3b --semantic-model qwen/qwen3.6-35b-a3b --scenario-group silverton_noisy --timeout 300
+```
+
+Latest local result:
+
+| Pack | Runs | Legacy decision OK | Semantic decision OK | Legacy avg score | Semantic avg score | Semantic operations | Semantic admitted | Semantic skipped |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| Silverton noisy temporal | 8 | 4 | 2 | 0.781 | 0.729 | 7 | 5 | 2 |
+
+Local report file:
+
+- `tmp/guardrail_dependency_ab/guardrail_dependency_ab_20260426T142809Z.md`
+
+Interpretation:
+
+- The model usually preserves the important semantic content even through noise:
+  `Londn ONT` versus London UK, LHR/Heathrow dates, `solo nosotros dos`, Silas's
+  ambiguous `im`, and the allergy/side-effect boundary all surfaced in the IR.
+- The weak point is still administrative decision projection, not raw language
+  understanding. Several cases contain good workspace structure but land as
+  `mixed` where a frontier policy may prefer `quarantine`, `reject`, or
+  `answer`.
+- Temporal extraction is present but not yet temporal reasoning. The IR can hold
+  2018-2024, April 2023 corrections, and relative-date anchors, but the runtime
+  still needs a factual temporal representation before durable mutations can
+  support serious interval queries.
+- A structural projection bug was fixed during this pass: ambiguous referents are
+  no longer upgraded into pure hypothetical `answer` turns just because an
+  explanatory note contains if-language.
+
+This pack should stay intentionally hard. It is useful less as a pass/fail demo
+and more as a pressure gauge for whether future work reduces domain-specific
+Python while keeping the authority boundary intact.
