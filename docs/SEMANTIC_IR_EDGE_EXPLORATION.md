@@ -56,6 +56,29 @@ Summary:
 operation-policy prompt improved some retraction polarity behavior, but it made
 decision labels worse by overusing `mixed` or `clarify`.
 
+## LM Studio AFK Recheck
+
+After switching the live research loop to LM Studio structured output, a
+35B-only recheck was run with `qwen/qwen3.6-35b-a3b`, temperature `0.0`,
+top-p `0.82`, top-k `20`, context `16384`, and thinking off.
+
+| Pack | Schema contract in prompt | JSON OK | Schema OK | Decision OK | Avg rough score |
+|---|---:|---:|---:|---:|---:|
+| hard edge | no | 20/20 | 20/20 | 15/20 | 0.91 |
+| hard edge | yes | 20/20 | 20/20 | 15/20 | 0.92 |
+| weak edges | no | 10/10 | 10/10 | 4/10 | 0.82 |
+| weak edges | yes | 10/10 | 10/10 | 7/10 | 0.89 |
+| Silverton noisy | no | 8/8 | 8/8 | 2/8 | 0.75 |
+
+The main finding is that LM Studio structured output reliably handles JSON
+shape, but the compact schema/policy contract still helps decision calibration.
+So the runtime now keeps the compact root-shape contract in the semantic IR
+prompt even when LM Studio is enforcing `json_schema`.
+
+The Silverton noisy pack remains deliberately adversarial. It is less a polished
+demo and more a pressure gauge for identity ambiguity, temporal correction,
+policy labels, and claim/fact separation.
+
 ## Strong Signals
 
 The model is already strong at:
@@ -99,6 +122,9 @@ The newest design is weakest at:
 
 - hypothetical queries: the model often asks for clarification instead of
   treating the turn as a pure hypothetical query
+- admin label policy: the model sometimes chooses `commit` when the structure
+  contains safe claim/event writes plus unsafe legal implications that our
+  external scorer expects as `mixed`
 - correction decision labels: the model sometimes labels retract/assert
   corrections as `mixed` even when they are safe commits
 - medical negation: explicit "not allergic; side effect instead" is still

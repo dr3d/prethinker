@@ -263,3 +263,22 @@ The current prompt also tells the model to keep arrays compact, avoid repeated
 equivalent assertions, and choose clarification when ambiguous pronouns leave
 only a generic speech/container fact such as `told`, `said`, or `claimed` as a
 safe write.
+
+## LM Studio Structured Output Note
+
+LM Studio's `response_format=json_schema` is useful, but it is not a substitute
+for semantic policy text in the prompt. A local AFK sweep on
+`qwen/qwen3.6-35b-a3b` compared structured output with and without the compact
+root-shape contract in the prompt:
+
+| Pack | Schema contract in prompt | JSON OK | Schema OK | Decision OK | Avg rough score |
+|---|---:|---:|---:|---:|---:|
+| weak edges | no | 10/10 | 10/10 | 4/10 | 0.82 |
+| weak edges | yes | 10/10 | 10/10 | 7/10 | 0.89 |
+| hard edge | no | 20/20 | 20/20 | 15/20 | 0.91 |
+| hard edge | yes | 20/20 | 20/20 | 15/20 | 0.92 |
+
+The product read is: structured output should enforce JSON shape, while the
+prompt still carries the compact schema/policy contract that helps the model
+choose better decisions. This is not a second prompt path; it is the same
+semantic task with mechanical JSON enforcement underneath.

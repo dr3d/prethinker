@@ -327,7 +327,7 @@ def call_semantic_ir(
         context=context,
         allowed_predicates=allowed_predicates,
         domain=domain,
-        include_schema_contract=backend != "lmstudio",
+        include_schema_contract=True,
     )
     if backend == "lmstudio":
         return _call_lmstudio_semantic_ir(config=config, messages=messages)

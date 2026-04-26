@@ -1778,9 +1778,9 @@ def main() -> int:
         for scenario in scenarios:
             options = dict(PROMPT_VARIANTS[variant])
             options["num_ctx"] = int(args.num_ctx)
-            include_schema_in_prompt = bool(args.include_schema_in_prompt)
-            if backend != "lmstudio":
-                include_schema_in_prompt = not bool(args.omit_schema_in_prompt)
+            include_schema_in_prompt = not bool(args.omit_schema_in_prompt)
+            if args.include_schema_in_prompt:
+                include_schema_in_prompt = True
             record = {
                 "ts": _utc_now(),
                 "backend": backend,
