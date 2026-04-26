@@ -1,5 +1,11 @@
 # GIC English Input Pipeline
 
+Status note, 2026-04-26: this document remains useful for understanding the
+legacy English-first pipeline and why the project accumulated Python-side
+guardrails. The current research center is the stronger-model
+`semantic_ir_v1` path described in
+[docs/SEMANTIC_IR_RESEARCH_DIRECTION_REPORT.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_RESEARCH_DIRECTION_REPORT.md).
+
 This note is the technical follow-through of what `Prethinker` is doing today when an English utterance arrives at the canonical interactive front door.
 
 It is written for knowledge engineers, systems people, and anyone who wants to understand where the language model stops, where the guardrails begin, and how a typed sentence becomes a KB mutation, query, or refusal.

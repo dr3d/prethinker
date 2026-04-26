@@ -123,6 +123,20 @@
       line-height: 1.45;
     }
 
+    .hero-visual {
+      margin-top: 16px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #050b13;
+    }
+
+    .hero-visual img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
     .hero strong { color: var(--ink); }
 
     .hero-actions {
@@ -337,6 +351,7 @@
       <div class="chips">
         <a class="chip" href="https://github.com/dr3d/prethinker/blob/main/README.md">Project README</a>
         <a class="chip" href="https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md">Project State</a>
+        <a class="chip" href="https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md">Docs Guide</a>
         <a class="chip" href="https://github.com/dr3d/prethinker/blob/main/docs/PRETHINKER.md">System Design</a>
         <a class="chip" href="https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_MAPPER_SPEC.md">Mapper Spec</a>
         <a class="chip" href="https://github.com/dr3d/prethinker/blob/main/docs/CONSOLE_TRYBOOK.md">Console Trybook</a>
@@ -350,17 +365,21 @@
       <h1>Prethinker Docs Hub<br />Current Truth, Product Shape, And Evidence.</h1>
       <p>
         This hub prioritizes <strong>current verified status</strong>, the <strong>Prethinker Console</strong> as the manual front door,
-        and the durable design notes that describe the product as a <strong>governed adapter</strong> rather than just a parser lab.
+        and the current semantic IR direction: <strong>understanding before deterministic truth</strong>.
       </p>
       <p class="lede" style="margin-top:6px;">
         Read this as a public snapshot: what is stable, what is frontier, what the UI is for, and where the honest boundaries still are.
       </p>
+      <div class="hero-visual">
+        <img src="assets/prethinker-semantic-ir-workspace.png" alt="Prethinker semantic IR workspace diagram" />
+      </div>
       <div class="hero-actions">
         <a class="btn primary" href="https://github.com/dr3d/prethinker/blob/main/README.md">Open README</a>
         <a class="btn primary" href="https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md">Open Project State</a>
+        <a class="btn cool" href="https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md">Open Docs Guide</a>
         <a class="btn cool" href="https://github.com/dr3d/prethinker/blob/main/docs/PRETHINKER.md">Open System Design</a>
         <a class="btn cool" href="https://github.com/dr3d/prethinker/blob/main/docs/EXPLAINER.md">Open Explainer</a>
-        <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/GIC_ENGLISH_INPUT_PIPELINE.md">Open GIC Pipeline</a>
+        <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_RESEARCH_DIRECTION_REPORT.md">Open Semantic IR Report</a>
       </div>
       <div class="jump">
         <a href="#status">Status</a>
@@ -373,24 +392,24 @@
       </div>
       <div class="metrics">
         <div class="metric">
-          <div class="k">Safety Gate</div>
-          <div id="m-gate" class="v">142</div>
-          <div class="hint">Latest verified full gate</div>
+          <div class="k">Full Test Suite</div>
+          <div id="m-gate" class="v">248</div>
+          <div class="hint">Latest local pytest pass count</div>
         </div>
         <div class="metric">
-          <div class="k">Blocksworld Strict</div>
+          <div class="k">Semantic IR Edge</div>
           <div id="m-shadow" class="v">20/20</div>
-          <div class="hint">Solve/replay green; pilot 8/8</div>
+          <div class="hint">Runtime A/B decision labels; avg 0.976</div>
         </div>
         <div class="metric">
-          <div class="k">Temporal Pack</div>
-          <div id="m-glitch" class="v">8/12</div>
-          <div class="hint">Frozen pack now has 0 fail; correction is 10/12</div>
+          <div class="k">Weak Edges</div>
+          <div id="m-glitch" class="v">10/10</div>
+          <div class="hint">Semantic IR runtime A/B; avg 1.000</div>
         </div>
         <div class="metric">
-          <div class="k">Medical Profile</div>
-          <div id="m-runs" class="v">79/79</div>
-          <div class="hint" id="m-runs-hint">12/12 sharp memory, 7/7 checks, 38/38 clarification</div>
+          <div class="k">Silverton Noisy</div>
+          <div id="m-runs" class="v">2/8</div>
+          <div class="hint" id="m-runs-hint">Hard frontier pressure gauge, not demo headline</div>
         </div>
       </div>
     </section>
@@ -405,6 +424,7 @@
           <p>Compact current architecture, live demo status, local assets, and next frontiers.</p>
           <div class="actions">
             <a class="btn primary" href="https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md">Open</a>
+            <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md">Docs Guide</a>
           </div>
         </article>
         <article class="card">
@@ -534,19 +554,21 @@
           </div>
         </article>
         <article class="card half">
-          <span class="tag">Stable Lane</span>
-          <h3>Blocksworld Guarded Lane</h3>
-          <p>Historical stable-lane context. Rerun local gates before making new claims.</p>
+          <span class="tag">Semantic IR</span>
+          <h3>Guardrail Dependency A/B</h3>
+          <p>The current evidence lane for measuring whether semantic IR reduces Python rescue pressure while preserving safe admission.</p>
           <div class="actions">
-            <a class="btn primary" href="https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md">Status</a>
+            <a class="btn primary" href="https://github.com/dr3d/prethinker/blob/main/docs/GUARDRAIL_DEPENDENCY_AB.md">Open A/B</a>
+            <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/PYTHON_GUARDRAIL_AUDIT.md">Guardrail Audit</a>
           </div>
         </article>
         <article class="card half">
-          <span class="tag">Narrative</span>
-          <h3>Narrative Recovery</h3>
-          <p>Broader-lane context retained as history; the current push is the live gateway and bounded medical profile.</p>
+          <span class="tag">Frontier</span>
+          <h3>Silverton Pressure Packs</h3>
+          <p>Hard claim/fact, temporal, identity, and noisy-language batteries. Useful for finding policy weaknesses, not for polished demo claims.</p>
           <div class="actions">
-            <a class="btn primary" href="https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md">Status Note</a>
+            <a class="btn primary" href="https://github.com/dr3d/prethinker/blob/main/docs/GUARDRAIL_DEPENDENCY_AB.md">Latest Notes</a>
+            <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_RESEARCH_DIRECTION_REPORT.md">Research Direction</a>
           </div>
         </article>
         <article class="card half">
@@ -653,7 +675,7 @@
     </section>
 
     <div class="footer-note">
-      Docs Hub refresh: April 25, 2026. This page favors current verified status, public product framing,
+      Docs Hub refresh: April 26, 2026. This page favors current semantic IR status, public product framing,
       and curated evidence over retired handoff clutter or rolling migration notes.
     </div>
   </main>
@@ -803,10 +825,8 @@
           safeJson("assets/media_manifest.json"),
         ]);
 
-        if (historical) {
-          document.getElementById("m-runs").textContent = `${historical.runs_total ?? "-"}`;
-          document.getElementById("m-runs-hint").textContent = `Historical pass rate: ${fmtPct(Number(historical.run_pass_rate))}`;
-        }
+        // Headline metrics are intentionally static current-state claims.
+        // Historical run totals remain available through the data links below.
 
         const body = document.getElementById("latest-runs-body");
         if (body) {

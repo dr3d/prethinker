@@ -1,6 +1,10 @@
 # Semantic Workspace Bakeoff
 
-Last updated: 2026-04-25
+Last updated: 2026-04-26
+
+Status note: this document records the model-selection path that led to the
+current `semantic_ir_v1` lane. For the latest runtime evidence and mapper
+policy, read [docs/GUARDRAIL_DEPENDENCY_AB.md](https://github.com/dr3d/prethinker/blob/main/docs/GUARDRAIL_DEPENDENCY_AB.md) and [docs/SEMANTIC_IR_RESEARCH_DIRECTION_REPORT.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_RESEARCH_DIRECTION_REPORT.md).
 
 This note records the first local Ollama bakeoff for a larger, more pluggable
 Prethinker language layer. Raw model traces stay under `tmp/semantic_bakeoff/`

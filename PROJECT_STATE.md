@@ -4,7 +4,7 @@ Last updated: 2026-04-26
 
 ## One-Sentence Shape
 
-Prethinker is a governed natural-language-to-Prolog workbench: neural parsing proposes symbolic deltas, deterministic gates decide what can become durable KB state, and the UI shows that process live.
+Prethinker is a governed natural-language-to-Prolog workbench: neural models propose semantic workspaces, deterministic gates decide what can become durable KB state, and the UI shows that process live.
 
 ## Current Center
 
@@ -12,7 +12,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural parsing pr
 - UI: `ui_gateway/`, served locally by `python ui_gateway/main.py` using the stdlib `ThreadingHTTPServer`.
 - Active profile: `medical@v0`.
 - Active research asset: local UMLS Semantic Network KB built from `sn_current.tgz`.
-- Active sidecar experiment: opt-in `semantic_ir_v1` compiler path using `qwen3.6:35b`.
+- Active architecture pivot: opt-in `semantic_ir_v1` compiler path using `qwen3.6:35b-a3b` through LM Studio/OpenAI-compatible structured output.
 - Current demonstration surface: prompt-book UI plus live ledger cards showing route, clarification, blocked execution, and KB mutation outcomes.
 
 ## What Works Now
@@ -24,9 +24,9 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural parsing pr
 - The UI can demonstrate write routes, query/clarification routes, mutation telemetry, and prompt-book-driven examples.
 - The UMLS Semantic Network builder produces local Prolog facts for semantic types, semantic relations, structural rows, and inherited relation closures.
 - The opt-in semantic IR runtime path can route and commit safe direct assertions without running the legacy parse-side English rescue chain.
-- The first 20-case semantic IR edge battery shows `qwen3.6:35b` holding difficult provenance, temporal, exception, correction, and counterfactual distinctions with 20/20 JSON/schema and 17/20 decision labels under `best_guarded_v2`.
-- The first runtime guardrail A/B run shows semantic IR improving edge-battery score from 0.743 to 0.854 and reducing non-mapper parse rescues from 7 to 0 over 20 cases.
-- A 10-case weak-edge fix pass now improves semantic IR runtime score from the legacy 0.650 baseline to 0.900, with 7/10 decision labels, zero non-mapper parse rescues, safe hypothetical query routing, allergy retractions, denial event commits, quantified-set write skips, and alias-aware retractions.
+- The current semantic IR edge battery shows `qwen3.6:35b-a3b` holding difficult provenance, temporal, exception, correction, and counterfactual distinctions with `20/20` decision labels and `0.976` average score in runtime A/B.
+- A 10-case weak-edge fix pass now reaches `10/10` decision labels and `1.000` average score, with zero non-mapper parse rescues.
+- Silverton probate packs are intentionally hard frontier batteries for claim/fact separation, identity ambiguity, temporal intervals, noisy spelling, multilingual fragments, and policy-label calibration. They are pressure gauges, not polished demo headlines yet.
 
 ## Local UMLS Assets
 
@@ -62,14 +62,17 @@ This is the next useful layer for type steering and explanation. It should suppo
 - Expand the medical profile only when the new predicate earns its place through tests and a clear demo.
 - Keep measuring guardrail dependency directly: compare old pipeline rescue-hook use against semantic IR direct coverage on Glitch, Ledger, medical ambiguity, and temporal packs.
 - Push the remaining mapper frontier: durable rule admission for quantified exception language, better decision-label calibration for safe partial commits, and cleaner nested event predicate shapes.
+- Represent temporal facts durably enough that extracted dates, intervals, corrections, and relative-time anchors can support real KB queries instead of staying only in the semantic workspace.
 
 ## Verification Snapshot
 
 Recent verified results:
 
-- Full suite: `234 passed`
-- Focused semantic IR runtime battery: `13 passed`
-- Weak-edge runtime A/B: semantic IR `7/10` decision labels, `0.900` avg score, `0` non-mapper parse rescues
+- Full suite after latest noisy-pack work: `248 passed`
+- Focused semantic IR runtime battery: `23 passed`
+- Edge runtime A/B: semantic IR `20/20` decision labels, `0.976` avg score, `0` non-mapper parse rescues
+- Weak-edge runtime A/B: semantic IR `10/10` decision labels, `1.000` avg score, `0` non-mapper parse rescues
+- Silverton noisy temporal pack: semantic IR `2/8` decision labels, `0.729` avg score; useful evidence that noisy language is less of a blocker than policy labels and temporal admission
 - Python compile check for touched runtime files passed
 
 Rerun the full suite before committing a new stopping point.
@@ -79,13 +82,15 @@ Rerun the full suite before committing a new stopping point.
 1. `README.md`
 2. `AGENT-README.md`
 3. `docs/PRETHINK_GATEWAY_MVP.md`
-4. `docs/UMLS_MVP.md`
-5. `docs/MEDICAL_PROFILE.md`
-6. `docs/FREETHINKER_DESIGN.md`
-7. `docs/SEMANTIC_IR_EDGE_EXPLORATION.md`
-8. `docs/GUARDRAIL_DEPENDENCY_AB.md`
-9. `docs/CONSOLE_TRYBOOK.md`
-10. `ui_gateway/README.md`
+4. `docs/PUBLIC_DOCS_GUIDE.md`
+5. `docs/SEMANTIC_IR_RESEARCH_DIRECTION_REPORT.md`
+6. `docs/SEMANTIC_IR_MAPPER_SPEC.md`
+7. `docs/GUARDRAIL_DEPENDENCY_AB.md`
+8. `docs/UMLS_MVP.md`
+9. `docs/MEDICAL_PROFILE.md`
+10. `docs/FREETHINKER_DESIGN.md`
+11. `docs/CONSOLE_TRYBOOK.md`
+12. `ui_gateway/README.md`
 
 ## What Was Pruned
 

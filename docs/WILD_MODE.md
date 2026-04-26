@@ -1,6 +1,11 @@
 # Out In The Wild: Frontier Excursion Mode
 
-Last updated: 2026-04-14
+Last updated: 2026-04-26
+
+Status note: this remains useful as the realism/noise lane, but the current
+research implementation should be read through the semantic IR pivot: harder
+real-world text is now mainly a way to test whether `semantic_ir_v1` can reduce
+English-specific rescue code while deterministic admission stays strict.
 
 ## What This Mode Is
 

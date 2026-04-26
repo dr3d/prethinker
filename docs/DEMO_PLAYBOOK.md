@@ -2,7 +2,11 @@
 
 This playbook merges your 10 high-impact demos with Prethinker-native demos that highlight our governed ingestion model, clarification policy, and deterministic memory.
 
-Last updated: 2026-04-12
+Last updated: 2026-04-26
+
+Status note: this is a demo-idea bank. The current live demo surface is the
+console prompt book plus semantic IR admission traces. For runnable current
+operator prompts, start with [docs/CONSOLE_TRYBOOK.md](https://github.com/dr3d/prethinker/blob/main/docs/CONSOLE_TRYBOOK.md).
 
 ## Core Positioning
 

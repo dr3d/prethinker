@@ -116,7 +116,7 @@ The constitutional rule is:
 
 This is the obvious question, and it is a good one.
 
-Why not just give one `qwen3.5:9b` a larger context window, a strong prompt, and let it do both the compiling and the clarification work?
+Why not just give one bigger model a larger context window, a strong prompt, and let it do both the compiling and the clarification work?
 
 That may turn out to be enough for some slices, but the jobs pull in different directions:
 
@@ -124,6 +124,10 @@ That may turn out to be enough for some slices, but the jobs pull in different d
 - the clarification role should be softer, more contextual, and better at discourse continuity
 
 When one role must both "never guess" and "use context intelligently," drift starts to creep in.
+
+The current semantic IR work partially answers this: yes, we should use a
+stronger model for more holistic understanding. The safety rule still holds,
+though. Bigger model output becomes a richer proposal, not durable truth.
 
 So the split is not really "two different intelligences."
 
@@ -290,19 +294,19 @@ That is also why the repo is careful about honesty:
 
 ## What We Know Today
 
-As of April 20, 2026:
+As of April 26, 2026:
 
-- the safety gate is green at `142 passed`
-- strict Blocksworld remains the last verified stable proof lane
-- the canonical interactive path now has frozen frontier packs instead of just ad hoc examples
-- the correction frontier is `10/12` pass with only `2` failures left
-- the temporal frontier is `8/12` pass, `4/12` warn, and `0/12` fail
-- the console is now the canonical interactive front door
-- Freethinker is a real design-track capability, but still policy-off by default
+- the full local pytest suite is green at `248 passed`
+- the console is the canonical interactive front door
+- `semantic_ir_v1` is the active research lane for richer model understanding before deterministic admission
+- the latest semantic IR edge runtime A/B is `20/20` decision labels with `0.976` average score
+- the latest weak-edge runtime A/B is `10/10` decision labels with `1.000` average score
+- Silverton probate/noisy temporal packs are intentionally hard pressure gauges for policy labels, temporal representation, and claim/fact separation
+- Freethinker remains a non-authoritative clarification sidecar, not the main semantic compiler
 
 The important subtlety is this:
 
-the system is stronger today as a governed parser stack than it is as a broad raw-language front door.
+the system is stronger today as a governed semantic workspace stack than it is as a broad raw-language front door.
 
 That is real progress.
 It is not the same as universal robustness.

@@ -60,6 +60,7 @@ It is the first place where the product behavior becomes legible.
 - runtime path uses the canonical `process_utterance()` server entryway plus deterministic core tool execution
 - the live dials surface can now expose bounded runtime profiles such as `medical@v0`, not just raw model/backend settings
 - the console now has a profile-aware prompt-book rail for repeatable demos that pair a setup move, an utterance, and the expected reasoning behavior to watch
+- the semantic IR path can be enabled to show richer model workspace proposals before deterministic mapper/admission policy decides what survives
 
 ## Newbie-Friendly Surface
 
@@ -94,10 +95,13 @@ This is important because the same UI needs to serve two audiences:
 
 ## Default Binding Choices
 
-- compiler model: `qwen3.5:9b` or baked local equivalent
+- legacy compiler model: `qwen3.5:9b` or baked local equivalent
+- semantic IR research model: `qwen/qwen3.6-35b-a3b` via LM Studio/OpenAI-compatible structured output
 - compiler mode: `strict`
-- compiler backend: `ollama`
-- compiler base URL: `http://127.0.0.1:11434`
+- legacy compiler backend: `ollama`
+- legacy compiler base URL: `http://127.0.0.1:11434`
+- semantic IR backend: `lmstudio`
+- semantic IR base URL: `http://127.0.0.1:1234`
 - served handoff mode in strict mode: `never`
 - Freethinker sidecar policy: `off`
 

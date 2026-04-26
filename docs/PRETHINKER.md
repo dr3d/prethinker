@@ -28,14 +28,14 @@ Prethinker is valuable only if that trust boundary stays legible.
 
 At a high level:
 
-`language -> compiler proposal -> deterministic gate -> KB mutation/query -> evidence`
+`language -> semantic workspace -> deterministic gate -> KB mutation/query -> evidence`
 
 In practice that means:
 
 1. A user utterance arrives.
 2. The compiler classifies it as a write, query, retract, rule, or `other`.
-3. A parser proposal is emitted in a strict machine-readable schema.
-4. Deterministic validation and normalization decide whether it is admissible.
+3. The active research path emits a `semantic_ir_v1` workspace rather than forcing immediate Prolog.
+4. Deterministic validation, mapping, and normalization decide whether any candidate operation is admissible.
 5. The runtime either:
    - commits a mutation
    - answers a query
@@ -147,22 +147,24 @@ The bounded clarification liaison.
 
 This split is about permissions, not necessarily different model families.
 
-Both roles can be backed by the same underlying `qwen3.5:9b` weights with different prompts and policies.
+The roles may be backed by different models. The current semantic IR lane uses a stronger local `qwen3.6:35b-a3b` model, while smaller models remain useful as baselines or fast strict-parser lanes.
 
 ## Current Reality
 
-As of April 25, 2026:
+As of April 26, 2026:
 
 - the canonical interactive entryway is `process_utterance()` in [src/mcp_server.py](/D:/_PROJECTS/prethinker/src/mcp_server.py)
 - the console in [ui_gateway/](/D:/_PROJECTS/prethinker/ui_gateway) is the main manual test cockpit
 - the prompt-book UI and ledger telemetry are the primary live demonstration surface
+- `semantic_ir_v1` is the active architecture pivot for model understanding before deterministic admission
+- [src/semantic_ir.py](/D:/_PROJECTS/prethinker/src/semantic_ir.py) owns mapper projection policy and admission diagnostics
 - `medical@v0` is the most active bounded profile
 - UMLS Semantic Network assets are built locally for type/relation explanation
 - Freethinker remains optional and non-authoritative
 
 That means the repo already supports the governed compiler shape directly.
 
-The clarification-liaison shape is partially scaffolded and intentionally not yet allowed to change baseline behavior.
+The clarification-liaison shape is partially scaffolded and intentionally not yet allowed to authorize writes. The bigger current research question is whether richer semantic workspaces can reduce English-specific Python rescue logic while preserving the same authority boundary.
 
 ## Why The Repo Looks The Way It Does
 

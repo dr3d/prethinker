@@ -6,6 +6,7 @@ This folder contains a local MVP for a product-style front door to Prethinker. I
 - a backend endpoint that represents `prethink://` ingress
 - a tiny config surface for served-LLM and compiler defaults
 - runtime hooks bound to real pre-think + deterministic core runtime tools
+- semantic IR runtime switches for the current stronger-model research lane
 - one-click session export for post-mortem JSON traces
 
 The UI is now wired to the canonical interactive utterance entryway in `src/mcp_server.py`, so manual console turns exercise the same shared server path instead of a UI-only parser fork.
@@ -90,9 +91,9 @@ The backend uses stdlib only: `http.server`, `argparse`, `json`, and small helpe
 ```text
 browser chat UI
   -> /api/prethink
-    -> prethink://local/front-door classifier (strict compiler)
+    -> prethink://local/front-door classifier or semantic_ir_v1 workspace
       -> clarify gate
-        -> deterministic Prolog tools (assert/query/retract)
+        -> deterministic mapper + Prolog tools (assert/query/retract)
           -> grounded answer envelope
 ```
 

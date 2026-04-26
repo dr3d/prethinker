@@ -33,6 +33,8 @@ forming a broad, holistic interpretation of messy language. Python should still
 validate, normalize, reject, and execute. It should not have to keep learning
 English one special case at a time.
 
+![Prethinker semantic IR workspace](assets/prethinker-semantic-ir-workspace.png)
+
 ## Why We Are Changing Direction
 
 Prethinker has always been strongest at the boundary between language and
@@ -284,12 +286,12 @@ Semantic IR path:
 qwen3.6:35b + semantic_ir_v1 + deterministic mapper
 ```
 
-Full 20-case edge result:
+Latest full 20-case edge result:
 
 | Path | Decision OK | Avg score | Parse rescues |
 |---|---:|---:|---:|
-| legacy | 10/20 | 0.743 | 7 |
-| semantic IR | 13/20 | 0.854 | 0 non-mapper rescues |
+| legacy | 10/20 | 0.777 | 0 counted legacy parse rescues |
+| semantic IR | 20/20 | 0.976 | 0 non-mapper rescues |
 
 That is the first concrete evidence that the new path can reduce dependence on
 Python-side semantic rescue while improving final-state quality.
@@ -298,14 +300,33 @@ Then we built a 10-case weak-edge fix pass around the exact failures:
 hypotheticals, quantified class writes, medical allergy retractions, denial
 events, and alias-aware retractions.
 
-Weak-edge runtime result:
+Latest weak-edge runtime result:
 
 | Path | Decision OK | Avg score | Parse rescues |
 |---|---:|---:|---:|
-| legacy | 3/10 | 0.650 | 5 |
-| semantic IR | 7/10 | 0.900 | 0 non-mapper rescues |
+| legacy | 3/10 | 0.633 | 5 |
+| semantic IR | 10/10 | 1.000 | 0 non-mapper rescues |
 
 This is the strongest evidence so far that the new direction is productive.
+
+### Silverton Probate Packs
+
+The Silverton packs are deliberately harder than the demo batteries. They test
+claim/fact separation, identity ambiguity, London Ontario versus London UK,
+medical-sounding witness discrediting, two-witness policy rules, noisy spelling,
+code-switching, and temporal corrections.
+
+Current local results:
+
+| Pack | Runs | Semantic decision OK | Semantic avg score | Interpretation |
+|---|---:|---:|---:|---|
+| Silverton probate | 10 | 2/10 | 0.725 | Hard frontier pack |
+| Silverton noisy temporal | 8 | 2/8 | 0.729 | Noise is readable; policy/temporal admission remains weak |
+
+The useful lesson is not that the model fails at messy text. It often preserves
+the important semantic content. The remaining difficulty is administrative:
+which parts should be answered, clarified, quarantined, rejected, or admitted as
+durable temporal facts.
 
 ## What Structured Output Adds
 
@@ -406,7 +427,8 @@ already:
 - avoided several legacy bad commits
 - handled old story-role failures more cleanly
 - represented conditional legal state without collapsing it into completed fact
-- improved weak-edge runtime score from 0.650 legacy to 0.900 semantic IR
+- improved weak-edge runtime score from roughly 0.650 legacy to 1.000 semantic IR
+- reached 20/20 on the edge runtime pack and 10/10 on the weak-edge runtime pack
 - made schema obedience reliable through LM Studio structured output
 
 The big picture is still ambitious, but the direction feels more principled:
@@ -486,4 +508,3 @@ the architecture.
    - Move from English rescue patches to structural admission gates.
    - Keep the authority boundary.
    - Let the LLM do more semantic work, but never own durable truth.
-

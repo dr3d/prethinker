@@ -1,6 +1,10 @@
 # Prethinker Orchestration (Codex + Agent54)
 
-Last updated: 2026-04-19
+Last updated: 2026-04-26
+
+Status note: this document contains older parser-lane orchestration guidance.
+Treat it as operational background. For current semantic IR work, prefer
+[docs/PUBLIC_DOCS_GUIDE.md](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md), [docs/SEMANTIC_IR_MAPPER_SPEC.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_MAPPER_SPEC.md), and [docs/GUARDRAIL_DEPENDENCY_AB.md](https://github.com/dr3d/prethinker/blob/main/docs/GUARDRAIL_DEPENDENCY_AB.md).
 
 ## Purpose
 
