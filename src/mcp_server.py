@@ -1793,7 +1793,10 @@ class PrologMCPServer:
             self._last_parse_trace = trace
             return None, error or "semantic_ir_v1 failed"
 
-        parsed, warnings = semantic_ir_to_legacy_parse(ir)
+        parsed, warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=self._semantic_ir_allowed_predicates(),
+        )
         trace["normalized"] = self._clone_trace_payload(parsed)
         trace["rescues"].append(
             {

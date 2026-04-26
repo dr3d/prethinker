@@ -250,6 +250,15 @@ def _avoid_probe(item: str) -> str:
 
 def _semantic_ir_decision(result: dict[str, Any]) -> str:
     trace = result.get("compiler_trace", {}) if isinstance(result.get("compiler_trace"), dict) else {}
+    parse = trace.get("parse", {}) if isinstance(trace, dict) else {}
+    if isinstance(parse, dict):
+        normalized = parse.get("normalized", {})
+        if isinstance(normalized, dict):
+            diagnostics = normalized.get("admission_diagnostics", {})
+            if isinstance(diagnostics, dict):
+                decision = str(diagnostics.get("projected_decision", "")).strip().lower()
+                if decision in {"commit", "clarify", "quarantine", "reject", "answer", "mixed"}:
+                    return decision
     for section in ("prethink", "parse"):
         node = trace.get(section, {}) if isinstance(trace, dict) else {}
         if not isinstance(node, dict):

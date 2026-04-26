@@ -80,6 +80,37 @@ class GuardrailDependencyABTests(unittest.TestCase):
         self.assertTrue(score["safe_outcome_ok"])
         self.assertEqual(score["decision"], "mixed")
 
+    def test_runtime_score_prefers_mapper_projected_decision(self) -> None:
+        result = {
+            "status": "success",
+            "front_door": {"compiler_intent": "assert_fact"},
+            "execution": {"intent": "assert_fact", "writes_applied": 0, "operations": []},
+            "compiler_trace": {
+                "prethink": {
+                    "semantic_ir": {
+                        "parsed": {
+                            "schema_version": "semantic_ir_v1",
+                            "decision": "mixed",
+                        }
+                    }
+                },
+                "parse": {
+                    "normalized": {
+                        "admission_diagnostics": {
+                            "projected_decision": "quarantine",
+                        }
+                    }
+                },
+            },
+        }
+        score = _score_runtime_result(
+            result,
+            {"expect": {"decision": "reject", "must": [], "avoid": []}},
+            final_kb=[],
+        )
+        self.assertEqual(score["decision"], "quarantine")
+        self.assertTrue(score["decision_ok"])
+
     def test_runtime_score_checks_avoid_against_final_kb(self) -> None:
         scenario = {
             "expect": {

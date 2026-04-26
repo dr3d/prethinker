@@ -157,6 +157,31 @@ Domain-specific type grounding belongs to profile contracts. For example,
 metadata when deciding whether `taking(Patient, Thing)` names a medication or a
 condition. The semantic IR mapper should not grow medical-specific type lists.
 
+## Predicate Palette Policy
+
+The active predicate palette is an admission contract, not just prompt advice.
+The model may propose any `candidate_operations` it wants, but the mapper skips
+operations whose predicate signature is outside the active allowed set.
+
+This applies to:
+
+- `assert` operations;
+- `query` operations;
+- `retract` targets;
+- every predicate signature inside an executable `rule` clause.
+
+For example, if a probate pack allows `claimed/3`, `verbal_amendment/3`, and
+`valid_amendment/1`, a model-proposed `excluded(arthur, beatrice)` operation is
+not admitted. The trace records:
+
+```text
+predicate_not_in_allowed_palette
+```
+
+This is a structural guardrail. It does not teach Python Spanish, probate law,
+or medical vocabulary; it only enforces the current domain contract after the
+LLM has built the semantic workspace.
+
 ## Unsafe Implications
 
 `unsafe_implications` records tempting candidates that should not become durable

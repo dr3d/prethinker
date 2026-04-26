@@ -550,6 +550,77 @@ class SemanticIRRuntimeTests(unittest.TestCase):
             )
         )
 
+    def test_mapper_skips_out_of_palette_candidate_operation(self) -> None:
+        ir = _ir(
+            decision="mixed",
+            turn_type="mixed",
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "claimed",
+                    "args": ["Arthur", "Father", "all mine now"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "assert",
+                    "predicate": "excluded",
+                    "args": ["Arthur", "Beatrice"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+            ],
+            unsafe_implications=[
+                {
+                    "candidate": "valid_amendment(charter_change)",
+                    "why_unsafe": "Two-witness rule is not satisfied.",
+                    "commit_policy": "quarantine",
+                }
+            ],
+            self_check={"bad_commit_risk": "medium", "missing_slots": [], "notes": []},
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=["claimed/3", "valid_amendment/1", "invalid_amendment_reason/2"],
+        )
+        self.assertEqual(parsed["intent"], "other")
+        self.assertEqual(parsed["facts"], [])
+        self.assertTrue(any("excluded/2 outside allowed predicate palette" in warning for warning in warnings))
+        diagnostics = parsed["admission_diagnostics"]
+        self.assertEqual(diagnostics["projected_decision"], "quarantine")
+        self.assertTrue(diagnostics["features"]["predicate_palette_enabled"])
+        skipped = [row for row in diagnostics["operations"] if not row["admitted"]]
+        self.assertTrue(
+            any(row["skip_reason"] == "predicate_not_in_allowed_palette" for row in skipped)
+        )
+
+    def test_mapper_skips_rule_clause_outside_palette(self) -> None:
+        ir = _ir(
+            decision="commit",
+            turn_type="rule_update",
+            candidate_operations=[
+                {
+                    "operation": "rule",
+                    "predicate": "ancestor",
+                    "args": [],
+                    "clause": "ancestor(X, Y) :- parent(X, Y), trusted_source(X).",
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                }
+            ],
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=["ancestor/2", "parent/2"],
+        )
+        self.assertEqual(parsed["intent"], "other")
+        self.assertEqual(parsed["rules"], [])
+        self.assertEqual(parsed["admission_diagnostics"]["projected_decision"], "quarantine")
+        self.assertTrue(any("trusted_source/1" in warning for warning in warnings))
+
     def test_mapper_skips_context_sourced_asserts_as_existing_state(self) -> None:
         ir = _ir(
             candidate_operations=[
@@ -914,6 +985,7 @@ class SemanticIRRuntimeTests(unittest.TestCase):
             semantic_ir_enabled=True,
             semantic_ir_model="qwen3.6:35b",
         )
+        server._registry_signatures.add(("cleared", 1))
         server.assert_fact("cleared(crate12).")
 
         def fake_compile_semantic_ir(utterance: str):
@@ -1019,6 +1091,7 @@ class SemanticIRRuntimeTests(unittest.TestCase):
             semantic_ir_enabled=True,
             semantic_ir_model="qwen3.6:35b",
         )
+        server._registry_signatures.add(("has_condition", 2))
         server.assert_fact("has_condition(mara, asthma).")
 
         def fake_compile_semantic_ir(utterance: str):
@@ -1048,6 +1121,7 @@ class SemanticIRRuntimeTests(unittest.TestCase):
             semantic_ir_enabled=True,
             semantic_ir_model="qwen3.6:35b",
         )
+        server._registry_signatures.update({("cleared", 1), ("may_ship", 1), ("cannot_ship", 1)})
         server.assert_fact("cleared(crate12).")
         server.assert_rule("may_ship(X) :- cleared(X).")
 

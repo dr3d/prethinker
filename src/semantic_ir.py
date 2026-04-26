@@ -498,14 +498,19 @@ def semantic_ir_to_prethink_payload(ir: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def semantic_ir_admission_diagnostics(ir: dict[str, Any]) -> dict[str, Any]:
+def semantic_ir_admission_diagnostics(
+    ir: dict[str, Any],
+    *,
+    allowed_predicates: Any = None,
+) -> dict[str, Any]:
     """Explain mapper admission choices without granting authority.
 
     These diagnostics are intentionally deterministic and structural. They are
     a scorecard for traces and experiments, not a second admission path.
     """
     model_decision = _normalize_decision(ir.get("decision"))
-    projected_decision = _projected_decision(ir)
+    allowed_signatures = _allowed_predicate_signature_set(allowed_predicates)
+    projected_decision = _projected_decision(ir, allowed_signatures=allowed_signatures)
     operations: list[dict[str, Any]] = []
     warning_counts: dict[str, int] = {}
     admitted_count = 0
@@ -518,7 +523,6 @@ def semantic_ir_admission_diagnostics(ir: dict[str, Any]) -> dict[str, Any]:
     }
     entity_names = _entity_name_map(ir)
     entity_meta = _entity_metadata_map(ir)
-
     for index, op in enumerate(_candidate_operations(ir)):
         diagnosis = _diagnose_candidate_operation(
             ir,
@@ -526,6 +530,7 @@ def semantic_ir_admission_diagnostics(ir: dict[str, Any]) -> dict[str, Any]:
             index=index,
             entity_names=entity_names,
             entity_meta=entity_meta,
+            allowed_signatures=allowed_signatures,
         )
         if (
             projected_decision in {"reject", "quarantine", "clarify"}
@@ -558,13 +563,18 @@ def semantic_ir_admission_diagnostics(ir: dict[str, Any]) -> dict[str, Any]:
         else:
             skipped_count += 1
 
-    features = _admission_feature_summary(ir)
+    features = _admission_feature_summary(ir, allowed_signatures=allowed_signatures)
     return {
         "version": "admission_diagnostics_v1",
         "authority": "diagnostic_only_mapper_remains_authoritative",
         "model_decision": model_decision,
         "projected_decision": projected_decision,
-        "projection_reason": _projection_reason(ir, model_decision, projected_decision),
+        "projection_reason": _projection_reason(
+            ir,
+            model_decision,
+            projected_decision,
+            allowed_signatures=allowed_signatures,
+        ),
         "features": features,
         "operation_count": len(operations),
         "admitted_count": admitted_count,
@@ -575,13 +585,18 @@ def semantic_ir_admission_diagnostics(ir: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def semantic_ir_to_legacy_parse(ir: dict[str, Any]) -> tuple[dict[str, Any], list[str]]:
-    decision = _projected_decision(ir)
+def semantic_ir_to_legacy_parse(
+    ir: dict[str, Any],
+    *,
+    allowed_predicates: Any = None,
+) -> tuple[dict[str, Any], list[str]]:
+    allowed_signatures = _allowed_predicate_signature_set(allowed_predicates)
+    decision = _projected_decision(ir, allowed_signatures=allowed_signatures)
     facts: list[str] = []
     rules: list[str] = []
     queries: list[str] = []
     retracts: list[str] = []
-    diagnostics = semantic_ir_admission_diagnostics(ir)
+    diagnostics = semantic_ir_admission_diagnostics(ir, allowed_predicates=allowed_signatures)
     warnings = [
         str(item.get("warning", "")).strip()
         for item in diagnostics.get("operations", [])
@@ -648,6 +663,7 @@ def _diagnose_candidate_operation(
     index: int,
     entity_names: dict[str, str],
     entity_meta: dict[str, dict[str, Any]],
+    allowed_signatures: set[tuple[str, int]],
 ) -> dict[str, Any]:
     operation = str(op.get("operation", "")).strip().lower()
     safety = str(op.get("safety", "")).strip().lower()
@@ -677,6 +693,7 @@ def _diagnose_candidate_operation(
             source=source,
             safety=safety,
             polarity=polarity,
+            allowed_signatures=allowed_signatures,
         ),
     }
 
@@ -721,6 +738,19 @@ def _diagnose_candidate_operation(
             warning="skipped identity premise scoped to a query",
             codes=["hypothetical_policy", "identity_premise_not_truth"],
         )
+    palette_problem = _operation_palette_problem(
+        op,
+        predicate=predicate,
+        args=args,
+        operation=operation,
+        allowed_signatures=allowed_signatures,
+    )
+    if palette_problem:
+        return skip(
+            str(palette_problem["reason"]),
+            warning=str(palette_problem["warning"]),
+            codes=list(palette_problem["codes"]),
+        )
     if polarity == "negative" and operation == "assert" and not _is_negative_event_predicate(predicate):
         return skip(
             "negative_fact_semantics_not_supported",
@@ -763,7 +793,11 @@ def _diagnose_candidate_operation(
     return skip("unsupported_operation", codes=["operation_policy"])
 
 
-def _admission_feature_summary(ir: dict[str, Any]) -> dict[str, Any]:
+def _admission_feature_summary(
+    ir: dict[str, Any],
+    *,
+    allowed_signatures: set[tuple[str, int]],
+) -> dict[str, Any]:
     safe_ops = [
         op
         for op in _candidate_operations(ir)
@@ -794,6 +828,12 @@ def _admission_feature_summary(ir: dict[str, Any]) -> dict[str, Any]:
         "has_unresolved_referents": bool(_semantic_ir_ambiguities(ir)),
         "has_unsafe_implications": _has_unsafe_implications(ir),
         "has_claim_and_direct_assertions": _has_claim_and_direct_assertions(ir),
+        "predicate_palette_enabled": bool(allowed_signatures),
+        "predicate_palette_size": len(allowed_signatures),
+        "has_out_of_palette_safe_write": _has_out_of_palette_safe_write(
+            ir,
+            allowed_signatures=allowed_signatures,
+        ),
         "bad_commit_risk": risk,
         "bad_commit_risk_score": risk_score,
         "diagnostic_note": "These values explain mapper pressure; they do not authorize writes.",
@@ -809,6 +849,7 @@ def _operation_feature_summary(
     source: str,
     safety: str,
     polarity: str,
+    allowed_signatures: set[tuple[str, int]],
 ) -> dict[str, Any]:
     source_support = {
         "direct": 1.0,
@@ -819,6 +860,12 @@ def _operation_feature_summary(
         "directness": 1.0 if source == "direct" else 0.0,
         "evidence_support": source_support,
         "predicate_shape_valid": bool(predicate),
+        "predicate_palette_allowed": _operation_signature_allowed(
+            predicate=predicate,
+            args=args,
+            operation=operation,
+            allowed_signatures=allowed_signatures,
+        ),
         "arg_count": len(args),
         "model_marked_safe": safety == "safe",
         "write_operation": operation in {"assert", "retract", "rule"},
@@ -827,6 +874,97 @@ def _operation_feature_summary(
         "bad_commit_risk": _bad_commit_risk(ir),
         "has_ungrounded_argument_atom": any(arg in UNGROUNDED_ARGUMENT_ATOMS for arg in args),
     }
+
+
+def _allowed_predicate_signature_set(raw: Any) -> set[tuple[str, int]]:
+    if raw is None:
+        return set()
+    values = raw
+    if isinstance(raw, set):
+        values = list(raw)
+    elif isinstance(raw, tuple):
+        values = list(raw)
+    elif not isinstance(raw, list):
+        values = [raw]
+    signatures: set[tuple[str, int]] = set()
+    for item in values:
+        if isinstance(item, tuple) and len(item) == 2:
+            name = _predicate_name(item[0])
+            try:
+                arity = int(item[1])
+            except Exception:
+                continue
+            if name and arity >= 0:
+                signatures.add((name, arity))
+            continue
+        text = str(item or "").strip()
+        match = re.fullmatch(r"\s*([A-Za-z_][A-Za-z0-9_]*)\s*/\s*(\d+)\s*", text)
+        if not match:
+            continue
+        name = _predicate_name(match.group(1))
+        arity = int(match.group(2))
+        if name:
+            signatures.add((name, arity))
+    return signatures
+
+
+def _operation_signature_allowed(
+    *,
+    predicate: str,
+    args: list[str],
+    operation: str,
+    allowed_signatures: set[tuple[str, int]],
+) -> bool:
+    if not allowed_signatures or not predicate:
+        return True
+    if operation == "rule" and not args:
+        return True
+    return (predicate, len(args)) in allowed_signatures
+
+
+def _operation_palette_problem(
+    op: dict[str, Any],
+    *,
+    predicate: str,
+    args: list[str],
+    operation: str,
+    allowed_signatures: set[tuple[str, int]],
+) -> dict[str, Any] | None:
+    if not allowed_signatures or operation not in {"assert", "query", "retract", "rule"}:
+        return None
+    if operation == "rule":
+        clause = str(op.get("clause") or op.get("logic") or "").strip()
+        signatures = _predicate_signatures_from_clause(clause)
+        if signatures:
+            unknown = sorted(signature for signature in signatures if signature not in allowed_signatures)
+            if unknown:
+                return {
+                    "reason": "predicate_not_in_allowed_palette",
+                    "warning": "skipped rule operation outside allowed predicate palette: "
+                    + ", ".join(f"{name}/{arity}" for name, arity in unknown),
+                    "codes": ["predicate_palette_gate", "allowed_predicate_contract"],
+                }
+            return None
+    if (predicate, len(args)) not in allowed_signatures:
+        return {
+            "reason": "predicate_not_in_allowed_palette",
+            "warning": f"skipped {predicate}/{len(args)} outside allowed predicate palette",
+            "codes": ["predicate_palette_gate", "allowed_predicate_contract"],
+        }
+    return None
+
+
+def _predicate_signatures_from_clause(clause: str) -> set[tuple[str, int]]:
+    signatures: set[tuple[str, int]] = set()
+    text = str(clause or "")
+    for match in re.finditer(r"\b([a-z_][a-z0-9_]*)\s*\(([^()]*)\)", text):
+        predicate = _predicate_name(match.group(1))
+        if not predicate:
+            continue
+        args_text = match.group(2).strip()
+        arity = 0 if not args_text else len([item for item in args_text.split(",")])
+        signatures.add((predicate, arity))
+    return signatures
 
 
 def _generic_grounding_problem(
@@ -846,7 +984,13 @@ def _generic_grounding_problem(
     return None
 
 
-def _projection_reason(ir: dict[str, Any], model_decision: str, projected_decision: str) -> str:
+def _projection_reason(
+    ir: dict[str, Any],
+    model_decision: str,
+    projected_decision: str,
+    *,
+    allowed_signatures: set[tuple[str, int]],
+) -> str:
     if projected_decision == model_decision:
         return "model_decision_preserved"
     if _is_pure_hypothetical_query(ir):
@@ -855,8 +999,18 @@ def _projection_reason(ir: dict[str, Any], model_decision: str, projected_decisi
         return "ambiguous_referents_with_only_speech_wrapper_projected_to_clarify"
     if model_decision == "commit" and _has_initialed_person_state_write(ir):
         return "initialed_person_state_write_projected_to_mixed"
-    if model_decision in {"commit", "mixed"} and _has_only_communication_writes_with_unsafe_implications(ir):
+    if model_decision in {"commit", "mixed"} and _has_only_communication_writes_with_unsafe_implications(
+        ir,
+        allowed_signatures=allowed_signatures,
+    ):
         return "only_communication_writes_with_unsafe_implications_projected_to_quarantine"
+    if model_decision in {"commit", "mixed"} and _has_out_of_palette_safe_write(
+        ir,
+        allowed_signatures=allowed_signatures,
+    ):
+        if _has_palette_allowed_safe_write(ir, allowed_signatures=allowed_signatures):
+            return "out_of_palette_write_projected_to_mixed"
+        return "out_of_palette_write_projected_to_quarantine"
     if model_decision == "commit" and _has_only_context_writes_with_unsafe_implications(ir):
         return "context_writes_with_unsafe_implications_projected_to_mixed"
     if model_decision == "commit" and _has_safe_direct_write(ir) and _has_projection_relevant_unsafe_implications(ir):
@@ -885,7 +1039,12 @@ def _normalize_decision(value: Any) -> str:
     return decision
 
 
-def _projected_decision(ir: dict[str, Any]) -> str:
+def _projected_decision(
+    ir: dict[str, Any],
+    *,
+    allowed_signatures: set[tuple[str, int]] | None = None,
+) -> str:
+    allowed_signatures = allowed_signatures or set()
     decision = _normalize_decision(ir.get("decision"))
     if _ambiguous_content_should_clarify(ir):
         return "clarify"
@@ -893,7 +1052,17 @@ def _projected_decision(ir: dict[str, Any]) -> str:
         return "answer"
     if decision == "commit" and _has_initialed_person_state_write(ir):
         return "mixed"
-    if decision in {"commit", "mixed"} and _has_only_communication_writes_with_unsafe_implications(ir):
+    if decision in {"commit", "mixed"} and _has_only_communication_writes_with_unsafe_implications(
+        ir,
+        allowed_signatures=allowed_signatures,
+    ):
+        return "quarantine"
+    if decision in {"commit", "mixed"} and _has_out_of_palette_safe_write(
+        ir,
+        allowed_signatures=allowed_signatures,
+    ):
+        if _has_palette_allowed_safe_write(ir, allowed_signatures=allowed_signatures):
+            return "mixed"
         return "quarantine"
     if decision == "commit" and _has_only_context_writes_with_unsafe_implications(ir):
         return "mixed"
@@ -1223,7 +1392,12 @@ def _ambiguous_content_should_clarify(ir: dict[str, Any]) -> bool:
     return all(predicate in COMMUNICATION_CONTAINER_PREDICATES for predicate in safe_write_predicates)
 
 
-def _has_only_communication_writes_with_unsafe_implications(ir: dict[str, Any]) -> bool:
+def _has_only_communication_writes_with_unsafe_implications(
+    ir: dict[str, Any],
+    *,
+    allowed_signatures: set[tuple[str, int]] | None = None,
+) -> bool:
+    allowed_signatures = allowed_signatures or set()
     if not _has_projection_relevant_unsafe_implications(ir):
         return False
     write_predicates: list[str] = []
@@ -1232,14 +1406,79 @@ def _has_only_communication_writes_with_unsafe_implications(ir: dict[str, Any]) 
             continue
         if str(op.get("source", "")).strip().lower() != "direct":
             continue
-        if str(op.get("operation", "")).strip().lower() not in {"assert", "rule"}:
+        operation = str(op.get("operation", "")).strip().lower()
+        if operation not in {"assert", "rule"}:
             continue
         predicate = _predicate_name(op.get("predicate"))
+        if allowed_signatures and _operation_palette_problem(
+            op,
+            predicate=predicate,
+            args=_operation_args(op.get("args"), entity_names=_entity_name_map(ir), for_query=False),
+            operation=operation,
+            allowed_signatures=allowed_signatures,
+        ):
+            continue
         if predicate:
             write_predicates.append(predicate)
     if not write_predicates:
         return False
     return all(predicate in COMMUNICATION_CONTAINER_PREDICATES for predicate in write_predicates)
+
+
+def _has_out_of_palette_safe_write(
+    ir: dict[str, Any],
+    *,
+    allowed_signatures: set[tuple[str, int]],
+) -> bool:
+    if not allowed_signatures:
+        return False
+    entity_names = _entity_name_map(ir)
+    for op in _candidate_operations(ir):
+        operation = str(op.get("operation", "")).strip().lower()
+        if operation not in {"assert", "retract", "rule"}:
+            continue
+        if str(op.get("safety", "")).strip().lower() != "safe":
+            continue
+        if _is_query_scoped_identity_premise(ir, _predicate_name(op.get("predicate"))):
+            continue
+        predicate = _predicate_name(op.get("predicate"))
+        args = _operation_args(op.get("args"), entity_names=entity_names, for_query=False)
+        if _operation_palette_problem(
+            op,
+            predicate=predicate,
+            args=args,
+            operation=operation,
+            allowed_signatures=allowed_signatures,
+        ):
+            return True
+    return False
+
+
+def _has_palette_allowed_safe_write(
+    ir: dict[str, Any],
+    *,
+    allowed_signatures: set[tuple[str, int]],
+) -> bool:
+    if not allowed_signatures:
+        return False
+    entity_names = _entity_name_map(ir)
+    for op in _candidate_operations(ir):
+        operation = str(op.get("operation", "")).strip().lower()
+        if operation not in {"assert", "retract", "rule"}:
+            continue
+        if str(op.get("safety", "")).strip().lower() != "safe":
+            continue
+        predicate = _predicate_name(op.get("predicate"))
+        args = _operation_args(op.get("args"), entity_names=entity_names, for_query=False)
+        if not _operation_palette_problem(
+            op,
+            predicate=predicate,
+            args=args,
+            operation=operation,
+            allowed_signatures=allowed_signatures,
+        ):
+            return True
+    return False
 
 
 def _has_safe_direct_retract(ir: dict[str, Any]) -> bool:
