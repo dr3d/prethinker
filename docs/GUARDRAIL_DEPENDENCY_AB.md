@@ -247,3 +247,31 @@ Structural fixes from this pass:
   context-sourced writes are skipped and should not leave the decision label as
   a clean commit;
 - added mapper operation diagnostics to JSONL/Markdown A/B output.
+
+## Silverton Probate Pack
+
+The Silverton pack is a new held-out stress battery for claim/fact separation,
+identity ambiguity, location grounding, medical-boundary claims, and conditional
+probate logic.
+
+Run:
+
+```text
+python scripts/run_guardrail_dependency_ab.py --backend lmstudio --base-url http://127.0.0.1:1234 --legacy-model qwen/qwen3.6-35b-a3b --semantic-model qwen/qwen3.6-35b-a3b --scenario-group silverton --timeout 300
+```
+
+Initial local result:
+
+| Pack | Runs | Legacy decision OK | Semantic decision OK | Legacy avg score | Semantic avg score | Semantic operations | Semantic admitted | Semantic skipped |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| Silverton | 10 | 6 | 2 | 0.783 | 0.725 | 13 | 7 | 6 |
+
+Local report file:
+
+- `tmp/guardrail_dependency_ab/guardrail_dependency_ab_20260426T134749Z.md`
+
+This pack is deliberately not part of the default edge pack yet. It exposes the
+next frontier: the model still over-commits or over-clarifies when claims,
+ambiguous initials, London Ontario versus London UK, and two-witness amendment
+rules interact. That makes it useful as a future regression target once the
+semantic workspace and mapper policy are tightened for probate-style reasoning.

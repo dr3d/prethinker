@@ -6,6 +6,7 @@ from scripts.run_guardrail_dependency_ab import (
     _score_runtime_result,
     _semantic_ir_decision,
 )
+from scripts.run_semantic_ir_prompt_bakeoff import SILVERTON_SCENARIO_IDS, WILD_SCENARIOS
 
 
 class GuardrailDependencyABTests(unittest.TestCase):
@@ -86,6 +87,22 @@ class GuardrailDependencyABTests(unittest.TestCase):
         )
         self.assertTrue(score["decision_ok"])
         self.assertEqual(score["avoid_count"], 1)
+
+    def test_silverton_probate_pack_is_registered(self) -> None:
+        by_id = {str(row.get("id", "")): row for row in WILD_SCENARIOS}
+        self.assertEqual(len(SILVERTON_SCENARIO_IDS), 10)
+        for scenario_id in SILVERTON_SCENARIO_IDS:
+            self.assertIn(scenario_id, by_id)
+            scenario = by_id[scenario_id]
+            self.assertEqual(str(scenario.get("domain", "")).split("_", 1)[0], "probate")
+            self.assertIn(str(scenario.get("expect", {}).get("decision", "")), {
+                "answer",
+                "clarify",
+                "commit",
+                "mixed",
+                "quarantine",
+                "reject",
+            })
 
 
 if __name__ == "__main__":

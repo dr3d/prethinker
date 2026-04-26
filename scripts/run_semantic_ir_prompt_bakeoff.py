@@ -779,6 +779,156 @@ WILD_SCENARIOS: list[dict[str, Any]] = [
             "avoid": ["closed(bay7) as current"],
         },
     },
+    {
+        "id": "silverton_arthur_workshop_claim",
+        "domain": "probate",
+        "utterance": (
+            "Arthur says, \"Dad told me last June in the workshop, just the two of us, "
+            "that the whole Silverton estate was mine because Beatrice moved to London and stayed there far too long.\""
+        ),
+        "context": [
+            "Charter: inheritance is split 50/50 between Arthur and Beatrice unless a beneficiary resided outside the country for more than five consecutive years.",
+            "Amendment rule: verbal changes to the Charter are valid only if witnessed by two non-beneficiaries simultaneously.",
+            "Arthur and Beatrice are beneficiaries.",
+        ],
+        "allowed_predicates": [
+            "claimed/3",
+            "beneficiary/1",
+            "verbal_amendment/3",
+            "valid_amendment/1",
+            "forfeited_share_to/2",
+            "resided_outside_country_for/3",
+        ],
+        "expect": {
+            "decision": "quarantine",
+            "must": ["Arthur", "claim", "just the two of us", "two non-beneficiaries"],
+            "avoid": ["valid_amendment", "forfeited_share_to(beatrice", "inherited(arthur"],
+        },
+    },
+    {
+        "id": "silverton_london_location_ambiguity",
+        "domain": "probate",
+        "utterance": "Beatrice moved to London and stayed there far too long.",
+        "context": [
+            "The forfeiture rule only applies to residence outside the country for more than five consecutive years.",
+            "Known possible locations include London, Ontario and London, UK.",
+        ],
+        "allowed_predicates": ["resided_in/3", "resided_outside_country_for/3", "forfeited_share_to/2"],
+        "expect": {
+            "decision": "clarify",
+            "must": ["London", "Ontario", "UK", "ambiguous"],
+            "avoid": ["resided_outside_country_for(beatrice", "forfeited_share_to(beatrice"],
+        },
+    },
+    {
+        "id": "silverton_silas_him_by_pond",
+        "domain": "probate",
+        "utterance": (
+            "Silas said, \"I remember the Christmas of '22. I saw him by the koi pond. "
+            "He looked like he'd been away a long time. I think he was the one in England, not her. "
+            "But I have a bad memory for names.\""
+        ),
+        "context": ["Arthur and Alfred are both male Silvertons.", "Beatrice is also involved in the probate dispute."],
+        "allowed_predicates": ["claimed/3", "saw/3", "resided_in/3", "witness_reliability_issue/2"],
+        "expect": {
+            "decision": "quarantine",
+            "must": ["Silas", "him", "bad memory", "ambiguous"],
+            "avoid": ["resided_in(arthur, england", "resided_in(beatrice, england"],
+        },
+    },
+    {
+        "id": "silverton_heathrow_log_a_silverton",
+        "domain": "probate",
+        "utterance": "The travel ledger shows \"Silverton, A.\" booked a one-way flight to Heathrow in 2018 and returned in 2024.",
+        "context": ["Known A. Silvertons include Arthur Silverton and Alfred Silverton."],
+        "allowed_predicates": ["travel_log_entry/4", "candidate_identity/2", "resided_in/3", "returned_in/2"],
+        "expect": {
+            "decision": "mixed",
+            "must": ["Silverton, A.", "Heathrow", "Arthur", "Alfred"],
+            "avoid": ["resided_in(arthur, uk", "forfeited_share_to(arthur"],
+        },
+    },
+    {
+        "id": "silverton_silas_medical_reaction_claim",
+        "domain": "probate_medical_boundary",
+        "utterance": (
+            "Arthur says Silas is confused because of his medication; he told Arthur he has a "
+            "\"terrible reaction\" to his pills that makes him see double."
+        ),
+        "context": ["Silas is a witness in the Silverton probate dispute."],
+        "allowed_predicates": ["claimed/3", "reported_side_effect/3", "has_allergy/2", "witness_reliability_issue/2"],
+        "expect": {
+            "decision": "quarantine",
+            "must": ["Arthur", "Silas", "claim", "terrible reaction"],
+            "avoid": ["has_allergy(silas", "unreliable(silas) as fact", "invalid_witness"],
+        },
+    },
+    {
+        "id": "silverton_beatrice_negative_country_interval",
+        "domain": "probate",
+        "utterance": "Beatrice says she was in London, Ontario, not London, UK, and never left the country for more than a weekend.",
+        "context": ["The forfeiture rule requires more than five consecutive years outside the country."],
+        "allowed_predicates": ["resided_in/3", "denied/3", "not_outside_country_longer_than/3", "forfeited_share_to/2"],
+        "expect": {
+            "decision": "mixed",
+            "must": ["Beatrice", "London, Ontario", "not London, UK", "never left"],
+            "avoid": ["forfeited_share_to(beatrice", "resided_in(beatrice, uk"],
+        },
+    },
+    {
+        "id": "silverton_hypothetical_arthur_forfeiture",
+        "domain": "probate",
+        "utterance": "If Arthur was in England from 2018 to 2024, would his share be forfeited to the Clock Restoration Fund?",
+        "context": [
+            "Charter: a beneficiary forfeits their share to the Silverton Clock Restoration Fund if they resided outside the country for more than five consecutive years.",
+            "Arthur is a beneficiary.",
+        ],
+        "allowed_predicates": ["resided_outside_country_for/3", "forfeited_share_to/2", "beneficiary/1"],
+        "expect": {
+            "decision": "answer",
+            "must": ["Arthur", "hypothetical", "England", "Clock Restoration Fund"],
+            "avoid": ["resided_outside_country_for(arthur", "forfeited_share_to(arthur) as fact"],
+        },
+    },
+    {
+        "id": "silverton_alfred_identity_rebuttal",
+        "domain": "probate",
+        "utterance": "Arthur says the ledger's \"Silverton, A.\" was Alfred, Dad's cousin, not Arthur.",
+        "context": ["The ledger contains a Heathrow trip under the name Silverton, A.", "Arthur and Alfred are both A. Silvertons."],
+        "allowed_predicates": ["claimed/3", "candidate_identity/2", "same_person/2", "not_same_person/2"],
+        "expect": {
+            "decision": "quarantine",
+            "must": ["Arthur", "Alfred", "Silverton, A.", "claim"],
+            "avoid": ["same_person(silverton_a, alfred) as fact", "not_same_person(silverton_a, arthur) as fact"],
+        },
+    },
+    {
+        "id": "silverton_a_silverton_query",
+        "domain": "probate",
+        "utterance": "Is there exactly one A. Silverton in the family?",
+        "context": ["Known family members: Arthur Silverton, Beatrice Silverton, Alfred Silverton."],
+        "allowed_predicates": ["family_member/1", "initial_matches/2", "same_person/2"],
+        "expect": {
+            "decision": "answer",
+            "must": ["A. Silverton", "Arthur", "Alfred", "query"],
+            "avoid": ["same_person(arthur", "exactly_one as fact"],
+        },
+    },
+    {
+        "id": "silverton_two_witness_rule_violation",
+        "domain": "probate",
+        "utterance": "Dad told Arthur that the Charter changed, but Arthur admits it was just the two of them in the workshop.",
+        "context": [
+            "Amendment rule: verbal changes to the Charter are valid only if witnessed by two non-beneficiaries simultaneously.",
+            "Arthur is a beneficiary.",
+        ],
+        "allowed_predicates": ["claimed/3", "valid_amendment/1", "invalid_amendment_reason/2", "beneficiary/1"],
+        "expect": {
+            "decision": "reject",
+            "must": ["just the two", "two non-beneficiaries", "Arthur", "beneficiary"],
+            "avoid": ["valid_amendment", "changed_charter as fact"],
+        },
+    },
 ]
 
 
@@ -817,6 +967,20 @@ WEAK_EDGE_SCENARIO_IDS = [
     "weak_denial_reported_by_mara",
     "weak_retraction_alias_crate12",
     "weak_retraction_alias_bay_7",
+]
+
+
+SILVERTON_SCENARIO_IDS = [
+    "silverton_arthur_workshop_claim",
+    "silverton_london_location_ambiguity",
+    "silverton_silas_him_by_pond",
+    "silverton_heathrow_log_a_silverton",
+    "silverton_silas_medical_reaction_claim",
+    "silverton_beatrice_negative_country_interval",
+    "silverton_hypothetical_arthur_forfeiture",
+    "silverton_alfred_identity_rebuttal",
+    "silverton_a_silverton_query",
+    "silverton_two_witness_rule_violation",
 ]
 
 
