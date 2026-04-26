@@ -92,3 +92,43 @@ This is a real signal in favor of continuing. The semantic IR route is not just 
 shinier parser; it reduced dependency on the old parse rescue chain and avoided
 several bad legacy commits. The next deletion candidates should be measured
 against this harness, not removed by instinct.
+
+## Weak-Edge Fix Pass
+
+Run:
+
+```text
+python scripts/run_guardrail_dependency_ab.py --scenario-group weak_edges --timeout 300
+```
+
+Result:
+
+| Runs | Legacy decision OK | Semantic decision OK | Legacy avg score | Semantic avg score | Legacy parse rescues | Semantic non-mapper rescues | Rescue reduction |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 10 | 3 | 7 | 0.650 | 0.900 | 5 | 0 | 5 |
+
+The weak-edge pass targeted the exact issues found above: hypothetical queries,
+quantified class writes, medical allergy retractions, denial events, and entity
+normalization for retractions.
+
+Fixed or improved:
+
+- pure hypothetical `if/had/would` questions now route as query turns without
+  committing hypothetical facts
+- explicit allergy corrections can safely retract stale allergy facts while
+  holding side-effect/intolerance assertions if the model marks them uncertain
+- denial predicates such as `denied/3` survive as speech/event facts instead of
+  being skipped as signed negative facts
+- numbered-entity retracts now try aliases like `crate_12` and `crate12`
+- alias retract no-results no longer poison the turn when a later alias succeeds
+- quantified set atoms such as `submitted_form(residents)` are skipped unless
+  the IR expands them into individual known members
+
+Remaining weak spots:
+
+- the runtime scorer still labels some safe partial commits as `commit` where
+  the scenario expectation says `mixed`; this is mostly decision-label
+  calibration, not bad final KB state
+- rule admission for quantified exception language is still shallow; the mapper
+  can preserve safe direct facts but does not yet synthesize a durable rule from
+  a structured IR unless the rule clause is explicit

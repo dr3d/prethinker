@@ -86,7 +86,13 @@ BEST_GUARDED_V2_GUIDANCE = (
     "- Do not turn a claim into a fact. 'Bob says he has it' is a claim, not possession.\n"
     "- Do not infer diagnosis or staging from a single lab value request. Quarantine or clarify.\n"
     "- Do not infer allergy from nausea/vomiting alone. Clarify allergy vs side effect/intolerance.\n"
+    "- If the user explicitly corrects a prior allergy record with 'not allergic' and provides a side-effect/intolerance explanation, propose retracting the allergy and recording the side effect; do not give medical advice.\n"
     "- A clear correction like 'not Mara, Fred has it' may propose retract/assert.\n"
+    "- Do not invent required governance slots that are not in the predicate schema. Source document, authority, or reason fields are optional provenance unless the allowed predicate explicitly requires them.\n"
+    "- A direct correction like 'remove X allergy; stomach upset only' is explicit enough to retract the allergy and record side effect/intolerance when the old allergy fact is in context.\n"
+    "- Do not assert a fact about a quantified group atom such as submitted_form(residents) for 'all residents except Kai'. Use individual known members only when context enumerates them; otherwise mark the class-level write unsafe.\n"
+    "- Pure hypothetical questions with 'if ... would ...?' are queries, not writes and not clarification requests when the hypothetical nature is clear.\n"
+    "- Denial predicates are speech/event facts. 'Omar denied signing the waiver' may assert denied(...); it must not assert signed(...) false.\n"
     "- If context supplies exactly one active patient and one active lab test, a direct 'it came back high' may propose a safe lab_result_high write.\n"
     "- For rule-plus-fact or fact-plus-query turns, use mixed and keep unsafe query targets out of committed facts.\n"
     "- Preserve negation in candidate_operations with polarity='negative'. Do not turn 'never saw X' into a positive saw/2 fact."
@@ -209,7 +215,7 @@ def parse_semantic_ir_json(text: str) -> dict[str, Any] | None:
 
 
 def semantic_ir_to_prethink_payload(ir: dict[str, Any]) -> dict[str, Any]:
-    decision = _normalize_decision(ir.get("decision"))
+    decision = _projected_decision(ir)
     intent = _intent_from_ir(ir)
     questions = _string_list(ir.get("clarification_questions"))
     risk = _bad_commit_risk(ir)
@@ -222,6 +228,8 @@ def semantic_ir_to_prethink_payload(ir: dict[str, Any]) -> dict[str, Any]:
         "medium": 0.48,
         "high": 0.86,
     }.get(risk, 0.48)
+    if not needs_clarification and decision in {"commit", "mixed", "answer"} and _has_safe_direct_write(ir):
+        uncertainty = min(uncertainty, 0.2)
     if needs_clarification:
         uncertainty = max(uncertainty, 0.82)
     return {
@@ -243,13 +251,14 @@ def semantic_ir_to_prethink_payload(ir: dict[str, Any]) -> dict[str, Any]:
 
 
 def semantic_ir_to_legacy_parse(ir: dict[str, Any]) -> tuple[dict[str, Any], list[str]]:
-    decision = _normalize_decision(ir.get("decision"))
+    decision = _projected_decision(ir)
     warnings: list[str] = []
     facts: list[str] = []
     rules: list[str] = []
     queries: list[str] = []
     retracts: list[str] = []
     entity_names = _entity_name_map(ir)
+    entity_meta = _entity_metadata_map(ir)
 
     for op in _candidate_operations(ir):
         operation = str(op.get("operation", "")).strip().lower()
@@ -261,11 +270,14 @@ def semantic_ir_to_legacy_parse(ir: dict[str, Any]) -> tuple[dict[str, Any], lis
         if source == "inferred":
             warnings.append("skipped inferred safe operation pending policy")
             continue
-        if polarity == "negative" and operation == "assert":
-            warnings.append("skipped negative assertion pending explicit negation policy")
-            continue
         predicate = _predicate_name(op.get("predicate"))
         if not predicate:
+            continue
+        if operation == "assert" and _operation_targets_quantified_set(op, entity_meta):
+            warnings.append("skipped quantified set assertion without individual expansion")
+            continue
+        if polarity == "negative" and operation == "assert" and not _is_negative_event_predicate(predicate):
+            warnings.append("skipped negative assertion pending explicit negation policy")
             continue
         args = _operation_args(op.get("args"), entity_names=entity_names, for_query=operation == "query")
         if operation == "assert":
@@ -273,7 +285,7 @@ def semantic_ir_to_legacy_parse(ir: dict[str, Any]) -> tuple[dict[str, Any], lis
         elif operation == "query":
             queries.append(_clause(predicate, args))
         elif operation == "retract":
-            retracts.append(_clause(predicate, args))
+            retracts.extend(_retract_clause_variants(predicate, args))
         elif operation == "rule":
             clause = str(op.get("clause") or op.get("logic") or "").strip()
             if clause:
@@ -290,7 +302,7 @@ def semantic_ir_to_legacy_parse(ir: dict[str, Any]) -> tuple[dict[str, Any], lis
     intent = _legacy_intent(facts=facts, rules=rules, queries=queries, retracts=retracts, decision=decision)
     logic_parts = facts + rules + queries
     if not logic_parts and retracts:
-        logic_parts = list(retracts)
+        logic_parts = [_retract_command(clause) for clause in retracts]
     payload = {
         "intent": intent,
         "logic_string": " ".join(logic_parts),
@@ -326,8 +338,27 @@ def _normalize_decision(value: Any) -> str:
     return decision
 
 
+def _projected_decision(ir: dict[str, Any]) -> str:
+    decision = _normalize_decision(ir.get("decision"))
+    if _is_pure_hypothetical_query(ir):
+        return "answer"
+    if (
+        decision == "quarantine"
+        and _raw_missing_slots(ir)
+        and not _missing_slots(ir)
+        and _has_safe_direct_write(ir)
+    ):
+        return "mixed"
+    if decision == "quarantine" and str(ir.get("turn_type", "")).strip().lower() == "correction":
+        if _has_safe_direct_retract(ir):
+            return "mixed"
+    return decision
+
+
 def _intent_from_ir(ir: dict[str, Any]) -> str:
     safe_ops: list[str] = []
+    if _is_pure_hypothetical_query(ir):
+        return "query"
     for op in _candidate_operations(ir):
         if str(op.get("safety", "")).strip().lower() != "safe":
             continue
@@ -336,7 +367,8 @@ def _intent_from_ir(ir: dict[str, Any]) -> str:
         polarity = str(op.get("polarity", "positive") or "positive").strip().lower()
         if source == "inferred":
             continue
-        if polarity == "negative" and operation == "assert":
+        predicate = _predicate_name(op.get("predicate"))
+        if polarity == "negative" and operation == "assert" and not _is_negative_event_predicate(predicate):
             continue
         safe_ops.append(operation)
     if "assert" in safe_ops:
@@ -385,6 +417,20 @@ def _entity_name_map(ir: dict[str, Any]) -> dict[str, str]:
         name = str(item.get("normalized") or item.get("surface") or "").strip()
         if name:
             out[entity_id] = name
+    return out
+
+
+def _entity_metadata_map(ir: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    out: dict[str, dict[str, Any]] = {}
+    raw = ir.get("entities", [])
+    if not isinstance(raw, list):
+        return out
+    for item in raw:
+        if not isinstance(item, dict):
+            continue
+        entity_id = str(item.get("id", "")).strip()
+        if entity_id:
+            out[entity_id] = item
     return out
 
 
@@ -442,6 +488,142 @@ def _clause(predicate: str, args: list[str]) -> str:
     return _ensure_period(f"{predicate}({', '.join(args)})")
 
 
+def _retract_command(clause: str) -> str:
+    target = str(clause or "").strip()
+    target = target[:-1] if target.endswith(".") else target
+    return _ensure_period(f"retract({target})")
+
+
+def _retract_clause_variants(predicate: str, args: list[str]) -> list[str]:
+    variants: list[list[str]] = [[]]
+    for arg in args:
+        choices = _term_aliases_for_retract(arg)
+        variants = [prefix + [choice] for prefix in variants for choice in choices]
+    clauses: list[str] = []
+    seen: set[str] = set()
+    for variant_args in variants[:8]:
+        clause = _clause(predicate, variant_args)
+        if clause not in seen:
+            seen.add(clause)
+            clauses.append(clause)
+    return clauses
+
+
+def _term_aliases_for_retract(term: str) -> list[str]:
+    raw = str(term or "").strip()
+    if not raw:
+        return ["unknown"]
+    aliases = [raw]
+    compact = re.sub(r"(?<=[a-zA-Z])_(?=\d)", "", raw)
+    compact = re.sub(r"(?<=\d)_(?=[a-zA-Z])", "", compact)
+    if compact and compact != raw:
+        aliases.append(compact)
+    split_number = re.sub(r"(?<=[a-zA-Z])(?=\d)", "_", compact)
+    if split_number and split_number not in aliases:
+        aliases.append(split_number)
+    return aliases
+
+
+def _is_negative_event_predicate(predicate: str) -> bool:
+    return predicate in {
+        "denied",
+        "denies",
+        "denial",
+        "refuted",
+        "disputed",
+        "rejected_claim",
+    }
+
+
+def _has_safe_direct_write(ir: dict[str, Any]) -> bool:
+    for op in _candidate_operations(ir):
+        if str(op.get("safety", "")).strip().lower() != "safe":
+            continue
+        if str(op.get("source", "")).strip().lower() != "direct":
+            continue
+        if str(op.get("operation", "")).strip().lower() in {"assert", "retract", "rule"}:
+            return True
+    return False
+
+
+def _has_safe_direct_retract(ir: dict[str, Any]) -> bool:
+    for op in _candidate_operations(ir):
+        if str(op.get("safety", "")).strip().lower() != "safe":
+            continue
+        if str(op.get("source", "")).strip().lower() != "direct":
+            continue
+        if str(op.get("operation", "")).strip().lower() == "retract":
+            return True
+    return False
+
+
+def _operation_targets_quantified_set(op: dict[str, Any], entity_meta: dict[str, dict[str, Any]]) -> bool:
+    raw_args = op.get("args", [])
+    if not isinstance(raw_args, list):
+        return False
+    for arg in raw_args:
+        entity_id = ""
+        if isinstance(arg, dict):
+            entity_id = str(arg.get("id") or arg.get("entity") or arg.get("value") or "").strip()
+        else:
+            entity_id = str(arg or "").strip()
+        meta = entity_meta.get(entity_id)
+        if not isinstance(meta, dict):
+            continue
+        surface = str(meta.get("surface") or "").strip().lower()
+        normalized = str(meta.get("normalized") or "").strip().lower()
+        if surface.startswith(("all ", "every ", "each ")):
+            return True
+        if normalized in {"all", "everyone", "everybody"}:
+            return True
+    return False
+
+
+def _is_pure_hypothetical_query(ir: dict[str, Any]) -> bool:
+    turn_type = str(ir.get("turn_type", "")).strip().lower()
+    if turn_type not in {"query", "unknown"} and _normalize_decision(ir.get("decision")) != "answer":
+        text = " ".join(
+            [
+                str(ir.get("decision", "")),
+                json.dumps(ir.get("self_check", {}), ensure_ascii=False),
+                json.dumps(ir.get("unsafe_implications", []), ensure_ascii=False),
+            ]
+        ).lower()
+        if "hypothetical" not in text and "counterfactual" not in text:
+            return False
+    ops = _candidate_operations(ir)
+    if not ops:
+        return False
+    safe_queries = [
+        op
+        for op in ops
+        if str(op.get("operation", "")).strip().lower() == "query"
+        and str(op.get("safety", "")).strip().lower() == "safe"
+    ]
+    if not safe_queries:
+        return False
+    unsafe_writes = [
+        op
+        for op in ops
+        if str(op.get("operation", "")).strip().lower() in {"assert", "retract", "rule"}
+        and str(op.get("source", "")).strip().lower() != "context"
+    ]
+    if unsafe_writes:
+        return False
+    text = flatten_semantic_text(ir)
+    return "hypothetical" in text or "counterfactual" in text or "if " in text or "would" in text
+
+
+def flatten_semantic_text(value: Any) -> str:
+    if isinstance(value, str):
+        return value.lower()
+    if isinstance(value, dict):
+        return " ".join(flatten_semantic_text(item) for item in value.values())
+    if isinstance(value, list):
+        return " ".join(flatten_semantic_text(item) for item in value)
+    return str(value).lower()
+
+
 def _ensure_period(clause: str) -> str:
     text = str(clause or "").strip()
     return text if text.endswith(".") else f"{text}."
@@ -482,11 +664,33 @@ def _bad_commit_risk(ir: dict[str, Any]) -> str:
     return risk if risk in {"low", "medium", "high"} else "medium"
 
 
-def _missing_slots(ir: dict[str, Any]) -> list[str]:
+OPTIONAL_METADATA_MISSING_SLOTS = {
+    "source_document_id",
+    "source_note_id",
+    "source_encounter_id",
+    "reason",
+    "reason_for_quarantine",
+    "quarantine_reason",
+    "authority",
+}
+
+
+def _raw_missing_slots(ir: dict[str, Any]) -> list[str]:
     self_check = ir.get("self_check", {})
     if not isinstance(self_check, dict):
         return []
     return _string_list(self_check.get("missing_slots", []))
+
+
+def _missing_slots(ir: dict[str, Any]) -> list[str]:
+    slots = _raw_missing_slots(ir)
+    if _has_safe_direct_write(ir):
+        return [
+            slot
+            for slot in slots
+            if slot.strip().lower() not in OPTIONAL_METADATA_MISSING_SLOTS
+        ]
+    return slots
 
 
 def _semantic_ir_ambiguities(ir: dict[str, Any]) -> list[str]:

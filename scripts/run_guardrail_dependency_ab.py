@@ -21,6 +21,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from scripts.run_semantic_ir_prompt_bakeoff import (  # noqa: E402
     EDGE_SCENARIO_IDS,
+    WEAK_EDGE_SCENARIO_IDS,
     WILD_SCENARIOS,
     _decision_matches,
     flatten_text,
@@ -368,7 +369,7 @@ def write_outputs(records: list[dict[str, Any]], jsonl_path: Path) -> None:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--scenario-group", choices=["edge_sample", "edge", "all"], default="edge_sample")
+    parser.add_argument("--scenario-group", choices=["edge_sample", "edge", "weak_edges", "all"], default="edge_sample")
     parser.add_argument("--scenario-ids", default="")
     parser.add_argument("--legacy-model", default="qwen35-semparse:9b")
     parser.add_argument("--semantic-model", default="qwen3.6:35b")
@@ -386,6 +387,8 @@ def main() -> int:
             scenario_ids = list(DEFAULT_EDGE_SAMPLE)
         elif args.scenario_group == "edge":
             scenario_ids = list(EDGE_SCENARIO_IDS)
+        elif args.scenario_group == "weak_edges":
+            scenario_ids = list(WEAK_EDGE_SCENARIO_IDS)
     by_id = {str(scenario.get("id", "")): scenario for scenario in WILD_SCENARIOS}
     scenarios = [by_id[item] for item in scenario_ids] if scenario_ids else list(WILD_SCENARIOS)
 

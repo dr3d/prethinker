@@ -659,6 +659,126 @@ WILD_SCENARIOS: list[dict[str, Any]] = [
             "avoid": ["covered_emergency_shift(felix)", "receives_hazard_pay(felix) as fact"],
         },
     },
+    {
+        "id": "weak_hypothetical_waiver_query",
+        "domain": "policy",
+        "utterance": "If the supervisor had waived Felix's exception, would Felix receive hazard pay?",
+        "context": ["Felix is normally excepted from hazard pay.", "A supervisor waiver overrides the exception."],
+        "allowed_predicates": ["waived_exception/2", "receives_hazard_pay/1", "exception_to/2"],
+        "expect": {
+            "decision": "answer",
+            "must": ["Felix", "hypothetical", "waived", "hazard pay"],
+            "avoid": ["waived_exception(felix", "receives_hazard_pay(felix) as fact"],
+        },
+    },
+    {
+        "id": "weak_hypothetical_transfer_query",
+        "domain": "legal_story",
+        "utterance": "Had Pavel certified the default before July, would Celia have been allowed to transfer Jonas's half?",
+        "context": ["Celia can transfer Jonas's half only if Pavel certifies default before July."],
+        "allowed_predicates": ["certified_before/3", "allowed_transfer/3", "transferred/3"],
+        "expect": {
+            "decision": "answer",
+            "must": ["Pavel", "hypothetical", "Celia", "transfer"],
+            "avoid": ["certified_before(pavel", "transferred(celia"],
+        },
+    },
+    {
+        "id": "weak_quantified_residents_except_kai",
+        "domain": "compliance",
+        "utterance": "All residents except Kai submitted forms; Kai submitted a waiver instead.",
+        "context": ["Known residents: Kai, Lena, Omar."],
+        "allowed_predicates": ["resident/1", "submitted_form/1", "submitted_waiver/1", "exception_to_requirement/2"],
+        "expect": {
+            "decision": "mixed",
+            "must": ["Kai", "waiver", "except", "residents"],
+            "avoid": ["submitted_form(kai", "submitted_form(lena"],
+        },
+    },
+    {
+        "id": "weak_quantified_box_expired_exception",
+        "domain": "compliance",
+        "utterance": "All flagged invoices require review unless exempt. Box8 is flagged, but its exemption expired yesterday.",
+        "context": [],
+        "allowed_predicates": ["flagged/1", "exempt/1", "expired_on/2", "requires_review/1"],
+        "expect": {
+            "decision": "mixed",
+            "must": ["Box8", "flagged", "exemption", "expired"],
+            "avoid": ["exempt(box8) as current", "requires_review(box8) as fact"],
+        },
+    },
+    {
+        "id": "weak_medical_negation_side_effect",
+        "domain": "medical",
+        "utterance": "Priya is not allergic to amoxicillin; list it as nausea, not allergy.",
+        "context": ["has_allergy(priya, amoxicillin)."],
+        "allowed_predicates": ["has_allergy/2", "side_effect/3", "has_symptom/2"],
+        "expect": {
+            "decision": "commit",
+            "must": ["Priya", "amoxicillin", "nausea", "not allergy"],
+            "avoid": ["has_allergy(priya, amoxicillin) as current"],
+        },
+    },
+    {
+        "id": "weak_medical_negation_intolerance",
+        "domain": "medical",
+        "utterance": "Remove Leo's penicillin allergy; the note says stomach upset only.",
+        "context": ["has_allergy(leo, penicillin)."],
+        "allowed_predicates": ["has_allergy/2", "side_effect/3", "has_symptom/2"],
+        "expect": {
+            "decision": "commit",
+            "must": ["Leo", "penicillin", "stomach upset", "remove"],
+            "avoid": ["has_allergy(leo, penicillin) as current"],
+        },
+    },
+    {
+        "id": "weak_denial_camera_observation",
+        "domain": "story_state",
+        "utterance": "Omar denied taking the key, but the camera showed him unlocking the cabinet with it later.",
+        "context": [],
+        "allowed_predicates": ["denied/3", "showed/3", "used_to_unlock/3", "took/2"],
+        "expect": {
+            "decision": "mixed",
+            "must": ["Omar", "denied", "camera", "unlocking"],
+            "avoid": ["took(omar, key) as fact", "not_took"],
+        },
+    },
+    {
+        "id": "weak_denial_reported_by_mara",
+        "domain": "story_state",
+        "utterance": "Mara reported that Omar denied signing the waiver.",
+        "context": [],
+        "allowed_predicates": ["reported/3", "denied/3", "signed/2"],
+        "expect": {
+            "decision": "commit",
+            "must": ["Mara", "Omar", "denied", "waiver"],
+            "avoid": ["signed(omar, waiver) false", "not_signed"],
+        },
+    },
+    {
+        "id": "weak_retraction_alias_crate12",
+        "domain": "inventory",
+        "utterance": "Crate 12 was cleared. Actually crate12 should be quarantined instead.",
+        "context": ["cleared(crate12)."],
+        "allowed_predicates": ["cleared/1", "quarantined/1"],
+        "expect": {
+            "decision": "commit",
+            "must": ["Crate 12", "crate12", "quarantined", "instead"],
+            "avoid": ["cleared(crate12) as current"],
+        },
+    },
+    {
+        "id": "weak_retraction_alias_bay_7",
+        "domain": "inventory",
+        "utterance": "Bay 7 is not closed anymore; bay7 reopened this morning.",
+        "context": ["closed(bay7)."],
+        "allowed_predicates": ["closed/1", "reopened_on/2"],
+        "expect": {
+            "decision": "commit",
+            "must": ["Bay 7", "bay7", "reopened", "morning"],
+            "avoid": ["closed(bay7) as current"],
+        },
+    },
 ]
 
 
@@ -683,6 +803,20 @@ EDGE_SCENARIO_IDS = [
     "edge_denial_not_negation",
     "edge_double_negation_lived_salem",
     "edge_hypothetical_hazard_pay_query",
+]
+
+
+WEAK_EDGE_SCENARIO_IDS = [
+    "weak_hypothetical_waiver_query",
+    "weak_hypothetical_transfer_query",
+    "weak_quantified_residents_except_kai",
+    "weak_quantified_box_expired_exception",
+    "weak_medical_negation_side_effect",
+    "weak_medical_negation_intolerance",
+    "weak_denial_camera_observation",
+    "weak_denial_reported_by_mara",
+    "weak_retraction_alias_crate12",
+    "weak_retraction_alias_bay_7",
 ]
 
 
@@ -804,7 +938,13 @@ PROMPT_VARIANTS: dict[str, dict[str, Any]] = {
             "- Do not turn a claim into a fact. 'Bob says he has it' is a claim, not possession.\n"
             "- Do not infer diagnosis or staging from a single lab value request. Quarantine or clarify.\n"
             "- Do not infer allergy from nausea/vomiting alone. Clarify allergy vs side effect/intolerance.\n"
+            "- If the user explicitly corrects a prior allergy record with 'not allergic' and provides a side-effect/intolerance explanation, propose retracting the allergy and recording the side effect; do not give medical advice.\n"
             "- A clear correction like 'not Mara, Fred has it' may propose retract/assert.\n"
+            "- Do not invent required governance slots that are not in the predicate schema. Source document, authority, or reason fields are optional provenance unless the allowed predicate explicitly requires them.\n"
+            "- A direct correction like 'remove X allergy; stomach upset only' is explicit enough to retract the allergy and record side effect/intolerance when the old allergy fact is in context.\n"
+            "- Do not assert a fact about a quantified group atom such as submitted_form(residents) for 'all residents except Kai'. Use individual known members only when context enumerates them; otherwise mark the class-level write unsafe.\n"
+            "- Pure hypothetical questions with 'if ... would ...?' are queries, not writes and not clarification requests when the hypothetical nature is clear.\n"
+            "- Denial predicates are speech/event facts. 'Omar denied signing the waiver' may assert denied(...); it must not assert signed(...) false.\n"
             "- If context supplies exactly one active patient and one active lab test, a direct 'it came back high' may propose a safe lab_result_high write.\n"
             "- For rule-plus-fact or fact-plus-query turns, use mixed and keep unsafe query targets out of committed facts.\n"
             "- Preserve negation in candidate_operations with polarity='negative'. Do not turn 'never saw X' into a positive saw/2 fact."
@@ -832,7 +972,13 @@ PROMPT_VARIANTS: dict[str, dict[str, Any]] = {
             "- Do not turn a claim into a fact. 'Bob says he has it' is a claim, not possession.\n"
             "- Do not infer diagnosis or staging from a single lab value request. Quarantine or clarify.\n"
             "- Do not infer allergy from nausea/vomiting alone. Clarify allergy vs side effect/intolerance unless the user explicitly corrects a prior allergy record.\n"
+            "- If the user explicitly corrects a prior allergy record with 'not allergic' and provides a side-effect/intolerance explanation, propose retracting the allergy and recording the side effect; do not give medical advice.\n"
             "- A clear correction like 'not Mara, Fred has it', 'that was wrong', or 'instead' may propose retract/assert.\n"
+            "- Do not invent required governance slots that are not in the predicate schema. Source document, authority, or reason fields are optional provenance unless the allowed predicate explicitly requires them.\n"
+            "- A direct correction like 'remove X allergy; stomach upset only' is explicit enough to retract the allergy and record side effect/intolerance when the old allergy fact is in context.\n"
+            "- Do not assert a fact about a quantified group atom such as submitted_form(residents) for 'all residents except Kai'. Use individual known members only when context enumerates them; otherwise mark the class-level write unsafe.\n"
+            "- Pure hypothetical questions with 'if ... would ...?' are queries, not writes and not clarification requests when the hypothetical nature is clear.\n"
+            "- Denial predicates are speech/event facts. 'Omar denied signing the waiver' may assert denied(...); it must not assert signed(...) false.\n"
             "- If context supplies exactly one active patient and one active lab test, a direct 'it came back high' may propose a safe lab_result_high write.\n"
             "- For rule-plus-fact or fact-plus-query turns, use mixed and keep unsafe query targets out of committed facts.\n"
             "- Preserve negation in candidate_operations with polarity='negative'. Do not turn 'never saw X' into a positive saw/2 fact.\n"
@@ -842,6 +988,8 @@ PROMPT_VARIANTS: dict[str, dict[str, Any]] = {
             "- Counterfactuals and hypotheticals are not writes. Represent them as query/unsafe implication/self_check notes.\n"
             "- Disjunctions like 'A or B caused it' do not prove either cause; record safe observations and quarantine cause assignment.\n"
             "- Do not copy context rules into candidate_operations unless the user is adding or changing the rule.\n"
+            "- Do not invent required governance slots that are not in the predicate schema. Source document, authority, or reason fields are optional provenance unless the allowed predicate explicitly requires them.\n"
+            "- Do not assert a fact about a quantified group atom such as submitted_form(residents) for 'all residents except Kai'. Use individual known members only when context enumerates them; otherwise mark the class-level write unsafe.\n"
             "- Preserve temporal scope: until, during, after, before, not yet, no longer, and from/to should not become timeless facts.\n"
             "- Preserve provenance: claimed, alleged, admitted, denied, observed, found, and reported are different relations."
         ),
@@ -868,10 +1016,13 @@ PROMPT_VARIANTS: dict[str, dict[str, Any]] = {
             "- A retract operation should use polarity='positive' when retracting a previously stored positive fact. Use polarity='negative' only for explicit negative facts.\n"
             "- Direct corrections with 'not X, Y instead', 'that was wrong', or 'don't call it normal' may propose safe retract/assert operations.\n"
             "- Direct 'not allergic; side effect/nausea instead' may propose retracting the allergy and asserting the side effect, while keeping clinical advice out.\n"
+            "- A direct correction like 'remove X allergy; stomach upset only' is explicit enough to retract the allergy and record side effect/intolerance when the old allergy fact is in context.\n"
             "- Denials are claim events, not negated facts. 'Omar denied signing' is denied(...), not not(signed(...)).\n"
             "- Counterfactuals and hypotheticals are not writes. Represent them as query/unsafe implication/self_check notes.\n"
             "- Disjunctions like 'A or B caused it' do not prove either cause; record safe observations and quarantine cause assignment.\n"
             "- Do not copy context rules into candidate_operations unless the user is adding or changing the rule.\n"
+            "- Do not invent required governance slots that are not in the predicate schema. Source document, authority, or reason fields are optional provenance unless the allowed predicate explicitly requires them.\n"
+            "- Do not assert a fact about a quantified group atom such as submitted_form(residents) for 'all residents except Kai'. Use individual known members only when context enumerates them; otherwise mark the class-level write unsafe.\n"
             "- Preserve temporal scope: until, during, after, before, not yet, no longer, and from/to should not become timeless facts.\n"
             "- Preserve provenance: claimed, alleged, admitted, denied, observed, found, and reported are different relations."
         ),
@@ -1079,7 +1230,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--model", default="qwen3.6:35b")
     parser.add_argument("--variants", default="strict_contract_v1,negative_examples_v1,nbest_selfcheck_v1,domain_profile_v1,best_guarded_v2")
     parser.add_argument("--scenario-ids", default="")
-    parser.add_argument("--scenario-group", choices=["all", "edge"], default="all")
+    parser.add_argument("--scenario-group", choices=["all", "edge", "weak_edges"], default="all")
     parser.add_argument("--base-url", default="http://127.0.0.1:11434")
     parser.add_argument("--out-dir", default=str(DEFAULT_OUT_DIR))
     parser.add_argument("--timeout", type=int, default=300)
@@ -1091,8 +1242,11 @@ def main() -> int:
     args = parse_args()
     variants = [item.strip() for item in args.variants.split(",") if item.strip()]
     scenario_ids = [item.strip() for item in str(args.scenario_ids or "").split(",") if item.strip()]
-    if not scenario_ids and args.scenario_group == "edge":
-        scenario_ids = list(EDGE_SCENARIO_IDS)
+    if not scenario_ids:
+        if args.scenario_group == "edge":
+            scenario_ids = list(EDGE_SCENARIO_IDS)
+        elif args.scenario_group == "weak_edges":
+            scenario_ids = list(WEAK_EDGE_SCENARIO_IDS)
     by_id = {scenario["id"]: scenario for scenario in WILD_SCENARIOS}
     scenarios = [by_id[item] for item in scenario_ids] if scenario_ids else list(WILD_SCENARIOS)
     out_dir = Path(args.out_dir)

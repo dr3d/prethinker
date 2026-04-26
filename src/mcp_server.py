@@ -1884,9 +1884,10 @@ class PrologMCPServer:
                     {"clause": clause, "prethink_id": prethink_id, "confirm": True},
                 )
                 operations.append({"tool": "retract_fact", "clause": clause, "result": result})
-                if str(result.get("status", "")).strip() == "success":
+                status = str(result.get("status", "")).strip()
+                if status == "success":
                     writes_applied += 1
-                else:
+                elif status not in {"no_results", "no_result"}:
                     errors.append(f"retract_fact failed for {clause}")
 
         elif intent == "query":

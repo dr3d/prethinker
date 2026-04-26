@@ -77,7 +77,34 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         parsed, warnings = semantic_ir_to_legacy_parse(ir)
         self.assertEqual(warnings, [])
         self.assertEqual(parsed["intent"], "retract")
+        self.assertEqual(parsed["logic_string"], "retract(owns(mara, silver_compass)).")
         self.assertEqual(parsed["correction_retract_clauses"], ["owns(mara, silver_compass)."])
+
+    def test_mapper_adds_retract_alias_for_numbered_entity(self) -> None:
+        ir = _ir(
+            candidate_operations=[
+                {
+                    "operation": "retract",
+                    "predicate": "cleared",
+                    "args": ["crate_12"],
+                    "polarity": "negative",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "assert",
+                    "predicate": "quarantined",
+                    "args": ["crate_12"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+            ]
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(ir)
+        self.assertEqual(warnings, [])
+        self.assertIn("cleared(crate_12).", parsed["correction_retract_clauses"])
+        self.assertIn("cleared(crate12).", parsed["correction_retract_clauses"])
 
     def test_mapper_correction_retract_assert_validates_with_assert_logic_string(self) -> None:
         ir = _ir(
@@ -107,6 +134,142 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         self.assertEqual(parsed["correction_retract_clauses"], ["owns(mara, silver_compass)."])
         ok, errors = _validate_parsed(parsed)
         self.assertTrue(ok, errors)
+
+    def test_mapper_allows_denial_event_with_negative_polarity(self) -> None:
+        ir = _ir(
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "denied",
+                    "args": ["Omar", "waiver", "signed"],
+                    "polarity": "negative",
+                    "source": "direct",
+                    "safety": "safe",
+                }
+            ]
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(ir)
+        self.assertEqual(warnings, [])
+        self.assertEqual(parsed["intent"], "assert_fact")
+        self.assertEqual(parsed["facts"], ["denied(omar, waiver, signed)."])
+
+    def test_mapper_skips_quantified_group_assertion_without_expansion(self) -> None:
+        ir = _ir(
+            entities=[
+                {
+                    "id": "e1",
+                    "surface": "All residents",
+                    "normalized": "residents",
+                    "type": "person",
+                    "confidence": 0.9,
+                },
+                {"id": "e2", "surface": "Kai", "normalized": "Kai", "type": "person", "confidence": 0.95},
+            ],
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "submitted_form",
+                    "args": ["e1"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "assert",
+                    "predicate": "submitted_waiver",
+                    "args": ["e2"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+            ],
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(ir)
+        self.assertEqual(parsed["facts"], ["submitted_waiver(kai)."])
+        self.assertTrue(any("quantified set assertion" in warning for warning in warnings))
+
+    def test_prethink_payload_treats_pure_hypothetical_as_query(self) -> None:
+        ir = _ir(
+            decision="clarify",
+            turn_type="query",
+            candidate_operations=[
+                {
+                    "operation": "query",
+                    "predicate": "receives_hazard_pay",
+                    "args": ["Felix"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                }
+            ],
+            clarification_questions=["Are you asking hypothetically?"],
+            self_check={
+                "bad_commit_risk": "high",
+                "missing_slots": [],
+                "notes": ["This is a hypothetical would-question."],
+            },
+        )
+        payload = semantic_ir_to_prethink_payload(ir)
+        self.assertEqual(payload["intent"], "query")
+        self.assertFalse(payload["needs_clarification"])
+
+    def test_prethink_payload_does_not_block_on_optional_provenance_slot(self) -> None:
+        ir = _ir(
+            decision="quarantine",
+            turn_type="correction",
+            candidate_operations=[
+                {
+                    "operation": "retract",
+                    "predicate": "cleared",
+                    "args": ["crate_12"],
+                    "polarity": "negative",
+                    "source": "direct",
+                    "safety": "safe",
+                }
+            ],
+            self_check={
+                "bad_commit_risk": "high",
+                "missing_slots": ["reason_for_quarantine"],
+                "notes": ["The correction itself is clear; the missing slot is metadata."],
+            },
+        )
+        payload = semantic_ir_to_prethink_payload(ir)
+        self.assertEqual(payload["intent"], "retract")
+        self.assertFalse(payload["needs_clarification"])
+        self.assertLess(payload["uncertainty_score"], 0.25)
+
+    def test_quarantined_correction_still_projects_safe_retract(self) -> None:
+        ir = _ir(
+            decision="quarantine",
+            turn_type="correction",
+            candidate_operations=[
+                {
+                    "operation": "retract",
+                    "predicate": "cleared",
+                    "args": ["crate_12"],
+                    "polarity": "negative",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "assert",
+                    "predicate": "quarantined",
+                    "args": ["crate_12"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "needs_clarification",
+                },
+            ],
+            self_check={
+                "bad_commit_risk": "high",
+                "missing_slots": [],
+                "notes": ["The replacement assertion is unsafe, but the old clear fact is a safe retraction."],
+            },
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(ir)
+        self.assertEqual(warnings, [])
+        self.assertEqual(parsed["intent"], "retract")
+        self.assertIn("retract(cleared(crate12)).", parsed["logic_string"])
 
     def test_prethink_payload_uses_clarify_for_missing_slot(self) -> None:
         ir = _ir(
@@ -143,6 +306,37 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         query = server.query_rows("owns(mara, X).")
         self.assertEqual(query["status"], "success")
         self.assertEqual(query["rows"], [{"X": "silver_compass"}])
+
+    def test_server_retract_alias_no_result_does_not_poison_success(self) -> None:
+        server = PrologMCPServer(
+            compiler_prompt_enabled=False,
+            semantic_ir_enabled=True,
+            semantic_ir_model="qwen3.6:35b",
+        )
+        server.assert_fact("cleared(crate12).")
+
+        def fake_compile_semantic_ir(utterance: str):
+            return _ir(
+                decision="quarantine",
+                turn_type="correction",
+                candidate_operations=[
+                    {
+                        "operation": "retract",
+                        "predicate": "cleared",
+                        "args": ["crate_12"],
+                        "polarity": "negative",
+                        "source": "direct",
+                        "safety": "safe",
+                    }
+                ],
+                self_check={"bad_commit_risk": "high", "missing_slots": [], "notes": []},
+            ), ""
+
+        server._compile_semantic_ir = fake_compile_semantic_ir  # type: ignore[method-assign]
+        result = server.process_utterance({"utterance": "Actually crate12 should be quarantined instead."})
+        self.assertEqual(result["status"], "success")
+        self.assertEqual(result["execution"]["writes_applied"], 1)
+        self.assertEqual(server.query_rows("cleared(crate12).")["status"], "no_results")
 
 
 if __name__ == "__main__":

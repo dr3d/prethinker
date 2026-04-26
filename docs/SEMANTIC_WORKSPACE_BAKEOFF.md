@@ -313,3 +313,16 @@ Python rescue dependency while improving final-state quality. It also found the
 next mapper weaknesses: hypothetical queries, quantified exception rules,
 medical negation, nested denial events, and entity normalization for retractions.
 See `docs/GUARDRAIL_DEPENDENCY_AB.md`.
+
+Follow-up weak-edge fix pass:
+
+| Runs | Legacy decision OK | Semantic decision OK | Legacy avg score | Semantic avg score | Legacy parse rescues | Semantic non-mapper rescues |
+|---:|---:|---:|---:|---:|---:|---:|
+| 10 | 3 | 7 | 0.650 | 0.900 | 5 | 0 |
+
+That pass added small regression batteries around hypothetical queries,
+medical negation/correction, denial events, quantified group writes, and
+surface-form alias retractions. The strongest signal is that the LLM now carries
+more semantic load while the mapper remains a structural gate: it skips unsafe
+candidate operations, avoids quantified class atoms, and applies only direct
+safe KB mutations.

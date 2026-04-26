@@ -26,6 +26,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural parsing pr
 - The opt-in semantic IR runtime path can route and commit safe direct assertions without running the legacy parse-side English rescue chain.
 - The first 20-case semantic IR edge battery shows `qwen3.6:35b` holding difficult provenance, temporal, exception, correction, and counterfactual distinctions with 20/20 JSON/schema and 17/20 decision labels under `best_guarded_v2`.
 - The first runtime guardrail A/B run shows semantic IR improving edge-battery score from 0.743 to 0.854 and reducing non-mapper parse rescues from 7 to 0 over 20 cases.
+- A 10-case weak-edge fix pass now improves semantic IR runtime score from the legacy 0.650 baseline to 0.900, with 7/10 decision labels, zero non-mapper parse rescues, safe hypothetical query routing, allergy retractions, denial event commits, quantified-set write skips, and alias-aware retractions.
 
 ## Local UMLS Assets
 
@@ -59,15 +60,16 @@ This is the next useful layer for type steering and explanation. It should suppo
 - Wire more Semantic Network explanations into the UI, especially type ancestry and relation paths.
 - Keep improving reset/session hygiene so first utterances after reset cannot inherit stale entity context.
 - Expand the medical profile only when the new predicate earns its place through tests and a clear demo.
-- Measure guardrail dependency directly: compare old pipeline rescue-hook use against semantic IR direct coverage on Glitch, Ledger, medical ambiguity, and temporal packs.
-- Fix the mapper weaknesses surfaced by A/B: hypothetical query handling, quantified exception rules, medical negation, nested denial events, and entity normalization for retractions.
+- Keep measuring guardrail dependency directly: compare old pipeline rescue-hook use against semantic IR direct coverage on Glitch, Ledger, medical ambiguity, and temporal packs.
+- Push the remaining mapper frontier: durable rule admission for quantified exception language, better decision-label calibration for safe partial commits, and cleaner nested event predicate shapes.
 
 ## Verification Snapshot
 
 Recent verified results:
 
-- Full suite: `218 passed`
-- Focused semantic IR/config/runtime hooks: `25 passed`
+- Full suite: `234 passed`
+- Focused semantic IR runtime battery: `13 passed`
+- Weak-edge runtime A/B: semantic IR `7/10` decision labels, `0.900` avg score, `0` non-mapper parse rescues
 - Python compile check for touched runtime files passed
 
 Rerun the full suite before committing a new stopping point.
