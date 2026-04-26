@@ -275,3 +275,32 @@ next frontier: the model still over-commits or over-clarifies when claims,
 ambiguous initials, London Ontario versus London UK, and two-witness amendment
 rules interact. That makes it useful as a future regression target once the
 semantic workspace and mapper policy are tightened for probate-style reasoning.
+
+## Silverton Incremental Consumption
+
+The incremental Silverton script tests a different consumption pattern:
+
+```text
+story so far + admitted mapper clauses + new focused utterance
+```
+
+Run:
+
+```text
+python scripts/run_silverton_incremental_semantic_ir.py --backend lmstudio --base-url http://127.0.0.1:1234 --model qwen/qwen3.6-35b-a3b --num-ctx 16384 --timeout 300
+```
+
+Initial local result:
+
+| Runs | Schema OK | Decision OK | Avg rough score | Avg latency ms | Max rough context tokens |
+|---:|---:|---:|---:|---:|---:|
+| 10 | 10 | 3 | 0.773 | 7173 | 600 |
+
+Local report file:
+
+- `tmp/silverton_incremental_semantic_ir/silverton_incremental_20260426T135629Z.md`
+
+This confirms that `16K` context is not the limiting factor for this scenario.
+The failure mode is semantic/policy calibration: the model sees enough story
+context, but still tends to over-use `mixed` where the desired frontier policy
+expects quarantine/reject/answer.
