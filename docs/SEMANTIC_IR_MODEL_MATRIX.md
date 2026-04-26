@@ -40,7 +40,7 @@ Noisy Silverton probate runs remain hard:
 
 | Model | Silverton Noisy Exact | Silverton Noisy Safe | Avg Score |
 | --- | ---: | ---: | ---: |
-| `qwen/qwen3.6-35b-a3b` | 3/8 | 6/8 | 0.760 |
+| `qwen/qwen3.6-35b-a3b` | 6/8 | 8/8 | 0.885 |
 | `google/gemma-4-26b-a4b` | 3/8 | not rescored | 0.750 |
 
 ## Read
@@ -68,12 +68,13 @@ has good behavior on the same architecture, but it is not automatically the
 winner on every local battery. The model matrix says we should keep the harness
 model-agnostic and avoid overfitting the prompt to one family.
 
-The noisy Silverton pack is a different story. Gemma and Qwen 35B both stalled
-around `3/8` exact policy labels. After splitting the score, the latest Qwen
-35B run shows `6/8` safe outcomes, `0.906` extraction average, and `1.000` KB
-safety average. That says the frontier is not mostly "dangerous model writes";
-it is policy calibration for mixed correction/query/claim turns, temporal
-representation, and when safe partial commits should still count as `mixed`.
+The noisy Silverton pack is a different story. Initial Qwen and Gemma runs
+stalled around `3/8` exact policy labels. After splitting the score and adding
+three structural mapper policies, the latest Qwen 35B run reaches `6/8` exact
+labels, `8/8` safe outcomes, `0.906` extraction average, and `1.000` KB safety
+average. That says the frontier is not mostly "dangerous model writes"; it is
+policy calibration around mixed correction/query/claim turns, temporal
+representation, and deterministic predicate-palette enforcement.
 
 ## Current Best Bets
 
@@ -117,6 +118,7 @@ Recent local artifacts:
 - `tmp/guardrail_dependency_ab/guardrail_dependency_ab_20260426T185356411787Z_silverton-noisy_google-gemma-4-26b-a4b_pid19856.jsonl`
 - `tmp/guardrail_dependency_ab/guardrail_dependency_ab_20260426T185825798091Z_silverton-noisy_qwen-qwen3-6-35b-a3b_pid46608.jsonl`
 - `tmp/guardrail_dependency_ab/guardrail_dependency_ab_20260426T191252669879Z_silverton-noisy_qwen-qwen3-6-35b-a3b_pid51032.jsonl`
+- `tmp/guardrail_dependency_ab/guardrail_dependency_ab_20260426T193927569057Z_silverton-noisy_qwen-qwen3-6-35b-a3b_pid47592.jsonl`
 
 ## Next Work
 

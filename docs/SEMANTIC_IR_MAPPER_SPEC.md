@@ -203,11 +203,36 @@ Pure hypothetical questions are projected to `answer` when:
 
 - the turn is a query or otherwise explicitly hypothetical/counterfactual;
 - a safe query operation exists;
-- no non-context write operation is present.
+- no non-context write operation is present, except identity premises that are
+  scoped to the query itself.
 
 The mapper may admit an `inferred` query target for a hypothetical question,
 because the whole point of the turn is to ask about a derived consequence. This
 exception does not apply to inferred writes.
+
+Identity premises such as `candidate_identity(silverton_a, alfred)` are not
+durable truth when they are embedded inside a question like "if A is Alfred,
+does Arthur lose?" The mapper skips those candidate identity writes and admits
+the query instead.
+
+## Claim-Only Policy
+
+A speech wrapper can be useful evidence, but it is not a free pass through the
+authority boundary. When the only safe direct writes are communication
+containers such as `claimed(...)` and the same IR also contains unsafe
+substantive implications, the mapper projects the turn to `quarantine` and
+blocks the write.
+
+That policy prevents a biased or legally loaded claim from becoming the only
+durable residue of a turn whose actual content is unsafe.
+
+## Alias Grounding Policy
+
+Initial-only person aliases are weak grounding for durable person-state facts.
+If a safe direct state write uses an entity like `A. Silverton`, the mapper may
+still admit the factual temporal/event clause, but it projects the decision to
+`mixed`. This keeps the KB traceable while preserving the unresolved identity
+pressure for follow-up policy.
 
 ## Minimal Temporal Vocabulary
 

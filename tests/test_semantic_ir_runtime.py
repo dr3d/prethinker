@@ -438,6 +438,118 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         self.assertEqual(parsed["intent"], "query")
         self.assertEqual(parsed["queries"], ["receives_hazard_pay(felix)."])
 
+    def test_mapper_skips_query_scoped_identity_premise(self) -> None:
+        ir = _ir(
+            decision="mixed",
+            turn_type="mixed",
+            entities=[
+                {"id": "e1", "surface": "Silverton A.", "normalized": "Silverton A.", "type": "person", "confidence": 0.9},
+                {"id": "e2", "surface": "Alfred", "normalized": "Alfred", "type": "person", "confidence": 0.9},
+                {"id": "e3", "surface": "Arthur", "normalized": "Arthur", "type": "person", "confidence": 0.9},
+            ],
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "candidate_identity",
+                    "args": ["e1", "e2"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "query",
+                    "predicate": "forfeited_share_to",
+                    "args": ["e3", "50"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+            ],
+            self_check={
+                "bad_commit_risk": "medium",
+                "missing_slots": [],
+                "notes": ["The utterance asks a conditional question about whether Arthur still loses."],
+            },
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(ir)
+        self.assertEqual(parsed["intent"], "query")
+        self.assertEqual(parsed["facts"], [])
+        self.assertEqual(parsed["queries"], ["forfeited_share_to(arthur, 50)."])
+        self.assertTrue(any("identity premise scoped to a query" in warning for warning in warnings))
+        diagnostics = parsed["admission_diagnostics"]
+        self.assertEqual(diagnostics["projected_decision"], "answer")
+        skipped = [row for row in diagnostics["operations"] if not row["admitted"]]
+        self.assertEqual(skipped[0]["skip_reason"], "query_scoped_identity_premise_not_admissible")
+
+    def test_initialed_person_state_write_projects_to_mixed(self) -> None:
+        ir = _ir(
+            decision="commit",
+            turn_type="correction",
+            entities=[
+                {"id": "e1", "surface": "A. Silverton", "normalized": "A. Silverton", "type": "person", "confidence": 0.95},
+                {"id": "e2", "surface": "Apr 2023", "normalized": "2023-04", "type": "time", "confidence": 0.95},
+            ],
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "returned_in",
+                    "args": ["e1", "e2"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                }
+            ],
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(ir)
+        self.assertEqual(warnings, [])
+        self.assertEqual(parsed["facts"], ["returned_in(a_silverton, 2023_04)."])
+        diagnostics = parsed["admission_diagnostics"]
+        self.assertEqual(diagnostics["projected_decision"], "mixed")
+        self.assertEqual(
+            diagnostics["projection_reason"],
+            "initialed_person_state_write_projected_to_mixed",
+        )
+
+    def test_only_claim_wrapper_with_unsafe_implication_projects_to_quarantine(self) -> None:
+        ir = _ir(
+            decision="mixed",
+            turn_type="mixed",
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "claimed",
+                    "args": ["Arthur", "Silas", "witness_reliability_issue"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                }
+            ],
+            unsafe_implications=[
+                {
+                    "candidate": "witness_reliability_issue(silas, discredited)",
+                    "why_unsafe": "The committed fact would turn a biased claim into a finding.",
+                    "commit_policy": "quarantine",
+                }
+            ],
+            self_check={"bad_commit_risk": "medium", "missing_slots": [], "notes": []},
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(ir)
+        self.assertEqual(warnings, [])
+        self.assertEqual(parsed["intent"], "other")
+        self.assertEqual(parsed["facts"], [])
+        diagnostics = parsed["admission_diagnostics"]
+        self.assertEqual(diagnostics["projected_decision"], "quarantine")
+        self.assertEqual(
+            diagnostics["projection_reason"],
+            "only_communication_writes_with_unsafe_implications_projected_to_quarantine",
+        )
+        self.assertTrue(
+            any(
+                row["skip_reason"] == "projected_decision_quarantine_blocks_write"
+                for row in diagnostics["operations"]
+            )
+        )
+
     def test_mapper_skips_context_sourced_asserts_as_existing_state(self) -> None:
         ir = _ir(
             candidate_operations=[

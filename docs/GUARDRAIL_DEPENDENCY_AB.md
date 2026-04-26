@@ -355,18 +355,18 @@ Latest local result:
 
 | Pack | Runs | Legacy exact OK | Semantic exact OK | Legacy safe OK | Semantic safe OK | Legacy avg score | Semantic avg score |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Silverton noisy temporal | 8 | 3 | 3 | 6 | 6 | 0.750 | 0.760 |
+| Silverton noisy temporal | 8 | 3 | 6 | 6 | 8 | 0.750 | 0.885 |
 
 Score dimensions:
 
 | Path | Extraction avg | KB safety avg | Operations | Admitted | Skipped |
 |---|---:|---:|---:|---:|---:|
 | Legacy | 0.875 | 1.000 | 0 | 0 | 0 |
-| Semantic IR | 0.906 | 1.000 | 9 | 8 | 1 |
+| Semantic IR | 0.906 | 1.000 | 7 | 6 | 1 |
 
 Local report file:
 
-- `tmp/guardrail_dependency_ab/guardrail_dependency_ab_20260426T191252669879Z_silverton-noisy_qwen-qwen3-6-35b-a3b_pid51032.md`
+- `tmp/guardrail_dependency_ab/guardrail_dependency_ab_20260426T193927569057Z_silverton-noisy_qwen-qwen3-6-35b-a3b_pid47592.md`
 
 Interpretation:
 
@@ -374,11 +374,16 @@ Interpretation:
   `Londn ONT` versus London UK, LHR/Heathrow dates, `solo nosotros dos`, Silas's
   ambiguous `im`, and the allergy/side-effect boundary all surfaced in the IR.
 - The new scoring split confirms that the weak point is administrative decision
-  projection, not unsafe KB mutation. Exact labels are only `3/8`, but safe
-  outcomes are `6/8` and final KB safety is `1.000`.
-- The remaining misses are instructive: safe temporal corrections, mixed
-  correction-plus-query turns, and claim storage need clearer admission policy
-  than a single `commit`/`mixed`/`answer` label can express.
+  projection, not unsafe KB mutation. Exact labels are now `6/8`, safe outcomes
+  are `8/8`, and final KB safety is `1.000`.
+- The improvement came from structural policy, not prompt tuning: query-scoped
+  identity premises no longer become facts, initial-only person aliases project
+  state corrections to `mixed`, and claim-only wrappers with unsafe substantive
+  implications project to `quarantine`.
+- The remaining misses are instructive: invalid verbal-amendment language still
+  needs deterministic predicate-palette enforcement, and one ambiguous Silas
+  witness turn remains a reasonable `clarify` where the pack expected
+  `quarantine`.
 - Temporal extraction is present but not yet temporal reasoning. The IR can hold
   2018-2024, April 2023 corrections, and relative-date anchors, but the runtime
   still needs a factual temporal representation before durable mutations can

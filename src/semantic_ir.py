@@ -224,6 +224,13 @@ UNGROUNDED_ARGUMENT_ATOMS = {
     "unknown_female",
 }
 
+IDENTITY_PREDICATES = {
+    "candidate_identity",
+    "same_person",
+    "identity",
+    "identified_as",
+}
+
 
 BEST_GUARDED_V2_SYSTEM = (
     "You are a semantic IR compiler for a governed symbolic memory system. "
@@ -708,6 +715,12 @@ def _diagnose_candidate_operation(
             warning="skipped quantified set assertion without individual expansion",
             codes=["quantifier_policy", "no_group_atom_commit"],
         )
+    if operation == "assert" and _is_query_scoped_identity_premise(ir, predicate):
+        return skip(
+            "query_scoped_identity_premise_not_admissible",
+            warning="skipped identity premise scoped to a query",
+            codes=["hypothetical_policy", "identity_premise_not_truth"],
+        )
     if polarity == "negative" and operation == "assert" and not _is_negative_event_predicate(predicate):
         return skip(
             "negative_fact_semantics_not_supported",
@@ -840,6 +853,10 @@ def _projection_reason(ir: dict[str, Any], model_decision: str, projected_decisi
         return "pure_hypothetical_query_projected_to_answer"
     if _ambiguous_content_should_clarify(ir):
         return "ambiguous_referents_with_only_speech_wrapper_projected_to_clarify"
+    if model_decision == "commit" and _has_initialed_person_state_write(ir):
+        return "initialed_person_state_write_projected_to_mixed"
+    if model_decision in {"commit", "mixed"} and _has_only_communication_writes_with_unsafe_implications(ir):
+        return "only_communication_writes_with_unsafe_implications_projected_to_quarantine"
     if model_decision == "commit" and _has_only_context_writes_with_unsafe_implications(ir):
         return "context_writes_with_unsafe_implications_projected_to_mixed"
     if model_decision == "commit" and _has_safe_direct_write(ir) and _has_projection_relevant_unsafe_implications(ir):
@@ -874,6 +891,10 @@ def _projected_decision(ir: dict[str, Any]) -> str:
         return "clarify"
     if _is_pure_hypothetical_query(ir):
         return "answer"
+    if decision == "commit" and _has_initialed_person_state_write(ir):
+        return "mixed"
+    if decision in {"commit", "mixed"} and _has_only_communication_writes_with_unsafe_implications(ir):
+        return "quarantine"
     if decision == "commit" and _has_only_context_writes_with_unsafe_implications(ir):
         return "mixed"
     if decision == "commit" and _has_safe_direct_write(ir) and _has_projection_relevant_unsafe_implications(ir):
@@ -1202,6 +1223,25 @@ def _ambiguous_content_should_clarify(ir: dict[str, Any]) -> bool:
     return all(predicate in COMMUNICATION_CONTAINER_PREDICATES for predicate in safe_write_predicates)
 
 
+def _has_only_communication_writes_with_unsafe_implications(ir: dict[str, Any]) -> bool:
+    if not _has_projection_relevant_unsafe_implications(ir):
+        return False
+    write_predicates: list[str] = []
+    for op in _candidate_operations(ir):
+        if str(op.get("safety", "")).strip().lower() != "safe":
+            continue
+        if str(op.get("source", "")).strip().lower() != "direct":
+            continue
+        if str(op.get("operation", "")).strip().lower() not in {"assert", "rule"}:
+            continue
+        predicate = _predicate_name(op.get("predicate"))
+        if predicate:
+            write_predicates.append(predicate)
+    if not write_predicates:
+        return False
+    return all(predicate in COMMUNICATION_CONTAINER_PREDICATES for predicate in write_predicates)
+
+
 def _has_safe_direct_retract(ir: dict[str, Any]) -> bool:
     for op in _candidate_operations(ir):
         if str(op.get("safety", "")).strip().lower() != "safe":
@@ -1235,6 +1275,67 @@ def _operation_targets_quantified_set(op: dict[str, Any], entity_meta: dict[str,
     return False
 
 
+def _has_safe_query(ir: dict[str, Any]) -> bool:
+    for op in _candidate_operations(ir):
+        if str(op.get("operation", "")).strip().lower() != "query":
+            continue
+        if str(op.get("safety", "")).strip().lower() == "safe":
+            return True
+    return False
+
+
+def _is_query_scoped_identity_premise(ir: dict[str, Any], predicate: str) -> bool:
+    if predicate not in IDENTITY_PREDICATES:
+        return False
+    if not _has_safe_query(ir):
+        return False
+    turn_type = str(ir.get("turn_type", "")).strip().lower()
+    text = flatten_semantic_text(ir)
+    if turn_type in {"query", "mixed"}:
+        return True
+    return any(marker in text for marker in ("hypothetical", "conditional question", " if ", "would"))
+
+
+def _has_initialed_person_state_write(ir: dict[str, Any]) -> bool:
+    entity_meta = _entity_metadata_map(ir)
+    for op in _candidate_operations(ir):
+        if str(op.get("safety", "")).strip().lower() != "safe":
+            continue
+        if str(op.get("source", "")).strip().lower() != "direct":
+            continue
+        if str(op.get("operation", "")).strip().lower() not in {"assert", "retract"}:
+            continue
+        predicate = _predicate_name(op.get("predicate"))
+        if not predicate or predicate in IDENTITY_PREDICATES:
+            continue
+        raw_args = op.get("args", [])
+        if not isinstance(raw_args, list):
+            continue
+        for arg in raw_args:
+            entity_id = ""
+            if isinstance(arg, dict):
+                entity_id = str(arg.get("id") or arg.get("entity") or arg.get("value") or "").strip()
+            else:
+                entity_id = str(arg or "").strip()
+            meta = entity_meta.get(entity_id)
+            if isinstance(meta, dict) and _is_initialed_person_entity(meta):
+                return True
+    return False
+
+
+def _is_initialed_person_entity(meta: dict[str, Any]) -> bool:
+    entity_type = str(meta.get("type") or "").strip().lower()
+    if entity_type and entity_type != "person":
+        return False
+    surface = str(meta.get("surface") or "").strip()
+    normalized = str(meta.get("normalized") or "").strip()
+    text = f"{surface} {normalized}"
+    if re.search(r"\b[A-Za-z]\.\s+[A-Za-z][A-Za-z'-]+\b", text):
+        return True
+    atomish = _atomize(normalized or surface)
+    return bool(re.fullmatch(r"[a-z]_[a-z][a-z0-9_]+", atomish))
+
+
 def _is_pure_hypothetical_query(ir: dict[str, Any]) -> bool:
     if _has_ambiguous_or_unresolved_referent(ir):
         return False
@@ -1247,7 +1348,11 @@ def _is_pure_hypothetical_query(ir: dict[str, Any]) -> bool:
                 json.dumps(ir.get("unsafe_implications", []), ensure_ascii=False),
             ]
         ).lower()
-        if "hypothetical" not in text and "counterfactual" not in text:
+        if (
+            "hypothetical" not in text
+            and "counterfactual" not in text
+            and "conditional question" not in text
+        ):
             return False
     ops = _candidate_operations(ir)
     if not ops:
@@ -1265,11 +1370,18 @@ def _is_pure_hypothetical_query(ir: dict[str, Any]) -> bool:
         for op in ops
         if str(op.get("operation", "")).strip().lower() in {"assert", "retract", "rule"}
         and str(op.get("source", "")).strip().lower() != "context"
+        and not _is_query_scoped_identity_premise(ir, _predicate_name(op.get("predicate")))
     ]
     if unsafe_writes:
         return False
     text = flatten_semantic_text(ir)
-    return "hypothetical" in text or "counterfactual" in text or "if " in text or "would" in text
+    return (
+        "hypothetical" in text
+        or "counterfactual" in text
+        or "conditional question" in text
+        or "if " in text
+        or "would" in text
+    )
 
 
 def _has_ambiguous_or_unresolved_referent(ir: dict[str, Any]) -> bool:
