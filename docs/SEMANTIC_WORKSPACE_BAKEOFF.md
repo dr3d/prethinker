@@ -326,3 +326,47 @@ surface-form alias retractions. The strongest signal is that the LLM now carries
 more semantic load while the mapper remains a structural gate: it skips unsafe
 candidate operations, avoids quantified class atoms, and applies only direct
 safe KB mutations.
+
+## LM Studio Structured Output
+
+LM Studio's OpenAI-compatible endpoint was tested as a `semantic_ir_v1` backend
+using `response_format: { "type": "json_schema" }`. This is deliberately
+different from the Ollama prompt-only JSON path: the JSON shape is enforced by
+the inference server instead of repeated in the prompt.
+
+Operational settings:
+
+- backend: LM Studio at `http://127.0.0.1:1234/v1`
+- model: `qwen/qwen3.6-35b-a3b`
+- `reasoning_effort`: `none`
+- prompt schema duplication: off
+- structured schema: `semantic_ir_v1` via `response_format`
+
+The `reasoning_effort` setting matters. Without `"none"`, Qwen may put the
+structured JSON in `reasoning_content` while leaving normal `content` empty.
+With `"none"`, all tested outputs landed in `content`.
+
+Full 56-case clean run:
+
+| Backend | Prompt schema duplicated | JSON OK | Schema OK | Decision OK | Avg rough score | Avg latency |
+|---|---:|---:|---:|---:|---:|---:|
+| LM Studio structured | no | 56/56 | 56/56 | 43/56 | 0.899 | 6.1s |
+
+Subset read:
+
+| Subset | JSON OK | Schema OK | Decision OK | Avg rough score |
+|---|---:|---:|---:|---:|
+| all | 56/56 | 56/56 | 43/56 | 0.899 |
+| edge | 20/20 | 20/20 | 15/20 | 0.882 |
+| weak edges | 10/10 | 10/10 | 5/10 | 0.831 |
+
+For comparison only, a double-schema run with the schema both in the prompt and
+in `response_format` scored higher on this pack: 44/56 decision OK and 0.917
+average rough score. That is not the preferred operating mode because it repeats
+the contract in two places and risks the same prompt-drift problems this lane is
+trying to remove.
+
+Read: structured output clearly improves the mechanical part of the problem.
+It removes wrapper-key, malformed-JSON, and missing-field failure modes. It does
+not solve semantic policy by itself; decision-label calibration and unsafe
+commit judgment remain prompt/model/gate work.

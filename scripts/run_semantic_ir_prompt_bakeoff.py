@@ -851,6 +851,133 @@ SCHEMA_CONTRACT = {
 }
 
 
+SEMANTIC_IR_JSON_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": [
+        "schema_version",
+        "decision",
+        "turn_type",
+        "entities",
+        "referents",
+        "assertions",
+        "unsafe_implications",
+        "candidate_operations",
+        "clarification_questions",
+        "self_check",
+    ],
+    "properties": {
+        "schema_version": {"type": "string", "const": "semantic_ir_v1"},
+        "decision": {
+            "type": "string",
+            "enum": ["commit", "clarify", "quarantine", "reject", "answer", "mixed"],
+        },
+        "turn_type": {
+            "type": "string",
+            "enum": ["state_update", "query", "correction", "rule_update", "mixed", "unknown"],
+        },
+        "entities": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["id", "surface", "normalized", "type", "confidence"],
+                "properties": {
+                    "id": {"type": "string"},
+                    "surface": {"type": "string"},
+                    "normalized": {"type": "string"},
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "person",
+                            "object",
+                            "medication",
+                            "lab_test",
+                            "condition",
+                            "symptom",
+                            "place",
+                            "time",
+                            "unknown",
+                        ],
+                    },
+                    "confidence": {"type": "number"},
+                },
+            },
+        },
+        "referents": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["surface", "status", "candidates", "chosen"],
+                "properties": {
+                    "surface": {"type": "string"},
+                    "status": {"type": "string", "enum": ["resolved", "ambiguous", "unresolved"]},
+                    "candidates": {"type": "array", "items": {"type": "string"}},
+                    "chosen": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+                },
+            },
+        },
+        "assertions": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["kind", "subject", "relation_concept", "object", "polarity", "certainty"],
+                "properties": {
+                    "kind": {"type": "string", "enum": ["direct", "question", "claim", "correction", "rule"]},
+                    "subject": {"type": "string"},
+                    "relation_concept": {"type": "string"},
+                    "object": {"type": "string"},
+                    "polarity": {"type": "string", "enum": ["positive", "negative"]},
+                    "certainty": {"type": "number"},
+                },
+            },
+        },
+        "unsafe_implications": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["candidate", "why_unsafe", "commit_policy"],
+                "properties": {
+                    "candidate": {"type": "string"},
+                    "why_unsafe": {"type": "string"},
+                    "commit_policy": {"type": "string", "enum": ["clarify", "quarantine", "reject"]},
+                },
+            },
+        },
+        "candidate_operations": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["operation", "predicate", "args", "polarity", "source", "safety"],
+                "properties": {
+                    "operation": {"type": "string", "enum": ["assert", "retract", "rule", "query", "none"]},
+                    "predicate": {"type": "string"},
+                    "args": {"type": "array", "items": {"type": "string"}},
+                    "polarity": {"type": "string", "enum": ["positive", "negative"]},
+                    "source": {"type": "string", "enum": ["direct", "inferred", "context"]},
+                    "safety": {"type": "string", "enum": ["safe", "unsafe", "needs_clarification"]},
+                },
+            },
+        },
+        "clarification_questions": {"type": "array", "items": {"type": "string"}},
+        "self_check": {
+            "type": "object",
+            "additionalProperties": False,
+            "required": ["bad_commit_risk", "missing_slots", "notes"],
+            "properties": {
+                "bad_commit_risk": {"type": "string", "enum": ["low", "medium", "high"]},
+                "missing_slots": {"type": "array", "items": {"type": "string"}},
+                "notes": {"type": "array", "items": {"type": "string"}},
+            },
+        },
+    },
+}
+
+
 PROMPT_VARIANTS: dict[str, dict[str, Any]] = {
     "strict_contract_v1": {
         "temperature": 0.0,
@@ -1038,14 +1165,19 @@ def _json_dumps(data: Any) -> str:
     return json.dumps(data, ensure_ascii=False, indent=2)
 
 
-def build_messages(*, variant: str, scenario: dict[str, Any]) -> list[dict[str, str]]:
+def build_messages(
+    *,
+    variant: str,
+    scenario: dict[str, Any],
+    include_schema_in_prompt: bool = True,
+) -> list[dict[str, str]]:
     prompt = PROMPT_VARIANTS[variant]
     payload = {
-        "required_top_level_json_shape": SCHEMA_CONTRACT,
         "task": "Analyze the utterance and emit semantic_ir_v1 JSON only.",
         "output_instruction": (
-            "Return exactly one JSON object using required_top_level_json_shape as the root shape. "
-            "Do not copy the key name required_top_level_json_shape into your response."
+            "Return exactly one JSON object conforming to semantic_ir_v1. "
+            "Do not include prose or wrapper keys. Keep arrays compact: include only essential entities, "
+            "assertions, unsafe implications, and candidate operations, and do not repeat equivalent items."
         ),
         "domain": scenario["domain"],
         "utterance": scenario["utterance"],
@@ -1054,6 +1186,12 @@ def build_messages(*, variant: str, scenario: dict[str, Any]) -> list[dict[str, 
         "authority_boundary": "The runtime validates and commits; you only propose semantic structure.",
         "variant_guidance": prompt["extra"],
     }
+    if include_schema_in_prompt:
+        payload["required_top_level_json_shape"] = SCHEMA_CONTRACT
+        payload["output_instruction"] = (
+            "Return exactly one JSON object using required_top_level_json_shape as the root shape. "
+            "Do not copy the key name required_top_level_json_shape into your response."
+        )
     return [
         {"role": "system", "content": str(prompt["system"])},
         {"role": "user", "content": "INPUT_JSON:\n" + _json_dumps(payload)},
@@ -1101,6 +1239,60 @@ def call_ollama(
         "latency_ms": int((time.perf_counter() - started) * 1000),
         "raw": raw,
         "content": str(message.get("content", "")).strip(),
+    }
+
+
+def call_lmstudio(
+    *,
+    base_url: str,
+    model: str,
+    messages: list[dict[str, str]],
+    options: dict[str, Any],
+    timeout: int,
+    reasoning_effort: str,
+    max_tokens: int,
+) -> dict[str, Any]:
+    payload: dict[str, Any] = {
+        "model": model,
+        "messages": messages,
+        "temperature": float(options.get("temperature", 0.0)),
+        "top_p": float(options.get("top_p", 0.9)),
+        "max_tokens": int(max_tokens),
+        "response_format": {
+            "type": "json_schema",
+            "json_schema": {
+                "name": "semantic_ir_v1",
+                "strict": True,
+                "schema": SEMANTIC_IR_JSON_SCHEMA,
+            },
+        },
+    }
+    if reasoning_effort:
+        payload["reasoning_effort"] = reasoning_effort
+    req = urllib.request.Request(
+        f"{base_url.rstrip('/')}/v1/chat/completions",
+        data=json.dumps(payload).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    started = time.perf_counter()
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as response:
+            raw = json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as exc:
+        body = exc.read().decode("utf-8", errors="replace")
+        raise RuntimeError(f"HTTP {exc.code}: {body}") from exc
+    except urllib.error.URLError as exc:
+        raise RuntimeError(str(exc)) from exc
+    choices = raw.get("choices", []) if isinstance(raw, dict) else []
+    message = choices[0].get("message", {}) if choices and isinstance(choices[0], dict) else {}
+    content = str(message.get("content", "") if isinstance(message, dict) else "").strip()
+    reasoning_content = str(message.get("reasoning_content", "") if isinstance(message, dict) else "").strip()
+    return {
+        "latency_ms": int((time.perf_counter() - started) * 1000),
+        "raw": raw,
+        "content": content or reasoning_content,
+        "content_channel": "content" if content else ("reasoning_content" if reasoning_content else ""),
     }
 
 
@@ -1227,19 +1419,31 @@ def write_summary(records: list[dict[str, Any]], path: Path) -> None:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model", default="qwen3.6:35b")
+    parser.add_argument("--backend", choices=["ollama", "lmstudio"], default="ollama")
+    parser.add_argument("--model", default="")
     parser.add_argument("--variants", default="strict_contract_v1,negative_examples_v1,nbest_selfcheck_v1,domain_profile_v1,best_guarded_v2")
     parser.add_argument("--scenario-ids", default="")
     parser.add_argument("--scenario-group", choices=["all", "edge", "weak_edges"], default="all")
-    parser.add_argument("--base-url", default="http://127.0.0.1:11434")
+    parser.add_argument("--base-url", default="")
     parser.add_argument("--out-dir", default=str(DEFAULT_OUT_DIR))
     parser.add_argument("--timeout", type=int, default=300)
     parser.add_argument("--num-ctx", type=int, default=16384)
+    parser.add_argument("--reasoning-effort", default="none")
+    parser.add_argument("--max-tokens", type=int, default=4096)
+    parser.add_argument("--omit-schema-in-prompt", action="store_true")
+    parser.add_argument("--include-schema-in-prompt", action="store_true")
     return parser.parse_args()
 
 
 def main() -> int:
     args = parse_args()
+    backend = str(args.backend or "ollama").strip().lower()
+    model = str(args.model or "").strip()
+    if not model:
+        model = "qwen/qwen3.6-35b-a3b" if backend == "lmstudio" else "qwen3.6:35b"
+    base_url = str(args.base_url or "").strip()
+    if not base_url:
+        base_url = "http://127.0.0.1:1234" if backend == "lmstudio" else "http://127.0.0.1:11434"
     variants = [item.strip() for item in args.variants.split(",") if item.strip()]
     scenario_ids = [item.strip() for item in str(args.scenario_ids or "").split(",") if item.strip()]
     if not scenario_ids:
@@ -1262,28 +1466,50 @@ def main() -> int:
         for scenario in scenarios:
             options = dict(PROMPT_VARIANTS[variant])
             options["num_ctx"] = int(args.num_ctx)
+            include_schema_in_prompt = bool(args.include_schema_in_prompt)
+            if backend != "lmstudio":
+                include_schema_in_prompt = not bool(args.omit_schema_in_prompt)
             record = {
                 "ts": _utc_now(),
-                "model": args.model,
+                "backend": backend,
+                "model": model,
                 "variant": variant,
                 "scenario_id": scenario["id"],
                 "domain": scenario["domain"],
                 "options": {k: v for k, v in options.items() if k not in {"system", "extra"}},
+                "prompt_schema_included": include_schema_in_prompt,
             }
-            print(f"[{_utc_now()}] {args.model} {variant} {scenario['id']}", flush=True)
+            print(f"[{_utc_now()}] {backend} {model} {variant} {scenario['id']}", flush=True)
             try:
-                response = call_ollama(
-                    base_url=args.base_url,
-                    model=args.model,
-                    messages=build_messages(variant=variant, scenario=scenario),
-                    options=options,
-                    timeout=int(args.timeout),
+                messages = build_messages(
+                    variant=variant,
+                    scenario=scenario,
+                    include_schema_in_prompt=include_schema_in_prompt,
                 )
+                if backend == "lmstudio":
+                    response = call_lmstudio(
+                        base_url=base_url,
+                        model=model,
+                        messages=messages,
+                        options=options,
+                        timeout=int(args.timeout),
+                        reasoning_effort=str(args.reasoning_effort or ""),
+                        max_tokens=int(args.max_tokens),
+                    )
+                else:
+                    response = call_ollama(
+                        base_url=base_url,
+                        model=model,
+                        messages=messages,
+                        options=options,
+                        timeout=int(args.timeout),
+                    )
                 parsed, parse_error = parse_json_payload(response["content"])
                 record.update(
                     {
                         "latency_ms": response["latency_ms"],
                         "content": response["content"],
+                        "content_channel": response.get("content_channel", "content"),
                         "parsed": parsed,
                         "parsed_ok": parsed is not None,
                         "parse_error": parse_error,
