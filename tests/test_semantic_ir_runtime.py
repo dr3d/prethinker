@@ -245,6 +245,31 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         self.assertEqual(parsed["intent"], "query")
         self.assertEqual(parsed["queries"], ["receives_hazard_pay(felix)."])
 
+    def test_mapper_skips_context_sourced_asserts_as_existing_state(self) -> None:
+        ir = _ir(
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "owns",
+                    "args": ["Mara", "silver compass"],
+                    "polarity": "positive",
+                    "source": "context",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "assert",
+                    "predicate": "located_in",
+                    "args": ["silver compass", "locker"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+            ]
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(ir)
+        self.assertEqual(parsed["facts"], ["located_in(silver_compass, locker)."])
+        self.assertTrue(any("context-sourced write" in warning for warning in warnings))
+
     def test_prethink_payload_does_not_block_on_optional_provenance_slot(self) -> None:
         ir = _ir(
             decision="quarantine",

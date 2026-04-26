@@ -234,6 +234,11 @@ unsafe-implication cleanup, and claim/direct-observation decision projection.
 Those rules do not parse English phrases. They enforce the semantic workspace
 contract after the model has done the language understanding.
 
+The mapper contract is now tracked in
+`docs/SEMANTIC_IR_MAPPER_SPEC.md`. That spec is the reference for deciding
+whether new Python belongs in the structural mapper or is drifting back into
+language rescue.
+
 ## Immediate Next Steps
 
 1. Add structured guardrail event labels:

@@ -471,6 +471,9 @@ def semantic_ir_to_legacy_parse(ir: dict[str, Any]) -> tuple[dict[str, Any], lis
         if source == "inferred" and not (operation == "query" and _is_pure_hypothetical_query(ir)):
             warnings.append("skipped inferred safe operation pending policy")
             continue
+        if source == "context" and operation in {"assert", "rule"}:
+            warnings.append("skipped context-sourced write operation")
+            continue
         predicate = _predicate_name(op.get("predicate"))
         if not predicate:
             continue

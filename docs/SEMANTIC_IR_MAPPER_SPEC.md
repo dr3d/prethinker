@@ -1,0 +1,257 @@
+# Semantic IR Mapper Specification
+
+Last updated: 2026-04-26
+
+## Purpose
+
+The mapper is the deterministic contract between `semantic_ir_v1` and durable
+runtime behavior.
+
+The LLM may propose a semantic workspace. The mapper decides what that proposal
+means operationally:
+
+```text
+semantic_ir_v1 proposal
+  -> projected decision
+  -> admissible operations
+  -> legacy parse/runtime packet
+  -> KB mutation, query, clarification, quarantine, or rejection
+```
+
+This document exists to keep the mapper from becoming a new hidden patch pile.
+Every mapper rule should answer:
+
+```text
+What IR shape does this handle?
+Why does this guardrail exist?
+Is it structural policy, or is it secretly language-specific?
+What runtime behavior is guaranteed?
+```
+
+The mapper should contain structural guardrails. It should not learn English
+phrases one special case at a time.
+
+## Authority Boundary
+
+`semantic_ir_v1` is not truth. It is a proposal.
+
+The runtime may commit only after:
+
+- the IR shape is valid enough to parse;
+- a projected decision is derived;
+- candidate operations pass mapper policy;
+- predicate names and terms can be normalized into executable clauses;
+- downstream registry/type/runtime gates accept the operation.
+
+The LLM is allowed to be ambitious in interpretation. The mapper is required to
+be conservative in admission.
+
+## Mapper Inputs
+
+| IR field | Mapper use | Notes |
+| --- | --- | --- |
+| `decision` | Initial decision, then projected by structural policy | The model label is advisory, not final. |
+| `turn_type` | Helps identify queries, corrections, rules, and mixed turns | Used especially for hypothetical queries and correction projection. |
+| `entities` | Maps entity IDs to normalized terms | If an operation arg references `e1`, mapper resolves it through `entities`. |
+| `referents` | Exposes unresolved or ambiguous references | Ambiguous/unresolved referents become clarification ambiguities. |
+| `assertions` | High-level semantic evidence | Used for projection such as claim plus direct observation -> `mixed`. |
+| `unsafe_implications` | Things the model considered but should not commit | Non-duplicate unsafe implications can project `commit` to `mixed`. |
+| `candidate_operations` | Only field that may produce clauses | Candidate operations still pass source/safety/polarity policy. |
+| `clarification_questions` | User-facing question source for `clarify` | First question is used when clarification is required. |
+| `self_check.missing_slots` | Clarification or quarantine signal | Optional provenance slots are ignored when a safe direct write exists. |
+| `self_check.bad_commit_risk` | Confidence/uncertainty shaping | Does not by itself authorize or block writes. |
+
+## Decision Projection
+
+The mapper projects the model's top-level `decision` before creating runtime
+behavior.
+
+| IR shape | Projected decision | Why |
+| --- | --- | --- |
+| Pure hypothetical query with a safe query operation | `answer` | Hypothetical questions should be answered as queries and must not write premise/conclusion facts. |
+| `commit` plus safe direct write plus non-duplicate unsafe implications | `mixed` | Some direct facts may be safe while other implications must remain uncommitted. |
+| `commit` plus both claim and direct assertions | `mixed` | Claims and observations can coexist without collapsing claim content into fact. |
+| `quarantine` with only optional metadata slots missing and a safe direct write | `mixed` | Missing provenance/authority text should not block a clear safe operation. |
+| `quarantine` correction with safe direct retract | `mixed` | A safe retraction may be admissible even if replacement assertions are unsafe. |
+| `clarify` with missing essential slots | `clarify` | Missing patient/entity/measurement/referent blocks safe admission. |
+| `reject` | `reject` | Explicit policy rejection remains authoritative. |
+
+Projection is structural policy. It is not a phrase rewrite.
+
+## Operation Admission
+
+Only `candidate_operations` may become executable clauses.
+
+| Operation condition | Mapper behavior | Why |
+| --- | --- | --- |
+| `safety != safe` | Skip operation | The model itself marked the operation unsafe or incomplete. |
+| `source=inferred` write | Skip operation | Plausible inference is not durable truth. |
+| `source=inferred` query in a pure hypothetical query | Admit query | Hypothetical answers often require a derived query target, but still do not write. |
+| `source=context` assert/rule | Skip operation | Context is already-known state/rules; it must not be re-written as a new user assertion. |
+| `source=context` retract | Admit if otherwise safe | Corrections often retract stale context facts. |
+| `operation=assert`, positive polarity | Admit if predicate/args normalize | Direct safe facts become facts. |
+| `operation=assert`, negative polarity, non-event predicate | Skip operation | The runtime does not yet have a general negative-fact semantics. |
+| `operation=assert`, negative polarity, denial/speech event predicate | Admit | `denied(...)` records a speech/event fact, not logical negation. |
+| `operation=retract` | Emit retract variants | Numbered aliases like `crate12`/`crate_12` are structural term normalization. |
+| `operation=rule` without explicit rule clause | Skip operation | The mapper does not synthesize durable Prolog rules from prose. |
+| Quantified group assertion without individual expansion | Skip operation | Prevents fake facts like `submitted_form(residents)`. |
+
+## Polarity Policy
+
+`polarity=negative` does not mean "assert a negative Prolog fact."
+
+Current policy:
+
+- negative retracts are allowed;
+- negative speech/event assertions are allowed for predicates like `denied/3`;
+- general negative assertions are skipped until the runtime has explicit
+  negation semantics;
+- skipped negative assertions produce mapper warnings.
+
+This avoids turning:
+
+```text
+Omar denied taking the key.
+```
+
+into:
+
+```prolog
+not_took(omar, key).
+```
+
+or any equivalent hard negative fact.
+
+## Source Policy
+
+`source` is a trust signal.
+
+| Source | Meaning | Write behavior |
+| --- | --- | --- |
+| `direct` | Grounded in the current utterance | May write if safe. |
+| `context` | Already present in KB/recent context | May support retractions; assert/rule writes are skipped. |
+| `inferred` | Derived by model reasoning | Writes are skipped; pure-hypothetical queries may be admitted. |
+
+This is one of the central anti-patch rules. It does not care what language the
+utterance was written in; it cares how the IR grounds the operation.
+
+## Unsafe Implications
+
+`unsafe_implications` records tempting candidates that should not become durable
+state.
+
+The mapper uses unsafe implications to project `commit` to `mixed` when safe
+operations coexist with unsafe material. One exception exists:
+
+- if an unsafe implication duplicates an operation that the final
+  `candidate_operations` marks safe, the mapper treats it as stale model
+  bookkeeping and does not downgrade the decision.
+
+This handles structured-output self-contradictions without adding English
+phrase patches.
+
+## Clarification Policy
+
+Clarification is required when essential slots are missing:
+
+- patient/entity identity;
+- unresolved referent;
+- measurement direction or lab target;
+- correction target;
+- required predicate argument.
+
+Optional provenance slots do not block a safe direct write:
+
+- `source_document_id`
+- `source_note_id`
+- `source_encounter_id`
+- `reason`
+- `reason_for_quarantine`
+- `quarantine_reason`
+- `authority`
+
+Those slots are useful metadata, not semantic prerequisites unless a predicate
+schema explicitly requires them.
+
+## Query Policy
+
+Queries do not mutate the KB.
+
+Pure hypothetical questions are projected to `answer` when:
+
+- the turn is a query or otherwise explicitly hypothetical/counterfactual;
+- a safe query operation exists;
+- no non-context write operation is present.
+
+The mapper may admit an `inferred` query target for a hypothetical question,
+because the whole point of the turn is to ask about a derived consequence. This
+exception does not apply to inferred writes.
+
+## Trace Obligations
+
+Every structural intervention should be visible in traces or warnings.
+
+Current trace class:
+
+- `structural_mapper`
+
+Examples:
+
+- `semantic_ir_mapper`
+- `semantic_ir_prethink_projection`
+- skipped inferred write
+- skipped context-sourced assert/rule
+- skipped negative assertion
+- skipped quantified group assertion
+- duplicate unsafe implication ignored by projection
+
+The A/B harness additionally classifies non-structural legacy events as:
+
+- `legacy_route_fallback`
+- `semantic_rescue_english`
+- `domain_medical`
+- `clarification_policy`
+- `authority_admission`
+
+The deletion-pressure metric is:
+
+```text
+semantic_rescue_english_count == 0
+```
+
+while scores and final KB state hold.
+
+## Non-Goals
+
+The mapper should not:
+
+- repair English phrases;
+- infer domain meaning from raw utterance text;
+- synthesize facts from prose outside `candidate_operations`;
+- synthesize durable Prolog rules without an explicit rule clause;
+- turn claims into facts;
+- create a general negative-fact system until the runtime supports one;
+- treat structured JSON validity as semantic safety.
+
+## Conformance Batteries
+
+The mapper contract should be guarded by small no-GPU unit tests.
+
+Required cases:
+
+- safe direct assertion maps to a fact;
+- unsafe candidate operation is skipped;
+- inferred write is skipped;
+- inferred hypothetical query is admitted;
+- context-sourced assert/rule is skipped;
+- context/direct retract is admitted;
+- negative non-event assertion is skipped;
+- denial event assertion is admitted;
+- quantified group atom is skipped;
+- duplicate unsafe implication does not downgrade an admitted safe operation;
+- claim plus direct observation projects to `mixed`;
+- optional provenance slots do not block safe correction;
+- unresolved referents project to clarification.
+
+Live model batteries then test whether the LLM can produce good IR. Unit tests
+test whether the deterministic mapper keeps its promises.

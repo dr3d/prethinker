@@ -194,3 +194,6 @@ These are not phrase patches. They are mostly admission/projection rules around
 the semantic workspace contract, which is the direction we want: less Python
 interpreting English, more Python enforcing the boundary and cleaning
 self-contradictory IR bookkeeping.
+
+The mapper contract for those structural rules is documented in
+`docs/SEMANTIC_IR_MAPPER_SPEC.md`.
