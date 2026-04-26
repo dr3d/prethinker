@@ -40,6 +40,9 @@ The runner records:
 
 For live runtime fairness, the runner preloads Prolog-looking context facts and
 injects each scenario's allowed predicate signatures into the runtime registry.
+The rule/mutation pass also extracts embedded context clauses such as
+`Existing fact: lives_in(mara, denver).` and `Existing rule: ...` so stored-logic
+conflict tests exercise actual runtime state, not only prompt text.
 This is still a research probe, not an external benchmark.
 
 ## Full Edge Result
@@ -198,6 +201,34 @@ self-contradictory IR bookkeeping.
 
 The mapper contract for those structural rules is documented in
 `docs/SEMANTIC_IR_MAPPER_SPEC.md`.
+
+## Rule/Mutation Conflict Pass
+
+Run:
+
+```text
+python scripts/run_guardrail_dependency_ab.py --backend lmstudio --base-url http://127.0.0.1:1234 --legacy-model qwen/qwen3.5-9b --semantic-model qwen/qwen3.6-35b-a3b --scenario-group rule_mutation --timeout 300
+```
+
+Latest local evidence:
+
+| Runs | Legacy decision OK | Semantic decision OK | Legacy avg score | Semantic avg score | Semantic non-mapper rescues |
+|---:|---:|---:|---:|---:|---:|
+| 10 | 6 | 10 | 0.758 | 0.917 | 0 |
+
+What changed during this pass:
+
+- `semantic_ir_v1` rule operations can carry an explicit executable `clause`;
+- mixed fact+query turns now keep `logic_string` valid for the legacy
+  `assert_fact` contract while still carrying query clauses for execution;
+- the A/B harness preloads embedded context facts and rules into the runtime;
+- runtime admission now blocks narrow stored-logic conflicts before mutation:
+  likely-functional current-state overwrites and simple `may_*`/`cannot_*`
+  modal contradictions against derivable KB state.
+
+This is a useful marker for the "less fussy Python" goal. The new Python is not
+semantic repair of English; it is a visible admission reason: the proposed write
+collides with stored state.
 
 ## Admission Diagnostics
 

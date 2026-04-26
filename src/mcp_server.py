@@ -30,9 +30,11 @@ from kb_pipeline import (
     CorePrologRuntime,
     _build_extractor_prompt,
     _call_model_prompt,
+    _extract_calls_with_args,
     _extract_retract_targets,
     _get_api_key,
     _load_env_file,
+    _normalize_clause,
     _normalize_clarification_fields,
     _parse_model_json,
     _resolve_env_file,
@@ -56,6 +58,20 @@ from src.semantic_ir import (
     call_semantic_ir,
     semantic_ir_to_legacy_parse,
     semantic_ir_to_prethink_payload,
+)
+
+
+FUNCTIONAL_CURRENT_STATE_PREDICATES: set[tuple[str, int]] = {
+    ("lives_in", 2),
+    ("located_at", 2),
+    ("located_in", 2),
+    ("scheduled_for", 2),
+}
+
+FUNCTIONAL_CURRENT_STATE_PREFIXES: tuple[str, ...] = (
+    "current_",
+    "latest_",
+    "primary_",
 )
 
 
@@ -1802,6 +1818,138 @@ class PrologMCPServer:
             return None, "; ".join(errors)
         return admitted, ""
 
+    def _runtime_direct_fact_clauses(self) -> list[str]:
+        clauses: list[str] = []
+        engine = getattr(self._runtime, "engine", None)
+        if engine is not None:
+            for row in getattr(engine, "clauses", []) or []:
+                if getattr(row, "body", None):
+                    continue
+                text = _normalize_clause(str(row))
+                if text:
+                    clauses.append(text)
+        raw_clauses = getattr(self._runtime, "_clauses", None)
+        if isinstance(raw_clauses, set):
+            for row in sorted(raw_clauses):
+                text = _normalize_clause(str(row))
+                if text and ":-" not in text:
+                    clauses.append(text)
+        deduped: list[str] = []
+        seen: set[str] = set()
+        for clause in clauses:
+            if clause in seen:
+                continue
+            seen.add(clause)
+            deduped.append(clause)
+        return deduped
+
+    @staticmethod
+    def _single_fact_call(clause: str) -> tuple[str, list[str], str] | None:
+        normalized = _normalize_clause(clause)
+        if not normalized or ":-" in normalized:
+            return None
+        expr = normalized[:-1] if normalized.endswith(".") else normalized
+        calls = _extract_calls_with_args(expr)
+        if len(calls) != 1:
+            return None
+        predicate, args = calls[0]
+        if not predicate:
+            return None
+        return predicate, [str(arg).strip() for arg in args], normalized
+
+    @staticmethod
+    def _is_likely_functional_current_state_predicate(predicate: str, arity: int) -> bool:
+        name = str(predicate).strip().lower()
+        if (name, int(arity)) in FUNCTIONAL_CURRENT_STATE_PREDICATES:
+            return True
+        return int(arity) >= 2 and any(name.startswith(prefix) for prefix in FUNCTIONAL_CURRENT_STATE_PREFIXES)
+
+    @staticmethod
+    def _opposing_modal_predicates(predicate: str) -> list[str]:
+        name = str(predicate).strip().lower()
+        for prefix in ("cannot_", "cant_"):
+            if name.startswith(prefix) and len(name) > len(prefix):
+                stem = name[len(prefix) :]
+                return [f"may_{stem}", f"can_{stem}"]
+        for prefix in ("may_", "can_"):
+            if name.startswith(prefix) and len(name) > len(prefix):
+                stem = name[len(prefix) :]
+                return [f"cannot_{stem}", f"cant_{stem}"]
+        return []
+
+    @staticmethod
+    def _compact_numbered_atom_aliases(args: list[str]) -> list[list[str]]:
+        variants = [list(args)]
+        compacted = [re.sub(r"(?<=[a-z])_(?=\d)", "", str(arg).strip()) for arg in args]
+        if compacted != args:
+            variants.append(compacted)
+        return variants
+
+    def _stored_logic_conflicts_for_facts(
+        self,
+        *,
+        fact_clauses: list[str],
+        correction_retracts: list[str],
+    ) -> list[dict[str, Any]]:
+        correction_targets = {
+            _normalize_clause(clause)
+            for clause in correction_retracts
+            if _normalize_clause(str(clause))
+        }
+        existing_facts: list[tuple[str, list[str], str]] = []
+        for clause in self._runtime_direct_fact_clauses():
+            parsed = self._single_fact_call(clause)
+            if parsed is None:
+                continue
+            existing_facts.append(parsed)
+
+        conflicts: list[dict[str, Any]] = []
+        for raw_clause in fact_clauses:
+            parsed_new = self._single_fact_call(raw_clause)
+            if parsed_new is None:
+                continue
+            predicate, args, normalized = parsed_new
+            arity = len(args)
+            if self._is_likely_functional_current_state_predicate(predicate, arity) and args:
+                subject = args[0]
+                for existing_predicate, existing_args, existing_clause in existing_facts:
+                    if existing_clause in correction_targets:
+                        continue
+                    if existing_clause == normalized:
+                        continue
+                    if existing_predicate != predicate or len(existing_args) != arity:
+                        continue
+                    if existing_args and existing_args[0] == subject and existing_args != args:
+                        conflicts.append(
+                            {
+                                "kind": "functional_current_state_conflict",
+                                "candidate": normalized,
+                                "existing": existing_clause,
+                                "predicate": f"{predicate}/{arity}",
+                                "subject": subject,
+                                "reason": "candidate changes a likely functional current-state value without an explicit retract/correction",
+                            }
+                        )
+
+            for opposite in self._opposing_modal_predicates(predicate):
+                for query_args in self._compact_numbered_atom_aliases(args):
+                    opposite_query = f"{opposite}({', '.join(query_args)})."
+                    result = self.query_rows(opposite_query)
+                    if str(result.get("status", "")).strip() != "success":
+                        continue
+                    conflicts.append(
+                        {
+                            "kind": "rule_derived_modal_conflict",
+                            "candidate": normalized,
+                            "opposing_query": opposite_query,
+                            "predicate": f"{predicate}/{arity}",
+                            "reason": "candidate contradicts an opposite modal predicate derivable from current KB state",
+                            "query_rows": result.get("rows", []),
+                        }
+                    )
+                    break
+        return conflicts
+
     def _apply_compiled_parse(self, *, parsed: dict[str, Any], prethink_id: str) -> dict[str, Any]:
         intent = str(parsed.get("intent", "")).strip()
         operations: list[dict[str, Any]] = []
@@ -1841,6 +1989,32 @@ class PrologMCPServer:
                 clause = str(parsed.get("logic_string", "")).strip()
                 if clause:
                     rule_clauses = [clause]
+
+            conflicts = self._stored_logic_conflicts_for_facts(
+                fact_clauses=fact_clauses,
+                correction_retracts=correction_retracts,
+            )
+            if conflicts:
+                errors.append("stored logic conflict blocked fact assertion")
+                operations.append(
+                    {
+                        "tool": "stored_logic_conflict_guard",
+                        "result": {
+                            "status": "blocked",
+                            "result_type": "stored_logic_conflict",
+                            "conflicts": conflicts,
+                        },
+                    }
+                )
+                return {
+                    "status": "error",
+                    "intent": intent,
+                    "writes_applied": writes_applied,
+                    "operations": operations,
+                    "query_result": query_result,
+                    "parse": parsed,
+                    "errors": errors,
+                }
 
             for clause in fact_clauses:
                 result = self.tools_call(

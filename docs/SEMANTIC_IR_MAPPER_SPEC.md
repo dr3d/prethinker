@@ -254,6 +254,24 @@ This is not an English patch. It is a KB-state admission question: "does this
 operation safely add knowledge, or does it silently rewrite what the KB already
 means?"
 
+Current implementation is deliberately narrow:
+
+- `src/mcp_server.py` checks candidate fact clauses immediately before runtime
+  writes;
+- a small structural set of likely-functional current-state predicates, such as
+  `lives_in/2`, `located_at/2`, `located_in/2`, and `scheduled_for/2`, blocks a
+  different value for the same subject unless the turn already carries an
+  explicit retract/correction;
+- modal predicate pairs are checked by naming shape: `cannot_*`/`cant_*` facts
+  are probed against derivable `may_*`/`can_*` queries, and vice versa;
+- numbered atom spelling variants such as `crate12` and `crate_12` are treated
+  as structural aliases for this probe.
+
+This guard is not the final contradiction engine. It is a first admission
+pressure layer for the most dangerous mutation shape: an apparently harmless
+assertion that silently fights stored current state or a rule-derived modal
+consequence.
+
 ## Trace Obligations
 
 Every structural intervention should be visible in traces or warnings.

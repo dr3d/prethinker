@@ -152,6 +152,45 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         self.assertEqual(parsed["rules"], ["ancestor(X, Y) :- parent(X, Y)."])
         self.assertEqual(parsed["admission_diagnostics"]["admitted_count"], 1)
 
+    def test_mapper_keeps_assert_logic_string_valid_when_mixed_with_query(self) -> None:
+        ir = _ir(
+            decision="mixed",
+            turn_type="mixed",
+            unsafe_implications=[
+                {
+                    "candidate": "may_ship(crate12)",
+                    "why_unsafe": "Candidate conflicts with context-derived shipping permission.",
+                    "commit_policy": "clarify",
+                }
+            ],
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "cannot_ship",
+                    "args": ["crate12"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "query",
+                    "predicate": "may_ship",
+                    "args": ["crate12"],
+                    "polarity": "positive",
+                    "source": "context",
+                    "safety": "safe",
+                },
+            ],
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(ir)
+        self.assertEqual(warnings, [])
+        self.assertEqual(parsed["intent"], "assert_fact")
+        self.assertEqual(parsed["logic_string"], "cannot_ship(crate12).")
+        self.assertEqual(parsed["facts"], ["cannot_ship(crate12)."])
+        self.assertEqual(parsed["queries"], ["may_ship(crate12)."])
+        ok, errors = _validate_parsed(parsed)
+        self.assertTrue(ok, errors)
+
     def test_mapper_allows_negative_polarity_retract_as_retraction(self) -> None:
         ir = _ir(
             candidate_operations=[
@@ -787,6 +826,141 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         self.assertEqual(result["status"], "success")
         self.assertEqual(result["execution"]["writes_applied"], 1)
         self.assertEqual(server.query_rows("cleared(crate12).")["status"], "no_results")
+
+    def test_server_blocks_unannounced_functional_state_overwrite(self) -> None:
+        server = PrologMCPServer(
+            compiler_prompt_enabled=False,
+            semantic_ir_enabled=True,
+            semantic_ir_model="qwen3.6:35b",
+        )
+        server.assert_fact("lives_in(mara, denver).")
+
+        def fake_compile_semantic_ir(utterance: str):
+            return _ir(
+                candidate_operations=[
+                    {
+                        "operation": "assert",
+                        "predicate": "lives_in",
+                        "args": ["Mara", "Salem"],
+                        "polarity": "positive",
+                        "source": "direct",
+                        "safety": "safe",
+                    }
+                ]
+            ), ""
+
+        server._compile_semantic_ir = fake_compile_semantic_ir  # type: ignore[method-assign]
+        result = server.process_utterance({"utterance": "Mara lives in Salem."})
+        self.assertEqual(result["status"], "error")
+        self.assertEqual(result["execution"]["writes_applied"], 0)
+        guard_ops = [
+            op for op in result["execution"]["operations"] if op.get("tool") == "stored_logic_conflict_guard"
+        ]
+        self.assertEqual(len(guard_ops), 1)
+        conflicts = guard_ops[0]["result"]["conflicts"]
+        self.assertEqual(conflicts[0]["kind"], "functional_current_state_conflict")
+        self.assertEqual(server.query_rows("lives_in(mara, denver).")["status"], "success")
+        self.assertEqual(server.query_rows("lives_in(mara, salem).")["status"], "no_results")
+
+    def test_server_allows_explicit_functional_state_correction(self) -> None:
+        server = PrologMCPServer(
+            compiler_prompt_enabled=False,
+            semantic_ir_enabled=True,
+            semantic_ir_model="qwen3.6:35b",
+        )
+        server.assert_fact("lives_in(mara, denver).")
+
+        def fake_compile_semantic_ir(utterance: str):
+            return _ir(
+                decision="commit",
+                turn_type="correction",
+                candidate_operations=[
+                    {
+                        "operation": "retract",
+                        "predicate": "lives_in",
+                        "args": ["Mara", "Denver"],
+                        "polarity": "positive",
+                        "source": "direct",
+                        "safety": "safe",
+                    },
+                    {
+                        "operation": "assert",
+                        "predicate": "lives_in",
+                        "args": ["Mara", "Salem"],
+                        "polarity": "positive",
+                        "source": "direct",
+                        "safety": "safe",
+                    },
+                ],
+            ), ""
+
+        server._compile_semantic_ir = fake_compile_semantic_ir  # type: ignore[method-assign]
+        result = server.process_utterance({"utterance": "Correction: Mara lives in Salem, not Denver."})
+        self.assertEqual(result["status"], "success")
+        self.assertEqual(result["execution"]["writes_applied"], 2)
+        self.assertEqual(server.query_rows("lives_in(mara, denver).")["status"], "no_results")
+        self.assertEqual(server.query_rows("lives_in(mara, salem).")["status"], "success")
+
+    def test_server_allows_nonexclusive_additional_condition(self) -> None:
+        server = PrologMCPServer(
+            compiler_prompt_enabled=False,
+            semantic_ir_enabled=True,
+            semantic_ir_model="qwen3.6:35b",
+        )
+        server.assert_fact("has_condition(mara, asthma).")
+
+        def fake_compile_semantic_ir(utterance: str):
+            return _ir(
+                candidate_operations=[
+                    {
+                        "operation": "assert",
+                        "predicate": "has_condition",
+                        "args": ["Mara", "hypertension"],
+                        "polarity": "positive",
+                        "source": "direct",
+                        "safety": "safe",
+                    }
+                ]
+            ), ""
+
+        server._compile_semantic_ir = fake_compile_semantic_ir  # type: ignore[method-assign]
+        result = server.process_utterance({"utterance": "Mara also has hypertension."})
+        self.assertEqual(result["status"], "success")
+        self.assertEqual(result["execution"]["writes_applied"], 1)
+        self.assertEqual(server.query_rows("has_condition(mara, asthma).")["status"], "success")
+        self.assertEqual(server.query_rows("has_condition(mara, hypertension).")["status"], "success")
+
+    def test_server_blocks_rule_derived_modal_conflict(self) -> None:
+        server = PrologMCPServer(
+            compiler_prompt_enabled=False,
+            semantic_ir_enabled=True,
+            semantic_ir_model="qwen3.6:35b",
+        )
+        server.assert_fact("cleared(crate12).")
+        server.assert_rule("may_ship(X) :- cleared(X).")
+
+        def fake_compile_semantic_ir(utterance: str):
+            return _ir(
+                candidate_operations=[
+                    {
+                        "operation": "assert",
+                        "predicate": "cannot_ship",
+                        "args": ["crate_12"],
+                        "polarity": "positive",
+                        "source": "direct",
+                        "safety": "safe",
+                    }
+                ]
+            ), ""
+
+        server._compile_semantic_ir = fake_compile_semantic_ir  # type: ignore[method-assign]
+        result = server.process_utterance({"utterance": "Crate 12 cannot ship."})
+        self.assertEqual(result["status"], "error")
+        guard_ops = [
+            op for op in result["execution"]["operations"] if op.get("tool") == "stored_logic_conflict_guard"
+        ]
+        self.assertEqual(guard_ops[0]["result"]["conflicts"][0]["kind"], "rule_derived_modal_conflict")
+        self.assertEqual(server.query_rows("cannot_ship(crate12).")["status"], "no_results")
 
 
 if __name__ == "__main__":

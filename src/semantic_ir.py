@@ -602,7 +602,14 @@ def semantic_ir_to_legacy_parse(ir: dict[str, Any]) -> tuple[dict[str, Any], lis
         retracts = []
 
     intent = _legacy_intent(facts=facts, rules=rules, queries=queries, retracts=retracts, decision=decision)
-    logic_parts = facts + rules + queries
+    if intent == "assert_fact":
+        logic_parts = facts
+    elif intent == "assert_rule":
+        logic_parts = rules
+    elif intent == "query":
+        logic_parts = queries
+    else:
+        logic_parts = facts + rules + queries
     if not logic_parts and retracts:
         logic_parts = [_retract_command(clause) for clause in retracts]
     payload = {

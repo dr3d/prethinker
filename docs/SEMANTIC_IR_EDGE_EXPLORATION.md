@@ -48,6 +48,7 @@ Initial `qwen/qwen3.6-35b-a3b` LM Studio result:
 |---|---:|---:|---:|---:|---:|
 | rule + mutation conflict | 10 | 10/10 | 10/10 | 7/10 | 0.89 |
 | rule + mutation conflict after rule-clause schema | 10 | 10/10 | 10/10 | 9/10 | 0.96 |
+| rule + mutation conflict after stored-logic guard | 10 | 10/10 | 10/10 | 9/10 | 0.95 |
 
 Strong cases: direct Horn rule recognition, recursive ancestor-rule shape, pure
 context-rule query without writing the context rule, explicit retract/assert
@@ -73,10 +74,22 @@ Runtime A/B on the same pack:
 | Runs | Legacy decision OK | Semantic decision OK | Legacy avg score | Semantic avg score | Semantic non-mapper rescues |
 |---:|---:|---:|---:|---:|---:|
 | 10 | 6/10 | 9/10 | 0.808 | 0.883 | 0 |
+| 10 | 6/10 | 10/10 | 0.758 | 0.917 | 0 |
 
-The remaining miss is still the hard one: rule-derived contradiction admission.
-The model can notice the collision, but deterministic runtime policy does not
-yet generally prove that a new write contradicts consequences of existing rules.
+The newest pass added a narrow deterministic stored-logic guard. It catches two
+classes before mutation:
+
+- likely-functional current-state overwrites, such as `lives_in(mara, salem)`
+  when `lives_in(mara, denver)` is already stored and no retract/correction is
+  present;
+- modal predicate contradictions where an asserted `cannot_*`/`cant_*` fact
+  contradicts a derivable `may_*`/`can_*` consequence, or vice versa.
+
+This is intentionally not a general contradiction prover. The important research
+movement is that the guard is structural and KB-state-based, not another English
+phrase rescue. It also exposed a useful adapter bug: mixed fact+query turns must
+keep `logic_string` valid for the legacy `assert_fact` contract while still
+carrying query clauses for execution.
 
 ## Results
 
@@ -182,11 +195,10 @@ The newest design is weakest at:
   needs a first-class representation for negative facts, closed-world absence,
   and negated observations
 - rule clauses: the model understands rules and exceptions, but the mapper does
-  not yet admit full rule bodies from IR
-- stored-logic conflict detection: the model can notice collisions against
-  context, but the deterministic runtime does not yet have a general
-  contradiction/admission layer that distinguishes "additional compatible fact"
-  from "unintended overwrite of a current fact"
+  not yet admit full default/exception rule semantics from prose
+- stored-logic conflict detection: the runtime now catches a narrow structural
+  subset, but not full first-order contradiction, temporal conflict, or profile
+  declared exclusivity yet
 
 ## Mapper Adjustment
 
@@ -212,3 +224,5 @@ sentence. The next hard push should be:
 - build the guardrail-dependency A/B harness against old Python rescue hooks
 - promote the best edge cases into regression tests for the live
   `semantic_ir_enabled` path
+- evolve stored-logic conflict policy into profile-declared functional
+  predicates, opposition pairs, and temporal/current-state scopes

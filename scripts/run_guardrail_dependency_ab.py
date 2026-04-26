@@ -57,6 +57,16 @@ def _looks_like_clause(text: str) -> bool:
     return bool(re.match(r"^[a-z_][a-z0-9_]*\s*\(", value))
 
 
+def _extract_context_clause(text: str) -> str:
+    value = str(text or "").strip()
+    if _looks_like_clause(value):
+        return value
+    match = re.search(r"([a-z_][a-z0-9_]*\s*\(.+\)\s*(?::-\s*.+)?\.)\s*$", value)
+    if match:
+        return match.group(1).strip()
+    return ""
+
+
 def _preload_context(server: PrologMCPServer, scenario: dict[str, Any]) -> list[dict[str, Any]]:
     loaded: list[dict[str, Any]] = []
     context = scenario.get("context", [])
@@ -69,11 +79,15 @@ def _preload_context(server: PrologMCPServer, scenario: dict[str, Any]) -> list[
             continue
         if isinstance(recent, list):
             recent.append(text)
-        if _looks_like_clause(text):
-            result = server.assert_fact(text)
-            loaded.append({"context": text, "assert_result": result})
+        clause = _extract_context_clause(text)
+        if clause:
+            if ":-" in clause:
+                result = server.assert_rule(clause)
+            else:
+                result = server.assert_fact(clause)
+            loaded.append({"context": text, "clause": clause, "assert_result": result})
         else:
-            loaded.append({"context": text, "assert_result": None})
+            loaded.append({"context": text, "clause": "", "assert_result": None})
     return loaded
 
 
@@ -191,6 +205,21 @@ def _operation_clauses(execution: dict[str, Any]) -> list[str]:
     return clauses
 
 
+def _has_stored_logic_conflict_guard(execution: dict[str, Any]) -> bool:
+    operations = execution.get("operations", []) if isinstance(execution, dict) else []
+    if not isinstance(operations, list):
+        return False
+    for op in operations:
+        if not isinstance(op, dict):
+            continue
+        if str(op.get("tool", "")).strip() != "stored_logic_conflict_guard":
+            continue
+        result = op.get("result", {}) if isinstance(op.get("result"), dict) else {}
+        if str(result.get("status", "")).strip() == "blocked":
+            return True
+    return False
+
+
 def _admission_diagnostics(execution: dict[str, Any]) -> dict[str, Any]:
     parsed = execution.get("parse", {}) if isinstance(execution, dict) else {}
     if not isinstance(parsed, dict):
@@ -246,7 +275,9 @@ def _score_runtime_result(
     status = str(result.get("status", "")).strip()
     intent = str(execution.get("intent") or front_door.get("compiler_intent") or "").strip()
     ir_decision = _semantic_ir_decision(result)
-    if ir_decision in {"commit", "clarify", "quarantine", "reject", "answer", "mixed"}:
+    if _has_stored_logic_conflict_guard(execution):
+        decision = "clarify"
+    elif ir_decision in {"commit", "clarify", "quarantine", "reject", "answer", "mixed"}:
         decision = ir_decision
     elif status == "clarification_required" or bool(front_door.get("needs_clarification")):
         decision = "clarify"
