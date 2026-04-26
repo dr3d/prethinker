@@ -69,6 +69,7 @@ top-p `0.82`, top-k `20`, context `16384`, and thinking off.
 | weak edges | no | 10/10 | 10/10 | 4/10 | 0.82 |
 | weak edges | yes | 10/10 | 10/10 | 7/10 | 0.89 |
 | Silverton noisy | no | 8/8 | 8/8 | 2/8 | 0.75 |
+| Silverton noisy | yes | 8/8 | 8/8 | 4/8 | 0.82 |
 
 The main finding is that LM Studio structured output reliably handles JSON
 shape, but the compact schema/policy contract still helps decision calibration.
@@ -77,7 +78,10 @@ prompt even when LM Studio is enforcing `json_schema`.
 
 The Silverton noisy pack remains deliberately adversarial. It is less a polished
 demo and more a pressure gauge for identity ambiguity, temporal correction,
-policy labels, and claim/fact separation.
+policy labels, and claim/fact separation. The schema contract improved it, but
+the remaining misses are still policy-shaped: `reject` versus `quarantine`,
+`clarify` versus `answer`, and `commit` versus `mixed` when a safe temporal
+correction coexists with unsafe legal consequences.
 
 ## Strong Signals
 
