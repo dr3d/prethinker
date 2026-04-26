@@ -66,6 +66,133 @@ SCHEMA_CONTRACT: dict[str, Any] = {
 }
 
 
+SEMANTIC_IR_JSON_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": [
+        "schema_version",
+        "decision",
+        "turn_type",
+        "entities",
+        "referents",
+        "assertions",
+        "unsafe_implications",
+        "candidate_operations",
+        "clarification_questions",
+        "self_check",
+    ],
+    "properties": {
+        "schema_version": {"type": "string", "const": "semantic_ir_v1"},
+        "decision": {
+            "type": "string",
+            "enum": ["commit", "clarify", "quarantine", "reject", "answer", "mixed"],
+        },
+        "turn_type": {
+            "type": "string",
+            "enum": ["state_update", "query", "correction", "rule_update", "mixed", "unknown"],
+        },
+        "entities": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["id", "surface", "normalized", "type", "confidence"],
+                "properties": {
+                    "id": {"type": "string"},
+                    "surface": {"type": "string"},
+                    "normalized": {"type": "string"},
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "person",
+                            "object",
+                            "medication",
+                            "lab_test",
+                            "condition",
+                            "symptom",
+                            "place",
+                            "time",
+                            "unknown",
+                        ],
+                    },
+                    "confidence": {"type": "number"},
+                },
+            },
+        },
+        "referents": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["surface", "status", "candidates", "chosen"],
+                "properties": {
+                    "surface": {"type": "string"},
+                    "status": {"type": "string", "enum": ["resolved", "ambiguous", "unresolved"]},
+                    "candidates": {"type": "array", "items": {"type": "string"}},
+                    "chosen": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+                },
+            },
+        },
+        "assertions": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["kind", "subject", "relation_concept", "object", "polarity", "certainty"],
+                "properties": {
+                    "kind": {"type": "string", "enum": ["direct", "question", "claim", "correction", "rule"]},
+                    "subject": {"type": "string"},
+                    "relation_concept": {"type": "string"},
+                    "object": {"type": "string"},
+                    "polarity": {"type": "string", "enum": ["positive", "negative"]},
+                    "certainty": {"type": "number"},
+                },
+            },
+        },
+        "unsafe_implications": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["candidate", "why_unsafe", "commit_policy"],
+                "properties": {
+                    "candidate": {"type": "string"},
+                    "why_unsafe": {"type": "string"},
+                    "commit_policy": {"type": "string", "enum": ["clarify", "quarantine", "reject"]},
+                },
+            },
+        },
+        "candidate_operations": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["operation", "predicate", "args", "polarity", "source", "safety"],
+                "properties": {
+                    "operation": {"type": "string", "enum": ["assert", "retract", "rule", "query", "none"]},
+                    "predicate": {"type": "string"},
+                    "args": {"type": "array", "items": {"type": "string"}},
+                    "polarity": {"type": "string", "enum": ["positive", "negative"]},
+                    "source": {"type": "string", "enum": ["direct", "inferred", "context"]},
+                    "safety": {"type": "string", "enum": ["safe", "unsafe", "needs_clarification"]},
+                },
+            },
+        },
+        "clarification_questions": {"type": "array", "items": {"type": "string"}},
+        "self_check": {
+            "type": "object",
+            "additionalProperties": False,
+            "required": ["bad_commit_risk", "missing_slots", "notes"],
+            "properties": {
+                "bad_commit_risk": {"type": "string", "enum": ["low", "medium", "high"]},
+                "missing_slots": {"type": "array", "items": {"type": "string"}},
+                "notes": {"type": "array", "items": {"type": "string"}},
+            },
+        },
+    },
+}
+
+
 BEST_GUARDED_V2_SYSTEM = (
     "You are a semantic IR compiler for a governed symbolic memory system. "
     "The root object must be semantic_ir_v1 itself, with schema_version and decision as top-level keys. "
@@ -80,19 +207,29 @@ BEST_GUARDED_V2_GUIDANCE = (
     "- reject: user asks for treatment, dose, medication stop/hold/start, or clinical recommendation. You may still include clarification questions, but the decision remains reject.\n"
     "- quarantine: direct facts conflict with a claim, a claim would overwrite observed state, or a candidate fact is plausible but unsafe.\n"
     "- clarify: missing referent, measurement direction, patient identity, object of 'it/that', or allergy-vs-intolerance distinction blocks a write.\n"
-    "- mixed: same turn contains both safe writes and a query/rule/unsafe implication.\n"
+    "- mixed: same turn contains both safe writes and a query/rule/unsafe implication. If unsafe_implications is non-empty and safe operations are also present, decision MUST be mixed, not commit.\n"
     "- commit: direct state update or correction has a clear target and safe predicate mapping.\n"
     "Special guards:\n"
+    "- Context entries are already-known state/rules, not new user assertions. Do not create candidate_operations that merely restate context.\n"
+    "- Use context to resolve referents and answer queries; only the current utterance may introduce a new write candidate.\n"
+    "- If the current utterance contains policy/rule language such as all/every/unless/must/before and also direct facts, choose mixed. Commit the direct facts and represent rule/policy material in assertions or unsafe_implications if no safe rule clause is available.\n"
     "- Do not turn a claim into a fact. 'Bob says he has it' is a claim, not possession.\n"
     "- Do not infer diagnosis or staging from a single lab value request. Quarantine or clarify.\n"
-    "- Do not infer allergy from nausea/vomiting alone. Clarify allergy vs side effect/intolerance.\n"
-    "- If the user explicitly corrects a prior allergy record with 'not allergic' and provides a side-effect/intolerance explanation, propose retracting the allergy and recording the side effect; do not give medical advice.\n"
+    "- Do not infer allergy from nausea/vomiting alone. Clarify allergy vs side effect/intolerance when the user only reports symptoms.\n"
+    "- If the user explicitly says 'not allergic' and gives a side-effect/intolerance explanation such as nausea, the correction is clear: propose retracting the allergy and recording the side effect; do not ask for allergy-vs-intolerance clarification.\n"
     "- A clear correction like 'not Mara, Fred has it' may propose retract/assert.\n"
+    "- Retraction is a governance operation, not a predicate. You may propose operation='retract' even when 'retract/1' is not in allowed_predicates.\n"
+    "- A correction like 'it should be quarantined instead' with context containing the old fact is enough to retract the old fact and assert the replacement fact; do not ask for authority/provenance unless the predicate itself requires it.\n"
     "- Do not invent required governance slots that are not in the predicate schema. Source document, authority, or reason fields are optional provenance unless the allowed predicate explicitly requires them.\n"
     "- A direct correction like 'remove X allergy; stomach upset only' is explicit enough to retract the allergy and record side effect/intolerance when the old allergy fact is in context.\n"
+    "- Medical comparative labs can still be direct facts: 'lower than last week but still above the upper bound' means lab_result_high remains safe; do not require the numeric value unless the predicate requires a value slot.\n"
+    "- 'Do not call it normal' is explicit negative classification; do not treat it as an ambiguous referent when the preceding lab test is clear.\n"
     "- Do not assert a fact about a quantified group atom such as submitted_form(residents) for 'all residents except Kai'. Use individual known members only when context enumerates them; otherwise mark the class-level write unsafe.\n"
-    "- Pure hypothetical questions with 'if ... would ...?' are queries, not writes and not clarification requests when the hypothetical nature is clear.\n"
+    "- Pure hypothetical questions with 'if ... would ...?' are queries, not writes and not clarification requests when the hypothetical nature is clear. Mark the query operation safe; do not ask whether the user wants a hypothetical answer. Do not assert the hypothetical premise or any derived consequence as a fact.\n"
     "- Denial predicates are speech/event facts. 'Omar denied signing the waiver' may assert denied(...); it must not assert signed(...) false.\n"
+    "- Legal findings are scoped speech/finding facts. 'The court did not find that Pavel paid' must not become negative paid(Pavel, ...). It is an absence of finding; use mixed/quarantine or a finding predicate if available.\n"
+    "- 'Only after X did Y become effective; X happened Wednesday' is enough to commit Y's effective date as Wednesday when an effective_on predicate is allowed. Do not mark the effective date unsafe merely because it follows from the stated condition.\n"
+    "- Do not include draft thoughts, reversals, or self-debate in unsafe_implications. If the final candidate_operations mark an operation safe, do not also list the same operation as unsafe.\n"
     "- If context supplies exactly one active patient and one active lab test, a direct 'it came back high' may propose a safe lab_result_high write.\n"
     "- For rule-plus-fact or fact-plus-query turns, use mixed and keep unsafe query targets out of committed facts.\n"
     "- Preserve negation in candidate_operations with polarity='negative'. Do not turn 'never saw X' into a positive saw/2 fact."
@@ -110,6 +247,8 @@ class SemanticIRCallConfig:
     top_p: float = 0.82
     top_k: int = 20
     think_enabled: bool = False
+    reasoning_effort: str = "none"
+    max_tokens: int = 4096
 
 
 def build_semantic_ir_messages(
@@ -118,14 +257,11 @@ def build_semantic_ir_messages(
     context: list[str] | None = None,
     allowed_predicates: list[str] | None = None,
     domain: str = "runtime",
+    include_schema_contract: bool = True,
 ) -> list[dict[str, str]]:
     payload = {
-        "required_top_level_json_shape": SCHEMA_CONTRACT,
         "task": "Analyze the utterance and emit semantic_ir_v1 JSON only.",
-        "output_instruction": (
-            "Return exactly one JSON object using required_top_level_json_shape as the root shape. "
-            "Do not copy the key name required_top_level_json_shape into your response."
-        ),
+        "output_instruction": "Return exactly one semantic_ir_v1 JSON object.",
         "domain": domain,
         "utterance": utterance,
         "context": context or [],
@@ -133,6 +269,12 @@ def build_semantic_ir_messages(
         "authority_boundary": "The runtime validates and commits; you only propose semantic structure.",
         "variant_guidance": BEST_GUARDED_V2_GUIDANCE,
     }
+    if include_schema_contract:
+        payload["required_top_level_json_shape"] = SCHEMA_CONTRACT
+        payload["output_instruction"] = (
+            "Return exactly one JSON object using required_top_level_json_shape as the root shape. "
+            "Do not copy the key name required_top_level_json_shape into your response."
+        )
     return [
         {"role": "system", "content": BEST_GUARDED_V2_SYSTEM},
         {"role": "user", "content": "INPUT_JSON:\n" + json.dumps(payload, ensure_ascii=False, indent=2)},
@@ -147,14 +289,22 @@ def call_semantic_ir(
     allowed_predicates: list[str] | None = None,
     domain: str = "runtime",
 ) -> dict[str, Any]:
-    if str(config.backend or "ollama").strip().lower() != "ollama":
-        raise RuntimeError("semantic_ir_v1 currently supports ollama backend only")
+    backend = str(config.backend or "ollama").strip().lower()
     messages = build_semantic_ir_messages(
         utterance=utterance,
         context=context,
         allowed_predicates=allowed_predicates,
         domain=domain,
+        include_schema_contract=backend != "lmstudio",
     )
+    if backend == "lmstudio":
+        return _call_lmstudio_semantic_ir(config=config, messages=messages)
+    if backend != "ollama":
+        raise RuntimeError(f"semantic_ir_v1 backend not supported: {backend}")
+    return _call_ollama_semantic_ir(config=config, messages=messages)
+
+
+def _call_ollama_semantic_ir(*, config: SemanticIRCallConfig, messages: list[dict[str, str]]) -> dict[str, Any]:
     payload = {
         "model": config.model,
         "stream": False,
@@ -186,6 +336,57 @@ def call_semantic_ir(
 
     message = raw.get("message", {}) if isinstance(raw, dict) else {}
     content = str(message.get("content", "") if isinstance(message, dict) else "").strip()
+    parsed = parse_semantic_ir_json(content)
+    return {
+        "latency_ms": int((time.perf_counter() - started) * 1000),
+        "raw": raw,
+        "content": content,
+        "parsed": parsed,
+    }
+
+
+def _call_lmstudio_semantic_ir(*, config: SemanticIRCallConfig, messages: list[dict[str, str]]) -> dict[str, Any]:
+    payload: dict[str, Any] = {
+        "model": config.model,
+        "messages": messages,
+        "temperature": float(config.temperature),
+        "top_p": float(config.top_p),
+        "max_tokens": int(config.max_tokens),
+        "response_format": {
+            "type": "json_schema",
+            "json_schema": {
+                "name": "semantic_ir_v1",
+                "strict": True,
+                "schema": SEMANTIC_IR_JSON_SCHEMA,
+            },
+        },
+    }
+    if str(config.reasoning_effort or "").strip():
+        payload["reasoning_effort"] = str(config.reasoning_effort).strip()
+    base_url = config.base_url.rstrip("/")
+    endpoint = f"{base_url}/chat/completions" if base_url.endswith("/v1") else f"{base_url}/v1/chat/completions"
+    req = urllib.request.Request(
+        endpoint,
+        data=json.dumps(payload).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    started = time.perf_counter()
+    try:
+        with urllib.request.urlopen(req, timeout=int(config.timeout)) as response:
+            raw = json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as exc:
+        body = exc.read().decode("utf-8", errors="replace")
+        raise RuntimeError(f"HTTP {exc.code}: {body}") from exc
+    except urllib.error.URLError as exc:
+        raise RuntimeError(str(exc)) from exc
+
+    choices = raw.get("choices", []) if isinstance(raw, dict) else []
+    first = choices[0] if choices and isinstance(choices[0], dict) else {}
+    message = first.get("message", {}) if isinstance(first, dict) else {}
+    content = str(message.get("content", "") if isinstance(message, dict) else "").strip()
+    if not content and isinstance(message, dict):
+        content = str(message.get("reasoning_content", "") or "").strip()
     parsed = parse_semantic_ir_json(content)
     return {
         "latency_ms": int((time.perf_counter() - started) * 1000),
@@ -267,7 +468,7 @@ def semantic_ir_to_legacy_parse(ir: dict[str, Any]) -> tuple[dict[str, Any], lis
         polarity = str(op.get("polarity", "positive") or "positive").strip().lower()
         if safety != "safe":
             continue
-        if source == "inferred":
+        if source == "inferred" and not (operation == "query" and _is_pure_hypothetical_query(ir)):
             warnings.append("skipped inferred safe operation pending policy")
             continue
         predicate = _predicate_name(op.get("predicate"))
@@ -342,6 +543,10 @@ def _projected_decision(ir: dict[str, Any]) -> str:
     decision = _normalize_decision(ir.get("decision"))
     if _is_pure_hypothetical_query(ir):
         return "answer"
+    if decision == "commit" and _has_safe_direct_write(ir) and _has_unsafe_implications(ir):
+        return "mixed"
+    if decision == "commit" and _has_safe_direct_write(ir) and _has_claim_and_direct_assertions(ir):
+        return "mixed"
     if (
         decision == "quarantine"
         and _raw_missing_slots(ir)
@@ -353,6 +558,10 @@ def _projected_decision(ir: dict[str, Any]) -> str:
         if _has_safe_direct_retract(ir):
             return "mixed"
     return decision
+
+
+def projected_semantic_ir_decision(ir: dict[str, Any]) -> str:
+    return _projected_decision(ir)
 
 
 def _intent_from_ir(ir: dict[str, Any]) -> str:
@@ -544,6 +753,47 @@ def _has_safe_direct_write(ir: dict[str, Any]) -> bool:
         if str(op.get("operation", "")).strip().lower() in {"assert", "retract", "rule"}:
             return True
     return False
+
+
+def _has_unsafe_implications(ir: dict[str, Any]) -> bool:
+    raw = ir.get("unsafe_implications", [])
+    if not isinstance(raw, list):
+        return False
+    return any(
+        isinstance(item, dict) and not _unsafe_implication_duplicates_safe_operation(item, ir)
+        for item in raw
+    )
+
+
+def _unsafe_implication_duplicates_safe_operation(item: dict[str, Any], ir: dict[str, Any]) -> bool:
+    candidate = str(item.get("candidate", "")).strip().lower()
+    if not candidate:
+        return False
+    for op in _candidate_operations(ir):
+        if str(op.get("safety", "")).strip().lower() != "safe":
+            continue
+        operation = str(op.get("operation", "")).strip().lower()
+        predicate = _predicate_name(op.get("predicate"))
+        args = _operation_args(op.get("args"), entity_names=_entity_name_map(ir), for_query=operation == "query")
+        if operation and operation not in candidate:
+            continue
+        if predicate and predicate not in candidate:
+            continue
+        if all(str(arg).strip().lower() in candidate for arg in args):
+            return True
+    return False
+
+
+def _has_claim_and_direct_assertions(ir: dict[str, Any]) -> bool:
+    raw = ir.get("assertions", [])
+    if not isinstance(raw, list):
+        return False
+    kinds = {
+        str(item.get("kind", "")).strip().lower()
+        for item in raw
+        if isinstance(item, dict)
+    }
+    return "claim" in kinds and "direct" in kinds
 
 
 def _has_safe_direct_retract(ir: dict[str, Any]) -> bool:

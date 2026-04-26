@@ -132,3 +132,65 @@ Remaining weak spots:
 - rule admission for quantified exception language is still shallow; the mapper
   can preserve safe direct facts but does not yet synthesize a durable rule from
   a structured IR unless the rule clause is explicit
+
+## LM Studio Structured Output Pass
+
+Run:
+
+```text
+python scripts/run_guardrail_dependency_ab.py --backend lmstudio --base-url http://127.0.0.1:1234 --legacy-model qwen/qwen3.6-35b-a3b --semantic-model qwen/qwen3.6-35b-a3b --scenario-group edge --timeout 300
+```
+
+Representative result:
+
+| Runs | Legacy decision OK | Semantic decision OK | Legacy avg score | Semantic avg score | Legacy parse rescues | Semantic non-mapper rescues | Rescue reduction |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 20 | 9 | 17 | 0.763 | 0.930 | 0 | 0 | 0 |
+
+This run used the same 35B model on both paths:
+
+- legacy path: old strict semantic-parser prompt through LM Studio
+- semantic path: `semantic_ir_v1` with LM Studio JSON-schema structured output
+
+The important result is not just the score lift. The semantic path used zero
+English/story rescue hooks. All recorded semantic interventions were structural
+mapper events.
+
+The edge set still shows some variance even at temperature 0. Targeted reruns
+after prompt/projection fixes reached the expected decision for previously
+failing cases such as nested quote denial, hypothetical hazard-pay query,
+medical allergy negation, and transfer effectiveness. Full-battery reruns can
+still wobble around a few decision labels, which means reproducibility and
+multi-pass adjudication are now first-class research questions.
+
+Weak-edge run:
+
+```text
+python scripts/run_guardrail_dependency_ab.py --backend lmstudio --base-url http://127.0.0.1:1234 --legacy-model qwen/qwen3.6-35b-a3b --semantic-model qwen/qwen3.6-35b-a3b --scenario-group weak_edges --timeout 300
+```
+
+Result:
+
+| Runs | Legacy decision OK | Semantic decision OK | Legacy avg score | Semantic avg score | Legacy parse rescues | Semantic non-mapper rescues | Rescue reduction |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 10 | 4 | 10 | 0.667 | 1.000 | 0 | 0 | 0 |
+
+The weak-edge pass is the cleanest evidence so far that the semantic workspace
+direction can reduce Python-side language rescue. It handled hypothetical
+queries, quantified exceptions, medical allergy/intolerance corrections, denial
+versus observation, and retract aliasing without invoking English-specific
+rescue hooks.
+
+New structural guardrails added during this pass:
+
+- LM Studio JSON-schema structured output support for runtime semantic IR
+- rescue taxonomy in the A/B harness
+- projected semantic decision scoring for `mixed` and hypothetical cases
+- inferred query admission for pure hypothetical questions
+- duplicate unsafe-implication cleanup when the same operation is admitted safe
+- claim-plus-direct-observation projection to `mixed`
+
+These are not phrase patches. They are mostly admission/projection rules around
+the semantic workspace contract, which is the direction we want: less Python
+interpreting English, more Python enforcing the boundary and cleaning
+self-contradictory IR bookkeeping.

@@ -27,6 +27,7 @@ from scripts.run_semantic_ir_prompt_bakeoff import (  # noqa: E402
     flatten_text,
 )
 from src.mcp_server import PrologMCPServer  # noqa: E402
+from src.semantic_ir import projected_semantic_ir_decision  # noqa: E402
 
 
 DEFAULT_OUT_DIR = REPO_ROOT / "tmp" / "guardrail_dependency_ab"
@@ -90,6 +91,8 @@ def _inject_allowed_predicates(server: PrologMCPServer, scenario: dict[str, Any]
 def _new_server(
     *,
     semantic_ir: bool,
+    backend: str,
+    base_url: str,
     legacy_model: str,
     semantic_model: str,
     timeout: int,
@@ -98,8 +101,8 @@ def _new_server(
     return PrologMCPServer(
         active_profile=active_profile,
         compiler_mode="strict",
-        compiler_backend="ollama",
-        compiler_base_url="http://127.0.0.1:11434",
+        compiler_backend=backend,
+        compiler_base_url=base_url,
         compiler_model=legacy_model,
         compiler_timeout=timeout,
         compiler_prompt_enabled=not semantic_ir,
@@ -124,6 +127,51 @@ def _extract_applied_rescues(trace: dict[str, Any], section: str) -> list[str]:
         for item in rescues
         if isinstance(item, dict) and bool(item.get("applied")) and str(item.get("name", "")).strip()
     ]
+
+
+def _classify_rescue_name(name: str) -> str:
+    value = str(name or "").strip().lower()
+    if not value:
+        return "unknown"
+    if value in {"semantic_ir_mapper", "semantic_ir_prethink_projection"}:
+        return "structural_mapper"
+    if value == "fallback_classifier":
+        return "legacy_route_fallback"
+    if any(token in value for token in ("registry", "type_", "predicate_name", "temporal_predicate_namespace")):
+        return "authority_admission"
+    if any(token in value for token in ("medical", "umls", "bridge")):
+        return "domain_medical"
+    if "clarification" in value or "freethinker" in value:
+        return "clarification_policy"
+    if any(
+        token in value
+        for token in (
+            "possessive",
+            "family",
+            "spouse",
+            "pronoun",
+            "subject_prefixed",
+            "make_with",
+            "observed",
+            "three_bears",
+            "narrative",
+            "route_intent_realign",
+            "route_fallback",
+            "speaker_prefixed",
+        )
+    ):
+        return "semantic_rescue_english"
+    if any(token in value for token in ("retract", "query_open_variable", "assert_fact_shape", "alias")):
+        return "structural_mapper"
+    return "uncategorized"
+
+
+def _classify_rescues(names: list[str]) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for name in names:
+        category = _classify_rescue_name(name)
+        counts[category] = counts.get(category, 0) + 1
+    return dict(sorted(counts.items()))
 
 
 def _operation_clauses(execution: dict[str, Any]) -> list[str]:
@@ -154,6 +202,26 @@ def _avoid_probe(item: str) -> str:
     return probe.strip()
 
 
+def _semantic_ir_decision(result: dict[str, Any]) -> str:
+    trace = result.get("compiler_trace", {}) if isinstance(result.get("compiler_trace"), dict) else {}
+    for section in ("prethink", "parse"):
+        node = trace.get(section, {}) if isinstance(trace, dict) else {}
+        if not isinstance(node, dict):
+            continue
+        semantic_ir = node.get("semantic_ir", {})
+        if not isinstance(semantic_ir, dict):
+            continue
+        parsed = semantic_ir.get("parsed", {})
+        if not isinstance(parsed, dict):
+            continue
+        if str(parsed.get("schema_version", "")).strip() != "semantic_ir_v1":
+            continue
+        decision = projected_semantic_ir_decision(parsed)
+        if decision:
+            return decision
+    return ""
+
+
 def _score_runtime_result(
     result: dict[str, Any],
     scenario: dict[str, Any],
@@ -166,7 +234,10 @@ def _score_runtime_result(
     front_door = result.get("front_door", {}) if isinstance(result.get("front_door"), dict) else {}
     status = str(result.get("status", "")).strip()
     intent = str(execution.get("intent") or front_door.get("compiler_intent") or "").strip()
-    if status == "clarification_required" or bool(front_door.get("needs_clarification")):
+    ir_decision = _semantic_ir_decision(result)
+    if ir_decision in {"commit", "clarify", "quarantine", "reject", "answer", "mixed"}:
+        decision = ir_decision
+    elif status == "clarification_required" or bool(front_door.get("needs_clarification")):
         decision = "clarify"
     elif intent == "query":
         decision = "answer"
@@ -216,6 +287,8 @@ def _summarize_result(
     parse_rescues = _extract_applied_rescues(trace, "parse")
     prethink_rescues = _extract_applied_rescues(trace, "prethink")
     score = _score_runtime_result(result, scenario, final_kb=final_kb)
+    all_rescues = parse_rescues + prethink_rescues
+    rescue_classes = _classify_rescues(all_rescues)
     return {
         "label": label,
         "status": str(result.get("status", "")).strip(),
@@ -226,6 +299,8 @@ def _summarize_result(
         "errors": list(execution.get("errors", [])) if isinstance(execution.get("errors"), list) else [],
         "parse_rescues": parse_rescues,
         "prethink_rescues": prethink_rescues,
+        "rescue_classes": rescue_classes,
+        "semantic_rescue_english_count": rescue_classes.get("semantic_rescue_english", 0),
         "non_mapper_parse_rescue_count": len([item for item in parse_rescues if item != "semantic_ir_mapper"]),
         "context_load": context_load,
         "final_kb": final_kb,
@@ -237,6 +312,8 @@ def _summarize_result(
 def run_case(
     *,
     scenario: dict[str, Any],
+    backend: str,
+    base_url: str,
     legacy_model: str,
     semantic_model: str,
     timeout: int,
@@ -245,6 +322,8 @@ def run_case(
     utterance = str(scenario.get("utterance", "")).strip()
     legacy_server = _new_server(
         semantic_ir=False,
+        backend=backend,
+        base_url=base_url,
         legacy_model=legacy_model,
         semantic_model=semantic_model,
         timeout=timeout,
@@ -252,6 +331,8 @@ def run_case(
     )
     semantic_server = _new_server(
         semantic_ir=True,
+        backend=backend,
+        base_url=base_url,
         legacy_model=legacy_model,
         semantic_model=semantic_model,
         timeout=timeout,
@@ -284,6 +365,10 @@ def run_case(
         "domain": str(scenario.get("domain", "")).strip(),
         "utterance": utterance,
         "expected_decision": str(scenario.get("expect", {}).get("decision", "")).strip(),
+        "backend": backend,
+        "base_url": base_url,
+        "legacy_model": legacy_model,
+        "semantic_model": semantic_model,
         "legacy": legacy,
         "semantic_ir": semantic,
         "delta": {
@@ -313,6 +398,16 @@ def _records_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
                 pass
         return sum(values) / max(1, len(values))
 
+    def rescue_class_totals(label: str) -> dict[str, int]:
+        totals: dict[str, int] = {}
+        for record in records:
+            classes = record[label].get("rescue_classes", {})
+            if not isinstance(classes, dict):
+                continue
+            for key, value in classes.items():
+                totals[str(key)] = totals.get(str(key), 0) + int(value or 0)
+        return dict(sorted(totals.items()))
+
     return {
         "runs": len(records),
         "legacy_decision_ok": sum(1 for row in records if row["legacy"]["score"]["decision_ok"]),
@@ -322,6 +417,12 @@ def _records_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
         "legacy_parse_rescues": sum(row["legacy"]["non_mapper_parse_rescue_count"] for row in records),
         "semantic_non_mapper_parse_rescues": sum(
             row["semantic_ir"]["non_mapper_parse_rescue_count"] for row in records
+        ),
+        "legacy_rescue_classes": rescue_class_totals("legacy"),
+        "semantic_rescue_classes": rescue_class_totals("semantic_ir"),
+        "legacy_semantic_rescue_english": sum(row["legacy"]["semantic_rescue_english_count"] for row in records),
+        "semantic_semantic_rescue_english": sum(
+            row["semantic_ir"]["semantic_rescue_english_count"] for row in records
         ),
         "total_parse_rescue_reduction": sum(row["delta"]["parse_rescue_reduction"] for row in records),
     }
@@ -333,6 +434,9 @@ def write_outputs(records: list[dict[str, Any]], jsonl_path: Path) -> None:
         for record in records:
             handle.write(json.dumps(record, ensure_ascii=False) + "\n")
     summary = _records_summary(records)
+    class_keys = sorted(
+        set(summary["legacy_rescue_classes"].keys()) | set(summary["semantic_rescue_classes"].keys())
+    )
     lines = [
         "# Guardrail Dependency A/B",
         "",
@@ -349,11 +453,27 @@ def write_outputs(records: list[dict[str, Any]], jsonl_path: Path) -> None:
             f"{summary['total_parse_rescue_reduction']} |"
         ),
         "",
-        "## Cases",
+        "## Rescue Classes",
         "",
-        "| Scenario | Expected | Legacy | Semantic IR | Rescue delta | Score delta |",
-        "|---|---|---|---|---:|---:|",
+        "| Class | Legacy | Semantic IR |",
+        "|---|---:|---:|",
     ]
+    for key in class_keys:
+        lines.append(
+            f"| `{key}` | {summary['legacy_rescue_classes'].get(key, 0)} | "
+            f"{summary['semantic_rescue_classes'].get(key, 0)} |"
+        )
+    lines.extend(
+        [
+            "",
+            "Semantic-rescue-English counts are the deletion-pressure metric: lower is better when scores hold.",
+            "",
+            "## Cases",
+            "",
+            "| Scenario | Expected | Legacy | Semantic IR | Rescue delta | Score delta |",
+            "|---|---|---|---|---:|---:|",
+        ]
+    )
     for record in records:
         legacy = record["legacy"]["score"]
         semantic = record["semantic_ir"]["score"]
@@ -371,6 +491,8 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--scenario-group", choices=["edge_sample", "edge", "weak_edges", "all"], default="edge_sample")
     parser.add_argument("--scenario-ids", default="")
+    parser.add_argument("--backend", choices=["ollama", "lmstudio"], default="ollama")
+    parser.add_argument("--base-url", default="")
     parser.add_argument("--legacy-model", default="qwen35-semparse:9b")
     parser.add_argument("--semantic-model", default="qwen3.6:35b")
     parser.add_argument("--timeout", type=int, default=300)
@@ -381,6 +503,10 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
+    backend = str(args.backend or "ollama").strip().lower()
+    base_url = str(args.base_url or "").strip()
+    if not base_url:
+        base_url = "http://127.0.0.1:1234" if backend == "lmstudio" else "http://127.0.0.1:11434"
     scenario_ids = [item.strip() for item in str(args.scenario_ids or "").split(",") if item.strip()]
     if not scenario_ids:
         if args.scenario_group == "edge_sample":
@@ -400,6 +526,8 @@ def main() -> int:
         records.append(
             run_case(
                 scenario=scenario,
+                backend=backend,
+                base_url=base_url,
                 legacy_model=str(args.legacy_model),
                 semantic_model=str(args.semantic_model),
                 timeout=int(args.timeout),

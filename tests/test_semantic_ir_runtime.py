@@ -213,6 +213,38 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         self.assertEqual(payload["intent"], "query")
         self.assertFalse(payload["needs_clarification"])
 
+    def test_mapper_allows_inferred_query_for_pure_hypothetical(self) -> None:
+        ir = _ir(
+            decision="mixed",
+            turn_type="query",
+            unsafe_implications=[
+                {
+                    "candidate": "receives_hazard_pay(felix)",
+                    "why_unsafe": "Hypothetical consequence is not a fact.",
+                    "commit_policy": "reject",
+                }
+            ],
+            candidate_operations=[
+                {
+                    "operation": "query",
+                    "predicate": "receives_hazard_pay",
+                    "args": ["Felix"],
+                    "polarity": "positive",
+                    "source": "inferred",
+                    "safety": "safe",
+                }
+            ],
+            self_check={
+                "bad_commit_risk": "low",
+                "missing_slots": [],
+                "notes": ["hypothetical if/would query"],
+            },
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(ir)
+        self.assertEqual(warnings, [])
+        self.assertEqual(parsed["intent"], "query")
+        self.assertEqual(parsed["queries"], ["receives_hazard_pay(felix)."])
+
     def test_prethink_payload_does_not_block_on_optional_provenance_slot(self) -> None:
         ir = _ir(
             decision="quarantine",
@@ -282,6 +314,71 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         self.assertTrue(payload["needs_clarification"])
         self.assertEqual(payload["clarification_question"], "Which patient does 'his' refer to?")
         self.assertGreaterEqual(payload["uncertainty_score"], 0.82)
+
+    def test_prethink_payload_projects_commit_with_unsafe_implication_as_mixed(self) -> None:
+        ir = _ir(
+            decision="commit",
+            unsafe_implications=[
+                {
+                    "candidate": "took(omar, key)",
+                    "why_unsafe": "Reported denial is not evidence of taking.",
+                    "commit_policy": "reject",
+                }
+            ],
+        )
+        payload = semantic_ir_to_prethink_payload(ir)
+        self.assertIn("decision=mixed", payload["rationale"])
+        self.assertFalse(payload["needs_clarification"])
+
+    def test_prethink_payload_projects_claim_plus_direct_observation_as_mixed(self) -> None:
+        ir = _ir(
+            decision="commit",
+            assertions=[
+                {
+                    "kind": "claim",
+                    "subject": "Omar",
+                    "relation_concept": "denied",
+                    "object": "taking_key",
+                    "polarity": "negative",
+                    "certainty": 0.9,
+                },
+                {
+                    "kind": "direct",
+                    "subject": "camera",
+                    "relation_concept": "showed",
+                    "object": "unlocking",
+                    "polarity": "positive",
+                    "certainty": 0.9,
+                },
+            ],
+        )
+        payload = semantic_ir_to_prethink_payload(ir)
+        self.assertIn("decision=mixed", payload["rationale"])
+
+    def test_prethink_payload_ignores_duplicate_unsafe_implication_for_safe_operation(self) -> None:
+        ir = _ir(
+            decision="commit",
+            turn_type="correction",
+            candidate_operations=[
+                {
+                    "operation": "retract",
+                    "predicate": "has_allergy",
+                    "args": ["Leo", "penicillin"],
+                    "polarity": "negative",
+                    "source": "context",
+                    "safety": "safe",
+                }
+            ],
+            unsafe_implications=[
+                {
+                    "candidate": "retract(has_allergy(leo, penicillin))",
+                    "why_unsafe": "Draft thought contradicted by final safe operation.",
+                    "commit_policy": "clarify",
+                }
+            ],
+        )
+        payload = semantic_ir_to_prethink_payload(ir)
+        self.assertIn("decision=commit", payload["rationale"])
 
     def test_server_semantic_ir_path_skips_legacy_rescue_chain(self) -> None:
         server = PrologMCPServer(
