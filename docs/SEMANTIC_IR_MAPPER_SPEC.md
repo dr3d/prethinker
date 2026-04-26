@@ -71,6 +71,9 @@ behavior.
 | Pure hypothetical query with a safe query operation | `answer` | Hypothetical questions should be answered as queries and must not write premise/conclusion facts. |
 | `commit` plus safe direct write plus non-duplicate unsafe implications | `mixed` | Some direct facts may be safe while other implications must remain uncommitted. |
 | `commit` plus both claim and direct assertions | `mixed` | Claims and observations can coexist without collapsing claim content into fact. |
+| Low-risk correction plus unsafe alternative whose policy is only `clarify` | `commit` | Harmless alternate modeling candidates such as symptom-vs-side-effect should not downgrade a complete safe correction. |
+| Ambiguous referents where only a generic speech/container write is safe | `clarify` | A wrapper fact like `told(...)` should not hide the fact that the content itself needs clarification. |
+| `commit` with only context-sourced writes plus unsafe implications | `mixed` | Context-sourced writes are skipped; the decision label must reflect that the useful work is partial/unsafe. |
 | `quarantine` with only optional metadata slots missing and a safe direct write | `mixed` | Missing provenance/authority text should not block a clear safe operation. |
 | `quarantine` correction with safe direct retract | `mixed` | A safe retraction may be admissible even if replacement assertions are unsafe. |
 | `clarify` with missing essential slots | `clarify` | Missing patient/entity/measurement/referent blocks safe admission. |
@@ -204,6 +207,21 @@ Examples:
 - skipped negative assertion
 - skipped quantified group assertion
 - duplicate unsafe implication ignored by projection
+
+The mapper also emits `admission_diagnostics_v1` on semantic IR parse payloads
+and mapper trace entries. This is an advisory scorecard, not an authority path.
+It records:
+
+- model decision versus projected decision;
+- projection reason;
+- per-operation source/safety/polarity/predicate features;
+- admitted versus skipped operations;
+- concrete clauses the mapper considered admissible;
+- skip reasons and rationale codes such as `source_policy`,
+  `candidate_safety_gate`, `polarity_policy`, and `no_rule_synthesis`.
+
+This lets us ask "why does this guardrail exist?" at operation granularity
+without turning score features into write permission.
 
 The A/B harness additionally classifies non-structural legacy events as:
 

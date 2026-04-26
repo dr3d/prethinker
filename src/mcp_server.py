@@ -1785,6 +1785,11 @@ class PrologMCPServer:
                 "applied": True,
                 "summary": "Mapped safe semantic_ir_v1 operations directly to runtime parse without English rescue passes.",
                 "warnings": list(warnings),
+                "admission_diagnostics": self._clone_trace_payload(
+                    parsed.get("admission_diagnostics", {})
+                    if isinstance(parsed.get("admission_diagnostics"), dict)
+                    else {}
+                ),
             }
         )
         admitted = self._apply_active_profile_parse_guard(parsed=parsed, utterance=effective)

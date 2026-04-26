@@ -878,6 +878,7 @@ SEMANTIC_IR_JSON_SCHEMA: dict[str, Any] = {
         },
         "entities": {
             "type": "array",
+            "maxItems": 12,
             "items": {
                 "type": "object",
                 "additionalProperties": False,
@@ -906,6 +907,7 @@ SEMANTIC_IR_JSON_SCHEMA: dict[str, Any] = {
         },
         "referents": {
             "type": "array",
+            "maxItems": 8,
             "items": {
                 "type": "object",
                 "additionalProperties": False,
@@ -920,6 +922,7 @@ SEMANTIC_IR_JSON_SCHEMA: dict[str, Any] = {
         },
         "assertions": {
             "type": "array",
+            "maxItems": 8,
             "items": {
                 "type": "object",
                 "additionalProperties": False,
@@ -936,6 +939,7 @@ SEMANTIC_IR_JSON_SCHEMA: dict[str, Any] = {
         },
         "unsafe_implications": {
             "type": "array",
+            "maxItems": 8,
             "items": {
                 "type": "object",
                 "additionalProperties": False,
@@ -949,6 +953,7 @@ SEMANTIC_IR_JSON_SCHEMA: dict[str, Any] = {
         },
         "candidate_operations": {
             "type": "array",
+            "maxItems": 8,
             "items": {
                 "type": "object",
                 "additionalProperties": False,
@@ -963,15 +968,15 @@ SEMANTIC_IR_JSON_SCHEMA: dict[str, Any] = {
                 },
             },
         },
-        "clarification_questions": {"type": "array", "items": {"type": "string"}},
+        "clarification_questions": {"type": "array", "maxItems": 3, "items": {"type": "string"}},
         "self_check": {
             "type": "object",
             "additionalProperties": False,
             "required": ["bad_commit_risk", "missing_slots", "notes"],
             "properties": {
                 "bad_commit_risk": {"type": "string", "enum": ["low", "medium", "high"]},
-                "missing_slots": {"type": "array", "items": {"type": "string"}},
-                "notes": {"type": "array", "items": {"type": "string"}},
+                "missing_slots": {"type": "array", "maxItems": 8, "items": {"type": "string"}},
+                "notes": {"type": "array", "maxItems": 8, "items": {"type": "string"}},
             },
         },
     },
@@ -1062,6 +1067,7 @@ PROMPT_VARIANTS: dict[str, dict[str, Any]] = {
             "- mixed: same turn contains both safe writes and a query/rule/unsafe implication.\n"
             "- commit: direct state update or correction has a clear target and safe predicate mapping.\n"
             "Special guards:\n"
+            "- Keep arrays compact: at most 8 assertions, 8 unsafe_implications, 8 candidate_operations, and 3 clarification_questions. Never repeat equivalent assertions.\n"
             "- Do not turn a claim into a fact. 'Bob says he has it' is a claim, not possession.\n"
             "- Do not infer diagnosis or staging from a single lab value request. Quarantine or clarify.\n"
             "- Do not infer allergy from nausea/vomiting alone. Clarify allergy vs side effect/intolerance.\n"
@@ -1072,6 +1078,7 @@ PROMPT_VARIANTS: dict[str, dict[str, Any]] = {
             "- Do not assert a fact about a quantified group atom such as submitted_form(residents) for 'all residents except Kai'. Use individual known members only when context enumerates them; otherwise mark the class-level write unsafe.\n"
             "- Pure hypothetical questions with 'if ... would ...?' are queries, not writes and not clarification requests when the hypothetical nature is clear.\n"
             "- Denial predicates are speech/event facts. 'Omar denied signing the waiver' may assert denied(...); it must not assert signed(...) false.\n"
+            "- When pronouns or referents are ambiguous and only a generic speech/container fact such as told/said/claimed is safe, choose clarify rather than committing the speech wrapper.\n"
             "- If context supplies exactly one active patient and one active lab test, a direct 'it came back high' may propose a safe lab_result_high write.\n"
             "- For rule-plus-fact or fact-plus-query turns, use mixed and keep unsafe query targets out of committed facts.\n"
             "- Preserve negation in candidate_operations with polarity='negative'. Do not turn 'never saw X' into a positive saw/2 fact."
@@ -1096,6 +1103,7 @@ PROMPT_VARIANTS: dict[str, dict[str, Any]] = {
             "- mixed: same turn contains both safe writes and a query/rule/unsafe implication.\n"
             "- commit: direct state update or correction has a clear target and safe predicate mapping.\n"
             "Special guards:\n"
+            "- Keep arrays compact: at most 8 assertions, 8 unsafe_implications, 8 candidate_operations, and 3 clarification_questions. Never repeat equivalent assertions.\n"
             "- Do not turn a claim into a fact. 'Bob says he has it' is a claim, not possession.\n"
             "- Do not infer diagnosis or staging from a single lab value request. Quarantine or clarify.\n"
             "- Do not infer allergy from nausea/vomiting alone. Clarify allergy vs side effect/intolerance unless the user explicitly corrects a prior allergy record.\n"
@@ -1106,6 +1114,7 @@ PROMPT_VARIANTS: dict[str, dict[str, Any]] = {
             "- Do not assert a fact about a quantified group atom such as submitted_form(residents) for 'all residents except Kai'. Use individual known members only when context enumerates them; otherwise mark the class-level write unsafe.\n"
             "- Pure hypothetical questions with 'if ... would ...?' are queries, not writes and not clarification requests when the hypothetical nature is clear.\n"
             "- Denial predicates are speech/event facts. 'Omar denied signing the waiver' may assert denied(...); it must not assert signed(...) false.\n"
+            "- When pronouns or referents are ambiguous and only a generic speech/container fact such as told/said/claimed is safe, choose clarify rather than committing the speech wrapper.\n"
             "- If context supplies exactly one active patient and one active lab test, a direct 'it came back high' may propose a safe lab_result_high write.\n"
             "- For rule-plus-fact or fact-plus-query turns, use mixed and keep unsafe query targets out of committed facts.\n"
             "- Preserve negation in candidate_operations with polarity='negative'. Do not turn 'never saw X' into a positive saw/2 fact.\n"
@@ -1140,12 +1149,14 @@ PROMPT_VARIANTS: dict[str, dict[str, Any]] = {
             "- quarantine: the only candidate commitments are claims, allegations, disjunctions, diagnoses, advice, or unsafe implications.\n"
             "- reject: medical advice or treatment/dose/hold/start/stop recommendations.\n"
             "Operation policy:\n"
+            "- Keep arrays compact: at most 8 assertions, 8 unsafe_implications, 8 candidate_operations, and 3 clarification_questions. Never repeat equivalent assertions.\n"
             "- A retract operation should use polarity='positive' when retracting a previously stored positive fact. Use polarity='negative' only for explicit negative facts.\n"
             "- Direct corrections with 'not X, Y instead', 'that was wrong', or 'don't call it normal' may propose safe retract/assert operations.\n"
             "- Direct 'not allergic; side effect/nausea instead' may propose retracting the allergy and asserting the side effect, while keeping clinical advice out.\n"
             "- A direct correction like 'remove X allergy; stomach upset only' is explicit enough to retract the allergy and record side effect/intolerance when the old allergy fact is in context.\n"
             "- Denials are claim events, not negated facts. 'Omar denied signing' is denied(...), not not(signed(...)).\n"
             "- Counterfactuals and hypotheticals are not writes. Represent them as query/unsafe implication/self_check notes.\n"
+            "- When pronouns or referents are ambiguous and only a generic speech/container fact such as told/said/claimed is safe, choose clarify rather than committing the speech wrapper.\n"
             "- Disjunctions like 'A or B caused it' do not prove either cause; record safe observations and quarantine cause assignment.\n"
             "- Do not copy context rules into candidate_operations unless the user is adding or changing the rule.\n"
             "- Do not invent required governance slots that are not in the predicate schema. Source document, authority, or reason fields are optional provenance unless the allowed predicate explicitly requires them.\n"

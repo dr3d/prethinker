@@ -247,3 +247,19 @@ Current mapper policy:
 - `retract` operations are treated as retractions even when the model marks the
   operation polarity as negative
 - rule operations require an explicit rule clause before admission
+
+Current structured-output schema limits live arrays to keep local models from
+looping or over-explaining:
+
+- up to 12 entities;
+- up to 8 referents;
+- up to 8 assertions;
+- up to 8 unsafe implications;
+- up to 8 candidate operations;
+- up to 3 clarification questions;
+- up to 8 missing slots and 8 self-check notes.
+
+The current prompt also tells the model to keep arrays compact, avoid repeated
+equivalent assertions, and choose clarification when ambiguous pronouns leave
+only a generic speech/container fact such as `told`, `said`, or `claimed` as a
+safe write.

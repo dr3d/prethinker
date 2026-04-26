@@ -93,6 +93,7 @@ SEMANTIC_IR_JSON_SCHEMA: dict[str, Any] = {
         },
         "entities": {
             "type": "array",
+            "maxItems": 12,
             "items": {
                 "type": "object",
                 "additionalProperties": False,
@@ -121,6 +122,7 @@ SEMANTIC_IR_JSON_SCHEMA: dict[str, Any] = {
         },
         "referents": {
             "type": "array",
+            "maxItems": 8,
             "items": {
                 "type": "object",
                 "additionalProperties": False,
@@ -135,6 +137,7 @@ SEMANTIC_IR_JSON_SCHEMA: dict[str, Any] = {
         },
         "assertions": {
             "type": "array",
+            "maxItems": 8,
             "items": {
                 "type": "object",
                 "additionalProperties": False,
@@ -151,6 +154,7 @@ SEMANTIC_IR_JSON_SCHEMA: dict[str, Any] = {
         },
         "unsafe_implications": {
             "type": "array",
+            "maxItems": 8,
             "items": {
                 "type": "object",
                 "additionalProperties": False,
@@ -164,6 +168,7 @@ SEMANTIC_IR_JSON_SCHEMA: dict[str, Any] = {
         },
         "candidate_operations": {
             "type": "array",
+            "maxItems": 8,
             "items": {
                 "type": "object",
                 "additionalProperties": False,
@@ -178,15 +183,15 @@ SEMANTIC_IR_JSON_SCHEMA: dict[str, Any] = {
                 },
             },
         },
-        "clarification_questions": {"type": "array", "items": {"type": "string"}},
+        "clarification_questions": {"type": "array", "maxItems": 3, "items": {"type": "string"}},
         "self_check": {
             "type": "object",
             "additionalProperties": False,
             "required": ["bad_commit_risk", "missing_slots", "notes"],
             "properties": {
                 "bad_commit_risk": {"type": "string", "enum": ["low", "medium", "high"]},
-                "missing_slots": {"type": "array", "items": {"type": "string"}},
-                "notes": {"type": "array", "items": {"type": "string"}},
+                "missing_slots": {"type": "array", "maxItems": 8, "items": {"type": "string"}},
+                "notes": {"type": "array", "maxItems": 8, "items": {"type": "string"}},
             },
         },
     },
@@ -210,6 +215,7 @@ BEST_GUARDED_V2_GUIDANCE = (
     "- mixed: same turn contains both safe writes and a query/rule/unsafe implication. If unsafe_implications is non-empty and safe operations are also present, decision MUST be mixed, not commit.\n"
     "- commit: direct state update or correction has a clear target and safe predicate mapping.\n"
     "Special guards:\n"
+    "- Keep arrays compact: at most 8 assertions, 8 unsafe_implications, 8 candidate_operations, and 3 clarification_questions. Never repeat equivalent assertions.\n"
     "- Context entries are already-known state/rules, not new user assertions. Do not create candidate_operations that merely restate context.\n"
     "- Use context to resolve referents and answer queries; only the current utterance may introduce a new write candidate.\n"
     "- If the current utterance contains policy/rule language such as all/every/unless/must/before and also direct facts, choose mixed. Commit the direct facts and represent rule/policy material in assertions or unsafe_implications if no safe rule clause is available.\n"
@@ -230,6 +236,7 @@ BEST_GUARDED_V2_GUIDANCE = (
     "- Legal findings are scoped speech/finding facts. 'The court did not find that Pavel paid' must not become negative paid(Pavel, ...). It is an absence of finding; use mixed/quarantine or a finding predicate if available.\n"
     "- 'Only after X did Y become effective; X happened Wednesday' is enough to commit Y's effective date as Wednesday when an effective_on predicate is allowed. Do not mark the effective date unsafe merely because it follows from the stated condition.\n"
     "- Do not include draft thoughts, reversals, or self-debate in unsafe_implications. If the final candidate_operations mark an operation safe, do not also list the same operation as unsafe.\n"
+    "- When pronouns or referents are ambiguous and only a generic speech/container fact such as told/said/claimed is safe, choose clarify rather than committing the speech wrapper.\n"
     "- If context supplies exactly one active patient and one active lab test, a direct 'it came back high' may propose a safe lab_result_high write.\n"
     "- For rule-plus-fact or fact-plus-query turns, use mixed and keep unsafe query targets out of committed facts.\n"
     "- Preserve negation in candidate_operations with polarity='negative'. Do not turn 'never saw X' into a positive saw/2 fact."
@@ -451,51 +458,109 @@ def semantic_ir_to_prethink_payload(ir: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def semantic_ir_admission_diagnostics(ir: dict[str, Any]) -> dict[str, Any]:
+    """Explain mapper admission choices without granting authority.
+
+    These diagnostics are intentionally deterministic and structural. They are
+    a scorecard for traces and experiments, not a second admission path.
+    """
+    model_decision = _normalize_decision(ir.get("decision"))
+    projected_decision = _projected_decision(ir)
+    operations: list[dict[str, Any]] = []
+    warning_counts: dict[str, int] = {}
+    admitted_count = 0
+    skipped_count = 0
+    clauses_by_effect: dict[str, list[str]] = {
+        "facts": [],
+        "rules": [],
+        "queries": [],
+        "retracts": [],
+    }
+    entity_names = _entity_name_map(ir)
+    entity_meta = _entity_metadata_map(ir)
+
+    for index, op in enumerate(_candidate_operations(ir)):
+        diagnosis = _diagnose_candidate_operation(
+            ir,
+            op,
+            index=index,
+            entity_names=entity_names,
+            entity_meta=entity_meta,
+        )
+        if (
+            projected_decision in {"reject", "quarantine", "clarify"}
+            and bool(diagnosis.get("admitted"))
+            and str(diagnosis.get("effect", "")).strip() in {"fact", "rule", "retract"}
+        ):
+            diagnosis = dict(diagnosis)
+            diagnosis["admitted"] = False
+            diagnosis["skip_reason"] = f"projected_decision_{projected_decision}_blocks_write"
+            diagnosis["clauses"] = []
+            diagnosis["rationale_codes"] = list(diagnosis.get("rationale_codes", [])) + [
+                "decision_projection_gate"
+            ]
+        operations.append(diagnosis)
+        warning = str(diagnosis.get("warning", "")).strip()
+        if warning:
+            warning_counts[warning] = warning_counts.get(warning, 0) + 1
+        if bool(diagnosis.get("admitted")):
+            admitted_count += 1
+            effect = str(diagnosis.get("effect", "")).strip()
+            clauses = [str(item).strip() for item in diagnosis.get("clauses", []) if str(item).strip()]
+            if effect == "fact":
+                clauses_by_effect["facts"].extend(clauses)
+            elif effect == "rule":
+                clauses_by_effect["rules"].extend(clauses)
+            elif effect == "query":
+                clauses_by_effect["queries"].extend(clauses)
+            elif effect == "retract":
+                clauses_by_effect["retracts"].extend(clauses)
+        else:
+            skipped_count += 1
+
+    features = _admission_feature_summary(ir)
+    return {
+        "version": "admission_diagnostics_v1",
+        "authority": "diagnostic_only_mapper_remains_authoritative",
+        "model_decision": model_decision,
+        "projected_decision": projected_decision,
+        "projection_reason": _projection_reason(ir, model_decision, projected_decision),
+        "features": features,
+        "operation_count": len(operations),
+        "admitted_count": admitted_count,
+        "skipped_count": skipped_count,
+        "warning_counts": dict(sorted(warning_counts.items())),
+        "clauses": clauses_by_effect,
+        "operations": operations,
+    }
+
+
 def semantic_ir_to_legacy_parse(ir: dict[str, Any]) -> tuple[dict[str, Any], list[str]]:
     decision = _projected_decision(ir)
-    warnings: list[str] = []
     facts: list[str] = []
     rules: list[str] = []
     queries: list[str] = []
     retracts: list[str] = []
-    entity_names = _entity_name_map(ir)
-    entity_meta = _entity_metadata_map(ir)
+    diagnostics = semantic_ir_admission_diagnostics(ir)
+    warnings = [
+        str(item.get("warning", "")).strip()
+        for item in diagnostics.get("operations", [])
+        if isinstance(item, dict) and str(item.get("warning", "")).strip()
+    ]
 
-    for op in _candidate_operations(ir):
-        operation = str(op.get("operation", "")).strip().lower()
-        safety = str(op.get("safety", "")).strip().lower()
-        source = str(op.get("source", "")).strip().lower()
-        polarity = str(op.get("polarity", "positive") or "positive").strip().lower()
-        if safety != "safe":
+    for item in diagnostics.get("operations", []):
+        if not isinstance(item, dict) or not bool(item.get("admitted")):
             continue
-        if source == "inferred" and not (operation == "query" and _is_pure_hypothetical_query(ir)):
-            warnings.append("skipped inferred safe operation pending policy")
-            continue
-        if source == "context" and operation in {"assert", "rule"}:
-            warnings.append("skipped context-sourced write operation")
-            continue
-        predicate = _predicate_name(op.get("predicate"))
-        if not predicate:
-            continue
-        if operation == "assert" and _operation_targets_quantified_set(op, entity_meta):
-            warnings.append("skipped quantified set assertion without individual expansion")
-            continue
-        if polarity == "negative" and operation == "assert" and not _is_negative_event_predicate(predicate):
-            warnings.append("skipped negative assertion pending explicit negation policy")
-            continue
-        args = _operation_args(op.get("args"), entity_names=entity_names, for_query=operation == "query")
-        if operation == "assert":
-            facts.append(_clause(predicate, args))
-        elif operation == "query":
-            queries.append(_clause(predicate, args))
-        elif operation == "retract":
-            retracts.extend(_retract_clause_variants(predicate, args))
-        elif operation == "rule":
-            clause = str(op.get("clause") or op.get("logic") or "").strip()
-            if clause:
-                rules.append(_ensure_period(clause))
-            else:
-                warnings.append("skipped rule operation without explicit clause")
+        effect = str(item.get("effect", "")).strip()
+        clauses = [str(clause).strip() for clause in item.get("clauses", []) if str(clause).strip()]
+        if effect == "fact":
+            facts.extend(clauses)
+        elif effect == "query":
+            queries.extend(clauses)
+        elif effect == "retract":
+            retracts.extend(clauses)
+        elif effect == "rule":
+            rules.extend(clauses)
 
     if decision in {"reject", "quarantine", "clarify"}:
         facts = []
@@ -522,10 +587,206 @@ def semantic_ir_to_legacy_parse(ir: dict[str, Any]) -> tuple[dict[str, Any], lis
         "clarification_question": _first_question(ir) if decision == "clarify" else "",
         "clarification_reason": _semantic_ir_reason(ir, decision) if decision == "clarify" else "",
         "rationale": f"Mapped from semantic_ir_v1 decision={decision}; skipped={len(warnings)}",
+        "admission_diagnostics": diagnostics,
     }
     if retracts:
         payload["correction_retract_clauses"] = retracts
     return payload, warnings
+
+
+def _diagnose_candidate_operation(
+    ir: dict[str, Any],
+    op: dict[str, Any],
+    *,
+    index: int,
+    entity_names: dict[str, str],
+    entity_meta: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    operation = str(op.get("operation", "")).strip().lower()
+    safety = str(op.get("safety", "")).strip().lower()
+    source = str(op.get("source", "")).strip().lower()
+    polarity = str(op.get("polarity", "positive") or "positive").strip().lower()
+    predicate = _predicate_name(op.get("predicate"))
+    args = _operation_args(op.get("args"), entity_names=entity_names, for_query=operation == "query")
+    base = {
+        "index": index,
+        "operation": operation,
+        "predicate": predicate,
+        "args": args,
+        "polarity": polarity,
+        "source": source,
+        "safety": safety,
+        "admitted": False,
+        "effect": "skip",
+        "clauses": [],
+        "skip_reason": "",
+        "warning": "",
+        "rationale_codes": [],
+        "features": _operation_feature_summary(
+            ir,
+            predicate=predicate,
+            args=args,
+            operation=operation,
+            source=source,
+            safety=safety,
+            polarity=polarity,
+        ),
+    }
+
+    def skip(reason: str, *, warning: str = "", codes: list[str] | None = None) -> dict[str, Any]:
+        base["skip_reason"] = reason
+        base["warning"] = warning
+        base["rationale_codes"] = codes or [reason]
+        return base
+
+    if safety != "safe":
+        return skip("operation_not_marked_safe", codes=["candidate_safety_gate"])
+    if source == "inferred" and not (operation == "query" and _is_pure_hypothetical_query(ir)):
+        return skip(
+            "inferred_write_not_admissible",
+            warning="skipped inferred safe operation pending policy",
+            codes=["source_policy", "inference_not_truth"],
+        )
+    if source == "context" and operation in {"assert", "rule"}:
+        return skip(
+            "context_write_not_admissible",
+            warning="skipped context-sourced write operation",
+            codes=["source_policy", "context_is_not_new_write"],
+        )
+    if not predicate:
+        return skip("invalid_predicate_name", codes=["predicate_shape_gate"])
+    if operation == "assert" and _operation_targets_quantified_set(op, entity_meta):
+        return skip(
+            "quantified_group_without_expansion",
+            warning="skipped quantified set assertion without individual expansion",
+            codes=["quantifier_policy", "no_group_atom_commit"],
+        )
+    if polarity == "negative" and operation == "assert" and not _is_negative_event_predicate(predicate):
+        return skip(
+            "negative_fact_semantics_not_supported",
+            warning="skipped negative assertion pending explicit negation policy",
+            codes=["polarity_policy", "no_general_negative_fact_system"],
+        )
+    if operation == "rule":
+        clause = str(op.get("clause") or op.get("logic") or "").strip()
+        if not clause:
+            return skip(
+                "rule_clause_missing",
+                warning="skipped rule operation without explicit clause",
+                codes=["rule_policy", "no_rule_synthesis"],
+            )
+        base["admitted"] = True
+        base["effect"] = "rule"
+        base["clauses"] = [_ensure_period(clause)]
+        base["rationale_codes"] = ["safe_rule_clause"]
+        return base
+    if operation == "assert":
+        base["admitted"] = True
+        base["effect"] = "fact"
+        base["clauses"] = [_clause(predicate, args)]
+        base["rationale_codes"] = ["safe_direct_fact" if source == "direct" else "safe_fact"]
+        return base
+    if operation == "query":
+        base["admitted"] = True
+        base["effect"] = "query"
+        base["clauses"] = [_clause(predicate, args)]
+        base["rationale_codes"] = ["safe_query"]
+        if source == "inferred":
+            base["rationale_codes"].append("hypothetical_inferred_query_exception")
+        return base
+    if operation == "retract":
+        base["admitted"] = True
+        base["effect"] = "retract"
+        base["clauses"] = _retract_clause_variants(predicate, args)
+        base["rationale_codes"] = ["safe_retract"]
+        return base
+    return skip("unsupported_operation", codes=["operation_policy"])
+
+
+def _admission_feature_summary(ir: dict[str, Any]) -> dict[str, Any]:
+    safe_ops = [
+        op
+        for op in _candidate_operations(ir)
+        if str(op.get("safety", "")).strip().lower() == "safe"
+    ]
+    sources = sorted(
+        {
+            str(op.get("source", "")).strip().lower()
+            for op in _candidate_operations(ir)
+            if str(op.get("source", "")).strip()
+        }
+    )
+    risk = _bad_commit_risk(ir)
+    risk_score = {"low": 0.15, "medium": 0.55, "high": 0.9}.get(risk, 0.55)
+    return {
+        "direct_operation_count": sum(
+            1 for op in safe_ops if str(op.get("source", "")).strip().lower() == "direct"
+        ),
+        "context_operation_count": sum(
+            1 for op in safe_ops if str(op.get("source", "")).strip().lower() == "context"
+        ),
+        "inferred_operation_count": sum(
+            1 for op in safe_ops if str(op.get("source", "")).strip().lower() == "inferred"
+        ),
+        "sources_present": sources,
+        "has_missing_required_slots": bool(_missing_slots(ir)),
+        "has_raw_missing_slots": bool(_raw_missing_slots(ir)),
+        "has_unresolved_referents": bool(_semantic_ir_ambiguities(ir)),
+        "has_unsafe_implications": _has_unsafe_implications(ir),
+        "has_claim_and_direct_assertions": _has_claim_and_direct_assertions(ir),
+        "bad_commit_risk": risk,
+        "bad_commit_risk_score": risk_score,
+        "diagnostic_note": "These values explain mapper pressure; they do not authorize writes.",
+    }
+
+
+def _operation_feature_summary(
+    ir: dict[str, Any],
+    *,
+    predicate: str,
+    args: list[str],
+    operation: str,
+    source: str,
+    safety: str,
+    polarity: str,
+) -> dict[str, Any]:
+    source_support = {
+        "direct": 1.0,
+        "context": 0.75,
+        "inferred": 0.25,
+    }.get(source, 0.0)
+    return {
+        "directness": 1.0 if source == "direct" else 0.0,
+        "evidence_support": source_support,
+        "predicate_shape_valid": bool(predicate),
+        "arg_count": len(args),
+        "model_marked_safe": safety == "safe",
+        "write_operation": operation in {"assert", "retract", "rule"},
+        "query_operation": operation == "query",
+        "negative_polarity": polarity == "negative",
+        "bad_commit_risk": _bad_commit_risk(ir),
+    }
+
+
+def _projection_reason(ir: dict[str, Any], model_decision: str, projected_decision: str) -> str:
+    if projected_decision == model_decision:
+        return "model_decision_preserved"
+    if _is_pure_hypothetical_query(ir):
+        return "pure_hypothetical_query_projected_to_answer"
+    if _ambiguous_content_should_clarify(ir):
+        return "ambiguous_referents_with_only_speech_wrapper_projected_to_clarify"
+    if model_decision == "commit" and _has_only_context_writes_with_unsafe_implications(ir):
+        return "context_writes_with_unsafe_implications_projected_to_mixed"
+    if model_decision == "commit" and _has_safe_direct_write(ir) and _has_projection_relevant_unsafe_implications(ir):
+        return "safe_write_with_unsafe_implications_projected_to_mixed"
+    if model_decision == "commit" and _has_safe_direct_write(ir) and _has_claim_and_direct_assertions(ir):
+        return "claim_plus_direct_observation_projected_to_mixed"
+    if model_decision == "quarantine" and _raw_missing_slots(ir) and not _missing_slots(ir):
+        return "only_optional_metadata_missing_projected_to_mixed"
+    if model_decision == "quarantine" and str(ir.get("turn_type", "")).strip().lower() == "correction":
+        if _has_safe_direct_retract(ir):
+            return "quarantined_correction_with_safe_retract_projected_to_mixed"
+    return "structural_projection"
 
 
 def _candidate_operations(ir: dict[str, Any]) -> list[dict[str, Any]]:
@@ -546,7 +807,11 @@ def _projected_decision(ir: dict[str, Any]) -> str:
     decision = _normalize_decision(ir.get("decision"))
     if _is_pure_hypothetical_query(ir):
         return "answer"
-    if decision == "commit" and _has_safe_direct_write(ir) and _has_unsafe_implications(ir):
+    if _ambiguous_content_should_clarify(ir):
+        return "clarify"
+    if decision == "commit" and _has_only_context_writes_with_unsafe_implications(ir):
+        return "mixed"
+    if decision == "commit" and _has_safe_direct_write(ir) and _has_projection_relevant_unsafe_implications(ir):
         return "mixed"
     if decision == "commit" and _has_safe_direct_write(ir) and _has_claim_and_direct_assertions(ir):
         return "mixed"
@@ -578,6 +843,8 @@ def _intent_from_ir(ir: dict[str, Any]) -> str:
         source = str(op.get("source", "")).strip().lower()
         polarity = str(op.get("polarity", "positive") or "positive").strip().lower()
         if source == "inferred":
+            continue
+        if source == "context" and operation in {"assert", "rule"}:
             continue
         predicate = _predicate_name(op.get("predicate"))
         if polarity == "negative" and operation == "assert" and not _is_negative_event_predicate(predicate):
@@ -768,6 +1035,40 @@ def _has_unsafe_implications(ir: dict[str, Any]) -> bool:
     )
 
 
+def _has_projection_relevant_unsafe_implications(ir: dict[str, Any]) -> bool:
+    raw = ir.get("unsafe_implications", [])
+    if not isinstance(raw, list):
+        return False
+    relevant = [
+        item
+        for item in raw
+        if isinstance(item, dict) and not _unsafe_implication_duplicates_safe_operation(item, ir)
+    ]
+    if not relevant:
+        return False
+    if (
+        _bad_commit_risk(ir) == "low"
+        and not _string_list(ir.get("clarification_questions"))
+        and all(str(item.get("commit_policy", "")).strip().lower() == "clarify" for item in relevant)
+    ):
+        return False
+    return True
+
+
+def _has_only_context_writes_with_unsafe_implications(ir: dict[str, Any]) -> bool:
+    if not _has_projection_relevant_unsafe_implications(ir):
+        return False
+    safe_writes = [
+        op
+        for op in _candidate_operations(ir)
+        if str(op.get("safety", "")).strip().lower() == "safe"
+        and str(op.get("operation", "")).strip().lower() in {"assert", "rule"}
+    ]
+    if not safe_writes:
+        return False
+    return all(str(op.get("source", "")).strip().lower() == "context" for op in safe_writes)
+
+
 def _unsafe_implication_duplicates_safe_operation(item: dict[str, Any], ir: dict[str, Any]) -> bool:
     candidate = str(item.get("candidate", "")).strip().lower()
     if not candidate:
@@ -797,6 +1098,51 @@ def _has_claim_and_direct_assertions(ir: dict[str, Any]) -> bool:
         if isinstance(item, dict)
     }
     return "claim" in kinds and "direct" in kinds
+
+
+COMMUNICATION_CONTAINER_PREDICATES = {
+    "said",
+    "says",
+    "told",
+    "reported",
+    "claimed",
+    "claim",
+    "stated",
+    "mentioned",
+}
+
+
+def _ambiguous_content_should_clarify(ir: dict[str, Any]) -> bool:
+    if _normalize_decision(ir.get("decision")) not in {"commit", "mixed"}:
+        return False
+    refs = ir.get("referents", [])
+    if not isinstance(refs, list):
+        return False
+    has_ambiguous_ref = any(
+        isinstance(ref, dict)
+        and str(ref.get("status", "")).strip().lower() in {"ambiguous", "unresolved"}
+        for ref in refs
+    )
+    if not has_ambiguous_ref:
+        return False
+    if not _string_list(ir.get("clarification_questions")):
+        return False
+    if _bad_commit_risk(ir) != "high":
+        return False
+    safe_write_predicates: list[str] = []
+    for op in _candidate_operations(ir):
+        if str(op.get("safety", "")).strip().lower() != "safe":
+            continue
+        if str(op.get("operation", "")).strip().lower() not in {"assert", "rule"}:
+            continue
+        if str(op.get("source", "")).strip().lower() != "direct":
+            continue
+        predicate = _predicate_name(op.get("predicate"))
+        if predicate:
+            safe_write_predicates.append(predicate)
+    if not safe_write_predicates:
+        return False
+    return all(predicate in COMMUNICATION_CONTAINER_PREDICATES for predicate in safe_write_predicates)
 
 
 def _has_safe_direct_retract(ir: dict[str, Any]) -> bool:

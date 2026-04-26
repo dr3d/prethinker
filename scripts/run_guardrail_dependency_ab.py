@@ -188,6 +188,14 @@ def _operation_clauses(execution: dict[str, Any]) -> list[str]:
     return clauses
 
 
+def _admission_diagnostics(execution: dict[str, Any]) -> dict[str, Any]:
+    parsed = execution.get("parse", {}) if isinstance(execution, dict) else {}
+    if not isinstance(parsed, dict):
+        return {}
+    diagnostics = parsed.get("admission_diagnostics", {})
+    return diagnostics if isinstance(diagnostics, dict) else {}
+
+
 def _kb_snapshot(server: PrologMCPServer) -> list[str]:
     try:
         return list(server._kb_snapshot_clauses(limit=500))  # type: ignore[attr-defined]
@@ -296,6 +304,7 @@ def _summarize_result(
         "writes_applied": int(execution.get("writes_applied", 0) or 0),
         "intent": str(execution.get("intent", "")).strip(),
         "clauses": _operation_clauses(execution),
+        "admission_diagnostics": _admission_diagnostics(execution),
         "errors": list(execution.get("errors", [])) if isinstance(execution.get("errors"), list) else [],
         "parse_rescues": parse_rescues,
         "prethink_rescues": prethink_rescues,
@@ -408,6 +417,19 @@ def _records_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
                 totals[str(key)] = totals.get(str(key), 0) + int(value or 0)
         return dict(sorted(totals.items()))
 
+    def diagnostic_totals(label: str) -> dict[str, int]:
+        totals = {"operation_count": 0, "admitted_count": 0, "skipped_count": 0}
+        for record in records:
+            diagnostics = record[label].get("admission_diagnostics", {})
+            if not isinstance(diagnostics, dict):
+                continue
+            for key in list(totals):
+                try:
+                    totals[key] += int(diagnostics.get(key, 0) or 0)
+                except Exception:
+                    pass
+        return totals
+
     return {
         "runs": len(records),
         "legacy_decision_ok": sum(1 for row in records if row["legacy"]["score"]["decision_ok"]),
@@ -424,6 +446,8 @@ def _records_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
         "semantic_semantic_rescue_english": sum(
             row["semantic_ir"]["semantic_rescue_english_count"] for row in records
         ),
+        "legacy_admission_diagnostics": diagnostic_totals("legacy"),
+        "semantic_admission_diagnostics": diagnostic_totals("semantic_ir"),
         "total_parse_rescue_reduction": sum(row["delta"]["parse_rescue_reduction"] for row in records),
     }
 
@@ -467,6 +491,21 @@ def write_outputs(records: list[dict[str, Any]], jsonl_path: Path) -> None:
         [
             "",
             "Semantic-rescue-English counts are the deletion-pressure metric: lower is better when scores hold.",
+            "",
+            "## Admission Diagnostics",
+            "",
+            "| Path | Operations | Admitted | Skipped |",
+            "|---|---:|---:|---:|",
+            (
+                f"| Legacy | {summary['legacy_admission_diagnostics']['operation_count']} | "
+                f"{summary['legacy_admission_diagnostics']['admitted_count']} | "
+                f"{summary['legacy_admission_diagnostics']['skipped_count']} |"
+            ),
+            (
+                f"| Semantic IR | {summary['semantic_admission_diagnostics']['operation_count']} | "
+                f"{summary['semantic_admission_diagnostics']['admitted_count']} | "
+                f"{summary['semantic_admission_diagnostics']['skipped_count']} |"
+            ),
             "",
             "## Cases",
             "",

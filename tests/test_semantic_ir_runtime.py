@@ -2,7 +2,11 @@ import unittest
 
 from kb_pipeline import _validate_parsed
 from src.mcp_server import PrologMCPServer
-from src.semantic_ir import semantic_ir_to_legacy_parse, semantic_ir_to_prethink_payload
+from src.semantic_ir import (
+    semantic_ir_admission_diagnostics,
+    semantic_ir_to_legacy_parse,
+    semantic_ir_to_prethink_payload,
+)
 
 
 def _ir(**updates):
@@ -269,6 +273,177 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         parsed, warnings = semantic_ir_to_legacy_parse(ir)
         self.assertEqual(parsed["facts"], ["located_in(silver_compass, locker)."])
         self.assertTrue(any("context-sourced write" in warning for warning in warnings))
+        diagnostics = parsed["admission_diagnostics"]
+        self.assertEqual(diagnostics["operation_count"], 2)
+        self.assertEqual(diagnostics["admitted_count"], 1)
+        self.assertEqual(diagnostics["skipped_count"], 1)
+        skipped = [row for row in diagnostics["operations"] if not row["admitted"]]
+        self.assertEqual(skipped[0]["skip_reason"], "context_write_not_admissible")
+        self.assertIn("source_policy", skipped[0]["rationale_codes"])
+
+    def test_admission_diagnostics_explain_projection_and_skips(self) -> None:
+        ir = _ir(
+            decision="commit",
+            unsafe_implications=[
+                {
+                    "candidate": "possessed(bob, key)",
+                    "why_unsafe": "Possession is implied, not directly observed.",
+                    "commit_policy": "quarantine",
+                }
+            ],
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "returned",
+                    "args": ["Bob", "Alice", "key"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "assert",
+                    "predicate": "possessed",
+                    "args": ["Bob", "key"],
+                    "polarity": "positive",
+                    "source": "inferred",
+                    "safety": "safe",
+                },
+            ],
+        )
+        diagnostics = semantic_ir_admission_diagnostics(ir)
+        self.assertEqual(diagnostics["model_decision"], "commit")
+        self.assertEqual(diagnostics["projected_decision"], "mixed")
+        self.assertEqual(
+            diagnostics["projection_reason"],
+            "safe_write_with_unsafe_implications_projected_to_mixed",
+        )
+        self.assertEqual(diagnostics["admitted_count"], 1)
+        self.assertEqual(diagnostics["skipped_count"], 1)
+        skipped = [row for row in diagnostics["operations"] if not row["admitted"]]
+        self.assertEqual(skipped[0]["skip_reason"], "inferred_write_not_admissible")
+        self.assertEqual(diagnostics["clauses"]["facts"], ["returned(bob, alice, key)."])
+
+    def test_low_risk_clarify_alternative_does_not_downgrade_safe_correction(self) -> None:
+        ir = _ir(
+            decision="commit",
+            turn_type="correction",
+            candidate_operations=[
+                {
+                    "operation": "retract",
+                    "predicate": "has_allergy",
+                    "args": ["Leo", "penicillin"],
+                    "polarity": "negative",
+                    "source": "context",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "assert",
+                    "predicate": "side_effect",
+                    "args": ["Leo", "penicillin", "stomach upset"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+            ],
+            unsafe_implications=[
+                {
+                    "candidate": "has_symptom(leo, stomach_upset)",
+                    "why_unsafe": "Alternative modeling choice, not an active symptom.",
+                    "commit_policy": "clarify",
+                }
+            ],
+            self_check={"bad_commit_risk": "low", "missing_slots": [], "notes": []},
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(ir)
+        self.assertEqual(warnings, [])
+        self.assertEqual(parsed["intent"], "assert_fact")
+        self.assertIn("decision=commit", parsed["rationale"])
+        self.assertEqual(parsed["admission_diagnostics"]["projected_decision"], "commit")
+
+    def test_context_labeled_writes_with_unsafe_implications_project_to_mixed(self) -> None:
+        ir = _ir(
+            decision="commit",
+            turn_type="state_update",
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "showed",
+                    "args": ["camera", "Omar", "unlocking cabinet"],
+                    "polarity": "positive",
+                    "source": "context",
+                    "safety": "safe",
+                }
+            ],
+            unsafe_implications=[
+                {
+                    "candidate": "took(omar, key)",
+                    "why_unsafe": "Usage does not prove acquisition.",
+                    "commit_policy": "reject",
+                }
+            ],
+            self_check={"bad_commit_risk": "low", "missing_slots": [], "notes": []},
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(ir)
+        self.assertTrue(any("context-sourced write" in warning for warning in warnings))
+        self.assertEqual(parsed["intent"], "other")
+        diagnostics = parsed["admission_diagnostics"]
+        self.assertEqual(diagnostics["projected_decision"], "mixed")
+        self.assertEqual(
+            diagnostics["projection_reason"],
+            "context_writes_with_unsafe_implications_projected_to_mixed",
+        )
+
+    def test_ambiguous_pronouns_with_only_speech_wrapper_project_to_clarify(self) -> None:
+        ir = _ir(
+            decision="mixed",
+            turn_type="mixed",
+            referents=[
+                {
+                    "surface": "her sister",
+                    "status": "ambiguous",
+                    "candidates": ["mara_sister", "priya_sister"],
+                    "chosen": "mara_sister",
+                }
+            ],
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "told",
+                    "args": ["Mara", "Priya", "claim_content"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "assert",
+                    "predicate": "saw",
+                    "args": ["mara_sister", "van"],
+                    "polarity": "positive",
+                    "source": "inferred",
+                    "safety": "unsafe",
+                },
+            ],
+            clarification_questions=["Whose sister saw the van?"],
+            self_check={"bad_commit_risk": "high", "missing_slots": [], "notes": []},
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(ir)
+        self.assertEqual(warnings, [])
+        self.assertEqual(parsed["intent"], "other")
+        self.assertEqual(parsed["facts"], [])
+        self.assertTrue(parsed["needs_clarification"])
+        diagnostics = parsed["admission_diagnostics"]
+        self.assertEqual(diagnostics["projected_decision"], "clarify")
+        self.assertEqual(
+            diagnostics["projection_reason"],
+            "ambiguous_referents_with_only_speech_wrapper_projected_to_clarify",
+        )
+        self.assertEqual(diagnostics["admitted_count"], 0)
+        self.assertTrue(
+            any(
+                row["skip_reason"] == "projected_decision_clarify_blocks_write"
+                for row in diagnostics["operations"]
+            )
+        )
 
     def test_prethink_payload_does_not_block_on_optional_provenance_slot(self) -> None:
         ir = _ir(
@@ -425,6 +600,9 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         trace = result["compiler_trace"]["parse"]
         rescue_names = [row["name"] for row in trace["rescues"]]
         self.assertEqual(rescue_names, ["semantic_ir_mapper"])
+        diagnostics = trace["rescues"][0]["admission_diagnostics"]
+        self.assertEqual(diagnostics["admitted_count"], 1)
+        self.assertEqual(diagnostics["operations"][0]["effect"], "fact")
         query = server.query_rows("owns(mara, X).")
         self.assertEqual(query["status"], "success")
         self.assertEqual(query["rows"], [{"X": "silver_compass"}])

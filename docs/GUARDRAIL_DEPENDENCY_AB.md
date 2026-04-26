@@ -31,6 +31,7 @@ The runner records:
 
 - status and inferred decision
 - committed clauses and final KB state
+- mapper `admission_diagnostics_v1` counts when semantic IR is enabled
 - prethink rescue hooks
 - parse rescue hooks
 - non-mapper parse rescue count
@@ -197,3 +198,52 @@ self-contradictory IR bookkeeping.
 
 The mapper contract for those structural rules is documented in
 `docs/SEMANTIC_IR_MAPPER_SPEC.md`.
+
+## Admission Diagnostics
+
+The A/B harness now carries mapper diagnostics into each JSONL record and
+summary report. For each semantic IR parse, diagnostics show:
+
+- how many candidate operations were proposed;
+- how many were admitted or skipped;
+- projected decision versus model decision;
+- skip reasons and rationale codes;
+- admitted clause previews grouped as facts, rules, queries, and retracts.
+
+These diagnostics are deliberately non-authoritative. They help explain and
+tune the mapper contract while preserving the invariant that only deterministic
+mapper/runtime policy admits durable KB mutations.
+
+## Diagnostics/Projection Pass
+
+Runs:
+
+```text
+python scripts/run_guardrail_dependency_ab.py --backend lmstudio --base-url http://127.0.0.1:1234 --legacy-model qwen/qwen3.6-35b-a3b --semantic-model qwen/qwen3.6-35b-a3b --scenario-group edge --timeout 300
+python scripts/run_guardrail_dependency_ab.py --backend lmstudio --base-url http://127.0.0.1:1234 --legacy-model qwen/qwen3.6-35b-a3b --semantic-model qwen/qwen3.6-35b-a3b --scenario-group weak_edges --timeout 300
+```
+
+Latest local evidence:
+
+| Pack | Runs | Legacy decision OK | Semantic decision OK | Legacy avg score | Semantic avg score | Semantic operations | Semantic admitted | Semantic skipped |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| Edge | 20 | 10 | 20 | 0.777 | 0.976 | 43 | 37 | 6 |
+| Weak edges | 10 | 3 | 10 | 0.633 | 1.000 | 16 | 16 | 0 |
+
+Local report files:
+
+- `tmp/guardrail_dependency_ab/guardrail_dependency_ab_20260426T130519Z.md`
+- `tmp/guardrail_dependency_ab/guardrail_dependency_ab_20260426T131751Z.md`
+
+Structural fixes from this pass:
+
+- bounded `semantic_ir_v1` structured-output arrays to reduce JSON runaway and
+  repeated assertion loops;
+- projected ambiguous-pronoun turns to clarification when the only safe write is
+  a generic speech/container fact;
+- ignored low-risk clarify-policy unsafe alternatives when a safe correction is
+  otherwise complete;
+- projected context-labeled writes plus unsafe implications to `mixed`, because
+  context-sourced writes are skipped and should not leave the decision label as
+  a clean commit;
+- added mapper operation diagnostics to JSONL/Markdown A/B output.
