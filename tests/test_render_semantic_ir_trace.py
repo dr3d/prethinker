@@ -11,6 +11,19 @@ class RenderSemanticIRTraceTests(unittest.TestCase):
             "utterance": "Mara is in Paris. Actually, not London.",
             "context": ["Existing current fact: lives_in(mara, london)."],
             "allowed_predicates": ["lives_in/2"],
+            "model_input": {
+                "input_payload": {
+                    "domain": "demo",
+                    "utterance": "Mara is in Paris. Actually, not London.",
+                    "context": ["Existing current fact: lives_in(mara, london)."],
+                    "allowed_predicates": ["lives_in/2"],
+                },
+                "messages": [
+                    {"role": "system", "content": "system prompt"},
+                    {"role": "user", "content": "INPUT_JSON: {...}"},
+                ],
+                "options": {"temperature": 0.0, "num_ctx": 16384},
+            },
             "score": {"decision": "commit", "expected_decision": "commit", "rough_score": 1.0},
             "parsed": {
                 "schema_version": "semantic_ir_v1",
@@ -84,6 +97,8 @@ class RenderSemanticIRTraceTests(unittest.TestCase):
         )
 
         self.assertIn("Layer 0 - Focused Model Input", rendered)
+        self.assertIn("Recorded model input / request envelope", rendered)
+        self.assertIn("Exact chat messages sent to model", rendered)
         self.assertIn("Layer 2 - Parsed `semantic_ir_v1` Workspace", rendered)
         self.assertIn("Layer 3 - Deterministic Mapper / Admission Gate", rendered)
         self.assertIn("Facts passivated for KB assertion", rendered)

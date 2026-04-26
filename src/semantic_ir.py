@@ -298,14 +298,14 @@ class SemanticIRCallConfig:
     max_tokens: int = 4096
 
 
-def build_semantic_ir_messages(
+def build_semantic_ir_input_payload(
     *,
     utterance: str,
     context: list[str] | None = None,
     allowed_predicates: list[str] | None = None,
     domain: str = "runtime",
     include_schema_contract: bool = True,
-) -> list[dict[str, str]]:
+) -> dict[str, Any]:
     payload = {
         "task": "Analyze the utterance and emit semantic_ir_v1 JSON only.",
         "output_instruction": "Return exactly one semantic_ir_v1 JSON object.",
@@ -322,6 +322,24 @@ def build_semantic_ir_messages(
             "Return exactly one JSON object using required_top_level_json_shape as the root shape. "
             "Do not copy the key name required_top_level_json_shape into your response."
         )
+    return payload
+
+
+def build_semantic_ir_messages(
+    *,
+    utterance: str,
+    context: list[str] | None = None,
+    allowed_predicates: list[str] | None = None,
+    domain: str = "runtime",
+    include_schema_contract: bool = True,
+) -> list[dict[str, str]]:
+    payload = build_semantic_ir_input_payload(
+        utterance=utterance,
+        context=context,
+        allowed_predicates=allowed_predicates,
+        domain=domain,
+        include_schema_contract=include_schema_contract,
+    )
     return [
         {"role": "system", "content": BEST_GUARDED_V2_SYSTEM},
         {"role": "user", "content": "INPUT_JSON:\n" + json.dumps(payload, ensure_ascii=False, indent=2)},
@@ -335,8 +353,16 @@ def call_semantic_ir(
     context: list[str] | None = None,
     allowed_predicates: list[str] | None = None,
     domain: str = "runtime",
+    include_model_input: bool = False,
 ) -> dict[str, Any]:
     backend = str(config.backend or "ollama").strip().lower()
+    input_payload = build_semantic_ir_input_payload(
+        utterance=utterance,
+        context=context,
+        allowed_predicates=allowed_predicates,
+        domain=domain,
+        include_schema_contract=True,
+    )
     messages = build_semantic_ir_messages(
         utterance=utterance,
         context=context,
@@ -345,10 +371,28 @@ def call_semantic_ir(
         include_schema_contract=True,
     )
     if backend == "lmstudio":
-        return _call_lmstudio_semantic_ir(config=config, messages=messages)
-    if backend != "ollama":
+        result = _call_lmstudio_semantic_ir(config=config, messages=messages)
+    elif backend == "ollama":
+        result = _call_ollama_semantic_ir(config=config, messages=messages)
+    else:
         raise RuntimeError(f"semantic_ir_v1 backend not supported: {backend}")
-    return _call_ollama_semantic_ir(config=config, messages=messages)
+    if include_model_input:
+        result["model_input"] = {
+            "backend": backend,
+            "model": config.model,
+            "messages": messages,
+            "input_payload": input_payload,
+            "options": {
+                "temperature": float(config.temperature),
+                "top_p": float(config.top_p),
+                "top_k": int(config.top_k),
+                "num_ctx": int(config.context_length),
+                "max_tokens": int(config.max_tokens),
+                "thinking": bool(config.think_enabled),
+                "reasoning_effort": str(config.reasoning_effort or ""),
+            },
+        }
+    return result
 
 
 def _call_ollama_semantic_ir(*, config: SemanticIRCallConfig, messages: list[dict[str, str]]) -> dict[str, Any]:

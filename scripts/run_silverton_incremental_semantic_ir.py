@@ -170,6 +170,7 @@ def run_incremental(
                 context=context,
                 allowed_predicates=allowed_predicates,
                 domain="silverton_incremental_probate",
+                include_model_input=True,
             )
         except Exception as exc:
             result = {"latency_ms": 0, "content": "", "parsed": None, "raw": {}}
@@ -191,6 +192,7 @@ def run_incremental(
                 "context": context,
                 "allowed_predicates": allowed_predicates,
                 "latency_ms": int(result.get("latency_ms", 0) or 0),
+                "model_input": result.get("model_input", {}),
                 "content": str(result.get("content", "")),
                 "parsed": parsed if isinstance(parsed, dict) else None,
                 "parse_error": error,

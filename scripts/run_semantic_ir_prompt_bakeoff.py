@@ -1975,6 +1975,19 @@ def main() -> int:
                     scenario=scenario,
                     include_schema_in_prompt=include_schema_in_prompt,
                 )
+                record["model_input"] = {
+                    "messages": messages,
+                    "scenario": {
+                        "id": scenario.get("id", ""),
+                        "domain": scenario.get("domain", ""),
+                        "utterance": scenario.get("utterance", ""),
+                        "context": scenario.get("context", []),
+                        "allowed_predicates": scenario.get("allowed_predicates", []),
+                    },
+                    "variant": variant,
+                    "include_schema_in_prompt": include_schema_in_prompt,
+                    "options": {k: v for k, v in options.items() if k not in {"system", "extra"}},
+                }
                 if backend == "lmstudio":
                     response = call_lmstudio(
                         base_url=base_url,

@@ -143,6 +143,22 @@ def _extract_raw_content(record: dict[str, Any]) -> str:
     return ""
 
 
+def _extract_model_input(record: dict[str, Any]) -> dict[str, Any]:
+    candidate = record.get("model_input")
+    if isinstance(candidate, dict):
+        return candidate
+    for path in (
+        ["raw", "compiler_trace", "parse", "semantic_ir", "model_input"],
+        ["raw", "compiler_trace", "prethink", "semantic_ir", "model_input"],
+        ["compiler_trace", "parse", "semantic_ir", "model_input"],
+        ["compiler_trace", "prethink", "semantic_ir", "model_input"],
+    ):
+        value = _nested_get(record, path)
+        if isinstance(value, dict):
+            return value
+    return {}
+
+
 def _extract_mapped(
     record: dict[str, Any],
     parsed: dict[str, Any] | None,
@@ -177,11 +193,37 @@ def _input_from_record(
 ) -> dict[str, Any]:
     scenario_id = str(record.get("scenario_id", "") or record.get("id", "")).strip()
     scenario = scenario_map.get(scenario_id, {})
+    model_input = _extract_model_input(record)
+    input_payload = model_input.get("input_payload") if isinstance(model_input.get("input_payload"), dict) else {}
+    input_scenario = model_input.get("scenario") if isinstance(model_input.get("scenario"), dict) else {}
 
-    utterance = _text(record.get("utterance")).strip() or _text(scenario.get("utterance")).strip()
-    context = _as_list(record.get("context") if "context" in record else scenario.get("context"))
+    utterance = (
+        _text(record.get("utterance")).strip()
+        or _text(input_payload.get("utterance")).strip()
+        or _text(input_scenario.get("utterance")).strip()
+        or _text(model_input.get("utterance")).strip()
+        or _text(scenario.get("utterance")).strip()
+    )
+    context_source = record.get("context") if "context" in record else None
+    if context_source is None:
+        context_source = input_payload.get("context") if "context" in input_payload else None
+    if context_source is None:
+        context_source = input_scenario.get("context") if "context" in input_scenario else None
+    if context_source is None:
+        context_source = model_input.get("context") if "context" in model_input else scenario.get("context")
+    context = _as_list(context_source)
     allowed = _as_list(
-        record.get("allowed_predicates") if "allowed_predicates" in record else scenario.get("allowed_predicates")
+        record.get("allowed_predicates")
+        if "allowed_predicates" in record
+        else (
+            input_payload.get("allowed_predicates")
+            if "allowed_predicates" in input_payload
+            else (
+                input_scenario.get("allowed_predicates")
+                if "allowed_predicates" in input_scenario
+                else model_input.get("allowed_predicates", scenario.get("allowed_predicates"))
+            )
+        )
     )
     expect = record.get("expect") if isinstance(record.get("expect"), dict) else scenario.get("expect", {})
     if not isinstance(expect, dict):
@@ -193,7 +235,13 @@ def _input_from_record(
     )
     return {
         "scenario_id": scenario_id,
-        "domain": _text(record.get("domain") or scenario.get("domain")).strip(),
+        "domain": _text(
+            record.get("domain")
+            or input_payload.get("domain")
+            or input_scenario.get("domain")
+            or model_input.get("domain")
+            or scenario.get("domain")
+        ).strip(),
         "utterance": utterance,
         "context": [str(item) for item in context],
         "allowed_predicates": [str(item) for item in allowed],
@@ -419,6 +467,7 @@ def _render_record(
 ) -> list[str]:
     record = _extract_semantic_side(record, side)
     input_info = _input_from_record(record, scenario_map)
+    model_input = _extract_model_input(record)
     parsed = _extract_parsed(record)
     raw_content = _extract_raw_content(record)
     mapped, mapper_warnings = _extract_mapped(record, parsed, input_info["allowed_predicates"])
@@ -466,6 +515,18 @@ def _render_record(
         lines.append("")
     else:
         lines.extend(["**Allowed predicate palette:** not recorded", ""])
+    if model_input:
+        prompt_bits = []
+        if isinstance(model_input.get("input_payload"), dict):
+            prompt_bits.extend(["**Input JSON payload:**", "", _code_block(model_input["input_payload"], "json", max_chars=raw_chars)])
+        if isinstance(model_input.get("messages"), list):
+            prompt_bits.extend(["", "**Exact chat messages sent to model:**", "", _code_block(model_input["messages"], "json", max_chars=raw_chars)])
+        if isinstance(model_input.get("options"), dict):
+            prompt_bits.extend(["", "**Generation/runtime options:**", "", _code_block(model_input["options"], "json")])
+        if not prompt_bits:
+            prompt_bits.append(_code_block(model_input, "json", max_chars=raw_chars))
+        lines.extend(_details("Recorded model input / request envelope", "\n".join(prompt_bits)))
+        lines.append("")
 
     lines.extend(["### Layer 1 - Raw Semantic Workspace Proposal", ""])
     if raw_content:
