@@ -218,6 +218,25 @@ What to look for:
 - `/state` should reflect session and clarification status
 - `/kb` should expose the actual live runtime KB
 
+## Scenario 13: Claim, Identity, And Time
+
+Fresh session. Use the semantic IR compiler path. Do not add story-specific
+prompt guidance.
+
+1. `Arthur says the whole Silverton estate is his because Beatrice lived in London too long.`
+2. `Beatrice says she meant London, Ontario, not London, UK.`
+3. `The ledger says Silverton, A. returned from Heathrow in April 2024.`
+4. `Correction: that return stamp was April 2023, still A. Silverton.`
+5. `Does this prove Arthur forfeited his share?`
+
+What to look for:
+
+- Arthur's statement should stay a claim, not overwrite estate truth
+- London, Ontario and London, UK should remain distinct
+- `Silverton, A.` should not silently collapse to Arthur while Alfred remains plausible
+- the timestamp correction should be represented as a correction, not two equal dates
+- the forfeiture query should avoid a hard conclusion unless the identity and interval are grounded
+
 ## One Strong Comparison Pack
 
 If you want one compact run that puts pressure on several surfaces at once, try this in a fresh session:

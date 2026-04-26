@@ -138,6 +138,24 @@ or any equivalent hard negative fact.
 This is one of the central anti-patch rules. It does not care what language the
 utterance was written in; it cares how the IR grounds the operation.
 
+## Grounding Policy
+
+The generic mapper may reject writes whose arguments are obvious unresolved
+placeholder atoms such as `patient`, `someone`, `his`, or `unknown`.
+
+This is a structural guardrail, not an English phrase repair:
+
+- it applies to admitted write candidates, not to raw utterance text;
+- it blocks durable `assert`/`rule` operations until the missing entity is
+  grounded;
+- it does not block a query that intentionally asks about an unresolved slot.
+
+Domain-specific type grounding belongs to profile contracts. For example,
+`medical@v0` stores UMLS semantic-group expectations in
+`modelfiles/profile.medical.v0.json`, and `src/medical_profile.py` reads that
+metadata when deciding whether `taking(Patient, Thing)` names a medication or a
+condition. The semantic IR mapper should not grow medical-specific type lists.
+
 ## Unsafe Implications
 
 `unsafe_implications` records tempting candidates that should not become durable
@@ -189,6 +207,24 @@ Pure hypothetical questions are projected to `answer` when:
 The mapper may admit an `inferred` query target for a hypothetical question,
 because the whole point of the turn is to ask about a derived consequence. This
 exception does not apply to inferred writes.
+
+## Minimal Temporal Vocabulary
+
+Temporal language is in scope for semantic extraction, but full temporal proof is
+not yet claimed. The current durable representation should stay factual and
+auditable:
+
+```prolog
+occurred_on(Event, Date).
+interval_start(Event, Date).
+interval_end(Event, Date).
+corrected_temporal_value(Event, Field, OldValue, NewValue).
+```
+
+These predicates let the workspace preserve what the model understood about
+dates, intervals, and corrections without pretending the runtime can already
+prove every temporal consequence. A future temporal reasoner can consume these
+facts for duration, ordering, overlap, and consecutive-interval checks.
 
 ## Trace Obligations
 
@@ -266,6 +302,10 @@ Required cases:
 - negative non-event assertion is skipped;
 - denial event assertion is admitted;
 - quantified group atom is skipped;
+- placeholder write argument is skipped while placeholder query remains
+  representable;
+- minimal temporal facts are admitted as factual representation, not temporal
+  proof;
 - duplicate unsafe implication does not downgrade an admitted safe operation;
 - claim plus direct observation projects to `mixed`;
 - optional provenance slots do not block safe correction;

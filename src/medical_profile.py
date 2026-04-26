@@ -87,6 +87,33 @@ def canonical_predicate_signatures(manifest: dict[str, Any]) -> list[str]:
     return signatures
 
 
+def predicate_argument_groups(manifest: dict[str, Any] | None = None) -> dict[str, dict[int, set[str]]]:
+    source = manifest if isinstance(manifest, dict) else load_profile_manifest()
+    out: dict[str, dict[int, set[str]]] = {}
+    for row in canonical_palette(source):
+        signature = str(row.get("signature", "")).strip()
+        if not signature or "/" not in signature:
+            continue
+        predicate = signature.split("/", 1)[0]
+        raw_groups = row.get("umls_argument_groups", {})
+        if not isinstance(raw_groups, dict):
+            continue
+        converted: dict[int, set[str]] = {}
+        for raw_index, raw_values in raw_groups.items():
+            try:
+                index = int(raw_index)
+            except Exception:
+                continue
+            if not isinstance(raw_values, list):
+                continue
+            groups = {str(item).strip() for item in raw_values if str(item).strip()}
+            if groups:
+                converted[index] = groups
+        if converted:
+            out[predicate] = converted
+    return out
+
+
 def load_profile_concepts(slice_dir: Path) -> list[dict[str, Any]]:
     concepts_path = Path(slice_dir) / "concepts.jsonl"
     if not concepts_path.exists():
@@ -370,7 +397,10 @@ def sanitize_medical_parse_for_bridge(
         if parsed_clause is None:
             continue
         predicate, args = parsed_clause
-        expected_by_index = PREDICATE_ARGUMENT_GROUPS.get(predicate, {})
+        expected_by_index = predicate_argument_groups().get(
+            predicate,
+            PREDICATE_ARGUMENT_GROUPS.get(predicate, {}),
+        )
         for index, expected_groups in expected_by_index.items():
             if index >= len(args):
                 continue

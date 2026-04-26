@@ -100,6 +100,19 @@ The bounded UMLS slice now emits a local `umls_bridge_facts.pl` file with normal
 
 Those bridge facts are intended for routing, validation, and clarification pressure. They are not intended to expand the nine-predicate palette.
 
+The profile manifest also carries the profile-owned argument contracts that map
+canonical predicate slots onto those semantic groups. For example:
+
+- `taking/2` expects the second argument to ground as `medication`;
+- `has_condition/2` expects the second argument to ground as `condition`;
+- lab-result predicates expect the second argument to ground as
+  `lab_or_procedure`.
+
+This keeps medical type steering in `medical@v0` instead of growing
+medical-specific checks inside the generic semantic IR mapper. The mapper asks
+"is this operation structurally admissible?"; the profile asks "does this
+medical predicate have the right kind of concept in the right slot?"
+
 The Semantic Network KB builder is now scaffolded for `SRDEF`, `SRSTR`, and optional `SRSTRE1`/`SRSTRE2` files. It should remain a local type/relation spine until the medical lane has tests that justify consuming more of it at runtime.
 
 ## Example Command

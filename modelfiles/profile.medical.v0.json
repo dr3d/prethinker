@@ -19,46 +19,63 @@
     {
       "signature": "taking/2",
       "arguments": ["person", "medication"],
+      "umls_argument_groups": { "1": ["medication"] },
+      "grounding": { "0": "patient_identity_required", "1": "umls_or_literal_medication" },
       "notes": "Medication exposure or ongoing use."
     },
     {
       "signature": "has_condition/2",
       "arguments": ["person", "condition"],
+      "umls_argument_groups": { "1": ["condition"] },
+      "grounding": { "0": "patient_identity_required", "1": "umls_or_literal_condition" },
       "notes": "Diagnosed conditions, not vague symptoms or shorthand."
     },
     {
       "signature": "has_symptom/2",
       "arguments": ["person", "symptom"],
+      "umls_argument_groups": { "1": ["symptom_or_finding"] },
+      "grounding": { "0": "patient_identity_required", "1": "umls_or_literal_symptom" },
       "notes": "Symptoms and findings distinct from durable diagnoses."
     },
     {
       "signature": "has_allergy/2",
       "arguments": ["person", "allergy_or_substance"],
+      "umls_argument_groups": { "1": ["allergy", "medication"] },
+      "grounding": { "0": "patient_identity_required", "1": "explicit_allergy_or_substance" },
       "notes": "Explicit allergy history."
     },
     {
       "signature": "underwent_lab_test/2",
       "arguments": ["person", "lab_test"],
+      "umls_argument_groups": { "1": ["lab_or_procedure"] },
+      "grounding": { "0": "patient_identity_required", "1": "umls_or_literal_lab_test" },
       "notes": "A lab event or repeated measurement occurred."
     },
     {
       "signature": "lab_result_high/2",
       "arguments": ["person", "lab_test"],
+      "umls_argument_groups": { "1": ["lab_or_procedure"] },
+      "grounding": { "0": "patient_identity_required", "1": "umls_or_literal_lab_test" },
       "notes": "A clarified or explicit high reading/result."
     },
     {
       "signature": "lab_result_rising/2",
       "arguments": ["person", "lab_test"],
+      "umls_argument_groups": { "1": ["lab_or_procedure"] },
+      "grounding": { "0": "patient_identity_required", "1": "umls_or_literal_lab_test" },
       "notes": "A trend upward across lab results."
     },
     {
       "signature": "lab_result_abnormal/2",
       "arguments": ["person", "lab_test"],
+      "umls_argument_groups": { "1": ["lab_or_procedure"] },
+      "grounding": { "0": "patient_identity_required", "1": "umls_or_literal_lab_test" },
       "notes": "Abnormal but underspecified lab/function result."
     },
     {
       "signature": "pregnant/1",
       "arguments": ["person"],
+      "grounding": { "0": "patient_identity_required" },
       "notes": "Unary pregnancy state."
     }
   ],

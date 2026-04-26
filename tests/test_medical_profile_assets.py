@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from src import medical_profile
+
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -57,3 +59,24 @@ def test_medical_type_schema_example_covers_core_predicates():
     assert predicates.get("has_symptom/2") == ["person", "symptom"]
     assert predicates.get("has_allergy/2") == ["person", "allergy_or_substance"]
     assert predicates.get("pregnant/1") == ["person"]
+
+
+def test_medical_profile_contracts_align_registry_and_type_schema():
+    manifest = _load_json(ROOT / "modelfiles" / "profile.medical.v0.json")
+    registry = _load_json(ROOT / "modelfiles" / "predicate_registry.medical.json")
+    schema = _load_json(ROOT / "modelfiles" / "type_schema.medical.example.json")
+    registry_signatures = {
+        f"{row['name']}/{row['arity']}"
+        for row in registry.get("canonical_predicates", [])
+    }
+    schema_predicates = set(schema.get("predicates", {}))
+    profile_signatures = set(medical_profile.canonical_predicate_signatures(manifest))
+    assert profile_signatures == registry_signatures
+    assert profile_signatures == schema_predicates
+
+    group_contracts = medical_profile.predicate_argument_groups(manifest)
+    assert group_contracts["taking"][1] == {"medication"}
+    assert group_contracts["has_condition"][1] == {"condition"}
+    assert group_contracts["has_symptom"][1] == {"symptom_or_finding"}
+    assert group_contracts["lab_result_high"][1] == {"lab_or_procedure"}
+    assert "pregnant" not in group_contracts

@@ -190,6 +190,32 @@ const PROMPT_BOOKS = {
         "This should exercise parsing and rescue behavior. Debug details should make clear what was normalized before the KB accepted it.",
     },
     {
+      title: "Claim, identity, and time should stay separate",
+      setup: "Use the semantic IR compiler path. This pressures claim-vs-fact, identity ambiguity, and temporal correction without a story-specific prompt.",
+      steps: [
+        {
+          label: "Claim",
+          utterance:
+            "Arthur says the whole Silverton estate is his because Beatrice lived in London too long.",
+        },
+        {
+          label: "Clarify place",
+          utterance: "Beatrice says she meant London, Ontario, not London, UK.",
+        },
+        {
+          label: "Ledger fact",
+          utterance: "The ledger says Silverton, A. returned from Heathrow in April 2024.",
+        },
+        {
+          label: "Correction",
+          utterance: "Correction: that return stamp was April 2023, still A. Silverton.",
+        },
+        { label: "Query", utterance: "Does this prove Arthur forfeited his share?" },
+      ],
+      watch:
+        "Look for claims remaining claims, London ambiguity staying explicit, A. Silverton not collapsing to Arthur, and the forfeiture query avoiding a hard conclusion.",
+    },
+    {
       title: "Route boundary",
       setup: "Use ordinary assistant requests that should not become KB mutations.",
       steps: [

@@ -168,6 +168,23 @@ Python to reduce:
 - "If a clarification answer contains these words, synthesize a fact."
 - "If this possessive phrase appears, split it into a family bundle."
 
+## Current Follow-Up
+
+The first concrete post-audit cleanup direction is now in place:
+
+- medical predicate slot expectations are profile metadata in
+  `modelfiles/profile.medical.v0.json`;
+- `src/medical_profile.py` reads those contracts for UMLS bridge admission;
+- the generic semantic IR mapper only keeps structural grounding rules, such as
+  "do not durably write `patient` or `unknown` as a placeholder argument";
+- temporal facts are represented with small factual predicates such as
+  `interval_start/2`, `interval_end/2`, and
+  `corrected_temporal_value/4` rather than a story-specific English repair.
+
+That is the intended pattern: keep guardrails visible and policy-shaped, but
+push domain-specific meaning into profile packages and semantic interpretation
+into the LLM workspace.
+
 ## Proposed Experiment
 
 Add a runtime/research knob:

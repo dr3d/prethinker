@@ -47,6 +47,47 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         ok, errors = _validate_parsed(parsed)
         self.assertTrue(ok, errors)
 
+    def test_mapper_admits_minimal_temporal_fact_vocabulary(self) -> None:
+        ir = _ir(
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "interval_start",
+                    "args": ["silverton_a_london_interval", "2018_03"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "assert",
+                    "predicate": "interval_end",
+                    "args": ["silverton_a_london_interval", "2024_04"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "assert",
+                    "predicate": "corrected_temporal_value",
+                    "args": ["silverton_a_return_stamp", "return_date", "2024_04", "2023_04"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+            ]
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(ir)
+        self.assertEqual(warnings, [])
+        self.assertEqual(parsed["intent"], "assert_fact")
+        self.assertEqual(
+            parsed["facts"],
+            [
+                "interval_start(silverton_a_london_interval, 2018_03).",
+                "interval_end(silverton_a_london_interval, 2024_04).",
+                "corrected_temporal_value(silverton_a_return_stamp, return_date, 2024_04, 2023_04).",
+            ],
+        )
+
     def test_mapper_skips_negative_assertion_until_negation_policy_exists(self) -> None:
         ir = _ir(
             candidate_operations=[
@@ -64,6 +105,30 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         self.assertEqual(parsed["intent"], "other")
         self.assertEqual(parsed["facts"], [])
         self.assertTrue(any("negative assertion" in warning for warning in warnings))
+
+    def test_mapper_skips_placeholder_argument_write(self) -> None:
+        ir = _ir(
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "lab_result_high",
+                    "args": ["patient", "blood_pressure_measurement"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                }
+            ]
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(ir)
+        self.assertEqual(parsed["intent"], "other")
+        self.assertEqual(parsed["facts"], [])
+        self.assertTrue(any("unresolved placeholder" in warning for warning in warnings))
+        skipped = [
+            row
+            for row in parsed["admission_diagnostics"]["operations"]
+            if not row["admitted"]
+        ]
+        self.assertEqual(skipped[0]["skip_reason"], "ungrounded_argument_atom")
 
     def test_mapper_allows_negative_polarity_retract_as_retraction(self) -> None:
         ir = _ir(
@@ -83,6 +148,28 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         self.assertEqual(parsed["intent"], "retract")
         self.assertEqual(parsed["logic_string"], "retract(owns(mara, silver_compass)).")
         self.assertEqual(parsed["correction_retract_clauses"], ["owns(mara, silver_compass)."])
+
+    def test_mapper_allows_placeholder_argument_query(self) -> None:
+        ir = _ir(
+            decision="clarify",
+            turn_type="query",
+            candidate_operations=[
+                {
+                    "operation": "query",
+                    "predicate": "lab_result_high",
+                    "args": ["patient", "blood_pressure_measurement"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                }
+            ],
+            clarification_questions=["Which patient?"],
+            self_check={"bad_commit_risk": "medium", "missing_slots": ["patient"], "notes": []},
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(ir)
+        self.assertEqual(warnings, [])
+        self.assertEqual(parsed["intent"], "query")
+        self.assertEqual(parsed["queries"], ["lab_result_high(patient, blood_pressure_measurement)."])
 
     def test_mapper_adds_retract_alias_for_numbered_entity(self) -> None:
         ir = _ir(

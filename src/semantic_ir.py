@@ -198,6 +198,31 @@ SEMANTIC_IR_JSON_SCHEMA: dict[str, Any] = {
 }
 
 
+UNGROUNDED_ARGUMENT_ATOMS = {
+    "he",
+    "him",
+    "his",
+    "she",
+    "her",
+    "hers",
+    "they",
+    "them",
+    "their",
+    "theirs",
+    "it",
+    "its",
+    "this",
+    "that",
+    "patient",
+    "person",
+    "someone",
+    "somebody",
+    "unknown",
+    "unknown_male",
+    "unknown_female",
+}
+
+
 BEST_GUARDED_V2_SYSTEM = (
     "You are a semantic IR compiler for a governed symbolic memory system. "
     "The root object must be semantic_ir_v1 itself, with schema_version and decision as top-level keys. "
@@ -655,6 +680,13 @@ def _diagnose_candidate_operation(
         )
     if not predicate:
         return skip("invalid_predicate_name", codes=["predicate_shape_gate"])
+    grounding_problem = _generic_grounding_problem(predicate, args, operation=operation)
+    if grounding_problem:
+        return skip(
+            str(grounding_problem["reason"]),
+            warning=str(grounding_problem["warning"]),
+            codes=list(grounding_problem["codes"]),
+        )
     if operation == "assert" and _operation_targets_quantified_set(op, entity_meta):
         return skip(
             "quantified_group_without_expansion",
@@ -765,7 +797,25 @@ def _operation_feature_summary(
         "query_operation": operation == "query",
         "negative_polarity": polarity == "negative",
         "bad_commit_risk": _bad_commit_risk(ir),
+        "has_ungrounded_argument_atom": any(arg in UNGROUNDED_ARGUMENT_ATOMS for arg in args),
     }
+
+
+def _generic_grounding_problem(
+    predicate: str,
+    args: list[str],
+    *,
+    operation: str,
+) -> dict[str, Any] | None:
+    if not predicate or operation not in {"assert", "rule"}:
+        return None
+    if any(arg in UNGROUNDED_ARGUMENT_ATOMS for arg in args):
+        return {
+            "reason": "ungrounded_argument_atom",
+            "warning": f"skipped {predicate}/{len(args)} because an argument is an unresolved placeholder",
+            "codes": ["grounding_policy", "no_placeholder_commit"],
+        }
+    return None
 
 
 def _projection_reason(ir: dict[str, Any], model_decision: str, projected_decision: str) -> str:
