@@ -1098,8 +1098,12 @@ def render_html(markdown_text: str, *, title: str) -> str:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Render semantic_ir_v1 JSONL artifacts into a layered trace.")
     parser.add_argument("jsonl", help="Input JSONL from semantic IR bakeoff, incremental, or guardrail runs.")
-    parser.add_argument("--out", default="", help="Output Markdown path. Defaults under tmp/semantic_ir_trace_views.")
-    parser.add_argument("--html", action="store_true", help="Also write a simple HTML wrapper next to the Markdown.")
+    parser.add_argument(
+        "--out",
+        default="",
+        help="Output path. .md writes Markdown; .html writes rendered HTML. Defaults under tmp/semantic_ir_trace_views.",
+    )
+    parser.add_argument("--html", action="store_true", help="Also write a rendered HTML file next to Markdown output.")
     parser.add_argument(
         "--raw-chars",
         type=int,
@@ -1139,6 +1143,11 @@ def main() -> int:
         side=str(args.side),
         limit=int(args.limit),
     )
+    if out.suffix.lower() in {".html", ".htm"}:
+        out.write_text(render_html(markdown_text, title=out.stem), encoding="utf-8")
+        print(f"Wrote {out}")
+        return 0
+
     out.write_text(markdown_text, encoding="utf-8")
     print(f"Wrote {out}")
     if args.html:

@@ -1,6 +1,11 @@
+import json
+import sys
+import tempfile
 import unittest
+from pathlib import Path
+from unittest.mock import patch
 
-from scripts.render_semantic_ir_trace import render_html, render_markdown
+from scripts.render_semantic_ir_trace import main, render_html, render_markdown
 
 
 class RenderSemanticIRTraceTests(unittest.TestCase):
@@ -179,6 +184,33 @@ class RenderSemanticIRTraceTests(unittest.TestCase):
         self.assertIn("<h2>1. <code>demo</code></h2>", html)
         self.assertIn("max-height: 28rem", html)
         self.assertNotIn("<pre># Semantic IR Trace", html)
+
+    def test_html_out_suffix_writes_rendered_html_not_markdown_source(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            jsonl = tmp_path / "run.jsonl"
+            out = tmp_path / "trace.html"
+            jsonl.write_text(
+                json.dumps(
+                    {
+                        "scenario_id": "demo",
+                        "domain": "demo",
+                        "utterance": "Mara is in Paris.",
+                        "parsed": None,
+                        "parse_error": "not needed",
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            with patch.object(sys, "argv", ["render_semantic_ir_trace.py", str(jsonl), "--out", str(out)]):
+                self.assertEqual(main(), 0)
+
+            text = out.read_text(encoding="utf-8")
+            self.assertTrue(text.lstrip().startswith("<!doctype html>"))
+            self.assertIn("<h1>Semantic IR Trace</h1>", text)
+            self.assertNotIn("# Semantic IR Trace", text[:200])
 
 
 if __name__ == "__main__":
