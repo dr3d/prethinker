@@ -2065,26 +2065,29 @@ function buildExpandableDebugText(text, { nested = false } = {}) {
 
   const lineCount = normalized.split(/\r?\n/).length;
   const shell = document.createElement("section");
-  shell.className = `debug-text-shell${nested ? " nested" : ""}`;
+  shell.className = `debug-text-shell${nested ? " nested" : ""} is-collapsed`;
 
-  const preview = document.createElement("div");
-  preview.className = `debug-text-preview${nested ? " nested" : ""}`;
-  preview.textContent = normalized;
-  shell.appendChild(preview);
-
-  const details = document.createElement("details");
-  details.className = `debug-text-details${nested ? " nested" : ""}`;
-
-  const summary = document.createElement("summary");
-  summary.className = "debug-text-summary";
-  summary.textContent = `Show full text (${lineCount} lines)`;
+  const toggle = document.createElement("button");
+  toggle.className = "debug-text-toggle";
+  toggle.type = "button";
+  toggle.setAttribute("aria-expanded", "false");
+  toggle.textContent = `Expand JSON (${lineCount} lines)`;
 
   const pre = document.createElement("pre");
+  pre.className = "debug-text-scroller";
   pre.textContent = normalized;
 
-  details.appendChild(summary);
-  details.appendChild(pre);
-  shell.appendChild(details);
+  toggle.addEventListener("click", () => {
+    const expanded = shell.classList.toggle("is-expanded");
+    shell.classList.toggle("is-collapsed", !expanded);
+    toggle.setAttribute("aria-expanded", expanded ? "true" : "false");
+    toggle.textContent = expanded
+      ? `Collapse JSON (${lineCount} lines)`
+      : `Expand JSON (${lineCount} lines)`;
+  });
+
+  shell.appendChild(toggle);
+  shell.appendChild(pre);
   return shell;
 }
 

@@ -1213,77 +1213,64 @@ body.debug-mode .debug-stack {
   gap: 4px;
 }
 
-.debug-text-preview {
-  min-width: 0;
-  padding: 8px 10px;
-  border: 1px solid rgba(255, 214, 170, 0.08);
-  border-radius: 10px;
-  background: rgba(255, 243, 231, 0.02);
-  color: rgba(255, 244, 232, 0.88);
-  font-size: 0.8rem;
-  line-height: 1.45;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-  word-break: break-word;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 4;
-  overflow: hidden;
-}
-
-.debug-text-preview.nested {
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-}
-
-.debug-text-details {
-  border: 1px solid rgba(255, 214, 170, 0.08);
-  border-radius: 10px;
-  background: rgba(255, 243, 231, 0.02);
-  overflow: hidden;
-  min-width: 0;
-}
-
-.debug-text-details.nested {
-  background: transparent;
-}
-
-.debug-text-summary {
+.debug-text-toggle {
   display: flex;
   align-items: center;
   gap: 8px;
+  width: 100%;
   padding: 6px 10px;
   cursor: pointer;
-  list-style: none;
   user-select: none;
+  border: 1px solid rgba(255, 214, 170, 0.08);
+  border-radius: 10px;
+  background: rgba(255, 243, 231, 0.03);
   color: rgba(255, 236, 214, 0.76);
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
+  text-align: left;
 }
 
-.debug-text-summary::-webkit-details-marker {
-  display: none;
-}
-
-.debug-text-summary::before {
+.debug-text-toggle::before {
   content: "▸";
   color: var(--accent);
   font-size: 0.92rem;
   line-height: 1;
 }
 
-.debug-text-details[open] > .debug-text-summary::before {
+.debug-text-shell.is-expanded > .debug-text-toggle::before {
   content: "▾";
 }
 
-.debug-text-details > pre {
-  padding: 0 10px 10px;
-  max-height: 320px;
+.debug-text-scroller {
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 214, 170, 0.08);
+  border-radius: 10px;
+  background: rgba(255, 243, 231, 0.02);
+  color: rgba(255, 244, 232, 0.88);
+  max-height: 9.5rem;
   overflow: auto;
+}
+
+.debug-text-shell.nested .debug-text-scroller {
+  max-height: 8rem;
+}
+
+.debug-subblock .debug-text-scroller {
+  max-height: 8rem;
+}
+
+.debug-text-shell.is-expanded > .debug-text-scroller {
+  max-height: min(70vh, 620px);
+}
+
+.debug-text-shell.nested.is-expanded > .debug-text-scroller {
+  max-height: min(58vh, 440px);
+}
+
+.debug-subblock .debug-text-shell.is-expanded > .debug-text-scroller {
+  max-height: min(58vh, 440px);
 }
 
 .phase-list {
@@ -1314,8 +1301,8 @@ body.debug-mode .phase-card:not(.debug-bubble-card) {
 }
 
 .phase-summary-row {
-  position: relative;
-  display: flex;
+  display: grid;
+  grid-template-columns: 22px minmax(9rem, 1fr) minmax(8rem, 1.25fr);
   align-items: center;
   gap: 8px;
   padding: 9px 10px;
@@ -1331,7 +1318,7 @@ body.debug-mode .phase-card:not(.debug-bubble-card) {
 .phase-summary-row::before {
   content: "▸";
   color: var(--accent);
-  margin-right: 0;
+  justify-self: center;
   font-size: 1.08rem;
   line-height: 1;
 }
@@ -1341,12 +1328,13 @@ body.debug-mode .phase-card:not(.debug-bubble-card) {
 }
 
 .phase-name {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
   font-weight: 700;
+  justify-self: center;
+  min-width: 0;
   text-align: center;
-  pointer-events: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .phase-body {
@@ -1355,12 +1343,14 @@ body.debug-mode .phase-card:not(.debug-bubble-card) {
 }
 
 .phase-status {
-  margin-left: auto;
-  min-width: 48px;
+  min-width: 0;
   text-align: right;
   color: var(--text-soft);
   text-transform: uppercase;
   font-size: 0.72rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .phase-summary {
@@ -1428,6 +1418,15 @@ button {
   cursor: pointer;
   color: #fff8f0;
   background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+}
+
+.debug-text-toggle {
+  border: 1px solid rgba(255, 214, 170, 0.08);
+  border-radius: 10px;
+  padding: 6px 10px;
+  color: rgba(255, 236, 214, 0.76);
+  background: rgba(255, 243, 231, 0.03);
+  font-size: 0.68rem;
 }
 
 .ghost-button {
