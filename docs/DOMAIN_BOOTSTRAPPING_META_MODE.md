@@ -227,6 +227,69 @@ The goal is not to automate ontology design on day one. The goal is to see
 whether a strong model can draft a useful, reviewable domain surface faster than
 we can invent one by hand.
 
+## First Harness
+
+A first executable harness now exists:
+
+```powershell
+python scripts/run_profile_bootstrap.py `
+  --dataset datasets/profile_bootstrap/samples/contracts_compliance_seed_8.jsonl `
+  --domain-hint contracts_compliance `
+  --backend lmstudio `
+  --model qwen/qwen3.6-35b-a3b
+```
+
+The runner sends a small representative corpus to the model and asks for strict
+`profile_bootstrap_v1` JSON through LM Studio structured output. It writes local
+research artifacts under ignored `tmp/profile_bootstrap/`.
+
+The first seed corpus is intentionally contracts/compliance-shaped because that
+domain stresses obligations, rights, exceptions, source priority, corrections,
+approval events, and rule-versus-fact boundaries. The seed is small enough to
+review by hand and large enough to expose profile-design failure modes.
+
+The first measured tightening loop found a useful weakness: the model could
+propose a good predicate palette, then write starter frontier cases using
+unlisted predicates or different arities. The harness now scores:
+
+- generic predicate count;
+- unknown positive predicate references in starter cases;
+- arity drift between candidate predicates and example calls;
+- schema validity and rough coverage counts.
+
+With the current guidance, a local `qwen/qwen3.6-35b-a3b` run produced:
+
+```text
+parsed_ok: true
+rough_score: 1.000
+candidate_predicates: 10
+generic_predicate_count: 0
+frontier_unknown_positive_predicate_count: 0
+starter_frontier_cases: 8
+```
+
+Representative proposed predicates included:
+
+- `obligation/3`
+- `conditional_right/3`
+- `submitted_by/2`
+- `approved_by/2`
+- `sent_on/2`
+- `conflict_of_interest/2`
+- `waiver/2`
+- `sponsorship_expiry/2`
+- `priority_override/3`
+- `source_priority/3`
+
+This is not an approved profile. It is review material. The remaining human
+review question is semantic completeness: a structurally coherent profile can
+still omit a direct relation from a starter case or choose a predicate surface
+that should be split, renamed, or scoped differently.
+
+That is the intended boundary. The model helps draft the vocabulary; review,
+tests, and deterministic admission decide whether the vocabulary earns its way
+into a real profile.
+
 ## Bottom Line
 
 Domain bootstrapping is the meta-version of Prethinker:
