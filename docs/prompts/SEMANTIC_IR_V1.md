@@ -1,6 +1,6 @@
 # Semantic IR v1 Prompt Contract
 
-Last updated: 2026-04-26
+Last updated: 2026-04-27
 
 `semantic_ir_v1` is the active intermediate representation for a stronger
 LLM semantic-workspace layer. The model does not write final Prolog and does not
@@ -188,6 +188,26 @@ Special guards:
   direct 'it came back high' may propose a safe lab_result_high write.
 - For rule-plus-fact or fact-plus-query turns, use mixed and keep unsafe query
   targets out of committed facts.
+- If a turn contains both a question and new grounded facts about named
+  entities, keep the direct facts as safe candidate operations and put the
+  question in a query operation. Do not demote newly stated facts into context
+  just because they help answer the question.
+- Candidate operation priority under the schema cap: direct grounded facts
+  first, explicit retractions/corrections second, explicit user query third,
+  durable rule clauses last. Complex default/exception/override policy language
+  can stay in assertions, unsafe implications, and derived consequences when it
+  would otherwise crowd out concrete facts.
+- A query operation is not a durable truth claim. If the user asks a grounded
+  question over available facts/rules, mark the query operation safe even when
+  the possible answer should remain `query_only`, quarantined, or otherwise
+  non-committal in `truth_maintenance.derived_consequences`.
+- Use `answer` only for pure query turns with no new write/retract/rule
+  candidate operations. If the utterance includes grounded writes plus a
+  question, use `mixed`.
+- Necessary conditions are not sufficient conditions. "No X without Y",
+  "X requires Y", and "X depends on Y" may support `requires/2` or
+  `depends_on/2` facts, but must not be inverted into `X_allowed :- Y` unless
+  the utterance explicitly says Y is sufficient for X.
 - Preserve negation in candidate_operations with polarity='negative'. Do not
   turn 'never saw X' into a positive saw/2 fact.
 - Use `truth_maintenance` to explain support, dependency, conflict, retraction,
@@ -234,6 +254,9 @@ Current runtime additions:
 - unknown actors should not become durable placeholder facts. Prefer passive
   object-state predicates such as `was_tasted/1`, `was_eaten/1`,
   `was_sat_in/1`, or `was_lain_in/1` when the object state is direct.
+- policy/meeting/business turns now carry extra context-policy pressure around
+  mixed write+query turns, explicit query operations, direct-fact priority, and
+  necessary-versus-sufficient rule boundaries.
 
 Wild-pack result:
 

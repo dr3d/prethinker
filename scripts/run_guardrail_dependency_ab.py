@@ -22,6 +22,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from scripts.run_semantic_ir_prompt_bakeoff import (  # noqa: E402
     EDGE_SCENARIO_IDS,
+    POLICY_DEMO_SCENARIO_IDS,
     RULE_MUTATION_SCENARIO_IDS,
     SILVERTON_NOISY_SCENARIO_IDS,
     SILVERTON_SCENARIO_IDS,
@@ -629,7 +630,16 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--scenario-group",
-        choices=["edge_sample", "edge", "weak_edges", "silverton", "silverton_noisy", "rule_mutation", "all"],
+        choices=[
+            "edge_sample",
+            "edge",
+            "weak_edges",
+            "silverton",
+            "silverton_noisy",
+            "rule_mutation",
+            "policy_demo",
+            "all",
+        ],
         default="edge_sample",
     )
     parser.add_argument("--scenario-ids", default="")
@@ -663,6 +673,8 @@ def main() -> int:
             scenario_ids = list(SILVERTON_NOISY_SCENARIO_IDS)
         elif args.scenario_group == "rule_mutation":
             scenario_ids = list(RULE_MUTATION_SCENARIO_IDS)
+        elif args.scenario_group == "policy_demo":
+            scenario_ids = list(POLICY_DEMO_SCENARIO_IDS)
     by_id = {str(scenario.get("id", "")): scenario for scenario in WILD_SCENARIOS}
     scenarios = [by_id[item] for item in scenario_ids] if scenario_ids else list(WILD_SCENARIOS)
 

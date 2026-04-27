@@ -70,6 +70,8 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 - A first-pass SEC EDGAR adapter shell now lives under `adapters/sec_edgar/`. It requires `SEC_USER_AGENT` for live calls, caches raw responses locally, emits harness cases, and includes an offline synthetic fixture for obligation-not-fact and condition-not-event tests.
 - First SEC live smoke generated ignored Apple/Microsoft filing harness data and ran 11 Semantic IR cases through LM Studio. All emitted valid JSON; adding `filer_of/2` fixed an initial palette gap where filing metadata was being squeezed into `party_to_contract/3`.
 - A new held-out cross-turn frontier proposal lives at `docs/data/frontier_packs/semantic_ir_cross_turn_frontier_pack_v1.json`. It targets identity drift, claim/observation separation, noisy multilingual corrections, mixed rule/query/fact turns, temporal corrections, and domain type ambiguity.
+- A new `policy_demo` Semantic IR bakeoff group now targets the "talk your rules into existence" demo family: reimbursement-policy violations, meeting commitments, access sponsorship expiry, customer-support override ladders, story-world throne claims, and business dependency credibility.
+- Prompt/context policy now explicitly separates pure answers from mixed write+query turns, prioritizes direct grounded facts before complex rule clauses under the operation cap, requires explicit query operations for explicit questions, and blocks necessary-condition-to-sufficient-rule inversions such as turning "no launch without QA" into `launch_allowed(...)`.
 
 ## Local UMLS Assets
 
@@ -125,6 +127,7 @@ This is the next useful layer for type steering and explanation. It should suppo
 - Keep the Semantic IR harness model-agnostic, but use `qwen/qwen3.6-35b-a3b` as the default development model unless a specific comparison question needs another local model.
 - Tighten narrative ingestion next around stable object identity, event observation predicates, and temporal/event ordering instead of adding story-specific Python phrase patches.
 - Keep a regular regression cadence around segmentation, predicate-palette admission, stored-logic conflicts, and rule/query mixed turns; the frontier is productive enough that small improvements can easily re-open older failure modes.
+- Push the policy-demo frontier into the UI/prompt book once the command-line harness stays stable: the highest-impact demo is still "record reimbursement policy, ingest February events, ask which reimbursements violated policy, and show why without writing derived violation facts."
 
 ## Verification Snapshot
 
@@ -166,6 +169,7 @@ Recent verified results:
 - Focused truth-maintenance schema/trace/alignment verification: `54 passed` across semantic IR runtime and trace rendering; compile check passed for touched Semantic IR scripts. Live LM Studio `qwen/qwen3.6-35b-a3b` truth-maintenance smoke covered correction-plus-claim, rule-consequence-as-query, and observed-document-vs-witness-claim turns. The model emitted support links, conflicts, retraction plans, and `query_only`/`do_not_commit` consequences while the mapper admitted only candidate-operation effects. The first live alignment mini-battery reported `0` fuzzy edges across those three cases.
 - Live LM Studio KB-context smoke: with `lives_in(mara, london).` in the KB, `Actually, Mara lives in Paris now.` produced a safe retract/assert pair and cited the old KB clause in `truth_maintenance`; the normal `process_utterance()` path retracted London and asserted Paris. `Mara lives in Paris now.` without an explicit correction marker produced a clarification question and no facts.
 - Prompt-molded KB-context smoke: with a single current-state subject candidate from `lives_in(mara, london).`, `Actually, she lives in Paris now.` resolved `she` to Mara, produced retract/assert operations, and yielded `0` truth-maintenance fuzzy edges. The same battery showed KB-backed queries stay as queries and claim-vs-observation turns preserve conflict pressure instead of overwriting observed facts.
+- Policy-demo Semantic IR bakeoff, current best local model and `best_guarded_v2`: `7/7` JSON/schema, `7/7` raw model decisions, `7/7` mapper-projected decisions, admission contracts `5/7`, admission checks `67/70`, average rough score `0.95`. The remaining misses are useful frontier pressure around representing compound access-expiry queries and exact meeting-objection shapes.
 
 ## Reading Order
 

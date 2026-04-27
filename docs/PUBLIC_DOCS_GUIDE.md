@@ -145,6 +145,8 @@ Latest local verification before this refresh:
   useful as a pressure gauge rather than a demo headline
 - Cross-turn frontier proposal: `docs/data/frontier_packs/semantic_ir_cross_turn_frontier_pack_v1.json`, held out for future runner integration
 - Lava sweep harness: `scripts/run_semantic_ir_lava_sweep.py` balances old and new scenario sources, generates typo/bad-grammar/context-switch variants, repeats temperature-0 signatures for variance checks, applies admitted writes to a private stream KB, and records admitted queries without executing them by default so recursive query evaluation cannot stall broad Semantic IR sweeps
+- Policy-demo bakeoff group: `python scripts/run_semantic_ir_prompt_bakeoff.py --backend lmstudio --base-url http://127.0.0.1:1234 --model qwen/qwen3.6-35b-a3b --scenario-group policy_demo --variants best_guarded_v2`
+- Latest policy-demo pass: `7/7` JSON/schema, `7/7` model decisions, `7/7` mapper-projected decisions, admission contracts `5/7`, admission checks `67/70`, average rough score `0.95`. This group exercises the most demo-ready "talk your rules into existence" surface: policies, meeting commitments, access sponsorship, support-rule overrides, story-world claims, and business dependency credibility.
 
 The important qualitative result is that semantic IR has reduced dependence on
 non-mapper Python rescue code in tested packs. The remaining hard problems are

@@ -10,11 +10,13 @@ from scripts.run_guardrail_dependency_ab import (
 )
 from scripts.run_semantic_ir_prompt_bakeoff import (
     HARBOR_FRONTIER_SCENARIO_IDS,
+    POLICY_DEMO_SCENARIO_IDS,
     RULE_MUTATION_SCENARIO_IDS,
     SILVERTON_NOISY_SCENARIO_IDS,
     SILVERTON_SCENARIO_IDS,
     WILD_SCENARIOS,
     _slug_component as _bakeoff_slug_component,
+    score_admission,
 )
 
 
@@ -164,6 +166,62 @@ class GuardrailDependencyABTests(unittest.TestCase):
         self.assertTrue(score["safe_outcome_ok"])
         self.assertEqual(score["kb_safety_score"], 1.0)
 
+    def test_admission_score_checks_truth_maintenance_evidence(self) -> None:
+        mapped = {
+            "admission_diagnostics": {
+                "clauses": {
+                    "facts": ["requested_by(reimbursement_1, maya)."],
+                    "queries": ["violation(reimbursement_1, reimbursement_policy)."],
+                },
+                "clause_supports": {
+                    "facts": [
+                        {
+                            "clause": "requested_by(reimbursement_1, maya).",
+                            "support_ref": "R1 requested by Maya",
+                        }
+                    ]
+                },
+                "truth_maintenance": {
+                    "support_links": [
+                        {
+                            "operation_index": 0,
+                            "support_kind": "direct_utterance",
+                            "support_ref": "R1 requested by Maya",
+                            "role": "grounds",
+                        }
+                    ],
+                    "conflicts": [
+                        {
+                            "new_operation_index": 1,
+                            "conflict_kind": "claim_vs_observation",
+                            "why": "claim conflicts with observation",
+                        }
+                    ],
+                    "derived_consequences": [
+                        {
+                            "statement": "R1 violates reimbursement policy",
+                            "commit_policy": "query_only",
+                        }
+                    ],
+                },
+                "operations": [],
+            }
+        }
+        scenario = {
+            "expect": {
+                "admission": {
+                    "must_admit_fact": [["requested_by(r1", "requested_by(reimbursement_1"]],
+                    "must_admit_query": ["violation("],
+                    "must_support_ref": ["direct_utterance", "R1 requested"],
+                    "must_conflict": ["claim_vs_observation"],
+                    "must_derived_consequence": [["violation", "violates"], "query_only"],
+                }
+            }
+        }
+        score = score_admission(mapped, scenario)
+        self.assertTrue(score["ok"], score)
+        self.assertEqual(score["check_count"], score["check_total"])
+
     def test_silverton_probate_pack_is_registered(self) -> None:
         by_id = {str(row.get("id", "")): row for row in WILD_SCENARIOS}
         self.assertEqual(len(SILVERTON_SCENARIO_IDS), 10)
@@ -303,6 +361,56 @@ class GuardrailDependencyABTests(unittest.TestCase):
                 )
             )
         self.assertTrue({"harbor_house_legal", "harbor_house_temporal"}.issubset(domains))
+
+    def test_policy_demo_pack_is_registered(self) -> None:
+        by_id = {str(row.get("id", "")): row for row in WILD_SCENARIOS}
+        self.assertEqual(len(POLICY_DEMO_SCENARIO_IDS), 7)
+        domains = set()
+        for scenario_id in POLICY_DEMO_SCENARIO_IDS:
+            self.assertIn(scenario_id, by_id)
+            scenario = by_id[scenario_id]
+            domains.add(str(scenario.get("domain", "")))
+            self.assertTrue(scenario.get("predicate_contracts"))
+            self.assertTrue(scenario.get("allowed_predicates"))
+            self.assertIn(str(scenario.get("expect", {}).get("decision", "")), {
+                "answer",
+                "clarify",
+                "commit",
+                "mixed",
+                "quarantine",
+                "reject",
+            })
+            text = " ".join(
+                [
+                    str(scenario.get("utterance", "")),
+                    " ".join(str(item) for item in scenario.get("context", [])),
+                    " ".join(str(item) for item in scenario.get("expect", {}).get("must", [])),
+                    " ".join(str(item) for item in scenario.get("expect", {}).get("avoid", [])),
+                ]
+            ).lower()
+            self.assertTrue(
+                any(
+                    token in text
+                    for token in [
+                        "policy",
+                        "rule",
+                        "violate",
+                        "depends",
+                        "blocked",
+                        "query",
+                        "commitment",
+                        "claim",
+                    ]
+                )
+            )
+            admission = scenario.get("expect", {}).get("admission", {})
+            self.assertTrue(
+                any(
+                    key in admission
+                    for key in ["must_support_ref", "must_conflict", "must_derived_consequence"]
+                )
+            )
+        self.assertTrue({"policy_stress_test", "meeting_commitment", "story_world"}.issubset(domains))
 
 
 if __name__ == "__main__":

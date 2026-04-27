@@ -2,7 +2,7 @@
 
 This playbook merges your 10 high-impact demos with Prethinker-native demos that highlight our governed ingestion model, clarification policy, and deterministic memory.
 
-Last updated: 2026-04-26
+Last updated: 2026-04-27
 
 Status note: this is a demo-idea bank. The current live demo surface is the
 console prompt book plus semantic IR admission traces. For runnable current
@@ -77,6 +77,24 @@ For focused current fixtures, start with:
 - `docs/data/frontier_packs/semantic_ir_cross_turn_frontier_pack_v1.json`
 - `docs/data/frontier_packs/process_utterance_temporal_pack_v1.json`
 - `docs/data/frontier_packs/process_utterance_correction_pack_v1.json`
+
+For the current "talk your rules into existence" frontier:
+
+```powershell
+python scripts/run_semantic_ir_prompt_bakeoff.py --backend lmstudio --base-url http://127.0.0.1:1234 --model qwen/qwen3.6-35b-a3b --scenario-group policy_demo --variants best_guarded_v2
+```
+
+The first policy-demo group covers reimbursement rules and February violation
+queries, meeting commitments, contractor-access sponsorship expiry, customer
+support override ladders, story-world throne claims, and business dependency
+credibility. Latest local result: `7/7` JSON/schema, `7/7` model decisions,
+`7/7` mapper-projected decisions, `67/70` admission checks, average rough score
+`0.95`.
+
+The important demo behavior is not that every derived answer becomes a fact. It
+is that the system admits grounded facts, admits explicit queries, and keeps
+derived consequences in the trace unless a deterministic rule path really
+authorizes them.
 
 ## New Demo Focus: Time-Loop Carnival
 
