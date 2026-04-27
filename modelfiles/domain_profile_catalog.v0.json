@@ -52,6 +52,23 @@
       "thick_context_source": "profile.probate.v0.json"
     },
     {
+      "profile_id": "sec_contracts@v0",
+      "status": "proposal",
+      "description": "SEC/EDGAR and contract-obligation intake for filings, exhibits, parties, obligations, conditions, effective dates, termination, breach events, and provenance.",
+      "use_when": [
+        "SEC EDGAR filing, exhibit, 10-K, 8-K, agreement, loan, indenture, merger, or contract language",
+        "shall, must, required to, may, subject to, provided that, unless, before, after, upon, effective date, termination, or default language",
+        "party, borrower, lender, issuer, guarantor, agent, subsidiary, obligation, entitlement, covenant, breach, or governing law extraction",
+        "financial filing metadata or exhibit provenance"
+      ],
+      "avoid_when": [
+        "investment advice or trading recommendation",
+        "legal advice about enforceability",
+        "medical fact intake"
+      ],
+      "thick_context_source": "profile.sec_contracts.v0.json"
+    },
+    {
       "profile_id": "legal_courtlistener@v0",
       "status": "proposal",
       "description": "CourtListener-backed legal source intake for opinions, dockets, judges, parties, citations, claims, findings, holdings, and document provenance.",

@@ -23,6 +23,7 @@ The short version:
 - The active Semantic IR path passes `medical@v0` predicate contracts and compact UMLS concept context into the model input before deterministic admission.
 - A thin profile roster now exposes skill-like domain packages such as `medical@v0`, `story_world@v0`, and `probate@v0`; only explicitly selected thick context affects the current Semantic IR pass.
 - `legal_courtlistener@v0` and `adapters/courtlistener/` are the first legal-source profile/adapter scaffold for claim/finding, citation, docket, role-scope, and identity-boundary experiments.
+- `sec_contracts@v0` and `adapters/sec_edgar/` are the third large starter domain, aimed at obligations, conditions, temporal triggers, party roles, and filing/exhibit provenance.
 - The Prolog KB is the committed truth layer; model output remains provisional until the runtime admits it.
 - Long story-like utterances can now be segmented into focused Semantic IR passes so narrative ingestion stays inspectable instead of relying on one summary-shaped model response.
 - Historical reports, old prompt snapshots, and run logs were pruned from the forward-facing tree because Git already preserves them.
@@ -57,7 +58,7 @@ The public repo currently tracks `30` pytest files under [tests/](https://github
 
 ```powershell
 python -m pytest -q
-# 292 passed
+# 299 passed
 ```
 
 Focused verification after the current Semantic IR console/story-ingestion and profile-contract passes:
@@ -71,6 +72,8 @@ python -m pytest tests/test_domain_profiles.py
 # 2 passed
 python -m pytest tests/test_courtlistener_adapter.py tests/test_domain_profiles.py
 # 8 passed
+python -m pytest tests/test_sec_edgar_adapter.py tests/test_domain_profiles.py
+# 9 passed
 ```
 
 The UMLS Semantic Network and Metathesaurus-derived runtime assets are intentionally not committed because they depend on licensed source data. The public repo includes the builders, tests, docs, and profile code; outside reproduction of the UMLS lane requires obtaining the licensed UMLS files separately.

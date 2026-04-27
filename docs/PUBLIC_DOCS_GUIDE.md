@@ -95,14 +95,16 @@ future architecture.
 
 Latest local verification before this refresh:
 
-- Full pytest suite: `292 passed`
+- Full pytest suite: `299 passed`
 - Profile-aware Semantic IR/UMLS handoff: `medical@v0` now supplies predicate contracts plus compact UMLS bridge context to the model input before deterministic admission
 - Domain-profile catalog foundation: thin roster plus mock `story_world@v0` and `probate@v0` thick-context packages for future skill-like profile selection
 - CourtListener legal-source scaffold: `legal_courtlistener@v0`, `adapters/courtlistener/`, and a synthetic legal seed fixture for claim/finding, citation, docket, role-scope, and identity-boundary tests
+- SEC/contracts scaffold: `sec_contracts@v0`, `adapters/sec_edgar/`, and a synthetic contract seed fixture for obligation, condition, temporal-trigger, party-scope, and breach-boundary tests
 - Focused Semantic IR console/story-ingestion verification: `55 passed`
 - Focused profile-contract verification: `6 passed`
 - Focused domain-profile package verification: `2 passed`
 - Focused CourtListener/domain-profile verification: `8 passed`
+- Focused SEC/domain-profile verification: `9 passed`
 - Semantic IR runtime edge pack: `20/20` decision labels, `0.976` avg score
 - Semantic IR weak-edge pack: `10/10` decision labels, `1.000` avg score
 - Goldilocks full-story segmented smoke: `56` deduped mutations across `50`

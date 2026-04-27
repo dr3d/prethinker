@@ -1,0 +1,53 @@
+{
+  "profile_id": "sec_contracts@v0",
+  "status": "proposal_mock",
+  "description": "SEC/EDGAR and contract-obligation intake profile for filings, exhibits, parties, obligations, conditions, effective dates, termination, breach events, and source provenance.",
+  "predicate_registry": "future profile-owned registry",
+  "recommended_settings": {
+    "compiler_mode": "strict",
+    "strict_registry": true,
+    "clarification_eagerness": 0.8,
+    "freethinker_resolution_policy": "advisory_only"
+  },
+  "selection_hints": {
+    "use_when": [
+      "SEC EDGAR filing, exhibit, 10-K, 8-K, agreement, loan, indenture, merger, or contract language",
+      "shall, must, required to, may, subject to, provided that, unless, before, after, upon, effective date, termination, or default language",
+      "party, borrower, lender, issuer, guarantor, agent, subsidiary, counterparty, obligation, entitlement, covenant, breach, or governing law extraction",
+      "financial filing metadata or exhibit provenance"
+    ],
+    "avoid_when": [
+      "investment advice or trading recommendation",
+      "legal advice about enforceability",
+      "medical fact intake",
+      "fictional story with no contract or filing source"
+    ]
+  },
+  "semantic_ir_context": [
+    "profile_scope: SEC and contract source intake; extract source-grounded metadata, parties, obligations, conditions, and temporal constraints without investment or legal advice",
+    "obligation_policy: shall/must/is required to language is an obligation or rule-like constraint, not evidence that the action already happened",
+    "entitlement_policy: may/is entitled to language is a permission or right, not evidence that the right was exercised",
+    "condition_policy: subject to/provided that/unless/if clauses are conditions or unsafe rule material unless a precise executable rule is admitted",
+    "temporal_policy: preserve effective dates, maturity dates, termination dates, renewal windows, and before/after/upon triggers; do not collapse future obligations into current facts",
+    "party_policy: roles are scoped to contracts or filings; do not emit global borrower/lender/issuer facts",
+    "provenance_policy: SEC filing metadata and exhibits are source records; preserve accession number, form type, exhibit id, and filing date when available",
+    "advice_boundary: do not answer who should invest, trade, sue, breach, enforce, or win; reject advice/outcome requests"
+  ],
+  "canonical_palette": [
+    { "signature": "filing_form/2", "arguments": ["filing", "form_type"], "notes": "SEC filing form type such as 10-K or 8-K." },
+    { "signature": "filed_on/2", "arguments": ["filing_or_document", "date"], "notes": "Filing or document date." },
+    { "signature": "accession_number/2", "arguments": ["filing", "accession_number"], "notes": "SEC accession number." },
+    { "signature": "exhibit_to_filing/3", "arguments": ["exhibit", "filing", "exhibit_type"], "notes": "Exhibit associated with an SEC filing." },
+    { "signature": "party_to_contract/3", "arguments": ["party", "contract", "role"], "notes": "Contract-scoped party role." },
+    { "signature": "obligation/3", "arguments": ["obligated_party", "obligation_content", "source"], "notes": "Duty or required future action; not proof of completed action." },
+    { "signature": "entitled_to/3", "arguments": ["party", "right_or_benefit", "source"], "notes": "Right, permission, or entitlement." },
+    { "signature": "effective_on/2", "arguments": ["contract_or_clause", "date_or_trigger"], "notes": "Effective date or trigger." },
+    { "signature": "terminates_on/2", "arguments": ["contract_or_clause", "date_or_trigger"], "notes": "Termination date or trigger." },
+    { "signature": "subject_to/2", "arguments": ["clause_or_obligation", "condition"], "notes": "Condition or dependency." },
+    { "signature": "condition_met/2", "arguments": ["condition", "evidence_source"], "notes": "Condition satisfaction when explicitly evidenced." },
+    { "signature": "breach_event/2", "arguments": ["contract_or_obligation", "event"], "notes": "Explicit breach/default event, not inferred from obligation text alone." },
+    { "signature": "governing_law/2", "arguments": ["contract", "jurisdiction"], "notes": "Governing law clause." },
+    { "signature": "document_states/4", "arguments": ["document", "filing_or_contract", "content", "source"], "notes": "Source document states content without making it completed fact." },
+    { "signature": "candidate_identity/2", "arguments": ["ambiguous_alias", "candidate_entity"], "notes": "Possible identity, not resolved identity." }
+  ]
+}

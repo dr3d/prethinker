@@ -39,6 +39,9 @@ Two starter/mock profiles also exist for exploration:
 - `legal_courtlistener@v0`: CourtListener legal source intake for opinions,
   dockets, parties, judges, citations, allegations, findings, holdings, and
   provenance
+- `sec_contracts@v0`: SEC/EDGAR and contract-obligation intake for filings,
+  exhibits, parties, obligations, conditions, effective dates, termination,
+  breach events, and provenance
 
 These packages are intentionally declarative. They are research scaffolds for
 testing the catalog idea, not new automatic runtime authority.
@@ -92,6 +95,12 @@ The roster should be small enough to keep in ordinary context:
     "description": "Estate/probate claims, witnesses, beneficiary status, amendments, and forfeiture rules.",
     "use_when": ["inheritance", "witnessed amendment", "beneficiary", "estate charter"],
     "avoid_when": ["general family biography with no legal rule"]
+  },
+  {
+    "profile_id": "sec_contracts@v0",
+    "description": "SEC/EDGAR and contract intake: filings, exhibits, parties, obligations, conditions, effective dates.",
+    "use_when": ["SEC filing", "contract exhibit", "shall/must obligation", "subject to/provided that condition"],
+    "avoid_when": ["investment advice", "legal advice", "outcome prediction"]
   },
   {
     "profile_id": "legal_courtlistener@v0",
