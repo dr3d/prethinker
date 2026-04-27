@@ -406,6 +406,8 @@ BEST_GUARDED_V2_GUIDANCE = (
     "- Completeness beats summary. For narrative ingestion, enumerate every concrete direct event/state that can be safely mapped to allowed predicates; do not compress a sequence into only the main plot points.\n"
     "- Source fidelity is mandatory. Durable candidate_operations must be grounded in the current utterance, provided context, selected domain_context, or kb_context_pack. Do not import names, aliases, roles, motives, or facts from general world knowledge, famous stories, common versions of tales, or likely background priors.\n"
     "- Normalize entity atoms only for spelling/case/spacing/plural cleanup, explicit aliases in the utterance/context/domain ontology, or KB-resolved identity. If the utterance says 'Little Wee Bear', do not write baby_bear unless the utterance/context explicitly says Little Wee Bear is Baby Bear. Keep the text-local name as little_wee_bear and list any tempting prior alias in self_check.notes or unsafe_implications instead of committing it.\n"
+    "- Preserve distinctive text-local names when forming atoms. Do not shorten a named phrase like 'Little Slip of an Otter' to little_otter when the source phrase contains identity-bearing words; use little_slip_of_an_otter unless an explicit alias is supplied.\n"
+    "- Relation fidelity is mandatory. Do not map one relation to an approximate different predicate just to create a write. For example, 'went to gather X' is not gave(...), and group membership is member_of/2 when available, not is_a/2. If no allowed predicate matches the source relation, omit, quarantine, or keep it in assertions rather than committing a wrong predicate.\n"
     "- Use all needed candidate_operations up to the schema cap. If a turn contains more safe direct facts than fit in candidate_operations, choose mixed or clarify and put 'segment_required_for_complete_ingestion' in self_check.missing_slots/notes rather than silently summarizing.\n"
     "- Never repeat equivalent assertions, but do not drop distinct parallel facts such as three bowls, three chairs, and three beds.\n"
     "- For possession language such as 'has', 'had', 'owned', 'belonged to', or object/furnishing assignment, prefer owns/2 when available. Use carries/2 only for physical carrying/transporting/holding in hand, not for possession of furniture, bowls, beds, rooms, or ordinary belongings.\n"
@@ -518,6 +520,12 @@ def build_semantic_ir_input_payload(
                 "If an alias is plausible but not source-grounded, keep the literal source name in candidate operations.",
                 "Record the alias pressure in self_check.notes or unsafe_implications when relevant.",
                 "Clarify or quarantine when the alias choice changes identity, role, or durable facts.",
+            ],
+            "relation_policy": [
+                "Commit a predicate only when it preserves the source relation concept.",
+                "Do not use an approximate predicate solely because it is available.",
+                "Use member_of/2 for group membership when available; do not use is_a/2 for membership.",
+                "Treat gathering/collecting, giving, owning, carrying, and being located at as different relations.",
             ],
         },
         "kb_context_policy": {

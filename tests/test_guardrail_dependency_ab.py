@@ -14,9 +14,11 @@ from scripts.run_semantic_ir_prompt_bakeoff import (
     RULE_MUTATION_SCENARIO_IDS,
     SILVERTON_NOISY_SCENARIO_IDS,
     SILVERTON_SCENARIO_IDS,
+    SOURCE_FIDELITY_SCENARIO_IDS,
     WILD_SCENARIOS,
     _slug_component as _bakeoff_slug_component,
     score_admission,
+    score_record,
 )
 
 
@@ -411,6 +413,93 @@ class GuardrailDependencyABTests(unittest.TestCase):
                 )
             )
         self.assertTrue({"policy_stress_test", "meeting_commitment", "story_world"}.issubset(domains))
+
+    def test_source_fidelity_pack_is_registered(self) -> None:
+        by_id = {str(row.get("id", "")): row for row in WILD_SCENARIOS}
+        self.assertEqual(SOURCE_FIDELITY_SCENARIO_IDS, ["story_source_fidelity_otter_names"])
+        scenario = by_id[SOURCE_FIDELITY_SCENARIO_IDS[0]]
+        self.assertEqual(scenario.get("domain"), "story_source_fidelity")
+        self.assertIn("member_of/2", scenario.get("allowed_predicates", []))
+        self.assertIn("gathered/2", scenario.get("allowed_predicates", []))
+        self.assertTrue(scenario.get("predicate_contracts"))
+        expected_text = " ".join(
+            [
+                " ".join(str(item) for item in scenario.get("expect", {}).get("must", [])),
+                " ".join(str(item) for item in scenario.get("expect", {}).get("avoid", [])),
+            ]
+        ).lower()
+        self.assertIn("little slip of an otter", expected_text)
+        self.assertIn("baby_bear", expected_text)
+        self.assertIn("gave(", expected_text)
+
+    def test_source_fidelity_score_catches_prior_leakage_and_bad_relation(self) -> None:
+        by_id = {str(row.get("id", "")): row for row in WILD_SCENARIOS}
+        scenario = by_id["story_source_fidelity_otter_names"]
+        parsed = {
+            "schema_version": "semantic_ir_v1",
+            "decision": "commit",
+            "turn_type": "state_update",
+            "entities": [
+                {"id": "e1", "surface": "Little Slip of an Otter", "normalized": "little_otter", "type": "person", "confidence": 0.82},
+                {"id": "e2", "surface": "Baby Bear", "normalized": "baby_bear", "type": "person", "confidence": 0.77},
+            ],
+            "referents": [],
+            "assertions": [],
+            "unsafe_implications": [],
+            "candidate_operations": [
+                {
+                    "operation": "assert",
+                    "predicate": "gave",
+                    "args": ["group_of_otters", "little_mint_sprig", "little_otter"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                    "confidence": 0.86,
+                },
+                {
+                    "operation": "assert",
+                    "predicate": "is_a",
+                    "args": ["little_otter", "three_otters"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                    "confidence": 0.83,
+                },
+            ],
+            "clarification_questions": [],
+            "truth_maintenance": {},
+            "self_check": {"bad_commit_risk": "low", "notes": []},
+        }
+        score = score_record(parsed, scenario)
+        self.assertLess(score["avoid_count"], score["avoid_total"], score)
+        self.assertLess(score["must_count"], score["must_total"], score)
+
+    def test_source_fidelity_admission_contract_catches_bad_writes(self) -> None:
+        by_id = {str(row.get("id", "")): row for row in WILD_SCENARIOS}
+        scenario = by_id["story_source_fidelity_otter_names"]
+        mapped = {
+            "admission_diagnostics": {
+                "clauses": {
+                    "facts": [
+                        "gave(group_of_otters, little_mint_sprig, little_otter).",
+                        "is_a(little_otter, three_otters).",
+                        "owns(baby_bear, baby_bear_bowl).",
+                    ]
+                },
+                "operations": [
+                    {
+                        "admitted": True,
+                        "effect": "fact",
+                        "operation": "assert",
+                        "predicate": "gave",
+                        "args": ["group_of_otters", "little_mint_sprig", "little_otter"],
+                    }
+                ],
+            }
+        }
+        score = score_admission(mapped, scenario)
+        self.assertFalse(score["ok"], score)
+        self.assertTrue(any("must_not_admit_fact" in miss for miss in score["misses"]))
 
 
 if __name__ == "__main__":

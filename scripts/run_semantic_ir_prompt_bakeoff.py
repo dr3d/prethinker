@@ -258,6 +258,69 @@ WILD_SCENARIOS: list[dict[str, Any]] = [
         },
     },
     {
+        "id": "story_source_fidelity_otter_names",
+        "domain": "story_source_fidelity",
+        "utterance": (
+            "There were three Otters: a Little Slip of an Otter, a Middle-sized Otter, "
+            "and a Great Long Otter. They went down to the river to gather three sprigs of mint: "
+            "a little mint sprig for the Little Slip of an Otter, a middle-sized mint sprig "
+            "for the Middle-sized Otter, and a great dripping mint sprig for the Great Long Otter."
+        ),
+        "context": [
+            "Source-fidelity stress test: use text-local names and relations only.",
+            "Do not replace story-local names with familiar aliases from well-known tales.",
+            "If a relation is unavailable in the allowed predicates, omit or quarantine it rather than approximating a different relation.",
+        ],
+        "allowed_predicates": ["member_of/2", "went_to/2", "gathered/2"],
+        "predicate_contracts": [
+            {"signature": "member_of/2", "args": ["member_entity", "group_entity"]},
+            {"signature": "went_to/2", "args": ["actor", "destination"]},
+            {"signature": "gathered/2", "args": ["actor", "object"]},
+        ],
+        "expect": {
+            "decision": "commit",
+            "must": [
+                "little slip of an otter",
+                "middle-sized otter",
+                "great long otter",
+                "member_of",
+                "gathered",
+            ],
+            "avoid": [
+                "baby_bear",
+                "mama_bear",
+                "papa_bear",
+                "little_otter",
+                "middle_otter",
+                "great_otter",
+                "group_of_otters",
+                "is_a(little",
+                "is_a(middle",
+                "is_a(great",
+                "gave(",
+            ],
+            "admission": {
+                "must_admit_fact": [
+                    "member_of(little_slip_of_an_otter",
+                    "member_of(middle_sized_otter",
+                    "member_of(great_long_otter",
+                    "gathered(",
+                ],
+                "must_not_admit_fact": [
+                    "baby_bear",
+                    "mama_bear",
+                    "papa_bear",
+                    "little_otter",
+                    "middle_otter",
+                    "great_otter",
+                    "group_of_otters",
+                    "is_a(",
+                    "gave(",
+                ],
+            },
+        },
+    },
+    {
         "id": "ledger_separation_tax_condition",
         "domain": "legal_story",
         "utterance": (
@@ -2084,6 +2147,11 @@ POLICY_DEMO_SCENARIO_IDS = [
 ]
 
 
+SOURCE_FIDELITY_SCENARIO_IDS = [
+    "story_source_fidelity_otter_names",
+]
+
+
 SCHEMA_CONTRACT = {
     "schema_version": "semantic_ir_v1",
     "decision": "commit|clarify|quarantine|reject|answer|mixed",
@@ -2337,6 +2405,9 @@ PROMPT_VARIANTS: dict[str, dict[str, Any]] = {
             "- commit: direct state update or correction has a clear target and safe predicate mapping.\n"
             "Special guards:\n"
             "- Keep arrays compact: at most 8 assertions, 8 unsafe_implications, 8 candidate_operations, and 3 clarification_questions. Never repeat equivalent assertions.\n"
+            "- Source fidelity is mandatory. Do not import names, aliases, roles, motives, or facts from famous stories, common versions, or general world priors unless the current utterance/context states them.\n"
+            "- Preserve distinctive text-local names when forming atoms. Normalize spelling/case/spacing, but do not shorten 'Little Slip of an Otter' to little_otter or replace a text-local name with a familiar alias.\n"
+            "- Relation fidelity is mandatory. Do not map one relation to an approximate different predicate just to create a write: 'went to gather X' is not gave(...), and group membership is member_of/2 when available, not is_a/2.\n"
             "- Do not turn a claim into a fact. 'Bob says he has it' is a claim, not possession.\n"
             "- Do not infer diagnosis or staging from a single lab value request. Quarantine or clarify.\n"
             "- Do not infer allergy from nausea/vomiting alone. Clarify allergy vs side effect/intolerance.\n"
@@ -2388,6 +2459,9 @@ PROMPT_VARIANTS: dict[str, dict[str, Any]] = {
             "- commit: direct state update or correction has a clear target and safe predicate mapping.\n"
             "Special guards:\n"
             "- Keep arrays compact: at most 8 assertions, 8 unsafe_implications, 8 candidate_operations, and 3 clarification_questions. Never repeat equivalent assertions.\n"
+            "- Source fidelity is mandatory. Do not import names, aliases, roles, motives, or facts from famous stories, common versions, or general world priors unless the current utterance/context states them.\n"
+            "- Preserve distinctive text-local names when forming atoms. Normalize spelling/case/spacing, but do not shorten 'Little Slip of an Otter' to little_otter or replace a text-local name with a familiar alias.\n"
+            "- Relation fidelity is mandatory. Do not map one relation to an approximate different predicate just to create a write: 'went to gather X' is not gave(...), and group membership is member_of/2 when available, not is_a/2.\n"
             "- Do not turn a claim into a fact. 'Bob says he has it' is a claim, not possession.\n"
             "- Do not infer diagnosis or staging from a single lab value request. Quarantine or clarify.\n"
             "- Do not infer allergy from nausea/vomiting alone. Clarify allergy vs side effect/intolerance unless the user explicitly corrects a prior allergy record.\n"
@@ -2965,6 +3039,7 @@ def parse_args() -> argparse.Namespace:
             "rule_mutation",
             "harbor_frontier",
             "policy_demo",
+            "source_fidelity",
         ],
         default="all",
     )
@@ -3005,6 +3080,8 @@ def main() -> int:
             scenario_ids = list(HARBOR_FRONTIER_SCENARIO_IDS)
         elif args.scenario_group == "policy_demo":
             scenario_ids = list(POLICY_DEMO_SCENARIO_IDS)
+        elif args.scenario_group == "source_fidelity":
+            scenario_ids = list(SOURCE_FIDELITY_SCENARIO_IDS)
     by_id = {scenario["id"]: scenario for scenario in WILD_SCENARIOS}
     scenarios = [by_id[item] for item in scenario_ids] if scenario_ids else list(WILD_SCENARIOS)
     out_dir = Path(args.out_dir)
