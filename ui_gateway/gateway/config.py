@@ -9,8 +9,22 @@ def _normalize_active_profile(value: object, default: str = "general") -> str:
     aliases = {
         "default": "general",
         "general": "general",
+        "auto": "auto",
         "medical": "medical@v0",
         "medical@v0": "medical@v0",
+        "legal": "legal_courtlistener@v0",
+        "legal_courtlistener": "legal_courtlistener@v0",
+        "legal_courtlistener@v0": "legal_courtlistener@v0",
+        "courtlistener": "legal_courtlistener@v0",
+        "sec": "sec_contracts@v0",
+        "sec_contracts": "sec_contracts@v0",
+        "sec_contracts@v0": "sec_contracts@v0",
+        "contracts": "sec_contracts@v0",
+        "story": "story_world@v0",
+        "story_world": "story_world@v0",
+        "story_world@v0": "story_world@v0",
+        "probate": "probate@v0",
+        "probate@v0": "probate@v0",
     }
     requested = str(value or default).strip().lower()
     return aliases.get(requested, aliases.get(str(default or "general").strip().lower(), "general"))

@@ -222,6 +222,63 @@ class LocalMcpServerTests(unittest.TestCase):
         self.assertTrue(trace_input.get("predicate_contracts"))
         self.assertTrue(trace_input.get("domain_context"))
 
+    def test_semantic_ir_auto_profile_switches_context_across_domains(self) -> None:
+        server = PrologMCPServer(
+            compiler_prompt_enabled=False,
+            semantic_ir_enabled=True,
+            compiler_backend="lmstudio",
+            active_profile="auto",
+        )
+        server._profile_semantic_ir_context = [
+            "profile_scope: bounded medical memory",
+            "umls_concept: warfarin; groups=medication; aliases=warfarin, coumadin",
+        ]
+        parsed = {
+            "schema_version": "semantic_ir_v1",
+            "decision": "commit",
+            "turn_type": "state_update",
+            "entities": [],
+            "referents": [],
+            "assertions": [],
+            "unsafe_implications": [],
+            "candidate_operations": [],
+            "clarification_questions": [],
+            "self_check": {"bad_commit_risk": "low", "missing_slots": [], "notes": []},
+        }
+        utterances = [
+            ("Priya is taking Coumadin.", "medical@v0", "taking/2", "bounded medical memory"),
+            (
+                "In Doe v. Acme, the complaint alleged breach but the court found only timeliness.",
+                "legal_courtlistener@v0",
+                "claim_made/4",
+                "claim_policy:",
+            ),
+            (
+                "The borrower shall repay the loan after the maturity date unless default is waived.",
+                "sec_contracts@v0",
+                "obligation/3",
+                "obligation_policy:",
+            ),
+            ("Mara's blood pressure reading was high.", "medical@v0", "lab_result_high/2", "bounded medical memory"),
+        ]
+
+        with patch(
+            "src.mcp_server.call_semantic_ir",
+            return_value={"content": "{}", "parsed": parsed, "latency_ms": 1},
+        ) as mocked:
+            for utterance, expected_profile, expected_signature, expected_context in utterances:
+                ir, error = server._compile_semantic_ir(utterance)
+                self.assertEqual(error, "")
+                self.assertIs(ir, parsed)
+                kwargs = mocked.call_args.kwargs
+                self.assertEqual(kwargs.get("domain"), expected_profile)
+                signatures = set(kwargs.get("allowed_predicates") or [])
+                self.assertIn(expected_signature, signatures)
+                self.assertIn(expected_context, "\n".join(kwargs.get("domain_context") or []))
+                trace = server._last_semantic_ir_trace
+                self.assertEqual(trace.get("selected_profile"), expected_profile)
+                self.assertEqual(trace.get("profile_selection", {}).get("profile_id"), expected_profile)
+
     def test_pre_think_they_coreference_group_with_exception(self) -> None:
         utterance = (
             "I am Scott. my brother is Blake. his wife is Jan. "

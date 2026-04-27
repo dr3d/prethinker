@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -90,6 +91,182 @@ def profile_package_contracts(profile: dict[str, Any]) -> list[dict[str, Any]]:
 
 def profile_package_context(profile: dict[str, Any]) -> list[str]:
     return _string_list(profile.get("semantic_ir_context") if isinstance(profile, dict) else [])
+
+
+def select_domain_profile(
+    utterance: str,
+    *,
+    context: list[str] | None = None,
+    catalog: dict[str, Any] | None = None,
+    min_score: float = 3.0,
+) -> dict[str, Any]:
+    """Select a likely domain profile from the thin roster.
+
+    This is intentionally boring and inspectable. It is a control-plane helper
+    for deciding which thick context package to load; it does not authorize KB
+    writes or override mapper admission.
+    """
+
+    source = catalog if isinstance(catalog, dict) else load_domain_profile_catalog()
+    profiles = source.get("profiles", []) if isinstance(source, dict) else []
+    utterance_text = str(utterance or "").casefold()
+    context_text = " ".join(str(item) for item in (context or [])).casefold()
+    best: dict[str, Any] = {}
+    best_score = 0.0
+    second_score = 0.0
+    for profile in profiles if isinstance(profiles, list) else []:
+        if not isinstance(profile, dict):
+            continue
+        profile_id = str(profile.get("profile_id", "")).strip()
+        source_path = str(profile.get("thick_context_source", "")).strip()
+        if not profile_id or not source_path or source_path.startswith("future "):
+            continue
+        utterance_score, reasons = _profile_match_score(utterance_text, profile)
+        context_score, context_reasons = _profile_match_score(context_text, profile)
+        context_nudge = min(2.0, context_score * 0.2)
+        score = utterance_score + context_nudge
+        if context_nudge:
+            reasons.extend(f"context: {item}" for item in context_reasons[:3])
+        if score > best_score:
+            second_score = best_score
+            best_score = score
+            best = {
+                "profile_id": profile_id,
+                "score": round(score, 2),
+                "runner_up_score": round(second_score, 2),
+                "reasons": reasons[:8],
+            }
+        elif score > second_score:
+            second_score = score
+            if best:
+                best["runner_up_score"] = round(second_score, 2)
+    if not best or best_score < float(min_score):
+        return {
+            "profile_id": "general",
+            "score": round(best_score, 2),
+            "runner_up_score": round(second_score, 2),
+            "reasons": ["no catalog profile crossed selection threshold"],
+        }
+    if best_score - second_score < 1.0:
+        return {
+            "profile_id": "general",
+            "score": round(best_score, 2),
+            "runner_up_score": round(second_score, 2),
+            "reasons": ["top profile scores were too close for automatic selection", *best.get("reasons", [])[:6]],
+        }
+    return best
+
+
+def _profile_match_score(text: str, profile: dict[str, Any]) -> tuple[float, list[str]]:
+    score = 0.0
+    reasons: list[str] = []
+    profile_id = str(profile.get("profile_id", "")).strip()
+    haystack = " ".join(
+        [
+            str(profile.get("description", "")),
+            " ".join(_string_list(profile.get("use_when"))),
+        ]
+    ).casefold()
+    profile_terms = _term_set(haystack)
+    input_terms = _term_set(text)
+    overlap = sorted(profile_terms & input_terms)
+    if overlap:
+        score += min(6.0, len(overlap) * 0.75)
+        reasons.append("term overlap: " + ", ".join(overlap[:8]))
+    for hint in _string_list(profile.get("use_when")):
+        hint_score = _hint_score(text, hint)
+        if hint_score:
+            score += hint_score
+            reasons.append(f"use_when matched: {hint}")
+    for hint in _string_list(profile.get("avoid_when")):
+        hint_score = _hint_score(text, hint)
+        if hint_score:
+            score -= hint_score * 1.25
+            reasons.append(f"avoid_when matched: {hint}")
+    score += _profile_specific_bonus(profile_id, text, input_terms, reasons)
+    return score, reasons
+
+
+def _hint_score(text: str, hint: str) -> float:
+    raw = str(hint or "").casefold().strip()
+    if not raw:
+        return 0.0
+    if raw in text:
+        return 5.0
+    terms = _term_set(raw)
+    if not terms:
+        return 0.0
+    hits = terms & _term_set(text)
+    if len(hits) >= max(2, min(4, len(terms))):
+        return min(4.0, len(hits) * 0.8)
+    return 0.0
+
+
+def _profile_specific_bonus(profile_id: str, text: str, terms: set[str], reasons: list[str]) -> float:
+    bonuses: dict[str, set[str]] = {
+        "medical@v0": {
+            "patient",
+            "priya",
+            "mara",
+            "coumadin",
+            "warfarin",
+            "creatinine",
+            "serum",
+            "glucose",
+            "pressure",
+            "bp",
+            "allergy",
+            "symptom",
+            "pregnant",
+        },
+        "legal_courtlistener@v0": {
+            "courtlistener",
+            "court",
+            "complaint",
+            "alleged",
+            "finding",
+            "found",
+            "holding",
+            "docket",
+            "opinion",
+            "judge",
+            "citation",
+            "appellant",
+            "appellee",
+            "case",
+        },
+        "sec_contracts@v0": {
+            "sec",
+            "edgar",
+            "filing",
+            "exhibit",
+            "contract",
+            "agreement",
+            "borrower",
+            "lender",
+            "shall",
+            "must",
+            "subject",
+            "unless",
+            "default",
+            "maturity",
+            "obligation",
+            "covenant",
+        },
+    }
+    hits = sorted(bonuses.get(profile_id, set()) & terms)
+    if not hits:
+        return 0.0
+    reasons.append("profile terms: " + ", ".join(hits[:8]))
+    return min(8.0, len(hits) * 1.5)
+
+
+def _term_set(text: str) -> set[str]:
+    return {
+        term
+        for term in re.findall(r"[a-z0-9]+", str(text or "").casefold())
+        if len(term) > 2 and term not in {"the", "and", "for", "that", "with", "from", "this"}
+    }
 
 
 def _string_list(value: Any) -> list[str]:

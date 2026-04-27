@@ -76,6 +76,19 @@ class GatewayConfigTests(unittest.TestCase):
             updated = store.update({"active_profile": "wizard-doctor"}).to_dict()
             self.assertEqual(updated.get("active_profile"), "general")
 
+    def test_active_profile_accepts_auto_and_domain_aliases(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            store = ConfigStore(Path(tmpdir) / "gateway_config.json")
+            self.assertEqual(store.update({"active_profile": "auto"}).to_dict().get("active_profile"), "auto")
+            self.assertEqual(
+                store.update({"active_profile": "courtlistener"}).to_dict().get("active_profile"),
+                "legal_courtlistener@v0",
+            )
+            self.assertEqual(
+                store.update({"active_profile": "contracts"}).to_dict().get("active_profile"),
+                "sec_contracts@v0",
+            )
+
     def test_invalid_reply_surface_policy_is_sanitized(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             store = ConfigStore(Path(tmpdir) / "gateway_config.json")

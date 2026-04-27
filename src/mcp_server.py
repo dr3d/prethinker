@@ -41,7 +41,14 @@ from kb_pipeline import (
     _synthesize_clarification_question,
     _validate_parsed,
 )
-from src.domain_profiles import load_domain_profile_catalog, thin_profile_roster
+from src.domain_profiles import (
+    load_domain_profile_catalog,
+    load_profile_package,
+    profile_package_context,
+    profile_package_contracts,
+    select_domain_profile,
+    thin_profile_roster,
+)
 from src.medical_profile import (
     bridge_admission_guidance,
     build_medical_profile_guide,
@@ -125,8 +132,22 @@ def _normalize_active_profile(value: Any, default: str = "general") -> str:
     aliases = {
         "default": "general",
         "general": "general",
+        "auto": "auto",
         "medical": "medical@v0",
         "medical@v0": "medical@v0",
+        "legal": "legal_courtlistener@v0",
+        "legal_courtlistener": "legal_courtlistener@v0",
+        "legal_courtlistener@v0": "legal_courtlistener@v0",
+        "courtlistener": "legal_courtlistener@v0",
+        "sec": "sec_contracts@v0",
+        "sec_contracts": "sec_contracts@v0",
+        "sec_contracts@v0": "sec_contracts@v0",
+        "contracts": "sec_contracts@v0",
+        "story": "story_world@v0",
+        "story_world": "story_world@v0",
+        "story_world@v0": "story_world@v0",
+        "probate": "probate@v0",
+        "probate@v0": "probate@v0",
     }
     requested = str(value or default).strip().lower()
     return aliases.get(requested, aliases.get(str(default or "general").strip().lower(), "general"))
@@ -236,6 +257,8 @@ class PrologMCPServer:
             self._semantic_ir_top_k = 20
         self._semantic_ir_thinking = bool(semantic_ir_thinking)
         self._last_semantic_ir_trace: dict[str, Any] = {}
+        self._last_semantic_ir_profile_selection: dict[str, Any] = {}
+        self._last_semantic_ir_selected_profile = ""
         self._freethinker_resolution_policy = _normalize_freethinker_resolution_policy(
             freethinker_resolution_policy,
             "off",
@@ -302,7 +325,7 @@ class PrologMCPServer:
         self._profile_concepts = []
         self._profile_umls_bridge = {}
         self._profile_load_error = ""
-        if self._active_profile != "medical@v0":
+        if self._active_profile not in {"medical@v0", "auto"}:
             return
         try:
             manifest = load_profile_manifest()
@@ -348,8 +371,15 @@ class PrologMCPServer:
             known_predicates=self._profile_known_predicates,
         )
 
-    def _apply_active_profile_parse_guard(self, *, parsed: dict[str, Any], utterance: str) -> dict[str, Any]:
-        if self._active_profile == "medical@v0":
+    def _apply_active_profile_parse_guard(
+        self,
+        *,
+        parsed: dict[str, Any],
+        utterance: str,
+        profile_id: str = "",
+    ) -> dict[str, Any]:
+        effective_profile = str(profile_id or self._active_profile or "").strip()
+        if effective_profile == "medical@v0":
             guarded = sanitize_medical_parse_for_clarification(parsed, utterance=utterance)
             guarded = sanitize_medical_parse_for_bridge(
                 guarded if isinstance(guarded, dict) else parsed,
@@ -1727,19 +1757,52 @@ class PrologMCPServer:
             think_enabled=self._semantic_ir_thinking,
         )
 
-    def _semantic_ir_allowed_predicates(self) -> list[str]:
+    def _semantic_ir_selected_profile_for_utterance(self, utterance: str) -> str:
+        if self._active_profile == "auto":
+            selection = select_domain_profile(
+                utterance,
+                context=self._semantic_ir_context(),
+                catalog=self._domain_profile_catalog,
+            )
+            self._last_semantic_ir_profile_selection = self._clone_trace_payload(selection)
+            selected = str(selection.get("profile_id", "general")).strip() if isinstance(selection, dict) else "general"
+            self._last_semantic_ir_selected_profile = "" if selected == "general" else selected
+            return self._last_semantic_ir_selected_profile
+        self._last_semantic_ir_profile_selection = {
+            "profile_id": self._active_profile,
+            "score": None,
+            "runner_up_score": None,
+            "reasons": ["active_profile explicitly configured"],
+        }
+        self._last_semantic_ir_selected_profile = "" if self._active_profile == "general" else self._active_profile
+        return self._last_semantic_ir_selected_profile
+
+    def _profile_contracts_for(self, profile_id: str) -> list[dict[str, Any]]:
+        if profile_id == "medical@v0":
+            return self._clone_trace_payload(self._profile_predicate_contracts)
+        profile = load_profile_package(profile_id, self._domain_profile_catalog)
+        return profile_package_contracts(profile) if profile else []
+
+    def _profile_context_for(self, profile_id: str) -> list[str]:
+        if profile_id == "medical@v0":
+            return [str(item).strip() for item in self._profile_semantic_ir_context if str(item).strip()]
+        profile = load_profile_package(profile_id, self._domain_profile_catalog)
+        return profile_package_context(profile) if profile else []
+
+    def _semantic_ir_allowed_predicates(self, profile_id: str = "") -> list[str]:
+        profile_contracts = self._profile_contracts_for(profile_id) if profile_id else []
+        if profile_contracts:
+            signatures = [str(row.get("signature", "")).strip() for row in profile_contracts if str(row.get("signature", "")).strip()]
+            if signatures:
+                return signatures
         signatures = sorted(self._registry_signatures)
         return [f"{name}/{arity}" for name, arity in signatures]
 
-    def _semantic_ir_predicate_contracts(self) -> list[dict[str, Any]]:
-        if self._active_profile == "medical@v0":
-            return self._clone_trace_payload(self._profile_predicate_contracts)
-        return []
+    def _semantic_ir_predicate_contracts(self, profile_id: str = "") -> list[dict[str, Any]]:
+        return self._profile_contracts_for(profile_id) if profile_id else []
 
-    def _semantic_ir_domain_context(self) -> list[str]:
-        if self._active_profile == "medical@v0":
-            return [str(item).strip() for item in self._profile_semantic_ir_context if str(item).strip()]
-        return []
+    def _semantic_ir_domain_context(self, profile_id: str = "") -> list[str]:
+        return self._profile_context_for(profile_id) if profile_id else []
 
     def _semantic_ir_available_domain_profiles(self) -> list[dict[str, Any]]:
         return self._clone_trace_payload(self._domain_profile_roster)
@@ -1757,20 +1820,29 @@ class PrologMCPServer:
         return context
 
     def _compile_semantic_ir(self, utterance: str) -> tuple[dict[str, Any] | None, str]:
+        selected_profile = self._semantic_ir_selected_profile_for_utterance(utterance)
+        domain = selected_profile or "runtime"
+        semantic_context = self._semantic_ir_context()
+        domain_context = self._semantic_ir_domain_context(selected_profile)
+        allowed_predicates = self._semantic_ir_allowed_predicates(selected_profile)
+        predicate_contracts = self._semantic_ir_predicate_contracts(selected_profile)
         trace = {
             "enabled": True,
             "utterance": utterance,
             "model": self._semantic_ir_model,
             "backend": self._compiler_backend,
             "base_url": self._compiler_base_url,
+            "active_profile": self._active_profile,
+            "selected_profile": selected_profile or "general",
+            "profile_selection": self._clone_trace_payload(self._last_semantic_ir_profile_selection),
             "model_input": {
-                "domain": self._active_profile if self._active_profile != "general" else "runtime",
+                "domain": domain,
                 "utterance": utterance,
-                "context": self._semantic_ir_context(),
+                "context": semantic_context,
                 "available_domain_profiles": self._semantic_ir_available_domain_profiles(),
-                "domain_context": self._semantic_ir_domain_context(),
-                "allowed_predicates": self._semantic_ir_allowed_predicates(),
-                "predicate_contracts": self._semantic_ir_predicate_contracts(),
+                "domain_context": domain_context,
+                "allowed_predicates": allowed_predicates,
+                "predicate_contracts": predicate_contracts,
                 "options": {
                     "temperature": self._semantic_ir_temperature,
                     "top_p": self._semantic_ir_top_p,
@@ -1789,12 +1861,12 @@ class PrologMCPServer:
             result = call_semantic_ir(
                 utterance=utterance,
                 config=self._semantic_ir_call_config(),
-                context=self._semantic_ir_context(),
-                domain_context=self._semantic_ir_domain_context(),
+                context=semantic_context,
+                domain_context=domain_context,
                 available_domain_profiles=self._semantic_ir_available_domain_profiles(),
-                allowed_predicates=self._semantic_ir_allowed_predicates(),
-                predicate_contracts=self._semantic_ir_predicate_contracts(),
-                domain=self._active_profile if self._active_profile != "general" else "runtime",
+                allowed_predicates=allowed_predicates,
+                predicate_contracts=predicate_contracts,
+                domain=domain,
             )
         except Exception as exc:
             trace["error"] = str(exc)
@@ -1856,7 +1928,7 @@ class PrologMCPServer:
 
         parsed, warnings = semantic_ir_to_legacy_parse(
             ir,
-            allowed_predicates=self._semantic_ir_allowed_predicates(),
+            allowed_predicates=self._semantic_ir_allowed_predicates(self._last_semantic_ir_selected_profile),
         )
         trace["normalized"] = self._clone_trace_payload(parsed)
         trace["rescues"].append(
@@ -1872,7 +1944,11 @@ class PrologMCPServer:
                 ),
             }
         )
-        admitted = self._apply_active_profile_parse_guard(parsed=parsed, utterance=effective)
+        admitted = self._apply_active_profile_parse_guard(
+            parsed=parsed,
+            utterance=effective,
+            profile_id=self._last_semantic_ir_selected_profile,
+        )
         trace["admitted"] = self._clone_trace_payload(admitted)
         ok, errors = _validate_parsed(admitted)
         trace["validation_errors"] = list(errors)

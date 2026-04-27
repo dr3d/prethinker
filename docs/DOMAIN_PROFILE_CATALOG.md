@@ -65,13 +65,13 @@ utterance + recent context
   -> KB mutation, query, clarification, quarantine, or rejection
 ```
 
-Domain profile selection can be explicit at first:
+Domain profile selection can be explicit:
 
 ```text
 active_profile = medical@v0
 ```
 
-Later it can become catalog-assisted:
+It can also be catalog-assisted:
 
 ```text
 available_profiles = [medical@v0, probate@v0, story_world@v0, logistics@v0]
@@ -81,6 +81,27 @@ selected profile(s) -> thick Semantic IR context
 
 The profile selector is advisory. It may choose the domain context supplied to
 the model, but it may not authorize writes.
+
+`active_profile=auto` is the first measured implementation of this idea. It uses
+a deterministic selector over the thin catalog hints, then loads only the
+selected profile package for the Semantic IR call. The trace records:
+
+- visible roster
+- selected profile
+- selection score and reasons
+- loaded domain context
+- loaded predicate contracts
+- mapper/admission outcome
+
+A synthetic switching test now walks one server through:
+
+```text
+medical@v0 -> legal_courtlistener@v0 -> sec_contracts@v0 -> medical@v0
+```
+
+and verifies that each turn receives the matching thick context and predicate
+palette. This proves the control-plane mechanism can switch domains; it does
+not prove mixed-domain turns are solved.
 
 ## Thin Roster Versus Thick Profile
 
@@ -176,7 +197,8 @@ This keeps domain awareness from becoming a hidden prompt hack.
   multi-profile turns be segmented first?
 
 The near-term answer is conservative: use explicit `active_profile` for
-development, then add profile-catalog selection as a measured experiment.
+development when you need repeatability, and use `active_profile=auto` as a
+measured experiment when testing domain switching.
 
 ## Control Plane Discipline
 

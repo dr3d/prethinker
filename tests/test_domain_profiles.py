@@ -7,6 +7,7 @@ from src.domain_profiles import (
     load_profile_package,
     profile_package_context,
     profile_package_contracts,
+    select_domain_profile,
     thin_profile_roster,
 )
 
@@ -46,3 +47,32 @@ def test_mock_profile_packages_are_declarative_and_loadable():
     assert "candidate_identity/2" in probate_signatures
     assert any("unknown_agent" in line for line in profile_package_context(story))
     assert any("claim" in line for line in profile_package_context(probate))
+
+
+def test_profile_selector_can_switch_across_medical_legal_and_contract_turns():
+    catalog = load_domain_profile_catalog(ROOT / "modelfiles" / "domain_profile_catalog.v0.json")
+    turns = [
+        ("Priya is taking Coumadin and her serum creatinine was repeated.", "medical@v0"),
+        ("In Doe v. Acme, the complaint alleged breach but the court found only timeliness.", "legal_courtlistener@v0"),
+        ("The borrower shall repay the loan after the maturity date unless default is waived.", "sec_contracts@v0"),
+        ("Mara's blood pressure reading was high.", "medical@v0"),
+    ]
+    selected = [
+        select_domain_profile(utterance, catalog=catalog, context=[]).get("profile_id")
+        for utterance, _expected in turns
+    ]
+    assert selected == [expected for _utterance, expected in turns]
+
+
+def test_profile_selector_does_not_stick_to_previous_domain_context():
+    catalog = load_domain_profile_catalog(ROOT / "modelfiles" / "domain_profile_catalog.v0.json")
+    sec_context = [
+        "obligation(borrower, repay_loan_after_maturity, loan_agreement).",
+        "subject_to(repay_loan_after_maturity, default_not_waived).",
+    ]
+    selected = select_domain_profile(
+        "Mara's blood pressure reading was high.",
+        catalog=catalog,
+        context=sec_context,
+    )
+    assert selected.get("profile_id") == "medical@v0"

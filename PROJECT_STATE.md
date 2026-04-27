@@ -46,6 +46,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 - `medical@v0` Semantic IR calls now receive profile-owned predicate contracts and compact UMLS bridge context before the model proposes a workspace. This lets the model normalize examples like `Coumadin` to `warfarin` and see argument-role/semantic-group expectations, while the deterministic mapper still owns admission.
 - The profile context now explicitly treats an explicit named patient as sufficient grounding for the research profile, while pronouns, multiple candidates, aliases, and missing patient identity still require clarification.
 - A thin domain-profile roster now exists in `modelfiles/domain_profile_catalog.v0.json` and is included in Semantic IR input as `available_domain_profiles`. This is the first skill-directory-style control-plane hook: it advertises possible profile contexts without loading every thick package or authorizing writes.
+- `active_profile=auto` now has a first deterministic catalog selector. It chooses a profile from the thin roster, loads only that profile's thick context/contracts for the Semantic IR call, and records the selected profile plus reasons in the trace. A synthetic switch test covers medical -> legal -> SEC/contracts -> medical.
 - Declarative starter profile packages now exist for exploration: `modelfiles/profile.story_world.v0.json`, `modelfiles/profile.probate.v0.json`, and `modelfiles/profile.legal_courtlistener.v0.json`. They provide mock thick context and predicate contracts for future routing experiments without changing runtime admission authority.
 - A first-pass CourtListener adapter shell now lives under `adapters/courtlistener/`. It includes a conservative token-based REST client, normalizer, legal predicate contracts, harness conversion, README, and an offline synthetic legal seed fixture for claim/finding, citation, role-scope, docket, and identity-boundary tests.
 - First CourtListener live smoke generated ignored `breach of lease` and `summary judgment` harness slices and ran legal Semantic IR cases through LM Studio. All emitted valid JSON; the legal palette preserved claim/finding, citation-not-endorsement, docket-not-holding, role-scope, and ambiguous judge identity boundaries.
@@ -90,14 +91,14 @@ This is the next useful layer for type steering and explanation. It should suppo
 - Push the remaining mapper frontier: durable rule admission for quantified exception language, better decision-label calibration for safe partial commits, and cleaner nested event predicate shapes.
 - Represent temporal facts durably enough that extracted dates, intervals, corrections, and relative-time anchors can support real KB queries instead of staying only in the semantic workspace.
 - Keep profile contracts out of the generic mapper: profile packages should own domain type/grounding policy, while the mapper stays structural and auditable.
-- Treat richer domain context as a catalog/skill mechanism, not hardwired prompt drift. The next profile-aware step is a measured domain-profile selector that can choose `medical@v0` or another cataloged profile without granting write authority.
+- Treat richer domain context as a catalog/skill mechanism, not hardwired prompt drift. The current auto selector is deterministic and measured; next steps are multi-profile turns, selector confidence UX, and deciding when mixed-domain utterances should be segmented before Semantic IR.
 - Grow deterministic stored-logic admission beyond the first guard: profile-declared functional predicates, temporal scope, negation policy, and richer contradiction probes are still open.
 - Extend predicate-palette enforcement with profile-owned type contracts and better UI surfacing for skipped operations.
 - Promote scenario-local predicate contracts into reusable profile/predicate manifests, then enforce those contracts deterministically where possible.
 - Expand trace views around admission contracts so reviewers can see not only the model decision, but also which exact boundary checks passed.
 - Build a new held-out frontier pack instead of over-polishing Silverton: cross-document temporal causality, aliases, corrections, disputed claims, and profile type pressure.
 - Port the new cross-turn frontier pack into a runner only after deciding which expectations should be hard regression gates versus research pressure gauges.
-- Explore domain-profile selection with the starter profiles: first offline roster-selection traces, then optional gateway traces, before any automatic context loading affects normal runs.
+- Expand auto profile-selection tests from clean synthetic switching into messy mixed-domain turns. Profile selection is still advisory context loading, not admission authority.
 - Keep expanding the CourtListener lane with small live API slices and curated synthetic boundaries. Generated live data remains ignored under `datasets/courtlistener/generated/` unless a tiny fixture is intentionally curated.
 - Run the SEC adapter against a small EDGAR submissions slice only after setting `SEC_USER_AGENT` and choosing a durable cache/review policy. Keep generated live data under ignored `datasets/sec_edgar/generated/`.
 - Keep the Semantic IR harness model-agnostic, but use `qwen/qwen3.6-35b-a3b` as the default development model unless a specific comparison question needs another local model.
@@ -109,6 +110,7 @@ This is the next useful layer for type steering and explanation. It should suppo
 Recent verified results:
 
 - Full suite after SEC/contracts third-domain scaffold: `299 passed`
+- Full suite after auto domain-profile switching: `303 passed`
 - Focused semantic IR runtime battery: `23 passed`
 - Focused profile-contract/domain-roster handoff verification: `7 passed`
 - Focused CourtListener/domain-profile verification: `8 passed`
@@ -126,6 +128,7 @@ Recent verified results:
 - Goldilocks full-story segmented Semantic IR smoke after narrative palette: `56` deduped mutations across `50` segments in about `180s`; major bad-write artifacts from the first UI attempt (`unknown_agent`, voice-as-`carries`, nonsensical `inside(...)` writes, and stray `head` facts) were removed.
 - Focused post-story-ingestion verification: `55 passed` across semantic IR runtime, UI gateway phases, and gateway config.
 - Live LM Studio medical smoke after profile-context wiring: `Priya is taking Coumadin.` committed `taking(priya, warfarin).`; `His serum creatinine was repeated this afternoon.` still required patient-identity clarification.
+- Live LM Studio auto-profile smoke selected `medical@v0`, `legal_courtlistener@v0`, `sec_contracts@v0`, then `medical@v0` across four turns, with each turn receiving the expected domain context and predicate palette.
 - Python compile check for touched runtime files passed
 
 Rerun the full suite before committing a new stopping point.

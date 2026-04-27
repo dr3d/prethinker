@@ -22,6 +22,7 @@ The short version:
 - UMLS is used as a bounded normalization and semantic-type bridge, not as a giant preloaded clinical encyclopedia.
 - The active Semantic IR path passes `medical@v0` predicate contracts and compact UMLS concept context into the model input before deterministic admission.
 - A thin profile roster now exposes skill-like domain packages such as `medical@v0`, `story_world@v0`, and `probate@v0`; only explicitly selected thick context affects the current Semantic IR pass.
+- `active_profile=auto` can now select a cataloged profile per turn and load that profile's thick context/contracts into the Semantic IR call without granting write authority.
 - `legal_courtlistener@v0` and `adapters/courtlistener/` are the legal-source profile/adapter lane for claim/finding, citation, docket, role-scope, provenance, and identity-boundary experiments.
 - `sec_contracts@v0` and `adapters/sec_edgar/` are the third large starter domain, aimed at obligations, conditions, temporal triggers, party roles, and filing/exhibit provenance.
 - The Prolog KB is the committed truth layer; model output remains provisional until the runtime admits it.
@@ -60,7 +61,7 @@ The public repo currently tracks `30` pytest files under [tests/](https://github
 
 ```powershell
 python -m pytest -q
-# 299 passed
+# 303 passed
 ```
 
 Focused verification after the current Semantic IR console/story-ingestion and profile-contract passes:
@@ -71,7 +72,7 @@ python -m pytest tests/test_semantic_ir_runtime.py tests/test_ui_gateway_phases.
 python -m pytest tests/test_medical_profile_assets.py tests/test_mcp_server.py::LocalMcpServerTests::test_semantic_ir_medical_profile_passes_contracts_and_umls_context
 # 6 passed
 python -m pytest tests/test_domain_profiles.py
-# 2 passed
+# 4 passed
 python -m pytest tests/test_courtlistener_adapter.py tests/test_domain_profiles.py
 # 8 passed
 python -m pytest tests/test_sec_edgar_adapter.py tests/test_domain_profiles.py
