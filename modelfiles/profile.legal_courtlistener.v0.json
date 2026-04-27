@@ -84,8 +84,34 @@
     { "signature": "document_states/4", "arguments": ["document", "case", "content", "source"], "notes": "Source document states content without converting it to truth." },
     { "signature": "document_states/3", "arguments": ["document", "content", "source"], "notes": "Source document states content when no case id is available." },
     { "signature": "claim_made/4", "arguments": ["speaker_or_document", "claim_subject", "claim_content", "source"], "notes": "Scoped allegation or claim." },
-    { "signature": "finding/4", "arguments": ["court_or_judge", "case", "finding_content", "source"], "notes": "Explicit court/judge finding." },
-    { "signature": "holding/3", "arguments": ["case", "holding_content", "source"], "notes": "Explicit legal holding; avoid when dicta/holding is unclear." },
+    {
+      "signature": "finding/4",
+      "arguments": ["court_or_judge", "case", "finding_content", "source"],
+      "validators": [
+        {
+          "kind": "argument_must_not_contain_terms",
+          "argument": "finding_content",
+          "terms": ["alleged", "alleges", "allegation", "complaint", "claimed", "party_claim"],
+          "reason": "allegation_not_court_finding",
+          "warning": "skipped finding/4 because alleged complaint content is not an explicit court finding"
+        }
+      ],
+      "notes": "Explicit court/judge finding."
+    },
+    {
+      "signature": "holding/3",
+      "arguments": ["case", "holding_content", "source"],
+      "validators": [
+        {
+          "kind": "argument_must_not_contain_terms",
+          "argument": "holding_content",
+          "terms": ["cites", "cited", "citation", "dicta", "unclear"],
+          "reason": "citation_or_unclear_text_not_holding",
+          "warning": "skipped holding/3 because citation or unclear text is not a durable holding"
+        }
+      ],
+      "notes": "Explicit legal holding; avoid when dicta/holding is unclear."
+    },
     { "signature": "procedural_event/4", "arguments": ["case", "event_type", "date", "source"], "notes": "Procedural docket or case event." },
     { "signature": "docket_entry/4", "arguments": ["case", "entry_number", "date", "description"], "notes": "Docket entry metadata." },
     { "signature": "access_log_entry/4", "arguments": ["alias_or_person", "place_or_room", "date", "source"], "notes": "Access-log source record; alias identity may remain unresolved." },

@@ -624,6 +624,8 @@ def _render_record(
                 f"out_of_palette_write=`{features.get('has_out_of_palette_safe_write', '')}`, "
                 f"contract_enabled=`{features.get('predicate_contract_enabled', '')}`, "
                 f"contract_invalid_write=`{features.get('has_contract_invalid_safe_write', '')}`, "
+                f"contract_policy_invalid=`{features.get('has_contract_policy_invalid_safe_write', '')}`, "
+                f"temporal_order_mismatch=`{features.get('has_temporal_interval_order_mismatch', '')}`, "
                 f"risk=`{features.get('bad_commit_risk', '')}`",
                 "",
             ]

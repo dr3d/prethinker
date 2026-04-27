@@ -58,8 +58,34 @@
     { "signature": "effective_on/2", "arguments": ["contract_or_clause", "date_or_trigger"], "notes": "Effective date or trigger." },
     { "signature": "terminates_on/2", "arguments": ["contract_or_clause", "date_or_trigger"], "notes": "Termination date or trigger." },
     { "signature": "subject_to/2", "arguments": ["clause_or_obligation", "condition"], "notes": "Condition or dependency." },
-    { "signature": "condition_met/2", "arguments": ["condition", "evidence_source"], "notes": "Condition satisfaction when explicitly evidenced." },
-    { "signature": "breach_event/2", "arguments": ["contract_or_obligation", "event"], "notes": "Explicit breach/default event, not inferred from obligation text alone." },
+    {
+      "signature": "condition_met/2",
+      "arguments": ["condition", "evidence_source"],
+      "validators": [
+        {
+          "kind": "argument_must_not_contain_terms",
+          "argument": "evidence_source",
+          "terms": ["pending", "not_met", "unmet", "unless", "subject_to", "if"],
+          "reason": "condition_satisfaction_not_evidenced",
+          "warning": "skipped condition_met/2 because the evidence source does not establish satisfaction"
+        }
+      ],
+      "notes": "Condition satisfaction when explicitly evidenced."
+    },
+    {
+      "signature": "breach_event/2",
+      "arguments": ["contract_or_obligation", "event"],
+      "validators": [
+        {
+          "kind": "argument_must_not_contain_terms",
+          "argument": "event",
+          "terms": ["shall", "must", "required", "obligation", "future", "if", "unless"],
+          "reason": "obligation_language_not_breach_event",
+          "warning": "skipped breach_event/2 because obligation language is not an explicit breach/default event"
+        }
+      ],
+      "notes": "Explicit breach/default event, not inferred from obligation text alone."
+    },
     { "signature": "clearance_event/4", "arguments": ["actor", "item", "date_or_order", "source"], "notes": "Explicit clearance or approval event; not proof that all conditions were satisfied." },
     { "signature": "locked/1", "arguments": ["thing"], "notes": "Explicit lock/freeze state." },
     { "signature": "stock_type/2", "arguments": ["item", "stock_type"], "notes": "Explicit item/stock classification." },

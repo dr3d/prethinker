@@ -82,6 +82,9 @@ def profile_package_contracts(profile: dict[str, Any]) -> list[dict[str, Any]]:
             "signature": signature,
             "arguments": _string_list(row.get("arguments")),
         }
+        validators = row.get("validators", row.get("admission_validators", []))
+        if isinstance(validators, list) and validators:
+            contract["validators"] = [item for item in validators if isinstance(item, dict)]
         notes = str(row.get("notes", "")).strip()
         if notes:
             contract["notes"] = notes

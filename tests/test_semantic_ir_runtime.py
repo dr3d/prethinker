@@ -306,6 +306,99 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         self.assertEqual(diagnostics["features"]["predicate_contract_enabled"], True)
         self.assertEqual(diagnostics["features"]["has_contract_invalid_safe_write"], False)
 
+    def test_mapper_applies_profile_contract_validator_without_language_patch(self) -> None:
+        ir = _ir(
+            decision="commit",
+            entities=[
+                {"id": "e1", "surface": "court", "normalized": "court", "type": "object", "confidence": 0.99},
+                {"id": "e2", "surface": "Doe v Acme", "normalized": "Doe v Acme", "type": "object", "confidence": 0.99},
+            ],
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "claim_made",
+                    "args": ["complaint", "Acme", "breached lease", "Doe v Acme"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "assert",
+                    "predicate": "finding",
+                    "args": ["e1", "e2", "complaint alleged breach", "opinion"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+            ],
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=["claim_made/4", "finding/4"],
+            predicate_contracts=[
+                {"signature": "claim_made/4", "arguments": ["speaker_or_document", "claim_subject", "claim_content", "source"]},
+                {
+                    "signature": "finding/4",
+                    "arguments": ["court_or_judge", "case", "finding_content", "source"],
+                    "validators": [
+                        {
+                            "kind": "argument_must_not_contain_terms",
+                            "argument": "finding_content",
+                            "terms": ["alleged", "complaint"],
+                            "reason": "allegation_not_court_finding",
+                        }
+                    ],
+                },
+            ],
+        )
+        self.assertEqual(parsed["facts"], ["claim_made(complaint, acme, breached_lease, doe_v_acme)."])
+        self.assertTrue(any("allegation_not_court_finding" in warning for warning in warnings))
+        diagnostics = parsed["admission_diagnostics"]
+        self.assertEqual(diagnostics["projected_decision"], "mixed")
+        self.assertEqual(diagnostics["projection_reason"], "profile_contract_policy_projected_to_mixed")
+        self.assertEqual(diagnostics["features"]["has_contract_policy_invalid_safe_write"], True)
+        skipped = [row for row in diagnostics["operations"] if not row["admitted"]]
+        self.assertEqual(skipped[0]["skip_reason"], "allegation_not_court_finding")
+
+    def test_mapper_blocks_inverted_temporal_interval(self) -> None:
+        ir = _ir(
+            decision="commit",
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "interval_start",
+                    "args": ["absence_interval_1", "2024-05-01"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "assert",
+                    "predicate": "interval_end",
+                    "args": ["absence_interval_1", "2024-03-01"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+            ],
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=["interval_start/2", "interval_end/2"],
+            predicate_contracts=[
+                {"signature": "interval_start/2", "arguments": ["interval", "date"]},
+                {"signature": "interval_end/2", "arguments": ["interval", "date"]},
+            ],
+        )
+        self.assertEqual(parsed["facts"], [])
+        self.assertEqual(parsed["admission_diagnostics"]["projected_decision"], "quarantine")
+        self.assertEqual(
+            parsed["admission_diagnostics"]["projection_reason"],
+            "temporal_interval_order_projected_to_quarantine",
+        )
+        self.assertTrue(any("interval start is after interval end" in warning for warning in warnings))
+        self.assertEqual(parsed["admission_diagnostics"]["features"]["has_temporal_interval_order_mismatch"], True)
+
     def test_mapper_admits_story_world_predicates_from_palette(self) -> None:
         ir = _ir(
             candidate_operations=[

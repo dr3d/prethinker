@@ -256,6 +256,39 @@ This is the next step after predicate-palette enforcement. It keeps predicate
 contracts visible and executable without turning the generic mapper into a
 domain ontology.
 
+## Profile Contract Validator Policy
+
+Profiles may attach small declarative validators to individual predicate
+contracts. These validators are not prompt hints; they are explicit admission
+policy carried by the selected profile package.
+
+Current supported validator:
+
+```json
+{
+  "kind": "argument_must_not_contain_terms",
+  "argument": "finding_content",
+  "terms": ["alleged", "complaint"],
+  "reason": "allegation_not_court_finding"
+}
+```
+
+This lets `legal_courtlistener@v0` say that allegation-like content must not be
+admitted as `finding/4`, and lets `sec_contracts@v0` say that obligation-like
+future language must not be admitted as `breach_event/2`. The rule is still
+profile-owned and visible in JSON. The generic mapper only applies the declared
+validator to normalized IR arguments.
+
+Skipped operations report the profile reason, such as:
+
+```text
+allegation_not_court_finding
+obligation_language_not_breach_event
+```
+
+The purpose is to make domain guardrails inspectable and reusable without
+teaching the mapper hidden legal or contract prose.
+
 ## Unsafe Implications
 
 `unsafe_implications` records tempting candidates that should not become durable
@@ -361,6 +394,17 @@ dates, intervals, and corrections without pretending the runtime can already
 prove every temporal consequence. A future temporal reasoner can consume these
 facts for duration, ordering, overlap, and consecutive-interval checks.
 
+The current mapper also checks one temporal invariant: when an IR proposes both
+`interval_start(Interval, Start)` and `interval_end(Interval, End)` with
+parseable dates, `Start` must not be after `End`. Violations are skipped with:
+
+```text
+temporal_interval_order_mismatch
+```
+
+This is not full temporal reasoning. It is a structural sanity check before
+durable interval facts reach the KB.
+
 ## Stored-Logic Conflict Policy
 
 Some writes are dangerous because they look like ordinary additions but may
@@ -436,7 +480,7 @@ It records:
 - concrete clauses the mapper considered admissible;
 - skip reasons and rationale codes such as `source_policy`,
   `candidate_safety_gate`, `polarity_policy`, `predicate_contract_role`,
-  and `no_rule_synthesis`.
+  `profile_contract_validator`, `temporal_policy`, and `no_rule_synthesis`.
 
 This lets us ask "why does this guardrail exist?" at operation granularity
 without turning score features into write permission.
@@ -488,6 +532,8 @@ Required cases:
   representable;
 - predicate contract role mismatch is skipped;
 - correctly shaped predicate contract arguments are admitted;
+- profile contract validator failure is skipped;
+- inverted start/end interval pairs are skipped;
 - minimal temporal facts are admitted as factual representation, not temporal
   proof;
 - duplicate unsafe implication does not downgrade an admitted safe operation;

@@ -599,13 +599,16 @@ def semantic_ir_admission_diagnostics(
     """
     model_decision = _normalize_decision(ir.get("decision"))
     allowed_signatures = _allowed_predicate_signature_set(allowed_predicates)
-    contract_map = _predicate_contract_map(predicate_contracts if predicate_contracts is not None else allowed_predicates)
+    raw_contracts = predicate_contracts if predicate_contracts is not None else allowed_predicates
+    contract_map = _predicate_contract_map(raw_contracts)
+    contract_details = _predicate_contract_detail_map(raw_contracts)
     if not allowed_signatures and contract_map:
         allowed_signatures = set(contract_map)
     projected_decision = _projected_decision(
         ir,
         allowed_signatures=allowed_signatures,
         contract_map=contract_map,
+        contract_details=contract_details,
     )
     operations: list[dict[str, Any]] = []
     warning_counts: dict[str, int] = {}
@@ -620,6 +623,7 @@ def semantic_ir_admission_diagnostics(
     entity_names = _entity_name_map(ir)
     entity_meta = _entity_metadata_map(ir)
     admitted_clause_keys: set[tuple[str, str]] = set()
+    temporal_invalid_operation_indexes = _temporal_invalid_operation_indexes(ir, entity_names=entity_names)
     for index, op in enumerate(_candidate_operations(ir)):
         diagnosis = _diagnose_candidate_operation(
             ir,
@@ -629,6 +633,8 @@ def semantic_ir_admission_diagnostics(
             entity_meta=entity_meta,
             allowed_signatures=allowed_signatures,
             contract_map=contract_map,
+            contract_details=contract_details,
+            temporal_invalid_operation_indexes=temporal_invalid_operation_indexes,
         )
         if (
             projected_decision in {"reject", "quarantine", "clarify"}
@@ -688,6 +694,7 @@ def semantic_ir_admission_diagnostics(
         ir,
         allowed_signatures=allowed_signatures,
         contract_map=contract_map,
+        contract_details=contract_details,
     )
     return {
         "version": "admission_diagnostics_v1",
@@ -700,6 +707,7 @@ def semantic_ir_admission_diagnostics(
             projected_decision,
             allowed_signatures=allowed_signatures,
             contract_map=contract_map,
+            contract_details=contract_details,
         ),
         "features": features,
         "operation_count": len(operations),
@@ -718,13 +726,16 @@ def semantic_ir_to_legacy_parse(
     predicate_contracts: Any = None,
 ) -> tuple[dict[str, Any], list[str]]:
     allowed_signatures = _allowed_predicate_signature_set(allowed_predicates)
-    contract_map = _predicate_contract_map(predicate_contracts if predicate_contracts is not None else allowed_predicates)
+    raw_contracts = predicate_contracts if predicate_contracts is not None else allowed_predicates
+    contract_map = _predicate_contract_map(raw_contracts)
+    contract_details = _predicate_contract_detail_map(raw_contracts)
     if not allowed_signatures and contract_map:
         allowed_signatures = set(contract_map)
     decision = _projected_decision(
         ir,
         allowed_signatures=allowed_signatures,
         contract_map=contract_map,
+        contract_details=contract_details,
     )
     facts: list[str] = []
     rules: list[str] = []
@@ -733,7 +744,7 @@ def semantic_ir_to_legacy_parse(
     diagnostics = semantic_ir_admission_diagnostics(
         ir,
         allowed_predicates=allowed_signatures,
-        predicate_contracts=contract_map,
+        predicate_contracts=raw_contracts,
     )
     warnings = [
         str(item.get("warning", "")).strip()
@@ -803,6 +814,8 @@ def _diagnose_candidate_operation(
     entity_meta: dict[str, dict[str, Any]],
     allowed_signatures: set[tuple[str, int]],
     contract_map: dict[tuple[str, int], list[str]],
+    contract_details: dict[tuple[str, int], dict[str, Any]],
+    temporal_invalid_operation_indexes: set[int],
 ) -> dict[str, Any]:
     operation = str(op.get("operation", "")).strip().lower()
     safety = str(op.get("safety", "")).strip().lower()
@@ -905,6 +918,25 @@ def _diagnose_candidate_operation(
             warning=str(contract_problem["warning"]),
             codes=list(contract_problem["codes"]),
         )
+    contract_policy_problem = _operation_contract_policy_problem(
+        predicate=predicate,
+        args=args,
+        operation=operation,
+        contract_map=contract_map,
+        contract_details=contract_details,
+    )
+    if contract_policy_problem:
+        return skip(
+            str(contract_policy_problem["reason"]),
+            warning=str(contract_policy_problem["warning"]),
+            codes=list(contract_policy_problem["codes"]),
+        )
+    if index in temporal_invalid_operation_indexes:
+        return skip(
+            "temporal_interval_order_mismatch",
+            warning=f"skipped {predicate}/{len(args)} because interval start is after interval end",
+            codes=["temporal_policy", "interval_order_gate"],
+        )
     if polarity == "negative" and operation == "assert" and not _is_negative_event_predicate(predicate):
         return skip(
             "negative_fact_semantics_not_supported",
@@ -952,8 +984,10 @@ def _admission_feature_summary(
     *,
     allowed_signatures: set[tuple[str, int]],
     contract_map: dict[tuple[str, int], list[str]] | None = None,
+    contract_details: dict[tuple[str, int], dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     contract_map = contract_map or {}
+    contract_details = contract_details or {}
     safe_ops = [
         op
         for op in _candidate_operations(ir)
@@ -997,6 +1031,12 @@ def _admission_feature_summary(
             ir,
             contract_map=contract_map,
         ),
+        "has_contract_policy_invalid_safe_write": _has_contract_policy_invalid_safe_write(
+            ir,
+            contract_map=contract_map,
+            contract_details=contract_details,
+        ),
+        "has_temporal_interval_order_mismatch": _has_temporal_interval_order_mismatch(ir),
         "bad_commit_risk": risk,
         "bad_commit_risk_score": risk_score,
         "diagnostic_note": "These values explain mapper pressure; they do not authorize writes.",
@@ -1140,6 +1180,45 @@ def _predicate_contract_map(raw: Any) -> dict[tuple[str, int], list[str]]:
     return out
 
 
+def _predicate_contract_detail_map(raw: Any) -> dict[tuple[str, int], dict[str, Any]]:
+    if raw is None:
+        return {}
+    if isinstance(raw, dict) and all(isinstance(key, tuple) and len(key) == 2 for key in raw):
+        return {}
+    values = raw
+    if isinstance(raw, dict):
+        values = [raw]
+    elif isinstance(raw, set):
+        values = list(raw)
+    elif isinstance(raw, tuple):
+        values = list(raw)
+    elif not isinstance(raw, list):
+        values = [raw]
+    out: dict[tuple[str, int], dict[str, Any]] = {}
+    for item in values:
+        if not isinstance(item, dict):
+            continue
+        signature = str(item.get("signature") or "").strip()
+        name = ""
+        arity: int | None = None
+        if signature:
+            match = re.fullmatch(r"\s*([A-Za-z_][A-Za-z0-9_]*)\s*/\s*(\d+)\s*", signature)
+            if match:
+                name = _predicate_name(match.group(1))
+                arity = int(match.group(2))
+        if not name:
+            predicate_text = str(item.get("predicate") or item.get("name") or "").strip()
+            name = _predicate_name(predicate_text) if predicate_text else ""
+        roles = item.get("arguments", item.get("args", []))
+        if not isinstance(roles, list):
+            roles = []
+        if arity is None:
+            arity = len([role for role in roles if str(role).strip()])
+        if name and arity >= 0:
+            out[(name, arity)] = dict(item)
+    return out
+
+
 def _operation_signature_allowed(
     *,
     predicate: str,
@@ -1217,6 +1296,65 @@ def _operation_contract_role_problem(
                 ),
                 "codes": ["predicate_contract_gate", "argument_role_mismatch"],
             }
+    return None
+
+
+def _operation_contract_policy_problem(
+    *,
+    predicate: str,
+    args: list[str],
+    operation: str,
+    contract_map: dict[tuple[str, int], list[str]],
+    contract_details: dict[tuple[str, int], dict[str, Any]],
+) -> dict[str, Any] | None:
+    if operation not in {"assert", "query", "retract"}:
+        return None
+    signature = (predicate, len(args))
+    detail = contract_details.get(signature, {})
+    if not isinstance(detail, dict):
+        return None
+    validators = detail.get("validators", detail.get("admission_validators", []))
+    if not isinstance(validators, list):
+        return None
+    roles = contract_map.get(signature, [])
+    for validator in validators:
+        if not isinstance(validator, dict):
+            continue
+        kind = str(validator.get("kind", "")).strip()
+        if kind != "argument_must_not_contain_terms":
+            continue
+        index = _validator_argument_index(validator.get("argument"), roles)
+        if index is None or index < 0 or index >= len(args):
+            continue
+        arg_atom = _atomize(args[index])
+        terms = [_atomize(str(item)) for item in validator.get("terms", []) if str(item).strip()]
+        if not terms:
+            continue
+        if any(term and term in arg_atom for term in terms):
+            reason = str(validator.get("reason") or "profile_contract_validator_failed").strip()
+            warning = str(validator.get("warning") or "").strip()
+            if not warning:
+                warning = f"skipped {predicate}/{len(args)} because profile validator {reason} matched argument {index + 1}"
+            return {
+                "reason": reason,
+                "warning": warning,
+                "codes": ["profile_contract_validator", "argument_content_policy"],
+            }
+    return None
+
+
+def _validator_argument_index(raw: Any, roles: list[str]) -> int | None:
+    if isinstance(raw, int):
+        return raw if raw < 0 else raw - 1
+    text = str(raw or "").strip()
+    if not text:
+        return None
+    if re.fullmatch(r"\d+", text):
+        return int(text) - 1
+    wanted = _atomize(text)
+    for index, role in enumerate(roles):
+        if _atomize(role) == wanted:
+            return index
     return None
 
 
@@ -1318,6 +1456,47 @@ def _looks_like_date_atom(value: str) -> bool:
     return bool(re.search(r"\b\d{1,2}_\d{1,2}_\d{2,4}\b", atom))
 
 
+def _date_sort_key(value: str) -> tuple[int, int, int] | None:
+    atom = _atomize(str(value or ""))
+    match = re.fullmatch(r"(\d{4})(?:_(\d{1,2}))?(?:_(\d{1,2}))?", atom)
+    if not match:
+        return None
+    year = int(match.group(1))
+    month = int(match.group(2) or 1)
+    day = int(match.group(3) or 1)
+    if not (1 <= month <= 12 and 1 <= day <= 31):
+        return None
+    return (year, month, day)
+
+
+def _temporal_invalid_operation_indexes(ir: dict[str, Any], *, entity_names: dict[str, str]) -> set[int]:
+    intervals: dict[str, dict[str, tuple[int, tuple[int, int, int]]]] = {}
+    for index, op in enumerate(_candidate_operations(ir)):
+        if str(op.get("safety", "")).strip().lower() != "safe":
+            continue
+        if str(op.get("operation", "")).strip().lower() != "assert":
+            continue
+        predicate = _predicate_name(op.get("predicate"))
+        if predicate not in {"interval_start", "interval_end"}:
+            continue
+        args = _operation_args(op.get("args"), entity_names=entity_names, for_query=False)
+        if len(args) != 2:
+            continue
+        date_key = _date_sort_key(args[1])
+        if date_key is None:
+            continue
+        row = intervals.setdefault(args[0], {})
+        row[predicate] = (index, date_key)
+    invalid: set[int] = set()
+    for row in intervals.values():
+        start = row.get("interval_start")
+        end = row.get("interval_end")
+        if start and end and start[1] > end[1]:
+            invalid.add(start[0])
+            invalid.add(end[0])
+    return invalid
+
+
 def _is_variable_term(value: str) -> bool:
     text = str(value or "").strip()
     return bool(text) and (text[0].isupper() or text.startswith("_"))
@@ -1383,6 +1562,7 @@ def _projection_reason(
     *,
     allowed_signatures: set[tuple[str, int]],
     contract_map: dict[tuple[str, int], list[str]] | None = None,
+    contract_details: dict[tuple[str, int], dict[str, Any]] | None = None,
 ) -> str:
     if projected_decision == model_decision:
         return "model_decision_preserved"
@@ -1413,6 +1593,18 @@ def _projection_reason(
         if _has_contract_valid_safe_write(ir, contract_map=contract_map or {}):
             return "contract_role_mismatch_projected_to_mixed"
         return "contract_role_mismatch_projected_to_quarantine"
+    if model_decision in {"commit", "mixed"} and _has_contract_policy_invalid_safe_write(
+        ir,
+        contract_map=contract_map or {},
+        contract_details=contract_details or {},
+    ):
+        if _has_contract_valid_safe_write(ir, contract_map=contract_map or {}):
+            return "profile_contract_policy_projected_to_mixed"
+        return "profile_contract_policy_projected_to_quarantine"
+    if model_decision in {"commit", "mixed"} and _has_temporal_interval_order_mismatch(ir):
+        if _has_temporal_valid_safe_write(ir):
+            return "temporal_interval_order_projected_to_mixed"
+        return "temporal_interval_order_projected_to_quarantine"
     if model_decision == "commit" and _has_only_context_writes_with_unsafe_implications(ir):
         return "context_writes_with_unsafe_implications_projected_to_mixed"
     if model_decision == "commit" and _has_safe_direct_write(ir) and _has_projection_relevant_unsafe_implications(ir):
@@ -1454,9 +1646,11 @@ def _projected_decision(
     *,
     allowed_signatures: set[tuple[str, int]] | None = None,
     contract_map: dict[tuple[str, int], list[str]] | None = None,
+    contract_details: dict[tuple[str, int], dict[str, Any]] | None = None,
 ) -> str:
     allowed_signatures = allowed_signatures or set()
     contract_map = contract_map or {}
+    contract_details = contract_details or {}
     decision = _normalize_decision(ir.get("decision"))
     if _ambiguous_content_should_clarify(ir):
         return "clarify"
@@ -1483,6 +1677,18 @@ def _projected_decision(
         contract_map=contract_map,
     ):
         if _has_contract_valid_safe_write(ir, contract_map=contract_map):
+            return "mixed"
+        return "quarantine"
+    if decision in {"commit", "mixed"} and _has_contract_policy_invalid_safe_write(
+        ir,
+        contract_map=contract_map,
+        contract_details=contract_details,
+    ):
+        if _has_contract_valid_safe_write(ir, contract_map=contract_map):
+            return "mixed"
+        return "quarantine"
+    if decision in {"commit", "mixed"} and _has_temporal_interval_order_mismatch(ir):
+        if _has_temporal_valid_safe_write(ir):
             return "mixed"
         return "quarantine"
     if decision == "commit" and _has_only_context_writes_with_unsafe_implications(ir):
@@ -1975,6 +2181,34 @@ def _has_contract_invalid_safe_write(
     return False
 
 
+def _has_contract_policy_invalid_safe_write(
+    ir: dict[str, Any],
+    *,
+    contract_map: dict[tuple[str, int], list[str]],
+    contract_details: dict[tuple[str, int], dict[str, Any]],
+) -> bool:
+    if not contract_details:
+        return False
+    entity_names = _entity_name_map(ir)
+    for op in _candidate_operations(ir):
+        operation = str(op.get("operation", "")).strip().lower()
+        if operation not in {"assert", "retract", "query"}:
+            continue
+        if str(op.get("safety", "")).strip().lower() != "safe":
+            continue
+        predicate = _predicate_name(op.get("predicate"))
+        args = _operation_args(op.get("args"), entity_names=entity_names, for_query=operation == "query")
+        if _operation_contract_policy_problem(
+            predicate=predicate,
+            args=args,
+            operation=operation,
+            contract_map=contract_map,
+            contract_details=contract_details,
+        ):
+            return True
+    return False
+
+
 def _has_contract_valid_safe_write(
     ir: dict[str, Any],
     *,
@@ -2002,6 +2236,25 @@ def _has_contract_valid_safe_write(
             entity_meta=entity_meta,
             contract_map=contract_map,
         ):
+            return True
+    return False
+
+
+def _has_temporal_interval_order_mismatch(ir: dict[str, Any]) -> bool:
+    return bool(_temporal_invalid_operation_indexes(ir, entity_names=_entity_name_map(ir)))
+
+
+def _has_temporal_valid_safe_write(ir: dict[str, Any]) -> bool:
+    entity_names = _entity_name_map(ir)
+    invalid = _temporal_invalid_operation_indexes(ir, entity_names=entity_names)
+    for index, op in enumerate(_candidate_operations(ir)):
+        if index in invalid:
+            continue
+        if str(op.get("safety", "")).strip().lower() != "safe":
+            continue
+        if str(op.get("source", "")).strip().lower() != "direct":
+            continue
+        if str(op.get("operation", "")).strip().lower() in {"assert", "retract", "rule"}:
             return True
     return False
 

@@ -55,9 +55,15 @@ def test_mock_profile_packages_are_declarative_and_loadable():
     assert "relative_date_resolves_to/3" in legal_signatures
     assert "interval_start/2" in legal_signatures
     assert "outside_district_interval/3" in legal_signatures
+    legal_contracts = profile_package_contracts(legal)
+    finding_contract = next(row for row in legal_contracts if row["signature"] == "finding/4")
+    assert finding_contract["validators"][0]["reason"] == "allegation_not_court_finding"
     sec = load_profile_package("sec_contracts@v0", catalog)
     sec_signatures = {row["signature"] for row in profile_package_contracts(sec)}
     assert "clearance_event/4" in sec_signatures
+    sec_contracts = profile_package_contracts(sec)
+    breach_contract = next(row for row in sec_contracts if row["signature"] == "breach_event/2")
+    assert breach_contract["validators"][0]["reason"] == "obligation_language_not_breach_event"
     assert any("unknown_agent" in line for line in profile_package_context(story))
     assert any("claim" in line for line in profile_package_context(probate))
 

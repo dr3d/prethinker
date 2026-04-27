@@ -144,6 +144,14 @@ selections and `40/40` valid Semantic IR while the mapper caught a real
 profiles expose role contracts; the generic mapper enforces only structural
 shape.
 
+Profile contracts can now also carry small declarative admission validators.
+The first validators live in `legal_courtlistener@v0` and `sec_contracts@v0`:
+legal finding/holding predicates can reject allegation/citation-shaped content,
+and contract predicates can reject condition/breach writes that are only
+obligation or unsatisfied-condition language. This keeps domain guardrails in
+profile JSON where they can be reviewed, tested, and eventually reused across
+scenario packs.
+
 ## Thin Roster Versus Thick Profile
 
 The roster should be small enough to keep in ordinary context:
@@ -202,6 +210,7 @@ A mature profile should eventually declare:
 - thicker profile context blocks for selected use
 - predicate registry
 - predicate contracts and argument roles
+- declarative admission validators for profile-owned predicate contracts
 - optional ontology or alias context
 - profile-specific clarification policy
 - profile-specific type/grounding validators
