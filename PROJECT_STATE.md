@@ -112,7 +112,7 @@ This is the next useful layer for type steering and explanation. It should suppo
 Recent verified results:
 
 - Full suite after SEC/contracts third-domain scaffold: `299 passed`
-- Full suite after mixed-domain agility harness: `305 passed`
+- Full suite after mixed-domain agility guardrail/profile tightening: `306 passed`
 - Focused semantic IR runtime battery: `23 passed`
 - Focused profile-contract/domain-roster handoff verification: `7 passed`
 - Focused CourtListener/domain-profile verification: `8 passed`
@@ -132,6 +132,7 @@ Recent verified results:
 - Live LM Studio medical smoke after profile-context wiring: `Priya is taking Coumadin.` committed `taking(priya, warfarin).`; `His serum creatinine was repeated this afternoon.` still required patient-identity clarification.
 - Live LM Studio auto-profile smoke selected `medical@v0`, `legal_courtlistener@v0`, `sec_contracts@v0`, then `medical@v0` across four turns, with each turn receiving the expected domain context and predicate palette.
 - Mixed-domain agility smoke, seed `42`, selected expected profiles for `12/12` shuffled turns and produced valid Semantic IR for `12/12`. The stream included Glitch, Goldilocks, Ledger, CourtListener, SEC/contracts, and medical turns. Trace rendered locally under ignored `tmp/semantic_ir_trace_views/`.
+- Mixed-domain guardrail/profile tightening on the same seed reduced bad admitted placeholder/loose-trait clauses from `4` to `0`: `null`/generic actor writes are now skipped, `docket_entry(... null ...)` no longer reaches facts, and the story profile steers descriptive traits to `has_trait/2` instead of `owns/2`.
 - Python compile check for touched runtime files passed
 
 Rerun the full suite before committing a new stopping point.

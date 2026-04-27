@@ -26,7 +26,8 @@
     "profile_scope: story-world semantic ingestion; capture direct narrative events and states without turning a story into a summary",
     "identity_policy: preserve named actors and stable object identity across turns; ask or quarantine when a pronoun has multiple plausible referents",
     "unknown_actor_policy: do not commit unknown_agent writes; prefer passive object-state predicates such as was_tasted/1, was_eaten/1, was_sat_in/1, or was_lain_in/1 when available",
-    "event_policy: use specific predicates for movement, tasting, eating, sitting, lying, sleeping, seeing, finding, entering, exiting, and breaking; do not use inside/2 or carries/2 as generic fallbacks",
+    "event_policy: use specific predicates for movement, tasting, eating, sitting, lying, sleeping, seeing, finding, entering, exiting, returning from an activity, and breaking; do not use inside/2 or carries/2 as generic fallbacks",
+    "trait_policy: use has_trait/2 for descriptions such as hair color, size, voice, or physical qualities; do not encode traits as owns/2",
     "temporal_policy: preserve order in assertions/self_check when exact temporal predicates are unavailable; do not invent timestamps"
   ],
   "canonical_palette": [
@@ -35,7 +36,10 @@
     { "signature": "inside/2", "arguments": ["entity", "container"], "notes": "Physical containment only; not a generic relation." },
     { "signature": "entered/2", "arguments": ["actor", "place"], "notes": "Boundary crossing into a place." },
     { "signature": "exited/2", "arguments": ["actor", "place"], "notes": "Boundary crossing out of a place." },
+    { "signature": "returned_from/2", "arguments": ["actor", "activity_or_place"], "notes": "Return from an activity or location." },
     { "signature": "found/2", "arguments": ["actor", "object"], "notes": "Discovery of an object or place." },
+    { "signature": "has_trait/2", "arguments": ["entity", "trait"], "notes": "Descriptive trait such as hair color, size, voice, or physical quality; not possession." },
+    { "signature": "robot_unit/1", "arguments": ["entity"], "notes": "Robot or artificial unit identity when explicit." },
     { "signature": "tasted/2", "arguments": ["actor", "food_or_drink"], "notes": "Direct tasting event." },
     { "signature": "ate/2", "arguments": ["actor", "food"], "notes": "Eating event." },
     { "signature": "ate_all/2", "arguments": ["actor", "food"], "notes": "Complete consumption event." },

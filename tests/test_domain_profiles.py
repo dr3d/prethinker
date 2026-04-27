@@ -41,6 +41,8 @@ def test_mock_profile_packages_are_declarative_and_loadable():
     story_signatures = {row["signature"] for row in story_contracts}
     assert "tasted/2" in story_signatures
     assert "was_tasted/1" in story_signatures
+    assert "has_trait/2" in story_signatures
+    assert "returned_from/2" in story_signatures
     probate_contracts = profile_package_contracts(probate)
     probate_signatures = {row["signature"] for row in probate_contracts}
     assert "claimed/3" in probate_signatures

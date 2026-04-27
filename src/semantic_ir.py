@@ -220,11 +220,19 @@ UNGROUNDED_ARGUMENT_ATOMS = {
     "someone",
     "somebody",
     "unknown",
+    "null",
+    "none",
+    "n_a",
+    "na",
+    "not_provided",
+    "unspecified",
     "unknown_male",
     "unknown_female",
     "unknown_agent",
     "unknown_person",
     "unknown_actor",
+    "male_actor",
+    "female_actor",
 }
 
 IDENTITY_PREDICATES = {
@@ -1077,7 +1085,12 @@ def _is_placeholder_atom(arg: str) -> bool:
         return True
     return (
         value.startswith("unknown_")
+        or value in {"null", "none", "n_a", "na", "not_provided", "unspecified"}
+        or value.endswith("_null")
+        or value.endswith("_not_provided")
+        or value.endswith("_unspecified")
         or value.startswith("someone_")
+        or value.endswith("_actor")
         or value.endswith("_unknown")
         or value.endswith("_unknown_agent")
     )

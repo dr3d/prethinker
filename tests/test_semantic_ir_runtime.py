@@ -157,6 +157,41 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         ]
         self.assertEqual(skipped[0]["skip_reason"], "ungrounded_argument_atom")
 
+    def test_mapper_skips_null_and_generic_actor_placeholder_writes(self) -> None:
+        ir = _ir(
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "docket_entry",
+                    "args": ["Doe v Acme", "42", "null", "null"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "assert",
+                    "predicate": "entered",
+                    "args": ["female_actor", "Sonic Zips"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+            ]
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=["docket_entry/4", "entered/2"],
+        )
+        self.assertEqual(parsed["facts"], [])
+        self.assertEqual(parsed["intent"], "other")
+        self.assertEqual(len(warnings), 2)
+        skipped = [
+            row
+            for row in parsed["admission_diagnostics"]["operations"]
+            if not row["admitted"]
+        ]
+        self.assertEqual([row["skip_reason"] for row in skipped], ["ungrounded_argument_atom", "ungrounded_argument_atom"])
+
     def test_mapper_admits_story_world_predicates_from_palette(self) -> None:
         ir = _ir(
             candidate_operations=[

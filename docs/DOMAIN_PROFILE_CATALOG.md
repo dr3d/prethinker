@@ -112,6 +112,12 @@ expected profile for `12/12` shuffled turns and produced valid Semantic IR for
 quality issues such as vague story predicates and placeholder/null arguments in
 otherwise useful legal operations.
 
+The first tightening pass on that same seed moved those issues measurably:
+bad admitted placeholder/loose-trait clauses dropped from `4` to `0`. The mapper
+now rejects `null`/unspecified/generic-actor write arguments, and the story-world
+profile exposes `has_trait/2`, `returned_from/2`, and `robot_unit/1` so the model
+has better predicates for traits and return events.
+
 ## Thin Roster Versus Thick Profile
 
 The roster should be small enough to keep in ordinary context:
