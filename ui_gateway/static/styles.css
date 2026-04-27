@@ -1232,6 +1232,38 @@ body.debug-mode .debug-stack {
   text-align: left;
 }
 
+.debug-text-shell.has-label {
+  gap: 4px;
+}
+
+.debug-text-shell.has-label .debug-text-toggle {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  padding: 0 2px 4px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.debug-inline-label,
+.debug-text-label {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.debug-text-meta {
+  color: rgba(255, 236, 214, 0.7);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  justify-self: end;
+}
+
 .debug-text-toggle::before {
   content: "▸";
   color: var(--accent);

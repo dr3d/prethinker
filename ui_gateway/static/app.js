@@ -2055,9 +2055,22 @@ function shouldCollapseDebugText(text) {
   return normalized.split(/\r?\n/).length > 8;
 }
 
-function buildExpandableDebugText(text, { nested = false } = {}) {
+function buildExpandableDebugText(text, { nested = false, label = "" } = {}) {
   const normalized = String(text || "").trim();
   if (!shouldCollapseDebugText(normalized)) {
+    if (label) {
+      const shell = document.createElement("section");
+      shell.className = `debug-text-shell${nested ? " nested" : ""} has-label`;
+      const heading = document.createElement("p");
+      heading.className = "debug-inline-label";
+      heading.textContent = label;
+      const pre = document.createElement("pre");
+      pre.className = "debug-text-scroller";
+      pre.textContent = normalized;
+      shell.appendChild(heading);
+      shell.appendChild(pre);
+      return shell;
+    }
     const pre = document.createElement("pre");
     pre.textContent = normalized;
     return pre;
@@ -2065,13 +2078,32 @@ function buildExpandableDebugText(text, { nested = false } = {}) {
 
   const lineCount = normalized.split(/\r?\n/).length;
   const shell = document.createElement("section");
-  shell.className = `debug-text-shell${nested ? " nested" : ""} is-collapsed`;
+  shell.className = `debug-text-shell${nested ? " nested" : ""}${label ? " has-label" : ""} is-collapsed`;
 
   const toggle = document.createElement("button");
   toggle.className = "debug-text-toggle";
   toggle.type = "button";
   toggle.setAttribute("aria-expanded", "false");
-  toggle.textContent = `Expand JSON (${lineCount} lines)`;
+  const setToggleText = (expanded) => {
+    if (!label) {
+      toggle.textContent = expanded
+        ? `Collapse JSON (${lineCount} lines)`
+        : `Expand JSON (${lineCount} lines)`;
+      return;
+    }
+    toggle.textContent = "";
+    const labelSpan = document.createElement("span");
+    labelSpan.className = "debug-text-label";
+    labelSpan.textContent = label;
+    const metaSpan = document.createElement("span");
+    metaSpan.className = "debug-text-meta";
+    metaSpan.textContent = expanded
+      ? `Collapse (${lineCount} lines)`
+      : `Expand (${lineCount} lines)`;
+    toggle.appendChild(labelSpan);
+    toggle.appendChild(metaSpan);
+  };
+  setToggleText(false);
 
   const pre = document.createElement("pre");
   pre.className = "debug-text-scroller";
@@ -2081,9 +2113,7 @@ function buildExpandableDebugText(text, { nested = false } = {}) {
     const expanded = shell.classList.toggle("is-expanded");
     shell.classList.toggle("is-collapsed", !expanded);
     toggle.setAttribute("aria-expanded", expanded ? "true" : "false");
-    toggle.textContent = expanded
-      ? `Collapse JSON (${lineCount} lines)`
-      : `Expand JSON (${lineCount} lines)`;
+    setToggleText(expanded);
   });
 
   shell.appendChild(toggle);
@@ -2114,10 +2144,13 @@ function buildDebugBubble({ title, summary, blocks, variantClass }) {
   for (const block of blocks) {
     const section = document.createElement("section");
     section.className = "debug-block";
-    const heading = document.createElement("p");
-    heading.className = "debug-block-label";
-    heading.textContent = block.label;
-    section.appendChild(heading);
+    const isJsonBlock = String(variantClass || "").includes("debug-bubble-json");
+    if (!isJsonBlock) {
+      const heading = document.createElement("p");
+      heading.className = "debug-block-label";
+      heading.textContent = block.label;
+      section.appendChild(heading);
+    }
     if (Array.isArray(block.parts) && block.parts.length) {
       for (const part of block.parts) {
         const subSection = document.createElement("section");
@@ -2134,7 +2167,11 @@ function buildDebugBubble({ title, summary, blocks, variantClass }) {
         section.appendChild(subSection);
       }
     } else {
-      section.appendChild(buildExpandableDebugText(block.text));
+      section.appendChild(
+        buildExpandableDebugText(block.text, {
+          label: isJsonBlock ? block.label : "",
+        })
+      );
     }
     body.appendChild(section);
   }
