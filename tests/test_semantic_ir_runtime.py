@@ -229,6 +229,83 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         ]
         self.assertEqual(skipped[0]["skip_reason"], "duplicate_candidate_operation")
 
+    def test_mapper_blocks_clear_contract_role_mismatch(self) -> None:
+        ir = _ir(
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "interval_start",
+                    "args": ["e1", "2024-01-01"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                }
+            ]
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=["interval_start/2"],
+            predicate_contracts=[
+                {"signature": "interval_start/2", "arguments": ["interval", "date"]},
+            ],
+        )
+        self.assertEqual(parsed["facts"], [])
+        self.assertEqual(parsed["intent"], "other")
+        self.assertTrue(any("role interval" in warning for warning in warnings))
+        diagnostics = parsed["admission_diagnostics"]
+        self.assertEqual(diagnostics["projected_decision"], "quarantine")
+        self.assertEqual(
+            diagnostics["projection_reason"],
+            "contract_role_mismatch_projected_to_quarantine",
+        )
+        skipped = [
+            row
+            for row in diagnostics["operations"]
+            if not row["admitted"]
+        ]
+        self.assertEqual(skipped[0]["skip_reason"], "predicate_contract_role_mismatch")
+
+    def test_mapper_admits_contract_role_shape_when_interval_is_grounded(self) -> None:
+        ir = _ir(
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "outside_district_interval",
+                    "args": ["e1", "district", "mira_absence_interval_1"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "assert",
+                    "predicate": "interval_start",
+                    "args": ["mira_absence_interval_1", "2024-01-01"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+            ]
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=["outside_district_interval/3", "interval_start/2"],
+            predicate_contracts=[
+                {"signature": "outside_district_interval/3", "arguments": ["person", "district_or_scope", "interval"]},
+                {"signature": "interval_start/2", "arguments": ["interval", "date"]},
+            ],
+        )
+        self.assertEqual(warnings, [])
+        self.assertEqual(
+            parsed["facts"],
+            [
+                "outside_district_interval(mara, district, mira_absence_interval_1).",
+                "interval_start(mira_absence_interval_1, 2024_01_01).",
+            ],
+        )
+        diagnostics = parsed["admission_diagnostics"]
+        self.assertEqual(diagnostics["features"]["predicate_contract_enabled"], True)
+        self.assertEqual(diagnostics["features"]["has_contract_invalid_safe_write"], False)
+
     def test_mapper_admits_story_world_predicates_from_palette(self) -> None:
         ir = _ir(
             candidate_operations=[

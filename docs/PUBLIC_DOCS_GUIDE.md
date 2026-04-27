@@ -97,7 +97,7 @@ future architecture.
 
 Latest local verification before this refresh:
 
-- Full pytest suite: `308 passed`
+- Full pytest suite: `310 passed`
 - Profile-aware Semantic IR/UMLS handoff: `medical@v0` now supplies predicate contracts plus compact UMLS bridge context to the model input before deterministic admission
 - Domain-profile catalog foundation: thin roster plus mock `story_world@v0` and `probate@v0` thick-context packages for future skill-like profile selection
 - Auto profile-selection smoke: deterministic selector can steer one synthetic conversation through `medical@v0`, `legal_courtlistener@v0`, `sec_contracts@v0`, then back to `medical@v0`, loading matching thick context and predicate contracts per turn
@@ -106,6 +106,7 @@ Latest local verification before this refresh:
 - Mixed-domain hard seed `99`: selector accuracy improved from `18/24` to `24/24`; real LM Studio pass stayed `24/24` valid Semantic IR
 - Mixed-domain wider seed `2718`: selector-only improved from `36/40` to `40/40`; real LM Studio pass reached `40/40` expected profile selections and `40/40` valid Semantic IR
 - Current profile packages use declarative `selection_keywords` plus profile-owned predicate contracts for legal source documents, relative dates, probate guardianship/conditional gifts, and SEC/contract-style clearance state; the mapper still owns actual admission
+- Predicate-contract role enforcement now blocks obvious argument-shape mismatches, such as an `interval_start/2` operation whose first argument is a date instead of an interval id; the latest seed `2718` LM Studio run preserved `40/40` profile selections and `40/40` valid Semantic IR with that stricter gate enabled
 - Mapper duplicate-collapse now prevents repeated candidate-operation floods from becoming repeated KB writes
 - CourtListener legal-source lane: `legal_courtlistener@v0`, `adapters/courtlistener/`, a synthetic legal seed fixture, and ignored live CourtListener smoke data for claim/finding, citation, docket, role-scope, provenance, and identity-boundary tests
 - SEC/contracts scaffold: `sec_contracts@v0`, `adapters/sec_edgar/`, and a synthetic contract seed fixture for obligation, condition, temporal-trigger, party-scope, and breach-boundary tests
@@ -126,5 +127,6 @@ Latest local verification before this refresh:
 
 The important qualitative result is that semantic IR has reduced dependence on
 non-mapper Python rescue code in tested packs. The remaining hard problems are
-argument-role contract enforcement, temporal fact representation, rule
-admission, and the mapper policy for partial/unsafe operations.
+reusable predicate-contract coverage, temporal fact representation, rule
+admission, richer profile validators, and the mapper policy for partial/unsafe
+operations.

@@ -1,6 +1,6 @@
 # Semantic IR Mapper Specification
 
-Last updated: 2026-04-26
+Last updated: 2026-04-27
 
 ## Purpose
 
@@ -220,6 +220,42 @@ This palette is intentionally generic story/world-state vocabulary, not a
 Goldilocks patch. It gives the LLM better legal targets while keeping the mapper
 free to reject out-of-palette or ungrounded operations.
 
+## Predicate Contract Role Policy
+
+Predicate contracts may also declare argument roles and ordering, such as:
+
+```json
+{
+  "signature": "interval_start/2",
+  "args": ["interval", "date"]
+}
+```
+
+The mapper now treats those contracts as admission evidence. Name/arity palette
+checks answer "is this predicate allowed?" Contract role checks answer "is this
+candidate operation shaped like that predicate contract?"
+
+The current role gate is deliberately conservative. It blocks only clear shape
+errors, for example:
+
+- an `interval` slot receiving a date or person-like entity;
+- a `date` slot receiving a person or place-like entity;
+- a `person` slot receiving a time, place, document, or medical concept;
+- a `document`/`source` slot receiving a person or time value.
+
+The mapper does not infer legal, medical, or story meaning from raw English to
+make this decision. It uses the IR's normalized arguments, entity metadata, and
+profile-owned predicate contracts. Ambiguous cases are allowed to continue to
+profile validators or runtime policy; obvious mismatches are skipped with:
+
+```text
+predicate_contract_role_mismatch
+```
+
+This is the next step after predicate-palette enforcement. It keeps predicate
+contracts visible and executable without turning the generic mapper into a
+domain ontology.
+
 ## Unsafe Implications
 
 `unsafe_implications` records tempting candidates that should not become durable
@@ -395,10 +431,12 @@ It records:
 - model decision versus projected decision;
 - projection reason;
 - per-operation source/safety/polarity/predicate features;
+- per-operation predicate-contract presence and argument roles;
 - admitted versus skipped operations;
 - concrete clauses the mapper considered admissible;
 - skip reasons and rationale codes such as `source_policy`,
-  `candidate_safety_gate`, `polarity_policy`, and `no_rule_synthesis`.
+  `candidate_safety_gate`, `polarity_policy`, `predicate_contract_role`,
+  and `no_rule_synthesis`.
 
 This lets us ask "why does this guardrail exist?" at operation granularity
 without turning score features into write permission.
@@ -448,6 +486,8 @@ Required cases:
 - quantified group atom is skipped;
 - placeholder write argument is skipped while placeholder query remains
   representable;
+- predicate contract role mismatch is skipped;
+- correctly shaped predicate contract arguments are admitted;
 - minimal temporal facts are admitted as factual representation, not temporal
   proof;
 - duplicate unsafe implication does not downgrade an admitted safe operation;

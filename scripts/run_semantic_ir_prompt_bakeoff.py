@@ -2668,6 +2668,7 @@ def main() -> int:
                     mapped, mapper_warnings = semantic_ir_to_legacy_parse(
                         parsed,
                         allowed_predicates=scenario.get("allowed_predicates", []),
+                        predicate_contracts=scenario.get("predicate_contracts", []),
                     )
                 record.update(
                     {

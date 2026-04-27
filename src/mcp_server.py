@@ -1943,6 +1943,7 @@ class PrologMCPServer:
         parsed, warnings = semantic_ir_to_legacy_parse(
             ir,
             allowed_predicates=self._semantic_ir_allowed_predicates(self._last_semantic_ir_selected_profile),
+            predicate_contracts=self._semantic_ir_predicate_contracts(self._last_semantic_ir_selected_profile),
         )
         trace["normalized"] = self._clone_trace_payload(parsed)
         trace["rescues"].append(

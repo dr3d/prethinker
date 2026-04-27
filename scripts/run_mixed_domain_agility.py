@@ -115,6 +115,7 @@ def main() -> int:
                     mapped, warnings = semantic_ir_to_legacy_parse(
                         ir,
                         allowed_predicates=trace.get("model_input", {}).get("allowed_predicates", []),
+                        predicate_contracts=trace.get("model_input", {}).get("predicate_contracts", []),
                     )
                     diagnostics = mapped.get("admission_diagnostics", {}) if isinstance(mapped, dict) else {}
                     record.update(

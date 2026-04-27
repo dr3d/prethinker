@@ -117,7 +117,11 @@ def main() -> int:
             mapped: dict[str, Any] = {}
             warnings: list[str] = []
             if isinstance(parsed, dict):
-                mapped, warnings = semantic_ir_to_legacy_parse(parsed, allowed_predicates=allowed_predicates)
+                mapped, warnings = semantic_ir_to_legacy_parse(
+                    parsed,
+                    allowed_predicates=allowed_predicates,
+                    predicate_contracts=predicate_contracts,
+                )
             diagnostics = mapped.get("admission_diagnostics", {}) if isinstance(mapped, dict) else {}
             record.update(
                 {

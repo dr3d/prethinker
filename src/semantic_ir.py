@@ -590,6 +590,7 @@ def semantic_ir_admission_diagnostics(
     ir: dict[str, Any],
     *,
     allowed_predicates: Any = None,
+    predicate_contracts: Any = None,
 ) -> dict[str, Any]:
     """Explain mapper admission choices without granting authority.
 
@@ -598,7 +599,14 @@ def semantic_ir_admission_diagnostics(
     """
     model_decision = _normalize_decision(ir.get("decision"))
     allowed_signatures = _allowed_predicate_signature_set(allowed_predicates)
-    projected_decision = _projected_decision(ir, allowed_signatures=allowed_signatures)
+    contract_map = _predicate_contract_map(predicate_contracts if predicate_contracts is not None else allowed_predicates)
+    if not allowed_signatures and contract_map:
+        allowed_signatures = set(contract_map)
+    projected_decision = _projected_decision(
+        ir,
+        allowed_signatures=allowed_signatures,
+        contract_map=contract_map,
+    )
     operations: list[dict[str, Any]] = []
     warning_counts: dict[str, int] = {}
     admitted_count = 0
@@ -620,6 +628,7 @@ def semantic_ir_admission_diagnostics(
             entity_names=entity_names,
             entity_meta=entity_meta,
             allowed_signatures=allowed_signatures,
+            contract_map=contract_map,
         )
         if (
             projected_decision in {"reject", "quarantine", "clarify"}
@@ -675,7 +684,11 @@ def semantic_ir_admission_diagnostics(
         else:
             skipped_count += 1
 
-    features = _admission_feature_summary(ir, allowed_signatures=allowed_signatures)
+    features = _admission_feature_summary(
+        ir,
+        allowed_signatures=allowed_signatures,
+        contract_map=contract_map,
+    )
     return {
         "version": "admission_diagnostics_v1",
         "authority": "diagnostic_only_mapper_remains_authoritative",
@@ -686,6 +699,7 @@ def semantic_ir_admission_diagnostics(
             model_decision,
             projected_decision,
             allowed_signatures=allowed_signatures,
+            contract_map=contract_map,
         ),
         "features": features,
         "operation_count": len(operations),
@@ -701,14 +715,26 @@ def semantic_ir_to_legacy_parse(
     ir: dict[str, Any],
     *,
     allowed_predicates: Any = None,
+    predicate_contracts: Any = None,
 ) -> tuple[dict[str, Any], list[str]]:
     allowed_signatures = _allowed_predicate_signature_set(allowed_predicates)
-    decision = _projected_decision(ir, allowed_signatures=allowed_signatures)
+    contract_map = _predicate_contract_map(predicate_contracts if predicate_contracts is not None else allowed_predicates)
+    if not allowed_signatures and contract_map:
+        allowed_signatures = set(contract_map)
+    decision = _projected_decision(
+        ir,
+        allowed_signatures=allowed_signatures,
+        contract_map=contract_map,
+    )
     facts: list[str] = []
     rules: list[str] = []
     queries: list[str] = []
     retracts: list[str] = []
-    diagnostics = semantic_ir_admission_diagnostics(ir, allowed_predicates=allowed_signatures)
+    diagnostics = semantic_ir_admission_diagnostics(
+        ir,
+        allowed_predicates=allowed_signatures,
+        predicate_contracts=contract_map,
+    )
     warnings = [
         str(item.get("warning", "")).strip()
         for item in diagnostics.get("operations", [])
@@ -776,6 +802,7 @@ def _diagnose_candidate_operation(
     entity_names: dict[str, str],
     entity_meta: dict[str, dict[str, Any]],
     allowed_signatures: set[tuple[str, int]],
+    contract_map: dict[tuple[str, int], list[str]],
 ) -> dict[str, Any]:
     operation = str(op.get("operation", "")).strip().lower()
     safety = str(op.get("safety", "")).strip().lower()
@@ -806,6 +833,7 @@ def _diagnose_candidate_operation(
             safety=safety,
             polarity=polarity,
             allowed_signatures=allowed_signatures,
+            contract_map=contract_map,
         ),
     }
 
@@ -863,6 +891,20 @@ def _diagnose_candidate_operation(
             warning=str(palette_problem["warning"]),
             codes=list(palette_problem["codes"]),
         )
+    contract_problem = _operation_contract_role_problem(
+        op,
+        predicate=predicate,
+        args=args,
+        operation=operation,
+        entity_meta=entity_meta,
+        contract_map=contract_map,
+    )
+    if contract_problem:
+        return skip(
+            str(contract_problem["reason"]),
+            warning=str(contract_problem["warning"]),
+            codes=list(contract_problem["codes"]),
+        )
     if polarity == "negative" and operation == "assert" and not _is_negative_event_predicate(predicate):
         return skip(
             "negative_fact_semantics_not_supported",
@@ -909,7 +951,9 @@ def _admission_feature_summary(
     ir: dict[str, Any],
     *,
     allowed_signatures: set[tuple[str, int]],
+    contract_map: dict[tuple[str, int], list[str]] | None = None,
 ) -> dict[str, Any]:
+    contract_map = contract_map or {}
     safe_ops = [
         op
         for op in _candidate_operations(ir)
@@ -943,9 +987,15 @@ def _admission_feature_summary(
         "has_self_check_rule_conflict": _self_check_mentions_unresolved_rule_conflict(ir),
         "predicate_palette_enabled": bool(allowed_signatures),
         "predicate_palette_size": len(allowed_signatures),
+        "predicate_contract_enabled": bool(contract_map),
+        "predicate_contract_size": len(contract_map),
         "has_out_of_palette_safe_write": _has_out_of_palette_safe_write(
             ir,
             allowed_signatures=allowed_signatures,
+        ),
+        "has_contract_invalid_safe_write": _has_contract_invalid_safe_write(
+            ir,
+            contract_map=contract_map,
         ),
         "bad_commit_risk": risk,
         "bad_commit_risk_score": risk_score,
@@ -963,6 +1013,7 @@ def _operation_feature_summary(
     safety: str,
     polarity: str,
     allowed_signatures: set[tuple[str, int]],
+    contract_map: dict[tuple[str, int], list[str]] | None = None,
 ) -> dict[str, Any]:
     source_support = {
         "direct": 1.0,
@@ -979,6 +1030,8 @@ def _operation_feature_summary(
             operation=operation,
             allowed_signatures=allowed_signatures,
         ),
+        "predicate_contract_present": (predicate, len(args)) in (contract_map or {}),
+        "predicate_contract_roles": list((contract_map or {}).get((predicate, len(args)), [])),
         "arg_count": len(args),
         "model_marked_safe": safety == "safe",
         "write_operation": operation in {"assert", "retract", "rule"},
@@ -1001,6 +1054,22 @@ def _allowed_predicate_signature_set(raw: Any) -> set[tuple[str, int]]:
         values = [raw]
     signatures: set[tuple[str, int]] = set()
     for item in values:
+        if isinstance(item, dict):
+            text = str(item.get("signature") or "").strip()
+            if not text:
+                predicate = str(item.get("predicate") or item.get("name") or "").strip()
+                args = item.get("arguments", item.get("args", []))
+                if predicate and isinstance(args, list):
+                    name = _predicate_name(predicate)
+                    if name:
+                        signatures.add((name, len(args)))
+                continue
+            match = re.fullmatch(r"\s*([A-Za-z_][A-Za-z0-9_]*)\s*/\s*(\d+)\s*", text)
+            if match:
+                name = _predicate_name(match.group(1))
+                if name:
+                    signatures.add((name, int(match.group(2))))
+            continue
         if isinstance(item, tuple) and len(item) == 2:
             name = _predicate_name(item[0])
             try:
@@ -1019,6 +1088,56 @@ def _allowed_predicate_signature_set(raw: Any) -> set[tuple[str, int]]:
         if name:
             signatures.add((name, arity))
     return signatures
+
+
+def _predicate_contract_map(raw: Any) -> dict[tuple[str, int], list[str]]:
+    if raw is None:
+        return {}
+    if isinstance(raw, dict) and all(isinstance(key, tuple) and len(key) == 2 for key in raw):
+        out: dict[tuple[str, int], list[str]] = {}
+        for key, value in raw.items():
+            name = _predicate_name(key[0])
+            try:
+                arity = int(key[1])
+            except Exception:
+                continue
+            roles = value if isinstance(value, list) else []
+            if name and arity >= 0:
+                out[(name, arity)] = [str(role).strip() for role in roles if str(role).strip()]
+        return out
+    values = raw
+    if isinstance(raw, dict):
+        values = [raw]
+    elif isinstance(raw, set):
+        values = list(raw)
+    elif isinstance(raw, tuple):
+        values = list(raw)
+    elif not isinstance(raw, list):
+        values = [raw]
+    out: dict[tuple[str, int], list[str]] = {}
+    for item in values:
+        if not isinstance(item, dict):
+            continue
+        signature = str(item.get("signature") or "").strip()
+        name = ""
+        arity: int | None = None
+        if signature:
+            match = re.fullmatch(r"\s*([A-Za-z_][A-Za-z0-9_]*)\s*/\s*(\d+)\s*", signature)
+            if match:
+                name = _predicate_name(match.group(1))
+                arity = int(match.group(2))
+        if not name:
+            predicate_text = str(item.get("predicate") or item.get("name") or "").strip()
+            name = _predicate_name(predicate_text) if predicate_text else ""
+        roles = item.get("arguments", item.get("args", []))
+        if not isinstance(roles, list):
+            roles = []
+        role_names = [str(role).strip() for role in roles if str(role).strip()]
+        if arity is None:
+            arity = len(role_names)
+        if name and arity >= 0:
+            out[(name, arity)] = role_names
+    return out
 
 
 def _operation_signature_allowed(
@@ -1065,6 +1184,143 @@ def _operation_palette_problem(
             "codes": ["predicate_palette_gate", "allowed_predicate_contract"],
         }
     return None
+
+
+def _operation_contract_role_problem(
+    op: dict[str, Any],
+    *,
+    predicate: str,
+    args: list[str],
+    operation: str,
+    entity_meta: dict[str, dict[str, Any]],
+    contract_map: dict[tuple[str, int], list[str]],
+) -> dict[str, Any] | None:
+    if not contract_map or operation not in {"assert", "query", "retract"}:
+        return None
+    roles = contract_map.get((predicate, len(args)))
+    if not roles:
+        return None
+    raw_args = op.get("args", [])
+    if not isinstance(raw_args, list):
+        raw_args = []
+    for index, (arg, role) in enumerate(zip(args, roles), start=1):
+        if _is_variable_term(arg):
+            continue
+        meta = _metadata_for_operation_arg(raw_args[index - 1] if index - 1 < len(raw_args) else "", arg, entity_meta)
+        problem = _role_argument_problem(str(role), arg, meta)
+        if problem:
+            return {
+                "reason": "predicate_contract_role_mismatch",
+                "warning": (
+                    f"skipped {predicate}/{len(args)} because argument {index} "
+                    f"for role {role} looks like {problem}"
+                ),
+                "codes": ["predicate_contract_gate", "argument_role_mismatch"],
+            }
+    return None
+
+
+def _metadata_for_operation_arg(
+    raw_arg: Any,
+    atom: str,
+    entity_meta: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    candidates: list[str] = []
+    if isinstance(raw_arg, dict):
+        for key in ("id", "entity", "value", "normalized", "surface"):
+            if key in raw_arg:
+                candidates.append(str(raw_arg.get(key) or "").strip())
+    else:
+        candidates.append(str(raw_arg or "").strip())
+    candidates.append(str(atom or "").strip())
+    for candidate in candidates:
+        if candidate in entity_meta:
+            return entity_meta[candidate]
+    atomized = _atomize(atom)
+    for meta in entity_meta.values():
+        normalized = _atomize(str(meta.get("normalized") or meta.get("surface") or ""))
+        surface = _atomize(str(meta.get("surface") or ""))
+        if atomized and atomized in {normalized, surface}:
+            return meta
+    return {}
+
+
+def _role_argument_problem(role: str, arg: str, meta: dict[str, Any]) -> str:
+    role_kind = _contract_role_kind(role)
+    if not role_kind:
+        return ""
+    entity_type = str(meta.get("type") or "").strip().lower() if isinstance(meta, dict) else ""
+    value = _atomize(str(meta.get("normalized") or meta.get("surface") or arg)) if isinstance(meta, dict) else _atomize(arg)
+    if role_kind == "interval":
+        if entity_type == "person":
+            return "a person, not an interval"
+        if _looks_like_date_atom(value):
+            return "a date, not an interval"
+        if "interval" not in value and not value.endswith("_period") and not value.endswith("_span"):
+            return "a non-interval atom"
+    elif role_kind == "date":
+        if entity_type == "person":
+            return "a person, not a date/time"
+        if entity_type == "place":
+            return "a place, not a date/time"
+        if entity_type and entity_type not in {"time", "unknown"} and not _looks_like_date_atom(value):
+            return f"{entity_type}, not a date/time"
+    elif role_kind == "document":
+        if entity_type == "person":
+            return "a person, not a source document"
+        if entity_type == "time":
+            return "a time, not a source document"
+    elif role_kind == "person":
+        if entity_type in {"time", "place", "medication", "lab_test", "condition", "symptom"}:
+            return f"{entity_type}, not a person/party"
+    return ""
+
+
+def _contract_role_kind(role: str) -> str:
+    value = _atomize(role)
+    if not value:
+        return ""
+    if "interval" in value:
+        return "interval"
+    if value in {"date", "time", "date_filed", "decision_date", "filing_date"}:
+        return "date"
+    if value.endswith("_date") or value.startswith("date_") or "date_or" in value:
+        return "date"
+    if any(marker in value for marker in ("document", "filing", "exhibit", "docket", "source")):
+        return "document"
+    if value in {"case", "contract", "clause", "obligation"} or value.endswith("_case"):
+        return "document"
+    if any(
+        marker in value
+        for marker in (
+            "person",
+            "patient",
+            "judge",
+            "attorney",
+            "beneficiary",
+            "guardian",
+            "ward",
+            "witness",
+            "speaker",
+            "actor",
+        )
+    ):
+        return "person"
+    return ""
+
+
+def _looks_like_date_atom(value: str) -> bool:
+    atom = str(value or "").strip().lower()
+    if re.fullmatch(r"\d{4}(_\d{1,2}){0,2}", atom):
+        return True
+    if re.search(r"\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|january|february|march|april|june|july|august|september|october|november|december)_", atom):
+        return True
+    return bool(re.search(r"\b\d{1,2}_\d{1,2}_\d{2,4}\b", atom))
+
+
+def _is_variable_term(value: str) -> bool:
+    text = str(value or "").strip()
+    return bool(text) and (text[0].isupper() or text.startswith("_"))
 
 
 def _predicate_signatures_from_clause(clause: str) -> set[tuple[str, int]]:
@@ -1126,6 +1382,7 @@ def _projection_reason(
     projected_decision: str,
     *,
     allowed_signatures: set[tuple[str, int]],
+    contract_map: dict[tuple[str, int], list[str]] | None = None,
 ) -> str:
     if projected_decision == model_decision:
         return "model_decision_preserved"
@@ -1149,6 +1406,13 @@ def _projection_reason(
         if _has_palette_allowed_safe_write(ir, allowed_signatures=allowed_signatures):
             return "out_of_palette_write_projected_to_mixed"
         return "out_of_palette_write_projected_to_quarantine"
+    if model_decision in {"commit", "mixed"} and _has_contract_invalid_safe_write(
+        ir,
+        contract_map=contract_map or {},
+    ):
+        if _has_contract_valid_safe_write(ir, contract_map=contract_map or {}):
+            return "contract_role_mismatch_projected_to_mixed"
+        return "contract_role_mismatch_projected_to_quarantine"
     if model_decision == "commit" and _has_only_context_writes_with_unsafe_implications(ir):
         return "context_writes_with_unsafe_implications_projected_to_mixed"
     if model_decision == "commit" and _has_safe_direct_write(ir) and _has_projection_relevant_unsafe_implications(ir):
@@ -1189,8 +1453,10 @@ def _projected_decision(
     ir: dict[str, Any],
     *,
     allowed_signatures: set[tuple[str, int]] | None = None,
+    contract_map: dict[tuple[str, int], list[str]] | None = None,
 ) -> str:
     allowed_signatures = allowed_signatures or set()
+    contract_map = contract_map or {}
     decision = _normalize_decision(ir.get("decision"))
     if _ambiguous_content_should_clarify(ir):
         return "clarify"
@@ -1210,6 +1476,13 @@ def _projected_decision(
         allowed_signatures=allowed_signatures,
     ):
         if _has_palette_allowed_safe_write(ir, allowed_signatures=allowed_signatures):
+            return "mixed"
+        return "quarantine"
+    if decision in {"commit", "mixed"} and _has_contract_invalid_safe_write(
+        ir,
+        contract_map=contract_map,
+    ):
+        if _has_contract_valid_safe_write(ir, contract_map=contract_map):
             return "mixed"
         return "quarantine"
     if decision == "commit" and _has_only_context_writes_with_unsafe_implications(ir):
@@ -1668,6 +1941,66 @@ def _has_out_of_palette_safe_write(
             args=args,
             operation=operation,
             allowed_signatures=allowed_signatures,
+        ):
+            return True
+    return False
+
+
+def _has_contract_invalid_safe_write(
+    ir: dict[str, Any],
+    *,
+    contract_map: dict[tuple[str, int], list[str]],
+) -> bool:
+    if not contract_map:
+        return False
+    entity_meta = _entity_metadata_map(ir)
+    entity_names = _entity_name_map(ir)
+    for op in _candidate_operations(ir):
+        operation = str(op.get("operation", "")).strip().lower()
+        if operation not in {"assert", "retract", "query"}:
+            continue
+        if str(op.get("safety", "")).strip().lower() != "safe":
+            continue
+        predicate = _predicate_name(op.get("predicate"))
+        args = _operation_args(op.get("args"), entity_names=entity_names, for_query=operation == "query")
+        if _operation_contract_role_problem(
+            op,
+            predicate=predicate,
+            args=args,
+            operation=operation,
+            entity_meta=entity_meta,
+            contract_map=contract_map,
+        ):
+            return True
+    return False
+
+
+def _has_contract_valid_safe_write(
+    ir: dict[str, Any],
+    *,
+    contract_map: dict[tuple[str, int], list[str]],
+) -> bool:
+    if not contract_map:
+        return False
+    entity_meta = _entity_metadata_map(ir)
+    entity_names = _entity_name_map(ir)
+    for op in _candidate_operations(ir):
+        operation = str(op.get("operation", "")).strip().lower()
+        if operation not in {"assert", "retract", "query"}:
+            continue
+        if str(op.get("safety", "")).strip().lower() != "safe":
+            continue
+        predicate = _predicate_name(op.get("predicate"))
+        args = _operation_args(op.get("args"), entity_names=entity_names, for_query=operation == "query")
+        if (predicate, len(args)) not in contract_map:
+            continue
+        if not _operation_contract_role_problem(
+            op,
+            predicate=predicate,
+            args=args,
+            operation=operation,
+            entity_meta=entity_meta,
+            contract_map=contract_map,
         ):
             return True
     return False

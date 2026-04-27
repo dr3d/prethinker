@@ -32,6 +32,9 @@ It owns:
 
 The generic Semantic IR mapper does not own medical vocabulary. It sees
 candidate operations and structural contracts, then decides what is admissible.
+Those structural contracts are now executable in a limited way: the mapper can
+reject obvious role/order mismatches in candidate operations without learning
+domain vocabulary itself.
 
 Two starter/mock profiles also exist for exploration:
 
@@ -133,6 +136,13 @@ expected profile selections with `40/40` valid Semantic IR. The useful changes
 were declarative: profile-owned keywords, broader profile-owned predicate
 contracts for legal/probate/SEC frontier cases, and a generic duplicate
 candidate-operation collapse in the mapper.
+
+The next tightening pass enabled deterministic contract-role checks. On the
+same wider seed, the real LM Studio run stayed at `40/40` expected profile
+selections and `40/40` valid Semantic IR while the mapper caught a real
+`interval_start/2` role mismatch. This is the intended profile pattern:
+profiles expose role contracts; the generic mapper enforces only structural
+shape.
 
 ## Thin Roster Versus Thick Profile
 

@@ -163,6 +163,7 @@ def _extract_mapped(
     record: dict[str, Any],
     parsed: dict[str, Any] | None,
     allowed_predicates: list[str],
+    predicate_contracts: list[dict[str, Any]],
 ) -> tuple[dict[str, Any], list[str]]:
     mapped = record.get("mapped")
     if isinstance(mapped, dict):
@@ -181,7 +182,11 @@ def _extract_mapped(
 
     if isinstance(parsed, dict):
         try:
-            return semantic_ir_to_legacy_parse(parsed, allowed_predicates=allowed_predicates)
+            return semantic_ir_to_legacy_parse(
+                parsed,
+                allowed_predicates=allowed_predicates,
+                predicate_contracts=predicate_contracts,
+            )
         except Exception as exc:
             return {"render_error": f"semantic_ir_to_legacy_parse failed: {exc}"}, []
     return {}, []
@@ -225,6 +230,19 @@ def _input_from_record(
             )
         )
     )
+    contracts = _as_list(
+        record.get("predicate_contracts")
+        if "predicate_contracts" in record
+        else (
+            input_payload.get("predicate_contracts")
+            if "predicate_contracts" in input_payload
+            else (
+                input_scenario.get("predicate_contracts")
+                if "predicate_contracts" in input_scenario
+                else model_input.get("predicate_contracts", scenario.get("predicate_contracts"))
+            )
+        )
+    )
     expect = record.get("expect") if isinstance(record.get("expect"), dict) else scenario.get("expect", {})
     if not isinstance(expect, dict):
         expect = {}
@@ -245,6 +263,7 @@ def _input_from_record(
         "utterance": utterance,
         "context": [str(item) for item in context],
         "allowed_predicates": [str(item) for item in allowed],
+        "predicate_contracts": [item for item in contracts if isinstance(item, dict)],
         "expected_decision": expected_decision,
         "expect": expect,
     }
@@ -470,7 +489,12 @@ def _render_record(
     model_input = _extract_model_input(record)
     parsed = _extract_parsed(record)
     raw_content = _extract_raw_content(record)
-    mapped, mapper_warnings = _extract_mapped(record, parsed, input_info["allowed_predicates"])
+    mapped, mapper_warnings = _extract_mapped(
+        record,
+        parsed,
+        input_info["allowed_predicates"],
+        input_info["predicate_contracts"],
+    )
     diagnostics = _diagnostics_from_mapped(mapped)
     score = record.get("score") if isinstance(record.get("score"), dict) else {}
     admission_score = record.get("admission_score") if isinstance(record.get("admission_score"), dict) else {}
@@ -598,6 +622,8 @@ def _render_record(
                 f"unsafe_implications=`{features.get('has_unsafe_implications', '')}`, "
                 f"palette_enabled=`{features.get('predicate_palette_enabled', '')}`, "
                 f"out_of_palette_write=`{features.get('has_out_of_palette_safe_write', '')}`, "
+                f"contract_enabled=`{features.get('predicate_contract_enabled', '')}`, "
+                f"contract_invalid_write=`{features.get('has_contract_invalid_safe_write', '')}`, "
                 f"risk=`{features.get('bad_commit_risk', '')}`",
                 "",
             ]
