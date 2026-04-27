@@ -90,61 +90,65 @@ It is intentionally caged:
 - guarded
 - allergic to guessing
 
-### Freethinker, Shelved
-
-`Freethinker` was an earlier clarification-sidecar idea: a separate helper that
-could watch recent context, propose better clarification questions, and possibly
-suggest grounded referential resolutions.
-
-That idea has been displaced by the current Semantic IR direction. The stronger
-model now receives recent context, domain profile context, predicate contracts,
-and a compact KB seed directly inside the main semantic workspace pass. That is
-cleaner than asking a second model to patch hesitation after the fact.
-
-The implementation still has a config and trace surface for Freethinker, but it
-is off by default and should be read as a shelved experiment, not an active
-architectural limb.
-
-## Why Not Just One Bigger Model?
+## Why Not Just Let The Bigger Model Write?
 
 This is the obvious question, and it is a good one.
 
-Why not just give one bigger model a larger context window, a strong prompt, and let it do both the compiling and the clarification work?
+Why not give one capable model a strong prompt, a larger context window, the
+current KB, and permission to update memory directly?
 
-That may turn out to be enough for some slices, but the jobs pull in different directions:
+Because the model is good at a different job than the KB.
 
-- the compiler role should be narrow, auditable, and conservative
-- the clarification role should be softer, more contextual, and better at discourse continuity
+The model should do the semantic work:
 
-When one role must both "never guess" and "use context intelligently," drift starts to creep in.
+- understand messy language
+- resolve ordinary context when it is grounded
+- notice ambiguity and conflict
+- separate claims from observations
+- propose candidate facts, rules, queries, retractions, and clarifications
 
-The current semantic IR work partially answers this: yes, we should use a
-stronger model for more holistic understanding. The safety rule still holds,
-though. Bigger model output becomes a richer proposal, not durable truth.
+The runtime should do the authority work:
 
-So the split is not really "two different intelligences."
+- validate schemas and predicate contracts
+- enforce domain policy
+- reject unsupported writes
+- prevent claim/fact collapse
+- apply precise mutations
+- keep provenance and traces
 
-It is:
+So the split is not "small model vs. big model."
 
-- one authority role
-- one advisory role
+It is **semantic proposal vs. durable admission**.
 
-Even if both are backed by the same underlying 9B model family.
+The current system uses a stronger Semantic IR model much more aggressively than
+the earlier parser lane did. It gives the model recent context, selected domain
+profile context, predicate contracts, and a compact KB seed. But the model still
+does not get to write truth by itself.
 
 ## What The System Actually Does On A Turn
 
 At a high level:
 
-`utterance -> proposed operation -> deterministic gate -> apply/query -> evidence`
+```text
+utterance + context
+  -> semantic_ir_v1 workspace
+  -> deterministic admission
+  -> query, clarification, quarantine, rejection, or KB mutation
+  -> evidence
+```
 
 More concretely:
 
 1. A turn arrives.
-2. Prethinker classifies it as a write, query, rule, retract, or `other`.
-3. The parser proposes a structured operation.
-4. The runtime checks schema, shape, registry/type rules, and ambiguity policy.
-5. If accepted, the deterministic runtime mutates or queries the KB.
-6. The result is recorded with provenance and can be inspected later.
+2. Prethinker builds a front-door packet: route, risk, clarification pressure,
+   and segment plan.
+3. The runtime selects a domain profile and builds a compact context packet from
+   recent turns, predicate contracts, and relevant KB state.
+4. The model proposes a `semantic_ir_v1` workspace.
+5. The deterministic mapper admits, skips, clarifies, quarantines, or rejects
+   candidate operations.
+6. If accepted, the runtime mutates or queries the KB.
+7. The result is recorded with provenance and can be inspected later.
 
 That means the LLM is allowed to propose structure.
 
@@ -295,7 +299,7 @@ As of April 27, 2026:
 - the latest semantic IR edge runtime A/B is `20/20` decision labels with `0.976` average score
 - the latest weak-edge runtime A/B is `10/10` decision labels with `1.000` average score
 - Silverton probate/noisy temporal packs are intentionally hard pressure gauges for policy labels, temporal representation, and claim/fact separation
-- Freethinker is off-mainline; the current bet is Semantic IR context engineering before deterministic admission
+- the current bet is Semantic IR context engineering before deterministic admission
 
 The important subtlety is this:
 
