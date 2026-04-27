@@ -855,7 +855,16 @@ def render_markdown(
 
 
 def render_html(markdown_text: str, *, title: str) -> str:
-    escaped = html.escape(markdown_text)
+    try:
+        import markdown as markdown_lib  # type: ignore[import-not-found]
+
+        body = markdown_lib.markdown(
+            markdown_text,
+            extensions=["extra", "tables", "fenced_code", "md_in_html"],
+            output_format="html5",
+        )
+    except Exception:
+        body = f"<pre>{html.escape(markdown_text)}</pre>"
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -863,20 +872,110 @@ def render_html(markdown_text: str, *, title: str) -> str:
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{html.escape(title)}</title>
   <style>
-    body {{ margin: 0; font-family: ui-sans-serif, system-ui, Segoe UI, sans-serif; background: #111820; color: #efe9dd; }}
-    main {{ max-width: 1180px; margin: 0 auto; padding: 32px 20px 64px; }}
-    pre {{ white-space: pre-wrap; overflow-wrap: anywhere; background: #1d252e; border: 1px solid #46515c; border-radius: 8px; padding: 14px; }}
-    code {{ color: #f3d7ad; }}
-    table {{ border-collapse: collapse; width: 100%; margin: 12px 0 24px; font-size: 14px; }}
-    th, td {{ border: 1px solid #46515c; padding: 7px 9px; vertical-align: top; }}
-    th {{ background: #24303a; text-align: left; }}
-    blockquote {{ border-left: 4px solid #d8914f; margin-left: 0; padding-left: 14px; color: #fff7eb; }}
-    details {{ margin: 12px 0 20px; }}
+    :root {{
+      color-scheme: dark;
+      --bg: #101820;
+      --panel: #1c252d;
+      --panel-2: #26313a;
+      --border: #46515c;
+      --text: #efe9dd;
+      --muted: #cbbda8;
+      --accent: #d8914f;
+      --green: #77c9a1;
+    }}
+    * {{ box-sizing: border-box; }}
+    body {{
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, Segoe UI, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.48;
+    }}
+    main {{ max-width: 1240px; margin: 0 auto; padding: 30px 20px 64px; }}
+    h1 {{ margin: 0 0 14px; font-size: 30px; }}
+    h2 {{
+      margin: 34px 0 12px;
+      padding: 18px 20px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: linear-gradient(180deg, #23303a, #1b242d);
+      font-size: 22px;
+    }}
+    h3 {{ margin: 28px 0 10px; font-size: 17px; color: #f6dcc0; }}
+    p, ul {{ color: var(--text); }}
+    code {{
+      color: #f3d7ad;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 4px;
+      padding: 1px 4px;
+    }}
+    pre {{
+      white-space: pre;
+      overflow: auto;
+      overflow-wrap: normal;
+      max-height: 28rem;
+      background: #151e26;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+      line-height: 1.4;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
+    }}
+    pre code {{
+      display: block;
+      min-width: max-content;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: #f4e6d0;
+    }}
+    details {{
+      margin: 14px 0 22px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: rgba(255,255,255,0.035);
+      overflow: hidden;
+    }}
+    summary {{
+      cursor: pointer;
+      padding: 10px 14px;
+      background: #303942;
+      color: #f5ddbc;
+      font-weight: 700;
+      user-select: none;
+    }}
+    details > *:not(summary) {{ margin-left: 14px; margin-right: 14px; }}
+    table {{
+      display: block;
+      max-height: 30rem;
+      overflow: auto;
+      border-collapse: collapse;
+      width: 100%;
+      margin: 12px 0 24px;
+      font-size: 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }}
+    thead {{ position: sticky; top: 0; z-index: 1; }}
+    th, td {{ border: 1px solid var(--border); padding: 7px 9px; vertical-align: top; min-width: 120px; }}
+    th {{ background: var(--panel-2); text-align: left; color: #f4d9b2; }}
+    td {{ background: rgba(255,255,255,0.015); }}
+    blockquote {{
+      border-left: 4px solid var(--accent);
+      margin-left: 0;
+      padding: 10px 14px;
+      background: rgba(216,145,79,0.09);
+      color: #fff7eb;
+      border-radius: 0 8px 8px 0;
+    }}
+    strong {{ color: #f6dfbf; }}
+    a {{ color: #90c8ff; }}
   </style>
 </head>
 <body>
 <main>
-<pre>{escaped}</pre>
+{body}
 </main>
 </body>
 </html>

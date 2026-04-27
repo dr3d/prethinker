@@ -1,6 +1,6 @@
 import unittest
 
-from scripts.render_semantic_ir_trace import render_markdown
+from scripts.render_semantic_ir_trace import render_html, render_markdown
 
 
 class RenderSemanticIRTraceTests(unittest.TestCase):
@@ -156,6 +156,17 @@ class RenderSemanticIRTraceTests(unittest.TestCase):
 
         self.assertIn("Parse unavailable", rendered)
         self.assertIn("timed out", rendered)
+
+    def test_html_renders_markdown_instead_of_source_pre(self) -> None:
+        html = render_html(
+            "# Semantic IR Trace\n\n## 1. `demo`\n\n```json\n{\"ok\": true}\n```\n",
+            title="demo",
+        )
+
+        self.assertIn("<h1>Semantic IR Trace</h1>", html)
+        self.assertIn("<h2>1. <code>demo</code></h2>", html)
+        self.assertIn("max-height: 28rem", html)
+        self.assertNotIn("<pre># Semantic IR Trace", html)
 
 
 if __name__ == "__main__":
