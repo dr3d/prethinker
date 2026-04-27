@@ -980,11 +980,13 @@ def render_html(markdown_text: str, *, title: str) -> str:
     }}
     .trace-record > summary.record-summary {{
       display: grid;
-      grid-template-columns: 22px minmax(14rem, max-content) minmax(0, 1fr);
-      gap: 10px;
+      grid-template-columns: 22px minmax(0, 1fr);
+      grid-template-rows: auto auto;
+      column-gap: 10px;
+      row-gap: 2px;
       align-items: center;
-      min-height: 44px;
-      padding: 8px 14px;
+      min-height: 52px;
+      padding: 8px 14px 9px;
       background: #24313b;
       list-style: none;
     }}
@@ -994,26 +996,43 @@ def render_html(markdown_text: str, *, title: str) -> str:
       color: var(--accent);
       font-size: 16px;
       justify-self: center;
+      grid-row: 1 / span 2;
+      grid-column: 1;
     }}
     .trace-record[open] > summary.record-summary::before {{ content: "▾"; }}
     .record-title {{
       display: inline-flex;
       align-items: center;
       gap: 8px;
+      grid-column: 2;
+      grid-row: 1;
       min-width: 0;
+      overflow: hidden;
       font-size: 17px;
       font-weight: 800;
       color: #f4d9b2;
     }}
-    .record-meta {{
+    .record-title code {{
+      display: inline-block;
       min-width: 0;
-      justify-self: end;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      vertical-align: bottom;
+    }}
+    .record-meta {{
+      grid-column: 2;
+      grid-row: 2;
+      min-width: 0;
+      justify-self: start;
+      max-width: 100%;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
       color: var(--muted);
-      font-size: 14px;
-      text-align: right;
+      font-size: 13px;
+      text-align: left;
     }}
     .trace-record:not([open]) {{
       background: rgba(255,255,255,0.03);
