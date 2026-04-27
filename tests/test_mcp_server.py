@@ -221,6 +221,54 @@ class LocalMcpServerTests(unittest.TestCase):
         self.assertTrue(trace_input.get("available_domain_profiles"))
         self.assertTrue(trace_input.get("predicate_contracts"))
         self.assertTrue(trace_input.get("domain_context"))
+        self.assertTrue(trace_input.get("kb_context_pack"))
+
+    def test_semantic_ir_receives_compact_kb_context_pack(self) -> None:
+        server = PrologMCPServer(
+            compiler_prompt_enabled=False,
+            semantic_ir_enabled=True,
+            compiler_backend="lmstudio",
+            active_profile="auto",
+        )
+        server.assert_fact("lives_in(mara, london).")
+        server.assert_fact("has_condition(mara, asthma).")
+        server.assert_fact("access_log_entry(jonas, lab_a, april_1).")
+        parsed = {
+            "schema_version": "semantic_ir_v1",
+            "decision": "commit",
+            "turn_type": "correction",
+            "entities": [],
+            "referents": [],
+            "assertions": [],
+            "unsafe_implications": [],
+            "candidate_operations": [],
+            "truth_maintenance": {
+                "support_links": [],
+                "conflicts": [],
+                "retraction_plan": [],
+                "derived_consequences": [],
+            },
+            "clarification_questions": [],
+            "self_check": {"bad_commit_risk": "low", "missing_slots": [], "notes": []},
+        }
+
+        with patch(
+            "src.mcp_server.call_semantic_ir",
+            return_value={"content": "{}", "parsed": parsed, "latency_ms": 1},
+        ) as mocked:
+            ir, error = server._compile_semantic_ir("Actually, Mara lives in Paris now.")
+
+        self.assertEqual(error, "")
+        self.assertIs(ir, parsed)
+        pack = mocked.call_args.kwargs.get("kb_context_pack")
+        self.assertIsInstance(pack, dict)
+        self.assertEqual(pack.get("version"), "semantic_ir_context_pack_v1")
+        self.assertIn("lives_in(mara, london).", pack.get("relevant_clauses", []))
+        self.assertIn("lives_in(mara, london).", pack.get("current_state_candidates", []))
+        self.assertIn("mara", pack.get("entity_candidates", []))
+        self.assertGreaterEqual(pack.get("manifest", {}).get("total_direct_fact_clauses", 0), 3)
+        trace_pack = server._last_semantic_ir_trace.get("model_input", {}).get("kb_context_pack", {})
+        self.assertEqual(trace_pack.get("version"), "semantic_ir_context_pack_v1")
 
     def test_semantic_ir_auto_profile_switches_context_across_domains(self) -> None:
         server = PrologMCPServer(

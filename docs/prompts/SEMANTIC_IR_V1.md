@@ -198,6 +198,14 @@ Special guards:
   targets in `truth_maintenance.retraction_plan`, and possible consequences in
   `truth_maintenance.derived_consequences` with `query_only`, `quarantine`,
   `future_rule_support`, or `do_not_commit`.
+- `candidate_operations[].predicate` should be the bare predicate name, such as
+  `lives_in`, not a signature such as `lives_in/2`.
+- If `kb_context_pack.current_state_candidates` contains an old current-state
+  fact and the utterance explicitly corrects it, propose a safe `retract` for
+  the old clause and a safe `assert` for the replacement when clear. If the
+  utterance conflicts with the old state but is not an explicit correction,
+  choose `clarify` and ask whether the new value should replace the old KB
+  value.
 ```
 
 Current runtime additions:
@@ -207,6 +215,11 @@ Current runtime additions:
   block for support links, conflicts, retraction plans, and derived
   consequences, while deterministic admission still reads writes only from
   `candidate_operations`;
+- Semantic IR calls can include a compact `kb_context_pack` containing exact
+  retrieved KB clauses, current-state candidates, entity candidates, recent
+  committed logic, and a small snapshot. This is symbolic context, not write
+  authority. The model may use it to resolve references, identify corrections,
+  and cite conflicts in `truth_maintenance`;
 - the prompt still carries a compact root-shape contract because schema
   enforcement fixes JSON shape, not policy calibration;
 - narrative ingestion should use specific story-world predicates from the active

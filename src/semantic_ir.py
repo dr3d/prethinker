@@ -419,10 +419,13 @@ BEST_GUARDED_V2_GUIDANCE = (
     "- Simple Horn rules such as 'if parent(X,Y) then ancestor(X,Y)' may commit as operation='rule' when you can emit a precise executable clause using allowed predicates. Put that Prolog-style text in candidate_operations[].clause. Default/exception rules with unless/except/only-if are not ordinary facts; if negation/exception semantics are unclear, choose mixed and represent the rule as a rule assertion or unsafe implication, not as a current fact.\n"
     "- Never mark a rule operation safe without an executable clause. If you cannot provide candidate_operations[].clause, do not emit a safe rule operation.\n"
     "- Existing current facts in context are state constraints. If a new utterance gives a different value for the same likely functional predicate such as lives_in/2 or scheduled_for/2, choose clarify unless the user explicitly marks it as a correction with words like correction, actually, wrong, not X, or instead.\n"
+    "- If a new current-state write conflicts with kb_context_pack.current_state_candidates and the utterance is not an explicit correction, the top-level decision should be clarify, the write operation should be needs_clarification, and clarification_questions should ask whether the new value is intended to replace the old KB value.\n"
     "- If the new write would contradict a consequence implied by existing context rules and facts, choose clarify or quarantine. Do not assert the opposite fact until the user supplies an explicit correction, exception, or revocation.\n"
     "- If direct facts should be recorded but they create an unresolved conflict with context rules, choose mixed, keep the direct writes as safe operations, and describe the conflict in unsafe_implications/self_check. If self_check says there is a logical conflict or consistency check still needed, the decision should not be commit.\n"
     "- Use truth_maintenance to explain support, dependency, conflict, retraction, and derived-consequence structure. This block is a proposal/audit workspace only; it never authorizes writes. Every executable write/query still must appear in candidate_operations.\n"
     "- In truth_maintenance.conflicts, point to the candidate operation index and the existing context/source/rule it conflicts with. In truth_maintenance.retraction_plan, point to explicit correction targets. In derived_consequences, mark consequences query_only, quarantine, future_rule_support, or do_not_commit instead of committing them as facts.\n"
+    "- kb_context_pack contains deterministic KB retrieval. Treat exact KB clauses as current committed state for resolving references, corrections, and conflicts. Do not restate KB clauses as new writes. Use candidate_operations only for the current utterance, and use truth_maintenance to cite KB support or conflict pressure.\n"
+    "- If kb_context_pack.current_state_candidates contains an old current-state fact and the utterance explicitly corrects it with words like actually, instead, wrong, not X, or no longer, propose a safe retract for the old clause and a safe assert for the replacement when the target and replacement are clear.\n"
     "- Some predicates are non-exclusive, such as has_condition/2. A new compatible condition can be committed without retracting an existing different condition.\n"
     "- Do not turn a claim into a fact. 'Bob says he has it' is a claim, not possession.\n"
     "- Do not infer diagnosis or staging from a single lab value request. Quarantine or clarify.\n"
@@ -430,6 +433,7 @@ BEST_GUARDED_V2_GUIDANCE = (
     "- If the user explicitly says 'not allergic' and gives a side-effect/intolerance explanation such as nausea, the correction is clear: propose retracting the allergy and recording the side effect; do not ask for allergy-vs-intolerance clarification.\n"
     "- A clear correction like 'not Mara, Fred has it' may propose retract/assert.\n"
     "- Retraction is a governance operation, not a predicate. You may propose operation='retract' even when 'retract/1' is not in allowed_predicates.\n"
+    "- candidate_operations[].predicate must be the bare predicate name such as lives_in, not a signature such as lives_in/2. The arity is implied by args.\n"
     "- A correction like 'it should be quarantined instead' with context containing the old fact is enough to retract the old fact and assert the replacement fact; do not ask for authority/provenance unless the predicate itself requires it.\n"
     "- Do not invent required governance slots that are not in the predicate schema. Source document, authority, or reason fields are optional provenance unless the allowed predicate explicitly requires them.\n"
     "- A direct correction like 'remove X allergy; stomach upset only' is explicit enough to retract the allergy and record side effect/intolerance when the old allergy fact is in context.\n"
@@ -474,6 +478,7 @@ def build_semantic_ir_input_payload(
     available_domain_profiles: list[dict[str, Any]] | None = None,
     allowed_predicates: list[str] | None = None,
     predicate_contracts: list[dict[str, Any]] | None = None,
+    kb_context_pack: dict[str, Any] | None = None,
     domain: str = "runtime",
     include_schema_contract: bool = True,
 ) -> dict[str, Any]:
@@ -487,6 +492,7 @@ def build_semantic_ir_input_payload(
         "domain_context": domain_context or [],
         "allowed_predicates": allowed_predicates or [],
         "predicate_contracts": predicate_contracts or [],
+        "kb_context_pack": kb_context_pack or {},
         "authority_boundary": "The runtime validates and commits; you only propose semantic structure.",
         "variant_guidance": BEST_GUARDED_V2_GUIDANCE,
     }
@@ -507,6 +513,7 @@ def build_semantic_ir_messages(
     available_domain_profiles: list[dict[str, Any]] | None = None,
     allowed_predicates: list[str] | None = None,
     predicate_contracts: list[dict[str, Any]] | None = None,
+    kb_context_pack: dict[str, Any] | None = None,
     domain: str = "runtime",
     include_schema_contract: bool = True,
 ) -> list[dict[str, str]]:
@@ -517,6 +524,7 @@ def build_semantic_ir_messages(
         available_domain_profiles=available_domain_profiles,
         allowed_predicates=allowed_predicates,
         predicate_contracts=predicate_contracts,
+        kb_context_pack=kb_context_pack,
         domain=domain,
         include_schema_contract=include_schema_contract,
     )
@@ -535,6 +543,7 @@ def call_semantic_ir(
     available_domain_profiles: list[dict[str, Any]] | None = None,
     allowed_predicates: list[str] | None = None,
     predicate_contracts: list[dict[str, Any]] | None = None,
+    kb_context_pack: dict[str, Any] | None = None,
     domain: str = "runtime",
     include_model_input: bool = False,
 ) -> dict[str, Any]:
@@ -546,6 +555,7 @@ def call_semantic_ir(
         available_domain_profiles=available_domain_profiles,
         allowed_predicates=allowed_predicates,
         predicate_contracts=predicate_contracts,
+        kb_context_pack=kb_context_pack,
         domain=domain,
         include_schema_contract=True,
     )
@@ -556,6 +566,7 @@ def call_semantic_ir(
         available_domain_profiles=available_domain_profiles,
         allowed_predicates=allowed_predicates,
         predicate_contracts=predicate_contracts,
+        kb_context_pack=kb_context_pack,
         domain=domain,
         include_schema_contract=True,
     )
@@ -1331,7 +1342,11 @@ def _truth_maintenance_alignment(
                 operation_index=index,
                 detail=f"Admitted {effect} operation has no truth_maintenance.support_links entry.",
             )
-        if not admitted and index in support_indexes:
+        if (
+            not admitted
+            and index in support_indexes
+            and str(op.get("safety", "")).strip().lower() != "needs_clarification"
+        ):
             add_edge(
                 "supported_operation_skipped_by_mapper",
                 operation_index=index,
@@ -1406,6 +1421,15 @@ def _truth_maintenance_alignment(
         for op in operations
         if not bool(op.get("admitted")) and _operation_index(op.get("index")) in support_indexes
     )
+    needs_clarification_with_support = sum(
+        1
+        for op in operations
+        if (
+            not bool(op.get("admitted"))
+            and _operation_index(op.get("index")) in support_indexes
+            and str(op.get("safety", "")).strip().lower() == "needs_clarification"
+        )
+    )
     return {
         "authority": "diagnostic_only_no_admission_effect",
         "operation_count": operation_count,
@@ -1416,6 +1440,7 @@ def _truth_maintenance_alignment(
         "admitted_with_support_count": admitted_with_support,
         "admitted_without_support_count": admitted_without_support,
         "skipped_with_support_count": skipped_with_support,
+        "needs_clarification_with_support_count": needs_clarification_with_support,
         "conflict_on_admitted_count": sum(
             1
             for index in conflict_indexes

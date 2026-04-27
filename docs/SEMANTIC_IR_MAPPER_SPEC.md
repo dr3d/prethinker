@@ -526,6 +526,22 @@ These are research pressure gauges. They are meant to show where the compiler
 contract, prompt, profile context, or predicate palette is still fuzzy, not to
 silently change admission outcomes.
 
+Semantic IR calls can also receive `kb_context_pack`, a compact deterministic
+retrieval packet built from the current runtime KB. It is intentionally small
+enough for the current 16K-context model path and includes:
+
+- exact relevant KB clauses;
+- likely functional current-state candidates;
+- entity candidates from those clauses;
+- recent committed logic;
+- a small fallback KB snapshot;
+- retrieval terms and a manifest describing the packet.
+
+This is symbolic context, not RAG authority. The model may use it to resolve
+referents, recognize corrections, and populate `truth_maintenance`, but it must
+not restate old KB clauses as new writes. The mapper still admits only
+`candidate_operations`.
+
 The A/B harness additionally classifies non-structural legacy events as:
 
 - `legacy_route_fallback`

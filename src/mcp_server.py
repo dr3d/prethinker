@@ -1828,6 +1828,105 @@ class PrologMCPServer:
             context.append(f"pending_utterance: {pending_utterance}")
         return context
 
+    def _semantic_ir_context_terms(self, *, utterance: str, context: list[str]) -> set[str]:
+        terms: set[str] = set()
+        for raw in [utterance, *context]:
+            for token in self._tokenize_words(str(raw)):
+                normalized = re.sub(r"[^a-z0-9_]+", "_", token.strip().lower()).strip("_")
+                if len(normalized) >= 2:
+                    terms.add(normalized)
+                    terms.update(part for part in normalized.split("_") if len(part) >= 2)
+        return terms
+
+    @staticmethod
+    def _clause_terms(predicate: str, args: list[str]) -> set[str]:
+        terms: set[str] = {str(predicate).strip().lower()}
+        for arg in args:
+            normalized = re.sub(r"[^a-z0-9_]+", "_", str(arg).strip().lower()).strip("_")
+            if not normalized:
+                continue
+            terms.add(normalized)
+            terms.update(part for part in normalized.split("_") if len(part) >= 2)
+        return terms
+
+    def _semantic_ir_kb_context_pack(
+        self,
+        *,
+        utterance: str,
+        semantic_context: list[str],
+        selected_profile: str,
+        allowed_predicates: list[str],
+    ) -> dict[str, Any]:
+        fact_rows: list[dict[str, Any]] = []
+        for clause in self._runtime_direct_fact_clauses():
+            parsed = self._single_fact_call(clause)
+            if parsed is None:
+                continue
+            predicate, args, normalized = parsed
+            fact_rows.append(
+                {
+                    "clause": normalized,
+                    "predicate": predicate,
+                    "arity": len(args),
+                    "args": args,
+                    "terms": sorted(self._clause_terms(predicate, args)),
+                }
+            )
+        terms = self._semantic_ir_context_terms(utterance=utterance, context=semantic_context)
+        allowed_names = {
+            str(item).split("/", 1)[0].strip().lower()
+            for item in allowed_predicates
+            if str(item).strip()
+        }
+        relevant: list[dict[str, Any]] = []
+        for row in fact_rows:
+            row_terms = set(row.get("terms", []))
+            predicate = str(row.get("predicate", "")).strip().lower()
+            if (row_terms & terms) or (predicate in allowed_names and predicate in terms):
+                relevant.append(row)
+        if not relevant and fact_rows:
+            relevant = fact_rows[-8:]
+        relevant = relevant[-24:]
+        recent = [str(item).strip() for item in self._recent_committed_logic[-12:] if str(item).strip()]
+        snapshot = self._kb_snapshot_clauses(limit=12)
+        entity_candidates: list[str] = []
+        for row in relevant:
+            for arg in row.get("args", []):
+                text = str(arg).strip()
+                if text and text not in entity_candidates:
+                    entity_candidates.append(text)
+        current_state_candidates = [
+            row["clause"]
+            for row in relevant
+            if self._is_likely_functional_current_state_predicate(
+                str(row.get("predicate", "")),
+                int(row.get("arity", 0) or 0),
+            )
+        ][:12]
+        return {
+            "version": "semantic_ir_context_pack_v1",
+            "authority": "context_only_runtime_kb_remains_authoritative",
+            "active_profile": selected_profile or "general",
+            "manifest": {
+                "total_direct_fact_clauses": len(fact_rows),
+                "relevant_clause_count": len(relevant),
+                "recent_commit_count": len(recent),
+                "snapshot_count": len(snapshot),
+                "retrieval_terms": sorted(terms)[:48],
+                "context_budget_note": "Compact symbolic retrieval for 16K context; not a full KB dump.",
+            },
+            "relevant_clauses": [row["clause"] for row in relevant],
+            "current_state_candidates": current_state_candidates,
+            "entity_candidates": entity_candidates[:32],
+            "recent_committed_logic": recent,
+            "small_kb_snapshot": snapshot,
+            "instructions": [
+                "Use exact KB clauses to resolve references, corrections, and conflict pressure.",
+                "Do not copy KB clauses into candidate_operations unless the current utterance explicitly changes them.",
+                "Use truth_maintenance.support_links/conflicts/retraction_plan to cite KB context.",
+            ],
+        }
+
     def _compile_semantic_ir(
         self,
         utterance: str,
@@ -1840,6 +1939,12 @@ class PrologMCPServer:
         domain_context = self._semantic_ir_domain_context(selected_profile)
         allowed_predicates = self._semantic_ir_allowed_predicates(selected_profile)
         predicate_contracts = self._semantic_ir_predicate_contracts(selected_profile)
+        kb_context_pack = self._semantic_ir_kb_context_pack(
+            utterance=utterance,
+            semantic_context=semantic_context,
+            selected_profile=selected_profile,
+            allowed_predicates=allowed_predicates,
+        )
         trace = {
             "enabled": True,
             "utterance": utterance,
@@ -1857,6 +1962,7 @@ class PrologMCPServer:
                 "domain_context": domain_context,
                 "allowed_predicates": allowed_predicates,
                 "predicate_contracts": predicate_contracts,
+                "kb_context_pack": kb_context_pack,
                 "options": {
                     "temperature": self._semantic_ir_temperature,
                     "top_p": self._semantic_ir_top_p,
@@ -1880,6 +1986,7 @@ class PrologMCPServer:
                 available_domain_profiles=self._semantic_ir_available_domain_profiles(),
                 allowed_predicates=allowed_predicates,
                 predicate_contracts=predicate_contracts,
+                kb_context_pack=kb_context_pack,
                 domain=domain,
             )
         except Exception as exc:

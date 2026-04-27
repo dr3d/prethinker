@@ -537,6 +537,7 @@ def _render_truth_alignment(diagnostics: dict[str, Any]) -> list[str]:
         f"- admitted operations with support: `{alignment.get('admitted_with_support_count', 0)}`",
         f"- admitted operations without support: `{alignment.get('admitted_without_support_count', 0)}`",
         f"- skipped operations with model support: `{alignment.get('skipped_with_support_count', 0)}`",
+        f"- needs-clarification operations with support: `{alignment.get('needs_clarification_with_support_count', 0)}`",
         f"- conflicts on admitted operations: `{alignment.get('conflict_on_admitted_count', 0)}`",
         "",
     ]
