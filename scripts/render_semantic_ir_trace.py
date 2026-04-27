@@ -308,6 +308,13 @@ def _record_summary(index: int, scenario_label: str, parts: list[str]) -> str:
     )
 
 
+def _summary_excerpt(text: str, limit: int = 110) -> str:
+    compact = " ".join(str(text or "").split())
+    if not compact:
+        return ""
+    return compact if len(compact) <= limit else compact[: limit - 1].rstrip() + "..."
+
+
 def _render_entities(parsed: dict[str, Any]) -> list[str]:
     rows = []
     for entity in _as_list(parsed.get("entities")):
@@ -664,23 +671,24 @@ def _render_record(
     admission_score = record.get("admission_score") if isinstance(record.get("admission_score"), dict) else {}
 
     scenario_label = input_info["scenario_id"] or f"record_{index}"
-    model = _text(record.get("model") or record.get("semantic_model") or record.get("backend")).strip()
     actual = _text(score.get("decision") or (parsed or {}).get("decision")).strip()
     expected = input_info["expected_decision"]
     projected = _text(diagnostics.get("projected_decision")).strip()
-    layer_summary = [
-        f"model=`{model or 'unknown'}`",
-        f"decision model=`{actual or 'unknown'}`",
-        f"projected=`{projected or 'unknown'}`",
-    ]
-    if expected:
-        layer_summary.append(f"expected=`{expected}`")
+    decision_bits = [actual or "unknown"]
+    if projected and projected != actual:
+        decision_bits.append(f"projected {projected}")
+    if expected and expected not in decision_bits:
+        decision_bits.append(f"expected {expected}")
+    layer_summary = [f"decision {' / '.join(decision_bits)}"]
     if score:
         layer_summary.append(f"score=`{score.get('rough_score', '')}`")
     if admission_score and admission_score.get("contract_present"):
         layer_summary.append(
             f"admission=`{admission_score.get('check_count', 0)}/{admission_score.get('check_total', 0)}`"
         )
+    excerpt = _summary_excerpt(input_info["utterance"])
+    if excerpt:
+        layer_summary.append(f"utterance: {excerpt}")
 
     lines: list[str] = [
         '<details class="trace-record" markdown="1">',
