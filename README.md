@@ -1,12 +1,23 @@
 # Prethinker
 
+**A governed write layer between natural language and a deterministic knowledge base.**
+
 Prethinker is a governed semantic-intake layer for turning natural-language claims into auditable symbolic state.
 
-More concretely, it is a local research workbench for governed Prolog knowledge-base updates. The LLM proposes structured semantic workspaces; deterministic code validates, maps, and applies only the parts that survive policy, schema, and consistency checks.
+The core bet is simple: **the model may propose, but deterministic code decides what becomes truth**. A capable LLM builds a rich semantic workspace from messy language; the mapper admits only candidate operations that survive schema, predicate-contract, provenance, and consistency checks; the Prolog KB remains the durable state layer.
+
+This is not "English to Prolog by vibes." It is a research workbench for controlled memory admission: how much semantic understanding can a strong model contribute while a deterministic runtime prevents unsafe writes, ambiguity collapse, and claim/fact confusion?
 
 Current center: a live `ui_gateway` console backed by `src/mcp_server.py`, the `semantic_ir_v1` runtime path with `qwen3.6:35b-a3b`, profile-aware admission, and three starter domain lanes: bounded medical/UMLS, CourtListener legal-source intake, and SEC/contracts obligation intake.
 
 ![Prethinker semantic IR workspace](docs/assets/prethinker-semantic-ir-workspace.png)
+
+## Read First
+
+- [Full design explainer](https://github.com/dr3d/prethinker/blob/main/docs/EXPLAINER.md) - the short conceptual tour.
+- [Docs and evidence hub](https://dr3d.github.io/prethinker/) - public docs, run reports, and current research map.
+- [Project state](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md) - compact status snapshot for the repo as it sits now.
+- [Public docs guide](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md) - reading order for deeper technical material.
 
 ## Current State
 
@@ -32,6 +43,8 @@ The short version:
 
 ## Useful Entry Points
 
+- [docs/EXPLAINER.md](https://github.com/dr3d/prethinker/blob/main/docs/EXPLAINER.md) - what Prethinker is and why the authority boundary matters.
+- [Docs hub](https://dr3d.github.io/prethinker/) - GitHub Pages index for public docs and evidence.
 - [PROJECT_STATE.md](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md) - current architecture, demo status, and next frontiers.
 - [AGENT-README.md](https://github.com/dr3d/prethinker/blob/main/AGENT-README.md) - fast onboarding for coding agents.
 - [docs/PRETHINK_GATEWAY_MVP.md](https://github.com/dr3d/prethinker/blob/main/docs/PRETHINK_GATEWAY_MVP.md) - live gateway shape.
@@ -58,11 +71,11 @@ Open `http://127.0.0.1:8765` for the live console.
 
 ## Reproducibility Notes
 
-The public repo currently tracks `37` pytest files under [tests/](https://github.com/dr3d/prethinker/tree/main/tests). The latest full-suite verification after the profile-aware Semantic IR, domain-profile, and clause-support work was:
+The public repo currently tracks `38` pytest files under [tests/](https://github.com/dr3d/prethinker/tree/main/tests). The latest full-suite verification after the profile-aware Semantic IR, domain-profile, lava-sweep, and clause-support work was:
 
 ```powershell
 python -m pytest -q
-# 313 passed
+# 318 passed
 ```
 
 Focused verification after the current Semantic IR console/story-ingestion and profile-contract passes:
@@ -85,3 +98,13 @@ The UMLS Semantic Network and Metathesaurus-derived runtime assets are intention
 ## Repository Hygiene
 
 Large licensed or generated assets live under ignored local paths, especially `tmp/licensed/umls/2025AB/`. The repo should keep source code, compact docs, profiles, tests, and small durable fixtures. Do not commit full UMLS archives, extracted Metathesaurus tables, run dumps, caches, coverage HTML, or throwaway reports.
+
+## About The Author
+
+Prethinker is built by Scott Evernden (`dr3d`), a retired software engineer who has been working in and around the symbolic AI tradition since 1980.
+
+Scott first encountered Prolog at Digital Equipment Corporation in 1980 and became DEC's internal evangelist for the language. A friend he turned onto Prolog, Peter Gabel, later founded Arity Corporation, one of the canonical commercial Prolog implementations of the PC era. Scott ported SB-Prolog to the Amiga in 1986, working at the level of the Warren Abstract Machine, and lived through the expert-systems winter as a working symbolic programmer.
+
+His earlier career includes computer graphics work at MIT's Architecture Machine Group under Nicholas Negroponte, Fortran libraries for one of the earliest commercial color inkjet plotters at Applicon, graphics terminal software at DEC, and foundational architecture work as employee #6 at Applix, later acquired by Cognos and then IBM. He later worked at Network Integrity / LiveVault, acquired by Iron Mountain, and briefly came out of retirement in 2019 as a Principal AI Engineer at Cantina Consulting in Boston.
+
+Prethinker is partly a return to older logic-programming instincts through the lens of modern local LLMs. The lesson behind the project is that inference engines can be sharp; knowledge acquisition and truth admission are where systems often fail. This project asks whether a strong neural model can help acquire meaning while durable truth stays behind an explicit symbolic gate.

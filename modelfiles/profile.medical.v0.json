@@ -8,6 +8,20 @@
   "ontology_prospector_prompt": "modelfiles/medical_ontology_prospector_prompt.md",
   "umls_slice_dir": "tmp/licensed/umls/2025AB/prethinker_mvp",
   "umls_bridge_facts": "tmp/licensed/umls/2025AB/prethinker_mvp/umls_bridge_facts.pl",
+  "selection_keywords": [
+    "active patient",
+    "blood pressure",
+    "blood sugar",
+    "sugar",
+    "reading",
+    "readings",
+    "lab",
+    "lab result",
+    "measurement",
+    "glucose",
+    "inr",
+    "creatinine"
+  ],
   "recommended_settings": {
     "compiler_mode": "strict",
     "strict_registry": true,

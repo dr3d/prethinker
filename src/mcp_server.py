@@ -1951,13 +1951,23 @@ class PrologMCPServer:
         utterance: str,
         *,
         context: list[str] | None = None,
+        allowed_predicates_override: list[str] | None = None,
+        predicate_contracts_override: list[dict[str, Any]] | None = None,
     ) -> tuple[dict[str, Any] | None, str]:
         selected_profile = self._semantic_ir_selected_profile_for_utterance(utterance, context=context)
         domain = selected_profile or "runtime"
         semantic_context = self._semantic_ir_context(context)
         domain_context = self._semantic_ir_domain_context(selected_profile)
-        allowed_predicates = self._semantic_ir_allowed_predicates(selected_profile)
-        predicate_contracts = self._semantic_ir_predicate_contracts(selected_profile)
+        allowed_predicates = (
+            list(allowed_predicates_override)
+            if allowed_predicates_override is not None
+            else self._semantic_ir_allowed_predicates(selected_profile)
+        )
+        predicate_contracts = (
+            list(predicate_contracts_override)
+            if predicate_contracts_override is not None
+            else self._semantic_ir_predicate_contracts(selected_profile)
+        )
         kb_context_pack = self._semantic_ir_kb_context_pack(
             utterance=utterance,
             semantic_context=semantic_context,

@@ -108,7 +108,7 @@ architecture.
 
 Latest local verification before this refresh:
 
-- Full pytest suite: `313 passed`
+- Full pytest suite: `318 passed`
 - Profile-aware Semantic IR/UMLS handoff: `medical@v0` now supplies predicate contracts plus compact UMLS bridge context to the model input before deterministic admission
 - Domain-profile catalog foundation: thin roster plus mock `story_world@v0` and `probate@v0` thick-context packages for future skill-like profile selection
 - Auto profile-selection smoke: deterministic selector can steer one synthetic conversation through `medical@v0`, `legal_courtlistener@v0`, `sec_contracts@v0`, then back to `medical@v0`, loading matching thick context and predicate contracts per turn
@@ -139,6 +139,7 @@ Latest local verification before this refresh:
 - Silverton noisy temporal pack: intentionally harder noisy/multilingual pack,
   useful as a pressure gauge rather than a demo headline
 - Cross-turn frontier proposal: `docs/data/frontier_packs/semantic_ir_cross_turn_frontier_pack_v1.json`, held out for future runner integration
+- Lava sweep harness: `scripts/run_semantic_ir_lava_sweep.py` balances old and new scenario sources, generates typo/bad-grammar/context-switch variants, repeats temperature-0 signatures for variance checks, applies admitted writes to a private stream KB, and records admitted queries without executing them by default so recursive query evaluation cannot stall broad Semantic IR sweeps
 
 The important qualitative result is that semantic IR has reduced dependence on
 non-mapper Python rescue code in tested packs. The remaining hard problems are
