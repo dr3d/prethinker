@@ -7,17 +7,12 @@ __pycache__/
 *.pyo
 *.pyd
 codex-state.json
+kb_runs/
+kb_runs_published/
+kb_store/
 docs/drafts/
-kb_store/frontierv*/
-kb_store/ceprobe_*/
-kb_store/confprobe_*/
-kb_store/rung_*/
-kb_store/demo_*/
-kb_store/raw_*/
-kb_store/bw_planetarium_case_*/
 
 # Local runtime cache/index (do not publish by accident)
-kb_store/ontologies_index.json
 docs/reports/*-stress-latest.html
 docs/reports/mid_pack-stress.html
 docs/reports/upper_mid_pack-stress.html

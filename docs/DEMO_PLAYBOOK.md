@@ -61,27 +61,22 @@ These are the extra demos that show what is unique about this repo architecture.
 
 This sequence gives immediate practical value, then shows strategic power, then gives the "magic" effect.
 
-## Runnable Scenario Pack (Now Added)
+## Runnable Scenario Direction
 
-These are executable starter scenarios in this repo:
+The old rendered HTML demo-report lane has been retired from the public tree.
+For live work, use the console prompt book and Semantic IR trace renderer
+instead:
 
-- `kb_scenarios/demo_01_meeting_commitment_extractor.json`
-- `kb_scenarios/demo_02_policy_stress_test_machine.json`
-- `kb_scenarios/demo_03_story_world_interrogator.json`
-- `kb_scenarios/demo_04_reimbursement_violation_check.json`
-- `kb_scenarios/demo_05_time_loop_carnival.json`
-
-Run one:
-
-```bash
-python kb_pipeline.py --backend ollama --base-url http://127.0.0.1:11434 --model qwen35-semparse:9b --runtime core --scenario kb_scenarios/demo_02_policy_stress_test_machine.json --kb-name demo_policy --out kb_runs/demo_02_policy_stress_test_machine.json
+```powershell
+python ui_gateway/main.py
+python scripts/run_mixed_domain_agility.py --help
 ```
 
-Render report:
+For focused current fixtures, start with:
 
-```bash
-python scripts/render_kb_run_html.py --input kb_runs/demo_02_policy_stress_test_machine.json --output docs/reports/demo_02_policy_stress_test_machine.html --theme standard
-```
+- `docs/data/frontier_packs/semantic_ir_cross_turn_frontier_pack_v1.json`
+- `docs/data/frontier_packs/process_utterance_temporal_pack_v1.json`
+- `docs/data/frontier_packs/process_utterance_correction_pack_v1.json`
 
 ## New Demo Focus: Time-Loop Carnival
 

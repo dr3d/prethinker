@@ -174,16 +174,18 @@ The codebase has three different kinds of artifacts because they serve different
   - `kb_pipeline.py`
   - `src/mcp_server.py`
   - `ui_gateway/`
-- local evidence and run artifacts
-  - `kb_runs/`
+- local evidence and run artifacts, which should stay ignored
   - `tmp/`
+  - `kb_runs/`
+  - `kb_store/`
   - generated reports when explicitly rendered
 - design notes
   - `PROJECT_STATE.md`
   - `docs/EXPLAINER.md`
   - `docs/FREETHINKER_DESIGN.md`
-  - `docs/ONTOLOGY_STEERING.md`
-  - `docs/ORCHESTRATION.md`
+  - `docs/SEMANTIC_IR_MAPPER_SPEC.md`
+  - `docs/DOMAIN_PROFILE_CATALOG.md`
+  - `docs/PROJECT_HORIZON.md`
 
 The point is not just to build a parser.
 

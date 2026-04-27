@@ -64,12 +64,25 @@ The best current documents for that work are:
 - [docs/PYTHON_GUARDRAIL_AUDIT.md](https://github.com/dr3d/prethinker/blob/main/docs/PYTHON_GUARDRAIL_AUDIT.md)
 - [docs/prompts/SEMANTIC_IR_V1.md](https://github.com/dr3d/prethinker/blob/main/docs/prompts/SEMANTIC_IR_V1.md)
 
-## Current Domain Center
+## Current Domain Lanes
 
-The active domain lane is bounded medical memory, not broad diagnosis:
+The active domain work is a three-lane starter set. These lanes provide profile
+context, predicate contracts, and admission pressure; none of them grants the
+model direct write authority.
 
 - [docs/MEDICAL_PROFILE.md](https://github.com/dr3d/prethinker/blob/main/docs/MEDICAL_PROFILE.md)
 - [docs/UMLS_MVP.md](https://github.com/dr3d/prethinker/blob/main/docs/UMLS_MVP.md)
+- [docs/COURTLISTENER_DOMAIN.md](https://github.com/dr3d/prethinker/blob/main/docs/COURTLISTENER_DOMAIN.md)
+- [docs/SEC_CONTRACTS_DOMAIN.md](https://github.com/dr3d/prethinker/blob/main/docs/SEC_CONTRACTS_DOMAIN.md)
+- [docs/DOMAIN_PROFILE_CATALOG.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PROFILE_CATALOG.md)
+
+Medical/UMLS remains bounded medical memory and normalization, not broad
+diagnosis. CourtListener is legal-source intake, not legal advice or outcome
+prediction. SEC/contracts is obligation and filing intake, not investment or
+contract advice.
+
+Ontology notes:
+
 - [docs/ONTOLOGY_PROSPECTOR.md](https://github.com/dr3d/prethinker/blob/main/docs/ONTOLOGY_PROSPECTOR.md)
 - [docs/ONTOLOGY_STEERING.md](https://github.com/dr3d/prethinker/blob/main/docs/ONTOLOGY_STEERING.md)
 
@@ -85,14 +98,11 @@ These docs are still useful, but should be read as context for how the project
 got here, not as the current center of gravity:
 
 - [docs/GIC_ENGLISH_INPUT_PIPELINE.md](https://github.com/dr3d/prethinker/blob/main/docs/GIC_ENGLISH_INPUT_PIPELINE.md)
-- [docs/WILD_MODE.md](https://github.com/dr3d/prethinker/blob/main/docs/WILD_MODE.md)
-- [docs/WILD_FAILURE_ISOLATION.md](https://github.com/dr3d/prethinker/blob/main/docs/WILD_FAILURE_ISOLATION.md)
-- older HTML run reports under [docs/reports/](https://github.com/dr3d/prethinker/tree/main/docs/reports)
-- ladder/rung history under [docs/rungs/](https://github.com/dr3d/prethinker/tree/main/docs/rungs)
-
-The older 9B English-parser lane is not deleted because it explains the path
-that led to the semantic IR pivot. It should not be mistaken for the preferred
-future architecture.
+Old generated HTML run reports, ladder/rung pages, dated prompt snapshots,
+legacy parser-lane notes, and stale report manifests were retired from the
+forward-facing tree. Git history preserves them. The older 9B English-parser
+lane is useful history, but it should not be mistaken for the preferred future
+architecture.
 
 ## Current Evidence Snapshot
 

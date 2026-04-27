@@ -61,4 +61,4 @@ python -m pytest tests/test_sec_edgar_adapter.py tests/test_domain_profiles.py -
 python -m pytest -q
 ```
 
-The last known full-suite result after the SEC/contracts scaffold was `299 passed`. The latest focused CourtListener/domain-profile pass verified `8 passed`; the latest focused SEC/domain-profile pass verified `9 passed`. The latest CourtListener smoke traces are local under ignored `datasets/courtlistener/generated/` and rendered under ignored `tmp/semantic_ir_trace_views/`.
+The last known full-suite result after the profile-validator, temporal-gate, and clause-support work was `313 passed`. Recent focused batteries also cover CourtListener, SEC/contracts, domain profiles, Semantic IR runtime, UI gateway phases, trace rendering, and UMLS builders. Live/generated smoke traces belong under ignored paths such as `datasets/*/generated/` and `tmp/semantic_ir_trace_views/`.

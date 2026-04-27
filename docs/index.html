@@ -355,7 +355,7 @@
         <a class="chip" href="https://github.com/dr3d/prethinker/blob/main/docs/PRETHINKER.md">System Design</a>
         <a class="chip" href="https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_MAPPER_SPEC.md">Mapper Spec</a>
         <a class="chip" href="https://github.com/dr3d/prethinker/blob/main/docs/CONSOLE_TRYBOOK.md">Console Trybook</a>
-        <a class="chip" href="https://dr3d.github.io/prethinker/run-reports-hub.html">Run Reports Explorer</a>
+        <a class="chip" href="https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PROFILE_CATALOG.md">Domain Profiles</a>
         <a class="chip" href="https://github.com/dr3d/prethinker/blob/main/AGENT-README.md">Agent Handoff</a>
       </div>
       <button id="theme-toggle" class="theme-toggle" type="button">theme: light</button>
@@ -586,17 +586,8 @@
           <p>Compact explainers for collaborators who need the mental model without digging through session logs.</p>
           <div class="actions">
             <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/EXPLAINER.md">Explainer</a>
-            <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/ORCHESTRATION.md">Orchestration</a>
+            <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/PROJECT_HORIZON.md">Project Horizon</a>
             <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/PRETHINKER.md">System View</a>
-          </div>
-        </article>
-        <article class="card half">
-          <span class="tag">Historical Demo</span>
-          <h3>Goldilocks Roundtrip</h3>
-          <p>Useful for failure analysis and narration from captured KB state, but not the current headline strict proof lane.</p>
-          <div class="actions">
-            <a class="btn" href="https://dr3d.github.io/prethinker/goldilocks-roundtrip.html">Roundtrip HTML</a>
-            <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/data/roundtrip/goldilocks_roundtrip_generated_kb.pl">KB</a>
           </div>
         </article>
       </div>
@@ -614,68 +605,39 @@
     </section>
 
     <section id="data" class="section">
-      <h2>Live Data Snapshot</h2>
-      <p class="lede">The latest runs and feed pointers that drive downstream analysis pages.</p>
+      <h2>Current Verification Snapshot</h2>
+      <p class="lede">The old generated report explorer has been retired from the forward-facing site. Current status lives in compact docs and focused fixtures.</p>
       <div class="grid">
-        <article class="card wide">
-          <span class="tag">Latest Runs</span>
-          <h3>Recent Manifest Rows</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Finished (UTC)</th>
-                <th>Scenario</th>
-                <th>Status</th>
-                <th>Artifact</th>
-              </tr>
-            </thead>
-            <tbody id="latest-runs-body">
-              <tr><td colspan="4" class="mono">loading...</td></tr>
-            </tbody>
-          </table>
+        <article class="card half">
+          <span class="tag">Status</span>
+          <h3>Project State</h3>
+          <p>Current architecture, verification snapshots, local assets, and near-term research pressure.</p>
           <div class="actions">
-            <a class="btn" href="https://dr3d.github.io/prethinker/research-results.html">Research Results</a>
-            <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/data/runs_manifest.json">runs_manifest.json</a>
-            <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/data/scenario_progress.json">scenario_progress.json</a>
-            <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/data/runs_curated.json">runs_curated.json</a>
+            <a class="btn primary" href="https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md">Open</a>
+          </div>
+        </article>
+        <article class="card half">
+          <span class="tag">Fixtures</span>
+          <h3>Frontier Packs</h3>
+          <p>Current JSON fixtures for temporal, correction, cross-turn, medical, and UMLS pressure tests.</p>
+          <div class="actions">
+            <a class="btn" href="https://github.com/dr3d/prethinker/tree/main/docs/data/frontier_packs">Open</a>
+            <a class="btn" href="https://github.com/dr3d/prethinker/tree/main/docs/data">Data</a>
+          </div>
+        </article>
+        <article class="card half">
+          <span class="tag">History</span>
+          <h3>History</h3>
+          <p>Older ladder reports, HTML run explorers, prompt snapshots, and rolling status files were pruned from the public tree. Git history preserves the trail.</p>
+          <div class="actions">
+            <a class="btn" href="https://github.com/dr3d/prethinker/commits/main/">Commits</a>
           </div>
         </article>
       </div>
     </section>
 
-    <section id="archive" class="section">
-      <h2>Archive + Tooling</h2>
-      <p class="lede">High-volume explorer surfaces, legacy cards, and long-running assembly history live here.</p>
-      <div class="grid">
-        <article class="card">
-          <span class="tag">Explorer</span>
-          <h3>Run Reports Hub</h3>
-          <p>Full run explorer across published HTML reports and prompt snapshots.</p>
-          <div class="actions"><a class="btn" href="https://dr3d.github.io/prethinker/run-reports-hub.html">Open</a></div>
-        </article>
-        <article class="card">
-          <span class="tag">Cards</span>
-          <h3>Progress Cards</h3>
-          <p>Compact per-run cards and learning notes from prior phases.</p>
-          <div class="actions"><a class="btn" href="https://dr3d.github.io/prethinker/progress_cards.html">Open</a></div>
-        </article>
-        <article class="card">
-          <span class="tag">Regression</span>
-          <h3>Rungs Archive</h3>
-          <p>Ladder artifacts retained for replay, forensic checks, and regression safety.</p>
-          <div class="actions"><a class="btn" href="https://dr3d.github.io/prethinker/rungs/index.html">Open</a></div>
-        </article>
-        <article class="card">
-          <span class="tag">History</span>
-          <h3>History</h3>
-          <p>Old markdown reports and rolling logs were pruned from the forward-facing tree; Git history preserves the long record.</p>
-          <div class="actions"><a class="btn" href="https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md">Open</a></div>
-        </article>
-      </div>
-    </section>
-
     <div class="footer-note">
-      Docs Hub refresh: April 26, 2026. This page favors current semantic IR status, public product framing,
+      Docs Hub refresh: April 27, 2026. This page favors current semantic IR status, public product framing,
       and curated evidence over retired handoff clutter or rolling migration notes.
     </div>
   </main>
@@ -705,18 +667,6 @@
           setTheme(next);
           localStorage.setItem(key, next);
         });
-      }
-
-      function fmtPct(value) {
-        if (typeof value !== "number" || Number.isNaN(value)) return "-";
-        return `${Math.round(value * 100)}%`;
-      }
-
-      function fmtUtc(v) {
-        if (!v) return "-";
-        const d = new Date(v);
-        if (Number.isNaN(d.getTime())) return String(v);
-        return d.toISOString().slice(0, 16).replace("T", " ");
       }
 
       async function safeJson(url) {
@@ -819,45 +769,12 @@
       }
 
       async function loadDashboard() {
-        const [historical, runsManifest, mediaManifest] = await Promise.all([
-          safeJson("data/historical_metrics.json"),
-          safeJson("data/runs_manifest.json"),
+        const [mediaManifest] = await Promise.all([
           safeJson("assets/media_manifest.json"),
         ]);
 
         // Headline metrics are intentionally static current-state claims.
-        // Historical run totals remain available through the data links below.
-
-        const body = document.getElementById("latest-runs-body");
-        if (body) {
-          body.innerHTML = "";
-          const rows = runsManifest && Array.isArray(runsManifest.runs)
-            ? [...runsManifest.runs]
-                .sort((a, b) => {
-                  const at = Date.parse(a?.finished_utc || "");
-                  const bt = Date.parse(b?.finished_utc || "");
-                  return (Number.isNaN(bt) ? 0 : bt) - (Number.isNaN(at) ? 0 : at);
-                })
-                .slice(0, 8)
-            : [];
-          if (!rows.length) {
-            body.innerHTML = '<tr><td colspan="4" class="mono">Unable to load runs_manifest.json.</td></tr>';
-          } else {
-            for (const run of rows) {
-              const tr = document.createElement("tr");
-              const status = String(run.status || "-");
-              const cls = status === "passed" ? "status-pass" : "status-fail";
-              const href = run.report_html_rel || run.report_json_rel || "run-reports-hub.html";
-              tr.innerHTML = `
-                <td>${fmtUtc(run.finished_utc)}</td>
-                <td>${run.scenario || "-"}</td>
-                <td class="${cls}">${status}</td>
-                <td><a href="${href}">open</a></td>
-              `;
-              body.appendChild(tr);
-            }
-          }
-        }
+        // Detailed current verification lives in PROJECT_STATE.md.
 
         const mediaEntries = normalizeManifestEntries(mediaManifest || manifestFallback);
         renderMedia(mediaEntries);

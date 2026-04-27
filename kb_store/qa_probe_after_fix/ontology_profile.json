@@ -1,9 +1,0 @@
-{
-  "ontology_name": "qa_probe_after_fix",
-  "generated_at_utc": "2026-04-10T03:31:16+00:00",
-  "clause_count": 0,
-  "predicate_signatures": [],
-  "fact_predicates": [],
-  "rule_head_predicates": [],
-  "rule_body_predicates": []
-}

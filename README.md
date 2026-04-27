@@ -4,7 +4,7 @@ Prethinker is a governed semantic-intake layer for turning natural-language clai
 
 More concretely, it is a local research workbench for governed Prolog knowledge-base updates. The LLM proposes structured semantic workspaces; deterministic code validates, maps, and applies only the parts that survive policy, schema, and consistency checks.
 
-Current center: a live `ui_gateway` console backed by `src/mcp_server.py`, the `semantic_ir_v1` runtime path with `qwen3.6:35b-a3b`, the bounded `medical@v0` profile, and local UMLS Semantic Network assets.
+Current center: a live `ui_gateway` console backed by `src/mcp_server.py`, the `semantic_ir_v1` runtime path with `qwen3.6:35b-a3b`, profile-aware admission, and three starter domain lanes: bounded medical/UMLS, CourtListener legal-source intake, and SEC/contracts obligation intake.
 
 ![Prethinker semantic IR workspace](docs/assets/prethinker-semantic-ir-workspace.png)
 
@@ -58,11 +58,11 @@ Open `http://127.0.0.1:8765` for the live console.
 
 ## Reproducibility Notes
 
-The public repo currently tracks `30` pytest files under [tests/](https://github.com/dr3d/prethinker/tree/main/tests). The latest full-suite verification after the profile-aware Semantic IR/UMLS handoff was:
+The public repo currently tracks `37` pytest files under [tests/](https://github.com/dr3d/prethinker/tree/main/tests). The latest full-suite verification after the profile-aware Semantic IR, domain-profile, and clause-support work was:
 
 ```powershell
 python -m pytest -q
-# 306 passed
+# 313 passed
 ```
 
 Focused verification after the current Semantic IR console/story-ingestion and profile-contract passes:
