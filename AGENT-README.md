@@ -28,7 +28,8 @@ Treat older reports and prompt snapshots as Git history, not live guidance.
 - Long story-like console inputs may be split into focused Semantic IR segments by `ui_gateway/gateway/phases.py`; each segment still goes through canonical `process_utterance()`, then the gateway dedupes the visible mutation list.
 - `medical@v0` is the active bounded profile.
 - `medical@v0` Semantic IR calls include profile-owned predicate contracts and compact UMLS bridge context; the generic mapper should remain structural rather than accumulating medical type lists.
-- `modelfiles/domain_profile_catalog.v0.json` is the thin skill-like roster. `profile.story_world.v0.json` and `profile.probate.v0.json` are proposal/mock thick-context packages for future routing experiments.
+- `modelfiles/domain_profile_catalog.v0.json` is the thin skill-like roster. `profile.story_world.v0.json`, `profile.probate.v0.json`, and `profile.legal_courtlistener.v0.json` are proposal/mock thick-context packages for future routing experiments.
+- `adapters/courtlistener/` is a conservative legal-source adapter shell. Keep live generated data under ignored `datasets/courtlistener/generated/`; do not commit raw API caches.
 - `src/umls_mvp.py` and `scripts/build_umls_semantic_network_kb.py` contain the current UMLS bridge/Semantic Network work.
 - `Freethinker` is a bounded optional clarification sidecar; it is not an authoritative truth layer.
 - The Prolog KB receives committed facts/rules only after runtime gates accept them.
@@ -50,7 +51,8 @@ Use focused tests while iterating, then run the full suite before a stopping-poi
 python -m pytest tests/test_medical_profile_runtime.py tests/test_ui_gateway_phases.py tests/test_ui_gateway_runtime_hooks.py -q
 python -m pytest tests/test_umls_mvp.py tests/test_umls_semantic_network_builder.py -q
 python -m pytest tests/test_semantic_ir_runtime.py tests/test_guardrail_dependency_ab.py -q
+python -m pytest tests/test_courtlistener_adapter.py tests/test_domain_profiles.py -q
 python -m pytest -q
 ```
 
-The last known full-suite result was `286 passed`. The latest focused console/story-ingestion pass verified `55 passed` across semantic IR runtime, UI gateway phases, and gateway config; the latest focused profile-contract handoff verified `6 passed`, and domain-profile package tests verified `2 passed`.
+The last known full-suite result after the CourtListener scaffold was `292 passed`. The latest focused CourtListener/domain-profile pass verified `8 passed`.

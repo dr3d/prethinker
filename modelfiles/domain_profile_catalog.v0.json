@@ -52,6 +52,24 @@
       "thick_context_source": "profile.probate.v0.json"
     },
     {
+      "profile_id": "legal_courtlistener@v0",
+      "status": "proposal",
+      "description": "CourtListener-backed legal source intake for opinions, dockets, judges, parties, citations, claims, findings, holdings, and document provenance.",
+      "use_when": [
+        "CourtListener opinion, docket, judge, filing, citation, or oral argument data",
+        "case caption, court, judge, party, attorney, citation, or date extraction",
+        "party allegation versus court finding",
+        "docket event versus merits holding",
+        "legal identity ambiguity in source records"
+      ],
+      "avoid_when": [
+        "legal advice or outcome prediction",
+        "broad precedent reasoning",
+        "clinical intake"
+      ],
+      "thick_context_source": "profile.legal_courtlistener.v0.json"
+    },
+    {
       "profile_id": "logistics@v0",
       "status": "proposal",
       "description": "Shipping, warehouse, access logs, custody, inspection, clearance, quarantine, and current-state conflicts.",

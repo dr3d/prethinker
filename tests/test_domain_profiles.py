@@ -21,6 +21,7 @@ def test_domain_profile_catalog_loads_thin_roster():
     assert "medical@v0" in profile_ids
     assert "story_world@v0" in profile_ids
     assert "probate@v0" in profile_ids
+    assert "legal_courtlistener@v0" in profile_ids
     medical = next(row for row in roster if row["profile_id"] == "medical@v0")
     assert "Bounded medical memory" in medical["description"]
     assert any("medication" in item for item in medical["use_when"])

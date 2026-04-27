@@ -36,6 +36,9 @@ Two starter/mock profiles also exist for exploration:
   movement, possession, and scene state
 - `probate@v0`: estate/probate claims, witnesses, amendments, beneficiary
   status, identity ambiguity, document evidence, and forfeiture conditions
+- `legal_courtlistener@v0`: CourtListener legal source intake for opinions,
+  dockets, parties, judges, citations, allegations, findings, holdings, and
+  provenance
 
 These packages are intentionally declarative. They are research scaffolds for
 testing the catalog idea, not new automatic runtime authority.
@@ -89,6 +92,12 @@ The roster should be small enough to keep in ordinary context:
     "description": "Estate/probate claims, witnesses, beneficiary status, amendments, and forfeiture rules.",
     "use_when": ["inheritance", "witnessed amendment", "beneficiary", "estate charter"],
     "avoid_when": ["general family biography with no legal rule"]
+  },
+  {
+    "profile_id": "legal_courtlistener@v0",
+    "description": "CourtListener source intake: opinions, dockets, parties, judges, citations, claims, findings, holdings.",
+    "use_when": ["CourtListener record", "case citation", "docket event", "claim versus finding"],
+    "avoid_when": ["legal advice", "outcome prediction", "broad precedent reasoning"]
   },
   {
     "profile_id": "story_world@v0",

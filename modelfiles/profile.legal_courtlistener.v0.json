@@ -1,0 +1,56 @@
+{
+  "profile_id": "legal_courtlistener@v0",
+  "status": "proposal_mock",
+  "description": "CourtListener-backed legal intake profile for opinions, dockets, parties, judges, citations, claims, findings, holdings, and source provenance.",
+  "predicate_registry": "future profile-owned registry",
+  "recommended_settings": {
+    "compiler_mode": "strict",
+    "strict_registry": true,
+    "clarification_eagerness": 0.85,
+    "freethinker_resolution_policy": "advisory_only"
+  },
+  "selection_hints": {
+    "use_when": [
+      "CourtListener opinion, docket, judge, filing, citation, or oral argument data",
+      "case caption, court, filing date, decision date, judge, party, attorney, or citation extraction",
+      "party allegation versus court finding",
+      "citation or docket event provenance",
+      "ambiguous legal identity such as initials or shared surnames"
+    ],
+    "avoid_when": [
+      "legal advice or outcome prediction",
+      "broad precedent reasoning",
+      "medical fact intake",
+      "fictional story with no legal source"
+    ]
+  },
+  "semantic_ir_context": [
+    "profile_scope: CourtListener legal source intake; extract source-grounded metadata and claims without broad legal reasoning",
+    "authority_boundary: CourtListener source text and metadata are evidence records, not legal advice or proof of who should win",
+    "claim_policy: a party allegation, complaint assertion, brief argument, or attorney statement is a claim_made/4, not a finding/4 or holding/3",
+    "finding_policy: a court finding must be explicitly attributed to the court, judge, or opinion; do not promote allegations to findings",
+    "docket_policy: docket events are procedural_event/4 or docket_entry/4; do not turn filing events into merits holdings",
+    "citation_policy: cites_case/2 means citation only; do not infer endorsement, following, overruling, or precedential agreement unless an allowed predicate and explicit text support it",
+    "role_policy: party roles are scoped to a case with party_to_case/3; do not emit global plaintiff/defendant facts",
+    "identity_policy: initials, abbreviated judge names, and shared legal surnames require candidate_identity/2 or clarification when multiple candidates exist",
+    "holding_policy: if holding versus dicta is unclear, quarantine or represent the text as document_states/4 rather than durable holding/3"
+  ],
+  "canonical_palette": [
+    { "signature": "case_caption/2", "arguments": ["case", "caption"], "notes": "Caption string for a case or opinion cluster." },
+    { "signature": "court_of/2", "arguments": ["case", "court"], "notes": "Court associated with a case." },
+    { "signature": "filed_on/2", "arguments": ["case_or_document", "date"], "notes": "Filing date." },
+    { "signature": "decided_on/2", "arguments": ["case_or_opinion", "date"], "notes": "Decision date for an opinion or cluster." },
+    { "signature": "authored_by/2", "arguments": ["opinion_or_document", "judge"], "notes": "Opinion/document author when explicit." },
+    { "signature": "judge_on_case/2", "arguments": ["judge", "case"], "notes": "Judge associated with a case." },
+    { "signature": "party_to_case/3", "arguments": ["party", "case", "role"], "notes": "Case-scoped party role." },
+    { "signature": "represented_by/3", "arguments": ["attorney", "party", "case"], "notes": "Case-scoped representation." },
+    { "signature": "cites_case/2", "arguments": ["citing_case", "cited_case"], "notes": "Citation relation only; not endorsement." },
+    { "signature": "document_states/4", "arguments": ["document", "case", "content", "source"], "notes": "Source document states content without converting it to truth." },
+    { "signature": "claim_made/4", "arguments": ["speaker_or_document", "claim_subject", "claim_content", "source"], "notes": "Scoped allegation or claim." },
+    { "signature": "finding/4", "arguments": ["court_or_judge", "case", "finding_content", "source"], "notes": "Explicit court/judge finding." },
+    { "signature": "holding/3", "arguments": ["case", "holding_content", "source"], "notes": "Explicit legal holding; avoid when dicta/holding is unclear." },
+    { "signature": "procedural_event/4", "arguments": ["case", "event_type", "date", "source"], "notes": "Procedural docket or case event." },
+    { "signature": "docket_entry/4", "arguments": ["case", "entry_number", "date", "description"], "notes": "Docket entry metadata." },
+    { "signature": "candidate_identity/2", "arguments": ["ambiguous_alias", "candidate_entity"], "notes": "Possible identity, not resolved identity." }
+  ]
+}

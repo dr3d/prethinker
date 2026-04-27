@@ -46,7 +46,8 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 - `medical@v0` Semantic IR calls now receive profile-owned predicate contracts and compact UMLS bridge context before the model proposes a workspace. This lets the model normalize examples like `Coumadin` to `warfarin` and see argument-role/semantic-group expectations, while the deterministic mapper still owns admission.
 - The profile context now explicitly treats an explicit named patient as sufficient grounding for the research profile, while pronouns, multiple candidates, aliases, and missing patient identity still require clarification.
 - A thin domain-profile roster now exists in `modelfiles/domain_profile_catalog.v0.json` and is included in Semantic IR input as `available_domain_profiles`. This is the first skill-directory-style control-plane hook: it advertises possible profile contexts without loading every thick package or authorizing writes.
-- Two declarative starter profile packages now exist for exploration: `modelfiles/profile.story_world.v0.json` and `modelfiles/profile.probate.v0.json`. They provide mock thick context and predicate contracts for future routing experiments without changing runtime admission authority.
+- Declarative starter profile packages now exist for exploration: `modelfiles/profile.story_world.v0.json`, `modelfiles/profile.probate.v0.json`, and `modelfiles/profile.legal_courtlistener.v0.json`. They provide mock thick context and predicate contracts for future routing experiments without changing runtime admission authority.
+- A first-pass CourtListener adapter shell now lives under `adapters/courtlistener/`. It includes a conservative token-based REST client, normalizer, legal predicate contracts, harness conversion, README, and an offline synthetic legal seed fixture for claim/finding, citation, role-scope, docket, and identity-boundary tests.
 - A new held-out cross-turn frontier proposal lives at `docs/data/frontier_packs/semantic_ir_cross_turn_frontier_pack_v1.json`. It targets identity drift, claim/observation separation, noisy multilingual corrections, mixed rule/query/fact turns, temporal corrections, and domain type ambiguity.
 
 ## Local UMLS Assets
@@ -93,6 +94,7 @@ This is the next useful layer for type steering and explanation. It should suppo
 - Build a new held-out frontier pack instead of over-polishing Silverton: cross-document temporal causality, aliases, corrections, disputed claims, and profile type pressure.
 - Port the new cross-turn frontier pack into a runner only after deciding which expectations should be hard regression gates versus research pressure gauges.
 - Explore domain-profile selection with the starter profiles: first offline roster-selection traces, then optional gateway traces, before any automatic context loading affects normal runs.
+- Run the CourtListener adapter against a small live API slice only after choosing a durable cache/review policy. Keep generated live data under ignored `datasets/courtlistener/generated/` unless a tiny fixture is intentionally curated.
 - Keep the Semantic IR harness model-agnostic, but use `qwen/qwen3.6-35b-a3b` as the default development model unless a specific comparison question needs another local model.
 - Tighten narrative ingestion next around stable object identity, event observation predicates, and temporal/event ordering instead of adding story-specific Python phrase patches.
 - Keep a regular regression cadence around segmentation, predicate-palette admission, stored-logic conflicts, and rule/query mixed turns; the frontier is productive enough that small improvements can easily re-open older failure modes.
@@ -101,10 +103,10 @@ This is the next useful layer for type steering and explanation. It should suppo
 
 Recent verified results:
 
-- Full suite after profile-aware Semantic IR/UMLS handoff plus domain-profile roster/mock-profile foundation: `286 passed`
+- Full suite after CourtListener profile/adapter scaffold: `292 passed`
 - Focused semantic IR runtime battery: `23 passed`
 - Focused profile-contract/domain-roster handoff verification: `7 passed`
-- Focused domain-profile package verification: `2 passed`
+- Focused CourtListener/domain-profile verification: `8 passed`
 - Edge runtime A/B: semantic IR `20/20` decision labels, `0.976` avg score, `0` non-mapper parse rescues
 - Weak-edge runtime A/B: semantic IR `10/10` decision labels, `1.000` avg score, `0` non-mapper parse rescues
 - Silverton noisy temporal pack: semantic IR `2/8` decision labels, `0.729` avg score; useful evidence that noisy language is less of a blocker than policy labels and temporal admission
