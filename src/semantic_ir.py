@@ -426,6 +426,9 @@ BEST_GUARDED_V2_GUIDANCE = (
     "- In truth_maintenance.conflicts, point to the candidate operation index and the existing context/source/rule it conflicts with. In truth_maintenance.retraction_plan, point to explicit correction targets. In derived_consequences, mark consequences query_only, quarantine, future_rule_support, or do_not_commit instead of committing them as facts.\n"
     "- kb_context_pack contains deterministic KB retrieval. Treat exact KB clauses as current committed state for resolving references, corrections, and conflicts. Do not restate KB clauses as new writes. Use candidate_operations only for the current utterance, and use truth_maintenance to cite KB support or conflict pressure.\n"
     "- If kb_context_pack.current_state_candidates contains an old current-state fact and the utterance explicitly corrects it with words like actually, instead, wrong, not X, or no longer, propose a safe retract for the old clause and a safe assert for the replacement when the target and replacement are clear.\n"
+    "- If a pronoun or short referent has exactly one plausible entity in kb_context_pack.current_state_subject_candidates, and the utterance is an explicit correction of that entity's current state, you may resolve the referent from KB context and propose the retract/assert pair. If there are multiple plausible candidates, clarify instead.\n"
+    "- Do not ask for clarification solely because the subject is a pronoun when there is exactly one current_state_subject_candidate, no competing named subject, and an explicit correction marker. In that narrow case, set the referent status to resolved and cite the KB clause in truth_maintenance.\n"
+    "- If the utterance says someone claims/alleges/reports a state that conflicts with an observed or source-backed KB clause, do not overwrite the observed/source-backed fact. If a claim predicate is available, record only the claim as a claim; otherwise quarantine or clarify.\n"
     "- Some predicates are non-exclusive, such as has_condition/2. A new compatible condition can be committed without retracting an existing different condition.\n"
     "- Do not turn a claim into a fact. 'Bob says he has it' is a claim, not possession.\n"
     "- Do not infer diagnosis or staging from a single lab value request. Quarantine or clarify.\n"
@@ -493,6 +496,25 @@ def build_semantic_ir_input_payload(
         "allowed_predicates": allowed_predicates or [],
         "predicate_contracts": predicate_contracts or [],
         "kb_context_pack": kb_context_pack or {},
+        "kb_context_policy": {
+            "purpose": "Give the model compact visibility into committed KB state for reference resolution, correction handling, and conflict analysis.",
+            "authority": "Context only. Durable effects still require admitted candidate_operations.",
+            "do_not": [
+                "Do not copy existing KB clauses into candidate_operations as new writes.",
+                "Do not treat retrieved KB context as permission to infer unrelated facts.",
+                "Do not overwrite observed/source-backed facts with a claim.",
+            ],
+            "correction_policy": [
+                "Explicit correction markers such as actually, instead, wrong, not X, no longer, or correction can justify retract/assert against a matching current-state KB clause when target and replacement are clear.",
+                "A conflicting current-state update without an explicit correction marker should clarify whether the new value replaces the old KB value.",
+            ],
+            "reference_policy": [
+                "A pronoun may resolve from KB context only when exactly one plausible current_state_subject_candidate is relevant to the utterance.",
+                "Do not ask solely because of the pronoun when there is one current_state_subject_candidate, no competing named subject, and an explicit correction marker.",
+                "Multiple plausible KB candidates require clarification.",
+            ],
+            "claim_policy": "Claims, allegations, and reports remain speech/source facts. They do not overwrite observed/source-backed KB clauses.",
+        },
         "authority_boundary": "The runtime validates and commits; you only propose semantic structure.",
         "variant_guidance": BEST_GUARDED_V2_GUIDANCE,
     }

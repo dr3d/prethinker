@@ -532,6 +532,8 @@ enough for the current 16K-context model path and includes:
 
 - exact relevant KB clauses;
 - likely functional current-state candidates;
+- likely current-state subject candidates, so pronouns can be resolved only
+  when the KB working set has one plausible subject;
 - entity candidates from those clauses;
 - recent committed logic;
 - a small fallback KB snapshot;

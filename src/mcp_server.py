@@ -1903,6 +1903,24 @@ class PrologMCPServer:
                 int(row.get("arity", 0) or 0),
             )
         ][:12]
+        current_state_subject_candidates: list[dict[str, Any]] = []
+        for row in relevant:
+            predicate = str(row.get("predicate", "")).strip()
+            arity = int(row.get("arity", 0) or 0)
+            args = row.get("args", []) if isinstance(row.get("args"), list) else []
+            if not args or not self._is_likely_functional_current_state_predicate(predicate, arity):
+                continue
+            subject = str(args[0]).strip()
+            if not subject:
+                continue
+            candidate = {
+                "entity": subject,
+                "role": "current_state_subject",
+                "predicate": f"{predicate}/{arity}",
+                "source_clause": str(row.get("clause", "")).strip(),
+            }
+            if candidate not in current_state_subject_candidates:
+                current_state_subject_candidates.append(candidate)
         return {
             "version": "semantic_ir_context_pack_v1",
             "authority": "context_only_runtime_kb_remains_authoritative",
@@ -1917,6 +1935,7 @@ class PrologMCPServer:
             },
             "relevant_clauses": [row["clause"] for row in relevant],
             "current_state_candidates": current_state_candidates,
+            "current_state_subject_candidates": current_state_subject_candidates[:16],
             "entity_candidates": entity_candidates[:32],
             "recent_committed_logic": recent,
             "small_kb_snapshot": snapshot,

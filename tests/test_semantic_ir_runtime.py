@@ -3,6 +3,7 @@ import unittest
 from kb_pipeline import _validate_parsed
 from src.mcp_server import PrologMCPServer
 from src.semantic_ir import (
+    build_semantic_ir_input_payload,
     semantic_ir_admission_diagnostics,
     semantic_ir_to_legacy_parse,
     semantic_ir_to_prethink_payload,
@@ -45,6 +46,19 @@ def _ir(**updates):
 
 
 class SemanticIRRuntimeTests(unittest.TestCase):
+    def test_input_payload_carries_kb_context_policy(self) -> None:
+        payload = build_semantic_ir_input_payload(
+            utterance="Actually, Mara lives in Paris now.",
+            kb_context_pack={
+                "version": "semantic_ir_context_pack_v1",
+                "current_state_candidates": ["lives_in(mara, london)."],
+            },
+            include_schema_contract=False,
+        )
+        self.assertEqual(payload["kb_context_pack"]["version"], "semantic_ir_context_pack_v1")
+        self.assertIn("correction_policy", payload["kb_context_policy"])
+        self.assertIn("reference_policy", payload["kb_context_policy"])
+
     def test_mapper_emits_valid_legacy_parse_for_safe_assert(self) -> None:
         parsed, warnings = semantic_ir_to_legacy_parse(_ir())
         self.assertEqual(warnings, [])

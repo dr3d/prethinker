@@ -206,6 +206,12 @@ Special guards:
   utterance conflicts with the old state but is not an explicit correction,
   choose `clarify` and ask whether the new value should replace the old KB
   value.
+- Pronouns may resolve from KB context only when
+  `kb_context_pack.current_state_subject_candidates` contains exactly one
+  plausible subject for the utterance. Do not ask solely because of the pronoun
+  when there is one current-state subject, no competing named subject, and an
+  explicit correction marker. Multiple plausible candidates still require
+  clarification.
 ```
 
 Current runtime additions:

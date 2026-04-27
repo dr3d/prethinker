@@ -265,10 +265,23 @@ class LocalMcpServerTests(unittest.TestCase):
         self.assertEqual(pack.get("version"), "semantic_ir_context_pack_v1")
         self.assertIn("lives_in(mara, london).", pack.get("relevant_clauses", []))
         self.assertIn("lives_in(mara, london).", pack.get("current_state_candidates", []))
+        self.assertIn(
+            {
+                "entity": "mara",
+                "role": "current_state_subject",
+                "predicate": "lives_in/2",
+                "source_clause": "lives_in(mara, london).",
+            },
+            pack.get("current_state_subject_candidates", []),
+        )
         self.assertIn("mara", pack.get("entity_candidates", []))
         self.assertGreaterEqual(pack.get("manifest", {}).get("total_direct_fact_clauses", 0), 3)
         trace_pack = server._last_semantic_ir_trace.get("model_input", {}).get("kb_context_pack", {})
         self.assertEqual(trace_pack.get("version"), "semantic_ir_context_pack_v1")
+        payload = mocked.call_args.kwargs
+        # The API call receives the pack directly; the prompt payload also carries
+        # KB policy in src.semantic_ir.build_semantic_ir_input_payload.
+        self.assertIn("lives_in(mara, london).", payload.get("kb_context_pack", {}).get("relevant_clauses", []))
 
     def test_semantic_ir_auto_profile_switches_context_across_domains(self) -> None:
         server = PrologMCPServer(
