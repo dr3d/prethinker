@@ -10,7 +10,9 @@ For the current research direction and why the project moved away from this
 English-first parser lane, read
 [docs/SEMANTIC_IR_RESEARCH_DIRECTION_REPORT.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_RESEARCH_DIRECTION_REPORT.md).
 
-This note is the technical follow-through of what `Prethinker` is doing today when an English utterance arrives at the canonical interactive front door.
+This note is the technical follow-through of what the earlier English-first
+lane did when an English utterance arrived at the canonical interactive front
+door.
 
 It is written for knowledge engineers, systems people, and anyone who wants to understand where the language model stops, where the guardrails begin, and how a typed sentence becomes a KB mutation, query, or refusal.
 
@@ -20,7 +22,7 @@ It is written for knowledge engineers, systems people, and anyone who wants to u
 
 It is a governed pipeline with 3 distinct layers:
 
-1. a `qwen3.5:9b` model acting as a strict compiler
+1. a smaller local model acting as a strict compiler
 2. runtime wrappers that define the exact contract for the current pass
 3. deterministic Python gates that normalize, validate, clarify, and apply
 
@@ -33,15 +35,17 @@ That is the core of the Governed Intent Compiler idea.
 
 ## Scope Of This Note
 
-This article describes the **current live interactive path**:
+This article describes the **former live interactive path**:
 
 - browser console / UI
 - MCP `process_utterance()`
 - strict compiler mode
-- `qwen3.5:9b`
-- `Freethinker` policy `off`
+- an older strict compiler model
+- no clarification sidecar in the default path
 
-This is not a hypothetical future architecture note. It is the current runtime path centered on:
+This is not the current runtime path. It is retained to explain why the project
+started moving semantic responsibility into `semantic_ir_v1` and deterministic
+admission policy. The old path was centered on:
 
 - [src/mcp_server.py](../src/mcp_server.py)
 
@@ -51,9 +55,9 @@ And surfaced through:
 - [ui_gateway/gateway/phases.py](../ui_gateway/gateway/phases.py)
 - [ui_gateway/gateway/server.py](../ui_gateway/gateway/server.py)
 
-## Current Language Claim
+## Historical Language Claim
 
-The current product/runtime should be understood as **English-first**.
+The legacy parser lane should be understood as **English-first**.
 
 That means:
 
@@ -193,7 +197,9 @@ So the parser lane is deliberately optimized for:
 - no reflective prose
 - no hidden chain-of-thought becoming the public output
 
-This matters because `qwen3.5:9b` behaves very differently with thinking on versus off. In this project, thinking-on is not just “less tidy.” It breaks the parser contract.
+This mattered because the older strict compiler behaved very differently with
+thinking on versus off. In that lane, thinking-on was not just "less tidy"; it
+broke the parser contract.
 
 ## Step 1: The Utterance Arrives
 
@@ -439,7 +445,7 @@ It records:
 
 - pre-think source
 - fallback usage
-- Freethinker status
+- sidecar status
 - parse rescues
 - validation failures
 - final admitted shape
@@ -498,7 +504,7 @@ In other words, the system is not just “translating sentences.” It is trying
 
 ## What The Model Is Good At Here
 
-The 9B model is still doing meaningful work:
+The legacy model was still doing meaningful work:
 
 - route suggestion
 - first-pass semantic structure
@@ -547,7 +553,8 @@ Those are not abstract concerns. They are now frozen into replayable frontier pa
 
 If you are a knowledge engineer, the main thing to understand is this:
 
-The project is not trying to prove that a 9B model “understands English” in some broad philosophical way.
+The project was not trying to prove that a smaller local model "understands
+English" in some broad philosophical way.
 
 It is trying to prove something narrower and more useful:
 
@@ -563,7 +570,7 @@ That is the practical meaning of a Governed Intent Compiler.
 Today, `Prethinker` is best understood as:
 
 - an English-first governed adapter
-- with a strict 9B semantic compiler at the front
+- with a strict semantic compiler at the front
 - wrapped by strong runtime contracts
 - and made safe by deterministic validation and apply layers
 

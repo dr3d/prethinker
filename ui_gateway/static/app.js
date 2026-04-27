@@ -167,7 +167,7 @@ const PROMPT_BOOKS = {
     },
     {
       title: "Context check without sidecar",
-      setup: "Keep Freethinker off. This probes whether the main Semantic IR path uses recent context conservatively.",
+      setup: "Keep the experimental sidecar off. This probes whether the main Semantic IR path uses recent context conservatively.",
       steps: [
         { label: "Context", utterance: "Scott's mom is Ann." },
         { label: "Context", utterance: "Priya's brother is Omar." },
@@ -2525,9 +2525,9 @@ function freethinkerAdvisoryPayload(baseConfig) {
     freethinker_resolution_policy: "advisory_only",
     freethinker_temperature: Number(baseConfig?.freethinker_temperature ?? 0.2) || 0.2,
     freethinker_thinking: Boolean(baseConfig?.freethinker_thinking),
-    freethinker_model: String(baseConfig?.freethinker_model || "qwen3.5:9b"),
-    freethinker_backend: String(baseConfig?.freethinker_backend || "ollama"),
-    freethinker_base_url: String(baseConfig?.freethinker_base_url || "http://127.0.0.1:11434"),
+    freethinker_model: String(baseConfig?.freethinker_model || SEMANTIC_IR_PRIMARY.model),
+    freethinker_backend: String(baseConfig?.freethinker_backend || SEMANTIC_IR_PRIMARY.backend),
+    freethinker_base_url: String(baseConfig?.freethinker_base_url || SEMANTIC_IR_PRIMARY.baseUrl),
     freethinker_context_length: Number(baseConfig?.freethinker_context_length || 16384),
     freethinker_timeout: Number(baseConfig?.freethinker_timeout || 60),
     freethinker_prompt_file: String(
@@ -2562,9 +2562,9 @@ function medicalProfilePayload(baseConfig) {
     freethinker_resolution_policy: "off",
     freethinker_temperature: Number(baseConfig?.freethinker_temperature ?? 0.2) || 0.2,
     freethinker_thinking: Boolean(baseConfig?.freethinker_thinking),
-    freethinker_model: String(baseConfig?.freethinker_model || "qwen3.5:9b"),
-    freethinker_backend: String(baseConfig?.freethinker_backend || "ollama"),
-    freethinker_base_url: String(baseConfig?.freethinker_base_url || "http://127.0.0.1:11434"),
+    freethinker_model: String(baseConfig?.freethinker_model || SEMANTIC_IR_PRIMARY.model),
+    freethinker_backend: String(baseConfig?.freethinker_backend || SEMANTIC_IR_PRIMARY.backend),
+    freethinker_base_url: String(baseConfig?.freethinker_base_url || SEMANTIC_IR_PRIMARY.baseUrl),
     freethinker_context_length: Number(baseConfig?.freethinker_context_length || 16384),
     freethinker_timeout: Number(baseConfig?.freethinker_timeout || 60),
     freethinker_prompt_file: String(
@@ -2624,7 +2624,7 @@ async function applyFreethinkerAdvisory() {
     state.config = response.config;
     fillConfigForm(state.config);
     document.getElementById("config-status").textContent =
-      "Experimental Freethinker sidecar enabled. Use only as a controlled sidecar-on comparison.";
+      "Experimental sidecar enabled. Use only as a controlled sidecar-on comparison.";
   } catch (error) {
     document.getElementById("config-status").textContent = `Freethinker preset failed: ${String(error)}`;
   }

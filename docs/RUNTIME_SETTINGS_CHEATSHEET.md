@@ -1,11 +1,14 @@
 # Prethinker Runtime Settings Cheat Sheet
 
-Last updated: 2026-04-15
+Last updated: 2026-04-27
 
 ## Purpose
 
-This is the operational cheat sheet for running Prethinker with predictable behavior.
-It focuses on runtime controls, clarification engine (CE) behavior, sidecar usage, and temporal sequencing.
+This is a legacy operational cheat sheet for older batch lanes. The current
+manual front door is the UI gateway with `semantic_ir_v1`,
+`qwen/qwen3.6-35b-a3b`, domain profiles, recent context, and KB seed context.
+Use [docs/CURRENT_UTTERANCE_PIPELINE.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_UTTERANCE_PIPELINE.md)
+for the current live utterance path.
 
 ## Mental Model
 
@@ -14,7 +17,7 @@ Prethinker has two layers:
 1. Compiler path (deterministic-first):
    - Parses utterances into structured intents.
    - Applies validated facts/rules/queries/retracts.
-2. CE sidecar path (optional clarifier):
+2. Legacy CE helper path (optional clarifier):
    - Answers clarification questions when ambiguity blocks safe writes.
    - Uses bounded recent-turn + KB context.
    - Improves short-horizon disambiguation without changing deterministic apply rules.
@@ -50,7 +53,7 @@ Prethinker has two layers:
 - `--clarification-eagerness-decay-turns`
 - `--clarification-eagerness-decay-clauses`
 
-### Sidecar clarification model
+### Legacy helper clarification model
 
 - `--clarification-answer-model`
 - `--clarification-answer-backend`
@@ -87,13 +90,13 @@ Prethinker has two layers:
 
 ## Recommended Presets
 
-### Preset A: Safe static baseline (default operations)
+### Preset A: Legacy safe static baseline
 
 Use for reproducible day-to-day runs and regression baselines.
 
 ```powershell
 python kb_pipeline.py `
-  --backend ollama --base-url http://127.0.0.1:11434 --model qwen3.5:9b `
+  --backend lmstudio --base-url http://127.0.0.1:1234 --model qwen/qwen3.6-35b-a3b `
   --runtime core `
   --scenario kb_scenarios/story_glitch_in_the_airlock_raw_line.json `
   --kb-name baseline_static_glitch `
@@ -102,9 +105,9 @@ python kb_pipeline.py `
   --clarification-eagerness 0.20 `
   --clarification-eagerness-mode static `
   --max-clarification-rounds 2 `
-  --clarification-answer-model qwen3.5:9b `
-  --clarification-answer-backend ollama `
-  --clarification-answer-base-url http://127.0.0.1:11434 `
+  --clarification-answer-model qwen/qwen3.6-35b-a3b `
+  --clarification-answer-backend lmstudio `
+  --clarification-answer-base-url http://127.0.0.1:1234 `
   --clarification-answer-context-length 8192 `
   --clarification-answer-min-confidence 0.0 `
   --out tmp/runs/baseline_static_glitch.pipeline.json
@@ -116,7 +119,7 @@ Use when standing up a new ontology and you want CE to start strict, then relax.
 
 ```powershell
 python kb_pipeline.py `
-  --backend ollama --base-url http://127.0.0.1:11434 --model qwen3.5:9b `
+  --backend lmstudio --base-url http://127.0.0.1:1234 --model qwen/qwen3.6-35b-a3b `
   --runtime core `
   --scenario kb_scenarios/story_glitch_in_the_airlock_raw_line.json `
   --kb-name adaptive_bootstrap_glitch `
@@ -129,9 +132,9 @@ python kb_pipeline.py `
   --clarification-eagerness-decay-turns 24 `
   --clarification-eagerness-decay-clauses 120 `
   --max-clarification-rounds 2 `
-  --clarification-answer-model qwen3.5:9b `
-  --clarification-answer-backend ollama `
-  --clarification-answer-base-url http://127.0.0.1:11434 `
+  --clarification-answer-model qwen/qwen3.6-35b-a3b `
+  --clarification-answer-backend lmstudio `
+  --clarification-answer-base-url http://127.0.0.1:1234 `
   --clarification-answer-context-length 8192 `
   --clarification-answer-min-confidence 0.0 `
   --out tmp/runs/adaptive_bootstrap_glitch.pipeline.json
@@ -143,7 +146,7 @@ Use for narrative/state-change stories where order matters.
 
 ```powershell
 python kb_pipeline.py `
-  --backend ollama --base-url http://127.0.0.1:11434 --model qwen3.5:9b `
+  --backend lmstudio --base-url http://127.0.0.1:1234 --model qwen/qwen3.6-35b-a3b `
   --runtime core `
   --scenario kb_scenarios/story_goldilocks_roundtrip.json `
   --kb-name story_temporal_goldilocks `
@@ -153,9 +156,9 @@ python kb_pipeline.py `
   --temporal-dual-write --temporal-predicate at_step `
   --clarification-eagerness 0.20 --clarification-eagerness-mode static `
   --max-clarification-rounds 2 `
-  --clarification-answer-model qwen3.5:9b `
-  --clarification-answer-backend ollama `
-  --clarification-answer-base-url http://127.0.0.1:11434 `
+  --clarification-answer-model qwen/qwen3.6-35b-a3b `
+  --clarification-answer-backend lmstudio `
+  --clarification-answer-base-url http://127.0.0.1:1234 `
   --clarification-answer-context-length 8192 `
   --clarification-answer-min-confidence 0.0 `
   --out tmp/runs/story_temporal_goldilocks.pipeline.json
@@ -167,7 +170,7 @@ Use for mostly timeless domain facts. Keep temporal off unless ingesting case ti
 
 ```powershell
 python kb_pipeline.py `
-  --backend ollama --base-url http://127.0.0.1:11434 --model qwen3.5:9b `
+  --backend lmstudio --base-url http://127.0.0.1:1234 --model qwen/qwen3.6-35b-a3b `
   --runtime core `
   --scenario kb_scenarios/acid_01_medical_baseline.json `
   --kb-name medical_static `
@@ -176,9 +179,9 @@ python kb_pipeline.py `
   --clarification-eagerness 0.18 `
   --clarification-eagerness-mode static `
   --max-clarification-rounds 2 `
-  --clarification-answer-model qwen3.5:9b `
-  --clarification-answer-backend ollama `
-  --clarification-answer-base-url http://127.0.0.1:11434 `
+  --clarification-answer-model qwen/qwen3.6-35b-a3b `
+  --clarification-answer-backend lmstudio `
+  --clarification-answer-base-url http://127.0.0.1:1234 `
   --clarification-answer-context-length 8192 `
   --clarification-answer-min-confidence 0.0 `
   --out tmp/runs/medical_static.pipeline.json
@@ -189,13 +192,13 @@ python kb_pipeline.py `
 Static CE:
 
 ```powershell
-python scripts/run_gate_cycle.py --batch glitch_focus --model qwen3.5:9b --clarification-eagerness-mode static
+python scripts/run_gate_cycle.py --batch glitch_focus --model qwen/qwen3.6-35b-a3b --clarification-eagerness-mode static
 ```
 
 Adaptive CE + temporal:
 
 ```powershell
-python scripts/run_gate_cycle.py --batch glitch_focus --model qwen3.5:9b --clarification-eagerness-mode adaptive --temporal-dual-write
+python scripts/run_gate_cycle.py --batch glitch_focus --model qwen/qwen3.6-35b-a3b --clarification-eagerness-mode adaptive --temporal-dual-write
 ```
 
 ## Diagnostics
@@ -215,6 +218,5 @@ python scripts/run_gate_cycle.py --help
 Check model availability:
 
 ```powershell
-ollama list
+Invoke-RestMethod http://127.0.0.1:1234/v1/models
 ```
-

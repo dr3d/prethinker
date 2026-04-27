@@ -4,7 +4,7 @@ Last updated: 2026-04-27
 
 This is the current live path for a user utterance in Prethinker. The older
 [GIC English Input Pipeline](https://github.com/dr3d/prethinker/blob/main/docs/GIC_ENGLISH_INPUT_PIPELINE.md)
-is now historical context for the English-first 9B parser lane.
+is historical context for the earlier English-first parser lane.
 
 The current center is better described as:
 
@@ -98,10 +98,9 @@ When the user answers, the pending turn is resumed. The clarification question
 and answer become part of the effective utterance for the Semantic IR pass, so
 the model sees the user-resolved context instead of guessing.
 
-Freethinker is no longer part of the mainline pipeline. Its config and trace
-surface still exist as a shelved optional sidecar experiment, but the current
-research path is to give the Semantic IR model better recent context, profile
-context, and KB seed context before deterministic admission.
+The current pipeline does this context work inside the primary Semantic IR pass:
+recent context, profile context, predicate contracts, and KB seed context are
+assembled before deterministic admission.
 
 ### 4. Long utterances are segmented into focused passes
 

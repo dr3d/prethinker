@@ -23,8 +23,8 @@ Full-ingestion audit (explicit source + KB):
 ```powershell
 python scripts/kb_interrogator.py `
   --source-text-file docs/data/roundtrip/goldilocks_roundtrip_input_story.md `
-  --candidate-kb docs/data/roundtrip/goldilocks_roundtrip_generated_kb.pl `
-  --backend ollama --base-url http://127.0.0.1:11434 --model qwen3.5:9b `
+  --candidate-kb tmp/goldilocks_roundtrip_generated_kb.pl `
+  --backend lmstudio --base-url http://127.0.0.1:1234 --model qwen/qwen3.6-35b-a3b `
   --exam-style general `
   --out-json tmp/goldilocks_interrogator.json `
   --out-md tmp/goldilocks_interrogator.md
@@ -36,7 +36,7 @@ As-you-go interrogation (prefix turns from a run JSON):
 python scripts/kb_interrogator.py `
   --source-text-file tmp/goldilocks_roundtrip_run_latest.json `
   --through-turn 12 `
-  --backend ollama --base-url http://127.0.0.1:11434 --model qwen3.5:9b `
+  --backend lmstudio --base-url http://127.0.0.1:1234 --model qwen/qwen3.6-35b-a3b `
   --exam-style detective `
   --out-json tmp/goldilocks_interrogator_turn12.json `
   --out-md tmp/goldilocks_interrogator_turn12.md
@@ -47,7 +47,7 @@ Run JSON interrogation with KB auto-detect + exam scenario export:
 ```powershell
 python scripts/kb_interrogator.py `
   --source-text-file tmp/goldilocks_roundtrip_run_latest.json `
-  --backend ollama --base-url http://127.0.0.1:11434 --model qwen3.5:9b `
+  --backend lmstudio --base-url http://127.0.0.1:1234 --model qwen/qwen3.6-35b-a3b `
   --exam-style detective --exam-question-count 10 `
   --emit-exam-scenario tmp/scenarios/goldilocks_exam_from_interrogator.json `
   --out-json tmp/goldilocks_interrogator_detective.json `

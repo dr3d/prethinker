@@ -122,33 +122,27 @@ That means:
 
 In other words, the project should become broader by architecture and domain tuning, not by pretending ambiguous chat is already precise enough for durable KB mutation.
 
-## The Two-Rail Future
+## Current Semantic Workspace Path
 
-The design now distinguishes two roles:
+The current design has one main interpretation path:
 
 ### Prethinker
-
-The strict compiler.
 
 - schema-bound
 - mutation-aware
 - clarification-capable
 - the only role allowed to authorize KB writes
+- backed by a stronger local `qwen/qwen3.6-35b-a3b` Semantic IR pass
+- supplied with recent context, selected domain profile context, predicate
+  contracts, and a compact KB seed
 
-### Freethinker, Shelved
-
-Freethinker was the bounded clarification-liaison concept: context-aware,
-non-authoritative, and never allowed to write to the KB. It helped clarify the
-permission boundary, but it is no longer the mainline path.
-
-The current design uses a stronger local `qwen3.6:35b-a3b` Semantic IR pass with
-recent context, selected domain profile context, predicate contracts, and a
-compact KB seed. That lets the main workspace do more of the discourse and
-truth-maintenance setup before deterministic admission.
+That lets the main workspace do more of the discourse and truth-maintenance
+setup before deterministic admission, without adding a second mainline model
+role.
 
 ## Current Reality
 
-As of April 26, 2026:
+As of April 27, 2026:
 
 - the canonical interactive entryway is `process_utterance()` in [src/mcp_server.py](https://github.com/dr3d/prethinker/blob/main/src/mcp_server.py)
 - the console in [ui_gateway/](https://github.com/dr3d/prethinker/tree/main/ui_gateway) is the main manual test cockpit
@@ -157,11 +151,13 @@ As of April 26, 2026:
 - [src/semantic_ir.py](https://github.com/dr3d/prethinker/blob/main/src/semantic_ir.py) owns mapper projection policy and admission diagnostics
 - `medical@v0` is the most active bounded profile
 - UMLS Semantic Network assets are built locally for type/relation explanation
-- Freethinker is shelved/off-mainline; Semantic IR context engineering is the active path
 
 That means the repo already supports the governed compiler shape directly.
 
-The clarification-liaison shape is partially scaffolded and intentionally not yet allowed to authorize writes. The bigger current research question is whether richer semantic workspaces can reduce English-specific Python rescue logic while preserving the same authority boundary.
+The old clarification-liaison sidecar remains historical scaffolding only. The
+bigger current research question is whether richer semantic workspaces can
+reduce English-specific Python rescue logic while preserving the same authority
+boundary.
 
 ## Why The Repo Looks The Way It Does
 
@@ -182,7 +178,6 @@ The codebase has three different kinds of artifacts because they serve different
   - `docs/SEMANTIC_IR_MAPPER_SPEC.md`
   - `docs/DOMAIN_PROFILE_CATALOG.md`
   - `docs/PROJECT_HORIZON.md`
-  - `docs/FREETHINKER_DESIGN.md` as a historical/shelved sidecar note
 
 The point is not just to build a parser.
 

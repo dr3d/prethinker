@@ -1,6 +1,6 @@
 # Prethinker Roadmap
 
-Last updated: 2026-04-26
+Last updated: 2026-04-27
 
 ## Current Positioning
 
@@ -18,13 +18,13 @@ deterministic runtime code decides what can become durable state.
 
 ## Current Center Of Gravity
 
-The older `qwen3.5:9b` English-parser lane remains useful history and a fast
-baseline, but it is no longer the preferred research direction.
+The older English-parser lane remains useful history, but it is no longer the
+preferred research direction or the default demo path.
 
 The active frontier is:
 
 - `semantic_ir_v1` as the intermediate semantic workspace
-- `qwen3.6:35b-a3b` as the main local semantic workspace model
+- `qwen/qwen3.6-35b-a3b` as the main local semantic workspace model
 - LM Studio/OpenAI-compatible structured output for schema-constrained JSON
 - deterministic mapper/admission diagnostics in `src/semantic_ir.py`
 - live console demos through `process_utterance()`
@@ -38,7 +38,7 @@ Python rescue code to recover.
 
 Latest local verification before this refresh:
 
-- Full pytest suite: `248 passed`
+- Full pytest suite: `318 passed`
 - Edge runtime A/B: semantic IR `20/20`, `0.976` avg score, `0` non-mapper parse rescues
 - Weak-edge runtime A/B: semantic IR `10/10`, `1.000` avg score, `0` non-mapper parse rescues
 - Silverton probate pack: intentionally hard; currently weak

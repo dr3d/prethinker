@@ -48,7 +48,7 @@ class SemanticIRModelMatrixSummaryTests(unittest.TestCase):
             [
                 {
                     "scenario_group": "rule_mutation",
-                    "model": "qwen/qwen3.5-9b",
+                    "model": "qwen/qwen3.6-35b-a3b",
                     "runs": 10,
                     "semantic_decision_ok": 10,
                     "semantic_safe_outcome_ok": 10,
@@ -61,7 +61,7 @@ class SemanticIRModelMatrixSummaryTests(unittest.TestCase):
                 }
             ]
         )
-        self.assertIn("| rule_mutation | `qwen/qwen3.5-9b` | 10 | 10/10 | 10/10 | 0.917 | 6/10 | 8/10 | 0.758 |", markdown)
+        self.assertIn("| rule_mutation | `qwen/qwen3.6-35b-a3b` | 10 | 10/10 | 10/10 | 0.917 | 6/10 | 8/10 | 0.758 |", markdown)
         self.assertIn("`run.jsonl`", markdown)
 
 

@@ -71,9 +71,9 @@ class GatewayConfig:
     semantic_ir_thinking: bool = False
     clarification_eagerness: float = 0.75
     freethinker_resolution_policy: str = "off"
-    freethinker_model: str = "qwen3.5:9b"
-    freethinker_backend: str = "ollama"
-    freethinker_base_url: str = "http://127.0.0.1:11434"
+    freethinker_model: str = "qwen/qwen3.6-35b-a3b"
+    freethinker_backend: str = "lmstudio"
+    freethinker_base_url: str = "http://127.0.0.1:1234"
     freethinker_context_length: int = 16384
     freethinker_timeout: int = 60
     freethinker_temperature: float = 0.2
@@ -138,6 +138,14 @@ class ConfigStore:
         served_model = str(raw_payload.get("served_llm_model", "")).strip()
         if served_model in old_model_values:
             migrated["served_llm_model"] = "qwen/qwen3.6-35b-a3b"
+
+        sidecar_model = str(raw_payload.get("freethinker_model", "")).strip()
+        if sidecar_model in old_model_values:
+            migrated["freethinker_model"] = "qwen/qwen3.6-35b-a3b"
+        if str(raw_payload.get("freethinker_backend", "")).strip().lower() in {"", "ollama"} and sidecar_model in old_model_values:
+            migrated["freethinker_backend"] = "lmstudio"
+        if str(raw_payload.get("freethinker_base_url", "")).strip() in {"", "http://127.0.0.1:11434"} and sidecar_model in old_model_values:
+            migrated["freethinker_base_url"] = "http://127.0.0.1:1234"
         return migrated
 
     def _sanitize(self, payload: dict) -> dict:

@@ -48,7 +48,7 @@ clarification, and commit only inspected KB mutations. It also gave us a strong
 debugging cockpit: route, clarification, commit/block state, and ledger traces
 were visible instead of hidden behind a friendly answer.
 
-But the older implementation used a fairly constrained `qwen3.5:9b` semantic
+But the older implementation used a fairly constrained smaller local semantic
 parser. Because that parser was boxed tightly, Python increasingly had to rescue
 language understanding after the fact. The rescue code was useful, but the shape
 was worrying.
@@ -72,26 +72,16 @@ becoming a catalog of remembered failures.
 
 That is the core reason for the new research lane.
 
-## What Freethinker Helped With, and Where It Was Not Enough
+## Retired Sidecar Lesson
 
-Freethinker was introduced as a clarification sidecar. The idea was good:
-Prethinker remains the strict compiler, while Freethinker watches recent context
-and helps improve or resolve clarification turns.
-
-That split was valuable for clarifying permissions: Freethinker was a liaison,
-not an authority. It could help with questions like:
-
-- "Which patient does 'his' refer to?"
-- "Is there exactly one grounded candidate in recent context?"
-- "Can the clarification question be made more precise?"
-
-But Freethinker was not a full answer to the broader semantic problem. Its first
-role was advisory, and the default policy remained off. It was designed to
-assist moments where Prethinker hesitated, not to replace the semantic parser.
+An earlier clarification-sidecar design helped clarify the permission boundary:
+a helper could suggest context, but only Prethinker and the deterministic mapper
+could authorize writes. That was useful as a design exercise, but it is not the
+current mainline.
 
 The bigger issue was upstream: the main parser was still a tightly caged model
-being asked to emit a narrow parse. When it missed the shape of an utterance,
-Freethinker could sometimes help clarify, but it did not remove the need for
+being asked to emit a narrow parse. When it missed the shape of an utterance, a
+sidecar could sometimes improve a question, but it did not remove the need for
 Python to perform increasingly specific semantic repair.
 
 That is why we are now exploring a more fundamental change:
@@ -218,13 +208,13 @@ building the fence out of one-off English patches.
 
 We tested several local model candidates and prompting modes.
 
-The early bakeoff compared `qwen3.5:9b`, `qwen3.6:27b`,
+The early bakeoff compared a smaller Qwen baseline, a 27B dense Qwen model,
 `qwen3.6:35b-a3b`, `gemma4:26b`, and `medgemma:27b` across semantic workspace,
 ambiguity critic, and strict compiler styles.
 
 The important takeaways:
 
-- `qwen3.5:9b` remained a strong fast baseline, especially as a strict compiler.
+- the smaller Qwen baseline remained a strong fast baseline, especially as a strict compiler.
   But it did not feel like the model we wanted for broader semantic
   understanding.
 - `qwen3.6:27b` looked strong when allowed to do rich semantic workspace
@@ -318,7 +308,7 @@ against the semantic IR path inside the runtime.
 Legacy path:
 
 ```text
-qwen35-semparse:9b + parser + Python rescue chain
+old baked parser-lane model + parser + Python rescue chain
 ```
 
 Semantic IR path:
@@ -500,7 +490,7 @@ the architecture.
 5. Measure Python rescue dependency directly, not anecdotally.
 6. Tighten the semantic IR schema around rules, negation, claims, and temporal
    scope.
-7. Treat Freethinker as a shelved clarification-sidecar concept, not the main
+7. Treat the old clarification sidecar as historical scaffolding, not the main
    semantic compiler.
 
 ## Slide Outline
@@ -512,7 +502,7 @@ the architecture.
    - Too much semantic rescue was accumulating in Python.
    - The system risked becoming test-specific.
 
-3. Why Freethinker helped but was not enough
+3. Why the retired sidecar was not enough
    - Good clarification sidecar.
    - Not a replacement for richer semantic understanding.
 

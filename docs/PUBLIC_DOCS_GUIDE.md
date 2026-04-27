@@ -20,8 +20,6 @@ Use the project terms this way:
 - **Mapper**: deterministic code that admits, skips, clarifies, quarantines, or
   rejects candidate operations.
 - **Prolog KB**: the durable symbolic state after admission.
-- **Freethinker**: shelved optional clarification-sidecar experiment; not the
-  current mainline path.
 - **Console**: the live cockpit for watching the process.
 - **Medical/UMLS**: the current bounded domain lane, not a general clinical
   reasoning claim.
@@ -102,16 +100,20 @@ got here, not as the current center of gravity:
 
 - [docs/GIC_ENGLISH_INPUT_PIPELINE.md](https://github.com/dr3d/prethinker/blob/main/docs/GIC_ENGLISH_INPUT_PIPELINE.md)
 Old generated HTML run reports, ladder/rung pages, dated prompt snapshots,
-legacy parser-lane notes, and stale report manifests were retired from the
-forward-facing tree. Git history preserves them. The older 9B English-parser
-lane is useful history, but it should not be mistaken for the preferred future
-architecture.
+pre-mid-April media/results, legacy parser-lane notes, and stale report
+manifests were retired from the forward-facing tree. Git history preserves them.
+The older English-parser lane is useful history, but it should not be mistaken
+for the preferred future architecture centered on `qwen/qwen3.6-35b-a3b` and
+Semantic IR context engineering.
 
 ## Current Evidence Snapshot
 
 Latest local verification before this refresh:
 
 - Full pytest suite: `318 passed`
+- Harbor frontier latest pass: `14/14` JSON/schema, raw model labels `13/14`,
+  mapper-projected decisions `14/14`, admission contracts `14/14`, admission
+  checks `52/52`, average rough score `0.96`
 - Profile-aware Semantic IR/UMLS handoff: `medical@v0` now supplies predicate contracts plus compact UMLS bridge context to the model input before deterministic admission
 - Domain-profile catalog foundation: thin roster plus mock `story_world@v0` and `probate@v0` thick-context packages for future skill-like profile selection
 - Auto profile-selection smoke: deterministic selector can steer one synthetic conversation through `medical@v0`, `legal_courtlistener@v0`, `sec_contracts@v0`, then back to `medical@v0`, loading matching thick context and predicate contracts per turn

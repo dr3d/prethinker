@@ -109,9 +109,9 @@ class RuntimeHooks:
                 str(bool(config.get("semantic_ir_thinking", False))),
                 str(round(float(config.get("clarification_eagerness", 0.75) or 0.75), 3)),
                 str(config.get("freethinker_resolution_policy", "off")),
-                str(config.get("freethinker_backend", "ollama")),
-                str(config.get("freethinker_base_url", "http://127.0.0.1:11434")),
-                str(config.get("freethinker_model", "qwen3.5:9b")),
+                str(config.get("freethinker_backend", "lmstudio")),
+                str(config.get("freethinker_base_url", "http://127.0.0.1:1234")),
+                str(config.get("freethinker_model", "qwen/qwen3.6-35b-a3b")),
                 str(int(config.get("freethinker_context_length", 16384) or 16384)),
                 str(int(config.get("freethinker_timeout", 60) or 60)),
                 str(round(float(config.get("freethinker_temperature", 0.2) or 0.2), 3)),
@@ -155,11 +155,11 @@ class RuntimeHooks:
             freethinker_resolution_policy=str(
                 config.get("freethinker_resolution_policy", "off") or "off"
             ),
-            freethinker_backend=str(config.get("freethinker_backend", "ollama") or "ollama"),
+            freethinker_backend=str(config.get("freethinker_backend", "lmstudio") or "lmstudio"),
             freethinker_base_url=str(
-                config.get("freethinker_base_url", "http://127.0.0.1:11434") or "http://127.0.0.1:11434"
+                config.get("freethinker_base_url", "http://127.0.0.1:1234") or "http://127.0.0.1:1234"
             ),
-            freethinker_model=str(config.get("freethinker_model", "qwen3.5:9b") or "qwen3.5:9b"),
+            freethinker_model=str(config.get("freethinker_model", "qwen/qwen3.6-35b-a3b") or "qwen/qwen3.6-35b-a3b"),
             freethinker_context_length=max(512, int(config.get("freethinker_context_length", 16384) or 16384)),
             freethinker_timeout=max(5, int(config.get("freethinker_timeout", 60) or 60)),
             freethinker_temperature=max(0.0, min(2.0, float(config.get("freethinker_temperature", 0.2) or 0.2))),
@@ -1083,7 +1083,7 @@ class RuntimeHooks:
         prompt = self._build_served_prompt(utterance=utterance, route=route, execution=execution)
         api_key = _get_api_key()
         backend = str(config.get("served_llm_provider", "ollama") or "ollama")
-        model = str(config.get("served_llm_model", "qwen3.5:9b") or "qwen3.5:9b")
+        model = str(config.get("served_llm_model", "qwen/qwen3.6-35b-a3b") or "qwen/qwen3.6-35b-a3b")
         base_url = str(config.get("served_llm_base_url", "http://127.0.0.1:11434") or "http://127.0.0.1:11434")
         try:
             raw = _call_model_prompt(

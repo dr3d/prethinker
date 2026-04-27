@@ -55,7 +55,7 @@ It is reinforced by:
 - the bounded UMLS MVP probes and bridge admission preflight
 - the medical prompt probe
 - the clarification-aware medical probe
-- the local `qwen3.5:27b` ontology prospector run
+- the local ontology prospector run
 
 See:
 
@@ -88,7 +88,7 @@ Recommended posture for this profile:
 - `strict_registry=true`
 - `strict_types=false`
 - higher clarification eagerness
-- `freethinker_resolution_policy=off`
+- experimental sidecar policy off
 
 The older advisory-sidecar idea has been superseded for the mainline path by
 Semantic IR context engineering: profile context, recent context, predicate
@@ -125,9 +125,9 @@ For batch experiments, the current stack can already use the profile assets expl
 
 ```powershell
 python kb_pipeline.py `
-  --backend ollama `
-  --base-url http://127.0.0.1:11434 `
-  --model qwen3.5:9b `
+  --backend lmstudio `
+  --base-url http://127.0.0.1:1234 `
+  --model qwen/qwen3.6-35b-a3b `
   --scenario kb_scenarios/stage_02_rule_ingest.json `
   --kb-name medical_profile_demo `
   --predicate-registry modelfiles/predicate_registry.medical.json `
@@ -149,7 +149,7 @@ A live LM Studio smoke after this wiring normalized `Priya is taking Coumadin.` 
 The profile can now also be exercised as one manifest-driven package with:
 
 ```powershell
-python scripts/run_medical_profile_suite.py --model qwen3.5:9b
+python scripts/run_medical_profile_suite.py --model qwen/qwen3.6-35b-a3b
 ```
 
 That suite rolls up:

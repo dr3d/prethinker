@@ -103,15 +103,13 @@ This is important because the same UI needs to serve two audiences:
 
 ## Default Binding Choices
 
-- legacy compiler model: `qwen3.5:9b` or baked local equivalent when explicitly testing the old lane
+- legacy compiler model: only when explicitly testing the old parser lane
 - semantic IR research/default console model: `qwen/qwen3.6-35b-a3b` via LM Studio/OpenAI-compatible structured output
 - compiler mode: `strict`
-- legacy compiler backend: `ollama`
-- legacy compiler base URL: `http://127.0.0.1:11434`
 - semantic IR backend: `lmstudio`
 - semantic IR base URL: `http://127.0.0.1:1234`
 - served handoff mode in strict mode: `never`
-- Freethinker sidecar policy: `off`
+- experimental sidecar policy: `off`
 
 ## Long Narrative Ingestion
 
@@ -155,27 +153,12 @@ collapsing into one overlarge workspace. The rule is structural and domain
 neutral: split where the turn mode changes, then let each segment go through
 normal Semantic IR admission.
 
-## Freethinker Status
+## Experimental Sidecar Status
 
-Freethinker exists as a shelved design-track capability, not as a default
-behavioral change and not as part of the current mainline research path.
-
-Current state:
-
-- config surface exists
-- trace slot exists
-- default policy is `off`
-- no live Freethinker resolution is currently changing commits in the console
-
-Current intended path:
-
-- leave it off for normal research runs
-- use the primary Semantic IR pass for context engineering
-- revisit the sidecar only as a controlled experiment with a sidecar-off control
-
-Reference:
-
-- [docs/FREETHINKER_DESIGN.md](https://github.com/dr3d/prethinker/blob/main/docs/FREETHINKER_DESIGN.md)
+Sidecar controls remain in the UI/config only so old experiments can be
+reproduced. They are off by default and not part of the current mainline
+research path. Normal console work should use the primary Semantic IR pass with
+recent context, profile context, predicate contracts, and KB seed context.
 
 ## Deliberate Limits
 

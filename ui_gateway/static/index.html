@@ -239,7 +239,7 @@
         </div>
         <div class="mini-card">
           <span class="mini-label">Served LLM</span>
-          <strong id="served-model-label">qwen3.5:9b</strong>
+          <strong id="served-model-label">qwen/qwen3.6-35b-a3b</strong>
         </div>
       </div>
       <div class="diagram-box">
@@ -275,7 +275,7 @@
         </div>
         <p class="status-line compact-line">
           Strict lock enforces compiler=`strict`, served handoff=`never`, and final confirmation=`true`.
-          Semantic IR is the current primary path; Freethinker is a shelved sidecar experiment.
+          Semantic IR is the current primary path; the sidecar controls are retained only for controlled experiments.
           Served chat keeps fact compilation on, but lets uncertain turns fall through to the served model.
         </p>
       </div>

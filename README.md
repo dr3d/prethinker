@@ -8,7 +8,7 @@ The core bet is simple: **the model may propose, but deterministic code decides 
 
 This is not "English to Prolog by vibes." It is a research workbench for controlled memory admission: how much semantic understanding can a strong model contribute while a deterministic runtime prevents unsafe writes, ambiguity collapse, and claim/fact confusion?
 
-Current center: a live `ui_gateway` console backed by `src/mcp_server.py`, the `semantic_ir_v1` runtime path with `qwen3.6:35b-a3b`, profile-aware admission, and three starter domain lanes: bounded medical/UMLS, CourtListener legal-source intake, and SEC/contracts obligation intake.
+Current center: a live `ui_gateway` console backed by `src/mcp_server.py`, the `semantic_ir_v1` runtime path with `qwen/qwen3.6-35b-a3b`, profile-aware admission, and three starter domain lanes: bounded medical/UMLS, CourtListener legal-source intake, and SEC/contracts obligation intake.
 
 ![Prethinker semantic IR workspace](docs/assets/prethinker-semantic-ir-workspace.png)
 

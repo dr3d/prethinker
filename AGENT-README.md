@@ -35,7 +35,6 @@ Treat older reports and prompt snapshots as Git history, not live guidance.
 - `adapters/courtlistener/` is a conservative legal-source adapter. Keep live generated data under ignored `datasets/courtlistener/generated/`; do not commit raw API caches.
 - `adapters/sec_edgar/` is a conservative SEC/contract adapter shell. Keep live generated data under ignored `datasets/sec_edgar/generated/`; do not commit raw API caches.
 - `src/umls_mvp.py` and `scripts/build_umls_semantic_network_kb.py` contain the current UMLS bridge/Semantic Network work.
-- `Freethinker` is a shelved optional sidecar experiment. The current mainline path is Semantic IR plus domain/recent-context/KB-seeded context engineering.
 - The Prolog KB receives committed facts/rules only after runtime gates accept them.
 
 ## Core Invariants

@@ -24,7 +24,7 @@ tmp/guardrail_dependency_ab/
 
 Each scenario is run through two fresh runtime servers:
 
-- legacy: `qwen35-semparse:9b` plus the current parser and Python rescue chain
+- legacy: the old baked parser-lane model plus the parser and Python rescue chain
 - semantic IR: `qwen3.6:35b` plus the `semantic_ir_v1` mapper
 
 The runner records:
@@ -209,7 +209,7 @@ The mapper contract for those structural rules is documented in
 Run:
 
 ```text
-python scripts/run_guardrail_dependency_ab.py --backend lmstudio --base-url http://127.0.0.1:1234 --legacy-model qwen/qwen3.5-9b --semantic-model qwen/qwen3.6-35b-a3b --scenario-group rule_mutation --timeout 300
+python scripts/run_guardrail_dependency_ab.py --backend lmstudio --base-url http://127.0.0.1:1234 --legacy-model <legacy-parser-model> --semantic-model qwen/qwen3.6-35b-a3b --scenario-group rule_mutation --timeout 300
 ```
 
 Latest local evidence:
@@ -348,7 +348,7 @@ medical-sounding witness-discredit claim.
 Run:
 
 ```text
-python scripts/run_guardrail_dependency_ab.py --backend lmstudio --base-url http://127.0.0.1:1234 --legacy-model qwen/qwen3.5-9b --semantic-model qwen/qwen3.6-35b-a3b --scenario-group silverton_noisy --timeout 300
+python scripts/run_guardrail_dependency_ab.py --backend lmstudio --base-url http://127.0.0.1:1234 --legacy-model <legacy-parser-model> --semantic-model qwen/qwen3.6-35b-a3b --scenario-group silverton_noisy --timeout 300
 ```
 
 Latest local result:

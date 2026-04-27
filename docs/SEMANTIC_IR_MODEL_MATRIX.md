@@ -31,7 +31,7 @@ external benchmark.
 | Model | Rule/Mutation | Weak Edges | Hard Edge |
 | --- | ---: | ---: | ---: |
 | `qwen/qwen3.6-35b-a3b` | 10/10, avg 0.917 | 9/10, avg 0.967 | 17/20, avg 0.930 |
-| `qwen/qwen3.5-9b` | 10/10, avg 0.917 | 8/10, avg 0.917 | 14/20, avg 0.881 |
+| smaller Qwen baseline | 10/10, avg 0.917 | 8/10, avg 0.917 | 14/20, avg 0.881 |
 | `qwen/qwen3.6-27b` | 9/10, avg 0.883 | 7/10, avg 0.883 | not run |
 | `google/gemma-4-26b-a4b` | 10/10, avg 0.917 | 10/10, avg 0.983 | 19/20, avg 0.959 |
 | `nvidia/nemotron-3-nano` | 4/10, avg 0.652 | 4/10, avg 0.692 | not run |
@@ -81,7 +81,7 @@ surfacing for skipped operations, and real temporal reasoning.
 Recommended research defaults:
 
 - primary comparison model: `qwen/qwen3.6-35b-a3b`
-- small baseline: `qwen/qwen3.5-9b`
+- small baseline: the older smaller-Qwen parser comparison lane
 - different-family challenger: `google/gemma-4-26b-a4b`
 - negative contrast: `nvidia/nemotron-3-nano`
 

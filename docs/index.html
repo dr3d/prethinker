@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Prethinker Docs Hub</title>
-  <meta name="description" content="Public documentation hub for Prethinker: current status, governed adapter design, front-door evidence, and media." />
+  <meta name="description" content="Public documentation hub for Prethinker: current status, governed adapter design, front-door evidence, and recent results." />
   <style>
     @import url("https://fonts.googleapis.com/css2?family=Sora:wght@500;700;800&family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap");
 
@@ -388,9 +388,8 @@
         <a href="#start">Start Here</a>
         <a href="#console">Console</a>
         <a href="#evidence">Evidence</a>
-        <a href="#media">Media</a>
+        <a href="#recent-results">Recent Results</a>
         <a href="#data">Data</a>
-        <a href="#archive">Archive</a>
       </div>
       <div class="metrics">
         <div class="metric">
@@ -404,14 +403,14 @@
           <div class="hint">Runtime A/B decision labels; avg 0.976</div>
         </div>
         <div class="metric">
-          <div class="k">Weak Edges</div>
-          <div id="m-glitch" class="v">10/10</div>
-          <div class="hint">Semantic IR runtime A/B; avg 1.000</div>
+          <div class="k">Mixed Domains</div>
+          <div id="m-glitch" class="v">40/40</div>
+          <div class="hint">Seed 2718 profile selection + valid Semantic IR</div>
         </div>
         <div class="metric">
-          <div class="k">Silverton Noisy</div>
-          <div id="m-runs" class="v">2/8</div>
-          <div class="hint" id="m-runs-hint">Hard frontier pressure gauge, not demo headline</div>
+          <div class="k">Harbor Frontier</div>
+          <div id="m-runs" class="v">14/14</div>
+          <div class="hint" id="m-runs-hint">Mapper-projected decisions and admission contracts</div>
         </div>
       </div>
     </section>
@@ -528,16 +527,6 @@
           <p>Runtime path from UI utterance through context engineering, domain profile selection, Semantic IR, mapper admission, queries, and KB mutation.</p>
           <div class="actions">
             <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_UTTERANCE_PIPELINE.md">Open</a>
-            <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/GIC_ENGLISH_INPUT_PIPELINE.md">Legacy GIC</a>
-          </div>
-        </article>
-        <article class="card">
-          <span class="tag">Shelved</span>
-          <h3>Freethinker Sidecar</h3>
-          <p>Historical clarification-sidecar design. Useful background, but no longer the mainline path; Semantic IR context engineering now carries this work.</p>
-          <div class="actions">
-            <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md">Status</a>
-            <a class="btn cool" href="https://github.com/dr3d/prethinker/blob/main/docs/FREETHINKER_DESIGN.md">Historical Note</a>
           </div>
         </article>
       </div>
@@ -575,15 +564,6 @@
           </div>
         </article>
         <article class="card half">
-          <span class="tag">Mechanism</span>
-          <h3>Interrogator + MITM Contract</h3>
-          <p>How deterministic ingest, clarification, commit, and exam loops are wired and interpreted.</p>
-          <div class="actions">
-            <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/KB_INTERROGATOR.md">KB Interrogator</a>
-            <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/prethink_control_plane_contract.md">Control Plane Contract</a>
-          </div>
-        </article>
-        <article class="card half">
           <span class="tag">Explainer</span>
           <h3>Architecture Notes</h3>
           <p>Compact explainers for collaborators who need the mental model without digging through session logs.</p>
@@ -596,14 +576,30 @@
       </div>
     </section>
 
-    <section id="media" class="section">
-      <h2>Media + Podcasts</h2>
-      <p class="lede">Manifest-driven media cards with direct embedded playback and download links.</p>
-      <div class="card wide">
-        <span class="tag">Showcase</span>
-        <h3>Asset Feed</h3>
-        <p id="media-status">Loading media from <code>assets/media_manifest.json</code>...</p>
-        <div id="media-grid" class="media-grid"></div>
+    <section id="recent-results" class="section">
+      <h2>Recent Results</h2>
+      <p class="lede">Only current April 2026 evidence is surfaced here; older generated reports and pre-pivot records stay in Git history.</p>
+      <div class="grid">
+        <article class="card half">
+          <span class="tag">Latest</span>
+          <h3>Harbor Frontier</h3>
+          <p>Latest pass: <strong>14/14</strong> JSON/schema, mapper-projected decisions, admission contracts, and admission checks <strong>52/52</strong>; average rough score <strong>0.96</strong>.</p>
+        </article>
+        <article class="card half">
+          <span class="tag">Agility</span>
+          <h3>Mixed-Domain Seed 2718</h3>
+          <p>Legal, SEC/contracts, medical, story-world, and probate turns held <strong>40/40</strong> expected profile selections and <strong>40/40</strong> valid Semantic IR after stricter predicate-contract gates.</p>
+        </article>
+        <article class="card half">
+          <span class="tag">Runtime</span>
+          <h3>Semantic IR Edge Packs</h3>
+          <p>Edge runtime A/B: <strong>20/20</strong> decision labels, avg <strong>0.976</strong>. Weak-edge pass: <strong>10/10</strong>, avg <strong>1.000</strong>. Non-mapper parse rescues: <strong>0</strong>.</p>
+        </article>
+        <article class="card half">
+          <span class="tag">Tests</span>
+          <h3>Verification</h3>
+          <p>Latest full pytest suite: <strong>318 passed</strong>. Focused story/UI/config verification: <strong>55 passed</strong>. Legal and SEC profile checks: <strong>8</strong> and <strong>9</strong> passed.</p>
+        </article>
       </div>
     </section>
 
@@ -672,121 +668,8 @@
         });
       }
 
-      async function safeJson(url) {
-        try {
-          const res = await fetch(url, { cache: "no-store" });
-          if (!res.ok) return null;
-          return await res.json();
-        } catch (_) {
-          return null;
-        }
-      }
-
-      function normalizeManifestEntries(raw) {
-        if (!raw || !Array.isArray(raw.entries)) return [];
-        return raw.entries.map((entry) => {
-          const variants = Array.isArray(entry.variants) ? entry.variants : [];
-          return {
-            title: String(entry.title || entry.base || "Untitled"),
-            variants: variants
-              .filter((v) => v && v.src)
-              .map((v) => ({
-                src: String(v.src),
-                kind: String(v.kind || "").toLowerCase(),
-                type: String(v.type || ""),
-                label: String(v.label || "").toUpperCase() || "MEDIA",
-              })),
-          };
-        }).filter((e) => e.variants.length > 0);
-      }
-
-      const manifestFallback = {
-        entries: [
-          { title: "The Governed Pipeline", variants: [{ src: "assets/The_Governed_Pipeline.mp4", kind: "video", type: "video/mp4", label: "MP4" }] },
-          { title: "English As A Logic Programming Language", variants: [{ src: "assets/English-as-a-Logic-Programming-Language.mp3", kind: "audio", type: "audio/mpeg", label: "MP3" }] },
-          { title: "Fixing AI Hallucinations With Prolog", variants: [{ src: "assets/Fixing-AI-Hallucinations-with-Prolog.mp3", kind: "audio", type: "audio/mpeg", label: "MP3" }] },
-          { title: "How PRETHINKER Protects AI Database Integrity", variants: [{ src: "assets/How-PRETHINKER-Protects-AI-Database-Integrity.mp3", kind: "audio", type: "audio/mpeg", label: "MP3" }] },
-          { title: "Neuro Symbolic Architecture Stops AI Hallucinations", variants: [{ src: "assets/Neuro-Symbolic-Architecture-Stops-AI-Hallucinations.mp3", kind: "audio", type: "audio/mpeg", label: "MP3" }] },
-          { title: "Prethinker Trustworthy AI", variants: [{ src: "assets/Prethinker-Trustworthy-AI.mp4", kind: "video", type: "video/mp4", label: "MP4" }] },
-          { title: "Sharp Memory Versus Mushy AI Fluency", variants: [{ src: "assets/Sharp-Memory-Versus-Mushy-AI-Fluency.mp3", kind: "audio", type: "audio/mpeg", label: "MP3" }] },
-        ],
-      };
-
-      function renderMedia(entries) {
-        const status = document.getElementById("media-status");
-        const host = document.getElementById("media-grid");
-        if (!status || !host) return;
-        host.innerHTML = "";
-        if (!entries.length) {
-          status.textContent = "No media assets found.";
-          return;
-        }
-        status.textContent = `Loaded ${entries.length} media entries.`;
-        for (const entry of entries) {
-          const card = document.createElement("article");
-          card.className = "media-card";
-          const title = document.createElement("h4");
-          title.textContent = entry.title;
-          card.appendChild(title);
-
-          const videos = entry.variants.filter((v) => v.kind === "video");
-          const audios = entry.variants.filter((v) => v.kind === "audio");
-
-          if (videos.length) {
-            const v = document.createElement("video");
-            v.controls = true;
-            v.preload = "metadata";
-            for (const item of videos) {
-              const src = document.createElement("source");
-              src.src = item.src;
-              if (item.type) src.type = item.type;
-              v.appendChild(src);
-            }
-            card.appendChild(v);
-          }
-          if (audios.length) {
-            const a = document.createElement("audio");
-            a.controls = true;
-            a.preload = "metadata";
-            for (const item of audios) {
-              const src = document.createElement("source");
-              src.src = item.src;
-              if (item.type) src.type = item.type;
-              a.appendChild(src);
-            }
-            card.appendChild(a);
-          }
-
-          const actions = document.createElement("div");
-          actions.className = "actions";
-          for (const v of entry.variants) {
-            const a = document.createElement("a");
-            a.className = "btn";
-            a.href = v.src;
-            a.textContent = `${v.label || "FILE"} File`;
-            actions.appendChild(a);
-          }
-          card.appendChild(actions);
-          host.appendChild(card);
-        }
-      }
-
-      async function loadDashboard() {
-        const [mediaManifest] = await Promise.all([
-          safeJson("assets/media_manifest.json"),
-        ]);
-
-        // Headline metrics are intentionally static current-state claims.
-        // Detailed current verification lives in PROJECT_STATE.md.
-
-        const mediaEntries = normalizeManifestEntries(mediaManifest || manifestFallback);
-        renderMedia(mediaEntries);
-      }
-
-      loadDashboard().catch(() => {
-        document.getElementById("media-status").textContent = "Unable to load media and telemetry feeds.";
-        renderMedia(normalizeManifestEntries(manifestFallback));
-      });
+      // Headline metrics are intentionally static current-state claims.
+      // Detailed current verification lives in PROJECT_STATE.md.
     })();
   </script>
 </body>

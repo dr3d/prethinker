@@ -135,7 +135,7 @@ def test_medical_profile_suite_render_summary_mentions_profile_and_rollups():
         {
             "generated_at_utc": "2026-04-23T00:00:00+00:00",
             "profile_id": "medical@v0",
-            "model": "qwen3.5:9b",
+            "model": "qwen/qwen3.6-35b-a3b",
             "profile_assets": {
                 "profile_manifest": "modelfiles/profile.medical.v0.json",
                 "predicate_registry": "modelfiles/predicate_registry.medical.json",

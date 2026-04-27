@@ -188,24 +188,24 @@ class PrologMCPServer:
         *,
         active_profile: str = "general",
         compiler_mode: str = "strict",
-        compiler_backend: str = "ollama",
-        compiler_base_url: str = "http://127.0.0.1:11434",
-        compiler_model: str = "qwen3.5:9b",
-        compiler_context_length: int = 8192,
-        compiler_timeout: int = 60,
+        compiler_backend: str = "lmstudio",
+        compiler_base_url: str = "http://127.0.0.1:1234",
+        compiler_model: str = "qwen/qwen3.6-35b-a3b",
+        compiler_context_length: int = 16384,
+        compiler_timeout: int = 120,
         compiler_prompt_file: str = "",
         compiler_prompt_enabled: bool = True,
         freethinker_resolution_policy: str = "off",
-        freethinker_backend: str = "ollama",
-        freethinker_base_url: str = "http://127.0.0.1:11434",
-        freethinker_model: str = "qwen3.5:9b",
+        freethinker_backend: str = "lmstudio",
+        freethinker_base_url: str = "http://127.0.0.1:1234",
+        freethinker_model: str = "qwen/qwen3.6-35b-a3b",
         freethinker_context_length: int = 16384,
         freethinker_timeout: int = 60,
         freethinker_prompt_file: str = "",
         freethinker_temperature: float = 0.2,
         freethinker_thinking: bool = False,
         semantic_ir_enabled: bool = False,
-        semantic_ir_model: str = "qwen3.6:35b",
+        semantic_ir_model: str = "qwen/qwen3.6-35b-a3b",
         semantic_ir_context_length: int = 16384,
         semantic_ir_timeout: int = 120,
         semantic_ir_temperature: float = 0.0,
@@ -224,9 +224,9 @@ class PrologMCPServer:
         self._compiler_mode = str(compiler_mode or "strict").strip().lower()
         if self._compiler_mode not in {"strict", "auto", "heuristic"}:
             self._compiler_mode = "strict"
-        self._compiler_backend = str(compiler_backend or "ollama").strip()
-        self._compiler_base_url = str(compiler_base_url or "http://127.0.0.1:11434").strip()
-        self._compiler_model = str(compiler_model or "qwen3.5:9b").strip()
+        self._compiler_backend = str(compiler_backend or "lmstudio").strip()
+        self._compiler_base_url = str(compiler_base_url or "http://127.0.0.1:1234").strip()
+        self._compiler_model = str(compiler_model or "qwen/qwen3.6-35b-a3b").strip()
         self._compiler_context_length = max(512, int(compiler_context_length))
         self._compiler_timeout = max(5, int(compiler_timeout))
         prompt_candidate = str(compiler_prompt_file or "").strip()
@@ -239,7 +239,7 @@ class PrologMCPServer:
         self._compiler_prompt_load_error = ""
         self._compiler_api_key = _get_api_key()
         self._semantic_ir_enabled = bool(semantic_ir_enabled)
-        self._semantic_ir_model = str(semantic_ir_model or "qwen3.6:35b").strip()
+        self._semantic_ir_model = str(semantic_ir_model or "qwen/qwen3.6-35b-a3b").strip()
         self._semantic_ir_context_length = max(512, int(semantic_ir_context_length))
         self._semantic_ir_timeout = max(5, int(semantic_ir_timeout))
         self._semantic_ir_temperature = _clip_temperature(semantic_ir_temperature, 0.0)
@@ -263,9 +263,9 @@ class PrologMCPServer:
             freethinker_resolution_policy,
             "off",
         )
-        self._freethinker_backend = str(freethinker_backend or "ollama").strip()
-        self._freethinker_base_url = str(freethinker_base_url or "http://127.0.0.1:11434").strip()
-        self._freethinker_model = str(freethinker_model or "qwen3.5:9b").strip()
+        self._freethinker_backend = str(freethinker_backend or "lmstudio").strip()
+        self._freethinker_base_url = str(freethinker_base_url or "http://127.0.0.1:1234").strip()
+        self._freethinker_model = str(freethinker_model or "qwen/qwen3.6-35b-a3b").strip()
         self._freethinker_context_length = max(512, int(freethinker_context_length))
         self._freethinker_timeout = max(5, int(freethinker_timeout))
         self._freethinker_temperature = _clip_temperature(freethinker_temperature, 0.2)
@@ -4799,11 +4799,11 @@ def main() -> int:
         default="strict",
         help="Pre-think compiler mode: strict binds to compiler model, auto falls back to heuristics, heuristic skips compiler.",
     )
-    parser.add_argument("--compiler-backend", default="ollama", help="Compiler backend (ollama or lmstudio).")
-    parser.add_argument("--compiler-base-url", default="http://127.0.0.1:11434", help="Compiler backend base URL.")
-    parser.add_argument("--compiler-model", default="qwen3.5:9b", help="Compiler model tag.")
-    parser.add_argument("--compiler-context-length", type=int, default=8192, help="Compiler context length.")
-    parser.add_argument("--compiler-timeout", type=int, default=60, help="Compiler timeout in seconds.")
+    parser.add_argument("--compiler-backend", default="lmstudio", help="Compiler backend (ollama or lmstudio).")
+    parser.add_argument("--compiler-base-url", default="http://127.0.0.1:1234", help="Compiler backend base URL.")
+    parser.add_argument("--compiler-model", default="qwen/qwen3.6-35b-a3b", help="Compiler model tag.")
+    parser.add_argument("--compiler-context-length", type=int, default=16384, help="Compiler context length.")
+    parser.add_argument("--compiler-timeout", type=int, default=120, help="Compiler timeout in seconds.")
     parser.add_argument(
         "--compiler-prompt-file",
         default=str(REPO_ROOT / "modelfiles" / "semantic_parser_system_prompt.md"),
