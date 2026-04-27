@@ -380,6 +380,7 @@ def _render_truth_maintenance(parsed: dict[str, Any]) -> list[str]:
                 ]
             )
     lines.append("**Support / dependency links:**")
+    lines.append("")
     lines.extend(
         _markdown_table(["op #", "kind", "role", "support ref", "confidence"], support_rows)
         if support_rows
@@ -400,6 +401,7 @@ def _render_truth_maintenance(parsed: dict[str, Any]) -> list[str]:
                 ]
             )
     lines.append("**Conflict proposals:**")
+    lines.append("")
     lines.extend(
         _markdown_table(["op #", "existing/context ref", "kind", "policy", "why"], conflict_rows)
         if conflict_rows
@@ -412,6 +414,7 @@ def _render_truth_maintenance(parsed: dict[str, Any]) -> list[str]:
         if isinstance(item, dict):
             retract_rows.append([item.get("operation_index", ""), item.get("target_ref", ""), item.get("reason", "")])
     lines.append("**Retraction plan:**")
+    lines.append("")
     lines.extend(
         _markdown_table(["op #", "target", "reason"], retract_rows)
         if retract_rows
@@ -430,6 +433,7 @@ def _render_truth_maintenance(parsed: dict[str, Any]) -> list[str]:
                 ]
             )
     lines.append("**Derived consequences:**")
+    lines.append("")
     lines.extend(
         _markdown_table(["statement", "basis", "commit policy"], consequence_rows)
         if consequence_rows
@@ -486,11 +490,11 @@ def _render_admission_ops(diagnostics: dict[str, Any]) -> list[str]:
 
 
 def _render_clause_list(title: str, clauses: list[Any]) -> list[str]:
-    lines = [f"**{title}:**"]
+    lines = [f"**{title}:**", ""]
     values = [str(item).strip() for item in clauses if str(item).strip()]
     if not values:
-        return lines + ["- none"]
-    return lines + [f"- `{item}`" for item in values]
+        return lines + ["- none", ""]
+    return lines + [f"- `{item}`" for item in values] + [""]
 
 
 def _render_clause_supports(mapped: dict[str, Any], diagnostics: dict[str, Any]) -> list[str]:
@@ -498,7 +502,7 @@ def _render_clause_supports(mapped: dict[str, Any], diagnostics: dict[str, Any])
     if not isinstance(supports, dict):
         supports = diagnostics.get("clause_supports")
     if not isinstance(supports, dict):
-        return ["**Clause support records:**", "- none"]
+        return ["**Clause support records:**", "", "- none"]
     rows = []
     for effect in ("facts", "rules", "retracts", "queries"):
         for row in _as_list(supports.get(effect)):
@@ -516,8 +520,8 @@ def _render_clause_supports(mapped: dict[str, Any], diagnostics: dict[str, Any])
                 ]
             )
     if not rows:
-        return ["**Clause support records:**", "- none"]
-    return ["**Clause support records:**"] + _markdown_table(
+        return ["**Clause support records:**", "", "- none"]
+    return ["**Clause support records:**", ""] + _markdown_table(
         ["effect", "clause", "op #", "op", "predicate", "source", "rationale"],
         rows,
     )
@@ -553,6 +557,7 @@ def _render_truth_alignment(diagnostics: dict[str, Any]) -> list[str]:
                 ]
             )
     lines.append("**Fuzzy edges:**")
+    lines.append("")
     lines.extend(
         _markdown_table(["severity", "kind", "op #", "detail"], rows)
         if rows
@@ -589,9 +594,11 @@ def _render_conflict_pressure(input_info: dict[str, Any], parsed: dict[str, Any]
 
     lines = []
     lines.append("**Old/current state visible to the model:**")
+    lines.append("")
     lines.extend([f"- {_text(item)}" for item in old_state] or ["- none marked in context"])
     lines.append("")
     lines.append("**Unsafe implications challenged before KB admission:**")
+    lines.append("")
     if unsafe:
         for item in unsafe:
             if isinstance(item, dict):
@@ -604,6 +611,7 @@ def _render_conflict_pressure(input_info: dict[str, Any], parsed: dict[str, Any]
         lines.append("- none")
     lines.append("")
     lines.append("**Skipped operations / conflict gates:**")
+    lines.append("")
     if skipped:
         for op in skipped:
             reason = _text(op.get("skip_reason")).strip() or "skipped"
@@ -679,12 +687,14 @@ def _render_record(
     ]
     if input_info["context"]:
         lines.append("**Context visible to model:**")
+        lines.append("")
         lines.extend(f"- {_text(item)}" for item in input_info["context"])
         lines.append("")
     else:
         lines.extend(["**Context visible to model:** none recorded", ""])
     if input_info["allowed_predicates"]:
         lines.append("**Allowed predicate palette:**")
+        lines.append("")
         lines.append(", ".join(f"`{item}`" for item in input_info["allowed_predicates"]))
         lines.append("")
     else:
@@ -734,12 +744,14 @@ def _render_record(
 
     clarification_questions = [str(item).strip() for item in _as_list(parsed.get("clarification_questions")) if str(item).strip()]
     lines.append("**Clarification questions:**")
+    lines.append("")
     lines.extend([f"- {item}" for item in clarification_questions] or ["- none"])
     lines.append("")
     self_check = parsed.get("self_check") if isinstance(parsed.get("self_check"), dict) else {}
     notes = [str(item).strip() for item in _as_list(self_check.get("notes")) if str(item).strip()]
     missing = [str(item).strip() for item in _as_list(self_check.get("missing_slots")) if str(item).strip()]
     lines.append("**Self-check:**")
+    lines.append("")
     lines.append(f"- missing slots: {', '.join(missing) if missing else 'none'}")
     lines.extend([f"- note: {item}" for item in notes] or ["- note: none"])
     lines.append("")
@@ -801,6 +813,7 @@ def _render_record(
 
     warnings = [str(item).strip() for item in mapper_warnings if str(item).strip()]
     lines.append("**Mapper warnings:**")
+    lines.append("")
     lines.extend([f"- {item}" for item in warnings] or ["- none"])
     lines.append("")
 
