@@ -101,6 +101,7 @@ Latest local verification before this refresh:
 - Profile-aware Semantic IR/UMLS handoff: `medical@v0` now supplies predicate contracts plus compact UMLS bridge context to the model input before deterministic admission
 - Domain-profile catalog foundation: thin roster plus mock `story_world@v0` and `probate@v0` thick-context packages for future skill-like profile selection
 - Auto profile-selection smoke: deterministic selector can steer one synthetic conversation through `medical@v0`, `legal_courtlistener@v0`, `sec_contracts@v0`, then back to `medical@v0`, loading matching thick context and predicate contracts per turn
+- Mixed-domain agility smoke: `scripts/run_mixed_domain_agility.py` shuffled Goldilocks, Glitch, Ledger, CourtListener, SEC/contracts, and medical cases; first LM Studio smoke reached `12/12` expected profile selections and `12/12` valid Semantic IR
 - CourtListener legal-source lane: `legal_courtlistener@v0`, `adapters/courtlistener/`, a synthetic legal seed fixture, and ignored live CourtListener smoke data for claim/finding, citation, docket, role-scope, provenance, and identity-boundary tests
 - SEC/contracts scaffold: `sec_contracts@v0`, `adapters/sec_edgar/`, and a synthetic contract seed fixture for obligation, condition, temporal-trigger, party-scope, and breach-boundary tests
 - Focused Semantic IR console/story-ingestion verification: `55 passed`

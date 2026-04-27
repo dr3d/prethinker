@@ -103,6 +103,15 @@ and verifies that each turn receives the matching thick context and predicate
 palette. This proves the control-plane mechanism can switch domains; it does
 not prove mixed-domain turns are solved.
 
+`scripts/run_mixed_domain_agility.py` is the next pressure gauge. It builds a
+randomized stream from Goldilocks, Glitch, Ledger, Silverton, Harbor,
+CourtListener, SEC/contracts, and medical scenarios, then runs the stream
+through `active_profile=auto`. The first real LM Studio smoke selected the
+expected profile for `12/12` shuffled turns and produced valid Semantic IR for
+`12/12`. The interesting misses were not routing failures; they were downstream
+quality issues such as vague story predicates and placeholder/null arguments in
+otherwise useful legal operations.
+
 ## Thin Roster Versus Thick Profile
 
 The roster should be small enough to keep in ordinary context:

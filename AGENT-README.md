@@ -30,6 +30,7 @@ Treat older reports and prompt snapshots as Git history, not live guidance.
 - Long story-like console inputs may be split into focused Semantic IR segments by `ui_gateway/gateway/phases.py`; each segment still goes through canonical `process_utterance()`, then the gateway dedupes the visible mutation list.
 - `medical@v0` is the active bounded ontology profile; `legal_courtlistener@v0` and `sec_contracts@v0` are live-data profile lanes for provenance/conflict and obligation/rule pressure.
 - `active_profile=auto` uses a deterministic catalog selector to choose one profile per Semantic IR turn and load that profile's thick context/contracts. It is context selection only, not write authority.
+- `scripts/run_mixed_domain_agility.py` is the current cross-domain pressure harness for shuffled Goldilocks/Glitch/Ledger/Silverton/Harbor/legal/SEC/medical streams.
 - `medical@v0` Semantic IR calls include profile-owned predicate contracts and compact UMLS bridge context; the generic mapper should remain structural rather than accumulating medical type lists.
 - `modelfiles/domain_profile_catalog.v0.json` is the thin skill-like roster. `profile.story_world.v0.json`, `profile.probate.v0.json`, `profile.legal_courtlistener.v0.json`, and `profile.sec_contracts.v0.json` are declarative thick-context packages for routing/profile experiments.
 - `adapters/courtlistener/` is a conservative legal-source adapter. Keep live generated data under ignored `datasets/courtlistener/generated/`; do not commit raw API caches.
