@@ -84,6 +84,14 @@ For the current "talk your rules into existence" frontier:
 python scripts/run_semantic_ir_prompt_bakeoff.py --backend lmstudio --base-url http://127.0.0.1:1234 --model qwen/qwen3.6-35b-a3b --scenario-group policy_demo --variants best_guarded_v2
 ```
 
+For the focused cross-turn reimbursement demo:
+
+```powershell
+python scripts/run_policy_reimbursement_demo.py --backend lmstudio --base-url http://127.0.0.1:1234 --model qwen/qwen3.6-35b-a3b --timeout 600 --include-model-input
+```
+
+See [docs/POLICY_REIMBURSEMENT_DEMO.md](https://github.com/dr3d/prethinker/blob/main/docs/POLICY_REIMBURSEMENT_DEMO.md).
+
 The first policy-demo group covers reimbursement rules and February violation
 queries, meeting commitments, contractor-access sponsorship expiry, customer
 support override ladders, story-world throne claims, and business dependency
@@ -95,6 +103,13 @@ The important demo behavior is not that every derived answer becomes a fact. It
 is that the system admits grounded facts, admits explicit queries, and keeps
 derived consequences in the trace unless a deterministic rule path really
 authorizes them.
+
+The focused reimbursement runner now shows that path end to end: English policy
+installs executable rules, later English event reports become facts, the Prolog
+runtime derives `r1` and `r2` as policy violations, and an explicit correction
+removes `r2` from the derived answer without ever writing `violation(r2, ...)`
+as a durable fact. Latest local result: `4/4` parsed, `4/4` expected query
+matches, `4/4` no derived violation write leak, rough score `1.000`.
 
 ## New Demo Focus: Time-Loop Carnival
 

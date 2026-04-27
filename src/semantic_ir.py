@@ -1172,6 +1172,12 @@ def _diagnose_candidate_operation(
     if operation == "rule":
         clause = str(op.get("clause") or op.get("logic") or "").strip()
         if not clause:
+            if _operation_has_variable_like_raw_arg(op):
+                return skip(
+                    "rule_clause_missing",
+                    warning="skipped rule operation with variable-like args but no executable clause",
+                    codes=["rule_policy", "no_rule_synthesis", "variable_args_not_fact"],
+                )
             if args and source == "direct" and polarity == "positive":
                 base["admitted"] = True
                 base["effect"] = "fact"
@@ -1209,6 +1215,28 @@ def _diagnose_candidate_operation(
         base["rationale_codes"] = ["safe_retract"]
         return base
     return skip("unsupported_operation", codes=["operation_policy"])
+
+
+def _operation_has_variable_like_raw_arg(op: dict[str, Any]) -> bool:
+    raw_args = op.get("args")
+    if not isinstance(raw_args, list):
+        return False
+    for item in raw_args:
+        if isinstance(item, dict):
+            for key in ("value", "surface", "normalized", "entity", "id"):
+                if key in item and _raw_arg_looks_like_variable(item.get(key)):
+                    return True
+            continue
+        if _raw_arg_looks_like_variable(item):
+            return True
+    return False
+
+
+def _raw_arg_looks_like_variable(value: Any) -> bool:
+    raw = str(value or "").strip()
+    if raw.startswith("?"):
+        return True
+    return bool(re.fullmatch(r"[A-Z][A-Za-z_]*", raw))
 
 
 def _clause_support_records(diagnosis: dict[str, Any], clauses: list[str]) -> list[dict[str, Any]]:
@@ -2350,6 +2378,8 @@ def _term_from_arg(value: Any, *, entity_names: dict[str, str], for_query: bool)
     raw = str(value or "").strip()
     if raw in entity_names:
         raw = entity_names[raw]
+    if for_query and re.fullmatch(r"[A-Z]", raw):
+        return _variable_name(raw)
     if for_query and raw in {"?", "X", "Y", "Z", "Who", "What", "Where", "When"}:
         return raw if raw in {"X", "Y", "Z"} else "X"
     if for_query and raw.startswith("?"):
