@@ -1,16 +1,16 @@
 {
   "version": 1,
   "defaults": {
-    "backend": "ollama",
-    "base_url": "http://127.0.0.1:11434",
-    "model": "qwen3.5:9b",
+    "backend": "lmstudio",
+    "base_url": "http://127.0.0.1:1234",
+    "model": "qwen/qwen3.6-35b-a3b",
     "prompt_file": "modelfiles/semantic_parser_system_prompt.md",
-    "context_length": 8192,
+    "context_length": 16384,
     "clarification_eagerness": 0.0,
     "max_clarification_rounds": 0,
     "clarification_answer_model": "gpt-oss:20b",
-    "clarification_answer_backend": "ollama",
-    "clarification_answer_base_url": "http://127.0.0.1:11434",
+    "clarification_answer_backend": "lmstudio",
+    "clarification_answer_base_url": "http://127.0.0.1:1234",
     "clarification_answer_context_length": 16384,
     "force_empty_kb": true
   },

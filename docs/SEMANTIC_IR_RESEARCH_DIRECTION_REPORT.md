@@ -517,7 +517,7 @@ the architecture.
    - Less pressure for English-specific Python patches.
 
 6. Model exploration
-   - 9B remains fast baseline.
+   - the smaller Qwen lane remained a fast baseline.
    - 27B is strong but slow.
    - 35B-A3B is the best general sidecar candidate so far.
    - MedGemma is interesting for medical ambiguity, not general authority.

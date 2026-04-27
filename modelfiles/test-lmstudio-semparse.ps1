@@ -2,11 +2,11 @@ param(
   [ValidateSet("lmstudio", "ollama")]
   [string]$Backend = "lmstudio",
   [string]$BaseUrl = "",
-  [string]$Model = "qwen/qwen3.5-9b",
+  [string]$Model = "qwen/qwen3.6-35b-a3b",
   [string]$Utterance = "If someone is a manager then they can approve budgets.",
   [string]$EnvFile = "",
   [bool]$TwoPass = $true,
-  [int]$ContextLength = 4096,
+  [int]$ContextLength = 16384,
   [int]$TimeoutSec = 90
 )
 

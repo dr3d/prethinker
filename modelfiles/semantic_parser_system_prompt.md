@@ -1,4 +1,4 @@
-﻿# Semantic Parser Prompt Pack (Qwen 3.5 9B)
+# Legacy Semantic Parser Prompt Pack
 
 Use this as maintainable guidance for semantic parsing into Prolog structures.
 Keep behavior language-agnostic, deterministic, and schema-strict.

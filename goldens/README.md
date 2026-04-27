@@ -34,7 +34,7 @@ python scripts/golden_kb.py compare --golden goldens/kb/<story_id>.pl --candidat
 Fast benchmark (story scenario -> generated KB -> golden compare):
 
 ```bash
-python scripts/golden_kb.py benchmark --scenario kb_scenarios/<story_id>.json --golden goldens/kb/<story_id>.pl --backend ollama --model qwen3.5:9b --prompt-file modelfiles/semantic_parser_system_prompt.md --clarification-eagerness 0.0 --max-clarification-rounds 0 --force-empty-kb --out-summary tmp/golden_bench_<story_id>.json
+python scripts/golden_kb.py benchmark --scenario kb_scenarios/<story_id>.json --golden goldens/kb/<story_id>.pl --backend lmstudio --model qwen/qwen3.6-35b-a3b --prompt-file modelfiles/semantic_parser_system_prompt.md --clarification-eagerness 0.0 --max-clarification-rounds 0 --force-empty-kb --out-summary tmp/golden_bench_<story_id>.json
 ```
 
 Run every manifest entry:

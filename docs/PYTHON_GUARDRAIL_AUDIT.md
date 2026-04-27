@@ -202,7 +202,7 @@ Definitions:
 Then replay scenario packs through three paths:
 
 ```text
-legacy 9B + full rescue
+legacy parser lane + full rescue
 semantic_ir 35B + full rescue
 semantic_ir 35B + structural_only
 ```
@@ -218,7 +218,8 @@ Track:
 - query answer equivalence
 - trace clarity
 
-The win condition is not merely "35B gets more right." The win condition is:
+The win condition is not merely "the stronger model gets more right." The win
+condition is:
 
 ```text
 semantic_ir 35B + structural_only >= legacy full rescue

@@ -45,8 +45,8 @@ Noisy Silverton probate runs remain hard:
 
 ## Read
 
-Structured output is doing real work. Even the 9B Qwen model stays schema-clean
-and competitive on the smaller rule/mutation pack.
+Structured output is doing real work. Even the smaller Qwen baseline stayed
+schema-clean and competitive on the smaller rule/mutation pack.
 
 But model choice still matters. Nemotron used the same structured-output path
 and still underperformed badly. Its failure shape was not broken JSON; it was
