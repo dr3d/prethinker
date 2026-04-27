@@ -14,6 +14,13 @@ then choose one or more profiles whose description matches the utterance and
 context. Only the selected profile's thicker context is loaded into the
 Semantic IR pass.
 
+There is a second, more speculative direction: profile bootstrapping. When no
+profile exists, Prethinker should eventually be able to run a meta-mode that
+analyzes representative text and proposes candidate entity types, predicates,
+argument contracts, admission risks, clarification policies, and starter
+frontier cases. That proposal is not authority. It is review material for
+creating a new profile package. See [Domain Bootstrapping Meta-Mode](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_BOOTSTRAPPING_META_MODE.md).
+
 ## Current Example
 
 `medical@v0` is the first real profile. Two additional live-data lanes now
@@ -215,6 +222,17 @@ A mature profile should eventually declare:
 - profile-specific clarification policy
 - profile-specific type/grounding validators
 - examples and held-out frontier cases
+
+For unknown domains, the desired process is not to let the model invent
+durable writes freely. The desired process is:
+
+```text
+unknown-domain text
+  -> profile_bootstrap_v1 proposal
+  -> review and frontier tests
+  -> approved profile package
+  -> ordinary semantic_ir_v1 intake with deterministic admission
+```
 
 This is intentionally similar to a skill system: the model gets access to a
 small relevant capability package when the utterance appears to need it. The
