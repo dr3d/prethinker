@@ -4,6 +4,7 @@ const state = {
   configOpen: false,
   heroOpen: false,
   debugMode: false,
+  turnInFlight: false,
   pendingClarification: null,
   turns: [],
 };
@@ -2770,6 +2771,27 @@ function escapeHtml(text) {
     .replaceAll(">", "&gt;");
 }
 
+function setComposerBusy(isBusy) {
+  state.turnInFlight = Boolean(isBusy);
+  const form = document.getElementById("chat-form");
+  const button = document.getElementById("send-button");
+  const label = button?.querySelector(".send-button-label");
+  if (form) {
+    form.classList.toggle("is-processing", state.turnInFlight);
+  }
+  if (button) {
+    button.disabled = state.turnInFlight;
+    button.setAttribute("aria-busy", state.turnInFlight ? "true" : "false");
+    button.setAttribute(
+      "aria-label",
+      state.turnInFlight ? "Prethinker is processing this turn" : "Open front door"
+    );
+  }
+  if (label) {
+    label.textContent = state.turnInFlight ? "Compiling Turn" : "Open Front Door";
+  }
+}
+
 async function loadConfig() {
   const payload = await getJson("/api/config");
   state.config = payload.config;
@@ -2779,6 +2801,9 @@ async function loadConfig() {
 
 async function submitUtterance(event) {
   event.preventDefault();
+  if (state.turnInFlight) {
+    return;
+  }
   const field = document.getElementById("utterance");
   const utterance = field.value.trim();
   if (!utterance) {
@@ -2787,6 +2812,7 @@ async function submitUtterance(event) {
   collapseChatExpandos();
   appendUserMessage(utterance);
   field.value = "";
+  setComposerBusy(true);
 
   try {
     const payload = await getJson("/api/prethink", {
@@ -2828,6 +2854,9 @@ async function submitUtterance(event) {
       ],
     });
     renderLedger();
+  }
+  finally {
+    setComposerBusy(false);
   }
 }
 

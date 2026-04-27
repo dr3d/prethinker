@@ -131,7 +131,11 @@
             <span>Plain language is fine.</span>
             <span>Press <kbd>Enter</kbd> to send, <kbd>Shift</kbd> + <kbd>Enter</kbd> for a new line.</span>
           </div>
-          <button type="submit">Send To Front Door</button>
+          <button id="send-button" class="send-button" type="submit">
+            <span class="send-button-light" aria-hidden="true"></span>
+            <span class="send-button-label">Open Front Door</span>
+            <span class="send-button-arrow" aria-hidden="true">&gt;</span>
+          </button>
         </form>
       </main>
 
