@@ -7,6 +7,7 @@ This folder contains a local MVP for a product-style front door to Prethinker. I
 - a tiny config surface for served-LLM and compiler defaults
 - runtime hooks bound to real pre-think + deterministic core runtime tools
 - semantic IR runtime switches for the current stronger-model research lane
+- segmented Semantic IR ingestion for long story-like utterances
 - one-click session export for post-mortem JSON traces
 
 The UI is now wired to the canonical interactive utterance entryway in `src/mcp_server.py`, so manual console turns exercise the same shared server path instead of a UI-only parser fork.
@@ -66,7 +67,7 @@ This keeps the console as a hard MITM bouncer and prevents served-LLM bypass pat
 
 - `POST /api/prethink`
   - accepts `{ "session_id": "...", "utterance": "..." }`
-  - returns a phaseful envelope: `ingest`, `clarify`, `commit`, `answer`
+  - returns a phaseful envelope: `ingest`, `workspace`, `admission`, `clarify`, `commit`, `answer`
 - `GET /api/config`
   - returns current local console config
 - `POST /api/config`
@@ -96,6 +97,12 @@ browser chat UI
         -> deterministic mapper + Prolog tools (assert/query/retract)
           -> grounded answer envelope
 ```
+
+For long story-like inputs, `gateway/phases.py` can split the input into
+focused line/sentence segments. Each segment still goes through
+`process_utterance()`; the gateway aggregates and dedupes applied mutations for
+the visible turn. This keeps full-story ingestion inspectable without creating a
+parallel UI-only parser.
 
 ## File Map
 

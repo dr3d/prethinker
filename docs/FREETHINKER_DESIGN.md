@@ -70,7 +70,7 @@ Historical probe reports were pruned from the forward-facing tree after their co
 
 ### Canonical Console Path
 
-The console currently routes through `process_utterance()` in [src/mcp_server.py](/D:/_PROJECTS/prethinker/src/mcp_server.py:1845).
+The console currently routes through `process_utterance()` in [src/mcp_server.py](https://github.com/dr3d/prethinker/blob/main/src/mcp_server.py).
 
 Relevant behavior:
 
@@ -80,15 +80,15 @@ Relevant behavior:
 
 Current clarification hold insertion point:
 
-- [src/mcp_server.py](/D:/_PROJECTS/prethinker/src/mcp_server.py:1934)
+- [src/mcp_server.py](https://github.com/dr3d/prethinker/blob/main/src/mcp_server.py)
 
 Current parse carry-forward behavior:
 
-- [src/mcp_server.py](/D:/_PROJECTS/prethinker/src/mcp_server.py:672)
+- [src/mcp_server.py](https://github.com/dr3d/prethinker/blob/main/src/mcp_server.py)
 
 ### Existing Sidecar-Like Machinery
 
-The batch harness already has a helper-model clarification path in [kb_pipeline.py](/D:/_PROJECTS/prethinker/kb_pipeline.py:11369).
+The batch harness already has a helper-model clarification path in [kb_pipeline.py](https://github.com/dr3d/prethinker/blob/main/kb_pipeline.py).
 
 It builds a bounded context pack from:
 
@@ -99,9 +99,9 @@ It builds a bounded context pack from:
 
 Key pieces:
 
-- context pack: [kb_pipeline.py](/D:/_PROJECTS/prethinker/kb_pipeline.py:2400)
-- clarification helper prompt: [kb_pipeline.py](/D:/_PROJECTS/prethinker/kb_pipeline.py:2554)
-- synthetic/helper answer generation: [kb_pipeline.py](/D:/_PROJECTS/prethinker/kb_pipeline.py:2631)
+- context pack: [kb_pipeline.py](https://github.com/dr3d/prethinker/blob/main/kb_pipeline.py)
+- clarification helper prompt: [kb_pipeline.py](https://github.com/dr3d/prethinker/blob/main/kb_pipeline.py)
+- synthetic/helper answer generation: [kb_pipeline.py](https://github.com/dr3d/prethinker/blob/main/kb_pipeline.py)
 
 This is the best existing foundation for Freethinker.
 

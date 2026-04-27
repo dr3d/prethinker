@@ -42,6 +42,11 @@ A separate `rule_mutation` pack keeps two newer edges visible:
   non-exclusive additions, and claims that contradict observed KB state without
   erasing it.
 
+A newer console smoke uses the Goldilocks roundtrip story as a long narrative
+ingestion edge. The useful pressure there is not legal reasoning; it is whether
+the model can preserve event/action structure across many small segments while
+the mapper blocks vague or ungrounded writes.
+
 Initial `qwen/qwen3.6-35b-a3b` LM Studio result:
 
 | Pack | Runs | JSON OK | Schema OK | Decision OK | Avg rough score |
@@ -177,6 +182,23 @@ semantic_ir_mapper
 
 That is the desired shape: the LLM owns semantic interpretation; deterministic
 code owns admission and execution.
+
+The strongest story-ingestion smoke now produces specific narrative facts such
+as:
+
+```prolog
+tasted(goldilocks, papa_bear_porridge).
+sat_in(goldilocks, baby_bear_chair).
+broke(baby_bear_chair).
+asleep_in(goldilocks, baby_bear_bed).
+exited(goldilocks, house).
+ran_through(goldilocks, forest).
+```
+
+The significant improvement is not that this is a solved story reasoner. It is
+that the generic mapper/palette design removed the most obvious bad commits from
+the earlier full-story UI run: `unknown_agent`, voice-as-`carries`, overbroad
+`inside(...)` writes, and stray body-part facts.
 
 ## Weak Edges
 

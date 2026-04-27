@@ -94,7 +94,7 @@ SEMANTIC_IR_JSON_SCHEMA: dict[str, Any] = {
         },
         "entities": {
             "type": "array",
-            "maxItems": 12,
+            "maxItems": 64,
             "items": {
                 "type": "object",
                 "additionalProperties": False,
@@ -123,7 +123,7 @@ SEMANTIC_IR_JSON_SCHEMA: dict[str, Any] = {
         },
         "referents": {
             "type": "array",
-            "maxItems": 8,
+            "maxItems": 32,
             "items": {
                 "type": "object",
                 "additionalProperties": False,
@@ -138,7 +138,7 @@ SEMANTIC_IR_JSON_SCHEMA: dict[str, Any] = {
         },
         "assertions": {
             "type": "array",
-            "maxItems": 8,
+            "maxItems": 64,
             "items": {
                 "type": "object",
                 "additionalProperties": False,
@@ -155,7 +155,7 @@ SEMANTIC_IR_JSON_SCHEMA: dict[str, Any] = {
         },
         "unsafe_implications": {
             "type": "array",
-            "maxItems": 8,
+            "maxItems": 32,
             "items": {
                 "type": "object",
                 "additionalProperties": False,
@@ -169,7 +169,7 @@ SEMANTIC_IR_JSON_SCHEMA: dict[str, Any] = {
         },
         "candidate_operations": {
             "type": "array",
-            "maxItems": 8,
+            "maxItems": 64,
             "items": {
                 "type": "object",
                 "additionalProperties": False,
@@ -185,7 +185,7 @@ SEMANTIC_IR_JSON_SCHEMA: dict[str, Any] = {
                 },
             },
         },
-        "clarification_questions": {"type": "array", "maxItems": 3, "items": {"type": "string"}},
+        "clarification_questions": {"type": "array", "maxItems": 6, "items": {"type": "string"}},
         "self_check": {
             "type": "object",
             "additionalProperties": False,
@@ -193,7 +193,7 @@ SEMANTIC_IR_JSON_SCHEMA: dict[str, Any] = {
             "properties": {
                 "bad_commit_risk": {"type": "string", "enum": ["low", "medium", "high"]},
                 "missing_slots": {"type": "array", "maxItems": 8, "items": {"type": "string"}},
-                "notes": {"type": "array", "maxItems": 8, "items": {"type": "string"}},
+                "notes": {"type": "array", "maxItems": 12, "items": {"type": "string"}},
             },
         },
     },
@@ -222,6 +222,9 @@ UNGROUNDED_ARGUMENT_ATOMS = {
     "unknown",
     "unknown_male",
     "unknown_female",
+    "unknown_agent",
+    "unknown_person",
+    "unknown_actor",
 }
 
 IDENTITY_PREDICATES = {
@@ -249,7 +252,16 @@ BEST_GUARDED_V2_GUIDANCE = (
     "- mixed: same turn contains both safe writes and a query/rule/unsafe implication. If unsafe_implications is non-empty and safe operations are also present, decision MUST be mixed, not commit.\n"
     "- commit: direct state update or correction has a clear target and safe predicate mapping.\n"
     "Special guards:\n"
-    "- Keep arrays compact: at most 8 assertions, 8 unsafe_implications, 8 candidate_operations, and 3 clarification_questions. Never repeat equivalent assertions.\n"
+    "- Completeness beats summary. For narrative ingestion, enumerate every concrete direct event/state that can be safely mapped to allowed predicates; do not compress a sequence into only the main plot points.\n"
+    "- Use all needed candidate_operations up to the schema cap. If a turn contains more safe direct facts than fit in candidate_operations, choose mixed or clarify and put 'segment_required_for_complete_ingestion' in self_check.missing_slots/notes rather than silently summarizing.\n"
+    "- Never repeat equivalent assertions, but do not drop distinct parallel facts such as three bowls, three chairs, and three beds.\n"
+    "- For possession language such as 'has', 'had', 'owned', 'belonged to', or object/furnishing assignment, prefer owns/2 when available. Use carries/2 only for physical carrying/transporting/holding in hand, not for possession of furniture, bowls, beds, rooms, or ordinary belongings.\n"
+    "- For ordinary story-world narration, prefer specific event/state predicates from allowed_predicates when present. Examples: is_a/2 for category, walked_through/2 or ran_through/2 for movement through a place, entered/2 and exited/2 for boundary crossing, found/2 for discovery, on/2 for physical support, tasted/2, ate/2 or ate_all/2 for consumption, sat_in/2 and lay_in/2 for chairs/beds, asleep_in/2 for sleeping location, broke/1 for a broken object, returned_home/1 for returning home, and too_hot_for/2, too_cold_for/2, too_hard_for/2, too_soft_for/2, just_right_for/2 for preference/fit evaluations.\n"
+    "- Do not use inside/2 as a generic substitute for sitting, lying, tasting, eating, seeing, owning, or being about/near something. Use inside/2 only when the utterance says physical containment/interior location.\n"
+    "- Do not use carries/2 for voices, properties, evidence, names, relationships, rooms, furniture, or ownership. If someone spoke or cried out and no speech predicate is available, represent it in assertions, not as a candidate_operation.\n"
+    "- Do not create durable writes with placeholder actors such as unknown_agent/unknown_person/someone. If the actor is unknown but the object state is direct, use passive state predicates from allowed_predicates such as was_tasted/1, was_eaten/1, was_sat_in/1, or was_lain_in/1. Otherwise quarantine or omit the write.\n"
+    "- Preserve stable object identity across segments. Reuse object atoms already present in context for the same object. For possessive story objects, prefer possessor-scoped atoms such as papa_bear_porridge, mama_bear_chair, or baby_bear_bed over generic size-only atoms like big_chair or small_bed. If size is mentioned, it may inform the object atom only when no possessor is available.\n"
+    "- If a segment says an observer saw that an unknown person had acted on an object, commit the passive object state when available, not a vague saw(observer, event_something_...) write. Example: 'Papa saw someone had tasted his porridge' should prefer was_tasted(papa_bear_porridge) and omit the unknown actor/event wrapper unless a precise observed-event predicate is available.\n"
     "- Context entries are already-known state/rules, not new user assertions. Do not create candidate_operations that merely restate context.\n"
     "- Use context to resolve referents and answer queries; only the current utterance may introduce a new write candidate.\n"
     "- If the current utterance contains policy/rule language such as all/every/unless/must/before and also direct facts, choose mixed. Commit the direct facts and represent rule/policy material in assertions or unsafe_implications if no safe rule clause is available.\n"
@@ -297,7 +309,7 @@ class SemanticIRCallConfig:
     top_k: int = 20
     think_enabled: bool = False
     reasoning_effort: str = "none"
-    max_tokens: int = 4096
+    max_tokens: int = 12000
 
 
 def build_semantic_ir_input_payload(
@@ -1035,7 +1047,25 @@ def _generic_grounding_problem(
             "warning": f"skipped {predicate}/{len(args)} because an argument is an unresolved placeholder",
             "codes": ["grounding_policy", "no_placeholder_commit"],
         }
+    if any(_is_placeholder_atom(arg) for arg in args):
+        return {
+            "reason": "ungrounded_argument_atom",
+            "warning": f"skipped {predicate}/{len(args)} because an argument is an unresolved placeholder",
+            "codes": ["grounding_policy", "no_placeholder_commit"],
+        }
     return None
+
+
+def _is_placeholder_atom(arg: str) -> bool:
+    value = str(arg or "").strip().lower()
+    if not value:
+        return True
+    return (
+        value.startswith("unknown_")
+        or value.startswith("someone_")
+        or value.endswith("_unknown")
+        or value.endswith("_unknown_agent")
+    )
 
 
 def _projection_reason(

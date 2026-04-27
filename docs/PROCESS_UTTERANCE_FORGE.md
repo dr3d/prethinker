@@ -2,7 +2,7 @@
 
 `Process Utterance Forge` is a dynamic hammer harness for the canonical interactive entryway:
 
-- [src/mcp_server.py](</D:/_PROJECTS/prethinker/src/mcp_server.py>) `process_utterance()`
+- [src/mcp_server.py](https://github.com/dr3d/prethinker/blob/main/src/mcp_server.py) `process_utterance()`
 
 The point is not to add infinite canned turnsets. The point is to:
 
@@ -25,7 +25,7 @@ We also want a forge that can:
 
 ## Current Script
 
-- [scripts/run_process_utterance_forge.py](</D:/_PROJECTS/prethinker/scripts/run_process_utterance_forge.py>)
+- [scripts/run_process_utterance_forge.py](https://github.com/dr3d/prethinker/blob/main/scripts/run_process_utterance_forge.py)
 
 The first pass currently does this:
 

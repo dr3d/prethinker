@@ -1,5 +1,6 @@
 ﻿from __future__ import annotations
 
+import re
 import time
 from typing import Any
 
@@ -14,6 +15,411 @@ def _phase(name: str, status: str, summary: str, data: dict) -> dict:
         "summary": summary,
         "data": data,
     }
+
+
+MAX_STORY_SEGMENTS = 80
+MIN_STORY_SEGMENTS = 4
+MIN_STORY_CHARS = 700
+
+
+def _strip_markdown_noise(text: str) -> list[str]:
+    lines: list[str] = []
+    for raw_line in str(text or "").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        lines.append(line)
+    return lines
+
+
+def _split_story_segments(utterance: str) -> list[str]:
+    text = str(utterance or "").strip()
+    if not text:
+        return []
+    lines = _strip_markdown_noise(text)
+    if len(lines) >= MIN_STORY_SEGMENTS:
+        return lines[:MAX_STORY_SEGMENTS]
+    sentence_segments = [
+        segment.strip()
+        for segment in re.split(r"(?<=[.!?])\s+", text)
+        if segment.strip()
+    ]
+    if len(sentence_segments) >= MIN_STORY_SEGMENTS:
+        return sentence_segments[:MAX_STORY_SEGMENTS]
+    return []
+
+
+def _should_segment_story(utterance: str, config: dict) -> bool:
+    if not bool(config.get("semantic_ir_enabled", False)):
+        return False
+    text = str(utterance or "").strip()
+    if len(text) < MIN_STORY_CHARS:
+        return False
+    segments = _split_story_segments(text)
+    if len(segments) < MIN_STORY_SEGMENTS:
+        return False
+    lowered = f" {text.lower()} "
+    if text.count("?") >= max(2, len(segments) // 2):
+        return False
+    return any(
+        marker in lowered
+        for marker in (
+            " once upon a time ",
+            " goldilocks ",
+            " there were ",
+            " returned home",
+            " had ",
+            " was ",
+            " were ",
+        )
+    )
+
+
+def _semantic_ir_layers(compiler_trace: dict | None) -> tuple[dict, dict, dict]:
+    if not isinstance(compiler_trace, dict):
+        return {}, {}, {}
+    parse = compiler_trace.get("parse") if isinstance(compiler_trace.get("parse"), dict) else {}
+    prethink = compiler_trace.get("prethink") if isinstance(compiler_trace.get("prethink"), dict) else {}
+    parse_semantic = parse.get("semantic_ir") if isinstance(parse.get("semantic_ir"), dict) else {}
+    prethink_semantic = prethink.get("semantic_ir") if isinstance(prethink.get("semantic_ir"), dict) else {}
+    semantic = parse_semantic if isinstance(parse_semantic.get("parsed"), dict) else prethink_semantic
+    ir = semantic.get("parsed") if isinstance(semantic.get("parsed"), dict) else {}
+    admission = {}
+    normalized = parse.get("normalized") if isinstance(parse.get("normalized"), dict) else {}
+    if isinstance(normalized.get("admission_diagnostics"), dict):
+        admission = normalized["admission_diagnostics"]
+    if not admission:
+        for rescue in parse.get("rescues", []) if isinstance(parse.get("rescues"), list) else []:
+            if isinstance(rescue, dict) and isinstance(rescue.get("admission_diagnostics"), dict):
+                admission = rescue["admission_diagnostics"]
+                break
+    return semantic, ir, admission
+
+
+def _append_semantic_ir_phases(phases: list[dict], compiler_trace: dict | None) -> None:
+    semantic, ir, admission = _semantic_ir_layers(compiler_trace)
+    if not ir:
+        return
+
+    decision = str(ir.get("decision", "")).strip() or "unknown"
+    turn_type = str(ir.get("turn_type", "")).strip() or "unknown"
+    model = str(semantic.get("model", "")).strip() or "semantic_ir_v1"
+    risk = str(((ir.get("self_check") or {}).get("bad_commit_risk", ""))).strip()
+    questions = ir.get("clarification_questions") if isinstance(ir.get("clarification_questions"), list) else []
+    phases.append(
+        _phase(
+            "workspace",
+            decision,
+            f"Semantic IR workspace proposed {decision}/{turn_type} with {model}.",
+            {
+                "model": model,
+                "backend": semantic.get("backend", ""),
+                "latency_ms": semantic.get("latency_ms", 0),
+                "decision": decision,
+                "turn_type": turn_type,
+                "bad_commit_risk": risk,
+                "clarification_questions": questions,
+                "entities": ir.get("entities", []),
+                "referents": ir.get("referents", []),
+                "assertions": ir.get("assertions", []),
+                "unsafe_implications": ir.get("unsafe_implications", []),
+                "candidate_operations": ir.get("candidate_operations", []),
+                "self_check": ir.get("self_check", {}),
+            },
+        )
+    )
+
+
+def _operation_clause_text(op: dict) -> str:
+    if not isinstance(op, dict):
+        return ""
+    result = op.get("result") if isinstance(op.get("result"), dict) else {}
+    return str(
+        result.get("fact")
+        or result.get("rule")
+        or result.get("query")
+        or result.get("prolog_query")
+        or op.get("clause")
+        or op.get("query")
+        or ""
+    ).strip()
+
+
+def _segment_admission_counts(trace: dict | None) -> tuple[int, int, str]:
+    _semantic, ir, admission = _semantic_ir_layers(trace)
+    admitted = 0
+    skipped = 0
+    if admission:
+        try:
+            admitted = int(admission.get("admitted_count", 0) or 0)
+            skipped = int(admission.get("skipped_count", 0) or 0)
+        except Exception:
+            admitted = 0
+            skipped = 0
+    decision = str(ir.get("decision", "")).strip() if isinstance(ir, dict) else ""
+    return admitted, skipped, decision
+
+
+def _process_segmented_story(
+    *,
+    utterance: str,
+    session: SessionState,
+    config: dict,
+    runtime: RuntimeHooks,
+    started_at: float,
+) -> dict:
+    segments = _split_story_segments(utterance)
+    operations: list[dict] = []
+    segment_records: list[dict] = []
+    clauses_seen: set[str] = set()
+    held_count = 0
+    error_count = 0
+    admitted_total = 0
+    skipped_total = 0
+
+    for index, segment in enumerate(segments, start=1):
+        result = runtime.process_utterance(
+            utterance=segment,
+            config=config,
+            session={
+                "session_id": session.session_id,
+                "turns": session.turns,
+                "pending_clarification": None,
+            },
+        )
+        trace = result.get("compiler_trace") if isinstance(result.get("compiler_trace"), dict) else {}
+        admitted, skipped, decision = _segment_admission_counts(trace)
+        admitted_total += admitted
+        skipped_total += skipped
+        front_door = result.get("front_door") if isinstance(result.get("front_door"), dict) else {}
+        execution = result.get("execution") if isinstance(result.get("execution"), dict) else {}
+        status = str(result.get("status", "")).strip()
+        execution_status = str(execution.get("status", "")).strip()
+
+        if status == "clarification_required":
+            held_count += 1
+            if hasattr(runtime, "clear_pending_prethink"):
+                runtime.clear_pending_prethink(config=config)
+        elif execution_status and execution_status != "success":
+            error_count += 1
+
+        segment_ops = execution.get("operations") if isinstance(execution.get("operations"), list) else []
+        if not segment_ops and execution_status == "success":
+            parse_trace = trace.get("parse") if isinstance(trace.get("parse"), dict) else {}
+            normalized = (
+                parse_trace.get("normalized")
+                if isinstance(parse_trace.get("normalized"), dict)
+                else {}
+            )
+            synthesized_ops: list[dict] = []
+            for fact in normalized.get("facts", []) if isinstance(normalized.get("facts"), list) else []:
+                clause = str(fact).strip()
+                if clause:
+                    synthesized_ops.append({"tool": "assert_fact", "result": {"status": "success", "fact": clause}})
+            for rule in normalized.get("rules", []) if isinstance(normalized.get("rules"), list) else []:
+                clause = str(rule).strip()
+                if clause:
+                    synthesized_ops.append({"tool": "assert_rule", "result": {"status": "success", "rule": clause}})
+            for query in normalized.get("queries", []) if isinstance(normalized.get("queries"), list) else []:
+                clause = str(query).strip()
+                if clause:
+                    synthesized_ops.append({"tool": "query_rows", "result": {"status": "success", "query": clause}})
+            segment_ops = synthesized_ops
+        new_operation_count = 0
+        for op in segment_ops:
+            if not isinstance(op, dict):
+                continue
+            clause = _operation_clause_text(op)
+            tool = str(op.get("tool", "")).strip()
+            result_obj = op.get("result") if isinstance(op.get("result"), dict) else {}
+            op_status = str(result_obj.get("status") or op.get("status") or execution_status or "").strip()
+            if tool in {"assert_fact", "assert_rule"} and op_status == "success" and clause:
+                if clause in clauses_seen:
+                    continue
+                clauses_seen.add(clause)
+            operations.append(op)
+            new_operation_count += 1
+        segment_records.append(
+            {
+                "index": index,
+                "utterance": segment,
+                "status": status,
+                "route": str(front_door.get("route", "")).strip(),
+                "decision": decision,
+                "admitted_count": admitted,
+                "skipped_count": skipped,
+                "writes_applied": int(execution.get("writes_applied", 0) or 0),
+                "operation_count": new_operation_count,
+                "clarification_question": str(front_door.get("clarification_question", "")).strip(),
+                "errors": list(execution.get("errors", [])) if isinstance(execution.get("errors"), list) else [],
+                "trace": trace,
+            }
+        )
+
+    deduped_operations: list[dict] = []
+    final_seen_clauses: set[str] = set()
+    for op in operations:
+        tool = str(op.get("tool", "")).strip() if isinstance(op, dict) else ""
+        clause = _operation_clause_text(op)
+        if tool in {"assert_fact", "assert_rule"} and clause:
+            if clause in final_seen_clauses:
+                continue
+            final_seen_clauses.add(clause)
+        deduped_operations.append(op)
+    operations = deduped_operations
+
+    writes_applied = sum(
+        1
+        for op in operations
+        if isinstance(op, dict)
+        and str(op.get("tool", "")).strip() in {"assert_fact", "assert_rule", "retract_fact"}
+    )
+
+    execution = {
+        "status": "success" if writes_applied > 0 else ("error" if error_count else "no_results"),
+        "intent": "assert_fact" if writes_applied > 0 else "other",
+        "writes_applied": writes_applied,
+        "operations": operations,
+        "query_result": None,
+        "parse": {
+            "intent": "assert_fact" if writes_applied > 0 else "other",
+            "facts": [
+                _operation_clause_text(op)
+                for op in operations
+                if isinstance(op, dict) and str(op.get("tool", "")).strip() == "assert_fact"
+            ],
+        },
+        "errors": [
+            f"{held_count} segment(s) held for clarification.",
+            f"{error_count} segment(s) had execution errors.",
+        ]
+        if held_count or error_count
+        else [],
+    }
+    route = "write" if writes_applied > 0 else "other"
+    phases = [
+        _phase(
+            "ingest",
+            "segmented",
+            f"Long narrative split into {len(segments)} focused Semantic IR segment(s).",
+            {
+                "front_door_uri": config["front_door_uri"],
+                "segment_count": len(segments),
+                "strategy": "line_or_sentence_semantic_ir_ingestion",
+            },
+        ),
+        _phase(
+            "workspace",
+            "segmented",
+            f"Processed {len(segments)} semantic workspace proposal(s) instead of one summary-shaped proposal.",
+            {
+                "segment_count": len(segments),
+                "admitted_count": admitted_total,
+                "skipped_count": skipped_total,
+                "held_count": held_count,
+                "error_count": error_count,
+                "segments": [
+                    {key: value for key, value in record.items() if key != "trace"}
+                    for record in segment_records
+                ],
+            },
+        ),
+        _phase(
+            "admission",
+            "ok" if writes_applied else "empty",
+            f"Segmented admission produced {writes_applied} applied mutation(s).",
+            {
+                "admitted_count": admitted_total,
+                "skipped_count": skipped_total,
+                "writes_applied": writes_applied,
+            },
+        ),
+        _phase(
+            "clarify",
+            "partial" if held_count else "skipped",
+            "Some segments held for clarification." if held_count else "No segment-level clarification is pending.",
+            {"held_count": held_count},
+        ),
+        _phase(
+            "commit",
+            "applied" if writes_applied else "skipped",
+            "Deterministic commit attempted for all story segments.",
+            execution,
+        ),
+    ]
+    answer = {
+        "speaker": "prethink-gateway",
+        "text": (
+            f"Segmented story ingestion complete: {writes_applied} mutation(s) applied "
+            f"across {len(segments)} segment(s)."
+            + (f" {held_count} segment(s) held for clarification." if held_count else "")
+        ),
+        "mode": "answer",
+    }
+    phases.append(_phase("answer", "ok", "Prepared final response envelope.", answer))
+    trace = {
+        "segmented_story": {
+            "strategy": "line_or_sentence_semantic_ir_ingestion",
+            "segment_count": len(segments),
+            "admitted_count": admitted_total,
+            "skipped_count": skipped_total,
+            "writes_applied": writes_applied,
+            "held_count": held_count,
+            "error_count": error_count,
+            "segments": segment_records,
+        },
+        "summary": {
+            "overall": (
+                f"segmented_story={len(segments)} segments; "
+                f"writes={writes_applied}; held={held_count}; errors={error_count}"
+            ),
+            "prethink_source": "segmented_semantic_ir",
+        },
+    }
+    turn = {
+        "turn_index": len(session.turns) + 1,
+        "timestamp": started_at,
+        "utterance": utterance,
+        "route": route,
+        "phases": phases,
+        "assistant": answer,
+        "trace": trace,
+    }
+    session.turns.append(turn)
+    session.pending_clarification = None
+    return {
+        "status": "ok",
+        "front_door_uri": config["front_door_uri"],
+        "session_id": session.session_id,
+        "turn": turn,
+        "pending_clarification": None,
+    }
+
+    if not admission:
+        phases.append(
+            _phase(
+                "admission",
+                "not_reached",
+                "Deterministic mapper has not run yet for this held turn.",
+                {"reason": "prethink_only_semantic_workspace"},
+            )
+        )
+        return
+
+    operations = admission.get("operations") if isinstance(admission.get("operations"), list) else []
+    admitted_count = int(admission.get("admitted_count", 0) or 0)
+    skipped_count = int(admission.get("skipped_count", 0) or 0)
+    if not (admitted_count or skipped_count) and operations:
+        admitted_count = sum(1 for op in operations if isinstance(op, dict) and bool(op.get("admitted")))
+        skipped_count = len(operations) - admitted_count
+    phases.append(
+        _phase(
+            "admission",
+            "ok" if admitted_count else ("held" if skipped_count or decision in {"clarify", "quarantine", "reject"} else "empty"),
+            f"Deterministic mapper admitted {admitted_count} operation(s) and skipped {skipped_count}.",
+            admission if isinstance(admission, dict) else {},
+        )
+    )
 
 
 def process_turn(
@@ -92,6 +498,15 @@ def process_turn(
             "pending_clarification": session.pending_clarification,
         }
 
+    if not session.pending_clarification and _should_segment_story(utterance, config):
+        return _process_segmented_story(
+            utterance=utterance,
+            session=session,
+            config=config,
+            runtime=runtime,
+            started_at=started_at,
+        )
+
     if session.pending_clarification:
         pending = session.pending_clarification
         lowered = utterance.strip().lower()
@@ -167,6 +582,7 @@ def process_turn(
                 "intent": "other",
                 "errors": [str(process_result.get("message", "utterance processing failed")).strip() or "utterance processing failed"],
             }
+            _append_semantic_ir_phases(phases, compiler_trace)
             phases.append(
                 _phase(
                     "commit",
@@ -209,6 +625,7 @@ def process_turn(
                 front_door,
             )
         )
+        _append_semantic_ir_phases(phases, compiler_trace)
         if str(process_result.get("status", "")).strip() == "clarification_required" and front_door["needs_clarification"]:
             if runtime.should_handoff_instead_of_clarify(route=route, config=config):
                 phases.append(

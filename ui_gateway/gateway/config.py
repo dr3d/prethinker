@@ -33,22 +33,22 @@ class GatewayConfig:
     front_door_uri: str = "prethink://local/front-door"
     active_profile: str = "general"
     reply_surface_policy: str = "deterministic_template"
-    served_llm_provider: str = "ollama"
-    served_llm_model: str = "qwen3.5:9b"
-    served_llm_base_url: str = "http://127.0.0.1:11434"
+    served_llm_provider: str = "lmstudio"
+    served_llm_model: str = "qwen/qwen3.6-35b-a3b"
+    served_llm_base_url: str = "http://127.0.0.1:1234"
     served_llm_context_length: int = 16384
-    served_llm_timeout: int = 60
+    served_llm_timeout: int = 120
     served_handoff_mode: str = "never"
     compiler_mode: str = "strict"
     compiler_prompt_mode: str = "auto"
-    compiler_model: str = "qwen3.5:9b"
-    compiler_backend: str = "ollama"
-    compiler_base_url: str = "http://127.0.0.1:11434"
-    compiler_context_length: int = 8192
-    compiler_timeout: int = 60
+    compiler_model: str = "qwen/qwen3.6-35b-a3b"
+    compiler_backend: str = "lmstudio"
+    compiler_base_url: str = "http://127.0.0.1:1234"
+    compiler_context_length: int = 16384
+    compiler_timeout: int = 120
     compiler_prompt_file: str = "modelfiles/semantic_parser_system_prompt.md"
-    semantic_ir_enabled: bool = False
-    semantic_ir_model: str = "qwen3.6:35b"
+    semantic_ir_enabled: bool = True
+    semantic_ir_model: str = "qwen/qwen3.6-35b-a3b"
     semantic_ir_context_length: int = 16384
     semantic_ir_timeout: int = 120
     semantic_ir_temperature: float = 0.0
@@ -88,7 +88,43 @@ class ConfigStore:
         except (OSError, json.JSONDecodeError):
             payload = {}
         sanitized = self._sanitize(payload)
+        sanitized = self._migrate_semantic_ir_defaults(payload, sanitized)
         return GatewayConfig(**self._enforce_invariants(sanitized))
+
+    def _migrate_semantic_ir_defaults(self, raw_payload: dict, sanitized: dict) -> dict:
+        """Move older gateway config files onto the current Semantic IR console path.
+
+        This only upgrades values that are absent or still equal to the old stock
+        defaults, so explicit operator choices survive.
+        """
+        migrated = dict(sanitized)
+        old_model_values = {"qwen3.5:9b", "qwen/qwen3.5-9b", "q:latest"}
+
+        def _int_or_zero(value: object) -> int:
+            try:
+                return int(value or 0)
+            except Exception:
+                return 0
+
+        if "semantic_ir_enabled" not in raw_payload:
+            migrated["semantic_ir_enabled"] = True
+        if str(raw_payload.get("semantic_ir_model", "")).strip() in {"", "qwen3.6:35b"}:
+            migrated["semantic_ir_model"] = "qwen/qwen3.6-35b-a3b"
+
+        compiler_model = str(raw_payload.get("compiler_model", "")).strip()
+        if compiler_model in old_model_values:
+            migrated["compiler_model"] = "qwen/qwen3.6-35b-a3b"
+        if str(raw_payload.get("compiler_backend", "")).strip().lower() in {"", "ollama"} and compiler_model in old_model_values:
+            migrated["compiler_backend"] = "lmstudio"
+        if str(raw_payload.get("compiler_base_url", "")).strip() in {"", "http://127.0.0.1:11434"} and compiler_model in old_model_values:
+            migrated["compiler_base_url"] = "http://127.0.0.1:1234"
+        if _int_or_zero(raw_payload.get("compiler_timeout", 0)) in {0, 60} and compiler_model in old_model_values:
+            migrated["compiler_timeout"] = 120
+
+        served_model = str(raw_payload.get("served_llm_model", "")).strip()
+        if served_model in old_model_values:
+            migrated["served_llm_model"] = "qwen/qwen3.6-35b-a3b"
+        return migrated
 
     def _sanitize(self, payload: dict) -> dict:
         allowed = GatewayConfig().__dict__.keys()

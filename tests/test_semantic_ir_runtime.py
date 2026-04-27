@@ -130,6 +130,76 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         ]
         self.assertEqual(skipped[0]["skip_reason"], "ungrounded_argument_atom")
 
+    def test_mapper_skips_placeholder_prefixed_argument_write(self) -> None:
+        ir = _ir(
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "sat_in",
+                    "args": ["unknown_agent", "middle sized bear chair"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                }
+            ]
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=["sat_in/2"],
+        )
+        self.assertEqual(parsed["intent"], "other")
+        self.assertEqual(parsed["facts"], [])
+        self.assertTrue(any("unresolved placeholder" in warning for warning in warnings))
+        skipped = [
+            row
+            for row in parsed["admission_diagnostics"]["operations"]
+            if not row["admitted"]
+        ]
+        self.assertEqual(skipped[0]["skip_reason"], "ungrounded_argument_atom")
+
+    def test_mapper_admits_story_world_predicates_from_palette(self) -> None:
+        ir = _ir(
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "sat_in",
+                    "args": ["Goldilocks", "Baby Bear chair"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "assert",
+                    "predicate": "broke",
+                    "args": ["Baby Bear chair"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "assert",
+                    "predicate": "was_tasted",
+                    "args": ["Papa Bear porridge"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+            ]
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=["sat_in/2", "broke/1", "was_tasted/1"],
+        )
+        self.assertEqual(warnings, [])
+        self.assertEqual(
+            parsed["facts"],
+            [
+                "sat_in(goldilocks, baby_bear_chair).",
+                "broke(baby_bear_chair).",
+                "was_tasted(papa_bear_porridge).",
+            ],
+        )
+
     def test_projection_marks_positive_write_plus_unsupported_negative_assertion_mixed(self) -> None:
         ir = _ir(
             candidate_operations=[

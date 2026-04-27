@@ -143,6 +143,41 @@ let the big model propose a richer workspace;
 let deterministic code decide what survives.
 ```
 
+## Newest Console Extension: Segmented Story Ingestion
+
+The latest UI/gateway work applies the same architecture to long narrative
+inputs. A full story should not be forced through one giant model response that
+summarizes away concrete events. The console can now split story-like utterances
+into focused line/sentence segments, run each segment through the canonical
+`process_utterance()` Semantic IR path, and aggregate the admitted mutations for
+the visible ledger turn.
+
+The important design constraint is that this is not a story-specific parser.
+Each segment still goes through:
+
+```text
+segment text
+  -> semantic_ir_v1 workspace
+  -> deterministic mapper/palette/grounding admission
+  -> Prolog tool execution
+```
+
+This exposed the next useful boundary. The model was able to understand the
+story, but the old generic predicate palette gave it poor legal targets, so it
+overused broad predicates like `inside/2`, `at/2`, and `carries/2`. The fix was
+structural: add a small generic story-world palette (`tasted/2`, `sat_in/2`,
+`lay_in/2`, `broke/1`, `asleep_in/2`, passive observed-state predicates, and
+movement predicates), and block placeholder durable writes such as
+`unknown_agent`.
+
+On the Goldilocks roundtrip story, the current smoke run produced `56` deduped
+mutations across `50` segments in about `180s`. More important than the count,
+the failure shape improved: earlier artifacts like `unknown_agent`,
+voice-as-`carries`, nonsensical `inside(...)` facts, and stray body-part facts
+were removed. The remaining questions are now cleaner research problems:
+stable object identity, observed-event representation, and temporal/event
+ordering.
+
 ## Why a Smarter Model Might Reduce Python Guardrails
 
 The hope is not that a larger model makes guardrails unnecessary. The hope is

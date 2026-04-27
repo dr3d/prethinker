@@ -17,9 +17,11 @@ The short version:
 - `process_utterance()` is the canonical runtime entrypoint.
 - The UI is a manual demonstration cockpit, not a marketing page.
 - `semantic_ir_v1` is the active architecture pivot: stronger model semantics before deterministic admission.
+- The console defaults to the current LM Studio `qwen/qwen3.6-35b-a3b` Semantic IR lane for manual research runs.
 - `medical@v0` is the main bounded domain profile.
 - UMLS is used as a bounded normalization and semantic-type bridge, not as a giant preloaded clinical encyclopedia.
 - The Prolog KB is the committed truth layer; model output remains provisional until the runtime admits it.
+- Long story-like utterances can now be segmented into focused Semantic IR passes so narrative ingestion stays inspectable instead of relying on one summary-shaped model response.
 - Historical reports, old prompt snapshots, and run logs were pruned from the forward-facing tree because Git already preserves them.
 
 ## Useful Entry Points
@@ -47,11 +49,18 @@ Open `http://127.0.0.1:8765` for the live console.
 
 ## Reproducibility Notes
 
-The public repo currently tracks `29` pytest files under [tests/](https://github.com/dr3d/prethinker/tree/main/tests). The latest local verification before this update was:
+The public repo currently tracks `29` pytest files under [tests/](https://github.com/dr3d/prethinker/tree/main/tests). The latest full-suite verification before this update was:
 
 ```powershell
 python -m pytest -q
-# 248 passed
+# 281 passed
+```
+
+Focused verification after the current Semantic IR console/story-ingestion pass:
+
+```powershell
+python -m pytest tests/test_semantic_ir_runtime.py tests/test_ui_gateway_phases.py tests/test_gateway_config.py
+# 55 passed
 ```
 
 The UMLS Semantic Network and Metathesaurus-derived runtime assets are intentionally not committed because they depend on licensed source data. The public repo includes the builders, tests, docs, and profile code; outside reproduction of the UMLS lane requires obtaining the licensed UMLS files separately.

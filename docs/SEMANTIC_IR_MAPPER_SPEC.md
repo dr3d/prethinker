@@ -142,7 +142,8 @@ utterance was written in; it cares how the IR grounds the operation.
 ## Grounding Policy
 
 The generic mapper may reject writes whose arguments are obvious unresolved
-placeholder atoms such as `patient`, `someone`, `his`, or `unknown`.
+placeholder atoms such as `patient`, `someone`, `his`, `unknown`, or
+placeholder-shaped atoms such as `unknown_agent`.
 
 This is a structural guardrail, not an English phrase repair:
 
@@ -156,6 +157,17 @@ Domain-specific type grounding belongs to profile contracts. For example,
 `modelfiles/profile.medical.v0.json`, and `src/medical_profile.py` reads that
 metadata when deciding whether `taking(Patient, Thing)` names a medication or a
 condition. The semantic IR mapper should not grow medical-specific type lists.
+
+For narrative ingestion, the same policy blocks tempting but ungrounded event
+facts such as:
+
+```prolog
+sat_in(unknown_agent, mama_bear_chair).
+```
+
+If the utterance only says that an unknown person acted on an object, the model
+should prefer an admitted passive object-state predicate when one exists, such
+as `was_tasted(papa_bear_porridge)` or `was_sat_in(mama_bear_chair)`.
 
 ## Predicate Palette Policy
 
@@ -181,6 +193,20 @@ predicate_not_in_allowed_palette
 This is a structural guardrail. It does not teach Python Spanish, probate law,
 or medical vocabulary; it only enforces the current domain contract after the
 LLM has built the semantic workspace.
+
+The current generic registry also includes a small story-world event/state
+palette so narrative runs do not have to misuse broad predicates:
+
+- `tasted/2`, `ate/2`, `ate_all/2`
+- `sat_in/2`, `lay_in/2`, `asleep_in/2`
+- `was_tasted/1`, `was_eaten/1`, `was_sat_in/1`, `was_lain_in/1`
+- `walked_through/2`, `ran_through/2`, `entered/2`, `exited/2`
+- `broke/1`, `returned_home/1`, `went_to/2`, `woke_up/1`
+- preference/fit predicates such as `too_hot_for/2` and `just_right_for/2`
+
+This palette is intentionally generic story/world-state vocabulary, not a
+Goldilocks patch. It gives the LLM better legal targets while keeping the mapper
+free to reject out-of-palette or ungrounded operations.
 
 ## Unsafe Implications
 

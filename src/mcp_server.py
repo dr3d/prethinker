@@ -3255,9 +3255,18 @@ class PrologMCPServer:
         coreference = self._build_coreference_hint(utterance)
         segments = self._build_turn_segments(utterance)
         ce_threshold = max(0.0, 1.0 - float(self._session.clarification_eagerness))
+        coreference_requires_clarification = bool(coreference.get("clarification_recommended"))
+        if (
+            self._semantic_ir_enabled
+            and not compiler_needs_clarification
+            and uncertainty < ce_threshold
+        ):
+            coreference_requires_clarification = False
+            coreference["clarification_override"] = "semantic_ir_confident_commit"
+        coreference["clarification_applied"] = bool(coreference_requires_clarification)
         clarification_required = bool(
             compiler_needs_clarification
-            or bool(coreference.get("clarification_recommended"))
+            or coreference_requires_clarification
             or (uncertainty >= ce_threshold and self._session.enabled)
         )
         clarification_question = compiler_clarification_question or str(
@@ -3265,6 +3274,8 @@ class PrologMCPServer:
         ).strip()
         if clarification_required and not clarification_question:
             clarification_question = "Please clarify the intended fact or referent before I continue."
+        if not clarification_required:
+            clarification_question = ""
         packet = {
             "prethink_id": self._next_prethink_id(),
             "utterance": utterance,

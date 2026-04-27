@@ -46,6 +46,12 @@ utterance + context
   -> KB mutation, query, clarification, quarantine, or rejection
 ```
 
+The newest console work extends that pivot to long narrative ingestion. Story-like
+utterances can be split into focused Semantic IR segments, processed through the
+same runtime path, and then shown as one deduped ledger turn. This is meant to
+exercise model semantic understanding while keeping admission deterministic and
+auditable.
+
 The best current documents for that work are:
 
 - [docs/SEMANTIC_IR_RESEARCH_DIRECTION_REPORT.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_RESEARCH_DIRECTION_REPORT.md)
@@ -88,9 +94,13 @@ future architecture.
 
 Latest local verification before this refresh:
 
-- Full pytest suite: `248 passed`
+- Full pytest suite: `281 passed`
+- Focused Semantic IR console/story-ingestion verification: `55 passed`
 - Semantic IR runtime edge pack: `20/20` decision labels, `0.976` avg score
 - Semantic IR weak-edge pack: `10/10` decision labels, `1.000` avg score
+- Goldilocks full-story segmented smoke: `56` deduped mutations across `50`
+  segments, with placeholder and vague-predicate bad writes removed after adding
+  a generic story-world predicate palette
 - Silverton probate pack: intentionally hard frontier pack, currently weak
 - Silverton noisy temporal pack: intentionally harder noisy/multilingual pack,
   useful as a pressure gauge rather than a demo headline

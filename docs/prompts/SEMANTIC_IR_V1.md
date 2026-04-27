@@ -1,8 +1,8 @@
 # Semantic IR v1 Prompt Contract
 
-Last updated: 2026-04-25
+Last updated: 2026-04-26
 
-`semantic_ir_v1` is the proposed intermediate representation for a stronger
+`semantic_ir_v1` is the active intermediate representation for a stronger
 LLM semantic-workspace layer. The model does not write final Prolog and does not
 commit durable truth. It emits typed candidate meaning for deterministic
 validation.
@@ -106,7 +106,8 @@ Controls:
 
 ```json
 {
-  "model": "qwen3.6:35b",
+  "model": "qwen/qwen3.6-35b-a3b",
+  "backend": "lmstudio",
   "temperature": 0.0,
   "top_p": 0.82,
   "top_k": 20,
@@ -156,6 +157,18 @@ Special guards:
 - Preserve negation in candidate_operations with polarity='negative'. Do not
   turn 'never saw X' into a positive saw/2 fact.
 ```
+
+Current runtime additions:
+
+- LM Studio structured output uses the JSON schema in `src/semantic_ir.py`;
+- the prompt still carries a compact root-shape contract because schema
+  enforcement fixes JSON shape, not policy calibration;
+- narrative ingestion should use specific story-world predicates from the active
+  palette when available, instead of overloading `inside/2`, `at/2`, or
+  `carries/2`;
+- unknown actors should not become durable placeholder facts. Prefer passive
+  object-state predicates such as `was_tasted/1`, `was_eaten/1`,
+  `was_sat_in/1`, or `was_lain_in/1` when the object state is direct.
 
 Wild-pack result:
 

@@ -28,7 +28,7 @@ The design goal is:
 
 The console should be understood as a presentation layer over the canonical interactive entryway:
 
-- [src/mcp_server.py](/D:/_PROJECTS/prethinker/src/mcp_server.py) `process_utterance()`
+- [src/mcp_server.py](https://github.com/dr3d/prethinker/blob/main/src/mcp_server.py) `process_utterance()`
 
 That means the console is supposed to be a truthful way to test Prethinker itself, not "something close enough."
 
@@ -53,6 +53,8 @@ It is the first place where the product behavior becomes legible.
 - local stdlib HTTP server in `ui_gateway/gateway/server.py`
 - `POST /api/prethink` returns a phaseful envelope:
   - `ingest`
+  - `workspace`
+  - `admission`
   - `clarify`
   - `commit`
   - `answer`
@@ -61,6 +63,7 @@ It is the first place where the product behavior becomes legible.
 - the live dials surface can now expose bounded runtime profiles such as `medical@v0`, not just raw model/backend settings
 - the console now has a profile-aware prompt-book rail for repeatable demos that pair a setup move, an utterance, and the expected reasoning behavior to watch
 - the semantic IR path can be enabled to show richer model workspace proposals before deterministic mapper/admission policy decides what survives
+- long story-like utterances can be processed as multiple focused Semantic IR segments, then shown as one deduped console turn with segment-level trace data
 
 ## Newbie-Friendly Surface
 
@@ -83,6 +86,10 @@ By default, internals stay mostly hidden.
 When `Debug details` is enabled, the user can inspect:
 
 - compiler trace summary
+- semantic workspace proposal
+- model input compact view
+- structured JSON
+- segmented story records when applicable
 - raw/normalized/admitted path
 - ambiguity rows
 - phase cards
@@ -95,8 +102,8 @@ This is important because the same UI needs to serve two audiences:
 
 ## Default Binding Choices
 
-- legacy compiler model: `qwen3.5:9b` or baked local equivalent
-- semantic IR research model: `qwen/qwen3.6-35b-a3b` via LM Studio/OpenAI-compatible structured output
+- legacy compiler model: `qwen3.5:9b` or baked local equivalent when explicitly testing the old lane
+- semantic IR research/default console model: `qwen/qwen3.6-35b-a3b` via LM Studio/OpenAI-compatible structured output
 - compiler mode: `strict`
 - legacy compiler backend: `ollama`
 - legacy compiler base URL: `http://127.0.0.1:11434`
@@ -104,6 +111,25 @@ This is important because the same UI needs to serve two audiences:
 - semantic IR base URL: `http://127.0.0.1:1234`
 - served handoff mode in strict mode: `never`
 - Freethinker sidecar policy: `off`
+
+## Long Narrative Ingestion
+
+The console now has a special path for long story-like utterances. Instead of
+asking the model for one giant summary-shaped workspace, the gateway splits the
+text into line/sentence segments and sends each segment through the canonical
+runtime path.
+
+This is deliberately a harness/framework choice, not a story-specific parser:
+
+- each segment still uses `semantic_ir_v1`;
+- each segment still goes through mapper admission and deterministic tools;
+- placeholder actors such as `unknown_agent` are blocked from durable writes;
+- admitted operations are deduped before the UI displays the final ledger.
+
+The first useful smoke target is the repo's Goldilocks roundtrip story. The
+latest local run produced `56` deduped mutations across `50` segments in about
+`180s`, with the earlier bad artifacts (`unknown_agent`, voice-as-`carries`,
+nonsensical `inside(...)` writes, stray body-part facts) removed.
 
 ## Freethinker Status
 

@@ -13,7 +13,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 - Active profile: `medical@v0`.
 - Active research asset: local UMLS Semantic Network KB built from `sn_current.tgz`.
 - Active architecture pivot: opt-in `semantic_ir_v1` compiler path using `qwen3.6:35b-a3b` through LM Studio/OpenAI-compatible structured output.
-- Current demonstration surface: prompt-book UI plus live ledger cards showing route, clarification, blocked execution, and KB mutation outcomes.
+- Current demonstration surface: prompt-book UI plus live ledger cards showing route, semantic workspace, deterministic admission, clarification, blocked execution, and KB mutation outcomes.
 
 ## What Works Now
 
@@ -38,6 +38,10 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 - The final noisy Silverton miss was repaired by projecting speculative ambiguous observations with no safe operation to `quarantine`.
 - The Harbor frontier pack now has admission-level contracts for selected scenarios: expected admitted facts/retracts/queries, forbidden admitted facts, skipped operations, and skip reasons.
 - Predicate contracts can now be supplied in Semantic IR input payloads so a predicate's argument roles and ordering are explicit instead of being hidden in test expectations.
+- The console now defaults to the current LM Studio Semantic IR lane (`qwen/qwen3.6-35b-a3b`) instead of the older 9B/Ollama parser path, while still keeping Freethinker off by default.
+- Long story-like utterances in the UI can use segmented Semantic IR ingestion: the gateway splits the narrative into focused segments, processes each through the canonical `process_utterance()` path, dedupes applied mutations, and exposes segment-level workspace/admission traces.
+- The generic predicate registry now includes a small story-world event/state palette (`tasted/2`, `sat_in/2`, `lay_in/2`, `broke/1`, `asleep_in/2`, `was_tasted/1`, `was_eaten/1`, `was_sat_in/1`, `was_lain_in/1`, etc.) so narrative ingestion no longer has to squeeze ordinary events into `inside/2`, `at/2`, or `carries/2`.
+- The mapper now blocks placeholder-like durable write arguments such as `unknown_agent`, while the prompt steers unknown-actor observations toward passive object-state predicates when those are available.
 
 ## Local UMLS Assets
 
@@ -81,12 +85,13 @@ This is the next useful layer for type steering and explanation. It should suppo
 - Expand trace views around admission contracts so reviewers can see not only the model decision, but also which exact boundary checks passed.
 - Build a new held-out frontier pack instead of over-polishing Silverton: cross-document temporal causality, aliases, corrections, disputed claims, and profile type pressure.
 - Keep the Semantic IR harness model-agnostic, but use `qwen/qwen3.6-35b-a3b` as the default development model unless a specific comparison question needs another local model.
+- Tighten narrative ingestion next around stable object identity, event observation predicates, and temporal/event ordering instead of adding story-specific Python phrase patches.
 
 ## Verification Snapshot
 
 Recent verified results:
 
-- Full suite after final noisy-Silverton projection repair: `271 passed`
+- Full suite after Semantic IR console/story-ingestion cleanup: `281 passed`
 - Focused semantic IR runtime battery: `23 passed`
 - Edge runtime A/B: semantic IR `20/20` decision labels, `0.976` avg score, `0` non-mapper parse rescues
 - Weak-edge runtime A/B: semantic IR `10/10` decision labels, `1.000` avg score, `0` non-mapper parse rescues
@@ -97,6 +102,8 @@ Recent verified results:
 - Noisy Silverton reached `8/8` exact labels and `8/8` safe outcomes, with `0.906` extraction average and `1.000` KB safety average. Treat this as a pressure-pack milestone, not proof of broad temporal or legal reasoning.
 - Rule/mutation conflict pack still reaches semantic IR `10/10` exact labels after predicate-palette enforcement.
 - Harbor frontier latest pass: `14/14` JSON/schema, raw model labels `13/14`, mapper-projected decisions `14/14`, admission contracts `14/14`, admission checks `52/52`, average rough score `0.96`.
+- Goldilocks full-story segmented Semantic IR smoke after narrative palette: `56` deduped mutations across `50` segments in about `180s`; major bad-write artifacts from the first UI attempt (`unknown_agent`, voice-as-`carries`, nonsensical `inside(...)` writes, and stray `head` facts) were removed.
+- Focused post-story-ingestion verification: `55 passed` across semantic IR runtime, UI gateway phases, and gateway config.
 - Python compile check for touched runtime files passed
 
 Rerun the full suite before committing a new stopping point.

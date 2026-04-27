@@ -160,6 +160,26 @@ What to look for:
 - whether the console asks for clarification only when truly needed
 - whether the resulting KB looks structured rather than bloated or bizarre
 
+## Scenario 8B: Full Story Segmentation
+
+Fresh session.
+
+Paste the full story from
+[docs/data/roundtrip/goldilocks_roundtrip_input_story.md](https://github.com/dr3d/prethinker/blob/main/docs/data/roundtrip/goldilocks_roundtrip_input_story.md)
+as one utterance.
+
+What to look for:
+
+- the console should report `routing=segmented_semantic_ir`
+- the debug trace should show multiple story segments rather than one giant
+  summary workspace
+- the visible operations should favor story predicates such as `tasted/2`,
+  `sat_in/2`, `lay_in/2`, `broke/1`, `asleep_in/2`, `was_tasted/1`, and
+  `was_sat_in/1`
+- bad placeholder writes such as `unknown_agent` should not be committed
+- ordinary events should not be forced into vague `inside/2` or `carries/2`
+  clauses
+
 ## Scenario 9: Mixed Intent Boundary
 
 Fresh session.

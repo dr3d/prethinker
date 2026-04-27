@@ -344,4 +344,4 @@ Not "a chatbot that sounds smarter."
 
 A conversation-adjacent system that makes stateful reasoning inspectable.
 
-![Prethinker control plane: natural-language input flows through interception, normalization, clarification/confirmation gates, then deterministic KB mutation](D:/_PROJECTS/prethinker/docs/assets/prethinker-control-plane-infographic-v2.png)
+![Prethinker control plane: natural-language input flows through interception, normalization, clarification/confirmation gates, then deterministic KB mutation](assets/prethinker-control-plane-infographic-v2.png)

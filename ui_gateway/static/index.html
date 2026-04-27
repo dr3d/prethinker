@@ -221,8 +221,8 @@
         <button id="hero-close" class="ghost-button hero-close" type="button">Close</button>
       </div>
       <p class="lede">
-        Paste everyday language and inspect the governed path: classify, clarify if needed, parse,
-        and deterministically answer or commit.
+        Paste everyday language and inspect the governed path: build a Semantic IR workspace,
+        pass it through deterministic admission, then answer or commit.
       </p>
         <div class="hero-grid">
           <div class="mini-card">
@@ -230,8 +230,8 @@
             <strong id="profile-label">general</strong>
           </div>
           <div class="mini-card">
-            <span class="mini-label">Compiler</span>
-            <strong id="compiler-model-label">qwen3.5:9b</strong>
+            <span class="mini-label">Semantic IR Model</span>
+            <strong id="compiler-model-label">qwen/qwen3.6-35b-a3b</strong>
         </div>
         <div class="mini-card">
           <span class="mini-label">Mode</span>
@@ -244,9 +244,9 @@
       </div>
       <div class="diagram-box">
         <p>1. You type an utterance</p>
-        <p>2. Prethinker routes it</p>
-        <p>3. It either clarifies, answers, or commits</p>
-        <p>4. You can open the trace to see what changed</p>
+        <p>2. The model proposes a semantic workspace</p>
+        <p>3. The mapper admits, skips, clarifies, or quarantines operations</p>
+        <p>4. The trace shows what reached the KB and why</p>
       </div>
     </aside>
 
@@ -275,7 +275,7 @@
         </div>
         <p class="status-line compact-line">
           Strict lock enforces compiler=`strict`, served handoff=`never`, and final confirmation=`true`.
-          Freethinker advisory keeps the compiler authoritative while letting the watcher refine clarification.
+          Semantic IR is the current primary path; Freethinker is optional advisory only.
           Served chat keeps fact compilation on, but lets uncertain turns fall through to the served model.
         </p>
       </div>
@@ -485,6 +485,6 @@
       </article>
     </template>
 
-    <script src="./app.js?v=prompt-book-expando" defer></script>
+    <script src="./app.js?v=semantic-ir-console" defer></script>
   </body>
 </html>

@@ -29,6 +29,18 @@ const API_BASE = (() => {
   return "";
 })();
 
+const SEMANTIC_IR_PRIMARY = {
+  backend: "lmstudio",
+  baseUrl: "http://127.0.0.1:1234",
+  model: "qwen/qwen3.6-35b-a3b",
+  contextLength: 16384,
+  timeout: 120,
+  temperature: 0.0,
+  topP: 0.82,
+  topK: 20,
+  thinking: false,
+};
+
 const PROFILE_EXAMPLES = {
   general: {
     title: "Kick the tires with ordinary language.",
@@ -351,13 +363,19 @@ function downloadTextFile(text, filename, mimeType = "text/plain") {
 
 function syncHero(config) {
   const activeProfile = config.active_profile || "general";
+  const semanticEnabled = Boolean(config.semantic_ir_enabled);
+  const semanticModel = String(config.semantic_ir_model || "").trim();
+  const compilerModel = semanticEnabled && semanticModel ? semanticModel : config.compiler_model;
+  const compilerBackend = String(config.compiler_backend || "").trim();
   document.getElementById("profile-label").textContent = activeProfile;
-  document.getElementById("compiler-model-label").textContent = config.compiler_model;
+  document.getElementById("compiler-model-label").textContent = compilerModel;
   document.getElementById("compiler-mode-label").textContent =
-    `${config.compiler_mode} / handoff=${config.served_handoff_mode}`;
+    `${semanticEnabled ? "semantic_ir_v1" : config.compiler_mode} / ${compilerBackend || "backend?"} / handoff=${config.served_handoff_mode}`;
   document.getElementById("served-model-label").textContent = config.served_llm_model;
   document.getElementById("profile-pill").textContent = `Profile: ${activeProfile}`;
-  document.getElementById("compiler-pill").textContent = `Compiler: ${config.compiler_model}`;
+  document.getElementById("compiler-pill").textContent = semanticEnabled
+    ? `SIR: ${compilerModel}`
+    : `Compiler: ${compilerModel}`;
   document.getElementById("strict-pill").textContent = config.strict_mode ? "Strict mode on" : "Strict mode off";
   const ledgerProfileNote = document.getElementById("ledger-profile-note");
   if (ledgerProfileNote) {
@@ -620,10 +638,29 @@ function summarizeTurnInternals(turn) {
   }
 
   let noteText = "None reported.";
+  const { semantic, ir, admission } = semanticTrace(trace);
   const reasons = Array.isArray(ingestData.reasons)
     ? ingestData.reasons.map((item) => String(item || "").trim()).filter(Boolean)
     : [];
-  if (reasons.length) {
+  const selfNotes = Array.isArray(ir?.self_check?.notes)
+    ? ir.self_check.notes.map((item) => String(item || "").trim()).filter(Boolean)
+    : [];
+  if (ir) {
+    const risk = String(ir?.self_check?.bad_commit_risk || "").trim();
+    const decision = String(ir.decision || "").trim();
+    const turnType = String(ir.turn_type || "").trim();
+    const noteParts = [];
+    if (decision || turnType) {
+      noteParts.push(`SIR ${decision || "decision?"}/${turnType || "turn?"}`);
+    }
+    if (risk) {
+      noteParts.push(`risk=${risk}`);
+    }
+    if (selfNotes.length) {
+      noteParts.push(selfNotes.slice(0, 2).join("; "));
+    }
+    noteText = noteParts.join("; ") || "Semantic IR workspace captured.";
+  } else if (reasons.length) {
     noteText = reasons.join("; ");
   } else if (route === "command") {
     noteText = "Not applicable (slash command).";
@@ -661,6 +698,20 @@ function summarizeTurnInternals(turn) {
     (item) => item !== "clarification_fields_normalized"
   );
   const compilerPathParts = [];
+  if (ir) {
+    const model = String(semantic.model || "").trim();
+    compilerPathParts.push(`semantic_ir_v1${model ? `=${model}` : ""}`);
+    if (admission && Object.keys(admission).length) {
+      const ops = Array.isArray(admission.operations) ? admission.operations : [];
+      const admitted = Number.isFinite(Number(admission.admitted_count))
+        ? Number(admission.admitted_count)
+        : ops.filter((op) => op && typeof op === "object" && Boolean(op.admitted)).length;
+      const skipped = Number.isFinite(Number(admission.skipped_count))
+        ? Number(admission.skipped_count)
+        : Math.max(0, ops.length - admitted);
+      compilerPathParts.push(`admission admitted=${admitted} skipped=${skipped}`);
+    }
+  }
   if (prethinkSource && prethinkSource !== "primary") {
     compilerPathParts.push(`routing=${prethinkSource}`);
   }
@@ -713,7 +764,10 @@ function summarizeCommitOperations(turn) {
     const result = op.result && typeof op.result === "object" ? op.result : {};
     const resultType = String(result.result_type || "").trim();
     const opLabel = String(op.tool || "").trim() || resultType || "operation";
-    const clause = operationClauseText(op) || "-";
+    const clause = operationClauseText(op);
+    if (!clause || opLabel === "none") {
+      continue;
+    }
     lines.push(`${opLabel} :: ${clause}`);
   }
 
@@ -1629,6 +1683,156 @@ function prettyJson(value) {
   return JSON.stringify(value, null, 2);
 }
 
+function semanticTrace(turnTrace) {
+  const parse = turnTrace && typeof turnTrace.parse === "object" ? turnTrace.parse : {};
+  const prethink = turnTrace && typeof turnTrace.prethink === "object" ? turnTrace.prethink : {};
+  const parseSemantic = parse && typeof parse.semantic_ir === "object" ? parse.semantic_ir : {};
+  const prethinkSemantic =
+    prethink && typeof prethink.semantic_ir === "object" ? prethink.semantic_ir : {};
+  const semantic = parseSemantic.parsed ? parseSemantic : prethinkSemantic;
+  const ir = semantic && typeof semantic.parsed === "object" ? semantic.parsed : null;
+  return {
+    parse,
+    prethink,
+    semantic,
+    ir,
+    admission:
+      (((parse?.normalized || {}).admission_diagnostics) ||
+        (((parse?.rescues || [])[0] || {}).admission_diagnostics) ||
+        {}),
+  };
+}
+
+function hasSemanticTrace(turnTrace) {
+  return Boolean(semanticTrace(turnTrace).ir);
+}
+
+function semanticTraceSummary(turnTrace) {
+  const { semantic, ir, admission } = semanticTrace(turnTrace);
+  if (!ir) {
+    return "";
+  }
+  const model = String(semantic.model || "").trim() || "semantic_ir_v1";
+  const decision = String(ir.decision || "").trim() || "decision?";
+  const hasAdmission =
+    admission &&
+    (Array.isArray(admission.operations) ||
+      Object.prototype.hasOwnProperty.call(admission, "admitted_count") ||
+      Object.prototype.hasOwnProperty.call(admission, "skipped_count"));
+  if (!hasAdmission) {
+    return `${model} -> ${decision} | admission not reached`;
+  }
+  const ops = Array.isArray(admission?.operations) ? admission.operations : [];
+  const admitted = Number.isFinite(Number(admission?.admitted_count))
+    ? Number(admission.admitted_count)
+    : ops.filter((op) => op && typeof op === "object" && Boolean(op.admitted)).length;
+  const skipped = Number.isFinite(Number(admission?.skipped_count))
+    ? Number(admission.skipped_count)
+    : Math.max(0, ops.length - admitted);
+  const counts = admitted !== null || skipped !== null
+    ? ` | admitted ${admitted || 0}, skipped ${skipped || 0}`
+    : "";
+  return `${model} -> ${decision}${counts}`;
+}
+
+function collectSemanticWorkspaceBlocks(turnTrace) {
+  const { semantic, ir, parse, admission } = semanticTrace(turnTrace);
+  if (!ir) {
+    return [];
+  }
+  const blocks = [];
+  blocks.push({
+    label: "Workspace decision",
+    text: prettyJson({
+      schema_version: ir.schema_version,
+      decision: ir.decision,
+      turn_type: ir.turn_type,
+      clarification_questions: ir.clarification_questions || [],
+      self_check: ir.self_check || {},
+    }),
+  });
+  blocks.push({
+    label: "Entities and referents",
+    text: prettyJson({
+      entities: ir.entities || [],
+      referents: ir.referents || [],
+    }),
+  });
+  blocks.push({
+    label: "Assertions and unsafe implications",
+    text: prettyJson({
+      assertions: ir.assertions || [],
+      unsafe_implications: ir.unsafe_implications || [],
+    }),
+  });
+  blocks.push({
+    label: "Candidate operations",
+    text: prettyJson(ir.candidate_operations || []),
+  });
+  if (admission && Object.keys(admission).length) {
+    blocks.push({
+      label: "Deterministic admission gate",
+      text: prettyJson(admission),
+    });
+  }
+  if (parse?.admitted && typeof parse.admitted === "object") {
+    blocks.push({
+      label: "Runtime parse admitted to execution",
+      text: prettyJson(parse.admitted),
+    });
+  } else if (parse?.normalized && typeof parse.normalized === "object") {
+    blocks.push({
+      label: "Runtime parse projected by mapper",
+      text: prettyJson(parse.normalized),
+    });
+  }
+  const rawMessage = String(semantic.raw_message || "").trim();
+  if (rawMessage) {
+    blocks.push({ label: "Raw structured model message", text: rawMessage });
+  }
+  return blocks;
+}
+
+function collectSegmentedStoryBlocks(turnTrace) {
+  const segmented = turnTrace && typeof turnTrace.segmented_story === "object"
+    ? turnTrace.segmented_story
+    : null;
+  if (!segmented) {
+    return [];
+  }
+  const segments = Array.isArray(segmented.segments) ? segmented.segments : [];
+  const compactSegments = segments.map((segment) => ({
+    index: segment.index,
+    status: segment.status,
+    route: segment.route,
+    decision: segment.decision,
+    writes_applied: segment.writes_applied,
+    admitted_count: segment.admitted_count,
+    skipped_count: segment.skipped_count,
+    held: Boolean(segment.clarification_question),
+    utterance: segment.utterance,
+    errors: segment.errors || [],
+  }));
+  return [
+    {
+      label: "Segmented story summary",
+      text: prettyJson({
+        strategy: segmented.strategy,
+        segment_count: segmented.segment_count,
+        writes_applied: segmented.writes_applied,
+        admitted_count: segmented.admitted_count,
+        skipped_count: segmented.skipped_count,
+        held_count: segmented.held_count,
+        error_count: segmented.error_count,
+      }),
+    },
+    {
+      label: "Segment outcomes",
+      text: prettyJson(compactSegments),
+    },
+  ];
+}
+
 function findFirstMarkerIndex(text, markers) {
   let bestIndex = -1;
   for (const marker of markers) {
@@ -1741,6 +1945,20 @@ function splitPromptSections(promptText, kind, sharedPromptReference = "") {
 function collectModelContextBlocks(turn) {
   const turnTrace = turn && typeof turn.trace === "object" ? turn.trace : null;
   const blocks = [];
+  const { semantic } = semanticTrace(turnTrace);
+  const semanticModelInput = semantic && typeof semantic.model_input === "object" ? semantic.model_input : null;
+  if (semanticModelInput) {
+    blocks.push({
+      label: "Semantic IR model input",
+      text: prettyJson({
+        model: semantic.model,
+        backend: semantic.backend,
+        base_url: semantic.base_url,
+        latency_ms: semantic.latency_ms,
+        input: semanticModelInput,
+      }),
+    });
+  }
   let routingSharedPrompt = "";
   const prethinkPrimaryPrompt = String(
     ((((turnTrace || {}).prethink || {}).primary || {}).prompt_text || "")
@@ -1796,6 +2014,13 @@ function collectModelContextBlocks(turn) {
 
 function collectCompilerJsonBlocks(turnTrace) {
   const blocks = [];
+  const { ir, parse } = semanticTrace(turnTrace);
+  if (ir && typeof ir === "object") {
+    blocks.push({ label: "Semantic IR JSON", text: prettyJson(ir) });
+  }
+  if (parse?.normalized && typeof parse.normalized === "object") {
+    blocks.push({ label: "Mapper Runtime JSON", text: prettyJson(parse.normalized) });
+  }
   const routingJson = (((turnTrace || {}).prethink || {}).primary || {}).parsed;
   if (routingJson && typeof routingJson === "object") {
     blocks.push({ label: "Routing JSON", text: prettyJson(routingJson) });
@@ -2021,9 +2246,27 @@ function appendGatewayTurn(turn) {
   debugStack.appendChild(internalsEl);
 
   const turnTrace = turn && typeof turn.trace === "object" ? turn.trace : null;
+  const segmentedBubble = buildDebugBubble({
+    title: "story segments",
+    summary: "long narrative ingestion",
+    blocks: collectSegmentedStoryBlocks(turnTrace),
+    variantClass: "debug-bubble-semantic",
+  });
+  if (segmentedBubble) {
+    debugStack.appendChild(segmentedBubble);
+  }
+  const semanticBubble = buildDebugBubble({
+    title: "semantic workspace",
+    summary: semanticTraceSummary(turnTrace) || "semantic_ir_v1 proposal",
+    blocks: collectSemanticWorkspaceBlocks(turnTrace),
+    variantClass: "debug-bubble-semantic",
+  });
+  if (semanticBubble) {
+    debugStack.appendChild(semanticBubble);
+  }
   const modelContextBubble = buildDebugBubble({
-    title: "model context",
-    summary: "what the 9b saw",
+    title: "model input",
+    summary: hasSemanticTrace(turnTrace) ? "what the Semantic IR model saw" : "what the compiler saw",
     blocks: collectModelContextBlocks(turn),
     variantClass: "debug-bubble-context",
   });
@@ -2031,8 +2274,8 @@ function appendGatewayTurn(turn) {
     debugStack.appendChild(modelContextBubble);
   }
   const compilerJsonBubble = buildDebugBubble({
-    title: "compiler json",
-    summary: "raw model output",
+    title: hasSemanticTrace(turnTrace) ? "structured json" : "compiler json",
+    summary: hasSemanticTrace(turnTrace) ? "workspace and mapper payloads" : "raw model output",
     blocks: collectCompilerJsonBlocks(turnTrace),
     variantClass: "debug-bubble-json",
   });
@@ -2245,6 +2488,19 @@ function strictBouncerPayload(baseConfig) {
     ...baseConfig,
     strict_mode: true,
     compiler_mode: "strict",
+    compiler_backend: SEMANTIC_IR_PRIMARY.backend,
+    compiler_base_url: SEMANTIC_IR_PRIMARY.baseUrl,
+    compiler_model: SEMANTIC_IR_PRIMARY.model,
+    compiler_context_length: SEMANTIC_IR_PRIMARY.contextLength,
+    compiler_timeout: SEMANTIC_IR_PRIMARY.timeout,
+    semantic_ir_enabled: true,
+    semantic_ir_model: SEMANTIC_IR_PRIMARY.model,
+    semantic_ir_context_length: SEMANTIC_IR_PRIMARY.contextLength,
+    semantic_ir_timeout: SEMANTIC_IR_PRIMARY.timeout,
+    semantic_ir_temperature: SEMANTIC_IR_PRIMARY.temperature,
+    semantic_ir_top_p: SEMANTIC_IR_PRIMARY.topP,
+    semantic_ir_top_k: SEMANTIC_IR_PRIMARY.topK,
+    semantic_ir_thinking: SEMANTIC_IR_PRIMARY.thinking,
     served_handoff_mode: "never",
     require_final_confirmation: true,
     clarification_eagerness: Math.max(0.75, Number(baseConfig?.clarification_eagerness || 0)),
@@ -2284,10 +2540,23 @@ function medicalProfilePayload(baseConfig) {
     reply_surface_policy: "deterministic_template",
     strict_mode: true,
     compiler_mode: "strict",
+    compiler_backend: SEMANTIC_IR_PRIMARY.backend,
+    compiler_base_url: SEMANTIC_IR_PRIMARY.baseUrl,
+    compiler_model: SEMANTIC_IR_PRIMARY.model,
+    compiler_context_length: SEMANTIC_IR_PRIMARY.contextLength,
+    compiler_timeout: SEMANTIC_IR_PRIMARY.timeout,
+    semantic_ir_enabled: true,
+    semantic_ir_model: SEMANTIC_IR_PRIMARY.model,
+    semantic_ir_context_length: SEMANTIC_IR_PRIMARY.contextLength,
+    semantic_ir_timeout: SEMANTIC_IR_PRIMARY.timeout,
+    semantic_ir_temperature: SEMANTIC_IR_PRIMARY.temperature,
+    semantic_ir_top_p: SEMANTIC_IR_PRIMARY.topP,
+    semantic_ir_top_k: SEMANTIC_IR_PRIMARY.topK,
+    semantic_ir_thinking: SEMANTIC_IR_PRIMARY.thinking,
     served_handoff_mode: "never",
     require_final_confirmation: true,
     clarification_eagerness: Math.max(0.8, Number(baseConfig?.clarification_eagerness || 0)),
-    freethinker_resolution_policy: "advisory_only",
+    freethinker_resolution_policy: "off",
     freethinker_temperature: Number(baseConfig?.freethinker_temperature ?? 0.2) || 0.2,
     freethinker_thinking: Boolean(baseConfig?.freethinker_thinking),
     freethinker_model: String(baseConfig?.freethinker_model || "qwen3.5:9b"),

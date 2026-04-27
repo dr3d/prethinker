@@ -162,6 +162,62 @@ class _MedicalClarificationRuntime:
         }
 
 
+class _SegmentRuntime:
+    def __init__(self) -> None:
+        self.calls = []
+
+    def process_utterance(self, *, utterance, config, session, clarification_answer=None, prethink_id=None):
+        self.calls.append(utterance)
+        atom = f"segment_{len(self.calls)}"
+        return {
+            "status": "ok",
+            "front_door": {
+                "route": "write",
+                "compiler_intent": "assert_fact",
+                "needs_clarification": False,
+                "reasons": ["semantic_ir_v1"],
+                "clarification_question": "",
+                "prethink_id": f"pt-{len(self.calls)}",
+            },
+            "execution": {
+                "status": "success",
+                "intent": "assert_fact",
+                "writes_applied": 1,
+                "operations": [
+                    {
+                        "tool": "assert_fact",
+                        "result": {"status": "success", "fact": f"observed({atom})."},
+                    }
+                ],
+                "query_result": None,
+                "parse": {"intent": "assert_fact", "facts": [f"observed({atom})."]},
+                "errors": [],
+            },
+            "compiler_trace": {
+                "parse": {
+                    "semantic_ir": {
+                        "model": "qwen/qwen3.6-35b-a3b",
+                        "parsed": {"decision": "commit", "turn_type": "state_update"},
+                    },
+                    "normalized": {
+                        "admission_diagnostics": {
+                            "admitted_count": 1,
+                            "skipped_count": 0,
+                            "operations": [{"admitted": True}],
+                        }
+                    },
+                },
+                "summary": {"overall": "semantic_ir_v1"},
+            },
+        }
+
+    def should_handoff_instead_of_clarify(self, *, route, config):
+        return False
+
+    def answer(self, *, utterance, route, execution, clarification, config):
+        return {"speaker": "prethink-gateway", "text": "unused", "mode": "answer"}
+
+
 class GatewayPhasesTests(unittest.TestCase):
     def test_process_turn_uses_served_handoff_when_clarification_is_suppressed(self) -> None:
         runtime = _FakeRuntime()
@@ -262,6 +318,41 @@ class GatewayPhasesTests(unittest.TestCase):
             commit_phase["data"]["operations"][0]["clause"],
             "lab_result_high(mara, blood_pressure_measurement).",
         )
+
+    def test_long_story_uses_segmented_semantic_ir_ingestion(self) -> None:
+        runtime = _SegmentRuntime()
+        session = SessionState(session_id="session-story")
+        config = {
+            "front_door_uri": "prethink://local/front-door",
+            "served_handoff_mode": "never",
+            "strict_mode": True,
+            "semantic_ir_enabled": True,
+        }
+        story = "\n".join(
+            [
+                "Goldilocks was a little girl.",
+                "Goldilocks walked through the forest.",
+                "Goldilocks found a small house in the forest.",
+                "There were three bowls of porridge on the table.",
+            ]
+            * 8
+        )
+
+        result = process_turn(
+            utterance=story,
+            session=session,
+            config=config,
+            runtime=runtime,
+            config_store=None,
+        )
+
+        turn = result["turn"]
+        self.assertEqual(turn["route"], "write")
+        self.assertEqual(len(runtime.calls), 32)
+        self.assertEqual(turn["trace"]["segmented_story"]["segment_count"], 32)
+        commit_phase = next(phase for phase in turn["phases"] if phase["phase"] == "commit")
+        self.assertEqual(commit_phase["status"], "applied")
+        self.assertEqual(commit_phase["data"]["writes_applied"], 32)
 
 
 if __name__ == "__main__":

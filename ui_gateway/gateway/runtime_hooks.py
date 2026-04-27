@@ -93,14 +93,14 @@ class RuntimeHooks:
                 str(config.get("active_profile", "general")),
                 str(config.get("compiler_mode", "strict")),
                 str(config.get("compiler_prompt_mode", "auto")),
-                str(config.get("compiler_backend", "ollama")),
-                str(config.get("compiler_base_url", "http://127.0.0.1:11434")),
-                str(config.get("compiler_model", "qwen3.5:9b")),
-                str(int(config.get("compiler_context_length", 8192) or 8192)),
-                str(int(config.get("compiler_timeout", 60) or 60)),
+                str(config.get("compiler_backend", "lmstudio")),
+                str(config.get("compiler_base_url", "http://127.0.0.1:1234")),
+                str(config.get("compiler_model", "qwen/qwen3.6-35b-a3b")),
+                str(int(config.get("compiler_context_length", 16384) or 16384)),
+                str(int(config.get("compiler_timeout", 120) or 120)),
                 prompt_path,
-                str(bool(config.get("semantic_ir_enabled", False))),
-                str(config.get("semantic_ir_model", "qwen3.6:35b")),
+                str(bool(config.get("semantic_ir_enabled", True))),
+                str(config.get("semantic_ir_model", "qwen/qwen3.6-35b-a3b")),
                 str(int(config.get("semantic_ir_context_length", 16384) or 16384)),
                 str(int(config.get("semantic_ir_timeout", 120) or 120)),
                 str(round(float(config.get("semantic_ir_temperature", 0.0) or 0.0), 3)),
@@ -137,15 +137,15 @@ class RuntimeHooks:
             kb_path=self._kb_path,
             active_profile=str(config.get("active_profile", "general") or "general"),
             compiler_mode=compiler_mode,
-            compiler_backend=str(config.get("compiler_backend", "ollama") or "ollama"),
-            compiler_base_url=str(config.get("compiler_base_url", "http://127.0.0.1:11434") or "http://127.0.0.1:11434"),
-            compiler_model=str(config.get("compiler_model", "qwen3.5:9b") or "qwen3.5:9b"),
-            compiler_context_length=max(512, int(config.get("compiler_context_length", 8192) or 8192)),
-            compiler_timeout=max(5, int(config.get("compiler_timeout", 60) or 60)),
+            compiler_backend=str(config.get("compiler_backend", "lmstudio") or "lmstudio"),
+            compiler_base_url=str(config.get("compiler_base_url", "http://127.0.0.1:1234") or "http://127.0.0.1:1234"),
+            compiler_model=str(config.get("compiler_model", "qwen/qwen3.6-35b-a3b") or "qwen/qwen3.6-35b-a3b"),
+            compiler_context_length=max(512, int(config.get("compiler_context_length", 16384) or 16384)),
+            compiler_timeout=max(5, int(config.get("compiler_timeout", 120) or 120)),
             compiler_prompt_file=str(prompt_path) if prompt_path is not None else "",
             compiler_prompt_enabled=prompt_enabled,
-            semantic_ir_enabled=bool(config.get("semantic_ir_enabled", False)),
-            semantic_ir_model=str(config.get("semantic_ir_model", "qwen3.6:35b") or "qwen3.6:35b"),
+            semantic_ir_enabled=bool(config.get("semantic_ir_enabled", True)),
+            semantic_ir_model=str(config.get("semantic_ir_model", "qwen/qwen3.6-35b-a3b") or "qwen/qwen3.6-35b-a3b"),
             semantic_ir_context_length=max(512, int(config.get("semantic_ir_context_length", 16384) or 16384)),
             semantic_ir_timeout=max(5, int(config.get("semantic_ir_timeout", 120) or 120)),
             semantic_ir_temperature=max(0.0, min(2.0, float(config.get("semantic_ir_temperature", 0.0) or 0.0))),
@@ -247,6 +247,15 @@ class RuntimeHooks:
             "kb_result": result,
         }
 
+    def clear_pending_prethink(self, *, config: dict[str, Any]) -> dict[str, Any]:
+        server = self._ensure_server(config)
+        if hasattr(server, "_pending_prethink"):
+            server._pending_prethink = None
+        return {
+            "status": "success",
+            "result_type": "pending_prethink_cleared",
+        }
+
     def process_utterance(
         self,
         *,
@@ -290,9 +299,9 @@ class RuntimeHooks:
                 "front_door_uri": config["front_door_uri"],
                 "compiler": {
                     "mode": config.get("compiler_mode", "strict"),
-                    "model": config.get("compiler_model", "qwen3.5:9b"),
-                    "backend": config.get("compiler_backend", "ollama"),
-                    "base_url": config.get("compiler_base_url", "http://127.0.0.1:11434"),
+                    "model": config.get("compiler_model", "qwen/qwen3.6-35b-a3b"),
+                    "backend": config.get("compiler_backend", "lmstudio"),
+                    "base_url": config.get("compiler_base_url", "http://127.0.0.1:1234"),
                     "strict_mode": config.get("strict_mode", True),
                     "used": False,
                     "error": message,
@@ -332,9 +341,9 @@ class RuntimeHooks:
             "front_door_uri": config["front_door_uri"],
             "compiler": {
                 "mode": config.get("compiler_mode", "strict"),
-                "model": config.get("compiler_model", "qwen3.5:9b"),
-                "backend": config.get("compiler_backend", "ollama"),
-                "base_url": config.get("compiler_base_url", "http://127.0.0.1:11434"),
+                "model": config.get("compiler_model", "qwen/qwen3.6-35b-a3b"),
+                "backend": config.get("compiler_backend", "lmstudio"),
+                "base_url": config.get("compiler_base_url", "http://127.0.0.1:1234"),
                 "strict_mode": config.get("strict_mode", True),
                 "used": bool(compiler.get("used", True)),
                 "error": str(compiler.get("error", "")).strip(),
@@ -380,12 +389,12 @@ class RuntimeHooks:
         api_key = _get_api_key()
         try:
             response = _call_model_prompt(
-                backend=str(config.get("compiler_backend", "ollama") or "ollama"),
-                base_url=str(config.get("compiler_base_url", "http://127.0.0.1:11434") or "http://127.0.0.1:11434"),
-                model=str(config.get("compiler_model", "qwen3.5:9b") or "qwen3.5:9b"),
+                backend=str(config.get("compiler_backend", "lmstudio") or "lmstudio"),
+                base_url=str(config.get("compiler_base_url", "http://127.0.0.1:1234") or "http://127.0.0.1:1234"),
+                model=str(config.get("compiler_model", "qwen/qwen3.6-35b-a3b") or "qwen/qwen3.6-35b-a3b"),
                 prompt_text=extraction_prompt,
-                context_length=max(512, int(config.get("compiler_context_length", 8192) or 8192)),
-                timeout=max(5, int(config.get("compiler_timeout", 60) or 60)),
+                context_length=max(512, int(config.get("compiler_context_length", 16384) or 16384)),
+                timeout=max(5, int(config.get("compiler_timeout", 120) or 120)),
                 api_key=api_key,
             )
         except Exception as exc:

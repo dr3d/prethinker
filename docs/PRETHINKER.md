@@ -153,11 +153,11 @@ The roles may be backed by different models. The current semantic IR lane uses a
 
 As of April 26, 2026:
 
-- the canonical interactive entryway is `process_utterance()` in [src/mcp_server.py](/D:/_PROJECTS/prethinker/src/mcp_server.py)
-- the console in [ui_gateway/](/D:/_PROJECTS/prethinker/ui_gateway) is the main manual test cockpit
+- the canonical interactive entryway is `process_utterance()` in [src/mcp_server.py](https://github.com/dr3d/prethinker/blob/main/src/mcp_server.py)
+- the console in [ui_gateway/](https://github.com/dr3d/prethinker/tree/main/ui_gateway) is the main manual test cockpit
 - the prompt-book UI and ledger telemetry are the primary live demonstration surface
 - `semantic_ir_v1` is the active architecture pivot for model understanding before deterministic admission
-- [src/semantic_ir.py](/D:/_PROJECTS/prethinker/src/semantic_ir.py) owns mapper projection policy and admission diagnostics
+- [src/semantic_ir.py](https://github.com/dr3d/prethinker/blob/main/src/semantic_ir.py) owns mapper projection policy and admission diagnostics
 - `medical@v0` is the most active bounded profile
 - UMLS Semantic Network assets are built locally for type/relation explanation
 - Freethinker remains optional and non-authoritative

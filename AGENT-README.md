@@ -22,8 +22,9 @@ Treat older reports and prompt snapshots as Git history, not live guidance.
 
 - `src/mcp_server.py` owns the canonical `process_utterance()` runtime.
 - `ui_gateway/` is the live manual cockpit for prompt-book demos, route telemetry, KB mutations, and clarification turns.
-- `semantic_ir_v1` is the active research path for richer model semantics before deterministic admission.
+- `semantic_ir_v1` is the active research path for richer model semantics before deterministic admission; the console default is the LM Studio `qwen/qwen3.6-35b-a3b` lane.
 - `src/semantic_ir.py` owns the mapper, projection policy, and admission diagnostics.
+- Long story-like console inputs may be split into focused Semantic IR segments by `ui_gateway/gateway/phases.py`; each segment still goes through canonical `process_utterance()`, then the gateway dedupes the visible mutation list.
 - `medical@v0` is the active bounded profile.
 - `src/umls_mvp.py` and `scripts/build_umls_semantic_network_kb.py` contain the current UMLS bridge/Semantic Network work.
 - `Freethinker` is a bounded optional clarification sidecar; it is not an authoritative truth layer.
@@ -49,4 +50,4 @@ python -m pytest tests/test_semantic_ir_runtime.py tests/test_guardrail_dependen
 python -m pytest -q
 ```
 
-The last known full-suite result was `248 passed`.
+The last known full-suite result was `281 passed`. The latest focused console/story-ingestion pass verified `55 passed` across semantic IR runtime, UI gateway phases, and gateway config.

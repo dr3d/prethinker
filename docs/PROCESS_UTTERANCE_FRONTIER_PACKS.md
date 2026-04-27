@@ -6,13 +6,13 @@ The forge is still where we discover new weirdness. The packs are where we pin t
 
 ## Current Packs
 
-- [process_utterance_correction_pack_v1.json](</D:/_PROJECTS/prethinker/docs/data/frontier_packs/process_utterance_correction_pack_v1.json>)
-- [process_utterance_temporal_pack_v1.json](</D:/_PROJECTS/prethinker/docs/data/frontier_packs/process_utterance_temporal_pack_v1.json>)
+- [process_utterance_correction_pack_v1.json](https://github.com/dr3d/prethinker/blob/main/docs/data/frontier_packs/process_utterance_correction_pack_v1.json)
+- [process_utterance_temporal_pack_v1.json](https://github.com/dr3d/prethinker/blob/main/docs/data/frontier_packs/process_utterance_temporal_pack_v1.json)
 
 ## Frozen Baselines
 
-- [process_utterance_correction_pack_v1_baseline.json](</D:/_PROJECTS/prethinker/docs/data/frontier_packs/process_utterance_correction_pack_v1_baseline.json>)
-- [process_utterance_temporal_pack_v1_baseline.json](</D:/_PROJECTS/prethinker/docs/data/frontier_packs/process_utterance_temporal_pack_v1_baseline.json>)
+- [process_utterance_correction_pack_v1_baseline.json](https://github.com/dr3d/prethinker/blob/main/docs/data/frontier_packs/process_utterance_correction_pack_v1_baseline.json)
+- [process_utterance_temporal_pack_v1_baseline.json](https://github.com/dr3d/prethinker/blob/main/docs/data/frontier_packs/process_utterance_temporal_pack_v1_baseline.json)
 
 Historical dated baseline reports were pruned from the forward-facing tree; rerun the pack runner to regenerate fresh local reports when needed.
 
@@ -26,13 +26,13 @@ Historical dated baseline reports were pruned from the forward-facing tree; reru
 
 ## Builder
 
-- [build_process_utterance_frontier_packs.py](</D:/_PROJECTS/prethinker/scripts/build_process_utterance_frontier_packs.py>)
+- [build_process_utterance_frontier_packs.py](https://github.com/dr3d/prethinker/blob/main/scripts/build_process_utterance_frontier_packs.py)
 
 This script re-derives the tracked pack JSONs from the current forge interesting-case directories.
 
 ## Runner
 
-- [run_process_utterance_frontier_pack.py](</D:/_PROJECTS/prethinker/scripts/run_process_utterance_frontier_pack.py>)
+- [run_process_utterance_frontier_pack.py](https://github.com/dr3d/prethinker/blob/main/scripts/run_process_utterance_frontier_pack.py)
 
 Suggested smoke command:
 
