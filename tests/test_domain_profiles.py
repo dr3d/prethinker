@@ -65,6 +65,8 @@ def test_mock_profile_packages_are_declarative_and_loadable():
     breach_contract = next(row for row in sec_contracts if row["signature"] == "breach_event/2")
     assert breach_contract["validators"][0]["reason"] == "obligation_language_not_breach_event"
     assert any("unknown_agent" in line for line in profile_package_context(story))
+    assert any("source_fidelity_policy" in line for line in profile_package_context(story))
+    assert any("Little Wee Bear" in line and "Baby Bear" in line for line in profile_package_context(story))
     assert any("claim" in line for line in profile_package_context(probate))
 
 

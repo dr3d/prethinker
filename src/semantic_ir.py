@@ -404,6 +404,8 @@ BEST_GUARDED_V2_GUIDANCE = (
     "- commit: direct state update or correction has a clear target and safe predicate mapping.\n"
     "Special guards:\n"
     "- Completeness beats summary. For narrative ingestion, enumerate every concrete direct event/state that can be safely mapped to allowed predicates; do not compress a sequence into only the main plot points.\n"
+    "- Source fidelity is mandatory. Durable candidate_operations must be grounded in the current utterance, provided context, selected domain_context, or kb_context_pack. Do not import names, aliases, roles, motives, or facts from general world knowledge, famous stories, common versions of tales, or likely background priors.\n"
+    "- Normalize entity atoms only for spelling/case/spacing/plural cleanup, explicit aliases in the utterance/context/domain ontology, or KB-resolved identity. If the utterance says 'Little Wee Bear', do not write baby_bear unless the utterance/context explicitly says Little Wee Bear is Baby Bear. Keep the text-local name as little_wee_bear and list any tempting prior alias in self_check.notes or unsafe_implications instead of committing it.\n"
     "- Use all needed candidate_operations up to the schema cap. If a turn contains more safe direct facts than fit in candidate_operations, choose mixed or clarify and put 'segment_required_for_complete_ingestion' in self_check.missing_slots/notes rather than silently summarizing.\n"
     "- Never repeat equivalent assertions, but do not drop distinct parallel facts such as three bowls, three chairs, and three beds.\n"
     "- For possession language such as 'has', 'had', 'owned', 'belonged to', or object/furnishing assignment, prefer owns/2 when available. Use carries/2 only for physical carrying/transporting/holding in hand, not for possession of furniture, bowls, beds, rooms, or ordinary belongings.\n"
@@ -505,6 +507,19 @@ def build_semantic_ir_input_payload(
         "allowed_predicates": allowed_predicates or [],
         "predicate_contracts": predicate_contracts or [],
         "kb_context_pack": kb_context_pack or {},
+        "source_fidelity_policy": {
+            "commit_scope": "Only propose durable operations grounded in the current utterance, explicit context, selected domain context, or committed KB context.",
+            "normalization_scope": [
+                "Allowed: casing, punctuation, whitespace, morphology, and explicit aliases supplied by the utterance/context/domain ontology/KB.",
+                "Not allowed: replacing a text-local name with a familiar name from model prior knowledge.",
+                "Not allowed: adding roles/facts from a well-known source text unless the current input or context states them.",
+            ],
+            "alias_policy": [
+                "If an alias is plausible but not source-grounded, keep the literal source name in candidate operations.",
+                "Record the alias pressure in self_check.notes or unsafe_implications when relevant.",
+                "Clarify or quarantine when the alias choice changes identity, role, or durable facts.",
+            ],
+        },
         "kb_context_policy": {
             "purpose": "Give the model compact visibility into committed KB state for reference resolution, correction handling, and conflict analysis.",
             "authority": "Context only. Durable effects still require admitted candidate_operations.",

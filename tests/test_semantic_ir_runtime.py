@@ -58,6 +58,9 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         self.assertEqual(payload["kb_context_pack"]["version"], "semantic_ir_context_pack_v1")
         self.assertIn("correction_policy", payload["kb_context_policy"])
         self.assertIn("reference_policy", payload["kb_context_policy"])
+        fidelity = payload["source_fidelity_policy"]
+        self.assertIn("commit_scope", fidelity)
+        self.assertTrue(any("familiar name" in item for item in fidelity["normalization_scope"]))
 
     def test_mapper_emits_valid_legacy_parse_for_safe_assert(self) -> None:
         parsed, warnings = semantic_ir_to_legacy_parse(_ir())
