@@ -1305,6 +1305,168 @@ body.debug-mode .debug-stack {
   max-height: min(58vh, 440px);
 }
 
+.pipeline-trace-card .phase-details {
+  border-color: rgba(119, 201, 161, 0.36);
+  background: linear-gradient(180deg, rgba(44, 74, 68, 0.38), rgba(32, 39, 44, 0.94));
+}
+
+.pipeline-trace-body {
+  display: grid;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.pipeline-intro {
+  margin: 8px 0 2px;
+  color: rgba(255, 236, 214, 0.82);
+  font-size: 0.9rem;
+}
+
+.pipeline-layer {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid rgba(255, 214, 170, 0.1);
+  border-radius: 10px;
+  background: rgba(255, 243, 231, 0.025);
+}
+
+.pipeline-layer-header {
+  display: grid;
+  grid-template-columns: minmax(8rem, max-content) minmax(0, 1fr);
+  gap: 10px;
+  align-items: baseline;
+  min-width: 0;
+}
+
+.pipeline-layer-title {
+  margin: 0;
+  color: var(--text);
+  font-weight: 800;
+  font-size: 0.86rem;
+}
+
+.pipeline-layer-summary {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pipeline-kv-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 6px;
+  min-width: 0;
+}
+
+.pipeline-kv {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  min-width: 0;
+  padding: 7px 8px;
+  border: 1px solid rgba(255, 214, 170, 0.08);
+  border-radius: 8px;
+  background: rgba(255, 243, 231, 0.025);
+}
+
+.pipeline-kv-key,
+.pipeline-subtitle {
+  color: rgba(255, 236, 214, 0.72);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.pipeline-kv-value {
+  min-width: 0;
+  color: var(--text);
+  font-size: 0.82rem;
+  overflow-wrap: anywhere;
+}
+
+.pipeline-table-wrap {
+  max-height: 14rem;
+  overflow: auto;
+  min-width: 0;
+  border: 1px solid rgba(255, 214, 170, 0.08);
+  border-radius: 9px;
+  background: rgba(12, 18, 23, 0.22);
+}
+
+.pipeline-table {
+  width: 100%;
+  min-width: 48rem;
+  border-collapse: collapse;
+  font-size: 0.74rem;
+}
+
+.pipeline-table th,
+.pipeline-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(255, 214, 170, 0.07);
+  border-right: 1px solid rgba(255, 214, 170, 0.06);
+  text-align: left;
+  vertical-align: top;
+}
+
+.pipeline-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  color: rgba(255, 236, 214, 0.82);
+  background: rgba(51, 62, 70, 0.98);
+  font-size: 0.66rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.pipeline-table td {
+  color: rgba(255, 244, 232, 0.86);
+  overflow-wrap: anywhere;
+}
+
+.pipeline-empty {
+  margin: 0;
+  color: rgba(255, 236, 214, 0.66);
+  font-size: 0.78rem;
+}
+
+.pipeline-clause-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 8px;
+  min-width: 0;
+}
+
+.pipeline-subsection {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.pipeline-subtitle {
+  margin: 0;
+}
+
+.pipeline-code-list {
+  max-height: 8rem;
+  padding: 7px 8px;
+  border: 1px solid rgba(255, 214, 170, 0.08);
+  border-radius: 8px;
+  background: rgba(12, 18, 23, 0.24);
+  white-space: pre;
+  overflow: auto;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
 .phase-list {
   display: grid;
   gap: 10px;
@@ -1343,6 +1505,11 @@ body.debug-mode .phase-card:not(.debug-bubble-card) {
   user-select: none;
 }
 
+.debug-bubble-summary,
+.pipeline-trace-card .phase-summary-row {
+  grid-template-columns: 22px minmax(8rem, max-content) minmax(0, 1fr);
+}
+
 .phase-summary-row::-webkit-details-marker {
   display: none;
 }
@@ -1361,9 +1528,9 @@ body.debug-mode .phase-card:not(.debug-bubble-card) {
 
 .phase-name {
   font-weight: 700;
-  justify-self: center;
+  justify-self: start;
   min-width: 0;
-  text-align: center;
+  text-align: left;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1376,13 +1543,14 @@ body.debug-mode .phase-card:not(.debug-bubble-card) {
 
 .phase-status {
   min-width: 0;
+  justify-self: end;
   text-align: right;
-  color: var(--text-soft);
-  text-transform: uppercase;
-  font-size: 0.72rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  color: var(--text-soft);
+  text-transform: uppercase;
+  font-size: 0.72rem;
 }
 
 .phase-summary {

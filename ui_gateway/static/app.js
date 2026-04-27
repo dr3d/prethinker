@@ -1735,6 +1735,331 @@ function semanticTraceSummary(turnTrace) {
   return `${model} -> ${decision}${counts}`;
 }
 
+function debugValue(value, fallback = "-") {
+  const text = String(value ?? "").trim();
+  return text || fallback;
+}
+
+function debugArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function debugCount(value) {
+  return debugArray(value).length;
+}
+
+function debugArgs(args) {
+  return debugArray(args).map((item) => String(item ?? "").trim()).filter(Boolean).join(", ");
+}
+
+function debugClauseList(clauses) {
+  return debugArray(clauses).map((item) => String(item ?? "").trim()).filter(Boolean);
+}
+
+function appendDebugKvGrid(parent, rows) {
+  const grid = document.createElement("div");
+  grid.className = "pipeline-kv-grid";
+  for (const [label, value] of rows) {
+    const item = document.createElement("p");
+    item.className = "pipeline-kv";
+    const key = document.createElement("span");
+    key.className = "pipeline-kv-key";
+    key.textContent = String(label || "");
+    const val = document.createElement("span");
+    val.className = "pipeline-kv-value";
+    val.textContent = debugValue(value);
+    item.appendChild(key);
+    item.appendChild(val);
+    grid.appendChild(item);
+  }
+  parent.appendChild(grid);
+}
+
+function appendDebugTable(parent, headers, rows, emptyText = "None.") {
+  if (!Array.isArray(rows) || !rows.length) {
+    const empty = document.createElement("p");
+    empty.className = "pipeline-empty";
+    empty.textContent = emptyText;
+    parent.appendChild(empty);
+    return;
+  }
+  const wrap = document.createElement("div");
+  wrap.className = "pipeline-table-wrap";
+  const table = document.createElement("table");
+  table.className = "pipeline-table";
+  const thead = document.createElement("thead");
+  const headRow = document.createElement("tr");
+  for (const header of headers) {
+    const th = document.createElement("th");
+    th.textContent = String(header || "");
+    headRow.appendChild(th);
+  }
+  thead.appendChild(headRow);
+  table.appendChild(thead);
+  const tbody = document.createElement("tbody");
+  for (const row of rows) {
+    const tr = document.createElement("tr");
+    for (const cell of row) {
+      const td = document.createElement("td");
+      td.textContent = debugValue(cell, "");
+      tr.appendChild(td);
+    }
+    tbody.appendChild(tr);
+  }
+  table.appendChild(tbody);
+  wrap.appendChild(table);
+  parent.appendChild(wrap);
+}
+
+function appendDebugClauseList(parent, title, clauses) {
+  const section = document.createElement("section");
+  section.className = "pipeline-subsection";
+  const heading = document.createElement("p");
+  heading.className = "pipeline-subtitle";
+  heading.textContent = title;
+  section.appendChild(heading);
+  const list = debugClauseList(clauses);
+  if (!list.length) {
+    const empty = document.createElement("p");
+    empty.className = "pipeline-empty";
+    empty.textContent = "None.";
+    section.appendChild(empty);
+  } else {
+    const code = document.createElement("pre");
+    code.className = "pipeline-code-list";
+    code.textContent = list.join("\n");
+    section.appendChild(code);
+  }
+  parent.appendChild(section);
+}
+
+function createPipelineLayer(title, summary = "") {
+  const layer = document.createElement("section");
+  layer.className = "pipeline-layer";
+  const header = document.createElement("div");
+  header.className = "pipeline-layer-header";
+  const name = document.createElement("p");
+  name.className = "pipeline-layer-title";
+  name.textContent = title;
+  header.appendChild(name);
+  if (summary) {
+    const status = document.createElement("p");
+    status.className = "pipeline-layer-summary";
+    status.textContent = summary;
+    header.appendChild(status);
+  }
+  layer.appendChild(header);
+  return layer;
+}
+
+function semanticModelInputPayload(semantic) {
+  const modelInput = semantic && typeof semantic.model_input === "object" ? semantic.model_input : {};
+  if (modelInput.input_payload && typeof modelInput.input_payload === "object") {
+    return modelInput.input_payload;
+  }
+  if (modelInput.scenario && typeof modelInput.scenario === "object") {
+    return modelInput.scenario;
+  }
+  return {};
+}
+
+function buildPipelineTraceBubble(turn) {
+  const turnTrace = turn && typeof turn.trace === "object" ? turn.trace : null;
+  const { semantic, ir, parse, admission } = semanticTrace(turnTrace);
+  if (!ir) {
+    return null;
+  }
+
+  const card = document.createElement("section");
+  card.className = "phase-card debug-bubble-card pipeline-trace-card";
+  const details = document.createElement("details");
+  details.className = "phase-details debug-bubble-details";
+  details.open = true;
+
+  const model = String(semantic.model || "").trim() || "semantic_ir_v1";
+  const decision = String(ir.decision || "").trim() || "decision?";
+  const projected = String(admission?.projected_decision || "").trim();
+  const admitted = Number.isFinite(Number(admission?.admitted_count))
+    ? Number(admission.admitted_count)
+    : debugArray(admission?.operations).filter((op) => op && typeof op === "object" && Boolean(op.admitted)).length;
+  const skipped = Number.isFinite(Number(admission?.skipped_count))
+    ? Number(admission.skipped_count)
+    : Math.max(0, debugArray(admission?.operations).length - admitted);
+
+  const summary = document.createElement("summary");
+  summary.className = "phase-summary-row debug-bubble-summary";
+  summary.innerHTML = `
+    <span class="phase-name">pipeline trace</span>
+    <span class="phase-status">${escapeHtml(
+      `${model} -> ${decision}${projected ? ` / ${projected}` : ""} | admitted ${admitted}, skipped ${skipped}`
+    )}</span>
+  `;
+
+  const body = document.createElement("div");
+  body.className = "phase-body pipeline-trace-body";
+  const intro = document.createElement("p");
+  intro.className = "pipeline-intro";
+  intro.textContent =
+    "One-turn view: model context, Semantic IR proposal, deterministic admission, truth-maintenance pressure, and the KB/query surface.";
+  body.appendChild(intro);
+
+  const payload = semanticModelInputPayload(semantic);
+  const context = debugArray(payload.context);
+  const allowed = debugArray(payload.allowed_predicates);
+  const contracts = debugArray(payload.predicate_contracts);
+  const kbPack = payload.kb_context_pack && typeof payload.kb_context_pack === "object"
+    ? payload.kb_context_pack
+    : {};
+  const kbClauses = [
+    ...debugArray(kbPack.exact_clauses),
+    ...debugArray(kbPack.relevant_clauses),
+    ...debugArray(kbPack.recent_committed_logic),
+  ].filter(Boolean);
+
+  const inputLayer = createPipelineLayer("Layer 0 - Model Input", "what the semantic compiler saw");
+  appendDebugKvGrid(inputLayer, [
+    ["domain", payload.domain || turn.domain || state.config?.active_profile || "-"],
+    ["model", model],
+    ["context items", context.length],
+    ["predicate palette", allowed.length],
+    ["predicate contracts", contracts.length],
+    ["KB context clauses", kbClauses.length],
+  ]);
+  if (context.length) {
+    appendDebugTable(
+      inputLayer,
+      ["context item"],
+      context.slice(0, 12).map((item) => [item]),
+      "No context visible."
+    );
+  }
+  body.appendChild(inputLayer);
+
+  const selfCheck = ir.self_check && typeof ir.self_check === "object" ? ir.self_check : {};
+  const workspaceLayer = createPipelineLayer("Layer 1 - Semantic Workspace", "soft proposal, not authority");
+  appendDebugKvGrid(workspaceLayer, [
+    ["decision", ir.decision],
+    ["turn type", ir.turn_type],
+    ["bad commit risk", selfCheck.bad_commit_risk],
+    ["entities", debugCount(ir.entities)],
+    ["assertions", debugCount(ir.assertions)],
+    ["unsafe implications", debugCount(ir.unsafe_implications)],
+    ["candidate ops", debugCount(ir.candidate_operations)],
+    ["clarifications", debugCount(ir.clarification_questions)],
+  ]);
+  appendDebugTable(
+    workspaceLayer,
+    ["entity", "normalized", "type", "confidence"],
+    debugArray(ir.entities).slice(0, 12).map((entity) => [
+      entity?.surface || entity?.id || "",
+      entity?.normalized || "",
+      entity?.type || "",
+      entity?.confidence ?? "",
+    ]),
+    "No entities proposed."
+  );
+  body.appendChild(workspaceLayer);
+
+  const opsLayer = createPipelineLayer("Layer 2 - Candidate Operations", "what could become writes or queries");
+  appendDebugTable(
+    opsLayer,
+    ["#", "op", "predicate(args)", "source", "safety", "polarity", "clause"],
+    debugArray(ir.candidate_operations).map((op, index) => [
+      index,
+      op?.operation || "",
+      `${op?.predicate || ""}(${debugArgs(op?.args)})`,
+      op?.source || "",
+      op?.safety || "",
+      op?.polarity || "",
+      op?.clause || "",
+    ]),
+    "No candidate operations proposed."
+  );
+  body.appendChild(opsLayer);
+
+  const diagnostics = admission && typeof admission === "object" ? admission : {};
+  const clauses = diagnostics.clauses && typeof diagnostics.clauses === "object" ? diagnostics.clauses : {};
+  const admissionLayer = createPipelineLayer("Layer 3 - Deterministic Admission", "mapper decides what survives");
+  appendDebugKvGrid(admissionLayer, [
+    ["model decision", diagnostics.model_decision || ir.decision],
+    ["projected decision", diagnostics.projected_decision || "-"],
+    ["projection reason", diagnostics.projection_reason || "-"],
+    ["operations", diagnostics.operation_count ?? debugCount(diagnostics.operations)],
+    ["admitted", admitted],
+    ["skipped/challenged", skipped],
+  ]);
+  appendDebugTable(
+    admissionLayer,
+    ["#", "admit", "effect", "predicate(args)", "skip/challenge", "rationale"],
+    debugArray(diagnostics.operations).map((op) => [
+      op?.index ?? "",
+      op?.admitted ? "yes" : "no",
+      op?.effect || "",
+      `${op?.predicate || ""}(${debugArgs(op?.args)})`,
+      op?.skip_reason || "",
+      debugArray(op?.rationale_codes).join(", "),
+    ]),
+    "Admission diagnostics not recorded."
+  );
+  const clauseGrid = document.createElement("div");
+  clauseGrid.className = "pipeline-clause-grid";
+  appendDebugClauseList(clauseGrid, "facts admitted", clauses.facts);
+  appendDebugClauseList(clauseGrid, "rules admitted", clauses.rules);
+  appendDebugClauseList(clauseGrid, "retracts admitted", clauses.retracts);
+  appendDebugClauseList(clauseGrid, "queries admitted", clauses.queries);
+  admissionLayer.appendChild(clauseGrid);
+  body.appendChild(admissionLayer);
+
+  const tm = diagnostics.truth_maintenance && typeof diagnostics.truth_maintenance === "object"
+    ? diagnostics.truth_maintenance
+    : (ir.truth_maintenance && typeof ir.truth_maintenance === "object" ? ir.truth_maintenance : {});
+  const alignment = diagnostics.truth_maintenance_alignment && typeof diagnostics.truth_maintenance_alignment === "object"
+    ? diagnostics.truth_maintenance_alignment
+    : {};
+  const tmLayer = createPipelineLayer("Layer 4 - Truth Maintenance", "support, conflicts, and derived consequences");
+  appendDebugKvGrid(tmLayer, [
+    ["support links", debugCount(tm.support_links)],
+    ["conflicts", debugCount(tm.conflicts)],
+    ["retraction plan", debugCount(tm.retraction_plan)],
+    ["derived consequences", debugCount(tm.derived_consequences)],
+    ["fuzzy edges", alignment.fuzzy_edge_count ?? debugCount(alignment.fuzzy_edges)],
+  ]);
+  appendDebugTable(
+    tmLayer,
+    ["op", "kind", "role", "support ref"],
+    debugArray(tm.support_links).slice(0, 12).map((item) => [
+      item?.operation_index ?? "",
+      item?.support_kind || "",
+      item?.role || "",
+      item?.support_ref || "",
+    ]),
+    "No support links recorded."
+  );
+  appendDebugTable(
+    tmLayer,
+    ["statement / conflict", "basis / existing", "policy"],
+    [
+      ...debugArray(tm.conflicts).map((item) => [
+        item?.why || item?.conflict_kind || "",
+        item?.existing_ref || "",
+        item?.recommended_policy || "",
+      ]),
+      ...debugArray(tm.derived_consequences).map((item) => [
+        item?.statement || "",
+        debugArray(item?.basis).join(", "),
+        item?.commit_policy || "",
+      ]),
+    ],
+    "No conflict or derived-consequence pressure recorded."
+  );
+  body.appendChild(tmLayer);
+
+  details.appendChild(summary);
+  details.appendChild(body);
+  card.appendChild(details);
+  return card;
+}
+
 function collectSemanticWorkspaceBlocks(turnTrace) {
   const { semantic, ir, parse, admission } = semanticTrace(turnTrace);
   if (!ir) {
@@ -2182,6 +2507,23 @@ function buildDebugBubble({ title, summary, blocks, variantClass }) {
   return card;
 }
 
+function collectRawSemanticPayloadBlocks(turn, turnTrace) {
+  const blocks = [];
+  for (const block of collectSegmentedStoryBlocks(turnTrace)) {
+    blocks.push({ ...block, label: `Story: ${block.label}` });
+  }
+  for (const block of collectModelContextBlocks(turn)) {
+    blocks.push({ ...block, label: `Input: ${block.label}` });
+  }
+  for (const block of collectSemanticWorkspaceBlocks(turnTrace)) {
+    blocks.push({ ...block, label: `Workspace: ${block.label}` });
+  }
+  for (const block of collectCompilerJsonBlocks(turnTrace)) {
+    blocks.push({ ...block, label: `Runtime: ${block.label}` });
+  }
+  return blocks;
+}
+
 function appendGatewayTurn(turn) {
   const template = document.getElementById("message-template");
   const fragment = template.content.cloneNode(true);
@@ -2286,41 +2628,57 @@ function appendGatewayTurn(turn) {
   debugStack.appendChild(internalsEl);
 
   const turnTrace = turn && typeof turn.trace === "object" ? turn.trace : null;
-  const segmentedBubble = buildDebugBubble({
-    title: "story segments",
-    summary: "long narrative ingestion",
-    blocks: collectSegmentedStoryBlocks(turnTrace),
-    variantClass: "debug-bubble-semantic",
-  });
-  if (segmentedBubble) {
-    debugStack.appendChild(segmentedBubble);
+  const pipelineTraceBubble = buildPipelineTraceBubble(turn);
+  if (pipelineTraceBubble) {
+    debugStack.appendChild(pipelineTraceBubble);
   }
-  const semanticBubble = buildDebugBubble({
-    title: "semantic workspace",
-    summary: semanticTraceSummary(turnTrace) || "semantic_ir_v1 proposal",
-    blocks: collectSemanticWorkspaceBlocks(turnTrace),
-    variantClass: "debug-bubble-semantic",
-  });
-  if (semanticBubble) {
-    debugStack.appendChild(semanticBubble);
-  }
-  const modelContextBubble = buildDebugBubble({
-    title: "model input",
-    summary: hasSemanticTrace(turnTrace) ? "what the Semantic IR model saw" : "what the compiler saw",
-    blocks: collectModelContextBlocks(turn),
-    variantClass: "debug-bubble-context",
-  });
-  if (modelContextBubble) {
-    debugStack.appendChild(modelContextBubble);
-  }
-  const compilerJsonBubble = buildDebugBubble({
-    title: hasSemanticTrace(turnTrace) ? "structured json" : "compiler json",
-    summary: hasSemanticTrace(turnTrace) ? "workspace and mapper payloads" : "raw model output",
-    blocks: collectCompilerJsonBlocks(turnTrace),
-    variantClass: "debug-bubble-json",
-  });
-  if (compilerJsonBubble) {
-    debugStack.appendChild(compilerJsonBubble);
+  if (hasSemanticTrace(turnTrace) || pipelineTraceBubble) {
+    const rawSemanticBubble = buildDebugBubble({
+      title: "raw semantic payloads",
+      summary: "model input, workspace JSON, mapper JSON",
+      blocks: collectRawSemanticPayloadBlocks(turn, turnTrace),
+      variantClass: "debug-bubble-json",
+    });
+    if (rawSemanticBubble) {
+      debugStack.appendChild(rawSemanticBubble);
+    }
+  } else {
+    const segmentedBubble = buildDebugBubble({
+      title: "story segments",
+      summary: "long narrative ingestion",
+      blocks: collectSegmentedStoryBlocks(turnTrace),
+      variantClass: "debug-bubble-semantic",
+    });
+    if (segmentedBubble) {
+      debugStack.appendChild(segmentedBubble);
+    }
+    const semanticBubble = buildDebugBubble({
+      title: "semantic workspace",
+      summary: semanticTraceSummary(turnTrace) || "semantic_ir_v1 proposal",
+      blocks: collectSemanticWorkspaceBlocks(turnTrace),
+      variantClass: "debug-bubble-semantic",
+    });
+    if (semanticBubble) {
+      debugStack.appendChild(semanticBubble);
+    }
+    const modelContextBubble = buildDebugBubble({
+      title: "model input",
+      summary: "what the compiler saw",
+      blocks: collectModelContextBlocks(turn),
+      variantClass: "debug-bubble-context",
+    });
+    if (modelContextBubble) {
+      debugStack.appendChild(modelContextBubble);
+    }
+    const compilerJsonBubble = buildDebugBubble({
+      title: "compiler json",
+      summary: "raw model output",
+      blocks: collectCompilerJsonBlocks(turnTrace),
+      variantClass: "debug-bubble-json",
+    });
+    if (compilerJsonBubble) {
+      debugStack.appendChild(compilerJsonBubble);
+    }
   }
   if (turnTrace) {
     const traceCard = document.createElement("section");
