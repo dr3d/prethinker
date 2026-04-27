@@ -243,6 +243,49 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         self.assertEqual(diagnostics["features"]["has_self_check_rule_conflict"], True)
         self.assertEqual(len(parsed["facts"]), 2)
 
+    def test_projection_admits_safe_direct_writes_from_quarantine(self) -> None:
+        ir = _ir(
+            decision="quarantine",
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "clinic_shipment",
+                    "args": ["H7"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "assert",
+                    "predicate": "release_allowed",
+                    "args": ["H7"],
+                    "polarity": "positive",
+                    "source": "inferred",
+                    "safety": "unsafe",
+                },
+            ],
+            unsafe_implications=[
+                {
+                    "candidate": "release_allowed(h7)",
+                    "why_unsafe": "direct fact conflicts with a context rule consequence",
+                    "commit_policy": "quarantine",
+                }
+            ],
+            self_check={"bad_commit_risk": "medium", "missing_slots": [], "notes": []},
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=["clinic_shipment/1", "release_allowed/1"],
+        )
+        self.assertEqual(warnings, [])
+        diagnostics = parsed["admission_diagnostics"]
+        self.assertEqual(diagnostics["projected_decision"], "mixed")
+        self.assertEqual(
+            diagnostics["projection_reason"],
+            "quarantine_with_safe_direct_write_projected_to_mixed",
+        )
+        self.assertEqual(parsed["facts"], ["clinic_shipment(h7)."])
+
     def test_mapper_admits_rule_operation_with_explicit_clause(self) -> None:
         ir = _ir(
             decision="commit",

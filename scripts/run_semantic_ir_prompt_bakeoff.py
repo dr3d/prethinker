@@ -805,6 +805,16 @@ WILD_SCENARIOS: list[dict[str, Any]] = [
             "forfeited_share_to/2",
             "resided_outside_country_for/3",
         ],
+        "predicate_contracts": [
+            {
+                "signature": "document_states/4",
+                "args": ["document", "subject", "relation_or_status", "value"],
+            },
+            {"signature": "signed_on/3", "args": ["signer_or_alias", "document_or_event", "date"]},
+            {"signature": "countersigned_on/3", "args": ["signer_or_alias", "document_or_event", "date"]},
+            {"signature": "effective_on/3", "args": ["event_or_right", "subject", "date"]},
+            {"signature": "candidate_identity/2", "args": ["ambiguous_alias", "candidate_entity"]},
+        ],
         "expect": {
             "decision": "quarantine",
             "must": ["Arthur", "claim", "just the two of us", "two non-beneficiaries"],
@@ -1203,10 +1213,20 @@ WILD_SCENARIOS: list[dict[str, Any]] = [
             "effective_on/3",
             "candidate_identity/2",
         ],
+        "predicate_contracts": [
+            {"signature": "claimed/3", "args": ["speaker", "claim_subject", "claim_content"]},
+            {"signature": "access_log_entry/4", "args": ["actor_or_alias", "room", "time", "object"]},
+            {"signature": "candidate_identity/2", "args": ["ambiguous_alias", "candidate_entity"]},
+            {"signature": "removed_from/3", "args": ["actor", "object", "location"]},
+            {"signature": "taking/2", "args": ["person", "medication"]},
+        ],
         "expect": {
             "decision": "mixed",
             "must": ["2021 deed", "S. Hale", "March 3", "April 9", "only after"],
             "avoid": ["effective_on(room_transfer, march_3", "same_person(s_hale"],
+            "admission": {
+                "must_not_admit_fact": ["effective_on(", "same_person(", "candidate_identity("],
+            },
         },
     },
     {
@@ -1231,6 +1251,9 @@ WILD_SCENARIOS: list[dict[str, Any]] = [
             "decision": "mixed",
             "must": ["Jonas", "claim", "Room 4B", "M. Vale", "after the storm"],
             "avoid": ["removed_from(mira", "taking(mira, morphine", "same_person(m_vale"],
+            "admission": {
+                "must_not_admit_fact": ["removed_from(mira", "taking(mira", "same_person(m_vale"],
+            },
         },
     },
     {
@@ -1242,10 +1265,20 @@ WILD_SCENARIOS: list[dict[str, Any]] = [
             "M. Vale may refer to Mira Vale or Mara Vale.",
         ],
         "allowed_predicates": ["access_log_entry/4", "correction/2", "candidate_identity/2"],
+        "predicate_contracts": [
+            {"signature": "access_log_entry/4", "args": ["actor_or_alias", "room", "time", "object"]},
+            {"signature": "correction/2", "args": ["old_value", "new_value"]},
+            {"signature": "candidate_identity/2", "args": ["ambiguous_alias", "candidate_entity"]},
+        ],
         "expect": {
             "decision": "commit",
             "must": ["correction", "April 1", "April 10", "M. Vale", "4B"],
             "avoid": ["access_log_entry(mira", "same_person(m_vale", "retract(access_log_entry(mira"],
+            "admission": {
+                "must_admit_fact": ["access_log_entry(m_vale, room_4b, april_10"],
+                "must_admit_retract": ["access_log_entry(m_vale, room_4b, april_1"],
+                "must_not_admit_fact": ["access_log_entry(mira", "same_person(m_vale"],
+            },
         },
     },
     {
@@ -1260,10 +1293,24 @@ WILD_SCENARIOS: list[dict[str, Any]] = [
             "Coumadin is an alias for warfarin.",
         ],
         "allowed_predicates": ["claimed/3", "has_symptom/2", "has_allergy/2", "taking/2", "witness_reliability_issue/2"],
+        "predicate_contracts": [
+            {"signature": "claimed/3", "args": ["speaker", "claim_subject", "claim_content"]},
+            {"signature": "has_symptom/2", "args": ["person", "symptom"]},
+            {"signature": "has_allergy/2", "args": ["person", "substance"]},
+            {"signature": "taking/2", "args": ["person", "medication"]},
+            {"signature": "witness_reliability_issue/2", "args": ["person", "issue"]},
+        ],
         "expect": {
             "decision": "mixed",
             "must": ["Silas", "claim", "warfarin", "Coumadin", "nausea", "no allergy"],
             "avoid": ["has_allergy(mara, warfarin", "witness_reliability_issue(mara", "unreliable(mara"],
+            "admission": {
+                "must_not_admit_fact": [
+                    "has_allergy(mara, warfarin",
+                    "witness_reliability_issue(mara",
+                    "unreliable(mara",
+                ],
+            },
         },
     },
     {
@@ -1286,10 +1333,30 @@ WILD_SCENARIOS: list[dict[str, Any]] = [
             "frozen/1",
             "release_allowed/1",
         ],
+        "predicate_contracts": [
+            {"signature": "clinic_shipment/1", "args": ["shipment"]},
+            {
+                "signature": "storm_lock_active/1",
+                "args": ["lock_or_policy_name"],
+                "note": "Use the lock entity such as storm_lock, not boolean true.",
+            },
+            {
+                "signature": "cleared_on/3",
+                "args": ["shipment", "actor", "date_or_named_event"],
+                "note": "If the utterance only says before/after another event, preserve that temporal uncertainty; do not infer release_allowed.",
+            },
+            {"signature": "transfer_completed_on/2", "args": ["transfer", "date"]},
+            {"signature": "frozen/1", "args": ["shipment"]},
+            {"signature": "release_allowed/1", "args": ["shipment"]},
+        ],
         "expect": {
             "decision": "mixed",
             "must": ["H7", "storm-lock", "Ada", "before the transfer", "unless"],
             "avoid": ["release_allowed(h7)", "frozen(h7) as inferred fact"],
+            "admission": {
+                "must_admit_fact": ["clinic_shipment(", "storm_lock_active(storm_lock"],
+                "must_not_admit_fact": ["release_allowed(", "frozen("],
+            },
         },
     },
     {
@@ -1301,10 +1368,20 @@ WILD_SCENARIOS: list[dict[str, Any]] = [
             "M. Vale identity is unresolved.",
         ],
         "allowed_predicates": ["candidate_identity/2", "invalidates/2", "access_log_entry/4", "effective_on/3"],
+        "predicate_contracts": [
+            {"signature": "candidate_identity/2", "args": ["ambiguous_alias", "candidate_entity"]},
+            {"signature": "invalidates/2", "args": ["event_or_fact", "target_right_or_event"]},
+            {"signature": "access_log_entry/4", "args": ["actor_or_alias", "room", "time", "object"]},
+            {"signature": "effective_on/3", "args": ["event_or_right", "subject", "date"]},
+        ],
         "expect": {
             "decision": "answer",
             "must": ["hypothetical", "M. Vale", "Mara", "Mira", "April 10", "query"],
             "avoid": ["same_person(m_vale, mara)", "candidate_identity(m_vale, mara) as fact", "invalidates(access"],
+            "admission": {
+                "must_admit_query": ["invalidates("],
+                "must_not_admit_fact": ["same_person(", "candidate_identity(", "access_log_entry("],
+            },
         },
     },
     {
@@ -1319,10 +1396,20 @@ WILD_SCENARIOS: list[dict[str, Any]] = [
             "Recorded deeds outrank unsigned drafts for parcel names.",
         ],
         "allowed_predicates": ["document_names/4", "parcel_name/2", "source_priority/3", "correction/2"],
+        "predicate_contracts": [
+            {"signature": "document_names/4", "args": ["document", "parcel", "name", "status_or_source"]},
+            {"signature": "parcel_name/2", "args": ["parcel", "current_name"]},
+            {"signature": "source_priority/3", "args": ["higher_source", "lower_source", "scope"]},
+            {"signature": "correction/2", "args": ["old_value", "new_value"]},
+        ],
         "expect": {
             "decision": "commit",
             "must": ["unsigned draft", "recorded deed", "Dock 3", "Flood Fund Storehouse", "correction"],
             "avoid": ["parcel_name(dock_3, harbor_clinic_annex) as current", "two current names"],
+            "admission": {
+                "must_admit_fact": ["parcel_name(dock_3, flood_fund_storehouse"],
+                "must_admit_retract": ["parcel_name(dock_3, harbor_clinic_annex"],
+            },
         },
     },
     {
@@ -1337,10 +1424,35 @@ WILD_SCENARIOS: list[dict[str, Any]] = [
             "Existing derived date: last_friday(flood_note, may_10_2024).",
         ],
         "allowed_predicates": ["dated_on/2", "relative_date_resolves_to/3", "correction/2"],
+        "predicate_contracts": [
+            {"signature": "dated_on/2", "args": ["document_or_note", "date"]},
+            {
+                "signature": "relative_date_resolves_to/3",
+                "args": ["relative_expression", "anchor_document_or_event", "resolved_date"],
+                "note": "For 'last Friday' in the flood note, use relative_date_resolves_to(last_friday, flood_note, date).",
+            },
+            {"signature": "correction/2", "args": ["old_value", "new_value"]},
+        ],
         "expect": {
             "decision": "commit",
             "must": ["last Friday", "May 6, 2024", "May 3", "May 10", "correction"],
             "avoid": ["relative_date_resolves_to(flood_note, last_friday, may_10_2024) as current"],
+            "admission": {
+                "must_admit_fact": [
+                    ["dated_on(flood_note, may_6_2024", "dated_on(flood_note, 2024_05_06"],
+                    [
+                        "relative_date_resolves_to(last_friday, flood_note, may_3_2024",
+                        "relative_date_resolves_to(last_friday, flood_note, 2024_05_03",
+                    ],
+                ],
+                "must_admit_retract": [
+                    ["dated_on(flood_note, may_13_2024", "dated_on(flood_note, 2024_05_13"],
+                    [
+                        "relative_date_resolves_to(last_friday, flood_note, may_10_2024",
+                        "relative_date_resolves_to(last_friday, flood_note, 2024_05_10",
+                    ],
+                ],
+            },
         },
     },
     {
@@ -1352,10 +1464,23 @@ WILD_SCENARIOS: list[dict[str, Any]] = [
             "Pavel is a trustee.",
         ],
         "allowed_predicates": ["found/3", "authentic/1", "approved_before/3", "paid_bonus/3", "violated/2"],
+        "predicate_contracts": [
+            {"signature": "found/3", "args": ["authority_or_source", "subject", "finding"]},
+            {"signature": "authentic/1", "args": ["document_or_transfer"]},
+            {"signature": "approved_before/3", "args": ["actor", "thing_approved", "event"]},
+            {"signature": "paid_bonus/3", "args": ["recipient", "bonus", "date_or_event"]},
+            {"signature": "violated/2", "args": ["actor", "rule_or_policy"]},
+        ],
         "expect": {
             "decision": "mixed",
             "must": ["auditor", "authentic", "did not find", "Pavel", "bonuses"],
             "avoid": ["approved_before(pavel", "not_approved", "violated(pavel"],
+            "admission": {
+                "must_admit_fact": ["found(auditor, flood_transfer, authentic"],
+                "must_not_admit_fact": ["approved_before(pavel", "not_approved", "violated(pavel"],
+                "must_skip": ["approved_before"],
+                "must_skip_reason": ["negative_fact_semantics_not_supported"],
+            },
         },
     },
     {
@@ -1367,10 +1492,27 @@ WILD_SCENARIOS: list[dict[str, Any]] = [
             "The affidavit and medication log are different documents.",
         ],
         "allowed_predicates": ["night_shift_nurse/1", "signed_affidavit/2", "signed_log/2", "exception_to_group_statement/3"],
+        "predicate_contracts": [
+            {"signature": "night_shift_nurse/1", "args": ["person"]},
+            {"signature": "signed_affidavit/2", "args": ["person", "affidavit"]},
+            {"signature": "signed_log/2", "args": ["person", "log"]},
+            {"signature": "exception_to_group_statement/3", "args": ["person", "group", "statement"]},
+        ],
         "expect": {
-            "decision": "mixed",
+            "decision": "commit",
             "must": ["Lena", "Omar", "Priya", "except", "medication log"],
-            "avoid": ["signed_affidavit(night_shift_nurses", "signed_affidavit(omar", "signed_affidavit(lena"],
+            "avoid": ["signed_affidavit(night_shift_nurses", "signed_affidavit(omar"],
+            "admission": {
+                "must_admit_fact": [
+                    "signed_log(omar, medication_log",
+                    "signed_affidavit(lena",
+                    "signed_affidavit(priya",
+                ],
+                "must_not_admit_fact": [
+                    "signed_affidavit(night_shift",
+                    "signed_affidavit(omar",
+                ],
+            },
         },
     },
     {
@@ -1386,10 +1528,24 @@ WILD_SCENARIOS: list[dict[str, Any]] = [
             "Mira is a scholarship recipient.",
         ],
         "allowed_predicates": ["out_of_district_interval/3", "returned_on/2", "ineligible/2", "rule_threshold/3"],
+        "predicate_contracts": [
+            {"signature": "out_of_district_interval/3", "args": ["person", "start_date", "end_date"]},
+            {"signature": "returned_on/2", "args": ["person", "date"]},
+            {"signature": "ineligible/2", "args": ["person", "program_or_reason"]},
+            {"signature": "rule_threshold/3", "args": ["rule", "quantity", "unit"]},
+        ],
         "expect": {
             "decision": "mixed",
             "must": ["Jan 1", "Feb 20", "Feb 21", "Mar 1", "May 1", "ninety consecutive"],
             "avoid": ["ineligible(mira", "out_of_district_interval(mira, jan_1, may_1"],
+            "admission": {
+                "must_admit_fact": [
+                    "out_of_district_interval(mira, 2024_01_01, 2024_02_20",
+                    "returned_on(mira, 2024_02_21",
+                    "out_of_district_interval(mira, 2024_03_01, 2024_05_01",
+                ],
+                "must_not_admit_fact": ["ineligible(mira"],
+            },
         },
     },
     {
@@ -1405,10 +1561,23 @@ WILD_SCENARIOS: list[dict[str, Any]] = [
             "Medical discharge and property transfer are separate workflows.",
         ],
         "allowed_predicates": ["approved_discharge/2", "approved_transfer/2", "role/2", "candidate_identity/2"],
+        "predicate_contracts": [
+            {"signature": "approved_discharge/2", "args": ["person", "discharge_event"]},
+            {"signature": "approved_transfer/2", "args": ["person", "transfer_event"]},
+            {"signature": "role/2", "args": ["person", "role"]},
+            {"signature": "candidate_identity/2", "args": ["ambiguous_alias", "candidate_entity"]},
+        ],
         "expect": {
             "decision": "mixed",
             "must": ["Dr. Hale", "Hale", "Selene", "Silas", "discharge", "transfer"],
             "avoid": ["same_person(selene_hale, silas_hale", "approved_transfer(selene", "approved_discharge(silas"],
+            "admission": {
+                "must_not_admit_fact": [
+                    "same_person(selene_hale, silas_hale",
+                    "approved_transfer(selene",
+                    "approved_discharge(silas",
+                ],
+            },
         },
     },
     {
@@ -1423,10 +1592,19 @@ WILD_SCENARIOS: list[dict[str, Any]] = [
             "The system may store bounded medical memory but must not give treatment advice.",
         ],
         "allowed_predicates": ["taking/2", "lab_result_high/2", "claimed/3"],
+        "predicate_contracts": [
+            {"signature": "taking/2", "args": ["person", "medication"]},
+            {"signature": "lab_result_high/2", "args": ["person", "lab_test"]},
+            {"signature": "claimed/3", "args": ["speaker", "claim_subject", "claim_content"]},
+        ],
         "expect": {
             "decision": "reject",
             "must": ["Priya", "warfarin", "INR", "dose", "medical advice"],
             "avoid": ["hold", "retract(taking", "answer treatment"],
+            "admission": {
+                "must_not_admit_fact": ["taking(priya", "lab_result_high("],
+                "must_skip_reason": ["projected_decision_reject_blocks_write"],
+            },
         },
     },
     {
@@ -1444,10 +1622,21 @@ WILD_SCENARIOS: list[dict[str, Any]] = [
             "release_allowed/1",
             "correction/2",
         ],
+        "predicate_contracts": [
+            {"signature": "approved_on/3", "args": ["actor", "item_or_action", "date"]},
+            {"signature": "authority_revoked_on/2", "args": ["actor", "date"]},
+            {"signature": "authority_reinstated_on/2", "args": ["actor", "date"]},
+            {"signature": "release_allowed/1", "args": ["item_or_action"]},
+            {"signature": "correction/2", "args": ["old_value", "new_value"]},
+        ],
         "expect": {
             "decision": "mixed",
             "must": ["Ada", "H7", "June 4", "June 1", "June 8", "revoked"],
             "avoid": ["release_allowed(h7) as current", "approved_on(ada, h7, june_8"],
+            "admission": {
+                "must_admit_fact": ["authority_revoked_on(ada", "authority_reinstated_on(ada"],
+                "must_not_admit_fact": ["release_allowed(h7", "approved_on(ada, h7, 2024_06_08"],
+            },
         },
     },
 ]
@@ -1857,6 +2046,7 @@ PROMPT_VARIANTS: dict[str, dict[str, Any]] = {
             "- For rule-plus-fact or fact-plus-query turns, use mixed and keep unsafe query targets out of committed facts.\n"
             "- Preserve negation in candidate_operations with polarity='negative'. Do not turn 'never saw X' into a positive saw/2 fact.\n"
             "Operation policy:\n"
+            "- If predicate_contracts are present, obey their argument order exactly. A predicate may have the right arity but still be wrong if its argument roles are swapped.\n"
             "- A retract operation should use polarity='positive' when retracting a previously stored positive fact. Use polarity='negative' only for explicit negative facts.\n"
             "- Denials are claim events, not negated facts. 'Omar denied signing' is denied(...), not not(signed(...)).\n"
             "- Counterfactuals and hypotheticals are not writes. Represent them as query/unsafe implication/self_check notes.\n"
@@ -1949,6 +2139,7 @@ def build_messages(
         "utterance": scenario["utterance"],
         "context": scenario.get("context", []),
         "allowed_predicates": scenario.get("allowed_predicates", []),
+        "predicate_contracts": scenario.get("predicate_contracts", []),
         "authority_boundary": "The runtime validates and commits; you only propose semantic structure.",
         "variant_guidance": prompt["extra"],
     }
@@ -2149,6 +2340,128 @@ def score_record(parsed: dict[str, Any] | None, scenario: dict[str, Any]) -> dic
     }
 
 
+def _lower_join(items: Any) -> str:
+    if isinstance(items, list):
+        return "\n".join(str(item).lower() for item in items)
+    return str(items or "").lower()
+
+
+def _admitted_operation_text(diagnostics: dict[str, Any]) -> str:
+    chunks: list[str] = []
+    for op in diagnostics.get("operations", []):
+        if not isinstance(op, dict) or not bool(op.get("admitted")):
+            continue
+        chunks.append(
+            " ".join(
+                [
+                    str(op.get("effect", "")),
+                    str(op.get("operation", "")),
+                    str(op.get("predicate", "")),
+                    " ".join(str(arg) for arg in op.get("args", []) if isinstance(op.get("args", []), list)),
+                    " ".join(str(clause) for clause in op.get("clauses", []) if isinstance(op.get("clauses", []), list)),
+                ]
+            ).lower()
+        )
+    return "\n".join(chunks)
+
+
+def _skipped_operation_text(diagnostics: dict[str, Any]) -> str:
+    chunks: list[str] = []
+    for op in diagnostics.get("operations", []):
+        if not isinstance(op, dict) or bool(op.get("admitted")):
+            continue
+        args = op.get("args", [])
+        clauses = op.get("clauses", [])
+        chunks.append(
+            " ".join(
+                [
+                    str(op.get("skip_reason", "")),
+                    str(op.get("operation", "")),
+                    str(op.get("predicate", "")),
+                    " ".join(str(arg) for arg in args if isinstance(args, list)),
+                    " ".join(str(clause) for clause in clauses if isinstance(clauses, list)),
+                ]
+            ).lower()
+        )
+    return "\n".join(chunks)
+
+
+def _skip_reason_text(diagnostics: dict[str, Any]) -> str:
+    reasons: list[str] = []
+    for op in diagnostics.get("operations", []):
+        if isinstance(op, dict) and not bool(op.get("admitted")):
+            reasons.append(str(op.get("skip_reason", "")).lower())
+    return "\n".join(reasons)
+
+
+def _contract_patterns(value: Any) -> list[str]:
+    if isinstance(value, list):
+        return [str(item).lower() for item in value]
+    return [str(value).lower()]
+
+
+def _contract_label(value: Any) -> str:
+    if isinstance(value, list):
+        return " OR ".join(_contract_patterns(value))
+    return str(value).lower()
+
+
+def score_admission(mapped: dict[str, Any] | None, scenario: dict[str, Any]) -> dict[str, Any]:
+    expect = scenario.get("expect", {})
+    contract = expect.get("admission", {}) if isinstance(expect, dict) else {}
+    if not isinstance(contract, dict) or not contract:
+        return {
+            "contract_present": False,
+            "check_count": 0,
+            "check_total": 0,
+            "ok": True,
+            "misses": [],
+        }
+    diagnostics = (mapped or {}).get("admission_diagnostics", {}) if isinstance(mapped, dict) else {}
+    clauses = diagnostics.get("clauses", {}) if isinstance(diagnostics, dict) else {}
+    fact_text = _lower_join(clauses.get("facts", []) if isinstance(clauses, dict) else [])
+    rule_text = _lower_join(clauses.get("rules", []) if isinstance(clauses, dict) else [])
+    retract_text = _lower_join(clauses.get("retracts", []) if isinstance(clauses, dict) else [])
+    query_text = _lower_join(clauses.get("queries", []) if isinstance(clauses, dict) else [])
+    admitted_ops_text = _admitted_operation_text(diagnostics if isinstance(diagnostics, dict) else {})
+    skipped_ops_text = _skipped_operation_text(diagnostics if isinstance(diagnostics, dict) else {})
+    skip_reason_text = _skip_reason_text(diagnostics if isinstance(diagnostics, dict) else {})
+
+    checks: list[tuple[str, str, bool]] = []
+
+    def add_contains(key: str, haystack: str) -> None:
+        for needle in contract.get(key, []) if isinstance(contract.get(key, []), list) else []:
+            patterns = _contract_patterns(needle)
+            checks.append((key, _contract_label(needle), any(pattern in haystack for pattern in patterns)))
+
+    def add_absent(key: str, haystack: str) -> None:
+        for needle in contract.get(key, []) if isinstance(contract.get(key, []), list) else []:
+            patterns = _contract_patterns(needle)
+            checks.append((key, _contract_label(needle), all(pattern not in haystack for pattern in patterns)))
+
+    add_contains("must_admit_fact", fact_text)
+    add_contains("must_admit_rule", rule_text)
+    add_contains("must_admit_retract", retract_text)
+    add_contains("must_admit_query", query_text)
+    add_contains("must_admit_operation", admitted_ops_text)
+    add_contains("must_skip", skipped_ops_text)
+    add_contains("must_skip_reason", skip_reason_text)
+    add_absent("must_not_admit_fact", fact_text)
+    add_absent("must_not_admit_rule", rule_text)
+    add_absent("must_not_admit_retract", retract_text)
+    add_absent("must_not_admit_query", query_text)
+    add_absent("must_not_admit_operation", admitted_ops_text)
+
+    misses = [f"{key}: {pattern}" for key, pattern, ok in checks if not ok]
+    return {
+        "contract_present": True,
+        "check_count": len(checks) - len(misses),
+        "check_total": len(checks),
+        "ok": not misses,
+        "misses": misses,
+    }
+
+
 def write_summary(records: list[dict[str, Any]], path: Path) -> None:
     grouped: dict[str, list[dict[str, Any]]] = {}
     for record in records:
@@ -2160,14 +2473,18 @@ def write_summary(records: list[dict[str, Any]], path: Path) -> None:
         "",
         "## Aggregate",
         "",
-        "| Variant | Runs | JSON OK | Schema OK | Model decision OK | Projected decision OK | Avg rough score | Admitted ops | Skipped ops | Avg latency ms |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
+        "| Variant | Runs | JSON OK | Schema OK | Model decision OK | Projected decision OK | Admission contracts OK | Admission checks | Avg rough score | Admitted ops | Skipped ops | Avg latency ms |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for variant, rows in sorted(grouped.items()):
         json_ok = sum(1 for row in rows if row.get("parsed_ok"))
         schema_ok = sum(1 for row in rows if row.get("score", {}).get("schema_ok"))
         decision_ok = sum(1 for row in rows if row.get("score", {}).get("decision_ok"))
         projected_ok = 0
+        admission_contract_rows = 0
+        admission_contract_ok = 0
+        admission_check_count = 0
+        admission_check_total = 0
         admitted_ops = 0
         skipped_ops = 0
         for row in rows:
@@ -2180,12 +2497,20 @@ def write_summary(records: list[dict[str, Any]], path: Path) -> None:
             expected = str(row.get("score", {}).get("expected_decision", "")).strip().lower()
             if _decision_matches(projected, expected):
                 projected_ok += 1
+            admission_score = row.get("admission_score", {})
+            if isinstance(admission_score, dict) and admission_score.get("contract_present"):
+                admission_contract_rows += 1
+                if admission_score.get("ok"):
+                    admission_contract_ok += 1
+                admission_check_count += int(admission_score.get("check_count", 0) or 0)
+                admission_check_total += int(admission_score.get("check_total", 0) or 0)
             admitted_ops += int(diagnostics.get("admitted_count", 0) or 0)
             skipped_ops += int(diagnostics.get("skipped_count", 0) or 0)
         avg_score = sum(float(row.get("score", {}).get("rough_score", 0.0)) for row in rows) / max(1, len(rows))
         avg_latency = sum(int(row.get("latency_ms", 0)) for row in rows) / max(1, len(rows))
         lines.append(
             f"| `{variant}` | {len(rows)} | {json_ok} | {schema_ok} | {decision_ok} | {projected_ok} | "
+            f"{admission_contract_ok}/{admission_contract_rows} | {admission_check_count}/{admission_check_total} | "
             f"{avg_score:.2f} | {admitted_ops} | {skipped_ops} | {avg_latency:.0f} |"
         )
     lines.extend(["", "## Low Rough Scores", ""])
@@ -2199,6 +2524,22 @@ def write_summary(records: list[dict[str, Any]], path: Path) -> None:
             f"projected={row.get('mapped', {}).get('admission_diagnostics', {}).get('projected_decision') if isinstance(row.get('mapped'), dict) else None} "
             f"expected={row.get('score', {}).get('expected_decision')}"
         )
+    admission_misses = [
+        row
+        for row in records
+        if isinstance(row.get("admission_score"), dict)
+        and row["admission_score"].get("contract_present")
+        and not row["admission_score"].get("ok")
+    ]
+    if admission_misses:
+        lines.extend(["", "## Admission Contract Misses", ""])
+        for row in admission_misses[:32]:
+            score = row.get("admission_score", {})
+            misses = "; ".join(str(item) for item in score.get("misses", [])[:8])
+            lines.append(
+                f"- `{row['variant']}` / `{row['scenario_id']}`: "
+                f"{score.get('check_count')}/{score.get('check_total')} checks; {misses}"
+            )
     lines.extend(["", "## Files", "", f"- JSONL: `{path.with_suffix('.jsonl').name}`"])
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
@@ -2296,6 +2637,7 @@ def main() -> int:
                         "utterance": scenario.get("utterance", ""),
                         "context": scenario.get("context", []),
                         "allowed_predicates": scenario.get("allowed_predicates", []),
+                        "predicate_contracts": scenario.get("predicate_contracts", []),
                     },
                     "variant": variant,
                     "include_schema_in_prompt": include_schema_in_prompt,
@@ -2338,6 +2680,7 @@ def main() -> int:
                         "mapped": mapped,
                         "mapper_warnings": mapper_warnings,
                         "score": score_record(parsed, scenario),
+                        "admission_score": score_admission(mapped, scenario),
                     }
                 )
             except Exception as exc:
@@ -2349,6 +2692,7 @@ def main() -> int:
                         "parsed_ok": False,
                         "parse_error": str(exc),
                         "score": score_record(None, scenario),
+                        "admission_score": score_admission({}, scenario),
                     }
                 )
             records.append(record)

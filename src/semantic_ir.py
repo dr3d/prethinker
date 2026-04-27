@@ -280,6 +280,7 @@ BEST_GUARDED_V2_GUIDANCE = (
     "- When pronouns or referents are ambiguous and only a generic speech/container fact such as told/said/claimed is safe, choose clarify rather than committing the speech wrapper.\n"
     "- If context supplies exactly one active patient and one active lab test, a direct 'it came back high' may propose a safe lab_result_high write.\n"
     "- For rule-plus-fact or fact-plus-query turns, use mixed and keep unsafe query targets out of committed facts.\n"
+    "- If predicate_contracts are present, obey their argument order exactly. A predicate may have the right arity but still be wrong if its argument roles are swapped.\n"
     "- Preserve negation in candidate_operations with polarity='negative'. Do not turn 'never saw X' into a positive saw/2 fact."
 )
 
@@ -304,6 +305,7 @@ def build_semantic_ir_input_payload(
     utterance: str,
     context: list[str] | None = None,
     allowed_predicates: list[str] | None = None,
+    predicate_contracts: list[dict[str, Any]] | None = None,
     domain: str = "runtime",
     include_schema_contract: bool = True,
 ) -> dict[str, Any]:
@@ -314,6 +316,7 @@ def build_semantic_ir_input_payload(
         "utterance": utterance,
         "context": context or [],
         "allowed_predicates": allowed_predicates or [],
+        "predicate_contracts": predicate_contracts or [],
         "authority_boundary": "The runtime validates and commits; you only propose semantic structure.",
         "variant_guidance": BEST_GUARDED_V2_GUIDANCE,
     }
@@ -331,6 +334,7 @@ def build_semantic_ir_messages(
     utterance: str,
     context: list[str] | None = None,
     allowed_predicates: list[str] | None = None,
+    predicate_contracts: list[dict[str, Any]] | None = None,
     domain: str = "runtime",
     include_schema_contract: bool = True,
 ) -> list[dict[str, str]]:
@@ -338,6 +342,7 @@ def build_semantic_ir_messages(
         utterance=utterance,
         context=context,
         allowed_predicates=allowed_predicates,
+        predicate_contracts=predicate_contracts,
         domain=domain,
         include_schema_contract=include_schema_contract,
     )
@@ -353,6 +358,7 @@ def call_semantic_ir(
     config: SemanticIRCallConfig,
     context: list[str] | None = None,
     allowed_predicates: list[str] | None = None,
+    predicate_contracts: list[dict[str, Any]] | None = None,
     domain: str = "runtime",
     include_model_input: bool = False,
 ) -> dict[str, Any]:
@@ -361,6 +367,7 @@ def call_semantic_ir(
         utterance=utterance,
         context=context,
         allowed_predicates=allowed_predicates,
+        predicate_contracts=predicate_contracts,
         domain=domain,
         include_schema_contract=True,
     )
@@ -368,6 +375,7 @@ def call_semantic_ir(
         utterance=utterance,
         context=context,
         allowed_predicates=allowed_predicates,
+        predicate_contracts=predicate_contracts,
         domain=domain,
         include_schema_contract=True,
     )
@@ -750,7 +758,7 @@ def _diagnose_candidate_operation(
 
     if safety != "safe":
         return skip("operation_not_marked_safe", codes=["candidate_safety_gate"])
-    if source == "inferred" and not (operation == "query" and _is_pure_hypothetical_query(ir)):
+    if source == "inferred" and operation != "query":
         return skip(
             "inferred_write_not_admissible",
             warning="skipped inferred safe operation pending policy",
@@ -1076,6 +1084,8 @@ def _projection_reason(
     if model_decision == "quarantine" and str(ir.get("turn_type", "")).strip().lower() == "correction":
         if _has_safe_direct_retract(ir):
             return "quarantined_correction_with_safe_retract_projected_to_mixed"
+    if model_decision == "quarantine" and _quarantine_with_safe_direct_write_should_mixed(ir):
+        return "quarantine_with_safe_direct_write_projected_to_mixed"
     return "structural_projection"
 
 
@@ -1142,6 +1152,8 @@ def _projected_decision(
     if decision == "quarantine" and str(ir.get("turn_type", "")).strip().lower() == "correction":
         if _has_safe_direct_retract(ir):
             return "mixed"
+    if decision == "quarantine" and _quarantine_with_safe_direct_write_should_mixed(ir):
+        return "mixed"
     return decision
 
 
@@ -1342,6 +1354,16 @@ def _has_safe_direct_write(ir: dict[str, Any]) -> bool:
     return False
 
 
+def _quarantine_with_safe_direct_write_should_mixed(ir: dict[str, Any]) -> bool:
+    if not _has_safe_direct_write(ir):
+        return False
+    if _has_ambiguous_or_unresolved_referent(ir):
+        return False
+    if _has_only_communication_writes_with_unsafe_implications(ir, allowed_signatures=set()):
+        return False
+    return True
+
+
 def _has_general_negative_assertion(ir: dict[str, Any]) -> bool:
     for op in _candidate_operations(ir):
         if str(op.get("safety", "")).strip().lower() != "safe":
@@ -1415,7 +1437,9 @@ def _has_projection_relevant_unsafe_implications(ir: dict[str, Any]) -> bool:
     if not relevant:
         return False
     if (
-        _bad_commit_risk(ir) == "low"
+        str(ir.get("turn_type", "")).strip().lower() == "correction"
+        and _has_safe_retract(ir)
+        and _bad_commit_risk(ir) == "low"
         and not _string_list(ir.get("clarification_questions"))
         and all(str(item.get("commit_policy", "")).strip().lower() == "clarify" for item in relevant)
     ):
@@ -1605,6 +1629,15 @@ def _has_safe_direct_retract(ir: dict[str, Any]) -> bool:
     return False
 
 
+def _has_safe_retract(ir: dict[str, Any]) -> bool:
+    for op in _candidate_operations(ir):
+        if str(op.get("safety", "")).strip().lower() != "safe":
+            continue
+        if str(op.get("operation", "")).strip().lower() == "retract":
+            return True
+    return False
+
+
 def _operation_targets_quantified_set(op: dict[str, Any], entity_meta: dict[str, dict[str, Any]]) -> bool:
     raw_args = op.get("args", [])
     if not isinstance(raw_args, list):
@@ -1649,6 +1682,8 @@ def _is_query_scoped_identity_premise(ir: dict[str, Any], predicate: str) -> boo
 
 
 def _has_initialed_person_state_write(ir: dict[str, Any]) -> bool:
+    if str(ir.get("turn_type", "")).strip().lower() == "correction" and _has_safe_direct_retract(ir):
+        return False
     entity_meta = _entity_metadata_map(ir)
     for op in _candidate_operations(ir):
         if str(op.get("safety", "")).strip().lower() != "safe":

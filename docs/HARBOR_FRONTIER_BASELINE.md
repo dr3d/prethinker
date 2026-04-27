@@ -85,6 +85,9 @@ A later `best_guarded_v3` pass added two important refinements:
 - if `self_check` identifies an unresolved rule/constraint validity problem,
   the mapper projects a raw `commit` label to `mixed` while still admitting the
   safe direct facts.
+- scenario expectations now include admission-level contracts, so the harness
+  can score what was actually admitted, skipped, or queried instead of only
+  scoring the model's decision label.
 
 Latest local run:
 
@@ -111,6 +114,23 @@ python scripts\run_semantic_ir_prompt_bakeoff.py `
 | Skipped ops | 11 |
 | Average latency | 6.2s |
 
+After adding explicit predicate contracts and admission-level scoring, the
+latest local Harbor run produced:
+
+| Metric | Result |
+|---|---:|
+| Scenarios | 14 |
+| JSON valid | 14/14 |
+| Schema valid | 14/14 |
+| Raw model decision labels | 13/14 |
+| Mapper-projected decision labels | 14/14 |
+| Admission contracts | 14/14 |
+| Admission checks | 52/52 |
+| Average rough score | 0.96 |
+| Admitted ops | 25 |
+| Skipped ops | 15 |
+| Average latency | 6.4s |
+
 Rendered trace:
 
 ```powershell
@@ -134,6 +154,10 @@ python scripts\render_semantic_ir_trace.py `
   approval might be invalid under a context rule, but still labeled the turn
   `commit`. The mapper now treats that self-check signal as admission pressure
   and projects to `mixed`.
+- `harbor_group_exception_known_members`: this is now treated as a safe
+  enumerated-group expansion when the context explicitly lists the members
+  (`Lena`, `Omar`, `Priya`). The admitted facts must still avoid a group atom
+  and must not claim Omar signed the affidavit.
 
 ## Immediate Design Lesson
 
@@ -148,3 +172,6 @@ basic extraction. It is the boundary between:
 
 Future work should add admission-level scoring for `must_admit`,
 `must_not_admit`, `must_skip_reason`, and temporal/source/mutation boundaries.
+The first version of that scoring is now active for Harbor; the next step is to
+promote stable contracts into reusable predicate/profile manifests instead of
+keeping them scenario-local.

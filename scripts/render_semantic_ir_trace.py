@@ -473,6 +473,7 @@ def _render_record(
     mapped, mapper_warnings = _extract_mapped(record, parsed, input_info["allowed_predicates"])
     diagnostics = _diagnostics_from_mapped(mapped)
     score = record.get("score") if isinstance(record.get("score"), dict) else {}
+    admission_score = record.get("admission_score") if isinstance(record.get("admission_score"), dict) else {}
 
     scenario_label = input_info["scenario_id"] or f"record_{index}"
     model = _text(record.get("model") or record.get("semantic_model") or record.get("backend")).strip()
@@ -488,6 +489,10 @@ def _render_record(
         layer_summary.append(f"expected=`{expected}`")
     if score:
         layer_summary.append(f"score=`{score.get('rough_score', '')}`")
+    if admission_score and admission_score.get("contract_present"):
+        layer_summary.append(
+            f"admission=`{admission_score.get('check_count', 0)}/{admission_score.get('check_total', 0)}`"
+        )
 
     lines: list[str] = [
         f"## {index}. `{scenario_label}`",
@@ -627,8 +632,10 @@ def _render_record(
         lines.extend(_render_clause_list("Final KB snapshot from run record", record["raw"]["final_kb"]))
         lines.append("")
 
-    if score:
+    if score or admission_score:
         lines.extend(["### Layer 5 - Scenario Scoring", "", _code_block(score, "json")])
+        if admission_score:
+            lines.extend(["", "**Admission contract score:**", "", _code_block(admission_score, "json")])
         lines.append("")
     return lines
 
