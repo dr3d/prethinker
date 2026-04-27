@@ -22,13 +22,45 @@
       "fictional scene narration without policy/rule language"
     ]
   },
+  "selection_keywords": [
+    "guardianship",
+    "ordinary residence",
+    "Calder's Reach",
+    "Calder Reach",
+    "Silverton",
+    "Silas",
+    "Xmas",
+    "Christmas",
+    "pond",
+    "England",
+    "London",
+    "Beatrice",
+    "Arthur",
+    "Artur",
+    "A.S.",
+    "Alfred",
+    "Elias",
+    "last spring",
+    "over 5 yrs",
+    "5 yrs",
+    "broke his big clock",
+    "papa",
+    "taller",
+    "solo nosotros",
+    "two witnesses",
+    "one witness",
+    "beneficiary",
+    "probate ledger"
+  ],
   "semantic_ir_context": [
     "profile_scope: probate and estate-memory ingestion; separate claims, observed documents, rules, and legal conclusions",
     "claim_policy: statements by beneficiaries are claims unless corroborated by an admitted document or witness rule; do not turn a claim into a world-state fact",
     "witness_policy: amendment validity may depend on witness count, witness independence, and simultaneity; unresolved witness qualifications should quarantine or clarify",
     "identity_policy: initials and surnames such as A. Silverton or R. Vale require identity grounding when multiple candidates exist",
     "rule_policy: unless/except/only-if language should remain rule-like or unsafe unless the mapper can admit an executable rule clause",
-    "temporal_policy: preserve intervals, consecutive-duration conditions, and corrected dates; do not decide forfeiture from ambiguous location or identity"
+    "temporal_policy: preserve intervals, consecutive-duration conditions, and corrected dates; do not decide forfeiture from ambiguous location or identity",
+    "guardianship_policy: temporary guardianship, ordinary residence, and name-alias discoveries are probate state/evidence; do not terminate guardianship from an alias discovery unless the utterance explicitly says the condition is met",
+    "gift_condition_policy: conditional gifts may record direct declinations and explicit pass-to events, but rule-like alternatives should remain scoped to the source document"
   ],
   "canonical_palette": [
     { "signature": "beneficiary/1", "arguments": ["person"], "notes": "Person named as beneficiary." },
@@ -36,7 +68,13 @@
     { "signature": "witnessed/3", "arguments": ["witness", "event", "time"], "notes": "Witness observation with time." },
     { "signature": "non_beneficiary/1", "arguments": ["person"], "notes": "Witness independence property when explicit." },
     { "signature": "document_states/2", "arguments": ["document", "content_concept"], "notes": "Observed document content." },
+    { "signature": "interval_start/2", "arguments": ["interval", "date"], "notes": "Start date of an explicitly stated interval." },
+    { "signature": "interval_end/2", "arguments": ["interval", "date"], "notes": "End date of an explicitly stated interval." },
     { "signature": "resided_outside_country/3", "arguments": ["person", "country", "interval"], "notes": "Residence interval outside country." },
+    { "signature": "ordinary_residence_in/2", "arguments": ["person", "place"], "notes": "Ordinary residence status when explicitly stated." },
+    { "signature": "guardianship_of/2", "arguments": ["guardian", "ward"], "notes": "Guardianship relation." },
+    { "signature": "declined_role/2", "arguments": ["person", "role"], "notes": "Explicit refusal or declination of a role." },
+    { "signature": "passed_to/2", "arguments": ["asset", "recipient"], "notes": "Explicit transfer/pass-to outcome in probate or gift source language." },
     { "signature": "forfeits_share/1", "arguments": ["person"], "notes": "Legal conclusion; should usually be query/rule-derived rather than directly asserted." },
     { "signature": "candidate_identity/2", "arguments": ["surface", "person"], "notes": "Identity candidate, not resolved identity." }
   ]

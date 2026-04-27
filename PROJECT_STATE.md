@@ -47,8 +47,12 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 - The profile context now explicitly treats an explicit named patient as sufficient grounding for the research profile, while pronouns, multiple candidates, aliases, and missing patient identity still require clarification.
 - A thin domain-profile roster now exists in `modelfiles/domain_profile_catalog.v0.json` and is included in Semantic IR input as `available_domain_profiles`. This is the first skill-directory-style control-plane hook: it advertises possible profile contexts without loading every thick package or authorizing writes.
 - `active_profile=auto` now has a first deterministic catalog selector. It chooses a profile from the thin roster, loads only that profile's thick context/contracts for the Semantic IR call, and records the selected profile plus reasons in the trace. A synthetic switch test covers medical -> legal -> SEC/contracts -> medical.
+- The auto selector now also consumes explicit per-turn Semantic IR context, so research runners can test the "story so far + new sentence" shape without smuggling that context into the utterance text.
+- Profile packages now own declarative `selection_keywords` in addition to thin roster hints. The selector can use those profile-owned hints while the mapper still owns admission.
 - A mixed-domain agility harness now lives at `scripts/run_mixed_domain_agility.py`. It randomizes Goldilocks, Glitch, Ledger, Silverton, Harbor, CourtListener, SEC/contracts, and medical scenarios through `active_profile=auto` so profile switching can be tested as a stream rather than isolated lanes.
 - Declarative starter profile packages now exist for exploration: `modelfiles/profile.story_world.v0.json`, `modelfiles/profile.probate.v0.json`, and `modelfiles/profile.legal_courtlistener.v0.json`. They provide mock thick context and predicate contracts for future routing experiments without changing runtime admission authority.
+- The legal/probate/SEC starter profiles now carry a broader profile-owned predicate surface for the current frontier packs: legal source documents, access logs, relative-date anchors, interval facts, probate guardianship/conditional-gift facts, and contract-like clearance/lock/stock state.
+- The mapper now collapses duplicate admitted candidate operations. This catches schema-cap repetition floods without teaching Python any story-specific language.
 - A first-pass CourtListener adapter shell now lives under `adapters/courtlistener/`. It includes a conservative token-based REST client, normalizer, legal predicate contracts, harness conversion, README, and an offline synthetic legal seed fixture for claim/finding, citation, role-scope, docket, and identity-boundary tests.
 - First CourtListener live smoke generated ignored `breach of lease` and `summary judgment` harness slices and ran legal Semantic IR cases through LM Studio. All emitted valid JSON; the legal palette preserved claim/finding, citation-not-endorsement, docket-not-holding, role-scope, and ambiguous judge identity boundaries.
 - `sec_contracts@v0` is now the third large starter domain. It targets SEC/EDGAR and contract-obligation intake: filing/exhibit provenance, party roles, obligations, rights, conditions, effective/termination triggers, and breach-event boundaries.
@@ -101,6 +105,7 @@ This is the next useful layer for type steering and explanation. It should suppo
 - Port the new cross-turn frontier pack into a runner only after deciding which expectations should be hard regression gates versus research pressure gauges.
 - Expand auto profile-selection tests from clean synthetic switching into messy mixed-domain turns. Profile selection is still advisory context loading, not admission authority.
 - Use the mixed agility harness as a regular pressure gauge. The next useful failures are not JSON validity; they are wrong profile selection, vague story predicates, placeholder/null write arguments, and mapper policy for partially good operations.
+- Add deterministic argument-role validation against predicate contracts. Predicate-palette admission now catches name/arity errors, but the next frontier is checking that `interval_start/2` receives an interval id rather than a person.
 - Keep expanding the CourtListener lane with small live API slices and curated synthetic boundaries. Generated live data remains ignored under `datasets/courtlistener/generated/` unless a tiny fixture is intentionally curated.
 - Run the SEC adapter against a small EDGAR submissions slice only after setting `SEC_USER_AGENT` and choosing a durable cache/review policy. Keep generated live data under ignored `datasets/sec_edgar/generated/`.
 - Keep the Semantic IR harness model-agnostic, but use `qwen/qwen3.6-35b-a3b` as the default development model unless a specific comparison question needs another local model.
@@ -112,7 +117,7 @@ This is the next useful layer for type steering and explanation. It should suppo
 Recent verified results:
 
 - Full suite after SEC/contracts third-domain scaffold: `299 passed`
-- Full suite after mixed-domain agility guardrail/profile tightening: `306 passed`
+- Full suite after mixed-domain profile/context tightening: `308 passed`
 - Focused semantic IR runtime battery: `23 passed`
 - Focused profile-contract/domain-roster handoff verification: `7 passed`
 - Focused CourtListener/domain-profile verification: `8 passed`
@@ -133,9 +138,10 @@ Recent verified results:
 - Live LM Studio auto-profile smoke selected `medical@v0`, `legal_courtlistener@v0`, `sec_contracts@v0`, then `medical@v0` across four turns, with each turn receiving the expected domain context and predicate palette.
 - Mixed-domain agility smoke, seed `42`, selected expected profiles for `12/12` shuffled turns and produced valid Semantic IR for `12/12`. The stream included Glitch, Goldilocks, Ledger, CourtListener, SEC/contracts, and medical turns. Trace rendered locally under ignored `tmp/semantic_ir_trace_views/`.
 - Mixed-domain guardrail/profile tightening on the same seed reduced bad admitted placeholder/loose-trait clauses from `4` to `0`: `null`/generic actor writes are now skipped, `docket_entry(... null ...)` no longer reaches facts, and the story profile steers descriptive traits to `has_trait/2` instead of `owns/2`.
+- Hard mixed-domain agility seed `99`: before this pass, selector accuracy was `18/24`; after profile-owned hints and per-turn context, selector accuracy reached `24/24` and valid Semantic IR remained `24/24`.
+- Wider mixed-domain agility seed `2718`: selector-only moved from `36/40` to `40/40`; the real LM Studio run reached `40/40` profile selections and `40/40` valid Semantic IR across CourtListener, Harbor, Ledger/probate, Silverton, SEC/contracts, Glitch, Goldilocks, and medical cases.
+- The same seed now demonstrates better admitted structure on hard cases: Harbor relative-date correction emits `document_dated/2` plus `relative_date_resolves_to/3` with retractions; document-priority conflict retracts the draft parcel name and asserts the recorded deed name; probate conditional-gift over-expansion dropped from `64` admitted writes to `2`; out-of-district temporal spans now use interval ids plus `outside_district_interval/3`.
 - Python compile check for touched runtime files passed
-
-Rerun the full suite before committing a new stopping point.
 
 ## Reading Order
 

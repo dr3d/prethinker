@@ -192,6 +192,43 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         ]
         self.assertEqual([row["skip_reason"] for row in skipped], ["ungrounded_argument_atom", "ungrounded_argument_atom"])
 
+    def test_mapper_collapses_duplicate_candidate_operations(self) -> None:
+        ir = _ir(
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "document_states",
+                    "args": ["Tomas", "condition_role_title"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "assert",
+                    "predicate": "document_states",
+                    "args": ["Tomas", "condition_role_title"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+            ]
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=["document_states/2"],
+        )
+        self.assertEqual(parsed["facts"], ["document_states(tomas, condition_role_title)."])
+        self.assertTrue(any("duplicate candidate operation" in warning for warning in warnings))
+        diagnostics = parsed["admission_diagnostics"]
+        self.assertEqual(diagnostics["admitted_count"], 1)
+        self.assertEqual(diagnostics["skipped_count"], 1)
+        skipped = [
+            row
+            for row in diagnostics["operations"]
+            if not row["admitted"]
+        ]
+        self.assertEqual(skipped[0]["skip_reason"], "duplicate_candidate_operation")
+
     def test_mapper_admits_story_world_predicates_from_palette(self) -> None:
         ir = _ir(
             candidate_operations=[

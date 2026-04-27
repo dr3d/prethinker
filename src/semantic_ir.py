@@ -611,6 +611,7 @@ def semantic_ir_admission_diagnostics(
     }
     entity_names = _entity_name_map(ir)
     entity_meta = _entity_metadata_map(ir)
+    admitted_clause_keys: set[tuple[str, str]] = set()
     for index, op in enumerate(_candidate_operations(ir)):
         diagnosis = _diagnose_candidate_operation(
             ir,
@@ -632,6 +633,29 @@ def semantic_ir_admission_diagnostics(
             diagnosis["rationale_codes"] = list(diagnosis.get("rationale_codes", [])) + [
                 "decision_projection_gate"
             ]
+        if bool(diagnosis.get("admitted")):
+            effect = str(diagnosis.get("effect", "")).strip()
+            clauses = [str(item).strip() for item in diagnosis.get("clauses", []) if str(item).strip()]
+            duplicate_clause = next(
+                (
+                    clause
+                    for clause in clauses
+                    if (effect, clause) in admitted_clause_keys
+                ),
+                "",
+            )
+            if duplicate_clause:
+                diagnosis = dict(diagnosis)
+                diagnosis["admitted"] = False
+                diagnosis["skip_reason"] = "duplicate_candidate_operation"
+                diagnosis["warning"] = "skipped duplicate candidate operation"
+                diagnosis["clauses"] = []
+                diagnosis["rationale_codes"] = list(diagnosis.get("rationale_codes", [])) + [
+                    "duplicate_operation_gate"
+                ]
+            else:
+                for clause in clauses:
+                    admitted_clause_keys.add((effect, clause))
         operations.append(diagnosis)
         warning = str(diagnosis.get("warning", "")).strip()
         if warning:

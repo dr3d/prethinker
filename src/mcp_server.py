@@ -1757,11 +1757,16 @@ class PrologMCPServer:
             think_enabled=self._semantic_ir_thinking,
         )
 
-    def _semantic_ir_selected_profile_for_utterance(self, utterance: str) -> str:
+    def _semantic_ir_selected_profile_for_utterance(
+        self,
+        utterance: str,
+        *,
+        context: list[str] | None = None,
+    ) -> str:
         if self._active_profile == "auto":
             selection = select_domain_profile(
                 utterance,
-                context=self._semantic_ir_context(),
+                context=self._semantic_ir_context(context),
                 catalog=self._domain_profile_catalog,
             )
             self._last_semantic_ir_profile_selection = self._clone_trace_payload(selection)
@@ -1807,8 +1812,12 @@ class PrologMCPServer:
     def _semantic_ir_available_domain_profiles(self) -> list[dict[str, Any]]:
         return self._clone_trace_payload(self._domain_profile_roster)
 
-    def _semantic_ir_context(self) -> list[str]:
+    def _semantic_ir_context(self, extra_context: list[str] | None = None) -> list[str]:
         context: list[str] = []
+        for item in extra_context or []:
+            text = str(item).strip()
+            if text:
+                context.append(text)
         for clause in self._recent_committed_logic[-16:]:
             text = str(clause).strip()
             if text:
@@ -1819,10 +1828,15 @@ class PrologMCPServer:
             context.append(f"pending_utterance: {pending_utterance}")
         return context
 
-    def _compile_semantic_ir(self, utterance: str) -> tuple[dict[str, Any] | None, str]:
-        selected_profile = self._semantic_ir_selected_profile_for_utterance(utterance)
+    def _compile_semantic_ir(
+        self,
+        utterance: str,
+        *,
+        context: list[str] | None = None,
+    ) -> tuple[dict[str, Any] | None, str]:
+        selected_profile = self._semantic_ir_selected_profile_for_utterance(utterance, context=context)
         domain = selected_profile or "runtime"
-        semantic_context = self._semantic_ir_context()
+        semantic_context = self._semantic_ir_context(context)
         domain_context = self._semantic_ir_domain_context(selected_profile)
         allowed_predicates = self._semantic_ir_allowed_predicates(selected_profile)
         predicate_contracts = self._semantic_ir_predicate_contracts(selected_profile)

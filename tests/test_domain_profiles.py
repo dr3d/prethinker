@@ -47,6 +47,17 @@ def test_mock_profile_packages_are_declarative_and_loadable():
     probate_signatures = {row["signature"] for row in probate_contracts}
     assert "claimed/3" in probate_signatures
     assert "candidate_identity/2" in probate_signatures
+    assert "guardianship_of/2" in probate_signatures
+    legal = load_profile_package("legal_courtlistener@v0", catalog)
+    legal_signatures = {row["signature"] for row in profile_package_contracts(legal)}
+    assert "access_log_entry/4" in legal_signatures
+    assert "document_states/3" in legal_signatures
+    assert "relative_date_resolves_to/3" in legal_signatures
+    assert "interval_start/2" in legal_signatures
+    assert "outside_district_interval/3" in legal_signatures
+    sec = load_profile_package("sec_contracts@v0", catalog)
+    sec_signatures = {row["signature"] for row in profile_package_contracts(sec)}
+    assert "clearance_event/4" in sec_signatures
     assert any("unknown_agent" in line for line in profile_package_context(story))
     assert any("claim" in line for line in profile_package_context(probate))
 
@@ -78,3 +89,19 @@ def test_profile_selector_does_not_stick_to_previous_domain_context():
         context=sec_context,
     )
     assert selected.get("profile_id") == "medical@v0"
+
+
+def test_profile_selector_uses_profile_owned_keywords_and_context():
+    catalog = load_domain_profile_catalog(ROOT / "modelfiles" / "domain_profile_catalog.v0.json")
+    selected = select_domain_profile(
+        "Nia wrote 'last Friday' in the flood note.",
+        catalog=catalog,
+        context=["Existing note anchor: flood_note dated May 13, 2024."],
+    )
+    assert selected.get("profile_id") == "legal_courtlistener@v0"
+    selected = select_domain_profile(
+        "Artur: papa me dijo en el taller, solo nosotros dos, 'all mine now' -- no Beatrice.",
+        catalog=catalog,
+        context=["Rule: verbal changes require two non-beneficiary witnesses."],
+    )
+    assert selected.get("profile_id") == "probate@v0"

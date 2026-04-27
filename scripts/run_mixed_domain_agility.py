@@ -73,7 +73,11 @@ def main() -> int:
         case_id = str(case.get("id") or f"mixed_{index:04d}")
         expected = str(case.get("expected_profile") or "")
         print(f"[{index}/{len(stream)}] {case_id} expected={expected}", flush=True)
-        selection = server._semantic_ir_selected_profile_for_utterance(str(case.get("utterance") or ""))
+        turn_context = [str(item) for item in case.get("context", []) if str(item).strip()]
+        selection = server._semantic_ir_selected_profile_for_utterance(
+            str(case.get("utterance") or ""),
+            context=turn_context,
+        )
         selected = selection or "general"
         record: dict[str, Any] = {
             "ts": _utc_now(),
@@ -95,7 +99,10 @@ def main() -> int:
         }
         if not args.selector_only:
             try:
-                ir, error = server._compile_semantic_ir(str(case.get("utterance") or ""))
+                ir, error = server._compile_semantic_ir(
+                    str(case.get("utterance") or ""),
+                    context=turn_context,
+                )
                 trace = server._last_semantic_ir_trace
                 record["selector_profile"] = trace.get("selected_profile")
                 record["selector_ok"] = not expected or trace.get("selected_profile") == expected
@@ -142,7 +149,7 @@ def build_mixed_cases() -> list[dict[str, Any]]:
     cases.extend(_wild_cases("glitch_", "story_world@v0", "glitch"))
     cases.extend(_wild_cases("ledger_", "probate@v0", "ledger"))
     cases.extend(_wild_ids(SILVERTON_SCENARIO_IDS + SILVERTON_NOISY_SCENARIO_IDS, "probate@v0", "silverton"))
-    cases.extend(_wild_ids(HARBOR_FRONTIER_SCENARIO_IDS, "legal_courtlistener@v0", "harbor"))
+    cases.extend(_harbor_cases())
     cases.extend(_dataset_cases(REPO_ROOT / "datasets" / "courtlistener" / "samples" / "legal_seed_synthetic_5.jsonl", "legal_courtlistener@v0", "courtlistener"))
     cases.extend(_dataset_cases(REPO_ROOT / "datasets" / "sec_edgar" / "samples" / "sec_contracts_synthetic_5.jsonl", "sec_contracts@v0", "sec_contracts"))
     cases.extend(_wild_medical_cases())
@@ -164,6 +171,25 @@ def _wild_ids(ids: list[str], expected_profile: str, source: str) -> list[dict[s
         for row in WILD_SCENARIOS
         if str(row.get("id", "")) in wanted
     ]
+
+
+def _harbor_cases() -> list[dict[str, Any]]:
+    wanted = set(HARBOR_FRONTIER_SCENARIO_IDS)
+    return [
+        _case_from_wild(row, expected_profile=_expected_harbor_profile(row), source="harbor")
+        for row in WILD_SCENARIOS
+        if str(row.get("id", "")) in wanted
+    ]
+
+
+def _expected_harbor_profile(row: dict[str, Any]) -> str:
+    scenario_id = str(row.get("id") or "")
+    domain = str(row.get("domain") or "")
+    if scenario_id == "harbor_clinical_advice_inside_legal_turn":
+        return "medical@v0"
+    if domain == "harbor_house_governance":
+        return "sec_contracts@v0"
+    return "legal_courtlistener@v0"
 
 
 def _wild_medical_cases() -> list[dict[str, Any]]:

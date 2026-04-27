@@ -121,8 +121,8 @@ def select_domain_profile(
         source_path = str(profile.get("thick_context_source", "")).strip()
         if not profile_id or not source_path or source_path.startswith("future "):
             continue
-        utterance_score, reasons = _profile_match_score(utterance_text, profile)
-        context_score, context_reasons = _profile_match_score(context_text, profile)
+        utterance_score, reasons = _profile_match_score(utterance_text, profile, catalog=source)
+        context_score, context_reasons = _profile_match_score(context_text, profile, catalog=source)
         context_nudge = min(2.0, context_score * 0.2)
         score = utterance_score + context_nudge
         if context_nudge:
@@ -157,14 +157,23 @@ def select_domain_profile(
     return best
 
 
-def _profile_match_score(text: str, profile: dict[str, Any]) -> tuple[float, list[str]]:
+def _profile_match_score(
+    text: str,
+    profile: dict[str, Any],
+    *,
+    catalog: dict[str, Any] | None = None,
+) -> tuple[float, list[str]]:
     score = 0.0
     reasons: list[str] = []
     profile_id = str(profile.get("profile_id", "")).strip()
+    package = load_profile_package(profile_id, catalog) if profile_id else {}
+    selection_hints = package.get("selection_hints", {}) if isinstance(package, dict) else {}
     haystack = " ".join(
         [
             str(profile.get("description", "")),
             " ".join(_string_list(profile.get("use_when"))),
+            " ".join(_string_list(selection_hints.get("use_when") if isinstance(selection_hints, dict) else [])),
+            " ".join(_string_list(package.get("selection_keywords") if isinstance(package, dict) else [])),
         ]
     ).casefold()
     profile_terms = _term_set(haystack)
@@ -173,12 +182,23 @@ def _profile_match_score(text: str, profile: dict[str, Any]) -> tuple[float, lis
     if overlap:
         score += min(6.0, len(overlap) * 0.75)
         reasons.append("term overlap: " + ", ".join(overlap[:8]))
-    for hint in _string_list(profile.get("use_when")):
+    for hint in [
+        *_string_list(profile.get("use_when")),
+        *_string_list(selection_hints.get("use_when") if isinstance(selection_hints, dict) else []),
+    ]:
         hint_score = _hint_score(text, hint)
         if hint_score:
             score += hint_score
             reasons.append(f"use_when matched: {hint}")
-    for hint in _string_list(profile.get("avoid_when")):
+    for keyword in _string_list(package.get("selection_keywords") if isinstance(package, dict) else []):
+        keyword_score = _keyword_score(text, keyword)
+        if keyword_score:
+            score += keyword_score
+            reasons.append(f"profile keyword: {keyword}")
+    for hint in [
+        *_string_list(profile.get("avoid_when")),
+        *_string_list(selection_hints.get("avoid_when") if isinstance(selection_hints, dict) else []),
+    ]:
         hint_score = _hint_score(text, hint)
         if hint_score:
             score -= hint_score * 1.25
@@ -199,6 +219,18 @@ def _hint_score(text: str, hint: str) -> float:
     hits = terms & _term_set(text)
     if len(hits) >= max(2, min(4, len(terms))):
         return min(4.0, len(hits) * 0.8)
+    return 0.0
+
+
+def _keyword_score(text: str, keyword: str) -> float:
+    raw = str(keyword or "").casefold().strip()
+    if not raw:
+        return 0.0
+    if raw in text:
+        return 2.5
+    terms = _term_set(raw)
+    if terms and terms <= _term_set(text):
+        return min(2.0, len(terms) * 0.7)
     return 0.0
 
 

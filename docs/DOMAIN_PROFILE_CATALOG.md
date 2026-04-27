@@ -93,6 +93,13 @@ selected profile package for the Semantic IR call. The trace records:
 - loaded predicate contracts
 - mapper/admission outcome
 
+The selector now also accepts explicit per-turn Semantic IR context. This is the
+control-plane version of "here is the story so far; now process this sentence":
+context can affect profile choice and model input, but it is still treated as
+already-known support, not as a new write. The selected profile package may also
+declare compact `selection_keywords`; those belong to the profile, not the
+generic mapper.
+
 A synthetic switching test now walks one server through:
 
 ```text
@@ -117,6 +124,15 @@ bad admitted placeholder/loose-trait clauses dropped from `4` to `0`. The mapper
 now rejects `null`/unspecified/generic-actor write arguments, and the story-world
 profile exposes `has_trait/2`, `returned_from/2`, and `robot_unit/1` so the model
 has better predicates for traits and return events.
+
+A harder mixed-domain seed then exposed selector and predicate-shape weaknesses
+rather than JSON failures. Seed `99` improved from `18/24` to `24/24` expected
+profile selections. Wider seed `2718` improved from `36/40` to `40/40`
+selector-only, and the corresponding real LM Studio pass reached `40/40`
+expected profile selections with `40/40` valid Semantic IR. The useful changes
+were declarative: profile-owned keywords, broader profile-owned predicate
+contracts for legal/probate/SEC frontier cases, and a generic duplicate
+candidate-operation collapse in the mapper.
 
 ## Thin Roster Versus Thick Profile
 
