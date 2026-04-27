@@ -135,19 +135,16 @@ The strict compiler.
 - clarification-capable
 - the only role allowed to authorize KB writes
 
-### Freethinker
+### Freethinker, Shelved
 
-The bounded clarification liaison.
+Freethinker was the bounded clarification-liaison concept: context-aware,
+non-authoritative, and never allowed to write to the KB. It helped clarify the
+permission boundary, but it is no longer the mainline path.
 
-- context-aware
-- non-authoritative
-- consulted only when Prethinker hesitates
-- may suggest a clarification answer or a better clarification question
-- may not write to the KB directly
-
-This split is about permissions, not necessarily different model families.
-
-The roles may be backed by different models. The current semantic IR lane uses a stronger local `qwen3.6:35b-a3b` model, while smaller models remain useful as baselines or fast strict-parser lanes.
+The current design uses a stronger local `qwen3.6:35b-a3b` Semantic IR pass with
+recent context, selected domain profile context, predicate contracts, and a
+compact KB seed. That lets the main workspace do more of the discourse and
+truth-maintenance setup before deterministic admission.
 
 ## Current Reality
 
@@ -160,7 +157,7 @@ As of April 26, 2026:
 - [src/semantic_ir.py](https://github.com/dr3d/prethinker/blob/main/src/semantic_ir.py) owns mapper projection policy and admission diagnostics
 - `medical@v0` is the most active bounded profile
 - UMLS Semantic Network assets are built locally for type/relation explanation
-- Freethinker remains optional and non-authoritative
+- Freethinker is shelved/off-mainline; Semantic IR context engineering is the active path
 
 That means the repo already supports the governed compiler shape directly.
 
@@ -182,10 +179,10 @@ The codebase has three different kinds of artifacts because they serve different
 - design notes
   - `PROJECT_STATE.md`
   - `docs/EXPLAINER.md`
-  - `docs/FREETHINKER_DESIGN.md`
   - `docs/SEMANTIC_IR_MAPPER_SPEC.md`
   - `docs/DOMAIN_PROFILE_CATALOG.md`
   - `docs/PROJECT_HORIZON.md`
+  - `docs/FREETHINKER_DESIGN.md` as a historical/shelved sidecar note
 
 The point is not just to build a parser.
 

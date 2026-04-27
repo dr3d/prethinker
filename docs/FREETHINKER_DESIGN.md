@@ -1,8 +1,18 @@
 # Freethinker Design
 
-This note captures the near-term design for adding a clarification sidecar to Prethinker without uncaging the main Governed Intent Compiler.
+Status note, 2026-04-27: this is a historical/shelved design note. Freethinker
+was useful for thinking about clarification and authority boundaries, but it is
+not the current mainline architecture. The active path is now a stronger
+`semantic_ir_v1` model pass with domain profile context, recent context, and a
+compact KB seed, followed by deterministic mapper admission.
 
-## Summary
+The code still has Freethinker config and trace hooks, and the sidecar can be
+revisited as a controlled experiment. It should not be presented as required for
+the current pipeline.
+
+This note captures the earlier design for adding a clarification sidecar to Prethinker without uncaging the main Governed Intent Compiler.
+
+## Historical Summary
 
 Prethinker should remain the strict compiler and the only component allowed to commit KB mutations.
 
@@ -18,14 +28,20 @@ Freethinker should be a separate, quieter helper model that:
 
 Freethinker is a liaison, not an authority.
 
-Current implementation status:
+Current implementation status, read historically:
 
 - the canonical console path now has a live bounded Freethinker model call
 - default resolution policy is still `off`
-- `advisory_only` is the first intended active rollout mode
+- `advisory_only` was the first intended active rollout mode
 - Freethinker has separate model/runtime settings, including temperature and think on/off
 - advisory mode already improves some generic pronoun clarification holds into named confirmation questions when recent context yields exactly one grounded candidate
 - Freethinker still does not write directly to the KB or bypass Prethinker
+
+Current mainline status:
+
+- normal research runs leave Freethinker off
+- Semantic IR context engineering now handles the main discourse/context job
+- this sidecar should only be revisited with a sidecar-off control
 
 ## Why This Exists
 

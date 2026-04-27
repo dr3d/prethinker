@@ -78,8 +78,8 @@ Freethinker was introduced as a clarification sidecar. The idea was good:
 Prethinker remains the strict compiler, while Freethinker watches recent context
 and helps improve or resolve clarification turns.
 
-That split is still valuable. Freethinker is a liaison, not an authority. It can
-help with questions like:
+That split was valuable for clarifying permissions: Freethinker was a liaison,
+not an authority. It could help with questions like:
 
 - "Which patient does 'his' refer to?"
 - "Is there exactly one grounded candidate in recent context?"
@@ -500,8 +500,8 @@ the architecture.
 5. Measure Python rescue dependency directly, not anecdotally.
 6. Tighten the semantic IR schema around rules, negation, claims, and temporal
    scope.
-7. Keep Freethinker as a clarification-sidecar concept, but do not confuse it
-   with the main semantic compiler.
+7. Treat Freethinker as a shelved clarification-sidecar concept, not the main
+   semantic compiler.
 
 ## Slide Outline
 

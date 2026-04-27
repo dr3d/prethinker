@@ -16,8 +16,7 @@ This is the short handoff for coding agents working in Prethinker.
 10. [docs/GUARDRAIL_DEPENDENCY_AB.md](https://github.com/dr3d/prethinker/blob/main/docs/GUARDRAIL_DEPENDENCY_AB.md)
 11. [docs/UMLS_MVP.md](https://github.com/dr3d/prethinker/blob/main/docs/UMLS_MVP.md)
 12. [docs/MEDICAL_PROFILE.md](https://github.com/dr3d/prethinker/blob/main/docs/MEDICAL_PROFILE.md)
-13. [docs/FREETHINKER_DESIGN.md](https://github.com/dr3d/prethinker/blob/main/docs/FREETHINKER_DESIGN.md)
-14. [ui_gateway/README.md](https://github.com/dr3d/prethinker/blob/main/ui_gateway/README.md)
+13. [ui_gateway/README.md](https://github.com/dr3d/prethinker/blob/main/ui_gateway/README.md)
 
 Treat older reports and prompt snapshots as Git history, not live guidance.
 
@@ -36,7 +35,7 @@ Treat older reports and prompt snapshots as Git history, not live guidance.
 - `adapters/courtlistener/` is a conservative legal-source adapter. Keep live generated data under ignored `datasets/courtlistener/generated/`; do not commit raw API caches.
 - `adapters/sec_edgar/` is a conservative SEC/contract adapter shell. Keep live generated data under ignored `datasets/sec_edgar/generated/`; do not commit raw API caches.
 - `src/umls_mvp.py` and `scripts/build_umls_semantic_network_kb.py` contain the current UMLS bridge/Semantic Network work.
-- `Freethinker` is a bounded optional clarification sidecar; it is not an authoritative truth layer.
+- `Freethinker` is a shelved optional sidecar experiment. The current mainline path is Semantic IR plus domain/recent-context/KB-seeded context engineering.
 - The Prolog KB receives committed facts/rules only after runtime gates accept them.
 
 ## Core Invariants

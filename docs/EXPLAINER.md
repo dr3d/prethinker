@@ -90,28 +90,20 @@ It is intentionally caged:
 - guarded
 - allergic to guessing
 
-### Freethinker
+### Freethinker, Shelved
 
-`Freethinker` is the planned clarification liaison.
+`Freethinker` was an earlier clarification-sidecar idea: a separate helper that
+could watch recent context, propose better clarification questions, and possibly
+suggest grounded referential resolutions.
 
-Its job is not to write to the KB.
+That idea has been displaced by the current Semantic IR direction. The stronger
+model now receives recent context, domain profile context, predicate contracts,
+and a compact KB seed directly inside the main semantic workspace pass. That is
+cleaner than asking a second model to patch hesitation after the fact.
 
-Its job is to help when Prethinker hesitates.
-
-Freethinker can:
-
-- watch recent context
-- track likely referents across turns
-- propose a better clarification question
-- sometimes suggest a grounded referential resolution
-- abstain when weak
-
-Freethinker is not a second authority.
-
-The constitutional rule is:
-
-- Freethinker may suggest.
-- Prethinker decides.
+The implementation still has a config and trace surface for Freethinker, but it
+is off by default and should be read as a shelved experiment, not an active
+architectural limb.
 
 ## Why Not Just One Bigger Model?
 
@@ -303,7 +295,7 @@ As of April 27, 2026:
 - the latest semantic IR edge runtime A/B is `20/20` decision labels with `0.976` average score
 - the latest weak-edge runtime A/B is `10/10` decision labels with `1.000` average score
 - Silverton probate/noisy temporal packs are intentionally hard pressure gauges for policy labels, temporal representation, and claim/fact separation
-- Freethinker remains a non-authoritative clarification sidecar, not the main semantic compiler
+- Freethinker is off-mainline; the current bet is Semantic IR context engineering before deterministic admission
 
 The important subtlety is this:
 

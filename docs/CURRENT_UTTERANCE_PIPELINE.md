@@ -98,9 +98,10 @@ When the user answers, the pending turn is resumed. The clarification question
 and answer become part of the effective utterance for the Semantic IR pass, so
 the model sees the user-resolved context instead of guessing.
 
-Freethinker remains optional and non-authoritative. It can help shape
-clarification language when enabled, but it does not write facts and does not
-bypass the mapper.
+Freethinker is no longer part of the mainline pipeline. Its config and trace
+surface still exist as a shelved optional sidecar experiment, but the current
+research path is to give the Semantic IR model better recent context, profile
+context, and KB seed context before deterministic admission.
 
 ### 4. Long utterances are segmented into focused passes
 

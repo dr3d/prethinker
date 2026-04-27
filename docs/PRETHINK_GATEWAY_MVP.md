@@ -157,7 +157,8 @@ normal Semantic IR admission.
 
 ## Freethinker Status
 
-Freethinker exists as a design-track capability, not as a default behavioral change.
+Freethinker exists as a shelved design-track capability, not as a default
+behavioral change and not as part of the current mainline research path.
 
 Current state:
 
@@ -166,11 +167,11 @@ Current state:
 - default policy is `off`
 - no live Freethinker resolution is currently changing commits in the console
 
-Near-term intended path:
+Current intended path:
 
-- UI-first
-- advisory only at first
-- improve clarification behavior before attempting write unblocking
+- leave it off for normal research runs
+- use the primary Semantic IR pass for context engineering
+- revisit the sidecar only as a controlled experiment with a sidecar-off control
 
 Reference:
 

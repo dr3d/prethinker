@@ -88,7 +88,11 @@ Recommended posture for this profile:
 - `strict_registry=true`
 - `strict_types=false`
 - higher clarification eagerness
-- `freethinker_resolution_policy=advisory_only`
+- `freethinker_resolution_policy=off`
+
+The older advisory-sidecar idea has been superseded for the mainline path by
+Semantic IR context engineering: profile context, recent context, predicate
+contracts, and compact KB seed context are fed into the primary workspace pass.
 
 Why `strict_types=false` by default:
 

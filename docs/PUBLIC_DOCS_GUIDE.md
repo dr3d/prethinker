@@ -20,7 +20,8 @@ Use the project terms this way:
 - **Mapper**: deterministic code that admits, skips, clarifies, quarantines, or
   rejects candidate operations.
 - **Prolog KB**: the durable symbolic state after admission.
-- **Freethinker**: optional non-authoritative clarification sidecar.
+- **Freethinker**: shelved optional clarification-sidecar experiment; not the
+  current mainline path.
 - **Console**: the live cockpit for watching the process.
 - **Medical/UMLS**: the current bounded domain lane, not a general clinical
   reasoning claim.

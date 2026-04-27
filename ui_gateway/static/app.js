@@ -166,15 +166,15 @@ const PROMPT_BOOKS = {
         "The first turn should hold because 'it' has no grounded referent. The follow-up should resolve the staged turn rather than starting a random new fact.",
     },
     {
-      title: "Freethinker-style context check",
-      setup: "Enable Freethinker Advisory, then try a pronoun turn whose antecedent is visible but not explicit in the same sentence.",
+      title: "Context check without sidecar",
+      setup: "Keep Freethinker off. This probes whether the main Semantic IR path uses recent context conservatively.",
       steps: [
         { label: "Context", utterance: "Scott's mom is Ann." },
         { label: "Context", utterance: "Priya's brother is Omar." },
         { label: "Ambiguous turn", utterance: "His brother lives in Morro Bay." },
       ],
       watch:
-        "With advisory on, the sidecar should help explain whether context resolves 'his' or whether the compiler should still hold for clarification.",
+        "The main Semantic IR trace should explain whether context resolves 'his' or whether the compiler should still hold for clarification.",
     },
     {
       title: "Conjunctions and ingredient queries",
@@ -271,15 +271,15 @@ const PROMPT_BOOKS = {
         "The medical guard should hold until the patient identity is clarified, even though the lab phrase is clear.",
     },
     {
-      title: "Context-dependent pronoun for Freethinker",
-      setup: "Enable Freethinker Advisory and let recent context compete with strict patient identity checks.",
+      title: "Context-dependent pronoun",
+      setup: "Keep the sidecar off and let recent context compete with strict patient identity checks.",
       steps: [
         { label: "Context", utterance: "Priya is taking warfarin." },
         { label: "Context", utterance: "Mara has asthma." },
         { label: "Ambiguous write", utterance: "Her creatinine was repeated this afternoon." },
       ],
       watch:
-        "Freethinker can inspect context, but the durable write should still be conservative if two female patients are in scope.",
+        "The Semantic IR workspace can inspect context, but the durable write should still be conservative if two female patients are in scope.",
     },
     {
       title: "Bounded safety context, not broad advice",
@@ -1249,7 +1249,7 @@ function renderPathStrip(ledger) {
 
   setPathCard("profile", {
     value: activeProfile,
-    meta: `${strictMode ? "strict" : "open"} | Freethinker ${freethinkerPolicy}`,
+    meta: `${strictMode ? "strict" : "open"} | sidecar ${freethinkerPolicy}`,
     tone: activeProfile === "medical@v0" ? "success" : "neutral",
   });
 
@@ -2624,7 +2624,7 @@ async function applyFreethinkerAdvisory() {
     state.config = response.config;
     fillConfigForm(state.config);
     document.getElementById("config-status").textContent =
-      "Freethinker advisory enabled (watcher active for clarification refinement).";
+      "Experimental Freethinker sidecar enabled. Use only as a controlled sidecar-on comparison.";
   } catch (error) {
     document.getElementById("config-status").textContent = `Freethinker preset failed: ${String(error)}`;
   }
@@ -2643,7 +2643,7 @@ async function applyMedicalProfilePreset() {
     state.config = response.config;
     fillConfigForm(state.config);
     document.getElementById("config-status").textContent =
-      "medical@v0 applied (strict compiler, medical prompt profile, clarification and Freethinker posture tightened).";
+      "medical@v0 applied (strict compiler, medical prompt profile, sidecar off).";
   } catch (error) {
     document.getElementById("config-status").textContent = `medical@v0 preset failed: ${String(error)}`;
   }

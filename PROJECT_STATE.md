@@ -48,7 +48,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 - Semantic IR calls now receive a compact deterministic `kb_context_pack`: exact relevant KB clauses, likely functional current-state candidates, entity candidates, recent committed logic, and a small fallback snapshot. This gives the 35B model current-KB visibility for corrections and conflict reasoning without granting it write authority.
 - `kb_context_pack` now includes role-aware `current_state_subject_candidates`, and the Semantic IR prompt payload carries explicit `kb_context_policy` guidance. This teaches the model how to use retrieved KB state for correction, pronoun resolution, claim-vs-observation boundaries, and conflict explanation without expanding Python-side language patches.
 - `scripts/run_semantic_ir_lava_sweep.py` now provides a broad mixed-domain lava harness. It balances scenario sources, generates typo/bad-grammar/context-switch variants, can repeat temperature-0 runs for signature variance checks, applies admitted writes to a private stream KB, and records admitted queries without executing them by default so recursive toy-Prolog queries cannot monopolize CPU.
-- The console now defaults to the current LM Studio Semantic IR lane (`qwen/qwen3.6-35b-a3b`) instead of the older 9B/Ollama parser path, while still keeping Freethinker off by default.
+- The console now defaults to the current LM Studio Semantic IR lane (`qwen/qwen3.6-35b-a3b`) instead of the older 9B/Ollama parser path. Freethinker remains off and is no longer part of the mainline research path.
 - Long story-like utterances in the UI can use segmented Semantic IR ingestion: the gateway splits the narrative into focused segments, processes each through the canonical `process_utterance()` path, dedupes applied mutations, and exposes segment-level workspace/admission traces.
 - Mixed long utterances can now segment at query boundaries, so questions do not pile up in the same semantic workspace as surrounding write facts.
 - The generic predicate registry now includes a small story-world event/state palette (`tasted/2`, `sat_in/2`, `lay_in/2`, `broke/1`, `asleep_in/2`, `was_tasted/1`, `was_eaten/1`, `was_sat_in/1`, `was_lain_in/1`, etc.) so narrative ingestion no longer has to squeeze ordinary events into `inside/2`, `at/2`, or `carries/2`.
@@ -183,9 +183,8 @@ Recent verified results:
 13. `docs/GUARDRAIL_DEPENDENCY_AB.md`
 14. `docs/UMLS_MVP.md`
 15. `docs/MEDICAL_PROFILE.md`
-16. `docs/FREETHINKER_DESIGN.md`
-17. `docs/CONSOLE_TRYBOOK.md`
-18. `ui_gateway/README.md`
+16. `docs/CONSOLE_TRYBOOK.md`
+17. `ui_gateway/README.md`
 
 ## What Was Pruned
 
