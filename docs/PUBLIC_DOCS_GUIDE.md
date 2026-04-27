@@ -34,6 +34,7 @@ Read these first:
 3. [AGENT-README.md](https://github.com/dr3d/prethinker/blob/main/AGENT-README.md)
 4. [docs/PRETHINK_GATEWAY_MVP.md](https://github.com/dr3d/prethinker/blob/main/docs/PRETHINK_GATEWAY_MVP.md)
 5. [ui_gateway/README.md](https://github.com/dr3d/prethinker/blob/main/ui_gateway/README.md)
+6. [docs/PROJECT_HORIZON.md](https://github.com/dr3d/prethinker/blob/main/docs/PROJECT_HORIZON.md)
 
 ## Current Research Center
 
@@ -97,7 +98,7 @@ future architecture.
 
 Latest local verification before this refresh:
 
-- Full pytest suite: `312 passed`
+- Full pytest suite: `313 passed`
 - Profile-aware Semantic IR/UMLS handoff: `medical@v0` now supplies predicate contracts plus compact UMLS bridge context to the model input before deterministic admission
 - Domain-profile catalog foundation: thin roster plus mock `story_world@v0` and `probate@v0` thick-context packages for future skill-like profile selection
 - Auto profile-selection smoke: deterministic selector can steer one synthetic conversation through `medical@v0`, `legal_courtlistener@v0`, `sec_contracts@v0`, then back to `medical@v0`, loading matching thick context and predicate contracts per turn
@@ -110,6 +111,7 @@ Latest local verification before this refresh:
 - Profile-owned admission validators now live in the legal and SEC profile contracts, so allegation-shaped findings, citation-shaped holdings, obligation-shaped breach events, and unevidenced condition satisfaction can be blocked declaratively rather than by hidden mapper code
 - Minimal temporal sanity checking now blocks inverted interval pairs where `interval_start/2` is later than `interval_end/2`
 - Latest seed `2718` LM Studio pass with these validators stayed at `40/40` expected profile selections and `40/40` valid Semantic IR; the legal validator blocked one allegation-shaped `finding/4` while keeping the safe `claim_made/4`
+- Clause support records now connect admitted facts/rules/retracts/queries back to their Semantic IR operation index, predicate, source, and rationale codes; this is a first dependency breadcrumb, not full truth maintenance yet
 - Mapper duplicate-collapse now prevents repeated candidate-operation floods from becoming repeated KB writes
 - CourtListener legal-source lane: `legal_courtlistener@v0`, `adapters/courtlistener/`, a synthetic legal seed fixture, and ignored live CourtListener smoke data for claim/finding, citation, docket, role-scope, provenance, and identity-boundary tests
 - SEC/contracts scaffold: `sec_contracts@v0`, `adapters/sec_edgar/`, and a synthetic contract seed fixture for obligation, condition, temporal-trigger, party-scope, and breach-boundary tests

@@ -41,6 +41,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 - The mapper now enforces obvious predicate-contract argument role mismatches. This extends palette admission from "is this predicate name/arity allowed?" to "do the proposed arguments fit the contract shape?", while leaving domain vocabulary in profile packages.
 - Profile packages can now carry declarative admission validators on predicate contracts. The first legal and SEC validators block allegation-shaped `finding/4`, citation/unclear `holding/3`, obligation-shaped `breach_event/2`, and unevidenced `condition_met/2` proposals without baking those rules into the generic mapper.
 - The mapper now has a first temporal sanity gate for interval facts: a proposed `interval_start/2` plus `interval_end/2` pair with parseable dates is skipped if the start is after the end.
+- Admitted Semantic IR clauses now carry first-pass support records from mapper operation to runtime payload. Each support record includes the originating operation index, predicate, source, polarity, and rationale codes, giving the trace a seed for future dependency/truth-maintenance work.
 - The console now defaults to the current LM Studio Semantic IR lane (`qwen/qwen3.6-35b-a3b`) instead of the older 9B/Ollama parser path, while still keeping Freethinker off by default.
 - Long story-like utterances in the UI can use segmented Semantic IR ingestion: the gateway splits the narrative into focused segments, processes each through the canonical `process_utterance()` path, dedupes applied mutations, and exposes segment-level workspace/admission traces.
 - Mixed long utterances can now segment at query boundaries, so questions do not pile up in the same semantic workspace as surrounding write facts.
@@ -101,6 +102,7 @@ This is the next useful layer for type steering and explanation. It should suppo
 - Keep profile contracts out of the generic mapper: profile packages should own domain type/grounding policy, while the mapper stays structural and auditable.
 - Treat richer domain context as a catalog/skill mechanism, not hardwired prompt drift. The current auto selector is deterministic and measured; next steps are multi-profile turns, selector confidence UX, and deciding when mixed-domain utterances should be segmented before Semantic IR.
 - Grow deterministic stored-logic admission beyond the first guard: profile-declared functional predicates, temporal scope, negation policy, and richer contradiction probes are still open.
+- Grow clause support records into a real dependency layer: derived conclusions should eventually point to supporting facts, rules, source documents, and retractions.
 - Extend predicate-contract enforcement beyond obvious structural mismatches: more reusable profile validators, profile-owned type contracts, declared functional predicates, temporal scope, and better UI surfacing for skipped operations.
 - Promote scenario-local predicate contracts into reusable profile/predicate manifests so fewer expectations live only inside individual frontier packs.
 - Expand trace views around admission contracts so reviewers can see not only the model decision, but also which exact boundary checks passed.
@@ -121,8 +123,9 @@ Recent verified results:
 
 - Full suite after SEC/contracts third-domain scaffold: `299 passed`
 - Full suite after mixed-domain profile/context tightening: `308 passed`
-- Full suite after profile-validator and temporal-gate enforcement: `312 passed`
+- Full suite after clause-support provenance breadcrumbs: `313 passed`
 - Focused profile-validator/temporal-gate verification: `125 passed`
+- Focused clause-support verification: `53 passed` across semantic IR runtime and trace rendering.
 - Focused semantic IR runtime battery: `23 passed`
 - Focused profile-contract/domain-roster handoff verification: `7 passed`
 - Focused CourtListener/domain-profile verification: `8 passed`
@@ -149,7 +152,7 @@ Recent verified results:
 - Predicate-contract role gate focused verification: semantic IR runtime battery `48 passed`; profile/mixed/MCP/render focused battery `64 passed`.
 - Mixed-domain agility seed `2718` after contract-role enforcement: real LM Studio pass kept `40/40` profile selections and `40/40` valid Semantic IR. The mapper caught a genuine `interval_start/2` role mismatch where the model put a date in the interval slot, while preserving the previously good Harbor interval representation.
 - Mixed-domain agility seed `2718` after profile validators and temporal gate: real LM Studio pass again kept `40/40` profile selections and `40/40` valid Semantic IR. The legal profile validator fired once, blocking an allegation-shaped `finding/4` while preserving the corresponding `claim_made/4`; targeted unit tests cover the SEC validator and inverted-interval failure cases.
-- Python compile check for touched runtime files passed; full pytest suite now `312 passed`
+- Python compile check for touched runtime files passed; full pytest suite now `313 passed`
 
 ## Reading Order
 
@@ -160,15 +163,16 @@ Recent verified results:
 5. `docs/SEMANTIC_IR_RESEARCH_DIRECTION_REPORT.md`
 6. `docs/SEMANTIC_IR_MAPPER_SPEC.md`
 7. `docs/SEMANTIC_IR_MODEL_MATRIX.md`
-8. `docs/DOMAIN_PROFILE_CATALOG.md`
-9. `docs/COURTLISTENER_DOMAIN.md`
-10. `docs/SEC_CONTRACTS_DOMAIN.md`
-11. `docs/GUARDRAIL_DEPENDENCY_AB.md`
-12. `docs/UMLS_MVP.md`
-13. `docs/MEDICAL_PROFILE.md`
-14. `docs/FREETHINKER_DESIGN.md`
-15. `docs/CONSOLE_TRYBOOK.md`
-16. `ui_gateway/README.md`
+8. `docs/PROJECT_HORIZON.md`
+9. `docs/DOMAIN_PROFILE_CATALOG.md`
+10. `docs/COURTLISTENER_DOMAIN.md`
+11. `docs/SEC_CONTRACTS_DOMAIN.md`
+12. `docs/GUARDRAIL_DEPENDENCY_AB.md`
+13. `docs/UMLS_MVP.md`
+14. `docs/MEDICAL_PROFILE.md`
+15. `docs/FREETHINKER_DESIGN.md`
+16. `docs/CONSOLE_TRYBOOK.md`
+17. `ui_gateway/README.md`
 
 ## What Was Pruned
 

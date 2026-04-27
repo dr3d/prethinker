@@ -306,6 +306,17 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         self.assertEqual(diagnostics["features"]["predicate_contract_enabled"], True)
         self.assertEqual(diagnostics["features"]["has_contract_invalid_safe_write"], False)
 
+    def test_mapper_records_clause_supports_for_admitted_operations(self) -> None:
+        parsed, warnings = semantic_ir_to_legacy_parse(_ir())
+        self.assertEqual(warnings, [])
+        supports = parsed["clause_supports"]["facts"]
+        self.assertEqual(len(supports), 1)
+        self.assertEqual(supports[0]["clause"], "owns(mara, silver_compass).")
+        self.assertEqual(supports[0]["operation_index"], 0)
+        self.assertEqual(supports[0]["predicate"], "owns")
+        self.assertEqual(supports[0]["source"], "direct")
+        self.assertIn("safe_direct_fact", supports[0]["rationale_codes"])
+
     def test_mapper_applies_profile_contract_validator_without_language_patch(self) -> None:
         ir = _ir(
             decision="commit",
@@ -1493,6 +1504,10 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         self.assertTrue(result["front_door"]["compiler"]["semantic_ir_enabled"])
         execution = result["execution"]
         self.assertEqual(execution["writes_applied"], 1)
+        assert_op = next(row for row in execution["operations"] if row.get("tool") == "assert_fact")
+        self.assertEqual(assert_op["support"]["clause"], "owns(mara, silver_compass).")
+        self.assertEqual(assert_op["support"]["operation_index"], 0)
+        self.assertEqual(assert_op["support"]["predicate"], "owns")
         trace = result["compiler_trace"]["parse"]
         rescue_names = [row["name"] for row in trace["rescues"]]
         self.assertEqual(rescue_names, ["semantic_ir_mapper"])

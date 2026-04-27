@@ -620,6 +620,12 @@ def semantic_ir_admission_diagnostics(
         "queries": [],
         "retracts": [],
     }
+    supports_by_effect: dict[str, list[dict[str, Any]]] = {
+        "facts": [],
+        "rules": [],
+        "queries": [],
+        "retracts": [],
+    }
     entity_names = _entity_name_map(ir)
     entity_meta = _entity_metadata_map(ir)
     admitted_clause_keys: set[tuple[str, str]] = set()
@@ -681,12 +687,16 @@ def semantic_ir_admission_diagnostics(
             clauses = [str(item).strip() for item in diagnosis.get("clauses", []) if str(item).strip()]
             if effect == "fact":
                 clauses_by_effect["facts"].extend(clauses)
+                supports_by_effect["facts"].extend(_clause_support_records(diagnosis, clauses))
             elif effect == "rule":
                 clauses_by_effect["rules"].extend(clauses)
+                supports_by_effect["rules"].extend(_clause_support_records(diagnosis, clauses))
             elif effect == "query":
                 clauses_by_effect["queries"].extend(clauses)
+                supports_by_effect["queries"].extend(_clause_support_records(diagnosis, clauses))
             elif effect == "retract":
                 clauses_by_effect["retracts"].extend(clauses)
+                supports_by_effect["retracts"].extend(_clause_support_records(diagnosis, clauses))
         else:
             skipped_count += 1
 
@@ -715,6 +725,7 @@ def semantic_ir_admission_diagnostics(
         "skipped_count": skipped_count,
         "warning_counts": dict(sorted(warning_counts.items())),
         "clauses": clauses_by_effect,
+        "clause_supports": supports_by_effect,
         "operations": operations,
     }
 
@@ -799,6 +810,7 @@ def semantic_ir_to_legacy_parse(
         "clarification_reason": _semantic_ir_reason(ir, decision) if decision == "clarify" else "",
         "rationale": f"Mapped from semantic_ir_v1 decision={decision}; skipped={len(warnings)}",
         "admission_diagnostics": diagnostics,
+        "clause_supports": diagnostics.get("clause_supports", {}),
     }
     if retracts:
         payload["correction_retract_clauses"] = retracts
@@ -977,6 +989,33 @@ def _diagnose_candidate_operation(
         base["rationale_codes"] = ["safe_retract"]
         return base
     return skip("unsupported_operation", codes=["operation_policy"])
+
+
+def _clause_support_records(diagnosis: dict[str, Any], clauses: list[str]) -> list[dict[str, Any]]:
+    records: list[dict[str, Any]] = []
+    for clause in clauses:
+        text = str(clause).strip()
+        if not text:
+            continue
+        records.append(
+            {
+                "clause": text,
+                "effect": str(diagnosis.get("effect", "")).strip(),
+                "operation_index": diagnosis.get("index"),
+                "operation": str(diagnosis.get("operation", "")).strip(),
+                "predicate": str(diagnosis.get("predicate", "")).strip(),
+                "args": [str(item) for item in diagnosis.get("args", []) if str(item).strip()],
+                "source": str(diagnosis.get("source", "")).strip(),
+                "safety": str(diagnosis.get("safety", "")).strip(),
+                "polarity": str(diagnosis.get("polarity", "")).strip(),
+                "rationale_codes": [
+                    str(item).strip()
+                    for item in diagnosis.get("rationale_codes", [])
+                    if str(item).strip()
+                ],
+            }
+        )
+    return records
 
 
 def _admission_feature_summary(

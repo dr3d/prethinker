@@ -416,6 +416,36 @@ def _render_clause_list(title: str, clauses: list[Any]) -> list[str]:
     return lines + [f"- `{item}`" for item in values]
 
 
+def _render_clause_supports(mapped: dict[str, Any], diagnostics: dict[str, Any]) -> list[str]:
+    supports = mapped.get("clause_supports")
+    if not isinstance(supports, dict):
+        supports = diagnostics.get("clause_supports")
+    if not isinstance(supports, dict):
+        return ["**Clause support records:**", "- none"]
+    rows = []
+    for effect in ("facts", "rules", "retracts", "queries"):
+        for row in _as_list(supports.get(effect)):
+            if not isinstance(row, dict):
+                continue
+            rows.append(
+                [
+                    effect,
+                    row.get("clause", ""),
+                    row.get("operation_index", ""),
+                    row.get("operation", ""),
+                    row.get("predicate", ""),
+                    row.get("source", ""),
+                    ", ".join(str(item) for item in _as_list(row.get("rationale_codes"))),
+                ]
+            )
+    if not rows:
+        return ["**Clause support records:**", "- none"]
+    return ["**Clause support records:**"] + _markdown_table(
+        ["effect", "clause", "op #", "op", "predicate", "source", "rationale"],
+        rows,
+    )
+
+
 def _render_conflict_pressure(input_info: dict[str, Any], parsed: dict[str, Any], diagnostics: dict[str, Any]) -> list[str]:
     context_markers = (
         "existing",
@@ -645,6 +675,7 @@ def _render_record(
     lines.extend(_render_clause_list("Rules passivated for KB assertion", _as_list(mapped.get("rules"))))
     lines.extend(_render_clause_list("Retract targets / correction clauses", _as_list(mapped.get("correction_retract_clauses"))))
     lines.extend(_render_clause_list("Queries extracted for KB read", _as_list(mapped.get("queries"))))
+    lines.extend(_render_clause_supports(mapped, diagnostics))
     lines.append("")
 
     warnings = [str(item).strip() for item in mapper_warnings if str(item).strip()]

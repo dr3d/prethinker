@@ -2111,6 +2111,19 @@ class PrologMCPServer:
         writes_applied = 0
         query_result: dict[str, Any] | None = None
         errors: list[str] = []
+        clause_supports = parsed.get("clause_supports", {}) if isinstance(parsed.get("clause_supports"), dict) else {}
+
+        def support_for(effect: str, clause: str) -> dict[str, Any]:
+            rows = clause_supports.get(effect, []) if isinstance(clause_supports, dict) else []
+            normalized_clause = _normalize_clause(str(clause))
+            if not isinstance(rows, list):
+                return {}
+            for row in rows:
+                if not isinstance(row, dict):
+                    continue
+                if _normalize_clause(str(row.get("clause", ""))) == normalized_clause:
+                    return self._clone_trace_payload(row)
+            return {}
 
         if intent in {"assert_fact", "assert_rule"}:
             correction_retracts = [
@@ -2125,7 +2138,12 @@ class PrologMCPServer:
                     {"clause": normalized_clause, "prethink_id": prethink_id, "confirm": True},
                 )
                 operations.append(
-                    {"tool": "retract_fact", "clause": normalized_clause, "result": result}
+                    {
+                        "tool": "retract_fact",
+                        "clause": normalized_clause,
+                        "support": support_for("retracts", normalized_clause),
+                        "result": result,
+                    }
                 )
                 status = str(result.get("status", "")).strip()
                 if status == "success":
@@ -2176,7 +2194,14 @@ class PrologMCPServer:
                     "assert_fact",
                     {"clause": clause, "prethink_id": prethink_id, "confirm": True},
                 )
-                operations.append({"tool": "assert_fact", "clause": clause, "result": result})
+                operations.append(
+                    {
+                        "tool": "assert_fact",
+                        "clause": clause,
+                        "support": support_for("facts", clause),
+                        "result": result,
+                    }
+                )
                 if str(result.get("status", "")).strip() == "success":
                     writes_applied += 1
                 else:
@@ -2187,7 +2212,14 @@ class PrologMCPServer:
                     "assert_rule",
                     {"clause": clause, "prethink_id": prethink_id, "confirm": True},
                 )
-                operations.append({"tool": "assert_rule", "clause": clause, "result": result})
+                operations.append(
+                    {
+                        "tool": "assert_rule",
+                        "clause": clause,
+                        "support": support_for("rules", clause),
+                        "result": result,
+                    }
+                )
                 if str(result.get("status", "")).strip() == "success":
                     writes_applied += 1
                 else:
@@ -2201,7 +2233,14 @@ class PrologMCPServer:
                     {"query": query, "prethink_id": prethink_id},
                 )
                 query_result = result
-                operations.append({"tool": "query_rows", "query": query, "result": result})
+                operations.append(
+                    {
+                        "tool": "query_rows",
+                        "query": query,
+                        "support": support_for("queries", query),
+                        "result": result,
+                    }
+                )
                 status = str(result.get("status", "")).strip()
                 if status not in {"success", "no_results"}:
                     errors.append(f"query_rows failed for {query}")
@@ -2217,7 +2256,14 @@ class PrologMCPServer:
                     "retract_fact",
                     {"clause": clause, "prethink_id": prethink_id, "confirm": True},
                 )
-                operations.append({"tool": "retract_fact", "clause": clause, "result": result})
+                operations.append(
+                    {
+                        "tool": "retract_fact",
+                        "clause": clause,
+                        "support": support_for("retracts", clause),
+                        "result": result,
+                    }
+                )
                 status = str(result.get("status", "")).strip()
                 if status == "success":
                     writes_applied += 1
@@ -2232,7 +2278,14 @@ class PrologMCPServer:
                 {"query": query, "prethink_id": prethink_id},
             )
             query_result = result
-            operations.append({"tool": "query_rows", "query": query, "result": result})
+            operations.append(
+                {
+                    "tool": "query_rows",
+                    "query": query,
+                    "support": support_for("queries", query),
+                    "result": result,
+                }
+            )
             status = str(result.get("status", "")).strip()
             if status not in {"success", "no_results"}:
                 errors.append(f"query_rows failed for {query}")

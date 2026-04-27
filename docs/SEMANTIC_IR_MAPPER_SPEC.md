@@ -478,12 +478,19 @@ It records:
 - per-operation predicate-contract presence and argument roles;
 - admitted versus skipped operations;
 - concrete clauses the mapper considered admissible;
+- `clause_supports`, which connect each admitted clause back to the mapper
+  operation index, predicate, source, polarity, and rationale codes;
 - skip reasons and rationale codes such as `source_policy`,
   `candidate_safety_gate`, `polarity_policy`, `predicate_contract_role`,
   `profile_contract_validator`, `temporal_policy`, and `no_rule_synthesis`.
 
 This lets us ask "why does this guardrail exist?" at operation granularity
 without turning score features into write permission.
+
+Clause support records are not yet a full truth-maintenance system. They are the
+first dependency breadcrumb: enough to show why a fact, rule, retract, or query
+was passivated for runtime, and enough to give future derived conclusions
+something to point back to.
 
 The A/B harness additionally classifies non-structural legacy events as:
 
