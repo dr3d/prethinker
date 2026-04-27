@@ -297,6 +297,17 @@ def _code_block(value: Any, language: str = "json", *, max_chars: int = 0) -> st
     return f"```{language}\n{text}\n```"
 
 
+def _record_summary(index: int, scenario_label: str, parts: list[str]) -> str:
+    clean_parts = [part.replace("`", "").strip() for part in parts if part.replace("`", "").strip()]
+    meta = " | ".join(clean_parts)
+    return (
+        '<summary class="record-summary">'
+        f'<span class="record-title">{index}. <code>{html.escape(scenario_label)}</code></span>'
+        f'<span class="record-meta">{html.escape(meta)}</span>'
+        "</summary>"
+    )
+
+
 def _render_entities(parsed: dict[str, Any]) -> list[str]:
     rows = []
     for entity in _as_list(parsed.get("entities")):
@@ -672,9 +683,8 @@ def _render_record(
         )
 
     lines: list[str] = [
-        f"## {index}. `{scenario_label}`",
-        "",
-        " ".join(layer_summary),
+        '<details class="trace-record" markdown="1">',
+        _record_summary(index, scenario_label, layer_summary),
         "",
         "### Layer 0 - Focused Model Input",
         "",
@@ -722,7 +732,8 @@ def _render_record(
     lines.extend(["### Layer 2 - Parsed `semantic_ir_v1` Workspace", ""])
     if not isinstance(parsed, dict):
         lines.append(f"Parse unavailable. Error: `{_text(record.get('parse_error')).strip() or 'unknown'}`")
-        return lines + [""]
+        lines.extend(["", "</details>", ""])
+        return lines
 
     lines.append(
         f"Model decision: `{parsed.get('decision', '')}`; turn type: `{parsed.get('turn_type', '')}`; "
@@ -759,7 +770,8 @@ def _render_record(
     lines.extend(["### Layer 3 - Deterministic Mapper / Admission Gate", ""])
     if "render_error" in mapped:
         lines.append(f"Mapper unavailable: `{mapped['render_error']}`")
-        return lines + [""]
+        lines.extend(["", "</details>", ""])
+        return lines
 
     lines.append(f"Legacy intent: `{mapped.get('intent', '')}`")
     logic_string = str(mapped.get("logic_string", "")).strip()
@@ -830,6 +842,8 @@ def _render_record(
         if admission_score:
             lines.extend(["", "**Admission contract score:**", "", _code_block(admission_score, "json")])
         lines.append("")
+    lines.append("</details>")
+    lines.append("")
     return lines
 
 
@@ -959,6 +973,54 @@ def render_html(markdown_text: str, *, title: str) -> str:
       user-select: none;
     }}
     details > *:not(summary) {{ margin-left: 14px; margin-right: 14px; }}
+    .trace-record {{
+      margin: 16px 0 18px;
+      border-radius: 12px;
+      background: linear-gradient(180deg, #202c35, #18222a);
+    }}
+    .trace-record > summary.record-summary {{
+      display: grid;
+      grid-template-columns: 22px minmax(14rem, max-content) minmax(0, 1fr);
+      gap: 10px;
+      align-items: center;
+      min-height: 44px;
+      padding: 8px 14px;
+      background: #24313b;
+      list-style: none;
+    }}
+    .trace-record > summary.record-summary::-webkit-details-marker {{ display: none; }}
+    .trace-record > summary.record-summary::before {{
+      content: "▸";
+      color: var(--accent);
+      font-size: 16px;
+      justify-self: center;
+    }}
+    .trace-record[open] > summary.record-summary::before {{ content: "▾"; }}
+    .record-title {{
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      font-size: 17px;
+      font-weight: 800;
+      color: #f4d9b2;
+    }}
+    .record-meta {{
+      min-width: 0;
+      justify-self: end;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--muted);
+      font-size: 14px;
+      text-align: right;
+    }}
+    .trace-record:not([open]) {{
+      background: rgba(255,255,255,0.03);
+    }}
+    .trace-record:not([open]) > summary.record-summary {{
+      border-radius: 12px;
+    }}
     table {{
       display: block;
       max-height: 30rem;

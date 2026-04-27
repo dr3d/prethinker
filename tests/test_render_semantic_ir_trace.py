@@ -145,6 +145,13 @@ class RenderSemanticIRTraceTests(unittest.TestCase):
         self.assertIn("lives_in(mara, paris).", rendered)
         self.assertIn("lives_in(mara, london).", rendered)
         self.assertIn("predicate_palette_gate", rendered)
+        self.assertIn('<details class="trace-record" markdown="1">', rendered)
+        self.assertIn('<summary class="record-summary">', rendered)
+
+        rendered_html = render_html(rendered, title="demo")
+        self.assertIn('<details class="trace-record">', rendered_html)
+        self.assertIn('<summary class="record-summary">', rendered_html)
+        self.assertIn("<h3>Layer 0 - Focused Model Input</h3>", rendered_html)
 
     def test_renders_parse_error_without_crashing(self) -> None:
         record = {
