@@ -79,7 +79,8 @@ Its job is to:
 
 If you want the code-level technical version of this story, see:
 
-- [GIC English Input Pipeline](https://github.com/dr3d/prethinker/blob/main/docs/GIC_ENGLISH_INPUT_PIPELINE.md)
+- [Current Utterance Pipeline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_UTTERANCE_PIPELINE.md)
+- [GIC English Input Pipeline](https://github.com/dr3d/prethinker/blob/main/docs/GIC_ENGLISH_INPUT_PIPELINE.md) for historical parser-lane context
 
 Prethinker is the authority boundary.
 
@@ -294,9 +295,9 @@ That is also why the repo is careful about honesty:
 
 ## What We Know Today
 
-As of April 26, 2026:
+As of April 27, 2026:
 
-- the full local pytest suite is green at `248 passed`
+- the full local pytest suite is green at `318 passed`
 - the console is the canonical interactive front door
 - `semantic_ir_v1` is the active research lane for richer model understanding before deterministic admission
 - the latest semantic IR edge runtime A/B is `20/20` decision labels with `0.976` average score

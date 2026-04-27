@@ -9,6 +9,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 ## Current Center
 
 - Runtime: `src/mcp_server.py`, especially `process_utterance()`.
+- Current pipeline reference: `docs/CURRENT_UTTERANCE_PIPELINE.md`.
 - UI: `ui_gateway/`, served locally by `python ui_gateway/main.py` using the stdlib `ThreadingHTTPServer`.
 - Active profile: `medical@v0`; active profile-lane experiments: `legal_courtlistener@v0` and `sec_contracts@v0`.
 - Active research asset: local UMLS Semantic Network KB built from `sn_current.tgz`.
@@ -171,19 +172,20 @@ Recent verified results:
 2. `AGENT-README.md`
 3. `docs/PRETHINK_GATEWAY_MVP.md`
 4. `docs/PUBLIC_DOCS_GUIDE.md`
-5. `docs/SEMANTIC_IR_RESEARCH_DIRECTION_REPORT.md`
-6. `docs/SEMANTIC_IR_MAPPER_SPEC.md`
-7. `docs/SEMANTIC_IR_MODEL_MATRIX.md`
-8. `docs/PROJECT_HORIZON.md`
-9. `docs/DOMAIN_PROFILE_CATALOG.md`
-10. `docs/COURTLISTENER_DOMAIN.md`
-11. `docs/SEC_CONTRACTS_DOMAIN.md`
-12. `docs/GUARDRAIL_DEPENDENCY_AB.md`
-13. `docs/UMLS_MVP.md`
-14. `docs/MEDICAL_PROFILE.md`
-15. `docs/FREETHINKER_DESIGN.md`
-16. `docs/CONSOLE_TRYBOOK.md`
-17. `ui_gateway/README.md`
+5. `docs/CURRENT_UTTERANCE_PIPELINE.md`
+6. `docs/SEMANTIC_IR_RESEARCH_DIRECTION_REPORT.md`
+7. `docs/SEMANTIC_IR_MAPPER_SPEC.md`
+8. `docs/SEMANTIC_IR_MODEL_MATRIX.md`
+9. `docs/PROJECT_HORIZON.md`
+10. `docs/DOMAIN_PROFILE_CATALOG.md`
+11. `docs/COURTLISTENER_DOMAIN.md`
+12. `docs/SEC_CONTRACTS_DOMAIN.md`
+13. `docs/GUARDRAIL_DEPENDENCY_AB.md`
+14. `docs/UMLS_MVP.md`
+15. `docs/MEDICAL_PROFILE.md`
+16. `docs/FREETHINKER_DESIGN.md`
+17. `docs/CONSOLE_TRYBOOK.md`
+18. `ui_gateway/README.md`
 
 ## What Was Pruned
 

@@ -1,9 +1,13 @@
 # GIC English Input Pipeline
 
-Status note, 2026-04-26: this document remains useful for understanding the
+Status note, 2026-04-27: this document remains useful for understanding the
 legacy English-first pipeline and why the project accumulated Python-side
-guardrails. The current research center is the stronger-model
-`semantic_ir_v1` path described in
+guardrails. The current live pipeline is the domain-aware, recent-context,
+KB-seeded Semantic IR path described in
+[docs/CURRENT_UTTERANCE_PIPELINE.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_UTTERANCE_PIPELINE.md).
+
+For the current research direction and why the project moved away from this
+English-first parser lane, read
 [docs/SEMANTIC_IR_RESEARCH_DIRECTION_REPORT.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_RESEARCH_DIRECTION_REPORT.md).
 
 This note is the technical follow-through of what `Prethinker` is doing today when an English utterance arrives at the canonical interactive front door.
