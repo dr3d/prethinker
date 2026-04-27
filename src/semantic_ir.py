@@ -1172,6 +1172,12 @@ def _diagnose_candidate_operation(
     if operation == "rule":
         clause = str(op.get("clause") or op.get("logic") or "").strip()
         if not clause:
+            if args and source == "direct" and polarity == "positive":
+                base["admitted"] = True
+                base["effect"] = "fact"
+                base["clauses"] = [_clause(predicate, args)]
+                base["rationale_codes"] = ["safe_rule_record_without_clause", "rule_label_demoted_to_fact_record"]
+                return base
             return skip(
                 "rule_clause_missing",
                 warning="skipped rule operation without explicit clause",

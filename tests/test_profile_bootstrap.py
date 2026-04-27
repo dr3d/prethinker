@@ -8,6 +8,10 @@ from src.profile_bootstrap import (
     PROFILE_BOOTSTRAP_JSON_SCHEMA,
     build_profile_bootstrap_messages,
     parse_profile_bootstrap_json,
+    profile_bootstrap_allowed_predicates,
+    profile_bootstrap_domain_context,
+    profile_bootstrap_frontier_cases,
+    profile_bootstrap_predicate_contracts,
     profile_bootstrap_score,
 )
 
@@ -86,6 +90,55 @@ class ProfileBootstrapTests(unittest.TestCase):
         self.assertEqual(score["generic_predicate_count"], 0)
         self.assertEqual(score["frontier_unknown_positive_predicate_refs"], [])
         self.assertGreater(score["rough_score"], 0.4)
+
+    def test_profile_bootstrap_projects_to_draft_semantic_ir_profile(self) -> None:
+        parsed = {
+            "schema_version": "profile_bootstrap_v1",
+            "domain_guess": "contracts_compliance",
+            "domain_scope": "Contract and compliance policy intake.",
+            "confidence": 0.9,
+            "source_summary": ["sample"],
+            "entity_types": [{"name": "approval", "description": "Approval.", "examples": ["r1"]}],
+            "candidate_predicates": [
+                {
+                    "signature": "approved_by/2",
+                    "args": ["item", "approver"],
+                    "description": "Specific approval relation.",
+                    "why": "Directly matches the domain relation.",
+                    "admission_notes": ["Requires source support."],
+                }
+            ],
+            "likely_functional_predicates": [],
+            "provenance_sensitive_predicates": ["approved_by/2"],
+            "admission_risks": ["event/fact collapse"],
+            "clarification_policy": ["clarify missing actor"],
+            "unsafe_transformations": ["do not infer approval"],
+            "starter_frontier_cases": [
+                {
+                    "utterance": "R1 was approved by Ilya.",
+                    "expected_boundary": "approved_by(r1, ilya)",
+                    "must_not_write": ["event_occurred(approval, r1)"],
+                }
+            ],
+            "self_check": {"profile_authority": "proposal_only", "notes": []},
+        }
+
+        self.assertEqual(profile_bootstrap_allowed_predicates(parsed), ["approved_by/2"])
+        self.assertEqual(
+            profile_bootstrap_predicate_contracts(parsed),
+            [
+                {
+                    "signature": "approved_by/2",
+                    "arguments": ["item", "approver"],
+                    "notes": (
+                        "Specific approval relation. Directly matches the domain relation. "
+                        "Requires source support."
+                    ),
+                }
+            ],
+        )
+        self.assertTrue(any("Contract and compliance" in row for row in profile_bootstrap_domain_context(parsed)))
+        self.assertEqual(profile_bootstrap_frontier_cases(parsed)[0]["id"], "bootstrap_case_01")
 
     def test_score_penalizes_generic_predicate_surface(self) -> None:
         base = {

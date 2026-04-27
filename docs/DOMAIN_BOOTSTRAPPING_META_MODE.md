@@ -272,14 +272,14 @@ Representative proposed predicates included:
 
 - `obligation/3`
 - `conditional_right/3`
+- `prohibition/3`
+- `override_rule/3`
 - `submitted_by/2`
 - `approved_by/2`
 - `sent_on/2`
-- `conflict_of_interest/2`
+- `conflict_rule/3`
 - `waiver/2`
-- `sponsorship_expiry/2`
-- `priority_override/3`
-- `source_priority/3`
+- `validity_condition/2`
 
 This is not an approved profile. It is review material. The remaining human
 review question is semantic completeness: a structurally coherent profile can
@@ -289,6 +289,61 @@ that should be split, renamed, or scoped differently.
 That is the intended boundary. The model helps draft the vocabulary; review,
 tests, and deterministic admission decide whether the vocabulary earns its way
 into a real profile.
+
+## First Closed Loop
+
+A second runner now closes the loop:
+
+```powershell
+python scripts/run_profile_bootstrap_loop.py `
+  --backend lmstudio `
+  --model qwen/qwen3.6-35b-a3b
+```
+
+It loads the latest local `profile_bootstrap_v1` run, projects the proposed
+candidate predicates into a temporary Semantic IR profile, runs the generated
+starter frontier cases through the ordinary Semantic IR model+mapper path, and
+scores the outcome.
+
+This matters because profile proposal quality has two layers:
+
+```text
+profile draft looks coherent
+  !=
+profile draft actually guides ingestion safely
+```
+
+The first closed-loop pass found two useful problems:
+
+- evaluation labels were accidentally visible to the model input, so the runner
+  was made label-clean;
+- the model often labeled normative record predicates as `operation='rule'`
+  without an executable clause, so the mapper now treats a positive direct
+  predicate+args `rule` operation with no clause as a fact-like rule record and
+  records `rule_label_demoted_to_fact_record` in the rationale.
+
+That mapper change is structural, not domain-language patching. Executable
+rules still require a clause, negative/general rule operations still do not
+become facts, and durable admission still checks palette and contracts.
+
+The current best closed-loop contracts/compliance smoke produced:
+
+```text
+cases: 8
+parsed_ok: 8
+zero_out_of_palette_skip_cases: 8
+zero_must_not_violation_cases: 8
+expected_ref_hit_cases: 7
+admitted_total: 16
+loop_rough_score: 0.969
+```
+
+The remaining miss is a real profile-design ambiguity, not a JSON or mapper
+failure: "No contractor may access production systems unless sponsored by a
+manager" can be represented either as a prohibition with an exception or as a
+conditional access right. The model chose the latter while the draft expected
+the former. That is exactly the kind of profile-surface decision this loop is
+meant to expose.
 
 ## Bottom Line
 

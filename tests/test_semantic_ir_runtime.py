@@ -728,6 +728,31 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         self.assertEqual(parsed["rules"], ["ancestor(X, Y) :- parent(X, Y)."])
         self.assertEqual(parsed["admission_diagnostics"]["admitted_count"], 1)
 
+    def test_mapper_admits_positive_rule_labeled_record_without_clause_as_fact(self) -> None:
+        ir = _ir(
+            decision="commit",
+            turn_type="rule_update",
+            candidate_operations=[
+                {
+                    "operation": "rule",
+                    "predicate": "obligation",
+                    "args": ["borrower", "deliver_statements", "within_90_days"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                }
+            ],
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=["obligation/3"],
+        )
+        self.assertEqual(warnings, [])
+        self.assertEqual(parsed["intent"], "assert_fact")
+        self.assertEqual(parsed["facts"], ["obligation(borrower, deliver_statements, within_90_days)."])
+        op = parsed["admission_diagnostics"]["operations"][0]
+        self.assertIn("rule_label_demoted_to_fact_record", op["rationale_codes"])
+
     def test_mapper_keeps_assert_logic_string_valid_when_mixed_with_query(self) -> None:
         ir = _ir(
             decision="mixed",

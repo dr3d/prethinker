@@ -146,8 +146,14 @@ PROFILE_BOOTSTRAP_GUIDANCE = (
     "- Prefer small, typed predicates over vague catch-all predicates.\n"
     "- Prefer admission-ready predicates that name the domain relation directly. For example, "
     "submitted_by/2, approved_by/2, sent_on/2, obligation/3, conditional_right/3, "
-    "subject_to/2, source_priority/3, and waiver/2 are usually better than generic "
+    "prohibition/3, conflict_rule/3, override_rule/3, subject_to/2, source_priority/3, and waiver/2 "
+    "are usually better than generic "
     "event_occurred/2, policy_constraint/2, candidate_relation/4, or related_to/2.\n"
+    "- Do not name a general policy or rule predicate as if it were a current-state violation. "
+    "For example, use conflict_rule/3 or prohibition/3 for 'approvers must not be requesters'; "
+    "reserve conflict_of_interest/2 or violation/2 for observed/evaluated facts only if the source states them.\n"
+    "- For exception and override ladders, prefer rule-record predicates such as override_rule/3, "
+    "exception_rule/3, or conditional_right/3 with atomic conditions. Do not collapse the rule into a current fact.\n"
     "- If you need a generic predicate, explain why a more specific predicate is not yet justified.\n"
     "- Mark predicates that likely need provenance or functional/current-state handling.\n"
     "- Provenance-sensitive is not the same as unsafe. If a source directly states submitted_by, "
@@ -158,6 +164,11 @@ PROFILE_BOOTSTRAP_GUIDANCE = (
     "silently dropping them. For example, a report that says an invoice was submitted by one person "
     "and approved by another may include both submitted_by and approved_by boundaries; the unsafe "
     "part is inferring conflict or management that the report does not state.\n"
+    "- Never put a directly stated source event into must_not_write merely because it could later "
+    "participate in a conflict check. For example, 'the report states invoice R-42 was submitted by "
+    "Dana and approved by Ilya, but does not say whether Ilya manages Dana' should include both "
+    "submitted_by(...) and approved_by(...) as positive boundaries; must_not_write should contain "
+    "only manages(...), conflict/violation conclusions, or other unsupported inferences.\n"
     "- Starter frontier cases should exercise the candidate predicates you actually proposed. "
     "Do not describe expected positive writes using predicates absent from candidate_predicates; "
     "unproposed predicates are fine only inside must_not_write as examples of unsafe writes.\n"
@@ -175,6 +186,9 @@ PROFILE_BOOTSTRAP_GUIDANCE = (
     "in expected_boundary and confirm its exact name/arity appears in candidate_predicates. If any "
     "positive call is missing, either add that predicate with argument roles or rewrite the case to "
     "use an existing proposed predicate.\n"
+    "- Also self-audit must_not_write: if a must_not_write item is a candidate predicate whose "
+    "relation is directly and explicitly stated by the utterance, move it into expected_boundary "
+    "instead of forbidding it.\n"
     "- Include examples from the samples, but do not invent durable facts.\n"
     "Safety boundary:\n"
     "- This output is profile-design material only.\n"
@@ -303,6 +317,118 @@ def profile_bootstrap_score(parsed: dict[str, Any] | None) -> dict[str, Any]:
         "frontier_case_count": frontier_count,
         "rough_score": round(float(rough_score), 3),
     }
+
+
+def profile_bootstrap_allowed_predicates(parsed: dict[str, Any] | None) -> list[str]:
+    if not isinstance(parsed, dict):
+        return []
+    predicates = parsed.get("candidate_predicates", [])
+    if not isinstance(predicates, list):
+        return []
+    out: list[str] = []
+    for item in predicates:
+        if not isinstance(item, dict):
+            continue
+        signature = _signature_key(str(item.get("signature", "")))
+        if signature:
+            out.append(signature)
+    return out
+
+
+def profile_bootstrap_predicate_contracts(parsed: dict[str, Any] | None) -> list[dict[str, Any]]:
+    if not isinstance(parsed, dict):
+        return []
+    predicates = parsed.get("candidate_predicates", [])
+    if not isinstance(predicates, list):
+        return []
+    contracts: list[dict[str, Any]] = []
+    for item in predicates:
+        if not isinstance(item, dict):
+            continue
+        signature = _signature_key(str(item.get("signature", "")))
+        if not signature:
+            continue
+        contract: dict[str, Any] = {
+            "signature": signature,
+            "arguments": [str(arg).strip() for arg in item.get("args", []) if str(arg).strip()]
+            if isinstance(item.get("args"), list)
+            else [],
+        }
+        notes = " ".join(
+            [
+                str(item.get("description", "")).strip(),
+                str(item.get("why", "")).strip(),
+                " ".join(str(note).strip() for note in item.get("admission_notes", []) if str(note).strip())
+                if isinstance(item.get("admission_notes"), list)
+                else "",
+            ]
+        ).strip()
+        if notes:
+            contract["notes"] = notes
+        contracts.append(contract)
+    return contracts
+
+
+def profile_bootstrap_domain_context(parsed: dict[str, Any] | None) -> list[str]:
+    if not isinstance(parsed, dict):
+        return []
+    context: list[str] = []
+    domain_guess = str(parsed.get("domain_guess", "")).strip()
+    domain_scope = str(parsed.get("domain_scope", "")).strip()
+    if domain_guess:
+        context.append(f"draft_profile_id: {domain_guess}@bootstrap")
+    if domain_scope:
+        context.append(f"profile_scope: {domain_scope}")
+    for risk in parsed.get("admission_risks", []) if isinstance(parsed.get("admission_risks"), list) else []:
+        text = str(risk).strip()
+        if text:
+            context.append(f"admission_risk: {text}")
+    for policy in parsed.get("clarification_policy", []) if isinstance(parsed.get("clarification_policy"), list) else []:
+        text = str(policy).strip()
+        if text:
+            context.append(f"clarification_policy: {text}")
+    for transform in parsed.get("unsafe_transformations", []) if isinstance(parsed.get("unsafe_transformations"), list) else []:
+        text = str(transform).strip()
+        if text:
+            context.append(f"unsafe_transformation: {text}")
+    context.append(
+        "draft_profile_operation_policy: Candidate predicates such as obligation/3, conditional_right/3, "
+        "prohibition/3, conflict_rule/3, and override_rule/3 are ordinary record predicates unless the model can emit "
+        "a precise executable Horn clause. Use operation='assert' for direct source-grounded normative records; "
+        "use operation='rule' only when candidate_operations[].clause contains an executable rule. A safe "
+        "operation='rule' without an executable clause is not admitted by the mapper."
+    )
+    context.append(
+        "authority_boundary: This is a draft profile supplied for semantic parsing guidance only; "
+        "deterministic admission still owns KB mutation."
+    )
+    return context
+
+
+def profile_bootstrap_frontier_cases(parsed: dict[str, Any] | None) -> list[dict[str, Any]]:
+    if not isinstance(parsed, dict):
+        return []
+    cases = parsed.get("starter_frontier_cases", [])
+    if not isinstance(cases, list):
+        return []
+    out: list[dict[str, Any]] = []
+    for index, item in enumerate(cases, start=1):
+        if not isinstance(item, dict):
+            continue
+        utterance = str(item.get("utterance", "")).strip()
+        if not utterance:
+            continue
+        out.append(
+            {
+                "id": f"bootstrap_case_{index:02d}",
+                "utterance": utterance,
+                "expected_boundary": str(item.get("expected_boundary", "")).strip(),
+                "must_not_write": [str(row).strip() for row in item.get("must_not_write", []) if str(row).strip()]
+                if isinstance(item.get("must_not_write"), list)
+                else [],
+            }
+        )
+    return out
 
 
 def _signature_key(signature: str) -> str:
