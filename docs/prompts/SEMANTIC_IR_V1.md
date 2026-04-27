@@ -73,6 +73,40 @@ clarify or quarantine.
       "safety": "safe|unsafe|needs_clarification"
     }
   ],
+  "truth_maintenance": {
+    "support_links": [
+      {
+        "operation_index": 0,
+        "support_kind": "direct_utterance|context_clause|source_document|rule|claim|observation|correction|inference",
+        "support_ref": "",
+        "role": "grounds|retracts|conflicts_with|depends_on|derives|questions",
+        "confidence": 0.0
+      }
+    ],
+    "conflicts": [
+      {
+        "new_operation_index": 0,
+        "existing_ref": "",
+        "conflict_kind": "functional_overwrite|claim_vs_observation|temporal_overlap|rule_violation|identity_ambiguity|polarity_conflict|unknown",
+        "recommended_policy": "commit|mixed|clarify|quarantine|reject",
+        "why": ""
+      }
+    ],
+    "retraction_plan": [
+      {
+        "operation_index": 0,
+        "target_ref": "",
+        "reason": "explicit_correction|superseded_current_state|source_priority|temporal_update|other"
+      }
+    ],
+    "derived_consequences": [
+      {
+        "statement": "",
+        "basis": ["op:0"],
+        "commit_policy": "query_only|quarantine|future_rule_support|do_not_commit"
+      }
+    ]
+  },
   "clarification_questions": [""],
   "self_check": {
     "bad_commit_risk": "low|medium|high",
@@ -156,11 +190,23 @@ Special guards:
   targets out of committed facts.
 - Preserve negation in candidate_operations with polarity='negative'. Do not
   turn 'never saw X' into a positive saw/2 fact.
+- Use `truth_maintenance` to explain support, dependency, conflict, retraction,
+  and derived-consequence structure. This block is an audit/proposal workspace,
+  not an authority path: every executable write/query still has to appear in
+  `candidate_operations`.
+- Put conflict pressure in `truth_maintenance.conflicts`, explicit correction
+  targets in `truth_maintenance.retraction_plan`, and possible consequences in
+  `truth_maintenance.derived_consequences` with `query_only`, `quarantine`,
+  `future_rule_support`, or `do_not_commit`.
 ```
 
 Current runtime additions:
 
 - LM Studio structured output uses the JSON schema in `src/semantic_ir.py`;
+- structured output now includes a first-class `truth_maintenance` proposal
+  block for support links, conflicts, retraction plans, and derived
+  consequences, while deterministic admission still reads writes only from
+  `candidate_operations`;
 - the prompt still carries a compact root-shape contract because schema
   enforcement fixes JSON shape, not policy calibration;
 - narrative ingestion should use specific story-world predicates from the active

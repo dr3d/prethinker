@@ -31,6 +31,12 @@ def _ir(**updates):
                 "safety": "safe",
             }
         ],
+        "truth_maintenance": {
+            "support_links": [],
+            "conflicts": [],
+            "retraction_plan": [],
+            "derived_consequences": [],
+        },
         "clarification_questions": [],
         "self_check": {"bad_commit_risk": "low", "missing_slots": [], "notes": []},
     }
@@ -316,6 +322,74 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         self.assertEqual(supports[0]["predicate"], "owns")
         self.assertEqual(supports[0]["source"], "direct")
         self.assertIn("safe_direct_fact", supports[0]["rationale_codes"])
+
+    def test_mapper_surfaces_truth_maintenance_without_granting_authority(self) -> None:
+        ir = _ir(
+            decision="mixed",
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "lives_in",
+                    "args": ["Mara", "Paris"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "assert",
+                    "predicate": "citizen_of",
+                    "args": ["Mara", "France"],
+                    "polarity": "positive",
+                    "source": "inferred",
+                    "safety": "safe",
+                },
+            ],
+            truth_maintenance={
+                "support_links": [
+                    {
+                        "operation_index": 0,
+                        "support_kind": "direct_utterance",
+                        "support_ref": "current turn",
+                        "role": "grounds",
+                        "confidence": 0.98,
+                    }
+                ],
+                "conflicts": [
+                    {
+                        "new_operation_index": 0,
+                        "existing_ref": "context:lives_in(mara,london)",
+                        "conflict_kind": "functional_overwrite",
+                        "recommended_policy": "clarify",
+                        "why": "Residence behaves like current state without explicit correction.",
+                    }
+                ],
+                "retraction_plan": [
+                    {
+                        "operation_index": 0,
+                        "target_ref": "context:lives_in(mara,london)",
+                        "reason": "superseded_current_state",
+                    }
+                ],
+                "derived_consequences": [
+                    {
+                        "statement": "Mara may be in France.",
+                        "basis": ["op:0"],
+                        "commit_policy": "do_not_commit",
+                    }
+                ],
+            },
+        )
+
+        parsed, warnings = semantic_ir_to_legacy_parse(ir, allowed_predicates=["lives_in/2", "citizen_of/2"])
+
+        self.assertTrue(any("inferred safe operation" in warning for warning in warnings))
+        self.assertEqual(parsed["facts"], ["lives_in(mara, paris)."])
+        self.assertEqual(parsed["admission_diagnostics"]["admitted_count"], 1)
+        truth = parsed["truth_maintenance"]
+        self.assertEqual(truth["support_links"][0]["support_ref"], "current turn")
+        self.assertEqual(truth["conflicts"][0]["conflict_kind"], "functional_overwrite")
+        self.assertEqual(truth["retraction_plan"][0]["reason"], "superseded_current_state")
+        self.assertEqual(truth["derived_consequences"][0]["commit_policy"], "do_not_commit")
 
     def test_mapper_applies_profile_contract_validator_without_language_patch(self) -> None:
         ir = _ir(

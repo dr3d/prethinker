@@ -24,7 +24,11 @@ DEFAULT_OUT_DIR = REPO_ROOT / "tmp" / "semantic_ir_prompt_bakeoff"
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from src.semantic_ir import semantic_ir_to_legacy_parse  # noqa: E402
+from src.semantic_ir import (  # noqa: E402
+    SCHEMA_CONTRACT as RUNTIME_SCHEMA_CONTRACT,
+    SEMANTIC_IR_JSON_SCHEMA as RUNTIME_SEMANTIC_IR_JSON_SCHEMA,
+    semantic_ir_to_legacy_parse,
+)
 
 
 WILD_SCENARIOS: list[dict[str, Any]] = [
@@ -1901,6 +1905,9 @@ SEMANTIC_IR_JSON_SCHEMA: dict[str, Any] = {
         },
     },
 }
+
+SCHEMA_CONTRACT = RUNTIME_SCHEMA_CONTRACT
+SEMANTIC_IR_JSON_SCHEMA = RUNTIME_SEMANTIC_IR_JSON_SCHEMA
 
 
 PROMPT_VARIANTS: dict[str, dict[str, Any]] = {

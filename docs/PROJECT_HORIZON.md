@@ -93,6 +93,13 @@ solvers may consume
 dependencies stay visible
 ```
 
+The first implementation step toward this boundary now exists inside
+`semantic_ir_v1`: a `truth_maintenance` proposal block where the model may name
+support links, conflicts, retraction plans, and derived consequences. That block
+is not an execution surface. It is how the larger model can use more of its
+semantic intelligence while deterministic admission still decides what becomes
+state.
+
 ## Why This Horizon Matters
 
 Most model systems blur together:

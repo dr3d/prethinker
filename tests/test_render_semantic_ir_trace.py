@@ -57,6 +57,34 @@ class RenderSemanticIRTraceTests(unittest.TestCase):
                     }
                 ],
                 "unsafe_implications": [],
+                "truth_maintenance": {
+                    "support_links": [
+                        {
+                            "operation_index": 1,
+                            "support_kind": "direct_utterance",
+                            "support_ref": "current turn says Mara is in Paris",
+                            "role": "grounds",
+                            "confidence": 0.96,
+                        }
+                    ],
+                    "conflicts": [
+                        {
+                            "new_operation_index": 1,
+                            "existing_ref": "context:lives_in(mara,london)",
+                            "conflict_kind": "functional_overwrite",
+                            "recommended_policy": "commit",
+                            "why": "Explicit correction retracts the old residence before asserting the new one.",
+                        }
+                    ],
+                    "retraction_plan": [
+                        {
+                            "operation_index": 0,
+                            "target_ref": "context:lives_in(mara,london)",
+                            "reason": "explicit_correction",
+                        }
+                    ],
+                    "derived_consequences": [],
+                },
                 "candidate_operations": [
                     {
                         "operation": "retract",
@@ -101,6 +129,9 @@ class RenderSemanticIRTraceTests(unittest.TestCase):
         self.assertIn("Exact chat messages sent to model", rendered)
         self.assertIn("Layer 2 - Parsed `semantic_ir_v1` Workspace", rendered)
         self.assertIn("Layer 3 - Deterministic Mapper / Admission Gate", rendered)
+        self.assertIn("Support / dependency links", rendered)
+        self.assertIn("context:lives_in(mara,london)", rendered)
+        self.assertIn("explicit_correction", rendered)
         self.assertIn("Facts passivated for KB assertion", rendered)
         self.assertIn("Retract targets / correction clauses", rendered)
         self.assertIn("lives_in(mara, paris).", rendered)

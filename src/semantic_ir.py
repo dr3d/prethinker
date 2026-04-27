@@ -58,6 +58,40 @@ SCHEMA_CONTRACT: dict[str, Any] = {
             "safety": "safe|unsafe|needs_clarification",
         }
     ],
+    "truth_maintenance": {
+        "support_links": [
+            {
+                "operation_index": 0,
+                "support_kind": "direct_utterance|context_clause|source_document|rule|claim|observation|correction|inference",
+                "support_ref": "",
+                "role": "grounds|retracts|conflicts_with|depends_on|derives|questions",
+                "confidence": 0.0,
+            }
+        ],
+        "conflicts": [
+            {
+                "new_operation_index": 0,
+                "existing_ref": "",
+                "conflict_kind": "functional_overwrite|claim_vs_observation|temporal_overlap|rule_violation|identity_ambiguity|polarity_conflict|unknown",
+                "recommended_policy": "commit|mixed|clarify|quarantine|reject",
+                "why": "",
+            }
+        ],
+        "retraction_plan": [
+            {
+                "operation_index": 0,
+                "target_ref": "",
+                "reason": "explicit_correction|superseded_current_state|source_priority|temporal_update|other",
+            }
+        ],
+        "derived_consequences": [
+            {
+                "statement": "",
+                "basis": ["op:0"],
+                "commit_policy": "query_only|quarantine|future_rule_support|do_not_commit",
+            }
+        ],
+    },
     "clarification_questions": [""],
     "self_check": {
         "bad_commit_risk": "low|medium|high",
@@ -79,6 +113,7 @@ SEMANTIC_IR_JSON_SCHEMA: dict[str, Any] = {
         "assertions",
         "unsafe_implications",
         "candidate_operations",
+        "truth_maintenance",
         "clarification_questions",
         "self_check",
     ],
@@ -185,6 +220,114 @@ SEMANTIC_IR_JSON_SCHEMA: dict[str, Any] = {
                 },
             },
         },
+        "truth_maintenance": {
+            "type": "object",
+            "additionalProperties": False,
+            "required": ["support_links", "conflicts", "retraction_plan", "derived_consequences"],
+            "properties": {
+                "support_links": {
+                    "type": "array",
+                    "maxItems": 64,
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": False,
+                        "required": ["operation_index", "support_kind", "support_ref", "role", "confidence"],
+                        "properties": {
+                            "operation_index": {"type": "integer", "minimum": 0},
+                            "support_kind": {
+                                "type": "string",
+                                "enum": [
+                                    "direct_utterance",
+                                    "context_clause",
+                                    "source_document",
+                                    "rule",
+                                    "claim",
+                                    "observation",
+                                    "correction",
+                                    "inference",
+                                ],
+                            },
+                            "support_ref": {"type": "string"},
+                            "role": {
+                                "type": "string",
+                                "enum": ["grounds", "retracts", "conflicts_with", "depends_on", "derives", "questions"],
+                            },
+                            "confidence": {"type": "number"},
+                        },
+                    },
+                },
+                "conflicts": {
+                    "type": "array",
+                    "maxItems": 32,
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": False,
+                        "required": ["new_operation_index", "existing_ref", "conflict_kind", "recommended_policy", "why"],
+                        "properties": {
+                            "new_operation_index": {"type": "integer", "minimum": 0},
+                            "existing_ref": {"type": "string"},
+                            "conflict_kind": {
+                                "type": "string",
+                                "enum": [
+                                    "functional_overwrite",
+                                    "claim_vs_observation",
+                                    "temporal_overlap",
+                                    "rule_violation",
+                                    "identity_ambiguity",
+                                    "polarity_conflict",
+                                    "unknown",
+                                ],
+                            },
+                            "recommended_policy": {
+                                "type": "string",
+                                "enum": ["commit", "mixed", "clarify", "quarantine", "reject"],
+                            },
+                            "why": {"type": "string"},
+                        },
+                    },
+                },
+                "retraction_plan": {
+                    "type": "array",
+                    "maxItems": 32,
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": False,
+                        "required": ["operation_index", "target_ref", "reason"],
+                        "properties": {
+                            "operation_index": {"type": "integer", "minimum": 0},
+                            "target_ref": {"type": "string"},
+                            "reason": {
+                                "type": "string",
+                                "enum": [
+                                    "explicit_correction",
+                                    "superseded_current_state",
+                                    "source_priority",
+                                    "temporal_update",
+                                    "other",
+                                ],
+                            },
+                        },
+                    },
+                },
+                "derived_consequences": {
+                    "type": "array",
+                    "maxItems": 32,
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": False,
+                        "required": ["statement", "basis", "commit_policy"],
+                        "properties": {
+                            "statement": {"type": "string"},
+                            "basis": {"type": "array", "maxItems": 12, "items": {"type": "string"}},
+                            "commit_policy": {
+                                "type": "string",
+                                "enum": ["query_only", "quarantine", "future_rule_support", "do_not_commit"],
+                            },
+                        },
+                    },
+                },
+            },
+        },
         "clarification_questions": {"type": "array", "maxItems": 6, "items": {"type": "string"}},
         "self_check": {
             "type": "object",
@@ -278,6 +421,8 @@ BEST_GUARDED_V2_GUIDANCE = (
     "- Existing current facts in context are state constraints. If a new utterance gives a different value for the same likely functional predicate such as lives_in/2 or scheduled_for/2, choose clarify unless the user explicitly marks it as a correction with words like correction, actually, wrong, not X, or instead.\n"
     "- If the new write would contradict a consequence implied by existing context rules and facts, choose clarify or quarantine. Do not assert the opposite fact until the user supplies an explicit correction, exception, or revocation.\n"
     "- If direct facts should be recorded but they create an unresolved conflict with context rules, choose mixed, keep the direct writes as safe operations, and describe the conflict in unsafe_implications/self_check. If self_check says there is a logical conflict or consistency check still needed, the decision should not be commit.\n"
+    "- Use truth_maintenance to explain support, dependency, conflict, retraction, and derived-consequence structure. This block is a proposal/audit workspace only; it never authorizes writes. Every executable write/query still must appear in candidate_operations.\n"
+    "- In truth_maintenance.conflicts, point to the candidate operation index and the existing context/source/rule it conflicts with. In truth_maintenance.retraction_plan, point to explicit correction targets. In derived_consequences, mark consequences query_only, quarantine, future_rule_support, or do_not_commit instead of committing them as facts.\n"
     "- Some predicates are non-exclusive, such as has_condition/2. A new compatible condition can be committed without retracting an existing different condition.\n"
     "- Do not turn a claim into a fact. 'Bob says he has it' is a claim, not possession.\n"
     "- Do not infer diagnosis or staging from a single lab value request. Quarantine or clarify.\n"
@@ -301,7 +446,7 @@ BEST_GUARDED_V2_GUIDANCE = (
     "- If context supplies exactly one active patient and one active lab test, a direct 'it came back high' may propose a safe lab_result_high write.\n"
     "- For rule-plus-fact or fact-plus-query turns, use mixed and keep unsafe query targets out of committed facts.\n"
     "- If predicate_contracts are present, obey their argument order exactly. A predicate may have the right arity but still be wrong if its argument roles are swapped.\n"
-    "- Preserve negation in candidate_operations with polarity='negative'. Do not turn 'never saw X' into a positive saw/2 fact."
+    "- Preserve negation in candidate_operations with polarity='negative'. Do not turn 'never saw X' into a positive saw/2 fact.\n"
     "- available_domain_profiles is a thin skill-like roster. Use it only to understand which domain context may be relevant; do not invent writes from unselected profile descriptions. domain_context and predicate_contracts are the thick selected-profile context."
 )
 
@@ -726,6 +871,7 @@ def semantic_ir_admission_diagnostics(
         "warning_counts": dict(sorted(warning_counts.items())),
         "clauses": clauses_by_effect,
         "clause_supports": supports_by_effect,
+        "truth_maintenance": _truth_maintenance_summary(ir),
         "operations": operations,
     }
 
@@ -811,6 +957,7 @@ def semantic_ir_to_legacy_parse(
         "rationale": f"Mapped from semantic_ir_v1 decision={decision}; skipped={len(warnings)}",
         "admission_diagnostics": diagnostics,
         "clause_supports": diagnostics.get("clause_supports", {}),
+        "truth_maintenance": diagnostics.get("truth_maintenance", {}),
     }
     if retracts:
         payload["correction_retract_clauses"] = retracts
@@ -1016,6 +1163,102 @@ def _clause_support_records(diagnosis: dict[str, Any], clauses: list[str]) -> li
             }
         )
     return records
+
+
+def _bounded_text(value: Any, *, max_chars: int = 400) -> str:
+    text = str(value or "").strip()
+    if max_chars <= 0 or len(text) <= max_chars:
+        return text
+    return text[:max_chars].rstrip()
+
+
+def _operation_index(value: Any) -> int | None:
+    try:
+        parsed = int(value)
+    except Exception:
+        return None
+    if parsed < 0:
+        return None
+    return parsed
+
+
+def _truth_maintenance_summary(ir: dict[str, Any]) -> dict[str, Any]:
+    """Surface model-proposed truth-maintenance structure without authority."""
+    result: dict[str, Any] = {
+        "authority": "proposal_only_candidate_operations_remain_authoritative",
+        "support_links": [],
+        "conflicts": [],
+        "retraction_plan": [],
+        "derived_consequences": [],
+    }
+    raw = ir.get("truth_maintenance")
+    if not isinstance(raw, dict):
+        return result
+
+    for item in raw.get("support_links", []):
+        if not isinstance(item, dict):
+            continue
+        index = _operation_index(item.get("operation_index"))
+        if index is None:
+            continue
+        result["support_links"].append(
+            {
+                "operation_index": index,
+                "support_kind": _bounded_text(item.get("support_kind"), max_chars=80),
+                "support_ref": _bounded_text(item.get("support_ref")),
+                "role": _bounded_text(item.get("role"), max_chars=80),
+                "confidence": item.get("confidence"),
+            }
+        )
+
+    for item in raw.get("conflicts", []):
+        if not isinstance(item, dict):
+            continue
+        index = _operation_index(item.get("new_operation_index"))
+        if index is None:
+            continue
+        result["conflicts"].append(
+            {
+                "new_operation_index": index,
+                "existing_ref": _bounded_text(item.get("existing_ref")),
+                "conflict_kind": _bounded_text(item.get("conflict_kind"), max_chars=80),
+                "recommended_policy": _bounded_text(item.get("recommended_policy"), max_chars=80),
+                "why": _bounded_text(item.get("why"), max_chars=800),
+            }
+        )
+
+    for item in raw.get("retraction_plan", []):
+        if not isinstance(item, dict):
+            continue
+        index = _operation_index(item.get("operation_index"))
+        if index is None:
+            continue
+        result["retraction_plan"].append(
+            {
+                "operation_index": index,
+                "target_ref": _bounded_text(item.get("target_ref")),
+                "reason": _bounded_text(item.get("reason"), max_chars=80),
+            }
+        )
+
+    for item in raw.get("derived_consequences", []):
+        if not isinstance(item, dict):
+            continue
+        raw_basis = item.get("basis", [])
+        basis = [
+            _bounded_text(entry, max_chars=120)
+            for entry in (raw_basis if isinstance(raw_basis, list) else [])
+            if _bounded_text(entry, max_chars=120)
+        ]
+        result["derived_consequences"].append(
+            {
+                "statement": _bounded_text(item.get("statement"), max_chars=800),
+                "basis": basis,
+                "commit_policy": _bounded_text(item.get("commit_policy"), max_chars=80),
+            }
+        )
+
+    return result
 
 
 def _admission_feature_summary(

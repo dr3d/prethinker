@@ -492,6 +492,25 @@ first dependency breadcrumb: enough to show why a fact, rule, retract, or query
 was passivated for runtime, and enough to give future derived conclusions
 something to point back to.
 
+`semantic_ir_v1` now also has a `truth_maintenance` proposal block. This is the
+model's place to do the smarter semantic work we want from the larger model:
+
+- connect candidate operations to direct utterance text, context clauses, source
+  documents, claims, observations, rules, corrections, or inferred support;
+- identify conflicts such as functional overwrites, claim-vs-observation
+  pressure, temporal overlap, rule violations, identity ambiguity, and polarity
+  conflict;
+- propose explicit retraction targets for corrections;
+- list derived consequences while marking them `query_only`, `quarantine`,
+  `future_rule_support`, or `do_not_commit`.
+
+The block is intentionally not executable. The mapper copies it into
+diagnostics and traces for auditability, but it never admits a write from
+`truth_maintenance`. Durable effects still come only from admitted
+`candidate_operations`. This gives the LLM a richer truth-maintenance workspace
+without turning Python into an English patch layer or turning model inferences
+into state.
+
 The A/B harness additionally classifies non-structural legacy events as:
 
 - `legacy_route_fallback`

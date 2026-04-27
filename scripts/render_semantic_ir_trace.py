@@ -361,6 +361,83 @@ def _render_unsafe(parsed: dict[str, Any]) -> list[str]:
     return _markdown_table(["candidate", "policy", "why unsafe"], rows)
 
 
+def _render_truth_maintenance(parsed: dict[str, Any]) -> list[str]:
+    tm = parsed.get("truth_maintenance")
+    if not isinstance(tm, dict):
+        return ["No truth-maintenance proposal emitted."]
+    lines: list[str] = []
+
+    support_rows = []
+    for item in _as_list(tm.get("support_links")):
+        if isinstance(item, dict):
+            support_rows.append(
+                [
+                    item.get("operation_index", ""),
+                    item.get("support_kind", ""),
+                    item.get("role", ""),
+                    item.get("support_ref", ""),
+                    item.get("confidence", ""),
+                ]
+            )
+    lines.append("**Support / dependency links:**")
+    lines.extend(
+        _markdown_table(["op #", "kind", "role", "support ref", "confidence"], support_rows)
+        if support_rows
+        else ["- none"]
+    )
+    lines.append("")
+
+    conflict_rows = []
+    for item in _as_list(tm.get("conflicts")):
+        if isinstance(item, dict):
+            conflict_rows.append(
+                [
+                    item.get("new_operation_index", ""),
+                    item.get("existing_ref", ""),
+                    item.get("conflict_kind", ""),
+                    item.get("recommended_policy", ""),
+                    item.get("why", ""),
+                ]
+            )
+    lines.append("**Conflict proposals:**")
+    lines.extend(
+        _markdown_table(["op #", "existing/context ref", "kind", "policy", "why"], conflict_rows)
+        if conflict_rows
+        else ["- none"]
+    )
+    lines.append("")
+
+    retract_rows = []
+    for item in _as_list(tm.get("retraction_plan")):
+        if isinstance(item, dict):
+            retract_rows.append([item.get("operation_index", ""), item.get("target_ref", ""), item.get("reason", "")])
+    lines.append("**Retraction plan:**")
+    lines.extend(
+        _markdown_table(["op #", "target", "reason"], retract_rows)
+        if retract_rows
+        else ["- none"]
+    )
+    lines.append("")
+
+    consequence_rows = []
+    for item in _as_list(tm.get("derived_consequences")):
+        if isinstance(item, dict):
+            consequence_rows.append(
+                [
+                    item.get("statement", ""),
+                    ", ".join(str(entry) for entry in _as_list(item.get("basis"))),
+                    item.get("commit_policy", ""),
+                ]
+            )
+    lines.append("**Derived consequences:**")
+    lines.extend(
+        _markdown_table(["statement", "basis", "commit policy"], consequence_rows)
+        if consequence_rows
+        else ["- none"]
+    )
+    return lines
+
+
 def _render_candidate_ops(parsed: dict[str, Any]) -> list[str]:
     rows = []
     for index, op in enumerate(_as_list(parsed.get("candidate_operations"))):
@@ -611,6 +688,8 @@ def _render_record(
     lines.extend(_render_assertions(parsed))
     lines.append("")
     lines.extend(_render_unsafe(parsed))
+    lines.append("")
+    lines.extend(_render_truth_maintenance(parsed))
     lines.append("")
     lines.extend(_render_candidate_ops(parsed))
     lines.append("")
