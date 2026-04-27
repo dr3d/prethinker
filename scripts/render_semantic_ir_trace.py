@@ -297,13 +297,15 @@ def _code_block(value: Any, language: str = "json", *, max_chars: int = 0) -> st
     return f"```{language}\n{text}\n```"
 
 
-def _record_summary(index: int, scenario_label: str, parts: list[str]) -> str:
-    clean_parts = [part.replace("`", "").strip() for part in parts if part.replace("`", "").strip()]
+def _record_summary(index: int, scenario_label: str, meta_parts: list[str], utterance_excerpt: str = "") -> str:
+    clean_parts = [part.replace("`", "").strip() for part in meta_parts if part.replace("`", "").strip()]
     meta = " | ".join(clean_parts)
+    utterance = f"utterance: {utterance_excerpt}" if utterance_excerpt else ""
     return (
         '<summary class="record-summary">'
         f'<span class="record-title">{index}. <code>{html.escape(scenario_label)}</code></span>'
         f'<span class="record-meta">{html.escape(meta)}</span>'
+        f'<span class="record-utterance">{html.escape(utterance)}</span>'
         "</summary>"
     )
 
@@ -687,12 +689,10 @@ def _render_record(
             f"admission=`{admission_score.get('check_count', 0)}/{admission_score.get('check_total', 0)}`"
         )
     excerpt = _summary_excerpt(input_info["utterance"])
-    if excerpt:
-        layer_summary.append(f"utterance: {excerpt}")
 
     lines: list[str] = [
         '<details class="trace-record" markdown="1">',
-        _record_summary(index, scenario_label, layer_summary),
+        _record_summary(index, scenario_label, layer_summary, excerpt),
         "",
         "### Layer 0 - Focused Model Input",
         "",
@@ -989,11 +989,11 @@ def render_html(markdown_text: str, *, title: str) -> str:
     .trace-record > summary.record-summary {{
       display: grid;
       grid-template-columns: 22px minmax(0, 1fr);
-      grid-template-rows: auto auto;
+      grid-template-rows: auto auto auto;
       column-gap: 10px;
       row-gap: 2px;
       align-items: center;
-      min-height: 52px;
+      min-height: 68px;
       padding: 8px 14px 9px;
       background: #24313b;
       list-style: none;
@@ -1004,7 +1004,7 @@ def render_html(markdown_text: str, *, title: str) -> str:
       color: var(--accent);
       font-size: 16px;
       justify-self: center;
-      grid-row: 1 / span 2;
+      grid-row: 1 / span 3;
       grid-column: 1;
     }}
     .trace-record[open] > summary.record-summary::before {{ content: "▾"; }}
@@ -1041,6 +1041,17 @@ def render_html(markdown_text: str, *, title: str) -> str:
       color: var(--muted);
       font-size: 13px;
       text-align: left;
+    }}
+    .record-utterance {{
+      grid-column: 2;
+      grid-row: 3;
+      min-width: 0;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: #dbc7ad;
+      font-size: 13px;
     }}
     .trace-record:not([open]) {{
       background: rgba(255,255,255,0.03);
