@@ -511,6 +511,21 @@ diagnostics and traces for auditability, but it never admits a write from
 without turning Python into an English patch layer or turning model inferences
 into state.
 
+Diagnostics also compare the model's truth-maintenance proposal against mapper
+admission. The comparison is still non-authoritative, but it surfaces fuzzy
+compiler edges such as:
+
+- an admitted operation with no model support link;
+- a model-supported operation skipped by the mapper;
+- a model conflict whose recommended policy is `clarify`, `quarantine`, or
+  `reject` while the mapper admitted the operation;
+- a retraction plan that does not line up with an admitted `retract`;
+- an admitted retract that lacks a retraction-plan entry.
+
+These are research pressure gauges. They are meant to show where the compiler
+contract, prompt, profile context, or predicate palette is still fuzzy, not to
+silently change admission outcomes.
+
 The A/B harness additionally classifies non-structural legacy events as:
 
 - `legacy_route_fallback`

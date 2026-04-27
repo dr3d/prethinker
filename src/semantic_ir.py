@@ -851,6 +851,7 @@ def semantic_ir_admission_diagnostics(
         contract_map=contract_map,
         contract_details=contract_details,
     )
+    truth_maintenance = _truth_maintenance_summary(ir)
     return {
         "version": "admission_diagnostics_v1",
         "authority": "diagnostic_only_mapper_remains_authoritative",
@@ -871,7 +872,8 @@ def semantic_ir_admission_diagnostics(
         "warning_counts": dict(sorted(warning_counts.items())),
         "clauses": clauses_by_effect,
         "clause_supports": supports_by_effect,
-        "truth_maintenance": _truth_maintenance_summary(ir),
+        "truth_maintenance": truth_maintenance,
+        "truth_maintenance_alignment": _truth_maintenance_alignment(truth_maintenance, operations),
         "operations": operations,
     }
 
@@ -1259,6 +1261,169 @@ def _truth_maintenance_summary(ir: dict[str, Any]) -> dict[str, Any]:
         )
 
     return result
+
+
+def _truth_maintenance_alignment(
+    truth_maintenance: dict[str, Any],
+    operations: list[dict[str, Any]],
+) -> dict[str, Any]:
+    operation_count = len(operations)
+    operation_by_index = {
+        int(op.get("index")): op
+        for op in operations
+        if isinstance(op, dict) and _operation_index(op.get("index")) is not None
+    }
+    support_indexes = {
+        int(item.get("operation_index"))
+        for item in truth_maintenance.get("support_links", [])
+        if isinstance(item, dict) and _operation_index(item.get("operation_index")) is not None
+    }
+    conflict_indexes = {
+        int(item.get("new_operation_index"))
+        for item in truth_maintenance.get("conflicts", [])
+        if isinstance(item, dict) and _operation_index(item.get("new_operation_index")) is not None
+    }
+    retraction_indexes = {
+        int(item.get("operation_index"))
+        for item in truth_maintenance.get("retraction_plan", [])
+        if isinstance(item, dict) and _operation_index(item.get("operation_index")) is not None
+    }
+    fuzzy_edges: list[dict[str, Any]] = []
+
+    def add_edge(kind: str, *, operation_index: int | None = None, detail: str = "", severity: str = "note") -> None:
+        fuzzy_edges.append(
+            {
+                "kind": kind,
+                "operation_index": operation_index,
+                "severity": severity,
+                "detail": _bounded_text(detail, max_chars=800),
+            }
+        )
+
+    def check_ref(index: int, kind: str) -> None:
+        if index not in operation_by_index:
+            add_edge(
+                "truth_maintenance_invalid_operation_ref",
+                operation_index=index,
+                detail=f"{kind} references operation {index}, but only {operation_count} candidate operation(s) exist.",
+                severity="warning",
+            )
+
+    for index in support_indexes:
+        check_ref(index, "support link")
+    for index in conflict_indexes:
+        check_ref(index, "conflict")
+    for index in retraction_indexes:
+        check_ref(index, "retraction plan")
+
+    for op in operations:
+        if not isinstance(op, dict):
+            continue
+        index = _operation_index(op.get("index"))
+        if index is None:
+            continue
+        admitted = bool(op.get("admitted"))
+        effect = str(op.get("effect", "")).strip()
+        operation = str(op.get("operation", "")).strip()
+        if admitted and effect in {"fact", "rule", "query", "retract"} and index not in support_indexes:
+            add_edge(
+                "admitted_operation_without_model_support_link",
+                operation_index=index,
+                detail=f"Admitted {effect} operation has no truth_maintenance.support_links entry.",
+            )
+        if not admitted and index in support_indexes:
+            add_edge(
+                "supported_operation_skipped_by_mapper",
+                operation_index=index,
+                detail=str(op.get("skip_reason") or "mapper skipped operation despite model support link"),
+                severity="warning",
+            )
+        if admitted and effect == "retract" and index not in retraction_indexes:
+            add_edge(
+                "admitted_retract_without_retraction_plan",
+                operation_index=index,
+                detail="Mapper admitted a retract operation, but the model did not include it in truth_maintenance.retraction_plan.",
+                severity="warning",
+            )
+        if index in retraction_indexes and not (admitted and effect == "retract"):
+            add_edge(
+                "retraction_plan_not_admitted_as_retract",
+                operation_index=index,
+                detail=f"Model proposed a retraction plan for operation='{operation}' effect='{effect}', admitted={admitted}.",
+                severity="warning",
+            )
+
+    for conflict in truth_maintenance.get("conflicts", []):
+        if not isinstance(conflict, dict):
+            continue
+        index = _operation_index(conflict.get("new_operation_index"))
+        if index is None or index not in operation_by_index:
+            continue
+        op = operation_by_index[index]
+        policy = str(conflict.get("recommended_policy") or "").strip().lower()
+        if bool(op.get("admitted")) and policy in {"clarify", "quarantine", "reject"}:
+            add_edge(
+                "conflict_policy_mismatch_admitted_operation",
+                operation_index=index,
+                detail=f"Model conflict recommends {policy}, but mapper admitted the operation. Existing ref: {conflict.get('existing_ref', '')}",
+                severity="warning",
+            )
+
+    for consequence in truth_maintenance.get("derived_consequences", []):
+        if not isinstance(consequence, dict):
+            continue
+        policy = str(consequence.get("commit_policy") or "").strip().lower()
+        if policy not in {"query_only", "quarantine", "future_rule_support", "do_not_commit"}:
+            add_edge(
+                "derived_consequence_unknown_policy",
+                detail=f"Derived consequence has unknown commit policy: {policy}",
+                severity="warning",
+            )
+
+    missing_support_ref_count = sum(
+        1
+        for item in truth_maintenance.get("support_links", [])
+        if isinstance(item, dict) and not str(item.get("support_ref") or "").strip()
+    )
+    if missing_support_ref_count:
+        add_edge(
+            "support_link_missing_reference",
+            detail=f"{missing_support_ref_count} support link(s) omit support_ref.",
+        )
+
+    admitted_with_support = sum(
+        1
+        for op in operations
+        if bool(op.get("admitted")) and _operation_index(op.get("index")) in support_indexes
+    )
+    admitted_without_support = sum(
+        1
+        for op in operations
+        if bool(op.get("admitted")) and _operation_index(op.get("index")) not in support_indexes
+    )
+    skipped_with_support = sum(
+        1
+        for op in operations
+        if not bool(op.get("admitted")) and _operation_index(op.get("index")) in support_indexes
+    )
+    return {
+        "authority": "diagnostic_only_no_admission_effect",
+        "operation_count": operation_count,
+        "support_link_count": len(truth_maintenance.get("support_links", [])),
+        "conflict_count": len(truth_maintenance.get("conflicts", [])),
+        "retraction_plan_count": len(truth_maintenance.get("retraction_plan", [])),
+        "derived_consequence_count": len(truth_maintenance.get("derived_consequences", [])),
+        "admitted_with_support_count": admitted_with_support,
+        "admitted_without_support_count": admitted_without_support,
+        "skipped_with_support_count": skipped_with_support,
+        "conflict_on_admitted_count": sum(
+            1
+            for index in conflict_indexes
+            if index in operation_by_index and bool(operation_by_index[index].get("admitted"))
+        ),
+        "fuzzy_edge_count": len(fuzzy_edges),
+        "fuzzy_edges": fuzzy_edges,
+    }
 
 
 def _admission_feature_summary(

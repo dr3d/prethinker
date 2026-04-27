@@ -390,6 +390,12 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         self.assertEqual(truth["conflicts"][0]["conflict_kind"], "functional_overwrite")
         self.assertEqual(truth["retraction_plan"][0]["reason"], "superseded_current_state")
         self.assertEqual(truth["derived_consequences"][0]["commit_policy"], "do_not_commit")
+        alignment = parsed["admission_diagnostics"]["truth_maintenance_alignment"]
+        self.assertEqual(alignment["admitted_with_support_count"], 1)
+        self.assertEqual(alignment["conflict_on_admitted_count"], 1)
+        edge_kinds = {row["kind"] for row in alignment["fuzzy_edges"]}
+        self.assertIn("conflict_policy_mismatch_admitted_operation", edge_kinds)
+        self.assertIn("retraction_plan_not_admitted_as_retract", edge_kinds)
 
     def test_mapper_applies_profile_contract_validator_without_language_patch(self) -> None:
         ir = _ir(

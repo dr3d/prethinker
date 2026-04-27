@@ -523,6 +523,43 @@ def _render_clause_supports(mapped: dict[str, Any], diagnostics: dict[str, Any])
     )
 
 
+def _render_truth_alignment(diagnostics: dict[str, Any]) -> list[str]:
+    alignment = diagnostics.get("truth_maintenance_alignment")
+    if not isinstance(alignment, dict):
+        return ["No truth-maintenance/admission alignment diagnostics."]
+    lines = [
+        "**Truth-maintenance/admission alignment:**",
+        "",
+        f"- support links: `{alignment.get('support_link_count', 0)}`",
+        f"- conflicts: `{alignment.get('conflict_count', 0)}`",
+        f"- retraction-plan entries: `{alignment.get('retraction_plan_count', 0)}`",
+        f"- derived consequences: `{alignment.get('derived_consequence_count', 0)}`",
+        f"- admitted operations with support: `{alignment.get('admitted_with_support_count', 0)}`",
+        f"- admitted operations without support: `{alignment.get('admitted_without_support_count', 0)}`",
+        f"- skipped operations with model support: `{alignment.get('skipped_with_support_count', 0)}`",
+        f"- conflicts on admitted operations: `{alignment.get('conflict_on_admitted_count', 0)}`",
+        "",
+    ]
+    rows = []
+    for item in _as_list(alignment.get("fuzzy_edges")):
+        if isinstance(item, dict):
+            rows.append(
+                [
+                    item.get("severity", ""),
+                    item.get("kind", ""),
+                    item.get("operation_index", ""),
+                    item.get("detail", ""),
+                ]
+            )
+    lines.append("**Fuzzy edges:**")
+    lines.extend(
+        _markdown_table(["severity", "kind", "op #", "detail"], rows)
+        if rows
+        else ["- none"]
+    )
+    return lines
+
+
 def _render_conflict_pressure(input_info: dict[str, Any], parsed: dict[str, Any], diagnostics: dict[str, Any]) -> list[str]:
     context_markers = (
         "existing",
@@ -747,6 +784,10 @@ def _render_record(
 
     lines.extend(["### Layer 3b - Conflict / Fact-Age Pressure", ""])
     lines.extend(_render_conflict_pressure(input_info, parsed, diagnostics))
+    lines.append("")
+
+    lines.extend(["### Layer 3c - Truth-Maintenance / Admission Delta", ""])
+    lines.extend(_render_truth_alignment(diagnostics))
     lines.append("")
 
     lines.extend(["### Layer 4 - Runtime Payload / KB Surface", ""])
