@@ -1,0 +1,71 @@
+{
+  "catalog_id": "domain_profile_catalog@v0",
+  "status": "thin_roster",
+  "description": "Small profile roster for selecting optional skill-like domain context before semantic_ir_v1 compilation. Selection is advisory and never authorizes writes.",
+  "profiles": [
+    {
+      "profile_id": "medical@v0",
+      "status": "implemented",
+      "description": "Bounded medical memory for medications, conditions, symptoms, allergies, lab tests, lab result states, and pregnancy.",
+      "use_when": [
+        "medication use or medication alias",
+        "patient condition, symptom, allergy, or side effect",
+        "lab test, lab result, or measurement trend",
+        "pregnancy state"
+      ],
+      "avoid_when": [
+        "clinical advice, diagnosis, treatment, dose, start, stop, or hold recommendation",
+        "non-medical custody of an object that happens to have a medical-sounding name"
+      ],
+      "thick_context_source": "profile.medical.v0.json"
+    },
+    {
+      "profile_id": "story_world@v0",
+      "status": "proposal",
+      "description": "Narrative events, objects, places, possession, movement, observations, corrections, and simple story-world state.",
+      "use_when": [
+        "fictional or narrative story",
+        "scene description with objects and actors",
+        "movement through places",
+        "object use, damage, tasting, eating, sitting, lying, or sleeping"
+      ],
+      "avoid_when": [
+        "formal legal/probate policy",
+        "clinical fact intake"
+      ],
+      "thick_context_source": "profile.story_world.v0.json"
+    },
+    {
+      "profile_id": "probate@v0",
+      "status": "proposal",
+      "description": "Estate/probate claims, beneficiaries, witnesses, amendments, forfeiture conditions, identity ambiguity, and ledger evidence.",
+      "use_when": [
+        "inheritance or beneficiary status",
+        "will, charter, amendment, witness, estate, or probate language",
+        "claim versus observed document evidence",
+        "identity ambiguity in legal records"
+      ],
+      "avoid_when": [
+        "general family history without a rule or legal consequence",
+        "medical advice"
+      ],
+      "thick_context_source": "profile.probate.v0.json"
+    },
+    {
+      "profile_id": "logistics@v0",
+      "status": "proposal",
+      "description": "Shipping, warehouse, access logs, custody, inspection, clearance, quarantine, and current-state conflicts.",
+      "use_when": [
+        "shipment status or clearance",
+        "crate, bay, warehouse, inspection, or custody transfer",
+        "access log conflict",
+        "current-state correction"
+      ],
+      "avoid_when": [
+        "fictional story with no operational state",
+        "clinical intake"
+      ],
+      "thick_context_source": "future profile.logistics.v0.json"
+    }
+  ]
+}

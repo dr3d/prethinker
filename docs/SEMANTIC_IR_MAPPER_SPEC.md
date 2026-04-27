@@ -158,6 +158,18 @@ Domain-specific type grounding belongs to profile contracts. For example,
 metadata when deciding whether `taking(Patient, Thing)` names a medication or a
 condition. The semantic IR mapper should not grow medical-specific type lists.
 
+The active Semantic IR call now receives those profile contracts and compact
+profile context as model input when `medical@v0` is selected. This is
+intentional domain tuning, but it is profile-owned rather than mapper-owned:
+
+- the profile may tell the model what predicate contracts and aliases exist;
+- the model may use that context to build a better workspace;
+- the mapper and profile validators still decide what can become durable state.
+
+Future domains should follow the same catalog shape instead of adding ad hoc
+logic to the generic mapper. See
+[docs/DOMAIN_PROFILE_CATALOG.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PROFILE_CATALOG.md).
+
 For narrative ingestion, the same policy blocks tempting but ungrounded event
 facts such as:
 

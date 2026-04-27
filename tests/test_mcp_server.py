@@ -175,6 +175,53 @@ class LocalMcpServerTests(unittest.TestCase):
             server._compiler_prompt_text,
         )
 
+    def test_semantic_ir_medical_profile_passes_contracts_and_umls_context(self) -> None:
+        server = PrologMCPServer(
+            compiler_prompt_enabled=False,
+            semantic_ir_enabled=True,
+            compiler_backend="lmstudio",
+            active_profile="medical@v0",
+        )
+        server._profile_semantic_ir_context = [
+            "profile_scope: bounded medical memory",
+            "umls_concept: warfarin; groups=medication; aliases=warfarin, coumadin",
+        ]
+        parsed = {
+            "schema_version": "semantic_ir_v1",
+            "decision": "commit",
+            "turn_type": "state_update",
+            "entities": [],
+            "referents": [],
+            "assertions": [],
+            "unsafe_implications": [],
+            "candidate_operations": [],
+            "clarification_questions": [],
+            "self_check": {"bad_commit_risk": "low", "missing_slots": [], "notes": []},
+        }
+
+        with patch(
+            "src.mcp_server.call_semantic_ir",
+            return_value={"content": "{}", "parsed": parsed, "latency_ms": 1},
+        ) as mocked:
+            ir, error = server._compile_semantic_ir("Priya is taking Coumadin.")
+
+        self.assertEqual(error, "")
+        self.assertIs(ir, parsed)
+        kwargs = mocked.call_args.kwargs
+        roster = kwargs.get("available_domain_profiles") or []
+        self.assertTrue(any(row.get("profile_id") == "medical@v0" for row in roster))
+        contracts = kwargs.get("predicate_contracts") or []
+        self.assertTrue(any(row.get("signature") == "taking/2" for row in contracts))
+        taking = next(row for row in contracts if row.get("signature") == "taking/2")
+        self.assertEqual(taking.get("arguments"), ["person", "medication"])
+        domain_context = "\n".join(kwargs.get("domain_context") or [])
+        self.assertIn("bounded medical memory", domain_context)
+        self.assertIn("umls_concept:", domain_context)
+        trace_input = server._last_semantic_ir_trace.get("model_input", {})
+        self.assertTrue(trace_input.get("available_domain_profiles"))
+        self.assertTrue(trace_input.get("predicate_contracts"))
+        self.assertTrue(trace_input.get("domain_context"))
+
     def test_pre_think_they_coreference_group_with_exception(self) -> None:
         utterance = (
             "I am Scott. my brother is Blake. his wife is Jan. "

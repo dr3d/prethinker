@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: 2026-04-26
+Last updated: 2026-04-27
 
 ## One-Sentence Shape
 
@@ -43,6 +43,11 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 - Mixed long utterances can now segment at query boundaries, so questions do not pile up in the same semantic workspace as surrounding write facts.
 - The generic predicate registry now includes a small story-world event/state palette (`tasted/2`, `sat_in/2`, `lay_in/2`, `broke/1`, `asleep_in/2`, `was_tasted/1`, `was_eaten/1`, `was_sat_in/1`, `was_lain_in/1`, etc.) so narrative ingestion no longer has to squeeze ordinary events into `inside/2`, `at/2`, or `carries/2`.
 - The mapper now blocks placeholder-like durable write arguments such as `unknown_agent`, while the prompt steers unknown-actor observations toward passive object-state predicates when those are available.
+- `medical@v0` Semantic IR calls now receive profile-owned predicate contracts and compact UMLS bridge context before the model proposes a workspace. This lets the model normalize examples like `Coumadin` to `warfarin` and see argument-role/semantic-group expectations, while the deterministic mapper still owns admission.
+- The profile context now explicitly treats an explicit named patient as sufficient grounding for the research profile, while pronouns, multiple candidates, aliases, and missing patient identity still require clarification.
+- A thin domain-profile roster now exists in `modelfiles/domain_profile_catalog.v0.json` and is included in Semantic IR input as `available_domain_profiles`. This is the first skill-directory-style control-plane hook: it advertises possible profile contexts without loading every thick package or authorizing writes.
+- Two declarative starter profile packages now exist for exploration: `modelfiles/profile.story_world.v0.json` and `modelfiles/profile.probate.v0.json`. They provide mock thick context and predicate contracts for future routing experiments without changing runtime admission authority.
+- A new held-out cross-turn frontier proposal lives at `docs/data/frontier_packs/semantic_ir_cross_turn_frontier_pack_v1.json`. It targets identity drift, claim/observation separation, noisy multilingual corrections, mixed rule/query/fact turns, temporal corrections, and domain type ambiguity.
 
 ## Local UMLS Assets
 
@@ -80,11 +85,14 @@ This is the next useful layer for type steering and explanation. It should suppo
 - Push the remaining mapper frontier: durable rule admission for quantified exception language, better decision-label calibration for safe partial commits, and cleaner nested event predicate shapes.
 - Represent temporal facts durably enough that extracted dates, intervals, corrections, and relative-time anchors can support real KB queries instead of staying only in the semantic workspace.
 - Keep profile contracts out of the generic mapper: profile packages should own domain type/grounding policy, while the mapper stays structural and auditable.
+- Treat richer domain context as a catalog/skill mechanism, not hardwired prompt drift. The next profile-aware step is a measured domain-profile selector that can choose `medical@v0` or another cataloged profile without granting write authority.
 - Grow deterministic stored-logic admission beyond the first guard: profile-declared functional predicates, temporal scope, negation policy, and richer contradiction probes are still open.
 - Extend predicate-palette enforcement with profile-owned type contracts and better UI surfacing for skipped operations.
 - Promote scenario-local predicate contracts into reusable profile/predicate manifests, then enforce those contracts deterministically where possible.
 - Expand trace views around admission contracts so reviewers can see not only the model decision, but also which exact boundary checks passed.
 - Build a new held-out frontier pack instead of over-polishing Silverton: cross-document temporal causality, aliases, corrections, disputed claims, and profile type pressure.
+- Port the new cross-turn frontier pack into a runner only after deciding which expectations should be hard regression gates versus research pressure gauges.
+- Explore domain-profile selection with the starter profiles: first offline roster-selection traces, then optional gateway traces, before any automatic context loading affects normal runs.
 - Keep the Semantic IR harness model-agnostic, but use `qwen/qwen3.6-35b-a3b` as the default development model unless a specific comparison question needs another local model.
 - Tighten narrative ingestion next around stable object identity, event observation predicates, and temporal/event ordering instead of adding story-specific Python phrase patches.
 - Keep a regular regression cadence around segmentation, predicate-palette admission, stored-logic conflicts, and rule/query mixed turns; the frontier is productive enough that small improvements can easily re-open older failure modes.
@@ -93,8 +101,10 @@ This is the next useful layer for type steering and explanation. It should suppo
 
 Recent verified results:
 
-- Full suite after Semantic IR console/story-ingestion cleanup: `282 passed`
+- Full suite after profile-aware Semantic IR/UMLS handoff plus domain-profile roster/mock-profile foundation: `286 passed`
 - Focused semantic IR runtime battery: `23 passed`
+- Focused profile-contract/domain-roster handoff verification: `7 passed`
+- Focused domain-profile package verification: `2 passed`
 - Edge runtime A/B: semantic IR `20/20` decision labels, `0.976` avg score, `0` non-mapper parse rescues
 - Weak-edge runtime A/B: semantic IR `10/10` decision labels, `1.000` avg score, `0` non-mapper parse rescues
 - Silverton noisy temporal pack: semantic IR `2/8` decision labels, `0.729` avg score; useful evidence that noisy language is less of a blocker than policy labels and temporal admission
@@ -106,6 +116,7 @@ Recent verified results:
 - Harbor frontier latest pass: `14/14` JSON/schema, raw model labels `13/14`, mapper-projected decisions `14/14`, admission contracts `14/14`, admission checks `52/52`, average rough score `0.96`.
 - Goldilocks full-story segmented Semantic IR smoke after narrative palette: `56` deduped mutations across `50` segments in about `180s`; major bad-write artifacts from the first UI attempt (`unknown_agent`, voice-as-`carries`, nonsensical `inside(...)` writes, and stray `head` facts) were removed.
 - Focused post-story-ingestion verification: `55 passed` across semantic IR runtime, UI gateway phases, and gateway config.
+- Live LM Studio medical smoke after profile-context wiring: `Priya is taking Coumadin.` committed `taking(priya, warfarin).`; `His serum creatinine was repeated this afternoon.` still required patient-identity clarification.
 - Python compile check for touched runtime files passed
 
 Rerun the full suite before committing a new stopping point.
@@ -119,12 +130,13 @@ Rerun the full suite before committing a new stopping point.
 5. `docs/SEMANTIC_IR_RESEARCH_DIRECTION_REPORT.md`
 6. `docs/SEMANTIC_IR_MAPPER_SPEC.md`
 7. `docs/SEMANTIC_IR_MODEL_MATRIX.md`
-8. `docs/GUARDRAIL_DEPENDENCY_AB.md`
-9. `docs/UMLS_MVP.md`
-10. `docs/MEDICAL_PROFILE.md`
-11. `docs/FREETHINKER_DESIGN.md`
-12. `docs/CONSOLE_TRYBOOK.md`
-13. `ui_gateway/README.md`
+8. `docs/DOMAIN_PROFILE_CATALOG.md`
+9. `docs/GUARDRAIL_DEPENDENCY_AB.md`
+10. `docs/UMLS_MVP.md`
+11. `docs/MEDICAL_PROFILE.md`
+12. `docs/FREETHINKER_DESIGN.md`
+13. `docs/CONSOLE_TRYBOOK.md`
+14. `ui_gateway/README.md`
 
 ## What Was Pruned
 

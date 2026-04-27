@@ -134,6 +134,14 @@ python kb_pipeline.py `
 
 In the canonical MCP/gateway path, `active_profile=medical@v0` now loads the profile assets and UMLS bridge automatically. Batch experiments can still pass assets explicitly when they need controlled comparisons.
 
+The active Semantic IR path also receives profile-owned context before the model proposes a workspace:
+
+- `predicate_contracts` derived from `modelfiles/profile.medical.v0.json`, including argument roles, UMLS semantic-group expectations, grounding notes, and predicate notes
+- compact UMLS bridge context derived from the local bounded slice, such as aliases and semantic groups for `warfarin`, `blood_pressure_measurement`, `serum_creatinine_measurement`, and other seed concepts
+- profile policy that explicit named patients are sufficiently grounded for this research profile, while unresolved pronouns, aliases, multiple candidates, vague measurements, and clinical advice requests still require clarification or rejection
+
+A live LM Studio smoke after this wiring normalized `Priya is taking Coumadin.` to `taking(priya, warfarin).` while still holding `His serum creatinine was repeated this afternoon.` for patient-identity clarification. The mapper remains authoritative; these profile hints improve the model's proposal rather than bypassing admission.
+
 The profile can now also be exercised as one manifest-driven package with:
 
 ```powershell

@@ -80,3 +80,33 @@ def test_medical_profile_contracts_align_registry_and_type_schema():
     assert group_contracts["has_symptom"][1] == {"symptom_or_finding"}
     assert group_contracts["lab_result_high"][1] == {"lab_or_procedure"}
     assert "pregnant" not in group_contracts
+
+    semantic_ir_contracts = medical_profile.semantic_ir_predicate_contracts(manifest)
+    taking_contract = next(row for row in semantic_ir_contracts if row["signature"] == "taking/2")
+    assert taking_contract["arguments"] == ["person", "medication"]
+    assert taking_contract["umls_argument_groups"] == {"1": ["medication"]}
+    assert taking_contract["grounding"]["0"] == "patient_identity_required"
+
+
+def test_medical_profile_semantic_ir_context_summarizes_umls_bridge():
+    bridge = {
+        "loaded": True,
+        "concepts": {
+            "warfarin": {
+                "preferred_atom": "warfarin",
+                "semantic_groups": ["medication"],
+                "aliases": ["warfarin", "coumadin"],
+            }
+        },
+    }
+    context = medical_profile.semantic_ir_profile_context(
+        manifest={"profile_id": "medical@v0"},
+        concepts=[],
+        umls_bridge=bridge,
+    )
+    joined = "\n".join(context)
+    assert "bounded medical memory" in joined
+    assert "explicit named patient/person" in joined
+    assert "warfarin" in joined
+    assert "coumadin" in joined
+    assert "groups=medication" in joined

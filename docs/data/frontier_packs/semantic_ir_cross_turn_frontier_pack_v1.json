@@ -1,0 +1,669 @@
+{
+  "pack_id": "semantic_ir_cross_turn_frontier_pack_v1",
+  "family": "semantic_ir_frontier",
+  "created_at_utc": "2026-04-27T00:00:00Z",
+  "status": "proposal_held_out",
+  "description": "Hard Semantic IR frontier proposal focused on cross-turn identity drift, claim/fact separation, rule-query-fact mixtures, temporal corrections, conflicting updates, noisy multilingual text, and domain type ambiguity.",
+  "design_goal": "Measure whether semantic_ir_v1 plus deterministic mapper policy can preserve meaning and avoid unsafe durable mutations without adding English-specific Python rescue patches.",
+  "porting_notes": {
+    "target_runner": "scripts/run_semantic_ir_prompt_bakeoff.py",
+    "case_shape": "Cases use id/domain/utterance/context/allowed_predicates/expect fields compatible with the current bakeoff scenario style, plus expected_admission and scoring_notes for richer checks.",
+    "recommended_mode": "Run as held-out research pack, not as a green regression suite. Exact decision labels are intentionally strict."
+  },
+  "scoring_notes": {
+    "decision_exact": "Projected decision should match expect.decision.",
+    "semantic_extraction": "Output text/IR should include all expect.must concepts and avoid expect.avoid concepts.",
+    "admission_safety": "Admitted clauses should satisfy expected_admission and must not include forbidden durable writes.",
+    "anti_patch_signal": "A pass should come from structural IR/source/palette/grounding policy, not phrase-specific Python normalization.",
+    "recommended_extensions": [
+      "must_not_admit clause-fragment checks over admission_diagnostics.clauses",
+      "must_skip_reason checks over admission_diagnostics.operations[*].rationale_codes",
+      "source_boundary labels such as claim_not_fact, observation_not_claim, query_premise_not_truth",
+      "temporal_boundary checks for corrected dates, intervals, and effective-date prerequisites",
+      "type_boundary checks for medical object custody versus medication use, and symptom versus diagnosis"
+    ]
+  },
+  "cases": [
+    {
+      "id": "ct_01_initial_alias_drift_across_turns",
+      "domain": "estate_operations",
+      "utterance": "Correction: R. Vale signed the vault release on May 4, not May 14. Still R. Vale, not sure whether that was Rowan or Rhea.",
+      "context": [
+        "Existing fact: signed_on(rowan_vale, vault_release, may_14).",
+        "Known people: Rowan Vale and Rhea Vale.",
+        "Prior note used the shorthand R. Vale without resolving it."
+      ],
+      "allowed_predicates": [
+        "signed_on/3",
+        "candidate_identity/2",
+        "correction/2"
+      ],
+      "expect": {
+        "decision": "mixed",
+        "must": [
+          "correction",
+          "R. Vale",
+          "May 4",
+          "May 14",
+          "Rowan",
+          "Rhea",
+          "identity unresolved"
+        ],
+        "avoid": [
+          "signed_on(rowan_vale, vault_release, may_4) as fact",
+          "signed_on(rhea_vale",
+          "same_person(r_vale"
+        ]
+      },
+      "expected_admission": {
+        "admit": [],
+        "must_not_admit": [
+          "signed_on(rowan_vale, vault_release, may_4)",
+          "signed_on(rhea_vale, vault_release, may_4)",
+          "candidate_identity(r_vale, rowan_vale)"
+        ],
+        "preferred_skip_reasons": [
+          "identity_premise_not_truth",
+          "decision_projection_gate"
+        ]
+      },
+      "failure_mode": "A date correction is grounded but the entity is not. This catches systems that repair the known Rowan fact because it is in context, silently losing the user's renewed alias uncertainty.",
+      "anti_patch_signal": "Should be handled by source/identity scope and correction-target grounding, not by special casing initials."
+    },
+    {
+      "id": "ct_02_claim_conflicts_with_camera_observation",
+      "domain": "facility_security",
+      "utterance": "Nora says Omar never entered Bay 7, but the camera observed Omar unlocking Bay 7 at 21:10.",
+      "context": [
+        "Nora is a shift lead.",
+        "Camera observations are treated as direct observations unless later disputed."
+      ],
+      "allowed_predicates": [
+        "claimed/3",
+        "observed/4",
+        "unlocked_at/3",
+        "entered/2"
+      ],
+      "expect": {
+        "decision": "mixed",
+        "must": [
+          "Nora",
+          "claim",
+          "Omar",
+          "camera",
+          "Bay 7",
+          "21:10"
+        ],
+        "avoid": [
+          "entered(omar, bay_7) as fact",
+          "not_entered(omar",
+          "claim overwrites observation"
+        ]
+      },
+      "expected_admission": {
+        "admit": [
+          "claimed(nora",
+          "observed(camera",
+          "unlocked_at(omar, bay_7"
+        ],
+        "must_not_admit": [
+          "entered(omar, bay_7)",
+          "not_entered(omar, bay_7)"
+        ],
+        "preferred_skip_reasons": [
+          "polarity_policy",
+          "source_policy"
+        ]
+      },
+      "failure_mode": "Tests claim versus observed event separation where an observation supports a narrower fact than the tempting broader inference.",
+      "anti_patch_signal": "A robust pass uses assertion kind/source policy, not phrases like 'camera observed'."
+    },
+    {
+      "id": "ct_03_rule_query_fact_braid",
+      "domain": "shipping_policy",
+      "utterance": "All cleared crates may ship unless quarantined. Crate 12 is cleared. If the mold hold is still pending, can it ship?",
+      "context": [
+        "Existing fact: mold_hold_status(crate12, pending).",
+        "A pending hold is not the same predicate as quarantined."
+      ],
+      "allowed_predicates": [
+        "cleared/1",
+        "quarantined/1",
+        "may_ship/1",
+        "mold_hold_status/2"
+      ],
+      "expect": {
+        "decision": "mixed",
+        "must": [
+          "rule",
+          "cleared",
+          "unless quarantined",
+          "Crate 12",
+          "pending",
+          "query"
+        ],
+        "avoid": [
+          "may_ship(crate12) as fact",
+          "quarantined(crate12)",
+          "mold_hold_status(crate12, pending) as new fact"
+        ]
+      },
+      "expected_admission": {
+        "admit": [
+          "cleared(crate12)"
+        ],
+        "must_not_admit": [
+          "may_ship(crate12)",
+          "quarantined(crate12)",
+          "mold_hold_status(crate12, pending)"
+        ],
+        "preferred_skip_reasons": [
+          "rule_policy",
+          "context_is_not_new_write"
+        ]
+      },
+      "failure_mode": "One turn contains a default rule, a direct fact, and a query under a context condition. The current schema can represent all pieces but may over-commit the rule-derived answer.",
+      "anti_patch_signal": "Requires structural separation of rule, direct assertion, context, and query rather than bespoke 'can it ship' handling."
+    },
+    {
+      "id": "ct_04_conflicting_current_update_without_correction",
+      "domain": "location_state",
+      "utterance": "Mara lives in Salem now; the old Denver line is probably from before the move.",
+      "context": [
+        "Existing current fact: lives_in(mara, denver).",
+        "lives_in/2 is treated as a likely functional current-state predicate unless the user explicitly corrects or dates the old value."
+      ],
+      "allowed_predicates": [
+        "lives_in/2",
+        "formerly_lived_in/2",
+        "correction/2"
+      ],
+      "expect": {
+        "decision": "clarify",
+        "must": [
+          "Mara",
+          "Salem",
+          "Denver",
+          "current-state conflict",
+          "probably"
+        ],
+        "avoid": [
+          "retract(lives_in(mara, denver))",
+          "formerly_lived_in(mara, denver)",
+          "lives_in(mara, salem) as current fact"
+        ]
+      },
+      "expected_admission": {
+        "admit": [],
+        "must_not_admit": [
+          "lives_in(mara, salem)",
+          "formerly_lived_in(mara, denver)",
+          "retract(lives_in(mara, denver))"
+        ],
+        "preferred_skip_reasons": [
+          "decision_projection_gate"
+        ]
+      },
+      "failure_mode": "Conflicting current-state update is plausible but not explicitly authorized as a correction. This pressures functional-predicate policy without relying on English phrase rescue.",
+      "anti_patch_signal": "Should be driven by predicate contract and context conflict, not the words 'old line'."
+    },
+    {
+      "id": "ct_05_noisy_multilingual_correction",
+      "domain": "inventory_state",
+      "utterance": "nah, caja 12 no esta cleared anymore - crate12 esta quarantined desde ayer.",
+      "context": [
+        "Existing current fact: cleared(crate12).",
+        "caja 12 is Spanish for box/crate 12."
+      ],
+      "allowed_predicates": [
+        "cleared/1",
+        "quarantined/1",
+        "quarantined_since/2"
+      ],
+      "expect": {
+        "decision": "commit",
+        "must": [
+          "crate12",
+          "caja 12",
+          "not cleared",
+          "quarantined",
+          "ayer",
+          "correction"
+        ],
+        "avoid": [
+          "cleared(crate12) as current",
+          "quarantined(caja_12)",
+          "new entity caja"
+        ]
+      },
+      "expected_admission": {
+        "admit": [
+          "retract(cleared(crate12))",
+          "quarantined(crate12)"
+        ],
+        "must_not_admit": [
+          "cleared(crate12)",
+          "quarantined(caja_12)"
+        ],
+        "preferred_skip_reasons": []
+      },
+      "failure_mode": "Tests noisy multilingual aliasing and correction/retraction without expecting a Python patch for Spanish tokens.",
+      "anti_patch_signal": "A pass should come from semantic IR alias normalization plus retract alias variants, not a hard-coded 'caja' rewrite."
+    },
+    {
+      "id": "ct_06_medication_custody_not_medication_use",
+      "domain": "medical_boundary",
+      "utterance": "Priya took the warfarin bottle from the lockbox, but the note does not say she takes warfarin.",
+      "context": [
+        "Priya is a nurse.",
+        "warfarin is a medication.",
+        "medical@v0 taking/2 means medication exposure or ongoing use, not physical custody of a bottle."
+      ],
+      "allowed_predicates": [
+        "removed_from/3",
+        "taking/2",
+        "has_condition/2",
+        "claimed/3"
+      ],
+      "expect": {
+        "decision": "mixed",
+        "must": [
+          "Priya",
+          "warfarin bottle",
+          "lockbox",
+          "not medication use",
+          "note does not say"
+        ],
+        "avoid": [
+          "taking(priya, warfarin)",
+          "has_condition",
+          "medication exposure"
+        ]
+      },
+      "expected_admission": {
+        "admit": [
+          "removed_from(priya"
+        ],
+        "must_not_admit": [
+          "taking(priya, warfarin)",
+          "has_condition(priya"
+        ],
+        "preferred_skip_reasons": [
+          "predicate_palette_gate",
+          "polarity_policy"
+        ]
+      },
+      "failure_mode": "Domain type ambiguity: medication as object custody versus medication use. A lexical parser may over-map any 'took warfarin' to taking/2.",
+      "anti_patch_signal": "Needs semantic role/type interpretation, not an English-specific exception for 'bottle'."
+    },
+    {
+      "id": "ct_07_vague_pressure_claim_with_observed_lab",
+      "domain": "medical_boundary",
+      "utterance": "Mara says her pressure was terrible, and the clinic observed potassium above the upper bound.",
+      "context": [
+        "Active patient: Mara.",
+        "pressure could mean blood pressure, chest pressure, or stress."
+      ],
+      "allowed_predicates": [
+        "claimed/3",
+        "lab_result_high/2",
+        "has_symptom/2",
+        "has_condition/2"
+      ],
+      "expect": {
+        "decision": "mixed",
+        "must": [
+          "Mara",
+          "claim",
+          "pressure ambiguous",
+          "potassium",
+          "upper bound"
+        ],
+        "avoid": [
+          "has_condition(mara, hypertension)",
+          "lab_result_high(mara, blood_pressure",
+          "pressure committed as fact"
+        ]
+      },
+      "expected_admission": {
+        "admit": [
+          "claimed(mara",
+          "lab_result_high(mara, potassium)"
+        ],
+        "must_not_admit": [
+          "has_condition(mara, hypertension)",
+          "lab_result_high(mara, blood_pressure)"
+        ],
+        "preferred_skip_reasons": []
+      },
+      "failure_mode": "Combines a vague patient claim with a separate observed lab. The pack checks whether ambiguity in one clause contaminates or blocks the safe clause.",
+      "anti_patch_signal": "Should depend on profile type/vague-surface policy and source separation."
+    },
+    {
+      "id": "ct_08_temporal_correction_changes_query_answer_only",
+      "domain": "probate_temporal",
+      "utterance": "Wait, the Heathrow return stamp was April 2023, not April 2024. Given that, did A. Silverton stay outside the country for more than five years?",
+      "context": [
+        "Existing travel note: Silverton, A. departed March 2018 and returned April 2024.",
+        "Known A. Silvertons include Arthur Silverton and Alfred Silverton.",
+        "Forfeiture requires more than five consecutive years outside the country."
+      ],
+      "allowed_predicates": [
+        "departed_in/2",
+        "returned_in/2",
+        "candidate_identity/2",
+        "duration_query/3",
+        "resided_outside_country_for/3"
+      ],
+      "expect": {
+        "decision": "mixed",
+        "must": [
+          "correction",
+          "April 2023",
+          "April 2024",
+          "A. Silverton",
+          "query",
+          "five years"
+        ],
+        "avoid": [
+          "returned_in(arthur",
+          "resided_outside_country_for(arthur",
+          "forfeited_share"
+        ]
+      },
+      "expected_admission": {
+        "admit": [],
+        "must_not_admit": [
+          "returned_in(arthur_silverton, april_2023)",
+          "returned_in(alfred_silverton, april_2023)",
+          "resided_outside_country_for"
+        ],
+        "preferred_skip_reasons": [
+          "identity_premise_not_truth",
+          "decision_projection_gate"
+        ]
+      },
+      "failure_mode": "Temporal correction plus query under unresolved identity. The system must not mutate an Arthur/Alfred fact just because the old context had a travel note.",
+      "anti_patch_signal": "Should exercise query-scoped identity and temporal correction boundaries rather than a Silverton-specific patch."
+    },
+    {
+      "id": "ct_09_nested_quote_observed_fact",
+      "domain": "incident_review",
+      "utterance": "Leah wrote, 'Omar denied opening the cabinet,' but I watched Omar open it with badge B7 ten minutes later.",
+      "context": [
+        "The current speaker is an observer.",
+        "Badge B7 is assigned to Omar."
+      ],
+      "allowed_predicates": [
+        "wrote/3",
+        "denied/3",
+        "observed/4",
+        "opened_with/3",
+        "opened/2"
+      ],
+      "expect": {
+        "decision": "mixed",
+        "must": [
+          "Leah",
+          "Omar",
+          "denied",
+          "watched",
+          "badge B7",
+          "ten minutes later"
+        ],
+        "avoid": [
+          "not_opened(omar",
+          "opened(omar, cabinet) from denial",
+          "Leah observed"
+        ]
+      },
+      "expected_admission": {
+        "admit": [
+          "wrote(leah",
+          "denied(omar",
+          "observed(",
+          "opened_with(omar, cabinet, badge_b7)"
+        ],
+        "must_not_admit": [
+          "not_opened(omar, cabinet)"
+        ],
+        "preferred_skip_reasons": []
+      },
+      "failure_mode": "Nested quote plus later direct observation. The denial is a speech event, not negation; the direct observation can be stored without making Leah the observer.",
+      "anti_patch_signal": "Should be schema/source/polarity behavior, not hand-written quote parsing."
+    },
+    {
+      "id": "ct_10_group_exception_with_query_tail",
+      "domain": "compliance",
+      "utterance": "Todos los residents except Kai filed Form A; Kai filed a waiver. So who is still missing paperwork?",
+      "context": [
+        "Known residents: Kai, Lena, Omar.",
+        "Form A and waiver are different paperwork categories."
+      ],
+      "allowed_predicates": [
+        "resident/1",
+        "filed_form/2",
+        "filed_waiver/1",
+        "missing_paperwork/1"
+      ],
+      "expect": {
+        "decision": "mixed",
+        "must": [
+          "Todos",
+          "residents",
+          "except Kai",
+          "Form A",
+          "waiver",
+          "query"
+        ],
+        "avoid": [
+          "filed_form(residents",
+          "filed_form(kai, form_a)",
+          "missing_paperwork(kai) as fact",
+          "filed_form(lena, form_a) as fact"
+        ]
+      },
+      "expected_admission": {
+        "admit": [
+          "filed_waiver(kai)"
+        ],
+        "must_not_admit": [
+          "filed_form(residents, form_a)",
+          "filed_form(lena, form_a)",
+          "filed_form(omar, form_a)",
+          "missing_paperwork(kai)"
+        ],
+        "preferred_skip_reasons": [
+          "quantifier_policy"
+        ]
+      },
+      "failure_mode": "Multilingual quantified group statement plus query tail. Current policy should avoid fake group atoms and avoid expanding every known member unless explicit expansion semantics exist.",
+      "anti_patch_signal": "Should be handled by quantifier policy, not Spanish-specific parsing."
+    },
+    {
+      "id": "ct_11_typo_pronoun_cross_turn_drift",
+      "domain": "story_state",
+      "utterance": "she movd it frm bay7 to med room after Priya tagged it, but her note says Omar had it first",
+      "context": [
+        "Recent turn: Mara handled sample S4 in Bay 7.",
+        "Recent turn: Priya tagged sample S5 in Bay 7.",
+        "Omar handled sample S4 yesterday."
+      ],
+      "allowed_predicates": [
+        "moved_from_to/4",
+        "tagged/2",
+        "noted/3",
+        "handled/2"
+      ],
+      "expect": {
+        "decision": "clarify",
+        "must": [
+          "she",
+          "it",
+          "her note",
+          "bay7",
+          "med room",
+          "ambiguous"
+        ],
+        "avoid": [
+          "moved_from_to(mara, s4",
+          "moved_from_to(priya, s5",
+          "handled(omar, s4) as new fact"
+        ]
+      },
+      "expected_admission": {
+        "admit": [],
+        "must_not_admit": [
+          "moved_from_to(mara",
+          "moved_from_to(priya",
+          "handled(omar"
+        ],
+        "preferred_skip_reasons": [
+          "grounding_policy",
+          "decision_projection_gate"
+        ]
+      },
+      "failure_mode": "Cross-turn identity drift under typos and pronouns. The model has enough context to guess, but not enough to safely write.",
+      "anti_patch_signal": "A pass should be from unresolved referent policy, not typo repair rules."
+    },
+    {
+      "id": "ct_12_role_scoped_alias_conflict",
+      "domain": "governance_medical",
+      "utterance": "Dr. Lin approved discharge, and Lin approved the lease transfer. The clinic Lin is Lena Lin; the trustee Lin is Luca Lin.",
+      "context": [
+        "Lena Lin is clinic director.",
+        "Luca Lin is property trustee.",
+        "Discharge approval and lease transfer approval are different workflows."
+      ],
+      "allowed_predicates": [
+        "approved_discharge/2",
+        "approved_transfer/2",
+        "role/2",
+        "same_person/2"
+      ],
+      "expect": {
+        "decision": "commit",
+        "must": [
+          "Dr. Lin",
+          "Lena Lin",
+          "trustee Lin",
+          "Luca Lin",
+          "discharge",
+          "lease transfer"
+        ],
+        "avoid": [
+          "same_person(lena_lin, luca_lin)",
+          "approved_transfer(lena_lin",
+          "approved_discharge(luca_lin"
+        ]
+      },
+      "expected_admission": {
+        "admit": [
+          "approved_discharge(lena_lin",
+          "approved_transfer(luca_lin"
+        ],
+        "must_not_admit": [
+          "same_person(lena_lin, luca_lin)",
+          "approved_transfer(lena_lin",
+          "approved_discharge(luca_lin"
+        ],
+        "preferred_skip_reasons": []
+      },
+      "failure_mode": "Same surname, two domains, two roles. The model must use domain role context rather than collapsing aliases.",
+      "anti_patch_signal": "Should rely on semantic role binding, not a list of names."
+    },
+    {
+      "id": "ct_13_claimed_rule_violation_with_observed_safe_fact",
+      "domain": "trust_governance",
+      "utterance": "Ada observed the flood transfer posted on June 2. Pavel claims that proves bonuses were illegal, because transfers must post before bonuses, but he has not shown when bonuses posted.",
+      "context": [
+        "Charter rule: flood transfer must post before trustee bonuses.",
+        "No current fact records when bonuses posted."
+      ],
+      "allowed_predicates": [
+        "observed/4",
+        "posted_on/2",
+        "claimed/3",
+        "violated/2",
+        "bonus_posted_on/2"
+      ],
+      "expect": {
+        "decision": "mixed",
+        "must": [
+          "Ada",
+          "observed",
+          "June 2",
+          "Pavel",
+          "claims",
+          "not shown when bonuses posted"
+        ],
+        "avoid": [
+          "violated(",
+          "bonus_posted_on",
+          "illegal as fact"
+        ]
+      },
+      "expected_admission": {
+        "admit": [
+          "observed(ada",
+          "posted_on(flood_transfer, june_2)",
+          "claimed(pavel"
+        ],
+        "must_not_admit": [
+          "violated(",
+          "bonus_posted_on("
+        ],
+        "preferred_skip_reasons": [
+          "inference_not_truth"
+        ]
+      },
+      "failure_mode": "A safe observed fact coexists with an unsupported legal conclusion. This catches systems that over-write derived violations from a claim.",
+      "anti_patch_signal": "Should use source/inference policy, not terms like 'proves' or 'illegal'."
+    },
+    {
+      "id": "ct_14_explicit_correction_with_noisy_alias_and_date",
+      "domain": "estate_operations",
+      "utterance": "sry, dock-seven wasn't closed on 4/02; bay7 closed 04/20 after the pump fail.",
+      "context": [
+        "Existing current fact: closed_on(dock_7, april_2).",
+        "dock-seven and bay7 may refer to the same place only if explicitly linked; current KB has no alias fact."
+      ],
+      "allowed_predicates": [
+        "closed_on/2",
+        "alias/2",
+        "failure_event/2",
+        "correction/2"
+      ],
+      "expect": {
+        "decision": "clarify",
+        "must": [
+          "dock-seven",
+          "bay7",
+          "4/02",
+          "04/20",
+          "pump fail",
+          "alias unclear"
+        ],
+        "avoid": [
+          "retract(closed_on(dock_7, april_2))",
+          "closed_on(bay7, april_20)",
+          "alias(dock_7, bay7) as fact"
+        ]
+      },
+      "expected_admission": {
+        "admit": [],
+        "must_not_admit": [
+          "closed_on(bay7, april_20)",
+          "retract(closed_on(dock_7, april_2))",
+          "alias(dock_7, bay7)"
+        ],
+        "preferred_skip_reasons": [
+          "grounding_policy",
+          "decision_projection_gate"
+        ]
+      },
+      "failure_mode": "Explicit correction language is present, but the correction target changes both alias and date. This should clarify rather than relying on a noisy alias guess.",
+      "anti_patch_signal": "Should be solved by correction-target identity grounding, not typo/noise phrase patches."
+    }
+  ]
+}

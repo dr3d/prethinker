@@ -20,6 +20,8 @@ The short version:
 - The console defaults to the current LM Studio `qwen/qwen3.6-35b-a3b` Semantic IR lane for manual research runs.
 - `medical@v0` is the main bounded domain profile.
 - UMLS is used as a bounded normalization and semantic-type bridge, not as a giant preloaded clinical encyclopedia.
+- The active Semantic IR path passes `medical@v0` predicate contracts and compact UMLS concept context into the model input before deterministic admission.
+- A thin profile roster now exposes skill-like domain packages such as `medical@v0`, `story_world@v0`, and `probate@v0`; only explicitly selected thick context affects the current Semantic IR pass.
 - The Prolog KB is the committed truth layer; model output remains provisional until the runtime admits it.
 - Long story-like utterances can now be segmented into focused Semantic IR passes so narrative ingestion stays inspectable instead of relying on one summary-shaped model response.
 - Historical reports, old prompt snapshots, and run logs were pruned from the forward-facing tree because Git already preserves them.
@@ -32,6 +34,7 @@ The short version:
 - [docs/PUBLIC_DOCS_GUIDE.md](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md) - current public-doc reading map.
 - [docs/SEMANTIC_IR_RESEARCH_DIRECTION_REPORT.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_RESEARCH_DIRECTION_REPORT.md) - why the project pivoted from parser rescue to semantic workspace.
 - [docs/SEMANTIC_IR_MAPPER_SPEC.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_MAPPER_SPEC.md) - deterministic mapper/admission contract.
+- [docs/DOMAIN_PROFILE_CATALOG.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PROFILE_CATALOG.md) - profile/skill-style context packages for domain-aware Semantic IR.
 - [docs/UMLS_MVP.md](https://github.com/dr3d/prethinker/blob/main/docs/UMLS_MVP.md) - UMLS bridge and Semantic Network work.
 - [docs/MEDICAL_PROFILE.md](https://github.com/dr3d/prethinker/blob/main/docs/MEDICAL_PROFILE.md) - bounded medical profile.
 - [docs/FREETHINKER_DESIGN.md](https://github.com/dr3d/prethinker/blob/main/docs/FREETHINKER_DESIGN.md) - optional clarification sidecar.
@@ -49,18 +52,22 @@ Open `http://127.0.0.1:8765` for the live console.
 
 ## Reproducibility Notes
 
-The public repo currently tracks `29` pytest files under [tests/](https://github.com/dr3d/prethinker/tree/main/tests). The latest full-suite verification before this update was:
+The public repo currently tracks `30` pytest files under [tests/](https://github.com/dr3d/prethinker/tree/main/tests). The latest full-suite verification after the profile-aware Semantic IR/UMLS handoff was:
 
 ```powershell
 python -m pytest -q
-# 282 passed
+# 286 passed
 ```
 
-Focused verification after the current Semantic IR console/story-ingestion pass:
+Focused verification after the current Semantic IR console/story-ingestion and profile-contract passes:
 
 ```powershell
 python -m pytest tests/test_semantic_ir_runtime.py tests/test_ui_gateway_phases.py tests/test_gateway_config.py
 # 55 passed
+python -m pytest tests/test_medical_profile_assets.py tests/test_mcp_server.py::LocalMcpServerTests::test_semantic_ir_medical_profile_passes_contracts_and_umls_context
+# 6 passed
+python -m pytest tests/test_domain_profiles.py
+# 2 passed
 ```
 
 The UMLS Semantic Network and Metathesaurus-derived runtime assets are intentionally not committed because they depend on licensed source data. The public repo includes the builders, tests, docs, and profile code; outside reproduction of the UMLS lane requires obtaining the licensed UMLS files separately.

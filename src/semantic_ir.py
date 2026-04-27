@@ -294,6 +294,7 @@ BEST_GUARDED_V2_GUIDANCE = (
     "- For rule-plus-fact or fact-plus-query turns, use mixed and keep unsafe query targets out of committed facts.\n"
     "- If predicate_contracts are present, obey their argument order exactly. A predicate may have the right arity but still be wrong if its argument roles are swapped.\n"
     "- Preserve negation in candidate_operations with polarity='negative'. Do not turn 'never saw X' into a positive saw/2 fact."
+    "- available_domain_profiles is a thin skill-like roster. Use it only to understand which domain context may be relevant; do not invent writes from unselected profile descriptions. domain_context and predicate_contracts are the thick selected-profile context."
 )
 
 
@@ -316,6 +317,8 @@ def build_semantic_ir_input_payload(
     *,
     utterance: str,
     context: list[str] | None = None,
+    domain_context: list[str] | None = None,
+    available_domain_profiles: list[dict[str, Any]] | None = None,
     allowed_predicates: list[str] | None = None,
     predicate_contracts: list[dict[str, Any]] | None = None,
     domain: str = "runtime",
@@ -327,6 +330,8 @@ def build_semantic_ir_input_payload(
         "domain": domain,
         "utterance": utterance,
         "context": context or [],
+        "available_domain_profiles": available_domain_profiles or [],
+        "domain_context": domain_context or [],
         "allowed_predicates": allowed_predicates or [],
         "predicate_contracts": predicate_contracts or [],
         "authority_boundary": "The runtime validates and commits; you only propose semantic structure.",
@@ -345,6 +350,8 @@ def build_semantic_ir_messages(
     *,
     utterance: str,
     context: list[str] | None = None,
+    domain_context: list[str] | None = None,
+    available_domain_profiles: list[dict[str, Any]] | None = None,
     allowed_predicates: list[str] | None = None,
     predicate_contracts: list[dict[str, Any]] | None = None,
     domain: str = "runtime",
@@ -353,6 +360,8 @@ def build_semantic_ir_messages(
     payload = build_semantic_ir_input_payload(
         utterance=utterance,
         context=context,
+        domain_context=domain_context,
+        available_domain_profiles=available_domain_profiles,
         allowed_predicates=allowed_predicates,
         predicate_contracts=predicate_contracts,
         domain=domain,
@@ -369,6 +378,8 @@ def call_semantic_ir(
     utterance: str,
     config: SemanticIRCallConfig,
     context: list[str] | None = None,
+    domain_context: list[str] | None = None,
+    available_domain_profiles: list[dict[str, Any]] | None = None,
     allowed_predicates: list[str] | None = None,
     predicate_contracts: list[dict[str, Any]] | None = None,
     domain: str = "runtime",
@@ -378,6 +389,8 @@ def call_semantic_ir(
     input_payload = build_semantic_ir_input_payload(
         utterance=utterance,
         context=context,
+        domain_context=domain_context,
+        available_domain_profiles=available_domain_profiles,
         allowed_predicates=allowed_predicates,
         predicate_contracts=predicate_contracts,
         domain=domain,
@@ -386,6 +399,8 @@ def call_semantic_ir(
     messages = build_semantic_ir_messages(
         utterance=utterance,
         context=context,
+        domain_context=domain_context,
+        available_domain_profiles=available_domain_profiles,
         allowed_predicates=allowed_predicates,
         predicate_contracts=predicate_contracts,
         domain=domain,

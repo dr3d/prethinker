@@ -41,6 +41,7 @@ from kb_pipeline import (
     _synthesize_clarification_question,
     _validate_parsed,
 )
+from src.domain_profiles import load_domain_profile_catalog, thin_profile_roster
 from src.medical_profile import (
     bridge_admission_guidance,
     build_medical_profile_guide,
@@ -52,6 +53,8 @@ from src.medical_profile import (
     resolve_profile_paths,
     sanitize_medical_parse_for_bridge,
     sanitize_medical_parse_for_clarification,
+    semantic_ir_predicate_contracts,
+    semantic_ir_profile_context,
 )
 from src.semantic_ir import (
     SemanticIRCallConfig,
@@ -253,9 +256,15 @@ class PrologMCPServer:
         self._freethinker_prompt_load_error = ""
         self._freethinker_api_key = _get_api_key()
         self._profile_manifest: dict[str, Any] = {}
+        self._domain_profile_catalog: dict[str, Any] = {}
+        self._domain_profile_roster: list[dict[str, Any]] = []
+        self._domain_profile_catalog_error = ""
+        self._load_domain_profile_catalog()
         self._profile_paths: dict[str, Path] = {}
         self._profile_prompt_supplement = ""
         self._profile_known_predicates: list[str] = []
+        self._profile_predicate_contracts: list[dict[str, Any]] = []
+        self._profile_semantic_ir_context: list[str] = []
         self._profile_concepts: list[dict[str, Any]] = []
         self._profile_umls_bridge: dict[str, Any] = {}
         self._profile_load_error = ""
@@ -269,6 +278,17 @@ class PrologMCPServer:
         self._load_compiler_prompt()
         self._load_freethinker_prompt()
 
+    def _load_domain_profile_catalog(self) -> None:
+        self._domain_profile_catalog = {}
+        self._domain_profile_roster = []
+        self._domain_profile_catalog_error = ""
+        try:
+            catalog = load_domain_profile_catalog()
+            self._domain_profile_catalog = catalog
+            self._domain_profile_roster = thin_profile_roster(catalog)
+        except Exception as exc:
+            self._domain_profile_catalog_error = str(exc)
+
     def _default_medical_slice_dir(self) -> Path:
         return (REPO_ROOT / "tmp" / "licensed" / "umls" / "2025AB" / "prethinker_mvp").resolve()
 
@@ -277,6 +297,8 @@ class PrologMCPServer:
         self._profile_paths = {}
         self._profile_prompt_supplement = ""
         self._profile_known_predicates = []
+        self._profile_predicate_contracts = []
+        self._profile_semantic_ir_context = []
         self._profile_concepts = []
         self._profile_umls_bridge = {}
         self._profile_load_error = ""
@@ -301,8 +323,14 @@ class PrologMCPServer:
             self._profile_paths = profile_paths
             self._profile_prompt_supplement = supplement
             self._profile_known_predicates = canonical_predicate_signatures(manifest)
+            self._profile_predicate_contracts = semantic_ir_predicate_contracts(manifest)
             self._profile_concepts = concepts
             self._profile_umls_bridge = bridge
+            self._profile_semantic_ir_context = semantic_ir_profile_context(
+                manifest=manifest,
+                concepts=concepts,
+                umls_bridge=bridge,
+            )
         except Exception as exc:
             self._profile_load_error = str(exc)
 
@@ -1703,6 +1731,19 @@ class PrologMCPServer:
         signatures = sorted(self._registry_signatures)
         return [f"{name}/{arity}" for name, arity in signatures]
 
+    def _semantic_ir_predicate_contracts(self) -> list[dict[str, Any]]:
+        if self._active_profile == "medical@v0":
+            return self._clone_trace_payload(self._profile_predicate_contracts)
+        return []
+
+    def _semantic_ir_domain_context(self) -> list[str]:
+        if self._active_profile == "medical@v0":
+            return [str(item).strip() for item in self._profile_semantic_ir_context if str(item).strip()]
+        return []
+
+    def _semantic_ir_available_domain_profiles(self) -> list[dict[str, Any]]:
+        return self._clone_trace_payload(self._domain_profile_roster)
+
     def _semantic_ir_context(self) -> list[str]:
         context: list[str] = []
         for clause in self._recent_committed_logic[-16:]:
@@ -1726,7 +1767,10 @@ class PrologMCPServer:
                 "domain": self._active_profile if self._active_profile != "general" else "runtime",
                 "utterance": utterance,
                 "context": self._semantic_ir_context(),
+                "available_domain_profiles": self._semantic_ir_available_domain_profiles(),
+                "domain_context": self._semantic_ir_domain_context(),
                 "allowed_predicates": self._semantic_ir_allowed_predicates(),
+                "predicate_contracts": self._semantic_ir_predicate_contracts(),
                 "options": {
                     "temperature": self._semantic_ir_temperature,
                     "top_p": self._semantic_ir_top_p,
@@ -1746,7 +1790,10 @@ class PrologMCPServer:
                 utterance=utterance,
                 config=self._semantic_ir_call_config(),
                 context=self._semantic_ir_context(),
+                domain_context=self._semantic_ir_domain_context(),
+                available_domain_profiles=self._semantic_ir_available_domain_profiles(),
                 allowed_predicates=self._semantic_ir_allowed_predicates(),
+                predicate_contracts=self._semantic_ir_predicate_contracts(),
                 domain=self._active_profile if self._active_profile != "general" else "runtime",
             )
         except Exception as exc:

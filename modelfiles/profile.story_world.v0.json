@@ -1,0 +1,51 @@
+{
+  "profile_id": "story_world@v0",
+  "status": "proposal_mock",
+  "description": "Narrative event/state profile for fictional or real-world scene ingestion: actors, objects, places, possession, movement, observation, use, damage, and simple corrections.",
+  "predicate_registry": "modelfiles/predicate_registry.json",
+  "recommended_settings": {
+    "compiler_mode": "strict",
+    "strict_registry": true,
+    "clarification_eagerness": 0.65,
+    "freethinker_resolution_policy": "advisory_only"
+  },
+  "selection_hints": {
+    "use_when": [
+      "fictional story or scene narration",
+      "object interactions such as tasted, ate, sat, lay, broke, entered, exited",
+      "who did what to which object",
+      "observed passive object states"
+    ],
+    "avoid_when": [
+      "formal legal/probate rules",
+      "medical fact intake",
+      "clinical advice"
+    ]
+  },
+  "semantic_ir_context": [
+    "profile_scope: story-world semantic ingestion; capture direct narrative events and states without turning a story into a summary",
+    "identity_policy: preserve named actors and stable object identity across turns; ask or quarantine when a pronoun has multiple plausible referents",
+    "unknown_actor_policy: do not commit unknown_agent writes; prefer passive object-state predicates such as was_tasted/1, was_eaten/1, was_sat_in/1, or was_lain_in/1 when available",
+    "event_policy: use specific predicates for movement, tasting, eating, sitting, lying, sleeping, seeing, finding, entering, exiting, and breaking; do not use inside/2 or carries/2 as generic fallbacks",
+    "temporal_policy: preserve order in assertions/self_check when exact temporal predicates are unavailable; do not invent timestamps"
+  ],
+  "canonical_palette": [
+    { "signature": "owns/2", "arguments": ["owner", "object"], "notes": "Durable possession or belonging." },
+    { "signature": "at/2", "arguments": ["entity", "place"], "notes": "Location when no more specific movement predicate applies." },
+    { "signature": "inside/2", "arguments": ["entity", "container"], "notes": "Physical containment only; not a generic relation." },
+    { "signature": "entered/2", "arguments": ["actor", "place"], "notes": "Boundary crossing into a place." },
+    { "signature": "exited/2", "arguments": ["actor", "place"], "notes": "Boundary crossing out of a place." },
+    { "signature": "found/2", "arguments": ["actor", "object"], "notes": "Discovery of an object or place." },
+    { "signature": "tasted/2", "arguments": ["actor", "food_or_drink"], "notes": "Direct tasting event." },
+    { "signature": "ate/2", "arguments": ["actor", "food"], "notes": "Eating event." },
+    { "signature": "ate_all/2", "arguments": ["actor", "food"], "notes": "Complete consumption event." },
+    { "signature": "sat_in/2", "arguments": ["actor", "seat"], "notes": "Sitting in/on a chair or seat." },
+    { "signature": "lay_in/2", "arguments": ["actor", "bed"], "notes": "Lying in/on a bed." },
+    { "signature": "asleep_in/2", "arguments": ["actor", "place_or_bed"], "notes": "Sleeping location." },
+    { "signature": "broke/1", "arguments": ["object"], "notes": "Object became broken." },
+    { "signature": "was_tasted/1", "arguments": ["food_or_drink"], "notes": "Passive observed tasting when actor is unknown." },
+    { "signature": "was_eaten/1", "arguments": ["food"], "notes": "Passive observed eating/consumption when actor is unknown." },
+    { "signature": "was_sat_in/1", "arguments": ["seat"], "notes": "Passive observed seat use when actor is unknown." },
+    { "signature": "was_lain_in/1", "arguments": ["bed"], "notes": "Passive observed bed use when actor is unknown." }
+  ]
+}

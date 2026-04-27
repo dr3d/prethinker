@@ -1,6 +1,6 @@
 # Public Docs Guide
 
-Last updated: 2026-04-26
+Last updated: 2026-04-27
 
 This page is the map for public readers. Git history keeps the older research
 trail; these docs should describe the project as it sits now.
@@ -56,6 +56,7 @@ The best current documents for that work are:
 
 - [docs/SEMANTIC_IR_RESEARCH_DIRECTION_REPORT.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_RESEARCH_DIRECTION_REPORT.md)
 - [docs/SEMANTIC_IR_MAPPER_SPEC.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_MAPPER_SPEC.md)
+- [docs/DOMAIN_PROFILE_CATALOG.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PROFILE_CATALOG.md)
 - [docs/GUARDRAIL_DEPENDENCY_AB.md](https://github.com/dr3d/prethinker/blob/main/docs/GUARDRAIL_DEPENDENCY_AB.md)
 - [docs/PYTHON_GUARDRAIL_AUDIT.md](https://github.com/dr3d/prethinker/blob/main/docs/PYTHON_GUARDRAIL_AUDIT.md)
 - [docs/prompts/SEMANTIC_IR_V1.md](https://github.com/dr3d/prethinker/blob/main/docs/prompts/SEMANTIC_IR_V1.md)
@@ -94,8 +95,12 @@ future architecture.
 
 Latest local verification before this refresh:
 
-- Full pytest suite: `282 passed`
+- Full pytest suite: `286 passed`
+- Profile-aware Semantic IR/UMLS handoff: `medical@v0` now supplies predicate contracts plus compact UMLS bridge context to the model input before deterministic admission
+- Domain-profile catalog foundation: thin roster plus mock `story_world@v0` and `probate@v0` thick-context packages for future skill-like profile selection
 - Focused Semantic IR console/story-ingestion verification: `55 passed`
+- Focused profile-contract verification: `6 passed`
+- Focused domain-profile package verification: `2 passed`
 - Semantic IR runtime edge pack: `20/20` decision labels, `0.976` avg score
 - Semantic IR weak-edge pack: `10/10` decision labels, `1.000` avg score
 - Goldilocks full-story segmented smoke: `56` deduped mutations across `50`
@@ -104,6 +109,7 @@ Latest local verification before this refresh:
 - Silverton probate pack: intentionally hard frontier pack, currently weak
 - Silverton noisy temporal pack: intentionally harder noisy/multilingual pack,
   useful as a pressure gauge rather than a demo headline
+- Cross-turn frontier proposal: `docs/data/frontier_packs/semantic_ir_cross_turn_frontier_pack_v1.json`, held out for future runner integration
 
 The important qualitative result is that semantic IR has reduced dependence on
 non-mapper Python rescue code in tested packs. The remaining hard problems are

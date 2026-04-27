@@ -114,6 +114,93 @@ def predicate_argument_groups(manifest: dict[str, Any] | None = None) -> dict[st
     return out
 
 
+def semantic_ir_predicate_contracts(manifest: dict[str, Any] | None = None) -> list[dict[str, Any]]:
+    source = manifest if isinstance(manifest, dict) else load_profile_manifest()
+    contracts: list[dict[str, Any]] = []
+    for row in canonical_palette(source):
+        signature = str(row.get("signature", "")).strip()
+        if not signature or "/" not in signature:
+            continue
+        contract: dict[str, Any] = {
+            "signature": signature,
+            "arguments": [str(item).strip() for item in row.get("arguments", []) or [] if str(item).strip()],
+        }
+        groups = row.get("umls_argument_groups", {})
+        if isinstance(groups, dict) and groups:
+            contract["umls_argument_groups"] = {
+                str(key): [str(item).strip() for item in value if str(item).strip()]
+                for key, value in groups.items()
+                if isinstance(value, list)
+            }
+        grounding = row.get("grounding", {})
+        if isinstance(grounding, dict) and grounding:
+            contract["grounding"] = {
+                str(key): str(value).strip()
+                for key, value in grounding.items()
+                if str(value).strip()
+            }
+        notes = str(row.get("notes", "")).strip()
+        if notes:
+            contract["notes"] = notes
+        contracts.append(contract)
+    return contracts
+
+
+def semantic_ir_profile_context(
+    *,
+    manifest: dict[str, Any] | None = None,
+    concepts: list[dict[str, Any]] | None = None,
+    umls_bridge: dict[str, Any] | None = None,
+    max_concepts: int = 20,
+    max_aliases_per_concept: int = 8,
+) -> list[str]:
+    source = manifest if isinstance(manifest, dict) else load_profile_manifest()
+    profile_id = str(source.get("profile_id", "medical@v0")).strip() or "medical@v0"
+    context = [
+        f"profile_id: {profile_id}",
+        "profile_scope: bounded medical memory; normalization and clarification only; not diagnosis or treatment advice",
+        "medical_commit_policy: use canonical predicate contracts; unresolved patient identity, vague measurements, allergy-vs-side-effect, and clinical advice requests must clarify/reject rather than write",
+        "patient_grounding_policy: an explicit named patient/person in the current utterance is sufficient identity grounding for this research profile; ask for clarification only for pronouns, aliases, multiple candidates, or missing patient identity",
+    ]
+
+    concept_rows = list(concepts or [])
+    if not concept_rows and isinstance(umls_bridge, dict):
+        bridge_concepts = umls_bridge.get("concepts", {})
+        if isinstance(bridge_concepts, dict):
+            for seed_id in sorted(bridge_concepts):
+                row = bridge_concepts.get(seed_id)
+                if isinstance(row, dict):
+                    concept_rows.append({"seed_id": seed_id, **row})
+
+    for row in concept_rows[: max(0, int(max_concepts))]:
+        seed_id = str(row.get("seed_id", "")).strip()
+        if not seed_id:
+            continue
+        groups = [
+            str(item).strip()
+            for item in row.get("semantic_groups", []) or umls_mvp.concept_semantic_groups(row)
+            if str(item).strip()
+        ]
+        aliases: list[str] = []
+        for item in row.get("aliases", []) or []:
+            if isinstance(item, dict):
+                text = str(item.get("text", "")).strip()
+            else:
+                text = str(item).strip()
+            if text and text not in aliases:
+                aliases.append(text)
+        preferred = str(row.get("preferred_name") or row.get("preferred_atom") or "").strip()
+        parts = [f"umls_concept: {seed_id}"]
+        if preferred:
+            parts.append(f"preferred={preferred}")
+        if groups:
+            parts.append(f"groups={','.join(groups)}")
+        if aliases:
+            parts.append(f"aliases={', '.join(aliases[: max(0, int(max_aliases_per_concept))])}")
+        context.append("; ".join(parts))
+    return context
+
+
 def load_profile_concepts(slice_dir: Path) -> list[dict[str, Any]]:
     concepts_path = Path(slice_dir) / "concepts.jsonl"
     if not concepts_path.exists():

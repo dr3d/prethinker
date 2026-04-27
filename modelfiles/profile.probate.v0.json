@@ -1,0 +1,43 @@
+{
+  "profile_id": "probate@v0",
+  "status": "proposal_mock",
+  "description": "Estate/probate profile for claims, beneficiaries, witnesses, amendments, forfeiture conditions, identity ambiguity, and document evidence.",
+  "predicate_registry": "future profile-owned registry",
+  "recommended_settings": {
+    "compiler_mode": "strict",
+    "strict_registry": true,
+    "clarification_eagerness": 0.8,
+    "freethinker_resolution_policy": "advisory_only"
+  },
+  "selection_hints": {
+    "use_when": [
+      "inheritance, estate, will, charter, probate, beneficiary, or forfeiture language",
+      "witnessed amendments and validity conditions",
+      "claim versus ledger/document evidence",
+      "ambiguous initials or family identities in legal records"
+    ],
+    "avoid_when": [
+      "general family biography without legal consequence",
+      "medical fact intake or clinical advice",
+      "fictional scene narration without policy/rule language"
+    ]
+  },
+  "semantic_ir_context": [
+    "profile_scope: probate and estate-memory ingestion; separate claims, observed documents, rules, and legal conclusions",
+    "claim_policy: statements by beneficiaries are claims unless corroborated by an admitted document or witness rule; do not turn a claim into a world-state fact",
+    "witness_policy: amendment validity may depend on witness count, witness independence, and simultaneity; unresolved witness qualifications should quarantine or clarify",
+    "identity_policy: initials and surnames such as A. Silverton or R. Vale require identity grounding when multiple candidates exist",
+    "rule_policy: unless/except/only-if language should remain rule-like or unsafe unless the mapper can admit an executable rule clause",
+    "temporal_policy: preserve intervals, consecutive-duration conditions, and corrected dates; do not decide forfeiture from ambiguous location or identity"
+  ],
+  "canonical_palette": [
+    { "signature": "beneficiary/1", "arguments": ["person"], "notes": "Person named as beneficiary." },
+    { "signature": "claimed/3", "arguments": ["speaker", "claim_concept", "target"], "notes": "Scoped speech act; not truth of target." },
+    { "signature": "witnessed/3", "arguments": ["witness", "event", "time"], "notes": "Witness observation with time." },
+    { "signature": "non_beneficiary/1", "arguments": ["person"], "notes": "Witness independence property when explicit." },
+    { "signature": "document_states/2", "arguments": ["document", "content_concept"], "notes": "Observed document content." },
+    { "signature": "resided_outside_country/3", "arguments": ["person", "country", "interval"], "notes": "Residence interval outside country." },
+    { "signature": "forfeits_share/1", "arguments": ["person"], "notes": "Legal conclusion; should usually be query/rule-derived rather than directly asserted." },
+    { "signature": "candidate_identity/2", "arguments": ["surface", "person"], "notes": "Identity candidate, not resolved identity." }
+  ]
+}
