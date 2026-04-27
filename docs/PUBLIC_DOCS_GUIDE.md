@@ -57,6 +57,7 @@ The best current documents for that work are:
 - [docs/SEMANTIC_IR_RESEARCH_DIRECTION_REPORT.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_RESEARCH_DIRECTION_REPORT.md)
 - [docs/SEMANTIC_IR_MAPPER_SPEC.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_MAPPER_SPEC.md)
 - [docs/DOMAIN_PROFILE_CATALOG.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PROFILE_CATALOG.md)
+- [docs/COURTLISTENER_DOMAIN.md](https://github.com/dr3d/prethinker/blob/main/docs/COURTLISTENER_DOMAIN.md)
 - [docs/SEC_CONTRACTS_DOMAIN.md](https://github.com/dr3d/prethinker/blob/main/docs/SEC_CONTRACTS_DOMAIN.md)
 - [docs/GUARDRAIL_DEPENDENCY_AB.md](https://github.com/dr3d/prethinker/blob/main/docs/GUARDRAIL_DEPENDENCY_AB.md)
 - [docs/PYTHON_GUARDRAIL_AUDIT.md](https://github.com/dr3d/prethinker/blob/main/docs/PYTHON_GUARDRAIL_AUDIT.md)
@@ -99,7 +100,7 @@ Latest local verification before this refresh:
 - Full pytest suite: `299 passed`
 - Profile-aware Semantic IR/UMLS handoff: `medical@v0` now supplies predicate contracts plus compact UMLS bridge context to the model input before deterministic admission
 - Domain-profile catalog foundation: thin roster plus mock `story_world@v0` and `probate@v0` thick-context packages for future skill-like profile selection
-- CourtListener legal-source scaffold: `legal_courtlistener@v0`, `adapters/courtlistener/`, and a synthetic legal seed fixture for claim/finding, citation, docket, role-scope, and identity-boundary tests
+- CourtListener legal-source lane: `legal_courtlistener@v0`, `adapters/courtlistener/`, a synthetic legal seed fixture, and ignored live CourtListener smoke data for claim/finding, citation, docket, role-scope, provenance, and identity-boundary tests
 - SEC/contracts scaffold: `sec_contracts@v0`, `adapters/sec_edgar/`, and a synthetic contract seed fixture for obligation, condition, temporal-trigger, party-scope, and breach-boundary tests
 - Focused Semantic IR console/story-ingestion verification: `55 passed`
 - Focused profile-contract verification: `6 passed`

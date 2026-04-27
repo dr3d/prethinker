@@ -70,7 +70,7 @@ def test_record_to_harness_case_includes_legal_contracts_and_boundaries():
     )
     case = record_to_harness_case(record, index=7)
     payload = case.to_dict()
-    assert payload["id"] == "courtlistener_opinion_0007"
+    assert payload["id"] == "courtlistener_opinion_abc_0007"
     assert payload["domain"] == "legal_courtlistener"
     assert "claim_made/4" in payload["allowed_predicates"]
     assert any(row["signature"] == "finding/4" for row in payload["predicate_contracts"])

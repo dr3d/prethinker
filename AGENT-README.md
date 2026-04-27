@@ -11,11 +11,13 @@ This is the short handoff for coding agents working in Prethinker.
 5. [docs/SEMANTIC_IR_RESEARCH_DIRECTION_REPORT.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_RESEARCH_DIRECTION_REPORT.md)
 6. [docs/SEMANTIC_IR_MAPPER_SPEC.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_MAPPER_SPEC.md)
 7. [docs/DOMAIN_PROFILE_CATALOG.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PROFILE_CATALOG.md)
-8. [docs/GUARDRAIL_DEPENDENCY_AB.md](https://github.com/dr3d/prethinker/blob/main/docs/GUARDRAIL_DEPENDENCY_AB.md)
-9. [docs/UMLS_MVP.md](https://github.com/dr3d/prethinker/blob/main/docs/UMLS_MVP.md)
-10. [docs/MEDICAL_PROFILE.md](https://github.com/dr3d/prethinker/blob/main/docs/MEDICAL_PROFILE.md)
-11. [docs/FREETHINKER_DESIGN.md](https://github.com/dr3d/prethinker/blob/main/docs/FREETHINKER_DESIGN.md)
-12. [ui_gateway/README.md](https://github.com/dr3d/prethinker/blob/main/ui_gateway/README.md)
+8. [docs/COURTLISTENER_DOMAIN.md](https://github.com/dr3d/prethinker/blob/main/docs/COURTLISTENER_DOMAIN.md)
+9. [docs/SEC_CONTRACTS_DOMAIN.md](https://github.com/dr3d/prethinker/blob/main/docs/SEC_CONTRACTS_DOMAIN.md)
+10. [docs/GUARDRAIL_DEPENDENCY_AB.md](https://github.com/dr3d/prethinker/blob/main/docs/GUARDRAIL_DEPENDENCY_AB.md)
+11. [docs/UMLS_MVP.md](https://github.com/dr3d/prethinker/blob/main/docs/UMLS_MVP.md)
+12. [docs/MEDICAL_PROFILE.md](https://github.com/dr3d/prethinker/blob/main/docs/MEDICAL_PROFILE.md)
+13. [docs/FREETHINKER_DESIGN.md](https://github.com/dr3d/prethinker/blob/main/docs/FREETHINKER_DESIGN.md)
+14. [ui_gateway/README.md](https://github.com/dr3d/prethinker/blob/main/ui_gateway/README.md)
 
 Treat older reports and prompt snapshots as Git history, not live guidance.
 
@@ -26,10 +28,10 @@ Treat older reports and prompt snapshots as Git history, not live guidance.
 - `semantic_ir_v1` is the active research path for richer model semantics before deterministic admission; the console default is the LM Studio `qwen/qwen3.6-35b-a3b` lane.
 - `src/semantic_ir.py` owns the mapper, projection policy, and admission diagnostics.
 - Long story-like console inputs may be split into focused Semantic IR segments by `ui_gateway/gateway/phases.py`; each segment still goes through canonical `process_utterance()`, then the gateway dedupes the visible mutation list.
-- `medical@v0` is the active bounded profile.
+- `medical@v0` is the active bounded ontology profile; `legal_courtlistener@v0` and `sec_contracts@v0` are live-data profile lanes for provenance/conflict and obligation/rule pressure.
 - `medical@v0` Semantic IR calls include profile-owned predicate contracts and compact UMLS bridge context; the generic mapper should remain structural rather than accumulating medical type lists.
-- `modelfiles/domain_profile_catalog.v0.json` is the thin skill-like roster. `profile.story_world.v0.json`, `profile.probate.v0.json`, `profile.legal_courtlistener.v0.json`, and `profile.sec_contracts.v0.json` are proposal/mock thick-context packages for future routing experiments.
-- `adapters/courtlistener/` is a conservative legal-source adapter shell. Keep live generated data under ignored `datasets/courtlistener/generated/`; do not commit raw API caches.
+- `modelfiles/domain_profile_catalog.v0.json` is the thin skill-like roster. `profile.story_world.v0.json`, `profile.probate.v0.json`, `profile.legal_courtlistener.v0.json`, and `profile.sec_contracts.v0.json` are declarative thick-context packages for routing/profile experiments.
+- `adapters/courtlistener/` is a conservative legal-source adapter. Keep live generated data under ignored `datasets/courtlistener/generated/`; do not commit raw API caches.
 - `adapters/sec_edgar/` is a conservative SEC/contract adapter shell. Keep live generated data under ignored `datasets/sec_edgar/generated/`; do not commit raw API caches.
 - `src/umls_mvp.py` and `scripts/build_umls_semantic_network_kb.py` contain the current UMLS bridge/Semantic Network work.
 - `Freethinker` is a bounded optional clarification sidecar; it is not an authoritative truth layer.
@@ -57,4 +59,4 @@ python -m pytest tests/test_sec_edgar_adapter.py tests/test_domain_profiles.py -
 python -m pytest -q
 ```
 
-The last known full-suite result after the SEC/contracts scaffold was `299 passed`. The latest focused CourtListener/domain-profile pass verified `8 passed`; the latest focused SEC/domain-profile pass verified `9 passed`.
+The last known full-suite result after the SEC/contracts scaffold was `299 passed`. The latest focused CourtListener/domain-profile pass verified `8 passed`; the latest focused SEC/domain-profile pass verified `9 passed`. The latest CourtListener smoke traces are local under ignored `datasets/courtlistener/generated/` and rendered under ignored `tmp/semantic_ir_trace_views/`.

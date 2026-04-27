@@ -16,7 +16,10 @@ Semantic IR pass.
 
 ## Current Example
 
-`medical@v0` is the first real profile.
+`medical@v0` is the first real profile. Two additional live-data lanes now
+exercise the same profile idea: `legal_courtlistener@v0` for legal-source
+provenance/conflict and `sec_contracts@v0` for filing/contract obligation
+pressure.
 
 It owns:
 
@@ -38,10 +41,11 @@ Two starter/mock profiles also exist for exploration:
   status, identity ambiguity, document evidence, and forfeiture conditions
 - `legal_courtlistener@v0`: CourtListener legal source intake for opinions,
   dockets, parties, judges, citations, allegations, findings, holdings, and
-  provenance
+  provenance; it has synthetic and ignored live API smoke traces
 - `sec_contracts@v0`: SEC/EDGAR and contract-obligation intake for filings,
   exhibits, parties, obligations, conditions, effective dates, termination,
-  breach events, and provenance
+  breach events, and provenance; it has synthetic and ignored live SEC smoke
+  traces
 
 These packages are intentionally declarative. They are research scaffolds for
 testing the catalog idea, not new automatic runtime authority.

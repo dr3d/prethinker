@@ -34,8 +34,9 @@ def record_to_harness_case(record: LegalSourceRecord, *, index: int = 1) -> Sema
         context.append(f"Provenance URL: {record.provenance_url}")
     if case_atom:
         context.append(f"Suggested case atom: {case_atom}")
+    source_id_atom = _atom(record.source_id)[:40]
     return SemanticIRHarnessCase(
-        id=f"courtlistener_{record.source_kind}_{index:04d}",
+        id=f"courtlistener_{record.source_kind}_{source_id_atom}_{index:04d}",
         domain="legal_courtlistener",
         utterance=utterance,
         context=context,

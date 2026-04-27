@@ -10,7 +10,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 
 - Runtime: `src/mcp_server.py`, especially `process_utterance()`.
 - UI: `ui_gateway/`, served locally by `python ui_gateway/main.py` using the stdlib `ThreadingHTTPServer`.
-- Active profile: `medical@v0`.
+- Active profile: `medical@v0`; active profile-lane experiments: `legal_courtlistener@v0` and `sec_contracts@v0`.
 - Active research asset: local UMLS Semantic Network KB built from `sn_current.tgz`.
 - Active architecture pivot: opt-in `semantic_ir_v1` compiler path using `qwen3.6:35b-a3b` through LM Studio/OpenAI-compatible structured output.
 - Current demonstration surface: prompt-book UI plus live ledger cards showing route, semantic workspace, deterministic admission, clarification, blocked execution, and KB mutation outcomes.
@@ -48,6 +48,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 - A thin domain-profile roster now exists in `modelfiles/domain_profile_catalog.v0.json` and is included in Semantic IR input as `available_domain_profiles`. This is the first skill-directory-style control-plane hook: it advertises possible profile contexts without loading every thick package or authorizing writes.
 - Declarative starter profile packages now exist for exploration: `modelfiles/profile.story_world.v0.json`, `modelfiles/profile.probate.v0.json`, and `modelfiles/profile.legal_courtlistener.v0.json`. They provide mock thick context and predicate contracts for future routing experiments without changing runtime admission authority.
 - A first-pass CourtListener adapter shell now lives under `adapters/courtlistener/`. It includes a conservative token-based REST client, normalizer, legal predicate contracts, harness conversion, README, and an offline synthetic legal seed fixture for claim/finding, citation, role-scope, docket, and identity-boundary tests.
+- First CourtListener live smoke generated ignored `breach of lease` and `summary judgment` harness slices and ran legal Semantic IR cases through LM Studio. All emitted valid JSON; the legal palette preserved claim/finding, citation-not-endorsement, docket-not-holding, role-scope, and ambiguous judge identity boundaries.
 - `sec_contracts@v0` is now the third large starter domain. It targets SEC/EDGAR and contract-obligation intake: filing/exhibit provenance, party roles, obligations, rights, conditions, effective/termination triggers, and breach-event boundaries.
 - A first-pass SEC EDGAR adapter shell now lives under `adapters/sec_edgar/`. It requires `SEC_USER_AGENT` for live calls, caches raw responses locally, emits harness cases, and includes an offline synthetic fixture for obligation-not-fact and condition-not-event tests.
 - First SEC live smoke generated ignored Apple/Microsoft filing harness data and ran 11 Semantic IR cases through LM Studio. All emitted valid JSON; adding `filer_of/2` fixed an initial palette gap where filing metadata was being squeezed into `party_to_contract/3`.
@@ -97,7 +98,7 @@ This is the next useful layer for type steering and explanation. It should suppo
 - Build a new held-out frontier pack instead of over-polishing Silverton: cross-document temporal causality, aliases, corrections, disputed claims, and profile type pressure.
 - Port the new cross-turn frontier pack into a runner only after deciding which expectations should be hard regression gates versus research pressure gauges.
 - Explore domain-profile selection with the starter profiles: first offline roster-selection traces, then optional gateway traces, before any automatic context loading affects normal runs.
-- Run the CourtListener adapter against a small live API slice only after choosing a durable cache/review policy. Keep generated live data under ignored `datasets/courtlistener/generated/` unless a tiny fixture is intentionally curated.
+- Keep expanding the CourtListener lane with small live API slices and curated synthetic boundaries. Generated live data remains ignored under `datasets/courtlistener/generated/` unless a tiny fixture is intentionally curated.
 - Run the SEC adapter against a small EDGAR submissions slice only after setting `SEC_USER_AGENT` and choosing a durable cache/review policy. Keep generated live data under ignored `datasets/sec_edgar/generated/`.
 - Keep the Semantic IR harness model-agnostic, but use `qwen/qwen3.6-35b-a3b` as the default development model unless a specific comparison question needs another local model.
 - Tighten narrative ingestion next around stable object identity, event observation predicates, and temporal/event ordering instead of adding story-specific Python phrase patches.
@@ -111,6 +112,7 @@ Recent verified results:
 - Focused semantic IR runtime battery: `23 passed`
 - Focused profile-contract/domain-roster handoff verification: `7 passed`
 - Focused CourtListener/domain-profile verification: `8 passed`
+- CourtListener legal smoke: synthetic boundary pass `5/5` valid JSON with safe claim/finding, citation, role, docket, and identity behavior; live metadata smoke `9/9` valid JSON over synthetic plus ignored CourtListener API records
 - Focused SEC/domain-profile verification: `9 passed`
 - Edge runtime A/B: semantic IR `20/20` decision labels, `0.976` avg score, `0` non-mapper parse rescues
 - Weak-edge runtime A/B: semantic IR `10/10` decision labels, `1.000` avg score, `0` non-mapper parse rescues
@@ -138,13 +140,14 @@ Rerun the full suite before committing a new stopping point.
 6. `docs/SEMANTIC_IR_MAPPER_SPEC.md`
 7. `docs/SEMANTIC_IR_MODEL_MATRIX.md`
 8. `docs/DOMAIN_PROFILE_CATALOG.md`
-9. `docs/SEC_CONTRACTS_DOMAIN.md`
-10. `docs/GUARDRAIL_DEPENDENCY_AB.md`
-11. `docs/UMLS_MVP.md`
-12. `docs/MEDICAL_PROFILE.md`
-13. `docs/FREETHINKER_DESIGN.md`
-14. `docs/CONSOLE_TRYBOOK.md`
-15. `ui_gateway/README.md`
+9. `docs/COURTLISTENER_DOMAIN.md`
+10. `docs/SEC_CONTRACTS_DOMAIN.md`
+11. `docs/GUARDRAIL_DEPENDENCY_AB.md`
+12. `docs/UMLS_MVP.md`
+13. `docs/MEDICAL_PROFILE.md`
+14. `docs/FREETHINKER_DESIGN.md`
+15. `docs/CONSOLE_TRYBOOK.md`
+16. `ui_gateway/README.md`
 
 ## What Was Pruned
 

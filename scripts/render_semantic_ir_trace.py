@@ -191,7 +191,7 @@ def _input_from_record(
     record: dict[str, Any],
     scenario_map: dict[str, dict[str, Any]],
 ) -> dict[str, Any]:
-    scenario_id = str(record.get("scenario_id", "") or record.get("id", "")).strip()
+    scenario_id = str(record.get("scenario_id", "") or record.get("case_id", "") or record.get("id", "")).strip()
     scenario = scenario_map.get(scenario_id, {})
     model_input = _extract_model_input(record)
     input_payload = model_input.get("input_payload") if isinstance(model_input.get("input_payload"), dict) else {}
