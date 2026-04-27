@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import hashlib
+import gzip
+import zlib
 import json
 import os
 import urllib.request
@@ -45,7 +47,13 @@ class SecEdgarClient:
             return json.loads(cached.read_text(encoding="utf-8"))
         req = urllib.request.Request(url, headers={"User-Agent": self.user_agent, "Accept-Encoding": "gzip, deflate"})
         with urllib.request.urlopen(req, timeout=30) as response:
-            payload = json.loads(response.read().decode("utf-8"))
+            raw = response.read()
+            encoding = str(response.headers.get("Content-Encoding", "")).lower()
+            if "gzip" in encoding:
+                raw = gzip.decompress(raw)
+            elif "deflate" in encoding:
+                raw = zlib.decompress(raw)
+            payload = json.loads(raw.decode("utf-8"))
         cached.parent.mkdir(parents=True, exist_ok=True)
         cached.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
         return payload

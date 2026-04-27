@@ -35,6 +35,7 @@
   ],
   "canonical_palette": [
     { "signature": "filing_form/2", "arguments": ["filing", "form_type"], "notes": "SEC filing form type such as 10-K or 8-K." },
+    { "signature": "filer_of/2", "arguments": ["entity", "filing"], "notes": "Company or reporting entity associated with an SEC filing." },
     { "signature": "filed_on/2", "arguments": ["filing_or_document", "date"], "notes": "Filing or document date." },
     { "signature": "accession_number/2", "arguments": ["filing", "accession_number"], "notes": "SEC accession number." },
     { "signature": "exhibit_to_filing/3", "arguments": ["exhibit", "filing", "exhibit_type"], "notes": "Exhibit associated with an SEC filing." },

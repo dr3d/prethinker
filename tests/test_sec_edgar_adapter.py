@@ -21,6 +21,7 @@ def test_sec_contracts_profile_is_cataloged_and_contracts_load():
     assert profile["profile_id"] == "sec_contracts@v0"
     contracts = profile_package_contracts(profile)
     signatures = {row["signature"] for row in contracts}
+    assert "filer_of/2" in signatures
     assert "obligation/3" in signatures
     assert "subject_to/2" in signatures
     assert "effective_on/2" in signatures
@@ -83,7 +84,7 @@ def test_contract_excerpt_to_harness_includes_obligation_boundaries():
     )
     case = record_to_harness_case(record, index=3)
     payload = case.to_dict()
-    assert payload["id"] == "sec_contract_excerpt_0003"
+    assert payload["id"].startswith("sec_contract_excerpt_exhibit_10_1_0003")
     assert payload["domain"] == "sec_contracts"
     assert "obligation/3" in payload["allowed_predicates"]
     assert any(row["signature"] == "subject_to/2" for row in payload["predicate_contracts"])
@@ -93,7 +94,10 @@ def test_contract_excerpt_to_harness_includes_obligation_boundaries():
 def test_sec_predicate_contracts_have_expected_shapes():
     signatures = sec_contract_predicate_signatures()
     contracts = semantic_ir_contracts()
+    assert "filer_of/2" in signatures
     assert "party_to_contract/3" in signatures
+    filer = next(row for row in contracts if row["signature"] == "filer_of/2")
+    assert filer["arguments"] == ["entity", "filing"]
     obligation = next(row for row in contracts if row["signature"] == "obligation/3")
     assert obligation["arguments"] == ["obligated_party", "obligation_content", "source"]
 

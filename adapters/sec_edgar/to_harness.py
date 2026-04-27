@@ -34,7 +34,7 @@ def record_to_harness_case(record: FilingSourceRecord, *, index: int = 1) -> Sem
     if record.provenance_url:
         context.append(f"Provenance URL: {record.provenance_url}")
     return SemanticIRHarnessCase(
-        id=f"sec_{record.source_kind}_{index:04d}",
+        id=f"sec_{record.source_kind}_{_atom(record.source_id)[:40]}_{index:04d}",
         domain="sec_contracts",
         utterance=utterance,
         context=context,
@@ -50,6 +50,7 @@ def record_to_harness_case(record: FilingSourceRecord, *, index: int = 1) -> Sem
                 "repaid(...) from shall repay language",
                 "breach_event(...) from obligation-only language",
                 "global borrower/lender role facts",
+                "party_to_contract(...) for ordinary filing metadata",
                 "condition_met(...) without explicit evidence",
             ],
         },

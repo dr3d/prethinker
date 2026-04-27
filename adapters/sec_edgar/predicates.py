@@ -5,6 +5,7 @@ from typing import Any
 
 SEC_CONTRACT_PREDICATE_CONTRACTS: list[dict[str, Any]] = [
     {"signature": "filing_form/2", "args": ["filing", "form_type"]},
+    {"signature": "filer_of/2", "args": ["entity", "filing"]},
     {"signature": "filed_on/2", "args": ["filing_or_document", "date"]},
     {"signature": "accession_number/2", "args": ["filing", "accession_number"]},
     {"signature": "exhibit_to_filing/3", "args": ["exhibit", "filing", "exhibit_type"]},

@@ -50,6 +50,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 - A first-pass CourtListener adapter shell now lives under `adapters/courtlistener/`. It includes a conservative token-based REST client, normalizer, legal predicate contracts, harness conversion, README, and an offline synthetic legal seed fixture for claim/finding, citation, role-scope, docket, and identity-boundary tests.
 - `sec_contracts@v0` is now the third large starter domain. It targets SEC/EDGAR and contract-obligation intake: filing/exhibit provenance, party roles, obligations, rights, conditions, effective/termination triggers, and breach-event boundaries.
 - A first-pass SEC EDGAR adapter shell now lives under `adapters/sec_edgar/`. It requires `SEC_USER_AGENT` for live calls, caches raw responses locally, emits harness cases, and includes an offline synthetic fixture for obligation-not-fact and condition-not-event tests.
+- First SEC live smoke generated ignored Apple/Microsoft filing harness data and ran 11 Semantic IR cases through LM Studio. All emitted valid JSON; adding `filer_of/2` fixed an initial palette gap where filing metadata was being squeezed into `party_to_contract/3`.
 - A new held-out cross-turn frontier proposal lives at `docs/data/frontier_packs/semantic_ir_cross_turn_frontier_pack_v1.json`. It targets identity drift, claim/observation separation, noisy multilingual corrections, mixed rule/query/fact turns, temporal corrections, and domain type ambiguity.
 
 ## Local UMLS Assets
@@ -137,12 +138,13 @@ Rerun the full suite before committing a new stopping point.
 6. `docs/SEMANTIC_IR_MAPPER_SPEC.md`
 7. `docs/SEMANTIC_IR_MODEL_MATRIX.md`
 8. `docs/DOMAIN_PROFILE_CATALOG.md`
-9. `docs/GUARDRAIL_DEPENDENCY_AB.md`
-10. `docs/UMLS_MVP.md`
-11. `docs/MEDICAL_PROFILE.md`
-12. `docs/FREETHINKER_DESIGN.md`
-13. `docs/CONSOLE_TRYBOOK.md`
-14. `ui_gateway/README.md`
+9. `docs/SEC_CONTRACTS_DOMAIN.md`
+10. `docs/GUARDRAIL_DEPENDENCY_AB.md`
+11. `docs/UMLS_MVP.md`
+12. `docs/MEDICAL_PROFILE.md`
+13. `docs/FREETHINKER_DESIGN.md`
+14. `docs/CONSOLE_TRYBOOK.md`
+15. `ui_gateway/README.md`
 
 ## What Was Pruned
 
