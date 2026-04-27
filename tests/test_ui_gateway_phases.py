@@ -218,6 +218,96 @@ class _SegmentRuntime:
         return {"speaker": "prethink-gateway", "text": "unused", "mode": "answer"}
 
 
+class _QueryBoundarySegmentRuntime(_SegmentRuntime):
+    def process_utterance(self, *, utterance, config, session, clarification_answer=None, prethink_id=None):
+        self.calls.append(utterance)
+        index = len(self.calls)
+        if "?" in utterance:
+            return {
+                "status": "ok",
+                "front_door": {
+                    "route": "query",
+                    "compiler_intent": "query",
+                    "needs_clarification": False,
+                    "reasons": ["semantic_ir_v1"],
+                    "clarification_question": "",
+                    "prethink_id": f"pt-{index}",
+                },
+                "execution": {
+                    "status": "success",
+                    "intent": "query",
+                    "writes_applied": 0,
+                    "operations": [
+                        {
+                            "tool": "query_rows",
+                            "result": {"status": "success", "query": "owns(mara, X)."},
+                        }
+                    ],
+                    "query_result": {"status": "success", "rows": [{"X": "lease"}]},
+                    "parse": {"intent": "query", "queries": ["owns(mara, X)."]},
+                    "errors": [],
+                },
+                "compiler_trace": {
+                    "parse": {
+                        "semantic_ir": {
+                            "model": "qwen/qwen3.6-35b-a3b",
+                            "parsed": {"decision": "answer", "turn_type": "query"},
+                        },
+                        "normalized": {
+                            "admission_diagnostics": {
+                                "admitted_count": 1,
+                                "skipped_count": 0,
+                                "operations": [{"admitted": True, "effect": "query"}],
+                            }
+                        },
+                    },
+                    "summary": {"overall": "semantic_ir_v1"},
+                },
+            }
+        atom = f"fact_{index}"
+        return {
+            "status": "ok",
+            "front_door": {
+                "route": "write",
+                "compiler_intent": "assert_fact",
+                "needs_clarification": False,
+                "reasons": ["semantic_ir_v1"],
+                "clarification_question": "",
+                "prethink_id": f"pt-{index}",
+            },
+            "execution": {
+                "status": "success",
+                "intent": "assert_fact",
+                "writes_applied": 1,
+                "operations": [
+                    {
+                        "tool": "assert_fact",
+                        "result": {"status": "success", "fact": f"observed({atom})."},
+                    }
+                ],
+                "query_result": None,
+                "parse": {"intent": "assert_fact", "facts": [f"observed({atom})."]},
+                "errors": [],
+            },
+            "compiler_trace": {
+                "parse": {
+                    "semantic_ir": {
+                        "model": "qwen/qwen3.6-35b-a3b",
+                        "parsed": {"decision": "commit", "turn_type": "state_update"},
+                    },
+                    "normalized": {
+                        "admission_diagnostics": {
+                            "admitted_count": 1,
+                            "skipped_count": 0,
+                            "operations": [{"admitted": True, "effect": "fact"}],
+                        }
+                    },
+                },
+                "summary": {"overall": "semantic_ir_v1"},
+            },
+        }
+
+
 class GatewayPhasesTests(unittest.TestCase):
     def test_process_turn_uses_served_handoff_when_clarification_is_suppressed(self) -> None:
         runtime = _FakeRuntime()
@@ -353,6 +443,51 @@ class GatewayPhasesTests(unittest.TestCase):
         commit_phase = next(phase for phase in turn["phases"] if phase["phase"] == "commit")
         self.assertEqual(commit_phase["status"], "applied")
         self.assertEqual(commit_phase["data"]["writes_applied"], 32)
+
+    def test_query_boundary_segmentation_keeps_queries_from_piling_into_writes(self) -> None:
+        runtime = _QueryBoundarySegmentRuntime()
+        session = SessionState(session_id="session-query-boundary")
+        config = {
+            "front_door_uri": "prethink://local/front-door",
+            "served_handoff_mode": "never",
+            "strict_mode": True,
+            "semantic_ir_enabled": True,
+        }
+        utterance = (
+            "Mara owns the lease. Oskar manages the unit. Who owns the lease? "
+            "Also remember that Theo signed the addendum."
+        )
+
+        result = process_turn(
+            utterance=utterance,
+            session=session,
+            config=config,
+            runtime=runtime,
+            config_store=None,
+        )
+
+        self.assertEqual(result["status"], "ok")
+        self.assertEqual(
+            runtime.calls,
+            [
+                "Mara owns the lease.",
+                "Oskar manages the unit.",
+                "Who owns the lease?",
+                "Also remember that Theo signed the addendum.",
+            ],
+        )
+        turn = result["turn"]
+        self.assertEqual(turn["route"], "write")
+        ingest = next(phase for phase in turn["phases"] if phase["phase"] == "ingest")
+        self.assertEqual(ingest["data"]["strategy"], "query_boundary_semantic_ir_ingestion")
+        workspace = next(phase for phase in turn["phases"] if phase["phase"] == "workspace")
+        self.assertEqual(workspace["data"]["segment_count"], 4)
+        self.assertEqual(workspace["data"]["query_count"], 1)
+        commit = next(phase for phase in turn["phases"] if phase["phase"] == "commit")
+        self.assertEqual(commit["data"]["writes_applied"], 3)
+        self.assertEqual(commit["data"]["status"], "success")
+        self.assertIn("segmented_query_boundaries", turn["trace"])
+        self.assertEqual(turn["trace"]["segmented_query_boundaries"]["query_count"], 1)
 
 
 if __name__ == "__main__":

@@ -40,6 +40,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 - Predicate contracts can now be supplied in Semantic IR input payloads so a predicate's argument roles and ordering are explicit instead of being hidden in test expectations.
 - The console now defaults to the current LM Studio Semantic IR lane (`qwen/qwen3.6-35b-a3b`) instead of the older 9B/Ollama parser path, while still keeping Freethinker off by default.
 - Long story-like utterances in the UI can use segmented Semantic IR ingestion: the gateway splits the narrative into focused segments, processes each through the canonical `process_utterance()` path, dedupes applied mutations, and exposes segment-level workspace/admission traces.
+- Mixed long utterances can now segment at query boundaries, so questions do not pile up in the same semantic workspace as surrounding write facts.
 - The generic predicate registry now includes a small story-world event/state palette (`tasted/2`, `sat_in/2`, `lay_in/2`, `broke/1`, `asleep_in/2`, `was_tasted/1`, `was_eaten/1`, `was_sat_in/1`, `was_lain_in/1`, etc.) so narrative ingestion no longer has to squeeze ordinary events into `inside/2`, `at/2`, or `carries/2`.
 - The mapper now blocks placeholder-like durable write arguments such as `unknown_agent`, while the prompt steers unknown-actor observations toward passive object-state predicates when those are available.
 
@@ -86,12 +87,13 @@ This is the next useful layer for type steering and explanation. It should suppo
 - Build a new held-out frontier pack instead of over-polishing Silverton: cross-document temporal causality, aliases, corrections, disputed claims, and profile type pressure.
 - Keep the Semantic IR harness model-agnostic, but use `qwen/qwen3.6-35b-a3b` as the default development model unless a specific comparison question needs another local model.
 - Tighten narrative ingestion next around stable object identity, event observation predicates, and temporal/event ordering instead of adding story-specific Python phrase patches.
+- Keep a regular regression cadence around segmentation, predicate-palette admission, stored-logic conflicts, and rule/query mixed turns; the frontier is productive enough that small improvements can easily re-open older failure modes.
 
 ## Verification Snapshot
 
 Recent verified results:
 
-- Full suite after Semantic IR console/story-ingestion cleanup: `281 passed`
+- Full suite after Semantic IR console/story-ingestion cleanup: `282 passed`
 - Focused semantic IR runtime battery: `23 passed`
 - Edge runtime A/B: semantic IR `20/20` decision labels, `0.976` avg score, `0` non-mapper parse rescues
 - Weak-edge runtime A/B: semantic IR `10/10` decision labels, `1.000` avg score, `0` non-mapper parse rescues

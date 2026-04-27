@@ -64,6 +64,7 @@ It is the first place where the product behavior becomes legible.
 - the console now has a profile-aware prompt-book rail for repeatable demos that pair a setup move, an utterance, and the expected reasoning behavior to watch
 - the semantic IR path can be enabled to show richer model workspace proposals before deterministic mapper/admission policy decides what survives
 - long story-like utterances can be processed as multiple focused Semantic IR segments, then shown as one deduped console turn with segment-level trace data
+- long or mixed utterances can split at query boundaries so a question does not share one semantic workspace with surrounding write facts
 
 ## Newbie-Friendly Surface
 
@@ -130,6 +131,29 @@ The first useful smoke target is the repo's Goldilocks roundtrip story. The
 latest local run produced `56` deduped mutations across `50` segments in about
 `180s`, with the earlier bad artifacts (`unknown_agent`, voice-as-`carries`,
 nonsensical `inside(...)` writes, stray body-part facts) removed.
+
+## Query Boundary Segmentation
+
+Queries are also natural segmentation points. In a mixed utterance such as:
+
+```text
+Mara owns the lease. Oskar manages the unit. Who owns the lease?
+Also remember that Theo signed the addendum.
+```
+
+the gateway now prefers focused segments:
+
+```text
+Mara owns the lease.
+Oskar manages the unit.
+Who owns the lease?
+Also remember that Theo signed the addendum.
+```
+
+This keeps asserted facts, query targets, and later write instructions from
+collapsing into one overlarge workspace. The rule is structural and domain
+neutral: split where the turn mode changes, then let each segment go through
+normal Semantic IR admission.
 
 ## Freethinker Status
 

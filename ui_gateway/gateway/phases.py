@@ -20,6 +20,8 @@ def _phase(name: str, status: str, summary: str, data: dict) -> dict:
 MAX_STORY_SEGMENTS = 80
 MIN_STORY_SEGMENTS = 4
 MIN_STORY_CHARS = 700
+MAX_QUERY_BOUNDARY_SEGMENTS = 24
+MIN_QUERY_BOUNDARY_CHARS = 80
 
 
 def _strip_markdown_noise(text: str) -> list[str]:
@@ -49,6 +51,31 @@ def _split_story_segments(utterance: str) -> list[str]:
     return []
 
 
+def _split_sentence_segments(text: str, *, limit: int) -> list[str]:
+    return [
+        segment.strip()
+        for segment in re.split(r"(?<=[.!?])\s+", str(text or "").strip())
+        if segment.strip()
+    ][:limit]
+
+
+def _split_query_boundary_segments(utterance: str) -> list[str]:
+    text = str(utterance or "").strip()
+    if not text or "?" not in text:
+        return []
+    segments = _split_sentence_segments(text, limit=MAX_QUERY_BOUNDARY_SEGMENTS)
+    if len(segments) < 2:
+        return []
+    query_indexes = [index for index, segment in enumerate(segments) if "?" in segment]
+    if not query_indexes:
+        return []
+    # A final single query can stay as one workspace; the useful boundary is a
+    # question that has setup before it, follow-up text after it, or siblings.
+    if len(segments) == 1 or (len(query_indexes) == 1 and query_indexes[0] == len(segments) - 1 and len(text) < MIN_QUERY_BOUNDARY_CHARS):
+        return []
+    return segments
+
+
 def _should_segment_story(utterance: str, config: dict) -> bool:
     if not bool(config.get("semantic_ir_enabled", False)):
         return False
@@ -73,6 +100,18 @@ def _should_segment_story(utterance: str, config: dict) -> bool:
             " were ",
         )
     )
+
+
+def _should_segment_query_boundaries(utterance: str, config: dict) -> bool:
+    if not bool(config.get("semantic_ir_enabled", False)):
+        return False
+    text = str(utterance or "").strip()
+    if len(text) < MIN_QUERY_BOUNDARY_CHARS:
+        return False
+    segments = _split_query_boundary_segments(text)
+    if len(segments) < 2:
+        return False
+    return True
 
 
 def _semantic_ir_layers(compiler_trace: dict | None) -> tuple[dict, dict, dict]:
@@ -169,6 +208,65 @@ def _process_segmented_story(
     started_at: float,
 ) -> dict:
     segments = _split_story_segments(utterance)
+    return _process_segmented_utterance(
+        utterance=utterance,
+        segments=segments,
+        session=session,
+        config=config,
+        runtime=runtime,
+        started_at=started_at,
+        strategy="line_or_sentence_semantic_ir_ingestion",
+        trace_key="segmented_story",
+        ingest_summary=f"Long narrative split into {len(segments)} focused Semantic IR segment(s).",
+        workspace_summary=f"Processed {len(segments)} semantic workspace proposal(s) instead of one summary-shaped proposal.",
+        commit_summary="Deterministic commit attempted for all story segments.",
+        answer_prefix="Segmented story ingestion complete",
+        route_name="segmented_semantic_ir",
+    )
+
+
+def _process_segmented_query_boundaries(
+    *,
+    utterance: str,
+    session: SessionState,
+    config: dict,
+    runtime: RuntimeHooks,
+    started_at: float,
+) -> dict:
+    segments = _split_query_boundary_segments(utterance)
+    return _process_segmented_utterance(
+        utterance=utterance,
+        segments=segments,
+        session=session,
+        config=config,
+        runtime=runtime,
+        started_at=started_at,
+        strategy="query_boundary_semantic_ir_ingestion",
+        trace_key="segmented_query_boundaries",
+        ingest_summary=f"Mixed turn split at query boundaries into {len(segments)} focused Semantic IR segment(s).",
+        workspace_summary=f"Processed {len(segments)} focused workspace proposal(s) so queries do not pile up with writes.",
+        commit_summary="Deterministic execution attempted for each query-boundary segment.",
+        answer_prefix="Segmented query-boundary ingestion complete",
+        route_name="query_boundary_semantic_ir",
+    )
+
+
+def _process_segmented_utterance(
+    *,
+    utterance: str,
+    segments: list[str],
+    session: SessionState,
+    config: dict,
+    runtime: RuntimeHooks,
+    started_at: float,
+    strategy: str,
+    trace_key: str,
+    ingest_summary: str,
+    workspace_summary: str,
+    commit_summary: str,
+    answer_prefix: str,
+    route_name: str,
+) -> dict:
     operations: list[dict] = []
     segment_records: list[dict] = []
     clauses_seen: set[str] = set()
@@ -176,6 +274,7 @@ def _process_segmented_story(
     error_count = 0
     admitted_total = 0
     skipped_total = 0
+    query_count = 0
 
     for index, segment in enumerate(segments, start=1):
         result = runtime.process_utterance(
@@ -237,6 +336,8 @@ def _process_segmented_story(
                 if clause in clauses_seen:
                     continue
                 clauses_seen.add(clause)
+            if tool == "query_rows":
+                query_count += 1
             operations.append(op)
             new_operation_count += 1
         segment_records.append(
@@ -274,9 +375,14 @@ def _process_segmented_story(
         if isinstance(op, dict)
         and str(op.get("tool", "")).strip() in {"assert_fact", "assert_rule", "retract_fact"}
     )
+    query_count = query_count or sum(
+        1
+        for op in operations
+        if isinstance(op, dict) and str(op.get("tool", "")).strip() == "query_rows"
+    )
 
     execution = {
-        "status": "success" if writes_applied > 0 else ("error" if error_count else "no_results"),
+        "status": "success" if (writes_applied > 0 or query_count > 0) else ("error" if error_count else "no_results"),
         "intent": "assert_fact" if writes_applied > 0 else "other",
         "writes_applied": writes_applied,
         "operations": operations,
@@ -296,28 +402,29 @@ def _process_segmented_story(
         if held_count or error_count
         else [],
     }
-    route = "write" if writes_applied > 0 else "other"
+    route = "write" if writes_applied > 0 else ("query" if query_count > 0 else "other")
     phases = [
         _phase(
             "ingest",
             "segmented",
-            f"Long narrative split into {len(segments)} focused Semantic IR segment(s).",
+            ingest_summary,
             {
                 "front_door_uri": config["front_door_uri"],
                 "segment_count": len(segments),
-                "strategy": "line_or_sentence_semantic_ir_ingestion",
+                "strategy": strategy,
             },
         ),
         _phase(
             "workspace",
             "segmented",
-            f"Processed {len(segments)} semantic workspace proposal(s) instead of one summary-shaped proposal.",
+            workspace_summary,
             {
                 "segment_count": len(segments),
                 "admitted_count": admitted_total,
                 "skipped_count": skipped_total,
                 "held_count": held_count,
                 "error_count": error_count,
+                "query_count": query_count,
                 "segments": [
                     {key: value for key, value in record.items() if key != "trace"}
                     for record in segment_records
@@ -332,6 +439,7 @@ def _process_segmented_story(
                 "admitted_count": admitted_total,
                 "skipped_count": skipped_total,
                 "writes_applied": writes_applied,
+                "query_count": query_count,
             },
         ),
         _phase(
@@ -342,15 +450,16 @@ def _process_segmented_story(
         ),
         _phase(
             "commit",
-            "applied" if writes_applied else "skipped",
-            "Deterministic commit attempted for all story segments.",
+            "applied" if writes_applied else ("queried" if query_count else "skipped"),
+            commit_summary,
             execution,
         ),
     ]
     answer = {
         "speaker": "prethink-gateway",
         "text": (
-            f"Segmented story ingestion complete: {writes_applied} mutation(s) applied "
+            f"{answer_prefix}: {writes_applied} mutation(s) applied "
+            f"and {query_count} query operation(s) executed "
             f"across {len(segments)} segment(s)."
             + (f" {held_count} segment(s) held for clarification." if held_count else "")
         ),
@@ -358,22 +467,23 @@ def _process_segmented_story(
     }
     phases.append(_phase("answer", "ok", "Prepared final response envelope.", answer))
     trace = {
-        "segmented_story": {
-            "strategy": "line_or_sentence_semantic_ir_ingestion",
+        trace_key: {
+            "strategy": strategy,
             "segment_count": len(segments),
             "admitted_count": admitted_total,
             "skipped_count": skipped_total,
             "writes_applied": writes_applied,
+            "query_count": query_count,
             "held_count": held_count,
             "error_count": error_count,
             "segments": segment_records,
         },
         "summary": {
             "overall": (
-                f"segmented_story={len(segments)} segments; "
-                f"writes={writes_applied}; held={held_count}; errors={error_count}"
+                f"{trace_key}={len(segments)} segments; "
+                f"writes={writes_applied}; queries={query_count}; held={held_count}; errors={error_count}"
             ),
-            "prethink_source": "segmented_semantic_ir",
+            "prethink_source": route_name,
         },
     }
     turn = {
@@ -500,6 +610,15 @@ def process_turn(
 
     if not session.pending_clarification and _should_segment_story(utterance, config):
         return _process_segmented_story(
+            utterance=utterance,
+            session=session,
+            config=config,
+            runtime=runtime,
+            started_at=started_at,
+        )
+
+    if not session.pending_clarification and _should_segment_query_boundaries(utterance, config):
+        return _process_segmented_query_boundaries(
             utterance=utterance,
             session=session,
             config=config,

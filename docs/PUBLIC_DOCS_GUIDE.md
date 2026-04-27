@@ -94,7 +94,7 @@ future architecture.
 
 Latest local verification before this refresh:
 
-- Full pytest suite: `281 passed`
+- Full pytest suite: `282 passed`
 - Focused Semantic IR console/story-ingestion verification: `55 passed`
 - Semantic IR runtime edge pack: `20/20` decision labels, `0.976` avg score
 - Semantic IR weak-edge pack: `10/10` decision labels, `1.000` avg score

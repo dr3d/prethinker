@@ -178,6 +178,12 @@ were removed. The remaining questions are now cleaner research problems:
 stable object identity, observed-event representation, and temporal/event
 ordering.
 
+The same segmentation idea now applies to long mixed turns with explicit
+queries. Query boundaries are treated as natural breaks because a question
+changes the mode of the turn: surrounding text may assert state, while the
+question should remain a query target rather than becoming another fact-like
+candidate. This is another structural boundary, not a domain patch.
+
 ## Why a Smarter Model Might Reduce Python Guardrails
 
 The hope is not that a larger model makes guardrails unnecessary. The hope is

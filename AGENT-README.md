@@ -50,4 +50,4 @@ python -m pytest tests/test_semantic_ir_runtime.py tests/test_guardrail_dependen
 python -m pytest -q
 ```
 
-The last known full-suite result was `281 passed`. The latest focused console/story-ingestion pass verified `55 passed` across semantic IR runtime, UI gateway phases, and gateway config.
+The last known full-suite result was `282 passed`. The latest focused console/story-ingestion pass verified `55 passed` across semantic IR runtime, UI gateway phases, and gateway config.

@@ -53,7 +53,7 @@ The public repo currently tracks `29` pytest files under [tests/](https://github
 
 ```powershell
 python -m pytest -q
-# 281 passed
+# 282 passed
 ```
 
 Focused verification after the current Semantic IR console/story-ingestion pass:

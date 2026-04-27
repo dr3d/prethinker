@@ -187,11 +187,13 @@ Fresh session.
 1. `Remember that the launch plan ships next week, and tell me whether it is delayed.`
 2. `Store that the museum opens at dawn, then tell me if it opens at noon.`
 3. `Jax returned from the spacewalk, right?`
+4. `Mara owns the lease. Oskar manages the unit. Who owns the lease? Also remember that Theo signed the addendum.`
 
 What to look for:
 
 - whether the front door separates write and query intent sensibly
 - whether it asks for clarification instead of bluffing through mixed instructions
+- whether longer mixed turns split at query boundaries so facts before and after the question do not pile into the query workspace
 
 ## Scenario 10: Negative Cases
 
