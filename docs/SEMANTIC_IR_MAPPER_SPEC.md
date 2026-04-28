@@ -1,6 +1,6 @@
 # Semantic IR Mapper Specification
 
-Last updated: 2026-04-27
+Last updated: 2026-04-28
 
 ## Purpose
 
@@ -14,6 +14,7 @@ means operationally:
 semantic_ir_v1 proposal
   -> projected decision
   -> admissible operations
+  -> scoped diagnostic worlds for blocked candidates
   -> legacy parse/runtime packet
   -> KB mutation, query, clarification, quarantine, or rejection
 ```
@@ -81,6 +82,32 @@ behavior.
 
 Projection is structural policy. It is not a phrase rewrite.
 
+## Epistemic Worlds V1
+
+Projection can block an operation that was otherwise structured enough to have
+become a fact, rule, or retract. For example, a medical turn may contain a safe
+memory fact and an unsafe dose-advice query; the mapper projects the turn to
+`reject` so the memory fact cannot enter global truth.
+
+Epistemic Worlds v1 preserves that blocked candidate in diagnostics using fixed
+wrapper predicates:
+
+```prolog
+world_operation(reject_world, op_0, taking, fact).
+world_arg(reject_world, op_0, 1, priya).
+world_arg(reject_world, op_0, 2, warfarin).
+world_policy(reject_world, op_0, reject).
+world_clause(reject_world, op_0, 1, taking_priya_warfarin).
+```
+
+These clauses mean: "this candidate was seen in a rejected/quarantined/clarify
+world." They do **not** mean `taking(priya, warfarin).` is true in the durable
+domain KB. This gives traces and future UX a way to remember disputed,
+rejected, or quarantined content without weakening the admission boundary.
+
+Current status: diagnostic payload only. Persisting and querying scoped worlds
+is an explicit future policy decision.
+
 ## Operation Admission
 
 Only `candidate_operations` may become executable clauses.
@@ -97,7 +124,8 @@ Only `candidate_operations` may become executable clauses.
 | `operation=assert`, negative polarity, denial/speech event predicate | Admit | `denied(...)` records a speech/event fact, not logical negation. |
 | `operation=retract` | Emit retract variants | Numbered aliases like `crate12`/`crate_12` are structural term normalization. |
 | `operation=rule` with explicit `clause` | Admit if the rule clause normalizes | The model may propose a rule only when it has already compiled the executable rule shape. |
-| `operation=rule` without explicit rule clause | Skip operation | The mapper does not synthesize durable Prolog rules from prose. |
+| `operation=rule` without explicit rule clause and variable-like args | Skip operation | Prevents variable stubs like `R` from becoming fake facts. |
+| `operation=rule` without explicit rule clause but positive direct ground args | Admit as a fact-like rule record | Captures direct labels without synthesizing executable Prolog rules. |
 | Quantified group assertion without individual expansion | Skip operation | Prevents fake facts like `submitted_form(residents)`. |
 
 ## Polarity Policy

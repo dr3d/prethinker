@@ -352,6 +352,16 @@ class SemanticIRRuntimeTests(unittest.TestCase):
                 for row in diagnostics["operations"]
             )
         )
+        worlds = diagnostics["epistemic_worlds"]
+        self.assertEqual(worlds["world_count"], 1)
+        self.assertIn("world_operation(reject_world, op_0, taking, fact).", worlds["clauses"])
+        self.assertIn("world_arg(reject_world, op_0, 1, priya).", worlds["clauses"])
+        self.assertIn("world_arg(reject_world, op_0, 2, warfarin).", worlds["clauses"])
+        self.assertIn(
+            "world_clause(reject_world, op_0, 1, taking_priya_warfarin).",
+            worlds["clauses"],
+        )
+        self.assertEqual(parsed["epistemic_worlds"], worlds)
 
     def test_mapper_admits_contract_role_shape_when_interval_is_grounded(self) -> None:
         ir = _ir(
@@ -1373,6 +1383,11 @@ class SemanticIRRuntimeTests(unittest.TestCase):
                 for row in diagnostics["operations"]
             )
         )
+        worlds = diagnostics["epistemic_worlds"]
+        self.assertEqual(worlds["world_count"], 1)
+        self.assertIn("world_operation(quarantine_world, op_0, claimed, fact).", worlds["clauses"])
+        self.assertIn("world_arg(quarantine_world, op_0, 1, arthur).", worlds["clauses"])
+        self.assertIn("world_arg(quarantine_world, op_0, 2, silas).", worlds["clauses"])
 
     def test_mapper_skips_out_of_palette_candidate_operation(self) -> None:
         ir = _ir(

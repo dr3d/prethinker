@@ -95,6 +95,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 - A new held-out cross-turn frontier proposal lives at `docs/data/frontier_packs/semantic_ir_cross_turn_frontier_pack_v1.json`. It targets identity drift, claim/observation separation, noisy multilingual corrections, mixed rule/query/fact turns, temporal corrections, and domain type ambiguity.
 - A new `policy_demo` Semantic IR bakeoff group now targets the "talk your rules into existence" demo family: reimbursement-policy violations, meeting commitments, access sponsorship expiry, customer-support override ladders, story-world throne claims, and business dependency credibility.
 - Prompt/context policy now explicitly separates pure answers from mixed write+query turns, prioritizes direct grounded facts before complex rule clauses under the operation cap, requires explicit query operations for explicit questions, and blocks necessary-condition-to-sufficient-rule inversions such as turning "no launch without QA" into `launch_allowed(...)`.
+- Epistemic Worlds v1 now surfaces projection-blocked writes as scoped diagnostic memory instead of global truth. When a turn projects to `reject`, `quarantine`, or `clarify`, the mapper can preserve the blocked candidate as fixed wrapper clauses such as `world_operation/4`, `world_arg/4`, and `world_policy/3`; these are diagnostic scoped-memory clauses and do not enter the durable domain predicates.
 
 ## Local UMLS Assets
 
@@ -132,6 +133,7 @@ Supporting architecture:
 
 - Grow deterministic stored-logic admission beyond the first guard: profile-declared functional predicates, temporal scope, negation policy, and richer contradiction probes are still open.
 - Grow clause support records and the `truth_maintenance` proposal block into a real dependency layer: derived conclusions should eventually point to supporting facts, rules, source documents, and retractions without granting model-proposed consequences write authority.
+- Decide when Epistemic Worlds should graduate from diagnostic payloads into optional durable scoped memory. The first slice preserves rejected/quarantined candidates without polluting global truth; the next step is explicit world-query UX and policy for which worlds are persisted.
 - Push the remaining mapper frontier: durable rule admission for quantified exception language, better decision-label calibration for safe partial commits, and cleaner nested event predicate shapes.
 - Keep profile contracts out of the generic mapper: profile packages should own domain type/grounding policy, while the mapper stays structural and auditable.
 - Promote scenario-local predicate contracts into reusable profile/predicate manifests so fewer expectations live only inside individual frontier packs.
@@ -221,6 +223,7 @@ Recent verified results:
 - Full pytest after router/frontier/trace work: `364 passed`.
 - Full pytest after router-first streamlining and Python selector retirement: `361 passed`.
 - Full pytest after router diagnostics, context audit, admission justification, and router training seed: `367 passed`.
+- Full pytest after Epistemic Worlds v1 diagnostic scoped-memory slice: `372 passed`.
 - Multilingual router probe: `router_ok=10/10`, `compiler_parsed_ok=10/10`.
 - Lava v2 calibration router probe: `router_ok=36/36`; calibration evidence only, because v2 influenced router guidance.
 - Lava v3 first held-out router probe with bootstrap-aware scoring: `router_ok=14/17`, `router_score_avg=0.868`.

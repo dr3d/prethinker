@@ -864,6 +864,12 @@ def semantic_ir_admission_diagnostics(
             and str(diagnosis.get("effect", "")).strip() in {"fact", "rule", "retract"}
         ):
             diagnosis = dict(diagnosis)
+            diagnosis["blocked_effect"] = str(diagnosis.get("effect", "")).strip()
+            diagnosis["blocked_clauses"] = [
+                str(item).strip()
+                for item in diagnosis.get("clauses", [])
+                if str(item).strip()
+            ]
             diagnosis["admitted"] = False
             diagnosis["skip_reason"] = f"projected_decision_{projected_decision}_blocks_write"
             diagnosis["clauses"] = []
@@ -924,6 +930,7 @@ def semantic_ir_admission_diagnostics(
         contract_details=contract_details,
     )
     truth_maintenance = _truth_maintenance_summary(ir)
+    epistemic_worlds = _epistemic_worlds_summary(projected_decision, operations)
     return {
         "version": "admission_diagnostics_v1",
         "authority": "diagnostic_only_mapper_remains_authoritative",
@@ -951,6 +958,7 @@ def semantic_ir_admission_diagnostics(
         ],
         "truth_maintenance": truth_maintenance,
         "truth_maintenance_alignment": _truth_maintenance_alignment(truth_maintenance, operations),
+        "epistemic_worlds": epistemic_worlds,
         "operations": operations,
     }
 
@@ -1037,10 +1045,95 @@ def semantic_ir_to_legacy_parse(
         "admission_diagnostics": diagnostics,
         "clause_supports": diagnostics.get("clause_supports", {}),
         "truth_maintenance": diagnostics.get("truth_maintenance", {}),
+        "epistemic_worlds": diagnostics.get("epistemic_worlds", {}),
     }
     if retracts:
         payload["correction_retract_clauses"] = retracts
     return payload, warnings
+
+
+def _epistemic_worlds_summary(projected_decision: str, operations: list[dict[str, Any]]) -> dict[str, Any]:
+    worlds: dict[str, dict[str, Any]] = {}
+    world_clauses: list[str] = []
+    world_operation_count = 0
+    decision = str(projected_decision or "").strip().lower()
+    for op in operations:
+        if not isinstance(op, dict):
+            continue
+        blocked_clauses = [
+            str(item).strip()
+            for item in op.get("blocked_clauses", [])
+            if str(item).strip()
+        ]
+        if not blocked_clauses:
+            continue
+        world_id = _epistemic_world_id(decision)
+        world = worlds.setdefault(
+            world_id,
+            {
+                "world_id": world_id,
+                "world_type": decision or "scoped",
+                "authority": "scoped_memory_not_global_truth",
+                "operations": [],
+                "clauses": [],
+            },
+        )
+        op_id = f"op_{int(op.get('index', world_operation_count))}"
+        predicate = _predicate_name(op.get("predicate")) or "unknown"
+        effect = _atomize(str(op.get("blocked_effect") or op.get("effect") or "fact"))
+        source = _atomize(str(op.get("source") or "unknown"))
+        safety = _atomize(str(op.get("safety") or "unknown"))
+        skip_reason = _atomize(str(op.get("skip_reason") or "projected_decision_blocks_write"))
+        args = [str(arg).strip() for arg in op.get("args", []) if str(arg).strip()]
+        clauses = [
+            _clause("world_operation", [world_id, op_id, predicate, effect]),
+            _clause("world_policy", [world_id, op_id, decision or "scoped"]),
+            _clause("world_source", [world_id, op_id, source]),
+            _clause("world_safety", [world_id, op_id, safety]),
+            _clause("world_skip_reason", [world_id, op_id, skip_reason]),
+        ]
+        for arg_index, arg in enumerate(args, start=1):
+            clauses.append(_clause("world_arg", [world_id, op_id, str(arg_index), _atomize(arg)]))
+        for clause_index, clause in enumerate(blocked_clauses, start=1):
+            clauses.append(
+                _clause(
+                    "world_clause",
+                    [world_id, op_id, str(clause_index), _atomize(clause)],
+                )
+            )
+        operation_record = {
+            "operation_index": op.get("index"),
+            "world_id": world_id,
+            "world_operation_id": op_id,
+            "predicate": predicate,
+            "effect": effect,
+            "source": source,
+            "safety": safety,
+            "skip_reason": str(op.get("skip_reason") or ""),
+            "args": args,
+            "blocked_clauses": blocked_clauses,
+            "world_clauses": clauses,
+        }
+        world["operations"].append(operation_record)
+        world["clauses"].extend(clauses)
+        world_clauses.extend(clauses)
+        world_operation_count += 1
+
+    return {
+        "version": "epistemic_worlds_v1",
+        "authority": "diagnostic_only_scoped_memory_does_not_mutate_global_truth",
+        "world_count": len(worlds),
+        "operation_count": world_operation_count,
+        "clauses": world_clauses,
+        "worlds": list(worlds.values()),
+    }
+
+
+def _epistemic_world_id(projected_decision: str) -> str:
+    decision = _atomize(projected_decision)
+    if decision in {"reject", "quarantine", "clarify"}:
+        return f"{decision}_world"
+    return "scoped_world"
 
 
 def _operation_admission_justification(diagnosis: dict[str, Any]) -> dict[str, Any]:

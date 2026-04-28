@@ -111,13 +111,14 @@ engineering, Semantic IR workspaces, and deterministic admission.
 
 Latest local verification before this refresh:
 
-- Full pytest suite after router diagnostics, context audit, admission justification, and router training seed: `367 passed`.
+- Full pytest suite after Epistemic Worlds v1 diagnostic scoped-memory slice: `372 passed`.
 - `active_profile=auto` now uses `semantic_router_v1` as the first-pass context/profile planner. The old Python catalog selector is no longer in the active runtime or research harnesses.
 - Multilingual router probe: `router_ok=10/10`, `compiler_parsed_ok=10/10` on raw Spanish, French, German, Portuguese, Italian, Japanese, and code-switched turns.
 - Lava v3 router repair/calibration pass: `router_ok=17/17`, `router_score_avg=0.991`, `compiler_parsed_ok=17/17`, with anti-coupling reduced to intentional bootstrap review-only skips on the two unexpected-domain turns.
 - Current profile packages supply router/compiler context, predicate contracts, and declarative validators for medical, legal/CourtListener, SEC/contracts, probate, and story-world lanes. The mapper still owns actual admission.
 - Predicate-contract role enforcement blocks obvious argument-shape mismatches, profile validators block domain-specific unsafe admissions declaratively, temporal gates block inverted interval pairs, and duplicate-collapse prevents repeated candidate-operation floods from becoming repeated KB writes.
 - Clause support records connect admitted facts/rules/retracts/queries back to their Semantic IR operation index, predicate, source, and rationale codes; this is a first dependency breadcrumb, not full truth maintenance yet.
+- Epistemic Worlds v1 diagnostics preserve projection-blocked candidates as scoped wrapper clauses such as `world_operation/4` and `world_arg/4`, so traces can remember rejected/quarantined content without asserting it as global truth.
 - CourtListener legal-source lane: `legal_courtlistener@v0`, `adapters/courtlistener/`, synthetic legal seed fixtures, and ignored live smoke data for claim/finding, citation-not-endorsement, docket-not-holding, role-scope, provenance, and identity-boundary tests.
 - SEC/contracts lane: `sec_contracts@v0`, `adapters/sec_edgar/`, and synthetic contract fixtures for obligation-not-fact, condition-not-event, temporal triggers, party scope, and breach-boundary tests.
 - Semantic IR runtime edge pack: `20/20` decision labels, `0.976` avg score.

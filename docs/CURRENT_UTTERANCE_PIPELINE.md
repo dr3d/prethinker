@@ -35,8 +35,10 @@ decide what becomes Prolog state.
 6. The model emits a `semantic_ir_v1` workspace.
 7. The deterministic mapper projects that workspace into admissible operations
    and diagnostics.
-8. The runtime validates and applies only admitted operations.
-9. The turn outcome is remembered, traced, and displayed in the UI.
+8. Projection-blocked writes may be preserved as scoped epistemic-world
+   diagnostics, not global truth.
+9. The runtime validates and applies only admitted operations.
+10. The turn outcome is remembered, traced, and displayed in the UI.
 
 ## Diagram
 
@@ -61,9 +63,11 @@ flowchart TD
   O -- "query" --> P["run query or record query plan"]
   O -- "safe assert/retract/rule" --> Q["apply runtime mutation"]
   O -- "unsafe/ambiguous/context/inferred" --> R["skip, quarantine, reject, or clarify"]
+  R --> T["optional scoped-world diagnostic memory"]
   P --> S["trace + UI debug bubbles + turn memory"]
   Q --> S
   R --> S
+  T --> S
 ```
 
 ## Step By Step
@@ -229,6 +233,21 @@ Typical checks include:
 This is where the authority boundary lives. The LLM can describe what it thinks
 is happening; the mapper decides what is admissible.
 
+If the mapper projection blocks an otherwise structured write because the whole
+turn must reject, quarantine, or clarify, the candidate can be copied into
+Epistemic Worlds v1 diagnostics. These use fixed wrapper predicates such as:
+
+```prolog
+world_operation(reject_world, op_0, taking, fact).
+world_arg(reject_world, op_0, 1, priya).
+world_arg(reject_world, op_0, 2, warfarin).
+world_policy(reject_world, op_0, reject).
+```
+
+That is scoped memory, not domain truth. It records "the system saw this
+candidate and refused to assert it globally" without creating
+`taking(priya, warfarin).`
+
 ### 9. The runtime applies admitted operations
 
 Admitted operations are translated into runtime actions:
@@ -261,6 +280,8 @@ The console turns the result into debug bubbles and ledger rows:
 - mutations applied
 - query rows or query plans
 - truth-maintenance diagnostics
+- epistemic-world scoped-memory diagnostics for rejected or quarantined
+  candidate writes
 - compact trace JSON for deeper inspection
 
 The purpose of the UI is not just to show an answer. It is to let a human watch
@@ -280,6 +301,7 @@ the system decide what it was willing to believe.
 | Inferred write | Usually skip or quarantine |
 | Context-sourced write | Usually skip |
 | Unsafe implication | Skip, quarantine, or clarify |
+| Projection-blocked structured write | Preserve in scoped-world diagnostics; do not assert domain fact |
 | General negative fact | Skip until negation semantics are explicit |
 | Rule candidate | Admit only through the explicit rule path and policy checks |
 | Ambiguous referent | Clarify or quarantine |

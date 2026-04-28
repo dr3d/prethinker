@@ -2055,6 +2055,37 @@ function buildPipelineTraceBubble(turn) {
   );
   body.appendChild(tmLayer);
 
+  const worlds = diagnostics.epistemic_worlds && typeof diagnostics.epistemic_worlds === "object"
+    ? diagnostics.epistemic_worlds
+    : (parse?.epistemic_worlds && typeof parse.epistemic_worlds === "object" ? parse.epistemic_worlds : {});
+  if (worlds && (Number(worlds.world_count || 0) || debugArray(worlds.clauses).length)) {
+    const worldsLayer = createPipelineLayer(
+      "Layer 5 - Epistemic Worlds",
+      "scoped memory for blocked candidates, not global truth"
+    );
+    appendDebugKvGrid(worldsLayer, [
+      ["worlds", worlds.world_count ?? debugCount(worlds.worlds)],
+      ["scoped operations", worlds.operation_count ?? debugArray(worlds.operations).length],
+      ["authority", worlds.authority || "-"],
+    ]);
+    appendDebugTable(
+      worldsLayer,
+      ["world", "op", "predicate(args)", "policy", "reason"],
+      debugArray(worlds.worlds).flatMap((world) =>
+        debugArray(world?.operations).map((op) => [
+          world?.world_id || op?.world_id || "",
+          op?.world_operation_id || op?.operation_index || "",
+          `${op?.predicate || ""}(${debugArgs(op?.args)})`,
+          world?.world_type || "",
+          op?.skip_reason || "",
+        ])
+      ),
+      "No scoped-world operations recorded."
+    );
+    appendDebugClauseList(worldsLayer, "scoped wrapper clauses", worlds.clauses);
+    body.appendChild(worldsLayer);
+  }
+
   details.appendChild(summary);
   details.appendChild(body);
   card.appendChild(details);
