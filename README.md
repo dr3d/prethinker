@@ -8,7 +8,7 @@ The core bet is simple: **the model may propose, but deterministic code decides 
 
 This is not "English to Prolog by vibes." It is a research workbench for controlled memory admission: how much semantic understanding can a strong model contribute while a deterministic runtime prevents unsafe writes, ambiguity collapse, and claim/fact confusion?
 
-Current center: a live `ui_gateway` console backed by `src/mcp_server.py`, the `semantic_ir_v1` runtime path with `qwen/qwen3.6-35b-a3b`, profile-aware admission, and three starter domain lanes: bounded medical/UMLS, CourtListener legal-source intake, and SEC/contracts obligation intake.
+Current center: a live `ui_gateway` console backed by `src/mcp_server.py`, the two-pass `semantic_router_v1 -> semantic_ir_v1` runtime path with `qwen/qwen3.6-35b-a3b`, profile-aware admission, scoped Epistemic Worlds diagnostics, and three starter domain lanes: bounded medical/UMLS, CourtListener legal-source intake, and SEC/contracts obligation intake.
 
 ![Prethinker semantic IR workspace](docs/assets/prethinker-semantic-ir-workspace.png)
 
@@ -39,6 +39,7 @@ The short version:
 - `scripts/run_mixed_domain_agility.py` randomizes Goldilocks, Glitch, Ledger, Silverton, Harbor, CourtListener, SEC/contracts, and medical turns through `active_profile=auto` as a cross-domain agility pressure gauge.
 - `legal_courtlistener@v0` and `adapters/courtlistener/` are the legal-source profile/adapter lane for claim/finding, citation, docket, role-scope, provenance, and identity-boundary experiments.
 - `sec_contracts@v0` and `adapters/sec_edgar/` are the third large starter domain, aimed at obligations, conditions, temporal triggers, party roles, and filing/exhibit provenance.
+- Epistemic Worlds v1 preserves projection-blocked and supported-but-skipped candidate writes as scoped diagnostics, without asserting them as global truth.
 - The Prolog KB is the committed truth layer; model output remains provisional until the runtime admits it.
 - Long story-like utterances can now be segmented into focused Semantic IR passes so narrative ingestion stays inspectable instead of relying on one summary-shaped model response.
 - Historical reports, old prompt snapshots, and run logs were pruned from the forward-facing tree because Git already preserves them.
@@ -75,27 +76,20 @@ Open `http://127.0.0.1:8765` for the live console.
 
 ## Reproducibility Notes
 
-The public repo currently tracks `38` pytest files under [tests/](https://github.com/dr3d/prethinker/tree/main/tests). The latest full-suite verification after the profile-aware Semantic IR, domain-profile, lava-sweep, and clause-support work was:
+The public repo currently tracks `43` pytest files under [tests/](https://github.com/dr3d/prethinker/tree/main/tests). Latest local full-suite verification:
 
 ```powershell
 python -m pytest -q
-# 318 passed
+# 372 passed
 ```
 
-Focused verification after the current Semantic IR console/story-ingestion and profile-contract passes:
+Current high-signal evidence:
 
-```powershell
-python -m pytest tests/test_semantic_ir_runtime.py tests/test_ui_gateway_phases.py tests/test_gateway_config.py
-# 55 passed
-python -m pytest tests/test_medical_profile_assets.py tests/test_mcp_server.py::LocalMcpServerTests::test_semantic_ir_medical_profile_passes_contracts_and_umls_context
-# 6 passed
-python -m pytest tests/test_domain_profiles.py
-# 4 passed
-python -m pytest tests/test_courtlistener_adapter.py tests/test_domain_profiles.py
-# 8 passed
-python -m pytest tests/test_sec_edgar_adapter.py tests/test_domain_profiles.py
-# 9 passed
-```
+- Semantic IR edge runtime A/B: `20/20` decision labels, `0.976` average score, `0` non-mapper parse rescues.
+- Weak-edge pass: `10/10` decision labels, `1.000` average score.
+- Multilingual router probe: `10/10` router choices and `10/10` compiler JSON on raw Spanish, French, German, Portuguese, Italian, Japanese, and code-switched turns.
+- Lava v5 scoped-world rerun: `60/60` parsed JSON, `60/60` domain selector, `60/60` admission-safe, `0/60` temp-0 signature variance groups, and `46` scoped-memory operations across `25/60` records.
+- Policy/reimbursement cross-turn demo: English policy installed executable rules, derived query answers without writing derived `violation/2` facts, then corrected state and changed the answer.
 
 The UMLS Semantic Network and Metathesaurus-derived runtime assets are intentionally not committed because they depend on licensed source data. The public repo includes the builders, tests, docs, and profile code; outside reproduction of the UMLS lane requires obtaining the licensed UMLS files separately.
 

@@ -27,6 +27,7 @@ Treat older reports and prompt snapshots as Git history, not live guidance.
 - `ui_gateway/` is the live manual cockpit for prompt-book demos, route telemetry, KB mutations, and clarification turns.
 - `semantic_ir_v1` is the active research path for richer model semantics before deterministic admission; the console default is the LM Studio `qwen/qwen3.6-35b-a3b` lane.
 - `src/semantic_ir.py` owns the mapper, projection policy, and admission diagnostics.
+- Epistemic Worlds v1 preserves projection-blocked and supported-but-skipped candidates as scoped diagnostics, without admitting them as global truth.
 - Long story-like console inputs may be split into focused Semantic IR segments by `ui_gateway/gateway/phases.py`; each segment still goes through canonical `process_utterance()`, then the gateway dedupes the visible mutation list.
 - `medical@v0` is the active bounded ontology profile; `legal_courtlistener@v0` and `sec_contracts@v0` are live-data profile lanes for provenance/conflict and obligation/rule pressure.
 - `active_profile=auto` uses `semantic_router_v1` to choose one profile per Semantic IR turn and load that profile's thick context/contracts. It is context selection only, not write authority.
@@ -60,4 +61,4 @@ python -m pytest tests/test_sec_edgar_adapter.py tests/test_domain_profiles.py -
 python -m pytest -q
 ```
 
-The last known full-suite result after the router diagnostics/context-audit pass was `367 passed`. Recent focused batteries also cover CourtListener, SEC/contracts, domain profiles, Semantic IR runtime, UI gateway phases, trace rendering, router agility, router training data, and UMLS builders. Live/generated smoke traces belong under ignored paths such as `datasets/*/generated/` and `tmp/semantic_ir_trace_views/`.
+The last known full-suite result after the Epistemic Worlds v1 diagnostic slice was `372 passed`. Recent focused batteries also cover CourtListener, SEC/contracts, domain profiles, Semantic IR runtime, UI gateway phases, trace rendering, router agility, router training data, Lava v5, and UMLS builders. Live/generated smoke traces belong under ignored paths such as `datasets/*/generated/` and `tmp/semantic_ir_trace_views/`.
