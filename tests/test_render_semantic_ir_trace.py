@@ -16,6 +16,52 @@ class RenderSemanticIRTraceTests(unittest.TestCase):
             "utterance": "Mara is in Paris. Actually, not London.",
             "context": ["Existing current fact: lives_in(mara, london)."],
             "allowed_predicates": ["lives_in/2"],
+            "router_profile": "medical@v0",
+            "effective_profile": "medical@v0",
+            "expected_profile": "medical@v0",
+            "router": {
+                "schema_version": "semantic_router_v1",
+                "selected_profile_id": "medical@v0",
+                "candidate_profile_ids": ["medical@v0"],
+                "routing_confidence": 0.93,
+                "turn_shape": "correction",
+                "should_segment": False,
+                "segments": [],
+                "guidance_modules": ["correction_retraction"],
+                "retrieval_hints": {
+                    "entity_terms": ["Mara"],
+                    "predicate_terms": ["lives_in"],
+                    "context_needs": ["current residence"],
+                },
+                "risk_flags": ["current_state_correction"],
+                "bootstrap_request": {
+                    "needed": False,
+                    "proposed_domain_name": "",
+                    "why": "",
+                    "candidate_predicate_concepts": [],
+                },
+                "notes": ["Use KB state only as context."],
+            },
+            "anti_coupling": {
+                "version": "anti_coupling_diagnostics_v1",
+                "flag_count": 1,
+                "summary": {
+                    "expected_profile": "medical@v0",
+                    "effective_profile": "medical@v0",
+                    "routing_confidence": 0.93,
+                    "projected_decision": "commit",
+                    "admitted_count": 2,
+                    "skipped_count": 1,
+                },
+                "flags": [
+                    {
+                        "severity": "review",
+                        "kind": "mapper_skips_tied_to_profile_context",
+                        "detail": "Mapper skipped one out-of-palette proposal.",
+                        "skip_reasons": {"predicate_not_in_allowed_palette": 1},
+                    }
+                ],
+            },
             "model_input": {
                 "input_payload": {
                     "domain": "demo",
@@ -130,6 +176,9 @@ class RenderSemanticIRTraceTests(unittest.TestCase):
         )
 
         self.assertIn("Layer 0 - Focused Model Input", rendered)
+        self.assertIn("Layer 0a - Semantic Router / Context Plan", rendered)
+        self.assertIn("Selected profile: `medical@v0`", rendered)
+        self.assertIn("Confidence: `0.93`", rendered)
         self.assertIn("Recorded model input / request envelope", rendered)
         self.assertIn("Exact chat messages sent to model", rendered)
         self.assertIn("Layer 2 - Parsed `semantic_ir_v1` Workspace", rendered)
@@ -143,6 +192,8 @@ class RenderSemanticIRTraceTests(unittest.TestCase):
         self.assertIn("Layer 3c - Truth-Maintenance / Admission Delta", rendered)
         self.assertIn("Truth-maintenance/admission alignment", rendered)
         self.assertIn("admitted_operation_without_model_support_link", rendered)
+        self.assertIn("Layer 3d - Router / Compiler Coupling Diagnostics", rendered)
+        self.assertIn("mapper_skips_tied_to_profile_context", rendered)
         self.assertIn("Facts passivated for KB assertion", rendered)
         self.assertIn("**Facts passivated for KB assertion:**\n\n- `lives_in(mara, paris).`", rendered)
         self.assertIn("Retract targets / correction clauses", rendered)

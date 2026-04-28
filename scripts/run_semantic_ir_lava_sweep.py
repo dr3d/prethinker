@@ -80,6 +80,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--selector-only", action="store_true")
     parser.add_argument("--no-apply", action="store_true", help="Compile/map but do not mutate/query the runtime KB.")
     parser.add_argument(
+        "--source-filter",
+        default="",
+        help="Optional case-insensitive substring filter applied to LavaCase.source or id before sampling.",
+    )
+    parser.add_argument(
         "--execute-queries",
         action="store_true",
         help="Also execute admitted queries. Off by default because recursive toy-Prolog queries can monopolize CPU.",
@@ -95,7 +100,12 @@ def main() -> int:
     rng = random.Random(int(args.seed))
     variants = [item.strip() for item in str(args.variants).split(",") if item.strip()]
     top_p_values = [float(item.strip()) for item in str(args.top_p_values).split(",") if item.strip()]
-    loaded_cases = load_lava_cases(include_tmp=bool(args.include_tmp))
+    loaded_cases = filter_lava_cases(
+        load_lava_cases(include_tmp=bool(args.include_tmp)),
+        source_filter=str(args.source_filter or ""),
+    )
+    if not loaded_cases:
+        raise SystemExit(f"No lava cases matched source filter: {args.source_filter!r}")
     base_cases = select_base_cases(loaded_cases, limit=int(args.limit), mode=str(args.sample_mode), rng=rng)
     stream = expand_variants(base_cases, variants=variants, rng=rng)
     out_dir = Path(args.out_dir)
@@ -386,6 +396,17 @@ def select_base_cases(cases: list[LavaCase], *, limit: int, mode: str, rng: rand
     return picked
 
 
+def filter_lava_cases(cases: list[LavaCase], *, source_filter: str = "") -> list[LavaCase]:
+    needle = str(source_filter or "").strip().lower()
+    if not needle:
+        return list(cases)
+    return [
+        case
+        for case in cases
+        if needle in case.source.lower() or needle in case.id.lower()
+    ]
+
+
 def source_family(source: str) -> str:
     raw = str(source or "unknown")
     if raw.startswith("kb_scenario:"):
@@ -587,6 +608,8 @@ def degrade_grammar(text: str) -> str:
 
 def profile_for_domain(domain: str) -> str:
     lower = domain.lower()
+    if "bootstrap" in lower or "unexpected" in lower:
+        return "bootstrap"
     if "medical" in lower or "umls" in lower:
         return "medical@v0"
     if "courtlistener" in lower or "legal_courtlistener" in lower:

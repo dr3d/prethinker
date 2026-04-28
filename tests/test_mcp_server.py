@@ -253,6 +253,37 @@ class LocalMcpServerTests(unittest.TestCase):
         }
 
         with patch(
+            "src.mcp_server.call_semantic_router",
+            return_value={
+                "content": "{}",
+                "parsed": {
+                    "schema_version": "semantic_router_v1",
+                    "selected_profile_id": "general",
+                    "candidate_profile_ids": ["general"],
+                    "routing_confidence": 0.9,
+                    "turn_shape": "correction",
+                    "should_segment": False,
+                    "segments": [],
+                    "guidance_modules": ["correction_retraction"],
+                    "retrieval_hints": {"entity_terms": ["Mara"], "predicate_terms": ["lives_in"], "context_needs": []},
+                    "risk_flags": [],
+                    "context_audit": {
+                        "why_this_profile": "generic correction over current KB state",
+                        "selected_context_sources": ["kb_context_pack"],
+                        "secondary_profiles_considered": [],
+                        "why_not_secondary": [],
+                    },
+                    "bootstrap_request": {
+                        "needed": False,
+                        "proposed_domain_name": "",
+                        "why": "",
+                        "candidate_predicate_concepts": [],
+                    },
+                    "notes": [],
+                },
+                "latency_ms": 1,
+            },
+        ), patch(
             "src.mcp_server.call_semantic_ir",
             return_value={"content": "{}", "parsed": parsed, "latency_ms": 1},
         ) as mocked:
@@ -278,6 +309,9 @@ class LocalMcpServerTests(unittest.TestCase):
         self.assertGreaterEqual(pack.get("manifest", {}).get("total_direct_fact_clauses", 0), 3)
         trace_pack = server._last_semantic_ir_trace.get("model_input", {}).get("kb_context_pack", {})
         self.assertEqual(trace_pack.get("version"), "semantic_ir_context_pack_v1")
+        context_audit = server._last_semantic_ir_trace.get("context_audit", {})
+        self.assertEqual(context_audit.get("version"), "context_audit_v1")
+        self.assertEqual(context_audit.get("why_this_profile"), "generic correction over current KB state")
         payload = mocked.call_args.kwargs
         # The API call receives the pack directly; the prompt payload also carries
         # KB policy in src.semantic_ir.build_semantic_ir_input_payload.
@@ -323,7 +357,34 @@ class LocalMcpServerTests(unittest.TestCase):
             ("Mara's blood pressure reading was high.", "medical@v0", "lab_result_high/2", "bounded medical memory"),
         ]
 
-        with patch(
+        router_results = [
+            {
+                "content": "{}",
+                "parsed": {
+                    "schema_version": "semantic_router_v1",
+                    "selected_profile_id": expected_profile,
+                    "candidate_profile_ids": [expected_profile],
+                    "routing_confidence": 0.95,
+                    "turn_shape": "state_update",
+                    "should_segment": False,
+                    "segments": [],
+                    "guidance_modules": [],
+                    "retrieval_hints": {"entity_terms": [], "predicate_terms": [], "context_needs": []},
+                    "risk_flags": [],
+                    "bootstrap_request": {
+                        "needed": False,
+                        "proposed_domain_name": "",
+                        "why": "",
+                        "candidate_predicate_concepts": [],
+                    },
+                    "notes": [],
+                },
+                "latency_ms": 1,
+            }
+            for _utterance, expected_profile, _expected_signature, _expected_context in utterances
+        ]
+
+        with patch("src.mcp_server.call_semantic_router", side_effect=router_results), patch(
             "src.mcp_server.call_semantic_ir",
             return_value={"content": "{}", "parsed": parsed, "latency_ms": 1},
         ) as mocked:

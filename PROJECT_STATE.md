@@ -13,7 +13,8 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 - UI: `ui_gateway/`, served locally by `python ui_gateway/main.py` using the stdlib `ThreadingHTTPServer`.
 - Active profile: `medical@v0`; active profile-lane experiments: `legal_courtlistener@v0` and `sec_contracts@v0`.
 - Active research asset: local UMLS Semantic Network KB built from `sn_current.tgz`.
-- Active architecture pivot: opt-in `semantic_ir_v1` compiler path using `qwen3.6:35b-a3b` through LM Studio/OpenAI-compatible structured output.
+- Active architecture pivot: two-pass `semantic_router_v1 -> semantic_ir_v1`, using the LLM as the context/profile planner and the deterministic mapper as the admission authority.
+- Current development model: `qwen/qwen3.6-35b-a3b` through LM Studio/OpenAI-compatible structured output. This is the best-known local path, not a permanent product dependency.
 - Current demonstration surface: prompt-book UI plus live ledger cards showing route, semantic workspace, deterministic admission, clarification, blocked execution, and KB mutation outcomes.
 
 ## What Works Now
@@ -57,17 +58,27 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 - `medical@v0` Semantic IR calls now receive profile-owned predicate contracts and compact UMLS bridge context before the model proposes a workspace. This lets the model normalize examples like `Coumadin` to `warfarin` and see argument-role/semantic-group expectations, while the deterministic mapper still owns admission.
 - The profile context now explicitly treats an explicit named patient as sufficient grounding for the research profile, while pronouns, multiple candidates, aliases, and missing patient identity still require clarification.
 - A thin domain-profile roster now exists in `modelfiles/domain_profile_catalog.v0.json` and is included in Semantic IR input as `available_domain_profiles`. This is the first skill-directory-style control-plane hook: it advertises possible profile contexts without loading every thick package or authorizing writes.
-- `active_profile=auto` now has a first deterministic catalog selector. It chooses a profile from the thin roster, loads only that profile's thick context/contracts for the Semantic IR call, and records the selected profile plus reasons in the trace. A synthetic switch test covers medical -> legal -> SEC/contracts -> medical.
-- The auto selector now also consumes explicit per-turn Semantic IR context, so research runners can test the "story so far + new sentence" shape without smuggling that context into the utterance text.
-- Profile packages now own declarative `selection_keywords` in addition to thin roster hints. The selector can use those profile-owned hints while the mapper still owns admission.
+- `active_profile=auto` now uses model-owned `semantic_router_v1` as the first-pass context/profile/guidance controller before the Semantic IR compiler. It emits a strict control-plane JSON object, loads only the selected profile context/contracts, and never authorizes writes.
+- Profile packages still own declarative `selection_keywords`, `selection_hints`, predicate contracts, and domain context, but those are now context assets for the router/compiler rather than a Python keyword selector.
+- The former Python catalog selector has been removed from the active runtime and research harnesses. Current traces and metrics center router quality, compiler validity, admission diagnostics, and anti-coupling flags.
+- The multilingual router probe is the cleanest current evidence for the wall-sign rule: `router_ok=10/10` and full router -> compiler JSON success `10/10` on raw Spanish, French, German, Portuguese, Italian, Japanese, and code-switched turns.
+- `semantic_ir_lava_pack_v2` is now explicitly a calibration pack, not held-out evidence. It reached `36/36` after exposing router/profile ownership gaps, but those gaps influenced the router guidance.
+- `semantic_ir_lava_pack_v3` began as the fresh held-out router frontier. Its first honest result was router `14/17` with compiler JSON `17/17` on the full pass. After that, v3 became calibration/repair evidence rather than pristine held-out evidence.
+- Generic router/profile repairs took Lava v3 to router `17/17`, compiler JSON `17/17`, and only bootstrap review-only skip diagnostics on the two unexpected-domain turns. The fixes were structural: context-integrity guidance, bootstrap-aware scoring/diagnostics, bootstrap review-only admission, `court_or_judge` institution handling, and scoped probate witness-eligibility predicates.
+- The router agility harness now emits `anti_coupling_diagnostics_v1` after the compiler/mapper pass. It flags low-confidence admissions, strict profile misses with admissions, semantic near misses with admissions, profile/predicate mismatches, out-of-palette skips, and cases where admitted predicates fit another profile better. Bootstrap fallback is treated as a valid context-engineering request rather than a profile miss.
+- `semantic_router_v1` now emits a `context_audit` block explaining why the profile/context was selected, which context sources should be loaded, which secondary profiles were considered, and why they were not primary. Runtime and router harness traces copy this as `context_audit_v1` with loaded context/contract/predicate counts.
+- The router harness now also emits `router_diagnostics_v1`, a structural router/compiler alignment layer that can flag cases such as "router chose medical, but the compiler emitted legal predicate surfaces" without inspecting raw language.
+- Mapper admission diagnostics now include human-readable `admission_justifications` derived from deterministic gates and rationale codes. Each operation can explain accepted-because and blocked-because reasons such as allowed palette, predicate contract pass, direct source, source-policy block, or missing durable rule clause.
+- A first labeled router training seed lives at `docs/data/router_training/router_training_seed_v1.jsonl` with 164 examples assembled from frontier packs, multilingual probes, and mixed-domain agility cases.
+- `semantic_ir_lava_pack_v4` is now the next fresh held-out candidate. It directly targets five architecture hazards called out from the current utterance pipeline: truth-maintenance dependency explosion, predicate canonicalization drift, claim/fact/observation promotion, segmentation semantics, and multilingual ontology pressure.
 - A new research note, `docs/DOMAIN_BOOTSTRAPPING_META_MODE.md`, captures the meta-profile idea: when no domain profile exists, a strong model may propose candidate entity types, predicates, contracts, risks, clarification policies, and starter frontier cases. This is review material for creating a profile, not authority for durable writes.
 - A first `profile_bootstrap_v1` harness now exists at `scripts/run_profile_bootstrap.py` with a contracts/compliance seed fixture. It asks the local structured-output model to propose a candidate domain profile, then scores schema validity, generic predicate use, and whether starter frontier cases stay inside the proposed predicate palette and arities.
 - `scripts/run_profile_bootstrap_loop.py` now closes the meta-profile loop: it loads a local profile bootstrap run, projects its candidate predicates/contracts into a temporary Semantic IR profile, runs the generated starter cases through the normal model+mapper path, and scores valid JSON, palette skips, must-not violations, and expected-boundary hits.
 - The mapper now admits positive direct `operation='rule'` records with predicate+args but no executable clause as fact-like rule records, with rationale `rule_label_demoted_to_fact_record`. This is a structural repair for model administrative labels; true executable rules still require a clause, and negative/general rule operations still do not become facts.
 - The mapper now blocks variable-like no-clause rule stubs from being demoted into facts. This closes a concrete policy-demo failure where `operation='rule'` plus `args=['R', ...]` could otherwise become a bogus durable atom such as `violation(r, reimbursement_policy).`
 - A focused cross-turn policy/reimbursement demo runner now lives at `scripts/run_policy_reimbursement_demo.py`. It records reimbursement rules, ingests February events, asks which reimbursements violated policy, applies an explicit approval correction, and verifies that derived `violation/2` answers are not written as durable facts.
-- A mixed-domain agility harness now lives at `scripts/run_mixed_domain_agility.py`. It randomizes Goldilocks, Glitch, Ledger, Silverton, Harbor, CourtListener, SEC/contracts, and medical scenarios through `active_profile=auto` so profile switching can be tested as a stream rather than isolated lanes.
-- Domain profile selection now weights recent context more heavily for anaphoric/follow-up utterances such as "it came back high", while leaving ordinary turns mostly utterance-driven. This fixed a mixed-stream miss where a medical lab follow-up fell to the general profile even though the context named an active patient and repeated serum creatinine.
+- A mixed-domain agility harness now lives at `scripts/run_mixed_domain_agility.py`. It randomizes Goldilocks, Glitch, Ledger, Silverton, Harbor, CourtListener, SEC/contracts, and medical scenarios through `active_profile=auto` so router-owned profile switching can be tested as a stream rather than isolated lanes.
+- Router prompt/context policy now makes recent context visible for anaphoric/follow-up utterances such as "it came back high", while keeping the final profile choice in `semantic_router_v1` rather than Python keyword logic.
 - Declarative starter profile packages now exist for exploration: `modelfiles/profile.story_world.v0.json`, `modelfiles/profile.probate.v0.json`, and `modelfiles/profile.legal_courtlistener.v0.json`. They provide mock thick context and predicate contracts for future routing experiments without changing runtime admission authority.
 - The probate profile now owns a few noisy selection aliases for the Silverton/London frontier, such as `Btrice`, `Londn`, `Londres`, `ONT`, and weekend/country shorthand. These are context-loading hints, not mapper admission rules.
 - The legal/probate/SEC starter profiles now carry a broader profile-owned predicate surface for the current frontier packs: legal source documents, access logs, relative-date anchors, interval facts, probate guardianship/conditional-gift facts, and contract-like clearance/lock/stock state.
@@ -117,11 +128,11 @@ This is the next useful layer for type steering and explanation. It should suppo
 - Wire more Semantic Network explanations into the UI, especially type ancestry and relation paths.
 - Keep improving reset/session hygiene so first utterances after reset cannot inherit stale entity context.
 - Expand the medical profile only when the new predicate earns its place through tests and a clear demo.
-- Keep measuring guardrail dependency directly: compare old pipeline rescue-hook use against semantic IR direct coverage on Glitch, Ledger, medical ambiguity, and temporal packs.
+- Keep measuring router/compiler/admission quality directly on Glitch, Ledger, medical ambiguity, temporal packs, and mixed-domain lava packs. The old Python-selector comparison has served its purpose and is no longer a useful frontier metric.
 - Push the remaining mapper frontier: durable rule admission for quantified exception language, better decision-label calibration for safe partial commits, and cleaner nested event predicate shapes.
 - Represent temporal facts durably enough that extracted dates, intervals, corrections, and relative-time anchors can support real KB queries instead of staying only in the semantic workspace.
 - Keep profile contracts out of the generic mapper: profile packages should own domain type/grounding policy, while the mapper stays structural and auditable.
-- Treat richer domain context as a catalog/skill mechanism, not hardwired prompt drift. The current auto selector is deterministic and measured; next steps are multi-profile turns, selector confidence UX, and deciding when mixed-domain utterances should be segmented before Semantic IR.
+- Treat richer domain context as a catalog/skill mechanism, not hardwired prompt drift. The current auto path is router-owned and measured; next steps are multi-profile turns, router confidence UX, and deciding when mixed-domain utterances should be segmented before Semantic IR.
 - Prototype `profile_bootstrap_v1`: feed 5-20 texts from an unfamiliar domain and ask the model to propose entity types, predicates, argument contracts, admission risks, clarification policies, and starter frontier cases. The first success criterion is reviewable profile-design material, not automatic profile authority.
 - Grow deterministic stored-logic admission beyond the first guard: profile-declared functional predicates, temporal scope, negation policy, and richer contradiction probes are still open.
 - Grow clause support records and the new `truth_maintenance` proposal block into a real dependency layer: derived conclusions should eventually point to supporting facts, rules, source documents, and retractions without granting model-proposed consequences write authority.
@@ -132,8 +143,8 @@ This is the next useful layer for type steering and explanation. It should suppo
 - Expand trace views around admission contracts so reviewers can see not only the model decision, but also which exact boundary checks passed.
 - Build a new held-out frontier pack instead of over-polishing Silverton: cross-document temporal causality, aliases, corrections, disputed claims, and profile type pressure.
 - Port the new cross-turn frontier pack into a runner only after deciding which expectations should be hard regression gates versus research pressure gauges.
-- Expand auto profile-selection tests from clean synthetic switching into messy mixed-domain turns. Profile selection is still advisory context loading, not admission authority.
-- Use the mixed agility harness as a regular pressure gauge. The next useful failures are not JSON validity; they are wrong profile selection, vague story predicates, placeholder/null write arguments, and mapper policy for partially good operations.
+- Expand router/profile-selection tests from clean synthetic switching into messy mixed-domain turns. Profile selection is still advisory context loading, not admission authority.
+- Use the mixed agility harness as a regular pressure gauge. The next useful failures are not JSON validity; they are wrong router choices, vague story predicates, placeholder/null write arguments, and mapper policy for partially good operations.
 - Keep argument-role validation structural. The mapper now catches clear cases like `interval_start/2` receiving a date in the interval slot; the next useful gains are reusable contracts and richer profile validators, not phrase patches.
 - Keep expanding the CourtListener lane with small live API slices and curated synthetic boundaries. Generated live data remains ignored under `datasets/courtlistener/generated/` unless a tiny fixture is intentionally curated.
 - Run the SEC adapter against a small EDGAR submissions slice only after setting `SEC_USER_AGENT` and choosing a durable cache/review policy. Keep generated live data under ignored `datasets/sec_edgar/generated/`.
@@ -172,8 +183,8 @@ Recent verified results:
 - Live LM Studio auto-profile smoke selected `medical@v0`, `legal_courtlistener@v0`, `sec_contracts@v0`, then `medical@v0` across four turns, with each turn receiving the expected domain context and predicate palette.
 - Mixed-domain agility smoke, seed `42`, selected expected profiles for `12/12` shuffled turns and produced valid Semantic IR for `12/12`. The stream included Glitch, Goldilocks, Ledger, CourtListener, SEC/contracts, and medical turns. Trace rendered locally under ignored `tmp/semantic_ir_trace_views/`.
 - Mixed-domain guardrail/profile tightening on the same seed reduced bad admitted placeholder/loose-trait clauses from `4` to `0`: `null`/generic actor writes are now skipped, `docket_entry(... null ...)` no longer reaches facts, and the story profile steers descriptive traits to `has_trait/2` instead of `owns/2`.
-- Hard mixed-domain agility seed `99`: before this pass, selector accuracy was `18/24`; after profile-owned hints and per-turn context, selector accuracy reached `24/24` and valid Semantic IR remained `24/24`.
-- Wider mixed-domain agility seed `2718`: selector-only moved from `36/40` to `40/40`; the real LM Studio run reached `40/40` profile selections and `40/40` valid Semantic IR across CourtListener, Harbor, Ledger/probate, Silverton, SEC/contracts, Glitch, Goldilocks, and medical cases.
+- Historical mixed-domain selector runs are superseded by router-first evaluation; Git history retains the pre-router records.
+- Wider mixed-domain LM Studio runs reached `40/40` profile selections and `40/40` valid Semantic IR across CourtListener, Harbor, Ledger/probate, Silverton, SEC/contracts, Glitch, Goldilocks, and medical cases.
 - The same seed now demonstrates better admitted structure on hard cases: Harbor relative-date correction emits `document_dated/2` plus `relative_date_resolves_to/3` with retractions; document-priority conflict retracts the draft parcel name and asserts the recorded deed name; probate conditional-gift over-expansion dropped from `64` admitted writes to `2`; out-of-district temporal spans now use interval ids plus `outside_district_interval/3`.
 - Predicate-contract role gate focused verification: semantic IR runtime battery `48 passed`; profile/mixed/MCP/render focused battery `64 passed`.
 - Mixed-domain agility seed `2718` after contract-role enforcement: real LM Studio pass kept `40/40` profile selections and `40/40` valid Semantic IR. The mapper caught a genuine `interval_start/2` role mismatch where the model put a date in the interval slot, while preserving the previously good Harbor interval representation.
@@ -186,9 +197,19 @@ Recent verified results:
 - Focused policy/reimbursement cross-turn demo with `qwen/qwen3.6-35b-a3b` through LM Studio: `4/4` parsed OK, `4/4` apply error free, `4/4` expected query matches, `4/4` no derived violation write leak, rough score `1.000`. The successful path installed four executable rules from English policy, derived `r1`/`r2` after event ingestion, then retracted `approved_by(r2, lena).` and changed the derived answer to only `r1`.
 - Profile bootstrap harness smoke on `datasets/profile_bootstrap/samples/contracts_compliance_seed_8.jsonl` with `qwen/qwen3.6-35b-a3b`: parsed OK, rough score `1.000`, `10` candidate predicates, `0` generic predicates, `0` unknown positive predicate refs in starter cases, and `8` starter frontier cases. Treat this as profile-design review material, not an approved contracts profile.
 - Profile bootstrap closed-loop smoke on the latest contracts/compliance draft: `8/8` valid Semantic IR, `8/8` zero out-of-palette skip cases, `8/8` zero must-not violation cases, `7/8` expected-boundary hit cases, `16` admitted clauses, loop rough score `0.969`. The remaining miss is profile-surface ambiguity: prohibition-with-exception versus conditional-right representation.
-- Mixed-domain agility seed `314159` initially exposed two profile-selection misses: noisy `Btrice/Londn ONT` probate text and an anaphoric medical follow-up, `It came back high after the repeat this afternoon.` After context-aware selector weighting and profile-owned noisy aliases, selector-only reached `40/40`; the full LM Studio run reached `40/40` profile selections and `40/40` valid Semantic IR.
+- Mixed-domain agility seed `314159` initially exposed two profile/context-selection misses: noisy `Btrice/Londn ONT` probate text and an anaphoric medical follow-up, `It came back high after the repeat this afternoon.` Those records are now historical context for the router-first path.
 - Full pytest after rule/query and clinical-boundary work: `347 passed`.
 - Broad 111-scenario Semantic IR bakeoff after the same work: `111/111` JSON/schema, raw model decisions `79/111`, mapper-projected decisions `86/111`, admission contracts `26/27`, admission checks `168/169`, average rough score `0.90`. Remaining low-score cases are mostly policy-label calibration and temporal/retraction frontier pressure, not JSON or mapper-admission collapse.
+- Focused router/frontier/domain verification after `semantic_router_v1`, multilingual probe, Lava v2/v3 packs, and anti-coupling diagnostics: `88 passed`.
+- Full pytest after router/frontier/trace work: `364 passed`.
+- Full pytest after router-first streamlining and Python selector retirement: `361 passed`.
+- Full pytest after router diagnostics, context audit, admission justification, and router training seed: `367 passed`.
+- Multilingual router probe: `router_ok=10/10`, `compiler_parsed_ok=10/10`.
+- Lava v2 calibration router probe: `router_ok=36/36`; calibration evidence only, because v2 influenced router guidance.
+- Lava v3 first held-out router probe with bootstrap-aware scoring: `router_ok=14/17`, `router_score_avg=0.868`.
+- Lava v3 repair/calibration pass after generic router/profile fixes: `router_ok=17/17`, `router_score_avg=0.991`, `compiler_parsed_ok=17/17`, with anti-coupling reduced to intentional bootstrap review-only skips on the two unexpected-domain cases: `bootstrap_review_only_skips=2`.
+- Lava v4 first pass: router-only smoke reached `25/25` profile choices. Full router -> Semantic IR pass reached `25/25` router choices and `25/25` compiler JSON, with anti-coupling limited to `mapper_skips_tied_to_profile_context=3`. The isolated lava-sweep scorer reached expectation `11/25`, which is useful pressure rather than a failure of format: most misses are semantic/admission-frontier cases around dependency invalidation, epistemic promotion, and multilingual ontology normalization.
+- Router context-audit schema smoke after adding `context_audit`: `3/3` Lava v4 router-only records parsed through LM Studio structured output, and the trace includes why-this-profile / why-not-secondary audit text.
 
 ## Reading Order
 
@@ -197,18 +218,20 @@ Recent verified results:
 3. `docs/PRETHINK_GATEWAY_MVP.md`
 4. `docs/PUBLIC_DOCS_GUIDE.md`
 5. `docs/CURRENT_UTTERANCE_PIPELINE.md`
-6. `docs/SEMANTIC_IR_RESEARCH_DIRECTION_REPORT.md`
-7. `docs/SEMANTIC_IR_MAPPER_SPEC.md`
-8. `docs/SEMANTIC_IR_MODEL_MATRIX.md`
+6. `docs/CONTEXT_CONTROL_ARCHITECTURE_BRIEF.md`
+7. `docs/SEMANTIC_IR_RESEARCH_DIRECTION_REPORT.md`
+8. `docs/SEMANTIC_IR_MAPPER_SPEC.md`
 9. `docs/PROJECT_HORIZON.md`
-10. `docs/DOMAIN_PROFILE_CATALOG.md`
-11. `docs/COURTLISTENER_DOMAIN.md`
-12. `docs/SEC_CONTRACTS_DOMAIN.md`
-13. `docs/GUARDRAIL_DEPENDENCY_AB.md`
-14. `docs/UMLS_MVP.md`
-15. `docs/MEDICAL_PROFILE.md`
-16. `docs/CONSOLE_TRYBOOK.md`
-17. `ui_gateway/README.md`
+10. `docs/SEMANTIC_ROUTER_EXPERIMENT.md`
+11. `docs/MULTILINGUAL_SEMANTIC_IR_PROBE.md`
+12. `docs/NO_LANGUAGE_HANDLING_IN_PYTHON_AUDIT.md`
+13. `docs/DOMAIN_PROFILE_CATALOG.md`
+14. `docs/COURTLISTENER_DOMAIN.md`
+15. `docs/SEC_CONTRACTS_DOMAIN.md`
+16. `docs/UMLS_MVP.md`
+17. `docs/MEDICAL_PROFILE.md`
+18. `docs/CONSOLE_TRYBOOK.md`
+19. `ui_gateway/README.md`
 
 ## What Was Pruned
 

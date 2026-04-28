@@ -891,6 +891,7 @@ def semantic_ir_admission_diagnostics(
             else:
                 for clause in clauses:
                     admitted_clause_keys.add((effect, clause))
+        diagnosis["admission_justification"] = _operation_admission_justification(diagnosis)
         operations.append(diagnosis)
         warning = str(diagnosis.get("warning", "")).strip()
         if warning:
@@ -941,6 +942,11 @@ def semantic_ir_admission_diagnostics(
         "warning_counts": dict(sorted(warning_counts.items())),
         "clauses": clauses_by_effect,
         "clause_supports": supports_by_effect,
+        "admission_justifications": [
+            item.get("admission_justification", {})
+            for item in operations
+            if isinstance(item, dict) and isinstance(item.get("admission_justification"), dict)
+        ],
         "truth_maintenance": truth_maintenance,
         "truth_maintenance_alignment": _truth_maintenance_alignment(truth_maintenance, operations),
         "operations": operations,
@@ -1033,6 +1039,101 @@ def semantic_ir_to_legacy_parse(
     if retracts:
         payload["correction_retract_clauses"] = retracts
     return payload, warnings
+
+
+def _operation_admission_justification(diagnosis: dict[str, Any]) -> dict[str, Any]:
+    admitted = bool(diagnosis.get("admitted"))
+    rationale_codes = [
+        str(item).strip()
+        for item in diagnosis.get("rationale_codes", [])
+        if str(item).strip()
+    ]
+    features = diagnosis.get("features", {}) if isinstance(diagnosis.get("features"), dict) else {}
+    accepted_because: list[str] = []
+    blocked_because: list[str] = []
+
+    if admitted:
+        accepted_because.extend(_human_rationale(code) for code in rationale_codes)
+        if features.get("predicate_in_allowed_palette") is True:
+            accepted_because.append("predicate signature is in the active allowed palette")
+        if features.get("predicate_contract_enabled") is True and not features.get("contract_role_mismatch"):
+            accepted_because.append("predicate contract roles passed structural validation")
+        if str(diagnosis.get("safety") or "").strip() == "safe":
+            accepted_because.append("candidate operation was explicitly marked safe by the semantic workspace")
+        if str(diagnosis.get("source") or "").strip() == "direct":
+            accepted_because.append("candidate operation is sourced directly from the current utterance")
+    else:
+        blocked_because.extend(_human_rationale(code) for code in rationale_codes)
+        skip_reason = str(diagnosis.get("skip_reason") or "").strip()
+        if skip_reason and skip_reason not in rationale_codes:
+            blocked_because.append(_human_rationale(skip_reason))
+        warning = str(diagnosis.get("warning") or "").strip()
+        if warning:
+            blocked_because.append(warning)
+
+    return {
+        "operation_index": diagnosis.get("index"),
+        "predicate": diagnosis.get("predicate"),
+        "operation": diagnosis.get("operation"),
+        "effect": diagnosis.get("effect"),
+        "admitted": admitted,
+        "clauses": diagnosis.get("clauses", []),
+        "accepted_because": _dedupe_text(accepted_because),
+        "blocked_because": _dedupe_text(blocked_because),
+        "rationale_codes": rationale_codes,
+    }
+
+
+def _human_rationale(code: str) -> str:
+    code = str(code or "").strip()
+    mapping = {
+        "safe_direct_fact": "safe direct fact candidate",
+        "safe_fact": "safe fact candidate",
+        "safe_query": "safe query candidate",
+        "safe_retract": "safe explicit retraction candidate",
+        "safe_rule_clause": "safe explicit rule clause",
+        "safe_rule_record_without_clause": "safe direct rule-like record without executable clause",
+        "rule_label_demoted_to_fact_record": "rule label treated as a fact record because no executable clause was supplied",
+        "candidate_safety_gate": "candidate operation was not marked safe",
+        "source_policy": "source policy blocks durable write",
+        "inference_not_truth": "inferred candidate is not durable truth",
+        "context_is_not_new_write": "context-sourced material is not a new write",
+        "predicate_shape_gate": "predicate name failed structural validation",
+        "predicate_palette_gate": "predicate signature is outside the active allowed palette",
+        "predicate_contract_gate": "predicate contract validation failed",
+        "contract_policy_gate": "profile contract policy blocked the operation",
+        "temporal_policy": "temporal policy blocked the operation",
+        "interval_order_gate": "interval start/end ordering is invalid",
+        "polarity_policy": "polarity policy blocked a general negative fact",
+        "no_general_negative_fact_system": "general negative fact semantics are not supported yet",
+        "rule_policy": "rule policy blocked the operation",
+        "no_rule_synthesis": "durable rule synthesis requires an explicit clause",
+        "variable_args_not_fact": "variable-like rule arguments cannot be demoted into facts",
+        "operation_policy": "operation type is unsupported",
+        "duplicate_operation_gate": "duplicate candidate operation was collapsed",
+        "decision_projection_gate": "projected turn decision blocks this write",
+        "quantifier_policy": "quantified set needs expansion before durable write",
+        "no_group_atom_commit": "group/set atom cannot stand in for individual facts",
+        "hypothetical_policy": "hypothetical/query-scoped premise is not durable truth",
+        "identity_premise_not_truth": "identity premise was scoped to a query, not a committed fact",
+        "hypothetical_inferred_query_exception": "inferred candidate was allowed only as a query",
+    }
+    return mapping.get(code, code.replace("_", " "))
+
+
+def _dedupe_text(items: list[str]) -> list[str]:
+    out: list[str] = []
+    seen: set[str] = set()
+    for item in items:
+        text = str(item or "").strip()
+        if not text:
+            continue
+        key = text.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(text)
+    return out
 
 
 def _diagnose_candidate_operation(
@@ -1972,6 +2073,12 @@ def _role_argument_problem(role: str, arg: str, meta: dict[str, Any]) -> str:
             return "a person, not a source document"
         if entity_type == "time":
             return "a time, not a source document"
+    elif role_kind == "person_or_document":
+        if entity_type == "time":
+            return "a time, not a person/source document"
+    elif role_kind == "court_or_judge":
+        if entity_type in {"time", "medication", "lab_test", "condition", "symptom"}:
+            return f"{entity_type}, not a court/judge"
     elif role_kind == "person":
         if entity_type in {"time", "place", "medication", "lab_test", "condition", "symptom"}:
             return f"{entity_type}, not a person/party"
@@ -1982,6 +2089,8 @@ def _contract_role_kind(role: str) -> str:
     value = _atomize(role)
     if not value:
         return ""
+    if "speaker" in value and "document" in value:
+        return "person_or_document"
     if "interval" in value:
         return "interval"
     if value in {"date", "time", "date_filed", "decision_date", "filing_date"}:
@@ -1997,6 +2106,10 @@ def _contract_role_kind(role: str) -> str:
     if any(
         marker in value
         for marker in (
+            "court_or_judge",
+            "court",
+            "tribunal",
+            "panel",
             "person",
             "patient",
             "judge",
@@ -2009,6 +2122,8 @@ def _contract_role_kind(role: str) -> str:
             "actor",
         )
     ):
+        if "court" in value or "tribunal" in value or "panel" in value:
+            return "court_or_judge"
         return "person"
     return ""
 

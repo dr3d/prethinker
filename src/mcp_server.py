@@ -46,7 +46,6 @@ from src.domain_profiles import (
     load_profile_package,
     profile_package_context,
     profile_package_contracts,
-    select_domain_profile,
     thin_profile_roster,
 )
 from src.medical_profile import (
@@ -69,6 +68,7 @@ from src.semantic_ir import (
     semantic_ir_to_legacy_parse,
     semantic_ir_to_prethink_payload,
 )
+from src.semantic_router import SemanticRouterCallConfig, call_semantic_router
 
 
 FUNCTIONAL_CURRENT_STATE_PREDICATES: set[tuple[str, int]] = {
@@ -1757,6 +1757,9 @@ class PrologMCPServer:
             think_enabled=self._semantic_ir_thinking,
         )
 
+    def _semantic_router_call_config(self) -> SemanticRouterCallConfig:
+        return SemanticRouterCallConfig.from_semantic_ir_config(self._semantic_ir_call_config())
+
     def _semantic_ir_selected_profile_for_utterance(
         self,
         utterance: str,
@@ -1764,14 +1767,64 @@ class PrologMCPServer:
         context: list[str] | None = None,
     ) -> str:
         if self._active_profile == "auto":
-            selection = select_domain_profile(
-                utterance,
-                context=self._semantic_ir_context(context),
-                catalog=self._domain_profile_catalog,
-            )
+            semantic_context = self._semantic_ir_context(context)
+            try:
+                router_result = call_semantic_router(
+                    utterance=utterance,
+                    config=self._semantic_router_call_config(),
+                    context=semantic_context,
+                    available_domain_profiles=self._semantic_ir_available_domain_profiles(),
+                    kb_manifest={"note": "runtime router profile/context selection only; mapper remains authority"},
+                    include_model_input=False,
+                )
+            except Exception as exc:
+                selection = {
+                    "schema_version": "semantic_router_v1",
+                    "selected_profile_id": "general",
+                    "candidate_profile_ids": [],
+                    "routing_confidence": 0.0,
+                    "turn_shape": "unknown",
+                    "guidance_modules": [],
+                    "risk_flags": ["router_call_failed"],
+                    "notes": [str(exc)],
+                    "error": str(exc),
+                }
+            else:
+                parsed = router_result.get("parsed")
+                selection = parsed if isinstance(parsed, dict) else {
+                    "schema_version": "semantic_router_v1",
+                    "selected_profile_id": "general",
+                    "candidate_profile_ids": [],
+                    "routing_confidence": 0.0,
+                    "turn_shape": "unknown",
+                    "guidance_modules": [],
+                    "risk_flags": ["router_parse_failed"],
+                    "notes": ["semantic_router_v1 did not return parseable JSON"],
+                    "raw_message": router_result.get("content", ""),
+                }
+                selection["latency_ms"] = router_result.get("latency_ms", 0)
+            selected = str(selection.get("selected_profile_id") or "general").strip()
+            known_profiles = {
+                str(row.get("profile_id", "")).strip()
+                for row in self._domain_profile_catalog.get("profiles", [])
+                if isinstance(row, dict)
+            }
+            if selected == "bootstrap":
+                effective = "bootstrap"
+            elif selected in known_profiles:
+                effective = selected
+            else:
+                effective = "general"
+                if selected and selected != "general":
+                    selection["effective_profile_id"] = "general"
+                    selection.setdefault("notes", []).append(
+                        f"selected profile {selected!r} has no available profile package; using general context"
+                    )
+            selection.setdefault("effective_profile_id", effective)
+            selection.setdefault("profile_id", effective)
+            selection.setdefault("authority", "router_controls_context_only_mapper_controls_admission")
             self._last_semantic_ir_profile_selection = self._clone_trace_payload(selection)
-            selected = str(selection.get("profile_id", "general")).strip() if isinstance(selection, dict) else "general"
-            self._last_semantic_ir_selected_profile = "" if selected == "general" else selected
+            self._last_semantic_ir_selected_profile = "" if effective == "general" else effective
             return self._last_semantic_ir_selected_profile
         self._last_semantic_ir_profile_selection = {
             "profile_id": self._active_profile,
@@ -1783,12 +1836,20 @@ class PrologMCPServer:
         return self._last_semantic_ir_selected_profile
 
     def _profile_contracts_for(self, profile_id: str) -> list[dict[str, Any]]:
+        if profile_id == "bootstrap":
+            return [{"signature": "bootstrap_review_only/0", "arguments": []}]
         if profile_id == "medical@v0":
             return self._clone_trace_payload(self._profile_predicate_contracts)
         profile = load_profile_package(profile_id, self._domain_profile_catalog)
         return profile_package_contracts(profile) if profile else []
 
     def _profile_context_for(self, profile_id: str) -> list[str]:
+        if profile_id == "bootstrap":
+            return [
+                "bootstrap_review_policy: no approved domain profile or predicate palette exists for this turn.",
+                "bootstrap_review_policy: semantic_ir_v1 may describe candidate meanings, risks, and clarification needs, but durable candidate_operations are review-only and will not be admitted.",
+                "bootstrap_review_policy: prefer clarify, quarantine, query, or mixed over commit when a new domain vocabulary would be required.",
+            ]
         if profile_id == "medical@v0":
             return [str(item).strip() for item in self._profile_semantic_ir_context if str(item).strip()]
         profile = load_profile_package(profile_id, self._domain_profile_catalog)
@@ -1808,6 +1869,35 @@ class PrologMCPServer:
 
     def _semantic_ir_domain_context(self, profile_id: str = "") -> list[str]:
         return self._profile_context_for(profile_id) if profile_id else []
+
+    def _semantic_ir_context_audit(
+        self,
+        *,
+        selected_profile: str,
+        domain_context: list[str],
+        allowed_predicates: list[str],
+        predicate_contracts: list[dict[str, Any]],
+    ) -> dict[str, Any]:
+        selection = self._last_semantic_ir_profile_selection if isinstance(self._last_semantic_ir_profile_selection, dict) else {}
+        router_audit = selection.get("context_audit") if isinstance(selection.get("context_audit"), dict) else {}
+        return {
+            "version": "context_audit_v1",
+            "authority": "diagnostic_only_router_controls_context_mapper_controls_admission",
+            "selected_profile_id": selection.get("selected_profile_id", selected_profile),
+            "effective_profile_id": selected_profile or "general",
+            "routing_confidence": selection.get("routing_confidence"),
+            "why_this_profile": router_audit.get("why_this_profile", ""),
+            "selected_context_sources": self._clone_trace_payload(router_audit.get("selected_context_sources", [])),
+            "secondary_profiles_considered": self._clone_trace_payload(router_audit.get("secondary_profiles_considered", [])),
+            "why_not_secondary": self._clone_trace_payload(router_audit.get("why_not_secondary", [])),
+            "guidance_modules": self._clone_trace_payload(selection.get("guidance_modules", [])),
+            "risk_flags": self._clone_trace_payload(selection.get("risk_flags", [])),
+            "retrieval_hints": self._clone_trace_payload(selection.get("retrieval_hints", {})),
+            "loaded_domain_context_count": len(domain_context),
+            "loaded_allowed_predicate_count": len(allowed_predicates),
+            "loaded_predicate_contract_count": len(predicate_contracts),
+            "loaded_allowed_predicate_sample": list(allowed_predicates)[:12],
+        }
 
     def _semantic_ir_available_domain_profiles(self) -> list[dict[str, Any]]:
         return self._clone_trace_payload(self._domain_profile_roster)
@@ -1983,6 +2073,12 @@ class PrologMCPServer:
             "active_profile": self._active_profile,
             "selected_profile": selected_profile or "general",
             "profile_selection": self._clone_trace_payload(self._last_semantic_ir_profile_selection),
+            "context_audit": self._semantic_ir_context_audit(
+                selected_profile=selected_profile or "general",
+                domain_context=domain_context,
+                allowed_predicates=allowed_predicates,
+                predicate_contracts=predicate_contracts,
+            ),
             "model_input": {
                 "domain": domain,
                 "utterance": utterance,

@@ -1,10 +1,10 @@
 # Current Utterance Pipeline
 
-Last updated: 2026-04-27
+Last updated: 2026-04-28
 
 This is the current live path for a user utterance in Prethinker. The older
-[GIC English Input Pipeline](https://github.com/dr3d/prethinker/blob/main/docs/GIC_ENGLISH_INPUT_PIPELINE.md)
-is historical context for the earlier English-first parser lane.
+English-first parser lane is historical context only and now lives in Git
+history rather than the public reading path.
 
 The current center is better described as:
 
@@ -27,7 +27,8 @@ decide what becomes Prolog state.
    clarification pressure, segment plan, and execution protocol.
 3. Long or mixed utterances may be split into focused segments, especially at
    query boundaries.
-4. The runtime selects a domain profile, often with `active_profile=auto`.
+4. The runtime uses `semantic_router_v1` to select a domain profile when
+   `active_profile=auto`.
 5. The runtime builds a compact Semantic IR input: utterance, recent turn
    context, profile context, allowed predicates, predicate contracts, and a
    small `kb_context_pack`.
@@ -127,8 +128,8 @@ separable.
 ### 5. A domain profile is selected
 
 The current pipeline can run with a fixed profile or `active_profile=auto`.
-Auto-selection uses a thin catalog plus profile-owned keywords to choose a
-domain context such as:
+Auto-selection uses `semantic_router_v1` plus the thin profile roster to choose
+a domain context such as:
 
 - `medical@v0`
 - `legal_courtlistener@v0`

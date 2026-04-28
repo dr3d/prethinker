@@ -13,10 +13,11 @@ This is the short handoff for coding agents working in Prethinker.
 7. [docs/DOMAIN_PROFILE_CATALOG.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PROFILE_CATALOG.md)
 8. [docs/COURTLISTENER_DOMAIN.md](https://github.com/dr3d/prethinker/blob/main/docs/COURTLISTENER_DOMAIN.md)
 9. [docs/SEC_CONTRACTS_DOMAIN.md](https://github.com/dr3d/prethinker/blob/main/docs/SEC_CONTRACTS_DOMAIN.md)
-10. [docs/GUARDRAIL_DEPENDENCY_AB.md](https://github.com/dr3d/prethinker/blob/main/docs/GUARDRAIL_DEPENDENCY_AB.md)
-11. [docs/UMLS_MVP.md](https://github.com/dr3d/prethinker/blob/main/docs/UMLS_MVP.md)
-12. [docs/MEDICAL_PROFILE.md](https://github.com/dr3d/prethinker/blob/main/docs/MEDICAL_PROFILE.md)
-13. [ui_gateway/README.md](https://github.com/dr3d/prethinker/blob/main/ui_gateway/README.md)
+10. [docs/SEMANTIC_ROUTER_EXPERIMENT.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_ROUTER_EXPERIMENT.md)
+11. [docs/NO_LANGUAGE_HANDLING_IN_PYTHON_AUDIT.md](https://github.com/dr3d/prethinker/blob/main/docs/NO_LANGUAGE_HANDLING_IN_PYTHON_AUDIT.md)
+12. [docs/UMLS_MVP.md](https://github.com/dr3d/prethinker/blob/main/docs/UMLS_MVP.md)
+13. [docs/MEDICAL_PROFILE.md](https://github.com/dr3d/prethinker/blob/main/docs/MEDICAL_PROFILE.md)
+14. [ui_gateway/README.md](https://github.com/dr3d/prethinker/blob/main/ui_gateway/README.md)
 
 Treat older reports and prompt snapshots as Git history, not live guidance.
 
@@ -28,7 +29,7 @@ Treat older reports and prompt snapshots as Git history, not live guidance.
 - `src/semantic_ir.py` owns the mapper, projection policy, and admission diagnostics.
 - Long story-like console inputs may be split into focused Semantic IR segments by `ui_gateway/gateway/phases.py`; each segment still goes through canonical `process_utterance()`, then the gateway dedupes the visible mutation list.
 - `medical@v0` is the active bounded ontology profile; `legal_courtlistener@v0` and `sec_contracts@v0` are live-data profile lanes for provenance/conflict and obligation/rule pressure.
-- `active_profile=auto` uses a deterministic catalog selector to choose one profile per Semantic IR turn and load that profile's thick context/contracts. It is context selection only, not write authority.
+- `active_profile=auto` uses `semantic_router_v1` to choose one profile per Semantic IR turn and load that profile's thick context/contracts. It is context selection only, not write authority.
 - `scripts/run_mixed_domain_agility.py` is the current cross-domain pressure harness for shuffled Goldilocks/Glitch/Ledger/Silverton/Harbor/legal/SEC/medical streams.
 - `medical@v0` Semantic IR calls include profile-owned predicate contracts and compact UMLS bridge context; the generic mapper should remain structural rather than accumulating medical type lists.
 - `modelfiles/domain_profile_catalog.v0.json` is the thin skill-like roster. `profile.story_world.v0.json`, `profile.probate.v0.json`, `profile.legal_courtlistener.v0.json`, and `profile.sec_contracts.v0.json` are declarative thick-context packages for routing/profile experiments.
@@ -53,10 +54,10 @@ Use focused tests while iterating, then run the full suite before a stopping-poi
 ```powershell
 python -m pytest tests/test_medical_profile_runtime.py tests/test_ui_gateway_phases.py tests/test_ui_gateway_runtime_hooks.py -q
 python -m pytest tests/test_umls_mvp.py tests/test_umls_semantic_network_builder.py -q
-python -m pytest tests/test_semantic_ir_runtime.py tests/test_guardrail_dependency_ab.py -q
+python -m pytest tests/test_semantic_ir_runtime.py tests/test_semantic_router.py tests/test_router_training_set.py -q
 python -m pytest tests/test_courtlistener_adapter.py tests/test_domain_profiles.py -q
 python -m pytest tests/test_sec_edgar_adapter.py tests/test_domain_profiles.py -q
 python -m pytest -q
 ```
 
-The last known full-suite result after the profile-validator, temporal-gate, and clause-support work was `313 passed`. Recent focused batteries also cover CourtListener, SEC/contracts, domain profiles, Semantic IR runtime, UI gateway phases, trace rendering, and UMLS builders. Live/generated smoke traces belong under ignored paths such as `datasets/*/generated/` and `tmp/semantic_ir_trace_views/`.
+The last known full-suite result after the router diagnostics/context-audit pass was `367 passed`. Recent focused batteries also cover CourtListener, SEC/contracts, domain profiles, Semantic IR runtime, UI gateway phases, trace rendering, router agility, router training data, and UMLS builders. Live/generated smoke traces belong under ignored paths such as `datasets/*/generated/` and `tmp/semantic_ir_trace_views/`.

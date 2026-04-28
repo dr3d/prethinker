@@ -19,7 +19,6 @@ It is a profile for:
 - predicate registry: [modelfiles/predicate_registry.medical.json](../modelfiles/predicate_registry.medical.json)
 - prompt supplement: [modelfiles/medical_compiler_prompt_supplement.md](https://github.com/dr3d/prethinker/blob/main/modelfiles/medical_compiler_prompt_supplement.md)
 - type schema example: [modelfiles/type_schema.medical.example.json](../modelfiles/type_schema.medical.example.json)
-- ontology prospector prompt: [modelfiles/medical_ontology_prospector_prompt.md](https://github.com/dr3d/prethinker/blob/main/modelfiles/medical_ontology_prospector_prompt.md)
 - manifest-driven suite runner: [scripts/run_medical_profile_suite.py](../scripts/run_medical_profile_suite.py)
 - local UMLS bridge generator: [scripts/build_umls_mvp_slice.py](../scripts/build_umls_mvp_slice.py)
 - local UMLS Semantic Network builder: [scripts/build_umls_semantic_network_kb.py](../scripts/build_umls_semantic_network_kb.py)
@@ -60,7 +59,6 @@ It is reinforced by:
 See:
 
 - [docs/UMLS_MVP.md](https://github.com/dr3d/prethinker/blob/main/docs/UMLS_MVP.md)
-- [docs/ONTOLOGY_PROSPECTOR.md](https://github.com/dr3d/prethinker/blob/main/docs/ONTOLOGY_PROSPECTOR.md)
 - [PROJECT_STATE.md](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md)
 
 ## Why The Palette Stays Small

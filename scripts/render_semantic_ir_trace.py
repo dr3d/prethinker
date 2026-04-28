@@ -147,6 +147,9 @@ def _extract_model_input(record: dict[str, Any]) -> dict[str, Any]:
     candidate = record.get("model_input")
     if isinstance(candidate, dict):
         return candidate
+    candidate = record.get("compiler_model_input")
+    if isinstance(candidate, dict):
+        return candidate
     for path in (
         ["raw", "compiler_trace", "parse", "semantic_ir", "model_input"],
         ["raw", "compiler_trace", "prethink", "semantic_ir", "model_input"],
@@ -157,6 +160,11 @@ def _extract_model_input(record: dict[str, Any]) -> dict[str, Any]:
         if isinstance(value, dict):
             return value
     return {}
+
+
+def _extract_router(record: dict[str, Any]) -> dict[str, Any]:
+    router = record.get("router")
+    return router if isinstance(router, dict) else {}
 
 
 def _extract_mapped(
@@ -483,6 +491,41 @@ def _render_candidate_ops(parsed: dict[str, Any]) -> list[str]:
     return _markdown_table(["#", "op", "predicate", "args", "source", "safety", "polarity", "clause"], rows)
 
 
+def _render_router_plan(record: dict[str, Any]) -> list[str]:
+    router = _extract_router(record)
+    if not router:
+        return ["No semantic router control-plane record found."]
+    retrieval = router.get("retrieval_hints") if isinstance(router.get("retrieval_hints"), dict) else {}
+    bootstrap = router.get("bootstrap_request") if isinstance(router.get("bootstrap_request"), dict) else {}
+    lines = [
+        f"Selected profile: `{record.get('router_profile') or router.get('selected_profile_id') or ''}`",
+        f"Effective profile: `{record.get('effective_profile') or ''}`",
+        f"Expected profile: `{record.get('expected_profile') or ''}`",
+        f"Confidence: `{router.get('routing_confidence', '')}`",
+        f"Turn shape: `{router.get('turn_shape', '')}`",
+        f"Should segment: `{router.get('should_segment', '')}`",
+        "",
+        "**Candidate profiles:** "
+        + (", ".join(f"`{item}`" for item in _as_list(router.get("candidate_profile_ids"))) or "none"),
+        "",
+        "**Guidance modules:** "
+        + (", ".join(f"`{item}`" for item in _as_list(router.get("guidance_modules"))) or "none"),
+        "",
+        "**Risk flags:** "
+        + (", ".join(f"`{item}`" for item in _as_list(router.get("risk_flags"))) or "none"),
+        "",
+    ]
+    if retrieval:
+        lines.extend(["**Retrieval hints:**", "", _code_block(retrieval, "json"), ""])
+    if bootstrap and (bootstrap.get("needed") or bootstrap.get("proposed_domain_name") or bootstrap.get("why")):
+        lines.extend(["**Bootstrap request:**", "", _code_block(bootstrap, "json"), ""])
+    notes = [str(item).strip() for item in _as_list(router.get("notes")) if str(item).strip()]
+    lines.append("**Router notes:**")
+    lines.append("")
+    lines.extend([f"- {item}" for item in notes] or ["- none"])
+    return lines
+
+
 def _render_admission_ops(diagnostics: dict[str, Any]) -> list[str]:
     rows = []
     for op in _as_list(diagnostics.get("operations")):
@@ -580,6 +623,43 @@ def _render_truth_alignment(diagnostics: dict[str, Any]) -> list[str]:
     lines.append("")
     lines.extend(
         _markdown_table(["severity", "kind", "op #", "detail"], rows)
+        if rows
+        else ["- none"]
+    )
+    return lines
+
+
+def _render_anti_coupling(record: dict[str, Any]) -> list[str]:
+    anti = record.get("anti_coupling") if isinstance(record.get("anti_coupling"), dict) else {}
+    if not anti:
+        return ["No router/compiler anti-coupling diagnostics recorded."]
+    summary = anti.get("summary") if isinstance(anti.get("summary"), dict) else {}
+    lines = [
+        "**Anti-coupling summary:**",
+        "",
+        f"- flag count: `{anti.get('flag_count', 0)}`",
+        f"- expected profile: `{summary.get('expected_profile', '')}`",
+        f"- effective profile: `{summary.get('effective_profile', '')}`",
+        f"- routing confidence: `{summary.get('routing_confidence', '')}`",
+        f"- projected decision: `{summary.get('projected_decision', '')}`",
+        f"- admitted/skipped: `{summary.get('admitted_count', 0)}/{summary.get('skipped_count', 0)}`",
+        "",
+    ]
+    rows = []
+    for flag in _as_list(anti.get("flags")):
+        if isinstance(flag, dict):
+            rows.append(
+                [
+                    flag.get("severity", ""),
+                    flag.get("kind", ""),
+                    flag.get("detail", ""),
+                    _json_dumps({key: value for key, value in flag.items() if key not in {"severity", "kind", "detail"}}),
+                ]
+            )
+    lines.append("**Flags:**")
+    lines.append("")
+    lines.extend(
+        _markdown_table(["severity", "kind", "detail", "evidence"], rows)
         if rows
         else ["- none"]
     )
@@ -688,6 +768,13 @@ def _render_record(
         layer_summary.append(
             f"admission=`{admission_score.get('check_count', 0)}/{admission_score.get('check_total', 0)}`"
         )
+    if record.get("router_profile") or record.get("effective_profile"):
+        layer_summary.append(
+            f"route={record.get('router_profile') or 'unknown'}->{record.get('effective_profile') or 'unknown'}"
+        )
+    anti = record.get("anti_coupling") if isinstance(record.get("anti_coupling"), dict) else {}
+    if int(anti.get("flag_count", 0) or 0):
+        layer_summary.append(f"anti-coupling=`{anti.get('flag_count')}`")
     excerpt = _summary_excerpt(input_info["utterance"])
 
     lines: list[str] = [
@@ -728,6 +815,11 @@ def _render_record(
         if not prompt_bits:
             prompt_bits.append(_code_block(model_input, "json", max_chars=raw_chars))
         lines.extend(_details("Recorded model input / request envelope", "\n".join(prompt_bits)))
+        lines.append("")
+
+    if _extract_router(record):
+        lines.extend(["### Layer 0a - Semantic Router / Context Plan", ""])
+        lines.extend(_render_router_plan(record))
         lines.append("")
 
     lines.extend(["### Layer 1 - Raw Semantic Workspace Proposal", ""])
@@ -821,6 +913,10 @@ def _render_record(
 
     lines.extend(["### Layer 3c - Truth-Maintenance / Admission Delta", ""])
     lines.extend(_render_truth_alignment(diagnostics))
+    lines.append("")
+
+    lines.extend(["### Layer 3d - Router / Compiler Coupling Diagnostics", ""])
+    lines.extend(_render_anti_coupling(record))
     lines.append("")
 
     lines.extend(["### Layer 4 - Runtime Payload / KB Surface", ""])

@@ -80,7 +80,6 @@ Its job is to:
 If you want the code-level technical version of this story, see:
 
 - [Current Utterance Pipeline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_UTTERANCE_PIPELINE.md)
-- [GIC English Input Pipeline](https://github.com/dr3d/prethinker/blob/main/docs/GIC_ENGLISH_INPUT_PIPELINE.md) for historical parser-lane context
 
 Prethinker is the authority boundary.
 

@@ -36,6 +36,8 @@
   ],
   "canonical_palette": [
     { "signature": "owns/2", "arguments": ["owner", "object"], "notes": "Durable possession or belonging." },
+    { "signature": "lives_in/2", "arguments": ["actor_or_group", "home_or_place"], "notes": "Residence or dwelling relation when explicitly stated." },
+    { "signature": "near/2", "arguments": ["entity", "nearby_place"], "notes": "Explicit proximity relation; not containment or residence." },
     { "signature": "member_of/2", "arguments": ["member_entity", "group_entity"], "notes": "Membership in an explicit group; not category/type." },
     { "signature": "gathered/2", "arguments": ["actor", "object"], "notes": "Actor gathered or collected an object; not giving or owning." },
     { "signature": "at/2", "arguments": ["entity", "place"], "notes": "Location when no more specific movement predicate applies." },

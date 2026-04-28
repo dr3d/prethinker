@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from scripts.run_semantic_ir_lava_sweep import apply_mapped_directly, select_base_cases
+from scripts.run_semantic_ir_lava_sweep import apply_mapped_directly, filter_lava_cases, select_base_cases
+from scripts.run_semantic_ir_lava_sweep import load_frontier_pack_cases
 from scripts.run_semantic_ir_lava_sweep import LavaCase
 from src.mcp_server import PrologMCPServer
 
@@ -49,3 +50,95 @@ def test_lava_balanced_sampling_spreads_source_families():
 
     assert len(selected) == 4
     assert {"medical", "dataset", "goldilocks"} <= sources
+
+
+def test_lava_pack_v2_loads_with_expected_profile_coverage():
+    from pathlib import Path
+
+    cases = [
+        case
+        for case in load_frontier_pack_cases(Path("docs/data/frontier_packs"))
+        if case.source.endswith("semantic_ir_lava_pack_v2")
+    ]
+    profiles = {case.expected_profile for case in cases}
+
+    assert len(cases) == 36
+    assert {
+        "medical@v0",
+        "legal_courtlistener@v0",
+        "sec_contracts@v0",
+        "story_world@v0",
+        "probate@v0",
+    } <= profiles
+    assert all(case.expect and case.expect.get("must") for case in cases)
+
+
+def test_lava_pack_v3_records_calibration_status_with_bootstrap_pressure():
+    import json
+    from pathlib import Path
+
+    path = Path("docs/data/frontier_packs/semantic_ir_lava_pack_v3.json")
+    metadata = json.loads(path.read_text(encoding="utf-8"))
+    cases = [
+        case
+        for case in load_frontier_pack_cases(Path("docs/data/frontier_packs"))
+        if case.source.endswith("semantic_ir_lava_pack_v3")
+    ]
+    profiles = {case.expected_profile for case in cases}
+
+    assert metadata["status"] == "calibration_after_first_held_out_run"
+    assert "First held-out result" in metadata["validation_note"]
+    assert len(cases) >= 16
+    assert {
+        "medical@v0",
+        "legal_courtlistener@v0",
+        "sec_contracts@v0",
+        "story_world@v0",
+        "probate@v0",
+        "bootstrap",
+    } <= profiles
+    assert all(case.expect and case.expect.get("avoid") for case in cases)
+
+
+def test_lava_pack_v4_targets_next_architecture_hazards():
+    import json
+    from pathlib import Path
+
+    path = Path("docs/data/frontier_packs/semantic_ir_lava_pack_v4.json")
+    metadata = json.loads(path.read_text(encoding="utf-8"))
+    cases = [
+        case
+        for case in load_frontier_pack_cases(Path("docs/data/frontier_packs"))
+        if case.source.endswith("semantic_ir_lava_pack_v4")
+    ]
+    profiles = {case.expected_profile for case in cases}
+    hazards = {row.get("hazard") for row in metadata["cases"]}
+
+    assert metadata["status"] == "fresh_held_out_candidate"
+    assert len(cases) == 25
+    assert hazards == {
+        "truth_maintenance_explosion",
+        "predicate_canonicalization_drift",
+        "claim_fact_observation_epistemology",
+        "segmentation_semantics",
+        "multilingual_ontology_pressure",
+    }
+    assert {
+        "medical@v0",
+        "legal_courtlistener@v0",
+        "sec_contracts@v0",
+        "story_world@v0",
+        "probate@v0",
+    } <= profiles
+    assert all(case.expect and case.expect.get("must") and case.expect.get("avoid") for case in cases)
+
+
+def test_lava_source_filter_matches_source_or_id():
+    cases = [
+        LavaCase(id="alpha_case", source="frontier:semantic_ir_lava_pack_v2", utterance="a"),
+        LavaCase(id="beta_special", source="dataset:other", utterance="b"),
+        LavaCase(id="gamma", source="dataset:other", utterance="c"),
+    ]
+
+    assert [case.id for case in filter_lava_cases(cases, source_filter="lava_pack_v2")] == ["alpha_case"]
+    assert [case.id for case in filter_lava_cases(cases, source_filter="beta")] == ["beta_special"]

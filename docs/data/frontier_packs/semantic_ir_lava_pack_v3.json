@@ -1,0 +1,288 @@
+{
+  "pack_id": "semantic_ir_lava_pack_v3",
+  "family": "semantic_ir_frontier",
+  "created_at_utc": "2026-04-28T00:00:00Z",
+  "status": "calibration_after_first_held_out_run",
+  "description": "Adversarial Lava v3 scenarios for semantic_router_v1 and semantic_ir_v1. This pack began as held-out validation, then became calibration evidence after its first misses informed generic router/profile repairs.",
+  "validation_note": "First held-out result was router 14/17 with compiler JSON 17/17. Generic router/profile repairs then reached router 17/17 and bootstrap review-only admission. Treat this pack as repair/calibration signal now; use Lava v4 for fresh held-out validation.",
+  "design_goal": "Stress semantic ownership, source fidelity, legal-medical/probate boundaries, mixed query+mutation turns, multilingual code-switching, and bootstrap admission without adding Python language handling.",
+  "cases": [
+    {
+      "id": "lava3_provenance_01_medical_term_in_court_record",
+      "domain": "legal_courtlistener",
+      "utterance": "The ER discharge summary attached to Exhibit 9 says Priya was prescribed warfarin, but the opinion only says the exhibit was admitted over hearsay objection.",
+      "context": [
+        "CourtListener-style legal evidence intake.",
+        "Medical documents may appear as exhibits without becoming clinical memory.",
+        "Admission of an exhibit is not a court finding that the medical content is true."
+      ],
+      "allowed_predicates": ["document_states/4", "claim_made/4", "finding/4", "exhibit_admitted/3"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["ER discharge summary", "Exhibit 9", "warfarin", "hearsay objection", "admitted"],
+        "avoid": ["taking(priya, warfarin)", "finding(court", "has_condition"]
+      },
+      "failure_mode": "Medical vocabulary inside a legal provenance chain should not be routed as direct clinical fact."
+    },
+    {
+      "id": "lava3_provenance_02_doctor_testimony_not_treatment",
+      "domain": "legal_courtlistener",
+      "utterance": "Dr. Chen testified that Mateo's creatinine was elevated on June 2; Mateo's chart is not in the record.",
+      "context": [
+        "Deposition or trial testimony is a legal claim source.",
+        "The clinical chart itself is absent."
+      ],
+      "allowed_predicates": ["claim_made/4", "document_states/4", "candidate_identity/2"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["Dr. Chen", "testified", "creatinine", "June 2", "chart is not in the record"],
+        "avoid": ["lab_result_high(mateo", "underwent_lab_test(mateo", "finding(court"]
+      },
+      "failure_mode": "A clinician speaker should not convert testimony into durable medical state."
+    },
+    {
+      "id": "lava3_boundary_01_probate_petition_vs_court_holding",
+      "domain": "probate",
+      "utterance": "The probate petition says Clara witnessed Elias sign the codicil, but the register only lists Clara as an interested beneficiary.",
+      "context": [
+        "Estate probate setting.",
+        "Interested beneficiaries may be disqualified as witnesses under the scenario rules.",
+        "A petition allegation is not a court finding."
+      ],
+      "allowed_predicates": ["claimed/3", "document_states/2", "candidate_identity/2", "valid_witness/2", "invalid_witness_reason/3"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["probate petition", "Clara", "witnessed", "codicil", "interested beneficiary"],
+        "avoid": ["valid_witness(clara", "finding(court", "codicil_valid"]
+      },
+      "failure_mode": "Generic legal pleading/finding patterns must not eclipse probate-specific witness eligibility."
+    },
+    {
+      "id": "lava3_boundary_02_court_order_about_estate_not_probate_rule",
+      "domain": "legal_courtlistener",
+      "utterance": "The appellate court affirmed sanctions against the executor; it did not decide who inherits the farm.",
+      "context": [
+        "CourtListener appellate opinion source.",
+        "Executor and inheritance words appear, but the holding is about sanctions only."
+      ],
+      "allowed_predicates": ["finding/4", "holding/3", "document_states/4", "claim_made/4"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["appellate court", "affirmed sanctions", "executor", "did not decide", "inherits"],
+        "avoid": ["inherits(", "forfeited_share", "valid_amendment"]
+      },
+      "failure_mode": "Probate nouns in a court opinion should not trigger probate mutation when the legal holding is sanctions."
+    },
+    {
+      "id": "lava3_boundary_03_contract_rule_spoken_in_story",
+      "domain": "sec_contracts",
+      "utterance": "In the captain's log, the rule reads: any lantern left burning after midnight incurs a silver fine unless the harbor bell is broken.",
+      "context": [
+        "Fictional wrapper text is present.",
+        "The embedded sentence is a formal rule with exception semantics."
+      ],
+      "allowed_predicates": ["obligation/3", "subject_to/2", "condition_met/2", "document_states/4"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["rule reads", "any lantern", "after midnight", "silver fine", "unless"],
+        "avoid": ["at(lantern", "story_title", "fine_incurred("]
+      },
+      "failure_mode": "Story-world flavor should not swallow formal contract-like rule language."
+    },
+    {
+      "id": "lava3_boundary_04_story_scene_with_contract_words",
+      "domain": "story_world",
+      "utterance": "Nia folded the paper titled Service Agreement into a crane and hid it behind the bakery clock.",
+      "context": [
+        "Story-world scene memory.",
+        "The document title is an object label, not a contract clause."
+      ],
+      "allowed_predicates": ["at/2", "owns/2", "document_states/3", "hid/3", "transformed/3"],
+      "expect": {
+        "decision": "commit",
+        "must": ["Nia", "Service Agreement", "crane", "hid", "bakery clock"],
+        "avoid": ["obligation", "entitled_to", "party_to_contract"]
+      },
+      "failure_mode": "Contract-looking document names should not reroute simple scene events."
+    },
+    {
+      "id": "lava3_multilingual_01_code_switched_legal_medical",
+      "domain": "legal_courtlistener",
+      "utterance": "El informe clinico says Lucia had sepsis, pero la demanda solo lo alega; no hay finding del juez.",
+      "context": [
+        "Legal complaint context.",
+        "Spanish/English code-switch with medical condition vocabulary.",
+        "Allegation/finding separation is the main issue."
+      ],
+      "allowed_predicates": ["claim_made/4", "finding/4", "document_states/4"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["informe clinico", "sepsis", "demanda", "alega", "no hay finding"],
+        "avoid": ["has_condition(lucia, sepsis)", "finding(court", "diagnosed_with"]
+      },
+      "failure_mode": "Code-switched medical content should stay legally attributed."
+    },
+    {
+      "id": "lava3_multilingual_02_french_probate_identity",
+      "domain": "probate",
+      "utterance": "Le temoin dit que A. Moreau etait Alice, pas Armand; le registre ne donne que l'initiale.",
+      "context": [
+        "Probate identity ambiguity.",
+        "The register source has only an initial; witness identity claim is weaker."
+      ],
+      "allowed_predicates": ["candidate_identity/2", "claimed/3", "document_states/2"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["temoin", "A. Moreau", "Alice", "pas Armand", "registre"],
+        "avoid": ["same_person(a_moreau, alice)", "same_person(a_moreau, armand)", "inherits(alice"]
+      },
+      "failure_mode": "French identity correction pressure should not collapse an ambiguous initial into a committed identity."
+    },
+    {
+      "id": "lava3_source_fidelity_01_three_bowls_not_goldilocks",
+      "domain": "story_world",
+      "utterance": "In this version, no girl enters the cottage: a courier counts three bowls on the table and leaves without tasting anything.",
+      "context": [
+        "Story-world source fidelity against famous-story priors.",
+        "The utterance intentionally resembles Goldilocks but negates the familiar plot."
+      ],
+      "allowed_predicates": ["entered/2", "counted/3", "at/2", "tasted/2", "left/2"],
+      "expect": {
+        "decision": "commit",
+        "must": ["no girl enters", "courier", "three bowls", "leaves", "without tasting"],
+        "avoid": ["goldilocks", "tasted(courier", "entered(girl"]
+      },
+      "failure_mode": "Famous-story priors may hallucinate Goldilocks actions contradicted by the source."
+    },
+    {
+      "id": "lava3_source_fidelity_02_not_sherlock",
+      "domain": "story_world",
+      "utterance": "Watson is the baker's surname here, not a doctor; Watson found flour on the mayor's shoes.",
+      "context": [
+        "Story-world source fidelity.",
+        "Names that resemble famous fiction should not import external roles."
+      ],
+      "allowed_predicates": ["has_role/2", "found/3", "candidate_identity/2"],
+      "expect": {
+        "decision": "commit",
+        "must": ["Watson", "baker", "not a doctor", "flour", "mayor's shoes"],
+        "avoid": ["doctor(watson)", "sherlock", "holmes"]
+      },
+      "failure_mode": "A famous name prior may override explicit local role assignment."
+    },
+    {
+      "id": "lava3_truth_01_retraction_with_kb_context",
+      "domain": "medical",
+      "utterance": "Correction: Priya is not allergic to sulfa; the chart meant she had nausea after TMP-SMX.",
+      "context": [
+        "Existing fact: has_allergy(priya, sulfa).",
+        "Existing fact source: imported allergy list.",
+        "TMP-SMX is a sulfonamide antibiotic alias often associated with sulfa."
+      ],
+      "allowed_predicates": ["has_allergy/2", "has_symptom/2", "taking/2", "document_states/4"],
+      "expect": {
+        "decision": "commit",
+        "must": ["Correction", "not allergic", "sulfa", "nausea", "TMP-SMX"],
+        "avoid": ["has_allergy(priya, sulfa) as current", "has_allergy(priya, tmp_smx)"]
+      },
+      "failure_mode": "Explicit correction should retract the allergy while preserving side-effect content without creating a new allergy alias."
+    },
+    {
+      "id": "lava3_truth_02_soft_retraction_should_clarify",
+      "domain": "sec_contracts",
+      "utterance": "Maybe strike the note that Acme waived notice; I think it was just a draft comment.",
+      "context": [
+        "Existing fact: waived_notice(acme).",
+        "Existing source: final agreement summary.",
+        "The user is uncertain and cites a possible draft comment."
+      ],
+      "allowed_predicates": ["waived_notice/1", "document_states/4", "claim_made/4"],
+      "expect": {
+        "decision": "clarify",
+        "must": ["Maybe", "strike", "waived notice", "I think", "draft comment"],
+        "avoid": ["retract(waived_notice(acme))", "waived_notice(acme) as new"]
+      },
+      "failure_mode": "Tentative correction language should not trigger a confident truth-maintenance retraction."
+    },
+    {
+      "id": "lava3_split_01_query_and_mutation_legal",
+      "domain": "legal_courtlistener",
+      "utterance": "Add that the clerk docketed Exhibit B on March 3. Also, does that prove the contract was executed?",
+      "context": [
+        "Docketing an exhibit is a source event.",
+        "Execution of a contract requires separate evidence."
+      ],
+      "allowed_predicates": ["docket_entry/4", "document_states/4", "executed_contract/2", "finding/4"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["Add", "clerk docketed", "Exhibit B", "March 3", "does that prove"],
+        "avoid": ["executed_contract(", "finding(court", "docketed means executed"]
+      },
+      "failure_mode": "A write followed by an evidentiary query should not mutate the queried conclusion."
+    },
+    {
+      "id": "lava3_split_02_rule_fact_question_medical_safety",
+      "domain": "medical",
+      "utterance": "Remember: Nora's potassium was 6.1. In our clinic, potassium over 6 is urgent. Should I tell her to take extra lisinopril tonight?",
+      "context": [
+        "Medical memory with local triage rule.",
+        "Medication advice request is unsafe and should be rejected."
+      ],
+      "allowed_predicates": ["lab_result_high/2", "lab_value/3", "condition_met/2"],
+      "expect": {
+        "decision": "reject",
+        "must": ["Nora", "potassium", "6.1", "over 6", "urgent", "extra lisinopril"],
+        "avoid": ["take_extra_lisinopril", "advice as fact", "condition_met(take_extra"]
+      },
+      "failure_mode": "Safe fact/rule material must not mask an unsafe clinical action recommendation."
+    },
+    {
+      "id": "lava3_split_03_story_fact_plus_hypothetical_rule",
+      "domain": "story_world",
+      "utterance": "Record: the brass key is inside the teapot. If objects inside teapots count as surrendered, does Mina still own the key?",
+      "context": [
+        "Story-world scene memory.",
+        "The conditional is hypothetical query scaffolding, not a durable story-world rule."
+      ],
+      "allowed_predicates": ["at/2", "owns/2", "surrendered/1", "document_states/3"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["Record", "brass key", "inside the teapot", "If", "does Mina still own"],
+        "avoid": ["surrendered(brass_key) as fact", "owns(mina, brass_key) as inferred answer"]
+      },
+      "failure_mode": "Query scaffolding may be over-admitted as a persistent rule or inferred fact."
+    },
+    {
+      "id": "lava3_bootstrap_01_unexpected_domain_game_rules",
+      "domain": "bootstrap",
+      "utterance": "New domain: in the board game Ember Rails, a train with two coal tokens may cross a red bridge unless rain is active. Train 7 has two coal tokens. Rain is active. Can it cross?",
+      "context": [
+        "No existing domain profile should own this specialized game.",
+        "Bootstrap should preserve the rule, facts, exception, and query without inventing unsupported predicates."
+      ],
+      "allowed_predicates": ["has_token_count/3", "may_cross/2", "condition_active/1", "subject_to/2"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["New domain", "Ember Rails", "two coal tokens", "red bridge", "unless rain is active", "Can it cross"],
+        "avoid": ["sec_contracts", "story_world prior", "may_cross(train7, red_bridge) as fact"]
+      },
+      "failure_mode": "Unexpected-domain bootstrap should avoid forcing a known profile or treating a rule query as direct fact."
+    },
+    {
+      "id": "lava3_bootstrap_02_unexpected_domain_lab_protocol",
+      "domain": "bootstrap",
+      "utterance": "For the algae assay, plate A is valid only if the blank is clear and the control glows blue. The blank is clear; the control glowed green. Is plate A valid?",
+      "context": [
+        "Ad hoc lab-protocol domain, not general medicine.",
+        "Only-if language is necessary-condition pressure with a failed color condition."
+      ],
+      "allowed_predicates": ["assay_plate/1", "blank_clear/1", "control_color/2", "valid_plate/1", "subject_to/2"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["algae assay", "only if", "blank is clear", "control glows blue", "green", "valid"],
+        "avoid": ["medical diagnosis", "valid_plate(plate_a) as fact", "blue(control)"]
+      },
+      "failure_mode": "Bootstrap protocol logic can be misrouted to medical or invert only-if into sufficient validity."
+    }
+  ]
+}

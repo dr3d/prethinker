@@ -32,12 +32,9 @@ The first bounded MVP is now built locally.
 
 - slice builder: `scripts/build_umls_mvp_slice.py`
 - probe runner: `scripts/run_umls_mvp_probe.py`
-- ontology prospector runner: `scripts/run_medical_ontology_prospector.py`
 - challenge battery: `docs/data/umls_mvp_sharp_memory_battery.json`
-- ontology prospector corpus: `docs/data/medical_ontology_prospector_corpus.json`
 - formal profile note: [docs/MEDICAL_PROFILE.md](https://github.com/dr3d/prethinker/blob/main/docs/MEDICAL_PROFILE.md)
 - clinical checks probe: `scripts/run_umls_mvp_clinical_probe.py`
-- local ontology mining note: [docs/ONTOLOGY_PROSPECTOR.md](https://github.com/dr3d/prethinker/blob/main/docs/ONTOLOGY_PROSPECTOR.md)
 - current compact status: [PROJECT_STATE.md](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md)
 
 Current measured result on the first local probe:

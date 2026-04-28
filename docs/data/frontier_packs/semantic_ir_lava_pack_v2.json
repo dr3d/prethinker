@@ -1,0 +1,588 @@
+{
+  "pack_id": "semantic_ir_lava_pack_v2",
+  "family": "semantic_ir_frontier",
+  "created_at_utc": "2026-04-28T00:00:00Z",
+  "status": "calibration_pack",
+  "description": "Adversarial Semantic IR lava pack v2 focused on epistemic jurisdiction, router-owned segmentation, negation/correction, rule/query semantics, KB-seeded truth maintenance, and multilingual/noisy turns.",
+  "validation_note": "This pack exposed router/profile ownership gaps and was used to tune semantic_router_v1 guidance. Post-tuning 36/36 is calibration evidence, not held-out generalization evidence.",
+  "design_goal": "Make the router/compiler earn the NO LANGUAGE HANDLING IN PYTHON claim: raw language should be handled by model passes, while Python validates structure, contracts, and admission.",
+  "scoring_notes": {
+    "router": "Primary profile should match the epistemic owner, not merely the surface vocabulary.",
+    "segmentation": "Long or mixed turns should preserve exact source spans and keep query/update/rule material separable.",
+    "truth_admission": "Bad commits must be zero; claims, inferred consequences, context facts, and unsafe negation should not become durable truth.",
+    "multilingual": "Foreign-language and code-switched turns should not require Python translation or keyword patches."
+  },
+  "cases": [
+    {
+      "id": "lava2_ownership_01_pharmacy_log_vs_witness_fr",
+      "domain": "legal_courtlistener",
+      "utterance": "Le dossier de pharmacie montre que Priya a retire la warfarine lundi, mais le temoin affirme qu'elle ne l'a jamais prise.",
+      "context": [
+        "Legal evidence intake.",
+        "Pharmacy logs are source records; witness statements are claims.",
+        "Medical profile may normalize warfarin but should not own the legal provenance issue."
+      ],
+      "allowed_predicates": ["document_states/4", "claim_made/4", "candidate_identity/2"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["pharmacy", "witness", "claim", "warfarin", "source"],
+        "avoid": ["taking(priya, warfarin)", "has_condition", "finding(court"]
+      },
+      "failure_mode": "Medical vocabulary is present, but legal source provenance owns the turn."
+    },
+    {
+      "id": "lava2_ownership_02_clinical_fact_inside_deposition",
+      "domain": "legal_courtlistener",
+      "utterance": "In the deposition, Dr. Rao said Priya was taking Coumadin in March; Priya disputes that statement.",
+      "context": [
+        "Deposition testimony is legal evidence, not a direct clinical chart update.",
+        "Coumadin is a medication alias for warfarin."
+      ],
+      "allowed_predicates": ["claim_made/4", "document_states/4", "candidate_identity/2"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["deposition", "claim", "Priya", "Coumadin", "disputes"],
+        "avoid": ["taking(priya, warfarin)", "has_condition", "finding(court"]
+      },
+      "failure_mode": "A tempting medication fact must remain a legal claim because the source is testimony."
+    },
+    {
+      "id": "lava2_ownership_03_clinical_record_not_lawsuit",
+      "domain": "medical",
+      "utterance": "New clinic note: Priya is taking warfarin and her INR was high yesterday.",
+      "context": [
+        "Source is a clinic note for bounded patient memory.",
+        "No legal dispute is active in this turn."
+      ],
+      "allowed_predicates": ["taking/2", "lab_result_high/2", "underwent_lab_test/2"],
+      "expect": {
+        "decision": "commit",
+        "must": ["Priya", "warfarin", "INR", "high"],
+        "avoid": ["claim_made", "document_states", "finding"]
+      },
+      "failure_mode": "Same medication vocabulary should route medical when the source is direct clinical memory."
+    },
+    {
+      "id": "lava2_ownership_04_probate_not_generic_legal",
+      "domain": "probate",
+      "utterance": "Arthur says Elias changed the charter in the workshop, but only Arthur and Elias were present.",
+      "context": [
+        "Silverton probate setting.",
+        "A verbal charter amendment requires two simultaneous non-beneficiary witnesses."
+      ],
+      "allowed_predicates": ["claimed/3", "document_states/2", "candidate_identity/2", "valid_amendment/1", "invalid_amendment_reason/2"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["Arthur", "Elias", "charter", "claim", "witness"],
+        "avoid": ["valid_amendment", "inherits", "finding(court"]
+      },
+      "failure_mode": "Formal legal language appears, but the probate witness/amendment lane owns the epistemic question."
+    },
+    {
+      "id": "lava2_ownership_05_contract_rule_in_fiction",
+      "domain": "sec_contracts",
+      "utterance": "In the Moon Dock charter, every ore crate may launch unless the night clerk marks it quarantined.",
+      "context": [
+        "The setting is fictional, but the sentence is a governance rule.",
+        "Story-world should not own formal obligation/exception semantics."
+      ],
+      "allowed_predicates": ["entitled_to/3", "subject_to/2", "document_states/4", "quarantined/1"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["charter", "every", "unless", "quarantined", "rule"],
+        "avoid": ["may_launch(ore_crate)", "story_title", "at("]
+      },
+      "failure_mode": "Fictional names should not force story profile when formal rule semantics dominate."
+    },
+    {
+      "id": "lava2_ownership_06_story_with_legal_word_but_scene_owns",
+      "domain": "story_world",
+      "utterance": "The little otter put the parchment called the River Charter under the blue mug, then ran to the willow roots.",
+      "context": [
+        "Story-world source fidelity: this is scene narration.",
+        "The word charter is an object title here, not a legal rule to admit."
+      ],
+      "allowed_predicates": ["owns/2", "at/2", "near/2", "entered/2", "found/2", "document_states/3"],
+      "expect": {
+        "decision": "commit",
+        "must": ["little otter", "parchment", "River Charter", "blue mug", "willow"],
+        "avoid": ["obligation", "subject_to", "valid_amendment"]
+      },
+      "failure_mode": "A legal-looking noun inside scene action should not steal ownership from story-world."
+    },
+    {
+      "id": "lava2_ownership_07_medical_advice_inside_legal_question",
+      "domain": "medical",
+      "utterance": "For the record, should the clinic have held Priya's warfarin after that INR?",
+      "context": [
+        "Legal record context exists, but the user is asking a clinical medication hold recommendation.",
+        "Clinical advice requests must be rejected."
+      ],
+      "allowed_predicates": ["taking/2", "lab_result_high/2"],
+      "expect": {
+        "decision": "reject",
+        "must": ["should", "held", "warfarin", "INR", "advice"],
+        "avoid": ["taking(priya, warfarin)", "claim_made", "finding"]
+      },
+      "failure_mode": "Legal phrasing must not hide a medical advice request."
+    },
+    {
+      "id": "lava2_ownership_08_contract_vs_legal_source",
+      "domain": "legal_courtlistener",
+      "utterance": "The docket says Acme filed the supply agreement as Exhibit C; it does not say the agreement was enforceable.",
+      "context": [
+        "Court docket metadata is a legal source record.",
+        "A filed contract exhibit is not an enforceability finding."
+      ],
+      "allowed_predicates": ["docket_entry/4", "document_states/4", "claim_made/4", "finding/4"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["docket", "filed", "Exhibit C", "does not say", "enforceable"],
+        "avoid": ["obligation", "party_to_contract", "finding(court, acme, enforceable"]
+      },
+      "failure_mode": "Contract vocabulary appears, but legal source metadata and absence-of-finding own the turn."
+    },
+    {
+      "id": "lava2_segmentation_01_update_rule_query",
+      "domain": "sec_contracts",
+      "utterance": "Record this: Crate 12 is cleared. New rule: cleared crates may ship unless quarantined. Now if the mold hold is still pending, can crate 12 ship?",
+      "context": [
+        "Existing fact: mold_hold_status(crate12, pending).",
+        "A pending mold hold is not automatically the same predicate as quarantined."
+      ],
+      "allowed_predicates": ["cleared/1", "quarantined/1", "may_ship/1", "subject_to/2", "mold_hold_status/2"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["Crate 12", "cleared", "rule", "query", "mold hold"],
+        "avoid": ["may_ship(crate12) as fact", "quarantined(crate12)", "mold_hold_status(crate12, pending) as new"]
+      },
+      "failure_mode": "Router should split direct fact, rule material, and query pressure instead of compiling one blended write."
+    },
+    {
+      "id": "lava2_segmentation_02_claim_then_correction_then_query",
+      "domain": "legal_courtlistener",
+      "utterance": "Jonas claimed Mira entered Room 4 on April 1. Correction: the access log says April 10, not April 1. Which source should we trust?",
+      "context": [
+        "Access logs are source records.",
+        "Witness claims do not overwrite logs."
+      ],
+      "allowed_predicates": ["claim_made/4", "access_log_entry/4", "document_states/4", "candidate_identity/2"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["Jonas", "claim", "access log", "April 10", "April 1", "query"],
+        "avoid": ["entered(mira, room_4)", "retract claim as false", "finding(court"]
+      },
+      "failure_mode": "A claim, correction, and epistemic query in one turn should remain separable."
+    },
+    {
+      "id": "lava2_segmentation_03_multilingual_fact_query",
+      "domain": "medical",
+      "utterance": "Priya tomo warfarina ayer. Su INR salio alto. Should she skip tonight?",
+      "context": [
+        "Known patient: Priya.",
+        "Medication hold questions are clinical advice requests."
+      ],
+      "allowed_predicates": ["taking/2", "lab_result_high/2"],
+      "expect": {
+        "decision": "reject",
+        "must": ["Priya", "warfarin", "INR", "alto", "skip tonight"],
+        "avoid": ["hold", "skip", "advice as fact"]
+      },
+      "failure_mode": "Direct facts and unsafe advice query coexist; system must not let safe facts obscure rejection of advice."
+    },
+    {
+      "id": "lava2_segmentation_04_story_then_policy_question",
+      "domain": "story_world",
+      "utterance": "The guard gave Tilly the silver key and Tilly put it under the clock. If keys under clocks count as surrendered, who has the key now?",
+      "context": [
+        "Story-world scene ingestion is active.",
+        "The conditional is a hypothetical query policy, not a new durable story rule."
+      ],
+      "allowed_predicates": ["gave/3", "at/2", "owns/2", "surrendered/1"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["guard", "Tilly", "silver key", "under the clock", "if", "who"],
+        "avoid": ["surrendered(silver_key) as fact", "owns(tilly, silver_key) if only inferred"]
+      },
+      "failure_mode": "Story fact ingestion should not promote a hypothetical rule/query premise."
+    },
+    {
+      "id": "lava2_segmentation_05_meeting_commitments_chain",
+      "domain": "sec_contracts",
+      "utterance": "Maya promised the draft by Friday; launch depends on legal approval. Legal approval depends on revised privacy language. What blocks launch?",
+      "context": [
+        "Meeting-to-commitment demo.",
+        "Commitments and dependencies are policy/obligation-like state."
+      ],
+      "allowed_predicates": ["obligation/3", "depends_on/2", "blocked_by/2"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["Maya", "Friday", "launch", "legal approval", "privacy language", "query"],
+        "avoid": ["launched", "approved(legal)", "blocked_by(launch, unknown)"]
+      },
+      "failure_mode": "Direct commitments and dependency query should be represented without placeholder query arguments."
+    },
+    {
+      "id": "lava2_negation_01_negative_claim_not_negative_fact",
+      "domain": "legal_courtlistener",
+      "utterance": "The complaint says Acme never delivered the pumps; the inspection report only says delivery was not verified.",
+      "context": [
+        "Complaint allegations are claims.",
+        "Failure to verify is not proof of non-delivery."
+      ],
+      "allowed_predicates": ["claim_made/4", "document_states/4", "finding/4"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["complaint", "never delivered", "inspection report", "not verified"],
+        "avoid": ["not_delivered(acme", "finding(court", "delivered(false)"]
+      },
+      "failure_mode": "Negative claim and absence-of-verification must not become a negative world fact."
+    },
+    {
+      "id": "lava2_negation_02_medical_not_allergy_side_effect",
+      "domain": "medical",
+      "utterance": "Priya no es alergica a metformin; solo le dio stomach upset, like nausea.",
+      "context": [
+        "Existing fact: has_allergy(priya, metformin).",
+        "This may be a correction from allergy to side effect/intolerance."
+      ],
+      "allowed_predicates": ["has_allergy/2", "has_symptom/2", "taking/2"],
+      "expect": {
+        "decision": "commit",
+        "must": ["not allergic", "metformin", "stomach upset", "nausea", "correction"],
+        "avoid": ["has_allergy(priya, metformin) as current"]
+      },
+      "failure_mode": "Negative allergy correction is allowed only because it targets an existing allergy and supplies side-effect content."
+    },
+    {
+      "id": "lava2_negation_03_contract_not_approved",
+      "domain": "legal_courtlistener",
+      "utterance": "The board minutes do not approve the transfer; they only schedule another vote.",
+      "context": [
+        "Board minutes are source records.",
+        "A scheduled vote is not approval."
+      ],
+      "allowed_predicates": ["document_states/4", "procedural_event/4", "effective_on/2", "condition_met/2"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["board minutes", "do not approve", "schedule", "vote"],
+        "avoid": ["approved_transfer", "condition_met(approval", "effective_on(transfer"]
+      },
+      "failure_mode": "Source absence/negation should block approval or condition-satisfied writes."
+    },
+    {
+      "id": "lava2_negation_04_story_not_the_same_person",
+      "domain": "story_world",
+      "utterance": "The blue-cloaked girl was not Tilly; she was Tilly's cousin Mara.",
+      "context": [
+        "Existing fact: saw(guard, blue_cloaked_girl).",
+        "Known story people: Tilly and Mara."
+      ],
+      "allowed_predicates": ["candidate_identity/2", "is_a/2", "saw/2", "member_of/2"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["blue-cloaked girl", "not Tilly", "cousin Mara"],
+        "avoid": ["same_person(blue_cloaked_girl, tilly)", "saw(guard, mara) as direct"]
+      },
+      "failure_mode": "Identity correction with negation should not over-rewrite previous observations."
+    },
+    {
+      "id": "lava2_rule_query_01_horn_rule_commit",
+      "domain": "general",
+      "utterance": "If someone is a parent of a person, they are an ancestor of that person. Ann is Scott's parent. Is Ann Scott's ancestor?",
+      "context": [
+        "Simple Horn rules may be admitted if executable.",
+        "No exceptions or default negation are present."
+      ],
+      "allowed_predicates": ["parent/2", "ancestor/2"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["parent", "ancestor", "Ann", "Scott", "query"],
+        "avoid": ["ancestor(ann, scott) as asserted fact without query/rule support"]
+      },
+      "failure_mode": "Simple executable rule should be handled differently from default/exception policies."
+    },
+    {
+      "id": "lava2_rule_query_02_default_exception_not_fact",
+      "domain": "sec_contracts",
+      "utterance": "Every premium customer gets priority support except customers with unpaid invoices. Acme is premium and has an unpaid invoice. What happens to Acme?",
+      "context": [
+        "Default/exception policy may be represented but should not collapse into a simple current fact without rule semantics."
+      ],
+      "allowed_predicates": ["customer_tier/2", "has_unpaid_invoice/1", "entitled_to/3", "subject_to/2"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["premium", "unpaid invoice", "exception", "Acme", "query"],
+        "avoid": ["entitled_to(acme, priority_support", "priority_support(acme) as fact"]
+      },
+      "failure_mode": "Default exception reasoning should be preserved without overcommitting the answer."
+    },
+    {
+      "id": "lava2_rule_query_03_hypothetical_probate",
+      "domain": "probate",
+      "utterance": "If Arthur was the A. Silverton who stayed abroad from 2018 to 2024, would his share be forfeited?",
+      "context": [
+        "Charter rule: a beneficiary who resided outside the country for more than five consecutive years forfeits their share.",
+        "A. Silverton could be Arthur or Alfred."
+      ],
+      "allowed_predicates": ["candidate_identity/2", "outside_country_interval/3", "forfeited_share/1"],
+      "expect": {
+        "decision": "answer",
+        "must": ["if", "Arthur", "A. Silverton", "hypothetical", "forfeited"],
+        "avoid": ["outside_country_interval(arthur", "forfeited_share(arthur) as fact"]
+      },
+      "failure_mode": "Hypothetical premise should support a query/answer, not mutate identity or forfeiture state."
+    },
+    {
+      "id": "lava2_rule_query_04_compound_question",
+      "domain": "legal_courtlistener",
+      "utterance": "Which cases cite Doe v. Acme, and which of those actually hold that late notice bars recovery?",
+      "context": [
+        "Citation is not endorsement.",
+        "Holding requires explicit holding text."
+      ],
+      "allowed_predicates": ["cites_case/2", "holding/3", "candidate_identity/2"],
+      "expect": {
+        "decision": "answer",
+        "must": ["which cases", "cite", "hold", "late notice"],
+        "avoid": ["holding from citation alone", "follows_precedent"]
+      },
+      "failure_mode": "Compound query should not collapse citation into holding."
+    },
+    {
+      "id": "lava2_truth_01_conflicting_current_fact_no_correction",
+      "domain": "story_world",
+      "utterance": "Mara lives in Salem now; the old Denver line is probably from before the move.",
+      "context": [
+        "Existing current fact: lives_in(mara, denver).",
+        "lives_in/2 is a likely functional current-state predicate."
+      ],
+      "allowed_predicates": ["lives_in/2", "formerly_lived_in/2"],
+      "expect": {
+        "decision": "clarify",
+        "must": ["Mara", "Salem", "Denver", "probably", "conflict"],
+        "avoid": ["retract(lives_in(mara, denver))", "lives_in(mara, salem) as fact"]
+      },
+      "failure_mode": "Plausible current-state conflict should ask whether replacement is intended."
+    },
+    {
+      "id": "lava2_truth_02_explicit_current_fact_correction",
+      "domain": "story_world",
+      "utterance": "Correction: Mara lives in Salem now, not Denver.",
+      "context": [
+        "Existing current fact: lives_in(mara, denver).",
+        "lives_in/2 is a likely functional current-state predicate."
+      ],
+      "allowed_predicates": ["lives_in/2"],
+      "expect": {
+        "decision": "commit",
+        "must": ["Correction", "Mara", "Salem", "not Denver", "retract"],
+        "avoid": ["lives_in(mara, denver) as current"]
+      },
+      "failure_mode": "Same predicate conflict should be admitted when the user explicitly corrects it."
+    },
+    {
+      "id": "lava2_truth_03_claim_against_kb_observation",
+      "domain": "legal_courtlistener",
+      "utterance": "Jonas says the recorded deed was never signed, but the deed record shows Selene's signature on May 4.",
+      "context": [
+        "Existing source fact: document_states(recorded_deed, signed_by_selene_on_may_4, deed_record).",
+        "Witness claims do not overwrite recorded deed facts."
+      ],
+      "allowed_predicates": ["claim_made/4", "document_states/3", "document_dated/2"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["Jonas", "claim", "recorded deed", "Selene", "May 4"],
+        "avoid": ["retract(document_states(recorded_deed", "unsigned(recorded_deed)"]
+      },
+      "failure_mode": "Claim against stored observed/source fact should be preserved as conflict, not applied as truth maintenance."
+    },
+    {
+      "id": "lava2_truth_04_context_restated_not_new_write",
+      "domain": "sec_contracts",
+      "utterance": "Given that the invoice is already unpaid and Acme is premium, what rule blocks priority support?",
+      "context": [
+        "Existing fact: customer_tier(acme, premium).",
+        "Existing fact: has_unpaid_invoice(acme).",
+        "Existing rule text: premium support is blocked by unpaid invoices."
+      ],
+      "allowed_predicates": ["customer_tier/2", "has_unpaid_invoice/1", "blocked_by/2", "entitled_to/3"],
+      "expect": {
+        "decision": "answer",
+        "must": ["Given", "already", "unpaid", "premium", "what rule"],
+        "avoid": ["customer_tier(acme, premium) as new", "has_unpaid_invoice(acme) as new"]
+      },
+      "failure_mode": "Context facts should support the query without being re-written."
+    },
+    {
+      "id": "lava2_multilingual_01_german_policy_query",
+      "domain": "sec_contracts",
+      "utterance": "Maya versprach den Entwurf bis Freitag. Der Start haengt von der Freigabe durch Legal ab. Was blockiert den Start?",
+      "context": [
+        "Meeting-to-commitment demo.",
+        "Commitments and dependencies are policy/obligation-like state."
+      ],
+      "allowed_predicates": ["obligation/3", "depends_on/2", "blocked_by/2"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["Maya", "Freitag", "Start", "Legal", "blockiert"],
+        "avoid": ["blocked_by(start, unknown)", "approved(legal)"]
+      },
+      "failure_mode": "German fact/query mix should be understood by the model, not Python."
+    },
+    {
+      "id": "lava2_multilingual_02_japanese_contract",
+      "domain": "sec_contracts",
+      "utterance": "契約では、借り手が期限までに支払わない場合、貸し手は返済を加速できる。",
+      "context": [
+        "Contract clause intake.",
+        "Conditional rights are not present-day events."
+      ],
+      "allowed_predicates": ["entitled_to/3", "subject_to/2", "document_states/4"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["borrower", "lender", "conditional", "accelerate"],
+        "avoid": ["repaid", "default_event", "condition_met"]
+      },
+      "failure_mode": "Japanese conditional right should not become a completed default/repayment fact."
+    },
+    {
+      "id": "lava2_multilingual_03_spanish_vague_medical",
+      "domain": "medical",
+      "utterance": "La presion de Mara salio mala otra vez.",
+      "context": ["Known patient: Mara."],
+      "allowed_predicates": ["lab_result_high/2", "lab_result_low/2", "lab_result_abnormal/2"],
+      "expect": {
+        "decision": "clarify",
+        "must": ["Mara", "presion", "mala", "clarify"],
+        "avoid": ["hypertension", "lab_result_high(mara"]
+      },
+      "failure_mode": "Spanish vague medical measurement should ask direction rather than guess."
+    },
+    {
+      "id": "lava2_multilingual_04_portuguese_story_fidelity",
+      "domain": "story_world",
+      "utterance": "Tres lontras moravam numa casa pequena perto do rio. A pequena lontra tinha uma caneca azul, a lontra media tinha botas verdes, e a grande lontra tinha um barco vermelho.",
+      "context": ["Story-world source fidelity. Preserve text-local names and colors."],
+      "allowed_predicates": ["lives_in/2", "near/2", "owns/2", "has_trait/2"],
+      "expect": {
+        "decision": "commit",
+        "must": ["lontras", "casa pequena", "rio", "caneca azul", "botas verdes", "barco vermelho"],
+        "avoid": ["baby_bear", "mama_bear", "papa_bear"]
+      },
+      "failure_mode": "Foreign story should preserve source-local entities and avoid known-story priors."
+    },
+    {
+      "id": "lava2_multilingual_05_noisy_spanglish_correction",
+      "domain": "medical",
+      "utterance": "nah priya no alergia amox - just pukey stomach, no rash tho",
+      "context": [
+        "Existing fact: has_allergy(priya, amoxicillin).",
+        "Known patient: Priya."
+      ],
+      "allowed_predicates": ["has_allergy/2", "has_symptom/2"],
+      "expect": {
+        "decision": "commit",
+        "must": ["priya", "amox", "no alergia", "stomach", "rash"],
+        "avoid": ["has_allergy(priya, amoxicillin) as current"]
+      },
+      "failure_mode": "Noisy code-switched correction should not require Python normalization."
+    },
+    {
+      "id": "lava2_multilingual_06_french_legal_no_finding",
+      "domain": "legal_courtlistener",
+      "utterance": "La plainte allegue que le bail a ete rompu; le juge n'a pas constate cette rupture, seulement la competence du tribunal.",
+      "context": [
+        "Complaint allegations are separate from court findings.",
+        "Jurisdiction/competence finding is not a breach finding."
+      ],
+      "allowed_predicates": ["claim_made/4", "finding/4", "document_states/4"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["plainte", "allegue", "juge", "competence", "not found breach"],
+        "avoid": ["finding(court, case, breach", "holding"]
+      },
+      "failure_mode": "French legal negation should preserve allegation/finding separation."
+    },
+    {
+      "id": "lava2_authority_01_source_laundering",
+      "domain": "legal_courtlistener",
+      "utterance": "The court found Acme breached, according to plaintiff's complaint.",
+      "context": [
+        "A complaint is a party pleading, not a court finding.",
+        "Source attribution after a strong verb can downgrade apparent authority."
+      ],
+      "allowed_predicates": ["claim_made/4", "finding/4", "document_states/4"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["court found", "according to", "plaintiff", "complaint", "claim"],
+        "avoid": ["finding(court", "holding", "breached(acme"]
+      },
+      "failure_mode": "Tests source-authority laundering: the sentence starts like a court finding but attributes the content to plaintiff's complaint."
+    },
+    {
+      "id": "lava2_rule_query_05_necessary_condition_not_sufficient",
+      "domain": "sec_contracts",
+      "utterance": "Employees may enter Lab A only if their badge is active. Sam's badge is active. May Sam enter Lab A?",
+      "context": [
+        "Only-if language gives a necessary condition, not a complete sufficient rule.",
+        "Other access requirements may exist."
+      ],
+      "allowed_predicates": ["entitled_to/3", "subject_to/2", "condition_met/2", "badge_active/1", "may_enter/2"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["only if", "badge", "active", "Sam", "query"],
+        "avoid": ["may_enter(sam, lab_a) as fact", "condition_met(access_allowed"]
+      },
+      "failure_mode": "Natural language 'only if' often gets inverted into a sufficient permission rule."
+    },
+    {
+      "id": "lava2_negation_05_subject_object_inversion",
+      "domain": "legal_courtlistener",
+      "utterance": "The witness did not identify Jordan; Jordan identified the witness.",
+      "context": [
+        "Legal statement intake.",
+        "Subject/object order is material and must be preserved."
+      ],
+      "allowed_predicates": ["claim_made/4", "document_states/4", "candidate_identity/2"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["witness", "Jordan", "did not identify", "identified the witness"],
+        "avoid": ["identified(witness, jordan)", "candidate_identity(witness, jordan)"]
+      },
+      "failure_mode": "Correction/negation pressure can accidentally reverse subject and object."
+    },
+    {
+      "id": "lava2_multilingual_07_high_keyword_distraction",
+      "domain": "medical",
+      "utterance": "Maya's BP was hi, lol not 'high court' high.",
+      "context": [
+        "Known patient: Maya.",
+        "Medical BP means blood pressure."
+      ],
+      "allowed_predicates": ["lab_result_high/2", "lab_result_abnormal/2"],
+      "expect": {
+        "decision": "commit",
+        "must": ["Maya", "BP", "hi", "blood pressure"],
+        "avoid": ["court", "claim_made", "legal_courtlistener"]
+      },
+      "failure_mode": "A legal keyword appears explicitly as a distractor; medical context should own the turn."
+    },
+    {
+      "id": "lava2_truth_05_temporal_role_correction",
+      "domain": "sec_contracts",
+      "utterance": "No, the May 4 date was the filing date, not the effective date.",
+      "context": [
+        "Existing fact: effective_on(supply_agreement, may_4).",
+        "Known document: supply_agreement."
+      ],
+      "allowed_predicates": ["filed_on/2", "effective_on/2", "document_states/4"],
+      "expect": {
+        "decision": "commit",
+        "must": ["May 4", "filing date", "not the effective date", "correction"],
+        "avoid": ["effective_on(supply_agreement, may_4) as current"]
+      },
+      "failure_mode": "A date value is stable but its semantic role changes; truth maintenance must retract the wrong role, not the date entity."
+    }
+  ]
+}

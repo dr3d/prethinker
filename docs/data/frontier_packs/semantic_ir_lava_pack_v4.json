@@ -1,0 +1,456 @@
+{
+  "pack_id": "semantic_ir_lava_pack_v4",
+  "family": "semantic_ir_frontier",
+  "created_at_utc": "2026-04-28T00:00:00Z",
+  "status": "fresh_held_out_candidate",
+  "description": "Lava v4 targets the next architectural failure classes in the router -> context package -> semantic_ir_v1 -> deterministic admission pipeline.",
+  "validation_note": "Fresh pack at creation time. If any results influence router prompts, profile contracts, mapper policy, or guidance, mark the affected cases as calibration evidence rather than held-out evidence.",
+  "design_goal": "Stress truth-maintenance dependency pressure, predicate canonicalization drift, claim/fact/observation promotion, cross-segment semantics, and multilingual ontology pressure without adding Python raw-utterance language handling.",
+  "hazard_families": [
+    "truth_maintenance_explosion",
+    "predicate_canonicalization_drift",
+    "claim_fact_observation_epistemology",
+    "segmentation_semantics",
+    "multilingual_ontology_pressure"
+  ],
+  "cases": [
+    {
+      "id": "lava4_tm_01_voided_certificate_invalidates_permit",
+      "domain": "sec_contracts",
+      "hazard": "truth_maintenance_explosion",
+      "utterance": "Earlier we treated Harbor Permit HP-17 as active because certificate C-14 was filed. Correction: C-14 had been voided two days before filing. Is HP-17 still active?",
+      "context": [
+        "Contract/compliance state intake.",
+        "Current KB may already contain condition_met(certificate_c14_filed) and active permit support.",
+        "A correction to supporting evidence should not silently leave dependent conclusions trusted."
+      ],
+      "allowed_predicates": ["document_states/4", "condition_met/2", "effective_on/2", "retract_support/3", "depends_on/2", "query_rows/1"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["HP-17", "C-14", "voided", "two days before", "depends"],
+        "avoid": ["condition_met(certificate_c14_filed", "active_permit", "permit_active(hp_17"]
+      },
+      "failure_mode": "A changed support fact must pressure dependent active-state conclusions rather than leaving stale derived state untouched."
+    },
+    {
+      "id": "lava4_tm_02_docket_correction_breaks_timeliness",
+      "domain": "legal_courtlistener",
+      "hazard": "truth_maintenance_explosion",
+      "utterance": "The draft summary said Entry 8 was timely because the docket listed it as filed January 5. The clerk's corrected docket now says Entry 8 was filed January 8, after the deadline.",
+      "context": [
+        "CourtListener-style docket/document intake.",
+        "A draft summary is lower authority than a corrected docket.",
+        "Timeliness derived from an old docket date should be treated as unsupported after the correction."
+      ],
+      "allowed_predicates": ["docket_entry/4", "document_states/4", "filed_on/2", "claim_made/4", "finding/4", "depends_on/2"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["Entry 8", "January 5", "January 8", "corrected docket", "deadline"],
+        "avoid": ["finding(court", "timely(entry_8", "filed_on(entry_8, january_5"]
+      },
+      "failure_mode": "A corrected source should defeat stale derived timeliness without promoting the draft summary into a finding."
+    },
+    {
+      "id": "lava4_tm_03_medical_lab_result_retracted_by_specimen_mixup",
+      "domain": "medical",
+      "hazard": "truth_maintenance_explosion",
+      "utterance": "Mara's potassium was entered as high yesterday, but the lab just corrected the record: that specimen belonged to Mira, not Mara.",
+      "context": [
+        "Bounded medical-memory profile.",
+        "Patient identity is part of the support for a lab result.",
+        "Do not infer treatment or clinical advice."
+      ],
+      "allowed_predicates": ["underwent_lab_test/2", "lab_result_high/2", "claim_made/4", "document_states/4", "candidate_identity/2"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["Mara", "potassium", "high", "corrected", "Mira"],
+        "avoid": ["lab_result_high(mara, potassium", "should_treat", "diagnosis"]
+      },
+      "failure_mode": "A correction to patient identity should block/retract the old patient-specific lab state."
+    },
+    {
+      "id": "lava4_tm_04_probate_witness_status_dependency",
+      "domain": "probate",
+      "hazard": "truth_maintenance_explosion",
+      "utterance": "We marked Clara as a valid codicil witness because she was listed as a neighbor. New registry page: Clara is also a beneficiary under paragraph 7.",
+      "context": [
+        "Probate witness eligibility setting.",
+        "Witness validity depends on non-beneficiary status under this scenario.",
+        "A registry page is source evidence; do not decide final inheritance."
+      ],
+      "allowed_predicates": ["document_states/2", "claimed/3", "valid_witness/2", "invalid_witness_reason/3", "candidate_identity/2", "depends_on/2"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["Clara", "valid codicil witness", "neighbor", "beneficiary", "paragraph 7"],
+        "avoid": ["valid_witness(clara", "inherits(clara", "codicil_valid"]
+      },
+      "failure_mode": "Eligibility derived from a role must be invalidated or quarantined when a disqualifying role appears."
+    },
+    {
+      "id": "lava4_tm_05_story_event_dependency_correction",
+      "domain": "story_world",
+      "hazard": "truth_maintenance_explosion",
+      "utterance": "The town record says Mira unlocked the archive because she had the brass key. Correction: the brass key was still sealed in the mayor's drawer that night.",
+      "context": [
+        "Story-world detective board.",
+        "Means/opportunity conclusions depend on object possession and access facts.",
+        "Do not keep a derived access conclusion if its support is corrected away."
+      ],
+      "allowed_predicates": ["has_key/2", "unlocked/2", "at/2", "document_states/3", "depends_on/2", "claim_made/4"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["Mira", "archive", "brass key", "sealed", "mayor's drawer"],
+        "avoid": ["unlocked(mira, archive", "has_key(mira, brass_key"]
+      },
+      "failure_mode": "Narrative causal conclusions should not survive after the supporting means fact is contradicted."
+    },
+    {
+      "id": "lava4_pred_01_parent_synonym_collapse",
+      "domain": "story_world",
+      "hazard": "predicate_canonicalization_drift",
+      "utterance": "Scott's dad is Ian; in the next line the note calls Ian his father and later says Ian is Scott's parent.",
+      "context": [
+        "Family relationship notes inside a story-world memory lane.",
+        "Use the canonical predicate when several surface forms describe the same relation."
+      ],
+      "allowed_predicates": ["parent/2", "candidate_identity/2", "claim_made/4"],
+      "expect": {
+        "decision": "commit",
+        "must": ["Scott", "Ian", "dad", "father", "parent"],
+        "avoid": ["dad_of", "father_of", "parent_of", "is_a(ian, father"]
+      },
+      "failure_mode": "Equivalent natural-language relation names should not spawn a predicate family."
+    },
+    {
+      "id": "lava4_pred_02_contract_payment_synonyms",
+      "domain": "sec_contracts",
+      "hazard": "predicate_canonicalization_drift",
+      "utterance": "The borrower shall pay, must remit, and is obligated to transfer the same quarterly fee by March 31.",
+      "context": [
+        "Contract obligation intake.",
+        "Three surface verbs describe one obligation, not three unrelated predicates."
+      ],
+      "allowed_predicates": ["obligation/3", "party_to_contract/3", "effective_on/2", "terminates_on/2", "subject_to/2"],
+      "expect": {
+        "decision": "commit",
+        "must": ["borrower", "shall pay", "must remit", "obligated", "quarterly fee", "March 31"],
+        "avoid": ["shall_pay", "must_remit", "transfer_fee(", "paid("]
+      },
+      "failure_mode": "Deontic paraphrases should canonicalize to obligation/3 and must not become completed payment facts."
+    },
+    {
+      "id": "lava4_pred_03_legal_party_role_synonyms",
+      "domain": "legal_courtlistener",
+      "hazard": "predicate_canonicalization_drift",
+      "utterance": "In Rao v. Kline, the opinion calls Rao the plaintiff, the claimant, and later the appellant; Kline is the defendant-appellee.",
+      "context": [
+        "Legal source metadata extraction.",
+        "Party roles must be scoped to the case; role aliases should not become global unary predicates."
+      ],
+      "allowed_predicates": ["case_caption/2", "party_to_case/3", "court_of/2", "document_states/4"],
+      "expect": {
+        "decision": "commit",
+        "must": ["Rao v. Kline", "plaintiff", "claimant", "appellant", "defendant-appellee"],
+        "avoid": ["plaintiff(rao", "claimant(rao", "appellant(rao", "defendant(kline"]
+      },
+      "failure_mode": "Legal role labels must stay case-scoped instead of drifting into global predicates."
+    },
+    {
+      "id": "lava4_pred_04_medical_glucose_synonyms",
+      "domain": "medical",
+      "hazard": "predicate_canonicalization_drift",
+      "utterance": "Priya's blood sugar, serum glucose, and glucose lab all refer to the same repeated test; it came back high.",
+      "context": [
+        "Bounded medical-memory profile.",
+        "Use one normalized lab-test concept rather than separate facts for every synonym.",
+        "Named patient is explicit; no clinical advice."
+      ],
+      "allowed_predicates": ["underwent_lab_test/2", "lab_result_high/2", "candidate_identity/2", "claim_made/4"],
+      "expect": {
+        "decision": "commit",
+        "must": ["Priya", "blood sugar", "serum glucose", "glucose", "high"],
+        "avoid": ["blood_sugar(", "serum_glucose(", "glucose_lab("]
+      },
+      "failure_mode": "Medical synonym surfaces should normalize to a single test concept within the bounded profile."
+    },
+    {
+      "id": "lava4_pred_05_probate_will_codicil_document_aliases",
+      "domain": "probate",
+      "hazard": "predicate_canonicalization_drift",
+      "utterance": "The note calls the same paper Elias's amendment, his codicil, and the June change to the will; Clara says she saw it signed.",
+      "context": [
+        "Probate document-intake setting.",
+        "Document aliases should be represented as candidate identity or document state, not three different durable documents without evidence."
+      ],
+      "allowed_predicates": ["document_states/2", "claimed/3", "candidate_identity/2", "valid_witness/2"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["amendment", "codicil", "June change", "Clara", "saw it signed"],
+        "avoid": ["valid_witness(clara", "three documents", "codicil_valid"]
+      },
+      "failure_mode": "Alias-rich document language should not explode into separate objects or valid witness conclusions."
+    },
+    {
+      "id": "lava4_epistemic_01_witness_claim_video_observation",
+      "domain": "legal_courtlistener",
+      "hazard": "claim_fact_observation_epistemology",
+      "utterance": "Jonas says Mira entered at 8:10, but the lobby video only shows a person in Mira's coat entering at 8:12.",
+      "context": [
+        "Legal/evidence intake.",
+        "Witness testimony is a claim; video is an observation with identity uncertainty."
+      ],
+      "allowed_predicates": ["claim_made/4", "document_states/4", "candidate_identity/2", "access_log_entry/4", "finding/4"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["Jonas says", "Mira", "8:10", "video", "Mira's coat", "8:12"],
+        "avoid": ["access_log_entry(mira", "finding(court", "entered(mira"]
+      },
+      "failure_mode": "Claim plus visual observation should preserve source and identity uncertainty."
+    },
+    {
+      "id": "lava4_epistemic_02_allegation_promoted_by_stipulation",
+      "domain": "legal_courtlistener",
+      "hazard": "claim_fact_observation_epistemology",
+      "utterance": "The complaint alleged Acme missed the April rent. Later, both parties stipulated in open court that Acme missed the April rent.",
+      "context": [
+        "Legal claim/finding/stipulation boundary.",
+        "A complaint allegation alone is not a finding; a later stipulation can become stronger admitted source evidence."
+      ],
+      "allowed_predicates": ["claim_made/4", "finding/4", "document_states/4", "procedural_event/4"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["complaint alleged", "Acme", "April rent", "stipulated", "open court"],
+        "avoid": ["finding(court, acme_missed_april_rent", "breach_event(acme"]
+      },
+      "failure_mode": "The system must represent epistemic promotion without pretending a pleading was a court finding."
+    },
+    {
+      "id": "lava4_epistemic_03_medical_patient_report_vs_observed_reaction",
+      "domain": "medical",
+      "hazard": "claim_fact_observation_epistemology",
+      "utterance": "Omar says penicillin makes him dizzy, but the nurse observed hives after the injection today.",
+      "context": [
+        "Bounded medical memory.",
+        "Patient-reported intolerance and observed allergic-type reaction are different sources.",
+        "Do not recommend treatment."
+      ],
+      "allowed_predicates": ["allergic_to/2", "has_symptom/2", "claim_made/4", "document_states/4"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["Omar", "penicillin", "dizzy", "nurse observed", "hives"],
+        "avoid": ["diagnose", "should_stop", "allergic_to(omar, dizzy"]
+      },
+      "failure_mode": "Different source types should not collapse into one undifferentiated allergy fact."
+    },
+    {
+      "id": "lava4_epistemic_04_citation_becomes_not_endorsement",
+      "domain": "legal_courtlistener",
+      "hazard": "claim_fact_observation_epistemology",
+      "utterance": "The majority cites Hale v. Port only to distinguish it; the dissent says Hale controls.",
+      "context": [
+        "Court opinion citation intake.",
+        "Citation is not endorsement, and dissent statements are not majority holdings."
+      ],
+      "allowed_predicates": ["cites_case/2", "holding/3", "claim_made/4", "document_states/4"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["majority", "cites", "Hale v. Port", "distinguish", "dissent", "controls"],
+        "avoid": ["holding(majority, hale_controls", "follows_precedent", "finding(court"]
+      },
+      "failure_mode": "Source role and rhetorical use determine whether a citation supports a legal proposition."
+    },
+    {
+      "id": "lava4_epistemic_05_obligation_not_breach_until_event",
+      "domain": "sec_contracts",
+      "hazard": "claim_fact_observation_epistemology",
+      "utterance": "The supplier must deliver widgets by May 1. The report does not say whether delivery happened.",
+      "context": [
+        "Contract obligation intake.",
+        "Obligation and breach/compliance event are separate epistemic states."
+      ],
+      "allowed_predicates": ["obligation/3", "breach_event/2", "condition_met/2", "document_states/4"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["supplier", "must deliver", "May 1", "does not say", "delivery happened"],
+        "avoid": ["breach_event", "delivered(", "condition_met(delivery"]
+      },
+      "failure_mode": "Future obligation language must not become an event or breach fact."
+    },
+    {
+      "id": "lava4_segment_01_commit_query_then_correction",
+      "domain": "sec_contracts",
+      "hazard": "segmentation_semantics",
+      "utterance": "Record this policy: no requester may approve their own reimbursement. Did February violate that? Also correction: reimbursement R2 was approved by Lena, not by Omar.",
+      "context": [
+        "Mixed policy/rule/query/correction turn.",
+        "Queries should not be swallowed into write facts.",
+        "The correction after the query must still be processed in order."
+      ],
+      "allowed_predicates": ["requested_by/2", "approved_by/2", "violation/2", "conflicted_approver/2", "query_rows/1", "obligation/3"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["policy", "February", "correction", "R2", "Lena", "Omar"],
+        "avoid": ["violation(r2", "approved_by(r2, omar"]
+      },
+      "failure_mode": "The segmenter/router must preserve rule setup, query, and later correction as distinct operations."
+    },
+    {
+      "id": "lava4_segment_02_story_before_after_causality",
+      "domain": "story_world",
+      "hazard": "segmentation_semantics",
+      "utterance": "Before Nia hid the ledger, Mara copied page 4. After the copy, the clerk sealed the original. Who could have read page 4 before sealing?",
+      "context": [
+        "Story-world investigation.",
+        "Temporal order matters across event clauses and the final query."
+      ],
+      "allowed_predicates": ["copied/2", "hid/3", "sealed/2", "before/2", "after/2", "query_rows/1", "candidate_identity/2"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["Before", "After", "Mara copied page 4", "sealed", "Who could have read"],
+        "avoid": ["read(mara", "sealed_before_copy", "query_as_fact"]
+      },
+      "failure_mode": "Temporal clauses must not be flattened into unordered facts when a query depends on order."
+    },
+    {
+      "id": "lava4_segment_03_legal_source_priority_across_sentences",
+      "domain": "legal_courtlistener",
+      "hazard": "segmentation_semantics",
+      "utterance": "The complaint says the lock failed on March 2. The maintenance log says it failed on March 5. Which date should the KB trust, if any?",
+      "context": [
+        "Legal/source-provenance setting.",
+        "A complaint allegation and maintenance log are different source classes.",
+        "The final sentence is a query about trust, not a new fact."
+      ],
+      "allowed_predicates": ["claim_made/4", "document_states/4", "query_rows/1", "candidate_identity/2"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["complaint", "March 2", "maintenance log", "March 5", "Which date"],
+        "avoid": ["failed_on(lock, march_2", "failed_on(lock, march_5", "finding(court"]
+      },
+      "failure_mode": "Conflicting source statements plus a trust query should produce provenance pressure, not a chosen fact."
+    },
+    {
+      "id": "lava4_segment_04_medical_context_switch_query_boundary",
+      "domain": "medical",
+      "hazard": "segmentation_semantics",
+      "utterance": "Priya repeated serum creatinine this afternoon. Is that dangerous? For the record, her glucose was high yesterday.",
+      "context": [
+        "Bounded medical memory.",
+        "Clinical advice question should be rejected or separated; safe memory fact may still be processed if policy allows mixed outcome."
+      ],
+      "allowed_predicates": ["underwent_lab_test/2", "lab_result_high/2", "claim_made/4", "query_rows/1"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["Priya", "serum creatinine", "dangerous", "For the record", "glucose", "high"],
+        "avoid": ["medical_advice", "dangerous(priya", "should"]
+      },
+      "failure_mode": "Advice query boundaries must not poison safe bounded memory ingestion."
+    },
+    {
+      "id": "lava4_segment_05_probate_rule_then_query_then_new_claim",
+      "domain": "probate",
+      "hazard": "segmentation_semantics",
+      "utterance": "The charter says verbal amendments require two non-beneficiary witnesses. Does Arthur's workshop story satisfy that? Beatrice now says Silas was present too.",
+      "context": [
+        "Probate rule/fact/query turn.",
+        "The new witness claim after the query should not retroactively answer without source handling."
+      ],
+      "allowed_predicates": ["claimed/3", "document_states/2", "valid_witness/2", "invalid_witness_reason/3", "query_rows/1"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["verbal amendments", "two non-beneficiary witnesses", "Arthur", "workshop", "Beatrice", "Silas"],
+        "avoid": ["valid_amendment", "valid_witness(silas", "satisfy_as_fact"]
+      },
+      "failure_mode": "A post-query claim should remain a claim, not a retroactive fact that completes the rule."
+    },
+    {
+      "id": "lava4_multi_01_spanish_possession_medical",
+      "domain": "medical",
+      "hazard": "multilingual_ontology_pressure",
+      "utterance": "A Lucia le salió alta la creatinina, pero el informe dice que la muestra era de Lucio, no de Lucia.",
+      "context": [
+        "Spanish medical-memory turn.",
+        "Dative/existential phrasing describes a lab result assigned to a patient.",
+        "The sample identity correction is the main safety issue."
+      ],
+      "allowed_predicates": ["underwent_lab_test/2", "lab_result_high/2", "candidate_identity/2", "document_states/4"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["Lucia", "creatinina", "alta", "muestra", "Lucio"],
+        "avoid": ["lab_result_high(lucia", "diagnosis", "treat"]
+      },
+      "failure_mode": "Spanish result-assignment grammar should normalize medical meaning while preserving patient-identity correction."
+    },
+    {
+      "id": "lava4_multi_02_japanese_topic_subject_legal",
+      "domain": "legal_courtlistener",
+      "hazard": "multilingual_ontology_pressure",
+      "utterance": "田中氏は契約違反だと原告が主張したが、裁判所は時効だけを判断した。",
+      "context": [
+        "Japanese legal-source turn.",
+        "Plaintiff allegation and court judgment are distinct.",
+        "Topic marking should not make the allegation into a finding."
+      ],
+      "allowed_predicates": ["claim_made/4", "finding/4", "holding/3", "document_states/4"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["田中", "原告", "主張", "裁判所", "時効"],
+        "avoid": ["finding(court, tanaka_breached", "breach_event", "contract_breach(tanaka"]
+      },
+      "failure_mode": "Japanese topic/subject ambiguity should not collapse an allegation into a court finding."
+    },
+    {
+      "id": "lava4_multi_03_russian_possession_story",
+      "domain": "story_world",
+      "hazard": "multilingual_ontology_pressure",
+      "utterance": "У Ивана был ключ от архива, но ключ лежал у Марии в ящике до полуночи.",
+      "context": [
+        "Story-world access evidence.",
+        "Russian possession/existence structures can imply custody, location, or access pressure.",
+        "Conflicting possession/location should be represented cautiously."
+      ],
+      "allowed_predicates": ["has_key/2", "at/2", "before/2", "claim_made/4", "candidate_identity/2"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["Иван", "ключ", "архив", "Марии", "ящике", "полуночи"],
+        "avoid": ["unlocked(ivan", "has_key(ivan, archive_key"]
+      },
+      "failure_mode": "Russian possession grammar should not overcommit access when a location clause points elsewhere."
+    },
+    {
+      "id": "lava4_multi_04_french_obligation_with_exception",
+      "domain": "sec_contracts",
+      "hazard": "multilingual_ontology_pressure",
+      "utterance": "Le fournisseur doit livrer avant le 1er mai, sauf si le port est fermé par ordre officiel.",
+      "context": [
+        "French contract obligation with exception.",
+        "The exception is a condition, not an observed closed-port event."
+      ],
+      "allowed_predicates": ["obligation/3", "subject_to/2", "condition_met/2", "document_states/4"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["fournisseur", "livrer", "1er mai", "sauf si", "port", "ordre officiel"],
+        "avoid": ["condition_met(port_closed", "delivered(", "breach_event"]
+      },
+      "failure_mode": "French deontic/exception structure should preserve obligation plus conditional exception without asserting the exception happened."
+    },
+    {
+      "id": "lava4_multi_05_code_switched_probate_place_identity",
+      "domain": "probate",
+      "hazard": "multilingual_ontology_pressure",
+      "utterance": "Beatrice dice que vivía en London, Ontario, pas au Royaume-Uni; Arthur insiste she was out of country five years.",
+      "context": [
+        "Probate residence/forfeiture setting.",
+        "London is location-ambiguous across languages.",
+        "A party accusation is not residence proof."
+      ],
+      "allowed_predicates": ["claimed/3", "document_states/2", "candidate_identity/2", "resided_in/3", "forfeited_share/2"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["Beatrice", "London, Ontario", "Royaume-Uni", "Arthur", "out of country", "five years"],
+        "avoid": ["forfeited_share(beatrice", "resided_in(beatrice, uk", "london_uk"]
+      },
+      "failure_mode": "Code-switched place identity should not trigger forfeiture from an ambiguous London reference."
+    }
+  ]
+}

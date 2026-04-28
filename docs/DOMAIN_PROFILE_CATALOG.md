@@ -85,30 +85,31 @@ It can also be catalog-assisted:
 
 ```text
 available_profiles = [medical@v0, probate@v0, story_world@v0, logistics@v0]
-utterance/context + thin roster -> selected profile candidate(s)
+semantic_router_v1(utterance/context + thin roster) -> selected profile candidate(s)
 selected profile(s) -> thick Semantic IR context
 ```
 
-The profile selector is advisory. It may choose the domain context supplied to
-the model, but it may not authorize writes.
+The router is advisory. It may choose the domain context supplied to the model,
+but it may not authorize writes.
 
-`active_profile=auto` is the first measured implementation of this idea. It uses
-a deterministic selector over the thin catalog hints, then loads only the
-selected profile package for the Semantic IR call. The trace records:
+`active_profile=auto` now uses `semantic_router_v1` as the measured
+implementation of this idea. It sends the thin roster to the model router, then
+loads only the selected profile package for the Semantic IR call. The trace
+records:
 
 - visible roster
 - selected profile
-- selection score and reasons
+- router confidence, candidates, guidance modules, and retrieval hints
 - loaded domain context
 - loaded predicate contracts
 - mapper/admission outcome
 
-The selector now also accepts explicit per-turn Semantic IR context. This is the
+The router also accepts explicit per-turn Semantic IR context. This is the
 control-plane version of "here is the story so far; now process this sentence":
 context can affect profile choice and model input, but it is still treated as
-already-known support, not as a new write. The selected profile package may also
-declare compact `selection_keywords`; those belong to the profile, not the
-generic mapper.
+already-known support, not as a new write. The selected profile package may
+declare compact `selection_keywords`; those are context assets for the router
+and compiler, not generic mapper rules.
 
 A synthetic switching test now walks one server through:
 
@@ -135,14 +136,12 @@ now rejects `null`/unspecified/generic-actor write arguments, and the story-worl
 profile exposes `has_trait/2`, `returned_from/2`, and `robot_unit/1` so the model
 has better predicates for traits and return events.
 
-A harder mixed-domain seed then exposed selector and predicate-shape weaknesses
-rather than JSON failures. Seed `99` improved from `18/24` to `24/24` expected
-profile selections. Wider seed `2718` improved from `36/40` to `40/40`
-selector-only, and the corresponding real LM Studio pass reached `40/40`
-expected profile selections with `40/40` valid Semantic IR. The useful changes
-were declarative: profile-owned keywords, broader profile-owned predicate
-contracts for legal/probate/SEC frontier cases, and a generic duplicate
-candidate-operation collapse in the mapper.
+A harder mixed-domain seed then exposed context-selection and predicate-shape
+weaknesses rather than JSON failures. Those historical selector runs have been
+superseded by the router-first path. The useful changes remain declarative:
+profile-owned keywords, broader profile-owned predicate contracts for
+legal/probate/SEC frontier cases, and a generic duplicate candidate-operation
+collapse in the mapper.
 
 The next tightening pass enabled deterministic contract-role checks. On the
 same wider seed, the real LM Studio run stayed at `40/40` expected profile

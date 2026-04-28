@@ -29,6 +29,13 @@
     "clarification_eagerness": 0.8,
     "freethinker_resolution_policy": "advisory_only"
   },
+  "semantic_ir_context": [
+    "profile_scope: bounded clinical memory, not diagnosis or treatment advice",
+    "multilingual_normalization_policy: for non-English or code-switched medical text, translate clinical relation concepts into the canonical predicate palette while preserving source wording in entities/assertions/self_check",
+    "medication_alias_policy: normalize obvious language variants of common generic medications to the canonical generic when the identity is clear, such as warfarina/warfarine -> warfarin; preserve uncertain or brand-specific surfaces when identity is unclear",
+    "ambiguity_policy: vague lab/measurement surfaces in any language should produce clarification questions rather than guessed high/low/normal state",
+    "advice_boundary: medication dose/hold/start/stop or treatment recommendation requests remain reject even when phrased indirectly or in another language"
+  ],
   "canonical_palette": [
     {
       "signature": "taking/2",

@@ -405,6 +405,41 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         self.assertEqual(supports[0]["source"], "direct")
         self.assertIn("safe_direct_fact", supports[0]["rationale_codes"])
 
+    def test_mapper_records_human_admission_justifications(self) -> None:
+        parsed, warnings = semantic_ir_to_legacy_parse(_ir())
+        self.assertEqual(warnings, [])
+        diagnostics = parsed["admission_diagnostics"]
+        justifications = diagnostics["admission_justifications"]
+
+        self.assertEqual(len(justifications), 1)
+        self.assertTrue(justifications[0]["admitted"])
+        self.assertIn("safe direct fact candidate", justifications[0]["accepted_because"])
+        self.assertIn(
+            "candidate operation was explicitly marked safe by the semantic workspace",
+            justifications[0]["accepted_because"],
+        )
+
+    def test_mapper_records_blocked_admission_justifications(self) -> None:
+        ir = _ir(
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "owns",
+                    "args": ["e1", "e2"],
+                    "polarity": "positive",
+                    "source": "inferred",
+                    "safety": "safe",
+                }
+            ]
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(ir)
+        self.assertTrue(warnings)
+        justification = parsed["admission_diagnostics"]["admission_justifications"][0]
+
+        self.assertFalse(justification["admitted"])
+        self.assertIn("source policy blocks durable write", justification["blocked_because"])
+        self.assertIn("inferred candidate is not durable truth", justification["blocked_because"])
+
     def test_mapper_surfaces_truth_maintenance_without_granting_authority(self) -> None:
         ir = _ir(
             decision="mixed",
@@ -532,6 +567,73 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         self.assertEqual(diagnostics["features"]["has_contract_policy_invalid_safe_write"], True)
         skipped = [row for row in diagnostics["operations"] if not row["admitted"]]
         self.assertEqual(skipped[0]["skip_reason"], "allegation_not_court_finding")
+
+    def test_mapper_allows_claim_speaker_or_document_role(self) -> None:
+        ir = _ir(
+            decision="mixed",
+            entities=[
+                {"id": "e1", "surface": "witness", "normalized": "witness", "type": "person", "confidence": 0.9},
+                {"id": "e2", "surface": "Priya", "normalized": "Priya", "type": "person", "confidence": 0.9},
+            ],
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "claim_made",
+                    "args": ["e1", "e2", "Priya never took warfarin", "witness statement"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                }
+            ],
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=["claim_made/4"],
+            predicate_contracts=[
+                {"signature": "claim_made/4", "arguments": ["speaker_or_document", "claim_subject", "claim_content", "source"]},
+            ],
+        )
+
+        self.assertEqual(warnings, [])
+        self.assertEqual(
+            parsed["facts"],
+            ["claim_made(witness, priya, priya_never_took_warfarin, witness_statement)."],
+        )
+
+    def test_mapper_allows_court_or_judge_institution_role(self) -> None:
+        ir = _ir(
+            decision="commit",
+            entities=[
+                {
+                    "id": "e1",
+                    "surface": "the appellate court",
+                    "normalized": "appellate court",
+                    "type": "place",
+                    "confidence": 0.94,
+                },
+                {"id": "e2", "surface": "Doe v Acme", "normalized": "Doe v Acme", "type": "object", "confidence": 0.99},
+            ],
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "finding",
+                    "args": ["e1", "e2", "complaint timely filed", "opinion"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+            ],
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=["finding/4"],
+            predicate_contracts=[
+                {"signature": "finding/4", "arguments": ["court_or_judge", "case", "finding_content", "source"]},
+            ],
+        )
+
+        self.assertEqual(parsed["facts"], ["finding(appellate_court, doe_v_acme, complaint_timely_filed, opinion)."])
+        self.assertFalse(any("predicate_contract_role_mismatch" in warning for warning in warnings))
 
     def test_mapper_blocks_inverted_temporal_interval(self) -> None:
         ir = _ir(

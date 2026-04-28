@@ -40,6 +40,7 @@
     "obligation_policy: shall/must/is required to language is an obligation or rule-like constraint, not evidence that the action already happened",
     "entitlement_policy: may/is entitled to language is a permission or right, not evidence that the right was exercised",
     "condition_policy: subject to/provided that/unless/if clauses are conditions or unsafe rule material unless a precise executable rule is admitted",
+    "dependency_policy: meeting/project/policy language such as depends on, blocked by, requires approval, or cannot launch until X is dependency state; represent explicit dependencies with depends_on/2 and explicit blockers with blocked_by/2 rather than rejecting the whole turn",
     "temporal_policy: preserve effective dates, maturity dates, termination dates, renewal windows, and before/after/upon triggers; do not collapse future obligations into current facts",
     "party_policy: roles are scoped to contracts or filings; do not emit global borrower/lender/issuer facts",
     "operational_policy: governance language about locked shipments, clearances, approvals, and release authority is contract-like state. Record explicit state/events without inferring permission when preconditions fail",
@@ -58,6 +59,8 @@
     { "signature": "effective_on/2", "arguments": ["contract_or_clause", "date_or_trigger"], "notes": "Effective date or trigger." },
     { "signature": "terminates_on/2", "arguments": ["contract_or_clause", "date_or_trigger"], "notes": "Termination date or trigger." },
     { "signature": "subject_to/2", "arguments": ["clause_or_obligation", "condition"], "notes": "Condition or dependency." },
+    { "signature": "depends_on/2", "arguments": ["dependent_item", "required_item"], "notes": "Explicit dependency, prerequisite, or launch/approval dependency." },
+    { "signature": "blocked_by/2", "arguments": ["item_or_goal", "blocker"], "notes": "Explicit current blocker for a goal, launch, approval, payment, or obligation." },
     {
       "signature": "condition_met/2",
       "arguments": ["condition", "evidence_source"],
