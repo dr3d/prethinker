@@ -674,6 +674,7 @@ def score_expectation(case: LavaCase, record: dict[str, Any], *, ir: dict[str, A
     must = [str(item).lower() for item in expect.get("must", []) if str(item).strip()]
     avoid = [str(item).lower() for item in expect.get("avoid", []) if str(item).strip()]
     must_hits = [item for item in must if item in diagnostic_text]
+    missing_must = [item for item in must if item not in diagnostic_text]
     avoid_hits = [item for item in avoid if item in diagnostic_text]
     avoid_durable_hits = [item for item in avoid if item in durable_text]
     avoid_query_hits = [item for item in avoid if item in query_text]
@@ -686,6 +687,7 @@ def score_expectation(case: LavaCase, record: dict[str, Any], *, ir: dict[str, A
         "decision_ok": decision_ok,
         "must_hits": len(must_hits),
         "must_total": len(must),
+        "missing_must": missing_must,
         "avoid_hits": avoid_hits,
         "avoid_durable_hits": avoid_durable_hits,
         "avoid_query_hits": avoid_query_hits,
@@ -732,6 +734,9 @@ def summarize_records(
     expectation_ok = sum(1 for row in expectation_rows if row.get("expectation_score", {}).get("ok"))
     semantic_clean = sum(1 for row in expectation_rows if row.get("expectation_score", {}).get("semantic_clean"))
     admission_safe = sum(1 for row in expectation_rows if row.get("expectation_score", {}).get("admission_safe"))
+    expectation_misses = [
+        row for row in expectation_rows if not row.get("expectation_score", {}).get("ok")
+    ][:12]
     projected = Counter(str(row.get("projected_decision") or "none") for row in records)
     profiles = Counter(str(row.get("selected_profile") or "none") for row in records)
     sources = Counter(source_family(str(row.get("source") or "none")) for row in records)
@@ -769,6 +774,25 @@ def summarize_records(
         f"- Expectation admission-safe: {admission_safe}/{len(expectation_rows)} checked",
         f"- Temp-0 variance groups: {len(unstable)}/{len(variance_groups)} unstable",
         "",
+        "## Expectation Miss Examples",
+        "",
+    ]
+    if expectation_misses:
+        for row in expectation_misses:
+            score = row.get("expectation_score", {})
+            missing = ", ".join(str(item) for item in score.get("missing_must", [])[:4]) or "none"
+            durable = ", ".join(str(item) for item in score.get("avoid_durable_hits", [])[:4]) or "none"
+            query = ", ".join(str(item) for item in score.get("avoid_query_hits", [])[:4]) or "none"
+            lines.append(
+                f"- `{row.get('case_id')}` variant={row.get('variant')} "
+                f"decision={row.get('projected_decision')}/{row.get('expected_decision')} "
+                f"must={score.get('must_hits')}/{score.get('must_total')} "
+                f"missing=[{missing}] durable_avoid=[{durable}] query_avoid=[{query}]"
+            )
+    else:
+        lines.append("- None.")
+    lines.extend([
+        "",
         "## Decision Mix",
         "",
         json.dumps(dict(projected.most_common()), indent=2, sort_keys=True),
@@ -787,7 +811,7 @@ def summarize_records(
         "",
         "## Highest Fuzzy/Skipped Records",
         "",
-    ]
+    ])
     if worst_fuzzy:
         for row in worst_fuzzy:
             lines.append(

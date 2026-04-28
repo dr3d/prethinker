@@ -173,6 +173,7 @@ def test_lava_expectation_separates_diagnostic_mentions_from_admitted_unsafe_cla
     score = score_expectation(case, record, ir=ir)
 
     assert score["must_hits"] == 1
+    assert score["missing_must"] == []
     assert score["avoid_hits"] == ["london_uk"]
     assert score["avoid_durable_hits"] == []
     assert score["avoid_admitted_hits"] == []
@@ -207,6 +208,7 @@ def test_lava_expectation_does_not_treat_queries_as_durable_bad_writes():
 
     score = score_expectation(case, record, ir={"note": "Theo access question"})
 
+    assert score["missing_must"] == []
     assert score["avoid_query_hits"] == ["access_grant(theo, production"]
     assert score["avoid_durable_hits"] == []
     assert score["admission_safe"] is True
