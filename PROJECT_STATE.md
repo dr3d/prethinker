@@ -143,10 +143,13 @@ Router/context work:
 - Expand router/profile-selection tests from clean synthetic switching into messy mixed-domain turns. Profile selection is advisory context loading, not admission authority.
 - Prototype `profile_bootstrap_v1`: feed 5-20 texts from an unfamiliar domain and ask the model to propose entity types, predicates, argument contracts, admission risks, clarification policies, and starter frontier cases. The first success criterion is reviewable profile-design material, not automatic profile authority.
 
-Evidence and UX:
+Demo-critical evidence and UX:
 
 - Push the policy-demo frontier into the UI/prompt book once the command-line harness stays stable: the highest-impact demo is still "record reimbursement policy, ingest February events, ask which reimbursements violated policy, and show why without writing derived violation facts."
 - Expand trace views around admission contracts so reviewers can see not only the model decision, but also which exact boundary checks passed.
+
+Polish:
+
 - Make the prompt-book examples meatier: each demo should show an utterance, the expected clarification or commit behavior, and the reason it is safer than a plain chatbot answer.
 - Wire more Semantic Network explanations into the UI, especially type ancestry and relation paths.
 
@@ -166,6 +169,8 @@ Domain/data lanes:
 - Keep the Semantic IR harness model-agnostic, but use `qwen/qwen3.6-35b-a3b` as the default development model unless a specific comparison question needs another local model.
 
 ## Verification Snapshot
+
+**Current headline:** latest full pytest suite `372 passed`; latest Lava v5 sampled run stayed `60/60` parsed JSON, `60/60` domain selector, `60/60` admission-safe, and `0/60` temp-0 signature variance groups. Current best demo pressure point remains the reimbursement policy cross-turn run: `4/4` parsed, `4/4` apply-error-free, `4/4` expected query matches, and no derived violation write leak.
 
 Recent verified results:
 
