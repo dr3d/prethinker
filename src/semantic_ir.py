@@ -930,7 +930,11 @@ def semantic_ir_admission_diagnostics(
         contract_details=contract_details,
     )
     truth_maintenance = _truth_maintenance_summary(ir)
-    epistemic_worlds = _epistemic_worlds_summary(projected_decision, operations)
+    epistemic_worlds = _epistemic_worlds_summary(
+        projected_decision,
+        operations,
+        truth_maintenance=truth_maintenance,
+    )
     return {
         "version": "admission_diagnostics_v1",
         "authority": "diagnostic_only_mapper_remains_authoritative",
@@ -957,7 +961,11 @@ def semantic_ir_admission_diagnostics(
             if isinstance(item, dict) and isinstance(item.get("admission_justification"), dict)
         ],
         "truth_maintenance": truth_maintenance,
-        "truth_maintenance_alignment": _truth_maintenance_alignment(truth_maintenance, operations),
+        "truth_maintenance_alignment": _truth_maintenance_alignment(
+            truth_maintenance,
+            operations,
+            epistemic_worlds=epistemic_worlds,
+        ),
         "epistemic_worlds": epistemic_worlds,
         "operations": operations,
     }
@@ -1052,42 +1060,63 @@ def semantic_ir_to_legacy_parse(
     return payload, warnings
 
 
-def _epistemic_worlds_summary(projected_decision: str, operations: list[dict[str, Any]]) -> dict[str, Any]:
+def _epistemic_worlds_summary(
+    projected_decision: str,
+    operations: list[dict[str, Any]],
+    *,
+    truth_maintenance: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     worlds: dict[str, dict[str, Any]] = {}
     world_clauses: list[str] = []
     world_operation_count = 0
     decision = str(projected_decision or "").strip().lower()
+    support_indexes = {
+        int(item.get("operation_index"))
+        for item in (truth_maintenance or {}).get("support_links", [])
+        if isinstance(item, dict) and _operation_index(item.get("operation_index")) is not None
+    }
     for op in operations:
         if not isinstance(op, dict):
             continue
+        index = _operation_index(op.get("index"))
         blocked_clauses = [
             str(item).strip()
             for item in op.get("blocked_clauses", [])
             if str(item).strip()
         ]
-        if not blocked_clauses:
+        operation = str(op.get("operation") or "").strip().lower()
+        predicate = _predicate_name(op.get("predicate")) or "unknown"
+        args = [str(arg).strip() for arg in op.get("args", []) if str(arg).strip()]
+        supported_but_skipped = (
+            index is not None
+            and index in support_indexes
+            and not bool(op.get("admitted"))
+            and operation in {"assert", "rule", "retract"}
+            and predicate != "unknown"
+            and bool(args)
+        )
+        if not blocked_clauses and not supported_but_skipped:
             continue
-        world_id = _epistemic_world_id(decision)
+        world_id = _epistemic_world_id(decision if blocked_clauses else "skipped")
         world = worlds.setdefault(
             world_id,
             {
                 "world_id": world_id,
-                "world_type": decision or "scoped",
+                "world_type": decision if blocked_clauses else "skipped_supported",
                 "authority": "scoped_memory_not_global_truth",
                 "operations": [],
                 "clauses": [],
             },
         )
-        op_id = f"op_{int(op.get('index', world_operation_count))}"
-        predicate = _predicate_name(op.get("predicate")) or "unknown"
+        op_id = f"op_{index if index is not None else world_operation_count}"
         effect = _atomize(str(op.get("blocked_effect") or op.get("effect") or "fact"))
         source = _atomize(str(op.get("source") or "unknown"))
         safety = _atomize(str(op.get("safety") or "unknown"))
         skip_reason = _atomize(str(op.get("skip_reason") or "projected_decision_blocks_write"))
-        args = [str(arg).strip() for arg in op.get("args", []) if str(arg).strip()]
+        policy = decision if blocked_clauses and decision else "skipped"
         clauses = [
             _clause("world_operation", [world_id, op_id, predicate, effect]),
-            _clause("world_policy", [world_id, op_id, decision or "scoped"]),
+            _clause("world_policy", [world_id, op_id, policy]),
             _clause("world_source", [world_id, op_id, source]),
             _clause("world_safety", [world_id, op_id, safety]),
             _clause("world_skip_reason", [world_id, op_id, skip_reason]),
@@ -1133,6 +1162,8 @@ def _epistemic_world_id(projected_decision: str) -> str:
     decision = _atomize(projected_decision)
     if decision in {"reject", "quarantine", "clarify"}:
         return f"{decision}_world"
+    if decision == "skipped":
+        return "skipped_world"
     return "scoped_world"
 
 
@@ -1565,6 +1596,8 @@ def _truth_maintenance_summary(ir: dict[str, Any]) -> dict[str, Any]:
 def _truth_maintenance_alignment(
     truth_maintenance: dict[str, Any],
     operations: list[dict[str, Any]],
+    *,
+    epistemic_worlds: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     operation_count = len(operations)
     operation_by_index = {
@@ -1587,6 +1620,7 @@ def _truth_maintenance_alignment(
         for item in truth_maintenance.get("retraction_plan", [])
         if isinstance(item, dict) and _operation_index(item.get("operation_index")) is not None
     }
+    scoped_indexes = _epistemic_world_operation_indexes(epistemic_worlds or {})
     fuzzy_edges: list[dict[str, Any]] = []
 
     def add_edge(kind: str, *, operation_index: int | None = None, detail: str = "", severity: str = "note") -> None:
@@ -1634,6 +1668,7 @@ def _truth_maintenance_alignment(
             not admitted
             and index in support_indexes
             and str(op.get("safety", "")).strip().lower() != "needs_clarification"
+            and index not in scoped_indexes
         ):
             add_edge(
                 "supported_operation_skipped_by_mapper",
@@ -1709,6 +1744,11 @@ def _truth_maintenance_alignment(
         for op in operations
         if not bool(op.get("admitted")) and _operation_index(op.get("index")) in support_indexes
     )
+    skipped_with_scoped_memory = sum(
+        1
+        for op in operations
+        if not bool(op.get("admitted")) and _operation_index(op.get("index")) in scoped_indexes
+    )
     needs_clarification_with_support = sum(
         1
         for op in operations
@@ -1728,6 +1768,7 @@ def _truth_maintenance_alignment(
         "admitted_with_support_count": admitted_with_support,
         "admitted_without_support_count": admitted_without_support,
         "skipped_with_support_count": skipped_with_support,
+        "skipped_with_scoped_memory_count": skipped_with_scoped_memory,
         "needs_clarification_with_support_count": needs_clarification_with_support,
         "conflict_on_admitted_count": sum(
             1
@@ -1737,6 +1778,26 @@ def _truth_maintenance_alignment(
         "fuzzy_edge_count": len(fuzzy_edges),
         "fuzzy_edges": fuzzy_edges,
     }
+
+
+def _epistemic_world_operation_indexes(epistemic_worlds: dict[str, Any]) -> set[int]:
+    indexes: set[int] = set()
+    raw_worlds = epistemic_worlds.get("worlds", [])
+    if not isinstance(raw_worlds, list):
+        return indexes
+    for world in raw_worlds:
+        if not isinstance(world, dict):
+            continue
+        operations = world.get("operations", [])
+        if not isinstance(operations, list):
+            continue
+        for op in operations:
+            if not isinstance(op, dict):
+                continue
+            index = _operation_index(op.get("operation_index"))
+            if index is not None:
+                indexes.add(index)
+    return indexes
 
 
 def _admission_feature_summary(

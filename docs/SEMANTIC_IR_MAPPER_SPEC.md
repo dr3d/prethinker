@@ -89,6 +89,11 @@ become a fact, rule, or retract. For example, a medical turn may contain a safe
 memory fact and an unsafe dose-advice query; the mapper projects the turn to
 `reject` so the memory fact cannot enter global truth.
 
+The same lane can preserve supported-but-skipped operations. If the model
+included a `truth_maintenance.support_links` entry for a candidate that mapper
+policy still skips, the candidate is no longer treated as merely lost. It can be
+copied into `skipped_world` while remaining outside durable truth.
+
 Epistemic Worlds v1 preserves that blocked candidate in diagnostics using fixed
 wrapper predicates:
 

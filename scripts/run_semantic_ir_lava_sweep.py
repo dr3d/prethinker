@@ -263,6 +263,7 @@ def run_case(
         clauses = diagnostics.get("clauses", {}) if isinstance(diagnostics.get("clauses"), dict) else {}
         alignment = diagnostics.get("truth_maintenance_alignment", {})
         fuzzy_edges = alignment.get("fuzzy_edges", []) if isinstance(alignment, dict) else []
+        epistemic_worlds = diagnostics.get("epistemic_worlds", {})
         record.update(
             {
                 "parsed_ok": True,
@@ -275,6 +276,7 @@ def run_case(
                 "clauses": clauses,
                 "truth_maintenance": ir.get("truth_maintenance", {}),
                 "truth_maintenance_alignment": alignment,
+                "epistemic_worlds": _compact_epistemic_worlds(epistemic_worlds),
                 "fuzzy_edge_count": len(fuzzy_edges),
                 "fuzzy_edge_kinds": _fuzzy_edge_kinds(fuzzy_edges),
             }
@@ -713,6 +715,7 @@ def score_expectation(case: LavaCase, record: dict[str, Any], *, ir: dict[str, A
 
 def signature_for(record: dict[str, Any]) -> dict[str, Any]:
     clauses = record.get("clauses", {}) if isinstance(record.get("clauses"), dict) else {}
+    worlds = record.get("epistemic_worlds", {}) if isinstance(record.get("epistemic_worlds"), dict) else {}
     return {
         "selected_profile": record.get("selected_profile", ""),
         "model_decision": record.get("model_decision", ""),
@@ -721,6 +724,7 @@ def signature_for(record: dict[str, Any]) -> dict[str, Any]:
         "retracts": sorted(str(item) for item in clauses.get("retracts", []) if str(item).strip()),
         "rules": sorted(str(item) for item in clauses.get("rules", []) if str(item).strip()),
         "queries": sorted(str(item) for item in clauses.get("queries", []) if str(item).strip()),
+        "world_clauses": sorted(str(item) for item in worlds.get("clauses", []) if str(item).strip()),
         "fuzzy": sorted(str(item) for item in record.get("fuzzy_edge_kinds", []) if str(item).strip()),
         "error": "; ".join(str(item) for item in record.get("errors", [])),
     }
@@ -780,6 +784,16 @@ def summarize_records(
     projected = Counter(str(row.get("projected_decision") or "none") for row in records)
     profiles = Counter(str(row.get("selected_profile") or "none") for row in records)
     sources = Counter(source_family(str(row.get("source") or "none")) for row in records)
+    world_rows = [
+        row
+        for row in records
+        if isinstance(row.get("epistemic_worlds"), dict)
+        and int(row.get("epistemic_worlds", {}).get("operation_count", 0) or 0) > 0
+    ]
+    world_operation_count = sum(
+        int(row.get("epistemic_worlds", {}).get("operation_count", 0) or 0)
+        for row in world_rows
+    )
     fuzzy = Counter()
     for row in records:
         fuzzy.update(str(item) for item in row.get("fuzzy_edge_kinds", []) if str(item).strip())
@@ -812,6 +826,7 @@ def summarize_records(
         f"- Expectation score: {expectation_ok}/{len(expectation_rows)} checked",
         f"- Expectation semantic-clean: {semantic_clean}/{len(expectation_rows)} checked",
         f"- Expectation admission-safe: {admission_safe}/{len(expectation_rows)} checked",
+        f"- Epistemic scoped-memory records: {len(world_rows)}/{total} records, {world_operation_count} scoped operation(s)",
         f"- Temp-0 variance groups: {len(unstable)}/{len(variance_groups)} unstable",
         "",
         "## Expectation Miss Examples",
@@ -884,6 +899,32 @@ def _compact_model_input_manifest(model_input: Any) -> dict[str, Any]:
         "predicate_contract_count": len(model_input.get("predicate_contracts", []) or []),
         "kb_context_manifest": manifest,
         "options": model_input.get("options", {}),
+    }
+
+
+def _compact_epistemic_worlds(worlds: Any) -> dict[str, Any]:
+    if not isinstance(worlds, dict):
+        return {}
+    compact_worlds: list[dict[str, Any]] = []
+    raw_worlds = worlds.get("worlds", [])
+    if isinstance(raw_worlds, list):
+        for world in raw_worlds:
+            if not isinstance(world, dict):
+                continue
+            compact_worlds.append(
+                {
+                    "world_id": world.get("world_id"),
+                    "world_type": world.get("world_type"),
+                    "operation_count": len(world.get("operations", []) or []),
+                }
+            )
+    return {
+        "version": worlds.get("version"),
+        "authority": worlds.get("authority"),
+        "world_count": int(worlds.get("world_count", 0) or 0),
+        "operation_count": int(worlds.get("operation_count", 0) or 0),
+        "clauses": [str(item) for item in worlds.get("clauses", []) if str(item).strip()],
+        "worlds": compact_worlds,
     }
 
 

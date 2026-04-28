@@ -95,7 +95,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 - A new held-out cross-turn frontier proposal lives at `docs/data/frontier_packs/semantic_ir_cross_turn_frontier_pack_v1.json`. It targets identity drift, claim/observation separation, noisy multilingual corrections, mixed rule/query/fact turns, temporal corrections, and domain type ambiguity.
 - A new `policy_demo` Semantic IR bakeoff group now targets the "talk your rules into existence" demo family: reimbursement-policy violations, meeting commitments, access sponsorship expiry, customer-support override ladders, story-world throne claims, and business dependency credibility.
 - Prompt/context policy now explicitly separates pure answers from mixed write+query turns, prioritizes direct grounded facts before complex rule clauses under the operation cap, requires explicit query operations for explicit questions, and blocks necessary-condition-to-sufficient-rule inversions such as turning "no launch without QA" into `launch_allowed(...)`.
-- Epistemic Worlds v1 now surfaces projection-blocked writes as scoped diagnostic memory instead of global truth. When a turn projects to `reject`, `quarantine`, or `clarify`, the mapper can preserve the blocked candidate as fixed wrapper clauses such as `world_operation/4`, `world_arg/4`, and `world_policy/3`; these are diagnostic scoped-memory clauses and do not enter the durable domain predicates.
+- Epistemic Worlds v1 now surfaces projection-blocked and supported-but-skipped writes as scoped diagnostic memory instead of global truth. The mapper can preserve the candidate as fixed wrapper clauses such as `world_operation/4`, `world_arg/4`, and `world_policy/3`; these are diagnostic scoped-memory clauses and do not enter the durable domain predicates.
 
 ## Local UMLS Assets
 
@@ -224,6 +224,7 @@ Recent verified results:
 - Full pytest after router-first streamlining and Python selector retirement: `361 passed`.
 - Full pytest after router diagnostics, context audit, admission justification, and router training seed: `367 passed`.
 - Full pytest after Epistemic Worlds v1 diagnostic scoped-memory slice: `372 passed`.
+- Lava v5 scoped-world rerun over `60` attempts stayed `60/60` parsed JSON, `60/60` domain selector, `60/60` admission-safe, and `0/60` temp-0 variance groups. Epistemic Worlds captured `46` scoped operation(s) across `25/60` records, reducing `supported_operation_skipped_by_mapper` fuzzy edges from the prior run's `35` to `2`.
 - Multilingual router probe: `router_ok=10/10`, `compiler_parsed_ok=10/10`.
 - Lava v2 calibration router probe: `router_ok=36/36`; calibration evidence only, because v2 influenced router guidance.
 - Lava v3 first held-out router probe with bootstrap-aware scoring: `router_ok=14/17`, `router_score_avg=0.868`.

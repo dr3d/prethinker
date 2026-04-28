@@ -479,6 +479,13 @@ class SemanticIRRuntimeTests(unittest.TestCase):
                         "support_ref": "current turn",
                         "role": "grounds",
                         "confidence": 0.98,
+                    },
+                    {
+                        "operation_index": 1,
+                        "support_kind": "model_inference",
+                        "support_ref": "op:0",
+                        "role": "inferred_from",
+                        "confidence": 0.62,
                     }
                 ],
                 "conflicts": [
@@ -519,10 +526,15 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         self.assertEqual(truth["derived_consequences"][0]["commit_policy"], "do_not_commit")
         alignment = parsed["admission_diagnostics"]["truth_maintenance_alignment"]
         self.assertEqual(alignment["admitted_with_support_count"], 1)
+        self.assertEqual(alignment["skipped_with_scoped_memory_count"], 1)
         self.assertEqual(alignment["conflict_on_admitted_count"], 1)
         edge_kinds = {row["kind"] for row in alignment["fuzzy_edges"]}
+        self.assertNotIn("supported_operation_skipped_by_mapper", edge_kinds)
         self.assertIn("conflict_policy_mismatch_admitted_operation", edge_kinds)
         self.assertIn("retraction_plan_not_admitted_as_retract", edge_kinds)
+        worlds = parsed["epistemic_worlds"]
+        self.assertIn("world_operation(skipped_world, op_1, citizen_of, skip).", worlds["clauses"])
+        self.assertIn("world_arg(skipped_world, op_1, 1, mara).", worlds["clauses"])
 
     def test_mapper_applies_profile_contract_validator_without_language_patch(self) -> None:
         ir = _ir(

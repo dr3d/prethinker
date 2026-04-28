@@ -235,7 +235,9 @@ is happening; the mapper decides what is admissible.
 
 If the mapper projection blocks an otherwise structured write because the whole
 turn must reject, quarantine, or clarify, the candidate can be copied into
-Epistemic Worlds v1 diagnostics. These use fixed wrapper predicates such as:
+Epistemic Worlds v1 diagnostics. The same scoped-memory lane can preserve a
+model-supported operation that the mapper skipped for source, safety, palette,
+or policy reasons. These use fixed wrapper predicates such as:
 
 ```prolog
 world_operation(reject_world, op_0, taking, fact).
@@ -301,7 +303,7 @@ the system decide what it was willing to believe.
 | Inferred write | Usually skip or quarantine |
 | Context-sourced write | Usually skip |
 | Unsafe implication | Skip, quarantine, or clarify |
-| Projection-blocked structured write | Preserve in scoped-world diagnostics; do not assert domain fact |
+| Projection-blocked or model-supported skipped write | Preserve in scoped-world diagnostics; do not assert domain fact |
 | General negative fact | Skip until negation semantics are explicit |
 | Rule candidate | Admit only through the explicit rule path and policy checks |
 | Ambiguous referent | Clarify or quarantine |
