@@ -303,7 +303,8 @@ the system decide what it was willing to believe.
 | Inferred write | Usually skip or quarantine |
 | Context-sourced write | Usually skip |
 | Unsafe implication | Skip, quarantine, or clarify |
-| Projection-blocked or model-supported skipped write | Preserve in scoped-world diagnostics; do not assert domain fact |
+| Projection-blocked or model-supported skipped write/query | Preserve in scoped-world diagnostics; do not assert domain fact |
+| Non-executable retraction pressure | Preserve as scoped `world_retraction_target/4` and `world_retraction_reason/4`; do not retract |
 | General negative fact | Skip until negation semantics are explicit |
 | Rule candidate | Admit only through the explicit rule path and policy checks |
 | Ambiguous referent | Clarify or quarantine |

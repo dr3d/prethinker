@@ -292,12 +292,12 @@ That is also why the repo is careful about honesty:
 
 As of April 28, 2026:
 
-- the full local pytest suite is green at `372 passed`
+- the full local pytest suite is green at `374 passed`
 - the console is the canonical interactive front door
 - `semantic_router_v1 -> semantic_ir_v1` is the active research lane for model-owned context planning and richer model understanding before deterministic admission
 - the latest semantic IR edge runtime A/B is `20/20` decision labels with `0.976` average score
 - the latest weak-edge runtime A/B is `10/10` decision labels with `1.000` average score
-- the latest Lava v5 scoped-world rerun stayed `60/60` parsed, `60/60` domain-routed, and `60/60` admission-safe
+- the latest Lava v5 scoped-world rerun stayed `60/60` parsed, `60/60` domain-routed, `60/60` admission-safe, and reached `0` fuzzy edge kinds
 - Epistemic Worlds v1 can preserve rejected, quarantined, or supported-but-skipped candidates as scoped diagnostics without asserting them as global truth
 - Silverton probate/noisy temporal packs are intentionally hard pressure gauges for policy labels, temporal representation, and claim/fact separation
 - the current bet is Semantic IR context engineering before deterministic admission

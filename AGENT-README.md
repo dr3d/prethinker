@@ -61,4 +61,4 @@ python -m pytest tests/test_sec_edgar_adapter.py tests/test_domain_profiles.py -
 python -m pytest -q
 ```
 
-The last known full-suite result after the Epistemic Worlds v1 diagnostic slice was `372 passed`. Recent focused batteries also cover CourtListener, SEC/contracts, domain profiles, Semantic IR runtime, UI gateway phases, trace rendering, router agility, router training data, Lava v5, and UMLS builders. Live/generated smoke traces belong under ignored paths such as `datasets/*/generated/` and `tmp/semantic_ir_trace_views/`.
+The last known full-suite result after Lava v5 truth-maintenance hardening was `374 passed`. Recent focused batteries also cover CourtListener, SEC/contracts, domain profiles, Semantic IR runtime, UI gateway phases, trace rendering, router agility, router training data, Lava v5, and UMLS builders. Live/generated smoke traces belong under ignored paths such as `datasets/*/generated/` and `tmp/semantic_ir_trace_views/`.

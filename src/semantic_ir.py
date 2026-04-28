@@ -861,7 +861,12 @@ def semantic_ir_admission_diagnostics(
         if (
             projected_decision in {"reject", "quarantine", "clarify"}
             and bool(diagnosis.get("admitted"))
-            and str(diagnosis.get("effect", "")).strip() in {"fact", "rule", "retract"}
+            and str(diagnosis.get("effect", "")).strip()
+            in (
+                {"fact", "rule", "retract", "query"}
+                if projected_decision in {"reject", "quarantine"}
+                else {"fact", "rule", "retract"}
+            )
         ):
             diagnosis = dict(diagnosis)
             diagnosis["blocked_effect"] = str(diagnosis.get("effect", "")).strip()
@@ -964,6 +969,7 @@ def semantic_ir_admission_diagnostics(
         "truth_maintenance_alignment": _truth_maintenance_alignment(
             truth_maintenance,
             operations,
+            projected_decision=projected_decision,
             epistemic_worlds=epistemic_worlds,
         ),
         "epistemic_worlds": epistemic_worlds,
@@ -1075,6 +1081,19 @@ def _epistemic_worlds_summary(
         for item in (truth_maintenance or {}).get("support_links", [])
         if isinstance(item, dict) and _operation_index(item.get("operation_index")) is not None
     }
+    retraction_plans_by_index: dict[int, list[dict[str, str]]] = {}
+    for item in (truth_maintenance or {}).get("retraction_plan", []):
+        if not isinstance(item, dict):
+            continue
+        index = _operation_index(item.get("operation_index"))
+        if index is None:
+            continue
+        retraction_plans_by_index.setdefault(index, []).append(
+            {
+                "target_ref": _bounded_text(item.get("target_ref"), max_chars=400),
+                "reason": _bounded_text(item.get("reason"), max_chars=80),
+            }
+        )
     for op in operations:
         if not isinstance(op, dict):
             continue
@@ -1087,33 +1106,49 @@ def _epistemic_worlds_summary(
         operation = str(op.get("operation") or "").strip().lower()
         predicate = _predicate_name(op.get("predicate")) or "unknown"
         args = [str(arg).strip() for arg in op.get("args", []) if str(arg).strip()]
+        effect = _atomize(str(op.get("blocked_effect") or op.get("effect") or "fact"))
+        admitted_retract = bool(op.get("admitted")) and effect == "retract"
+        scoped_retraction_plans = (
+            retraction_plans_by_index.get(index, [])
+            if index is not None and not admitted_retract
+            else []
+        )
         supported_but_skipped = (
             index is not None
             and index in support_indexes
             and not bool(op.get("admitted"))
-            and operation in {"assert", "rule", "retract"}
+            and operation in {"assert", "rule", "retract", "query"}
             and predicate != "unknown"
             and bool(args)
         )
-        if not blocked_clauses and not supported_but_skipped:
+        if not blocked_clauses and not supported_but_skipped and not scoped_retraction_plans:
             continue
-        world_id = _epistemic_world_id(decision if blocked_clauses else "skipped")
+        if scoped_retraction_plans:
+            world_id = "retraction_plan_world"
+        else:
+            world_id = _epistemic_world_id(decision if blocked_clauses else "skipped")
         world = worlds.setdefault(
             world_id,
             {
                 "world_id": world_id,
-                "world_type": decision if blocked_clauses else "skipped_supported",
+                "world_type": (
+                    "retraction_plan"
+                    if scoped_retraction_plans
+                    else decision if blocked_clauses else "skipped_supported"
+                ),
                 "authority": "scoped_memory_not_global_truth",
                 "operations": [],
                 "clauses": [],
             },
         )
         op_id = f"op_{index if index is not None else world_operation_count}"
-        effect = _atomize(str(op.get("blocked_effect") or op.get("effect") or "fact"))
         source = _atomize(str(op.get("source") or "unknown"))
         safety = _atomize(str(op.get("safety") or "unknown"))
         skip_reason = _atomize(str(op.get("skip_reason") or "projected_decision_blocks_write"))
-        policy = decision if blocked_clauses and decision else "skipped"
+        if scoped_retraction_plans:
+            policy = "retraction_plan_only"
+        else:
+            policy = decision if blocked_clauses and decision else "skipped"
         clauses = [
             _clause("world_operation", [world_id, op_id, predicate, effect]),
             _clause("world_policy", [world_id, op_id, policy]),
@@ -1130,6 +1165,11 @@ def _epistemic_worlds_summary(
                     [world_id, op_id, str(clause_index), _atomize(clause)],
                 )
             )
+        for plan_index, plan in enumerate(scoped_retraction_plans, start=1):
+            target_ref = _atomize(plan.get("target_ref") or "unknown_target")
+            reason = _atomize(plan.get("reason") or "unspecified")
+            clauses.append(_clause("world_retraction_target", [world_id, op_id, str(plan_index), target_ref]))
+            clauses.append(_clause("world_retraction_reason", [world_id, op_id, str(plan_index), reason]))
         operation_record = {
             "operation_index": op.get("index"),
             "world_id": world_id,
@@ -1141,6 +1181,7 @@ def _epistemic_worlds_summary(
             "skip_reason": str(op.get("skip_reason") or ""),
             "args": args,
             "blocked_clauses": blocked_clauses,
+            "retraction_plans": scoped_retraction_plans,
             "world_clauses": clauses,
         }
         world["operations"].append(operation_record)
@@ -1597,6 +1638,7 @@ def _truth_maintenance_alignment(
     truth_maintenance: dict[str, Any],
     operations: list[dict[str, Any]],
     *,
+    projected_decision: str = "",
     epistemic_worlds: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     operation_count = len(operations)
@@ -1610,17 +1652,38 @@ def _truth_maintenance_alignment(
         for item in truth_maintenance.get("support_links", [])
         if isinstance(item, dict) and _operation_index(item.get("operation_index")) is not None
     }
+    soft_out_of_range_question_support_indexes = {
+        int(item.get("operation_index"))
+        for item in truth_maintenance.get("support_links", [])
+        if (
+            isinstance(item, dict)
+            and _operation_index(item.get("operation_index")) is not None
+            and int(item.get("operation_index")) == operation_count
+            and str(item.get("role") or "").strip().lower() in {"question", "questions", "query"}
+        )
+    }
     conflict_indexes = {
         int(item.get("new_operation_index"))
         for item in truth_maintenance.get("conflicts", [])
         if isinstance(item, dict) and _operation_index(item.get("new_operation_index")) is not None
     }
+    conflict_policy_by_index: dict[int, set[str]] = {}
+    for item in truth_maintenance.get("conflicts", []):
+        if not isinstance(item, dict):
+            continue
+        index = _operation_index(item.get("new_operation_index"))
+        if index is None:
+            continue
+        policy = str(item.get("recommended_policy") or "").strip().lower()
+        if policy:
+            conflict_policy_by_index.setdefault(index, set()).add(policy)
     retraction_indexes = {
         int(item.get("operation_index"))
         for item in truth_maintenance.get("retraction_plan", [])
         if isinstance(item, dict) and _operation_index(item.get("operation_index")) is not None
     }
     scoped_indexes = _epistemic_world_operation_indexes(epistemic_worlds or {})
+    scoped_retraction_indexes = _epistemic_world_retraction_plan_indexes(epistemic_worlds or {})
     fuzzy_edges: list[dict[str, Any]] = []
 
     def add_edge(kind: str, *, operation_index: int | None = None, detail: str = "", severity: str = "note") -> None:
@@ -1635,6 +1698,8 @@ def _truth_maintenance_alignment(
 
     def check_ref(index: int, kind: str) -> None:
         if index not in operation_by_index:
+            if kind == "support link" and index in soft_out_of_range_question_support_indexes:
+                return
             add_edge(
                 "truth_maintenance_invalid_operation_ref",
                 operation_index=index,
@@ -1669,6 +1734,8 @@ def _truth_maintenance_alignment(
             and index in support_indexes
             and str(op.get("safety", "")).strip().lower() != "needs_clarification"
             and index not in scoped_indexes
+            and not (conflict_policy_by_index.get(index, set()) & {"clarify", "quarantine", "reject"})
+            and str(projected_decision or "").strip().lower() not in {"clarify", "quarantine", "reject"}
         ):
             add_edge(
                 "supported_operation_skipped_by_mapper",
@@ -1683,7 +1750,11 @@ def _truth_maintenance_alignment(
                 detail="Mapper admitted a retract operation, but the model did not include it in truth_maintenance.retraction_plan.",
                 severity="warning",
             )
-        if index in retraction_indexes and not (admitted and effect == "retract"):
+        if (
+            index in retraction_indexes
+            and not (admitted and effect == "retract")
+            and index not in scoped_retraction_indexes
+        ):
             add_edge(
                 "retraction_plan_not_admitted_as_retract",
                 operation_index=index,
@@ -1699,7 +1770,11 @@ def _truth_maintenance_alignment(
             continue
         op = operation_by_index[index]
         policy = str(conflict.get("recommended_policy") or "").strip().lower()
-        if bool(op.get("admitted")) and policy in {"clarify", "quarantine", "reject"}:
+        if (
+            bool(op.get("admitted"))
+            and policy in {"clarify", "quarantine", "reject"}
+            and str(projected_decision or "").strip().lower() not in {"clarify", "quarantine", "reject"}
+        ):
             add_edge(
                 "conflict_policy_mismatch_admitted_operation",
                 operation_index=index,
@@ -1749,6 +1824,11 @@ def _truth_maintenance_alignment(
         for op in operations
         if not bool(op.get("admitted")) and _operation_index(op.get("index")) in scoped_indexes
     )
+    retraction_plans_with_scoped_memory = sum(
+        1
+        for index in retraction_indexes
+        if index in scoped_retraction_indexes
+    )
     needs_clarification_with_support = sum(
         1
         for op in operations
@@ -1769,6 +1849,8 @@ def _truth_maintenance_alignment(
         "admitted_without_support_count": admitted_without_support,
         "skipped_with_support_count": skipped_with_support,
         "skipped_with_scoped_memory_count": skipped_with_scoped_memory,
+        "retraction_plan_scoped_count": retraction_plans_with_scoped_memory,
+        "soft_out_of_range_question_support_count": len(soft_out_of_range_question_support_indexes),
         "needs_clarification_with_support_count": needs_clarification_with_support,
         "conflict_on_admitted_count": sum(
             1
@@ -1793,6 +1875,29 @@ def _epistemic_world_operation_indexes(epistemic_worlds: dict[str, Any]) -> set[
             continue
         for op in operations:
             if not isinstance(op, dict):
+                continue
+            index = _operation_index(op.get("operation_index"))
+            if index is not None:
+                indexes.add(index)
+    return indexes
+
+
+def _epistemic_world_retraction_plan_indexes(epistemic_worlds: dict[str, Any]) -> set[int]:
+    indexes: set[int] = set()
+    raw_worlds = epistemic_worlds.get("worlds", [])
+    if not isinstance(raw_worlds, list):
+        return indexes
+    for world in raw_worlds:
+        if not isinstance(world, dict):
+            continue
+        operations = world.get("operations", [])
+        if not isinstance(operations, list):
+            continue
+        for op in operations:
+            if not isinstance(op, dict):
+                continue
+            plans = op.get("retraction_plans", [])
+            if not isinstance(plans, list) or not plans:
                 continue
             index = _operation_index(op.get("operation_index"))
             if index is not None:
@@ -2405,6 +2510,14 @@ def _projection_reason(
         return "model_decision_preserved"
     if _has_clinical_advice_query(ir):
         return "clinical_advice_query_projected_to_reject"
+    if _truth_maintenance_recommends_hard_reject(ir):
+        return "truth_maintenance_hard_reject_conflict_projected_to_reject"
+    if _truth_maintenance_recommends_reject(ir):
+        if _has_safe_direct_write(ir) and projected_decision == "mixed":
+            return "truth_maintenance_reject_conflict_projected_to_mixed"
+        return "truth_maintenance_reject_conflict_projected_to_reject"
+    if _truth_maintenance_recommends_policy(ir, {"clarify"}) and not _has_safe_direct_write(ir):
+        return "truth_maintenance_clarify_conflict_projected_to_clarify"
     if _is_pure_hypothetical_query(ir):
         return "pure_hypothetical_query_projected_to_answer"
     if model_decision == "clarify" and _speculative_ambiguous_observation_should_quarantine(ir):
@@ -2509,6 +2622,43 @@ def _has_clinical_advice_query(ir: dict[str, Any]) -> bool:
     return False
 
 
+def _truth_maintenance_recommends_reject(ir: dict[str, Any]) -> bool:
+    return _truth_maintenance_recommends_policy(ir, {"reject"})
+
+
+def _truth_maintenance_recommends_policy(ir: dict[str, Any], policies: set[str]) -> bool:
+    raw = ir.get("truth_maintenance")
+    if not isinstance(raw, dict):
+        return False
+    for item in raw.get("conflicts", []):
+        if not isinstance(item, dict):
+            continue
+        if str(item.get("recommended_policy") or "").strip().lower() in policies:
+            return True
+    return False
+
+
+def _truth_maintenance_recommends_hard_reject(ir: dict[str, Any]) -> bool:
+    raw = ir.get("truth_maintenance")
+    if not isinstance(raw, dict):
+        return False
+    hard_markers = {"avoid_when", "boundary", "safety", "clinical", "medical"}
+    for item in raw.get("conflicts", []):
+        if not isinstance(item, dict):
+            continue
+        if str(item.get("recommended_policy") or "").strip().lower() != "reject":
+            continue
+        text = _atomize(
+            " ".join(
+                str(item.get(key) or "")
+                for key in ("existing_ref", "conflict_kind", "why")
+            )
+        )
+        if any(marker in text for marker in hard_markers):
+            return True
+    return False
+
+
 def _projected_decision(
     ir: dict[str, Any],
     *,
@@ -2522,7 +2672,15 @@ def _projected_decision(
     decision = _normalize_decision(ir.get("decision"))
     if _has_clinical_advice_query(ir):
         return "reject"
+    if _truth_maintenance_recommends_hard_reject(ir):
+        return "reject"
+    if _truth_maintenance_recommends_reject(ir):
+        if _has_safe_direct_write(ir):
+            return "mixed"
+        return "reject"
     if _ambiguous_content_should_clarify(ir):
+        return "clarify"
+    if _truth_maintenance_recommends_policy(ir, {"clarify"}) and not _has_safe_direct_write(ir):
         return "clarify"
     if _is_pure_hypothetical_query(ir):
         return "answer"

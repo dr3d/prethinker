@@ -552,12 +552,20 @@ compiler edges such as:
 - a model-supported operation skipped by the mapper;
 - a model conflict whose recommended policy is `clarify`, `quarantine`, or
   `reject` while the mapper admitted the operation;
-- a retraction plan that does not line up with an admitted `retract`;
+- a retraction plan that does not line up with an admitted `retract` or a
+  scoped retraction-plan world record;
 - an admitted retract that lacks a retraction-plan entry.
 
 These are research pressure gauges. They are meant to show where the compiler
 contract, prompt, profile context, or predicate palette is still fuzzy, not to
 silently change admission outcomes.
+
+The current scoped-world path can preserve non-executable retraction pressure as
+`world_retraction_target/4` and `world_retraction_reason/4`. That makes "the
+model noticed this may supersede an old clause" visible without treating the
+proposal as a durable retract. Projection-level `reject`, `quarantine`, or
+`clarify` decisions can also explain why supported skipped operations are not
+mapper drift.
 
 Semantic IR calls can also receive `kb_context_pack`, a compact deterministic
 retrieval packet built from the current runtime KB. It is intentionally small

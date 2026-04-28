@@ -172,7 +172,7 @@ Domain/data lanes:
 
 ## Verification Snapshot
 
-**Current headline:** latest full pytest suite `372 passed`; latest Lava v5 sampled run stayed `60/60` parsed JSON, `60/60` domain selector, `60/60` admission-safe, and `0/60` temp-0 signature variance groups. Current best demo pressure point remains the reimbursement policy cross-turn run: `4/4` parsed, `4/4` apply-error-free, `4/4` expected query matches, and no derived violation write leak.
+**Current headline:** latest full pytest suite `374 passed`; latest Lava v5 sampled run stayed `60/60` parsed JSON, `60/60` domain selector, `60/60` admission-safe, `0` fuzzy edge kinds, and `0/60` temp-0 signature variance groups. Current best demo pressure point remains the reimbursement policy cross-turn run: `4/4` parsed, `4/4` apply-error-free, `4/4` expected query matches, and no derived violation write leak.
 
 Recent verified results:
 
@@ -224,7 +224,8 @@ Recent verified results:
 - Full pytest after router-first streamlining and Python selector retirement: `361 passed`.
 - Full pytest after router diagnostics, context audit, admission justification, and router training seed: `367 passed`.
 - Full pytest after Epistemic Worlds v1 diagnostic scoped-memory slice: `372 passed`.
-- Lava v5 scoped-world rerun over `60` attempts stayed `60/60` parsed JSON, `60/60` domain selector, `60/60` admission-safe, and `0/60` temp-0 variance groups. Epistemic Worlds captured `46` scoped operation(s) across `25/60` records, reducing `supported_operation_skipped_by_mapper` fuzzy edges from the prior run's `35` to `2`.
+- Full pytest after Lava v5 truth-maintenance hardening and scoped support-link tests: `374 passed`.
+- Lava v5 truth-maintenance hardening rerun over `60` attempts stayed `60/60` parsed JSON, `60/60` domain selector, `60/60` admission-safe, and `0/60` temp-0 variance groups. Epistemic Worlds captured `52` scoped operation(s) across `27/60` records, while fuzzy edge kinds dropped to `{}` after scoped retraction-plan preservation, structured reject/clarify policy alignment, skipped-query scoped memory, and soft handling for out-of-range question support links.
 - Multilingual router probe: `router_ok=10/10`, `compiler_parsed_ok=10/10`.
 - Lava v2 calibration router probe: `router_ok=36/36`; calibration evidence only, because v2 influenced router guidance.
 - Lava v3 first held-out router probe with bootstrap-aware scoring: `router_ok=14/17`, `router_score_avg=0.868`.

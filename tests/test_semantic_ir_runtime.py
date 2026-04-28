@@ -527,14 +527,114 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         alignment = parsed["admission_diagnostics"]["truth_maintenance_alignment"]
         self.assertEqual(alignment["admitted_with_support_count"], 1)
         self.assertEqual(alignment["skipped_with_scoped_memory_count"], 1)
+        self.assertEqual(alignment["retraction_plan_scoped_count"], 1)
         self.assertEqual(alignment["conflict_on_admitted_count"], 1)
         edge_kinds = {row["kind"] for row in alignment["fuzzy_edges"]}
         self.assertNotIn("supported_operation_skipped_by_mapper", edge_kinds)
         self.assertIn("conflict_policy_mismatch_admitted_operation", edge_kinds)
-        self.assertIn("retraction_plan_not_admitted_as_retract", edge_kinds)
+        self.assertNotIn("retraction_plan_not_admitted_as_retract", edge_kinds)
         worlds = parsed["epistemic_worlds"]
         self.assertIn("world_operation(skipped_world, op_1, citizen_of, skip).", worlds["clauses"])
         self.assertIn("world_arg(skipped_world, op_1, 1, mara).", worlds["clauses"])
+        self.assertIn("world_retraction_target(retraction_plan_world, op_0, 1, context_lives_in_mara_london).", worlds["clauses"])
+        self.assertIn("world_retraction_reason(retraction_plan_world, op_0, 1, superseded_current_state).", worlds["clauses"])
+
+    def test_truth_maintenance_softens_out_of_range_question_support(self) -> None:
+        ir = _ir(
+            decision="mixed",
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "depends_on",
+                    "args": ["launch", "legal_approval"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "query",
+                    "predicate": "blocked_by",
+                    "args": ["launch", "X"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+            ],
+            truth_maintenance={
+                "support_links": [
+                    {
+                        "operation_index": 0,
+                        "support_kind": "direct_utterance",
+                        "support_ref": "launch requires legal approval",
+                        "role": "grounds",
+                        "confidence": 0.9,
+                    },
+                    {
+                        "operation_index": 2,
+                        "support_kind": "direct_utterance",
+                        "support_ref": "what is still blocking launch?",
+                        "role": "questions",
+                        "confidence": 1.0,
+                    },
+                ],
+                "conflicts": [],
+                "retraction_plan": [],
+                "derived_consequences": [],
+            },
+        )
+
+        parsed, _warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=["depends_on/2", "blocked_by/2"],
+        )
+
+        alignment = parsed["admission_diagnostics"]["truth_maintenance_alignment"]
+        self.assertEqual(alignment["soft_out_of_range_question_support_count"], 1)
+        edge_kinds = {row["kind"] for row in alignment["fuzzy_edges"]}
+        self.assertNotIn("truth_maintenance_invalid_operation_ref", edge_kinds)
+
+    def test_supported_skipped_query_is_preserved_as_scoped_memory(self) -> None:
+        ir = _ir(
+            decision="mixed",
+            candidate_operations=[
+                {
+                    "operation": "query",
+                    "predicate": "valid_access",
+                    "args": ["theo"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+            ],
+            truth_maintenance={
+                "support_links": [
+                    {
+                        "operation_index": 0,
+                        "support_kind": "direct_utterance",
+                        "support_ref": "does theo still have valid access?",
+                        "role": "questions",
+                        "confidence": 0.9,
+                    }
+                ],
+                "conflicts": [],
+                "retraction_plan": [],
+                "derived_consequences": [],
+            },
+        )
+
+        parsed, _warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=["expires_on/2"],
+        )
+
+        alignment = parsed["admission_diagnostics"]["truth_maintenance_alignment"]
+        self.assertEqual(alignment["skipped_with_scoped_memory_count"], 1)
+        edge_kinds = {row["kind"] for row in alignment["fuzzy_edges"]}
+        self.assertNotIn("supported_operation_skipped_by_mapper", edge_kinds)
+        self.assertIn(
+            "world_operation(skipped_world, op_0, valid_access, skip).",
+            parsed["epistemic_worlds"]["clauses"],
+        )
 
     def test_mapper_applies_profile_contract_validator_without_language_patch(self) -> None:
         ir = _ir(
