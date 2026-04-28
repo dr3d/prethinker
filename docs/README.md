@@ -19,6 +19,7 @@ durable Prolog state, and the UI/trace layers show the decision path.
 - [Semantic Router Experiment](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_ROUTER_EXPERIMENT.md)
 - [No Language Handling In Python Audit](https://github.com/dr3d/prethinker/blob/main/docs/NO_LANGUAGE_HANDLING_IN_PYTHON_AUDIT.md)
 - [Multilingual Semantic IR Probe](https://github.com/dr3d/prethinker/blob/main/docs/MULTILINGUAL_SEMANTIC_IR_PROBE.md)
+- [Frontier Dataset Survey](https://github.com/dr3d/prethinker/blob/main/docs/FRONTIER_DATASET_SURVEY.md)
 - [Domain Profile Catalog](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PROFILE_CATALOG.md)
 - [Domain Bootstrapping Meta Mode](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_BOOTSTRAPPING_META_MODE.md)
 

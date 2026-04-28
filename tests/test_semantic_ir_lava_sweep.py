@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from scripts.run_semantic_ir_lava_sweep import apply_mapped_directly, filter_lava_cases, select_base_cases
+from scripts.run_semantic_ir_lava_sweep import apply_mapped_directly, filter_lava_cases, score_expectation, select_base_cases
 from scripts.run_semantic_ir_lava_sweep import load_frontier_pack_cases
 from scripts.run_semantic_ir_lava_sweep import LavaCase
 from src.mcp_server import PrologMCPServer
@@ -142,3 +142,72 @@ def test_lava_source_filter_matches_source_or_id():
 
     assert [case.id for case in filter_lava_cases(cases, source_filter="lava_pack_v2")] == ["alpha_case"]
     assert [case.id for case in filter_lava_cases(cases, source_filter="beta")] == ["beta_special"]
+
+
+def test_lava_expectation_separates_diagnostic_mentions_from_admitted_unsafe_clauses():
+    case = LavaCase(
+        id="spanish_probate",
+        source="frontier:test",
+        utterance="x",
+        expected_decision="mixed",
+        expect={
+            "decision": "mixed",
+            "must": ["London, Ontario"],
+            "avoid": ["london_uk"],
+        },
+    )
+    ir = {
+        "self_check": {
+            "notes": [
+                "The correction says this was London, Ontario, not london_uk.",
+            ]
+        }
+    }
+    record = {
+        "projected_decision": "mixed",
+        "clauses": {"facts": ["resided_in(beatriz, london_ontario, interval_1)."]},
+        "mapper_warnings": [],
+        "fuzzy_edge_kinds": [],
+    }
+
+    score = score_expectation(case, record, ir=ir)
+
+    assert score["must_hits"] == 1
+    assert score["avoid_hits"] == ["london_uk"]
+    assert score["avoid_durable_hits"] == []
+    assert score["avoid_admitted_hits"] == []
+    assert score["semantic_clean"] is False
+    assert score["admission_safe"] is True
+    assert score["ok"] is True
+
+
+def test_lava_expectation_does_not_treat_queries_as_durable_bad_writes():
+    case = LavaCase(
+        id="access_query",
+        source="frontier:test",
+        utterance="x",
+        expected_decision="mixed",
+        expect={
+            "decision": "mixed",
+            "must": ["Theo"],
+            "avoid": ["access_grant(theo, production"],
+        },
+    )
+    record = {
+        "projected_decision": "mixed",
+        "clauses": {
+            "facts": ["expires_on(b_14, before_approval)."],
+            "queries": ["access_grant(theo, production, sponsor_badge_b_14, current_state)."],
+            "rules": [],
+            "retracts": [],
+        },
+        "mapper_warnings": [],
+        "fuzzy_edge_kinds": [],
+    }
+
+    score = score_expectation(case, record, ir={"note": "Theo access question"})
+
+    assert score["avoid_query_hits"] == ["access_grant(theo, production"]
+    assert score["avoid_durable_hits"] == []
+    assert score["admission_safe"] is True
+    assert score["ok"] is True

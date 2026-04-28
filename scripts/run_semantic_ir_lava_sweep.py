@@ -652,7 +652,7 @@ def dedupe_cases(cases: Iterable[LavaCase]) -> list[LavaCase]:
 
 def score_expectation(case: LavaCase, record: dict[str, Any], *, ir: dict[str, Any]) -> dict[str, Any]:
     expect = case.expect or {}
-    text = json.dumps(
+    diagnostic_text = json.dumps(
         {
             "ir": ir,
             "clauses": record.get("clauses", {}),
@@ -662,18 +662,38 @@ def score_expectation(case: LavaCase, record: dict[str, Any], *, ir: dict[str, A
         ensure_ascii=False,
         sort_keys=True,
     ).lower()
+    clauses = record.get("clauses", {}) if isinstance(record.get("clauses"), dict) else {}
+    durable_clauses = {
+        "facts": clauses.get("facts", []),
+        "rules": clauses.get("rules", []),
+        "retracts": clauses.get("retracts", []),
+    }
+    query_clauses = {"queries": clauses.get("queries", [])}
+    durable_text = json.dumps(durable_clauses, ensure_ascii=False, sort_keys=True).lower()
+    query_text = json.dumps(query_clauses, ensure_ascii=False, sort_keys=True).lower()
     must = [str(item).lower() for item in expect.get("must", []) if str(item).strip()]
     avoid = [str(item).lower() for item in expect.get("avoid", []) if str(item).strip()]
-    must_hits = [item for item in must if item in text]
-    avoid_hits = [item for item in avoid if item in text]
+    must_hits = [item for item in must if item in diagnostic_text]
+    avoid_hits = [item for item in avoid if item in diagnostic_text]
+    avoid_durable_hits = [item for item in avoid if item in durable_text]
+    avoid_query_hits = [item for item in avoid if item in query_text]
     expected_decision = case.expected_decision
     decision_ok = not expected_decision or str(record.get("projected_decision", "")) == expected_decision
+    must_ok = len(must_hits) == len(must)
+    semantic_clean = not avoid_hits
+    admission_safe = not avoid_durable_hits
     return {
         "decision_ok": decision_ok,
         "must_hits": len(must_hits),
         "must_total": len(must),
         "avoid_hits": avoid_hits,
-        "ok": bool(decision_ok and len(must_hits) == len(must) and not avoid_hits),
+        "avoid_durable_hits": avoid_durable_hits,
+        "avoid_query_hits": avoid_query_hits,
+        # Backward-compatible alias for older ad hoc analysis scripts.
+        "avoid_admitted_hits": avoid_durable_hits,
+        "semantic_clean": semantic_clean,
+        "admission_safe": admission_safe,
+        "ok": bool(decision_ok and must_ok and admission_safe),
     }
 
 
@@ -710,6 +730,8 @@ def summarize_records(
         and row.get("expectation_score", {}).get("must_total", 0) > 0
     ]
     expectation_ok = sum(1 for row in expectation_rows if row.get("expectation_score", {}).get("ok"))
+    semantic_clean = sum(1 for row in expectation_rows if row.get("expectation_score", {}).get("semantic_clean"))
+    admission_safe = sum(1 for row in expectation_rows if row.get("expectation_score", {}).get("admission_safe"))
     projected = Counter(str(row.get("projected_decision") or "none") for row in records)
     profiles = Counter(str(row.get("selected_profile") or "none") for row in records)
     sources = Counter(source_family(str(row.get("source") or "none")) for row in records)
@@ -743,6 +765,8 @@ def summarize_records(
         f"- Parsed JSON: {parsed_ok}/{total}",
         f"- Domain selector: {selector_ok}/{len(selector_checked)} checked",
         f"- Expectation score: {expectation_ok}/{len(expectation_rows)} checked",
+        f"- Expectation semantic-clean: {semantic_clean}/{len(expectation_rows)} checked",
+        f"- Expectation admission-safe: {admission_safe}/{len(expectation_rows)} checked",
         f"- Temp-0 variance groups: {len(unstable)}/{len(variance_groups)} unstable",
         "",
         "## Decision Mix",
