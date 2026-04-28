@@ -113,3 +113,29 @@ def test_profile_selector_uses_profile_owned_keywords_and_context():
         context=["Rule: verbal changes require two non-beneficiary witnesses."],
     )
     assert selected.get("profile_id") == "probate@v0"
+
+
+def test_profile_selector_uses_context_for_anaphoric_medical_followup():
+    catalog = load_domain_profile_catalog(ROOT / "modelfiles" / "domain_profile_catalog.v0.json")
+    selected = select_domain_profile(
+        "It came back high after the repeat this afternoon.",
+        catalog=catalog,
+        context=[
+            "Active patient: Priya.",
+            "Previous event: serum creatinine was repeated this afternoon.",
+        ],
+    )
+    assert selected.get("profile_id") == "medical@v0"
+
+
+def test_profile_selector_uses_profile_owned_noisy_probate_keywords():
+    catalog = load_domain_profile_catalog(ROOT / "modelfiles" / "domain_profile_catalog.v0.json")
+    selected = select_domain_profile(
+        "Btrice txtd: i was in Londn ONT, pas Londres UK, jamais outta country > a wknd.",
+        catalog=catalog,
+        context=[
+            "Beatrice is a Silverton beneficiary.",
+            "The forfeiture condition requires more than five consecutive years outside the country.",
+        ],
+    )
+    assert selected.get("profile_id") == "probate@v0"

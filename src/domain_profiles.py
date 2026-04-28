@@ -126,7 +126,10 @@ def select_domain_profile(
             continue
         utterance_score, reasons = _profile_match_score(utterance_text, profile, catalog=source)
         context_score, context_reasons = _profile_match_score(context_text, profile, catalog=source)
-        context_nudge = min(2.0, context_score * 0.2)
+        if _utterance_depends_on_context(utterance_text):
+            context_nudge = min(4.0, context_score * 0.8)
+        else:
+            context_nudge = min(2.0, context_score * 0.2)
         score = utterance_score + context_nudge
         if context_nudge:
             reasons.extend(f"context: {item}" for item in context_reasons[:3])
@@ -370,6 +373,32 @@ def _profile_specific_bonus(profile_id: str, text: str, terms: set[str], reasons
         return 0.0
     reasons.append("profile terms: " + ", ".join(hits[:8]))
     return min(8.0, len(hits) * 1.5)
+
+
+def _utterance_depends_on_context(text: str) -> bool:
+    terms = _term_set(text)
+    context_markers = {
+        "it",
+        "its",
+        "they",
+        "them",
+        "he",
+        "she",
+        "his",
+        "her",
+        "this",
+        "that",
+        "those",
+        "same",
+        "again",
+        "repeat",
+        "repeated",
+        "back",
+        "correction",
+        "actually",
+        "instead",
+    }
+    return bool(terms & context_markers)
 
 
 def _term_set(text: str) -> set[str]:
