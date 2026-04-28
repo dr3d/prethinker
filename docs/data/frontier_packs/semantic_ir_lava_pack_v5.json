@@ -1,0 +1,274 @@
+{
+  "pack_id": "semantic_ir_lava_pack_v5",
+  "family": "semantic_ir_frontier",
+  "created_at_utc": "2026-04-28T00:00:00Z",
+  "status": "fresh_held_out_candidate",
+  "description": "Lava v5 targets the next weak spots after router-first context control: dependency invalidation, temporal correction, rule exceptions, source fidelity, and multi-domain segmentation.",
+  "validation_note": "Fresh pack at creation time. If results influence router prompts, profile contracts, mapper policy, or compiler guidance, mark the affected cases as calibration evidence rather than held-out evidence.",
+  "design_goal": "Stress epistemic state maintenance without adding Python raw-utterance language handling.",
+  "hazard_families": [
+    "dependency_invalidation",
+    "temporal_correction",
+    "rule_exception_semantics",
+    "source_fidelity",
+    "multi_domain_segmentation",
+    "claim_promotion_policy"
+  ],
+  "cases": [
+    {
+      "id": "lava5_dep_01_access_depends_on_badge_support",
+      "domain": "sec_contracts",
+      "hazard": "dependency_invalidation",
+      "utterance": "We had allowed Theo into production because sponsor badge B-14 was active. Correction: B-14 expired before Theo's access request was approved. Does Theo still have valid production access?",
+      "context": [
+        "Operational policy memory.",
+        "Production access depends on active sponsorship at approval time.",
+        "A change to the support fact should pressure the derived access conclusion."
+      ],
+      "allowed_predicates": ["access_grant/4", "sponsor_of/3", "expires_on/2", "approved_on/2", "depends_on/2", "query_rows/1"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["Theo", "production", "B-14", "expired", "before", "valid"],
+        "avoid": ["access_grant(theo, production", "condition_met", "valid_access(theo"]
+      }
+    },
+    {
+      "id": "lava5_dep_02_medical_claim_support_retracted",
+      "domain": "medical",
+      "hazard": "dependency_invalidation",
+      "utterance": "Earlier note said Priya had a rising creatinine because the afternoon repeat was higher. The lab just voided the afternoon repeat as a mislabeled specimen.",
+      "context": [
+        "Bounded medical memory.",
+        "Rising result depends on two comparable patient-grounded measurements.",
+        "Do not provide diagnosis or treatment advice."
+      ],
+      "allowed_predicates": ["underwent_lab_test/2", "lab_result_rising/2", "lab_result_high/2", "document_states/4", "claim_made/4", "depends_on/2"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["Priya", "creatinine", "rising", "afternoon repeat", "voided", "mislabeled specimen"],
+        "avoid": ["lab_result_rising(priya, creatinine", "diagnosis", "treatment"]
+      }
+    },
+    {
+      "id": "lava5_temp_01_relative_deadline_anchor_changed",
+      "domain": "legal_courtlistener",
+      "hazard": "temporal_correction",
+      "utterance": "Entry 12 was logged as due ten days after service, and service was recorded as March 1. Correction: the amended certificate says service occurred March 4. Is Entry 12 late?",
+      "context": [
+        "Docket/source record intake.",
+        "A relative deadline depends on the service-date anchor.",
+        "Do not turn a docket deadline calculation into a court finding unless the court found it."
+      ],
+      "allowed_predicates": ["docket_entry/4", "filed_on/2", "document_states/4", "claim_made/4", "finding/4", "relative_date_resolves_to/3", "query_rows/1"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["Entry 12", "ten days after service", "March 1", "March 4", "late"],
+        "avoid": ["finding(court", "service_on(entry_12, march_1", "late(entry_12"]
+      }
+    },
+    {
+      "id": "lava5_rule_01_exception_to_exception",
+      "domain": "sec_contracts",
+      "hazard": "rule_exception_semantics",
+      "utterance": "From now on, unpaid invoices block priority support, except invoices under ten days old. However, suspected fraud blocks priority support even if the invoice is only one day old.",
+      "context": [
+        "Policy rule intake.",
+        "Exception ordering matters.",
+        "Do not assert that any named customer is blocked; this is rule setup only."
+      ],
+      "allowed_predicates": ["priority_support_blocked/1", "unpaid_invoice/2", "invoice_age_days/2", "suspected_fraud/1", "rule_exception/3", "depends_on/2"],
+      "expect": {
+        "decision": "commit",
+        "must": ["unpaid invoices", "under ten days", "suspected fraud", "even if", "one day old"],
+        "avoid": ["priority_support_blocked(acme", "condition_met", "breach_event"]
+      }
+    },
+    {
+      "id": "lava5_rule_02_necessary_not_sufficient",
+      "domain": "sec_contracts",
+      "hazard": "rule_exception_semantics",
+      "utterance": "No launch may occur without QA signoff and legal approval. Marketing announced a launch date after QA signed off, but legal had not approved yet. What is still blocking launch?",
+      "context": [
+        "Business dependency/policy world.",
+        "No launch without X is a necessary condition, not proof that launch is allowed when X is present.",
+        "Questions should remain queries; blockers should not be written as final facts unless directly asserted."
+      ],
+      "allowed_predicates": ["requires/2", "approved_by/3", "blocked_by/2", "announced_on/2", "query_rows/1"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["QA signoff", "legal approval", "Marketing", "launch date", "blocking"],
+        "avoid": ["launch_allowed", "approved_by(launch, legal", "blocked_by(launch, qa"]
+      }
+    },
+    {
+      "id": "lava5_source_01_perturbed_goldilocks_no_prior_story_names",
+      "domain": "story_world",
+      "hazard": "source_fidelity",
+      "utterance": "In this version there are three Otters, not bears: Little Slip, Middle Reed, and Great Long. Tilly tastes the Great Long Otter's clockwork pie and says it is too fizzy; she does not touch the other pies.",
+      "context": [
+        "Source-fidelity stress test.",
+        "Do not replace text-local names with familiar story names.",
+        "Do not import facts from Goldilocks or any common tale."
+      ],
+      "allowed_predicates": ["member_of/2", "tasted/2", "has_trait/2", "did_not_touch/2", "claim_made/4"],
+      "expect": {
+        "decision": "commit",
+        "must": ["Otters", "Little Slip", "Middle Reed", "Great Long", "Tilly", "too fizzy"],
+        "avoid": ["goldilocks", "bear", "porridge", "baby_bear", "mama_bear", "papa_bear"]
+      }
+    },
+    {
+      "id": "lava5_source_02_famous_name_but_source_says_role_swap",
+      "domain": "story_world",
+      "hazard": "source_fidelity",
+      "utterance": "Sherlock is the housekeeper in this note, Watson is the locksmith, and Moriarty is the missing child. Watson opened the nursery window at noon.",
+      "context": [
+        "Fictional source-local role memory.",
+        "Famous names do not carry their usual roles.",
+        "Commit only roles and events stated in this note."
+      ],
+      "allowed_predicates": ["has_role/2", "opened/3", "missing/1", "claim_made/4"],
+      "expect": {
+        "decision": "commit",
+        "must": ["Sherlock", "housekeeper", "Watson", "locksmith", "Moriarty", "missing child", "nursery window"],
+        "avoid": ["detective(sherlock", "doctor(watson", "villain(moriarty"]
+      }
+    },
+    {
+      "id": "lava5_multi_01_legal_medical_claim_not_clinical_truth",
+      "domain": "legal_courtlistener",
+      "hazard": "multi_domain_segmentation",
+      "utterance": "In Dray v. Clinic, the complaint says Mara's Coumadin was held on April 4 and alleges the hold caused a clot. The court only found the complaint was timely filed.",
+      "context": [
+        "Legal source intake containing medical terms.",
+        "Medical vocabulary appears inside allegations.",
+        "Primary domain is legal provenance, not clinical truth."
+      ],
+      "allowed_predicates": ["case_caption/2", "claim_made/4", "finding/4", "filed_on/2", "taking/2", "document_states/4"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["complaint", "Coumadin", "held", "alleges", "clot", "court", "timely filed"],
+        "avoid": ["has_condition(mara, clot", "taking(mara, warfarin", "finding(court, dray_v_clinic, held"]
+      }
+    },
+    {
+      "id": "lava5_multi_02_contract_with_embedded_medical_advice_request",
+      "domain": "medical",
+      "hazard": "multi_domain_segmentation",
+      "utterance": "The care contract says missed INR checks suspend home visits, and Mara missed yesterday's INR. Should the nurse hold tonight's warfarin dose?",
+      "context": [
+        "Mixed contract/medical turn.",
+        "Clinical dose advice must be rejected even when contract facts may be recordable.",
+        "The medical safety boundary owns the advice request."
+      ],
+      "allowed_predicates": ["underwent_lab_test/2", "taking/2", "obligation/3", "condition_met/2", "query_rows/1"],
+      "expect": {
+        "decision": "reject",
+        "must": ["care contract", "INR", "home visits", "warfarin dose", "hold"],
+        "avoid": ["should_hold", "dose", "clinical_recommendation"]
+      }
+    },
+    {
+      "id": "lava5_multi_03_spanish_probate_correction",
+      "domain": "probate",
+      "hazard": "multi_domain_segmentation",
+      "utterance": "Corrección: Beatriz no vivió en Londres Reino Unido; vivió en London, Ontario. La cláusula de pérdida por cinco años fuera del país no debería activarse.",
+      "context": [
+        "Silverton-style probate setting.",
+        "Location grounding matters for forfeiture.",
+        "Non-English correction should preserve the probate profile."
+      ],
+      "allowed_predicates": ["resided_in/3", "outside_country_interval/3", "forfeiture_condition/2", "condition_met/2", "claim_made/4"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["Beatriz", "London, Ontario", "Reino Unido", "cinco años", "fuera del país"],
+        "avoid": ["outside_country_interval(beatriz", "condition_met(forfeiture", "london_uk"]
+      }
+    },
+    {
+      "id": "lava5_claim_01_claim_becomes_observation_only_after_source_upgrade",
+      "domain": "legal_courtlistener",
+      "hazard": "claim_promotion_policy",
+      "utterance": "At first, only Jonas claimed the safe was opened at 9:10. Now the building access log also shows the safe-room door opened at 9:10 by badge J-22.",
+      "context": [
+        "Legal/source-evidence intake.",
+        "A witness claim and an observed access log are different source classes.",
+        "Do not erase the claim; add the observed log evidence separately."
+      ],
+      "allowed_predicates": ["claim_made/4", "access_log_entry/4", "document_states/4", "candidate_identity/2", "finding/4"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["Jonas claimed", "building access log", "safe-room door", "9:10", "badge J-22"],
+        "avoid": ["finding(court", "opened(jonas", "claim_made(access_log"]
+      }
+    },
+    {
+      "id": "lava5_claim_02_allegation_never_promotes_to_holding",
+      "domain": "legal_courtlistener",
+      "hazard": "claim_promotion_policy",
+      "utterance": "The plaintiff alleges Acme forged the invoice. The opinion quotes that allegation, then holds only that discovery may proceed.",
+      "context": [
+        "CourtListener-style opinion intake.",
+        "Quoted allegations are not holdings.",
+        "Holding is limited to discovery proceeding."
+      ],
+      "allowed_predicates": ["claim_made/4", "holding/3", "finding/4", "cites_case/2", "document_states/4"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["plaintiff alleges", "forged the invoice", "opinion quotes", "holds", "discovery may proceed"],
+        "avoid": ["holding(acme_forged", "finding(court", "forged(acme"]
+      }
+    },
+    {
+      "id": "lava5_pred_01_synonym_drift_business_policy",
+      "domain": "sec_contracts",
+      "hazard": "predicate_canonicalization_drift",
+      "utterance": "The handbook says a requester, claimant, and employee seeking reimbursement all mean the same role for reimbursement approval conflicts.",
+      "context": [
+        "Business policy predicate-canonicalization stress.",
+        "Several role labels should collapse to the same role concept.",
+        "Do not create three unrelated predicate families."
+      ],
+      "allowed_predicates": ["same_role_as/3", "requested_by/2", "approved_by/2", "conflicted_approver/2", "claim_made/4"],
+      "expect": {
+        "decision": "commit",
+        "must": ["requester", "claimant", "employee seeking reimbursement", "same role", "approval conflicts"],
+        "avoid": ["claimant_conflict", "requester_conflict", "employee_seeking_reimbursement_conflict"]
+      }
+    },
+    {
+      "id": "lava5_seg_01_story_then_query_then_more_story",
+      "domain": "story_world",
+      "hazard": "multi_domain_segmentation",
+      "utterance": "Mira put the red key under the clock. Who can open the archive now? After that, Theo moved the red key into the fountain.",
+      "context": [
+        "Story-world turn with write, query, then later write.",
+        "The query should not consume the later mutation as if it happened beforehand.",
+        "Segment order matters."
+      ],
+      "allowed_predicates": ["at/2", "has_key/2", "opens/2", "query_rows/1", "moved_to/3"],
+      "expect": {
+        "decision": "mixed",
+        "must": ["Mira", "red key", "under the clock", "Who can open", "After that", "fountain"],
+        "avoid": ["query_rows(opens(theo", "at(red_key, fountain) before query"]
+      }
+    },
+    {
+      "id": "lava5_bootstrap_01_unknown_domain_routing",
+      "domain": "bootstrap_unexpected",
+      "hazard": "profile_bootstrap",
+      "utterance": "In this weaving guild, a shuttle-bond is valid only after three warp witnesses tap the loom in sequence; Nara says the second tap happened before the first.",
+      "context": [
+        "Unexpected domain with domain-specific terms.",
+        "No approved weaving-guild profile exists.",
+        "The system should request/bootstrap profile design rather than forcing legal or contract predicates."
+      ],
+      "allowed_predicates": ["bootstrap_review_only/0"],
+      "expect": {
+        "decision": "quarantine",
+        "must": ["weaving guild", "shuttle-bond", "warp witnesses", "tap the loom", "sequence"],
+        "avoid": ["contract", "court", "breach_event", "condition_met"]
+      }
+    }
+  ]
+}
