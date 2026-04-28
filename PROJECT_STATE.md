@@ -210,6 +210,7 @@ Recent verified results:
 - Lava v3 repair/calibration pass after generic router/profile fixes: `router_ok=17/17`, `router_score_avg=0.991`, `compiler_parsed_ok=17/17`, with anti-coupling reduced to intentional bootstrap review-only skips on the two unexpected-domain cases: `bootstrap_review_only_skips=2`.
 - Lava v4 first pass: router-only smoke reached `25/25` profile choices. Full router -> Semantic IR pass reached `25/25` router choices and `25/25` compiler JSON, with anti-coupling limited to `mapper_skips_tied_to_profile_context=3`. The isolated lava-sweep scorer reached expectation `11/25`, which is useful pressure rather than a failure of format: most misses are semantic/admission-frontier cases around dependency invalidation, epistemic promotion, and multilingual ontology normalization.
 - Router context-audit schema smoke after adding `context_audit`: `3/3` Lava v4 router-only records parsed through LM Studio structured output, and the trace includes why-this-profile / why-not-secondary audit text.
+- Adaptive-depth speed path: pinned `active_profile` turns skip `semantic_router_v1`, auto-router selections are cached for exact replay/retry signatures, and the Semantic IR compiler now receives a focused selected/candidate profile roster instead of the full profile catalog.
 
 ## Reading Order
 

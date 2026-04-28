@@ -259,6 +259,7 @@ class PrologMCPServer:
         self._last_semantic_ir_trace: dict[str, Any] = {}
         self._last_semantic_ir_profile_selection: dict[str, Any] = {}
         self._last_semantic_ir_selected_profile = ""
+        self._semantic_router_cache: dict[str, dict[str, Any]] = {}
         self._freethinker_resolution_policy = _normalize_freethinker_resolution_policy(
             freethinker_resolution_policy,
             "off",
@@ -1760,6 +1761,22 @@ class PrologMCPServer:
     def _semantic_router_call_config(self) -> SemanticRouterCallConfig:
         return SemanticRouterCallConfig.from_semantic_ir_config(self._semantic_ir_call_config())
 
+    def _semantic_router_cache_key(self, *, utterance: str, context: list[str]) -> str:
+        payload = {
+            "utterance": str(utterance or "").strip(),
+            "context": [str(item).strip() for item in context if str(item).strip()],
+            "backend": self._compiler_backend,
+            "base_url": self._compiler_base_url,
+            "model": self._semantic_ir_model,
+            "num_ctx": self._semantic_ir_context_length,
+            "profile_catalog": [
+                str(row.get("profile_id", "")).strip()
+                for row in self._domain_profile_catalog.get("profiles", [])
+                if isinstance(row, dict) and str(row.get("profile_id", "")).strip()
+            ],
+        }
+        return json.dumps(payload, sort_keys=True, ensure_ascii=False)
+
     def _semantic_ir_selected_profile_for_utterance(
         self,
         utterance: str,
@@ -1768,41 +1785,49 @@ class PrologMCPServer:
     ) -> str:
         if self._active_profile == "auto":
             semantic_context = self._semantic_ir_context(context)
-            try:
-                router_result = call_semantic_router(
-                    utterance=utterance,
-                    config=self._semantic_router_call_config(),
-                    context=semantic_context,
-                    available_domain_profiles=self._semantic_ir_available_domain_profiles(),
-                    kb_manifest={"note": "runtime router profile/context selection only; mapper remains authority"},
-                    include_model_input=False,
-                )
-            except Exception as exc:
-                selection = {
-                    "schema_version": "semantic_router_v1",
-                    "selected_profile_id": "general",
-                    "candidate_profile_ids": [],
-                    "routing_confidence": 0.0,
-                    "turn_shape": "unknown",
-                    "guidance_modules": [],
-                    "risk_flags": ["router_call_failed"],
-                    "notes": [str(exc)],
-                    "error": str(exc),
-                }
+            cache_key = self._semantic_router_cache_key(utterance=utterance, context=semantic_context)
+            cached_selection = self._semantic_router_cache.get(cache_key)
+            if isinstance(cached_selection, dict):
+                selection = self._clone_trace_payload(cached_selection)
+                selection["cache_hit"] = True
+                selection["latency_ms"] = 0
             else:
-                parsed = router_result.get("parsed")
-                selection = parsed if isinstance(parsed, dict) else {
-                    "schema_version": "semantic_router_v1",
-                    "selected_profile_id": "general",
-                    "candidate_profile_ids": [],
-                    "routing_confidence": 0.0,
-                    "turn_shape": "unknown",
-                    "guidance_modules": [],
-                    "risk_flags": ["router_parse_failed"],
-                    "notes": ["semantic_router_v1 did not return parseable JSON"],
-                    "raw_message": router_result.get("content", ""),
-                }
-                selection["latency_ms"] = router_result.get("latency_ms", 0)
+                try:
+                    router_result = call_semantic_router(
+                        utterance=utterance,
+                        config=self._semantic_router_call_config(),
+                        context=semantic_context,
+                        available_domain_profiles=self._semantic_ir_available_domain_profiles(),
+                        kb_manifest={"note": "runtime router profile/context selection only; mapper remains authority"},
+                        include_model_input=False,
+                    )
+                except Exception as exc:
+                    selection = {
+                        "schema_version": "semantic_router_v1",
+                        "selected_profile_id": "general",
+                        "candidate_profile_ids": [],
+                        "routing_confidence": 0.0,
+                        "turn_shape": "unknown",
+                        "guidance_modules": [],
+                        "risk_flags": ["router_call_failed"],
+                        "notes": [str(exc)],
+                        "error": str(exc),
+                    }
+                else:
+                    parsed = router_result.get("parsed")
+                    selection = parsed if isinstance(parsed, dict) else {
+                        "schema_version": "semantic_router_v1",
+                        "selected_profile_id": "general",
+                        "candidate_profile_ids": [],
+                        "routing_confidence": 0.0,
+                        "turn_shape": "unknown",
+                        "guidance_modules": [],
+                        "risk_flags": ["router_parse_failed"],
+                        "notes": ["semantic_router_v1 did not return parseable JSON"],
+                        "raw_message": router_result.get("content", ""),
+                    }
+                    selection["latency_ms"] = router_result.get("latency_ms", 0)
+                selection["cache_hit"] = False
             selected = str(selection.get("selected_profile_id") or "general").strip()
             known_profiles = {
                 str(row.get("profile_id", "")).strip()
@@ -1823,6 +1848,11 @@ class PrologMCPServer:
             selection.setdefault("effective_profile_id", effective)
             selection.setdefault("profile_id", effective)
             selection.setdefault("authority", "router_controls_context_only_mapper_controls_admission")
+            if not selection.get("cache_hit"):
+                self._semantic_router_cache[cache_key] = self._clone_trace_payload(selection)
+                while len(self._semantic_router_cache) > 32:
+                    first_key = next(iter(self._semantic_router_cache))
+                    self._semantic_router_cache.pop(first_key, None)
             self._last_semantic_ir_profile_selection = self._clone_trace_payload(selection)
             self._last_semantic_ir_selected_profile = "" if effective == "general" else effective
             return self._last_semantic_ir_selected_profile
@@ -1831,6 +1861,8 @@ class PrologMCPServer:
             "score": None,
             "runner_up_score": None,
             "reasons": ["active_profile explicitly configured"],
+            "semantic_router_skipped": True,
+            "speed_path": "active_profile_pinned",
         }
         self._last_semantic_ir_selected_profile = "" if self._active_profile == "general" else self._active_profile
         return self._last_semantic_ir_selected_profile
@@ -1901,6 +1933,24 @@ class PrologMCPServer:
 
     def _semantic_ir_available_domain_profiles(self) -> list[dict[str, Any]]:
         return self._clone_trace_payload(self._domain_profile_roster)
+
+    def _semantic_ir_visible_domain_profiles(self, selected_profile: str = "") -> list[dict[str, Any]]:
+        selected = str(selected_profile or "").strip()
+        selection = self._last_semantic_ir_profile_selection if isinstance(self._last_semantic_ir_profile_selection, dict) else {}
+        wanted = {selected} if selected else set()
+        for item in selection.get("candidate_profile_ids", []) if isinstance(selection.get("candidate_profile_ids"), list) else []:
+            text = str(item).strip()
+            if text:
+                wanted.add(text)
+        if not wanted:
+            return []
+        rows: list[dict[str, Any]] = []
+        for row in self._domain_profile_roster:
+            if not isinstance(row, dict):
+                continue
+            if str(row.get("profile_id", "")).strip() in wanted:
+                rows.append(row)
+        return self._clone_trace_payload(rows)
 
     def _semantic_ir_context(self, extra_context: list[str] | None = None) -> list[str]:
         context: list[str] = []
@@ -2048,6 +2098,7 @@ class PrologMCPServer:
         domain = selected_profile or "runtime"
         semantic_context = self._semantic_ir_context(context)
         domain_context = self._semantic_ir_domain_context(selected_profile)
+        visible_domain_profiles = self._semantic_ir_visible_domain_profiles(selected_profile)
         allowed_predicates = (
             list(allowed_predicates_override)
             if allowed_predicates_override is not None
@@ -2083,7 +2134,7 @@ class PrologMCPServer:
                 "domain": domain,
                 "utterance": utterance,
                 "context": semantic_context,
-                "available_domain_profiles": self._semantic_ir_available_domain_profiles(),
+                "available_domain_profiles": visible_domain_profiles,
                 "domain_context": domain_context,
                 "allowed_predicates": allowed_predicates,
                 "predicate_contracts": predicate_contracts,
@@ -2108,7 +2159,7 @@ class PrologMCPServer:
                 config=self._semantic_ir_call_config(),
                 context=semantic_context,
                 domain_context=domain_context,
-                available_domain_profiles=self._semantic_ir_available_domain_profiles(),
+                available_domain_profiles=visible_domain_profiles,
                 allowed_predicates=allowed_predicates,
                 predicate_contracts=predicate_contracts,
                 kb_context_pack=kb_context_pack,
@@ -2623,6 +2674,7 @@ class PrologMCPServer:
         self._last_prethink_fallback_trace = {}
         self._last_parse_trace = {}
         self._last_semantic_ir_trace = {}
+        self._semantic_router_cache.clear()
         self._prethink_counter = 1
         return {
             "status": "success",

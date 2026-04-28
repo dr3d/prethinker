@@ -144,6 +144,13 @@ not grant the model write authority.
 If a turn genuinely mixes domains, the current safest shape is to segment the
 turn so each focused pass can receive the right profile context.
 
+For speed, pinned profiles skip the router entirely. In `active_profile=auto`,
+the router receives the full thin profile roster, but the Semantic IR compiler
+receives only a focused roster containing the selected profile and close
+candidates. Exact router selections are cached for replay/retry paths with the
+same utterance and context signature. These are context-engineering speedups;
+they do not change mapper authority or add Python-side language interpretation.
+
 ### 6. The Semantic IR input is assembled
 
 This is the core context-engineering step. The model does not simply receive the

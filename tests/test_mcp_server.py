@@ -209,7 +209,7 @@ class LocalMcpServerTests(unittest.TestCase):
         self.assertIs(ir, parsed)
         kwargs = mocked.call_args.kwargs
         roster = kwargs.get("available_domain_profiles") or []
-        self.assertTrue(any(row.get("profile_id") == "medical@v0" for row in roster))
+        self.assertEqual([row.get("profile_id") for row in roster], ["medical@v0"])
         contracts = kwargs.get("predicate_contracts") or []
         self.assertTrue(any(row.get("signature") == "taking/2" for row in contracts))
         taking = next(row for row in contracts if row.get("signature") == "taking/2")
@@ -219,9 +219,45 @@ class LocalMcpServerTests(unittest.TestCase):
         self.assertIn("umls_concept:", domain_context)
         trace_input = server._last_semantic_ir_trace.get("model_input", {})
         self.assertTrue(trace_input.get("available_domain_profiles"))
+        self.assertEqual([row.get("profile_id") for row in trace_input.get("available_domain_profiles", [])], ["medical@v0"])
         self.assertTrue(trace_input.get("predicate_contracts"))
         self.assertTrue(trace_input.get("domain_context"))
         self.assertTrue(trace_input.get("kb_context_pack"))
+
+    def test_semantic_ir_pinned_profile_skips_router_and_focuses_roster(self) -> None:
+        server = PrologMCPServer(
+            compiler_prompt_enabled=False,
+            semantic_ir_enabled=True,
+            compiler_backend="lmstudio",
+            active_profile="sec_contracts@v0",
+        )
+        parsed = {
+            "schema_version": "semantic_ir_v1",
+            "decision": "commit",
+            "turn_type": "state_update",
+            "entities": [],
+            "referents": [],
+            "assertions": [],
+            "unsafe_implications": [],
+            "candidate_operations": [],
+            "clarification_questions": [],
+            "self_check": {"bad_commit_risk": "low", "missing_slots": [], "notes": []},
+        }
+
+        with patch("src.mcp_server.call_semantic_router") as router, patch(
+            "src.mcp_server.call_semantic_ir",
+            return_value={"content": "{}", "parsed": parsed, "latency_ms": 1},
+        ) as compiler:
+            ir, error = server._compile_semantic_ir("The borrower shall repay after maturity.")
+
+        self.assertEqual(error, "")
+        self.assertIs(ir, parsed)
+        router.assert_not_called()
+        selection = server._last_semantic_ir_trace.get("profile_selection", {})
+        self.assertTrue(selection.get("semantic_router_skipped"))
+        self.assertEqual(selection.get("speed_path"), "active_profile_pinned")
+        roster = compiler.call_args.kwargs.get("available_domain_profiles") or []
+        self.assertEqual([row.get("profile_id") for row in roster], ["sec_contracts@v0"])
 
     def test_semantic_ir_receives_compact_kb_context_pack(self) -> None:
         server = PrologMCPServer(
@@ -316,6 +352,52 @@ class LocalMcpServerTests(unittest.TestCase):
         # The API call receives the pack directly; the prompt payload also carries
         # KB policy in src.semantic_ir.build_semantic_ir_input_payload.
         self.assertIn("lives_in(mara, london).", payload.get("kb_context_pack", {}).get("relevant_clauses", []))
+
+    def test_semantic_router_exact_context_cache_reuses_auto_selection(self) -> None:
+        server = PrologMCPServer(
+            compiler_prompt_enabled=False,
+            semantic_ir_enabled=True,
+            compiler_backend="lmstudio",
+            active_profile="auto",
+        )
+        router_payload = {
+            "schema_version": "semantic_router_v1",
+            "selected_profile_id": "story_world@v0",
+            "candidate_profile_ids": ["story_world@v0"],
+            "routing_confidence": 0.99,
+            "turn_shape": "state_update",
+            "should_segment": False,
+            "segments": [],
+            "guidance_modules": ["source_fidelity"],
+            "retrieval_hints": {"entity_terms": [], "predicate_terms": [], "context_needs": []},
+            "risk_flags": [],
+            "context_audit": {
+                "why_this_profile": "story setting",
+                "selected_context_sources": [],
+                "secondary_profiles_considered": [],
+                "why_not_secondary": [],
+            },
+            "bootstrap_request": {
+                "needed": False,
+                "proposed_domain_name": "",
+                "why": "",
+                "candidate_predicate_concepts": [],
+            },
+            "notes": [],
+        }
+
+        with patch(
+            "src.mcp_server.call_semantic_router",
+            return_value={"content": "{}", "parsed": router_payload, "latency_ms": 123},
+        ) as router:
+            first = server._semantic_ir_selected_profile_for_utterance("Mara found the key.", context=["scene: archive"])
+            second = server._semantic_ir_selected_profile_for_utterance("Mara found the key.", context=["scene: archive"])
+
+        self.assertEqual(first, "story_world@v0")
+        self.assertEqual(second, "story_world@v0")
+        self.assertEqual(router.call_count, 1)
+        self.assertTrue(server._last_semantic_ir_profile_selection.get("cache_hit"))
+        self.assertEqual(server._last_semantic_ir_profile_selection.get("latency_ms"), 0)
 
     def test_semantic_ir_auto_profile_switches_context_across_domains(self) -> None:
         server = PrologMCPServer(
