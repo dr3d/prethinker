@@ -432,6 +432,7 @@ BEST_GUARDED_V2_GUIDANCE = (
     "- kb_context_pack contains deterministic KB retrieval. Treat exact KB clauses as current committed state for resolving references, corrections, and conflicts. Do not restate KB clauses as new writes. Use candidate_operations only for the current utterance, and use truth_maintenance to cite KB support or conflict pressure.\n"
     "- If kb_context_pack.current_state_candidates contains an old current-state fact and the utterance explicitly corrects it with words like actually, instead, wrong, not X, or no longer, propose a safe retract for the old clause and a safe assert for the replacement when the target and replacement are clear.\n"
     "- If a pronoun or short referent has exactly one plausible entity in kb_context_pack.current_state_subject_candidates, and the utterance is an explicit correction of that entity's current state, you may resolve the referent from KB context and propose the retract/assert pair. If there are multiple plausible candidates, clarify instead.\n"
+    "- If an explicit correction preserves the same ambiguous alias from an existing clause and changes only a non-identity slot such as date, room, status, or amount, you may retract/assert using the alias atom without resolving the underlying person. Treat the alias as the record key; identity ambiguity is irrelevant when the corrected clause keeps the same alias atom. Do not invent same_person or candidate_identity writes, and do not ask for clarification solely to resolve that preserved alias.\n"
     "- Do not ask for clarification solely because the subject is a pronoun when there is exactly one current_state_subject_candidate, no competing named subject, and an explicit correction marker. In that narrow case, set the referent status to resolved and cite the KB clause in truth_maintenance.\n"
     "- If the utterance says someone claims/alleges/reports a state that conflicts with an observed or source-backed KB clause, do not overwrite the observed/source-backed fact. If a claim predicate is available, record only the claim as a claim; otherwise quarantine or clarify.\n"
     "- Some predicates are non-exclusive, such as has_condition/2. A new compatible condition can be committed without retracting an existing different condition.\n"
@@ -456,7 +457,10 @@ BEST_GUARDED_V2_GUIDANCE = (
         "- Narrative or meeting facts stated before a question are still new utterance facts, not query-only context, unless they are explicitly quoted as already-known context.\n"
         "- A query candidate_operation is not a durable truth claim. If the user asks a well-grounded question over available facts/rules, mark the query operation safe even when the possible answer should remain uncertain, query_only, or quarantined in truth_maintenance.derived_consequences.\n"
         "- If the utterance contains an explicit question and an allowed predicate can represent that question, include a query candidate_operation. Do not rely only on derived_consequences for the user's explicit question.\n"
+        "- Compound questions such as 'who has A with B?' often contain more than one query target. When A and B map to allowed predicates, emit separate query candidate_operations for each target with shared variables or the named subject; do not collapse the whole question into only one query.\n"
+        "- Query targets should be the specific subject or deliverable named in the utterance, not a generic class noun. If the user asks about 'checkout launch', prefer checkout_launch or checkout consistently over generic launch.\n"
         "- Decision labels must match candidate_operations: use answer only for pure query turns with no new write/retract/rule candidate_operations. If the utterance includes grounded writes plus a question, use mixed.\n"
+        "- If a turn contains a negative assertion plus new rule/fact material and the negative assertion cannot safely become a durable fact, use mixed or quarantine rather than answer; the skipped negative assertion is still part of a mixed intake turn.\n"
         "- Necessary conditions are not sufficient conditions. 'No X without Y', 'X requires Y', and 'X depends on Y' may support requires/2 or depends_on/2 facts, but must not be inverted into X_allowed :- Y unless the utterance explicitly says Y is sufficient for X.\n"
     "- Denial predicates are speech/event facts. 'Omar denied signing the waiver' may assert denied(...); it must not assert signed(...) false.\n"
     "- Legal findings are scoped speech/finding facts. 'The court did not find that Pavel paid' must not become negative paid(Pavel, ...). It is an absence of finding; use mixed/quarantine or a finding predicate if available.\n"
@@ -1984,6 +1988,8 @@ def _contract_role_kind(role: str) -> str:
         return "date"
     if value.endswith("_date") or value.startswith("date_") or "date_or" in value:
         return "date"
+    if "authority" in value:
+        return ""
     if any(marker in value for marker in ("document", "filing", "exhibit", "docket", "source")):
         return "document"
     if value in {"case", "contract", "clause", "obligation"} or value.endswith("_case"):
@@ -2126,6 +2132,8 @@ def _projection_reason(
 ) -> str:
     if projected_decision == model_decision:
         return "model_decision_preserved"
+    if _has_clinical_advice_query(ir):
+        return "clinical_advice_query_projected_to_reject"
     if _is_pure_hypothetical_query(ir):
         return "pure_hypothetical_query_projected_to_answer"
     if model_decision == "clarify" and _speculative_ambiguous_observation_should_quarantine(ir):
@@ -2201,6 +2209,35 @@ def _normalize_decision(value: Any) -> str:
     return decision
 
 
+def _has_clinical_advice_query(ir: dict[str, Any]) -> bool:
+    clinical_terms = {
+        "dose",
+        "dosage",
+        "dose_recommendation",
+        "hold",
+        "held",
+        "start",
+        "stop",
+        "treatment",
+        "recommendation",
+        "medication_change",
+    }
+    for op in _candidate_operations(ir):
+        if str(op.get("operation") or "").strip().lower() != "query":
+            continue
+        text_parts = [
+            str(op.get("predicate") or ""),
+            " ".join(str(item) for item in op.get("args", []) if str(item).strip())
+            if isinstance(op.get("args"), list)
+            else "",
+            str(op.get("safety") or ""),
+        ]
+        text = _atomize(" ".join(text_parts))
+        if any(term in text for term in clinical_terms):
+            return True
+    return False
+
+
 def _projected_decision(
     ir: dict[str, Any],
     *,
@@ -2212,6 +2249,8 @@ def _projected_decision(
     contract_map = contract_map or {}
     contract_details = contract_details or {}
     decision = _normalize_decision(ir.get("decision"))
+    if _has_clinical_advice_query(ir):
+        return "reject"
     if _ambiguous_content_should_clarify(ir):
         return "clarify"
     if _is_pure_hypothetical_query(ir):

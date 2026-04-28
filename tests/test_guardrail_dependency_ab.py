@@ -11,6 +11,7 @@ from scripts.run_guardrail_dependency_ab import (
 from scripts.run_semantic_ir_prompt_bakeoff import (
     HARBOR_FRONTIER_SCENARIO_IDS,
     POLICY_DEMO_SCENARIO_IDS,
+    RULE_QUERY_SEMANTICS_SCENARIO_IDS,
     RULE_MUTATION_SCENARIO_IDS,
     SILVERTON_NOISY_SCENARIO_IDS,
     SILVERTON_SCENARIO_IDS,
@@ -413,6 +414,60 @@ class GuardrailDependencyABTests(unittest.TestCase):
                 )
             )
         self.assertTrue({"policy_stress_test", "meeting_commitment", "story_world"}.issubset(domains))
+
+    def test_rule_query_semantics_pack_is_registered(self) -> None:
+        by_id = {str(row.get("id", "")): row for row in WILD_SCENARIOS}
+        self.assertEqual(len(RULE_QUERY_SEMANTICS_SCENARIO_IDS), 9)
+        for scenario_id in RULE_QUERY_SEMANTICS_SCENARIO_IDS:
+            self.assertIn(scenario_id, by_id)
+            scenario = by_id[scenario_id]
+            self.assertTrue(scenario.get("predicate_contracts"), scenario_id)
+            self.assertTrue(scenario.get("allowed_predicates"), scenario_id)
+            self.assertTrue(scenario.get("expect", {}).get("admission"), scenario_id)
+            text = " ".join(
+                [
+                    str(scenario.get("utterance", "")),
+                    " ".join(str(item) for item in scenario.get("context", [])),
+                    " ".join(str(item) for item in scenario.get("expect", {}).get("must", [])),
+                    " ".join(str(item) for item in scenario.get("expect", {}).get("avoid", [])),
+                ]
+            ).lower()
+            self.assertTrue(
+                any(token in text for token in ["query", "rule", "policy", "valid", "compliant", "recused"]),
+                scenario_id,
+            )
+
+    def test_admission_score_can_forbid_skipped_helper_predicates(self) -> None:
+        scenario = {
+            "expect": {
+                "admission": {
+                    "must_not_skip": ["helper_predicate"],
+                    "must_not_skip_reason": ["out_of_palette_predicate"],
+                    "must_not_warning": ["helper_predicate"],
+                }
+            }
+        }
+        mapped = {
+            "admission_diagnostics": {
+                "clauses": {},
+                "operations": [
+                    {
+                        "admitted": False,
+                        "skip_reason": "out_of_palette_predicate",
+                        "operation": "assert",
+                        "predicate": "helper_predicate",
+                        "args": ["x"],
+                    }
+                ],
+                "warning_counts": {
+                    "skipped operation outside allowed predicate palette: helper_predicate/1": 1
+                },
+            }
+        }
+        score = score_admission(mapped, scenario)
+        self.assertFalse(score["ok"], score)
+        self.assertEqual(score["check_total"], 3)
+        self.assertTrue(any("must_not_skip" in miss for miss in score["misses"]))
 
     def test_source_fidelity_pack_is_registered(self) -> None:
         by_id = {str(row.get("id", "")): row for row in WILD_SCENARIOS}

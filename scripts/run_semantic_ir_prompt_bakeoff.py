@@ -1607,9 +1607,15 @@ WILD_SCENARIOS: list[dict[str, Any]] = [
             "avoid": ["ineligible(mira", "out_of_district_interval(mira, jan_1, may_1"],
             "admission": {
                 "must_admit_fact": [
-                    "out_of_district_interval(mira, 2024_01_01, 2024_02_20",
-                    "returned_on(mira, 2024_02_21",
-                    "out_of_district_interval(mira, 2024_03_01, 2024_05_01",
+                    [
+                        "out_of_district_interval(mira, 2024_01_01, 2024_02_20",
+                        "out_of_district_interval(mira, jan_1, feb_20",
+                    ],
+                    ["returned_on(mira, 2024_02_21", "returned_on(mira, feb_21"],
+                    [
+                        "out_of_district_interval(mira, 2024_03_01, 2024_05_01",
+                        "out_of_district_interval(mira, mar_1, may_1",
+                    ],
                 ],
                 "must_not_admit_fact": ["ineligible(mira"],
             },
@@ -2028,12 +2034,209 @@ WILD_SCENARIOS: list[dict[str, Any]] = [
                     ["depends_on(identity, sso_migration", "depends_on(identity_service, sso_migration_task", "depends_on(identity_service, sso_migration"],
                     ["requires(sso_migration, security_signoff", "requires(sso_migration_task, security_signoff_requirement"],
                     ["blocked_by(security_signoff, audit_findings", "blocked_by(security_signoff_requirement, audit_findings_blocker"],
-                    ["promised_on(marketing, launch", "promised_on(marketing, checkout_launch", "promised_on(marketing_team, product_launch", "promised_on(marketing_team, checkout"],
+                    [
+                        "promised_on(marketing, launch",
+                        "promised_on(marketing, checkout",
+                        "promised_on(marketing_team, product_launch",
+                        "promised_on(marketing_team, checkout",
+                    ],
                 ],
                 "must_admit_query": ["credible_launch_date("],
                 "must_not_admit_fact": ["credible_launch_date(", "critical_path("],
                 "must_support_ref": ["direct_utterance"],
                 "must_derived_consequence": [["block", "unresolved", "audit findings"]],
+            },
+        },
+    },
+    {
+        "id": "rule_query_access_expired_sharp",
+        "domain": "policy_rule_query",
+        "utterance": (
+            "Omar granted Kai production access on March 3. Erin sponsored Kai on November 1 and nobody renewed it. "
+            "Who has active access with expired sponsorship?"
+        ),
+        "context": [
+            "Existing rule: sponsorship expires after ninety days unless renewed.",
+            "Existing rule: active production access requires a non-expired manager sponsorship.",
+            "Kai is a contractor.",
+            "Erin is a manager.",
+            "Current date for this policy audit is March 15.",
+            "The question is compound: preserve both active-access and expired-sponsorship query targets when predicates exist.",
+        ],
+        "allowed_predicates": [
+            "granted_access_on/3",
+            "sponsored_on/3",
+            "renewed_on/3",
+            "contractor/1",
+            "manager/1",
+            "expired_sponsorship/2",
+            "active_access/2",
+        ],
+        "predicate_contracts": [
+            {"signature": "granted_access_on/3", "args": ["actor", "person", "date"]},
+            {"signature": "sponsored_on/3", "args": ["sponsor", "person", "date"]},
+            {"signature": "renewed_on/3", "args": ["sponsor", "person", "date"]},
+            {"signature": "contractor/1", "args": ["person"]},
+            {"signature": "manager/1", "args": ["person"]},
+            {"signature": "expired_sponsorship/2", "args": ["person", "resource_or_policy"]},
+            {"signature": "active_access/2", "args": ["person", "resource"]},
+        ],
+        "expect": {
+            "decision": "mixed",
+            "must": ["Kai", "production", "expired sponsorship", "active access", "query"],
+            "avoid": ["expired_sponsorship(kai", "active_access(kai, production) as fact"],
+            "admission": {
+                "must_admit_fact": ["granted_access_on(omar, kai", "sponsored_on(erin, kai"],
+                "must_admit_query": ["expired_sponsorship(", "active_access("],
+                "must_not_admit_fact": ["expired_sponsorship(kai", "active_access(kai, production"],
+                "must_support_ref": ["direct_utterance"],
+                "must_derived_consequence": [["expired_sponsorship", "sponsorship expired"], ["query_only", "do_not_commit"]],
+            },
+        },
+    },
+    {
+        "id": "rule_query_only_if_counterexample",
+        "domain": "policy_rule_query",
+        "utterance": (
+            "Approval A7 is valid only if Nia countersigned it. Nia countersigned A7. "
+            "Is A7 valid?"
+        ),
+        "context": [
+            "Only-if language states a necessary condition, not a sufficient condition.",
+            "A satisfied necessary condition alone should support a query, not a durable valid_approval fact.",
+        ],
+        "allowed_predicates": [
+            "countersigned_by/2",
+            "valid_approval/1",
+            "requires/2",
+        ],
+        "predicate_contracts": [
+            {"signature": "countersigned_by/2", "args": ["approval_or_document", "person"]},
+            {"signature": "valid_approval/1", "args": ["approval_or_document"]},
+            {"signature": "requires/2", "args": ["item", "requirement"]},
+        ],
+        "expect": {
+            "decision": "mixed",
+            "must": ["only if", "Nia", "A7", "necessary", "query"],
+            "avoid": ["valid_approval(a7) as fact"],
+            "admission": {
+                "must_admit_fact": ["countersigned_by(a7, nia"],
+                "must_admit_query": ["valid_approval("],
+                "must_not_admit_fact": ["valid_approval(a7"],
+                "must_not_admit_rule": ["valid_approval("],
+                "must_derived_consequence": [["necessary", "not sufficient", "only if"]],
+            },
+        },
+    },
+    {
+        "id": "rule_query_no_launch_without_qa",
+        "domain": "policy_rule_query",
+        "utterance": (
+            "No launch may occur without passing QA. Checkout has not passed QA. "
+            "Is the checkout launch allowed?"
+        ),
+        "context": [
+            "Necessary conditions are not sufficient conditions.",
+            "A negative statement that QA has not passed must not become a positive qa_passed fact.",
+        ],
+        "allowed_predicates": [
+            "requires/2",
+            "qa_passed/1",
+            "launch_allowed/1",
+        ],
+        "predicate_contracts": [
+            {"signature": "requires/2", "args": ["item", "requirement"]},
+            {"signature": "qa_passed/1", "args": ["item"]},
+            {"signature": "launch_allowed/1", "args": ["item"]},
+        ],
+        "expect": {
+            "decision": "mixed",
+            "must": ["launch", "QA", "not passed", "query"],
+            "avoid": ["durable positive launch_allowed fact", "positive qa_passed fact"],
+            "admission": {
+                "must_admit_fact": [["requires(checkout_launch, qa", "requires(checkout, qa", "requires(launch, qa"]],
+                "must_admit_query": ["launch_allowed("],
+                "must_not_admit_fact": ["launch_allowed(", "qa_passed("],
+                "must_not_admit_rule": ["launch_allowed("],
+                "must_derived_consequence": [["not passed", "not allowed", "false", "query_only", "quarantine", "do_not_commit"]],
+            },
+        },
+    },
+    {
+        "id": "rule_query_threshold_approval",
+        "domain": "policy_rule_query",
+        "utterance": (
+            "Expenses over 10000 require CFO approval. Expense E9 is 12000 and Pat approved it as CFO. "
+            "Is E9 compliant?"
+        ),
+        "context": [
+            "Threshold policies are rule-like. Direct expense amount and approval facts may be admitted.",
+            "Compliance should be queried or derived; do not write final compliance as a fact from the question.",
+        ],
+        "allowed_predicates": [
+            "expense_amount/2",
+            "approved_by/2",
+            "role/2",
+            "requires_approval_role/3",
+            "compliant_expense/1",
+        ],
+        "predicate_contracts": [
+            {"signature": "expense_amount/2", "args": ["expense", "amount"]},
+            {"signature": "approved_by/2", "args": ["expense", "person"]},
+            {"signature": "role/2", "args": ["person", "role"]},
+            {"signature": "requires_approval_role/3", "args": ["item_type_or_threshold", "role", "condition"]},
+            {"signature": "compliant_expense/1", "args": ["expense"]},
+        ],
+        "expect": {
+            "decision": "mixed",
+            "must": ["10000", "CFO", "E9", "12000", "query", "compliant"],
+            "avoid": ["compliant_expense(e9) as fact"],
+            "admission": {
+                "must_admit_fact": [
+                    ["expense_amount(e9, 12000", "expense_amount(expense_e9, 12000"],
+                    ["approved_by(e9, pat", "approved_by(expense_e9, pat"],
+                    "role(pat, cfo",
+                ],
+                "must_admit_query": ["compliant_expense("],
+                "must_not_admit_fact": ["compliant_expense(e9", "compliant_expense(expense_e9"],
+                "must_derived_consequence": [["compliant", "query_only", "future_rule_support"]],
+            },
+        },
+    },
+    {
+        "id": "rule_query_recusal_relationship_chain",
+        "domain": "policy_rule_query",
+        "utterance": (
+            "Anyone managing a requester is conflicted for that request. Lena manages Theo. "
+            "Theo requested reimbursement R2 and Lena approved it. Which approvals should be recused?"
+        ),
+        "context": [
+            "A conflict policy can support a query, but derived recusal findings should not be stored as direct facts.",
+            "Direct management, request, and approval events are safe facts.",
+        ],
+        "allowed_predicates": [
+            "manages/2",
+            "requested_by/2",
+            "approved_by/2",
+            "conflicted_approver/2",
+            "recuse_approval/1",
+        ],
+        "predicate_contracts": [
+            {"signature": "manages/2", "args": ["manager", "report"]},
+            {"signature": "requested_by/2", "args": ["reimbursement", "person"]},
+            {"signature": "approved_by/2", "args": ["reimbursement", "person"]},
+            {"signature": "conflicted_approver/2", "args": ["approver", "requester"]},
+            {"signature": "recuse_approval/1", "args": ["approval_or_reimbursement"]},
+        ],
+        "expect": {
+            "decision": "mixed",
+            "must": ["managing", "Lena", "Theo", "R2", "approved", "recused", "query"],
+            "avoid": ["recuse_approval(r2) as fact", "conflicted_approver(lena, theo) as fact"],
+            "admission": {
+                "must_admit_fact": ["manages(lena, theo", "requested_by(r2, theo", "approved_by(r2, lena"],
+                "must_admit_query": ["recuse_approval("],
+                "must_not_admit_fact": ["recuse_approval(r2", "conflicted_approver(lena, theo"],
+                "must_derived_consequence": [["r2", "recuse", "conflict", "query_only"]],
             },
         },
     },
@@ -2144,6 +2347,19 @@ POLICY_DEMO_SCENARIO_IDS = [
     "customer_support_override_ladder",
     "story_world_throne_claim_query",
     "business_dependency_promised_launch",
+]
+
+
+RULE_QUERY_SEMANTICS_SCENARIO_IDS = [
+    "policy_reimbursement_rule_setup",
+    "policy_february_reimbursement_violation_query",
+    "access_sponsorship_expiry_query",
+    "business_dependency_promised_launch",
+    "rule_query_access_expired_sharp",
+    "rule_query_only_if_counterexample",
+    "rule_query_no_launch_without_qa",
+    "rule_query_threshold_approval",
+    "rule_query_recusal_relationship_chain",
 ]
 
 
@@ -2427,12 +2643,16 @@ PROMPT_VARIANTS: dict[str, dict[str, Any]] = {
             "- Some predicates are non-exclusive, such as has_condition/2. A new compatible condition can be committed without retracting an existing different condition.\n"
             "- Pure questions against context rules are answer turns. Do not choose mixed just because a context rule appears in context; context rules are support for the query, not new writes.\n"
             "- If the current utterance contains both a question and new grounded facts about named entities, keep the direct facts as safe candidate_operations and put the question in a query operation. Do not demote newly stated facts into background context just because they help answer the question.\n"
+            "- If an explicit correction preserves the same ambiguous alias from an existing clause and changes only a non-identity slot such as date, room, status, or amount, you may retract/assert using the alias atom without resolving the underlying person. Treat the alias as the record key; identity ambiguity is irrelevant when the corrected clause keeps the same alias atom. Do not invent same_person or candidate_identity writes, and do not ask for clarification solely to resolve that preserved alias.\n"
             "- If the current utterance contains new policy/rule language plus concrete entity facts, treat the concrete facts separately from the rule. The rule may be future_rule_support/quarantine when exception semantics are unclear, but direct facts such as customer status, approvals, blockers, observations, and dates remain candidate writes when grounded.\n"
             "- Candidate operation priority under the schema cap: direct grounded facts first, explicit retractions/corrections second, explicit user query third, durable rule clauses last. For complex default/exception/override policies, prefer preserving rule language in assertions, unsafe_implications, and truth_maintenance.derived_consequences rather than omitting concrete facts to fit rule clauses.\n"
             "- Narrative or meeting facts stated before a question are still new utterance facts, not query-only context, unless they are explicitly quoted as already-known context.\n"
             "- A query candidate_operation is not a durable truth claim. If the user asks a well-grounded question over available facts/rules, mark the query operation safe even when the possible answer should remain uncertain, query_only, or quarantined in truth_maintenance.derived_consequences.\n"
             "- If the utterance contains an explicit question and an allowed predicate can represent that question, include a query candidate_operation. Do not rely only on derived_consequences for the user's explicit question.\n"
+            "- Compound questions such as 'who has A with B?' often contain more than one query target. When A and B map to allowed predicates, emit separate query candidate_operations for each target with shared variables or the named subject; do not collapse the whole question into only one query.\n"
+            "- Query targets should be the specific subject or deliverable named in the utterance, not a generic class noun. If the user asks about 'checkout launch', prefer checkout_launch or checkout consistently over generic launch.\n"
             "- Decision labels must match candidate_operations: use answer only for pure query turns with no new write/retract/rule candidate_operations. If the utterance includes grounded writes plus a question, use mixed.\n"
+            "- If a turn contains a negative assertion plus new rule/fact material and the negative assertion cannot safely become a durable fact, use mixed or quarantine rather than answer; the skipped negative assertion is still part of a mixed intake turn.\n"
             "- Necessary conditions are not sufficient conditions. 'No X without Y', 'X requires Y', and 'X depends on Y' may support requires/2 or depends_on/2 facts, but must not be inverted into X_allowed :- Y unless the utterance explicitly says Y is sufficient for X.\n"
             "- If context supplies exactly one active patient and one active lab test, a direct 'it came back high' may propose a safe lab_result_high write.\n"
             "- For rule-plus-fact or fact-plus-query turns, use mixed and keep unsafe query targets out of committed facts.\n"
@@ -2491,12 +2711,16 @@ PROMPT_VARIANTS: dict[str, dict[str, Any]] = {
             "- Some predicates are non-exclusive, such as has_condition/2. A new compatible condition can be committed without retracting an existing different condition.\n"
             "- Pure questions against context rules are answer turns. Do not choose mixed just because a context rule appears in context; context rules are support for the query, not new writes.\n"
             "- If the current utterance contains both a question and new grounded facts about named entities, keep the direct facts as safe candidate_operations and put the question in a query operation. Do not demote newly stated facts into background context just because they help answer the question.\n"
+            "- If an explicit correction preserves the same ambiguous alias from an existing clause and changes only a non-identity slot such as date, room, status, or amount, you may retract/assert using the alias atom without resolving the underlying person. Treat the alias as the record key; identity ambiguity is irrelevant when the corrected clause keeps the same alias atom. Do not invent same_person or candidate_identity writes, and do not ask for clarification solely to resolve that preserved alias.\n"
             "- If the current utterance contains new policy/rule language plus concrete entity facts, treat the concrete facts separately from the rule. The rule may be future_rule_support/quarantine when exception semantics are unclear, but direct facts such as customer status, approvals, blockers, observations, and dates remain candidate writes when grounded.\n"
             "- Candidate operation priority under the schema cap: direct grounded facts first, explicit retractions/corrections second, explicit user query third, durable rule clauses last. For complex default/exception/override policies, prefer preserving rule language in assertions, unsafe_implications, and truth_maintenance.derived_consequences rather than omitting concrete facts to fit rule clauses.\n"
             "- Narrative or meeting facts stated before a question are still new utterance facts, not query-only context, unless they are explicitly quoted as already-known context.\n"
             "- A query candidate_operation is not a durable truth claim. If the user asks a well-grounded question over available facts/rules, mark the query operation safe even when the possible answer should remain uncertain, query_only, or quarantined in truth_maintenance.derived_consequences.\n"
             "- If the utterance contains an explicit question and an allowed predicate can represent that question, include a query candidate_operation. Do not rely only on derived_consequences for the user's explicit question.\n"
+            "- Compound questions such as 'who has A with B?' often contain more than one query target. When A and B map to allowed predicates, emit separate query candidate_operations for each target with shared variables or the named subject; do not collapse the whole question into only one query.\n"
+            "- Query targets should be the specific subject or deliverable named in the utterance, not a generic class noun. If the user asks about 'checkout launch', prefer checkout_launch or checkout consistently over generic launch.\n"
             "- Decision labels must match candidate_operations: use answer only for pure query turns with no new write/retract/rule candidate_operations. If the utterance includes grounded writes plus a question, use mixed.\n"
+            "- If a turn contains a negative assertion plus new rule/fact material and the negative assertion cannot safely become a durable fact, use mixed or quarantine rather than answer; the skipped negative assertion is still part of a mixed intake turn.\n"
             "- Necessary conditions are not sufficient conditions. 'No X without Y', 'X requires Y', and 'X depends on Y' may support requires/2 or depends_on/2 facts, but must not be inverted into X_allowed :- Y unless the utterance explicitly says Y is sufficient for X.\n"
             "- Do not assert a fact about a quantified group atom such as submitted_form(residents) for 'all residents except Kai'. Use individual known members only when context enumerates them; otherwise mark the class-level write unsafe.\n"
             "- Preserve temporal scope: until, during, after, before, not yet, no longer, and from/to should not become timeless facts.\n"
@@ -2540,12 +2764,16 @@ PROMPT_VARIANTS: dict[str, dict[str, Any]] = {
             "- Some predicates are non-exclusive, such as has_condition/2. A new compatible condition can be committed without retracting an existing different condition.\n"
             "- Pure questions against context rules are answer turns. Do not choose mixed just because a context rule appears in context; context rules are support for the query, not new writes.\n"
             "- If the current utterance contains both a question and new grounded facts about named entities, keep the direct facts as safe candidate_operations and put the question in a query operation. Do not demote newly stated facts into background context just because they help answer the question.\n"
+            "- If an explicit correction preserves the same ambiguous alias from an existing clause and changes only a non-identity slot such as date, room, status, or amount, you may retract/assert using the alias atom without resolving the underlying person. Treat the alias as the record key; identity ambiguity is irrelevant when the corrected clause keeps the same alias atom. Do not invent same_person or candidate_identity writes, and do not ask for clarification solely to resolve that preserved alias.\n"
             "- If the current utterance contains new policy/rule language plus concrete entity facts, treat the concrete facts separately from the rule. The rule may be future_rule_support/quarantine when exception semantics are unclear, but direct facts such as customer status, approvals, blockers, observations, and dates remain candidate writes when grounded.\n"
             "- Candidate operation priority under the schema cap: direct grounded facts first, explicit retractions/corrections second, explicit user query third, durable rule clauses last. For complex default/exception/override policies, prefer preserving rule language in assertions, unsafe_implications, and truth_maintenance.derived_consequences rather than omitting concrete facts to fit rule clauses.\n"
             "- Narrative or meeting facts stated before a question are still new utterance facts, not query-only context, unless they are explicitly quoted as already-known context.\n"
             "- A query candidate_operation is not a durable truth claim. If the user asks a well-grounded question over available facts/rules, mark the query operation safe even when the possible answer should remain uncertain, query_only, or quarantined in truth_maintenance.derived_consequences.\n"
             "- If the utterance contains an explicit question and an allowed predicate can represent that question, include a query candidate_operation. Do not rely only on derived_consequences for the user's explicit question.\n"
+            "- Compound questions such as 'who has A with B?' often contain more than one query target. When A and B map to allowed predicates, emit separate query candidate_operations for each target with shared variables or the named subject; do not collapse the whole question into only one query.\n"
+            "- Query targets should be the specific subject or deliverable named in the utterance, not a generic class noun. If the user asks about 'checkout launch', prefer checkout_launch or checkout consistently over generic launch.\n"
             "- Decision labels must match candidate_operations: use answer only for pure query turns with no new write/retract/rule candidate_operations. If the utterance includes grounded writes plus a question, use mixed.\n"
+            "- If a turn contains a negative assertion plus new rule/fact material and the negative assertion cannot safely become a durable fact, use mixed or quarantine rather than answer; the skipped negative assertion is still part of a mixed intake turn.\n"
             "- Necessary conditions are not sufficient conditions. 'No X without Y', 'X requires Y', and 'X depends on Y' may support requires/2 or depends_on/2 facts, but must not be inverted into X_allowed :- Y unless the utterance explicitly says Y is sufficient for X.\n"
             "- Do not assert a fact about a quantified group atom such as submitted_form(residents) for 'all residents except Kai'. Use individual known members only when context enumerates them; otherwise mark the class-level write unsafe.\n"
             "- Preserve temporal scope: until, during, after, before, not yet, no longer, and from/to should not become timeless facts.\n"
@@ -2901,6 +3129,10 @@ def score_admission(mapped: dict[str, Any] | None, scenario: dict[str, Any]) -> 
         diagnostics if isinstance(diagnostics, dict) else {},
         "derived_consequences",
     )
+    warning_text = json.dumps(
+        diagnostics.get("warning_counts", {}) if isinstance(diagnostics, dict) else {},
+        ensure_ascii=False,
+    ).lower()
 
     checks: list[tuple[str, str, bool]] = []
 
@@ -2924,11 +3156,15 @@ def score_admission(mapped: dict[str, Any] | None, scenario: dict[str, Any]) -> 
     add_contains("must_support_ref", support_ref_text)
     add_contains("must_conflict", conflict_text)
     add_contains("must_derived_consequence", derived_text)
+    add_contains("must_warning", warning_text)
     add_absent("must_not_admit_fact", fact_text)
     add_absent("must_not_admit_rule", rule_text)
     add_absent("must_not_admit_retract", retract_text)
     add_absent("must_not_admit_query", query_text)
     add_absent("must_not_admit_operation", admitted_ops_text)
+    add_absent("must_not_skip", skipped_ops_text)
+    add_absent("must_not_skip_reason", skip_reason_text)
+    add_absent("must_not_warning", warning_text)
 
     misses = [f"{key}: {pattern}" for key, pattern, ok in checks if not ok]
     return {
@@ -3039,6 +3275,7 @@ def parse_args() -> argparse.Namespace:
             "rule_mutation",
             "harbor_frontier",
             "policy_demo",
+            "rule_query_semantics",
             "source_fidelity",
         ],
         default="all",
@@ -3080,6 +3317,8 @@ def main() -> int:
             scenario_ids = list(HARBOR_FRONTIER_SCENARIO_IDS)
         elif args.scenario_group == "policy_demo":
             scenario_ids = list(POLICY_DEMO_SCENARIO_IDS)
+        elif args.scenario_group == "rule_query_semantics":
+            scenario_ids = list(RULE_QUERY_SEMANTICS_SCENARIO_IDS)
         elif args.scenario_group == "source_fidelity":
             scenario_ids = list(SOURCE_FIDELITY_SCENARIO_IDS)
     by_id = {scenario["id"]: scenario for scenario in WILD_SCENARIOS}

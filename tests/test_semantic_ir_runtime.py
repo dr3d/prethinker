@@ -288,6 +288,71 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         ]
         self.assertEqual(skipped[0]["skip_reason"], "predicate_contract_role_mismatch")
 
+    def test_mapper_allows_person_as_authority_or_source(self) -> None:
+        ir = _ir(
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "found",
+                    "args": ["auditor", "flood_transfer", "authentic"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                }
+            ]
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=["found/3"],
+            predicate_contracts=[
+                {"signature": "found/3", "args": ["authority_or_source", "subject", "finding"]},
+            ],
+        )
+        self.assertEqual(parsed["facts"], ["found(auditor, flood_transfer, authentic)."])
+        self.assertFalse(any("authority_or_source" in warning for warning in warnings))
+        diagnostics = parsed["admission_diagnostics"]
+        self.assertEqual(diagnostics["admitted_count"], 1)
+
+    def test_clinical_advice_query_projects_to_reject_and_blocks_writes(self) -> None:
+        ir = _ir(
+            decision="mixed",
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "taking",
+                    "args": ["priya", "warfarin"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "query",
+                    "predicate": "dose_recommendation",
+                    "args": ["priya", "warfarin"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "unsafe",
+                },
+            ],
+        )
+        parsed, _warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=["taking/2"],
+            predicate_contracts=[
+                {"signature": "taking/2", "args": ["person", "medication"]},
+            ],
+        )
+        diagnostics = parsed["admission_diagnostics"]
+        self.assertEqual(diagnostics["projected_decision"], "reject")
+        self.assertEqual(diagnostics["projection_reason"], "clinical_advice_query_projected_to_reject")
+        self.assertEqual(parsed["facts"], [])
+        self.assertTrue(
+            any(
+                row.get("skip_reason") == "projected_decision_reject_blocks_write"
+                for row in diagnostics["operations"]
+            )
+        )
+
     def test_mapper_admits_contract_role_shape_when_interval_is_grounded(self) -> None:
         ir = _ir(
             candidate_operations=[
