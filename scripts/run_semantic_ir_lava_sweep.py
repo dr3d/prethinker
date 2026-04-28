@@ -189,6 +189,14 @@ def run_case(
 ) -> dict[str, Any]:
     started = time.perf_counter()
     selected = server._semantic_ir_selected_profile_for_utterance(case.utterance, context=list(case.context)) or "general"
+    allowed_predicates = _merge_ordered_strings(
+        server._semantic_ir_allowed_predicates(selected),
+        list(case.allowed_predicates),
+    )
+    predicate_contracts = _merge_contracts(
+        server._semantic_ir_predicate_contracts(selected),
+        list(case.predicate_contracts),
+    )
     record: dict[str, Any] = {
         "ts": _utc_now(),
         "index": index,
@@ -228,8 +236,8 @@ def run_case(
         ir, error = server._compile_semantic_ir(
             case.utterance,
             context=list(case.context),
-            allowed_predicates_override=list(case.allowed_predicates) or None,
-            predicate_contracts_override=list(case.predicate_contracts) or None,
+            allowed_predicates_override=allowed_predicates or None,
+            predicate_contracts_override=predicate_contracts or None,
         )
         trace = server._last_semantic_ir_trace if isinstance(server._last_semantic_ir_trace, dict) else {}
         record["selected_profile"] = str(trace.get("selected_profile") or selected or "general")
@@ -248,10 +256,8 @@ def run_case(
             return record
         mapped, warnings = semantic_ir_to_legacy_parse(
             ir,
-            allowed_predicates=list(case.allowed_predicates)
-            or trace.get("model_input", {}).get("allowed_predicates", []),
-            predicate_contracts=list(case.predicate_contracts)
-            or trace.get("model_input", {}).get("predicate_contracts", []),
+            allowed_predicates=allowed_predicates or trace.get("model_input", {}).get("allowed_predicates", []),
+            predicate_contracts=predicate_contracts or trace.get("model_input", {}).get("predicate_contracts", []),
         )
         diagnostics = mapped.get("admission_diagnostics", {}) if isinstance(mapped, dict) else {}
         clauses = diagnostics.get("clauses", {}) if isinstance(diagnostics.get("clauses"), dict) else {}
@@ -663,36 +669,42 @@ def score_expectation(case: LavaCase, record: dict[str, Any], *, ir: dict[str, A
         sort_keys=True,
     ).lower()
     clauses = record.get("clauses", {}) if isinstance(record.get("clauses"), dict) else {}
-    durable_clauses = {
+    asserted_clauses = {
         "facts": clauses.get("facts", []),
         "rules": clauses.get("rules", []),
-        "retracts": clauses.get("retracts", []),
     }
+    retract_clauses = {"retracts": clauses.get("retracts", [])}
     query_clauses = {"queries": clauses.get("queries", [])}
-    durable_text = json.dumps(durable_clauses, ensure_ascii=False, sort_keys=True).lower()
+    asserted_text = json.dumps(asserted_clauses, ensure_ascii=False, sort_keys=True).lower()
+    retract_text = json.dumps(retract_clauses, ensure_ascii=False, sort_keys=True).lower()
     query_text = json.dumps(query_clauses, ensure_ascii=False, sort_keys=True).lower()
     must = [str(item).lower() for item in expect.get("must", []) if str(item).strip()]
     avoid = [str(item).lower() for item in expect.get("avoid", []) if str(item).strip()]
     must_hits = [item for item in must if item in diagnostic_text]
     missing_must = [item for item in must if item not in diagnostic_text]
     avoid_hits = [item for item in avoid if item in diagnostic_text]
-    avoid_durable_hits = [item for item in avoid if item in durable_text]
+    avoid_asserted_hits = [item for item in avoid if item in asserted_text]
+    avoid_retract_hits = [item for item in avoid if item in retract_text]
     avoid_query_hits = [item for item in avoid if item in query_text]
     expected_decision = case.expected_decision
     decision_ok = not expected_decision or str(record.get("projected_decision", "")) == expected_decision
     must_ok = len(must_hits) == len(must)
     semantic_clean = not avoid_hits
-    admission_safe = not avoid_durable_hits
+    admission_safe = not avoid_asserted_hits
     return {
         "decision_ok": decision_ok,
         "must_hits": len(must_hits),
         "must_total": len(must),
         "missing_must": missing_must,
         "avoid_hits": avoid_hits,
-        "avoid_durable_hits": avoid_durable_hits,
+        "avoid_asserted_hits": avoid_asserted_hits,
+        "avoid_retract_hits": avoid_retract_hits,
+        # Backward-compatible alias: in expectation scoring, durable unsafe hits
+        # mean forbidden asserted facts/rules, not retractions that remove them.
+        "avoid_durable_hits": avoid_asserted_hits,
         "avoid_query_hits": avoid_query_hits,
         # Backward-compatible alias for older ad hoc analysis scripts.
-        "avoid_admitted_hits": avoid_durable_hits,
+        "avoid_admitted_hits": avoid_asserted_hits,
         "semantic_clean": semantic_clean,
         "admission_safe": admission_safe,
         "ok": bool(decision_ok and must_ok and admission_safe),
@@ -712,6 +724,34 @@ def signature_for(record: dict[str, Any]) -> dict[str, Any]:
         "fuzzy": sorted(str(item) for item in record.get("fuzzy_edge_kinds", []) if str(item).strip()),
         "error": "; ".join(str(item) for item in record.get("errors", [])),
     }
+
+
+def _merge_ordered_strings(*groups: list[str]) -> list[str]:
+    out: list[str] = []
+    seen: set[str] = set()
+    for group in groups:
+        for item in group or []:
+            text = str(item).strip()
+            key = text.lower()
+            if text and key not in seen:
+                out.append(text)
+                seen.add(key)
+    return out
+
+
+def _merge_contracts(*groups: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for group in groups:
+        for item in group or []:
+            if not isinstance(item, dict):
+                continue
+            signature = str(item.get("signature") or "").strip()
+            key = signature.lower() if signature else json.dumps(item, sort_keys=True, ensure_ascii=False)
+            if key not in seen:
+                out.append(dict(item))
+                seen.add(key)
+    return out
 
 
 def summarize_records(

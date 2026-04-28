@@ -175,6 +175,7 @@ def test_lava_expectation_separates_diagnostic_mentions_from_admitted_unsafe_cla
     assert score["must_hits"] == 1
     assert score["missing_must"] == []
     assert score["avoid_hits"] == ["london_uk"]
+    assert score["avoid_asserted_hits"] == []
     assert score["avoid_durable_hits"] == []
     assert score["avoid_admitted_hits"] == []
     assert score["semantic_clean"] is False
@@ -209,7 +210,38 @@ def test_lava_expectation_does_not_treat_queries_as_durable_bad_writes():
     score = score_expectation(case, record, ir={"note": "Theo access question"})
 
     assert score["missing_must"] == []
+    assert score["avoid_asserted_hits"] == []
     assert score["avoid_query_hits"] == ["access_grant(theo, production"]
     assert score["avoid_durable_hits"] == []
+    assert score["admission_safe"] is True
+    assert score["ok"] is True
+
+
+def test_lava_expectation_treats_forbidden_retracts_as_safe_admission():
+    case = LavaCase(
+        id="correct_bad_old_fact",
+        source="frontier:test",
+        utterance="x",
+        expected_decision="mixed",
+        expect={
+            "decision": "mixed",
+            "must": ["London, Ontario"],
+            "avoid": ["london_uk"],
+        },
+    )
+    record = {
+        "projected_decision": "mixed",
+        "clauses": {
+            "facts": ["resided_in(beatriz, london_ontario, interval_1)."],
+            "retracts": ["resided_outside_country(beatriz, london_uk, old_interval)."],
+        },
+        "mapper_warnings": [],
+        "fuzzy_edge_kinds": [],
+    }
+
+    score = score_expectation(case, record, ir={"note": "Correction to London, Ontario from london_uk"})
+
+    assert score["avoid_retract_hits"] == ["london_uk"]
+    assert score["avoid_asserted_hits"] == []
     assert score["admission_safe"] is True
     assert score["ok"] is True

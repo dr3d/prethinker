@@ -182,7 +182,7 @@
       "expect": {
         "decision": "mixed",
         "must": ["Beatriz", "London, Ontario", "Reino Unido", "cinco años", "fuera del país"],
-        "avoid": ["outside_country_interval(beatriz", "condition_met(forfeiture", "london_uk"]
+        "avoid": ["outside_country_interval(beatriz", "condition_met(forfeiture", "forfeiture_condition(beatriz", "london_uk"]
       }
     },
     {
