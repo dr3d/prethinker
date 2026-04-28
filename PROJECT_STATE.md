@@ -124,34 +124,46 @@ This is the next useful layer for type steering and explanation. It should suppo
 
 ## Near-Term Frontiers
 
+Top priority:
+
+- Represent temporal facts durably enough that extracted dates, intervals, corrections, and relative-time anchors can support real KB queries instead of staying only in the semantic workspace. This is the highest-leverage architecture move because it unlocks the policy-demo path: record rules/events, ask which cases violate or remain blocked, and show why without writing derived conclusions as facts.
+
+Supporting architecture:
+
+- Grow deterministic stored-logic admission beyond the first guard: profile-declared functional predicates, temporal scope, negation policy, and richer contradiction probes are still open.
+- Grow clause support records and the `truth_maintenance` proposal block into a real dependency layer: derived conclusions should eventually point to supporting facts, rules, source documents, and retractions without granting model-proposed consequences write authority.
+- Push the remaining mapper frontier: durable rule admission for quantified exception language, better decision-label calibration for safe partial commits, and cleaner nested event predicate shapes.
+- Keep profile contracts out of the generic mapper: profile packages should own domain type/grounding policy, while the mapper stays structural and auditable.
+- Promote scenario-local predicate contracts into reusable profile/predicate manifests so fewer expectations live only inside individual frontier packs.
+
+Router/context work:
+
+- Treat richer domain context as a catalog/skill mechanism, not hardwired prompt drift. The current auto path is router-owned and measured; next steps are multi-profile turns, router confidence UX, and deciding when mixed-domain utterances should be segmented before Semantic IR.
+- Treat `docs/data/router_training/router_training_seed_v1.jsonl` as a router contract surface, not a fine-tuning set. It is large enough to harden schema/prompt expectations, but still thin around bootstrap and legal/probate boundary tension.
+- Expand router/profile-selection tests from clean synthetic switching into messy mixed-domain turns. Profile selection is advisory context loading, not admission authority.
+- Prototype `profile_bootstrap_v1`: feed 5-20 texts from an unfamiliar domain and ask the model to propose entity types, predicates, argument contracts, admission risks, clarification policies, and starter frontier cases. The first success criterion is reviewable profile-design material, not automatic profile authority.
+
+Evidence and UX:
+
+- Push the policy-demo frontier into the UI/prompt book once the command-line harness stays stable: the highest-impact demo is still "record reimbursement policy, ingest February events, ask which reimbursements violated policy, and show why without writing derived violation facts."
+- Expand trace views around admission contracts so reviewers can see not only the model decision, but also which exact boundary checks passed.
 - Make the prompt-book examples meatier: each demo should show an utterance, the expected clarification or commit behavior, and the reason it is safer than a plain chatbot answer.
 - Wire more Semantic Network explanations into the UI, especially type ancestry and relation paths.
+
+Regression hygiene:
+
+- Keep measuring router/compiler/admission quality directly on Glitch, Ledger, medical ambiguity, temporal packs, and mixed-domain Lava packs. The old Python-selector comparison has served its purpose and is no longer a useful frontier metric.
+- Use the truth-maintenance/admission delta as a regular frontier metric: the next good improvements should reduce fuzzy edges by improving model workspace quality, profile contracts, or predicate surfaces, not by adding English phrase patches.
+- Keep a regular regression cadence around segmentation, predicate-palette admission, stored-logic conflicts, and rule/query mixed turns; the frontier is productive enough that small improvements can easily re-open older failure modes.
 - Keep improving reset/session hygiene so first utterances after reset cannot inherit stale entity context.
+
+Domain/data lanes:
+
 - Expand the medical profile only when the new predicate earns its place through tests and a clear demo.
-- Keep measuring router/compiler/admission quality directly on Glitch, Ledger, medical ambiguity, temporal packs, and mixed-domain lava packs. The old Python-selector comparison has served its purpose and is no longer a useful frontier metric.
-- Push the remaining mapper frontier: durable rule admission for quantified exception language, better decision-label calibration for safe partial commits, and cleaner nested event predicate shapes.
-- Represent temporal facts durably enough that extracted dates, intervals, corrections, and relative-time anchors can support real KB queries instead of staying only in the semantic workspace.
-- Keep profile contracts out of the generic mapper: profile packages should own domain type/grounding policy, while the mapper stays structural and auditable.
-- Treat richer domain context as a catalog/skill mechanism, not hardwired prompt drift. The current auto path is router-owned and measured; next steps are multi-profile turns, router confidence UX, and deciding when mixed-domain utterances should be segmented before Semantic IR.
-- Prototype `profile_bootstrap_v1`: feed 5-20 texts from an unfamiliar domain and ask the model to propose entity types, predicates, argument contracts, admission risks, clarification policies, and starter frontier cases. The first success criterion is reviewable profile-design material, not automatic profile authority.
-- Grow deterministic stored-logic admission beyond the first guard: profile-declared functional predicates, temporal scope, negation policy, and richer contradiction probes are still open.
-- Grow clause support records and the new `truth_maintenance` proposal block into a real dependency layer: derived conclusions should eventually point to supporting facts, rules, source documents, and retractions without granting model-proposed consequences write authority.
-- Use the new truth-maintenance/admission delta as a regular frontier metric: the next good improvements should reduce fuzzy edges by improving model workspace quality, profile contracts, or predicate surfaces, not by adding English phrase patches.
-- Expand `kb_context_pack` carefully under context-budget pressure: first measure correction/conflict gains, then consider ranked retrieval controls, ontology slices, source-priority summaries, and explicit KB/world manifests.
-- Extend predicate-contract enforcement beyond obvious structural mismatches: more reusable profile validators, profile-owned type contracts, declared functional predicates, temporal scope, and better UI surfacing for skipped operations.
-- Promote scenario-local predicate contracts into reusable profile/predicate manifests so fewer expectations live only inside individual frontier packs.
-- Expand trace views around admission contracts so reviewers can see not only the model decision, but also which exact boundary checks passed.
-- Build a new held-out frontier pack instead of over-polishing Silverton: cross-document temporal causality, aliases, corrections, disputed claims, and profile type pressure.
-- Port the new cross-turn frontier pack into a runner only after deciding which expectations should be hard regression gates versus research pressure gauges.
-- Expand router/profile-selection tests from clean synthetic switching into messy mixed-domain turns. Profile selection is still advisory context loading, not admission authority.
-- Use the mixed agility harness as a regular pressure gauge. The next useful failures are not JSON validity; they are wrong router choices, vague story predicates, placeholder/null write arguments, and mapper policy for partially good operations.
-- Keep argument-role validation structural. The mapper now catches clear cases like `interval_start/2` receiving a date in the interval slot; the next useful gains are reusable contracts and richer profile validators, not phrase patches.
 - Keep expanding the CourtListener lane with small live API slices and curated synthetic boundaries. Generated live data remains ignored under `datasets/courtlistener/generated/` unless a tiny fixture is intentionally curated.
 - Run the SEC adapter against a small EDGAR submissions slice only after setting `SEC_USER_AGENT` and choosing a durable cache/review policy. Keep generated live data under ignored `datasets/sec_edgar/generated/`.
-- Keep the Semantic IR harness model-agnostic, but use `qwen/qwen3.6-35b-a3b` as the default development model unless a specific comparison question needs another local model.
 - Tighten narrative ingestion next around stable object identity, event observation predicates, and temporal/event ordering instead of adding story-specific Python phrase patches.
-- Keep a regular regression cadence around segmentation, predicate-palette admission, stored-logic conflicts, and rule/query mixed turns; the frontier is productive enough that small improvements can easily re-open older failure modes.
-- Push the policy-demo frontier into the UI/prompt book once the command-line harness stays stable: the highest-impact demo is still "record reimbursement policy, ingest February events, ask which reimbursements violated policy, and show why without writing derived violation facts."
+- Keep the Semantic IR harness model-agnostic, but use `qwen/qwen3.6-35b-a3b` as the default development model unless a specific comparison question needs another local model.
 
 ## Verification Snapshot
 
