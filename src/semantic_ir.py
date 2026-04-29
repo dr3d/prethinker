@@ -409,6 +409,7 @@ DOCUMENT_TO_LOGIC_COMPILER_STRATEGY: dict[str, Any] = {
     "assertion_status": [
         "Classify content before writing: durable fact, observation, claim/allegation/report, correction, rule/norm/obligation, query, unsafe implication, or test-only scaffold.",
         "Claims can become durable claim records; they do not become durable world facts unless the source context authorizes that promotion.",
+        "For source-owned repeated records such as grievances, allegations, complaints, and accusations, preserve epistemic status explicitly when the allowed palette offers a status/provenance predicate. Useful labels include source_bound_accusation, source_claim, unverified_claim, observed_fact, and externally_confirmed_fact.",
         "Derived consequences belong in truth_maintenance unless the utterance directly states them or an executable rule/query needs them.",
     ],
     "entity_selection": [
@@ -424,6 +425,7 @@ DOCUMENT_TO_LOGIC_COMPILER_STRATEGY: dict[str, Any] = {
     ],
     "repeated_structure_strategy": [
         "For list-like source material, use stable ids plus record/property predicates, for example record(id, label), actor(id, actor), target(id, target), method(id, method), purpose(id, purpose), effect(id, effect).",
+        "For source-owned record lists, include an epistemic-status or provenance property keyed by the record id when the palette supports it, so later questions can distinguish accusations, claims, observations, and confirmed facts.",
         "Balance coverage across source boundary, entities, rules, representative records, conclusions, and commitments instead of spending the whole operation budget on the first repeated list.",
     ],
     "truth_maintenance_strategy": [
@@ -3060,17 +3062,22 @@ def _is_query_placeholder_arg(raw: str) -> bool:
     value = _atomize(str(raw or ""))
     if re.fullmatch(r"(arg|ledger|var)\d+", value):
         return True
-    return value in {
+    if value in {
         "answer",
         "arg",
         "actor",
         "action",
+        "accused",
+        "batch",
+        "batch_id",
+        "batchid",
         "condition",
         "candidate",
         "content",
         "declaration",
         "entity",
         "entry",
+        "evidence",
         "explanation",
         "explanation_detail",
         "explanationdetail",
@@ -3091,9 +3098,11 @@ def _is_query_placeholder_arg(raw: str) -> bool:
         "method_detail",
         "methoddetail",
         "object",
+        "observer",
         "person",
         "place",
         "reason",
+        "reporter",
         "record",
         "result",
         "rule",
@@ -3106,11 +3115,22 @@ def _is_query_placeholder_arg(raw: str) -> bool:
         "time",
         "type",
         "value",
+        "violation",
         "what",
         "when",
         "where",
         "who",
-    }
+    }:
+        return True
+    if value in {"obsid", "recallid", "recordtype", "rulecondition", "rulecontent", "violationlabel"}:
+        return True
+    if (
+        len(value) > 3
+        and not any(char.isdigit() for char in value)
+        and value.endswith(("id", "label", "content", "condition", "type"))
+    ):
+        return True
+    return False
 
 
 def _placeholder_variable_name(raw: str) -> str:

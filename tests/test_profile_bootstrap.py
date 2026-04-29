@@ -44,6 +44,7 @@ class ProfileBootstrapTests(unittest.TestCase):
     def test_bootstrap_guidance_preserves_source_records_reporters_and_conditions(self) -> None:
         self.assertIn("source-record predicate", PROFILE_BOOTSTRAP_GUIDANCE)
         self.assertIn("reporting/source actor", PROFILE_BOOTSTRAP_GUIDANCE)
+        self.assertIn("epistemic-status/provenance predicate", PROFILE_BOOTSTRAP_GUIDANCE)
         self.assertIn("avoid unary relation-like forms", PROFILE_BOOTSTRAP_GUIDANCE)
         self.assertIn("source-record loss", PROFILE_BOOTSTRAP_REVIEW_GUIDANCE)
         self.assertIn("reporter loss", PROFILE_BOOTSTRAP_REVIEW_GUIDANCE)

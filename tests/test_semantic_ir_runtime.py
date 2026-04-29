@@ -65,6 +65,7 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         self.assertEqual(strategy["name"], "document_to_logic_compiler_strategy_v1")
         self.assertIn("predicate_selection", strategy)
         self.assertTrue(any("querying" in item for item in strategy["predicate_selection"]))
+        self.assertTrue(any("source_bound_accusation" in item for item in strategy["assertion_status"]))
         self.assertTrue(any("stale date anchor" in item for item in strategy["truth_maintenance_strategy"]))
 
     def test_mapper_emits_valid_legacy_parse_for_safe_assert(self) -> None:
@@ -152,6 +153,30 @@ class SemanticIRRuntimeTests(unittest.TestCase):
                     "source": "direct",
                     "safety": "safe",
                 },
+                {
+                    "operation": "query",
+                    "predicate": "grievance_reporter",
+                    "args": ["grievanceid", "reporter"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "query",
+                    "predicate": "grievance_target",
+                    "args": ["grievanceid", "batch"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "query",
+                    "predicate": "alleged_violation",
+                    "args": ["Grievance", "accused", "violationlabel", "evidence"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
             ],
         )
 
@@ -167,6 +192,9 @@ class SemanticIRRuntimeTests(unittest.TestCase):
                 "declaration_action/2",
                 "grievance/2",
                 "ambiguous_identity/2",
+                "grievance_reporter/2",
+                "grievance_target/2",
+                "alleged_violation/4",
             ],
         )
 
@@ -183,6 +211,9 @@ class SemanticIRRuntimeTests(unittest.TestCase):
                 "declaration_action(Declaration, Action).",
                 "grievance(Grievanceid, Grievancelabel).",
                 "ambiguous_identity(k_lume, Candidate).",
+                "grievance_reporter(Grievanceid, Reporter).",
+                "grievance_target(Grievanceid, Batch).",
+                "alleged_violation(Grievance, Accused, Violationlabel, Evidence).",
             ],
         )
 

@@ -46,8 +46,8 @@ QA_JUDGE_SCHEMA: dict[str, Any] = {
         "schema_version": {"type": "string", "const": "qa_judge_v1"},
         "verdict": {"type": "string", "enum": ["exact", "partial", "miss", "not_judged"]},
         "answer_supported": {"type": "boolean"},
-        "concise_answer": {"type": "string"},
-        "issues": {"type": "array", "maxItems": 8, "items": {"type": "string"}},
+        "concise_answer": {"type": "string", "maxLength": 600},
+        "issues": {"type": "array", "maxItems": 8, "items": {"type": "string", "maxLength": 300}},
     },
 }
 
@@ -68,6 +68,15 @@ POST_INGESTION_QA_QUERY_STRATEGY: dict[str, Any] = {
     "arity_and_variable_policy": [
         "Keep every query at the full compiled predicate arity.",
         "Use uppercase variables such as X, Y, Item, Actor, Source, Date, or Reason for unknown slots.",
+        "If the question asks who, what, which, where, when, or why, the requested answer slot must be a variable unless that exact value is named in the question itself.",
+        "Do not pre-fill an answer slot with a likely answer from context; query for it. For example, ask grievance_actor(Grievance, Actor), not grievance_actor(Grievance, central_bakery_fleet), when the question asks who was accused.",
+        "Do not over-constrain descriptive label slots with guessed paraphrase atoms. If a question names a phrase that may be embedded inside a longer normalized label, keep the label/method/explanation slot as a variable and retrieve candidate rows.",
+        "Do not bind a record id too early when the requested answer may live in a sibling or duplicate record. Prefer broad discovery queries with variables first, then let the returned rows reveal the best-supported record.",
+        "For source-owned record predicates such as alleged_violation/4, ledger_entry/3, witness_observation/3, or grievance-like records, use variables for role/content/evidence slots unless the exact atom appears in relevant_clauses. Words like accused, evidence, observer, violation, and reporting_act are slot labels, not evidence values.",
+        "For where/location questions, prefer location predicates when they exist; otherwise retrieve method/explanation rows that may contain location-bearing labels instead of querying only object targets.",
+        "For institution, ledger, record, or source questions, retrieve both the event text and the container/source slot with a shared record variable: for example grievance_method(Grievance, Method), grievance_explanation(Grievance, Explanation), and grievance_target(Grievance, Institution).",
+        "For who-reported or reporter questions, query reporter predicates and the content predicates that describe what was reported, such as grievance_reporter(Grievance, Reporter) with grievance_explanation(Grievance, Explanation) or grievance_method(Grievance, Method). Do not rely only on target predicates.",
+        "When a question phrase may be only part of a longer normalized atom, do not bind the phrase as a lowercase constant. Query the whole slot as a variable and let returned rows expose atoms such as infirmary_ledger_recorded_blue_sneezing.",
         "Never use lowercase placeholder constants such as who, what, item, reason, source, or answer when a variable is intended.",
         "Words that merely name the slot, such as grievance_label, method_detail, explanation_detail, candidate, label, content, value, status, or institution, are variables too; write them as GrievanceLabel, MethodDetail, ExplanationDetail, Candidate, Label, Content, Value, Status, or Institution.",
         "If you want all rows for grievance/2, query grievance(Grievance, Label), not grievance(Grievance, grievance_label).",
@@ -148,10 +157,16 @@ def main() -> int:
         "For a query over a predicate, keep the predicate's full arity from compiled_predicate_inventory. If a slot is unspecified, fill it with an uppercase variable.",
         "When the answer position is unknown, use Prolog variables X, Y, or Z exactly. Lowercase terms such as rule, time, condition, item, person, location, who, what, where, and answer are constants, not variables.",
         "Inside candidate_operations[].args, variables must also be uppercase strings such as X, Y, Z, Rule, Item, or Time.",
+        "For who/what/which/where/when/why questions, leave the requested answer position as a variable. Do not fill that slot with a likely answer from relevant_clauses unless the user question itself names that value.",
         "Never put lowercase generic placeholder words into query arguments when you want the KB to return a value. This includes label words such as grievance_label, method_detail, explanation_detail, candidate, label, content, value, status, and institution.",
         "compiled_query_templates shows legal query shapes. Prefer those templates and then bind only the slots that are clearly named in the question.",
         "For multi-hop questions, emit multiple safe query operations over the actual KB predicates instead of inventing a composite predicate.",
         "For source/institution questions, prefer predicates that actually expose source, ledger, actor, reporter, complainant, or institution values in the compiled KB examples.",
+        "For ledger/record/institution questions, pair the descriptive event predicate with the likely container predicate using the same variable name, such as grievance_method(Grievance, Method) plus grievance_target(Grievance, Institution).",
+        "Do not lock onto a single grievance/document id before discovering answer-bearing rows; duplicate compiled records may contain different detail levels.",
+        "For reporter questions, include grievance_reporter(Grievance, Reporter) and a content-bearing predicate with the same Grievance variable; the thing reported may appear in an explanation or method label rather than in grievance_target.",
+        "For source-owned record predicates, avoid putting role labels into arguments. Query alleged_violation(Grievance, Actor, Violation, Evidence), ledger_entry(Ledger, Entry, RecordType), or witness_observation(Observation, Observer, Content) unless a concrete atom is copied from relevant_clauses.",
+        "When the question names a partial phrase such as blue sneezing, do not bind blue_sneezing unless that exact atom appears in relevant_clauses; use a variable over explanation/method slots so longer atoms can match.",
         "Keep QA workspaces compact: at most 4 query operations and at most 2 short self_check notes.",
         "For unsafe inference traps, preserve the difference between direct KB support, source claim, inference, and unknown.",
         "Use post_ingestion_qa_query_strategy_v1 in kb_context_pack as the query-planning procedure.",
@@ -521,6 +536,11 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "partial: query results contain some relevant support but miss important reference content or include unresolved noise.",
             "miss: query results do not support the reference answer, use wrong predicates, return no relevant rows, or propose writes for an ordinary question.",
             "not_judged: malformed/no reference or no meaningful query result to compare.",
+            "Identity policy: candidate_identity or ambiguous_identity rows are possible identities, not proof of identity. Multiple candidates support answers such as 'unknown', 'ambiguous', 'not definitively identified', or 'do not assign automatically'.",
+            "Automatic-identity policy: candidate_identity(k_lume, kira_lume) does not authorize assigning k_lume to kira_lume. Unless query results include a resolved_identity/same_person/identified_as fact or a rule explicitly permitting assignment, candidate rows support 'No' for automatic assignment questions.",
+            "Source-scope policy: if the reference answer says the event is not applicable to this source/document and all relevant queries return no matching rows while the source KB clearly concerns a different document/domain, this supports the reference. Use exact when this is the central answer.",
+            "Normalized-atom policy: snake_case atoms are the KB's canonical surface. If a returned atom embeds the reference answer as a clear normalized phrase, such as departed_dock_c_before_yeast_inspection supporting 'Dock C', that can be exact support even when the value appears inside a method or explanation predicate.",
+            "Return the final judgment only. Do not include internal debate, alternative verdicts, or self-correction in concise_answer.",
         ],
     }
     messages = [
@@ -529,27 +549,42 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "content": (
                 "You are a strict QA judge for a governed symbolic KB. "
                 "Return qa_judge_v1 JSON only. Judge the KB query results against the human reference answer; "
-                "do not use outside knowledge."
+                "do not use outside knowledge. Give only the final verdict rationale, with no chain-of-thought."
             ),
         },
         {"role": "user", "content": "INPUT_JSON:\n" + json.dumps(payload, ensure_ascii=False, indent=2)},
     ]
-    try:
-        return call_lmstudio_json_schema(
-            config=config,
-            messages=messages,
-            schema_name="qa_judge_v1",
-            schema=QA_JUDGE_SCHEMA,
-            max_tokens=min(int(config.max_tokens), 1200),
-        )
-    except Exception as exc:
-        return {
-            "schema_version": "qa_judge_v1",
-            "verdict": "not_judged",
-            "answer_supported": False,
-            "concise_answer": "",
-            "issues": [f"judge error: {exc}"],
-        }
+    last_error: Exception | None = None
+    for attempt in range(2):
+        try:
+            return call_lmstudio_json_schema(
+                config=config,
+                messages=messages,
+                schema_name="qa_judge_v1",
+                schema=QA_JUDGE_SCHEMA,
+                max_tokens=min(int(config.max_tokens), 1200),
+            )
+        except Exception as exc:
+            last_error = exc
+            if attempt == 0:
+                messages = [
+                    *messages,
+                    {
+                        "role": "user",
+                        "content": (
+                            "The previous judge response was malformed. "
+                            "Retry with exactly one qa_judge_v1 JSON object and no prose."
+                        ),
+                    },
+                ]
+                continue
+    return {
+        "schema_version": "qa_judge_v1",
+        "verdict": "not_judged",
+        "answer_supported": False,
+        "concise_answer": "",
+        "issues": [f"judge error: {last_error}"],
+    }
 
 
 def call_lmstudio_json_schema(

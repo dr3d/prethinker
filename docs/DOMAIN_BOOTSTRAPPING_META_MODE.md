@@ -748,6 +748,23 @@ This keeps the boundary clean:
 - Python parses the markdown numbering and JSONL oracle, but does not derive
   semantic answers from the question text.
 
+Recent Proclamation lesson:
+
+- Style-aligned profile/context pressure produced a stronger compiled KB for the
+  existing QA surface and reached `19 exact / 1 miss` on the first 20 reference
+  questions.
+- The remaining miss exposed a real missing structure: the KB could list
+  grievances, but not explicitly answer whether those grievances were
+  source-bound accusations or externally confirmed facts.
+- After making epistemic status/provenance a profile/intake concern, a hint-free
+  recompile invented `grievance_status/2` and emitted
+  `source_bound_accusation` rows. That status-aware KB reached
+  `18 exact / 2 miss` on the same first-20 QA pass.
+- The live tradeoff is useful: better epistemic structure can shift predicate
+  surfaces enough to stress query planning. The intended repair is still
+  profile/schema/context pressure plus structural query normalization, not
+  Python interpretation of source prose.
+
 ## First Closed Loop
 
 A second runner now closes the loop:

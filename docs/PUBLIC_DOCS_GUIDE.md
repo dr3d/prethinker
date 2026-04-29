@@ -134,11 +134,11 @@ Latest local verification:
 - Goldilocks full-story segmented smoke: `56` deduped mutations across `50` segments, with placeholder and vague-predicate bad writes removed after adding a generic story-world predicate palette.
 - Policy/reimbursement cross-turn demo: English policy installed executable rules, derived query answers without writing derived `violation/2` facts, then corrected state and changed the answer.
 - Profile bootstrap closed-loop smoke: a model-proposed starter profile ran generated starter cases through the normal Semantic IR mapper with `8/8` valid workspaces and `7/8` expected-boundary hits.
-- Raw Proclamation hint-free profile-review experiment: useful run produced `30` candidate predicates, `93` admitted source-compile operations, `4/4` successful planned passes, and first-20 post-ingestion QA at `10 exact / 5 partial / 4 miss / 1 not judged`. Newer source-record/reporter/condition pressure produced a stronger product-like compile shape (`18` predicates, `4` repeated structures, `497` admitted operations), and structural query-placeholder normalization lifted the first-20 QA pass to `12 exact / 2 partial / 6 miss`.
+- Raw Proclamation hint-free profile-review experiment: useful early run produced `30` candidate predicates, `93` admitted source-compile operations, `4/4` successful planned passes, and first-20 post-ingestion QA at `10 exact / 5 partial / 4 miss / 1 not judged`. Newer source-record/reporter/condition pressure produced a stronger style-aligned compile shape (`18` predicates, `4` repeated structures, `497` admitted operations), and structural query-placeholder/QA planning improvements lifted that first-20 QA pass to `19 exact / 1 miss`. A follow-up status-aware hint-free recompile invented `grievance_status/2` with `source_bound_accusation` and reached `18 exact / 2 miss`, showing both progress on epistemic status and the remaining predicate-surface/query-planning tension.
 
 The important qualitative result is that the current system has moved from
 Python-side language rescue toward model-owned context planning plus
 deterministic admission. The remaining hard problems are model-owned
 segmentation, reusable predicate-contract coverage, temporal fact
-representation, rule admission, broader profile validator coverage, and mapper
-policy for partial/unsafe operations.
+representation, a temporal-graph sub-IR, rule admission, broader profile
+validator coverage, and mapper policy for partial/unsafe operations.

@@ -82,6 +82,13 @@ def test_post_ingestion_qa_strategy_prefers_compiled_kb_surface() -> None:
     assert "compiled_predicate_inventory.signatures" in " ".join(strategy["predicate_surface_policy"])
     assert "relevant_clauses" in " ".join(strategy["predicate_surface_policy"])
     assert any("full compiled predicate arity" in item for item in strategy["arity_and_variable_policy"])
+    assert any("Do not pre-fill an answer slot" in item for item in strategy["arity_and_variable_policy"])
+    assert any("Do not over-constrain descriptive label slots" in item for item in strategy["arity_and_variable_policy"])
+    assert any("record id too early" in item for item in strategy["arity_and_variable_policy"])
+    assert any("source-owned record predicates" in item for item in strategy["arity_and_variable_policy"])
+    assert any("institution, ledger, record, or source questions" in item for item in strategy["arity_and_variable_policy"])
+    assert any("who-reported or reporter questions" in item for item in strategy["arity_and_variable_policy"])
+    assert any("longer normalized atom" in item for item in strategy["arity_and_variable_policy"])
     assert any("grievance(Grievance, Label)" in item for item in strategy["arity_and_variable_policy"])
     assert any("source-attributed claims" in item for item in strategy["epistemic_policy"])
 
