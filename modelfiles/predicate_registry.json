@@ -167,6 +167,19 @@
     { "name": "too_cold_for", "arity": 2, "aliases": [] },
     { "name": "too_hard_for", "arity": 2, "aliases": [] },
     { "name": "too_soft_for", "arity": 2, "aliases": [] },
-    { "name": "just_right_for", "arity": 2, "aliases": [] }
+    { "name": "just_right_for", "arity": 2, "aliases": [] },
+    { "name": "event_on", "arity": 2, "aliases": [] },
+    { "name": "interval_start", "arity": 2, "aliases": [] },
+    { "name": "interval_end", "arity": 2, "aliases": [] },
+    { "name": "before", "arity": 2, "aliases": [] },
+    { "name": "after", "arity": 2, "aliases": [] },
+    { "name": "precedes", "arity": 2, "aliases": [] },
+    { "name": "follows", "arity": 2, "aliases": [] },
+    { "name": "during", "arity": 2, "aliases": [] },
+    { "name": "overlaps", "arity": 2, "aliases": [] },
+    { "name": "same_time", "arity": 2, "aliases": [] },
+    { "name": "concurrent", "arity": 2, "aliases": [] },
+    { "name": "supersedes", "arity": 2, "aliases": [] },
+    { "name": "corrected_temporal_value", "arity": 4, "aliases": [] }
   ]
 }

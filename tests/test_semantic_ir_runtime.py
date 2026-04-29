@@ -8,6 +8,7 @@ from src.semantic_ir import (
     semantic_ir_to_legacy_parse,
     semantic_ir_to_prethink_payload,
 )
+from src.temporal_kernel import TEMPORAL_KERNEL_SIGNATURES, install_temporal_kernel
 
 
 def _ir(**updates):
@@ -438,6 +439,112 @@ class SemanticIRRuntimeTests(unittest.TestCase):
             ],
         )
         self.assertTrue(parsed["temporal_graph"]["present"])
+
+    def test_temporal_kernel_rules_reason_over_admitted_temporal_facts(self) -> None:
+        ir = _ir(
+            decision="commit",
+            turn_type="state_update",
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "before",
+                    "args": ["submission_event", "approval_event"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "assert",
+                    "predicate": "before",
+                    "args": ["approval_event", "payment_event"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+            ],
+            temporal_graph={
+                "schema_version": "temporal_graph_v1",
+                "events": [
+                    {
+                        "id": "submission_event",
+                        "label": "submission",
+                        "participants": ["mara"],
+                        "source_status": "direct_assertion",
+                        "support_ref": "current_utterance",
+                    },
+                    {
+                        "id": "approval_event",
+                        "label": "approval",
+                        "participants": ["iris"],
+                        "source_status": "direct_assertion",
+                        "support_ref": "current_utterance",
+                    },
+                    {
+                        "id": "payment_event",
+                        "label": "payment",
+                        "participants": ["finance"],
+                        "source_status": "direct_assertion",
+                        "support_ref": "current_utterance",
+                    },
+                ],
+                "time_anchors": [],
+                "intervals": [],
+                "edges": [
+                    {
+                        "relation": "before",
+                        "a": "submission_event",
+                        "b": "approval_event",
+                        "source_status": "direct_assertion",
+                        "support_ref": "current_utterance",
+                    },
+                    {
+                        "relation": "before",
+                        "a": "approval_event",
+                        "b": "payment_event",
+                        "source_status": "direct_assertion",
+                        "support_ref": "current_utterance",
+                    },
+                ],
+            },
+        )
+
+        parsed, warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=sorted(TEMPORAL_KERNEL_SIGNATURES),
+        )
+        self.assertEqual(warnings, [])
+        self.assertEqual(
+            parsed["facts"],
+            [
+                "before(submission_event, approval_event).",
+                "before(approval_event, payment_event).",
+            ],
+        )
+
+        server = PrologMCPServer(compiler_prompt_enabled=False, semantic_ir_enabled=True)
+        for fact in parsed["facts"]:
+            self.assertEqual(server.assert_fact(fact)["status"], "success")
+        install = install_temporal_kernel(server)
+        self.assertEqual(install["status"], "success")
+
+        inverse = server.query_rows("after(approval_event, submission_event).")
+        self.assertEqual(inverse["status"], "success")
+        transitive = server.query_rows("precedes(submission_event, payment_event).")
+        self.assertEqual(transitive["status"], "success")
+
+    def test_server_registry_exposes_temporal_kernel_predicates(self) -> None:
+        server = PrologMCPServer(compiler_prompt_enabled=False, semantic_ir_enabled=True)
+        available = set(server._semantic_ir_allowed_predicates())
+        self.assertTrue(TEMPORAL_KERNEL_SIGNATURES.issubset(available))
+        sec_available = set(server._semantic_ir_allowed_predicates("sec_contracts@v0"))
+        self.assertIn("obligation/3", sec_available)
+        self.assertTrue(TEMPORAL_KERNEL_SIGNATURES.issubset(sec_available))
+        sec_contracts = {
+            str(row.get("signature", "")).strip()
+            for row in server._semantic_ir_predicate_contracts("sec_contracts@v0")
+        }
+        self.assertIn("obligation/3", sec_contracts)
+        self.assertTrue(TEMPORAL_KERNEL_SIGNATURES.issubset(sec_contracts))
 
     def test_mapper_skips_negative_assertion_until_negation_policy_exists(self) -> None:
         ir = _ir(

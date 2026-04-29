@@ -79,7 +79,7 @@ The public repo currently tracks `45` pytest files under [tests/](https://github
 
 ```powershell
 python -m pytest -q
-# 399 passed
+# 401 passed
 ```
 
 Current high-signal evidence:
@@ -90,6 +90,7 @@ Current high-signal evidence:
 - Profile-owned predicate aliases now canonicalize candidate-operation predicate surfaces before palette admission, with an audit trail such as `dad_of/2 -> parent/2`; this is registry/context authority, not Python prose parsing.
 - Lava v5 latest 60-attempt rerun: `60/60` parsed JSON, `60/60` domain selector, `60/60` admission-safe, `45/60` semantic-clean, `41/60` full expectation score, `0/60` temp-0 signature variance groups, and `0` fuzzy edge kinds.
 - Policy/reimbursement cross-turn demo: English policy installed executable rules, derived query answers without writing derived `violation/2` facts, then corrected state and changed the answer.
+- Temporal kernel slice: admitted `before/2` facts now support deterministic `after/2`, transitive `precedes/2`, and `follows/2` queries through Prolog rules; `temporal_graph_v1` remains proposal-only unless matching candidate operations pass admission.
 
 The UMLS Semantic Network and Metathesaurus-derived runtime assets are intentionally not committed because they depend on licensed source data. The public repo includes the builders, tests, docs, and profile code; outside reproduction of the UMLS lane requires obtaining the licensed UMLS files separately.
 

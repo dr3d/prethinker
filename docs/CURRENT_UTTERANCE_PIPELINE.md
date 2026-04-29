@@ -259,6 +259,13 @@ candidate operations that pass deterministic admission. A temporal graph can
 make the model's time/order understanding visible, but it cannot write temporal
 facts by itself.
 
+When a temporal fact is admitted through `candidate_operations`, it can enter a
+small deterministic temporal kernel. For example, admitted `before/2` facts can
+support `after/2`, transitive `precedes/2`, and `follows/2` queries in Prolog.
+That is intentionally different from asking the model to answer the temporal
+question from prose. The temporal predicate contracts are cross-cutting context,
+loaded beside whichever domain profile the router selected.
+
 ### 8. The mapper admits, skips, or projects operations
 
 The mapper is the hard gate. It checks candidate operations against generic
@@ -384,7 +391,9 @@ papering over a bad proposal.
 - Better context selection under a small context window.
 - Clearer profile selection for mixed-domain turns.
 - More reusable predicate contracts and profile validators.
-- Richer temporal fact representation after admission.
+- Richer temporal fact representation after admission, building from the first
+  deterministic temporal kernel toward date/interval corrections and policy
+  deadlines.
 - Safer durable rule admission.
 - Better truth-maintenance support links and conflict handling.
 - UI traces that make every context source, model proposal, skip reason, query,

@@ -69,6 +69,7 @@ from src.semantic_ir import (
     semantic_ir_to_prethink_payload,
 )
 from src.semantic_router import SemanticRouterCallConfig, call_semantic_router
+from src.temporal_kernel import TEMPORAL_KERNEL_PREDICATE_CONTRACTS
 
 
 FUNCTIONAL_CURRENT_STATE_PREDICATES: set[tuple[str, int]] = {
@@ -1892,15 +1893,50 @@ class PrologMCPServer:
         if profile_contracts:
             signatures = [str(row.get("signature", "")).strip() for row in profile_contracts if str(row.get("signature", "")).strip()]
             if signatures:
-                return signatures
+                return self._dedupe_strings([*signatures, *self._temporal_kernel_signatures()])
         signatures = sorted(self._registry_signatures)
         return [f"{name}/{arity}" for name, arity in signatures]
 
     def _semantic_ir_predicate_contracts(self, profile_id: str = "") -> list[dict[str, Any]]:
-        return self._profile_contracts_for(profile_id) if profile_id else []
+        contracts = self._profile_contracts_for(profile_id) if profile_id else []
+        return self._dedupe_contracts([*contracts, *TEMPORAL_KERNEL_PREDICATE_CONTRACTS])
 
     def _semantic_ir_domain_context(self, profile_id: str = "") -> list[str]:
         return self._profile_context_for(profile_id) if profile_id else []
+
+    @staticmethod
+    def _temporal_kernel_signatures() -> list[str]:
+        return [
+            str(row.get("signature", "")).strip()
+            for row in TEMPORAL_KERNEL_PREDICATE_CONTRACTS
+            if str(row.get("signature", "")).strip()
+        ]
+
+    @staticmethod
+    def _dedupe_strings(values: list[str]) -> list[str]:
+        out: list[str] = []
+        seen: set[str] = set()
+        for value in values:
+            text = str(value or "").strip()
+            if not text or text in seen:
+                continue
+            seen.add(text)
+            out.append(text)
+        return out
+
+    @staticmethod
+    def _dedupe_contracts(contracts: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        out: list[dict[str, Any]] = []
+        seen: set[str] = set()
+        for contract in contracts:
+            if not isinstance(contract, dict):
+                continue
+            signature = str(contract.get("signature", "")).strip()
+            if not signature or signature in seen:
+                continue
+            seen.add(signature)
+            out.append(deepcopy(contract))
+        return out
 
     def _semantic_ir_context_audit(
         self,

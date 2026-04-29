@@ -80,6 +80,53 @@ The current edge vocabulary is intentionally small:
 before | after | during | overlaps | starts | ends | same_time | supersedes | unknown
 ```
 
+## Durable Temporal Kernel
+
+The first durable slice is a small predicate/rule kit, not a full temporal
+logic system:
+
+```text
+event_on/2
+interval_start/2
+interval_end/2
+before/2
+after/2
+precedes/2
+follows/2
+during/2
+overlaps/2
+same_time/2
+concurrent/2
+supersedes/2
+corrected_temporal_value/4
+```
+
+The model may propose these predicates as `candidate_operations`. They are
+available as a cross-cutting context module beside the selected domain profile,
+so legal, medical, contract, probate, and story-world turns can all preserve
+time/order structure without each profile inventing its own private temporal
+vocabulary. The mapper still validates the operation before anything is
+written.
+
+The deterministic temporal kernel then adds only rules over admitted facts:
+
+```prolog
+after(Later, Earlier) :- before(Earlier, Later).
+precedes(Earlier, Later) :- before(Earlier, Later).
+precedes(Earlier, Later) :- before(Earlier, Middle), precedes(Middle, Later).
+follows(Later, Earlier) :- precedes(Earlier, Later).
+concurrent(A, B) :- same_time(A, B).
+concurrent(A, B) :- overlaps(A, B).
+```
+
+This keeps the architecture clean:
+
+```text
+LLM extracts temporal structure
+mapper admits only safe temporal clauses
+Prolog answers temporal questions from admitted structure
+```
+
 ## Admission Boundary
 
 `temporal_graph_v1` never writes to the KB by itself.
@@ -139,12 +186,17 @@ Implemented:
 - admission diagnostics that surface event, time-anchor, interval, and edge
   counts plus bounded sample rows;
 - tests proving that temporal graphs have no durable KB effect without admitted
-  candidate operations.
+  candidate operations;
+- a first deterministic temporal kernel that derives `after/2`, transitive
+  `precedes/2`, `follows/2`, and coarse `concurrent/2` answers from admitted
+  temporal facts.
 
 Next:
 
 - add graph-derived temporal QA probes;
-- use graph proposals to improve temporal predicate profile design;
-- decide which temporal predicates deserve durable profile contracts;
+- wire the temporal kernel into the policy-demo harness and UI flows where the
+  user needs temporal queries over admitted events;
+- grow correction support so stale temporal anchors can be retracted or marked
+  superseded consistently;
 - expand trace/UI views so humans can inspect temporal graph proposals beside
   candidate operations and mapper decisions.
