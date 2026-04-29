@@ -107,6 +107,22 @@ class SemanticIRRuntimeTests(unittest.TestCase):
                     "source": "direct",
                     "safety": "safe",
                 },
+                {
+                    "operation": "query",
+                    "predicate": "grievance_method",
+                    "args": ["grievanceid", "method"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "query",
+                    "predicate": "declare_recall",
+                    "args": ["item", "status"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
             ],
         )
 
@@ -117,6 +133,8 @@ class SemanticIRRuntimeTests(unittest.TestCase):
                 "ledger_entry/2",
                 "explanation_given/2",
                 "conflict_between_ledgers/3",
+                "grievance_method/2",
+                "declare_recall/2",
             ],
         )
 
@@ -128,6 +146,8 @@ class SemanticIRRuntimeTests(unittest.TestCase):
                 "ledger_entry(Ledger1, Entry).",
                 "explanation_given(X, Explanation).",
                 "conflict_between_ledgers(Grievance, Ledger1, Ledger2).",
+                "grievance_method(Grievanceid, Method).",
+                "declare_recall(Item, Status).",
             ],
         )
 

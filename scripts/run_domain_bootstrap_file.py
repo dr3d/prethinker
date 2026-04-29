@@ -29,8 +29,11 @@ if str(REPO_ROOT) not in sys.path:
 
 from src.profile_bootstrap import (  # noqa: E402
     PROFILE_BOOTSTRAP_JSON_SCHEMA,
+    PROFILE_BOOTSTRAP_REVIEW_JSON_SCHEMA,
     build_profile_bootstrap_messages,
+    build_profile_bootstrap_review_messages,
     parse_profile_bootstrap_json,
+    parse_profile_bootstrap_review_json,
     profile_bootstrap_allowed_predicates,
     profile_bootstrap_domain_context,
     profile_bootstrap_predicate_contracts,
@@ -91,6 +94,16 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--max-plan-passes", type=int, default=8)
     parser.add_argument("--include-model-input", action="store_true")
+    parser.add_argument(
+        "--review-profile",
+        action="store_true",
+        help="Run an LLM-owned profile review pass before optional source compilation.",
+    )
+    parser.add_argument(
+        "--profile-review-retry",
+        action="store_true",
+        help="If profile review recommends retry, rerun profile bootstrap with review guidance.",
+    )
     return parser.parse_args()
 
 
@@ -193,6 +206,67 @@ def main() -> int:
         if isinstance(retry_parsed, dict):
             parsed = retry_parsed
             error = retry_error
+    profile_review: dict[str, Any] | None = None
+    profile_review_retry: dict[str, Any] | None = None
+    if bool(args.review_profile) and isinstance(parsed, dict):
+        profile_review = _review_profile_bootstrap(
+            source_text=source_text,
+            source_name=text_path.name,
+            parsed_profile=parsed,
+            intake_plan=intake_plan,
+            args=args,
+        )
+        review_parsed = profile_review.get("parsed") if isinstance(profile_review.get("parsed"), dict) else {}
+        should_retry = (
+            bool(args.profile_review_retry)
+            and isinstance(review_parsed, dict)
+            and (
+                review_parsed.get("coverage_ok") is False
+                or str(review_parsed.get("verdict", "")).strip() in {"retry_recommended", "reject_profile"}
+            )
+        )
+        if should_retry:
+            retry_sample = dict(sample)
+            retry_context = list(sample.get("context", [])) if isinstance(sample.get("context"), list) else []
+            retry_context.append(
+                "Profile review pass recommended one more profile-bootstrap attempt. "
+                "This is LLM control-plane guidance, not approved facts or a target Prolog file."
+            )
+            for item in review_parsed.get("retry_guidance", []) if isinstance(review_parsed.get("retry_guidance"), list) else []:
+                text = str(item).strip()
+                if text:
+                    retry_context.append(f"profile_review_retry_guidance: {text}")
+            for item in review_parsed.get("missing_capabilities", []) if isinstance(review_parsed.get("missing_capabilities"), list) else []:
+                if not isinstance(item, dict):
+                    continue
+                capability = str(item.get("capability", "")).strip()
+                suggested = ", ".join(str(sig).strip() for sig in item.get("suggested_signatures", []) if str(sig).strip()) if isinstance(item.get("suggested_signatures"), list) else ""
+                if capability or suggested:
+                    retry_context.append(f"profile_review_missing_capability: {capability}; suggested_signatures: {suggested}")
+            retry_sample["context"] = retry_context
+            retry_messages = build_profile_bootstrap_messages(samples=[retry_sample], domain_hint=str(args.domain_hint or ""))
+            retry_started = time.perf_counter()
+            retry_response = _call_lmstudio_json_schema(
+                base_url=str(args.base_url),
+                model=str(args.model),
+                messages=retry_messages,
+                schema=PROFILE_BOOTSTRAP_JSON_SCHEMA,
+                schema_name="profile_bootstrap_v1",
+                timeout=int(args.timeout),
+                temperature=float(args.temperature),
+                top_p=float(args.top_p),
+                max_tokens=int(args.max_tokens),
+            )
+            retry_parsed, retry_error = parse_profile_bootstrap_json(str(retry_response.get("content", "")))
+            profile_review_retry = {
+                "latency_ms": int((time.perf_counter() - retry_started) * 1000),
+                "parsed_ok": isinstance(retry_parsed, dict),
+                "parse_error": retry_error,
+                "raw_content": str(retry_response.get("content", ""))[:20000],
+            }
+            if isinstance(retry_parsed, dict):
+                parsed = retry_parsed
+                error = retry_error
     score = profile_bootstrap_score(parsed)
     record: dict[str, Any] = {
         "ts": _utc_now(),
@@ -209,6 +283,10 @@ def main() -> int:
     }
     if profile_retry is not None:
         record["profile_retry"] = profile_retry
+    if profile_review is not None:
+        record["profile_review"] = profile_review
+    if profile_review_retry is not None:
+        record["profile_review_retry"] = profile_review_retry
     if not args.skip_intake_plan:
         record["intake_plan"] = {
             "parsed_ok": isinstance(intake_plan, dict),
@@ -263,6 +341,50 @@ def main() -> int:
         )
     )
     return 0
+
+
+def _review_profile_bootstrap(
+    *,
+    source_text: str,
+    source_name: str,
+    parsed_profile: dict[str, Any],
+    intake_plan: dict[str, Any] | None,
+    args: argparse.Namespace,
+) -> dict[str, Any]:
+    started = time.perf_counter()
+    try:
+        response = _call_lmstudio_json_schema(
+            base_url=str(args.base_url),
+            model=str(args.model),
+            messages=build_profile_bootstrap_review_messages(
+                source_text=source_text,
+                source_name=source_name,
+                domain_hint=str(args.domain_hint or ""),
+                intake_plan=intake_plan,
+                proposed_profile=parsed_profile,
+            ),
+            schema=PROFILE_BOOTSTRAP_REVIEW_JSON_SCHEMA,
+            schema_name="profile_bootstrap_review_v1",
+            timeout=int(args.timeout),
+            temperature=float(args.temperature),
+            top_p=float(args.top_p),
+            max_tokens=min(int(args.max_tokens), 6000),
+        )
+    except Exception as exc:
+        return {
+            "parsed_ok": False,
+            "parse_error": str(exc),
+            "latency_ms": int((time.perf_counter() - started) * 1000),
+            "parsed": {},
+        }
+    parsed, error = parse_profile_bootstrap_review_json(str(response.get("content", "")))
+    return {
+        "parsed_ok": isinstance(parsed, dict),
+        "parse_error": error,
+        "latency_ms": int((time.perf_counter() - started) * 1000),
+        "parsed": parsed or {},
+        "raw_content": str(response.get("content", ""))[:12000],
+    }
 
 
 def _compare_expected_prolog(
@@ -391,6 +513,9 @@ def _compile_source_with_draft_profile(
                 "Preserve reporting and ledger-record acts as first-class queryable details when the draft profile supports them. If a source says someone reported, complained, witnessed, recorded, entered in a ledger, certified, or observed something, prefer reporter/2, complainant/2, reported_observation/2, ledger_entry/2, or similar profile predicates over collapsing the detail into only affected_person/2 or grievance/2.",
                 "When the source names a reporting actor and a role, preserve both if the palette supports it, e.g. a reporter/person predicate plus person_role/2. This is structural source fidelity, not a domain-specific language patch.",
                 "When a source contrasts two ledgers or records, preserve both the individual ledger entries and the conflict relation if the palette supports them. Do not keep only the conflict wrapper if a later question may ask which ledger recorded which event.",
+                "When the allowed palette contains ledger_entry plus a ledger-conflict predicate, emit ledger_entry facts for each side of the conflict before the conflict summary whenever the source identifies each ledger's content.",
+                "When the allowed palette contains explanation/detail predicates, preserve explicitly given explanations as queryable facts rather than only encoding the resulting rule, separation, or violation.",
+                "For recall, impoundment, remedy, declaration, and not-fit actions, keep item, status, location, label, authority, and condition queryable as separate attributes when the palette supports them. Do not hide Dock C or a quoted label only inside a long item atom if a later question may ask for it.",
                 "Do not emit source_priority, override, conflict, or authority-ranking facts unless the source explicitly ranks sources or states an override/conflict policy.",
                 "When a predicate contract names an argument source, source_document, or document, bind that argument to a stable source/document id such as doc_1 or a normalized document id. Do not put the speaker, claimant, or claim subject in a source/document argument.",
                 "For whole-source compilation, hard-cap any single repeated structure at 24 total candidate_operations, counting the record predicate and every property predicate. Do not exceed 6 representative records for any one repeated structure in a whole-source skeleton pass. If the source contains more records, list the omitted structure in self_check rather than emitting more operations.",
@@ -419,7 +544,7 @@ def _compile_source_with_draft_profile(
                     *(extra_context or []),
                     "COMPACT RETRY: the previous Semantic IR response for this same planned pass was not parseable.",
                     "Return a smaller valid semantic_ir_v1 object. Keep entities sparse and reusable.",
-                    "For repeated-record/evidence passes, emit at most 32 candidate_operations total.",
+                    "For repeated-record/evidence passes, emit at most 24 candidate_operations and at most 8 entities total.",
                     "Prioritize high-query-value details: reporting actors, complainants, ledger entries, conflicts between ledgers, affected items, locations, measurements, and rule violations.",
                     "Keep self_check.notes to at most two short notes.",
                 ],
@@ -492,6 +617,8 @@ def _compile_source_with_plan_passes(
                 f"current_intake_pass_recommended_predicates: {predicates}",
                 "For this call, emit only operations that belong to the current intake pass. Defer other source material to its own pass.",
                 "It is better to be complete for this pass than broadly summary-like across the entire source.",
+                "Keep focused pass JSON compact: reuse normalized atoms directly in candidate_operations instead of listing every named thing as an entity.",
+                "For focused pass compilation, aim for at most 12 entities, 32 candidate_operations, and 3 short self_check notes.",
             ],
         )
         compiled["pass_id"] = pass_id
@@ -619,6 +746,36 @@ def _write_summary(record: dict[str, Any], path: Path) -> None:
                     f"- `{item.get('pass_id', '')}` {item.get('purpose', '')}: {item.get('focus', '')}"
                 )
         lines.append("")
+    review = record.get("profile_review") if isinstance(record.get("profile_review"), dict) else {}
+    if review:
+        parsed_review = review.get("parsed") if isinstance(review.get("parsed"), dict) else {}
+        lines.extend(
+            [
+                "## Profile Review",
+                "",
+                f"- Parsed: `{review.get('parsed_ok', False)}`",
+                f"- Verdict: `{parsed_review.get('verdict', '')}`",
+                f"- Coverage OK: `{parsed_review.get('coverage_ok', '')}`",
+                f"- Missing capabilities: `{len(parsed_review.get('missing_capabilities', [])) if isinstance(parsed_review.get('missing_capabilities'), list) else 0}`",
+                "",
+            ]
+        )
+        for item in parsed_review.get("retry_guidance", []) if isinstance(parsed_review.get("retry_guidance"), list) else []:
+            text = str(item).strip()
+            if text:
+                lines.append(f"- Retry guidance: {text}")
+        lines.append("")
+    review_retry = record.get("profile_review_retry") if isinstance(record.get("profile_review_retry"), dict) else {}
+    if review_retry:
+        lines.extend(
+            [
+                "## Profile Review Retry",
+                "",
+                f"- Parsed: `{review_retry.get('parsed_ok', False)}`",
+                f"- Parse error: `{review_retry.get('parse_error', '')}`",
+                "",
+            ]
+        )
     lines.extend(["## Candidate Predicates", ""])
     for item in parsed.get("candidate_predicates", []) if isinstance(parsed.get("candidate_predicates"), list) else []:
         if isinstance(item, dict):

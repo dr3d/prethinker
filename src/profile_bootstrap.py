@@ -170,6 +170,65 @@ PROFILE_BOOTSTRAP_JSON_SCHEMA: dict[str, Any] = {
     },
 }
 
+PROFILE_BOOTSTRAP_REVIEW_JSON_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": [
+        "schema_version",
+        "verdict",
+        "coverage_ok",
+        "confidence",
+        "missing_capabilities",
+        "risky_predicates",
+        "retry_guidance",
+        "self_check",
+    ],
+    "properties": {
+        "schema_version": {"type": "string", "const": "profile_bootstrap_review_v1"},
+        "verdict": {"type": "string", "enum": ["pass", "retry_recommended", "reject_profile"]},
+        "coverage_ok": {"type": "boolean"},
+        "confidence": {"type": "number"},
+        "missing_capabilities": {
+            "type": "array",
+            "maxItems": 12,
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["capability", "why_it_matters", "suggested_signatures"],
+                "properties": {
+                    "capability": {"type": "string"},
+                    "why_it_matters": {"type": "string"},
+                    "suggested_signatures": {"type": "array", "maxItems": 12, "items": {"type": "string"}},
+                },
+            },
+        },
+        "risky_predicates": {
+            "type": "array",
+            "maxItems": 12,
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["signature", "risk", "recommended_action"],
+                "properties": {
+                    "signature": {"type": "string"},
+                    "risk": {"type": "string"},
+                    "recommended_action": {"type": "string"},
+                },
+            },
+        },
+        "retry_guidance": {"type": "array", "maxItems": 12, "items": {"type": "string"}},
+        "self_check": {
+            "type": "object",
+            "additionalProperties": False,
+            "required": ["review_authority", "notes"],
+            "properties": {
+                "review_authority": {"type": "string", "const": "proposal_only"},
+                "notes": {"type": "array", "maxItems": 8, "items": {"type": "string"}},
+            },
+        },
+    },
+}
+
 
 PROFILE_BOOTSTRAP_SYSTEM = (
     "You propose profile_bootstrap_v1 JSON for Prethinker domain-profile design. "
@@ -178,6 +237,14 @@ PROFILE_BOOTSTRAP_SYSTEM = (
     "claim/fact, obligation/fact, condition/event, provenance, and ambiguity boundaries. "
     "candidate_predicates is the authoritative proposed vocabulary; every predicate signature "
     "named in repeated_structures or positive starter expectations must appear there exactly."
+)
+
+PROFILE_BOOTSTRAP_REVIEW_SYSTEM = (
+    "You review a proposed profile_bootstrap_v1 predicate surface for Prethinker. "
+    "You do not extract facts, authorize writes, or rewrite the source. "
+    "Your job is to decide whether the proposed profile is expressive enough for later Semantic IR ingestion "
+    "while preserving source boundaries, provenance, claim/fact separation, repeated records, and queryability. "
+    "Return profile_bootstrap_review_v1 JSON only."
 )
 
 
@@ -239,6 +306,11 @@ PROFILE_BOOTSTRAP_GUIDANCE = (
     "- Property predicates inside repeated_structures should use argument roles that match record-property use. "
     "For example, if denies_right/2 is listed as a grievance property, its first argument role should be grievance_id, "
     "not denier. If you need both shapes, propose distinct predicates such as denies_right/2 and grievance_denies_right/2.\n"
+    "- Avoid unary predicates for relation-like details unless they are true entity-class markers. Predicates such as "
+    "recall_item/1, identity_ambiguous/1, pledge_resource/1, or rule_origin_mark/1 are often too weak for later questions "
+    "because they hide the source, record id, candidate, status, or owner. Prefer recall_action/2 plus recall_item/2, "
+    "ambiguous_alias/1 plus candidate_identity/2, pledge_resource/2, and rule_declaration/2 plus rule-property predicates "
+    "when the domain needs queryable structure.\n"
     "- For high-fidelity document-to-Prolog profiles, do not collapse all record details into generic target/method/effect "
     "fields when the source has useful structured slots. If the text repeatedly names affected items, people, roles, "
     "locations, quantities, measurements, temperatures, ledgers, explanations, rules violated, or identity candidates, "
@@ -338,6 +410,35 @@ PROFILE_BOOTSTRAP_GUIDANCE = (
     "- Do not emit semantic_ir_v1, Prolog clauses, or ordinary KB writes.\n"
 )
 
+PROFILE_BOOTSTRAP_REVIEW_GUIDANCE = (
+    "Review task:\n"
+    "- Compare the raw source, optional intake plan, and proposed profile surface.\n"
+    "- Look for missing predicate capabilities that would make later KB questions impossible even if the model understood the text.\n"
+    "- Do not ask for a predicate merely because a noun appears. Ask only for capabilities that preserve source boundary, "
+    "reporting/recording acts, repeated records, role-bearing entities, declarations/remedies, obligations/rules, "
+    "temporal anchors, identity ambiguity, conflicts, or provenance.\n"
+    "- Flag abstract profile drift: a profile that has only generic source_claim/grievance wrappers may be safe but too weak "
+    "if the source contains ledgers, reporters, complainants, measurements, locations, affected items, appeals, or remedies "
+    "that later questions should be able to retrieve.\n"
+    "- Do not recommend replacing a crisp queryable source-detail predicate with a vaguer abstraction. If the source has "
+    "an explicit conflict between two ledgers, a direct reporter, a named complainant, a recorded observation, or a "
+    "specific recall/declaration action, preserve that capability with a clear predicate such as conflict_between_ledgers/3, "
+    "reporter/2, complainant/2, reported_observation/2, ledger_entry/2, declares_recalled/2, or a close domain equivalent.\n"
+    "- For recalls, remedies, declarations, or impoundments, prefer a record/action predicate plus queryable attributes. "
+    "If the source names item, status, location, condition, label, or authority, preserve those slots separately rather "
+    "than hiding them inside one long normalized atom.\n"
+    "- Flag unary relation-like predicates as risky when they would prevent later questions from recovering the source, "
+    "record id, candidate identity, owner, item status, location, or condition. Entity-class predicates may be unary; "
+    "source claims, recalls, rules, pledges, ambiguity, and evidence usually need arity 2 or more.\n"
+    "- Flag overfit predicate drift: a profile that invents many one-off surface verbs instead of reusable record/property "
+    "families may be hard to query and should be retried.\n"
+    "- Suggested signatures are design recommendations only. They are not approved predicates and they are not facts.\n"
+    "- retry_guidance should be concise instructions that can be appended to a second profile-bootstrap attempt.\n"
+    "Safety boundary:\n"
+    "- This review is control-plane advice only.\n"
+    "- Do not emit semantic_ir_v1 or Prolog clauses.\n"
+)
+
 
 def build_profile_bootstrap_payload(
     *,
@@ -362,6 +463,54 @@ def build_profile_bootstrap_payload(
     return payload
 
 
+def build_profile_bootstrap_review_payload(
+    *,
+    source_text: str,
+    source_name: str = "",
+    domain_hint: str = "",
+    intake_plan: dict[str, Any] | None = None,
+    proposed_profile: dict[str, Any] | None = None,
+    include_schema_contract: bool = True,
+) -> dict[str, Any]:
+    payload: dict[str, Any] = {
+        "task": "Review a proposed profile_bootstrap_v1 surface and emit profile_bootstrap_review_v1 JSON only.",
+        "domain_hint": domain_hint,
+        "source_name": source_name,
+        "raw_source_text": source_text,
+        "intake_plan_v1": intake_plan or {},
+        "proposed_profile_bootstrap_v1": proposed_profile or {},
+        "review_guidance": PROFILE_BOOTSTRAP_REVIEW_GUIDANCE,
+        "authority_boundary": (
+            "The review may recommend better context and predicate capabilities. It never authorizes writes "
+            "and never approves a profile by itself."
+        ),
+    }
+    if include_schema_contract:
+        payload["required_top_level_json_shape"] = {
+            "schema_version": "profile_bootstrap_review_v1",
+            "verdict": "pass|retry_recommended|reject_profile",
+            "coverage_ok": "boolean",
+            "confidence": "number",
+            "missing_capabilities": [
+                {
+                    "capability": "human-readable missing capability",
+                    "why_it_matters": "why later ingestion/querying needs it",
+                    "suggested_signatures": ["predicate/arity"],
+                }
+            ],
+            "risky_predicates": [
+                {
+                    "signature": "predicate/arity",
+                    "risk": "why this predicate may be too broad, unsafe, or hard to query",
+                    "recommended_action": "keep|rename|replace|remove|narrow",
+                }
+            ],
+            "retry_guidance": ["concise guidance for a second profile-bootstrap pass"],
+            "self_check": {"review_authority": "proposal_only", "notes": [""]},
+        }
+    return payload
+
+
 def build_profile_bootstrap_messages(
     *,
     samples: list[dict[str, Any]],
@@ -377,6 +526,27 @@ def build_profile_bootstrap_messages(
     )
     return [
         {"role": "system", "content": PROFILE_BOOTSTRAP_SYSTEM},
+        {"role": "user", "content": "INPUT_JSON:\n" + json.dumps(payload, ensure_ascii=False, indent=2)},
+    ]
+
+
+def build_profile_bootstrap_review_messages(
+    *,
+    source_text: str,
+    source_name: str = "",
+    domain_hint: str = "",
+    intake_plan: dict[str, Any] | None = None,
+    proposed_profile: dict[str, Any] | None = None,
+) -> list[dict[str, str]]:
+    payload = build_profile_bootstrap_review_payload(
+        source_text=source_text,
+        source_name=source_name,
+        domain_hint=domain_hint,
+        intake_plan=intake_plan,
+        proposed_profile=proposed_profile,
+    )
+    return [
+        {"role": "system", "content": PROFILE_BOOTSTRAP_REVIEW_SYSTEM},
         {"role": "user", "content": "INPUT_JSON:\n" + json.dumps(payload, ensure_ascii=False, indent=2)},
     ]
 
@@ -398,6 +568,27 @@ def parse_profile_bootstrap_json(text: str) -> tuple[dict[str, Any] | None, str]
     if not isinstance(parsed, dict):
         return None, "json_not_object"
     if parsed.get("schema_version") != "profile_bootstrap_v1":
+        return None, "wrong_schema_version"
+    return parsed, ""
+
+
+def parse_profile_bootstrap_review_json(text: str) -> tuple[dict[str, Any] | None, str]:
+    raw = str(text or "").strip()
+    if not raw:
+        return None, "empty"
+    try:
+        parsed = json.loads(raw)
+    except json.JSONDecodeError:
+        match = re.search(r"\{.*\}", raw, flags=re.S)
+        if not match:
+            return None, "not_json"
+        try:
+            parsed = json.loads(match.group(0))
+        except json.JSONDecodeError as exc:
+            return None, f"json_error:{exc}"
+    if not isinstance(parsed, dict):
+        return None, "json_not_object"
+    if parsed.get("schema_version") != "profile_bootstrap_review_v1":
         return None, "wrong_schema_version"
     return parsed, ""
 

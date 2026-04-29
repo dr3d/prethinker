@@ -6,8 +6,11 @@ from pathlib import Path
 from scripts.run_profile_bootstrap import _load_jsonl
 from src.profile_bootstrap import (
     PROFILE_BOOTSTRAP_JSON_SCHEMA,
+    PROFILE_BOOTSTRAP_REVIEW_JSON_SCHEMA,
     build_profile_bootstrap_messages,
+    build_profile_bootstrap_review_messages,
     parse_profile_bootstrap_json,
+    parse_profile_bootstrap_review_json,
     profile_bootstrap_allowed_predicates,
     profile_bootstrap_domain_context,
     profile_bootstrap_frontier_cases,
@@ -47,6 +50,54 @@ class ProfileBootstrapTests(unittest.TestCase):
         repeated_schema = PROFILE_BOOTSTRAP_JSON_SCHEMA["properties"]["repeated_structures"]["items"]
         self.assertFalse(repeated_schema["additionalProperties"])
         self.assertIn("property_predicates", repeated_schema["required"])
+
+    def test_profile_review_schema_and_messages_are_control_plane_only(self) -> None:
+        self.assertEqual(PROFILE_BOOTSTRAP_REVIEW_JSON_SCHEMA["type"], "object")
+        self.assertFalse(PROFILE_BOOTSTRAP_REVIEW_JSON_SCHEMA["additionalProperties"])
+        self.assertIn("missing_capabilities", PROFILE_BOOTSTRAP_REVIEW_JSON_SCHEMA["required"])
+        missing_schema = PROFILE_BOOTSTRAP_REVIEW_JSON_SCHEMA["properties"]["missing_capabilities"]["items"]
+        self.assertFalse(missing_schema["additionalProperties"])
+
+        messages = build_profile_bootstrap_review_messages(
+            source_text="The infirmary ledger recorded blue sneezing.",
+            source_name="proclamation.md",
+            domain_hint="source_fidelity",
+            intake_plan={"schema_version": "intake_plan_v1"},
+            proposed_profile={"schema_version": "profile_bootstrap_v1", "candidate_predicates": []},
+        )
+
+        self.assertEqual(messages[0]["role"], "system")
+        self.assertIn("review a proposed", messages[0]["content"].casefold())
+        self.assertIn("INPUT_JSON", messages[1]["content"])
+        self.assertIn("raw_source_text", messages[1]["content"])
+        self.assertIn("proposed_profile_bootstrap_v1", messages[1]["content"])
+        self.assertIn("never authorizes writes", messages[1]["content"])
+
+    def test_parse_profile_review_json(self) -> None:
+        parsed, error = parse_profile_bootstrap_review_json(
+            json.dumps(
+                {
+                    "schema_version": "profile_bootstrap_review_v1",
+                    "verdict": "retry_recommended",
+                    "coverage_ok": False,
+                    "confidence": 0.86,
+                    "missing_capabilities": [
+                        {
+                            "capability": "ledger records",
+                            "why_it_matters": "Later questions ask which ledger recorded which observation.",
+                            "suggested_signatures": ["ledger_entry/2"],
+                        }
+                    ],
+                    "risky_predicates": [],
+                    "retry_guidance": ["Add a source-record predicate family."],
+                    "self_check": {"review_authority": "proposal_only", "notes": ["control-plane only"]},
+                }
+            )
+        )
+
+        self.assertEqual(error, "")
+        self.assertIsNotNone(parsed)
+        self.assertFalse(parsed["coverage_ok"])
 
     def test_parse_and_score_profile_bootstrap(self) -> None:
         parsed, error = parse_profile_bootstrap_json(
