@@ -41,6 +41,8 @@
     "entitlement_policy: may/is entitled to language is a permission or right, not evidence that the right was exercised",
     "condition_policy: subject to/provided that/unless/if clauses are conditions or unsafe rule material unless a precise executable rule is admitted",
     "dependency_policy: meeting/project/policy language such as depends on, blocked by, requires approval, or cannot launch until X is dependency state; represent explicit dependencies with depends_on/2 and explicit blockers with blocked_by/2 rather than rejecting the whole turn",
+    "announcement_policy: when a party announces, promises, schedules, or publishes a target date, preserve the announcement as an event or document state if an allowed predicate fits; do not drop the date merely because the launch/payment/support action itself is not yet allowed",
+    "role_synonym_policy: if a policy states that multiple role names mean the same role, preserve every distinct alias phrase using the active role-synonym predicate when available. Do not shorten 'employee seeking reimbursement' to employee if the longer phrase is the identity-bearing policy term.",
     "temporal_policy: preserve effective dates, maturity dates, termination dates, renewal windows, and before/after/upon triggers; do not collapse future obligations into current facts",
     "party_policy: roles are scoped to contracts or filings; do not emit global borrower/lender/issuer facts",
     "operational_policy: governance language about locked shipments, clearances, approvals, and release authority is contract-like state. Record explicit state/events without inferring permission when preconditions fail",
@@ -61,6 +63,8 @@
     { "signature": "subject_to/2", "arguments": ["clause_or_obligation", "condition"], "notes": "Condition or dependency." },
     { "signature": "depends_on/2", "arguments": ["dependent_item", "required_item"], "notes": "Explicit dependency, prerequisite, or launch/approval dependency." },
     { "signature": "blocked_by/2", "arguments": ["item_or_goal", "blocker"], "notes": "Explicit current blocker for a goal, launch, approval, payment, or obligation." },
+    { "signature": "announced_on/2", "arguments": ["announcer_or_item", "announced_item_or_date"], "notes": "Explicit announcement, promised target, published date, or launch-date announcement; not proof that the announced action is permitted." },
+    { "signature": "same_role_as/3", "arguments": ["role_alias", "canonical_or_related_role", "scope"], "notes": "Policy-scoped role synonym or equivalent role phrase." },
     {
       "signature": "condition_met/2",
       "arguments": ["condition", "evidence_source"],

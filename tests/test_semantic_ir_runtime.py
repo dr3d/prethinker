@@ -636,6 +636,108 @@ class SemanticIRRuntimeTests(unittest.TestCase):
             parsed["epistemic_worlds"]["clauses"],
         )
 
+    def test_identity_ambiguity_conflict_does_not_block_source_record_admission(self) -> None:
+        ir = _ir(
+            decision="mixed",
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "access_log_entry",
+                    "args": ["badge_j_22", "safe_room_door", "9_10", "building_access_log"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                }
+            ],
+            truth_maintenance={
+                "support_links": [
+                    {
+                        "operation_index": 0,
+                        "support_kind": "direct_utterance",
+                        "support_ref": "building access log",
+                        "role": "grounds",
+                        "confidence": 0.95,
+                    }
+                ],
+                "conflicts": [
+                    {
+                        "new_operation_index": 0,
+                        "existing_ref": "identity of badge holder unresolved",
+                        "conflict_kind": "identity_ambiguity",
+                        "recommended_policy": "quarantine",
+                        "why": "Do not infer Jonas from badge J-22.",
+                    }
+                ],
+                "retraction_plan": [],
+                "derived_consequences": [
+                    {
+                        "statement": "Jonas may be badge J-22.",
+                        "basis": ["op:0"],
+                        "commit_policy": "quarantine",
+                    }
+                ],
+            },
+        )
+
+        parsed, _warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=["access_log_entry/4"],
+        )
+
+        self.assertEqual(
+            parsed["facts"],
+            ["access_log_entry(badge_j_22, safe_room_door, 9_10, building_access_log)."],
+        )
+        alignment = parsed["admission_diagnostics"]["truth_maintenance_alignment"]
+        edge_kinds = {row["kind"] for row in alignment["fuzzy_edges"]}
+        self.assertNotIn("conflict_policy_mismatch_admitted_operation", edge_kinds)
+
+    def test_identity_ambiguity_conflict_still_flags_identity_write(self) -> None:
+        ir = _ir(
+            decision="mixed",
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "candidate_identity",
+                    "args": ["badge_j_22", "jonas"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                }
+            ],
+            truth_maintenance={
+                "support_links": [
+                    {
+                        "operation_index": 0,
+                        "support_kind": "direct_utterance",
+                        "support_ref": "building access log",
+                        "role": "grounds",
+                        "confidence": 0.95,
+                    }
+                ],
+                "conflicts": [
+                    {
+                        "new_operation_index": 0,
+                        "existing_ref": "identity of badge holder unresolved",
+                        "conflict_kind": "identity_ambiguity",
+                        "recommended_policy": "quarantine",
+                        "why": "Do not infer Jonas from badge J-22.",
+                    }
+                ],
+                "retraction_plan": [],
+                "derived_consequences": [],
+            },
+        )
+
+        parsed, _warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=["candidate_identity/2"],
+        )
+
+        alignment = parsed["admission_diagnostics"]["truth_maintenance_alignment"]
+        edge_kinds = {row["kind"] for row in alignment["fuzzy_edges"]}
+        self.assertIn("conflict_policy_mismatch_admitted_operation", edge_kinds)
+
     def test_mapper_applies_profile_contract_validator_without_language_patch(self) -> None:
         ir = _ir(
             decision="commit",

@@ -680,14 +680,18 @@ def score_expectation(case: LavaCase, record: dict[str, Any], *, ir: dict[str, A
     asserted_text = json.dumps(asserted_clauses, ensure_ascii=False, sort_keys=True).lower()
     retract_text = json.dumps(retract_clauses, ensure_ascii=False, sort_keys=True).lower()
     query_text = json.dumps(query_clauses, ensure_ascii=False, sort_keys=True).lower()
+    diagnostic_surfaces = _expectation_surfaces(diagnostic_text)
+    asserted_surfaces = _expectation_surfaces(asserted_text)
+    retract_surfaces = _expectation_surfaces(retract_text)
+    query_surfaces = _expectation_surfaces(query_text)
     must = [str(item).lower() for item in expect.get("must", []) if str(item).strip()]
     avoid = [str(item).lower() for item in expect.get("avoid", []) if str(item).strip()]
-    must_hits = [item for item in must if item in diagnostic_text]
-    missing_must = [item for item in must if item not in diagnostic_text]
-    avoid_hits = [item for item in avoid if item in diagnostic_text]
-    avoid_asserted_hits = [item for item in avoid if item in asserted_text]
-    avoid_retract_hits = [item for item in avoid if item in retract_text]
-    avoid_query_hits = [item for item in avoid if item in query_text]
+    must_hits = [item for item in must if _expectation_contains(diagnostic_surfaces, item)]
+    missing_must = [item for item in must if not _expectation_contains(diagnostic_surfaces, item)]
+    avoid_hits = [item for item in avoid if _expectation_contains(diagnostic_surfaces, item)]
+    avoid_asserted_hits = [item for item in avoid if _expectation_contains(asserted_surfaces, item)]
+    avoid_retract_hits = [item for item in avoid if _expectation_contains(retract_surfaces, item)]
+    avoid_query_hits = [item for item in avoid if _expectation_contains(query_surfaces, item)]
     expected_decision = case.expected_decision
     decision_ok = not expected_decision or str(record.get("projected_decision", "")) == expected_decision
     must_ok = len(must_hits) == len(must)
@@ -711,6 +715,25 @@ def score_expectation(case: LavaCase, record: dict[str, Any], *, ir: dict[str, A
         "admission_safe": admission_safe,
         "ok": bool(decision_ok and must_ok and admission_safe),
     }
+
+
+def _expectation_surfaces(text: str) -> set[str]:
+    raw = str(text or "").lower()
+    underscored = re.sub(r"[^a-z0-9]+", "_", raw).strip("_")
+    compact = re.sub(r"[^a-z0-9]+", "", raw)
+    colon_time = re.sub(r"\b(\d{1,2})[:_](\d{2})\b", r"\1_\2", raw)
+    return {raw, underscored, compact, colon_time}
+
+
+def _expectation_contains(surfaces: set[str], needle: str) -> bool:
+    raw = str(needle or "").lower().strip()
+    if not raw:
+        return False
+    variants = _expectation_surfaces(raw)
+    return any(
+        variant and any(variant in surface for surface in surfaces)
+        for variant in variants
+    )
 
 
 def signature_for(record: dict[str, Any]) -> dict[str, Any]:

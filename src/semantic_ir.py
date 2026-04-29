@@ -412,6 +412,7 @@ BEST_GUARDED_V2_GUIDANCE = (
     "- Never repeat equivalent assertions, but do not drop distinct parallel facts such as three bowls, three chairs, and three beds.\n"
     "- For possession language such as 'has', 'had', 'owned', 'belonged to', or object/furnishing assignment, prefer owns/2 when available. Use carries/2 only for physical carrying/transporting/holding in hand, not for possession of furniture, bowls, beds, rooms, or ordinary belongings.\n"
     "- For ordinary story-world narration, prefer specific event/state predicates from allowed_predicates when present. Examples: is_a/2 for category, walked_through/2 or ran_through/2 for movement through a place, entered/2 and exited/2 for boundary crossing, found/2 for discovery, on/2 for physical support, tasted/2, ate/2 or ate_all/2 for consumption, sat_in/2 and lay_in/2 for chairs/beds, asleep_in/2 for sleeping location, broke/1 for a broken object, returned_home/1 for returning home, and too_hot_for/2, too_cold_for/2, too_hard_for/2, too_soft_for/2, just_right_for/2 for preference/fit evaluations.\n"
+    "- If the story-world profile offers has_trait/2 and the utterance directly says an entity is too fizzy, too hot, too cold, too hard, too soft, just right, missing, tired, or otherwise described, preserve that source-local quality as has_trait(entity, trait) unless a more specific allowed predicate captures the exact relation. Do not drop the adjective/evaluation just because another event predicate such as tasted/2 was admitted.\n"
     "- Do not use inside/2 as a generic substitute for sitting, lying, tasting, eating, seeing, owning, or being about/near something. Use inside/2 only when the utterance says physical containment/interior location.\n"
     "- Do not use carries/2 for voices, properties, evidence, names, relationships, rooms, furniture, or ownership. If someone spoke or cried out and no speech predicate is available, represent it in assertions, not as a candidate_operation.\n"
     "- Do not create durable writes with placeholder actors such as unknown_agent/unknown_person/someone. If the actor is unknown but the object state is direct, use passive state predicates from allowed_predicates such as was_tasted/1, was_eaten/1, was_sat_in/1, or was_lain_in/1. Otherwise quarantine or omit the write.\n"
@@ -420,6 +421,7 @@ BEST_GUARDED_V2_GUIDANCE = (
     "- Context entries are already-known state/rules, not new user assertions. Do not create candidate_operations that merely restate context.\n"
     "- Use context to resolve referents and answer queries; only the current utterance may introduce a new write candidate.\n"
     "- If the current utterance contains policy/rule language such as all/every/unless/must/before and also direct facts, choose mixed. Commit the direct facts and represent rule/policy material in assertions or unsafe_implications if no safe rule clause is available.\n"
+    "- Preserve policy vocabulary and temporal anchors as symbolic terms when predicates allow it. For example, do not drop role aliases such as employee_seeking_reimbursement, announcement events such as launch_date, or relative expressions such as ten_days_after_service simply because the final rule/query result is not yet decidable.\n"
     "- Simple Horn rules such as 'if parent(X,Y) then ancestor(X,Y)' may commit as operation='rule' when you can emit a precise executable clause using allowed predicates. Put that Prolog-style text in candidate_operations[].clause. Default/exception rules with unless/except/only-if are not ordinary facts; if negation/exception semantics are unclear, choose mixed and represent the rule as a rule assertion or unsafe implication, not as a current fact.\n"
     "- Never mark a rule operation safe without an executable clause. If you cannot provide candidate_operations[].clause, do not emit a safe rule operation.\n"
     "- Existing current facts in context are state constraints. If a new utterance gives a different value for the same likely functional predicate such as lives_in/2 or scheduled_for/2, choose clarify unless the user explicitly marks it as a correction with words like correction, actually, wrong, not X, or instead.\n"
@@ -1634,6 +1636,24 @@ def _truth_maintenance_summary(ir: dict[str, Any]) -> dict[str, Any]:
     return result
 
 
+def _identity_ambiguity_allows_source_record_admission(conflict: dict[str, Any], op: dict[str, Any]) -> bool:
+    """Identity ambiguity can quarantine a linking inference without blocking a source record."""
+    conflict_kind = str(conflict.get("conflict_kind") or "").strip().lower()
+    if conflict_kind != "identity_ambiguity":
+        return False
+    predicate = str(op.get("predicate") or "").strip()
+    if not predicate or predicate in IDENTITY_PREDICATES:
+        return False
+    operation = str(op.get("operation") or "").strip().lower()
+    effect = str(op.get("effect") or "").strip().lower()
+    source = str(op.get("source") or "").strip().lower()
+    if operation != "assert" or effect != "fact":
+        return False
+    if source not in {"direct", "observed", "source", "document"}:
+        return False
+    return True
+
+
 def _truth_maintenance_alignment(
     truth_maintenance: dict[str, Any],
     operations: list[dict[str, Any]],
@@ -1774,6 +1794,7 @@ def _truth_maintenance_alignment(
             bool(op.get("admitted"))
             and policy in {"clarify", "quarantine", "reject"}
             and str(projected_decision or "").strip().lower() not in {"clarify", "quarantine", "reject"}
+            and not _identity_ambiguity_allows_source_record_admission(conflict, op)
         ):
             add_edge(
                 "conflict_policy_mismatch_admitted_operation",

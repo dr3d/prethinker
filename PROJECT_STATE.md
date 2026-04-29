@@ -172,7 +172,7 @@ Domain/data lanes:
 
 ## Verification Snapshot
 
-**Current headline:** latest full pytest suite `374 passed`; latest Lava v5 sampled run stayed `60/60` parsed JSON, `60/60` domain selector, `60/60` admission-safe, `0` fuzzy edge kinds, and `0/60` temp-0 signature variance groups. Current best demo pressure point remains the reimbursement policy cross-turn run: `4/4` parsed, `4/4` apply-error-free, `4/4` expected query matches, and no derived violation write leak.
+**Current headline:** latest full pytest suite `377 passed`; latest Lava v5 sampled run stayed `60/60` parsed JSON, `60/60` domain selector, `60/60` admission-safe, `45/60` semantic-clean, `41/60` full expectation score, `0` fuzzy edge kinds, and `0/60` temp-0 signature variance groups. Current best demo pressure point remains the reimbursement policy cross-turn run: `4/4` parsed, `4/4` apply-error-free, `4/4` expected query matches, and no derived violation write leak.
 
 Recent verified results:
 
@@ -226,6 +226,7 @@ Recent verified results:
 - Full pytest after Epistemic Worlds v1 diagnostic scoped-memory slice: `372 passed`.
 - Full pytest after Lava v5 truth-maintenance hardening and scoped support-link tests: `374 passed`.
 - Lava v5 truth-maintenance hardening rerun over `60` attempts stayed `60/60` parsed JSON, `60/60` domain selector, `60/60` admission-safe, and `0/60` temp-0 variance groups. Epistemic Worlds captured `52` scoped operation(s) across `27/60` records, while fuzzy edge kinds dropped to `{}` after scoped retraction-plan preservation, structured reject/clarify policy alignment, skipped-query scoped memory, and soft handling for out-of-range question support links.
+- Full pytest after source-record identity-ambiguity alignment and Lava expectation-surface scoring: `377 passed`.
 - Multilingual router probe: `router_ok=10/10`, `compiler_parsed_ok=10/10`.
 - Lava v2 calibration router probe: `router_ok=36/36`; calibration evidence only, because v2 influenced router guidance.
 - Lava v3 first held-out router probe with bootstrap-aware scoring: `router_ok=14/17`, `router_score_avg=0.868`.
@@ -237,6 +238,7 @@ Recent verified results:
 - Lava expectation scoring now separates semantic/diagnostic mentions, query-surface mentions, and admitted durable unsafe clauses. A forbidden concept appearing in self-check, unsafe-implication text, or a read-only query is no longer treated the same as a forbidden KB mutation; summaries report semantic-clean and admission-safe counts separately. A conservative rescore of the existing Lava v5 JSONL showed durable admission safety `120/120`, which reframes many remaining misses as semantic coverage or expectation-phrasing pressure rather than unsafe writes.
 - Fresh Lava v5 sampled rerun after the scoring change: `60/60` parsed JSON, `60/60` domain selector checks, `60/60` admission-safe, `46/60` semantic-clean, `21/60` full expectation score, and `0/60` temp-0 signature variance groups. The strongest current signal is safety under messy variants; the next weak spots are rule sufficiency, temporal retraction/admission, bootstrap review-only behavior, and source-fidelity expectations that punish diagnostic mentions of forbidden prior-story names.
 - Lava v5 follow-up after profile/palette overlay and query-arity prompt guidance: the rule/query case now admits `depends_on(launch, qa_signoff).`, `depends_on(launch, legal_approval).`, `announced_on(marketing, launch_date).`, and the read-only query `blocked_by(launch, blocker).` without mapper warnings. A final 60-attempt sampled rerun stayed `60/60` parsed JSON, `60/60` domain selector, `60/60` admission-safe, and `0/60` temp-0 signature variance groups. Remaining misses are mainly missing semantic anchors, temporal label calibration, and exception-rule representation, not unsafe durable writes.
+- Lava v5 source-record alignment rerun over `60` attempts stayed `60/60` parsed JSON, `60/60` domain selector, `60/60` admission-safe, `45/60` semantic-clean, `41/60` full expectation score, `0/60` temp-0 signature variance groups, and `{}` fuzzy edge kinds. The repaired fuzzy edge was an identity-ambiguity case where a neutral source record should be admitted while the person-linking inference remains quarantined.
 - `docs/FRONTIER_DATASET_SURVEY.md` captures next useful public/research data sources and pack concepts: CUAD/ContractNLI/MAUD/LegalBench-RAG for obligations and legal source spans, MeetingBank/QMSum/municipal minutes for commitments and votes, PubMedQA/MedNLI/RadNLI/MedSafetyBench for bounded medical evidence/safety, ParlaMint for multilingual policy, and TKGQA/FActScore/QAGS-style patterns for truth maintenance and source fidelity.
 
 ## Reading Order

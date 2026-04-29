@@ -245,3 +245,33 @@ def test_lava_expectation_treats_forbidden_retracts_as_safe_admission():
     assert score["avoid_asserted_hits"] == []
     assert score["admission_safe"] is True
     assert score["ok"] is True
+
+
+def test_lava_expectation_matches_symbolic_normalized_surfaces():
+    case = LavaCase(
+        id="normalized_surfaces",
+        source="frontier:test",
+        utterance="x",
+        expected_decision="mixed",
+        expect={
+            "decision": "mixed",
+            "must": ["9:10", "safe-room door"],
+            "avoid": [],
+        },
+    )
+    record = {
+        "projected_decision": "mixed",
+        "clauses": {
+            "facts": ["access_log_entry(badge_j_22, safe_room_door, 9_10, building_access_log)."],
+            "queries": [],
+            "rules": [],
+            "retracts": [],
+        },
+        "mapper_warnings": [],
+        "fuzzy_edge_kinds": [],
+    }
+
+    score = score_expectation(case, record, ir={})
+
+    assert score["missing_must"] == []
+    assert score["ok"] is True

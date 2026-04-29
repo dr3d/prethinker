@@ -80,7 +80,7 @@ The public repo currently tracks `43` pytest files under [tests/](https://github
 
 ```powershell
 python -m pytest -q
-# 374 passed
+# 377 passed
 ```
 
 Current high-signal evidence:
@@ -88,7 +88,7 @@ Current high-signal evidence:
 - Semantic IR edge runtime A/B: `20/20` decision labels, `0.976` average score, `0` non-mapper parse rescues.
 - Weak-edge pass: `10/10` decision labels, `1.000` average score.
 - Multilingual router probe: `10/10` router choices and `10/10` compiler JSON on raw Spanish, French, German, Portuguese, Italian, Japanese, and code-switched turns.
-- Lava v5 scoped-world rerun: `60/60` parsed JSON, `60/60` domain selector, `60/60` admission-safe, `0/60` temp-0 signature variance groups, `0` fuzzy edge kinds, and `52` scoped-memory operations across `27/60` records.
+- Lava v5 latest 60-attempt rerun: `60/60` parsed JSON, `60/60` domain selector, `60/60` admission-safe, `45/60` semantic-clean, `41/60` full expectation score, `0/60` temp-0 signature variance groups, and `0` fuzzy edge kinds.
 - Policy/reimbursement cross-turn demo: English policy installed executable rules, derived query answers without writing derived `violation/2` facts, then corrected state and changed the answer.
 
 The UMLS Semantic Network and Metathesaurus-derived runtime assets are intentionally not committed because they depend on licensed source data. The public repo includes the builders, tests, docs, and profile code; outside reproduction of the UMLS lane requires obtaining the licensed UMLS files separately.
