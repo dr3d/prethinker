@@ -61,6 +61,11 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         fidelity = payload["source_fidelity_policy"]
         self.assertIn("commit_scope", fidelity)
         self.assertTrue(any("familiar name" in item for item in fidelity["normalization_scope"]))
+        strategy = payload["compiler_strategy"]
+        self.assertEqual(strategy["name"], "document_to_logic_compiler_strategy_v1")
+        self.assertIn("predicate_selection", strategy)
+        self.assertTrue(any("querying" in item for item in strategy["predicate_selection"]))
+        self.assertTrue(any("stale date anchor" in item for item in strategy["truth_maintenance_strategy"]))
 
     def test_mapper_emits_valid_legacy_parse_for_safe_assert(self) -> None:
         parsed, warnings = semantic_ir_to_legacy_parse(_ir())

@@ -246,6 +246,11 @@ Current runtime additions:
   committed logic, and a small snapshot. This is symbolic context, not write
   authority. The model may use it to resolve references, identify corrections,
   and cite conflicts in `truth_maintenance`;
+- Semantic IR calls now include `document_to_logic_compiler_strategy_v1`, a
+  reusable context object that tells the model to establish source boundary,
+  assertion status, entity value, predicate usefulness, repeated-record shape,
+  truth-maintenance support, and query shape before proposing operations. This
+  is strategy context only; deterministic admission still decides every write;
 - the prompt still carries a compact root-shape contract because schema
   enforcement fixes JSON shape, not policy calibration;
 - narrative ingestion should use specific story-world predicates from the active

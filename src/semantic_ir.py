@@ -394,6 +394,59 @@ BEST_GUARDED_V2_SYSTEM = (
     "Use direct language understanding aggressively, but mark unsafe commitments explicitly."
 )
 
+DOCUMENT_TO_LOGIC_COMPILER_STRATEGY: dict[str, Any] = {
+    "name": "document_to_logic_compiler_strategy_v1",
+    "authority": "model_strategy_only_runtime_admission_remains_authoritative",
+    "core_principle": (
+        "Model the utterance or source's epistemic structure before choosing predicates: "
+        "who says it, what status it has, whether it is durable, and how it can support later reasoning."
+    ),
+    "source_boundary": [
+        "Identify whether the input is a user observation, source document, testimony, policy, contract, medical note, court record, fictional source, or ordinary conversation.",
+        "Treat source documents, testimony, claims, allegations, grievances, and declarations as attributed speech/source acts unless external verification is present in context.",
+        "Do not collapse source claims into objective world facts merely because they are confidently worded.",
+    ],
+    "assertion_status": [
+        "Classify content before writing: durable fact, observation, claim/allegation/report, correction, rule/norm/obligation, query, unsafe implication, or test-only scaffold.",
+        "Claims can become durable claim records; they do not become durable world facts unless the source context authorizes that promotion.",
+        "Derived consequences belong in truth_maintenance unless the utterance directly states them or an executable rule/query needs them.",
+    ],
+    "entity_selection": [
+        "Promote a term to an entity when it recurs, bears a role, acts, is acted on, names a source/document, identifies a group/institution/place/object, creates ambiguity pressure, or is needed for a later rule/query.",
+        "Do not turn every noun phrase into an entity; low-query-value descriptive text can remain in labels, rule_text-style fields, or claim content.",
+        "Preserve source-local names and explicit aliases; do not substitute model-prior names or famous-source defaults.",
+    ],
+    "predicate_selection": [
+        "A predicate earns its place when it supports querying, inference, provenance, contradiction prevention, correction, repeated structure, or claim/fact separation.",
+        "Prefer stable predicate families over one-off surface verbs when the source has repeated records such as grievances, docket entries, obligations, incidents, symptoms, clauses, or observations.",
+        "Use the allowed predicate palette and contracts exactly. If the palette lacks a faithful relation, omit/quarantine the operation or keep it in assertions rather than mapping to an approximate predicate.",
+        "Prefer source-attributed predicates for principles, legitimacy statements, accusations, character judgments, and other source-owned claims.",
+    ],
+    "repeated_structure_strategy": [
+        "For list-like source material, use stable ids plus record/property predicates, for example record(id, label), actor(id, actor), target(id, target), method(id, method), purpose(id, purpose), effect(id, effect).",
+        "Balance coverage across source boundary, entities, rules, representative records, conclusions, and commitments instead of spending the whole operation budget on the first repeated list.",
+    ],
+    "truth_maintenance_strategy": [
+        "For every write/query/rule candidate, include support_links that explain what grounds it.",
+        "For corrections, cite old KB/source support and propose explicit retract/assert operations when the target and replacement are clear.",
+        "For conflicts, preserve the competing claim/observation/source states and recommend clarify/quarantine/mixed rather than silently overwriting.",
+        "For temporal changes, preserve anchors and intervals durably when predicates allow them; a corrected date should retract or supersede the stale date anchor, not only the derived consequence.",
+    ],
+    "query_strategy": [
+        "For questions, query the actual predicate surface available in allowed_predicates, predicate_contracts, and kb_context_pack examples.",
+        "Use full predicate arity with uppercase variables for unknown slots.",
+        "For multi-hop questions, emit several precise query operations rather than inventing a composite predicate.",
+        "A query is not a durable truth claim; do not write the answer as a fact.",
+    ],
+    "self_check_questions": [
+        "Can this be queried later?",
+        "Does this preserve who said it?",
+        "Am I treating a claim as a fact?",
+        "Am I inventing a predicate or alias from model prior knowledge?",
+        "Should this be a source-attributed record, a rule, a correction, a query, or a parked unsafe implication?",
+    ],
+}
+
 
 BEST_GUARDED_V2_GUIDANCE = (
     "Decision policy:\n"
@@ -403,6 +456,7 @@ BEST_GUARDED_V2_GUIDANCE = (
     "- mixed: same turn contains both safe writes and a query/rule/unsafe implication. If unsafe_implications is non-empty and safe operations are also present, decision MUST be mixed, not commit.\n"
     "- commit: direct state update or correction has a clear target and safe predicate mapping.\n"
     "Special guards:\n"
+    "- Use compiler_strategy as the mental procedure before selecting predicates: establish source boundary, assertion status, entity value, predicate usefulness, repeated structure, and truth-maintenance implications.\n"
     "- Completeness beats summary. For narrative ingestion, enumerate every concrete direct event/state that can be safely mapped to allowed predicates; do not compress a sequence into only the main plot points.\n"
     "- Source fidelity is mandatory. Durable candidate_operations must be grounded in the current utterance, provided context, selected domain_context, or kb_context_pack. Do not import names, aliases, roles, motives, or facts from general world knowledge, famous stories, common versions of tales, or likely background priors.\n"
     "- Normalize entity atoms only for spelling/case/spacing/plural cleanup, explicit aliases in the utterance/context/domain ontology, or KB-resolved identity. If the utterance says 'Little Wee Bear', do not write baby_bear unless the utterance/context explicitly says Little Wee Bear is Baby Bear. Keep the text-local name as little_wee_bear and list any tempting prior alias in self_check.notes or unsafe_implications instead of committing it.\n"
@@ -555,6 +609,7 @@ def build_semantic_ir_input_payload(
             ],
             "claim_policy": "Claims, allegations, and reports remain speech/source facts. They do not overwrite observed/source-backed KB clauses.",
         },
+        "compiler_strategy": DOCUMENT_TO_LOGIC_COMPILER_STRATEGY,
         "authority_boundary": "The runtime validates and commits; you only propose semantic structure.",
         "variant_guidance": BEST_GUARDED_V2_GUIDANCE,
     }

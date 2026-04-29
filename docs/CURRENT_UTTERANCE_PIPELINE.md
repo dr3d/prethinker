@@ -182,6 +182,13 @@ signatures, and carry the model-authored pass plan forward. Python should not
 inspect the raw language to invent predicates, choose semantic segments, or
 rewrite utterances into a preferred ontology.
 
+For dense documents, `intake_plan_v1` is expected to split the source into
+model-authored focused passes. A good plan separates source boundary, rules,
+repeated records, ledgers/source records, reporters/witnesses, measurements,
+identity ambiguity, declarations, and pledges when those structures exist. The
+runner may iterate those passes, but the pass topics come from the model plan,
+not Python text analysis.
+
 Human-supplied expected Prolog files can be used in calibration to measure
 signature recall or to provide an explicit target ontology. That is different
 from hint-free operation. In product-like open-domain use there is no expected
@@ -203,6 +210,7 @@ raw utterance. The runtime assembles a compact prompt payload containing:
 - profile-owned admission guidance
 - model/runtime options
 - a compact `kb_context_pack`
+- a `document_to_logic_compiler_strategy_v1` object
 
 The `kb_context_pack` is deliberately small. It is not a full KB dump and not a
 general RAG answer. It gives the model useful current-state visibility:
@@ -217,6 +225,12 @@ general RAG answer. It gives the model useful current-state visibility:
 
 The model may use this to notice corrections, conflicts, aliases, pronouns, and
 claim-vs-observation pressure. The mapper still controls truth.
+
+The compiler strategy object is the reusable "how to think before writing"
+context. It tells the model to establish source boundary, assertion status,
+entity value, predicate usefulness, repeated-record structure, truth-maintenance
+support, and query shape before proposing operations. It is model guidance, not
+runtime authority.
 
 ### 7. The model proposes `semantic_ir_v1`
 

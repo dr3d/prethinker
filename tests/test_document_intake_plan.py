@@ -25,6 +25,8 @@ class DocumentIntakePlanTests(unittest.TestCase):
         self.assertIn("raw_source_text", messages[1]["content"])
         self.assertIn("declaration_style_document", messages[1]["content"])
         self.assertIn("required_top_level_json_shape", messages[1]["content"])
+        self.assertIn("Do not put a long list", messages[1]["content"])
+        self.assertIn("source-record and reporting acts", messages[1]["content"])
 
     def test_schema_is_strict_control_plane_object(self) -> None:
         self.assertEqual(INTAKE_PLAN_JSON_SCHEMA["type"], "object")

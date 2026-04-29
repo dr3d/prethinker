@@ -381,6 +381,13 @@ dense document: first source boundary, then principles/rules, then repeated
 records, then final declarations/pledges, instead of one overstuffed pass where
 the first repeated list consumes the operation budget.
 
+The current planner guidance is intentionally sharper than "make some chunks."
+For long source lists, the model should split work by semantic job when the text
+supports it: source records and ledgers, reporters/witnesses/complainants,
+measurements, identity ambiguity, rules with conditions, remedies/declarations,
+and pledges. Python still does not find those topics in the source; the plan is
+LLM-authored and carried forward as context.
+
 Example:
 
 ```powershell
@@ -707,6 +714,11 @@ The QA pass also gives the model the compiled KB surface:
 
 - actual predicate signatures found in admitted facts/rules;
 - representative clauses for those predicates;
+- legal query templates with full arity;
+- a `post_ingestion_qa_query_strategy_v1` block that says to use the compiled
+  predicate surface, uppercase Prolog variables, source-attributed claim
+  predicates, and primitive multi-hop query operations rather than invented
+  composite predicates;
 - source fact/rule counts.
 
 That is context engineering, not Python NLP. Python is not deriving meaning

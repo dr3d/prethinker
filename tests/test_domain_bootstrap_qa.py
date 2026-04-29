@@ -1,4 +1,5 @@
 from scripts.run_domain_bootstrap_qa import (
+    POST_INGESTION_QA_QUERY_STRATEGY,
     clause_signature,
     compiled_kb_inventory,
     parse_markdown_answer_key,
@@ -72,6 +73,16 @@ def test_compiled_kb_inventory_uses_clause_surfaces_not_english() -> None:
     assert inventory["examples"]["affected_item/2"] == ["affected_item(grievance_1, batch_p_44)."]
     assert "affected_item(X, Y)." in inventory["query_templates"]
     assert "can_depart(X)." in inventory["query_templates"]
+
+
+def test_post_ingestion_qa_strategy_prefers_compiled_kb_surface() -> None:
+    strategy = POST_INGESTION_QA_QUERY_STRATEGY
+
+    assert strategy["name"] == "post_ingestion_qa_query_strategy_v1"
+    assert "compiled_predicate_inventory.signatures" in " ".join(strategy["predicate_surface_policy"])
+    assert any("full compiled predicate arity" in item for item in strategy["arity_and_variable_policy"])
+    assert any("grievance(Grievance, Label)" in item for item in strategy["arity_and_variable_policy"])
+    assert any("source-attributed claims" in item for item in strategy["epistemic_policy"])
 
 
 def test_score_oracle_can_match_decision_predicate_and_answer_text() -> None:

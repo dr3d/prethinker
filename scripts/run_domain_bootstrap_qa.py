@@ -51,6 +51,37 @@ QA_JUDGE_SCHEMA: dict[str, Any] = {
     },
 }
 
+POST_INGESTION_QA_QUERY_STRATEGY: dict[str, Any] = {
+    "name": "post_ingestion_qa_query_strategy_v1",
+    "authority": "query_planning_guidance_only_runtime_executes_queries",
+    "core_principle": (
+        "Answer source-document questions by planning queries over the compiled KB surface, "
+        "not by re-reading the source text or inventing new predicate names."
+    ),
+    "predicate_surface_policy": [
+        "Use compiled_predicate_inventory.signatures as the available query vocabulary.",
+        "Prefer compiled_query_templates when a question asks for a value that appears in an existing predicate slot.",
+        "If a desired meaning is split across multiple predicates, emit multiple query operations with shared constants or variables.",
+        "Do not invent composite predicates such as who_accused/2 or why_recalled/2 unless that exact predicate exists in the compiled KB inventory.",
+    ],
+    "arity_and_variable_policy": [
+        "Keep every query at the full compiled predicate arity.",
+        "Use uppercase variables such as X, Y, Item, Actor, Source, Date, or Reason for unknown slots.",
+        "Never use lowercase placeholder constants such as who, what, item, reason, source, or answer when a variable is intended.",
+        "Words that merely name the slot, such as grievance_label, method_detail, explanation_detail, candidate, label, content, value, status, or institution, are variables too; write them as GrievanceLabel, MethodDetail, ExplanationDetail, Candidate, Label, Content, Value, Status, or Institution.",
+        "If you want all rows for grievance/2, query grievance(Grievance, Label), not grievance(Grievance, grievance_label).",
+    ],
+    "epistemic_policy": [
+        "Return claim/source/support queries for claimed or alleged content; do not ask for objective fact predicates when the KB only contains source-attributed claims.",
+        "For ambiguity questions, query ambiguity and candidate-identity predicates when present rather than forcing a single identity.",
+        "For rule/consequence questions, query stored rules and supporting facts; do not write derived conclusions as durable facts.",
+    ],
+    "failure_policy": [
+        "If no compiled predicate can faithfully answer the question, emit no write and explain the missing predicate/support in self_check.",
+        "If the question requires multi-hop reasoning not supported by the current runtime, emit the closest safe primitive queries and mark the remaining inference gap in truth_maintenance.derived_consequences.",
+    ],
+}
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run QA probes against a domain bootstrap source-compile run.")
@@ -116,12 +147,13 @@ def main() -> int:
         "For a query over a predicate, keep the predicate's full arity from compiled_predicate_inventory. If a slot is unspecified, fill it with an uppercase variable.",
         "When the answer position is unknown, use Prolog variables X, Y, or Z exactly. Lowercase terms such as rule, time, condition, item, person, location, who, what, where, and answer are constants, not variables.",
         "Inside candidate_operations[].args, variables must also be uppercase strings such as X, Y, Z, Rule, Item, or Time.",
-        "Never put lowercase generic placeholder words into query arguments when you want the KB to return a value.",
+        "Never put lowercase generic placeholder words into query arguments when you want the KB to return a value. This includes label words such as grievance_label, method_detail, explanation_detail, candidate, label, content, value, status, and institution.",
         "compiled_query_templates shows legal query shapes. Prefer those templates and then bind only the slots that are clearly named in the question.",
         "For multi-hop questions, emit multiple safe query operations over the actual KB predicates instead of inventing a composite predicate.",
         "For source/institution questions, prefer predicates that actually expose source, ledger, actor, reporter, complainant, or institution values in the compiled KB examples.",
         "Keep QA workspaces compact: at most 4 query operations and at most 2 short self_check notes.",
         "For unsafe inference traps, preserve the difference between direct KB support, source claim, inference, and unknown.",
+        "Use post_ingestion_qa_query_strategy_v1 in kb_context_pack as the query-planning procedure.",
     ]
     config = SemanticIRCallConfig(
         backend=str(args.backend),
@@ -361,6 +393,7 @@ def run_one_question(
     kb_context_pack = {
         "version": "semantic_ir_context_pack_v1",
         "mode": "post_ingestion_qa",
+        "post_ingestion_qa_query_strategy": POST_INGESTION_QA_QUERY_STRATEGY,
         "compiled_predicate_inventory": {
             "signatures": kb_inventory.get("signatures", [])[:120],
             "counts": kb_inventory.get("counts", {}),

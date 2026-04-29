@@ -119,7 +119,7 @@ engineering, Semantic IR workspaces, and deterministic admission.
 
 Latest local verification:
 
-- Full pytest suite after profile-owned predicate alias canonicalization: `394 passed`.
+- Full pytest suite after compiler-strategy and QA-context updates: `396 passed`.
 - Lava v5 latest 60-attempt rerun: `60/60` parsed JSON, `60/60` domain selector, `60/60` admission-safe, `45/60` semantic-clean, `41/60` full expectation score, `0` fuzzy edge kinds, and `0/60` temp-0 variance groups.
 - `active_profile=auto` now uses `semantic_router_v1` as the first-pass context/profile planner. The old Python catalog selector is no longer in the active runtime or research harnesses.
 - Multilingual router probe: `router_ok=10/10`, `compiler_parsed_ok=10/10` on raw Spanish, French, German, Portuguese, Italian, Japanese, and code-switched turns.
@@ -134,7 +134,7 @@ Latest local verification:
 - Goldilocks full-story segmented smoke: `56` deduped mutations across `50` segments, with placeholder and vague-predicate bad writes removed after adding a generic story-world predicate palette.
 - Policy/reimbursement cross-turn demo: English policy installed executable rules, derived query answers without writing derived `violation/2` facts, then corrected state and changed the answer.
 - Profile bootstrap closed-loop smoke: a model-proposed starter profile ran generated starter cases through the normal Semantic IR mapper with `8/8` valid workspaces and `7/8` expected-boundary hits.
-- Raw Proclamation hint-free profile-review experiment: useful run produced `30` candidate predicates, `93` admitted source-compile operations, `4/4` successful planned passes, and first-20 post-ingestion QA at `10 exact / 5 partial / 4 miss / 1 not judged`.
+- Raw Proclamation hint-free profile-review experiment: useful run produced `30` candidate predicates, `93` admitted source-compile operations, `4/4` successful planned passes, and first-20 post-ingestion QA at `10 exact / 5 partial / 4 miss / 1 not judged`. Newer source-record/reporter/condition pressure produced a stronger product-like compile shape (`18` predicates, `4` repeated structures, `497` admitted operations) while also exposing compiled-KB query planning as the next unstable edge.
 
 The important qualitative result is that the current system has moved from
 Python-side language rescue toward model-owned context planning plus

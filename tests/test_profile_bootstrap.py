@@ -6,7 +6,9 @@ from pathlib import Path
 from scripts.run_profile_bootstrap import _load_jsonl
 from src.profile_bootstrap import (
     PROFILE_BOOTSTRAP_JSON_SCHEMA,
+    PROFILE_BOOTSTRAP_GUIDANCE,
     PROFILE_BOOTSTRAP_REVIEW_JSON_SCHEMA,
+    PROFILE_BOOTSTRAP_REVIEW_GUIDANCE,
     build_profile_bootstrap_messages,
     build_profile_bootstrap_review_messages,
     parse_profile_bootstrap_json,
@@ -38,6 +40,14 @@ class ProfileBootstrapTests(unittest.TestCase):
         self.assertIn("contracts_compliance", messages[1]["content"])
         self.assertIn("required_top_level_json_shape", messages[1]["content"])
         self.assertIn("not authorizing KB writes", messages[0]["content"])
+
+    def test_bootstrap_guidance_preserves_source_records_reporters_and_conditions(self) -> None:
+        self.assertIn("source-record predicate", PROFILE_BOOTSTRAP_GUIDANCE)
+        self.assertIn("reporting/source actor", PROFILE_BOOTSTRAP_GUIDANCE)
+        self.assertIn("avoid unary relation-like forms", PROFILE_BOOTSTRAP_GUIDANCE)
+        self.assertIn("source-record loss", PROFILE_BOOTSTRAP_REVIEW_GUIDANCE)
+        self.assertIn("reporter loss", PROFILE_BOOTSTRAP_REVIEW_GUIDANCE)
+        self.assertIn("conditional-rule loss", PROFILE_BOOTSTRAP_REVIEW_GUIDANCE)
 
     def test_profile_bootstrap_schema_is_strict_root_object(self) -> None:
         self.assertEqual(PROFILE_BOOTSTRAP_JSON_SCHEMA["type"], "object")
