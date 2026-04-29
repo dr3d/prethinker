@@ -80,6 +80,7 @@ def test_post_ingestion_qa_strategy_prefers_compiled_kb_surface() -> None:
 
     assert strategy["name"] == "post_ingestion_qa_query_strategy_v1"
     assert "compiled_predicate_inventory.signatures" in " ".join(strategy["predicate_surface_policy"])
+    assert "relevant_clauses" in " ".join(strategy["predicate_surface_policy"])
     assert any("full compiled predicate arity" in item for item in strategy["arity_and_variable_policy"])
     assert any("grievance(Grievance, Label)" in item for item in strategy["arity_and_variable_policy"])
     assert any("source-attributed claims" in item for item in strategy["epistemic_policy"])

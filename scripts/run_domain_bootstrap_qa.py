@@ -60,6 +60,7 @@ POST_INGESTION_QA_QUERY_STRATEGY: dict[str, Any] = {
     ),
     "predicate_surface_policy": [
         "Use compiled_predicate_inventory.signatures as the available query vocabulary.",
+        "Use relevant_clauses as the primary evidence surface for choosing constants and record ids; compiled_predicate_inventory.examples is only a compact index.",
         "Prefer compiled_query_templates when a question asks for a value that appears in an existing predicate slot.",
         "If a desired meaning is split across multiple predicates, emit multiple query operations with shared constants or variables.",
         "Do not invent composite predicates such as who_accused/2 or why_recalled/2 unless that exact predicate exists in the compiled KB inventory.",
@@ -275,7 +276,7 @@ def compiled_kb_inventory(*, facts: list[str], rules: list[str]) -> dict[str, An
             continue
         counts[signature] = counts.get(signature, 0) + 1
         bucket = examples.setdefault(signature, [])
-        if len(bucket) < 3:
+        if len(bucket) < 8:
             bucket.append(str(clause).strip())
     signatures = sorted(counts, key=lambda item: (-counts[item], item))
     return {
@@ -400,7 +401,7 @@ def run_one_question(
             "examples": kb_inventory.get("examples", {}),
         },
         "compiled_query_templates": kb_inventory.get("query_templates", [])[:120],
-        "relevant_clauses": [*facts[:260], *rules[:80]],
+        "relevant_clauses": [*facts[:600], *rules[:160]],
         "source_fact_count": len(facts),
         "source_rule_count": len(rules),
     }

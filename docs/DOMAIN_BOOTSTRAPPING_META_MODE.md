@@ -725,6 +725,13 @@ That is context engineering, not Python NLP. Python is not deriving meaning
 from the question text; it is telling the model which Prolog surface actually
 exists so the model can ask useful KB queries.
 
+There is one structural query-syntax repair in this path: generic slot labels
+emitted by the model as query arguments, such as `label`, `candidate`,
+`grievancelabel`, or `methoddetail`, are normalized to Prolog variables. This
+does not inspect the user's question or source language; it prevents model
+placeholder words from becoming lowercase Prolog constants that force
+`no_results`.
+
 With an oracle JSONL, the runner can score exact structural expectations.
 
 An oracle row can be as small as:

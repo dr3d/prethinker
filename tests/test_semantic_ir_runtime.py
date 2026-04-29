@@ -128,6 +128,30 @@ class SemanticIRRuntimeTests(unittest.TestCase):
                     "source": "direct",
                     "safety": "safe",
                 },
+                {
+                    "operation": "query",
+                    "predicate": "declaration_action",
+                    "args": ["declaration", "action"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "query",
+                    "predicate": "grievance",
+                    "args": ["grievanceid", "grievancelabel"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "query",
+                    "predicate": "ambiguous_identity",
+                    "args": ["k_lume", "candidate"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
             ],
         )
 
@@ -140,6 +164,9 @@ class SemanticIRRuntimeTests(unittest.TestCase):
                 "conflict_between_ledgers/3",
                 "grievance_method/2",
                 "declare_recall/2",
+                "declaration_action/2",
+                "grievance/2",
+                "ambiguous_identity/2",
             ],
         )
 
@@ -153,6 +180,9 @@ class SemanticIRRuntimeTests(unittest.TestCase):
                 "conflict_between_ledgers(Grievance, Ledger1, Ledger2).",
                 "grievance_method(Grievanceid, Method).",
                 "declare_recall(Item, Status).",
+                "declaration_action(Declaration, Action).",
+                "grievance(Grievanceid, Grievancelabel).",
+                "ambiguous_identity(k_lume, Candidate).",
             ],
         )
 
