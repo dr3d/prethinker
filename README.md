@@ -80,7 +80,7 @@ The public repo currently tracks `45` pytest files under [tests/](https://github
 
 ```powershell
 python -m pytest -q
-# 392 passed
+# 394 passed
 ```
 
 Current high-signal evidence:
@@ -88,6 +88,7 @@ Current high-signal evidence:
 - Semantic IR edge runtime A/B: `20/20` decision labels, `0.976` average score, `0` non-mapper parse rescues.
 - Weak-edge pass: `10/10` decision labels, `1.000` average score.
 - Multilingual router probe: `10/10` router choices and `10/10` compiler JSON on raw Spanish, French, German, Portuguese, Italian, Japanese, and code-switched turns.
+- Profile-owned predicate aliases now canonicalize candidate-operation predicate surfaces before palette admission, with an audit trail such as `dad_of/2 -> parent/2`; this is registry/context authority, not Python prose parsing.
 - Lava v5 latest 60-attempt rerun: `60/60` parsed JSON, `60/60` domain selector, `60/60` admission-safe, `45/60` semantic-clean, `41/60` full expectation score, `0/60` temp-0 signature variance groups, and `0` fuzzy edge kinds.
 - Policy/reimbursement cross-turn demo: English policy installed executable rules, derived query answers without writing derived `violation/2` facts, then corrected state and changed the answer.
 

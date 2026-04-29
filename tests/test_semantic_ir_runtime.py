@@ -151,6 +151,47 @@ class SemanticIRRuntimeTests(unittest.TestCase):
             ],
         )
 
+    def test_profile_owned_predicate_alias_canonicalizes_before_palette_gate(self) -> None:
+        ir = _ir(
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "dad_of",
+                    "args": ["ian", "scott"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                }
+            ],
+        )
+
+        parsed, warnings = semantic_ir_to_legacy_parse(
+            ir,
+            predicate_contracts=[
+                {
+                    "signature": "parent/2",
+                    "arguments": ["parent", "child"],
+                    "aliases": ["father_of/2", "dad_of/2", "mother_of/2", "mom_of/2"],
+                }
+            ],
+        )
+
+        self.assertEqual(warnings, [])
+        self.assertEqual(parsed["facts"], ["parent(ian, scott)."])
+        diagnostics = parsed["admission_diagnostics"]
+        self.assertEqual(diagnostics["predicate_alias_count"], 4)
+        self.assertEqual(
+            diagnostics["predicate_aliases_applied"],
+            [
+                {
+                    "operation_index": 0,
+                    "from": "dad_of/2",
+                    "to": "parent/2",
+                    "authority": "profile_predicate_alias",
+                }
+            ],
+        )
+
     def test_mapper_admits_minimal_temporal_fact_vocabulary(self) -> None:
         ir = _ir(
             candidate_operations=[

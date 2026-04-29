@@ -69,3 +69,25 @@ def test_mock_profile_packages_are_declarative_and_loadable():
     assert any("source_fidelity_policy" in line for line in profile_package_context(story))
     assert any("Little Wee Bear" in line and "Baby Bear" in line for line in profile_package_context(story))
     assert any("claim" in line for line in profile_package_context(probate))
+
+
+def test_profile_package_contracts_preserve_declared_predicate_aliases():
+    profile = {
+        "canonical_palette": [
+            {
+                "signature": "parent/2",
+                "arguments": ["parent", "child"],
+                "aliases": ["father_of/2", "dad_of/2"],
+            }
+        ]
+    }
+
+    contracts = profile_package_contracts(profile)
+
+    assert contracts == [
+        {
+            "signature": "parent/2",
+            "arguments": ["parent", "child"],
+            "aliases": ["father_of/2", "dad_of/2"],
+        }
+    ]

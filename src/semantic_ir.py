@@ -820,10 +820,12 @@ def semantic_ir_admission_diagnostics(
     raw_contracts = predicate_contracts if predicate_contracts is not None else allowed_predicates
     contract_map = _predicate_contract_map(raw_contracts)
     contract_details = _predicate_contract_detail_map(raw_contracts)
+    predicate_aliases = _predicate_alias_map(raw_contracts)
+    ir_for_admission = _ir_with_predicate_aliases(ir, predicate_aliases)
     if not allowed_signatures and contract_map:
         allowed_signatures = set(contract_map)
     projected_decision = _projected_decision(
-        ir,
+        ir_for_admission,
         allowed_signatures=allowed_signatures,
         contract_map=contract_map,
         contract_details=contract_details,
@@ -844,13 +846,13 @@ def semantic_ir_admission_diagnostics(
         "queries": [],
         "retracts": [],
     }
-    entity_names = _entity_name_map(ir)
-    entity_meta = _entity_metadata_map(ir)
+    entity_names = _entity_name_map(ir_for_admission)
+    entity_meta = _entity_metadata_map(ir_for_admission)
     admitted_clause_keys: set[tuple[str, str]] = set()
-    temporal_invalid_operation_indexes = _temporal_invalid_operation_indexes(ir, entity_names=entity_names)
-    for index, op in enumerate(_candidate_operations(ir)):
+    temporal_invalid_operation_indexes = _temporal_invalid_operation_indexes(ir_for_admission, entity_names=entity_names)
+    for index, op in enumerate(_candidate_operations(ir_for_admission)):
         diagnosis = _diagnose_candidate_operation(
-            ir,
+            ir_for_admission,
             op,
             index=index,
             entity_names=entity_names,
@@ -931,12 +933,12 @@ def semantic_ir_admission_diagnostics(
             skipped_count += 1
 
     features = _admission_feature_summary(
-        ir,
+        ir_for_admission,
         allowed_signatures=allowed_signatures,
         contract_map=contract_map,
         contract_details=contract_details,
     )
-    truth_maintenance = _truth_maintenance_summary(ir)
+    truth_maintenance = _truth_maintenance_summary(ir_for_admission)
     epistemic_worlds = _epistemic_worlds_summary(
         projected_decision,
         operations,
@@ -948,13 +950,15 @@ def semantic_ir_admission_diagnostics(
         "model_decision": model_decision,
         "projected_decision": projected_decision,
         "projection_reason": _projection_reason(
-            ir,
+            ir_for_admission,
             model_decision,
             projected_decision,
             allowed_signatures=allowed_signatures,
             contract_map=contract_map,
             contract_details=contract_details,
         ),
+        "predicate_alias_count": len(predicate_aliases),
+        "predicate_aliases_applied": _predicate_alias_applications(ir, predicate_aliases),
         "features": features,
         "operation_count": len(operations),
         "admitted_count": admitted_count,
@@ -989,10 +993,12 @@ def semantic_ir_to_legacy_parse(
     raw_contracts = predicate_contracts if predicate_contracts is not None else allowed_predicates
     contract_map = _predicate_contract_map(raw_contracts)
     contract_details = _predicate_contract_detail_map(raw_contracts)
+    predicate_aliases = _predicate_alias_map(raw_contracts)
+    ir_for_admission = _ir_with_predicate_aliases(ir, predicate_aliases)
     if not allowed_signatures and contract_map:
         allowed_signatures = set(contract_map)
     decision = _projected_decision(
-        ir,
+        ir_for_admission,
         allowed_signatures=allowed_signatures,
         contract_map=contract_map,
         contract_details=contract_details,
@@ -1051,12 +1057,12 @@ def semantic_ir_to_legacy_parse(
         "rules": rules,
         "queries": queries,
         "confidence": _confidence_object(0.9 if decision in {"commit", "answer", "mixed"} else 0.25),
-        "ambiguities": _semantic_ir_ambiguities(ir),
+        "ambiguities": _semantic_ir_ambiguities(ir_for_admission),
         "needs_clarification": decision == "clarify",
         "uncertainty_score": 0.85 if decision == "clarify" else (0.65 if decision in {"quarantine", "reject"} else 0.2),
         "uncertainty_label": "high" if decision == "clarify" else ("medium" if decision in {"quarantine", "reject"} else "low"),
-        "clarification_question": _first_question(ir) if decision == "clarify" else "",
-        "clarification_reason": _semantic_ir_reason(ir, decision) if decision == "clarify" else "",
+        "clarification_question": _first_question(ir_for_admission) if decision == "clarify" else "",
+        "clarification_reason": _semantic_ir_reason(ir_for_admission, decision) if decision == "clarify" else "",
         "rationale": f"Mapped from semantic_ir_v1 decision={decision}; skipped={len(warnings)}",
         "admission_diagnostics": diagnostics,
         "clause_supports": diagnostics.get("clause_supports", {}),
@@ -2164,6 +2170,119 @@ def _predicate_contract_detail_map(raw: Any) -> dict[tuple[str, int], dict[str, 
         if name and arity >= 0:
             out[(name, arity)] = dict(item)
     return out
+
+
+def _predicate_alias_map(raw: Any) -> dict[tuple[str, int], tuple[str, int]]:
+    if raw is None:
+        return {}
+    values = raw
+    if isinstance(raw, dict):
+        values = [raw]
+    elif isinstance(raw, set):
+        values = list(raw)
+    elif isinstance(raw, tuple):
+        values = list(raw)
+    elif not isinstance(raw, list):
+        values = [raw]
+    aliases: dict[tuple[str, int], tuple[str, int]] = {}
+    for item in values:
+        if not isinstance(item, dict):
+            continue
+        canonical = _signature_tuple_from_contract(item)
+        if canonical is None:
+            continue
+        raw_aliases = item.get("aliases", item.get("predicate_aliases", []))
+        if not isinstance(raw_aliases, list):
+            continue
+        for alias in raw_aliases:
+            alias_signature = _signature_tuple(str(alias or ""), default_arity=canonical[1])
+            if alias_signature is None:
+                continue
+            if alias_signature[1] != canonical[1]:
+                continue
+            if alias_signature != canonical:
+                aliases[alias_signature] = canonical
+    return aliases
+
+
+def _signature_tuple_from_contract(item: dict[str, Any]) -> tuple[str, int] | None:
+    signature = str(item.get("signature") or "").strip()
+    parsed = _signature_tuple(signature)
+    if parsed is not None:
+        return parsed
+    predicate_text = str(item.get("predicate") or item.get("name") or "").strip()
+    name = _predicate_name(predicate_text) if predicate_text else ""
+    roles = item.get("arguments", item.get("args", []))
+    if not name or not isinstance(roles, list):
+        return None
+    return (name, len([role for role in roles if str(role).strip()]))
+
+
+def _signature_tuple(text: str, *, default_arity: int | None = None) -> tuple[str, int] | None:
+    raw = str(text or "").strip()
+    if not raw:
+        return None
+    match = re.fullmatch(r"\s*([A-Za-z_][A-Za-z0-9_]*)\s*/\s*(\d+)\s*", raw)
+    if match:
+        name = _predicate_name(match.group(1))
+        arity = int(match.group(2))
+        return (name, arity) if name and arity >= 0 else None
+    if default_arity is None:
+        return None
+    name = _predicate_name(raw)
+    return (name, int(default_arity)) if name and int(default_arity) >= 0 else None
+
+
+def _ir_with_predicate_aliases(
+    ir: dict[str, Any],
+    predicate_aliases: dict[tuple[str, int], tuple[str, int]],
+) -> dict[str, Any]:
+    if not predicate_aliases or not isinstance(ir, dict):
+        return ir
+    try:
+        clone = json.loads(json.dumps(ir))
+    except Exception:
+        clone = dict(ir)
+    ops = clone.get("candidate_operations", [])
+    if not isinstance(ops, list):
+        return clone
+    for op in ops:
+        if not isinstance(op, dict):
+            continue
+        predicate = _predicate_name(op.get("predicate"))
+        args = op.get("args", [])
+        arity = len(args) if isinstance(args, list) else 0
+        canonical = predicate_aliases.get((predicate, arity))
+        if canonical is None:
+            continue
+        op.setdefault("original_predicate", predicate)
+        op["predicate"] = canonical[0]
+    return clone
+
+
+def _predicate_alias_applications(
+    ir: dict[str, Any],
+    predicate_aliases: dict[tuple[str, int], tuple[str, int]],
+) -> list[dict[str, Any]]:
+    if not predicate_aliases:
+        return []
+    applications: list[dict[str, Any]] = []
+    for index, op in enumerate(_candidate_operations(ir)):
+        predicate = _predicate_name(op.get("predicate"))
+        args = op.get("args", [])
+        arity = len(args) if isinstance(args, list) else 0
+        canonical = predicate_aliases.get((predicate, arity))
+        if canonical is None:
+            continue
+        applications.append(
+            {
+                "operation_index": index,
+                "from": f"{predicate}/{arity}",
+                "to": f"{canonical[0]}/{canonical[1]}",
+                "authority": "profile_predicate_alias",
+            }
+        )
+    return applications
 
 
 def _operation_signature_allowed(
