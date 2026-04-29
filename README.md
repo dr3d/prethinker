@@ -80,7 +80,7 @@ The public repo currently tracks `45` pytest files under [tests/](https://github
 
 ```powershell
 python -m pytest -q
-# 388 passed
+# 390 passed
 ```
 
 Current high-signal evidence:

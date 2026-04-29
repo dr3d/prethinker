@@ -70,6 +70,67 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         ok, errors = _validate_parsed(parsed)
         self.assertTrue(ok, errors)
 
+    def test_query_placeholder_args_become_variables(self) -> None:
+        ir = _ir(
+            decision="answer",
+            turn_type="query",
+            candidate_operations=[
+                {
+                    "operation": "query",
+                    "predicate": "prohibits_serving_before",
+                    "args": ["rule", "glow cake", "time"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "query",
+                    "predicate": "ledger_entry",
+                    "args": ["ledger1", "entry"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "query",
+                    "predicate": "explanation_given",
+                    "args": ["X", "explanation"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "query",
+                    "predicate": "conflict_between_ledgers",
+                    "args": ["grievance", "ledger1", "ledger2"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+            ],
+        )
+
+        parsed, warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=[
+                "prohibits_serving_before/3",
+                "ledger_entry/2",
+                "explanation_given/2",
+                "conflict_between_ledgers/3",
+            ],
+        )
+
+        self.assertEqual(warnings, [])
+        self.assertEqual(
+            parsed["queries"],
+            [
+                "prohibits_serving_before(Rule, glow_cake, Time).",
+                "ledger_entry(Ledger1, Entry).",
+                "explanation_given(X, Explanation).",
+                "conflict_between_ledgers(Grievance, Ledger1, Ledger2).",
+            ],
+        )
+
     def test_mapper_admits_minimal_temporal_fact_vocabulary(self) -> None:
         ir = _ir(
             candidate_operations=[

@@ -2873,11 +2873,59 @@ def _term_from_arg(value: Any, *, entity_names: dict[str, str], for_query: bool)
         return raw if raw in {"X", "Y", "Z"} else "X"
     if for_query and raw.startswith("?"):
         return _variable_name(raw[1:] or "X")
+    if for_query and _is_query_placeholder_arg(raw):
+        return _placeholder_variable_name(raw)
     if re.fullmatch(r"-?\d+(\.\d+)?", raw):
         return raw
     if raw.startswith("'") and raw.endswith("'"):
         raw = raw[1:-1]
     return _atomize(raw)
+
+
+def _is_query_placeholder_arg(raw: str) -> bool:
+    value = _atomize(str(raw or ""))
+    if re.fullmatch(r"(arg|ledger|var)\d+", value):
+        return True
+    return value in {
+        "answer",
+        "arg",
+        "condition",
+        "entity",
+        "entry",
+        "explanation",
+        "event",
+        "fact",
+        "grievance",
+        "grievance_id",
+        "institution",
+        "item",
+        "ledger",
+        "location",
+        "object",
+        "person",
+        "place",
+        "reason",
+        "record",
+        "result",
+        "rule",
+        "source",
+        "subject",
+        "target",
+        "thing",
+        "time",
+        "value",
+        "what",
+        "when",
+        "where",
+        "who",
+    }
+
+
+def _placeholder_variable_name(raw: str) -> str:
+    value = _atomize(str(raw or "X"))
+    if not value:
+        return "X"
+    return "".join(part[:1].upper() + part[1:] for part in value.split("_") if part) or "X"
 
 
 def _variable_name(raw: str) -> str:

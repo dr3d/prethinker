@@ -352,6 +352,7 @@ def _compile_source_with_draft_profile(
     intake_plan: dict[str, Any] | None,
     args: argparse.Namespace,
     extra_context: list[str] | None = None,
+    compact_retry: bool = True,
 ) -> dict[str, Any]:
     allowed_predicates = profile_bootstrap_allowed_predicates(parsed_profile)
     predicate_contracts = profile_bootstrap_predicate_contracts(parsed_profile)
@@ -387,6 +388,9 @@ def _compile_source_with_draft_profile(
                 "If the whole source contains more safe facts than fit, preserve a balanced document skeleton: source/provenance boundary, core declaration or action, representative repeated records, and concluding commitments. Do not let one repeated list consume the whole candidate_operation budget.",
                 "When a draft profile offers source-attributed claim predicates such as claim_made/3 or source_claim/3, prefer those for normative principles, rights, accusations, character judgments, and legitimacy statements that the source asserts but does not externally prove.",
                 "If both a direct normative predicate and a source-attributed claim predicate are available, use the source-attributed claim predicate for rights, principles, legitimacy, and character judgments unless the direct predicate itself has a source/document argument.",
+                "Preserve reporting and ledger-record acts as first-class queryable details when the draft profile supports them. If a source says someone reported, complained, witnessed, recorded, entered in a ledger, certified, or observed something, prefer reporter/2, complainant/2, reported_observation/2, ledger_entry/2, or similar profile predicates over collapsing the detail into only affected_person/2 or grievance/2.",
+                "When the source names a reporting actor and a role, preserve both if the palette supports it, e.g. a reporter/person predicate plus person_role/2. This is structural source fidelity, not a domain-specific language patch.",
+                "When a source contrasts two ledgers or records, preserve both the individual ledger entries and the conflict relation if the palette supports them. Do not keep only the conflict wrapper if a later question may ask which ledger recorded which event.",
                 "Do not emit source_priority, override, conflict, or authority-ranking facts unless the source explicitly ranks sources or states an override/conflict policy.",
                 "When a predicate contract names an argument source, source_document, or document, bind that argument to a stable source/document id such as doc_1 or a normalized document id. Do not put the speaker, claimant, or claim subject in a source/document argument.",
                 "For whole-source compilation, hard-cap any single repeated structure at 24 total candidate_operations, counting the record predicate and every property predicate. Do not exceed 6 representative records for any one repeated structure in a whole-source skeleton pass. If the source contains more records, list the omitted structure in self_check rather than emitting more operations.",
@@ -405,6 +409,22 @@ def _compile_source_with_draft_profile(
         return {"ok": False, "error": str(exc)}
     ir = result.get("parsed") if isinstance(result, dict) else None
     if not isinstance(ir, dict):
+        if compact_retry:
+            return _compile_source_with_draft_profile(
+                source_text=source_text,
+                parsed_profile=parsed_profile,
+                intake_plan=intake_plan,
+                args=args,
+                extra_context=[
+                    *(extra_context or []),
+                    "COMPACT RETRY: the previous Semantic IR response for this same planned pass was not parseable.",
+                    "Return a smaller valid semantic_ir_v1 object. Keep entities sparse and reusable.",
+                    "For repeated-record/evidence passes, emit at most 32 candidate_operations total.",
+                    "Prioritize high-query-value details: reporting actors, complainants, ledger entries, conflicts between ledgers, affected items, locations, measurements, and rule violations.",
+                    "Keep self_check.notes to at most two short notes.",
+                ],
+                compact_retry=False,
+            )
         return {
             "ok": False,
             "error": str(result.get("parse_error", "semantic_ir_parse_failed")) if isinstance(result, dict) else "semantic_ir_failed",

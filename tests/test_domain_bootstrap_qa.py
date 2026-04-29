@@ -4,6 +4,7 @@ from scripts.run_domain_bootstrap_qa import (
     parse_markdown_answer_key,
     parse_numbered_markdown_questions,
     score_oracle,
+    summarize,
 )
 
 
@@ -69,6 +70,8 @@ def test_compiled_kb_inventory_uses_clause_surfaces_not_english() -> None:
     assert clause_signature(rules[0]) == "can_depart/1"
     assert inventory["signatures"] == ["affected_item/2", "can_depart/1", "claimed_label/2"]
     assert inventory["examples"]["affected_item/2"] == ["affected_item(grievance_1, batch_p_44)."]
+    assert "affected_item(X, Y)." in inventory["query_templates"]
+    assert "can_depart(X)." in inventory["query_templates"]
 
 
 def test_score_oracle_can_match_decision_predicate_and_answer_text() -> None:
@@ -84,6 +87,21 @@ def test_score_oracle_can_match_decision_predicate_and_answer_text() -> None:
     }
 
     assert score_oracle(row=row, oracle=oracle) is True
+
+
+def test_summarize_counts_reference_judge_verdicts() -> None:
+    rows = [
+        {"ok": True, "queries": ["p(X)."], "reference_answer": "A", "reference_judge": {"verdict": "exact"}},
+        {"ok": True, "queries": ["q(X)."], "reference_answer": "B", "reference_judge": {"verdict": "partial"}},
+        {"ok": True, "queries": [], "reference_answer": "C", "reference_judge": {"verdict": "miss"}},
+    ]
+
+    summary = summarize(rows=rows, load_errors=[], elapsed_ms=12)
+
+    assert summary["judge_rows"] == 3
+    assert summary["judge_exact"] == 1
+    assert summary["judge_partial"] == 1
+    assert summary["judge_miss"] == 1
 
 
 def test_score_oracle_returns_none_without_answer_key() -> None:

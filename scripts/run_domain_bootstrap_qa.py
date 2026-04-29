@@ -13,6 +13,8 @@ import json
 import re
 import sys
 import time
+import urllib.error
+import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -36,6 +38,20 @@ from src.semantic_ir import (  # noqa: E402
 )
 
 
+QA_JUDGE_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": ["schema_version", "verdict", "answer_supported", "concise_answer", "issues"],
+    "properties": {
+        "schema_version": {"type": "string", "const": "qa_judge_v1"},
+        "verdict": {"type": "string", "enum": ["exact", "partial", "miss", "not_judged"]},
+        "answer_supported": {"type": "boolean"},
+        "concise_answer": {"type": "string"},
+        "issues": {"type": "array", "maxItems": 8, "items": {"type": "string"}},
+    },
+}
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run QA probes against a domain bootstrap source-compile run.")
     parser.add_argument("--run-json", type=Path, required=True, help="domain_bootstrap_file_*.json with source_compile.")
@@ -52,7 +68,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--num-ctx", type=int, default=32768)
     parser.add_argument("--max-tokens", type=int, default=6000)
     parser.add_argument("--limit", type=int, default=0)
+    parser.add_argument("--only-ids", default="", help="Comma-separated QA ids to run, e.g. q006,q039.")
     parser.add_argument("--include-model-input", action="store_true")
+    parser.add_argument(
+        "--judge-reference-answers",
+        action="store_true",
+        help="Use the model in structured-output mode to compare query results with markdown reference answers.",
+    )
     return parser.parse_args()
 
 
@@ -63,6 +85,9 @@ def main() -> int:
     run_record = json.loads(run_path.read_text(encoding="utf-8-sig"))
     qa_text = qa_path.read_text(encoding="utf-8-sig")
     questions = parse_numbered_markdown_questions(qa_text)
+    only_ids = {item.strip() for item in str(args.only_ids or "").split(",") if item.strip()}
+    if only_ids:
+        questions = [item for item in questions if str(item.get("id", "")).strip() in only_ids]
     if int(args.limit or 0) > 0:
         questions = questions[: int(args.limit)]
     oracle = load_oracle(args.oracle_jsonl)
@@ -88,9 +113,14 @@ def main() -> int:
         "Treat the current utterance as a probe against existing KB state unless it explicitly states a correction or new assertion.",
         "For ordinary questions, emit query candidate_operations, not writes.",
         "Use the actual compiled KB predicate inventory exactly. Do not invent a new query predicate when the KB already has a predicate with the needed meaning.",
+        "For a query over a predicate, keep the predicate's full arity from compiled_predicate_inventory. If a slot is unspecified, fill it with an uppercase variable.",
         "When the answer position is unknown, use Prolog variables X, Y, or Z exactly. Lowercase terms such as rule, time, condition, item, person, location, who, what, where, and answer are constants, not variables.",
+        "Inside candidate_operations[].args, variables must also be uppercase strings such as X, Y, Z, Rule, Item, or Time.",
         "Never put lowercase generic placeholder words into query arguments when you want the KB to return a value.",
+        "compiled_query_templates shows legal query shapes. Prefer those templates and then bind only the slots that are clearly named in the question.",
         "For multi-hop questions, emit multiple safe query operations over the actual KB predicates instead of inventing a composite predicate.",
+        "For source/institution questions, prefer predicates that actually expose source, ledger, actor, reporter, complainant, or institution values in the compiled KB examples.",
+        "Keep QA workspaces compact: at most 4 query operations and at most 2 short self_check notes.",
         "For unsafe inference traps, preserve the difference between direct KB support, source claim, inference, and unknown.",
     ]
     config = SemanticIRCallConfig(
@@ -123,6 +153,11 @@ def main() -> int:
             oracle=oracle.get(item["id"], {}),
             include_model_input=bool(args.include_model_input),
         )
+        if bool(args.judge_reference_answers):
+            row["reference_judge"] = judge_reference_answer(
+                row=row,
+                config=config,
+            )
         rows.append(row)
 
     summary = summarize(rows=rows, load_errors=load_errors, elapsed_ms=int((time.perf_counter() - started) * 1000))
@@ -215,6 +250,7 @@ def compiled_kb_inventory(*, facts: list[str], rules: list[str]) -> dict[str, An
         "signatures": signatures,
         "counts": counts,
         "examples": {signature: examples.get(signature, []) for signature in signatures[:80]},
+        "query_templates": [query_template_for_signature(signature) for signature in signatures],
     }
 
 
@@ -227,6 +263,20 @@ def compiled_kb_contracts(signatures: list[str]) -> list[dict[str, Any]]:
             continue
         contracts.append({"signature": signature, "args": [f"arg{i}" for i in range(1, arity + 1)]})
     return contracts
+
+
+def query_template_for_signature(signature: str) -> str:
+    text = str(signature or "").strip()
+    if "/" not in text:
+        return ""
+    name, arity_text = text.rsplit("/", 1)
+    try:
+        arity = int(arity_text)
+    except Exception:
+        return ""
+    variables = ["X", "Y", "Z", "A", "B", "C", "D", "E"]
+    args = [variables[index] if index < len(variables) else f"V{index + 1}" for index in range(max(arity, 0))]
+    return f"{name}({', '.join(args)})."
 
 
 def clause_signature(clause: str) -> str:
@@ -316,6 +366,7 @@ def run_one_question(
             "counts": kb_inventory.get("counts", {}),
             "examples": kb_inventory.get("examples", {}),
         },
+        "compiled_query_templates": kb_inventory.get("query_templates", [])[:120],
         "relevant_clauses": [*facts[:260], *rules[:80]],
         "source_fact_count": len(facts),
         "source_rule_count": len(rules),
@@ -334,7 +385,13 @@ def run_one_question(
             include_model_input=include_model_input,
         )
     except Exception as exc:
-        return {**item, "ok": False, "error": str(exc), "latency_ms": int((time.perf_counter() - started) * 1000)}
+        return {
+            **item,
+            "ok": False,
+            "error": str(exc),
+            "latency_ms": int((time.perf_counter() - started) * 1000),
+            "reference_answer": str(oracle.get("reference_answer", "")),
+        }
     ir = result.get("parsed") if isinstance(result, dict) else None
     row: dict[str, Any] = {
         **item,
@@ -347,6 +404,7 @@ def run_one_question(
         row["model_input"] = result.get("model_input", {})
     if not isinstance(ir, dict):
         row["raw_content"] = str(result.get("content", ""))[:4000] if isinstance(result, dict) else ""
+        row["reference_answer"] = str(oracle.get("reference_answer", ""))
         return row
     mapped, warnings = semantic_ir_to_legacy_parse(
         ir,
@@ -400,8 +458,124 @@ def score_oracle(*, row: dict[str, Any], oracle: dict[str, Any]) -> bool | None:
     return True
 
 
+def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig) -> dict[str, Any]:
+    reference = str(row.get("reference_answer", "")).strip()
+    if not reference:
+        return {
+            "schema_version": "qa_judge_v1",
+            "verdict": "not_judged",
+            "answer_supported": False,
+            "concise_answer": "",
+            "issues": ["no reference answer supplied"],
+        }
+    payload = {
+        "task": "Compare deterministic Prolog query results with a human reference answer.",
+        "authority": "You are a scorer only. Do not invent missing KB rows. Judge only what the query results support.",
+        "question_id": row.get("id", ""),
+        "question": row.get("utterance", ""),
+        "reference_answer": reference,
+        "model_decision": row.get("model_decision", ""),
+        "projected_decision": row.get("projected_decision", ""),
+        "queries": row.get("queries", []),
+        "query_results": row.get("query_results", []),
+        "proposed_write_counts": {
+            "facts": len(row.get("proposed_facts", []) or []),
+            "rules": len(row.get("proposed_rules", []) or []),
+        },
+        "verdict_policy": [
+            "exact: query results clearly support the reference answer, allowing harmless extra rows when the answer set still contains the reference.",
+            "partial: query results contain some relevant support but miss important reference content or include unresolved noise.",
+            "miss: query results do not support the reference answer, use wrong predicates, return no relevant rows, or propose writes for an ordinary question.",
+            "not_judged: malformed/no reference or no meaningful query result to compare.",
+        ],
+    }
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "You are a strict QA judge for a governed symbolic KB. "
+                "Return qa_judge_v1 JSON only. Judge the KB query results against the human reference answer; "
+                "do not use outside knowledge."
+            ),
+        },
+        {"role": "user", "content": "INPUT_JSON:\n" + json.dumps(payload, ensure_ascii=False, indent=2)},
+    ]
+    try:
+        return call_lmstudio_json_schema(
+            config=config,
+            messages=messages,
+            schema_name="qa_judge_v1",
+            schema=QA_JUDGE_SCHEMA,
+            max_tokens=min(int(config.max_tokens), 1200),
+        )
+    except Exception as exc:
+        return {
+            "schema_version": "qa_judge_v1",
+            "verdict": "not_judged",
+            "answer_supported": False,
+            "concise_answer": "",
+            "issues": [f"judge error: {exc}"],
+        }
+
+
+def call_lmstudio_json_schema(
+    *,
+    config: SemanticIRCallConfig,
+    messages: list[dict[str, str]],
+    schema_name: str,
+    schema: dict[str, Any],
+    max_tokens: int,
+) -> dict[str, Any]:
+    base_url = str(config.base_url or "").rstrip("/")
+    endpoint = f"{base_url}/chat/completions" if base_url.endswith("/v1") else f"{base_url}/v1/chat/completions"
+    payload: dict[str, Any] = {
+        "model": config.model,
+        "messages": messages,
+        "temperature": float(config.temperature),
+        "top_p": float(config.top_p),
+        "max_tokens": int(max_tokens),
+        "response_format": {
+            "type": "json_schema",
+            "json_schema": {
+                "name": schema_name,
+                "strict": True,
+                "schema": schema,
+            },
+        },
+    }
+    if str(config.reasoning_effort or "").strip():
+        payload["reasoning_effort"] = str(config.reasoning_effort).strip()
+    req = urllib.request.Request(
+        endpoint,
+        data=json.dumps(payload).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=int(config.timeout)) as response:
+            raw = json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as exc:
+        body = exc.read().decode("utf-8", errors="replace")
+        raise RuntimeError(f"HTTP {exc.code}: {body}") from exc
+    except urllib.error.URLError as exc:
+        raise RuntimeError(str(exc)) from exc
+    choices = raw.get("choices", []) if isinstance(raw, dict) else []
+    first = choices[0] if choices and isinstance(choices[0], dict) else {}
+    message = first.get("message", {}) if isinstance(first, dict) else {}
+    content = str(message.get("content", "") if isinstance(message, dict) else "").strip()
+    parsed = json.loads(content)
+    if not isinstance(parsed, dict):
+        raise RuntimeError("structured judge returned non-object JSON")
+    return parsed
+
+
 def summarize(*, rows: list[dict[str, Any]], load_errors: list[str], elapsed_ms: int) -> dict[str, Any]:
     oracle_rows = [row for row in rows if isinstance(row.get("oracle_match"), bool)]
+    judge_rows = [
+        row.get("reference_judge")
+        for row in rows
+        if isinstance(row.get("reference_judge"), dict)
+    ]
     return {
         "question_count": len(rows),
         "reference_answer_rows": sum(1 for row in rows if row.get("reference_answer")),
@@ -410,6 +584,10 @@ def summarize(*, rows: list[dict[str, Any]], load_errors: list[str], elapsed_ms:
         "write_proposal_rows": sum(1 for row in rows if row.get("proposed_facts") or row.get("proposed_rules")),
         "oracle_rows": len(oracle_rows),
         "oracle_match": sum(1 for row in oracle_rows if row.get("oracle_match") is True),
+        "judge_rows": len(judge_rows),
+        "judge_exact": sum(1 for judge in judge_rows if judge.get("verdict") == "exact"),
+        "judge_partial": sum(1 for judge in judge_rows if judge.get("verdict") == "partial"),
+        "judge_miss": sum(1 for judge in judge_rows if judge.get("verdict") == "miss"),
         "runtime_load_error_count": len(load_errors),
         "elapsed_ms": elapsed_ms,
     }
@@ -429,6 +607,7 @@ def write_summary(record: dict[str, Any], path: Path) -> None:
         f"- Rows with queries: `{summary.get('query_rows', 0)}`",
         f"- Rows with proposed writes: `{summary.get('write_proposal_rows', 0)}`",
         f"- Oracle rows/matches: `{summary.get('oracle_rows', 0)}` / `{summary.get('oracle_match', 0)}`",
+        f"- Reference judge: exact=`{summary.get('judge_exact', 0)}` partial=`{summary.get('judge_partial', 0)}` miss=`{summary.get('judge_miss', 0)}`",
         "",
         "## Rows",
         "",
@@ -444,6 +623,7 @@ def write_summary(record: dict[str, Any], path: Path) -> None:
                 f"- Proposed writes: facts=`{len(row.get('proposed_facts', []) or [])}` rules=`{len(row.get('proposed_rules', []) or [])}`",
                 f"- Oracle match: `{row.get('oracle_match', None)}`",
                 f"- Reference answer: {row.get('reference_answer', '') or '-'}",
+                f"- Reference judge: `{(row.get('reference_judge') or {}).get('verdict', None)}`",
                 "",
                 "```json",
                 json.dumps(row.get("query_results", []), ensure_ascii=False, indent=2),
