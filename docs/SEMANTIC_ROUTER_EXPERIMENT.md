@@ -9,13 +9,25 @@ The next Prethinker frontier is not a bigger all-purpose prompt. It is staged co
 ```text
 raw utterance
   -> semantic_router_v1
-  -> focused context package
+  -> focused context + action plan
   -> semantic_ir_v1
   -> deterministic mapper/admission gate
   -> Prolog KB
 ```
 
-The router is the ingestion controller. It chooses attention, not truth.
+The router is becoming the ingestion controller. It chooses attention and the
+minimal next processing actions, not truth.
+
+This is intentionally similar to adaptive multi-stage reasoning systems such
+as AdapTime (`https://arxiv.org/abs/2604.24175`), but with Prethinker's
+authority boundary intact:
+
+```text
+controller plans
+compiler proposes
+mapper admits
+KB mutates
+```
 
 ## Headline Result
 
@@ -67,6 +79,7 @@ The router pass lets the model first ask:
 What kind of work is this turn?
 Which profile/context module is useful?
 What should the compiler pay attention to?
+Which processing actions are worth running?
 Does this need segmentation?
 What KB context should be retrieved?
 ```
@@ -97,6 +110,22 @@ The router must not emit facts, rules, queries, or KB mutations. It emits a stri
     "temporal_scope",
     "rule_query_boundary"
   ],
+  "action_plan": {
+    "actions": [
+      "compile_semantic_ir",
+      "include_kb_context",
+      "extract_query_operations",
+      "review_before_admission"
+    ],
+    "skip_heavy_steps": [
+      "segment_before_compile"
+    ],
+    "review_triggers": [
+      "mixed write+query turn",
+      "conditional rule language"
+    ],
+    "why": "The turn mixes policy facts/rules with an explicit question."
+  },
   "retrieval_hints": {
     "entity_terms": ["shipment_h7", "ada"],
     "predicate_terms": ["frozen", "cleared", "transfer"],
@@ -122,9 +151,64 @@ Python is still allowed to be the harness:
 - load known profile packages
 - load known guidance modules
 - retrieve KB context from structured router hints
+- obey or log the router's action plan
 - pass the focused package to `semantic_ir_v1`
 
 Python should not inspect the raw utterance and decide what the language means.
+
+## Action Plan V1
+
+`semantic_router_v1` now emits an explicit `action_plan` block. This is the
+first step toward a `semantic_controller_v1` shape:
+
+```json
+{
+  "actions": [
+    "compile_semantic_ir",
+    "segment_before_compile",
+    "include_kb_context",
+    "include_temporal_graph_guidance",
+    "include_truth_maintenance_guidance",
+    "extract_query_operations",
+    "review_before_admission",
+    "profile_bootstrap_review",
+    "ask_clarification_first"
+  ],
+  "skip_heavy_steps": [],
+  "review_triggers": [],
+  "why": ""
+}
+```
+
+The point is not to add more stages to every turn. The point is the opposite:
+make expensive stages conditional and auditable.
+
+Examples:
+
+- simple direct fact: `compile_semantic_ir`, maybe skip segmentation and review;
+- correction over current state: `compile_semantic_ir`, `include_kb_context`,
+  `include_truth_maintenance_guidance`;
+- explicit question mixed with writes: `compile_semantic_ir`,
+  `extract_query_operations`, often `review_before_admission`;
+- deadline, expiry, before/after, maturity, or date correction:
+  `include_temporal_graph_guidance`;
+- unknown domain: `profile_bootstrap_review` before ordinary compilation.
+
+The action plan does not authorize writes. It only tells the harness what
+context/workflow to assemble for the compiler and what diagnostics to show.
+
+## Fast Frontier Runs
+
+Long 35B structured-output sweeps are useful, but they are not always useful
+enough to justify the GPU time. The current interactive smoke command is:
+
+```powershell
+python scripts\run_semantic_ir_lava_sweep.py --fast
+```
+
+That preset runs a balanced 15-case clean slice with one repeat. It is meant to
+answer "did we break the center?" quickly. Larger multi-variant Lava sweeps are
+still valuable, but should be treated as longer frontier or nightly work.
 
 ## Coupled Hallucination Risk
 

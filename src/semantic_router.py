@@ -13,8 +13,9 @@ from src.semantic_ir import SemanticIRCallConfig
 SEMANTIC_ROUTER_SYSTEM = (
     "You are semantic_router_v1 for a governed symbolic memory ingestion system. "
     "You do not answer the user, do not extract final facts, and do not authorize KB writes. "
-    "Your job is context engineering: choose the domain/profile, guidance modules, retrieval hints, "
-    "and segmentation plan that should be handed to the semantic_ir_v1 compiler. "
+    "Your job is context engineering and action planning: choose the domain/profile, guidance modules, "
+    "retrieval hints, segmentation plan, and minimal next processing actions that should be handed to "
+    "the semantic_ir_v1 compiler. "
     "Emit only semantic_router_v1 JSON. Be multilingual-capable and uncertainty-preserving. "
     "Never treat routing-policy examples as recent_context; only the INPUT_JSON.recent_context array is recent context."
 )
@@ -38,6 +39,19 @@ GUIDANCE_MODULES = [
 ]
 
 
+CONTROLLER_ACTIONS = [
+    "compile_semantic_ir",
+    "segment_before_compile",
+    "include_kb_context",
+    "include_temporal_graph_guidance",
+    "include_truth_maintenance_guidance",
+    "extract_query_operations",
+    "review_before_admission",
+    "profile_bootstrap_review",
+    "ask_clarification_first",
+]
+
+
 ROUTER_SCHEMA_CONTRACT: dict[str, Any] = {
     "schema_version": "semantic_router_v1",
     "selected_profile_id": "medical@v0|story_world@v0|probate@v0|sec_contracts@v0|legal_courtlistener@v0|general|bootstrap",
@@ -54,6 +68,12 @@ ROUTER_SCHEMA_CONTRACT: dict[str, Any] = {
         }
     ],
     "guidance_modules": ["claim_vs_fact"],
+    "action_plan": {
+        "actions": ["compile_semantic_ir"],
+        "skip_heavy_steps": [],
+        "review_triggers": [],
+        "why": "",
+    },
     "retrieval_hints": {
         "entity_terms": [],
         "predicate_terms": [],
@@ -88,6 +108,7 @@ SEMANTIC_ROUTER_JSON_SCHEMA: dict[str, Any] = {
         "should_segment",
         "segments",
         "guidance_modules",
+        "action_plan",
         "retrieval_hints",
         "risk_flags",
         "context_audit",
@@ -132,6 +153,29 @@ SEMANTIC_ROUTER_JSON_SCHEMA: dict[str, Any] = {
             "items": {
                 "type": "string",
                 "enum": GUIDANCE_MODULES,
+            },
+        },
+        "action_plan": {
+            "type": "object",
+            "additionalProperties": False,
+            "required": ["actions", "skip_heavy_steps", "review_triggers", "why"],
+            "properties": {
+                "actions": {
+                    "type": "array",
+                    "maxItems": 8,
+                    "items": {"type": "string", "enum": CONTROLLER_ACTIONS},
+                },
+                "skip_heavy_steps": {
+                    "type": "array",
+                    "maxItems": 8,
+                    "items": {"type": "string"},
+                },
+                "review_triggers": {
+                    "type": "array",
+                    "maxItems": 8,
+                    "items": {"type": "string"},
+                },
+                "why": {"type": "string"},
             },
         },
         "retrieval_hints": {
@@ -227,6 +271,7 @@ def build_semantic_router_input_payload(
         "recent_context": context or [],
         "available_domain_profiles": available_domain_profiles or [],
         "available_guidance_modules": GUIDANCE_MODULES,
+        "available_controller_actions": CONTROLLER_ACTIONS,
         "kb_manifest": kb_manifest or {},
         "routing_policy": [
             "Select one known profile when a domain profile clearly fits and context_available is true.",
@@ -255,6 +300,15 @@ def build_semantic_router_input_payload(
             "Do not infer facts. Do not produce candidate_operations. Do not answer the user.",
             "If segmentation is useful, copy exact source text spans in order. Do not summarize segments.",
             "Prefer focused guidance modules over dumping all guidance into the compiler.",
+            "Choose the smallest useful action plan. Do not force every turn through every expensive step.",
+            "Use compile_semantic_ir for ordinary governed ingestion. Use segment_before_compile for long documents, multi-question turns, or mixed query/write turns where focused passes should reduce confusion.",
+            "Use include_kb_context for corrections, pronouns, current-state replacement, conflict checks, or query turns that depend on stored facts.",
+            "Use extract_query_operations whenever the utterance asks an explicit question, even if it also asserts rules or facts. Mixed write+query turns should usually include compile_semantic_ir and extract_query_operations.",
+            "Use include_temporal_graph_guidance for before/after/during/last/next/date correction, interval, deadline, expiry, maturity, or effective-date language.",
+            "Use include_truth_maintenance_guidance for corrections, conflicting sources, claim-vs-observation, retraction planning, derived consequences, and dependency-sensitive updates.",
+            "Use review_before_admission when routing confidence is low, when candidate profiles compete, when temporal facts are being corrected, or when a wrong profile could cause unsafe writes.",
+            "Use ask_clarification_first when the safest next step is a question rather than a compile pass, but still leave admission authority to the mapper/compiler path.",
+            "Use profile_bootstrap_review for unknown domains or when a predicate vocabulary must be designed before safe durable writes.",
             "Fill context_audit with why the selected profile/context was chosen, which context sources should be loaded, and why close secondary profiles were not primary. This is an audit trail only, not evidence or admission authority.",
         ],
         "authority_boundary": "Routing is advisory context engineering only. The mapper remains the authority for durable KB mutation.",

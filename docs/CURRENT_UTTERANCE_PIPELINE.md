@@ -10,6 +10,7 @@ The current center is better described as:
 
 ```text
 utterance + recent context + selected domain profile + compact KB seed
+  -> semantic_router_v1 context/action plan
   -> semantic_ir_v1 workspace
   -> deterministic mapper/admission
   -> query, clarification, quarantine, rejection, or durable KB mutation
@@ -27,8 +28,8 @@ decide what becomes Prolog state.
    clarification state, execution flags, and trace metadata.
 3. Long or mixed utterances may be split into focused segments, especially at
    query boundaries.
-4. The runtime uses `semantic_router_v1` to select a domain profile when
-   `active_profile=auto`.
+4. The runtime uses `semantic_router_v1` to select a domain profile and propose
+   a minimal action plan when `active_profile=auto`.
 5. The runtime builds a compact Semantic IR input: utterance, recent turn
    context, profile context, allowed predicates, predicate contracts, and a
    small `kb_context_pack`.
@@ -56,7 +57,7 @@ flowchart TD
   H -- "no" --> J["single focused pass"]
   I --> K["domain profile selection"]
   J --> K
-  K --> L["context engineering packet: profile + contracts + KB seed + recent window"]
+  K --> L["context engineering packet: profile + contracts + KB seed + recent window + action plan"]
   L --> M["LLM semantic_ir_v1 workspace"]
   M --> N["deterministic mapper/admission"]
   N --> O{"operation type"}
@@ -137,7 +138,7 @@ separable.
 
 The current pipeline can run with a fixed profile or `active_profile=auto`.
 Auto-selection uses `semantic_router_v1` plus the thin profile roster to choose
-a domain context such as:
+a domain context and a minimal action plan. Current profile contexts include:
 
 - `medical@v0`
 - `legal_courtlistener@v0`
@@ -148,6 +149,27 @@ a domain context such as:
 This is a skill-directory-style mechanism. A profile can supply extra context,
 predicate contracts, allowed predicates, and profile-owned validators. It does
 not grant the model write authority.
+
+The action plan is the first step toward an adaptive semantic controller:
+
+```json
+{
+  "actions": [
+    "compile_semantic_ir",
+    "include_kb_context",
+    "extract_query_operations",
+    "review_before_admission"
+  ],
+  "skip_heavy_steps": ["segment_before_compile"],
+  "review_triggers": ["mixed write+query turn"],
+  "why": "The turn mixes new policy state with an explicit query."
+}
+```
+
+Simple direct facts should not pay the same GPU/context cost as temporal
+corrections, long document ingestion, unknown-domain bootstrap, or mixed
+write/query turns. The action plan is advisory context choreography; the mapper
+still controls admission.
 
 If a turn genuinely mixes domains, the current safest shape is to segment the
 turn so each focused pass can receive the right profile context.

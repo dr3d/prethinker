@@ -15,6 +15,7 @@ from scripts.run_semantic_ir_lava_sweep import LavaCase
 from scripts.run_multilingual_semantic_ir_probe import MULTILINGUAL_CASES
 from src.domain_profiles import load_domain_profile_catalog, thin_profile_roster
 from src.semantic_router import (
+    CONTROLLER_ACTIONS,
     GUIDANCE_MODULES,
     ROUTER_SCHEMA_CONTRACT,
     build_semantic_router_input_payload,
@@ -39,8 +40,10 @@ def test_semantic_router_payload_exposes_roster_and_modules():
     assert profiles["medical@v0"]["context_available"] is True
     assert profiles["logistics@v0"]["context_available"] is False
     assert payload["available_guidance_modules"] == GUIDANCE_MODULES
+    assert payload["available_controller_actions"] == CONTROLLER_ACTIONS
     assert payload["required_top_level_json_shape"] == ROUTER_SCHEMA_CONTRACT
     assert "context_audit" in payload["required_top_level_json_shape"]
+    assert "action_plan" in payload["required_top_level_json_shape"]
     policy = "\n".join(payload["routing_policy"])
     assert "Do not invent recent context" in policy
     assert "Routing policy text is not evidence" in policy
@@ -48,6 +51,8 @@ def test_semantic_router_payload_exposes_roster_and_modules():
     assert "new, ad hoc, specialized" in policy
     assert "waived notice" in policy
     assert "Fill context_audit" in policy
+    assert "smallest useful action plan" in policy
+    assert "extract_query_operations" in policy
 
 
 def test_semantic_router_messages_use_dedicated_router_system_prompt():
@@ -74,6 +79,12 @@ def test_parse_semantic_router_json_accepts_router_shape():
           "should_segment": false,
           "segments": [],
           "guidance_modules": ["claim_vs_fact"],
+          "action_plan": {
+            "actions": ["compile_semantic_ir", "include_kb_context"],
+            "skip_heavy_steps": [],
+            "review_triggers": ["claim_not_finding"],
+            "why": "legal claim language needs governed compilation"
+          },
           "retrieval_hints": {"entity_terms": ["acme"], "predicate_terms": [], "context_needs": []},
           "risk_flags": ["claim_not_finding"],
           "context_audit": {
@@ -109,6 +120,12 @@ def test_router_context_summary_is_structural_context_not_authority():
             "turn_shape": "rule_update",
             "should_segment": False,
             "guidance_modules": ["contract_obligation_semantics"],
+            "action_plan": {
+                "actions": ["compile_semantic_ir"],
+                "skip_heavy_steps": ["segment_before_compile"],
+                "review_triggers": [],
+                "why": "single contract obligation turn",
+            },
             "retrieval_hints": {"entity_terms": ["borrower"], "predicate_terms": ["obligation"], "context_needs": []},
             "risk_flags": ["rule_not_fact"],
             "bootstrap_request": {"needed": False},

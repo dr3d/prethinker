@@ -13,7 +13,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 - UI: `ui_gateway/`, served locally by `python ui_gateway/main.py` using the stdlib `ThreadingHTTPServer`.
 - Active profile: `medical@v0`; active profile-lane experiments: `legal_courtlistener@v0` and `sec_contracts@v0`.
 - Active research asset: local UMLS Semantic Network KB built from `sn_current.tgz`.
-- Active architecture pivot: two-pass `semantic_router_v1 -> semantic_ir_v1`, using the LLM as the context/profile planner and the deterministic mapper as the admission authority.
+- Active architecture pivot: two-pass `semantic_router_v1 -> semantic_ir_v1`, using the LLM as the context/profile/action planner and the deterministic mapper as the admission authority.
 - Current development model: `qwen/qwen3.6-35b-a3b` through LM Studio/OpenAI-compatible structured output. This is the best-known local path, not a permanent product dependency.
 - Current demonstration surface: prompt-book UI plus live ledger cards showing route, semantic workspace, deterministic admission, clarification, blocked execution, and KB mutation outcomes.
 
@@ -63,6 +63,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 - The profile context now explicitly treats an explicit named patient as sufficient grounding for the research profile, while pronouns, multiple candidates, aliases, and missing patient identity still require clarification.
 - A thin domain-profile roster now exists in `modelfiles/domain_profile_catalog.v0.json` and is included in Semantic IR input as `available_domain_profiles`. This is the first skill-directory-style control-plane hook: it advertises possible profile contexts without loading every thick package or authorizing writes.
 - `active_profile=auto` now uses model-owned `semantic_router_v1` as the first-pass context/profile/guidance controller before the Semantic IR compiler. It emits a strict control-plane JSON object, loads only the selected profile context/contracts, and never authorizes writes.
+- `semantic_router_v1` now emits an explicit `action_plan` block inspired by adaptive staged-reasoning work such as AdapTime. The router can request focused actions such as `compile_semantic_ir`, `segment_before_compile`, `include_kb_context`, `include_temporal_graph_guidance`, `include_truth_maintenance_guidance`, `extract_query_operations`, `review_before_admission`, `profile_bootstrap_review`, or `ask_clarification_first`. This is context choreography only; it does not authorize facts, rules, queries, or writes.
 - Profile packages still own declarative `selection_keywords`, `selection_hints`, predicate contracts, and domain context, but those are now context assets for the router/compiler rather than a Python keyword selector.
 - The former Python catalog selector has been removed from the active runtime and research harnesses. Current traces and metrics center router quality, compiler validity, admission diagnostics, and anti-coupling flags.
 - The multilingual router probe is the cleanest current evidence for the wall-sign rule: `router_ok=10/10` and full router -> compiler JSON success `10/10` on raw Spanish, French, German, Portuguese, Italian, Japanese, and code-switched turns.
@@ -72,6 +73,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 - Mapper admission diagnostics now include human-readable `admission_justifications` derived from deterministic gates and rationale codes. Each operation can explain accepted-because and blocked-because reasons such as allowed palette, predicate contract pass, direct source, source-policy block, or missing durable rule clause.
 - A first labeled router training seed lives at `docs/data/router_training/router_training_seed_v1.jsonl` with 164 examples assembled from frontier packs, multilingual probes, and mixed-domain agility cases.
 - `semantic_ir_lava_pack_v5` is the current mixed-domain lava frontier. It targets truth-maintenance dependency pressure, predicate canonicalization drift, claim/fact/observation promotion, segmentation semantics, multilingual ontology pressure, rule sufficiency, source fidelity, and bootstrap behavior.
+- `scripts/run_semantic_ir_lava_sweep.py --fast` is now the interactive frontier smoke. It runs a balanced 15-case clean slice with one repeat so routine checks do not waste GPU time on multi-variant sweeps unless the research question really needs them.
 - A new research note, `docs/DOMAIN_BOOTSTRAPPING_META_MODE.md`, captures the meta-profile idea: when no domain profile exists, a strong model may propose candidate entity types, predicates, contracts, risks, clarification policies, and starter frontier cases. This is review material for creating a profile, not authority for durable writes.
 - A first `profile_bootstrap_v1` harness now exists at `scripts/run_profile_bootstrap.py` with a contracts/compliance seed fixture. It asks the local structured-output model to propose a candidate domain profile, then scores schema validity, generic predicate use, and whether starter frontier cases stay inside the proposed predicate palette and arities.
 - `scripts/run_profile_bootstrap_loop.py` now closes the meta-profile loop: it loads a local profile bootstrap run, projects its candidate predicates/contracts into a temporary Semantic IR profile, runs the generated starter cases through the normal model+mapper path, and scores valid JSON, palette skips, must-not violations, and expected-boundary hits.
@@ -188,11 +190,14 @@ Domain/data lanes:
 
 ## Verification Snapshot
 
-**Current headline:** latest full pytest suite `403 passed`; latest Lava v5 sampled run stayed `60/60` parsed JSON, `60/60` domain selector, `60/60` admission-safe, `45/60` semantic-clean, `41/60` full expectation score, `0` fuzzy edge kinds, and `0/60` temp-0 signature variance groups. Current best demo pressure point remains the reimbursement policy cross-turn run: `4/4` parsed, `4/4` apply-error-free, `4/4` expected query matches, and no derived violation write leak.
+**Current headline:** after retiring the legacy parser-lane tests and harnesses, the lean full pytest suite is `337 passed`. The current fast Lava smoke is `15/15` parsed JSON, `11/11` selector-checked, `0` fuzzy edge kinds, and no temp-0 variance measurement in the single-repeat fast preset. Current best demo pressure point remains the reimbursement policy cross-turn run: `4/4` parsed, `4/4` apply-error-free, `4/4` expected query matches, and no derived violation write leak.
 
 Recent verified results:
 
-- Full suite: `403 passed`.
+- Full suite after legacy parser-lane retirement: `337 passed`.
+- Router action-plan smoke: `3/3` router-only LM Studio calls parsed under the strict schema and produced useful action plans. Simple story/contract turns requested `compile_semantic_ir`; a medical correction requested `compile_semantic_ir`, `include_kb_context`, and `include_truth_maintenance_guidance`.
+- Fast Lava smoke: `15/15` parsed JSON, `11/11` selector-checked, `5/15` records with scoped epistemic memory, and `{}` fuzzy edge kinds in about 3.5 minutes on the local 35B LM Studio path.
+- Soup-to-nuts shakedown after the cleanup exposed the current practical testing boundary: broad `scenario-group=all` and multi-variant Lava runs are useful frontier/nightly jobs, but too slow for frequent interactive checks. Use `--fast` or focused source filters for daily research pulses.
 - Temporal kernel slice: admitted `before/2` facts now support deterministic `after/2`, transitive `precedes/2`, and `follows/2` queries through Prolog rules while `temporal_graph_v1` stays proposal-only unless matching candidate operations pass admission.
 - Temporal correction admission: unannounced replacement `event_on/2` anchors are blocked as stored-logic conflicts; explicit retract/assert temporal corrections succeed and remove the stale anchor.
 - Policy/reimbursement cross-turn demo: `4/4` parsed OK, `4/4` apply-error-free, `4/4` expected query matches, `4/4` no derived violation write leak, rough score `1.000`. The path installs executable rules from English policy, ingests February events, answers with derived violations, then retracts an approval and changes the answer without writing derived `violation/2` facts.

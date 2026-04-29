@@ -64,6 +64,11 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Hammer Semantic IR with a broad mixed-domain lava sweep.")
     parser.add_argument("--limit", type=int, default=48, help="Maximum base cases before variants/repeats.")
     parser.add_argument("--repeats", type=int, default=2, help="Repeated temp-0 passes used for variance checks.")
+    parser.add_argument(
+        "--fast",
+        action="store_true",
+        help="Interactive smoke preset: 15 clean cases, one repeat, stream state, no query execution.",
+    )
     parser.add_argument("--seed", type=int, default=8675309)
     parser.add_argument("--sample-mode", choices=["balanced", "random"], default="balanced")
     parser.add_argument("--variants", default="original,typo,bad_grammar,context_switch")
@@ -97,6 +102,13 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
+    if bool(args.fast):
+        args.limit = 15
+        args.repeats = 1
+        args.variants = "clean"
+        args.sample_mode = "balanced"
+        args.state_mode = "stream"
+        args.execute_queries = False
     rng = random.Random(int(args.seed))
     variants = [item.strip() for item in str(args.variants).split(",") if item.strip()]
     top_p_values = [float(item.strip()) for item in str(args.top_p_values).split(",") if item.strip()]
