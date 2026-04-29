@@ -353,6 +353,96 @@ class LocalMcpServerTests(unittest.TestCase):
         # KB policy in src.semantic_ir.build_semantic_ir_input_payload.
         self.assertIn("lives_in(mara, london).", payload.get("kb_context_pack", {}).get("relevant_clauses", []))
 
+    def test_semantic_ir_receives_router_action_context(self) -> None:
+        server = PrologMCPServer(
+            compiler_prompt_enabled=False,
+            semantic_ir_enabled=True,
+            compiler_backend="lmstudio",
+            active_profile="auto",
+        )
+        parsed = {
+            "schema_version": "semantic_ir_v1",
+            "decision": "mixed",
+            "turn_type": "mixed",
+            "entities": [],
+            "referents": [],
+            "assertions": [],
+            "unsafe_implications": [],
+            "candidate_operations": [],
+            "truth_maintenance": {
+                "support_links": [],
+                "conflicts": [],
+                "retraction_plan": [],
+                "derived_consequences": [],
+            },
+            "clarification_questions": [],
+            "self_check": {"bad_commit_risk": "low", "missing_slots": [], "notes": []},
+        }
+        router_payload = {
+            "schema_version": "semantic_router_v1",
+            "selected_profile_id": "sec_contracts@v0",
+            "candidate_profile_ids": ["sec_contracts@v0"],
+            "routing_confidence": 0.94,
+            "turn_shape": "mixed",
+            "should_segment": True,
+            "segments": [],
+            "guidance_modules": ["rule_query_boundary", "temporal_scope"],
+            "action_plan": {
+                "actions": [
+                    "compile_semantic_ir",
+                    "extract_query_operations",
+                    "include_kb_context",
+                    "include_truth_maintenance_guidance",
+                    "review_before_admission",
+                ],
+                "skip_heavy_steps": [],
+                "review_triggers": ["mixed_write_query"],
+                "why": "turn contains policy writes and a query over policy effects",
+            },
+            "retrieval_hints": {"entity_terms": [], "predicate_terms": [], "context_needs": []},
+            "risk_flags": ["mixed_write_query"],
+            "context_audit": {
+                "why_this_profile": "contract/policy rule plus query",
+                "selected_context_sources": ["sec_contracts@v0", "kb_context_pack"],
+                "secondary_profiles_considered": [],
+                "why_not_secondary": [],
+            },
+            "bootstrap_request": {
+                "needed": False,
+                "proposed_domain_name": "",
+                "why": "",
+                "candidate_predicate_concepts": [],
+            },
+            "notes": [],
+        }
+
+        with patch(
+            "src.mcp_server.call_semantic_router",
+            return_value={"content": "{}", "parsed": router_payload, "latency_ms": 1},
+        ), patch(
+            "src.mcp_server.call_semantic_ir",
+            return_value={"content": "{}", "parsed": parsed, "latency_ms": 1},
+        ) as mocked:
+            ir, error = server._compile_semantic_ir(
+                "Record the reimbursement rule, then ask which February claims violate it."
+            )
+
+        self.assertEqual(error, "")
+        self.assertIs(ir, parsed)
+        domain_context = "\n".join(mocked.call_args.kwargs.get("domain_context") or [])
+        self.assertIn("router_action_policy:", domain_context)
+        self.assertIn("extract_query_operations", domain_context)
+        self.assertIn("top-level decision mixed", domain_context)
+        self.assertIn("truth_maintenance", domain_context)
+        trace_input = server._last_semantic_ir_trace.get("model_input", {})
+        action_context = "\n".join(trace_input.get("router_action_context", []))
+        self.assertIn("include_kb_context", action_context)
+        context_audit = server._last_semantic_ir_trace.get("context_audit", {})
+        self.assertEqual(
+            context_audit.get("action_plan", {}).get("actions", [])[1],
+            "extract_query_operations",
+        )
+
     def test_semantic_router_exact_context_cache_reuses_auto_selection(self) -> None:
         server = PrologMCPServer(
             compiler_prompt_enabled=False,

@@ -171,6 +171,12 @@ corrections, long document ingestion, unknown-domain bootstrap, or mixed
 write/query turns. The action plan is advisory context choreography; the mapper
 still controls admission.
 
+In the live runtime, the router action plan is now projected into compact
+`router_action_policy:` lines inside the Semantic IR `domain_context`. The
+compiler can see focused processing pressure such as "extract explicit query
+operations", "use KB context", "include truth-maintenance guidance", or "ask
+clarification first" without Python interpreting the utterance text.
+
 If a turn genuinely mixes domains, the current safest shape is to segment the
 turn so each focused pass can receive the right profile context.
 

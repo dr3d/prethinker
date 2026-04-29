@@ -1,6 +1,6 @@
 # Semantic Router Experiment
 
-Last updated: 2026-04-28
+Last updated: 2026-04-29
 
 ## Thesis
 
@@ -196,6 +196,15 @@ Examples:
 
 The action plan does not authorize writes. It only tells the harness what
 context/workflow to assemble for the compiler and what diagnostics to show.
+
+The runtime now carries this plan into the compiler as compact
+`router_action_policy:` context. This is the first live use of the action plan
+beyond trace visibility: `extract_query_operations` pressures mixed turns to
+emit explicit query operations, `include_kb_context` tells the compiler to use
+the compact KB seed for grounding, and truth-maintenance/review actions steer
+support links, conflicts, retraction plans, and self-checks. The mapper still
+ignores the router as authority; admission is determined only by candidate
+operations and deterministic gates.
 
 ## Fast Frontier Runs
 

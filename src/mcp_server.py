@@ -1919,6 +1919,63 @@ class PrologMCPServer:
     def _semantic_ir_domain_context(self, profile_id: str = "") -> list[str]:
         return self._profile_context_for(profile_id) if profile_id else []
 
+    def _semantic_ir_router_action_context(self) -> list[str]:
+        selection = (
+            self._last_semantic_ir_profile_selection
+            if isinstance(self._last_semantic_ir_profile_selection, dict)
+            else {}
+        )
+        action_plan = selection.get("action_plan") if isinstance(selection.get("action_plan"), dict) else {}
+        actions = {
+            str(item).strip()
+            for item in action_plan.get("actions", [])
+            if str(item).strip()
+        }
+        if not actions:
+            return []
+        lines = [
+            "router_action_policy: semantic_router_v1 selected these processing actions; use them as context-control guidance only, not as truth.",
+        ]
+        why = str(action_plan.get("why", "")).strip()
+        if why:
+            lines.append(f"router_action_policy: router_rationale={why}")
+        if "extract_query_operations" in actions:
+            lines.extend(
+                [
+                    "router_action_policy: extract_query_operations means questions require explicit query candidate_operations over allowed predicates when a query is answerable from the KB.",
+                    "router_action_policy: if a turn contains both safe writes and a question, prefer top-level decision mixed with write operations plus query operations; do not collapse it to pure answer unless no writes are safe.",
+                ]
+            )
+        if "include_kb_context" in actions:
+            lines.append(
+                "router_action_policy: include_kb_context means use kb_context_pack for referents, corrections, current-state conflicts, and query grounding; do not restate KB clauses as new writes."
+            )
+        if "include_temporal_graph_guidance" in actions:
+            lines.append(
+                "router_action_policy: include_temporal_graph_guidance means represent dates, intervals, ordering, and before/after/during/overlap pressure in temporal_graph or temporal candidate operations when supported by the palette."
+            )
+        if "include_truth_maintenance_guidance" in actions:
+            lines.append(
+                "router_action_policy: include_truth_maintenance_guidance means populate support_links, conflicts, retraction_plan, and derived_consequences; derived consequences are query-only or diagnostic unless admitted as safe candidate operations."
+            )
+        if "review_before_admission" in actions:
+            lines.append(
+                "router_action_policy: review_before_admission means self_check must call out risky commits, missing grounding, unsupported inferences, and any reason the mapper should skip or quarantine an operation."
+            )
+        if "ask_clarification_first" in actions:
+            lines.append(
+                "router_action_policy: ask_clarification_first means prefer clarify when required identity, scope, predicate mapping, temporal anchor, or source authority is missing."
+            )
+        if "profile_bootstrap_review" in actions:
+            lines.append(
+                "router_action_policy: profile_bootstrap_review means new-domain vocabulary is review material only unless an approved profile and predicate palette already support it."
+            )
+        if "segment_before_compile" in actions:
+            lines.append(
+                "router_action_policy: segment_before_compile means use router segments as processing hints; keep query boundaries distinct from state updates in the semantic workspace."
+            )
+        return lines
+
     @staticmethod
     def _temporal_kernel_signatures() -> list[str]:
         return [
@@ -2149,7 +2206,11 @@ class PrologMCPServer:
         selected_profile = self._semantic_ir_selected_profile_for_utterance(utterance, context=context)
         domain = selected_profile or "runtime"
         semantic_context = self._semantic_ir_context(context)
-        domain_context = self._semantic_ir_domain_context(selected_profile)
+        router_action_context = self._semantic_ir_router_action_context()
+        domain_context = [
+            *self._semantic_ir_domain_context(selected_profile),
+            *router_action_context,
+        ]
         visible_domain_profiles = self._semantic_ir_visible_domain_profiles(selected_profile)
         allowed_predicates = (
             list(allowed_predicates_override)
@@ -2188,6 +2249,7 @@ class PrologMCPServer:
                 "context": semantic_context,
                 "available_domain_profiles": visible_domain_profiles,
                 "domain_context": domain_context,
+                "router_action_context": router_action_context,
                 "allowed_predicates": allowed_predicates,
                 "predicate_contracts": predicate_contracts,
                 "kb_context_pack": kb_context_pack,
