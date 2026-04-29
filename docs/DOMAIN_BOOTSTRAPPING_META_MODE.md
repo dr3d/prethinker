@@ -45,6 +45,39 @@ The runtime decides when that language becomes an approved profile.
 Only approved profiles can authorize durable predicate palettes.
 ```
 
+## The Codex Move We Want To Capture
+
+When a capable LLM is asked to "turn this document into Prolog" without a prior
+profile, it usually performs an implicit strategy:
+
+1. Read the whole source for recurring roles and relation types.
+2. Identify durable entity classes: documents, authorities, groups, rights,
+   obligations, grievances, events, sources, claims, and decisions.
+3. Choose predicate names that preserve useful distinctions instead of merely
+   summarizing the text.
+4. Choose argument order and arity so later questions are natural.
+5. Separate source claims from objective facts when provenance matters.
+6. Notice repeated structures and decide whether to use stable ids, such as
+   `grievance(g1, ...)`, plus properties like `grievance_actor/2`.
+7. Add a few derived rules only when the source states a general relationship
+   clearly enough to make the rule executable.
+
+That strategy is not magic, and it should not live in Codex as an invisible
+preprocessor. In Prethinker terms it is an LLM-owned control-plane pass:
+
+```text
+raw text
+  -> profile_bootstrap_v1 proposal
+  -> candidate predicates + contracts + risks + starter cases
+  -> review / scoring / optional draft-profile run
+  -> ordinary semantic_ir_v1 compiler
+  -> deterministic mapper/admission
+```
+
+The important rule is that Python may carry the object between stages, validate
+schemas, and score structural consistency, but Python must not inspect the raw
+language to invent predicates or rewrite the utterance.
+
 ## Why It Matters
 
 For a random domain, the hardest part may not be extracting one fact. It may be
@@ -289,6 +322,35 @@ that should be split, renamed, or scoped differently.
 That is the intended boundary. The model helps draft the vocabulary; review,
 tests, and deterministic admission decide whether the vocabulary earns its way
 into a real profile.
+
+## Raw File Bootstrap Harness
+
+For single-document experiments, use:
+
+```powershell
+python scripts/run_domain_bootstrap_file.py `
+  --text-file tmp/declaration.md `
+  --domain-hint founding_document `
+  --backend lmstudio `
+  --model qwen/qwen3.6-35b-a3b `
+  --compile-source
+```
+
+This runner is deliberately strict about the "no Python NLP" boundary:
+
+- Python reads the file bytes/text.
+- Python passes the raw source as one sample to `profile_bootstrap_v1`.
+- The LLM proposes entity types, predicates, contracts, risks, and starter
+  cases.
+- If `--compile-source` is enabled, the same raw source is passed to
+  `semantic_ir_v1` with that draft predicate surface.
+- Python validates/admission-scores the output, but does not segment,
+  summarize, classify, or derive predicates from the source language.
+
+The first expected limitation is operation-cap pressure: a long document may
+contain more safe facts than one Semantic IR response can carry. The right
+future repair is an LLM-produced intake plan or segmentation plan, not a Python
+sentence splitter that makes semantic choices.
 
 ## First Closed Loop
 
