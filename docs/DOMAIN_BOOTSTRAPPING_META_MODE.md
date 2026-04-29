@@ -78,6 +78,94 @@ The important rule is that Python may carry the object between stages, validate
 schemas, and score structural consistency, but Python must not inspect the raw
 language to invent predicates or rewrite the utterance.
 
+## Document-To-Logic Compiler Recipe
+
+The reusable recipe is:
+
+1. Establish the source boundary.
+   - Assign a source/document id.
+   - Decide whether the source is authoritative, testimonial, fictional,
+     legal, medical, contractual, etc.
+   - Decide which statements are source claims rather than global facts.
+2. Extract stable entities.
+   - Promote a term to entity status when it is recurring, role-bearing,
+     acting, acted upon, a source of authority, a document, a group, an
+     ambiguity target, or needed for a later query/rule.
+   - Do not promote every noun phrase.
+3. Classify each clause.
+   - definition/principle
+   - right
+   - rule
+   - grievance/accusation
+   - event
+   - relationship
+   - declaration/action
+   - pledge/obligation
+   - appeal/petition
+   - ambiguity candidate
+4. Decide assertion status.
+   - objective durable fact
+   - source claim
+   - accusation
+   - rule-like norm
+   - final declaration act
+   - unsafe implication
+   - test-only scaffold
+5. Map clause type to predicate family.
+   - principles -> claim/source assertion or right predicates
+   - grievances -> stable grievance ids plus actor/target/method/purpose/effect
+   - rules -> rule records and optional executable clauses
+   - declarations -> explicit declaration/action predicates
+   - relationships -> connection/governance/allegiance predicates
+   - petitions/appeals -> petitioned/appealed/warned predicates
+   - pledges -> pledge predicates
+   - ambiguity -> ambiguous alias / candidate identity predicates
+6. Normalize names.
+   - Use lowercase snake_case atoms.
+   - Preserve source-local identity.
+   - Use ids for repeated structures.
+7. Add provenance and safety.
+   - Claims, accusations, grievances, and source records should remain
+     distinguishable from objective durable facts.
+   - Admission risks should name tempting unsafe collapses.
+8. Add derived rules only when useful.
+   - Keep derived/test rules separate from extracted facts.
+   - Do not pretend derived rules were directly stated unless the source
+     actually stated them.
+
+Predicate selection heuristic:
+
+```text
+Can I query it?
+Can I infer from it?
+Can it prevent a bad write?
+Can it preserve provenance?
+Can it distinguish claim from fact?
+Can it represent a repeated structure?
+Can it support correction or contradiction handling?
+```
+
+Entity selection heuristic:
+
+```text
+recurring
+role-bearing
+acted upon
+acting on others
+source of authority
+document
+group
+possible ambiguity target
+needed for a rule
+needed for a later query
+```
+
+The highest-level instruction is:
+
+```text
+Model the source's epistemic structure, not just its surface grammar.
+```
+
 ## Why It Matters
 
 For a random domain, the hardest part may not be extracting one fact. It may be
