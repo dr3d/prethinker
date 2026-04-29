@@ -250,10 +250,14 @@ include:
 - clarification questions
 - `truth_maintenance` proposals such as support links, conflicts, retraction
   plans, and derived consequences
+- optional `temporal_graph_v1` proposals such as events, time anchors,
+  intervals, and before/during/overlap/supersedes edges
 - self-check/risk notes
 
 The model's top-level decision is advisory. Durable effects must come through
-candidate operations that pass deterministic admission.
+candidate operations that pass deterministic admission. A temporal graph can
+make the model's time/order understanding visible, but it cannot write temporal
+facts by itself.
 
 ### 8. The mapper admits, skips, or projects operations
 

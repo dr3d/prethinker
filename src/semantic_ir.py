@@ -92,6 +92,45 @@ SCHEMA_CONTRACT: dict[str, Any] = {
             }
         ],
     },
+    "temporal_graph": {
+        "schema_version": "temporal_graph_v1",
+        "events": [
+            {
+                "id": "ev1",
+                "label": "",
+                "participants": ["e1"],
+                "source_status": "direct_assertion|claim|observation|inferred|context",
+                "support_ref": "",
+            }
+        ],
+        "time_anchors": [
+            {
+                "id": "t1",
+                "value": "2026-04-29",
+                "precision": "instant|day|month|year|relative|unknown",
+                "source_status": "direct_assertion|claim|observation|inferred|context",
+                "support_ref": "",
+            }
+        ],
+        "intervals": [
+            {
+                "id": "i1",
+                "start": "t1",
+                "end": "t2",
+                "source_status": "direct_assertion|claim|observation|inferred|context",
+                "support_ref": "",
+            }
+        ],
+        "edges": [
+            {
+                "relation": "before|after|during|overlaps|starts|ends|same_time|supersedes|unknown",
+                "a": "ev1",
+                "b": "ev2",
+                "source_status": "direct_assertion|claim|observation|inferred|context",
+                "support_ref": "",
+            }
+        ],
+    },
     "clarification_questions": [""],
     "self_check": {
         "bad_commit_risk": "low|medium|high",
@@ -328,6 +367,106 @@ SEMANTIC_IR_JSON_SCHEMA: dict[str, Any] = {
                 },
             },
         },
+        "temporal_graph": {
+            "type": "object",
+            "additionalProperties": False,
+            "required": ["schema_version", "events", "time_anchors", "intervals", "edges"],
+            "properties": {
+                "schema_version": {"type": "string", "const": "temporal_graph_v1"},
+                "events": {
+                    "type": "array",
+                    "maxItems": 64,
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": False,
+                        "required": ["id", "label", "participants", "source_status", "support_ref"],
+                        "properties": {
+                            "id": {"type": "string"},
+                            "label": {"type": "string"},
+                            "participants": {"type": "array", "maxItems": 12, "items": {"type": "string"}},
+                            "source_status": {
+                                "type": "string",
+                                "enum": ["direct_assertion", "claim", "observation", "inferred", "context"],
+                            },
+                            "support_ref": {"type": "string"},
+                        },
+                    },
+                },
+                "time_anchors": {
+                    "type": "array",
+                    "maxItems": 64,
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": False,
+                        "required": ["id", "value", "precision", "source_status", "support_ref"],
+                        "properties": {
+                            "id": {"type": "string"},
+                            "value": {"type": "string"},
+                            "precision": {
+                                "type": "string",
+                                "enum": ["instant", "day", "month", "year", "relative", "unknown"],
+                            },
+                            "source_status": {
+                                "type": "string",
+                                "enum": ["direct_assertion", "claim", "observation", "inferred", "context"],
+                            },
+                            "support_ref": {"type": "string"},
+                        },
+                    },
+                },
+                "intervals": {
+                    "type": "array",
+                    "maxItems": 32,
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": False,
+                        "required": ["id", "start", "end", "source_status", "support_ref"],
+                        "properties": {
+                            "id": {"type": "string"},
+                            "start": {"type": "string"},
+                            "end": {"type": "string"},
+                            "source_status": {
+                                "type": "string",
+                                "enum": ["direct_assertion", "claim", "observation", "inferred", "context"],
+                            },
+                            "support_ref": {"type": "string"},
+                        },
+                    },
+                },
+                "edges": {
+                    "type": "array",
+                    "maxItems": 64,
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": False,
+                        "required": ["relation", "a", "b", "source_status", "support_ref"],
+                        "properties": {
+                            "relation": {
+                                "type": "string",
+                                "enum": [
+                                    "before",
+                                    "after",
+                                    "during",
+                                    "overlaps",
+                                    "starts",
+                                    "ends",
+                                    "same_time",
+                                    "supersedes",
+                                    "unknown",
+                                ],
+                            },
+                            "a": {"type": "string"},
+                            "b": {"type": "string"},
+                            "source_status": {
+                                "type": "string",
+                                "enum": ["direct_assertion", "claim", "observation", "inferred", "context"],
+                            },
+                            "support_ref": {"type": "string"},
+                        },
+                    },
+                },
+            },
+        },
         "clarification_questions": {"type": "array", "maxItems": 6, "items": {"type": "string"}},
         "self_check": {
             "type": "object",
@@ -434,6 +573,12 @@ DOCUMENT_TO_LOGIC_COMPILER_STRATEGY: dict[str, Any] = {
         "For conflicts, preserve the competing claim/observation/source states and recommend clarify/quarantine/mixed rather than silently overwriting.",
         "For temporal changes, preserve anchors and intervals durably when predicates allow them; a corrected date should retract or supersede the stale date anchor, not only the derived consequence.",
     ],
+    "temporal_graph_strategy": [
+        "When the utterance/source contains meaningful time, order, duration, interval, deadline, correction, or before/after language, include an optional temporal_graph_v1 proposal.",
+        "Model temporal structure as event nodes, separated time anchors, intervals, and edges such as before, during, overlaps, or supersedes instead of burying all time information in labels.",
+        "temporal_graph_v1 is proposal-only diagnostic structure. It does not create durable facts unless matching candidate_operations are separately emitted and admitted by the mapper.",
+        "Preserve source_status and support_ref for temporal nodes and edges so claims, observations, direct assertions, and inferred ordering remain distinguishable.",
+    ],
     "query_strategy": [
         "For questions, query the actual predicate surface available in allowed_predicates, predicate_contracts, and kb_context_pack examples.",
         "Use full predicate arity with uppercase variables for unknown slots.",
@@ -478,6 +623,7 @@ BEST_GUARDED_V2_GUIDANCE = (
     "- Use context to resolve referents and answer queries; only the current utterance may introduce a new write candidate.\n"
     "- If the current utterance contains policy/rule language such as all/every/unless/must/before and also direct facts, choose mixed. Commit the direct facts and represent rule/policy material in assertions or unsafe_implications if no safe rule clause is available.\n"
     "- Preserve policy vocabulary and temporal anchors as symbolic terms when predicates allow it. For example, do not drop role aliases such as employee_seeking_reimbursement, announcement events such as launch_date, or relative expressions such as ten_days_after_service simply because the final rule/query result is not yet decidable.\n"
+    "- If time/order/duration/interval/correction language is important, include temporal_graph_v1 as a proposal-only sub-IR with event nodes, time anchors, intervals, and temporal edges. Do not rely on temporal_graph_v1 to write facts; durable temporal facts still require candidate_operations that pass mapper admission.\n"
     "- Simple Horn rules such as 'if parent(X,Y) then ancestor(X,Y)' may commit as operation='rule' when you can emit a precise executable clause using allowed predicates. Put that Prolog-style text in candidate_operations[].clause. Default/exception rules with unless/except/only-if are not ordinary facts; if negation/exception semantics are unclear, choose mixed and represent the rule as a rule assertion or unsafe implication, not as a current fact.\n"
     "- Never mark a rule operation safe without an executable clause. If you cannot provide candidate_operations[].clause, do not emit a safe rule operation.\n"
     "- Existing current facts in context are state constraints. If a new utterance gives a different value for the same likely functional predicate such as lives_in/2 or scheduled_for/2, choose clarify unless the user explicitly marks it as a correction with words like correction, actually, wrong, not X, or instead.\n"
@@ -996,6 +1142,7 @@ def semantic_ir_admission_diagnostics(
         contract_details=contract_details,
     )
     truth_maintenance = _truth_maintenance_summary(ir_for_admission)
+    temporal_graph = _temporal_graph_summary(ir_for_admission)
     epistemic_worlds = _epistemic_worlds_summary(
         projected_decision,
         operations,
@@ -1029,6 +1176,7 @@ def semantic_ir_admission_diagnostics(
             if isinstance(item, dict) and isinstance(item.get("admission_justification"), dict)
         ],
         "truth_maintenance": truth_maintenance,
+        "temporal_graph": temporal_graph,
         "truth_maintenance_alignment": _truth_maintenance_alignment(
             truth_maintenance,
             operations,
@@ -1124,11 +1272,59 @@ def semantic_ir_to_legacy_parse(
         "admission_diagnostics": diagnostics,
         "clause_supports": diagnostics.get("clause_supports", {}),
         "truth_maintenance": diagnostics.get("truth_maintenance", {}),
+        "temporal_graph": diagnostics.get("temporal_graph", {}),
         "epistemic_worlds": diagnostics.get("epistemic_worlds", {}),
     }
     if retracts:
         payload["correction_retract_clauses"] = retracts
     return payload, warnings
+
+
+def _temporal_graph_summary(ir: dict[str, Any]) -> dict[str, Any]:
+    graph = ir.get("temporal_graph") if isinstance(ir, dict) else None
+    if not isinstance(graph, dict):
+        return {
+            "version": "temporal_graph_v1",
+            "authority": "proposal_only_no_durable_effect_without_candidate_operations",
+            "present": False,
+            "event_count": 0,
+            "time_anchor_count": 0,
+            "interval_count": 0,
+            "edge_count": 0,
+            "events": [],
+            "time_anchors": [],
+            "intervals": [],
+            "edges": [],
+        }
+
+    def bounded_rows(key: str, fields: list[str], limit: int) -> list[dict[str, str]]:
+        rows = graph.get(key, [])
+        if not isinstance(rows, list):
+            return []
+        out: list[dict[str, str]] = []
+        for row in rows[:limit]:
+            if not isinstance(row, dict):
+                continue
+            out.append({field: _bounded_text(row.get(field), max_chars=160) for field in fields})
+        return out
+
+    events = graph.get("events", []) if isinstance(graph.get("events"), list) else []
+    anchors = graph.get("time_anchors", []) if isinstance(graph.get("time_anchors"), list) else []
+    intervals = graph.get("intervals", []) if isinstance(graph.get("intervals"), list) else []
+    edges = graph.get("edges", []) if isinstance(graph.get("edges"), list) else []
+    return {
+        "version": "temporal_graph_v1",
+        "authority": "proposal_only_no_durable_effect_without_candidate_operations",
+        "present": True,
+        "event_count": len(events),
+        "time_anchor_count": len(anchors),
+        "interval_count": len(intervals),
+        "edge_count": len(edges),
+        "events": bounded_rows("events", ["id", "label", "source_status", "support_ref"], 12),
+        "time_anchors": bounded_rows("time_anchors", ["id", "value", "precision", "source_status", "support_ref"], 12),
+        "intervals": bounded_rows("intervals", ["id", "start", "end", "source_status", "support_ref"], 8),
+        "edges": bounded_rows("edges", ["relation", "a", "b", "source_status", "support_ref"], 12),
+    }
 
 
 def _epistemic_worlds_summary(
@@ -2766,6 +2962,8 @@ def _projection_reason(
         return "partial_write_admission_pressure_projected_to_mixed"
     if model_decision == "commit" and _has_safe_direct_write(ir) and _self_check_mentions_unresolved_rule_conflict(ir):
         return "self_check_rule_conflict_projected_to_mixed"
+    if model_decision == "mixed" and _low_risk_correction_with_only_safe_mutations_should_commit(ir):
+        return "low_risk_correction_with_only_safe_mutations_projected_to_commit"
     if model_decision == "quarantine" and _raw_missing_slots(ir) and not _missing_slots(ir):
         return "only_optional_metadata_missing_projected_to_mixed"
     if model_decision == "quarantine" and str(ir.get("turn_type", "")).strip().lower() == "correction":
@@ -2928,6 +3126,8 @@ def _projected_decision(
         return "mixed"
     if decision == "commit" and _has_safe_direct_write(ir) and _self_check_mentions_unresolved_rule_conflict(ir):
         return "mixed"
+    if decision == "mixed" and _low_risk_correction_with_only_safe_mutations_should_commit(ir):
+        return "commit"
     if (
         decision == "quarantine"
         and _raw_missing_slots(ir)
@@ -3319,6 +3519,35 @@ def _has_projection_relevant_unsafe_implications(ir: dict[str, Any]) -> bool:
     return True
 
 
+def _low_risk_correction_with_only_safe_mutations_should_commit(ir: dict[str, Any]) -> bool:
+    if str(ir.get("turn_type", "")).strip().lower() != "correction":
+        return False
+    if _bad_commit_risk(ir) != "low":
+        return False
+    if _string_list(ir.get("clarification_questions")) or _missing_slots(ir):
+        return False
+    if _has_projection_relevant_unsafe_implications(ir):
+        return False
+    ops = _candidate_operations(ir)
+    if not ops:
+        return False
+    has_retract = False
+    has_assert = False
+    for op in ops:
+        operation = str(op.get("operation", "")).strip().lower()
+        source = str(op.get("source", "")).strip().lower()
+        safety = str(op.get("safety", "")).strip().lower()
+        if operation not in {"assert", "retract"}:
+            return False
+        if safety != "safe":
+            return False
+        if source not in {"direct", "context"}:
+            return False
+        has_retract = has_retract or operation == "retract"
+        has_assert = has_assert or operation == "assert"
+    return has_retract and has_assert
+
+
 def _has_only_context_writes_with_unsafe_implications(ir: dict[str, Any]) -> bool:
     if not _has_projection_relevant_unsafe_implications(ir):
         return False
@@ -3343,7 +3572,7 @@ def _unsafe_implication_duplicates_safe_operation(item: dict[str, Any], ir: dict
         operation = str(op.get("operation", "")).strip().lower()
         predicate = _predicate_name(op.get("predicate"))
         args = _operation_args(op.get("args"), entity_names=_entity_name_map(ir), for_query=operation == "query")
-        if operation and operation not in candidate:
+        if operation and operation != "retract" and operation not in candidate:
             continue
         if predicate and predicate not in candidate:
             continue

@@ -67,6 +67,8 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         self.assertTrue(any("querying" in item for item in strategy["predicate_selection"]))
         self.assertTrue(any("source_bound_accusation" in item for item in strategy["assertion_status"]))
         self.assertTrue(any("stale date anchor" in item for item in strategy["truth_maintenance_strategy"]))
+        self.assertIn("temporal_graph_strategy", strategy)
+        self.assertTrue(any("proposal-only" in item for item in strategy["temporal_graph_strategy"]))
 
     def test_mapper_emits_valid_legacy_parse_for_safe_assert(self) -> None:
         parsed, warnings = semantic_ir_to_legacy_parse(_ir())
@@ -298,6 +300,144 @@ class SemanticIRRuntimeTests(unittest.TestCase):
                 "corrected_temporal_value(silverton_a_return_stamp, return_date, 2024_04, 2023_04).",
             ],
         )
+
+    def test_temporal_graph_is_diagnostic_not_durable_truth(self) -> None:
+        ir = _ir(
+            candidate_operations=[],
+            temporal_graph={
+                "schema_version": "temporal_graph_v1",
+                "events": [
+                    {
+                        "id": "ev1",
+                        "label": "Mara submitted the reimbursement",
+                        "participants": ["mara", "reimbursement_17"],
+                        "source_status": "direct_assertion",
+                        "support_ref": "current_utterance",
+                    },
+                    {
+                        "id": "ev2",
+                        "label": "Iris approved the reimbursement",
+                        "participants": ["iris", "reimbursement_17"],
+                        "source_status": "direct_assertion",
+                        "support_ref": "current_utterance",
+                    },
+                ],
+                "time_anchors": [
+                    {
+                        "id": "t1",
+                        "value": "2026-02-10",
+                        "precision": "day",
+                        "source_status": "direct_assertion",
+                        "support_ref": "current_utterance",
+                    }
+                ],
+                "intervals": [],
+                "edges": [
+                    {
+                        "relation": "before",
+                        "a": "ev1",
+                        "b": "ev2",
+                        "source_status": "direct_assertion",
+                        "support_ref": "current_utterance",
+                    }
+                ],
+            },
+        )
+
+        parsed, warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=["event/2", "event_on/2", "before/2"],
+        )
+
+        self.assertEqual(warnings, [])
+        self.assertEqual(parsed["intent"], "other")
+        self.assertEqual(parsed["facts"], [])
+        self.assertEqual(parsed["rules"], [])
+        self.assertEqual(parsed["queries"], [])
+        graph = parsed["admission_diagnostics"]["temporal_graph"]
+        self.assertTrue(graph["present"])
+        self.assertEqual(graph["event_count"], 2)
+        self.assertEqual(graph["time_anchor_count"], 1)
+        self.assertEqual(graph["edge_count"], 1)
+        self.assertEqual(
+            graph["authority"],
+            "proposal_only_no_durable_effect_without_candidate_operations",
+        )
+
+    def test_temporal_graph_facts_require_candidate_operations(self) -> None:
+        ir = _ir(
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "event_on",
+                    "args": ["approval_event", "2026_02_10"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "assert",
+                    "predicate": "before",
+                    "args": ["submission_event", "approval_event"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+            ],
+            temporal_graph={
+                "schema_version": "temporal_graph_v1",
+                "events": [
+                    {
+                        "id": "submission_event",
+                        "label": "submission",
+                        "participants": ["mara", "reimbursement_17"],
+                        "source_status": "direct_assertion",
+                        "support_ref": "current_utterance",
+                    },
+                    {
+                        "id": "approval_event",
+                        "label": "approval",
+                        "participants": ["iris", "reimbursement_17"],
+                        "source_status": "direct_assertion",
+                        "support_ref": "current_utterance",
+                    },
+                ],
+                "time_anchors": [
+                    {
+                        "id": "t1",
+                        "value": "2026-02-10",
+                        "precision": "day",
+                        "source_status": "direct_assertion",
+                        "support_ref": "current_utterance",
+                    }
+                ],
+                "intervals": [],
+                "edges": [
+                    {
+                        "relation": "before",
+                        "a": "submission_event",
+                        "b": "approval_event",
+                        "source_status": "direct_assertion",
+                        "support_ref": "current_utterance",
+                    }
+                ],
+            },
+        )
+
+        parsed, warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=["event_on/2", "before/2"],
+        )
+
+        self.assertEqual(warnings, [])
+        self.assertEqual(
+            parsed["facts"],
+            [
+                "event_on(approval_event, 2026_02_10).",
+                "before(submission_event, approval_event).",
+            ],
+        )
+        self.assertTrue(parsed["temporal_graph"]["present"])
 
     def test_mapper_skips_negative_assertion_until_negation_policy_exists(self) -> None:
         ir = _ir(
@@ -2189,6 +2329,40 @@ class SemanticIRRuntimeTests(unittest.TestCase):
                     "commit_policy": "clarify",
                 }
             ],
+        )
+        payload = semantic_ir_to_prethink_payload(ir)
+        self.assertIn("decision=commit", payload["rationale"])
+
+    def test_prethink_payload_ignores_retracted_stale_fact_unsafe_implication(self) -> None:
+        ir = _ir(
+            decision="mixed",
+            turn_type="correction",
+            candidate_operations=[
+                {
+                    "operation": "retract",
+                    "predicate": "stopped_on",
+                    "args": ["Mara", "warfarin", "Tuesday"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "assert",
+                    "predicate": "stopped_on",
+                    "args": ["Mara", "warfarin", "Wednesday morning"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+            ],
+            unsafe_implications=[
+                {
+                    "candidate": "stopped_on(mara, warfarin, tuesday)",
+                    "why_unsafe": "Explicitly corrected by the safe retract/assert pair.",
+                    "commit_policy": "quarantine",
+                }
+            ],
+            self_check={"bad_commit_risk": "low", "missing_slots": [], "notes": []},
         )
         payload = semantic_ir_to_prethink_payload(ir)
         self.assertIn("decision=commit", payload["rationale"])

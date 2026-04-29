@@ -113,6 +113,27 @@ rejected, or quarantined content without weakening the admission boundary.
 Current status: diagnostic payload only. Persisting and querying scoped worlds
 is an explicit future policy decision.
 
+## Temporal Graph V1
+
+`semantic_ir_v1` may include an optional `temporal_graph_v1` block. It lets the
+model represent temporal structure as events, time anchors, intervals, and
+edges such as `before`, `during`, `overlaps`, and `supersedes`.
+
+This block is proposal-only diagnostics:
+
+- it may improve trace readability and future temporal QA;
+- it may help humans see how the model understood ordering and intervals;
+- it may guide future profile-owned temporal predicate design;
+- it does not create durable facts, rules, queries, or retracts.
+
+The mapper only admits durable temporal state from `candidate_operations` that
+pass the same safety, source, predicate-palette, contract, and runtime gates as
+every other operation. If the model emits a temporal graph but no matching safe
+candidate operation, the graph appears in diagnostics and the KB remains
+unchanged.
+
+See [TEMPORAL_GRAPH_V1.md](https://github.com/dr3d/prethinker/blob/main/docs/TEMPORAL_GRAPH_V1.md).
+
 ## Operation Admission
 
 Only `candidate_operations` may become executable clauses.

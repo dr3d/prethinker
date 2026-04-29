@@ -61,6 +61,7 @@ The best current documents for that work are:
 - [docs/CONTEXT_CONTROL_ARCHITECTURE_BRIEF.md](https://github.com/dr3d/prethinker/blob/main/docs/CONTEXT_CONTROL_ARCHITECTURE_BRIEF.md)
 - [docs/SEMANTIC_IR_RESEARCH_DIRECTION_REPORT.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_RESEARCH_DIRECTION_REPORT.md)
 - [docs/SEMANTIC_IR_MAPPER_SPEC.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_MAPPER_SPEC.md)
+- [docs/TEMPORAL_GRAPH_V1.md](https://github.com/dr3d/prethinker/blob/main/docs/TEMPORAL_GRAPH_V1.md)
 - [docs/DOMAIN_PROFILE_CATALOG.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PROFILE_CATALOG.md)
 - [docs/COURTLISTENER_DOMAIN.md](https://github.com/dr3d/prethinker/blob/main/docs/COURTLISTENER_DOMAIN.md)
 - [docs/SEC_CONTRACTS_DOMAIN.md](https://github.com/dr3d/prethinker/blob/main/docs/SEC_CONTRACTS_DOMAIN.md)
@@ -119,9 +120,11 @@ engineering, Semantic IR workspaces, and deterministic admission.
 
 Latest local verification:
 
-- Full pytest suite after compiler-strategy and QA-context updates: `396 passed`.
+- Full pytest suite after temporal-graph proposal diagnostics and low-risk correction projection hardening: `399 passed`.
 - Lava v5 latest 60-attempt rerun: `60/60` parsed JSON, `60/60` domain selector, `60/60` admission-safe, `45/60` semantic-clean, `41/60` full expectation score, `0` fuzzy edge kinds, and `0/60` temp-0 variance groups.
 - `active_profile=auto` now uses `semantic_router_v1` as the first-pass context/profile planner. The old Python catalog selector is no longer in the active runtime or research harnesses.
+- `semantic_ir_v1` now includes optional `temporal_graph_v1` proposal diagnostics: event nodes, time anchors, intervals, and temporal edges are visible in traces, but they cannot write durable KB facts unless matching `candidate_operations` pass admission.
+- Low-risk correction projection now ignores unsafe-implication residue that duplicates the stale fact being safely retracted, so explicit temporal corrections can remain `commit` when the safe retract/assert pair is complete.
 - Multilingual router probe: `router_ok=10/10`, `compiler_parsed_ok=10/10` on raw Spanish, French, German, Portuguese, Italian, Japanese, and code-switched turns.
 - Current profile packages supply router/compiler context, predicate contracts, and declarative validators for medical, legal/CourtListener, SEC/contracts, probate, and story-world lanes. The mapper still owns actual admission.
 - Predicate-contract role enforcement blocks obvious argument-shape mismatches, profile validators block domain-specific unsafe admissions declaratively, temporal gates block inverted interval pairs, and duplicate-collapse prevents repeated candidate-operation floods from becoming repeated KB writes.
@@ -139,6 +142,6 @@ Latest local verification:
 The important qualitative result is that the current system has moved from
 Python-side language rescue toward model-owned context planning plus
 deterministic admission. The remaining hard problems are model-owned
-segmentation, reusable predicate-contract coverage, temporal fact
-representation, a temporal-graph sub-IR, rule admission, broader profile
-validator coverage, and mapper policy for partial/unsafe operations.
+segmentation, reusable predicate-contract coverage, durable temporal fact
+representation and graph-derived QA, rule admission, broader profile validator
+coverage, and mapper policy for partial/unsafe operations.

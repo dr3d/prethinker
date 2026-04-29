@@ -292,7 +292,7 @@ That is also why the repo is careful about honesty:
 
 As of April 29, 2026:
 
-- the full local pytest suite is green at `396 passed`
+- the full local pytest suite is green at `399 passed`
 - the console is the canonical interactive front door
 - `semantic_router_v1 -> semantic_ir_v1` is the active research lane for model-owned context planning and richer model understanding before deterministic admission
 - the latest semantic IR edge runtime A/B is `20/20` decision labels with `0.976` average score

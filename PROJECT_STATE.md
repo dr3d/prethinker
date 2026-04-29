@@ -46,6 +46,8 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 - Admitted Semantic IR clauses now carry first-pass support records from mapper operation to runtime payload. Each support record includes the originating operation index, predicate, source, polarity, and rationale codes, giving the trace a seed for future dependency/truth-maintenance work.
 - `semantic_ir_v1` now has a first-class `truth_maintenance` proposal block. The large model can propose support links, conflicts, retraction plans, and derived consequences; the mapper only copies that structure into diagnostics/traces and still admits durable effects exclusively from `candidate_operations`.
 - Admission diagnostics now compare the model's `truth_maintenance` proposal against mapper outcomes. Trace reports show support/conflict/retraction/consequence counts plus fuzzy edges such as admitted operations without model support, skipped operations with model support, conflict-policy mismatches, and retraction-plan/admitted-retract mismatches.
+- `semantic_ir_v1` now has an optional `temporal_graph_v1` proposal block for event nodes, time anchors, intervals, and ordering edges. It is deliberately diagnostic: the mapper surfaces the graph in traces but does not write temporal facts unless matching `candidate_operations` independently pass admission.
+- Low-risk correction projection now treats an unsafe implication that merely repeats the stale fact being retracted as duplicate diagnostic residue, not a reason to downgrade the safe retract/assert mutation plan.
 - Semantic IR calls now receive a compact deterministic `kb_context_pack`: exact relevant KB clauses, likely functional current-state candidates, entity candidates, recent committed logic, and a small fallback snapshot. This gives the 35B model current-KB visibility for corrections and conflict reasoning without granting it write authority.
 - `kb_context_pack` now includes role-aware `current_state_subject_candidates`, and the Semantic IR prompt payload carries explicit `kb_context_policy` guidance. This teaches the model how to use retrieved KB state for correction, pronoun resolution, claim-vs-observation boundaries, and conflict explanation without expanding Python-side language patches.
 - `semantic_ir_v1` payloads now carry a first-class `document_to_logic_compiler_strategy_v1` context object. It captures the Codex-style mental procedure for source boundary, assertion status, entity selection, predicate selection, repeated structures, truth maintenance, and query planning, while preserving the rule that runtime admission remains the only write authority.
@@ -138,7 +140,7 @@ This is the next useful layer for type steering and explanation. It should suppo
 Top priority:
 
 - Represent temporal facts durably enough that extracted dates, intervals, corrections, and relative-time anchors can support real KB queries instead of staying only in the semantic workspace. This is the highest-leverage architecture move because it unlocks the policy-demo path: record rules/events, ask which cases violate or remain blocked, and show why without writing derived conclusions as facts.
-- Add a `temporal_graph_v1`-style sub-IR experiment inspired by TG-LLM: event nodes, separated start/end anchors, interval edges, ordering/gap/overlap facts, support refs, and graph-derived QA probes. The key adaptation is Prethinker's authority boundary: the LLM proposes temporal graph structure, deterministic admission decides durable facts, and Prolog/temporal context answers queries.
+- Build on the new `temporal_graph_v1` sub-IR inspired by TG-LLM: event nodes, separated start/end anchors, interval edges, ordering/gap/overlap facts, support refs, and graph-derived QA probes. The key adaptation is Prethinker's authority boundary: the LLM proposes temporal graph structure, deterministic admission decides durable facts, and Prolog/temporal context answers queries.
 
 Supporting architecture:
 
@@ -183,11 +185,11 @@ Domain/data lanes:
 
 ## Verification Snapshot
 
-**Current headline:** latest full pytest suite `396 passed`; latest Lava v5 sampled run stayed `60/60` parsed JSON, `60/60` domain selector, `60/60` admission-safe, `45/60` semantic-clean, `41/60` full expectation score, `0` fuzzy edge kinds, and `0/60` temp-0 signature variance groups. Current best demo pressure point remains the reimbursement policy cross-turn run: `4/4` parsed, `4/4` apply-error-free, `4/4` expected query matches, and no derived violation write leak.
+**Current headline:** latest full pytest suite `399 passed`; latest Lava v5 sampled run stayed `60/60` parsed JSON, `60/60` domain selector, `60/60` admission-safe, `45/60` semantic-clean, `41/60` full expectation score, `0` fuzzy edge kinds, and `0/60` temp-0 signature variance groups. Current best demo pressure point remains the reimbursement policy cross-turn run: `4/4` parsed, `4/4` apply-error-free, `4/4` expected query matches, and no derived violation write leak.
 
 Recent verified results:
 
-- Full suite: `396 passed`.
+- Full suite: `399 passed`.
 - Policy/reimbursement cross-turn demo: `4/4` parsed OK, `4/4` apply-error-free, `4/4` expected query matches, `4/4` no derived violation write leak, rough score `1.000`. The path installs executable rules from English policy, ingests February events, answers with derived violations, then retracts an approval and changes the answer without writing derived `violation/2` facts.
 - Lava v5 source-record alignment rerun: `60/60` parsed JSON, `60/60` domain selector, `60/60` admission-safe, `45/60` semantic-clean, `41/60` full expectation score, `0/60` temp-0 signature variance groups, and `{}` fuzzy edge kinds. Remaining misses are mainly missing semantic anchors, temporal label calibration, and exception-rule representation rather than unsafe durable writes.
 - Multilingual router probe: `router_ok=10/10`, `compiler_parsed_ok=10/10` on raw Spanish, French, German, Portuguese, Italian, Japanese, and code-switched turns. This remains the cleanest evidence for the no-Python-language-handling direction.
