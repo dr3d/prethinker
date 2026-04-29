@@ -147,9 +147,12 @@ This file contains a large amount of older English-first parsing, route repair, 
 
 This is not the immediate live frontier, but it matters because docs and tests can make it look like current architecture.
 
-Replacement direction:
+Current cleanup:
 
-Mark legacy paths explicitly. Keep them for historical A/B testing and regression comparison, but do not let new Semantic IR work depend on them.
+The old parser-lane runners and prompt assets have now been removed from the
+working tree. Git history is the archive. Remaining `kb_pipeline.py` imports are
+for shared runtime/Prolog utilities until those pieces are split into smaller
+modules.
 
 ## Yellow-Zone Python
 

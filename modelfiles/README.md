@@ -9,8 +9,8 @@ mainline path is **Semantic IR v1** through LM Studio with:
 qwen/qwen3.6-35b-a3b
 ```
 
-The older strict-parser Modelfile assets remain only for historical comparison
-and legacy A/B work. They are not the default project direction.
+The older strict-parser Modelfile assets were retired from the working tree.
+Git history is the archive for that parser lane.
 
 ## Current Assets
 
@@ -20,21 +20,11 @@ and legacy A/B work. They are not the default project direction.
   checks.
 - `medical_compiler_prompt_supplement.md`: bounded `medical@v0` profile
   guidance.
-- `history/prompts/*.md`: generated local prompt snapshots; useful for
-  provenance, not part of the current docs spine.
+- `blank_prompt.md`: compatibility placeholder for legacy config fields that
+  no longer inject parser-lane prompt text.
 
-## Legacy Assets
-
-- `semantic_parser_system_prompt.md`: legacy parser prompt pack retained for
-  historical comparison and compatibility tests.
-- `semantic_parser_system_prompt_candidate.md`: older staging candidate for
-  parser-lane prompt A/B work.
-- the old Ollama parser-lane Modelfile retained for historical comparisons.
-- `test-lmstudio-semparse.ps1`: older parser-lane smoke harness.
-
-These are retained so historical comparisons can still be reproduced. New
-research should start from the Semantic IR path, not by baking another old-style
-English parser.
+New research should start from the Semantic IR path, not by baking another
+old-style English parser.
 
 ## Current Local Runtime
 

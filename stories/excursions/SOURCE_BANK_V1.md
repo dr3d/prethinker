@@ -87,5 +87,6 @@ Noisy lane (`G4`, Reddit legal threads):
 
 1. Convert `coop_fed_2024_01_31` -> one `excursion_cooperative` scenario.
 2. Convert `wild_hn_docker_spain_block` -> one `excursion_wild` scenario.
-3. Run both with bare `qwen3.5:9b` + runtime system prompt.
+3. Run through the current LM Studio Semantic IR path, usually
+   `qwen/qwen3.6-35b-a3b` with structured output.
 4. Promote recurrent failure patterns into new `rung_*` files only after repeatability.

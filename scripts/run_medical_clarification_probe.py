@@ -19,10 +19,10 @@ from scripts.run_medical_prompt_probe import _build_medical_guide  # noqa: E402
 
 
 DEFAULT_BASE_URL = "http://127.0.0.1:11434"
-DEFAULT_MODEL = "qwen3.5:9b"
+DEFAULT_MODEL = "qwen/qwen3.6-35b-a3b"
 DEFAULT_CONTEXT = 8192
 DEFAULT_TIMEOUT = 90
-DEFAULT_SHARED_PROMPT = ROOT / "modelfiles" / "semantic_parser_system_prompt.md"
+DEFAULT_SHARED_PROMPT = ROOT / "modelfiles" / "blank_prompt.md"
 DEFAULT_MEDICAL_SUPPLEMENT = ROOT / "modelfiles" / "medical_compiler_prompt_supplement.md"
 DEFAULT_BATTERY = ROOT / "docs" / "data" / "medical_clarification_probe_battery.json"
 DEFAULT_SLICE_DIR = ROOT / "tmp" / "licensed" / "umls" / "2025AB" / "prethinker_mvp"

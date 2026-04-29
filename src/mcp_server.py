@@ -235,7 +235,7 @@ class PrologMCPServer:
         self._compiler_timeout = max(5, int(compiler_timeout))
         prompt_candidate = str(compiler_prompt_file or "").strip()
         if not prompt_candidate:
-            prompt_candidate = str(REPO_ROOT / "modelfiles" / "semantic_parser_system_prompt.md")
+            prompt_candidate = str(REPO_ROOT / "modelfiles" / "blank_prompt.md")
         self._compiler_prompt_path = Path(prompt_candidate)
         self._compiler_prompt_enabled = bool(compiler_prompt_enabled)
         self._compiler_prompt_text = ""
@@ -4993,7 +4993,7 @@ def main() -> int:
     parser.add_argument("--compiler-timeout", type=int, default=120, help="Compiler timeout in seconds.")
     parser.add_argument(
         "--compiler-prompt-file",
-        default=str(REPO_ROOT / "modelfiles" / "semantic_parser_system_prompt.md"),
+        default=str(REPO_ROOT / "modelfiles" / "blank_prompt.md"),
         help="System prompt file used by compiler model.",
     )
     args = parser.parse_args()

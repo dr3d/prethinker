@@ -4,7 +4,9 @@
 
 1. Run ingest scenario: `kb_scenarios/story_glitch_in_the_airlock_roundtrip.json`
 2. Run interrogation scenario: `kb_scenarios/story_glitch_in_the_airlock_interrogation.json`
-3. Grade using validations and compare with the probe set at `goldens/probes/story_glitch_in_the_airlock_roundtrip.json`
+3. Prefer the current Semantic IR/Lava cases that cover Glitch source-fidelity,
+   identity, claim-vs-fact, and predicate-drift edges. The older golden-KB
+   parser comparison lane has been retired from the working tree.
 
 ## Query Dialog (Fact Recall)
 

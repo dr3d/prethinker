@@ -921,18 +921,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--compiler-mode", choices=["strict", "auto", "heuristic"], default="strict")
     parser.add_argument("--compiler-backend", default="ollama")
     parser.add_argument("--compiler-base-url", default="http://127.0.0.1:11434")
-    parser.add_argument("--compiler-model", default="qwen3.5:9b")
+    parser.add_argument("--compiler-model", default="qwen/qwen3.6-35b-a3b")
     parser.add_argument("--compiler-context-length", type=int, default=8192)
     parser.add_argument("--compiler-timeout", type=int, default=60)
     parser.add_argument(
         "--compiler-prompt-file",
-        default=str(ROOT / "modelfiles" / "semantic_parser_system_prompt.md"),
+        default=str(ROOT / "modelfiles" / "blank_prompt.md"),
     )
 
     parser.add_argument("--freethinker-resolution-policy", default="off")
     parser.add_argument("--freethinker-backend", default="ollama")
     parser.add_argument("--freethinker-base-url", default="http://127.0.0.1:11434")
-    parser.add_argument("--freethinker-model", default="qwen3.5:9b")
+    parser.add_argument("--freethinker-model", default="qwen/qwen3.6-35b-a3b")
     parser.add_argument("--freethinker-context-length", type=int, default=16384)
     parser.add_argument("--freethinker-timeout", type=int, default=60)
     parser.add_argument(
@@ -942,13 +942,13 @@ def parse_args() -> argparse.Namespace:
 
     parser.add_argument("--challenger-backend", default="ollama")
     parser.add_argument("--challenger-base-url", default="http://127.0.0.1:11434")
-    parser.add_argument("--challenger-model", default="qwen3.5:9b")
+    parser.add_argument("--challenger-model", default="qwen/qwen3.6-35b-a3b")
     parser.add_argument("--challenger-context-length", type=int, default=8192)
     parser.add_argument("--challenger-timeout", type=int, default=60)
 
     parser.add_argument("--judge-backend", default="ollama")
     parser.add_argument("--judge-base-url", default="http://127.0.0.1:11434")
-    parser.add_argument("--judge-model", default="qwen3.5:9b")
+    parser.add_argument("--judge-model", default="qwen/qwen3.6-35b-a3b")
     parser.add_argument("--judge-context-length", type=int, default=8192)
     parser.add_argument("--judge-timeout", type=int, default=60)
     return parser.parse_args()

@@ -69,7 +69,7 @@ class RuntimeHooks:
             return None
         raw = str(config.get("compiler_prompt_file", "")).strip()
         if not raw:
-            return REPO_ROOT / "modelfiles" / "semantic_parser_system_prompt.md"
+            return REPO_ROOT / "modelfiles" / "blank_prompt.md"
         candidate = Path(raw)
         if not candidate.is_absolute():
             candidate = (REPO_ROOT / candidate).resolve()

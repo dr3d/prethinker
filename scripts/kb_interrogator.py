@@ -27,7 +27,6 @@ if str(Path(__file__).resolve().parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import kb_pipeline as kp  # noqa: E402
-import golden_kb  # noqa: E402
 
 DEFAULT_BASE_URLS = {
     "ollama": "http://127.0.0.1:11434",
@@ -269,8 +268,20 @@ def _head_signature(clause: str) -> str:
     return f"{name.strip()}/{arity}"
 
 
+def _load_canonical_clauses(kb_path: Path) -> list[str]:
+    clauses: list[str] = []
+    for raw in kb_path.read_text(encoding="utf-8-sig").splitlines():
+        line = raw.strip()
+        if not line or line.startswith("%"):
+            continue
+        if not line.endswith("."):
+            line = f"{line}."
+        clauses.append(kp._normalize_clause(line))
+    return clauses
+
+
 def _build_runtime_from_kb(kb_path: Path) -> tuple[kp.CorePrologRuntime, list[str], list[dict[str, Any]]]:
-    clauses = golden_kb.load_canonical_clauses(kb_path)
+    clauses = _load_canonical_clauses(kb_path)
     runtime = kp.CorePrologRuntime()
     runtime.empty_kb()
     load_errors: list[dict[str, Any]] = []
@@ -1403,7 +1414,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--backend", choices=["ollama", "lmstudio"], default="ollama")
     parser.add_argument("--base-url", default=DEFAULT_BASE_URLS["ollama"])
-    parser.add_argument("--model", default="qwen3.5:9b")
+    parser.add_argument("--model", default="qwen/qwen3.6-35b-a3b")
     parser.add_argument("--context-length", type=int, default=8192)
     parser.add_argument("--timeout-seconds", type=int, default=180)
     parser.add_argument("--exam-style", choices=["general", "detective", "medical"], default="general")

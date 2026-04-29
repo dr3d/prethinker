@@ -20,10 +20,12 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 CHECK_FILES = [
-    "kb_pipeline.py",
-    "ingest_frontend.py",
-    "scripts/run_story_progressive_gulp.py",
-    "scripts/run_story_raw.py",
+    "src/semantic_ir.py",
+    "src/semantic_router.py",
+    "src/mcp_server.py",
+    "scripts/run_semantic_ir_lava_sweep.py",
+    "scripts/run_semantic_router_agility.py",
+    "scripts/run_domain_bootstrap_file.py",
 ]
 
 
@@ -67,4 +69,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

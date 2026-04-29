@@ -19,7 +19,7 @@ from src import umls_mvp  # noqa: E402
 
 
 DEFAULT_BASE_URL = "http://127.0.0.1:11434"
-DEFAULT_MODEL = "qwen3.5:9b"
+DEFAULT_MODEL = "qwen/qwen3.6-35b-a3b"
 DEFAULT_CONTEXT = 32768
 DEFAULT_TIMEOUT = 180
 DEFAULT_TEMPERATURE = 0.2

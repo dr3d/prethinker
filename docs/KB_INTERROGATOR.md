@@ -12,7 +12,7 @@ It does three things in one run:
 
 - Plain prose file: `.txt` / `.md`
 - Scenario JSON (`utterances`)
-- Run JSON (`turns[*].utterance`) from `kb_pipeline.py`
+- Run JSON or trace JSON from the current Semantic IR/domain-bootstrap harnesses
 
 If source is run JSON, candidate KB can be auto-discovered from `kb_namespace.corpus_path`.
 
@@ -75,7 +75,7 @@ Markdown report is a fast human read for triage.
 
 ## Recommended Workflow
 
-1. Ingest text/story into KB (`kb_pipeline.py`).
+1. Ingest text/story through the current Semantic IR/domain-bootstrap path.
 2. Run `kb_interrogator.py` on source + resulting KB.
 3. Promote repeated misses/bogus patterns into new scenario/rung tests.
 4. Re-run interrogator and compare pass rate + fact audit deltas.

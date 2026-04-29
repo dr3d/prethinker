@@ -43,8 +43,8 @@ DEFAULT_BASE_URLS = {
     "ollama": "http://127.0.0.1:11434",
 }
 DEFAULT_MODELS = {
-    "lmstudio": "qwen/qwen3.5-9b",
-    "ollama": "qwen3.5:9b",
+    "lmstudio": "qwen/qwen3.6-35b-a3b",
+    "ollama": "qwen3.6:35b",
 }
 AMBIGUOUS_PRONOUN_ATOMS = {
     "he",
@@ -9609,7 +9609,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--prompt-file",
-        default="modelfiles/semantic_parser_system_prompt.md",
+        default="modelfiles/blank_prompt.md",
         help="Optional markdown prompt guidance file to inject into classifier/extractor/repair prompts.",
     )
     parser.add_argument(

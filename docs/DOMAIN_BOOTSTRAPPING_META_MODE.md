@@ -1,4 +1,4 @@
-# Domain Bootstrapping Meta-Mode
+﻿# Domain Bootstrapping Meta-Mode
 
 Last updated: 2026-04-29
 
@@ -286,8 +286,8 @@ raw-file bootstrap run against a human-supplied expected Prolog file:
 
 ```powershell
 python scripts\run_domain_bootstrap_file.py `
-  --text-file tmp\proclamation.md `
-  --expected-prolog tmp\proclamation.pl `
+  --text-file datasets\profile_bootstrap\samples\document_intake\proclamation.md `
+  --expected-prolog datasets\profile_bootstrap\samples\document_intake\proclamation.pl `
   --domain-hint recall_proclamation `
   --backend lmstudio `
   --model qwen/qwen3.6-35b-a3b `
@@ -302,8 +302,8 @@ There is also a calibration-only mode:
 
 ```powershell
 python scripts\run_domain_bootstrap_file.py `
-  --text-file tmp\proclamation.md `
-  --expected-prolog tmp\proclamation.pl `
+  --text-file datasets\profile_bootstrap\samples\document_intake\proclamation.md `
+  --expected-prolog datasets\profile_bootstrap\samples\document_intake\proclamation.pl `
   --use-expected-signatures-as-guidance `
   --domain-hint recall_proclamation `
   --backend lmstudio `
@@ -392,8 +392,8 @@ Example:
 
 ```powershell
 python scripts\run_domain_bootstrap_file.py `
-  --text-file tmp\declaration.md `
-  --expected-prolog tmp\declaration.pl `
+  --text-file datasets\profile_bootstrap\samples\document_intake\declaration.md `
+  --expected-prolog datasets\profile_bootstrap\samples\document_intake\declaration.pl `
   --use-expected-signatures-as-guidance `
   --domain-hint declaration_style_document `
   --backend lmstudio `
@@ -648,7 +648,7 @@ For single-document experiments, use:
 
 ```powershell
 python scripts/run_domain_bootstrap_file.py `
-  --text-file tmp/declaration.md `
+  --text-file datasets/profile_bootstrap/samples/document_intake/declaration.md `
   --domain-hint founding_document `
   --backend lmstudio `
   --model qwen/qwen3.6-35b-a3b `
@@ -677,7 +677,7 @@ that makes semantic choices.
 
 ## Post-Ingestion QA Probes
 
-Question batteries such as `tmp/proclamation-qa.md` belong after source
+Question batteries such as `datasets/profile_bootstrap/samples/document_intake/proclamation-qa.md` belong after source
 ingestion. They should not steer `profile_bootstrap_v1` or
 `intake_plan_v1`; otherwise the test questions become hidden training context
 for the compiler.
@@ -700,7 +700,7 @@ The runner is:
 ```powershell
 python scripts\run_domain_bootstrap_qa.py `
   --run-json tmp\domain_bootstrap_file\<run>.json `
-  --qa-file tmp\proclamation-qa.md `
+  --qa-file datasets\profile_bootstrap\samples\document_intake\proclamation-qa.md `
   --model qwen/qwen3.6-35b-a3b
 ```
 
@@ -832,3 +832,4 @@ meta-mode: language samples -> governed symbolic vocabulary
 Both modes keep the same thesis:
 
 The model proposes. Admission governs.
+

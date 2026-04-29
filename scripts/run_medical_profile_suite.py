@@ -23,11 +23,11 @@ from src import medical_profile, umls_mvp  # noqa: E402
 
 
 DEFAULT_BASE_URL = "http://127.0.0.1:11434"
-DEFAULT_MODEL = "qwen3.5:9b"
+DEFAULT_MODEL = "qwen/qwen3.6-35b-a3b"
 DEFAULT_CONTEXT = 8192
 DEFAULT_TIMEOUT = 90
 DEFAULT_PROFILE = ROOT / "modelfiles" / "profile.medical.v0.json"
-DEFAULT_SHARED_PROMPT = ROOT / "modelfiles" / "semantic_parser_system_prompt.md"
+DEFAULT_SHARED_PROMPT = ROOT / "modelfiles" / "blank_prompt.md"
 DEFAULT_SLICE_DIR = ROOT / "tmp" / "licensed" / "umls" / "2025AB" / "prethinker_mvp"
 DEFAULT_OUT_DIR = ROOT / "tmp" / "licensed" / "umls" / "2025AB" / "prethinker_mvp" / "medical_profile_suite_latest"
 

@@ -1,8 +1,10 @@
 # KB Scenarios
 
-These scenario files are consumed by `kb_pipeline.py`.
+These scenario files are retained as reusable language/logic pressure material.
+Current broad sweeps mine them through the Semantic IR/Lava harnesses rather
+than the retired parser-lane story runners.
 
-Last updated: 2026-04-12
+Last updated: 2026-04-29
 
 ## Contract
 
@@ -31,26 +33,15 @@ Validation entry fields:
 - `max_rows`: optional maximum expected row count
 - `contains_row`: optional exact row object requirement
 
-## Important Runtime Behavior
+## Current Runtime Behavior
 
-`kb_pipeline.py` uses named retained KB namespaces:
-
-- New ontology KB namespace: `empty_kb()` is applied once for clean start.
-- Existing namespace: retained corpus is preloaded; no automatic empty/reset.
-- Clarification policy is configurable at runtime:
-  - `--clarification-eagerness` in `[0,1]` (higher asks clarification sooner)
-  - `--max-clarification-rounds` controls multi-round Q&A depth per utterance
-  - `--require-final-confirmation` requires explicit yes/no before write intents are applied (`assert_fact`, `assert_rule`, `retract`)
-
-Recommended for ladder/tuning loops:
-
-- Use a dedicated namespace such as `people_ladder_tune`.
-- Keep output run names monotonic (`..._r1`, `..._r2`, ...).
-- Re-run lower rungs after prompt edits before moving to acid tests.
+These files are no longer the preferred execution harness. They remain useful
+because `scripts/run_semantic_ir_lava_sweep.py` samples `kb_scenarios` as
+frontier material and applies the current router/Semantic IR/mapper path.
 
 ## Progressive Ladder
 
-Use these to ramp parser complexity before acid tests:
+Historical ladder files remain as source material:
 
 - `stage_01_facts_only.json`
 - `stage_02_rule_ingest.json`

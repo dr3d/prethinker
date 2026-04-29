@@ -135,7 +135,7 @@ python kb_pipeline.py `
   --predicate-registry modelfiles/predicate_registry.medical.json `
   --strict-registry `
   --type-schema modelfiles/type_schema.medical.example.json `
-  --prompt-file modelfiles/semantic_parser_system_prompt.md
+  --prompt-file modelfiles/blank_prompt.md
 ```
 
 In the canonical MCP/gateway path, `active_profile=medical@v0` now loads the profile assets and UMLS bridge automatically. Batch experiments can still pass assets explicitly when they need controlled comparisons.

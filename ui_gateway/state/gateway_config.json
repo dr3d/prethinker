@@ -15,7 +15,7 @@
   "compiler_base_url": "http://127.0.0.1:1234",
   "compiler_context_length": 16384,
   "compiler_timeout": 120,
-  "compiler_prompt_file": "modelfiles/semantic_parser_system_prompt.md",
+  "compiler_prompt_file": "modelfiles/blank_prompt.md",
   "semantic_ir_enabled": true,
   "semantic_ir_model": "qwen/qwen3.6-35b-a3b",
   "semantic_ir_context_length": 16384,

@@ -60,7 +60,7 @@ class GatewayConfig:
     compiler_base_url: str = "http://127.0.0.1:1234"
     compiler_context_length: int = 16384
     compiler_timeout: int = 120
-    compiler_prompt_file: str = "modelfiles/semantic_parser_system_prompt.md"
+    compiler_prompt_file: str = "modelfiles/blank_prompt.md"
     semantic_ir_enabled: bool = True
     semantic_ir_model: str = "qwen/qwen3.6-35b-a3b"
     semantic_ir_context_length: int = 16384
