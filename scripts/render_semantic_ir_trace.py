@@ -470,6 +470,103 @@ def _render_truth_maintenance(parsed: dict[str, Any]) -> list[str]:
     return lines
 
 
+def _render_temporal_graph(parsed: dict[str, Any]) -> list[str]:
+    graph = parsed.get("temporal_graph")
+    if not isinstance(graph, dict):
+        return ["No temporal graph proposal emitted."]
+
+    lines = [
+        "**Temporal graph proposal:**",
+        "",
+        "Diagnostic only. Durable temporal facts still require admitted `candidate_operations`.",
+        "",
+    ]
+
+    event_rows = []
+    for event in _as_list(graph.get("events")):
+        if isinstance(event, dict):
+            event_rows.append(
+                [
+                    event.get("id", ""),
+                    event.get("label", ""),
+                    ", ".join(str(item) for item in _as_list(event.get("participants"))),
+                    event.get("source_status", ""),
+                    event.get("support_ref", ""),
+                ]
+            )
+    lines.append("**Events:**")
+    lines.append("")
+    lines.extend(
+        _markdown_table(["id", "label", "participants", "source", "support ref"], event_rows)
+        if event_rows
+        else ["- none"]
+    )
+    lines.append("")
+
+    anchor_rows = []
+    for anchor in _as_list(graph.get("time_anchors")):
+        if isinstance(anchor, dict):
+            anchor_rows.append(
+                [
+                    anchor.get("id", ""),
+                    anchor.get("value", ""),
+                    anchor.get("precision", ""),
+                    anchor.get("source_status", ""),
+                    anchor.get("support_ref", ""),
+                ]
+            )
+    lines.append("**Time anchors:**")
+    lines.append("")
+    lines.extend(
+        _markdown_table(["id", "value", "precision", "source", "support ref"], anchor_rows)
+        if anchor_rows
+        else ["- none"]
+    )
+    lines.append("")
+
+    interval_rows = []
+    for interval in _as_list(graph.get("intervals")):
+        if isinstance(interval, dict):
+            interval_rows.append(
+                [
+                    interval.get("id", ""),
+                    interval.get("start", ""),
+                    interval.get("end", ""),
+                    interval.get("source_status", ""),
+                    interval.get("support_ref", ""),
+                ]
+            )
+    lines.append("**Intervals:**")
+    lines.append("")
+    lines.extend(
+        _markdown_table(["id", "start", "end", "source", "support ref"], interval_rows)
+        if interval_rows
+        else ["- none"]
+    )
+    lines.append("")
+
+    edge_rows = []
+    for edge in _as_list(graph.get("edges")):
+        if isinstance(edge, dict):
+            edge_rows.append(
+                [
+                    edge.get("relation", ""),
+                    edge.get("a", ""),
+                    edge.get("b", ""),
+                    edge.get("source_status", ""),
+                    edge.get("support_ref", ""),
+                ]
+            )
+    lines.append("**Edges:**")
+    lines.append("")
+    lines.extend(
+        _markdown_table(["relation", "a", "b", "source", "support ref"], edge_rows)
+        if edge_rows
+        else ["- none"]
+    )
+    return lines
+
+
 def _render_candidate_ops(parsed: dict[str, Any]) -> list[str]:
     rows = []
     for index, op in enumerate(_as_list(parsed.get("candidate_operations"))):
@@ -849,6 +946,8 @@ def _render_record(
     lines.extend(_render_unsafe(parsed))
     lines.append("")
     lines.extend(_render_truth_maintenance(parsed))
+    lines.append("")
+    lines.extend(_render_temporal_graph(parsed))
     lines.append("")
     lines.extend(_render_candidate_ops(parsed))
     lines.append("")

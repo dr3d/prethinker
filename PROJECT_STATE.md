@@ -162,6 +162,7 @@ Demo-critical evidence and UX:
 
 - Push the policy-demo frontier into the UI/prompt book once the command-line harness stays stable: the highest-impact demo is still "record reimbursement policy, ingest February events, ask which reimbursements violated policy, and show why without writing derived violation facts."
 - Expand trace views around admission contracts so reviewers can see not only the model decision, but also which exact boundary checks passed.
+- Keep temporal graphs visible in traces as event/time-anchor/interval/edge tables so temporal structure can be reviewed without spelunking through raw JSON.
 
 Polish:
 
