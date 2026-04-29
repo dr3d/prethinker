@@ -136,6 +136,29 @@ class RenderSemanticIRTraceTests(unittest.TestCase):
                     ],
                     "derived_consequences": [],
                 },
+                "temporal_graph": {
+                    "schema_version": "temporal_graph_v1",
+                    "events": [
+                        {
+                            "id": "ev1",
+                            "label": "Mara moved to Paris",
+                            "participants": ["e1", "e2"],
+                            "source_status": "direct_assertion",
+                            "support_ref": "current turn",
+                        }
+                    ],
+                    "time_anchors": [
+                        {
+                            "id": "t1",
+                            "value": "now",
+                            "precision": "relative",
+                            "source_status": "direct_assertion",
+                            "support_ref": "current turn",
+                        }
+                    ],
+                    "intervals": [],
+                    "edges": [],
+                },
                 "candidate_operations": [
                     {
                         "operation": "retract",
@@ -189,6 +212,10 @@ class RenderSemanticIRTraceTests(unittest.TestCase):
         self.assertIn("explicit_correction", rendered)
         self.assertIn("**Conflict proposals:**\n\n| op # | existing/context ref | kind | policy | why |", rendered)
         self.assertIn("**Retraction plan:**\n\n| op # | target | reason |", rendered)
+        self.assertIn("Temporal graph proposal", rendered)
+        self.assertIn("Diagnostic only. Durable temporal facts still require admitted `candidate_operations`.", rendered)
+        self.assertIn("Mara moved to Paris", rendered)
+        self.assertIn("**Time anchors:**\n\n| id | value | precision | source | support ref |", rendered)
         self.assertIn("Layer 3c - Truth-Maintenance / Admission Delta", rendered)
         self.assertIn("Truth-maintenance/admission alignment", rendered)
         self.assertIn("admitted_operation_without_model_support_link", rendered)
