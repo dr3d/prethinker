@@ -2611,6 +2611,83 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         self.assertEqual(server.query_rows("lives_in(mara, denver).")["status"], "no_results")
         self.assertEqual(server.query_rows("lives_in(mara, salem).")["status"], "success")
 
+    def test_server_blocks_unannounced_temporal_anchor_overwrite(self) -> None:
+        server = PrologMCPServer(
+            compiler_prompt_enabled=False,
+            semantic_ir_enabled=True,
+            semantic_ir_model="qwen3.6:35b",
+        )
+        server.assert_fact("event_on(return_stamp, 2023_04).")
+
+        def fake_compile_semantic_ir(utterance: str):
+            return _ir(
+                decision="commit",
+                turn_type="state_update",
+                entities=[],
+                candidate_operations=[
+                    {
+                        "operation": "assert",
+                        "predicate": "event_on",
+                        "args": ["return_stamp", "2024_04"],
+                        "polarity": "positive",
+                        "source": "direct",
+                        "safety": "safe",
+                    }
+                ],
+            ), ""
+
+        server._compile_semantic_ir = fake_compile_semantic_ir  # type: ignore[method-assign]
+
+        result = server.process_utterance({"utterance": "The return stamp is April 2024."})
+        self.assertEqual(result["execution"]["status"], "error")
+        guard_ops = [
+            op for op in result["execution"]["operations"] if op.get("tool") == "stored_logic_conflict_guard"
+        ]
+        self.assertEqual(guard_ops[0]["result"]["conflicts"][0]["kind"], "functional_current_state_conflict")
+        self.assertEqual(server.query_rows("event_on(return_stamp, 2023_04).")["status"], "success")
+        self.assertEqual(server.query_rows("event_on(return_stamp, 2024_04).")["status"], "no_results")
+
+    def test_server_allows_explicit_temporal_anchor_correction(self) -> None:
+        server = PrologMCPServer(
+            compiler_prompt_enabled=False,
+            semantic_ir_enabled=True,
+            semantic_ir_model="qwen3.6:35b",
+        )
+        server.assert_fact("event_on(return_stamp, 2023_04).")
+
+        def fake_compile_semantic_ir(utterance: str):
+            return _ir(
+                decision="commit",
+                turn_type="correction",
+                entities=[],
+                candidate_operations=[
+                    {
+                        "operation": "retract",
+                        "predicate": "event_on",
+                        "args": ["return_stamp", "2023_04"],
+                        "polarity": "positive",
+                        "source": "direct",
+                        "safety": "safe",
+                    },
+                    {
+                        "operation": "assert",
+                        "predicate": "event_on",
+                        "args": ["return_stamp", "2024_04"],
+                        "polarity": "positive",
+                        "source": "direct",
+                        "safety": "safe",
+                    },
+                ],
+            ), ""
+
+        server._compile_semantic_ir = fake_compile_semantic_ir  # type: ignore[method-assign]
+
+        result = server.process_utterance({"utterance": "Correction: the return stamp is April 2024, not April 2023."})
+        self.assertEqual(result["execution"]["status"], "success")
+        self.assertEqual(result["execution"]["writes_applied"], 2)
+        self.assertEqual(server.query_rows("event_on(return_stamp, 2023_04).")["status"], "no_results")
+        self.assertEqual(server.query_rows("event_on(return_stamp, 2024_04).")["status"], "success")
+
     def test_server_allows_nonexclusive_additional_condition(self) -> None:
         server = PrologMCPServer(
             compiler_prompt_enabled=False,

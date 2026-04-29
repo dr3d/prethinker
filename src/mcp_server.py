@@ -73,6 +73,9 @@ from src.temporal_kernel import TEMPORAL_KERNEL_PREDICATE_CONTRACTS
 
 
 FUNCTIONAL_CURRENT_STATE_PREDICATES: set[tuple[str, int]] = {
+    ("event_on", 2),
+    ("interval_end", 2),
+    ("interval_start", 2),
     ("lives_in", 2),
     ("located_at", 2),
     ("located_in", 2),

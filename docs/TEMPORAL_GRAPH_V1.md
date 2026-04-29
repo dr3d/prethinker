@@ -127,6 +127,12 @@ mapper admits only safe temporal clauses
 Prolog answers temporal questions from admitted structure
 ```
 
+Temporal anchors are also protected by stored-logic admission. `event_on/2`,
+`interval_start/2`, and `interval_end/2` are treated as likely functional
+records for their first argument. If a later turn proposes a different anchor
+for the same record, admission blocks the write unless the Semantic IR includes
+an explicit retract/correction target.
+
 ## Admission Boundary
 
 `temporal_graph_v1` never writes to the KB by itself.
@@ -189,7 +195,9 @@ Implemented:
   candidate operations;
 - a first deterministic temporal kernel that derives `after/2`, transitive
   `precedes/2`, `follows/2`, and coarse `concurrent/2` answers from admitted
-  temporal facts.
+  temporal facts;
+- a first temporal correction guard that blocks unannounced replacement anchors
+  while allowing explicit retract/assert corrections.
 
 Next:
 

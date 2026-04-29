@@ -285,6 +285,8 @@ Typical checks include:
 - negative fact policy
 - rule admission policy
 - temporal sanity, such as inverted intervals
+- stored temporal-anchor conflicts, such as replacing `event_on/2` without an
+  explicit retract/correction plan
 - stored-logic conflict checks
 - duplicate candidate collapse
 - profile validators such as allegation-not-finding or obligation-not-breach

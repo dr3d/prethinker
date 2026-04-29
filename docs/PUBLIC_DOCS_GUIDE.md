@@ -120,11 +120,12 @@ engineering, Semantic IR workspaces, and deterministic admission.
 
 Latest local verification:
 
-- Full pytest suite after adding the first deterministic temporal kernel slice: `401 passed`.
+- Full pytest suite after adding the first deterministic temporal kernel slice and temporal-anchor correction guard: `403 passed`.
 - Lava v5 latest 60-attempt rerun: `60/60` parsed JSON, `60/60` domain selector, `60/60` admission-safe, `45/60` semantic-clean, `41/60` full expectation score, `0` fuzzy edge kinds, and `0/60` temp-0 variance groups.
 - `active_profile=auto` now uses `semantic_router_v1` as the first-pass context/profile planner. The old Python catalog selector is no longer in the active runtime or research harnesses.
 - `semantic_ir_v1` now includes optional `temporal_graph_v1` proposal diagnostics: event nodes, time anchors, intervals, and temporal edges are visible in traces, but they cannot write durable KB facts unless matching `candidate_operations` pass admission.
 - The new temporal kernel can answer `after/2`, transitive `precedes/2`, `follows/2`, and coarse `concurrent/2` queries from admitted temporal facts. This is deterministic Prolog reasoning over admitted clauses, not model-side temporal answering.
+- Temporal anchor replacement now goes through stored-logic admission: changing `event_on/2`, `interval_start/2`, or `interval_end/2` for the same record requires an explicit retract/correction plan.
 - Low-risk correction projection now ignores unsafe-implication residue that duplicates the stale fact being safely retracted, so explicit temporal corrections can remain `commit` when the safe retract/assert pair is complete.
 - Multilingual router probe: `router_ok=10/10`, `compiler_parsed_ok=10/10` on raw Spanish, French, German, Portuguese, Italian, Japanese, and code-switched turns.
 - Current profile packages supply router/compiler context, predicate contracts, and declarative validators for medical, legal/CourtListener, SEC/contracts, probate, and story-world lanes. The mapper still owns actual admission.
