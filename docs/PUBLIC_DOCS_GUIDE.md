@@ -111,7 +111,7 @@ engineering, Semantic IR workspaces, and deterministic admission.
 
 Latest local verification before this refresh:
 
-- Full pytest suite after Lava v5 source-record identity-ambiguity alignment: `377 passed`.
+- Full pytest suite after document-intake planning and post-ingestion QA runner work: `388 passed`.
 - Lava v5 latest 60-attempt rerun: `60/60` parsed JSON, `60/60` domain selector, `60/60` admission-safe, `45/60` semantic-clean, `41/60` full expectation score, `0` fuzzy edge kinds, and `0/60` temp-0 variance groups.
 - `active_profile=auto` now uses `semantic_router_v1` as the first-pass context/profile planner. The old Python catalog selector is no longer in the active runtime or research harnesses.
 - Multilingual router probe: `router_ok=10/10`, `compiler_parsed_ok=10/10` on raw Spanish, French, German, Portuguese, Italian, Japanese, and code-switched turns.

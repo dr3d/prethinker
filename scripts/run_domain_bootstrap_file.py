@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 import time
 import urllib.error
@@ -35,6 +36,12 @@ from src.profile_bootstrap import (  # noqa: E402
     profile_bootstrap_predicate_contracts,
     profile_bootstrap_score,
 )
+from src.document_intake_plan import (  # noqa: E402
+    INTAKE_PLAN_JSON_SCHEMA,
+    build_intake_plan_messages,
+    intake_plan_context,
+    parse_intake_plan_json,
+)
 from src.semantic_ir import (  # noqa: E402
     SemanticIRCallConfig,
     call_semantic_ir,
@@ -45,6 +52,17 @@ from src.semantic_ir import (  # noqa: E402
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run LLM-owned profile bootstrap over a raw text file.")
     parser.add_argument("--text-file", type=Path, required=True)
+    parser.add_argument(
+        "--expected-prolog",
+        type=Path,
+        default=None,
+        help="Optional expected Prolog file used for structural signature comparison only.",
+    )
+    parser.add_argument(
+        "--use-expected-signatures-as-guidance",
+        action="store_true",
+        help="Calibration-only mode: include expected Prolog predicate signatures in the LLM profile-bootstrap input.",
+    )
     parser.add_argument("--domain-hint", default="")
     parser.add_argument("--backend", choices=["lmstudio"], default="lmstudio")
     parser.add_argument("--model", default="qwen/qwen3.6-35b-a3b")
@@ -54,13 +72,24 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--temperature", type=float, default=0.0)
     parser.add_argument("--top-p", type=float, default=0.82)
     parser.add_argument("--top-k", type=int, default=20)
-    parser.add_argument("--num-ctx", type=int, default=16384)
+    parser.add_argument("--num-ctx", type=int, default=32768)
     parser.add_argument("--max-tokens", type=int, default=12000)
+    parser.add_argument(
+        "--skip-intake-plan",
+        action="store_true",
+        help="Disable the LLM-owned intake_plan_v1 pre-pass.",
+    )
     parser.add_argument(
         "--compile-source",
         action="store_true",
         help="After profile bootstrap, run the same raw source through Semantic IR using the draft profile.",
     )
+    parser.add_argument(
+        "--compile-plan-passes",
+        action="store_true",
+        help="When an intake plan exists, compile once per LLM-authored pass_plan item instead of one flat source compile.",
+    )
+    parser.add_argument("--max-plan-passes", type=int, default=8)
     parser.add_argument("--include-model-input", action="store_true")
     return parser.parse_args()
 
@@ -69,6 +98,12 @@ def main() -> int:
     args = parse_args()
     text_path = args.text_file if args.text_file.is_absolute() else (REPO_ROOT / args.text_file).resolve()
     source_text = text_path.read_text(encoding="utf-8-sig")
+    expected_path = None
+    expected_signatures: list[str] = []
+    if args.expected_prolog:
+        expected_path = args.expected_prolog if args.expected_prolog.is_absolute() else (REPO_ROOT / args.expected_prolog).resolve()
+        if args.use_expected_signatures_as_guidance:
+            expected_signatures = sorted(_prolog_signatures(expected_path.read_text(encoding="utf-8-sig")))
     sample = {
         "id": text_path.stem,
         "source": str(text_path),
@@ -79,18 +114,85 @@ def main() -> int:
             "The LLM bootstrap pass must propose the candidate predicate/entity surface.",
         ],
     }
+    if expected_signatures:
+        sample["target_prolog_signatures_for_calibration"] = expected_signatures
+        sample["context"].append(
+            "Calibration-only: target_prolog_signatures_for_calibration is a human-supplied expected predicate roster. "
+            "Prefer matching those signatures when they fit the source and profile design."
+        )
+    intake_plan: dict[str, Any] | None = None
+    intake_error = ""
+    intake_latency_ms = 0
+    if not args.skip_intake_plan:
+        intake_started = time.perf_counter()
+        intake_response = _call_lmstudio_json_schema(
+            base_url=str(args.base_url),
+            model=str(args.model),
+            messages=build_intake_plan_messages(
+                source_text=source_text,
+                source_name=text_path.name,
+                domain_hint=str(args.domain_hint or ""),
+            ),
+            schema=INTAKE_PLAN_JSON_SCHEMA,
+            schema_name="intake_plan_v1",
+            timeout=int(args.timeout),
+            temperature=float(args.temperature),
+            top_p=float(args.top_p),
+            max_tokens=min(int(args.max_tokens), 12000),
+        )
+        intake_latency_ms = int((time.perf_counter() - intake_started) * 1000)
+        intake_plan, intake_error = parse_intake_plan_json(str(intake_response.get("content", "")))
+        if isinstance(intake_plan, dict):
+            sample["intake_plan_v1"] = intake_plan
+            sample["context"].append(
+                "The intake_plan_v1 object is an LLM-owned document-to-logic strategy. Use it as planning guidance, not as approved facts."
+            )
     messages = build_profile_bootstrap_messages(samples=[sample], domain_hint=str(args.domain_hint or ""))
     started = time.perf_counter()
     response = _call_lmstudio_json_schema(
         base_url=str(args.base_url),
         model=str(args.model),
         messages=messages,
+        schema=PROFILE_BOOTSTRAP_JSON_SCHEMA,
+        schema_name="profile_bootstrap_v1",
         timeout=int(args.timeout),
         temperature=float(args.temperature),
         top_p=float(args.top_p),
         max_tokens=int(args.max_tokens),
     )
     parsed, error = parse_profile_bootstrap_json(str(response.get("content", "")))
+    profile_retry: dict[str, Any] | None = None
+    if not isinstance(parsed, dict):
+        retry_sample = dict(sample)
+        retry_context = list(sample.get("context", [])) if isinstance(sample.get("context"), list) else []
+        retry_context.append(
+            "Retry after invalid/truncated profile JSON: emit a compact profile with at most 80 unique predicate signatures. "
+            "Do not duplicate synonymous predicate surfaces; choose one canonical predicate for each role."
+        )
+        retry_sample["context"] = retry_context
+        retry_messages = build_profile_bootstrap_messages(samples=[retry_sample], domain_hint=str(args.domain_hint or ""))
+        retry_started = time.perf_counter()
+        retry_response = _call_lmstudio_json_schema(
+            base_url=str(args.base_url),
+            model=str(args.model),
+            messages=retry_messages,
+            schema=PROFILE_BOOTSTRAP_JSON_SCHEMA,
+            schema_name="profile_bootstrap_v1",
+            timeout=int(args.timeout),
+            temperature=float(args.temperature),
+            top_p=float(args.top_p),
+            max_tokens=min(int(args.max_tokens), 18000),
+        )
+        retry_parsed, retry_error = parse_profile_bootstrap_json(str(retry_response.get("content", "")))
+        profile_retry = {
+            "latency_ms": int((time.perf_counter() - retry_started) * 1000),
+            "parsed_ok": isinstance(retry_parsed, dict),
+            "parse_error": retry_error,
+            "raw_content": str(retry_response.get("content", ""))[:20000],
+        }
+        if isinstance(retry_parsed, dict):
+            parsed = retry_parsed
+            error = retry_error
     score = profile_bootstrap_score(parsed)
     record: dict[str, Any] = {
         "ts": _utc_now(),
@@ -105,13 +207,36 @@ def main() -> int:
         "parsed": parsed or {},
         "raw_content": str(response.get("content", ""))[:20000],
     }
+    if profile_retry is not None:
+        record["profile_retry"] = profile_retry
+    if not args.skip_intake_plan:
+        record["intake_plan"] = {
+            "parsed_ok": isinstance(intake_plan, dict),
+            "parse_error": intake_error,
+            "latency_ms": intake_latency_ms,
+            "parsed": intake_plan or {},
+        }
     if args.include_model_input:
         record["model_input"] = {"messages": messages}
-    if bool(args.compile_source) and isinstance(parsed, dict):
+    if bool(args.compile_source) and isinstance(parsed, dict) and bool(args.compile_plan_passes) and isinstance(intake_plan, dict):
+        record["source_compile"] = _compile_source_with_plan_passes(
+            source_text=source_text,
+            parsed_profile=parsed,
+            intake_plan=intake_plan,
+            args=args,
+        )
+    elif bool(args.compile_source) and isinstance(parsed, dict):
         record["source_compile"] = _compile_source_with_draft_profile(
             source_text=source_text,
             parsed_profile=parsed,
+            intake_plan=intake_plan,
             args=args,
+        )
+    if args.expected_prolog:
+        record["expected_prolog"] = _compare_expected_prolog(
+            expected_path=expected_path or (REPO_ROOT / args.expected_prolog).resolve(),
+            parsed_profile=parsed if isinstance(parsed, dict) else {},
+            source_compile=record.get("source_compile") if isinstance(record.get("source_compile"), dict) else {},
         )
 
     out_dir = args.out_dir if args.out_dir.is_absolute() else (REPO_ROOT / args.out_dir).resolve()
@@ -131,6 +256,7 @@ def main() -> int:
                 "candidate_predicates": score.get("predicate_count", 0),
                 "compile_admitted": (record.get("source_compile") or {}).get("admitted_count"),
                 "compile_skipped": (record.get("source_compile") or {}).get("skipped_count"),
+                "expected_signature_recall": (record.get("expected_prolog") or {}).get("signature_recall"),
             },
             ensure_ascii=False,
             sort_keys=True,
@@ -139,7 +265,94 @@ def main() -> int:
     return 0
 
 
-def _compile_source_with_draft_profile(*, source_text: str, parsed_profile: dict[str, Any], args: argparse.Namespace) -> dict[str, Any]:
+def _compare_expected_prolog(
+    *,
+    expected_path: Path,
+    parsed_profile: dict[str, Any],
+    source_compile: dict[str, Any],
+) -> dict[str, Any]:
+    expected_text = expected_path.read_text(encoding="utf-8-sig")
+    expected_signatures = _prolog_signatures(expected_text)
+    profile_signatures = {
+        str(item.get("signature", "")).strip().casefold()
+        for item in parsed_profile.get("candidate_predicates", [])
+        if isinstance(item, dict) and str(item.get("signature", "")).strip()
+    }
+    emitted_text = "\n".join(
+        [
+            *[str(item) for item in source_compile.get("facts", []) if str(item).strip()],
+            *[str(item) for item in source_compile.get("rules", []) if str(item).strip()],
+        ]
+    )
+    emitted_signatures = _prolog_signatures(emitted_text)
+    profile_overlap = sorted(expected_signatures & profile_signatures)
+    overlap = sorted(expected_signatures & emitted_signatures)
+    profile_missing = sorted(expected_signatures - profile_signatures)
+    missing = sorted(expected_signatures - emitted_signatures)
+    extra = sorted(emitted_signatures - expected_signatures)
+    return {
+        "expected_path": str(expected_path),
+        "expected_signature_count": len(expected_signatures),
+        "profile_signature_count": len(profile_signatures),
+        "profile_overlap_signature_count": len(profile_overlap),
+        "profile_signature_recall": round(len(profile_overlap) / max(1, len(expected_signatures)), 3),
+        "emitted_signature_count": len(emitted_signatures),
+        "overlap_signature_count": len(overlap),
+        "signature_recall": round(len(overlap) / max(1, len(expected_signatures)), 3),
+        "signature_precision": round(len(overlap) / max(1, len(emitted_signatures)), 3),
+        "profile_overlap_signatures": profile_overlap,
+        "profile_missing_signatures": profile_missing[:80],
+        "overlap_signatures": overlap,
+        "missing_signatures": missing[:80],
+        "extra_signatures": extra[:80],
+    }
+
+
+def _prolog_signatures(text: str) -> set[str]:
+    signatures: set[str] = set()
+    for raw_line in str(text or "").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("%") or line.startswith(":-"):
+            continue
+        head = line.split(":-", 1)[0].strip()
+        match = re.match(r"^([a-z][a-zA-Z0-9_]*)\s*\((.*)\)", head)
+        if not match:
+            continue
+        signatures.add(f"{match.group(1).casefold()}/{_prolog_arity(match.group(2))}")
+    return signatures
+
+
+def _prolog_arity(args_text: str) -> int:
+    text = str(args_text or "").strip()
+    if not text:
+        return 0
+    depth = 0
+    quote = ""
+    count = 1
+    for char in text:
+        if quote:
+            if char == quote:
+                quote = ""
+            continue
+        if char in ("'", '"'):
+            quote = char
+        elif char == "(":
+            depth += 1
+        elif char == ")":
+            depth = max(0, depth - 1)
+        elif char == "," and depth == 0:
+            count += 1
+    return count
+
+
+def _compile_source_with_draft_profile(
+    *,
+    source_text: str,
+    parsed_profile: dict[str, Any],
+    intake_plan: dict[str, Any] | None,
+    args: argparse.Namespace,
+    extra_context: list[str] | None = None,
+) -> dict[str, Any]:
     allowed_predicates = profile_bootstrap_allowed_predicates(parsed_profile)
     predicate_contracts = profile_bootstrap_predicate_contracts(parsed_profile)
     domain_context = profile_bootstrap_domain_context(parsed_profile)
@@ -156,14 +369,30 @@ def _compile_source_with_draft_profile(*, source_text: str, parsed_profile: dict
         think_enabled=False,
         reasoning_effort="none",
     )
+    plan_context = intake_plan_context(intake_plan)
     try:
         result = call_semantic_ir(
             utterance=source_text,
             config=config,
             context=[
+                *plan_context,
+                *(extra_context or []),
                 "Compile the raw source text using the draft profile proposed by profile_bootstrap_v1.",
+                "Treat intake_plan_v1.pass_plan as the coverage checklist for this compile. Allocate candidate_operations across the planned passes instead of spending the whole operation budget on the first repeated structure you encounter.",
+                "When pass_plan names source boundary, principles/rules, repeated records, final declarations, appeals, or pledges, emit at least one representative safe operation from each supported pass before adding extra repeated-record details.",
+                "Use the breadth of the draft profile. If many allowed predicates are available, prefer a diverse skeleton that exercises distinct source/provenance, entity, claim, rule, repeated-record, declaration, and commitment predicate families over many operations using only one predicate family.",
+                "Avoid predicate canonicalization drift. If the allowed palette contains synonymous prefixed and reusable detail predicates, such as grievance_observation_location/2 and observation_location/2, prefer the reusable detail predicate when its first argument is already the grievance/incident/record id.",
+                "Use one canonical predicate surface consistently for a repeated slot. Do not mix grievance_method/2 with method/2, grievance_effect/2 with effect_claimed/2, or grievance_explanation_given/2 with explanation_given/2 unless their meanings are explicitly different in the profile contract.",
                 "Do not add facts not present in the source text.",
-                "If the whole source contains more safe facts than fit, preserve the highest-signal source-grounded facts and note segment_required_for_complete_ingestion.",
+                "If the whole source contains more safe facts than fit, preserve a balanced document skeleton: source/provenance boundary, core declaration or action, representative repeated records, and concluding commitments. Do not let one repeated list consume the whole candidate_operation budget.",
+                "When a draft profile offers source-attributed claim predicates such as claim_made/3 or source_claim/3, prefer those for normative principles, rights, accusations, character judgments, and legitimacy statements that the source asserts but does not externally prove.",
+                "If both a direct normative predicate and a source-attributed claim predicate are available, use the source-attributed claim predicate for rights, principles, legitimacy, and character judgments unless the direct predicate itself has a source/document argument.",
+                "Do not emit source_priority, override, conflict, or authority-ranking facts unless the source explicitly ranks sources or states an override/conflict policy.",
+                "When a predicate contract names an argument source, source_document, or document, bind that argument to a stable source/document id such as doc_1 or a normalized document id. Do not put the speaker, claimant, or claim subject in a source/document argument.",
+                "For whole-source compilation, hard-cap any single repeated structure at 24 total candidate_operations, counting the record predicate and every property predicate. Do not exceed 6 representative records for any one repeated structure in a whole-source skeleton pass. If the source contains more records, list the omitted structure in self_check rather than emitting more operations.",
+                "Emit source identity, core declaration/conclusion acts, and commitment/pledge operations before representative repeated records. A repeated structure must not crowd out the source boundary or conclusion.",
+                "For a long document skeleton, aim for this mix when the profile supports it: 2-4 source/provenance operations, 2-6 source-attributed principles or rights, 12-24 operations for representative repeated records, 2-6 declaration/conclusion operations, and 2-6 commitment/pledge operations. The exact predicates must still come from the draft profile.",
+                "If complete ingestion requires more operations than the schema cap, write the balanced skeleton and put segment_required_for_complete_ingestion in self_check.missing_slots/notes with the omitted section types.",
             ],
             domain_context=domain_context,
             allowed_predicates=allowed_predicates,
@@ -201,11 +430,87 @@ def _compile_source_with_draft_profile(*, source_text: str, parsed_profile: dict
     }
 
 
+def _compile_source_with_plan_passes(
+    *,
+    source_text: str,
+    parsed_profile: dict[str, Any],
+    intake_plan: dict[str, Any],
+    args: argparse.Namespace,
+) -> dict[str, Any]:
+    pass_plan = intake_plan.get("pass_plan") if isinstance(intake_plan.get("pass_plan"), list) else []
+    pass_records: list[dict[str, Any]] = []
+    unique_facts: list[str] = []
+    unique_rules: list[str] = []
+    unique_queries: list[str] = []
+    seen_facts: set[str] = set()
+    seen_rules: set[str] = set()
+    seen_queries: set[str] = set()
+    max_passes = max(1, int(getattr(args, "max_plan_passes", 8) or 8))
+    for index, item in enumerate(pass_plan[:max_passes]):
+        if not isinstance(item, dict):
+            continue
+        pass_id = str(item.get("pass_id", f"pass_{index + 1}")).strip() or f"pass_{index + 1}"
+        purpose = str(item.get("purpose", "")).strip()
+        focus = str(item.get("focus", "")).strip()
+        completion = str(item.get("completion_policy", "")).strip()
+        predicates = ", ".join(
+            str(row).strip()
+            for row in item.get("recommended_predicates", [])
+            if str(row).strip()
+        ) if isinstance(item.get("recommended_predicates"), list) else ""
+        compiled = _compile_source_with_draft_profile(
+            source_text=source_text,
+            parsed_profile=parsed_profile,
+            intake_plan=intake_plan,
+            args=args,
+            extra_context=[
+                "This is focused plan-pass compilation, not a whole-source gulp.",
+                f"current_intake_pass_id: {pass_id}",
+                f"current_intake_pass_purpose: {purpose}",
+                f"current_intake_pass_focus: {focus}",
+                f"current_intake_pass_completion_policy: {completion}",
+                f"current_intake_pass_recommended_predicates: {predicates}",
+                "For this call, emit only operations that belong to the current intake pass. Defer other source material to its own pass.",
+                "It is better to be complete for this pass than broadly summary-like across the entire source.",
+            ],
+        )
+        compiled["pass_id"] = pass_id
+        compiled["purpose"] = purpose
+        compiled["focus"] = focus
+        pass_records.append(compiled)
+        for target, seen, values in [
+            (unique_facts, seen_facts, compiled.get("facts", [])),
+            (unique_rules, seen_rules, compiled.get("rules", [])),
+            (unique_queries, seen_queries, compiled.get("queries", [])),
+        ]:
+            for value in values if isinstance(values, list) else []:
+                text = str(value).strip()
+                if text and text not in seen:
+                    seen.add(text)
+                    target.append(text)
+    return {
+        "ok": all(bool(item.get("ok")) for item in pass_records) if pass_records else False,
+        "mode": "intake_plan_passes",
+        "pass_count": len(pass_records),
+        "admitted_count": sum(int(item.get("admitted_count", 0) or 0) for item in pass_records),
+        "skipped_count": sum(int(item.get("skipped_count", 0) or 0) for item in pass_records),
+        "unique_fact_count": len(unique_facts),
+        "unique_rule_count": len(unique_rules),
+        "unique_query_count": len(unique_queries),
+        "facts": unique_facts,
+        "rules": unique_rules,
+        "queries": unique_queries,
+        "passes": pass_records,
+    }
+
+
 def _call_lmstudio_json_schema(
     *,
     base_url: str,
     model: str,
     messages: list[dict[str, str]],
+    schema: dict[str, Any],
+    schema_name: str,
     timeout: int,
     temperature: float,
     top_p: float,
@@ -220,9 +525,9 @@ def _call_lmstudio_json_schema(
         "response_format": {
             "type": "json_schema",
             "json_schema": {
-                "name": "profile_bootstrap_v1",
+                "name": schema_name,
                 "strict": True,
-                "schema": PROFILE_BOOTSTRAP_JSON_SCHEMA,
+                "schema": schema,
             },
         },
     }
@@ -266,15 +571,54 @@ def _write_summary(record: dict[str, Any], path: Path) -> None:
         f"- Entity types: `{score.get('entity_type_count', 0)}`",
         f"- Candidate predicates: `{score.get('predicate_count', 0)}`",
         f"- Generic predicates: `{score.get('generic_predicate_count', 0)}`",
+        f"- Repeated structures: `{score.get('repeated_structure_count', 0)}`",
+        f"- Repeated-structure unknown predicate refs: `{score.get('repeated_structure_unknown_predicate_refs', [])}`",
+        f"- Repeated-structure id-only record refs: `{score.get('repeated_structure_id_only_record_refs', [])}`",
+        f"- Repeated-structure role mismatch refs: `{score.get('repeated_structure_role_mismatch_refs', [])}`",
         f"- Frontier unknown positive predicate refs: `{score.get('frontier_unknown_positive_predicate_refs', [])}`",
         "",
-        "## Candidate Predicates",
-        "",
     ]
+    intake = record.get("intake_plan") if isinstance(record.get("intake_plan"), dict) else {}
+    if intake:
+        plan = intake.get("parsed") if isinstance(intake.get("parsed"), dict) else {}
+        boundary = plan.get("source_boundary") if isinstance(plan.get("source_boundary"), dict) else {}
+        lines.extend(
+            [
+                "## Intake Plan",
+                "",
+                f"- Parsed: `{intake.get('parsed_ok', False)}`",
+                f"- Source type: `{boundary.get('source_type', '')}`",
+                f"- Epistemic stance: `{boundary.get('epistemic_stance', '')}`",
+                f"- Passes: `{len(plan.get('pass_plan', [])) if isinstance(plan.get('pass_plan'), list) else 0}`",
+                "",
+            ]
+        )
+        for item in plan.get("pass_plan", []) if isinstance(plan.get("pass_plan"), list) else []:
+            if isinstance(item, dict):
+                lines.append(
+                    f"- `{item.get('pass_id', '')}` {item.get('purpose', '')}: {item.get('focus', '')}"
+                )
+        lines.append("")
+    lines.extend(["## Candidate Predicates", ""])
     for item in parsed.get("candidate_predicates", []) if isinstance(parsed.get("candidate_predicates"), list) else []:
         if isinstance(item, dict):
             lines.append(f"- `{item.get('signature', '')}` args={item.get('args', [])}: {item.get('description', '')}")
     if not lines[-1].startswith("- `"):
+        lines.append("- none")
+    lines.extend(["", "## Repeated Structures", ""])
+    repeated = parsed.get("repeated_structures", []) if isinstance(parsed.get("repeated_structures"), list) else []
+    if repeated:
+        for item in repeated:
+            if not isinstance(item, dict):
+                continue
+            lines.append(
+                f"- `{item.get('name', '')}` record=`{item.get('record_predicate', '')}` "
+                f"properties={item.get('property_predicates', [])}: {item.get('why', '')}"
+            )
+            examples = item.get("example_records", []) if isinstance(item.get("example_records"), list) else []
+            for example in examples[:3]:
+                lines.append(f"  - `{example}`")
+    else:
         lines.append("- none")
     lines.extend(["", "## Admission Risks", ""])
     risks = [str(item).strip() for item in parsed.get("admission_risks", []) if str(item).strip()] if isinstance(parsed.get("admission_risks"), list) else []
@@ -301,6 +645,54 @@ def _write_summary(record: dict[str, Any], path: Path) -> None:
                 "",
                 "```prolog",
                 *[str(item) for item in compile_record.get("rules", [])],
+                "```",
+            ]
+        )
+    expected = record.get("expected_prolog") if isinstance(record.get("expected_prolog"), dict) else {}
+    if expected:
+        lines.extend(
+            [
+                "",
+                "## Expected Prolog Signature Comparison",
+                "",
+                f"- Expected: `{expected.get('expected_path', '')}`",
+                f"- Expected signatures: `{expected.get('expected_signature_count', 0)}`",
+                f"- Profile candidate signatures: `{expected.get('profile_signature_count', 0)}`",
+                f"- Profile overlap signatures: `{expected.get('profile_overlap_signature_count', 0)}`",
+                f"- Profile signature recall: `{expected.get('profile_signature_recall', 0.0)}`",
+                f"- Emitted signatures: `{expected.get('emitted_signature_count', 0)}`",
+                f"- Overlap signatures: `{expected.get('overlap_signature_count', 0)}`",
+                f"- Signature recall: `{expected.get('signature_recall', 0.0)}`",
+                f"- Signature precision: `{expected.get('signature_precision', 0.0)}`",
+                "",
+                "### Overlap",
+                "",
+                "```text",
+                "\n".join(expected.get("overlap_signatures", [])),
+                "```",
+                "",
+                "### Profile Overlap",
+                "",
+                "```text",
+                "\n".join(expected.get("profile_overlap_signatures", [])),
+                "```",
+                "",
+                "### Missing From Profile",
+                "",
+                "```text",
+                "\n".join(expected.get("profile_missing_signatures", [])),
+                "```",
+                "",
+                "### Missing From Emitted",
+                "",
+                "```text",
+                "\n".join(expected.get("missing_signatures", [])),
+                "```",
+                "",
+                "### Extra In Emitted",
+                "",
+                "```text",
+                "\n".join(expected.get("extra_signatures", [])),
                 "```",
             ]
         )

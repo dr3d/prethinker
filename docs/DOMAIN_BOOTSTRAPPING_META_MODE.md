@@ -1,6 +1,6 @@
 # Domain Bootstrapping Meta-Mode
 
-Last updated: 2026-04-27
+Last updated: 2026-04-29
 
 This note records a frontier idea: Prethinker should eventually help discover
 the predicate palette for a domain it does not already know.
@@ -208,6 +208,22 @@ A future `profile_bootstrap_v1` output could look like:
       "why": "The domain distinguishes observed issues from completed repairs."
     }
   ],
+  "repeated_structures": [
+    {
+      "name": "inspection finding list",
+      "why": "The source records multiple findings with shared actor, target, issue, and status shape.",
+      "id_strategy": "finding_1, finding_2, ... per source record",
+      "record_predicate": "finding/2",
+      "property_predicates": ["finding_actor/2", "finding_target/2", "finding_status/2"],
+      "example_records": [
+        "finding(finding_1, loose_guardrail).",
+        "finding_actor(finding_1, march_safety_walkthrough)."
+      ],
+      "admission_notes": [
+        "A finding id is a source-record id, not proof that an unrelated source confirmed the issue."
+      ]
+    }
+  ],
   "admission_risks": [
     "A worker report is not the same as an inspection finding.",
     "A scheduled repair is not a completed repair.",
@@ -228,6 +244,180 @@ A future `profile_bootstrap_v1` output could look like:
 
 This object is profile-design material. It should not be mapped directly into
 the Prolog KB.
+
+## Expected-Prolog Calibration
+
+For research calibration, `scripts/run_domain_bootstrap_file.py` can compare a
+raw-file bootstrap run against a human-supplied expected Prolog file:
+
+```powershell
+python scripts\run_domain_bootstrap_file.py `
+  --text-file tmp\proclamation.md `
+  --expected-prolog tmp\proclamation.pl `
+  --domain-hint recall_proclamation `
+  --backend lmstudio `
+  --model qwen/qwen3.6-35b-a3b `
+  --compile-source
+```
+
+That comparison is structural. Python extracts predicate signatures from the
+expected Prolog and from the emitted facts/rules; it does not inspect the raw
+English source to invent predicates.
+
+There is also a calibration-only mode:
+
+```powershell
+python scripts\run_domain_bootstrap_file.py `
+  --text-file tmp\proclamation.md `
+  --expected-prolog tmp\proclamation.pl `
+  --use-expected-signatures-as-guidance `
+  --domain-hint recall_proclamation `
+  --backend lmstudio `
+  --model qwen/qwen3.6-35b-a3b `
+  --compile-source
+```
+
+This gives the model the human-supplied predicate signature roster as an
+ontology reference. It is useful for learning whether the LLM can align to a
+target Prolog style, but it should not be mistaken for open-domain autonomous
+profile discovery.
+
+Current lesson from the Declaration and Proclamation targets:
+
+- With target-signature guidance, profile discovery can get close to a supplied
+  ontology surface.
+- One-shot Semantic IR compilation still hits the operation cap on long,
+  information-dense documents.
+- The clean architecture move is now LLM-owned intake planning: the model
+  chooses follow-up passes such as source metadata, entity taxonomy,
+  principles/rules, grievance records, declarations/policies, and pledges.
+- Python should continue to validate schemas, compare signatures, and carry
+  context between stages; it should not decide where the English document
+  should be semantically split.
+
+## LLM-Owned Intake Plan
+
+The raw-file runner now has an explicit `intake_plan_v1` pre-pass. This is the
+visible version of the move a capable Codex-like model makes implicitly before
+writing Prolog:
+
+```text
+raw source document
+  -> intake_plan_v1
+       source boundary
+       epistemic stance
+       symbolic strategy
+       entity strategy
+       predicate-family strategy
+       pass plan
+       risk policy
+  -> profile_bootstrap_v1
+  -> semantic_ir_v1 compile
+  -> deterministic mapper/admission
+```
+
+The intake plan is not truth, not Prolog, and not a KB mutation. It is a
+control-plane object: a structured model proposal for how the later compiler
+should approach the source.
+
+This matters because the desired behavior is not "extract every noun and verb."
+It is:
+
+```text
+understand source type
+preserve epistemic boundary
+choose predicate families
+allocate dense material across focused passes
+then let deterministic admission decide what can become durable state
+```
+
+Python does not inspect the document to decide those passes. It only carries
+the model-authored pass plan forward.
+
+## Plan-Pass Compilation
+
+Long source documents are now compilable in two modes:
+
+- one flat source compile;
+- `--compile-plan-passes`, which runs one Semantic IR compile per
+  LLM-authored `intake_plan_v1.pass_plan` item.
+
+Plan-pass compilation is closer to the way a human or Codex-like model handles a
+dense document: first source boundary, then principles/rules, then repeated
+records, then final declarations/pledges, instead of one overstuffed pass where
+the first repeated list consumes the operation budget.
+
+Example:
+
+```powershell
+python scripts\run_domain_bootstrap_file.py `
+  --text-file tmp\declaration.md `
+  --expected-prolog tmp\declaration.pl `
+  --use-expected-signatures-as-guidance `
+  --domain-hint declaration_style_document `
+  --backend lmstudio `
+  --model qwen/qwen3.6-35b-a3b `
+  --compile-source `
+  --compile-plan-passes
+```
+
+Recent calibration results:
+
+```text
+Declaration, one flat compile:
+  emitted signature recall: 0.159
+  admitted operations: 128
+
+Declaration, intake-plan pass compilation:
+  emitted signature recall: 0.623
+  admitted operations: 234
+
+Proclamation, first plan-pass compile after canonicalization pressure:
+  emitted signature recall: 0.402
+  profile signature recall: 0.795
+  admitted operations: 302
+```
+
+These numbers are calibration against human-authored Prolog style, not product
+claims. In the product there is no expected Prolog answer key. The useful lesson
+is architectural: LLM-owned planning plus focused passes gives the compiler
+more of the same leverage Codex used manually, without Python doing NLP.
+
+The remaining hard edge is predicate canonicalization drift. The model may
+understand the document but offer competing surfaces such as
+`grievance_observation_location/2` and `observation_location/2`, then compile
+with a different surface than the human target. That should be solved by
+profile guidance, schema pressure, and review loops, not by a Python synonym
+rewriter over the raw utterance.
+
+## Repeated Structure Contract
+
+The current `profile_bootstrap_v1` contract now includes `repeated_structures`.
+This is the first explicit attempt to capture the "Declaration of Independence"
+style move that a capable LLM makes when it notices a list of recurring
+accusations, grievances, commitments, obligations, incidents, or docket entries.
+
+The model should not merely propose:
+
+```prolog
+grievance(Source, withheld_assent).
+grievance(Source, obstructed_migration).
+```
+
+when the source naturally supports a richer record family:
+
+```prolog
+grievance(g1, withheld_assent_to_laws).
+grievance_actor(g1, central_authority).
+grievance_target(g1, colonies).
+purpose(g1, obstruct_governance).
+```
+
+This does not mean Python has learned the word "grievance." The LLM proposes
+the record family, ids, and property predicates inside a strict JSON workspace.
+Python only checks structural consistency: the predicates named in
+`repeated_structures` must also appear in `candidate_predicates` with exact
+arities before the draft profile is considered internally coherent.
 
 ## Modes
 
@@ -427,18 +617,83 @@ python scripts/run_domain_bootstrap_file.py `
 This runner is deliberately strict about the "no Python NLP" boundary:
 
 - Python reads the file bytes/text.
+- If enabled, the LLM emits `intake_plan_v1` to describe source boundary,
+  strategy, and focused follow-up passes.
 - Python passes the raw source as one sample to `profile_bootstrap_v1`.
 - The LLM proposes entity types, predicates, contracts, risks, and starter
   cases.
 - If `--compile-source` is enabled, the same raw source is passed to
   `semantic_ir_v1` with that draft predicate surface.
+- If `--compile-plan-passes` is enabled, Python iterates over the
+  LLM-authored pass plan and asks Semantic IR to compile each focused pass.
 - Python validates/admission-scores the output, but does not segment,
   summarize, classify, or derive predicates from the source language.
 
 The first expected limitation is operation-cap pressure: a long document may
 contain more safe facts than one Semantic IR response can carry. The right
-future repair is an LLM-produced intake plan or segmentation plan, not a Python
-sentence splitter that makes semantic choices.
+repair is the current LLM-produced intake plan, not a Python sentence splitter
+that makes semantic choices.
+
+## Post-Ingestion QA Probes
+
+Question batteries such as `tmp/proclamation-qa.md` belong after source
+ingestion. They should not steer `profile_bootstrap_v1` or
+`intake_plan_v1`; otherwise the test questions become hidden training context
+for the compiler.
+
+The post-ingestion shape is:
+
+```text
+raw source
+  -> intake/profile/compile
+  -> admitted facts/rules in local KB
+  -> QA prompts
+  -> semantic_ir_v1 query/probe workspace
+  -> deterministic mapper
+  -> Prolog query rows / proposed-write diagnostics
+  -> optional oracle scoring
+```
+
+The runner is:
+
+```powershell
+python scripts\run_domain_bootstrap_qa.py `
+  --run-json tmp\domain_bootstrap_file\<run>.json `
+  --qa-file tmp\proclamation-qa.md `
+  --model qwen/qwen3.6-35b-a3b
+```
+
+Without an answer key, this produces a diagnostic transcript: what queries the
+model proposed, what the KB returned, and whether any QA prompt accidentally
+looked like a write. If the markdown contains a section titled `Answers`, those
+answers are copied into the diagnostic rows as human reference answers. They do
+not feed ingestion and they are not treated as automatic pass/fail expectations.
+
+The QA pass also gives the model the compiled KB surface:
+
+- actual predicate signatures found in admitted facts/rules;
+- representative clauses for those predicates;
+- source fact/rule counts.
+
+That is context engineering, not Python NLP. Python is not deriving meaning
+from the question text; it is telling the model which Prolog surface actually
+exists so the model can ask useful KB queries.
+
+With an oracle JSONL, the runner can score exact structural expectations.
+
+An oracle row can be as small as:
+
+```json
+{"id":"q001","expected_decision":"answer","expected_query_predicates":["declares_recalled"],"expected_answer_contains":["batch_p_44"]}
+```
+
+This keeps the boundary clean:
+
+- the proclamation source creates the KB;
+- the QA file probes the KB;
+- the answer key scores the probe;
+- Python parses the markdown numbering and JSONL oracle, but does not derive
+  semantic answers from the question text.
 
 ## First Closed Loop
 

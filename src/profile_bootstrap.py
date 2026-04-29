@@ -27,6 +27,17 @@ PROFILE_BOOTSTRAP_CONTRACT: dict[str, Any] = {
             "admission_notes": [""],
         }
     ],
+    "repeated_structures": [
+        {
+            "name": "",
+            "why": "",
+            "id_strategy": "",
+            "record_predicate": "predicate_name/2",
+            "property_predicates": ["property_predicate/2"],
+            "example_records": ["predicate_name(id_1, normalized_label)."],
+            "admission_notes": [""],
+        }
+    ],
     "likely_functional_predicates": [""],
     "provenance_sensitive_predicates": [""],
     "admission_risks": [""],
@@ -57,6 +68,7 @@ PROFILE_BOOTSTRAP_JSON_SCHEMA: dict[str, Any] = {
         "source_summary",
         "entity_types",
         "candidate_predicates",
+        "repeated_structures",
         "likely_functional_predicates",
         "provenance_sensitive_predicates",
         "admission_risks",
@@ -70,9 +82,10 @@ PROFILE_BOOTSTRAP_JSON_SCHEMA: dict[str, Any] = {
         "domain_guess": {"type": "string"},
         "domain_scope": {"type": "string"},
         "confidence": {"type": "number"},
-        "source_summary": {"type": "array", "items": {"type": "string"}},
+        "source_summary": {"type": "array", "maxItems": 4, "items": {"type": "string"}},
         "entity_types": {
             "type": "array",
+            "maxItems": 8,
             "items": {
                 "type": "object",
                 "additionalProperties": False,
@@ -80,32 +93,60 @@ PROFILE_BOOTSTRAP_JSON_SCHEMA: dict[str, Any] = {
                 "properties": {
                     "name": {"type": "string"},
                     "description": {"type": "string"},
-                    "examples": {"type": "array", "items": {"type": "string"}},
+                    "examples": {"type": "array", "maxItems": 12, "items": {"type": "string"}},
                 },
             },
         },
         "candidate_predicates": {
             "type": "array",
+            "maxItems": 140,
             "items": {
                 "type": "object",
                 "additionalProperties": False,
                 "required": ["signature", "args", "description", "why", "admission_notes"],
                 "properties": {
                     "signature": {"type": "string"},
-                    "args": {"type": "array", "items": {"type": "string"}},
+                    "args": {"type": "array", "maxItems": 5, "items": {"type": "string"}},
                     "description": {"type": "string"},
                     "why": {"type": "string"},
-                    "admission_notes": {"type": "array", "items": {"type": "string"}},
+                    "admission_notes": {"type": "array", "maxItems": 4, "items": {"type": "string"}},
                 },
             },
         },
-        "likely_functional_predicates": {"type": "array", "items": {"type": "string"}},
-        "provenance_sensitive_predicates": {"type": "array", "items": {"type": "string"}},
-        "admission_risks": {"type": "array", "items": {"type": "string"}},
-        "clarification_policy": {"type": "array", "items": {"type": "string"}},
-        "unsafe_transformations": {"type": "array", "items": {"type": "string"}},
+        "repeated_structures": {
+            "type": "array",
+            "maxItems": 5,
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": [
+                    "name",
+                    "why",
+                    "id_strategy",
+                    "record_predicate",
+                    "property_predicates",
+                    "example_records",
+                    "admission_notes",
+                ],
+                "properties": {
+                    "name": {"type": "string"},
+                    "why": {"type": "string"},
+                    "id_strategy": {"type": "string"},
+                    "record_predicate": {"type": "string"},
+                    "property_predicates": {"type": "array", "maxItems": 48, "items": {"type": "string"}},
+                    "example_records": {"type": "array", "maxItems": 8, "items": {"type": "string"}},
+                    "admission_notes": {"type": "array", "maxItems": 4, "items": {"type": "string"}},
+                },
+            },
+        },
+        "likely_functional_predicates": {"type": "array", "maxItems": 24, "items": {"type": "string"}},
+        "provenance_sensitive_predicates": {"type": "array", "maxItems": 32, "items": {"type": "string"}},
+        "admission_risks": {"type": "array", "maxItems": 8, "items": {"type": "string"}},
+        "clarification_policy": {"type": "array", "maxItems": 8, "items": {"type": "string"}},
+        "unsafe_transformations": {"type": "array", "maxItems": 8, "items": {"type": "string"}},
         "starter_frontier_cases": {
             "type": "array",
+            "maxItems": 8,
             "items": {
                 "type": "object",
                 "additionalProperties": False,
@@ -113,7 +154,7 @@ PROFILE_BOOTSTRAP_JSON_SCHEMA: dict[str, Any] = {
                 "properties": {
                     "utterance": {"type": "string"},
                     "expected_boundary": {"type": "string"},
-                    "must_not_write": {"type": "array", "items": {"type": "string"}},
+                    "must_not_write": {"type": "array", "maxItems": 8, "items": {"type": "string"}},
                 },
             },
         },
@@ -123,7 +164,7 @@ PROFILE_BOOTSTRAP_JSON_SCHEMA: dict[str, Any] = {
             "required": ["profile_authority", "notes"],
             "properties": {
                 "profile_authority": {"type": "string", "const": "proposal_only"},
-                "notes": {"type": "array", "items": {"type": "string"}},
+                "notes": {"type": "array", "maxItems": 8, "items": {"type": "string"}},
             },
         },
     },
@@ -134,19 +175,39 @@ PROFILE_BOOTSTRAP_SYSTEM = (
     "You propose profile_bootstrap_v1 JSON for Prethinker domain-profile design. "
     "You are not extracting durable facts and you are not authorizing KB writes. "
     "Infer a compact predicate/entity surface from representative text, preserving "
-    "claim/fact, obligation/fact, condition/event, provenance, and ambiguity boundaries."
+    "claim/fact, obligation/fact, condition/event, provenance, and ambiguity boundaries. "
+    "candidate_predicates is the authoritative proposed vocabulary; every predicate signature "
+    "named in repeated_structures or positive starter expectations must appear there exactly."
 )
 
 
 PROFILE_BOOTSTRAP_GUIDANCE = (
     "Task:\n"
     "- Analyze the sample texts as a possible domain profile seed.\n"
+    "- Keep the profile compact. Do not enumerate the full corpus inside profile_bootstrap_v1. Use representative "
+    "examples to design the predicate surface; complete ingestion belongs to later semantic_ir_v1 passes.\n"
+    "- If a sample includes target_prolog_signatures_for_calibration, treat that as a human-supplied ontology reference "
+    "for this calibration run. Prefer matching those signatures when they fit the source and preserve the epistemic "
+    "boundary, but do not invent writes or claim the profile is approved.\n"
     "- Use a document-to-logic compiler strategy, not a pure noun/verb extraction strategy. "
     "Extract terms only when they help preserve who said what, what role it has, whether it is durable, "
     "and whether it can support later reasoning.\n"
     "- First establish the source boundary. Decide whether the sample is a document, testimony, fictional source, "
     "policy, court record, medical note, contract, or other source class. Most source text is not neutral world fact; "
     "it may be document claim, allegation, grievance, rule, pledge, obligation, or declaration act.\n"
+    "- If the source boundary matters, propose explicit source/provenance predicates rather than only domain facts. "
+    "For document-like sources, consider document/1, document_type/2, source_document/2, issued_by/2, claim_made/3, "
+    "source_claim/3, or a domain-specific equivalent. Source claims and normative principles should usually be "
+    "represented as claims made by a source, not as direct objective facts. Avoid direct predicates such as "
+    "asserts_right/2 when claim_made(Source, Subject, ClaimLabel) or source_claim(Source, Subject, ClaimLabel) "
+    "would better preserve the epistemic boundary.\n"
+    "- For document-like sources, include a source-attributed claim predicate such as claim_made/3 or source_claim/3 "
+    "unless the proposed domain-specific claim predicates already include a source/document argument. Normative "
+    "principles, rights, accusations, character judgments, and legitimacy statements should be source-attributed "
+    "when they are not externally verified facts.\n"
+    "- If you propose source-attributed predicates whose first argument is source or source_document, also propose "
+    "at least one source identity predicate such as document_type/2, source_document/2, or issued_by/2 so later "
+    "Semantic IR compilation has a concrete source id to cite.\n"
     "- Identify stable recurring entities only when they are role-bearing, acted upon, acting on others, sources of "
     "authority, documents, groups, ambiguity targets, or needed for later rules/queries. Do not turn every noun phrase "
     "into an entity.\n"
@@ -158,6 +219,56 @@ PROFILE_BOOTSTRAP_GUIDANCE = (
     "findings, docket entries, commitments, or obligations, consider stable ids plus role/property predicates such as "
     "grievance/2, grievance_actor/2, grievance_target/2, method/2, purpose/2, effect_claimed/2, without_consent/2, "
     "rather than inventing one verb predicate for every surface sentence.\n"
+    "- Use repeated_structures whenever the source has a list-like family of source claims, grievances, incidents, "
+    "obligations, commitments, docket entries, findings, conditions, or similar records. Name the record predicate, "
+    "the id strategy, and the property predicates that make each record queryable. Include those record/property "
+    "predicates in candidate_predicates with exact arities and argument roles. For a Declaration-style grievance list, "
+    "prefer a shape like grievance/2 plus grievance_actor/2, grievance_target/2, method/2, purpose/2, effect_claimed/2, "
+    "and without_consent/2 when the source supports those properties.\n"
+    "- repeated_structures is not a separate hidden vocabulary. Every record_predicate and every property_predicate "
+    "listed there must exactly match a signature in candidate_predicates. If the candidate vocabulary uses "
+    "asserts_grievance/2, the repeated-structure record must also be asserts_grievance/2; do not introduce "
+    "grievance/2 only inside repeated_structures. If you want grievance/2, add grievance/2 to candidate_predicates.\n"
+    "- Self-check this especially hard: before finalizing, copy every repeated_structures[].record_predicate and every "
+    "repeated_structures[].property_predicates item into candidate_predicates if it is missing. Do not rely on examples "
+    "or prose to define a predicate.\n"
+    "- A repeated-structure record predicate should normally carry both the stable id and the normalized record label, "
+    "for example grievance(grievance_1, refusal_of_assent_to_updates), docket_entry(entry_17, motion_filed), "
+    "or obligation(obligation_3, deliver_reports). Avoid id-only markers such as grievance/1 unless the record has no "
+    "meaningful normalized type or content label. If you choose an id-only marker, explain why in admission_notes.\n"
+    "- Property predicates inside repeated_structures should use argument roles that match record-property use. "
+    "For example, if denies_right/2 is listed as a grievance property, its first argument role should be grievance_id, "
+    "not denier. If you need both shapes, propose distinct predicates such as denies_right/2 and grievance_denies_right/2.\n"
+    "- For high-fidelity document-to-Prolog profiles, do not collapse all record details into generic target/method/effect "
+    "fields when the source has useful structured slots. If the text repeatedly names affected items, people, roles, "
+    "locations, quantities, measurements, temperatures, ledgers, explanations, rules violated, or identity candidates, "
+    "propose domain-specific detail predicates such as affected_item/2, affected_group/2, observation_location/2, "
+    "observation_time/2, certified_temperature/2, observed_temperature/2, measurement_device/2, quantity/2, "
+    "ledger_entry/2, conflict_between_ledgers/3, violated_rule/2, explanation_given/2, ambiguous_alias/1, and "
+    "candidate_identity/2 when those slots are useful for later queries.\n"
+    "- Prefer reusable detail predicates keyed by the record id over over-prefixed one-off names. For example, prefer "
+    "affected_item(GrievanceId, Item), observation_location(GrievanceId, Place), quantity(GrievanceId, Quantity), "
+    "and explanation_given(GrievanceId, Explanation) over grievance_affected_item/2, grievance_observation_location/2, "
+    "or grievance_quantity/2 unless the unprefixed predicate would be ambiguous in the profile.\n"
+    "- Do not propose duplicate synonymous predicate surfaces such as observation_location/2 and "
+    "grievance_observation_location/2 for the same argument roles. Choose one canonical family and use it consistently "
+    "in candidate_predicates, repeated_structures, and starter cases. Prefer the shorter reusable detail predicate when "
+    "its first argument is already a record id.\n"
+    "- In calibration runs, if a human-supplied target signature roster contains a reusable detail predicate such as "
+    "method/2, purpose/2, affected_item/2, observation_location/2, observed_temperature/2, or explanation_given/2, "
+    "prefer that canonical surface over inventing a prefixed duplicate for the same role.\n"
+    "- Also consider simple unary entity-class predicates when they make the domain queryable: document/1, batch/1, "
+    "food_item/1, container/1, equipment/1, ledger/1, institution/1, place/1, role/1, person/1, group/1, organization/1, "
+    "authority/1, and similar profile-specific classes. These are profile candidates only; admission still requires "
+    "direct source support.\n"
+    "- Prefer exact domain predicates for formal conclusions and policies. If the source declares items recalled or "
+    "impounded, predicates such as declares_recalled/2, declares_impounded/2, not_fit_for_public_serving_until/2, "
+    "declared_policy/2, requires_completion/2, requires_review/2, or prohibits_serving_before/3 are often more "
+    "queryable than a generic remedial_declaration/2 wrapper.\n"
+    "- For proclamation-like or compliance-like documents, consider separate predicate families for source metadata, "
+    "entity taxonomy, principles, rules, source claims, detailed grievance/event records, warnings/appeals, recall or "
+    "remedy declarations, final policies, pledges, and test/admission rules. Do not put all of those jobs into one "
+    "generic source_claim or grievance_method field.\n"
     "- Preserve speech-act/provenance. Use candidate predicates that distinguish claim, allegation, grievance, finding, "
     "source record, declaration act, and objective state when the domain needs that distinction.\n"
     "- Prefer predicate surfaces that make later questions natural: Can I query it? infer from it? prevent a bad write? "
@@ -295,6 +406,10 @@ def profile_bootstrap_score(parsed: dict[str, Any] | None) -> dict[str, Any]:
             "frontier_case_count": 0,
             "frontier_unknown_positive_predicate_count": 0,
             "frontier_unknown_positive_predicate_refs": [],
+            "repeated_structure_count": 0,
+            "repeated_structure_unknown_predicate_refs": [],
+            "repeated_structure_id_only_record_refs": [],
+            "repeated_structure_role_mismatch_refs": [],
             "rough_score": 0.0,
         }
     schema_ok = parsed.get("schema_version") == "profile_bootstrap_v1"
@@ -303,11 +418,19 @@ def profile_bootstrap_score(parsed: dict[str, Any] | None) -> dict[str, Any]:
     predicate_count = len(predicates)
     generic_names = {"event_occurred", "policy_constraint", "candidate_relation", "related_to", "has_relation"}
     generic_predicate_count = 0
+    predicate_args_by_signature: dict[str, list[str]] = {}
     for item in predicates:
         signature = str(item.get("signature", ""))
         name = signature.split("/", 1)[0].strip().casefold()
         if name in generic_names:
             generic_predicate_count += 1
+        signature_key = _signature_key(signature)
+        if signature_key:
+            predicate_args_by_signature[signature_key] = [
+                str(arg).strip().casefold()
+                for arg in item.get("args", [])
+                if isinstance(item.get("args"), list) and str(arg).strip()
+            ]
     proposed_signatures = {_signature_key(str(item.get("signature", ""))) for item in predicates}
     proposed_signatures.discard("")
     risk_count = len([item for item in parsed.get("admission_risks", []) if str(item).strip()])
@@ -320,8 +443,33 @@ def profile_bootstrap_score(parsed: dict[str, Any] | None) -> dict[str, Any]:
             if ref not in proposed_signatures:
                 unknown_frontier_refs.append(ref)
     unknown_frontier_refs = sorted(set(unknown_frontier_refs))
+    repeated_structures = [item for item in parsed.get("repeated_structures", []) if isinstance(item, dict)]
+    repeated_unknown_refs: list[str] = []
+    repeated_id_only_record_refs: list[str] = []
+    repeated_role_mismatch_refs: list[str] = []
+    for item in repeated_structures:
+        property_predicates = item.get("property_predicates", [])
+        if not isinstance(property_predicates, list):
+            property_predicates = []
+        record_signature = _signature_key(str(item.get("record_predicate", "")))
+        if record_signature.endswith("/1"):
+            repeated_id_only_record_refs.append(record_signature)
+        for ref in [str(item.get("record_predicate", "")), *property_predicates]:
+            signature = _signature_key(str(ref))
+            if signature and signature not in proposed_signatures:
+                repeated_unknown_refs.append(signature)
+            if signature and signature in proposed_signatures and signature != record_signature:
+                args = predicate_args_by_signature.get(signature, [])
+                first_arg = args[0] if args else ""
+                if first_arg and "id" not in first_arg and "record" not in first_arg:
+                    repeated_role_mismatch_refs.append(signature)
+    repeated_unknown_refs = sorted(set(repeated_unknown_refs))
+    repeated_id_only_record_refs = sorted(set(repeated_id_only_record_refs))
+    repeated_role_mismatch_refs = sorted(set(repeated_role_mismatch_refs))
     specificity_score = 1.0 - min(generic_predicate_count, max(1, predicate_count)) / max(1, predicate_count)
     frontier_consistency = 1.0 if not unknown_frontier_refs else 0.0
+    repeated_structure_score = min(len(repeated_structures), 2) / 2
+    repeated_consistency = 1.0 if not (repeated_unknown_refs or repeated_id_only_record_refs or repeated_role_mismatch_refs) else 0.0
     rough_score = (
         (1 if schema_ok else 0)
         + min(entity_count, 4) / 4
@@ -330,7 +478,9 @@ def profile_bootstrap_score(parsed: dict[str, Any] | None) -> dict[str, Any]:
         + min(frontier_count, 3) / 3
         + specificity_score
         + frontier_consistency
-    ) / 7
+        + repeated_structure_score
+        + repeated_consistency
+    ) / 9
     return {
         "schema_ok": schema_ok,
         "entity_type_count": entity_count,
@@ -338,6 +488,10 @@ def profile_bootstrap_score(parsed: dict[str, Any] | None) -> dict[str, Any]:
         "generic_predicate_count": generic_predicate_count,
         "frontier_unknown_positive_predicate_count": len(unknown_frontier_refs),
         "frontier_unknown_positive_predicate_refs": unknown_frontier_refs,
+        "repeated_structure_count": len(repeated_structures),
+        "repeated_structure_unknown_predicate_refs": repeated_unknown_refs,
+        "repeated_structure_id_only_record_refs": repeated_id_only_record_refs,
+        "repeated_structure_role_mismatch_refs": repeated_role_mismatch_refs,
         "risk_count": risk_count,
         "frontier_case_count": frontier_count,
         "rough_score": round(float(rough_score), 3),
@@ -351,11 +505,13 @@ def profile_bootstrap_allowed_predicates(parsed: dict[str, Any] | None) -> list[
     if not isinstance(predicates, list):
         return []
     out: list[str] = []
+    seen: set[str] = set()
     for item in predicates:
         if not isinstance(item, dict):
             continue
         signature = _signature_key(str(item.get("signature", "")))
-        if signature:
+        if signature and signature not in seen:
+            seen.add(signature)
             out.append(signature)
     return out
 
@@ -367,12 +523,16 @@ def profile_bootstrap_predicate_contracts(parsed: dict[str, Any] | None) -> list
     if not isinstance(predicates, list):
         return []
     contracts: list[dict[str, Any]] = []
+    seen: set[str] = set()
     for item in predicates:
         if not isinstance(item, dict):
             continue
         signature = _signature_key(str(item.get("signature", "")))
         if not signature:
             continue
+        if signature in seen:
+            continue
+        seen.add(signature)
         contract: dict[str, Any] = {
             "signature": signature,
             "arguments": [str(arg).strip() for arg in item.get("args", []) if str(arg).strip()]
@@ -412,6 +572,14 @@ def profile_bootstrap_domain_context(parsed: dict[str, Any] | None) -> list[str]
         text = str(policy).strip()
         if text:
             context.append(f"clarification_policy: {text}")
+    for item in parsed.get("repeated_structures", []) if isinstance(parsed.get("repeated_structures"), list) else []:
+        if not isinstance(item, dict):
+            continue
+        name = str(item.get("name", "")).strip()
+        record = str(item.get("record_predicate", "")).strip()
+        props = ", ".join(str(ref).strip() for ref in item.get("property_predicates", []) if str(ref).strip()) if isinstance(item.get("property_predicates"), list) else ""
+        if name or record or props:
+            context.append(f"repeated_structure: {name}; record={record}; properties={props}")
     for transform in parsed.get("unsafe_transformations", []) if isinstance(parsed.get("unsafe_transformations"), list) else []:
         text = str(transform).strip()
         if text:

@@ -180,6 +180,7 @@ def write_summary(record: dict[str, Any], path: Path) -> None:
     parsed = record.get("parsed") if isinstance(record.get("parsed"), dict) else {}
     score = record.get("score") if isinstance(record.get("score"), dict) else {}
     predicates = parsed.get("candidate_predicates", []) if isinstance(parsed, dict) else []
+    repeated = parsed.get("repeated_structures", []) if isinstance(parsed, dict) else []
     risks = parsed.get("admission_risks", []) if isinstance(parsed, dict) else []
     frontier = parsed.get("starter_frontier_cases", []) if isinstance(parsed, dict) else []
     lines = [
@@ -195,6 +196,10 @@ def write_summary(record: dict[str, Any], path: Path) -> None:
         f"- Entity types: `{score.get('entity_type_count', 0)}`",
         f"- Candidate predicates: `{score.get('predicate_count', 0)}`",
         f"- Generic predicate count: `{score.get('generic_predicate_count', 0)}`",
+        f"- Repeated structures: `{score.get('repeated_structure_count', 0)}`",
+        f"- Repeated-structure unknown predicate refs: `{score.get('repeated_structure_unknown_predicate_refs', [])}`",
+        f"- Repeated-structure id-only record refs: `{score.get('repeated_structure_id_only_record_refs', [])}`",
+        f"- Repeated-structure role mismatch refs: `{score.get('repeated_structure_role_mismatch_refs', [])}`",
         f"- Frontier unknown positive predicate count: `{score.get('frontier_unknown_positive_predicate_count', 0)}`",
         f"- Frontier unknown positive predicate refs: `{score.get('frontier_unknown_positive_predicate_refs', [])}`",
         f"- Admission risks: `{score.get('risk_count', 0)}`",
@@ -210,6 +215,20 @@ def write_summary(record: dict[str, Any], path: Path) -> None:
             lines.append(
                 f"- `{item.get('signature', '')}` args={item.get('args', [])}: {item.get('description', '')}"
             )
+    else:
+        lines.append("- none")
+    lines.extend(["", "## Repeated Structures", ""])
+    if repeated:
+        for item in repeated:
+            if not isinstance(item, dict):
+                continue
+            lines.append(
+                f"- `{item.get('name', '')}` record=`{item.get('record_predicate', '')}` "
+                f"properties={item.get('property_predicates', [])}: {item.get('why', '')}"
+            )
+            examples = item.get("example_records", []) if isinstance(item.get("example_records"), list) else []
+            for example in examples[:3]:
+                lines.append(f"  - `{example}`")
     else:
         lines.append("- none")
     lines.extend(["", "## Admission Risks", ""])

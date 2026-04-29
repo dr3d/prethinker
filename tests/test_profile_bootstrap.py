@@ -40,9 +40,13 @@ class ProfileBootstrapTests(unittest.TestCase):
         self.assertEqual(PROFILE_BOOTSTRAP_JSON_SCHEMA["type"], "object")
         self.assertFalse(PROFILE_BOOTSTRAP_JSON_SCHEMA["additionalProperties"])
         self.assertIn("candidate_predicates", PROFILE_BOOTSTRAP_JSON_SCHEMA["required"])
+        self.assertIn("repeated_structures", PROFILE_BOOTSTRAP_JSON_SCHEMA["required"])
         candidate_schema = PROFILE_BOOTSTRAP_JSON_SCHEMA["properties"]["candidate_predicates"]["items"]
         self.assertFalse(candidate_schema["additionalProperties"])
         self.assertIn("admission_notes", candidate_schema["required"])
+        repeated_schema = PROFILE_BOOTSTRAP_JSON_SCHEMA["properties"]["repeated_structures"]["items"]
+        self.assertFalse(repeated_schema["additionalProperties"])
+        self.assertIn("property_predicates", repeated_schema["required"])
 
     def test_parse_and_score_profile_bootstrap(self) -> None:
         parsed, error = parse_profile_bootstrap_json(
@@ -139,6 +143,29 @@ class ProfileBootstrapTests(unittest.TestCase):
         )
         self.assertTrue(any("Contract and compliance" in row for row in profile_bootstrap_domain_context(parsed)))
         self.assertEqual(profile_bootstrap_frontier_cases(parsed)[0]["id"], "bootstrap_case_01")
+
+    def test_profile_projection_deduplicates_predicate_signatures(self) -> None:
+        parsed = {
+            "candidate_predicates": [
+                {
+                    "signature": "approved_by/2",
+                    "args": ["item", "approver"],
+                    "description": "First copy.",
+                    "why": "Model may repeat signatures under structured output pressure.",
+                    "admission_notes": ["Requires direct support."],
+                },
+                {
+                    "signature": "approved_by/2",
+                    "args": ["item", "approver"],
+                    "description": "Duplicate copy.",
+                    "why": "Should not duplicate downstream allowed palettes.",
+                    "admission_notes": ["Duplicate."],
+                },
+            ]
+        }
+
+        self.assertEqual(profile_bootstrap_allowed_predicates(parsed), ["approved_by/2"])
+        self.assertEqual(len(profile_bootstrap_predicate_contracts(parsed)), 1)
 
     def test_score_penalizes_generic_predicate_surface(self) -> None:
         base = {
@@ -260,6 +287,50 @@ class ProfileBootstrapTests(unittest.TestCase):
             score["frontier_unknown_positive_predicate_refs"],
             ["approved_by/3", "policy_constraint/2"],
         )
+
+    def test_score_catches_repeated_structure_refs_outside_palette(self) -> None:
+        parsed = {
+            "schema_version": "profile_bootstrap_v1",
+            "domain_guess": "founding_document",
+            "domain_scope": "Declaration-style source documents.",
+            "confidence": 0.9,
+            "source_summary": ["sample"],
+            "entity_types": [{"name": "grievance", "description": "Source accusation record.", "examples": ["g1"]}],
+            "candidate_predicates": [
+                {
+                    "signature": "grievance/2",
+                    "args": ["grievance_id", "grievance_type"],
+                    "description": "A recurring source grievance record.",
+                    "why": "The source contains a repeated accusation list.",
+                    "admission_notes": ["Keep as source claim, not objective fact."],
+                }
+            ],
+            "repeated_structures": [
+                {
+                    "name": "grievance list",
+                    "why": "Repeated accusation records need stable ids and properties.",
+                    "id_strategy": "g1, g2, ...",
+                    "record_predicate": "grievance/2",
+                    "property_predicates": ["grievance_actor/2"],
+                    "example_records": ["grievance(g1, withheld_assent)."],
+                    "admission_notes": ["Actor predicate must be in the palette before use."],
+                }
+            ],
+            "likely_functional_predicates": [],
+            "provenance_sensitive_predicates": ["grievance/2"],
+            "admission_risks": ["Claim/fact collapse"],
+            "clarification_policy": ["Clarify ambiguous authority labels"],
+            "unsafe_transformations": ["Do not assert accusations as verified facts"],
+            "starter_frontier_cases": [
+                {"utterance": "It withheld assent.", "expected_boundary": "grievance(g1, withheld_assent)", "must_not_write": []}
+            ],
+            "self_check": {"profile_authority": "proposal_only", "notes": []},
+        }
+
+        score = profile_bootstrap_score(parsed)
+
+        self.assertEqual(score["repeated_structure_count"], 1)
+        self.assertEqual(score["repeated_structure_unknown_predicate_refs"], ["grievance_actor/2"])
 
     def test_load_jsonl_accepts_harness_rows_as_samples(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

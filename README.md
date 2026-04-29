@@ -76,11 +76,11 @@ Open `http://127.0.0.1:8765` for the live console.
 
 ## Reproducibility Notes
 
-The public repo currently tracks `43` pytest files under [tests/](https://github.com/dr3d/prethinker/tree/main/tests). Latest local full-suite verification:
+The public repo currently tracks `45` pytest files under [tests/](https://github.com/dr3d/prethinker/tree/main/tests). Latest local full-suite verification:
 
 ```powershell
 python -m pytest -q
-# 377 passed
+# 388 passed
 ```
 
 Current high-signal evidence:

@@ -204,7 +204,7 @@ SEMANTIC_IR_JSON_SCHEMA: dict[str, Any] = {
         },
         "candidate_operations": {
             "type": "array",
-            "maxItems": 64,
+            "maxItems": 128,
             "items": {
                 "type": "object",
                 "additionalProperties": False,
