@@ -1,6 +1,6 @@
 # Modelfiles And Prompt Assets
 
-Last updated: 2026-04-27
+Last updated: 2026-04-29
 
 This folder contains prompt and profile assets used by Prethinker. The current
 mainline path is **Semantic IR v1** through LM Studio with:
@@ -14,10 +14,6 @@ and legacy A/B work. They are not the default project direction.
 
 ## Current Assets
 
-- `semantic_parser_system_prompt.md`: legacy parser prompt pack still used by
-  older batch paths and compatibility tests.
-- `semantic_parser_system_prompt_candidate.md`: staging candidate for prompt A/B
-  work.
 - `profile.*.json`: domain profile manifests and predicate contracts for
   Semantic IR context engineering.
 - `predicate_registry*.json`: predicate palettes used by registry/admission
@@ -29,6 +25,10 @@ and legacy A/B work. They are not the default project direction.
 
 ## Legacy Assets
 
+- `semantic_parser_system_prompt.md`: legacy parser prompt pack retained for
+  historical comparison and compatibility tests.
+- `semantic_parser_system_prompt_candidate.md`: older staging candidate for
+  parser-lane prompt A/B work.
 - the old Ollama parser-lane Modelfile retained for historical comparisons.
 - `test-lmstudio-semparse.ps1`: older parser-lane smoke harness.
 

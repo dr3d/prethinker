@@ -1,6 +1,6 @@
 # Medical Profile (`medical@v0`)
 
-Date: 2026-04-25
+Date: 2026-04-29
 
 `medical@v0` is the first formal bounded medical ontology package for Prethinker.
 
@@ -82,11 +82,14 @@ Example:
 
 Recommended posture for this profile:
 
-- `compiler_mode=strict`
-- `strict_registry=true`
-- `strict_types=false`
+- canonical runtime path: `active_profile=medical@v0` through
+  `semantic_router_v1 -> semantic_ir_v1`
+- Semantic IR backend: LM Studio/OpenAI-compatible structured output
+- default development model: `qwen/qwen3.6-35b-a3b`
 - higher clarification eagerness
-- experimental sidecar policy off
+- clarification sidecar off; clarification pressure should come from profile
+  context, recent context, predicate contracts, KB seed context, and mapper
+  projection
 
 The older advisory-sidecar idea has been superseded for the mainline path by
 Semantic IR context engineering: profile context, recent context, predicate
@@ -119,7 +122,8 @@ The Semantic Network KB builder is now scaffolded for `SRDEF`, `SRSTR`, and opti
 
 ## Example Command
 
-For batch experiments, the current stack can already use the profile assets explicitly:
+For compatibility batch experiments, older parser-lane tools can still load the
+profile assets explicitly:
 
 ```powershell
 python kb_pipeline.py `

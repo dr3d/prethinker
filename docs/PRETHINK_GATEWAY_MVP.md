@@ -103,13 +103,12 @@ This is important because the same UI needs to serve two audiences:
 
 ## Default Binding Choices
 
-- legacy compiler model: only when explicitly testing the old parser lane
 - semantic IR research/default console model: `qwen/qwen3.6-35b-a3b` via LM Studio/OpenAI-compatible structured output
-- compiler mode: `strict`
+- compiler mode: `semantic_ir_v1`
 - semantic IR backend: `lmstudio`
 - semantic IR base URL: `http://127.0.0.1:1234`
 - served handoff mode in strict mode: `never`
-- experimental sidecar policy: `off`
+- clarification sidecar policy: retired from the mainline; current clarification pressure should come through router/compiler context and mapper projection
 
 ## Long Narrative Ingestion
 

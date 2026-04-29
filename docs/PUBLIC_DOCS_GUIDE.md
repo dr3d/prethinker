@@ -1,6 +1,6 @@
 # Public Docs Guide
 
-Last updated: 2026-04-27
+Last updated: 2026-04-29
 
 This page is the map for public readers. Git history keeps the older research
 trail; these docs should describe the project as it sits now.
@@ -43,6 +43,7 @@ The active architectural pivot is:
 
 ```text
 utterance + context
+  -> semantic_router_v1 context/profile plan
   -> semantic_ir_v1 workspace
   -> deterministic mapper/admission diagnostics
   -> KB mutation, query, clarification, quarantine, or rejection
@@ -65,10 +66,17 @@ The best current documents for that work are:
 - [docs/SEC_CONTRACTS_DOMAIN.md](https://github.com/dr3d/prethinker/blob/main/docs/SEC_CONTRACTS_DOMAIN.md)
 - [docs/SEMANTIC_ROUTER_EXPERIMENT.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_ROUTER_EXPERIMENT.md)
 - [docs/ROUTER_TRAINING_SEED_AUDIT.md](https://github.com/dr3d/prethinker/blob/main/docs/ROUTER_TRAINING_SEED_AUDIT.md)
+- [docs/DOMAIN_BOOTSTRAPPING_META_MODE.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_BOOTSTRAPPING_META_MODE.md)
 - [docs/MULTILINGUAL_SEMANTIC_IR_PROBE.md](https://github.com/dr3d/prethinker/blob/main/docs/MULTILINGUAL_SEMANTIC_IR_PROBE.md)
 - [docs/NO_LANGUAGE_HANDLING_IN_PYTHON_AUDIT.md](https://github.com/dr3d/prethinker/blob/main/docs/NO_LANGUAGE_HANDLING_IN_PYTHON_AUDIT.md)
 - [docs/FRONTIER_DATASET_SURVEY.md](https://github.com/dr3d/prethinker/blob/main/docs/FRONTIER_DATASET_SURVEY.md)
 - [docs/prompts/SEMANTIC_IR_V1.md](https://github.com/dr3d/prethinker/blob/main/docs/prompts/SEMANTIC_IR_V1.md)
+
+The newest open-domain work is the hint-free profile/bootstrap path: raw text
+goes to an LLM-authored `intake_plan_v1` and `profile_bootstrap_v1` proposal,
+then ordinary Semantic IR and deterministic admission test whether the proposed
+predicate surface is usable. Human-authored expected Prolog files are
+calibration tools, not product-time hints.
 
 ## Current Domain Lanes
 
@@ -109,13 +117,12 @@ engineering, Semantic IR workspaces, and deterministic admission.
 
 ## Current Evidence Snapshot
 
-Latest local verification before this refresh:
+Latest local verification:
 
-- Full pytest suite after document-intake planning and post-ingestion QA runner work: `388 passed`.
+- Full pytest suite after profile-owned predicate alias canonicalization: `394 passed`.
 - Lava v5 latest 60-attempt rerun: `60/60` parsed JSON, `60/60` domain selector, `60/60` admission-safe, `45/60` semantic-clean, `41/60` full expectation score, `0` fuzzy edge kinds, and `0/60` temp-0 variance groups.
 - `active_profile=auto` now uses `semantic_router_v1` as the first-pass context/profile planner. The old Python catalog selector is no longer in the active runtime or research harnesses.
 - Multilingual router probe: `router_ok=10/10`, `compiler_parsed_ok=10/10` on raw Spanish, French, German, Portuguese, Italian, Japanese, and code-switched turns.
-- Lava v3 router repair/calibration pass: `router_ok=17/17`, `router_score_avg=0.991`, `compiler_parsed_ok=17/17`, with anti-coupling reduced to intentional bootstrap review-only skips on the two unexpected-domain turns.
 - Current profile packages supply router/compiler context, predicate contracts, and declarative validators for medical, legal/CourtListener, SEC/contracts, probate, and story-world lanes. The mapper still owns actual admission.
 - Predicate-contract role enforcement blocks obvious argument-shape mismatches, profile validators block domain-specific unsafe admissions declaratively, temporal gates block inverted interval pairs, and duplicate-collapse prevents repeated candidate-operation floods from becoming repeated KB writes.
 - Clause support records connect admitted facts/rules/retracts/queries back to their Semantic IR operation index, predicate, source, and rationale codes; this is a first dependency breadcrumb, not full truth maintenance yet.
@@ -127,6 +134,7 @@ Latest local verification before this refresh:
 - Goldilocks full-story segmented smoke: `56` deduped mutations across `50` segments, with placeholder and vague-predicate bad writes removed after adding a generic story-world predicate palette.
 - Policy/reimbursement cross-turn demo: English policy installed executable rules, derived query answers without writing derived `violation/2` facts, then corrected state and changed the answer.
 - Profile bootstrap closed-loop smoke: a model-proposed starter profile ran generated starter cases through the normal Semantic IR mapper with `8/8` valid workspaces and `7/8` expected-boundary hits.
+- Raw Proclamation hint-free profile-review experiment: useful run produced `30` candidate predicates, `93` admitted source-compile operations, `4/4` successful planned passes, and first-20 post-ingestion QA at `10 exact / 5 partial / 4 miss / 1 not judged`.
 
 The important qualitative result is that the current system has moved from
 Python-side language rescue toward model-owned context planning plus

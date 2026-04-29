@@ -2,6 +2,11 @@
 
 Last updated: 2026-04-26
 
+Status note, 2026-04-29: this is a pivot report, not the live pipeline
+reference. For the current router-first, KB-seeded, profile-aware path and the
+hint-free bootstrap work, read `docs/CURRENT_UTTERANCE_PIPELINE.md`,
+`docs/DOMAIN_BOOTSTRAPPING_META_MODE.md`, and `PROJECT_STATE.md`.
+
 ## Short Version
 
 Prethinker started with a strong authority-boundary idea: a language model may
@@ -482,16 +487,22 @@ validate it, that is progress.
 The next useful work is not to add a lot of features. It is to keep pressure on
 the architecture.
 
-1. Add LM Studio structured-output runtime integration behind a flag.
-2. Keep Ollama and LM Studio bakeoffs comparable.
-3. Split scores into mechanical validity, semantic decision, safe operation
-   quality, and final KB state.
-4. Build harder scenario packs that are less tailored to current rescue code.
-5. Measure Python rescue dependency directly, not anecdotally.
-6. Tighten the semantic IR schema around rules, negation, claims, and temporal
-   scope.
-7. Treat the old clarification sidecar as historical scaffolding, not the main
-   semantic compiler.
+1. Keep the current LM Studio structured-output path as the main development
+   lane unless a specific model-comparison question is being asked.
+2. Measure mechanical validity, router/profile choice, semantic decision,
+   safe-operation quality, final KB state, and admission safety separately.
+3. Build harder scenario packs and raw-document probes that are less tailored
+   to current prompts.
+4. Keep measuring Python rescue dependency directly. New wins should come from
+   better model workspaces, profile contracts, context packs, or structural
+   mapper checks, not phrase-specific Python patches.
+5. Tighten durable temporal representation, rule admission, negation policy,
+   claim/fact/observation promotion, and predicate canonicalization.
+6. Treat the old clarification sidecar and old parser lane as historical
+   scaffolding, not the current semantic compiler.
+7. Push hint-free domain/profile discovery: `intake_plan_v1` and
+   `profile_bootstrap_v1` should let the model propose symbolic vocabulary
+   without Python deriving predicates from the source text.
 
 ## Slide Outline
 

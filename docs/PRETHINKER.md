@@ -28,14 +28,17 @@ Prethinker is valuable only if that trust boundary stays legible.
 
 At a high level:
 
-`language -> semantic workspace -> deterministic gate -> KB mutation/query -> evidence`
+`language -> router/context plan -> semantic workspace -> deterministic gate -> KB mutation/query -> evidence`
 
 In practice that means:
 
 1. A user utterance arrives.
-2. The compiler classifies it as a write, query, retract, rule, or `other`.
-3. The active research path emits a `semantic_ir_v1` workspace rather than forcing immediate Prolog.
-4. Deterministic validation, mapping, and normalization decide whether any candidate operation is admissible.
+2. The router/context layer selects relevant profile context, predicate
+   contracts, recent-turn context, and compact KB seed material.
+3. The active research path emits a `semantic_ir_v1` workspace rather than
+   forcing immediate Prolog.
+4. Deterministic validation, mapping, normalization, and admission diagnostics
+   decide whether any candidate operation is admissible.
 5. The runtime either:
    - commits a mutation
    - answers a query
@@ -142,22 +145,25 @@ role.
 
 ## Current Reality
 
-As of April 27, 2026:
+As of April 29, 2026:
 
 - the canonical interactive entryway is `process_utterance()` in [src/mcp_server.py](https://github.com/dr3d/prethinker/blob/main/src/mcp_server.py)
 - the console in [ui_gateway/](https://github.com/dr3d/prethinker/tree/main/ui_gateway) is the main manual test cockpit
 - the prompt-book UI and ledger telemetry are the primary live demonstration surface
 - `semantic_ir_v1` is the active architecture pivot for model understanding before deterministic admission
+- `semantic_router_v1` is the active context/profile planner when `active_profile=auto`
 - [src/semantic_ir.py](https://github.com/dr3d/prethinker/blob/main/src/semantic_ir.py) owns mapper projection policy and admission diagnostics
-- `medical@v0` is the most active bounded profile
+- `medical@v0`, `legal_courtlistener@v0`, and `sec_contracts@v0` are the main starter domain lanes
 - UMLS Semantic Network assets are built locally for type/relation explanation
+- `intake_plan_v1` and `profile_bootstrap_v1` are the current hint-free raw-document/profile discovery path
 
 That means the repo already supports the governed compiler shape directly.
 
 The old clarification-liaison sidecar remains historical scaffolding only. The
 bigger current research question is whether richer semantic workspaces can
 reduce English-specific Python rescue logic while preserving the same authority
-boundary.
+boundary. Current improvements should come from model workspaces, context/profile
+contracts, KB context, or structural mapper checks, not Python phrase patches.
 
 ## Why The Repo Looks The Way It Does
 

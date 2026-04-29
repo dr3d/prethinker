@@ -166,6 +166,40 @@ The highest-level instruction is:
 Model the source's epistemic structure, not just its surface grammar.
 ```
 
+## Hint-Free Predicate Discovery
+
+The cleanest version of this mode gives the model the source text and generic
+profile-bootstrap contract, but **does not** give it a human-authored Prolog
+target surface. That is the mode closest to future product use.
+
+In hint-free discovery:
+
+- the model proposes entity types, predicate families, argument contracts,
+  repeated structures, admission risks, and starter cases;
+- Python validates schema and structural consistency;
+- Python may compare signatures after the fact for evaluation;
+- Python does not derive predicates from source words;
+- Python does not split the document on semantic grounds;
+- Python does not rewrite model predicate choices into a preferred ontology.
+
+This matters because the product will usually have no `expected.pl` file. The
+system has to grow a reviewable symbolic surface from the source material and
+then test whether that surface supports safe ingestion and later query.
+
+Human-authored Prolog remains useful for research calibration. It answers a
+different question:
+
+```text
+Can the model align to this particular symbolic style if we show it the target
+signature roster?
+```
+
+Hint-free discovery asks the harder product question:
+
+```text
+Can the model invent a useful symbolic style when no target roster exists?
+```
+
 ## Why It Matters
 
 For a random domain, the hardest part may not be extracting one fact. It may be

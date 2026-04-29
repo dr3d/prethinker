@@ -1,6 +1,6 @@
 # Current Utterance Pipeline
 
-Last updated: 2026-04-28
+Last updated: 2026-04-29
 
 This is the current live path for a user utterance in Prethinker. The older
 English-first parser lane is historical context only and now lives in Git
@@ -23,8 +23,8 @@ decide what becomes Prolog state.
 ## One-Turn Overview
 
 1. The UI or harness sends one utterance to `process_utterance()`.
-2. `pre_think()` builds the front-door packet: route, uncertainty,
-   clarification pressure, segment plan, and execution protocol.
+2. The runtime builds a front-door control packet: session state, pending
+   clarification state, execution flags, and trace metadata.
 3. Long or mixed utterances may be split into focused segments, especially at
    query boundaries.
 4. The runtime uses `semantic_router_v1` to select a domain profile when
@@ -45,8 +45,8 @@ decide what becomes Prolog state.
 ```mermaid
 flowchart TD
   A["User utterance"] --> B["process_utterance()"]
-  B --> C["pre_think(): route, uncertainty, segments"]
-  C --> D{"clarification needed?"}
+  B --> C["front-door packet: session, flags, trace"]
+  C --> D{"pending clarification?"}
   D -- "yes" --> E["store pending turn; ask question; no KB write"]
   E --> F["clarification answer"]
   F --> G["rebuild effective utterance with Q/A context"]
@@ -82,36 +82,40 @@ mutation, query execution, and trace collection.
 Resetting a session clears pending clarification state, recent runtime memory,
 trace state, and the runtime KB state for the live cockpit.
 
-### 2. The front door decides route and risk
+### 2. The front door prepares control state
 
-`pre_think()` builds a front-door packet before the heavier semantic compiler
-work. It estimates whether the utterance is a write, query, mixed turn, or
-context-only turn. It also computes clarification pressure and extracts a rough
-segment plan.
+The front door prepares runtime control state before the heavier semantic
+compiler work: session id, pending clarification state, active profile mode,
+model/backend settings, trace collection, and execution flags.
 
-This is not the final truth decision. It is the first routing layer that decides
-whether the system should proceed, stop for clarification, or prepare a
-multi-step execution protocol.
+This is not the semantic authority. The important design direction is that
+language understanding should happen in the model-owned router/compiler
+workspace, profile context, and deterministic mapper diagnostics, not in a
+growing pile of Python phrase rules.
 
-### 3. Clarification can stop the turn before parsing
+### 3. Clarification can stop the turn before mutation
 
-If the front door sees an unsafe missing referent, vague patient identity,
-unclear lab target, unresolved alias, or similar ambiguity, the runtime returns a
-clarification request and does not compile or mutate the KB.
+If the active turn is answering a pending clarification, the runtime resumes the
+held turn with the clarification question and answer included as context. If a
+Semantic IR pass projects `clarify`, the runtime stores the pending turn, asks
+the question, and does not mutate the KB.
 
 When the user answers, the pending turn is resumed. The clarification question
 and answer become part of the effective utterance for the Semantic IR pass, so
 the model sees the user-resolved context instead of guessing.
 
-The current pipeline does this context work inside the primary Semantic IR pass:
-recent context, profile context, predicate contracts, and KB seed context are
-assembled before deterministic admission.
+The current pipeline keeps clarification context visible to the primary Semantic
+IR pass: recent context, profile context, predicate contracts, and KB seed
+context are assembled before deterministic admission.
 
-### 4. Long utterances are segmented into focused passes
+### 4. Long utterances can be segmented into focused passes
 
 Narrative or mixed turns can be split into smaller Semantic IR passes. The
-segmenter looks for clauses and query boundaries so queries do not pile up in
-the same semantic workspace as surrounding fact ingestion.
+segment path is an engineering compromise for long UI turns and story-like
+inputs. The goal is not to let Python interpret the language. The stronger
+direction is for LLM-authored intake plans and query-boundary policy to decide
+which semantic work belongs together, while Python only carries focused payloads
+through the same canonical runtime path.
 
 The important execution protocol is:
 
@@ -154,6 +158,36 @@ receives only a focused roster containing the selected profile and close
 candidates. Exact router selections are cached for replay/retry paths with the
 same utterance and context signature. These are context-engineering speedups;
 they do not change mapper authority or add Python-side language interpretation.
+
+### 5b. Unknown-domain and hint-free predicate discovery are separate modes
+
+Ordinary per-turn ingestion uses approved profiles and approved predicate
+contracts. When the domain is unknown, or when a raw document has no prior
+profile, the current research path is **not** Python vocabulary extraction.
+
+The hint-free discovery shape is:
+
+```text
+raw text or representative corpus
+  -> intake_plan_v1
+  -> profile_bootstrap_v1 proposal
+  -> candidate predicates + contracts + risks + starter cases
+  -> review / retry / optional draft-profile run
+  -> ordinary semantic_ir_v1 compile
+  -> deterministic mapper/admission
+```
+
+Python may read bytes, call the model, validate JSON, compare emitted predicate
+signatures, and carry the model-authored pass plan forward. Python should not
+inspect the raw language to invent predicates, choose semantic segments, or
+rewrite utterances into a preferred ontology.
+
+Human-supplied expected Prolog files can be used in calibration to measure
+signature recall or to provide an explicit target ontology. That is different
+from hint-free operation. In product-like open-domain use there is no expected
+Prolog answer key; the model proposes a draft symbolic vocabulary, and review,
+tests, profile contracts, and deterministic admission decide whether it earns
+authority.
 
 ### 6. The Semantic IR input is assembled
 
