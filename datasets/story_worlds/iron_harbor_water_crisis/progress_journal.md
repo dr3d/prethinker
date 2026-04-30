@@ -76,3 +76,32 @@ For known domains, direct profile loading from a curated registry is cleaner
 than asking the LLM to rediscover the palette every time. For unknown domains,
 bootstrap remains useful, but the resulting profile should be reviewed and
 contracted before it becomes a serious ingestion target.
+
+## 2026-04-30 - Run IHR-005 - Placeholder-Normalized QA
+
+Rerunning QA over the IHR-004 compiled KB after structural query-placeholder
+normalization raised first-20 QA to `12 exact + 2 partial`.
+
+The improvement came from treating model-emitted lowercase slot labels such as
+`reading`, `mode`, `interval`, `zone`, `facility`, and `noticeid` as variables
+inside query operations. This is not Python prose interpretation; it is cleanup
+of structured query arguments after the model has already emitted a proposed
+query.
+
+### Current Remaining Edges
+
+- Pre-correction values need a parked-claim/source-record predicate. The current
+  compiled KB preserves authoritative corrected values better than superseded
+  claims.
+- Advisory status needs stricter argument-contract adherence; the model still
+  sometimes uses `contamination_advisory/2` as `(subject, status)` instead of
+  `(status, timestamp)`.
+- Offline-duration and omitted-zone questions need either better multi-query QA
+  planning or a small admitted rule layer for derived answers.
+
+### Rejected Attempt
+
+A heavier policy/incident QA strategy was tried and dropped because it reduced
+first-20 QA to `9 exact + 1 partial`. More instructions are not automatically
+better; the sharper win was keeping the context lean and improving structured
+query argument handling.

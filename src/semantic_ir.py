@@ -3285,6 +3285,7 @@ def _is_query_placeholder_arg(raw: str) -> bool:
         "explanationdetail",
         "event",
         "fact",
+        "facility",
         "grievance",
         "grievance_id",
         "grievance_label",
@@ -3305,6 +3306,7 @@ def _is_query_placeholder_arg(raw: str) -> bool:
         "person",
         "place",
         "reason",
+        "reading",
         "reporter",
         "record",
         "result",
@@ -3320,13 +3322,24 @@ def _is_query_placeholder_arg(raw: str) -> bool:
         "type",
         "value",
         "violation",
+        "zone",
         "what",
         "when",
         "where",
         "who",
     }:
         return True
-    if value in {"obsid", "recallid", "recordtype", "rulecondition", "rulecontent", "violationlabel"}:
+    if value in {
+        "interval",
+        "mode",
+        "noticeid",
+        "obsid",
+        "recallid",
+        "recordtype",
+        "rulecondition",
+        "rulecontent",
+        "violationlabel",
+    }:
         return True
     if (
         len(value) > 3
