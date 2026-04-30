@@ -541,3 +541,54 @@ A live q019/q051 targeted rerun remained `1 exact + 1 partial`: the model still
 answered q019 using positive row comparison rather than choosing the negative
 query operation, and q051 still lacked explicit omitted-zone support in the
 query result bundle. This is planner uptake, not a missing formal substrate.
+
+## 2026-04-30 - Run IHR-018 - Set Difference Planner Uptake
+
+Tightened the post-ingestion QA strategy so omission and set-difference
+questions explicitly require paired query operations:
+
+```text
+query residential_zone(Zone) polarity=positive
+query boil_water_notice(Zone, Time, Issuer) polarity=negative
+```
+
+The mapper then projects the second operation to query-only Prolog negation:
+
+```prolog
+\+(boil_water_notice(Zone, Time, Issuer)).
+```
+
+and the runner synthesizes the set-difference support query:
+
+```prolog
+residential_zone(Zone),
+\+(boil_water_notice(Zone, Time, Issuer)).
+```
+
+### Result
+
+Targeted omission/compliance probe:
+
+- q003/q017/q019/q020: `4 exact / 0 partial / 0 miss`
+- q019/q020 both used the intended negative-query operation
+- q017 recovered the missing start-event query for deadline-window support
+
+First-20 Harbor regression:
+
+- `20 exact / 0 partial / 0 miss`
+- `20/20` parsed OK
+- `0` write proposals during post-ingestion QA
+
+### What Improved
+
+This moves set-difference from "runtime can do it if asked" to "the planner can
+choose the right formal shape" for the common omitted-required-item pattern.
+The fix remains structural: context guidance plus query placeholder lifting.
+No Python code reads raw prose to infer omitted zones or domain facts.
+
+### Current Edge
+
+Comprehensive violation summaries such as q051/q098/q100 are improved but still
+only partial in the latest small probe. They need richer violation-support
+bundles, likely by giving the planner a clearer query pattern for assembling
+all three violation families without writing derived violation facts.

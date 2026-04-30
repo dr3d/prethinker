@@ -3331,6 +3331,7 @@ def _is_query_placeholder_arg(raw: str) -> bool:
         "actor",
         "action",
         "accused",
+        "authority",
         "authorizer",
         "batch",
         "batch_id",

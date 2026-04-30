@@ -249,6 +249,39 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         self.assertEqual(support[0]["polarity"], "negative")
         self.assertEqual(support[0]["effect"], "query")
 
+    def test_query_placeholder_authority_lifts_to_variable(self) -> None:
+        ir = _ir(
+            decision="answer",
+            turn_type="query",
+            candidate_operations=[
+                {
+                    "operation": "query",
+                    "predicate": "correction_record",
+                    "args": ["Recordid", "Originalvalue", "Correctedvalue", "authority"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                }
+            ],
+        )
+
+        parsed, warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=["correction_record/4"],
+            predicate_contracts=[
+                {
+                    "signature": "correction_record/4",
+                    "args": ["subject", "original_value", "corrected_value", "authority"],
+                }
+            ],
+        )
+
+        self.assertEqual(warnings, [])
+        self.assertEqual(
+            parsed["queries"],
+            ["correction_record(Recordid, Originalvalue, Correctedvalue, Authority)."],
+        )
+
     def test_profile_owned_predicate_alias_canonicalizes_before_palette_gate(self) -> None:
         ir = _ir(
             candidate_operations=[
