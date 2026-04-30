@@ -192,6 +192,7 @@ Domain/data lanes:
 - Run the SEC adapter against a small EDGAR submissions slice only after setting `SEC_USER_AGENT` and choosing a durable cache/review policy. Keep generated live data under ignored `datasets/sec_edgar/generated/`.
 - Tighten narrative ingestion next around stable object identity, event observation predicates, and temporal/event ordering instead of adding story-specific Python phrase patches.
 - Keep the Semantic IR harness model-agnostic, but use `qwen/qwen3.6-35b-a3b` as the default development model unless a specific comparison question needs another local model.
+- When comparing local LM Studio models, unload/eject the previous model before loading the next one. If multiple large models remain resident, VRAM pressure can push work toward CPU and make tokens/sec measurements meaningless.
 
 ## Verification Snapshot
 
