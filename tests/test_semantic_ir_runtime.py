@@ -615,6 +615,36 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         ]
         self.assertEqual(skipped[0]["skip_reason"], "ungrounded_argument_atom")
 
+    def test_mapper_skips_model_scratch_leak_argument_write(self) -> None:
+        ir = _ir(
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "story_time",
+                    "args": [
+                        "ev_boat",
+                        "note_json_array_closing_bracket_was_missing_in_thought_trace",
+                    ],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                }
+            ]
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=["story_time/2"],
+        )
+        self.assertEqual(parsed["intent"], "other")
+        self.assertEqual(parsed["facts"], [])
+        self.assertTrue(any("model scratch text" in warning for warning in warnings))
+        skipped = [
+            row
+            for row in parsed["admission_diagnostics"]["operations"]
+            if not row["admitted"]
+        ]
+        self.assertEqual(skipped[0]["skip_reason"], "model_scratch_leak_argument")
+
     def test_mapper_skips_null_and_generic_actor_placeholder_writes(self) -> None:
         ir = _ir(
             candidate_operations=[

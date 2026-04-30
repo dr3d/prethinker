@@ -451,3 +451,47 @@ Structural query placeholder normalization is useful, but the next large gain
 must come from better model-authored compile coverage. We should keep pushing
 context choreography and predicate-roster pressure rather than adding Python
 language patches.
+
+## Run OTR-008 - Direct Registry Flat Plus Focused Passes
+
+- Timestamp: `2026-04-30T12:20:03Z`
+- Model: `qwen/qwen3.6-35b-a3b`
+- Mode: direct `ontology_registry.json` profile, flat-plus-focused intake
+  passes, generic narrative source-fidelity guidance, and mapper scratch-text
+  hygiene.
+
+### Headline
+
+Best balanced first-20 QA result so far under the lean current pipeline:
+`9 exact + 2 partial = 11/20`.
+
+Compile admitted `82` operations with `0` skips, emitted/gold signature recall
+reached `0.292`, and precision stayed `1.000`. This does not beat the best
+one-off compile recall observed during exploratory runs, but it ties the best
+exact-only QA result and ties the best exact+partial support while keeping the
+mapper cleaner.
+
+### What Improved
+
+- Early inventory questions finally landed better: little mug, middle boots,
+  great boat, and boat location all reached exact answers.
+- Food extraction improved enough for exact answers to the bake/ingredient
+  questions.
+- The mapper now blocks obvious model scratch-text leakage from becoming durable
+  facts. This is structural admission hygiene, not prose preprocessing.
+
+### Remaining Misses
+
+- Species/kind support is still not transferred reliably into QA.
+- Errand sender/items regressed in this run even though earlier runs handled
+  them.
+- The half-birthday and swallowed-wheel support remains thin.
+- Query planning still misses some available support and sometimes asks overly
+  narrow predicates.
+
+### Lesson
+
+Otters is now a good frontier fixture precisely because it refuses to be solved
+by a single prompt tweak. The current weak point is not one bug; it is the
+interaction between source-wide compile coverage, stable atom choice across
+passes, and QA query planning over a partially compiled KB.

@@ -2894,6 +2894,12 @@ def _generic_grounding_problem(
             "warning": f"skipped {predicate}/{len(args)} because an argument is an unresolved placeholder",
             "codes": ["grounding_policy", "no_placeholder_commit"],
         }
+    if any(_looks_like_model_scratch_leak(arg) for arg in args):
+        return {
+            "reason": "model_scratch_leak_argument",
+            "warning": f"skipped {predicate}/{len(args)} because an argument looks like model scratch text",
+            "codes": ["grounding_policy", "no_model_scratch_commit"],
+        }
     return None
 
 
@@ -2912,6 +2918,23 @@ def _is_placeholder_atom(arg: str) -> bool:
         or value.endswith("_unknown")
         or value.endswith("_unknown_agent")
     )
+
+
+def _looks_like_model_scratch_leak(arg: str) -> bool:
+    value = str(arg or "").strip().lower()
+    if not value:
+        return False
+    scratch_terms = {
+        "thought_trace",
+        "final_output",
+        "syntax_error",
+        "json_array",
+        "json_structure",
+        "previous_line",
+        "correction_needed",
+        "fixing_here",
+    }
+    return any(term in value for term in scratch_terms)
 
 
 def _projection_reason(
