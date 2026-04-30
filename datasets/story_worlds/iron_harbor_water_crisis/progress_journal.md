@@ -61,13 +61,15 @@ The failure mode also changed: the model now used the right predicates, but the
 registry had only signatures and no argument contracts, so several emitted facts
 had unstable slot order.
 
-### IHR-004 - Direct Registry With Argument Contracts
+### IHR-004 - Direct Registry After Adding Argument Contracts
 
-Adding explicit `args` to `ontology_registry.json` and teaching direct registry
-profiles to preserve those argument contracts lifted emitted/gold signature
-recall to `0.929` and first-20 QA to `10 exact + 1 partial`.
+Adding explicit `args` to `ontology_registry.json` coincided with emitted/gold
+signature recall rising to `0.929` and first-20 QA to `10 exact + 1 partial`.
+Later inspection showed the registry loader was still stripping those `args`, so
+this run should be read as a predicate-surface improvement, not as proof that
+argument contracts were active yet.
 
-This is the strongest current Iron Harbor run.
+This was the strongest Iron Harbor run at the time.
 
 ### Lesson
 
@@ -122,3 +124,22 @@ the right arity but wrong argument roles. That suggests the next architectural
 move should be mapper-side contract diagnostics or typed role checks: detect
 contract-wrong operations, explain why they were skipped, and keep them out of
 the durable KB. That is governance, not Python NLP.
+
+## 2026-04-30 - Run IHR-007 - Preserved Argument Contracts
+
+The registry loader now preserves `args` from `ontology_registry.json`, and the
+contract gate now recognizes temporal role names such as `timestamp`,
+`authorized_at`, `issued_at`, `taken_at`, and `inspected_on`.
+
+Result:
+
+- emitted/gold signature recall: `0.964`
+- first-20 QA: `16 exact + 1 partial`
+- malformed advisory clauses such as `contamination_advisory(intake_point_alpha, triggered)` were replaced by clean clauses such as `contamination_advisory(triggered, 2026_03_04t02_00)`
+
+### Lesson
+
+This is the cleanest Iron Harbor run so far, and it confirms the next design
+principle: predicate contracts must travel with the profile, and the mapper
+should enforce obvious structural contract roles. Otherwise the system can have
+the right predicate name and still write a wrong fact.

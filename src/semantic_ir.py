@@ -2720,7 +2720,9 @@ def _role_argument_problem(role: str, arg: str, meta: dict[str, Any]) -> str:
             return "a person, not a date/time"
         if entity_type == "place":
             return "a place, not a date/time"
-        if entity_type and entity_type not in {"time", "unknown"} and not _looks_like_date_atom(value):
+        if not _looks_like_temporal_atom(value):
+            return "a non-temporal atom"
+        if entity_type and entity_type not in {"time", "unknown"} and not _looks_like_temporal_atom(value):
             return f"{entity_type}, not a date/time"
     elif role_kind == "document":
         if entity_type == "person":
@@ -2749,7 +2751,16 @@ def _contract_role_kind(role: str) -> str:
         return "interval"
     if value in {"date", "time", "date_filed", "decision_date", "filing_date"}:
         return "date"
-    if value.endswith("_date") or value.startswith("date_") or "date_or" in value:
+    if value in {"timestamp", "datetime"}:
+        return "date"
+    if (
+        value.endswith("_date")
+        or value.startswith("date_")
+        or value.endswith("_time")
+        or value.endswith("_at")
+        or value.endswith("_on")
+        or "date_or" in value
+    ):
         return "date"
     if "authority" in value:
         return ""
@@ -2786,9 +2797,22 @@ def _looks_like_date_atom(value: str) -> bool:
     atom = str(value or "").strip().lower()
     if re.fullmatch(r"\d{4}(_\d{1,2}){0,2}", atom):
         return True
+    if re.fullmatch(r"\d{4}_\d{1,2}_\d{1,2}t\d{1,2}_\d{2}", atom):
+        return True
     if re.search(r"\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|january|february|march|april|june|july|august|september|october|november|december)_", atom):
         return True
     return bool(re.search(r"\b\d{1,2}_\d{1,2}_\d{2,4}\b", atom))
+
+
+def _looks_like_temporal_atom(value: str) -> bool:
+    atom = str(value or "").strip().lower()
+    if _looks_like_date_atom(atom):
+        return True
+    if re.fullmatch(r"\d{1,2}_\d{2}", atom):
+        return True
+    if any(marker in atom for marker in ("today", "tomorrow", "yesterday", "morning", "afternoon", "evening")):
+        return True
+    return False
 
 
 def _date_sort_key(value: str) -> tuple[int, int, int] | None:
@@ -3294,6 +3318,7 @@ def _is_query_placeholder_arg(raw: str) -> bool:
         "grievancetype",
         "institution",
         "item",
+        "issuer",
         "label",
         "ledger",
         "location",
@@ -3305,6 +3330,7 @@ def _is_query_placeholder_arg(raw: str) -> bool:
         "owner",
         "person",
         "place",
+        "point",
         "reason",
         "reading",
         "reporter",
@@ -3317,6 +3343,7 @@ def _is_query_placeholder_arg(raw: str) -> bool:
         "status",
         "subject",
         "target",
+        "tester",
         "thing",
         "time",
         "type",
@@ -3333,6 +3360,8 @@ def _is_query_placeholder_arg(raw: str) -> bool:
         "interval",
         "mode",
         "noticeid",
+        "noticedzone",
+        "notifiedzone",
         "obsid",
         "recallid",
         "recordtype",

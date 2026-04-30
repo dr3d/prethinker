@@ -474,6 +474,11 @@ def _load_profile_registry(path: Path | None) -> dict[str, Any]:
             compact_predicates.append(
                 {
                     "signature": signature,
+                    "args": [
+                        str(arg).strip()
+                        for arg in item.get("args", [])
+                        if isinstance(item.get("args"), list) and str(arg).strip()
+                    ],
                     "category": str(item.get("category", "")).strip(),
                     "notes": str(item.get("notes", "")).strip(),
                 }
