@@ -105,3 +105,20 @@ A heavier policy/incident QA strategy was tried and dropped because it reduced
 first-20 QA to `9 exact + 1 partial`. More instructions are not automatically
 better; the sharper win was keeping the context lean and improving structured
 query argument handling.
+
+## 2026-04-30 - Run IHR-006 - Contract-Adherence Guidance
+
+Adding one concise compile instruction that predicate contracts are binding
+raised first-20 exact QA to `13/20`. The compile admitted more rows (`123`) with
+fewer skips (`4`) while preserving emitted/gold signature recall at `0.929`.
+
+This is the strongest exact-answer Iron Harbor run so far.
+
+### New Hard Edge
+
+The remaining errors show a deeper contract problem: valid arity is not enough.
+For example, the model can still emit a `contamination_advisory/2` clause with
+the right arity but wrong argument roles. That suggests the next architectural
+move should be mapper-side contract diagnostics or typed role checks: detect
+contract-wrong operations, explain why they were skipped, and keep them out of
+the durable KB. That is governance, not Python NLP.
