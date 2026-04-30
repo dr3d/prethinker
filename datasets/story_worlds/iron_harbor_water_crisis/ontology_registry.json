@@ -1,0 +1,148 @@
+{
+  "schema": "story_world_ontology_registry_v1",
+  "fixture": "iron_harbor_water_crisis",
+  "source": "gold_kb.pl",
+  "purpose": "Compact predicate inventory scaffold for policy incident intake, QA mapping, and failure analysis.",
+  "predicates": [
+    {
+      "signature": "before/2",
+      "category": "reference_kb",
+      "notes": "Derived from gold_kb.pl."
+    },
+    {
+      "signature": "boil_water_notice/3",
+      "category": "reference_kb",
+      "notes": "Derived from gold_kb.pl."
+    },
+    {
+      "signature": "boil_water_notice_deadline_hours/1",
+      "category": "reference_kb",
+      "notes": "Derived from gold_kb.pl."
+    },
+    {
+      "signature": "boil_water_notice_lift_deadline_hours/1",
+      "category": "reference_kb",
+      "notes": "Derived from gold_kb.pl."
+    },
+    {
+      "signature": "boil_water_notice_lifted/2",
+      "category": "reference_kb",
+      "notes": "Derived from gold_kb.pl."
+    },
+    {
+      "signature": "bypass_activated/2",
+      "category": "reference_kb",
+      "notes": "Derived from gold_kb.pl."
+    },
+    {
+      "signature": "bypass_authorization/3",
+      "category": "reference_kb",
+      "notes": "Derived from gold_kb.pl."
+    },
+    {
+      "signature": "bypass_inspection_validity_days/1",
+      "category": "reference_kb",
+      "notes": "Derived from gold_kb.pl."
+    },
+    {
+      "signature": "bypass_requires_joint/2",
+      "category": "reference_kb",
+      "notes": "Derived from gold_kb.pl."
+    },
+    {
+      "signature": "clean_reading_interval_hours/1",
+      "category": "reference_kb",
+      "notes": "Derived from gold_kb.pl."
+    },
+    {
+      "signature": "clean_threshold/2",
+      "category": "reference_kb",
+      "notes": "Derived from gold_kb.pl."
+    },
+    {
+      "signature": "coliform_reading/4",
+      "category": "reference_kb",
+      "notes": "Derived from gold_kb.pl."
+    },
+    {
+      "signature": "consecutive_clean_readings_required/1",
+      "category": "reference_kb",
+      "notes": "Derived from gold_kb.pl."
+    },
+    {
+      "signature": "contamination_advisory/2",
+      "category": "reference_kb",
+      "notes": "Derived from gold_kb.pl."
+    },
+    {
+      "signature": "contamination_threshold/2",
+      "category": "reference_kb",
+      "notes": "Derived from gold_kb.pl."
+    },
+    {
+      "signature": "downstream_of/2",
+      "category": "reference_kb",
+      "notes": "Derived from gold_kb.pl."
+    },
+    {
+      "signature": "eastgate_offline_threshold_hours/1",
+      "category": "reference_kb",
+      "notes": "Derived from gold_kb.pl."
+    },
+    {
+      "signature": "facility/2",
+      "category": "reference_kb",
+      "notes": "Derived from gold_kb.pl."
+    },
+    {
+      "signature": "facility_status/3",
+      "category": "reference_kb",
+      "notes": "Derived from gold_kb.pl."
+    },
+    {
+      "signature": "foundry_row_notification_deadline_hours/1",
+      "category": "reference_kb",
+      "notes": "Derived from gold_kb.pl."
+    },
+    {
+      "signature": "inspection/3",
+      "category": "reference_kb",
+      "notes": "Derived from gold_kb.pl."
+    },
+    {
+      "signature": "non_residential_zone/1",
+      "category": "reference_kb",
+      "notes": "Derived from gold_kb.pl."
+    },
+    {
+      "signature": "notification/5",
+      "category": "reference_kb",
+      "notes": "Derived from gold_kb.pl."
+    },
+    {
+      "signature": "okonkwo_arrival/2",
+      "category": "reference_kb",
+      "notes": "Derived from gold_kb.pl."
+    },
+    {
+      "signature": "person_role/2",
+      "category": "reference_kb",
+      "notes": "Derived from gold_kb.pl."
+    },
+    {
+      "signature": "residential_zone/1",
+      "category": "reference_kb",
+      "notes": "Derived from gold_kb.pl."
+    },
+    {
+      "signature": "review_meeting/2",
+      "category": "reference_kb",
+      "notes": "Derived from gold_kb.pl."
+    },
+    {
+      "signature": "testing_interval/2",
+      "category": "reference_kb",
+      "notes": "Derived from gold_kb.pl."
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "schema": "story_world_failure_buckets_v1",
+  "fixture": "iron_harbor_water_crisis",
+  "buckets": [
+    {
+      "id": "policy_scope_confusion",
+      "label": "Policy scope confusion",
+      "description": "Applies residential boil-water rules to Foundry Row or misses required residential zones.",
+      "watch_for": [
+        "Foundry Row treated as residential",
+        "Old Harbor omitted from required-zone reasoning",
+        "industrial notification confused with boil-water notice"
+      ]
+    },
+    {
+      "id": "correction_retraction_failure",
+      "label": "Correction/retraction failure",
+      "description": "Fails to replace corrected readings, dates, or arrival times while preserving retracted claims as historical claims.",
+      "watch_for": [
+        "120 treated as current reading",
+        "January 28 treated as confirmed inspection",
+        "01:45 treated as authoritative arrival"
+      ]
+    },
+    {
+      "id": "claim_fact_collapse",
+      "label": "Claim/fact collapse",
+      "description": "Promotes witness beliefs, disclosures, or misunderstandings into established findings.",
+      "watch_for": [
+        "Cheng disclosure as review-board finding",
+        "Ferreira belief as fact",
+        "witness statement double-asserted over timeline"
+      ]
+    },
+    {
+      "id": "temporal_deadline_error",
+      "label": "Temporal deadline error",
+      "description": "Miscalculates policy clocks and deadline anchors.",
+      "watch_for": [
+        "6-hour offline threshold missed",
+        "4-hour lift deadline from wrong anchor",
+        "February 1 to March 4 counted as 30 days"
+      ]
+    },
+    {
+      "id": "authorization_conjunction_error",
+      "label": "Authorization conjunction error",
+      "description": "Treats either officer as sufficient or ignores the Harbor Master's inspection-validity prerequisite.",
+      "watch_for": [
+        "either Cheng or Ferreira sufficient",
+        "invalid inspection still validates bypass",
+        "joint authorization not represented"
+      ]
+    },
+    {
+      "id": "multilingual_extraction_loss",
+      "label": "Multilingual extraction loss",
+      "description": "Misses facts supplied in translated Spanish, Swedish, or Hindi witness statements.",
+      "watch_for": [
+        "Okonkwo arrival claim missing",
+        "Lindstrom half-past-four statement missed",
+        "Patel email timing missed"
+      ]
+    },
+    {
+      "id": "false_positive_violation",
+      "label": "False-positive violation",
+      "description": "Reports compliance or ambiguous disclosures as clear policy violations.",
+      "watch_for": [
+        "Foundry Row notification marked late",
+        "normal 72-hour testing interval marked violated",
+        "pump-deterioration awareness asserted as policy violation"
+      ]
+    },
+    {
+      "id": "predicate_fragmentation",
+      "label": "Predicate fragmentation",
+      "description": "Invents near-duplicate predicate surfaces for readings, notifications, authorizations, or facility status.",
+      "watch_for": [
+        "coliform_reading vs coliform_result drift",
+        "notify/alert/inform split",
+        "offline/down/out_of_service split"
+      ]
+    },
+    {
+      "id": "absence_invention",
+      "label": "Absence invention",
+      "description": "Fills undocumented tests, deactivation times, or other missing source facts without support.",
+      "watch_for": [
+        "invented 12-hour tests",
+        "invented Pier 7 deactivation",
+        "additional intake points invented"
+      ]
+    },
+    {
+      "id": "source_authority_loss",
+      "label": "Source authority loss",
+      "description": "Ignores which source is explicitly treated as authoritative for corrected facts.",
+      "watch_for": [
+        "badge log not authoritative",
+        "lab notebook not authoritative",
+        "inspection log not authoritative"
+      ]
+    }
+  ]
+}
