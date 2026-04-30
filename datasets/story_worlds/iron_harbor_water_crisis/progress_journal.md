@@ -143,3 +143,27 @@ This is the cleanest Iron Harbor run so far, and it confirms the next design
 principle: predicate contracts must travel with the profile, and the mapper
 should enforce obvious structural contract roles. Otherwise the system can have
 the right predicate name and still write a wrong fact.
+
+## 2026-04-30 - Run IHR-008 - Full 100-Question QA Baseline
+
+Running all 100 QA probes against the IHR-007 compiled KB produced:
+
+- `100/100` parsed
+- `42` exact
+- `14` partial
+- `44` miss
+- `0` runtime load errors
+- `0` write-proposal leaks during QA
+
+The first-20 result was encouraging, but the full battery is correctly harder.
+It exposes the next real frontier:
+
+- temporal calculations and durations;
+- rule application rather than just rule lookup;
+- source-claim preservation for superseded values and witness statements;
+- multi-hop set difference such as required zones minus notified zones;
+- a QA planner gap for some simple `facility_status/3` questions where the
+  model knows the right predicate in self-check but emits no query.
+
+This is a good benchmark shape: the system is clearly improving, but the test
+is still hard enough to reveal meaningful architecture work.
