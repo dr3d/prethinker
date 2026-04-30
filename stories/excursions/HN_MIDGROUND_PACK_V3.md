@@ -49,4 +49,4 @@ Turnset policy:
 
 Use:
 - recommended first run: `scripts/run_mitm_session.py` with `--max-turns 12` then full 15-turn pass.
-- promote repeated misses into new `rung_47x` failure-guard scenarios.
+- promote repeated misses into current frontier fixtures or source-local benchmark packs.

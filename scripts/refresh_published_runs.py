@@ -29,10 +29,7 @@ def _parse_args() -> argparse.Namespace:
         "--keep-scenarios",
         default=(
             "stage_01_facts_only,stage_02_rule_ingest,stage_03_transitive_chain,"
-            "acid_03_temporal_override,acid_04_alias_pressure,acid_05_long_context_lineage,"
-            "rung_230_fuzzy_ce_branch_exclusion_language,"
-            "rung_340_ce_story_pronoun_transfer,rung_350_ce_story_multi_round_revision,"
-            "rung_360_ce_story_branch_merge_noise"
+            "acid_03_temporal_override,acid_04_alias_pressure,acid_05_long_context_lineage"
         ),
         help="Comma-separated scenarios to always keep (latest run for each).",
     )

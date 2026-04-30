@@ -89,4 +89,4 @@ Noisy lane (`G4`, Reddit legal threads):
 2. Convert `wild_hn_docker_spain_block` -> one `excursion_wild` scenario.
 3. Run through the current LM Studio Semantic IR path, usually
    `qwen/qwen3.6-35b-a3b` with structured output.
-4. Promote recurrent failure patterns into new `rung_*` files only after repeatability.
+4. Promote recurrent failure patterns into current frontier fixtures or source-local benchmark packs only after repeatability.

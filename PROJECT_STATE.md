@@ -195,10 +195,11 @@ Domain/data lanes:
 
 ## Verification Snapshot
 
-**Current headline:** after retiring the legacy parser-lane tests and harnesses, the lean full pytest suite is `338 passed`. The current fast Lava smoke is `15/15` parsed JSON, `11/11` selector-checked, `0` fuzzy edge kinds, and no temp-0 variance measurement in the single-repeat fast preset. Current best demo pressure point remains the reimbursement policy cross-turn run: `4/4` parsed, `4/4` apply-error-free, `4/4` expected query matches, and no derived violation write leak.
+**Current headline:** after retiring the legacy parser-lane tests, harnesses, and ladder-era JSON fixtures, the lean full pytest suite is `364 passed`. The current fast Lava smoke is `15/15` parsed JSON, `11/11` selector-checked, `0` fuzzy edge kinds, and no temp-0 variance measurement in the single-repeat fast preset. Current best demo pressure point remains the reimbursement policy cross-turn run: `4/4` parsed, `4/4` apply-error-free, `4/4` expected query matches, and no derived violation write leak.
 
 Recent verified results:
 
+- Full suite after retiring the old ladder-era JSON fixture set and generated ladder renderer: `364 passed`.
 - Full suite after router action-plan compile-pressure wiring: `338 passed`.
 - Focused router/context tests after action-plan compile-pressure wiring: `67 passed` across `tests/test_semantic_router.py` and `tests/test_mcp_server.py`.
 - Live action-plan compile-pressure smoke: a mixed reimbursement rule/query turn routed to `sec_contracts@v0`, projected `segment_before_compile` and `extract_query_operations` into `router_action_policy` compiler context, and the compiler returned `decision=mixed` with both a write candidate and a query candidate. The remaining edge is improving query predicate specificity under the selected profile.
@@ -248,4 +249,4 @@ Older milestone ladders and superseded calibration packs are intentionally left 
 
 ## What Was Pruned
 
-Historical markdown reports, dated prompt snapshots, generated ladder/report HTML, stale run manifests, old parser-lane orchestration notes, generated `kb_runs/`, generated `kb_store/`, and large session/source notes were removed from the forward-facing tree. Git history still carries them. The repo should now privilege source, compact current-state docs, small fixtures, and tests over a stack of stale status artifacts.
+Historical markdown reports, dated prompt snapshots, generated ladder/report HTML, stale run manifests, old parser-lane orchestration notes, the old ladder-era JSON fixture set, generated `kb_runs/`, generated `kb_store/`, and large session/source notes were removed from the forward-facing tree. Git history still carries them. The repo should now privilege source, compact current-state docs, small fixtures, and tests over a stack of stale status artifacts.

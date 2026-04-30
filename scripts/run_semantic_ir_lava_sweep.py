@@ -41,7 +41,6 @@ DEFAULT_DATASET_GLOBS = (
 )
 DEFAULT_KB_SCENARIO_GLOBS = (
     "kb_scenarios/story_*.json",
-    "kb_scenarios/rung_4*.json",
     "kb_scenarios/stage_00_*.json",
     "kb_scenarios/acid_*.json",
 )
@@ -433,8 +432,6 @@ def source_family(source: str) -> str:
         name = raw.split(":", 1)[1]
         if name.startswith("story_"):
             return "kb_story"
-        if name.startswith("rung_"):
-            return "kb_rung"
         if name.startswith("acid_"):
             return "kb_acid"
         if name.startswith("stage_"):

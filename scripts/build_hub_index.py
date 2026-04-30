@@ -19,7 +19,6 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--reports-dir", default="docs/reports")
     p.add_argument("--runs-dir", default="kb_runs")
     p.add_argument("--kb-pages-dir", default="docs/kb")
-    p.add_argument("--ladder-index", default="docs/rungs/index.html")
     p.add_argument("--output", default="docs/run-reports-hub.html")
     p.add_argument("--cards-output", default="docs/progress_cards.html")
     p.add_argument("--cards-runs-limit", type=int, default=8)
@@ -60,9 +59,7 @@ def parse_args() -> argparse.Namespace:
         "--spotcheck-scenarios",
         default=(
             "stage_01_facts_only,stage_02_rule_ingest,stage_03_transitive_chain,"
-            "acid_03_temporal_override,acid_04_alias_pressure,acid_05_long_context_lineage,"
-            "rung_140_ce_pronoun_typo_missing_qmark,rung_150_ce_typo_uncertainty_chain,"
-            "rung_160_ce_soft_retract_noise,rung_170_ce_pronoun_followup_no_qmark"
+            "acid_03_temporal_override,acid_04_alias_pressure,acid_05_long_context_lineage"
         ),
         help="Comma-separated scenario names to prioritize in Spot Checks.",
     )
@@ -811,7 +808,7 @@ def main() -> int:
     a = parse_args()
     reports_dir, runs_dir = _resolve(a.reports_dir), _resolve(a.runs_dir)
     historical_runs_dir = _resolve(a.historical_runs_dir)
-    kb_dir, ladder_idx, out = _resolve(a.kb_pages_dir), _resolve(a.ladder_index), _resolve(a.output)
+    kb_dir, out = _resolve(a.kb_pages_dir), _resolve(a.output)
     cards_out = _resolve(a.cards_output)
     out.parent.mkdir(parents=True, exist_ok=True)
 
@@ -994,7 +991,6 @@ def main() -> int:
         ]
     ) or "<tr><td colspan=\"3\">No KB snapshots.</td></tr>"
     docs_hub = f"<a href=\"{PAGES_BASE}\">Docs Hub</a>"
-    ladder = f"<a href=\"{_pages_link(ladder_idx)}\">View Test Ladder</a>" if ladder_idx.exists() else ""
     cards = f"<a href=\"{_pages_link(cards_out)}\">Progress Cards</a>" if cards_out.exists() else ""
     repo = f"<a href=\"{html.escape(a.repo_link)}\" target=\"_blank\" rel=\"noreferrer\">Repository</a>" if str(a.repo_link).strip() else ""
 
@@ -1002,7 +998,7 @@ def main() -> int:
     :root{{--bg:#f6f8fb;--p:#fff;--i:#172336;--m:#607089;--b:#d8e0ea;--h:#f8fbff;--l:#0a62c6}} html[data-theme="dark"]{{--bg:#111821;--p:#1a2430;--i:#e8eef6;--m:#aab6c8;--b:#314152;--h:#212d3a;--l:#7bb6ff}} body{{margin:0;background:var(--bg);color:var(--i);font-family:Segoe UI,Arial,sans-serif}} .w{{max-width:1200px;margin:0 auto;padding:20px}} .t{{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}} .nav a,.nav button{{border:1px solid var(--b);background:var(--p);padding:7px 11px;border-radius:999px;color:var(--i);text-decoration:none;cursor:pointer}} .m{{color:var(--m);font-size:13px}} .p{{background:var(--p);border:1px solid var(--b);border-radius:12px;overflow:hidden;margin:12px 0}} .ph{{padding:10px 12px;border-bottom:1px solid var(--b);background:var(--h);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}} .c{{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr 1fr;gap:8px;padding:10px;border-bottom:1px solid var(--b)}} .c input,.c select{{border:1px solid var(--b);background:var(--p);color:var(--i);border-radius:8px;padding:7px}} table{{width:100%;border-collapse:collapse}} th,td{{padding:9px 11px;border-bottom:1px solid var(--b);font-size:13px;text-align:left;vertical-align:top}} th{{background:var(--h);color:var(--m)}} a{{color:var(--l);text-decoration:none}} a:hover{{text-decoration:underline}} .tw{{max-height:540px;overflow:auto}} .k{{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}} .s{{background:var(--p);border:1px solid var(--b);border-radius:10px;padding:8px 10px}} .s b{{font-size:20px}} .hint{{padding:8px 10px;color:var(--m);font-size:12px}}
     @media (max-width:900px){{.c{{grid-template-columns:1fr 1fr}}}} @media (max-width:620px){{.c{{grid-template-columns:1fr}}}}
     </style></head><body><div class="w">
-    <div class="t"><div><h1 style="margin:0">{a.title}</h1><div class="m">generated {dt.datetime.now(dt.timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')} | {stats} | <a href="{rc_repo_href}" target="_blank" rel="noreferrer">curated evidence</a> | <a href="{sp_repo_href}" target="_blank" rel="noreferrer">scenario progress</a> | <a href="{pp_repo_href}" target="_blank" rel="noreferrer">prompt versions</a></div><div class="m">curated manifest: <a href="{rp_repo_href}" target="_blank" rel="noreferrer">runs manifest</a></div></div><div class="nav">{docs_hub} {ladder} {cards} {repo} <a href="#prompts">Prompt Evolution</a> <button id="theme">theme</button></div></div>
+    <div class="t"><div><h1 style="margin:0">{a.title}</h1><div class="m">generated {dt.datetime.now(dt.timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')} | {stats} | <a href="{rc_repo_href}" target="_blank" rel="noreferrer">curated evidence</a> | <a href="{sp_repo_href}" target="_blank" rel="noreferrer">scenario progress</a> | <a href="{pp_repo_href}" target="_blank" rel="noreferrer">prompt versions</a></div><div class="m">curated manifest: <a href="{rp_repo_href}" target="_blank" rel="noreferrer">runs manifest</a></div></div><div class="nav">{docs_hub} {cards} {repo} <a href="#prompts">Prompt Evolution</a> <button id="theme">theme</button></div></div>
     <div class="k"><div class="s">Runs<br/><b>{len(runs)}</b></div><div class="s">Passed<br/><b>{pass_total}</b></div><div class="s">Pass Rate<br/><b>{int(_score(pass_total, len(runs))*100)}%</b></div><div class="s">Scenarios<br/><b>{len(set([r['scenario'] for r in runs]))}</b></div><div class="s">Prompts<br/><b>{len(prompts)}</b></div></div>
     <div class="p"><div class="ph"><b>Newest Success Highlights</b><span class="m">public signal view</span></div><div class="tw"><table><thead><tr><th>Finished</th><th>Scenario</th><th>Model</th><th>Validation</th><th>Report</th></tr></thead><tbody>{success_rows}</tbody></table></div></div>
     <div class="p"><div class="ph"><b>Spot Checks</b><span class="m">curated checkpoints (not exhaustive)</span></div><div class="tw"><table><thead><tr><th>Finished</th><th>Scenario</th><th>Status</th><th>Validation</th><th>Model</th><th>Report</th></tr></thead><tbody>{spot_rows}</tbody></table></div></div>

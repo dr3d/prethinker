@@ -32,7 +32,7 @@ def test_lava_direct_apply_records_but_skips_queries_by_default():
 
 def test_lava_balanced_sampling_spreads_source_families():
     cases = [
-        LavaCase(id=f"rung_{i}", source="kb_scenario:rung_many", utterance=f"rung {i}")
+        LavaCase(id=f"legacy_{i}", source="kb_scenario:legacy_many", utterance=f"legacy case {i}")
         for i in range(12)
     ]
     cases.extend(
