@@ -363,7 +363,7 @@ honoree(little_slip_otter_half_birthday, little_slip_otter).
 served_for(clockwork_pie, little_slip_otter_half_birthday).
 
 initial_location(clockwork_pie, kitchen).
-location_after_event(clockwork_pie, e004, windowsill).
+location_after_event(clockwork_pie, e005, windowsill).
 
 
 /* ============================================================

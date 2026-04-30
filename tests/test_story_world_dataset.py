@@ -1,4 +1,5 @@
 import json
+import re
 from pathlib import Path
 
 from scripts.run_domain_bootstrap_qa import (
@@ -17,10 +18,14 @@ def test_otters_story_world_bundle_is_complete() -> None:
         "story.md",
         "gold_kb.pl",
         "gold_kb_notes.md",
+        "ontology_registry.json",
+        "failure_buckets.json",
         "qa_source.md",
         "qa.md",
         "qa_battery.jsonl",
         "intake_plan.md",
+        "progress_journal.md",
+        "progress_metrics.jsonl",
     }
 
     assert expected.issubset({path.name for path in OTTERS.iterdir()})
@@ -54,6 +59,27 @@ def test_otters_gold_kb_exercises_story_world_edges() -> None:
     assert "said(" in kb
     assert "final_state(" in kb
     assert "before(E1, E2)" in kb
+    assert "location_after_event(clockwork_pie, e005, windowsill)." in kb
+    for forbidden in ["goldilocks", "bear", "bears", "porridge", "chair", "chairs", "bed", "beds"]:
+        assert re.search(rf"(?<![a-z0-9_]){forbidden}(?![a-z0-9_])", kb.casefold()) is None
+
+
+def test_otters_metadata_is_graph_ready() -> None:
+    buckets = json.loads((OTTERS / "failure_buckets.json").read_text(encoding="utf-8"))
+    registry = json.loads((OTTERS / "ontology_registry.json").read_text(encoding="utf-8"))
+    metrics = [
+        json.loads(line)
+        for line in (OTTERS / "progress_metrics.jsonl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+
+    assert len(buckets["buckets"]) >= 10
+    assert any(item["id"] == "template_contamination" for item in buckets["buckets"])
+    assert registry["source"] == "gold_kb.pl"
+    signatures = {item["signature"] for item in registry["predicates"]}
+    for signature in ["event/5", "story_time/2", "before/2", "judged/4", "final_state/1"]:
+        assert signature in signatures
+    assert [row["run_id"] for row in metrics] == sorted(row["run_id"] for row in metrics)
 
 
 def test_otters_fixture_text_is_ascii_stable() -> None:

@@ -1,0 +1,66 @@
+{
+  "schema": "story_world_failure_buckets_v1",
+  "fixture": "otters_clockwork_pie",
+  "buckets": [
+    {
+      "id": "template_contamination",
+      "label": "Template contamination",
+      "description": "Imports familiar Goldilocks facts or aliases that are not in the local source story.",
+      "watch_for": ["bears", "porridge", "chairs", "beds", "sleeping", "Goldilocks-as-entity"]
+    },
+    {
+      "id": "chronology_loss",
+      "label": "Chronology loss",
+      "description": "Extracts roughly correct events but loses their source order or before/after relations.",
+      "watch_for": ["missing story_time facts", "incorrect event order", "repair before damage"]
+    },
+    {
+      "id": "speech_truth_confusion",
+      "label": "Speech/truth confusion",
+      "description": "Treats direct speech or a character claim as narrator-confirmed world truth.",
+      "watch_for": ["Tilly's denial asserted as fact", "said/3 collapsed into objective predicates"]
+    },
+    {
+      "id": "subjective_objective_confusion",
+      "label": "Subjective/objective confusion",
+      "description": "Treats a character judgment such as just right as an objective safety or correctness fact.",
+      "watch_for": ["little_boat marked safe", "judged/4 omitted", "accepted choice treated as true fitness"]
+    },
+    {
+      "id": "causal_gap",
+      "label": "Causal gap",
+      "description": "Captures an event but misses its consequence, state change, or downstream repair need.",
+      "watch_for": ["eat event without swallowed wheels", "boat use without sinking", "boot dance without damage"]
+    },
+    {
+      "id": "final_state_staleness",
+      "label": "Final-state staleness",
+      "description": "Leaves an earlier temporary state active after a later remedy, repair, or resolution.",
+      "watch_for": ["Tilly still ticking", "little_boat still sunk", "floor still flooded after mopping"]
+    },
+    {
+      "id": "group_expansion_failure",
+      "label": "Group expansion failure",
+      "description": "Fails to preserve countable grouped entities that need individual symbolic support.",
+      "watch_for": ["six brass wheels collapsed to one vague wheel", "missing brass_wheel_1..6 recovery"]
+    },
+    {
+      "id": "ownership_transfer_error",
+      "label": "Ownership-transfer error",
+      "description": "Mistakes use, possession, swallowing, or temporary control for ownership.",
+      "watch_for": ["Tilly owns the boots", "Tilly owns the boat", "swallowed wheels owned by Tilly"]
+    },
+    {
+      "id": "whimsy_erasure",
+      "label": "Whimsy erasure",
+      "description": "Normalizes magical or comic literal details into metaphor, mood, or disposable style.",
+      "watch_for": ["clockwork pie loses ticking", "boots stop being agentive", "pie key remedy ignored"]
+    },
+    {
+      "id": "predicate_fragmentation",
+      "label": "Predicate fragmentation",
+      "description": "Invents many near-duplicate predicates instead of using the controlled fixture vocabulary.",
+      "watch_for": ["ate/2 vs eat_all/5 vs consumed/2 drift", "ownership split across ad hoc predicates"]
+    }
+  ]
+}

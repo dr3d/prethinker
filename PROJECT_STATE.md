@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: 2026-04-29
+Last updated: 2026-04-30
 
 ## One-Sentence Shape
 
@@ -60,6 +60,9 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 - Mixed long utterances can now segment at query boundaries, so questions do not pile up in the same semantic workspace as surrounding write facts.
 - The generic predicate registry now includes a small story-world event/state palette (`tasted/2`, `sat_in/2`, `lay_in/2`, `broke/1`, `asleep_in/2`, `was_tasted/1`, `was_eaten/1`, `was_sat_in/1`, `was_lain_in/1`, etc.) so narrative ingestion no longer has to squeeze ordinary events into `inside/2`, `at/2`, or `carries/2`.
 - The mapper now blocks placeholder-like durable write arguments such as `unknown_agent`, while the prompt steers unknown-actor observations toward passive object-state predicates when those are available.
+- `datasets/story_worlds/otters_clockwork_pie/` is now the main playful-but-hard story-world frontier fixture. It includes a source-local Goldilocks-shaped story, human gold KB, 100-question QA battery, failure buckets, ontology registry scaffold, and an append-only progress ledger for graphing runs.
+- Otters OTR-001 through OTR-005 are the first mini-journal series. The cold baseline scored `7/20` exact first-20 QA and `0.000` emitted/gold predicate-signature recall; the current best balanced point, OTR-003, reaches `8/20` exact plus `3/20` partial, `0.097` emitted/gold signature recall, and `0.688` emitted/gold signature precision. The series exposed a real tradeoff between coverage, canonical predicate alignment, and source-local control-plane vocabulary.
+- Raw-file story compilation now has generic narrative-source context pressure selected from LLM-owned intake classification or explicit domain hint. It asks the model for story spine, event order, speech/truth separation, subjective judgments, causality, remediation, and final-state support without Python inspecting the prose for meaning.
 - `medical@v0` Semantic IR calls now receive profile-owned predicate contracts and compact UMLS bridge context before the model proposes a workspace. This lets the model normalize examples like `Coumadin` to `warfarin` and see argument-role/semantic-group expectations, while the deterministic mapper still owns admission.
 - The profile context now explicitly treats an explicit named patient as sufficient grounding for the research profile, while pronouns, multiple candidates, aliases, and missing patient identity still require clarification.
 - A thin domain-profile roster now exists in `modelfiles/domain_profile_catalog.v0.json` and is included in Semantic IR input as `available_domain_profiles`. This is the first skill-directory-style control-plane hook: it advertises possible profile contexts without loading every thick package or authorizing writes.

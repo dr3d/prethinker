@@ -27,6 +27,25 @@ DEFAULT_OUT_DIR = REPO_ROOT / "tmp" / "domain_bootstrap_file"
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+NARRATIVE_SOURCE_COMPILER_CONTEXT_V1 = [
+    "narrative_source_compiler_strategy_v1: Use this only for sources classified by the LLM intake plan or domain hint as story, narrative, fable, fiction, plot, or source-fidelity story-world material.",
+    "Narrative source rule: compile the closed world of this source text. Do not import facts, character names, motives, objects, or endings from famous stories, genre priors, or likely variants.",
+    "Narrative source rule: preserve source-local names and aliases. If the text says Little Slip of an Otter, Great Long Otter, or Tilly Tumbletop, do not normalize them to unrelated familiar names.",
+    "Narrative source rule: build a story spine when the profile supports it. Prefer event records with actor, action/type, target/object, place, source span/phase, and story order over isolated verb facts.",
+    "Narrative source rule: separate static state, event occurrence, character speech, narrator judgment, causal consequence, and final state. These are different epistemic jobs even when they share entities.",
+    "Narrative source rule: subjective fit or quality language such as too hot, too cold, just right, too hard, too soft, or too high should be tied to an evaluator or narrator context when the profile supports it.",
+    "Narrative source rule: quoted speech is a speech act by a character unless the source independently states the spoken content as narrator fact.",
+    "Narrative source rule: when an event changes state, preserve both the event and the resulting state if the profile supports it. If a later repair changes the final state, preserve final-state or remediation outcome rather than leaving only the broken intermediate state.",
+    "Narrative source rule: preserve errand, intention, forgetfulness, discovery, consequence, repair, and final emotional/condition states as queryable structure when stated by the source.",
+    "Narrative story-world canonical palette preference: when the draft profile offers equivalent choices, prefer event/5 for event_id, actor, action, object, place; story_time/2 for event order; before/2 and after/2 for temporal ordering; causes/2 and caused_by/2 for consequence links.",
+    "Narrative story-world canonical palette preference: prefer said/3 for event-scoped quoted speech or source-stated speech acts; prefer judged/4 for evaluator, item, dimension, judgment; prefer owned_by/2 for item-to-owner ownership; prefer designed_for/2 for items made for a character.",
+    "Narrative story-world canonical palette preference: prefer initial_location/2 and location_after_event/3 when the source gives object locations or movement; prefer final_state/1 and condition_after_story/2 for repaired, remaining, or resolved end-state facts.",
+    "Narrative story-world canonical palette preference: prefer household/1, household_member/2, character/1, object/1, place/1, food/1, name/2, kind/2, and property/2 for source-local cast and object taxonomy when the profile supports these classes.",
+    "Narrative story-world canonical palette warning: do not invent near-synonym predicate surfaces such as happens_before/2, says/3, evaluates_as/3, located_at/2, owns/2, or results_in/2 when the draft profile also provides the canonical story-world predicates before/2, said/3, judged/4, initial_location/2, owned_by/2, or causes/2.",
+    "Narrative story-world coverage warning: canonical predicates should not make the compile timid. Preserve representative facts for cast/entity taxonomy, ownership/design, locations, event spine, story order, speech, subjective judgment, causality, remediation, and final state when the source and profile support them.",
+    "Narrative source rule: if the profile lacks event, temporal-order, causal, or final-state predicates needed for the current pass, mention those missing capabilities in self_check rather than inventing out-of-palette predicates.",
+]
+
 from src.profile_bootstrap import (  # noqa: E402
     PROFILE_BOOTSTRAP_JSON_SCHEMA,
     PROFILE_BOOTSTRAP_REVIEW_JSON_SCHEMA,
@@ -231,6 +250,12 @@ def main() -> int:
             retry_context.append(
                 "Profile review pass recommended one more profile-bootstrap attempt. "
                 "This is LLM control-plane guidance, not approved facts or a target Prolog file."
+            )
+            retry_context.append(
+                "Profile review retry safety: preserve source-local vocabulary. If review guidance uses a famous story, "
+                "archetype, trope, or template label that is not literally present in the source, translate it into a "
+                "source-local structural name before proposing profile predicates or repeated structures. Do not repeat "
+                "the absent external label in risks, examples, explanations, or retry-derived notes."
             )
             for item in review_parsed.get("retry_guidance", []) if isinstance(review_parsed.get("retry_guidance"), list) else []:
                 text = str(item).strip()
@@ -479,6 +504,10 @@ def _compile_source_with_draft_profile(
     allowed_predicates = profile_bootstrap_allowed_predicates(parsed_profile)
     predicate_contracts = profile_bootstrap_predicate_contracts(parsed_profile)
     domain_context = profile_bootstrap_domain_context(parsed_profile)
+    source_compiler_context = _source_compiler_context(
+        intake_plan=intake_plan,
+        domain_hint=str(getattr(args, "domain_hint", "") or ""),
+    )
     config = SemanticIRCallConfig(
         backend="lmstudio",
         base_url=str(args.base_url),
@@ -499,6 +528,7 @@ def _compile_source_with_draft_profile(
             config=config,
             context=[
                 *plan_context,
+                *source_compiler_context,
                 *(extra_context or []),
                 "Compile the raw source text using the draft profile proposed by profile_bootstrap_v1.",
                 "Treat intake_plan_v1.pass_plan as the coverage checklist for this compile. Allocate candidate_operations across the planned passes instead of spending the whole operation budget on the first repeated structure you encounter.",
@@ -650,6 +680,27 @@ def _compile_source_with_plan_passes(
         "queries": unique_queries,
         "passes": pass_records,
     }
+
+
+def _source_compiler_context(*, intake_plan: dict[str, Any] | None, domain_hint: str = "") -> list[str]:
+    """Return context modules selected from LLM-owned/source-external control data.
+
+    This does not inspect the source prose. The branch uses either a user-supplied
+    domain hint or the structured source type proposed by intake_plan_v1.
+    """
+    terms: list[str] = [str(domain_hint or "").casefold()]
+    if isinstance(intake_plan, dict):
+        boundary = intake_plan.get("source_boundary") if isinstance(intake_plan.get("source_boundary"), dict) else {}
+        terms.extend(
+            [
+                str(boundary.get("source_type", "")).casefold(),
+                str(boundary.get("epistemic_stance", "")).casefold(),
+            ]
+        )
+    label = " ".join(terms)
+    if any(token in label for token in ["story", "narrative", "fable", "fiction", "plot"]):
+        return list(NARRATIVE_SOURCE_COMPILER_CONTEXT_V1)
+    return []
 
 
 def _call_lmstudio_json_schema(

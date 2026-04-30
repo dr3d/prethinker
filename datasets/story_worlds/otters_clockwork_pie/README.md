@@ -19,6 +19,10 @@ failures unless they appear in the source.
 - `qa_battery.jsonl`: machine-friendly QA rows with id, phase, question,
   expected answer, and likely mistake.
 - `intake_plan.md`: proposed benchmark/game-plan and failure buckets.
+- `failure_buckets.json`: compact story-world failure taxonomy for fixture
+  scoring and review.
+- `ontology_registry.json`: predicate/signature inventory scaffold derived from
+  `gold_kb.pl`.
 - `progress_journal.md`: running mini-journal of benchmark attempts and lessons.
 - `progress_metrics.jsonl`: append-only metrics rows for progress graphs.
 
