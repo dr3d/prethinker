@@ -191,6 +191,10 @@ def _qa_query_had_rows(qa_row: dict[str, Any]) -> bool:
 def _root_cause(*, support_present: bool, qa_verdict: str, qa_query_had_rows: bool) -> str:
     verdict = str(qa_verdict or "").strip().lower()
     if not support_present:
+        if qa_query_had_rows and verdict in {"exact", "partial"}:
+            return "support_present_under_alternate_surface"
+        if qa_query_had_rows:
+            return "support_map_or_query_surface_drift"
         return "compile_missing_required_support"
     if verdict in {"exact", "not_judged", ""}:
         return "support_available"

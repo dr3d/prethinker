@@ -384,3 +384,86 @@ planner does not yet reliably choose the derived-threshold plan. It still often
 measures directly from the raw event start. This is a useful clean separation:
 the formal substrate is ready; the next improvement is planner uptake of the
 temporal helper surface.
+
+## 2026-04-30 - Run IHR-014 - Fresh Non-Otters Support-Coverage Probe
+
+After the Otters support-map work, Iron Harbor was rerun as the fresh story-world
+pressure source so context guidance would not become story-specific.
+
+Fresh compile:
+
+- mode: current lean `flat-plus-plan-passes` compile with direct Iron Harbor registry
+- admitted ops: `71`
+- skipped ops: `9`
+- expected signature recall: `0.903`
+
+First-20 QA:
+
+- `20 exact + 0 partial + 0 miss`
+- query rows: `20/20`
+- runtime load errors: `0`
+- write-proposal leaks during QA: `0`
+
+Full-100 QA:
+
+- `63 exact + 18 partial + 19 miss`
+- query rows: `100/100`
+- runtime load errors: `0`
+- write-proposal leaks during QA: `0`
+
+Support-map diagnostic over the first 20:
+
+- gold-shaped support present: `2/20`
+- alternate-surface support: `18/20`
+
+### What This Exposed
+
+The headline QA score can hide a deeper symbolic-surface problem. The QA planner
+could often retrieve rows and the judge could verify the human answer, but the
+compiled KB used alternate surfaces such as unquoted timestamp atoms, short
+facility atoms, and alternate person-name order. This is not a raw language
+failure; it is predicate/atom canonicalization drift after successful semantic
+understanding.
+
+### Resulting Change
+
+The support scorer now distinguishes `support_present_under_alternate_surface`
+from true `compile_missing_required_support`. This preserves the research signal:
+we can tell "compiled, but not in the intended symbolic shape" apart from "not
+compiled at all."
+
+## 2026-04-30 - Run IHR-015 - Atom Ledger Join Probe
+
+Added generic policy-incident compiler guidance for a source-local atom ledger:
+choose one canonical atom for each person, facility, zone, system, and timestamp,
+then reuse it across role, event, inspection, notification, authorization,
+correction, and disclosure rows.
+
+Fresh compile after atom-ledger guidance:
+
+- admitted ops: `61`
+- skipped ops: `7`
+- expected signature recall: `0.839`
+
+Targeted QA probe:
+
+- ids: `q024,q027,q060,q068,q088`
+- result: `3 exact + 1 partial + 1 miss`
+
+### What Improved
+
+The Ferreira/Pier 7 joins improved immediately:
+
+- `q024` moved from miss to exact because `inspection/3`,
+  `bypass_authorization/3`, and the validity policy could now join on the same
+  person/facility atoms.
+- `q027` moved from miss to exact because the confirmed inspection date became
+  queryable through the same canonical surface.
+- `q068` remained exact for activation-after-authorization ordering.
+
+### Remaining Tradeoff
+
+The same compile became thinner overall. Atom-ledger consistency improved
+joinability, but the compiler dropped some broader coverage. The next target is
+to keep atom-ledger discipline without making the compiler timid: stable symbols
+plus broad support coverage, not one or the other.

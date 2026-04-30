@@ -120,6 +120,7 @@ def test_iron_harbor_story_world_bundle_is_complete() -> None:
         "qa_source.md",
         "qa.md",
         "qa_battery.jsonl",
+        "qa_support_map.jsonl",
         "intake_plan.md",
         "progress_journal.md",
         "progress_metrics.jsonl",
@@ -148,6 +149,21 @@ def test_iron_harbor_qa_battery_is_harness_ready() -> None:
     assert len(answers) == 100
     assert questions[0]["id"] == "q001"
     assert "85 CFU/100mL" in answers["q001"]
+
+
+def test_iron_harbor_qa_support_map_is_harness_ready() -> None:
+    records = [
+        json.loads(line)
+        for line in (IRON_HARBOR / "qa_support_map.jsonl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    assert len(records) == 20
+    assert records[0]["id"] == "q001"
+    assert records[-1]["id"] == "q020"
+    assert all(row.get("required_support_any") for row in records)
+    assert all(row.get("failure_classes") for row in records)
+    assert any("temporal_duration_gap" in row["failure_classes"] for row in records)
+    assert any("set_difference_reasoning_gap" in row["failure_classes"] for row in records)
 
 
 def test_iron_harbor_metadata_is_graph_ready() -> None:
