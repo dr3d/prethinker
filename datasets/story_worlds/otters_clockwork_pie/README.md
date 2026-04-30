@@ -26,6 +26,12 @@ failures unless they appear in the source.
 - `progress_journal.md`: running mini-journal of benchmark attempts and lessons.
 - `progress_metrics.jsonl`: append-only metrics rows for progress graphs.
 
+Generate a local graph-friendly table with:
+
+```bash
+python scripts/summarize_story_world_progress.py
+```
+
 ## Why It Matters
 
 This is a high-pressure story-world test for the current Semantic IR direction:
