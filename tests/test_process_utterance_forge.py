@@ -37,7 +37,6 @@ def test_summarize_result_extracts_parse_and_trace_fields():
             "summary": {
                 "overall": "parse adjusted via synthetic_guard",
                 "parse_rescues": ["synthetic_guard"],
-                "freethinker_action": "off",
             }
         },
     }

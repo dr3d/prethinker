@@ -26,8 +26,7 @@
     "compiler_mode": "strict",
     "strict_registry": true,
     "strict_types": false,
-    "clarification_eagerness": 0.8,
-    "freethinker_resolution_policy": "advisory_only"
+    "clarification_eagerness": 0.8
   },
   "semantic_ir_context": [
     "profile_scope: bounded clinical memory, not diagnosis or treatment advice",

@@ -108,7 +108,7 @@ This is important because the same UI needs to serve two audiences:
 - semantic IR backend: `lmstudio`
 - semantic IR base URL: `http://127.0.0.1:1234`
 - served handoff mode in strict mode: `never`
-- clarification sidecar policy: retired from the mainline; current clarification pressure should come through router/compiler context and mapper projection
+- retired clarification experiment: removed from the mainline; current clarification pressure should come through router/compiler context and mapper projection
 
 ## Long Narrative Ingestion
 
@@ -152,11 +152,11 @@ collapsing into one overlarge workspace. The rule is structural and domain
 neutral: split where the turn mode changes, then let each segment go through
 normal Semantic IR admission.
 
-## Experimental Sidecar Status
+## Retired Clarification Experiment
 
-Sidecar controls remain in the UI/config only so old experiments can be
-reproduced. They are off by default and not part of the current mainline
-research path. Normal console work should use the primary Semantic IR pass with
+The experimental clarification helper has been removed from the active UI,
+gateway config, and server trace surface. Old comparisons remain available in
+git history, but normal console work now uses the primary Semantic IR pass with
 recent context, profile context, predicate contracts, and KB seed context.
 
 ## Deliberate Limits

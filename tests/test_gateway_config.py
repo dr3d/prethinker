@@ -6,18 +6,12 @@ from ui_gateway.gateway.config import ConfigStore
 
 
 class GatewayConfigTests(unittest.TestCase):
-    def test_freethinker_defaults_roundtrip(self) -> None:
+    def test_defaults_roundtrip_current_gateway(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             store = ConfigStore(Path(tmpdir) / "gateway_config.json")
             config = store.get().to_dict()
             self.assertEqual(config.get("active_profile"), "general")
             self.assertEqual(config.get("reply_surface_policy"), "deterministic_template")
-            self.assertEqual(config.get("freethinker_resolution_policy"), "off")
-            self.assertEqual(config.get("freethinker_model"), "qwen/qwen3.6-35b-a3b")
-            self.assertEqual(config.get("freethinker_backend"), "lmstudio")
-            self.assertEqual(config.get("freethinker_base_url"), "http://127.0.0.1:1234")
-            self.assertEqual(config.get("freethinker_temperature"), 0.2)
-            self.assertFalse(config.get("freethinker_thinking"))
             self.assertEqual(config.get("compiler_backend"), "lmstudio")
             self.assertEqual(config.get("compiler_model"), "qwen/qwen3.6-35b-a3b")
             self.assertTrue(config.get("semantic_ir_enabled"))
@@ -25,30 +19,6 @@ class GatewayConfigTests(unittest.TestCase):
             self.assertEqual(config.get("semantic_ir_temperature"), 0.0)
             self.assertEqual(config.get("semantic_ir_top_p"), 0.82)
             self.assertEqual(config.get("semantic_ir_top_k"), 20)
-            self.assertEqual(
-                config.get("freethinker_prompt_file"),
-                "modelfiles/freethinker_system_prompt.md",
-            )
-
-    def test_invalid_freethinker_settings_are_sanitized(self) -> None:
-        with tempfile.TemporaryDirectory() as tmpdir:
-            store = ConfigStore(Path(tmpdir) / "gateway_config.json")
-            updated = store.update(
-                {
-                    "freethinker_resolution_policy": "wild_guessing",
-                    "freethinker_backend": "unknown",
-                    "freethinker_context_length": 128,
-                    "freethinker_timeout": 0,
-                    "freethinker_temperature": 9,
-                    "freethinker_thinking": 1,
-                }
-            ).to_dict()
-            self.assertEqual(updated.get("freethinker_resolution_policy"), "off")
-            self.assertEqual(updated.get("freethinker_backend"), "ollama")
-            self.assertEqual(updated.get("freethinker_context_length"), 512)
-            self.assertEqual(updated.get("freethinker_timeout"), 5)
-            self.assertEqual(updated.get("freethinker_temperature"), 2.0)
-            self.assertTrue(updated.get("freethinker_thinking"))
 
     def test_invalid_semantic_ir_settings_are_sanitized(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

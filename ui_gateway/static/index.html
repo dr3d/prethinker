@@ -267,9 +267,6 @@
           <button id="strict-lock-button" class="ghost-button strict-lock-button" type="button">
             Apply Strict Bouncer Lock
           </button>
-          <button id="freethinker-advisory-button" class="ghost-button freethinker-advisory-button" type="button">
-            Experimental Sidecar
-          </button>
           <button id="medical-profile-button" class="ghost-button medical-profile-button" type="button">
             Use medical@v0
           </button>
@@ -279,7 +276,7 @@
         </div>
         <p class="status-line compact-line">
           Strict lock enforces compiler=`strict`, served handoff=`never`, and final confirmation=`true`.
-          Semantic IR is the current primary path; the sidecar controls are retained only for controlled experiments.
+          Semantic IR, context routing, and deterministic admission are the current primary path.
           Served chat keeps fact compilation on, but lets uncertain turns fall through to the served model.
         </p>
       </div>
@@ -407,58 +404,12 @@
             <span>Semantic IR thinking</span>
             <input name="semantic_ir_thinking" type="checkbox">
           </label>
-          <p class="config-section-title">Freethinker sidecar (shelved)</p>
-          <label class="config-field">
-            <span>Freethinker policy</span>
-            <select name="freethinker_resolution_policy">
-              <option value="off">off</option>
-              <option value="advisory_only">advisory_only</option>
-              <option value="grounded_reference">grounded_reference</option>
-              <option value="conservative_contextual">conservative_contextual</option>
-            </select>
-          </label>
-          <label class="config-field">
-            <span>Freethinker model</span>
-            <input name="freethinker_model" type="text">
-          </label>
-          <label class="config-field">
-            <span>Freethinker backend</span>
-            <select name="freethinker_backend">
-              <option value="ollama">ollama</option>
-              <option value="lmstudio">lmstudio</option>
-            </select>
-          </label>
-          <label class="config-field">
-            <span>Freethinker base URL</span>
-            <input name="freethinker_base_url" type="text">
-          </label>
-          <label class="config-field">
-            <span>Freethinker context length</span>
-            <input name="freethinker_context_length" type="number" min="512" step="256">
-          </label>
-          <label class="config-field">
-            <span>Freethinker timeout (seconds)</span>
-            <input name="freethinker_timeout" type="number" min="5" step="1">
-          </label>
-          <label class="config-field">
-            <span>Freethinker temperature</span>
-            <input name="freethinker_temperature" type="number" min="0" max="2" step="0.05">
-          </label>
-          <label class="config-field config-flag">
-            <span>Freethinker thinking</span>
-            <input name="freethinker_thinking" type="checkbox">
-          </label>
-          <label class="config-field">
-            <span>Freethinker prompt file</span>
-            <input name="freethinker_prompt_file" type="text">
-          </label>
           <p class="config-section-title">Policy</p>
           <label class="config-field">
             <span>Reply surface</span>
             <select name="reply_surface_policy">
               <option value="deterministic">deterministic</option>
               <option value="deterministic_template">deterministic_template</option>
-              <option value="freethinker_humanize">freethinker_humanize (experimental)</option>
             </select>
           </label>
           <label class="config-field">

@@ -159,11 +159,12 @@ As of April 29, 2026:
 
 That means the repo already supports the governed compiler shape directly.
 
-The old clarification-liaison sidecar remains historical scaffolding only. The
-bigger current research question is whether richer semantic workspaces can
-reduce English-specific Python rescue logic while preserving the same authority
-boundary. Current improvements should come from model workspaces, context/profile
-contracts, KB context, or structural mapper checks, not Python phrase patches.
+The old clarification-liaison experiment is retired; it is no longer part of the
+active gateway surface. The bigger current research question is whether richer
+semantic workspaces can reduce English-specific Python rescue logic while
+preserving the same authority boundary. Current improvements should come from
+model workspaces, context/profile contracts, KB context, or structural mapper
+checks, not Python phrase patches.
 
 ## Why The Repo Looks The Way It Does
 

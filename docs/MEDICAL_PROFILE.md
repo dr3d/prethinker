@@ -86,11 +86,11 @@ Recommended posture for this profile:
 - Semantic IR backend: LM Studio/OpenAI-compatible structured output
 - default development model: `qwen/qwen3.6-35b-a3b`
 - higher clarification eagerness
-- clarification sidecar off; clarification pressure should come from profile
+- retired clarification experiment off; clarification pressure should come from profile
   context, recent context, predicate contracts, KB seed context, and mapper
   projection
 
-The older advisory-sidecar idea has been superseded for the mainline path by
+The older advisory clarification experiment has been superseded for the mainline path by
 Semantic IR context engineering: profile context, recent context, predicate
 contracts, and compact KB seed context are fed into the primary workspace pass.
 

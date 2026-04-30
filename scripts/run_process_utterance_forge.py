@@ -554,7 +554,6 @@ def _summarize_result(result: dict[str, Any]) -> dict[str, Any]:
         "error_count": len(execution.get("errors", [])) if isinstance(execution.get("errors"), list) else 0,
         "trace_overall": str(trace_summary.get("overall", "")).strip(),
         "trace_parse_rescues": list(trace_summary.get("parse_rescues", [])) if isinstance(trace_summary.get("parse_rescues"), list) else [],
-        "freethinker_action": str(trace_summary.get("freethinker_action", "")).strip(),
     }
 
 
@@ -742,13 +741,6 @@ def _run_episode(
         compiler_context_length=args.compiler_context_length,
         compiler_timeout=args.compiler_timeout,
         compiler_prompt_file=args.compiler_prompt_file,
-        freethinker_resolution_policy=args.freethinker_resolution_policy,
-        freethinker_backend=args.freethinker_backend,
-        freethinker_base_url=args.freethinker_base_url,
-        freethinker_model=args.freethinker_model,
-        freethinker_context_length=args.freethinker_context_length,
-        freethinker_timeout=args.freethinker_timeout,
-        freethinker_prompt_file=args.freethinker_prompt_file,
     )
     server.empty_kb()
     transcript: list[dict[str, Any]] = []
@@ -929,17 +921,6 @@ def parse_args() -> argparse.Namespace:
         default=str(ROOT / "modelfiles" / "blank_prompt.md"),
     )
 
-    parser.add_argument("--freethinker-resolution-policy", default="off")
-    parser.add_argument("--freethinker-backend", default="ollama")
-    parser.add_argument("--freethinker-base-url", default="http://127.0.0.1:11434")
-    parser.add_argument("--freethinker-model", default="qwen/qwen3.6-35b-a3b")
-    parser.add_argument("--freethinker-context-length", type=int, default=16384)
-    parser.add_argument("--freethinker-timeout", type=int, default=60)
-    parser.add_argument(
-        "--freethinker-prompt-file",
-        default=str(ROOT / "modelfiles" / "freethinker_system_prompt.md"),
-    )
-
     parser.add_argument("--challenger-backend", default="ollama")
     parser.add_argument("--challenger-base-url", default="http://127.0.0.1:11434")
     parser.add_argument("--challenger-model", default="qwen/qwen3.6-35b-a3b")
@@ -1009,7 +990,6 @@ def main() -> int:
             "compiler_model": args.compiler_model,
             "challenger_model": args.challenger_model,
             "judge_model": args.judge_model,
-            "freethinker_resolution_policy": args.freethinker_resolution_policy,
             "lane_profile": args.lane_profile,
             "episodes": int(args.episodes),
             "turns_per_episode": int(args.turns_per_episode),

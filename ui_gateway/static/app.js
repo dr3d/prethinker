@@ -167,8 +167,8 @@ const PROMPT_BOOKS = {
         "The first turn should hold because 'it' has no grounded referent. The follow-up should resolve the staged turn rather than starting a random new fact.",
     },
     {
-      title: "Context check without sidecar",
-      setup: "Keep the experimental sidecar off. This probes whether the main Semantic IR path uses recent context conservatively.",
+      title: "Context check in the main pipeline",
+      setup: "Probe whether the main Semantic IR path uses recent context conservatively.",
       steps: [
         { label: "Context", utterance: "Scott's mom is Ann." },
         { label: "Context", utterance: "Priya's brother is Omar." },
@@ -273,7 +273,7 @@ const PROMPT_BOOKS = {
     },
     {
       title: "Context-dependent pronoun",
-      setup: "Keep the sidecar off and let recent context compete with strict patient identity checks.",
+      setup: "Let recent context compete with strict patient identity checks.",
       steps: [
         { label: "Context", utterance: "Priya is taking warfarin." },
         { label: "Context", utterance: "Mara has asthma." },
@@ -691,7 +691,6 @@ function summarizeTurnInternals(turn) {
       ? trace.summary
       : {};
   const prethinkSource = String(traceSummary.prethink_source || "").trim();
-  const freethinkerAction = String(traceSummary.freethinker_action || "").trim().toLowerCase();
   const parseRescues = Array.isArray(traceSummary.parse_rescues)
     ? traceSummary.parse_rescues.map((item) => String(item || "").trim()).filter(Boolean)
     : [];
@@ -715,9 +714,6 @@ function summarizeTurnInternals(turn) {
   }
   if (prethinkSource && prethinkSource !== "primary") {
     compilerPathParts.push(`routing=${prethinkSource}`);
-  }
-  if (freethinkerAction && freethinkerAction !== "skipped") {
-    compilerPathParts.push(`freethinker=${freethinkerAction}`);
   }
   if (meaningfulParseRescues.length) {
     compilerPathParts.push(`parse adjusted via ${meaningfulParseRescues.join(", ")}`);
@@ -1245,12 +1241,11 @@ function renderPathStrip(ledger) {
   const commitPhase = findTurnPhase(latestTurn, "commit");
   const activeProfile = String(state.config?.active_profile || "general").trim() || "general";
   const strictMode = Boolean(state.config?.strict_mode);
-  const freethinkerPolicy = String(state.config?.freethinker_resolution_policy || "off").trim();
   const compilerIntent = String(frontDoor.compiler_intent || execution?.intent || route || "").trim();
 
   setPathCard("profile", {
     value: activeProfile,
-    meta: `${strictMode ? "strict" : "open"} | sidecar ${freethinkerPolicy}`,
+    meta: strictMode ? "strict admission" : "served fallback allowed",
     tone: activeProfile === "medical@v0" ? "success" : "neutral",
   });
 
@@ -2270,8 +2265,6 @@ function splitPromptSections(promptText, kind, sharedPromptReference = "") {
   const utteranceMarkers =
     kind === "routing"
       ? ["\nUSER_UTTERANCE:\n", "\nUtterance:\n"]
-      : kind === "freethinker"
-        ? ["\nCURRENT_UTTERANCE:\n", "\nUtterance:\n", "\nUSER_UTTERANCE:\n"]
       : ["\nUtterance:\n", "\nUSER_UTTERANCE:\n"];
   let utterance = "";
   let promptBody = body;
@@ -2287,8 +2280,6 @@ function splitPromptSections(promptText, kind, sharedPromptReference = "") {
   const wrapperMarkers =
     kind === "parse"
       ? ["Route lock:", "Known ontology predicates:", "Return JSON only with exactly these keys:"]
-      : kind === "freethinker"
-        ? ["FREETHINKER_CONTEXT_JSON:"]
       : kind === "served"
         ? [
             "You are the served assistant behind a governed pre-think gateway.",
@@ -2336,8 +2327,6 @@ function splitPromptSections(promptText, kind, sharedPromptReference = "") {
         label:
           kind === "parse"
             ? "Parse wrapper / schema"
-            : kind === "freethinker"
-              ? "Freethinker wrapper / schema"
             : kind === "served"
               ? "Served handoff wrapper"
               : "Routing wrapper / schema",
@@ -2399,16 +2388,6 @@ function collectModelContextBlocks(turn) {
     blocks.push({ label: "Parse Prompt", parts: decomposed.parts });
   }
 
-  const freethinkerPrompt = String(
-    ((((turnTrace || {}).freethinker || {}).prompt_text) || "")
-  ).trim();
-  if (freethinkerPrompt) {
-    blocks.push({
-      label: "Freethinker Prompt",
-      parts: splitPromptSections(freethinkerPrompt, "freethinker").parts,
-    });
-  }
-
   const servedPrompt = String(
     ((((turn || {}).assistant || {}).served_llm || {}).prompt_text || "")
   ).trim();
@@ -2444,11 +2423,6 @@ function collectCompilerJsonBlocks(turnTrace) {
   const parseJson = (((turnTrace || {}).parse || {}).extractor || {}).parsed;
   if (parseJson && typeof parseJson === "object") {
     blocks.push({ label: "Parse JSON", text: prettyJson(parseJson) });
-  }
-
-  const freethinkerJson = ((turnTrace || {}).freethinker || {}).parsed;
-  if (freethinkerJson && typeof freethinkerJson === "object") {
-    blocks.push({ label: "Freethinker JSON", text: prettyJson(freethinkerJson) });
   }
 
   return blocks;
@@ -2959,9 +2933,6 @@ async function saveConfig(event) {
     "semantic_ir_temperature",
     "semantic_ir_top_p",
     "semantic_ir_top_k",
-    "freethinker_context_length",
-    "freethinker_timeout",
-    "freethinker_temperature",
     "clarification_eagerness",
   ]);
 
@@ -2976,7 +2947,6 @@ async function saveConfig(event) {
   payload.require_final_confirmation = form.elements.namedItem("require_final_confirmation").checked;
   payload.semantic_ir_enabled = form.elements.namedItem("semantic_ir_enabled").checked;
   payload.semantic_ir_thinking = form.elements.namedItem("semantic_ir_thinking").checked;
-  payload.freethinker_thinking = form.elements.namedItem("freethinker_thinking").checked;
 
   try {
     const response = await getJson("/api/config", {
@@ -3027,23 +2997,6 @@ function servedChatPayload(baseConfig) {
   };
 }
 
-function freethinkerAdvisoryPayload(baseConfig) {
-  return {
-    ...baseConfig,
-    freethinker_resolution_policy: "advisory_only",
-    freethinker_temperature: Number(baseConfig?.freethinker_temperature ?? 0.2) || 0.2,
-    freethinker_thinking: Boolean(baseConfig?.freethinker_thinking),
-    freethinker_model: String(baseConfig?.freethinker_model || SEMANTIC_IR_PRIMARY.model),
-    freethinker_backend: String(baseConfig?.freethinker_backend || SEMANTIC_IR_PRIMARY.backend),
-    freethinker_base_url: String(baseConfig?.freethinker_base_url || SEMANTIC_IR_PRIMARY.baseUrl),
-    freethinker_context_length: Number(baseConfig?.freethinker_context_length || 16384),
-    freethinker_timeout: Number(baseConfig?.freethinker_timeout || 60),
-    freethinker_prompt_file: String(
-      baseConfig?.freethinker_prompt_file || "modelfiles/freethinker_system_prompt.md"
-    ),
-  };
-}
-
 function medicalProfilePayload(baseConfig) {
   return {
     ...baseConfig,
@@ -3067,17 +3020,6 @@ function medicalProfilePayload(baseConfig) {
     served_handoff_mode: "never",
     require_final_confirmation: true,
     clarification_eagerness: Math.max(0.8, Number(baseConfig?.clarification_eagerness || 0)),
-    freethinker_resolution_policy: "off",
-    freethinker_temperature: Number(baseConfig?.freethinker_temperature ?? 0.2) || 0.2,
-    freethinker_thinking: Boolean(baseConfig?.freethinker_thinking),
-    freethinker_model: String(baseConfig?.freethinker_model || SEMANTIC_IR_PRIMARY.model),
-    freethinker_backend: String(baseConfig?.freethinker_backend || SEMANTIC_IR_PRIMARY.backend),
-    freethinker_base_url: String(baseConfig?.freethinker_base_url || SEMANTIC_IR_PRIMARY.baseUrl),
-    freethinker_context_length: Number(baseConfig?.freethinker_context_length || 16384),
-    freethinker_timeout: Number(baseConfig?.freethinker_timeout || 60),
-    freethinker_prompt_file: String(
-      baseConfig?.freethinker_prompt_file || "modelfiles/freethinker_system_prompt.md"
-    ),
   };
 }
 
@@ -3119,25 +3061,6 @@ async function applyServedChatPreference() {
   }
 }
 
-async function applyFreethinkerAdvisory() {
-  try {
-    const payload = freethinkerAdvisoryPayload(state.config || {});
-    const response = await getJson("/api/config", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
-    state.config = response.config;
-    fillConfigForm(state.config);
-    document.getElementById("config-status").textContent =
-      "Experimental sidecar enabled. Use only as a controlled sidecar-on comparison.";
-  } catch (error) {
-    document.getElementById("config-status").textContent = `Freethinker preset failed: ${String(error)}`;
-  }
-}
-
 async function applyMedicalProfilePreset() {
   try {
     const payload = medicalProfilePayload(state.config || {});
@@ -3151,7 +3074,7 @@ async function applyMedicalProfilePreset() {
     state.config = response.config;
     fillConfigForm(state.config);
     document.getElementById("config-status").textContent =
-      "medical@v0 applied (strict compiler, medical prompt profile, sidecar off).";
+      "medical@v0 applied (strict compiler, medical prompt profile).";
   } catch (error) {
     document.getElementById("config-status").textContent = `medical@v0 preset failed: ${String(error)}`;
   }
@@ -3360,7 +3283,6 @@ window.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("reset-button").addEventListener("click", resetSession);
   document.getElementById("export-button").addEventListener("click", exportSession);
   document.getElementById("strict-lock-button").addEventListener("click", applyStrictBouncerLock);
-  document.getElementById("freethinker-advisory-button").addEventListener("click", applyFreethinkerAdvisory);
   document.getElementById("medical-profile-button").addEventListener("click", applyMedicalProfilePreset);
   document.getElementById("served-chat-button").addEventListener("click", applyServedChatPreference);
   try {

@@ -50,13 +50,6 @@ def _build_server(args: argparse.Namespace) -> PrologMCPServer:
         compiler_context_length=args.compiler_context_length,
         compiler_timeout=args.compiler_timeout,
         compiler_prompt_file=args.compiler_prompt_file,
-        freethinker_resolution_policy=args.freethinker_resolution_policy,
-        freethinker_backend=args.freethinker_backend,
-        freethinker_base_url=args.freethinker_base_url,
-        freethinker_model=args.freethinker_model,
-        freethinker_context_length=args.freethinker_context_length,
-        freethinker_timeout=args.freethinker_timeout,
-        freethinker_prompt_file=args.freethinker_prompt_file,
     )
 
 
@@ -117,17 +110,6 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--compiler-prompt-file",
         default=str(ROOT / "modelfiles" / "blank_prompt.md"),
-    )
-
-    parser.add_argument("--freethinker-resolution-policy", default="off")
-    parser.add_argument("--freethinker-backend", default="ollama")
-    parser.add_argument("--freethinker-base-url", default="http://127.0.0.1:11434")
-    parser.add_argument("--freethinker-model", default="qwen/qwen3.6-35b-a3b")
-    parser.add_argument("--freethinker-context-length", type=int, default=16384)
-    parser.add_argument("--freethinker-timeout", type=int, default=60)
-    parser.add_argument(
-        "--freethinker-prompt-file",
-        default=str(ROOT / "modelfiles" / "freethinker_system_prompt.md"),
     )
 
     parser.add_argument("--judge-backend", default="ollama")
@@ -202,7 +184,7 @@ def main() -> int:
                     "parse": {},
                     "errors": ["setup_failed"],
                 },
-                "compiler_trace": {"summary": {"overall": "setup_failed", "parse_rescues": [], "freethinker_action": ""}},
+                "compiler_trace": {"summary": {"overall": "setup_failed", "parse_rescues": []}},
             }
         else:
             target_result = _run_turn(server=server, utterance=target_utterance)

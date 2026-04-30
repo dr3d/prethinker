@@ -34,7 +34,6 @@ def _normalize_reply_surface_policy(value: object, default: str = "deterministic
     allowed = {
         "deterministic",
         "deterministic_template",
-        "freethinker_humanize",
     }
     requested = str(value or default).strip().lower()
     if requested not in allowed:
@@ -70,15 +69,6 @@ class GatewayConfig:
     semantic_ir_top_k: int = 20
     semantic_ir_thinking: bool = False
     clarification_eagerness: float = 0.75
-    freethinker_resolution_policy: str = "off"
-    freethinker_model: str = "qwen/qwen3.6-35b-a3b"
-    freethinker_backend: str = "lmstudio"
-    freethinker_base_url: str = "http://127.0.0.1:1234"
-    freethinker_context_length: int = 16384
-    freethinker_timeout: int = 60
-    freethinker_temperature: float = 0.2
-    freethinker_thinking: bool = False
-    freethinker_prompt_file: str = "modelfiles/freethinker_system_prompt.md"
     require_final_confirmation: bool = True
     strict_mode: bool = True
 
@@ -139,13 +129,6 @@ class ConfigStore:
         if served_model in old_model_values:
             migrated["served_llm_model"] = "qwen/qwen3.6-35b-a3b"
 
-        sidecar_model = str(raw_payload.get("freethinker_model", "")).strip()
-        if sidecar_model in old_model_values:
-            migrated["freethinker_model"] = "qwen/qwen3.6-35b-a3b"
-        if str(raw_payload.get("freethinker_backend", "")).strip().lower() in {"", "ollama"} and sidecar_model in old_model_values:
-            migrated["freethinker_backend"] = "lmstudio"
-        if str(raw_payload.get("freethinker_base_url", "")).strip() in {"", "http://127.0.0.1:11434"} and sidecar_model in old_model_values:
-            migrated["freethinker_base_url"] = "http://127.0.0.1:1234"
         return migrated
 
     def _sanitize(self, payload: dict) -> dict:
@@ -207,26 +190,6 @@ class ConfigStore:
                 sanitized["semantic_ir_top_k"] = max(1, int(sanitized["semantic_ir_top_k"]))
             except Exception:
                 sanitized.pop("semantic_ir_top_k", None)
-        if "freethinker_context_length" in sanitized:
-            try:
-                sanitized["freethinker_context_length"] = max(512, int(sanitized["freethinker_context_length"]))
-            except Exception:
-                sanitized.pop("freethinker_context_length", None)
-        if "freethinker_timeout" in sanitized:
-            try:
-                sanitized["freethinker_timeout"] = max(5, int(sanitized["freethinker_timeout"]))
-            except Exception:
-                sanitized.pop("freethinker_timeout", None)
-        if "freethinker_temperature" in sanitized:
-            try:
-                value = float(sanitized["freethinker_temperature"])
-                if value < 0.0:
-                    value = 0.0
-                if value > 2.0:
-                    value = 2.0
-                sanitized["freethinker_temperature"] = value
-            except Exception:
-                sanitized.pop("freethinker_temperature", None)
         if "served_llm_timeout" in sanitized:
             try:
                 sanitized["served_llm_timeout"] = max(5, int(sanitized["served_llm_timeout"]))
@@ -252,11 +215,6 @@ class ConfigStore:
             if backend not in {"ollama", "lmstudio"}:
                 backend = "ollama"
             sanitized["compiler_backend"] = backend
-        if "freethinker_backend" in sanitized:
-            backend = str(sanitized["freethinker_backend"]).strip().lower()
-            if backend not in {"ollama", "lmstudio"}:
-                backend = "ollama"
-            sanitized["freethinker_backend"] = backend
         if "clarification_eagerness" in sanitized:
             try:
                 value = float(sanitized["clarification_eagerness"])
@@ -271,8 +229,6 @@ class ConfigStore:
             sanitized["strict_mode"] = bool(sanitized["strict_mode"])
         if "require_final_confirmation" in sanitized:
             sanitized["require_final_confirmation"] = bool(sanitized["require_final_confirmation"])
-        if "freethinker_thinking" in sanitized:
-            sanitized["freethinker_thinking"] = bool(sanitized["freethinker_thinking"])
         if "semantic_ir_enabled" in sanitized:
             sanitized["semantic_ir_enabled"] = bool(sanitized["semantic_ir_enabled"])
         if "semantic_ir_thinking" in sanitized:
@@ -282,11 +238,6 @@ class ConfigStore:
             if mode not in {"auto", "always", "never"}:
                 mode = "auto"
             sanitized["compiler_prompt_mode"] = mode
-        if "freethinker_resolution_policy" in sanitized:
-            mode = str(sanitized["freethinker_resolution_policy"]).strip().lower()
-            if mode not in {"off", "advisory_only", "grounded_reference", "conservative_contextual"}:
-                mode = "off"
-            sanitized["freethinker_resolution_policy"] = mode
         return sanitized
 
     def _enforce_invariants(self, payload: dict) -> dict:

@@ -77,16 +77,16 @@ becoming a catalog of remembered failures.
 
 That is the core reason for the new research lane.
 
-## Retired Sidecar Lesson
+## Retired Clarification Lesson
 
-An earlier clarification-sidecar design helped clarify the permission boundary:
+An earlier clarification-helper design helped clarify the permission boundary:
 a helper could suggest context, but only Prethinker and the deterministic mapper
 could authorize writes. That was useful as a design exercise, but it is not the
 current mainline.
 
 The bigger issue was upstream: the main parser was still a tightly caged model
 being asked to emit a narrow parse. When it missed the shape of an utterance, a
-sidecar could sometimes improve a question, but it did not remove the need for
+clarification helper could sometimes improve a question, but it did not remove the need for
 Python to perform increasingly specific semantic repair.
 
 That is why we are now exploring a more fundamental change:
@@ -224,7 +224,7 @@ The important takeaways:
   understanding.
 - `qwen3.6:27b` looked strong when allowed to do rich semantic workspace
   analysis, but it was slower.
-- `qwen3.6:35b-a3b` became the most promising general sidecar candidate because
+- `qwen3.6:35b-a3b` became the most promising general semantic-workspace model because
   it kept JSON reliability high and ran much faster than the dense 27B in rich
   mode.
 - `gemma4:26b` was worth keeping in the candidate pool, especially with
@@ -232,7 +232,7 @@ The important takeaways:
   prompts.
 - `medgemma:27b` was interesting as a medical ambiguity critic. It handled vague
   pressure, creatinine pronoun ambiguity, and allergy-versus-intolerance well,
-  but it is not the obvious general semantic sidecar.
+  but it is not the obvious general semantic-workspace model.
 
 This led us to fix on `qwen3.6:35b-a3b` as the main research model for the
 semantic IR lane.
@@ -498,7 +498,7 @@ the architecture.
    mapper checks, not phrase-specific Python patches.
 5. Tighten durable temporal representation, rule admission, negation policy,
    claim/fact/observation promotion, and predicate canonicalization.
-6. Treat the old clarification sidecar and old parser lane as historical
+6. Treat the old clarification helper and old parser lane as historical
    scaffolding, not the current semantic compiler.
 7. Push hint-free domain/profile discovery: `intake_plan_v1` and
    `profile_bootstrap_v1` should let the model propose symbolic vocabulary
@@ -513,8 +513,8 @@ the architecture.
    - Too much semantic rescue was accumulating in Python.
    - The system risked becoming test-specific.
 
-3. Why the retired sidecar was not enough
-   - Good clarification sidecar.
+3. Why the retired clarification helper was not enough
+   - Good clarification helper.
    - Not a replacement for richer semantic understanding.
 
 4. The new architecture
@@ -530,7 +530,7 @@ the architecture.
 6. Model exploration
    - the smaller Qwen lane remained a fast baseline.
    - 27B is strong but slow.
-   - 35B-A3B is the best general sidecar candidate so far.
+   - 35B-A3B is the best general semantic-workspace model so far.
    - MedGemma is interesting for medical ambiguity, not general authority.
 
 7. Evidence so far

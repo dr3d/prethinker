@@ -6,8 +6,7 @@
   "recommended_settings": {
     "compiler_mode": "strict",
     "strict_registry": true,
-    "clarification_eagerness": 0.85,
-    "freethinker_resolution_policy": "advisory_only"
+    "clarification_eagerness": 0.85
   },
   "selection_hints": {
     "use_when": [
