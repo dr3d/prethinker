@@ -53,6 +53,15 @@ def test_semantic_router_payload_exposes_roster_and_modules():
     assert "Fill context_audit" in policy
     assert "smallest useful action plan" in policy
     assert "extract_query_operations" in policy
+    assert "flood notes" in policy
+    assert "educational trusts" in policy
+    assert "scholarship or benefit eligibility" in policy
+    assert "noisy narrative wording" in policy
+
+    assert "educational trust" in " ".join(profiles["probate@v0"]["use_when"])
+    assert "scholarship or benefit rules" in " ".join(profiles["legal_courtlistener@v0"]["use_when"])
+    assert "probate, estate, beneficiary" in " ".join(profiles["sec_contracts@v0"]["avoid_when"])
+    assert "source-record" in " ".join(profiles["story_world@v0"]["avoid_when"])
 
 
 def test_semantic_router_messages_use_dedicated_router_system_prompt():

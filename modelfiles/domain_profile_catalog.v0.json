@@ -31,17 +31,20 @@
       ],
       "avoid_when": [
         "formal legal/probate policy",
-        "clinical fact intake"
+        "clinical fact intake",
+        "recent legal, probate, administrative, source-record, eligibility, or document-correction context even when the wording is story-like"
       ],
       "thick_context_source": "profile.story_world.v0.json"
     },
     {
       "profile_id": "probate@v0",
       "status": "proposal",
-      "description": "Estate/probate claims, beneficiaries, witnesses, amendments, forfeiture conditions, identity ambiguity, and ledger evidence.",
+      "description": "Estate/probate claims, beneficiaries, trusts, property shares, witnesses, amendments, forfeiture conditions, identity ambiguity, and ledger evidence.",
       "use_when": [
         "inheritance or beneficiary status",
         "will, charter, amendment, witness, estate, or probate language",
+        "trust, educational trust, property share, nominal forced transfer, guardian asset transfer, or estate asset distribution",
+        "Silverton, Elias, Arthur, Alfred, A.S., residency, London, or forfeiture follow-up when recent context carries probate scenario pressure",
         "claim versus observed document evidence",
         "identity ambiguity in legal records"
       ],
@@ -64,19 +67,22 @@
       "avoid_when": [
         "investment advice or trading recommendation",
         "legal advice about enforceability",
-        "medical fact intake"
+        "medical fact intake",
+        "scholarship, benefit, or administrative eligibility records unless an explicit contract-party obligation owns the turn",
+        "probate, estate, beneficiary, trust, property-share, or guardian asset transfers unless the contract itself is the primary source"
       ],
       "thick_context_source": "profile.sec_contracts.v0.json"
     },
     {
       "profile_id": "legal_courtlistener@v0",
       "status": "proposal",
-      "description": "CourtListener-backed legal source intake for opinions, dockets, judges, parties, citations, claims, findings, holdings, and document provenance.",
+      "description": "CourtListener-backed and legal/admin source intake for opinions, dockets, judges, parties, citations, claims, findings, holdings, administrative records, source logs, eligibility records, and document provenance.",
       "use_when": [
         "CourtListener opinion, docket, judge, filing, citation, or oral argument data",
         "case caption, court, judge, party, attorney, citation, or date extraction",
         "party allegation versus court finding",
         "docket event versus merits holding",
+        "legal or administrative notes, flood notes, document dates, eligibility records, scholarship or benefit rules, access stamps, source logs, or record-backed temporal corrections",
         "legal identity ambiguity in source records"
       ],
       "avoid_when": [
