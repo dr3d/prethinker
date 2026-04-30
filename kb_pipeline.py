@@ -9618,7 +9618,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--scenario",
-        default="kb_scenarios/kb_positive.json",
+        default="kb_scenarios/acid_03_temporal_override.json",
         help="Scenario JSON path (utterances + validations).",
     )
     parser.add_argument(

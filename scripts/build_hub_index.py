@@ -58,7 +58,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         "--spotcheck-scenarios",
         default=(
-            "stage_01_facts_only,stage_02_rule_ingest,stage_03_transitive_chain,"
+            "stage_00_multilingual_probe,stage_00_foreign_unseen_probe,"
             "acid_03_temporal_override,acid_04_alias_pressure,acid_05_long_context_lineage"
         ),
         help="Comma-separated scenario names to prioritize in Spot Checks.",

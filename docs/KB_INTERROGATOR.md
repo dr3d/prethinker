@@ -77,7 +77,8 @@ Markdown report is a fast human read for triage.
 
 1. Ingest text/story through the current Semantic IR/domain-bootstrap path.
 2. Run `kb_interrogator.py` on source + resulting KB.
-3. Promote repeated misses/bogus patterns into new scenario/rung tests.
+3. Promote repeated misses/bogus patterns into current Lava/story-world/domain
+   bootstrap fixtures.
 4. Re-run interrogator and compare pass rate + fact audit deltas.
 
 ## Near-Term Trajectory

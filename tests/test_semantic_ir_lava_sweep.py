@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from scripts.run_semantic_ir_lava_sweep import apply_mapped_directly, filter_lava_cases, score_expectation, select_base_cases
+from scripts.run_semantic_ir_lava_sweep import apply_mapped_directly, filter_lava_cases, load_lava_cases, score_expectation, select_base_cases
 from scripts.run_semantic_ir_lava_sweep import load_frontier_pack_cases
 from scripts.run_semantic_ir_lava_sweep import LavaCase
 from src.mcp_server import PrologMCPServer
@@ -50,6 +50,19 @@ def test_lava_balanced_sampling_spreads_source_families():
 
     assert len(selected) == 4
     assert {"medical", "dataset", "goldilocks"} <= sources
+
+
+def test_remaining_kb_scenarios_are_mined_by_lava_sweep():
+    from pathlib import Path
+
+    scenario_files = {path.stem for path in Path("kb_scenarios").glob("*.json")}
+    loaded_sources = {
+        case.source.split(":", 1)[1]
+        for case in load_lava_cases(include_tmp=False)
+        if case.source.startswith("kb_scenario:")
+    }
+
+    assert scenario_files <= loaded_sources
 
 
 def test_lava_pack_v2_loads_with_expected_profile_coverage():

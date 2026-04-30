@@ -101,18 +101,19 @@ Let `semantic_router_v1` or `semantic_ir_v1` provide `turn_type`, `contains_quer
 
 File: `src/mcp_server.py`
 
-There are still older Python routines that parse pronouns, family bundles, same-clause spouse phrases, and possessive social relationships.
+The active raw-utterance rewrite layer for possessive family bundles,
+same-clause spouse phrases, and same-utterance family-anchor pronouns has been
+removed. Those monkey patches used to edit the user text before the compiler
+saw it, which violated the wall sign.
 
-Key examples:
+Remaining red-zone pressure:
 
 - `_build_coreference_hint()` lines 3943-4058.
 - `_utterance_has_explicit_family_bundle()` lines 3010-3019.
-- `_normalize_possessive_family_bundle_utterance()` lines 4882-4906.
-- `_normalize_same_clause_spouse_phrase_utterance()` lines 4935-4950.
-- `_normalize_same_utterance_family_anchor_pronouns()` lines 4985-5000.
-- Monkey patches around `PrologMCPServer.process_utterance` lines 4909-5016.
 
-This is the clearest example of the old architecture: Python learning English one failure at a time.
+The removed rewrite functions are preserved only in git history. Remaining
+coreference/family clarification helpers are still legacy strict-compiler
+debt, not the target architecture.
 
 Replacement direction:
 

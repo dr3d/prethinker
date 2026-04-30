@@ -14,10 +14,12 @@ the archive for those parser-era ladder files. Keeping them locally made the
 repo look like it still had an English-first test ladder, which no longer
 matches the current architecture.
 
-The remaining non-rung files are retained only because a few smoke/lava paths
-can still mine them as generic pressure material through the current
-router/Semantic IR/mapper pipeline. Do not add new fixtures here unless a
-legacy harness explicitly needs JSON scenario shape.
+Every remaining JSON fixture in this directory is mined by the current
+Semantic IR Lava sweep as generic pressure material through the
+router/Semantic IR/mapper pipeline. Older JSON fixtures that were not reachable
+from current sweeps have been removed from the working tree; git history remains
+their archive. Do not add new fixtures here unless a compatibility harness
+explicitly needs this historical JSON scenario shape.
 
 ## Preferred Homes For New Work
 

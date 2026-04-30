@@ -290,9 +290,9 @@ That is also why the repo is careful about honesty:
 
 ## What We Know Today
 
-As of April 29, 2026:
+As of April 30, 2026:
 
-- the full local pytest suite is green at `403 passed`
+- the lean local pytest suite is green at `339 passed` after retiring the legacy parser-lane tests, unreachable JSON fixtures, the old clarification side surface, and parser-era family/social rewrite crutches
 - the console is the canonical interactive front door
 - `semantic_router_v1 -> semantic_ir_v1` is the active research lane for model-owned context planning and richer model understanding before deterministic admission
 - the latest semantic IR edge runtime A/B is `20/20` decision labels with `0.976` average score
