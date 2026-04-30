@@ -38,3 +38,41 @@ compile-time pressure toward policy clauses, temporal deadlines, notification
 scope, authorization validity, correction records, and claim/finding separation.
 The next improvement should come from context choreography and predicate-roster
 selection, not Python reading the source text.
+
+## 2026-04-30 - Runs IHR-002 through IHR-004 - Profile Shape and Contracts
+
+### IHR-002 - Policy/Incident Context Profile Discovery
+
+Adding a policy/incident compiler strategy improved profile shape but hurt QA.
+The profile became prettier (`rough_score=1.000`, no generic predicates), yet
+it replaced many registry predicates with generic-but-plausible surfaces such as
+`policy_rule/3`, `measurement/4`, `deadline/3`, and `advisory_status/3`.
+
+That produced a useful failure lesson: profile score is not enough. A profile
+can be internally coherent and still drift away from the domain's intended
+query surface.
+
+### IHR-003 - Direct Registry Profile
+
+Using the registry directly changed the picture. Emitted/gold signature recall
+jumped to `0.857`, and first-20 QA rose to `8 exact + 2 partial`.
+
+The failure mode also changed: the model now used the right predicates, but the
+registry had only signatures and no argument contracts, so several emitted facts
+had unstable slot order.
+
+### IHR-004 - Direct Registry With Argument Contracts
+
+Adding explicit `args` to `ontology_registry.json` and teaching direct registry
+profiles to preserve those argument contracts lifted emitted/gold signature
+recall to `0.929` and first-20 QA to `10 exact + 1 partial`.
+
+This is the strongest current Iron Harbor run.
+
+### Lesson
+
+Domain packs need more than predicate names. They need predicate contracts.
+For known domains, direct profile loading from a curated registry is cleaner
+than asking the LLM to rediscover the palette every time. For unknown domains,
+bootstrap remains useful, but the resulting profile should be reviewed and
+contracted before it becomes a serious ingestion target.

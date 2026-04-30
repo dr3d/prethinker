@@ -6,143 +6,171 @@
   "predicates": [
     {
       "signature": "before/2",
-      "category": "reference_kb",
-      "notes": "Derived from gold_kb.pl."
+      "args": ["earlier_time_or_event", "later_time_or_event"],
+      "category": "temporal_order",
+      "notes": "Temporal ordering relation for timestamps or event ids."
     },
     {
       "signature": "boil_water_notice/3",
-      "category": "reference_kb",
-      "notes": "Derived from gold_kb.pl."
+      "args": ["zone", "issued_at", "issuer"],
+      "category": "notice",
+      "notes": "Records a boil-water notice issued to a zone at a time by an issuer."
     },
     {
       "signature": "boil_water_notice_deadline_hours/1",
-      "category": "reference_kb",
-      "notes": "Derived from gold_kb.pl."
+      "args": ["hours_after_threshold"],
+      "category": "policy_deadline",
+      "notes": "Required deadline, in hours, for issuing a boil-water notice after the offline threshold."
     },
     {
       "signature": "boil_water_notice_lift_deadline_hours/1",
-      "category": "reference_kb",
-      "notes": "Derived from gold_kb.pl."
+      "args": ["hours_after_second_clean_reading"],
+      "category": "policy_deadline",
+      "notes": "Required deadline, in hours, for formally lifting a boil-water notice after the clean-reading condition."
     },
     {
       "signature": "boil_water_notice_lifted/2",
-      "category": "reference_kb",
-      "notes": "Derived from gold_kb.pl."
+      "args": ["lifted_at", "issuer"],
+      "category": "notice",
+      "notes": "Records that the boil-water notice was formally lifted at a time by an issuer."
     },
     {
       "signature": "bypass_activated/2",
-      "category": "reference_kb",
-      "notes": "Derived from gold_kb.pl."
+      "args": ["facility", "activated_at"],
+      "category": "bypass",
+      "notes": "Records emergency bypass activation time for a facility."
     },
     {
       "signature": "bypass_authorization/3",
-      "category": "reference_kb",
-      "notes": "Derived from gold_kb.pl."
+      "args": ["facility", "officer", "authorized_at"],
+      "category": "bypass",
+      "notes": "Records written bypass authorization by an officer at a time."
     },
     {
       "signature": "bypass_inspection_validity_days/1",
-      "category": "reference_kb",
-      "notes": "Derived from gold_kb.pl."
+      "args": ["days"],
+      "category": "policy_threshold",
+      "notes": "Maximum age in days for a Harbor Master inspection to count as current."
     },
     {
       "signature": "bypass_requires_joint/2",
-      "category": "reference_kb",
-      "notes": "Derived from gold_kb.pl."
+      "args": ["required_role_a", "required_role_b"],
+      "category": "policy_requirement",
+      "notes": "Roles that must jointly authorize emergency bypass."
     },
     {
       "signature": "clean_reading_interval_hours/1",
-      "category": "reference_kb",
-      "notes": "Derived from gold_kb.pl."
+      "args": ["minimum_hours_apart"],
+      "category": "policy_threshold",
+      "notes": "Required separation between consecutive clean readings."
     },
     {
       "signature": "clean_threshold/2",
-      "category": "reference_kb",
-      "notes": "Derived from gold_kb.pl."
+      "args": ["measurement_kind", "maximum_clean_value"],
+      "category": "policy_threshold",
+      "notes": "Maximum value for a reading to count as clean."
     },
     {
       "signature": "coliform_reading/4",
-      "category": "reference_kb",
-      "notes": "Derived from gold_kb.pl."
+      "args": ["intake_point", "value_cfu_per_100ml", "taken_at", "technician"],
+      "category": "measurement",
+      "notes": "Authoritative coliform reading value, timestamp, and technician for an intake point."
     },
     {
       "signature": "consecutive_clean_readings_required/1",
-      "category": "reference_kb",
-      "notes": "Derived from gold_kb.pl."
+      "args": ["count"],
+      "category": "policy_threshold",
+      "notes": "Number of consecutive clean readings required before lifting a notice."
     },
     {
       "signature": "contamination_advisory/2",
-      "category": "reference_kb",
-      "notes": "Derived from gold_kb.pl."
+      "args": ["status", "timestamp"],
+      "category": "advisory",
+      "notes": "Records advisory status changes such as triggered or lifted."
     },
     {
       "signature": "contamination_threshold/2",
-      "category": "reference_kb",
-      "notes": "Derived from gold_kb.pl."
+      "args": ["measurement_kind", "trigger_value"],
+      "category": "policy_threshold",
+      "notes": "Value above which a contamination advisory is triggered."
     },
     {
       "signature": "downstream_of/2",
-      "category": "reference_kb",
-      "notes": "Derived from gold_kb.pl."
+      "args": ["zone", "facility"],
+      "category": "scope",
+      "notes": "Distribution or dependency relation from a zone to an upstream facility."
     },
     {
       "signature": "eastgate_offline_threshold_hours/1",
-      "category": "reference_kb",
-      "notes": "Derived from gold_kb.pl."
+      "args": ["hours_offline"],
+      "category": "policy_deadline",
+      "notes": "Offline duration that starts the boil-water-notice deadline during an advisory."
     },
     {
       "signature": "facility/2",
-      "category": "reference_kb",
-      "notes": "Derived from gold_kb.pl."
+      "args": ["facility", "facility_kind"],
+      "category": "entity",
+      "notes": "Facility identifier and type."
     },
     {
       "signature": "facility_status/3",
-      "category": "reference_kb",
-      "notes": "Derived from gold_kb.pl."
+      "args": ["facility", "status", "timestamp"],
+      "category": "facility_state",
+      "notes": "Timestamped facility state such as offline or online."
     },
     {
       "signature": "foundry_row_notification_deadline_hours/1",
-      "category": "reference_kb",
-      "notes": "Derived from gold_kb.pl."
+      "args": ["hours_after_advisory"],
+      "category": "policy_deadline",
+      "notes": "Required deadline for notifying Foundry Row of a contamination advisory."
     },
     {
       "signature": "inspection/3",
-      "category": "reference_kb",
-      "notes": "Derived from gold_kb.pl."
+      "args": ["facility", "inspector", "inspected_on"],
+      "category": "inspection",
+      "notes": "Authoritative inspection record."
     },
     {
       "signature": "non_residential_zone/1",
-      "category": "reference_kb",
-      "notes": "Derived from gold_kb.pl."
+      "args": ["zone"],
+      "category": "scope",
+      "notes": "Zone classified as non-residential."
     },
     {
       "signature": "notification/5",
-      "category": "reference_kb",
-      "notes": "Derived from gold_kb.pl."
+      "args": ["recipient", "notice_type", "notified_at", "method", "notifier"],
+      "category": "notification",
+      "notes": "Notification recipient, type, timestamp, delivery method, and notifying actor."
     },
     {
       "signature": "okonkwo_arrival/2",
-      "category": "reference_kb",
-      "notes": "Derived from gold_kb.pl."
+      "args": ["location", "arrived_at"],
+      "category": "correction",
+      "notes": "Authoritative corrected arrival time for M. Okonkwo."
     },
     {
       "signature": "person_role/2",
-      "category": "reference_kb",
-      "notes": "Derived from gold_kb.pl."
+      "args": ["person", "role"],
+      "category": "role",
+      "notes": "Person and official role."
     },
     {
       "signature": "residential_zone/1",
-      "category": "reference_kb",
-      "notes": "Derived from gold_kb.pl."
+      "args": ["zone"],
+      "category": "scope",
+      "notes": "Zone classified as residential."
     },
     {
       "signature": "review_meeting/2",
-      "category": "reference_kb",
-      "notes": "Derived from gold_kb.pl."
+      "args": ["meeting_at", "participants"],
+      "category": "review",
+      "notes": "Post-incident review meeting timestamp and participants."
     },
     {
       "signature": "testing_interval/2",
-      "category": "reference_kb",
-      "notes": "Derived from gold_kb.pl."
+      "args": ["operating_condition", "hours"],
+      "category": "policy_interval",
+      "notes": "Required testing interval in hours for a condition."
     }
   ]
 }

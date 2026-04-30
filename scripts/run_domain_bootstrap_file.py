@@ -46,6 +46,20 @@ NARRATIVE_SOURCE_COMPILER_CONTEXT_V1 = [
     "Narrative source rule: if the profile lacks event, temporal-order, causal, or final-state predicates needed for the current pass, mention those missing capabilities in self_check rather than inventing out-of-palette predicates.",
 ]
 
+POLICY_INCIDENT_SOURCE_COMPILER_CONTEXT_V1 = [
+    "policy_incident_source_compiler_strategy_v1: Use this for sources classified by the LLM intake plan or domain hint as policy, compliance, incident, operations log, regulatory record, timeline, or municipal/organizational procedure.",
+    "Policy incident rule: separate standing rules from observed incident facts. A threshold, deadline, required role, exception, or validity condition is not the same kind of state as a timestamped reading, notification, outage, authorization, correction, or review statement.",
+    "Policy incident rule: when the profile offers exact predicates for measurements, thresholds, intervals, state changes, notifications, authorizations, inspections, corrections, and temporal ordering, prefer those exact predicates over generic event/status wrappers.",
+    "Policy incident rule: preserve scoped applicability and exclusions. If the source distinguishes residential zones, industrial zones, downstream zones, affected zones, or excluded zones, compile those classifications and scope relations before deriving any compliance conclusion.",
+    "Policy incident rule: preserve timestamps as queryable values on the relevant event or observation predicates. Do not hide deadlines or times inside long normalized labels when the profile provides date/time slots.",
+    "Policy incident rule: preserve corrections as authoritative corrected facts plus parked claims or self_check notes for superseded values when the profile supports that distinction. Do not commit both old and corrected values as equal truth.",
+    "Policy incident rule: preserve joint authorization and prerequisite validity as structured policy requirements and timestamped authorization/inspection facts when the profile supports them.",
+    "Policy incident rule: preserve notification recipients, notice type, time, method, and notifying actor separately when the profile supports those slots.",
+    "Policy incident rule: preserve review-board statements, witness statements, disclosures, and allegations as claims or review records unless the source states an authoritative finding.",
+    "Policy incident coverage warning: a useful skeleton should include roles, scoped zones/entities, core facilities/systems, standing policy thresholds/deadlines, key measurements, advisory or trigger state, facility status changes, notifications, authorizations, inspections, corrections, and temporal order when the source and profile support them.",
+    "Policy incident canonical palette warning: do not invent vague substitutes such as event_occurred/4, policy_constraint/3, or compliance_status/3 when the draft profile provides a more precise predicate for the same job.",
+]
+
 from src.profile_bootstrap import (  # noqa: E402
     PROFILE_BOOTSTRAP_JSON_SCHEMA,
     PROFILE_BOOTSTRAP_REVIEW_JSON_SCHEMA,
@@ -483,10 +497,17 @@ def _profile_from_registry(registry: dict[str, Any], *, domain_hint: str = "") -
         if not signature or not match:
             continue
         arity = int(match.group(1))
+        args = [
+            str(arg).strip()
+            for arg in item.get("args", [])
+            if isinstance(item.get("args"), list) and str(arg).strip()
+        ]
+        if len(args) != arity:
+            args = [f"arg_{index}" for index in range(1, arity + 1)]
         predicates.append(
             {
                 "signature": signature,
-                "args": [f"arg_{index}" for index in range(1, arity + 1)],
+                "args": args,
                 "description": str(item.get("notes", "")).strip() or str(item.get("category", "")).strip(),
                 "why": f"registry_category={str(item.get('category', '')).strip()}",
                 "admission_notes": [
@@ -810,10 +831,35 @@ def _source_compiler_context(*, intake_plan: dict[str, Any] | None, domain_hint:
                 str(boundary.get("epistemic_stance", "")).casefold(),
             ]
         )
+        for item in intake_plan.get("pass_plan", []) if isinstance(intake_plan.get("pass_plan"), list) else []:
+            if isinstance(item, dict):
+                terms.extend(
+                    [
+                        str(item.get("purpose", "")).casefold(),
+                        str(item.get("focus", "")).casefold(),
+                    ]
+                )
     label = " ".join(terms)
+    contexts: list[str] = []
     if any(token in label for token in ["story", "narrative", "fable", "fiction", "plot"]):
-        return list(NARRATIVE_SOURCE_COMPILER_CONTEXT_V1)
-    return []
+        contexts.extend(NARRATIVE_SOURCE_COMPILER_CONTEXT_V1)
+    if any(
+        token in label
+        for token in [
+            "policy",
+            "compliance",
+            "incident",
+            "operations",
+            "regulatory",
+            "timeline",
+            "municipal",
+            "procedure",
+            "threshold",
+            "authorization",
+        ]
+    ):
+        contexts.extend(POLICY_INCIDENT_SOURCE_COMPILER_CONTEXT_V1)
+    return contexts
 
 
 def _call_lmstudio_json_schema(
