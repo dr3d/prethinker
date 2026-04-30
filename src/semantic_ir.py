@@ -3322,6 +3322,8 @@ def _is_query_placeholder_arg(raw: str) -> bool:
         "entity",
         "entry",
         "evidence",
+        "elapsedhours",
+        "elapsedminutes",
         "explanation",
         "explanation_detail",
         "explanationdetail",
@@ -3346,6 +3348,7 @@ def _is_query_placeholder_arg(raw: str) -> bool:
         "method",
         "method_detail",
         "methoddetail",
+        "minutes",
         "object",
         "observer",
         "offlinestart",
@@ -3389,6 +3392,8 @@ def _is_query_placeholder_arg(raw: str) -> bool:
         "interval",
         "lifter",
         "mode",
+        "hours",
+        "hourselapsed",
         "noticeid",
         "noticedzone",
         "notifiedzone",
@@ -3405,6 +3410,9 @@ def _is_query_placeholder_arg(raw: str) -> bool:
         "start_time",
         "validitydays",
         "validity_days",
+        "minuteselapsed",
+        "thresholdtime",
+        "threshold_time",
     }:
         return True
     if (

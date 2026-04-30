@@ -20,7 +20,7 @@ import unicodedata
 import urllib.error
 import urllib.request
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -7890,15 +7890,15 @@ class CorePrologRuntime:
         return names
 
     @staticmethod
-    def _temporal_sort_key(term: Term) -> tuple[int, int, int, int, int] | None:
+    def _temporal_datetime(term: Term) -> datetime | None:
         if getattr(term, "is_variable", False) or getattr(term, "args", []):
             return None
         value = str(getattr(term, "name", "") or "").strip().lower()
-        match = re.fullmatch(r"(\d{4})_(\d{2})_(\d{2})(?:t(\d{1,2})_(\d{2}))?", value)
+        match = re.fullmatch(r"(\d{4})[_-](\d{2})[_-](\d{2})(?:[t_](\d{1,2})[_:](\d{2}))?", value)
         if not match:
             return None
         year, month, day, hour, minute = match.groups()
-        return (
+        return datetime(
             int(year),
             int(month),
             int(day),
@@ -7906,18 +7906,79 @@ class CorePrologRuntime:
             int(minute or 0),
         )
 
+    @staticmethod
+    def _temporal_term(value: datetime) -> Term:
+        return Term(value.strftime("%Y_%m_%dt%H_%M"))
+
+    @staticmethod
+    def _numeric_value(term: Term) -> int | None:
+        if getattr(term, "is_variable", False) or getattr(term, "args", []):
+            return None
+        value = str(getattr(term, "name", "") or "").strip()
+        if not re.fullmatch(r"-?\d+", value):
+            return None
+        return int(value)
+
     def _resolve_temporal_relation(self, goal: Term, subst: Substitution) -> list[Substitution]:
-        if goal.name not in {"before", "after"} or len(goal.args) != 2:
+        if goal.name in {"before", "after"} and len(goal.args) == 2:
+            left = subst.apply(goal.args[0])
+            right = subst.apply(goal.args[1])
+            left_time = self._temporal_datetime(left)
+            right_time = self._temporal_datetime(right)
+            if left_time is None or right_time is None:
+                return []
+            if goal.name == "before":
+                return [subst] if left_time < right_time else []
+            return [subst] if left_time > right_time else []
+        if goal.name == "add_hours" and len(goal.args) == 3:
+            start = subst.apply(goal.args[0])
+            hours = subst.apply(goal.args[1])
+            end = subst.apply(goal.args[2])
+            start_time = self._temporal_datetime(start)
+            hour_count = self._numeric_value(hours)
+            end_time = self._temporal_datetime(end)
+            if start_time is not None and hour_count is not None:
+                computed_end = self._temporal_term(start_time + timedelta(hours=hour_count))
+                new_subst = self.engine.unify(end, computed_end, subst)
+                return [new_subst] if new_subst else []
+            if end_time is not None and hour_count is not None:
+                computed_start = self._temporal_term(end_time - timedelta(hours=hour_count))
+                new_subst = self.engine.unify(start, computed_start, subst)
+                return [new_subst] if new_subst else []
+            if start_time is not None and end_time is not None:
+                delta_hours = int((end_time - start_time).total_seconds() // 3600)
+                new_subst = self.engine.unify(hours, Term(str(delta_hours), is_number=True), subst)
+                return [new_subst] if new_subst else []
             return []
-        left = subst.apply(goal.args[0])
-        right = subst.apply(goal.args[1])
-        left_key = self._temporal_sort_key(left)
-        right_key = self._temporal_sort_key(right)
-        if left_key is None or right_key is None:
-            return []
-        if goal.name == "before":
-            return [subst] if left_key < right_key else []
-        return [subst] if left_key > right_key else []
+        if goal.name == "elapsed_minutes" and len(goal.args) == 3:
+            start = subst.apply(goal.args[0])
+            end = subst.apply(goal.args[1])
+            minutes = subst.apply(goal.args[2])
+            start_time = self._temporal_datetime(start)
+            end_time = self._temporal_datetime(end)
+            minute_count = self._numeric_value(minutes)
+            if start_time is None or end_time is None:
+                return []
+            computed_minutes = int((end_time - start_time).total_seconds() // 60)
+            if minute_count is not None:
+                return [subst] if minute_count == computed_minutes else []
+            new_subst = self.engine.unify(minutes, Term(str(computed_minutes), is_number=True), subst)
+            return [new_subst] if new_subst else []
+        if goal.name == "elapsed_hours" and len(goal.args) == 3:
+            start = subst.apply(goal.args[0])
+            end = subst.apply(goal.args[1])
+            hours = subst.apply(goal.args[2])
+            start_time = self._temporal_datetime(start)
+            end_time = self._temporal_datetime(end)
+            hour_count = self._numeric_value(hours)
+            if start_time is None or end_time is None:
+                return []
+            computed_hours = int((end_time - start_time).total_seconds() // 3600)
+            if hour_count is not None:
+                return [subst] if hour_count == computed_hours else []
+            new_subst = self.engine.unify(hours, Term(str(computed_hours), is_number=True), subst)
+            return [new_subst] if new_subst else []
+        return []
 
     def _resolve_query_goals(self, goals: list[Term]) -> list[Substitution]:
         solutions: list[Substitution] = [Substitution()]

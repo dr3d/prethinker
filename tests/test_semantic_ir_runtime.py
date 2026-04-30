@@ -923,6 +923,10 @@ class SemanticIRRuntimeTests(unittest.TestCase):
                         "sender",
                         "lifter",
                         "offlinestart",
+                        "hours",
+                        "minutes",
+                        "hourselapsed",
+                        "thresholdtime",
                     ],
                     "polarity": "positive",
                     "source": "direct",
@@ -938,7 +942,7 @@ class SemanticIRRuntimeTests(unittest.TestCase):
                 "bypass_inspection_validity_days/1",
                 "correction_record/4",
                 "clean_threshold/2",
-                "audit_point/12",
+                "audit_point/16",
             ],
         )
         self.assertEqual(
@@ -949,7 +953,7 @@ class SemanticIRRuntimeTests(unittest.TestCase):
                 "bypass_inspection_validity_days(Validitydays).",
                 "correction_record(Recordid, Originalvalue, Correctedvalue, Source).",
                 "clean_threshold(Type, Threshold).",
-                "audit_point(Time1, Actor1, Interval1, Value1, Count1, Requiredactor1, Role1, Level, Threshold2, Sender, Lifter, Offlinestart).",
+                "audit_point(Time1, Actor1, Interval1, Value1, Count1, Requiredactor1, Role1, Level, Threshold2, Sender, Lifter, Offlinestart, Hours, Minutes, Hourselapsed, Thresholdtime).",
             ],
         )
 

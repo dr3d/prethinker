@@ -69,6 +69,34 @@ class CoreRuntimeTests(unittest.TestCase):
         self.assertEqual(query.get("status"), "success")
         self.assertEqual(query.get("rows"), [{"Time": "2026_03_05t20_30", "Actor": "diane_cheng"}])
 
+    def test_temporal_arithmetic_virtual_predicates(self) -> None:
+        self.assertEqual(
+            self.runtime.assert_fact("facility_status(eastgate, offline, 2026_03_04t08_00).").get("status"),
+            "success",
+        )
+        self.assertEqual(self.runtime.assert_fact("threshold_hours(6).").get("status"), "success")
+        self.assertEqual(self.runtime.assert_fact("notice_time(2026_03_04t14_45).").get("status"), "success")
+
+        query = self.runtime.query_rows(
+            "facility_status(eastgate, offline, Start), threshold_hours(Hours), "
+            "add_hours(Start, Hours, Threshold), notice_time(Notice), "
+            "elapsed_minutes(Threshold, Notice, Minutes)."
+        )
+
+        self.assertEqual(query.get("status"), "success")
+        self.assertEqual(
+            query.get("rows"),
+            [
+                {
+                    "Start": "2026_03_04t08_00",
+                    "Hours": "6",
+                    "Threshold": "2026_03_04t14_00",
+                    "Notice": "2026_03_04t14_45",
+                    "Minutes": "45",
+                }
+            ],
+        )
+
     def test_retract_fact(self) -> None:
         self.assertEqual(self.runtime.assert_fact("parent(alice, bob).").get("status"), "success")
         remove = self.runtime.retract_fact("parent(alice, bob).")

@@ -352,3 +352,35 @@ deriving a threshold moment (`08:00 + 6h = 14:00`) before comparing it with the
 notice time (`14:45`). Prompting alone should not be asked to fake that; the
 runtime needs a small temporal arithmetic surface that can produce and explain
 derived time anchors.
+
+## 2026-04-30 - Temporal Arithmetic Substrate Note
+
+Added query-only virtual temporal predicates to the core runtime:
+
+- `add_hours/3`
+- `elapsed_minutes/3`
+- `elapsed_hours/3`
+
+These predicates are available to the post-ingestion QA planner as runtime
+helpers, not durable KB predicates. They let the deterministic substrate answer
+queries such as:
+
+```prolog
+facility_status(eastgate, offline, Start),
+threshold_hours(Hours),
+add_hours(Start, Hours, Threshold),
+notice_time(Notice),
+elapsed_minutes(Threshold, Notice, Minutes).
+```
+
+This directly supports the next desired shape for threshold-duration questions:
+derive the policy threshold moment first, then compare from that moment to the
+later event.
+
+### Current Edge
+
+The runtime capability exists and is covered by tests, but the semantic QA
+planner does not yet reliably choose the derived-threshold plan. It still often
+measures directly from the raw event start. This is a useful clean separation:
+the formal substrate is ready; the next improvement is planner uptake of the
+temporal helper surface.

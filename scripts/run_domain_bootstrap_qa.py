@@ -89,13 +89,19 @@ POST_INGESTION_QA_QUERY_STRATEGY: dict[str, Any] = {
         "For rule/consequence questions, query stored rules and supporting facts; do not write derived conclusions as durable facts.",
         "For policy-condition questions, retrieve both the governing policy rows and the observed event/measurement rows. Threshold, count, interval, and deadline predicates are answer-bearing evidence, not optional decoration.",
         "For comprehensive or multi-violation questions, plan one small support bundle per alleged violation: governing policy row, observed event row, and any timing/correction/source row needed to show why it is a violation. Prefer concrete event predicates such as inspection, notice/lift, notification, reading, authorization, and zone-scope predicates before broad before/after scans.",
-        "For threshold-elapsed questions, retrieve the starting state/event time, the threshold-hours policy row, and the later target event time. Do not replace the start time with a generic placeholder such as offlinestart.",
+        "For threshold-elapsed questions, retrieve the starting state/event time, the threshold-hours policy row, and the later target event time. Use add_hours(StartTime, ThresholdHours, ThresholdTime), then elapsed_minutes(ThresholdTime, LaterTime, Minutes). Do not measure from the raw start event when the question asks from the threshold moment.",
     ],
     "failure_policy": [
         "If no compiled predicate can faithfully answer the question, emit no write and explain the missing predicate/support in self_check.",
         "If the question requires multi-hop reasoning not supported by the current runtime, emit the closest safe primitive queries and mark the remaining inference gap in truth_maintenance.derived_consequences.",
     ],
 }
+
+TEMPORAL_VIRTUAL_SIGNATURES = [
+    "add_hours/3",
+    "elapsed_minutes/3",
+    "elapsed_hours/3",
+]
 
 STORY_WORLD_QA_QUERY_STRATEGY: dict[str, Any] = {
     "name": "story_world_qa_query_strategy_v1",
@@ -171,6 +177,14 @@ def main() -> int:
     predicate_contracts = profile_bootstrap_predicate_contracts(parsed_profile)
     kb_inventory = compiled_kb_inventory(facts=facts, rules=rules)
     actual_signatures = list(kb_inventory["signatures"])
+    for signature in TEMPORAL_VIRTUAL_SIGNATURES:
+        if signature not in actual_signatures:
+            actual_signatures.append(signature)
+    kb_inventory["signatures"] = actual_signatures
+    kb_inventory["query_templates"] = [
+        *kb_inventory.get("query_templates", []),
+        *[query_template_for_signature(signature) for signature in TEMPORAL_VIRTUAL_SIGNATURES],
+    ]
     if actual_signatures:
         allowed_predicates = actual_signatures
         predicate_contracts = compiled_kb_contracts(actual_signatures)
@@ -180,6 +194,7 @@ def main() -> int:
         "Treat the current utterance as a probe against existing KB state unless it explicitly states a correction or new assertion.",
         "For ordinary questions, emit query candidate_operations, not writes.",
         "Use the actual compiled KB predicate inventory exactly. Do not invent a new query predicate when the KB already has a predicate with the needed meaning.",
+        "The QA runtime exposes virtual temporal predicates add_hours/3, elapsed_minutes/3, and elapsed_hours/3. They are query-only runtime helpers for deriving time anchors and durations from admitted timestamp facts; they are not durable KB writes.",
         "For a query over a predicate, keep the predicate's full arity from compiled_predicate_inventory. If a slot is unspecified, fill it with an uppercase variable.",
         "When the answer position is unknown, use Prolog variables X, Y, or Z exactly. Lowercase terms such as rule, time, condition, item, person, location, who, what, where, and answer are constants, not variables.",
         "Inside candidate_operations[].args, variables must also be uppercase strings such as X, Y, Z, Rule, Item, or Time.",
@@ -534,29 +549,36 @@ def _temporal_join_with_previous(
     query: str,
 ) -> dict[str, Any] | None:
     match = re.fullmatch(
-        r"\s*(before|after)\(\s*([A-Z][A-Za-z0-9_]*)\s*,\s*([a-z0-9_]+)\s*\)\.?\s*",
+        r"\s*(before|after|add_hours|elapsed_minutes|elapsed_hours)\((.*)\)\.?\s*",
         query,
     )
     if not match:
         return None
-    _relation, variable, _ground_time = match.groups()
-    for prior in reversed(previous_queries):
-        if not re.search(rf"\b{re.escape(variable)}\b", prior):
-            continue
-        joined = f"{prior.rstrip('. ')}, {query.strip()}"
-        result = runtime.query_rows(joined)
-        if result.get("status") == "success":
-            return {
-                "query": joined,
-                "result": {
-                    **result,
-                    "reasoning_basis": {
-                        "kind": "core-local",
-                        "note": "conjunctive support query synthesized from structured query operations with a shared temporal variable",
-                    },
+    _predicate, args_text = match.groups()
+    variables = set(re.findall(r"\b[A-Z][A-Za-z0-9_]*\b", args_text))
+    if not variables:
+        return None
+    selected: list[str] = []
+    for prior in previous_queries:
+        prior_variables = set(re.findall(r"\b[A-Z][A-Za-z0-9_]*\b", prior))
+        if variables & prior_variables:
+            selected.append(prior)
+    if not selected:
+        return None
+    joined = f"{', '.join(item.rstrip('. ') for item in selected)}, {query.strip()}"
+    result = runtime.query_rows(joined)
+    if result.get("status") == "success":
+        return {
+            "query": joined,
+            "result": {
+                **result,
+                "reasoning_basis": {
+                    "kind": "core-local",
+                    "note": "conjunctive support query synthesized from structured query operations with shared temporal variables",
                 },
-                "derived_from_queries": [prior, query],
-            }
+            },
+            "derived_from_queries": [*selected, query],
+        }
     return None
 
 
