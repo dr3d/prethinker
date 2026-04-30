@@ -562,18 +562,44 @@ def _temporal_join_with_previous(
     )
     if not match:
         return None
-    _predicate, args_text = match.groups()
-    variables = set(re.findall(r"\b[A-Z][A-Za-z0-9_]*\b", args_text))
-    if not variables:
+    predicate, args_text = match.groups()
+    previous_queries = _temporal_queries_with_threshold_bridge(
+        previous_queries=previous_queries,
+        predicate=predicate,
+        args_text=args_text,
+    )
+    needed_variables = set(re.findall(r"\b[A-Z][A-Za-z0-9_]*\b", args_text))
+    if not needed_variables:
         return None
     selected: list[str] = []
-    for prior in previous_queries:
-        prior_variables = set(re.findall(r"\b[A-Z][A-Za-z0-9_]*\b", prior))
-        if variables & prior_variables:
-            selected.append(prior)
+    # Temporal chains often arrive as separate structured query operations:
+    # state(Start), threshold(Hours), add_hours(Start, Hours, Threshold),
+    # notice(Notice), elapsed_minutes(Threshold, Notice, Minutes).  Selecting
+    # only direct variable overlaps with the final temporal query drops the
+    # support needed to bind intermediate variables.  Build a small dependency
+    # closure over prior structured queries instead.
+    changed = True
+    while changed:
+        changed = False
+        for prior in reversed(previous_queries):
+            if prior in selected:
+                continue
+            prior_variables = set(re.findall(r"\b[A-Z][A-Za-z0-9_]*\b", prior))
+            if needed_variables & prior_variables:
+                selected.insert(0, prior)
+                needed_variables |= prior_variables
+                changed = True
     if not selected:
         return None
-    joined = f"{', '.join(item.rstrip('. ') for item in selected)}, {query.strip()}"
+    query_for_join = query.strip()
+    derived_from = [*selected, query]
+    if predicate == "elapsed_hours":
+        args = [item.strip() for item in args_text.split(",")]
+        if len(args) == 3:
+            minute_query = f"elapsed_minutes({args[0]}, {args[1]}, Minutes)."
+            query_for_join = f"{query_for_join.rstrip('. ')}, {minute_query}"
+            derived_from.append(minute_query)
+    joined = f"{', '.join(item.rstrip('. ') for item in selected)}, {query_for_join}"
     result = runtime.query_rows(joined)
     if result.get("status") == "success":
         return {
@@ -585,9 +611,40 @@ def _temporal_join_with_previous(
                     "note": "conjunctive support query synthesized from structured query operations with shared temporal variables",
                 },
             },
-            "derived_from_queries": [*selected, query],
+            "derived_from_queries": derived_from,
         }
     return None
+
+
+def _temporal_queries_with_threshold_bridge(
+    *,
+    previous_queries: list[str],
+    predicate: str,
+    args_text: str,
+) -> list[str]:
+    if predicate not in {"elapsed_minutes", "elapsed_hours"}:
+        return previous_queries
+    args = [item.strip() for item in args_text.split(",")]
+    if len(args) != 3:
+        return previous_queries
+    threshold_var = args[0]
+    if not re.fullmatch(r"[A-Z][A-Za-z0-9_]*", threshold_var) or "threshold" not in threshold_var.lower():
+        return previous_queries
+    if any(re.search(rf"\b{re.escape(threshold_var)}\b", prior) for prior in previous_queries):
+        return previous_queries
+
+    start_var = ""
+    hours_var = ""
+    for prior in previous_queries:
+        for variable in re.findall(r"\b[A-Z][A-Za-z0-9_]*\b", prior):
+            lowered = variable.lower()
+            if not start_var and ("start" in lowered or "offline" in lowered):
+                start_var = variable
+            if not hours_var and "hours" in lowered and ("threshold" in lowered or "deadline" in lowered):
+                hours_var = variable
+    if not start_var or not hours_var:
+        return previous_queries
+    return [*previous_queries, f"add_hours({start_var}, {hours_var}, {threshold_var})."]
 
 
 def score_oracle(*, row: dict[str, Any], oracle: dict[str, Any]) -> bool | None:

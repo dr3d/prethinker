@@ -467,3 +467,40 @@ The same compile became thinner overall. Atom-ledger consistency improved
 joinability, but the compiler dropped some broader coverage. The next target is
 to keep atom-ledger discipline without making the compiler timid: stable symbols
 plus broad support coverage, not one or the other.
+
+## 2026-04-30 - Run IHR-016 - Temporal Query Dependency Closure
+
+Tightened the post-ingestion QA runtime support for temporal helper chains. When
+the model emits a structured query sequence such as:
+
+```prolog
+facility_status(..., Start),
+eastgate_offline_threshold_hours(Hours),
+add_hours(Start, Hours, Threshold),
+boil_water_notice(..., Notice, ...),
+elapsed_minutes(Threshold, Notice, Minutes).
+```
+
+the query runner now builds a dependency closure over prior structured queries
+instead of joining only the immediately shared variables. It can also synthesize
+the missing `add_hours(Start, Hours, Threshold)` bridge when the model names a
+threshold time in an elapsed-time query but omits the explicit derivation step.
+
+### What Improved
+
+This is a substrate improvement, not a new language patch. The code operates
+only on already-structured query operations emitted by the model. Unit tests now
+cover:
+
+- threshold dependency closure from `Start + Hours -> Threshold`
+- synthesized threshold bridge when the model skips the `add_hours/3` query
+- minute-precision companion support when the model asks for `elapsed_hours/3`
+  but the useful answer is sub-hour
+
+### Current Edge
+
+The substrate can now prove the 45-minute threshold-to-notice interval when the
+structured ingredients are available. A targeted live q060 rerun still varied:
+one pass omitted the threshold policy row entirely and measured from the raw
+offline start instead. That remaining gap is planner uptake, not temporal
+runtime capability.

@@ -503,3 +503,23 @@ Otters is now a good frontier fixture precisely because it refuses to be solved
 by a single prompt tweak. The current weak point is not one bug; it is the
 interaction between source-wide compile coverage, stable atom choice across
 passes, and QA query planning over a partially compiled KB.
+
+## Run OTR-009 - Rotation Check After Iron Harbor Temporal Work
+
+- Timestamp: `2026-04-30T13:46:14Z`
+- Model: `qwen/qwen3.6-35b-a3b`
+- Mode: first-20 QA rerun against the OTR-008 compile after Iron Harbor temporal
+  query dependency-closure work.
+
+### Headline
+
+The story-world score stayed stable: `9 exact + 2 partial + 9 miss`, with
+`20/20` rows producing queries and no write-proposal leaks.
+
+### Lesson
+
+The Iron Harbor temporal/query changes were scoped: they did not regress the
+Otters source-fidelity path, but they also did not solve Otters' remaining
+coverage problems. This is useful separation. Otters should keep pressure on
+source-local entity/event coverage and prior-contamination resistance; Iron
+Harbor should keep pressure on policy, temporal, and rule-substrate behavior.

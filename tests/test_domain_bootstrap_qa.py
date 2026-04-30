@@ -1,5 +1,6 @@
 from scripts.run_domain_bootstrap_qa import (
     POST_INGESTION_QA_QUERY_STRATEGY,
+    _temporal_join_with_previous,
     clause_signature,
     compiled_kb_inventory,
     parse_markdown_answer_key,
@@ -7,6 +8,7 @@ from scripts.run_domain_bootstrap_qa import (
     score_oracle,
     summarize,
 )
+from kb_pipeline import CorePrologRuntime
 
 
 def test_parse_numbered_markdown_questions_keeps_phase_labels() -> None:
@@ -125,3 +127,83 @@ def test_summarize_counts_reference_judge_verdicts() -> None:
 
 def test_score_oracle_returns_none_without_answer_key() -> None:
     assert score_oracle(row={"queries": []}, oracle={}) is None
+
+
+def test_temporal_join_builds_dependency_closure_for_derived_threshold() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "facility_status(eastgate_treatment_facility, offline, 2026_03_04t08_00).",
+        "eastgate_offline_threshold_hours(6).",
+        "boil_water_notice(millbrook, 2026_03_04t14_45, diane_cheng).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    joined = _temporal_join_with_previous(
+        runtime,
+        previous_queries=[
+            "facility_status(eastgate_treatment_facility, offline, Starttime).",
+            "eastgate_offline_threshold_hours(Thresholdhours).",
+            "add_hours(Starttime, Thresholdhours, Thresholdtime).",
+            "boil_water_notice(Zone, Noticetime, Issuer).",
+        ],
+        query="elapsed_minutes(Thresholdtime, Noticetime, Minutes).",
+    )
+
+    assert joined is not None
+    result = joined["result"]
+    assert result["status"] == "success"
+    assert any(str(row.get("Minutes")) == "45" for row in result["rows"])
+    assert "facility_status(eastgate_treatment_facility, offline, Starttime)" in joined["query"]
+    assert "eastgate_offline_threshold_hours(Thresholdhours)" in joined["query"]
+
+
+def test_temporal_join_synthesizes_missing_threshold_bridge() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "facility_status(eastgate_treatment_facility, offline, 2026_03_04t08_00).",
+        "eastgate_offline_threshold_hours(6).",
+        "boil_water_notice(millbrook, 2026_03_04t14_45, diane_cheng).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    joined = _temporal_join_with_previous(
+        runtime,
+        previous_queries=[
+            "facility_status(eastgate_treatment_facility, offline, Starttime).",
+            "eastgate_offline_threshold_hours(Thresholdhours).",
+            "boil_water_notice(Zone, Noticetime, Issuer).",
+        ],
+        query="elapsed_minutes(Thresholdtime, Noticetime, Minutes).",
+    )
+
+    assert joined is not None
+    assert joined["result"]["status"] == "success"
+    assert any(str(row.get("Minutes")) == "45" for row in joined["result"]["rows"])
+    assert "add_hours(Starttime, Thresholdhours, Thresholdtime)" in joined["query"]
+
+
+def test_temporal_join_adds_minute_precision_for_elapsed_hours() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "facility_status(eastgate_treatment_facility, offline, 2026_03_04t08_00).",
+        "eastgate_offline_threshold_hours(6).",
+        "boil_water_notice(millbrook, 2026_03_04t14_45, diane_cheng).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    joined = _temporal_join_with_previous(
+        runtime,
+        previous_queries=[
+            "facility_status(eastgate_treatment_facility, offline, Starttime).",
+            "eastgate_offline_threshold_hours(Thresholdhours).",
+            "boil_water_notice(Zone, Noticetime, Issuer).",
+        ],
+        query="elapsed_hours(Thresholdtime, Noticetime, Elapsedhours).",
+    )
+
+    assert joined is not None
+    assert "elapsed_minutes(Thresholdtime, Noticetime, Minutes)" in joined["query"]
+    assert any(
+        str(row.get("Elapsedhours")) == "0" and str(row.get("Minutes")) == "45"
+        for row in joined["result"]["rows"]
+    )
