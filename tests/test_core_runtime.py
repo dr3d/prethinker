@@ -97,6 +97,36 @@ class CoreRuntimeTests(unittest.TestCase):
             ],
         )
 
+    def test_temporal_elapsed_days_virtual_predicate(self) -> None:
+        self.assertEqual(
+            self.runtime.assert_fact("inspection(pier_7, luis_ferreira, 2026_02_01).").get("status"),
+            "success",
+        )
+        self.assertEqual(
+            self.runtime.assert_fact("bypass_authorization(pier_7, luis_ferreira, 2026_03_04t15_30).").get("status"),
+            "success",
+        )
+
+        query = self.runtime.query_rows(
+            "inspection(Facility, Officer, InspectionDate), "
+            "bypass_authorization(Facility, Officer, AuthorizationTime), "
+            "elapsed_days(InspectionDate, AuthorizationTime, Days)."
+        )
+
+        self.assertEqual(query.get("status"), "success")
+        self.assertEqual(
+            query.get("rows"),
+            [
+                {
+                    "Facility": "pier_7",
+                    "Officer": "luis_ferreira",
+                    "InspectionDate": "2026_02_01",
+                    "AuthorizationTime": "2026_03_04t15_30",
+                    "Days": "31",
+                }
+            ],
+        )
+
     def test_retract_fact(self) -> None:
         self.assertEqual(self.runtime.assert_fact("parent(alice, bob).").get("status"), "success")
         remove = self.runtime.retract_fact("parent(alice, bob).")

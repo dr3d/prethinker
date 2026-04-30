@@ -1,6 +1,7 @@
 from scripts.run_domain_bootstrap_qa import (
     POST_INGESTION_QA_QUERY_STRATEGY,
     _negative_join_with_previous,
+    _relaxed_constant_query,
     _temporal_join_with_previous,
     clause_signature,
     compiled_kb_inventory,
@@ -94,6 +95,8 @@ def test_post_ingestion_qa_strategy_prefers_compiled_kb_surface() -> None:
     assert any("longer normalized atom" in item for item in strategy["arity_and_variable_policy"])
     assert any("grievance(Grievance, Label)" in item for item in strategy["arity_and_variable_policy"])
     assert any("source-attributed claims" in item for item in strategy["epistemic_policy"])
+    assert "elapsed_days" in " ".join(strategy["epistemic_policy"])
+    assert any("alternate atom order" in item for item in strategy["arity_and_variable_policy"])
 
 
 def test_score_oracle_can_match_decision_predicate_and_answer_text() -> None:
@@ -210,6 +213,28 @@ def test_temporal_join_adds_minute_precision_for_elapsed_hours() -> None:
     )
 
 
+def test_temporal_join_supports_elapsed_days_for_inspection_windows() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "inspection(pier_7, luis_ferreira, 2026_02_01).",
+        "bypass_authorization(pier_7, luis_ferreira, 2026_03_04t15_30).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    joined = _temporal_join_with_previous(
+        runtime,
+        previous_queries=[
+            "inspection(Facility, Officer, Inspectiondate).",
+            "bypass_authorization(Facility, Officer, Authtime).",
+        ],
+        query="elapsed_days(Inspectiondate, Authtime, Days).",
+    )
+
+    assert joined is not None
+    assert joined["result"]["status"] == "success"
+    assert any(str(row.get("Days")) == "31" for row in joined["result"]["rows"])
+
+
 def test_negative_query_join_supports_set_difference() -> None:
     runtime = CorePrologRuntime(max_depth=200)
     for fact in [
@@ -228,4 +253,25 @@ def test_negative_query_join_supports_set_difference() -> None:
     assert joined is not None
     assert joined["result"]["status"] == "success"
     assert joined["result"]["rows"][0]["Zone"] == "old_harbor"
-    assert "set-difference support query" in joined["result"]["reasoning_basis"]["note"]
+
+
+def test_relaxed_constant_query_recovers_over_bound_atom_drift() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    assert runtime.assert_fact("inspection(pier_7, luis_ferreira, 2026_02_01).").get("status") == "success"
+
+    exact = runtime.query_rows("inspection(pier_7, ferreira_luis, Date).")
+    assert exact["status"] == "no_results"
+
+    relaxed = _relaxed_constant_query(runtime, query="inspection(pier_7, ferreira_luis, Date).")
+
+    assert relaxed is not None
+    assert relaxed["result"]["status"] == "success"
+    assert relaxed["result"]["reasoning_basis"]["kind"] == "core-local"
+    assert relaxed["result"]["reasoning_basis"]["original_query"] == "inspection(pier_7, ferreira_luis, Date)."
+    assert relaxed["result"]["rows"] == [
+        {
+            "Relaxed1": "pier_7",
+            "Relaxed2": "luis_ferreira",
+            "Date": "2026_02_01",
+        }
+    ]

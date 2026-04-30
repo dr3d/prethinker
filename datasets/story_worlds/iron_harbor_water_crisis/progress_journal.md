@@ -592,3 +592,59 @@ Comprehensive violation summaries such as q051/q098/q100 are improved but still
 only partial in the latest small probe. They need richer violation-support
 bundles, likely by giving the planner a clearer query pattern for assembling
 all three violation families without writing derived violation facts.
+
+## 2026-04-30 - Run IHR-019 - Temporal Days And Atom-Drift Query Relaxation
+
+Added a query-only `elapsed_days/3` temporal primitive for inspection-validity
+windows and a diagnostic relaxation pass for already-structured Prolog queries
+that return no rows because a constant was over-bound.
+
+The relaxation is deliberately downstream of the model and downstream of
+Semantic IR. It does not inspect source prose. It only takes a failed structured
+query such as:
+
+```prolog
+inspection(pier_7, ferreira_luis, Date).
+```
+
+and adds a diagnostic support query over the same predicate surface:
+
+```prolog
+inspection(Relaxed1, Relaxed2, Date).
+```
+
+This addresses a real Harbor failure: the compiled KB had
+`inspection(pier_7, luis_ferreira, 2026_02_01)` while another predicate family
+used `ferreira_luis`. The model selected the right predicate family but mixed
+atom surfaces across families.
+
+### Result
+
+Targeted inspection-validity probe:
+
+- q024/q027/q085/q086: `4 exact / 0 partial / 0 miss`
+- previous targeted result before the relaxation: `0 exact / 0 partial / 4 miss`
+- `elapsed_days/3` is now covered by unit tests as a query-only runtime helper
+
+Full Harbor 100-question rerun:
+
+- `68 exact / 17 partial / 15 miss`
+- previous comparable full run: `63 exact / 16 partial / 21 miss`
+- `99/100` parsed OK
+- `99/100` query rows
+- `0` write proposals during post-ingestion QA
+
+### What Improved
+
+This converts several predicate-correct / atom-drift failures into supported
+answers without adding any raw-language handling in Python. It also gives the
+planner a more natural formal helper for "31 days between inspection and
+authorization" questions.
+
+### Current Edge
+
+The remaining misses are now mostly compile-coverage and richer source-surface
+issues: witness statement metadata, bylaw identity, review-meeting support,
+confirmation/reporting attribution, and explicit policy-condition support.
+These should be handled by better source-document compilation and profile
+predicates, not by answer-time prose tricks.

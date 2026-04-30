@@ -84,6 +84,7 @@ POST_INGESTION_QA_QUERY_STRATEGY: dict[str, Any] = {
         "Never use lowercase placeholder constants such as who, what, item, reason, source, or answer when a variable is intended.",
         "Words that merely name the slot, such as grievance_label, method_detail, explanation_detail, candidate, label, content, value, status, authority, or institution, are variables too; write them as GrievanceLabel, MethodDetail, ExplanationDetail, Candidate, Label, Content, Value, Status, Authority, or Institution.",
         "If you want all rows for grievance/2, query grievance(Grievance, Label), not grievance(Grievance, grievance_label).",
+        "For person/place names that may have alternate atom order or abbreviation, such as Luis Ferreira vs luis_ferreira/ferreira_luis or Pier 7 vs pier_7/pier_7_chlorination_unit, discover rows with variables first. Do not combine a constant copied from one predicate family with another predicate family unless that exact constant appears in that predicate's examples.",
     ],
     "epistemic_policy": [
         "Return claim/source/support queries for claimed or alleged content; do not ask for objective fact predicates when the KB only contains source-attributed claims.",
@@ -98,6 +99,7 @@ POST_INGESTION_QA_QUERY_STRATEGY: dict[str, Any] = {
         "For duration or deadline questions that name a state threshold, first retrieve the state-change predicate that carries the start timestamp, then retrieve the policy threshold, then call add_hours/3 or elapsed_minutes/3. Do not call temporal helpers with unbound invented lowercase constants.",
         "For within-window or deadline-compliance questions, retrieve three pieces before computing: the start event/time, the target event/time, and the policy deadline/interval. Then call elapsed_minutes/3, elapsed_hours/3, or add_hours/3 with those bound variables. Do not ask a temporal helper with an unbound Starttime if the relevant start event predicate exists in the compiled inventory.",
         "When a question asks elapsed time between a derived threshold moment and a later event, compute the threshold moment with add_hours(StartTime, ThresholdHours, ThresholdTime) before calling elapsed_minutes(ThresholdTime, LaterTime, Minutes). Prefer elapsed_minutes/3 over elapsed_hours/3 unless the question explicitly requires whole hours only.",
+        "For inspection-current or validity-window questions expressed in days, retrieve the inspection row and authorization row with shared variables, then call elapsed_days(InspectionDate, AuthorizationTime, ElapsedDays). Do not use add_hours/3 with a days-validity value.",
     ],
     "failure_policy": [
         "If no compiled predicate can faithfully answer the question, emit no write and explain the missing predicate/support in self_check.",
@@ -109,6 +111,7 @@ TEMPORAL_VIRTUAL_SIGNATURES = [
     "add_hours/3",
     "elapsed_minutes/3",
     "elapsed_hours/3",
+    "elapsed_days/3",
 ]
 
 STORY_WORLD_QA_QUERY_STRATEGY: dict[str, Any] = {
@@ -202,7 +205,7 @@ def main() -> int:
         "Treat the current utterance as a probe against existing KB state unless it explicitly states a correction or new assertion.",
         "For ordinary questions, emit query candidate_operations, not writes.",
         "Use the actual compiled KB predicate inventory exactly. Do not invent a new query predicate when the KB already has a predicate with the needed meaning.",
-        "The QA runtime exposes virtual temporal predicates add_hours/3, elapsed_minutes/3, and elapsed_hours/3. They are query-only runtime helpers for deriving time anchors and durations from admitted timestamp facts; they are not durable KB writes.",
+        "The QA runtime exposes virtual temporal predicates add_hours/3, elapsed_minutes/3, elapsed_hours/3, and elapsed_days/3. They are query-only runtime helpers for deriving time anchors and durations from admitted timestamp facts; they are not durable KB writes.",
         "For a query over a predicate, keep the predicate's full arity from compiled_predicate_inventory. If a slot is unspecified, fill it with an uppercase variable.",
         "Copy constants from relevant_clauses exactly. If the user question mentions only a surname, title, role, initials, or a paraphrased object/facility name, do not invent a lowercase atom for it; query with variables and let the compiled KB surface reveal the canonical constant.",
         "Role labels are not person constants. Query predicates such as inspection/3, bypass_authorization/3, coliform_reading/4, notification/5, or boil_water_notice_lifted/2 with Person/Actor variables, then use person_role/2 only to filter or explain those returned people.",
@@ -546,14 +549,65 @@ def run_query_plan(runtime: CorePrologRuntime, queries: list[str]) -> list[dict[
     for query in queries:
         result = runtime.query_rows(query)
         results.append({"query": query, "result": result})
+        effective_query = query
+        if result.get("status") != "success":
+            relaxed = _relaxed_constant_query(runtime, query=query)
+            if relaxed:
+                results.append(relaxed)
+                effective_query = str(relaxed.get("query", query))
         temporal_join = _temporal_join_with_previous(runtime, previous_queries=previous_queries, query=query)
         if temporal_join:
             results.append(temporal_join)
         negative_join = _negative_join_with_previous(runtime, previous_queries=previous_queries, query=query)
         if negative_join:
             results.append(negative_join)
-        previous_queries.append(query)
+        previous_queries.append(effective_query)
     return results
+
+
+def _relaxed_constant_query(runtime: CorePrologRuntime, *, query: str) -> dict[str, Any] | None:
+    text = str(query or "").strip()
+    match = re.fullmatch(r"\s*([A-Za-z_][A-Za-z0-9_]*)\((.*)\)\.?\s*", text)
+    if not match:
+        return None
+    predicate, args_text = match.groups()
+    if predicate in {"before", "after", "add_hours", "elapsed_minutes", "elapsed_hours", "elapsed_days"}:
+        return None
+    args = split_top_level_args(args_text)
+    if not args:
+        return None
+    relaxed_args: list[str] = []
+    relaxed_count = 0
+    for index, arg in enumerate(args, start=1):
+        item = str(arg or "").strip()
+        if re.fullmatch(r"[A-Z][A-Za-z0-9_]*", item):
+            relaxed_args.append(item)
+            continue
+        if re.fullmatch(r"-?\d+(?:\.\d+)?", item):
+            relaxed_args.append(item)
+            continue
+        relaxed_count += 1
+        relaxed_args.append(f"Relaxed{index}")
+    if relaxed_count == 0:
+        return None
+    relaxed_query = f"{predicate}({', '.join(relaxed_args)})."
+    if relaxed_query == text:
+        return None
+    result = runtime.query_rows(relaxed_query)
+    if result.get("status") != "success":
+        return None
+    return {
+        "query": relaxed_query,
+        "result": {
+            **result,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": "diagnostic relaxed query synthesized after an over-bound structured query returned no results",
+                "original_query": text,
+            },
+        },
+        "derived_from_queries": [text],
+    }
 
 
 def _negative_join_with_previous(
@@ -601,7 +655,7 @@ def _temporal_join_with_previous(
     query: str,
 ) -> dict[str, Any] | None:
     match = re.fullmatch(
-        r"\s*(before|after|add_hours|elapsed_minutes|elapsed_hours)\((.*)\)\.?\s*",
+        r"\s*(before|after|add_hours|elapsed_minutes|elapsed_hours|elapsed_days)\((.*)\)\.?\s*",
         query,
     )
     if not match:
@@ -666,7 +720,7 @@ def _temporal_queries_with_threshold_bridge(
     predicate: str,
     args_text: str,
 ) -> list[str]:
-    if predicate not in {"elapsed_minutes", "elapsed_hours"}:
+    if predicate not in {"elapsed_minutes", "elapsed_hours", "elapsed_days"}:
         return previous_queries
     args = [item.strip() for item in args_text.split(",")]
     if len(args) != 3:

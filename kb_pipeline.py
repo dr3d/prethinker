@@ -7980,6 +7980,20 @@ class CorePrologRuntime:
                 return [subst] if hour_count == computed_hours else []
             new_subst = self.engine.unify(hours, Term(str(computed_hours), is_number=True), subst)
             return [new_subst] if new_subst else []
+        if goal.name == "elapsed_days" and len(goal.args) == 3:
+            start = subst.apply(goal.args[0])
+            end = subst.apply(goal.args[1])
+            days = subst.apply(goal.args[2])
+            start_time = self._temporal_datetime(start)
+            end_time = self._temporal_datetime(end)
+            day_count = self._numeric_value(days)
+            if start_time is None or end_time is None:
+                return []
+            computed_days = (end_time.date() - start_time.date()).days
+            if day_count is not None:
+                return [subst] if day_count == computed_days else []
+            new_subst = self.engine.unify(days, Term(str(computed_days), is_number=True), subst)
+            return [new_subst] if new_subst else []
         return []
 
     def _resolve_query_goals(self, goals: list[Term]) -> list[Substitution]:
