@@ -165,9 +165,11 @@ class _MedicalClarificationRuntime:
 class _SegmentRuntime:
     def __init__(self) -> None:
         self.calls = []
+        self.contexts = []
 
-    def process_utterance(self, *, utterance, config, session, clarification_answer=None, prethink_id=None):
+    def process_utterance(self, *, utterance, config, session, clarification_answer=None, prethink_id=None, context=None):
         self.calls.append(utterance)
+        self.contexts.append(list(context or []))
         atom = f"segment_{len(self.calls)}"
         return {
             "status": "ok",
@@ -219,8 +221,9 @@ class _SegmentRuntime:
 
 
 class _QueryBoundarySegmentRuntime(_SegmentRuntime):
-    def process_utterance(self, *, utterance, config, session, clarification_answer=None, prethink_id=None):
+    def process_utterance(self, *, utterance, config, session, clarification_answer=None, prethink_id=None, context=None):
         self.calls.append(utterance)
+        self.contexts.append(list(context or []))
         index = len(self.calls)
         if "?" in utterance:
             return {
@@ -439,6 +442,14 @@ class GatewayPhasesTests(unittest.TestCase):
         turn = result["turn"]
         self.assertEqual(turn["route"], "write")
         self.assertEqual(len(runtime.calls), 32)
+        self.assertEqual(len(runtime.contexts), 32)
+        self.assertIn("processing segment 1/32", runtime.contexts[0][0])
+        self.assertEqual(len(runtime.contexts[0]), 2)
+        self.assertIn("processing segment 2/32", runtime.contexts[1][0])
+        self.assertIn("prior_source_segment_1: Goldilocks was a little girl.", runtime.contexts[1])
+        self.assertTrue(
+            any("do not import outside story or world knowledge" in item for item in runtime.contexts[1])
+        )
         self.assertEqual(turn["trace"]["segmented_story"]["segment_count"], 32)
         commit_phase = next(phase for phase in turn["phases"] if phase["phase"] == "commit")
         self.assertEqual(commit_phase["status"], "applied")
@@ -476,6 +487,10 @@ class GatewayPhasesTests(unittest.TestCase):
                 "Also remember that Theo signed the addendum.",
             ],
         )
+        self.assertEqual(len(runtime.contexts), 4)
+        self.assertIn("processing segment 3/4", runtime.contexts[2][0])
+        self.assertIn("prior_source_segment_1: Mara owns the lease.", runtime.contexts[2])
+        self.assertIn("prior_source_segment_2: Oskar manages the unit.", runtime.contexts[2])
         turn = result["turn"]
         self.assertEqual(turn["route"], "write")
         ingest = next(phase for phase in turn["phases"] if phase["phase"] == "ingest")

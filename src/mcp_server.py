@@ -1553,6 +1553,7 @@ class PrologMCPServer:
         compiler_intent: str,
         clarification_question: str = "",
         clarification_answer: str = "",
+        context: list[str] | None = None,
     ) -> tuple[dict[str, Any] | None, str]:
         if self._semantic_ir_enabled:
             return self._compile_apply_parse_with_semantic_ir(
@@ -1560,6 +1561,7 @@ class PrologMCPServer:
                 compiler_intent=compiler_intent,
                 clarification_question=clarification_question,
                 clarification_answer=clarification_answer,
+                context=context,
             )
         if not self._compiler_prompt_loaded:
             reason = self._compiler_prompt_load_error or "compiler prompt unavailable"
@@ -2301,6 +2303,7 @@ class PrologMCPServer:
         compiler_intent: str,
         clarification_question: str = "",
         clarification_answer: str = "",
+        context: list[str] | None = None,
     ) -> tuple[dict[str, Any] | None, str]:
         self._last_parse_trace = {}
         effective = utterance
@@ -2316,7 +2319,10 @@ class PrologMCPServer:
         if isinstance(cached_ir, dict):
             ir, error = self._clone_trace_payload(cached_ir), ""
         else:
-            ir, error = self._compile_semantic_ir(effective)
+            if context:
+                ir, error = self._compile_semantic_ir(effective, context=context)
+            else:
+                ir, error = self._compile_semantic_ir(effective)
         trace = {
             "utterance": utterance,
             "effective_utterance": effective,
@@ -3458,9 +3464,17 @@ class PrologMCPServer:
             out["clarification_reason"] = "Action or relation needs clarification"
         return out
 
-    def _compile_prethink_semantics(self, utterance: str) -> tuple[dict[str, Any] | None, str]:
+    def _compile_prethink_semantics(
+        self,
+        utterance: str,
+        *,
+        context: list[str] | None = None,
+    ) -> tuple[dict[str, Any] | None, str]:
         if self._semantic_ir_enabled:
-            return self._compile_prethink_semantics_with_semantic_ir(utterance)
+            return self._compile_prethink_semantics_with_semantic_ir(
+                utterance,
+                context=context,
+            )
         if not self._compiler_prompt_loaded:
             reason = self._compiler_prompt_load_error or "compiler prompt unavailable"
             return None, f"Compiler prompt not loaded: {reason}"
@@ -3593,10 +3607,18 @@ class PrologMCPServer:
             self._last_prethink_trace = trace
             return None, f"{exc} | Fallback classifier failed: {fallback_error}"
 
-    def _compile_prethink_semantics_with_semantic_ir(self, utterance: str) -> tuple[dict[str, Any] | None, str]:
+    def _compile_prethink_semantics_with_semantic_ir(
+        self,
+        utterance: str,
+        *,
+        context: list[str] | None = None,
+    ) -> tuple[dict[str, Any] | None, str]:
         self._last_prethink_trace = {}
         self._last_prethink_fallback_trace = {}
-        ir, error = self._compile_semantic_ir(utterance)
+        if context:
+            ir, error = self._compile_semantic_ir(utterance, context=context)
+        else:
+            ir, error = self._compile_semantic_ir(utterance)
         trace = {
             "utterance": utterance,
             "source": "semantic_ir_v1",
@@ -3780,13 +3802,21 @@ class PrologMCPServer:
     def pre_think(self, arguments: dict[str, Any] | None = None) -> dict[str, Any]:
         args = arguments or {}
         utterance = str(args.get("utterance", "")).strip()
+        context = [
+            str(item).strip()
+            for item in args.get("context", [])
+            if str(item).strip()
+        ] if isinstance(args.get("context"), list) else []
         if not utterance:
             return {"status": "validation_error", "message": "utterance is required"}
 
         compiled: dict[str, Any] | None = None
         compile_error = ""
         if self._compiler_mode != "heuristic":
-            compiled, compile_error = self._compile_prethink_semantics(utterance)
+            compiled, compile_error = self._compile_prethink_semantics(
+                utterance,
+                context=context,
+            )
             if compiled is None and self._compiler_mode == "strict":
                 failure_trace = self._ensure_prethink_trace(
                     utterance=utterance,
@@ -3998,6 +4028,11 @@ class PrologMCPServer:
         args = arguments or {}
         utterance = str(args.get("utterance", "")).strip()
         clarification_answer = str(args.get("clarification_answer", "")).strip()
+        context = [
+            str(item).strip()
+            for item in args.get("context", [])
+            if str(item).strip()
+        ] if isinstance(args.get("context"), list) else []
         effective_clarification_answer = clarification_answer
         provided_prethink_id = str(args.get("prethink_id", "")).strip()
         if not utterance:
@@ -4054,7 +4089,7 @@ class PrologMCPServer:
             if freethinker_answer:
                 effective_clarification_answer = freethinker_answer
         else:
-            prethink = self.pre_think({"utterance": utterance})
+            prethink = self.pre_think({"utterance": utterance, "context": context})
             if str(prethink.get("status", "")).strip() != "success":
                 prethink_message = str(prethink.get("message", "pre_think failed")).strip() or "pre_think failed"
                 failure_prethink_trace = self._clone_trace_payload(prethink.get("trace", {}))
@@ -4150,6 +4185,7 @@ class PrologMCPServer:
             compiler_intent=compiler_intent,
             clarification_question=str(front_door.get("clarification_question", "")).strip(),
             clarification_answer=effective_clarification_answer,
+            context=context,
         )
         parse_trace = self._ensure_parse_trace(
             utterance=utterance,

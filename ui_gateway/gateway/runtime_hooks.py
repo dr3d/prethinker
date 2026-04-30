@@ -264,6 +264,7 @@ class RuntimeHooks:
         session: dict,
         clarification_answer: str = "",
         prethink_id: str = "",
+        context: list[str] | None = None,
     ) -> dict[str, Any]:
         server = self._ensure_server(config)
         result = server.process_utterance(
@@ -271,6 +272,7 @@ class RuntimeHooks:
                 "utterance": utterance,
                 "clarification_answer": clarification_answer,
                 "prethink_id": prethink_id,
+                "context": list(context or []),
             }
         )
         front_door = result.get("front_door")

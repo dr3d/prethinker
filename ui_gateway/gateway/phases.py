@@ -76,6 +76,30 @@ def _split_query_boundary_segments(utterance: str) -> list[str]:
     return segments
 
 
+def _segment_source_context(
+    *,
+    segments: list[str],
+    index: int,
+    strategy: str,
+    max_previous: int = 4,
+) -> list[str]:
+    total = len(segments)
+    current = max(1, min(index, total))
+    context = [
+        (
+            f"segmented_source_context: processing segment {current}/{total} "
+            f"from the same user-provided source via {strategy}."
+        ),
+        "segmented_source_context: use prior source segments only for local referents and continuity; do not import outside story or world knowledge.",
+    ]
+    start = max(0, current - 1 - max_previous)
+    for prior_index, prior in enumerate(segments[start : current - 1], start=start + 1):
+        text = str(prior or "").strip()
+        if text:
+            context.append(f"prior_source_segment_{prior_index}: {text}")
+    return context
+
+
 def _should_segment_story(utterance: str, config: dict) -> bool:
     if not bool(config.get("semantic_ir_enabled", False)):
         return False
@@ -277,6 +301,11 @@ def _process_segmented_utterance(
     query_count = 0
 
     for index, segment in enumerate(segments, start=1):
+        segment_context = _segment_source_context(
+            segments=segments,
+            index=index,
+            strategy=strategy,
+        )
         result = runtime.process_utterance(
             utterance=segment,
             config=config,
@@ -285,6 +314,7 @@ def _process_segmented_utterance(
                 "turns": session.turns,
                 "pending_clarification": None,
             },
+            context=segment_context,
         )
         trace = result.get("compiler_trace") if isinstance(result.get("compiler_trace"), dict) else {}
         admitted, skipped, decision = _segment_admission_counts(trace)
@@ -351,6 +381,7 @@ def _process_segmented_utterance(
                 "skipped_count": skipped,
                 "writes_applied": int(execution.get("writes_applied", 0) or 0),
                 "operation_count": new_operation_count,
+                "context_count": len(segment_context),
                 "clarification_question": str(front_door.get("clarification_question", "")).strip(),
                 "errors": list(execution.get("errors", [])) if isinstance(execution.get("errors"), list) else [],
                 "trace": trace,
