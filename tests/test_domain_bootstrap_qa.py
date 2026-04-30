@@ -1,5 +1,6 @@
 from scripts.run_domain_bootstrap_qa import (
     POST_INGESTION_QA_QUERY_STRATEGY,
+    _negative_join_with_previous,
     _temporal_join_with_previous,
     clause_signature,
     compiled_kb_inventory,
@@ -207,3 +208,24 @@ def test_temporal_join_adds_minute_precision_for_elapsed_hours() -> None:
         str(row.get("Elapsedhours")) == "0" and str(row.get("Minutes")) == "45"
         for row in joined["result"]["rows"]
     )
+
+
+def test_negative_query_join_supports_set_difference() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "residential_zone(millbrook).",
+        "residential_zone(old_harbor).",
+        "boil_water_notice(millbrook, 2026_03_04t14_45, diane_cheng).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    joined = _negative_join_with_previous(
+        runtime,
+        previous_queries=["residential_zone(Zone)."],
+        query="\\+(boil_water_notice(Zone, Time, Issuer)).",
+    )
+
+    assert joined is not None
+    assert joined["result"]["status"] == "success"
+    assert joined["result"]["rows"][0]["Zone"] == "old_harbor"
+    assert "set-difference support query" in joined["result"]["reasoning_basis"]["note"]

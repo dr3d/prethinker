@@ -220,6 +220,35 @@ class SemanticIRRuntimeTests(unittest.TestCase):
             ],
         )
 
+    def test_negative_query_preserves_query_only_negation(self) -> None:
+        ir = _ir(
+            decision="answer",
+            turn_type="query",
+            candidate_operations=[
+                {
+                    "operation": "query",
+                    "predicate": "boil_water_notice",
+                    "args": ["Zone", "Time", "Issuer"],
+                    "polarity": "negative",
+                    "source": "direct",
+                    "safety": "safe",
+                }
+            ],
+        )
+
+        parsed, warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=["boil_water_notice/3"],
+            predicate_contracts=[{"signature": "boil_water_notice/3", "args": ["zone", "issued_at", "issuer"]}],
+        )
+
+        self.assertEqual(warnings, [])
+        self.assertEqual(parsed["facts"], [])
+        self.assertEqual(parsed["queries"], ["\\+(boil_water_notice(Zone, Time, Issuer))."])
+        support = parsed["clause_supports"]["queries"]
+        self.assertEqual(support[0]["polarity"], "negative")
+        self.assertEqual(support[0]["effect"], "query")
+
     def test_profile_owned_predicate_alias_canonicalizes_before_palette_gate(self) -> None:
         ir = _ir(
             candidate_operations=[

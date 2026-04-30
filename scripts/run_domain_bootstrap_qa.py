@@ -91,6 +91,7 @@ POST_INGESTION_QA_QUERY_STRATEGY: dict[str, Any] = {
         "For questions about the current, corrected, final, authoritative, or confirmed value, query the authoritative fact predicate and optionally correction_record/4 for provenance.",
         "For ambiguity questions, query ambiguity and candidate-identity predicates when present rather than forcing a single identity.",
         "For rule/consequence questions, query stored rules and supporting facts; do not write derived conclusions as durable facts.",
+        "For omission and set-difference questions such as 'which required X did not receive Y', emit a positive scope query and a negative query with the same variable. Example: residential_zone(Zone) plus a negative boil_water_notice(Zone, Time, Issuer) query. Negative queries are query-only evidence; they are not durable negative facts.",
         "For policy-condition questions, retrieve both the governing policy rows and the observed event/measurement rows. Threshold, count, interval, and deadline predicates are answer-bearing evidence, not optional decoration.",
         "For comprehensive or multi-violation questions, plan one small support bundle per alleged violation: governing policy row, observed event row, and any timing/correction/source row needed to show why it is a violation. Prefer concrete event predicates such as inspection, notice/lift, notification, reading, authorization, and zone-scope predicates before broad before/after scans.",
         "For threshold-elapsed questions, retrieve the starting state/event time, the threshold-hours policy row, and the later target event time. Use add_hours(StartTime, ThresholdHours, ThresholdTime), then elapsed_minutes(ThresholdTime, LaterTime, Minutes). Do not measure from the raw start event when the question asks from the threshold moment.",
@@ -546,8 +547,49 @@ def run_query_plan(runtime: CorePrologRuntime, queries: list[str]) -> list[dict[
         temporal_join = _temporal_join_with_previous(runtime, previous_queries=previous_queries, query=query)
         if temporal_join:
             results.append(temporal_join)
+        negative_join = _negative_join_with_previous(runtime, previous_queries=previous_queries, query=query)
+        if negative_join:
+            results.append(negative_join)
         previous_queries.append(query)
     return results
+
+
+def _negative_join_with_previous(
+    runtime: CorePrologRuntime,
+    *,
+    previous_queries: list[str],
+    query: str,
+) -> dict[str, Any] | None:
+    if not re.fullmatch(r"\s*\\\+\(.+\)\.?\s*", query):
+        return None
+    variables = set(re.findall(r"\b[A-Z][A-Za-z0-9_]*\b", query))
+    if not variables:
+        return None
+    selected: list[str] = []
+    for prior in reversed(previous_queries):
+        if prior.strip().startswith("\\+"):
+            continue
+        prior_variables = set(re.findall(r"\b[A-Z][A-Za-z0-9_]*\b", prior))
+        if variables & prior_variables:
+            selected.insert(0, prior)
+            break
+    if not selected:
+        return None
+    joined = f"{', '.join(item.rstrip('. ') for item in selected)}, {query.strip()}"
+    result = runtime.query_rows(joined)
+    if result.get("status") == "success":
+        return {
+            "query": joined,
+            "result": {
+                **result,
+                "reasoning_basis": {
+                    "kind": "core-local",
+                    "note": "set-difference support query synthesized from positive scope query plus negative query operation",
+                },
+            },
+            "derived_from_queries": [*selected, query],
+        }
+    return None
 
 
 def _temporal_join_with_previous(

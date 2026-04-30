@@ -1736,8 +1736,8 @@ def _diagnose_candidate_operation(
     if operation == "query":
         base["admitted"] = True
         base["effect"] = "query"
-        base["clauses"] = [_clause(predicate, args)]
-        base["rationale_codes"] = ["safe_query"]
+        base["clauses"] = [_query_clause(predicate, args, polarity=polarity)]
+        base["rationale_codes"] = ["safe_negative_query" if polarity == "negative" else "safe_query"]
         if source == "inferred":
             base["rationale_codes"].append("hypothetical_inferred_query_exception")
         return base
@@ -3483,6 +3483,14 @@ def _atomize(raw: str) -> str:
 
 def _clause(predicate: str, args: list[str]) -> str:
     return _ensure_period(f"{predicate}({', '.join(args)})")
+
+
+def _query_clause(predicate: str, args: list[str], *, polarity: str) -> str:
+    clause = _clause(predicate, args)
+    if str(polarity or "").strip().lower() != "negative":
+        return clause
+    inner = clause[:-1] if clause.endswith(".") else clause
+    return _ensure_period(f"\\+({inner})")
 
 
 def _retract_command(clause: str) -> str:

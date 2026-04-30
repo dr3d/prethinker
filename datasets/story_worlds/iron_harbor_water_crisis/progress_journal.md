@@ -504,3 +504,40 @@ structured ingredients are available. A targeted live q060 rerun still varied:
 one pass omitted the threshold policy row entirely and measured from the raw
 offline start instead. That remaining gap is planner uptake, not temporal
 runtime capability.
+
+## 2026-04-30 - Run IHR-017 - Query-Only Set Difference Substrate
+
+Added a query-only negation path for omission and set-difference questions. A
+negative `candidate_operations` query now projects to Prolog negation-as-failure
+in the query surface, for example:
+
+```prolog
+\+(boil_water_notice(Zone, Time, Issuer)).
+```
+
+The QA runner can join that against a prior positive scope query:
+
+```prolog
+residential_zone(Zone),
+\+(boil_water_notice(Zone, Time, Issuer)).
+```
+
+This supports questions like "which required zones did not receive notice?"
+without creating durable negative facts or derived violation facts.
+
+### What Improved
+
+The substrate now has a formal query-only omission mechanism. Unit coverage
+checks both sides:
+
+- the semantic IR mapper preserves negative query polarity as query-only
+  `\+(...)`, not as a durable negative assertion;
+- the QA runner synthesizes a set-difference support query from a positive scope
+  query plus a negative query operation.
+
+### Current Edge
+
+A live q019/q051 targeted rerun remained `1 exact + 1 partial`: the model still
+answered q019 using positive row comparison rather than choosing the negative
+query operation, and q051 still lacked explicit omitted-zone support in the
+query result bundle. This is planner uptake, not a missing formal substrate.
