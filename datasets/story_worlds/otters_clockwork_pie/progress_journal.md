@@ -428,3 +428,26 @@ The fastest path upward is now clearer:
 2. Improve compile coverage for early QA support: setting, kind/species,
    location, errand, intended-user, event, and final-state facts.
 3. Add phase-level scoring so we stop treating all misses as one blob.
+
+## Run OTR-006R - Placeholder-Normalized QA Rerun
+
+- Timestamp: `2026-04-30T02:43:59Z`
+- Model: `qwen/qwen3.6-35b-a3b`
+- Mode: rerun QA over OTR-006's compiled KB after normalizing generic query
+  placeholder constants such as `owner`, `character`, `speaker`, and
+  `consequence` into Prolog variables.
+
+### Headline
+
+Small query-surface cleanup helped, but did not change the main diagnosis.
+
+Exact first-20 QA support rose from `7/20` to `8/20`. The run still missed
+`12/20`, mostly because the compiled KB does not yet carry enough early-story
+support for setting, errand, designed-for ownership, and event-spine questions.
+
+### Lesson
+
+Structural query placeholder normalization is useful, but the next large gain
+must come from better model-authored compile coverage. We should keep pushing
+context choreography and predicate-roster pressure rather than adding Python
+language patches.
