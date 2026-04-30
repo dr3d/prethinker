@@ -52,6 +52,12 @@ coliform_reading(intake_point_alpha, 28, '2026-03-05T16:00', r_vasquez).
 % correction_authority: badge_log, showing 01:52
 % claim: ferreira_initial_inspection_date('2026-01-28').
 % correction_authority: written_inspection_log, showing 2026-02-01
+source_claim(r_vasquez, intake_point_alpha_coliform_2026_03_03t14_00, 120, retracted_transcription_error).
+correction_record(intake_point_alpha_coliform_2026_03_03t14_00, 120, 180, lab_notebook).
+source_claim(m_okonkwo, intake_point_alpha_arrival_time, '2026-03-04T01:45', superseded_by_badge_log).
+correction_record(intake_point_alpha_arrival_time, '2026-03-04T01:45', '2026-03-04T01:52', badge_log).
+source_claim(luis_ferreira, pier_7_inspection_date, '2026-01-28', retracted).
+correction_record(pier_7_inspection_date, '2026-01-28', '2026-02-01', written_inspection_log).
 
 % === Authoritative corrected facts ===
 okonkwo_arrival(intake_point_alpha, '2026-03-04T01:52').
@@ -101,6 +107,7 @@ before('2026-03-06T09:00', '2026-03-06T10:00').
 
 % === Disclosure (NOT a finding -- scoped as claim) ===
 % claim: disclosure(diane_cheng, aware_of_pump_deterioration_feb_20, '2026-03-06', statement_not_finding).
+disclosure(diane_cheng, aware_of_pump_deterioration_feb_20, '2026-03-06', statement_not_finding).
 
 % === Derived rules (should be installed from policy, not written as facts) ===
 % Rule: advisory triggered when reading > 400

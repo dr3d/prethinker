@@ -145,7 +145,15 @@ def test_iron_harbor_metadata_is_graph_ready() -> None:
     assert any(item["id"] == "false_positive_violation" for item in buckets["buckets"])
     assert registry["source"] == "gold_kb.pl"
     signatures = {item["signature"] for item in registry["predicates"]}
-    for signature in ["coliform_reading/4", "bypass_authorization/3", "notification/5", "before/2"]:
+    for signature in [
+        "coliform_reading/4",
+        "bypass_authorization/3",
+        "notification/5",
+        "before/2",
+        "source_claim/4",
+        "correction_record/4",
+        "disclosure/4",
+    ]:
         assert signature in signatures
     assert [row["timestamp"] for row in metrics] == sorted(row["timestamp"] for row in metrics)
 
@@ -168,3 +176,5 @@ def test_iron_harbor_traps_do_not_import_obvious_false_priors() -> None:
     assert "boil_water_notice(old_harbor" not in kb
     assert "inspection(pier_7_chlorination_unit, luis_ferreira, '2026-02-01')" in kb
     assert "inspection(pier_7_chlorination_unit, luis_ferreira, '2026-01-28')" not in kb
+    assert "source_claim(luis_ferreira, pier_7_inspection_date, '2026-01-28', retracted)." in kb
+    assert "disclosure(diane_cheng, aware_of_pump_deterioration_feb_20" in kb

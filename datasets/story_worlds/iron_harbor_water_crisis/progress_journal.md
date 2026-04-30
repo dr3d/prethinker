@@ -211,3 +211,36 @@ query projection:
 - rule and rule-application questions need deeper executable-rule support;
 - multi-hop set difference still needs better query planning over admitted
   primitive facts.
+
+## 2026-04-30 - Run IHR-010 - Source-Claim Surface Probe
+
+The fixture profile now includes explicit epistemic predicates:
+
+- `source_claim/4`
+- `correction_record/4`
+- `disclosure/4`
+
+The gold KB was updated so retracted values and the Cheng addendum are executable
+benchmark facts, not only comments. This is a benchmark maturation: the QA set
+asks about original claims, retractions, and statement-vs-finding status, so the
+reference KB and profile need predicate surfaces for those epistemic states.
+
+Flat source compilation picked up the Cheng disclosure and one coliform
+correction, but still missed Ferreira's retracted January 28 inspection claim.
+The LLM-authored pass-plan compile captured broader correction records,
+including Ferreira's `january_28 -> february_1` correction and Cheng's
+`statement_not_finding` disclosure.
+
+Result on the focused source-claim probe using the pass-plan compile:
+
+- q003/q026/q028/q094 targeted probe: `4 exact + 0 miss`
+- first-20 QA with the same pass-plan compile: `17 exact + 0 partial + 3 miss`
+
+### Lesson
+
+LLM-owned pass plans help recover late-document epistemic material, but this is
+not a free win yet. The pass-plan compile improved correction/disclosure support
+while losing some simple role-query behavior (`person_role/2` support) compared
+with the flatter IHR-009 compile. The next architecture question is whether
+document ingestion should merge a broad flat pass with focused LLM-authored
+passes, then let deterministic admission dedupe and reject malformed operations.

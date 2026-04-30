@@ -83,6 +83,8 @@ POST_INGESTION_QA_QUERY_STRATEGY: dict[str, Any] = {
     ],
     "epistemic_policy": [
         "Return claim/source/support queries for claimed or alleged content; do not ask for objective fact predicates when the KB only contains source-attributed claims.",
+        "For questions about original, initially stated, first claimed, retracted, corrected-from, transcription-error, or superseded values, query source_claim/4 and correction_record/4 when those predicates exist before querying only the current authoritative fact predicate.",
+        "For questions about the current, corrected, final, authoritative, or confirmed value, query the authoritative fact predicate and optionally correction_record/4 for provenance.",
         "For ambiguity questions, query ambiguity and candidate-identity predicates when present rather than forcing a single identity.",
         "For rule/consequence questions, query stored rules and supporting facts; do not write derived conclusions as durable facts.",
     ],

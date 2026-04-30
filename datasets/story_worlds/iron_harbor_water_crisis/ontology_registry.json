@@ -95,6 +95,18 @@
       "notes": "Value above which a contamination advisory is triggered."
     },
     {
+      "signature": "correction_record/4",
+      "args": ["subject", "original_value", "corrected_value", "authority"],
+      "category": "correction",
+      "notes": "Records a source-stated correction without treating the original value as current truth."
+    },
+    {
+      "signature": "disclosure/4",
+      "args": ["speaker", "content_summary", "date", "status"],
+      "category": "claim",
+      "notes": "Records a review disclosure or statement with explicit epistemic status, such as statement_not_finding."
+    },
+    {
       "signature": "downstream_of/2",
       "args": ["zone", "facility"],
       "category": "scope",
@@ -165,6 +177,12 @@
       "args": ["meeting_at", "participants"],
       "category": "review",
       "notes": "Post-incident review meeting timestamp and participants."
+    },
+    {
+      "signature": "source_claim/4",
+      "args": ["speaker_or_source", "claim_subject", "claim_content", "status"],
+      "category": "claim",
+      "notes": "Records a source-attributed claim, initial statement, allegation, or retracted value without promoting it to objective fact."
     },
     {
       "signature": "testing_interval/2",

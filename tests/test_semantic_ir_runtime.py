@@ -862,6 +862,64 @@ class SemanticIRRuntimeTests(unittest.TestCase):
             ],
         )
 
+    def test_query_projection_lifts_lowercase_slot_placeholders(self) -> None:
+        ir = _ir(
+            decision="answer",
+            turn_type="query",
+            candidate_operations=[
+                {
+                    "operation": "query",
+                    "predicate": "inspection",
+                    "args": ["pier_7", "luis_ferreira", "inspectiondate"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "query",
+                    "predicate": "bypass_authorization",
+                    "args": ["pier_7", "authorizer", "authtime"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "query",
+                    "predicate": "bypass_inspection_validity_days",
+                    "args": ["validitydays"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "query",
+                    "predicate": "correction_record",
+                    "args": ["recordid", "originalvalue", "correctedvalue", "source"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+            ],
+        )
+        parsed, _warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=[
+                "inspection/3",
+                "bypass_authorization/3",
+                "bypass_inspection_validity_days/1",
+                "correction_record/4",
+            ],
+        )
+        self.assertEqual(
+            parsed["queries"],
+            [
+                "inspection(pier_7, luis_ferreira, Inspectiondate).",
+                "bypass_authorization(pier_7, Authorizer, Authtime).",
+                "bypass_inspection_validity_days(Validitydays).",
+                "correction_record(Recordid, Originalvalue, Correctedvalue, Source).",
+            ],
+        )
+
     def test_mapper_admits_contract_role_shape_when_interval_is_grounded(self) -> None:
         ir = _ir(
             candidate_operations=[

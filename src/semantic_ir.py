@@ -3305,6 +3305,7 @@ def _is_query_placeholder_arg(raw: str) -> bool:
         "actor",
         "action",
         "accused",
+        "authorizer",
         "batch",
         "batch_id",
         "batchid",
@@ -3330,6 +3331,8 @@ def _is_query_placeholder_arg(raw: str) -> bool:
         "grievancelabel",
         "grievancetype",
         "institution",
+        "inspectiondate",
+        "inspector",
         "item",
         "issuer",
         "label",
@@ -3358,6 +3361,7 @@ def _is_query_placeholder_arg(raw: str) -> bool:
         "target",
         "tester",
         "thing",
+        "timestamp",
         "time",
         "type",
         "value",
@@ -3381,12 +3385,19 @@ def _is_query_placeholder_arg(raw: str) -> bool:
         "rulecondition",
         "rulecontent",
         "violationlabel",
+        "authtime",
+        "endtime",
+        "end_time",
+        "starttime",
+        "start_time",
+        "validitydays",
+        "validity_days",
     }:
         return True
     if (
         len(value) > 3
         and not any(char.isdigit() for char in value)
-        and value.endswith(("id", "label", "content", "condition", "type"))
+        and value.endswith(("id", "label", "content", "condition", "type", "value", "date", "time", "days", "hours"))
     ):
         return True
     return False
