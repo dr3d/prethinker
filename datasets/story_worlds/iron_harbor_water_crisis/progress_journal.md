@@ -244,3 +244,39 @@ while losing some simple role-query behavior (`person_role/2` support) compared
 with the flatter IHR-009 compile. The next architecture question is whether
 document ingestion should merge a broad flat pass with focused LLM-authored
 passes, then let deterministic admission dedupe and reject malformed operations.
+
+## 2026-04-30 - Run IHR-011 - Flat Plus Focused Pass Merge
+
+Added an experimental `--compile-flat-plus-plan-passes` mode:
+
+1. run one broad flat source compile for the stable skeleton;
+2. run focused LLM-authored intake-plan passes for sectional coverage;
+3. union only admitted fact/rule/query clauses, preserving pass diagnostics.
+
+Python does not segment or semantically interpret the source text here. The
+intake plan and every compile pass remain LLM-owned; deterministic code only
+deduplicates already admitted clauses after the mapper has enforced predicate
+contracts and admission policy.
+
+Result:
+
+- compile admitted operations: `113`
+- first-20 QA: `20 exact + 0 partial + 0 miss`
+- full 100 QA: `59 exact + 16 partial + 25 miss`
+- query rows: `100/100`
+- runtime load errors: `0`
+- write-proposal leaks during QA: `0`
+
+### What Improved
+
+The combined mode keeps the broad-role and policy skeleton that the flat pass
+handled well while recovering focused correction/disclosure records from the
+pass-plan compile. This directly improved source-claim and correction questions
+without regressing the early role/timeline probes.
+
+### Remaining Frontier
+
+The remaining misses are concentrated in rule application, authorization-chain
+reasoning, multi-hop enumeration/set difference, person tracking, source
+fidelity, and deeper temporal calculation. Those are increasingly reasoning
+substrate problems, not "could not query the KB" problems.

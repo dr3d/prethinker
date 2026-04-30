@@ -137,6 +137,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="When an intake plan exists, compile once per LLM-authored pass_plan item instead of one flat source compile.",
     )
+    parser.add_argument(
+        "--compile-flat-plus-plan-passes",
+        action="store_true",
+        help="Experimental: compile one broad flat pass plus focused LLM-authored pass_plan passes, then union admitted clauses.",
+    )
     parser.add_argument("--max-plan-passes", type=int, default=8)
     parser.add_argument("--include-model-input", action="store_true")
     parser.add_argument(
@@ -365,7 +370,14 @@ def main() -> int:
         }
     if args.include_model_input:
         record["model_input"] = {"messages": messages}
-    if bool(args.compile_source) and isinstance(parsed, dict) and bool(args.compile_plan_passes) and isinstance(intake_plan, dict):
+    if bool(args.compile_source) and isinstance(parsed, dict) and bool(args.compile_flat_plus_plan_passes) and isinstance(intake_plan, dict):
+        record["source_compile"] = _compile_source_flat_plus_plan_passes(
+            source_text=source_text,
+            parsed_profile=parsed,
+            intake_plan=intake_plan,
+            args=args,
+        )
+    elif bool(args.compile_source) and isinstance(parsed, dict) and bool(args.compile_plan_passes) and isinstance(intake_plan, dict):
         record["source_compile"] = _compile_source_with_plan_passes(
             source_text=source_text,
             parsed_profile=parsed,
@@ -821,6 +833,80 @@ def _compile_source_with_plan_passes(
         "queries": unique_queries,
         "passes": pass_records,
     }
+
+
+def _compile_source_flat_plus_plan_passes(
+    *,
+    source_text: str,
+    parsed_profile: dict[str, Any],
+    intake_plan: dict[str, Any],
+    args: argparse.Namespace,
+) -> dict[str, Any]:
+    flat = _compile_source_with_draft_profile(
+        source_text=source_text,
+        parsed_profile=parsed_profile,
+        intake_plan=intake_plan,
+        args=args,
+        extra_context=[
+            "This is the broad skeleton pass for a flat-plus-focused compile. Preserve stable source-wide facts, roles, thresholds, core events, and high-value corrections.",
+            "Focused pass_plan calls will follow, so prefer a balanced skeleton over exhaustive local detail.",
+        ],
+    )
+    focused = _compile_source_with_plan_passes(
+        source_text=source_text,
+        parsed_profile=parsed_profile,
+        intake_plan=intake_plan,
+        args=args,
+    )
+    unique_facts, unique_rules, unique_queries = _union_clause_lists(
+        flat.get("facts", []) if isinstance(flat, dict) else [],
+        focused.get("facts", []) if isinstance(focused, dict) else [],
+        flat.get("rules", []) if isinstance(flat, dict) else [],
+        focused.get("rules", []) if isinstance(focused, dict) else [],
+        flat.get("queries", []) if isinstance(flat, dict) else [],
+        focused.get("queries", []) if isinstance(focused, dict) else [],
+    )
+    return {
+        "ok": bool(flat.get("ok")) and bool(focused.get("ok")) if isinstance(flat, dict) and isinstance(focused, dict) else False,
+        "mode": "flat_plus_intake_plan_passes",
+        "pass_count": 1 + int(focused.get("pass_count", 0) or 0) if isinstance(focused, dict) else 1,
+        "admitted_count": int(flat.get("admitted_count", 0) or 0) + int(focused.get("admitted_count", 0) or 0),
+        "skipped_count": int(flat.get("skipped_count", 0) or 0) + int(focused.get("skipped_count", 0) or 0),
+        "unique_fact_count": len(unique_facts),
+        "unique_rule_count": len(unique_rules),
+        "unique_query_count": len(unique_queries),
+        "facts": unique_facts,
+        "rules": unique_rules,
+        "queries": unique_queries,
+        "flat_pass": flat,
+        "focused_passes": focused,
+    }
+
+
+def _union_clause_lists(
+    flat_facts: Any,
+    focused_facts: Any,
+    flat_rules: Any,
+    focused_rules: Any,
+    flat_queries: Any,
+    focused_queries: Any,
+) -> tuple[list[str], list[str], list[str]]:
+    def merge(*groups: Any) -> list[str]:
+        out: list[str] = []
+        seen: set[str] = set()
+        for values in groups:
+            for value in values if isinstance(values, list) else []:
+                text = str(value).strip()
+                if text and text not in seen:
+                    seen.add(text)
+                    out.append(text)
+        return out
+
+    return (
+        merge(flat_facts, focused_facts),
+        merge(flat_rules, focused_rules),
+        merge(flat_queries, focused_queries),
+    )
 
 
 def _source_compiler_context(*, intake_plan: dict[str, Any] | None, domain_hint: str = "") -> list[str]:
