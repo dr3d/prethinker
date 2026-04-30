@@ -119,11 +119,11 @@ STORY_WORLD_QA_QUERY_STRATEGY: dict[str, Any] = {
         "Do not answer from story memory or external tale templates."
     ),
     "query_patterns": [
-        "For species/kind/type questions, query kind(Entity, Kind), character(Entity), object(Entity), food(Entity), or place(Entity) when those predicates exist.",
+        "For species/kind/type questions, query kind(Entity, Kind) when available; otherwise query character(Entity), object(Entity), food(Entity), or place(Entity) with Entity as a variable and infer only from returned source-local atoms.",
         "For household/resident questions, query lives_at(Character, Place) and optionally kind(Character, Kind) or household_member(Household, Character) when available.",
-        "For location questions, query initial_location(Entity, Place), location_after_event(Entity, Event, Place), located_in(Entity, Place), near(Entity, Place), under(Entity, Place), or lives_at(Character, Place), choosing the predicate that exposes the requested slot.",
+        "For location questions, query all relevant location predicates that exist for the entity: initial_location(Entity, Place), location_after_event(Entity, Event, Place), located_in(Entity, Place), near(Entity, Place), under(Entity, Place), or lives_at(Character, Place). Do not stop after the first partial location row if the answer may be composite.",
         "For errand/sent-by questions, query sent_by(Sender, Person, Errand), errand_item(Errand, Item), forgotten_by_during_story(Person, Item), or hazy_notion_by_during_story(Person, Item) when available.",
-        "For ownership/intended-user questions, query owned_by(Object, Owner), designed_for(Object, Character), intended_for(Object, Character), or belongs_to_household(Object, Household).",
+        "For ownership/intended-user questions, query owned_by(Object, Owner), designed_for(Object, Character), intended_for(Object, Character), or belongs_to_household(Object, Household). If the question names a size/object phrase such as middle-sized boots, great boat, or little mug, do not invent an abbreviated atom such as boots_middle or boat_great unless that exact atom appears in relevant_clauses. Prefer Object as a variable and let returned rows expose canonical atoms.",
         "For event questions, query event(Event, Actor, Action, Object, Place) with variables in the answer slot, then add story_time(Event, Time) or before/after queries only when order matters.",
         "For speech questions, query said(Event, Speaker, Quote). Do not query said/3 for non-speech facts such as who sent someone unless the compiled KB only represents that knowledge in speech.",
         "For subjective fit/quality questions, query judged(Judge, Item, Dimension, Verdict), accepted_choice(Person, Item), rejected_choice(Person, Item), or pattern_choice(Group, Item, Verdict).",

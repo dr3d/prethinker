@@ -523,3 +523,126 @@ Otters source-fidelity path, but they also did not solve Otters' remaining
 coverage problems. This is useful separation. Otters should keep pressure on
 source-local entity/event coverage and prior-contamination resistance; Iron
 Harbor should keep pressure on policy, temporal, and rule-substrate behavior.
+
+## Run OTR-010 - Story QA Planner Hygiene After Harbor Work
+
+- Timestamp: `2026-04-30T14:23:35Z`
+- Model: `qwen/qwen3.6-35b-a3b`
+- Mode: first-20 QA rerun against the OTR-008 compile after query-only
+  set-difference work and story-world QA guidance tightening.
+
+### Headline
+
+The rerun reached `8 exact + 2 partial + 10 miss`. This is a small recovery from
+an intermediate `7 exact + 1 partial` probe, but still below the OTR-008/009
+high-water mark of `9 exact + 2 partial`.
+
+### What Improved
+
+- The species question now uses the compiled KB surface and reaches exact
+  support by querying residents rather than failing with no query.
+- Location and triad questions are at least querying plausible primitive
+  predicates rather than leaking writes or invented composite predicates.
+- Harbor-specific negative-query guidance did not create write leaks in the
+  story-world QA path.
+
+### What Failed
+
+The remaining misses are mostly not answer-time bugs. They expose compile
+coverage and atom-stability gaps:
+
+- middle/great object ownership rows are missing or split across incompatible
+  atoms;
+- the home location is split between `willow_root_house` and
+  `willow_tree_house`;
+- the clockwork pie components, mint-gathering reason, pie-key, rules in the
+  middle boat, and holes-in-boots support are absent or too indirect in the
+  compiled KB;
+- the planner still sometimes binds guessed atoms such as `boots_middle` or
+  `boat_great` instead of first discovering canonical object rows.
+
+### Lesson
+
+Otters should not be solved by more answer-time prompt nudges. The next serious
+move is compile-side: a source-local entity/object ledger and object-family
+coverage pass that freezes canonical atoms before the event, ownership, design,
+location, and final-state passes. That remains context choreography rather than
+Python NLP.
+
+## Run OTR-011 - Narrative Ledger Guidance Compile
+
+- Timestamp: `2026-04-30T14:31:10Z`
+- Model: `qwen/qwen3.6-35b-a3b`
+- Mode: direct registry flat-plus-focused compile after adding stronger
+  narrative compiler guidance for source-local ledger reuse and repeated
+  object-family coverage.
+
+### Headline
+
+The compile admitted more structure (`94` operations) but first-20 QA landed at
+`8 exact + 0 partial + 12 miss`. This is not an improvement over OTR-008/009.
+
+### What Improved
+
+The instruction did move one desired compile behavior: the new source compile
+preserved more repeated object-family ownership rows, including middle/great
+boot and mug ownership rows that earlier compiles often omitted.
+
+### What Regressed
+
+The same run destabilized other atom families:
+
+- `willow_tree_house` and `willow_root_house` both appeared for the same home;
+- `little_boat` and owner-prefixed boat atoms both appeared;
+- some early household/location questions regressed even though object-family
+  rows improved.
+
+### Lesson
+
+"Use a ledger" as prose guidance is not enough. The next architecture move
+should be a separate LLM-authored `source_entity_ledger_v1` context artifact:
+the model first proposes canonical characters, places, objects, object
+families, aliases, and source-local atom names; later compile passes receive
+that ledger and must reuse it. Python should not derive the ledger from prose;
+it should only validate the structured ledger and pass it forward as context.
+
+## Run OTR-012 - Experimental Source Entity Ledger
+
+- Timestamp: `2026-04-30T14:40:00Z`
+- Model: `qwen/qwen3.6-35b-a3b`
+- Mode: opt-in prototype `source_entity_ledger_v1` pre-pass injected into
+  flat-plus-focused compile context.
+
+### Headline
+
+The ledger pass itself was excellent, but the compile handoff is not yet good
+enough. First-20 QA landed at `6 exact + 2 partial + 12 miss`, below the current
+best.
+
+### What Worked
+
+The LLM-authored ledger found a strong source-local atom surface:
+
+- `willow_root_house`
+- `little_boat`, `middle_sized_boat`, `great_boat`
+- `little_boots`, `middle_sized_boots`, `great_boots`
+- `pie_key`
+- `mint_sprig`
+- `brass_wheels`
+- `clockwork_pie`
+
+It also produced useful object-family groups for mugs, boots, boats, and
+knives.
+
+### What Failed
+
+The compiler used the ledger more consistently, but too timidly. It admitted
+fewer total facts and still failed to emit enough ownership/design/component
+coverage to improve QA. A follow-up prompt that explicitly told static passes
+to cash in every ledger object family also failed to improve the compile.
+
+### Decision
+
+The mechanism is now kept behind an explicit `--source-entity-ledger` flag. It
+is architecturally promising, but it should not become the default path until
+the ledger-to-compile handoff demonstrably beats the simpler current pipeline.

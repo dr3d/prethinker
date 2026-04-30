@@ -43,14 +43,59 @@ NARRATIVE_SOURCE_COMPILER_CONTEXT_V1 = [
     "Narrative story-world canonical palette preference: prefer household/1, household_member/2, character/1, object/1, place/1, food/1, name/2, kind/2, and property/2 for source-local cast and object taxonomy when the profile supports these classes.",
     "Narrative story-world canonical palette warning: do not invent near-synonym predicate surfaces such as happens_before/2, says/3, evaluates_as/3, located_at/2, owns/2, or results_in/2 when the draft profile also provides the canonical story-world predicates before/2, said/3, judged/4, initial_location/2, owned_by/2, or causes/2.",
     "Narrative story-world coverage warning: canonical predicates should not make the compile timid. Preserve representative facts for cast/entity taxonomy, ownership/design, locations, event spine, story order, speech, subjective judgment, causality, remediation, and final state when the source and profile support them.",
+    "Narrative story-world ledger rule: before emitting event-heavy facts, establish a source-local entity/object/place ledger in the workspace and reuse those canonical atoms in every pass. Do not emit parallel atoms for the same house, object, character, food, or place unless the source distinguishes them.",
     "Narrative story-world object rule: repeated sized object triads should use compact source-local object atoms based on size and kind, such as small_cup, medium_cup, large_cup, small_tool, or large_vehicle, when the source names them that way. Do not over-prefix every object with the owner when owned_by/2 and designed_for/2 can carry ownership/intended-user separately.",
-    "Narrative story-world object coverage: when object/1, kind/2, size/2, owned_by/2, designed_for/2, and initial_location/2 are available, preserve all of those facets for important repeated objects instead of only one ownership row.",
+    "Narrative story-world object coverage: when object/1, kind/2, size/2, owned_by/2, designed_for/2, and initial_location/2 are available, preserve all of those facets for important repeated objects instead of only one ownership row. For repeated object families, emit the whole family in one consistent atom pattern: little/middle/great mug, little/middle/great boots, little/middle/great boat, or equivalent source-local families.",
     "Narrative story-world inventory coverage: introductory inventory lists are not decorative. If the source lists repeated possessed objects by size or owner, preserve every listed family even if later scenes focus on only one family. Do not drop cups/mugs/bowls, tools, footwear, vehicles, beds, boats, keys, or other listed object triads simply because later action scenes are more salient.",
     "Narrative story-world setting coverage: when located_in/2, under/2, near/2, part_of/2, or initial_location/2 are available, preserve descriptive setting relations for the home/place, not only lives_at/2 for residents.",
     "Narrative story-world food/occasion coverage: when ingredient_of/2, contains_before_eating/2, occasion/1, honoree/2, served_for/2, property/2, or portion_of/2 are available, preserve named ingredients/components, special occasions, honorees, and portion/component relations instead of reducing food to a single object.",
     "Narrative story-world event-spine coverage: when event/5 and story_time/2 are available, preserve source-stated actions such as making/baking/placing/leaving/gathering/entering/eating/trying/finding/repairing as event rows with stable event ids and story_time anchors. Use why_did_* helper predicates only when the profile provides them and the source directly states the reason.",
     "Narrative source rule: if the profile lacks event, temporal-order, causal, or final-state predicates needed for the current pass, mention those missing capabilities in self_check rather than inventing out-of-palette predicates.",
 ]
+
+SOURCE_ENTITY_LEDGER_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": ["schema_version", "source_kind", "canonical_entities", "object_families", "alias_notes", "risk_notes"],
+    "properties": {
+        "schema_version": {"type": "string", "const": "source_entity_ledger_v1"},
+        "source_kind": {"type": "string"},
+        "canonical_entities": {
+            "type": "array",
+            "maxItems": 96,
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["atom", "surface", "category", "aliases"],
+                "properties": {
+                    "atom": {"type": "string"},
+                    "surface": {"type": "string"},
+                    "category": {
+                        "type": "string",
+                        "enum": ["character", "place", "object", "food", "event", "group", "document", "abstract", "unknown"],
+                    },
+                    "aliases": {"type": "array", "maxItems": 12, "items": {"type": "string"}},
+                },
+            },
+        },
+        "object_families": {
+            "type": "array",
+            "maxItems": 32,
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["family", "members", "owner_or_intended_user_pattern"],
+                "properties": {
+                    "family": {"type": "string"},
+                    "members": {"type": "array", "maxItems": 12, "items": {"type": "string"}},
+                    "owner_or_intended_user_pattern": {"type": "string"},
+                },
+            },
+        },
+        "alias_notes": {"type": "array", "maxItems": 24, "items": {"type": "string"}},
+        "risk_notes": {"type": "array", "maxItems": 16, "items": {"type": "string"}},
+    },
+}
 
 POLICY_INCIDENT_SOURCE_COMPILER_CONTEXT_V1 = [
     "policy_incident_source_compiler_strategy_v1: Use this for sources classified by the LLM intake plan or domain hint as policy, compliance, incident, operations log, regulatory record, timeline, or municipal/organizational procedure.",
@@ -153,6 +198,11 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--max-plan-passes", type=int, default=8)
     parser.add_argument("--include-model-input", action="store_true")
+    parser.add_argument(
+        "--source-entity-ledger",
+        action="store_true",
+        help="Experimental: run an LLM-owned source_entity_ledger_v1 pass and inject it as compile context.",
+    )
     parser.add_argument(
         "--review-profile",
         action="store_true",
@@ -379,12 +429,52 @@ def main() -> int:
         }
     if args.include_model_input:
         record["model_input"] = {"messages": messages}
+    source_entity_ledger: dict[str, Any] | None = None
+    source_entity_ledger_context: list[str] = []
+    if bool(args.source_entity_ledger) and bool(args.compile_source) and isinstance(parsed, dict) and _should_build_source_entity_ledger(
+        intake_plan=intake_plan,
+        domain_hint=str(args.domain_hint or ""),
+    ):
+        ledger_started = time.perf_counter()
+        try:
+            ledger_response = _call_lmstudio_json_schema(
+                base_url=str(args.base_url),
+                model=str(args.model),
+                messages=_build_source_entity_ledger_messages(
+                    source_text=source_text,
+                    source_name=text_path.name,
+                    domain_hint=str(args.domain_hint or ""),
+                    profile_registry=profile_registry,
+                ),
+                schema=SOURCE_ENTITY_LEDGER_SCHEMA,
+                schema_name="source_entity_ledger_v1",
+                timeout=int(args.timeout),
+                temperature=float(args.temperature),
+                top_p=float(args.top_p),
+                max_tokens=min(int(args.max_tokens), 6000),
+            )
+            source_entity_ledger = json.loads(str(ledger_response.get("content", "{}")))
+            record["source_entity_ledger"] = {
+                "parsed_ok": isinstance(source_entity_ledger, dict),
+                "parse_error": "",
+                "latency_ms": int((time.perf_counter() - ledger_started) * 1000),
+                "parsed": source_entity_ledger,
+            }
+            source_entity_ledger_context = _source_entity_ledger_context(source_entity_ledger)
+        except Exception as exc:
+            record["source_entity_ledger"] = {
+                "parsed_ok": False,
+                "parse_error": str(exc),
+                "latency_ms": int((time.perf_counter() - ledger_started) * 1000),
+                "parsed": {},
+            }
     if bool(args.compile_source) and isinstance(parsed, dict) and bool(args.compile_flat_plus_plan_passes) and isinstance(intake_plan, dict):
         record["source_compile"] = _compile_source_flat_plus_plan_passes(
             source_text=source_text,
             parsed_profile=parsed,
             intake_plan=intake_plan,
             args=args,
+            extra_context=source_entity_ledger_context,
         )
     elif bool(args.compile_source) and isinstance(parsed, dict) and bool(args.compile_plan_passes) and isinstance(intake_plan, dict):
         record["source_compile"] = _compile_source_with_plan_passes(
@@ -392,6 +482,7 @@ def main() -> int:
             parsed_profile=parsed,
             intake_plan=intake_plan,
             args=args,
+            extra_context=source_entity_ledger_context,
         )
     elif bool(args.compile_source) and isinstance(parsed, dict):
         record["source_compile"] = _compile_source_with_draft_profile(
@@ -399,6 +490,7 @@ def main() -> int:
             parsed_profile=parsed,
             intake_plan=intake_plan,
             args=args,
+            extra_context=source_entity_ledger_context,
         )
     if args.expected_prolog:
         record["expected_prolog"] = _compare_expected_prolog(
@@ -774,6 +866,7 @@ def _compile_source_with_plan_passes(
     parsed_profile: dict[str, Any],
     intake_plan: dict[str, Any],
     args: argparse.Namespace,
+    extra_context: list[str] | None = None,
 ) -> dict[str, Any]:
     pass_plan = intake_plan.get("pass_plan") if isinstance(intake_plan.get("pass_plan"), list) else []
     pass_records: list[dict[str, Any]] = []
@@ -803,6 +896,7 @@ def _compile_source_with_plan_passes(
             args=args,
             extra_context=[
                 "This is focused plan-pass compilation, not a whole-source gulp.",
+                *(extra_context or []),
                 f"current_intake_pass_id: {pass_id}",
                 f"current_intake_pass_purpose: {purpose}",
                 f"current_intake_pass_focus: {focus}",
@@ -812,6 +906,7 @@ def _compile_source_with_plan_passes(
                 "It is better to be complete for this pass than broadly summary-like across the entire source.",
                 "Keep focused pass JSON compact: reuse normalized atoms directly in candidate_operations instead of listing every named thing as an entity.",
                 "For focused pass compilation, aim for at most 12 entities, 32 candidate_operations, and 3 short self_check notes.",
+                "If source_entity_ledger_v1 includes object_families and this pass is about entity taxonomy, static properties, inventory, ownership, design, or source metadata, emit rows for every family member the allowed profile can represent: object/1 when available, size/2 when available, owned_by/2 or designed_for/2 when available, and initial_location/2 when directly stated. Do not stop after only the little/small member of a repeated family.",
             ],
         )
         compiled["pass_id"] = pass_id
@@ -850,6 +945,7 @@ def _compile_source_flat_plus_plan_passes(
     parsed_profile: dict[str, Any],
     intake_plan: dict[str, Any],
     args: argparse.Namespace,
+    extra_context: list[str] | None = None,
 ) -> dict[str, Any]:
     flat = _compile_source_with_draft_profile(
         source_text=source_text,
@@ -857,6 +953,7 @@ def _compile_source_flat_plus_plan_passes(
         intake_plan=intake_plan,
         args=args,
         extra_context=[
+            *(extra_context or []),
             "This is the broad skeleton pass for a flat-plus-focused compile. Preserve stable source-wide facts, roles, thresholds, core events, and high-value corrections.",
             "Focused pass_plan calls will follow, so prefer a balanced skeleton over exhaustive local detail.",
         ],
@@ -866,6 +963,7 @@ def _compile_source_flat_plus_plan_passes(
         parsed_profile=parsed_profile,
         intake_plan=intake_plan,
         args=args,
+        extra_context=extra_context,
     )
     unique_facts, unique_rules, unique_queries = _union_clause_lists(
         flat.get("facts", []) if isinstance(flat, dict) else [],
@@ -962,6 +1060,57 @@ def _source_compiler_context(*, intake_plan: dict[str, Any] | None, domain_hint:
     ):
         contexts.extend(POLICY_INCIDENT_SOURCE_COMPILER_CONTEXT_V1)
     return contexts
+
+
+def _should_build_source_entity_ledger(*, intake_plan: dict[str, Any] | None, domain_hint: str = "") -> bool:
+    label = f"{domain_hint} {json.dumps(intake_plan or {}, ensure_ascii=False)}".casefold()
+    return any(token in label for token in ["story", "narrative", "fable", "fiction", "plot"])
+
+
+def _build_source_entity_ledger_messages(
+    *,
+    source_text: str,
+    source_name: str,
+    domain_hint: str,
+    profile_registry: dict[str, Any] | None,
+) -> list[dict[str, str]]:
+    payload = {
+        "task": "Build source_entity_ledger_v1 for later governed semantic compilation.",
+        "source_name": source_name,
+        "domain_hint": domain_hint,
+        "source_text": source_text,
+        "candidate_profile_registry_v1": profile_registry or {},
+        "rules": [
+            "Use only the supplied source text and candidate registry. Do not import famous-story names, objects, roles, or endings.",
+            "This ledger is context guidance only. It does not authorize durable KB writes.",
+            "Choose canonical snake_case atoms for recurring characters, places, foods, objects, groups, and important abstract states.",
+            "For repeated sized object families, list all local family members and keep atom names mutually consistent.",
+            "Record alias risks when the same source thing could otherwise receive two atom names.",
+        ],
+    }
+    return [
+        {
+            "role": "system",
+            "content": (
+                "You produce a compact source_entity_ledger_v1 JSON object for a governed symbolic compiler. "
+                "You do not answer the user and you do not write facts. The ledger helps later model passes "
+                "reuse canonical source-local atoms."
+            ),
+        },
+        {"role": "user", "content": json.dumps(payload, ensure_ascii=False, indent=2)},
+    ]
+
+
+def _source_entity_ledger_context(source_entity_ledger: dict[str, Any] | None) -> list[str]:
+    if not isinstance(source_entity_ledger, dict):
+        return []
+    return [
+        "source_entity_ledger_v1 is LLM-authored context guidance, not truth and not a gold fact set.",
+        "Reuse source_entity_ledger_v1 canonical atom names in candidate_operations whenever the source refers to the same character, place, object, food, family, or abstract state.",
+        "If the ledger has an alias note for a thing, do not emit parallel atoms for that thing in later passes. Pick the ledger atom and keep support in self_check if uncertain.",
+        "source_entity_ledger_v1_payload: "
+        + json.dumps(source_entity_ledger, ensure_ascii=False, sort_keys=True),
+    ]
 
 
 def _call_lmstudio_json_schema(
