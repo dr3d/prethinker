@@ -1,17 +1,11 @@
 from __future__ import annotations
 
-import importlib.util
 from pathlib import Path
 
 from src import medical_profile
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SUITE_MODULE_PATH = ROOT / "scripts" / "run_medical_profile_suite.py"
-SUITE_SPEC = importlib.util.spec_from_file_location("run_medical_profile_suite", SUITE_MODULE_PATH)
-assert SUITE_SPEC and SUITE_SPEC.loader
-SUITE_MODULE = importlib.util.module_from_spec(SUITE_SPEC)
-SUITE_SPEC.loader.exec_module(SUITE_MODULE)
 
 
 def test_canonical_predicate_signatures_follow_profile_manifest():
@@ -128,39 +122,6 @@ def test_sanitize_medical_parse_for_bridge_clears_incompatible_fact(tmp_path):
     assert sanitized["logic_string"] == ""
     assert sanitized["facts"] == []
     assert "UMLS bridge type steering" in sanitized["clarification_reason"]
-
-
-def test_medical_profile_suite_render_summary_mentions_profile_and_rollups():
-    text = SUITE_MODULE._render_summary_md(
-        {
-            "generated_at_utc": "2026-04-23T00:00:00+00:00",
-            "profile_id": "medical@v0",
-            "model": "qwen/qwen3.6-35b-a3b",
-            "profile_assets": {
-                "profile_manifest": "modelfiles/profile.medical.v0.json",
-                "predicate_registry": "modelfiles/predicate_registry.medical.json",
-            },
-            "counts": {
-                "sharp_memory_cases": 12,
-                "sharp_memory_pass": 10,
-                "sharp_memory_warn": 2,
-                "sharp_memory_fail": 0,
-                "clinical_checks_cases": 7,
-                "clinical_checks_pass": 5,
-                "clinical_checks_warn": 2,
-                "clinical_checks_fail": 0,
-                "prompt_baseline_score": 58,
-                "prompt_medical_score": 70,
-                "prompt_score_max": 79,
-                "clarification_baseline_score": 21,
-                "clarification_medical_score": 33,
-                "clarification_score_max": 38,
-            },
-        }
-    )
-    assert "medical@v0" in text
-    assert "10/12" in text
-    assert "33/38" in text
 
 
 def test_sanitize_medical_parse_for_clarification_clears_logic_on_unresolved_patient():

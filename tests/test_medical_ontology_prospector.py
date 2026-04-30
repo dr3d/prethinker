@@ -16,7 +16,7 @@ def test_render_case_includes_clarification_answer_when_present():
     text = MODULE._render_case(
         {
             "case_id": "pressure_clarified_measurement",
-            "source": "medical_clarification_probe",
+            "source": "medical_profile_seed_clarified",
             "utterance": "Mara's pressure has been high lately.",
             "clarification_answer": "I mean her blood pressure readings have been high.",
         }

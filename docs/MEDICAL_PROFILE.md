@@ -19,7 +19,6 @@ It is a profile for:
 - predicate registry: [modelfiles/predicate_registry.medical.json](../modelfiles/predicate_registry.medical.json)
 - prompt supplement: [modelfiles/medical_compiler_prompt_supplement.md](https://github.com/dr3d/prethinker/blob/main/modelfiles/medical_compiler_prompt_supplement.md)
 - type schema example: [modelfiles/type_schema.medical.example.json](../modelfiles/type_schema.medical.example.json)
-- manifest-driven suite runner: [scripts/run_medical_profile_suite.py](../scripts/run_medical_profile_suite.py)
 - local UMLS bridge generator: [scripts/build_umls_mvp_slice.py](../scripts/build_umls_mvp_slice.py)
 - local UMLS Semantic Network builder: [scripts/build_umls_semantic_network_kb.py](../scripts/build_umls_semantic_network_kb.py)
 
@@ -120,25 +119,12 @@ medical predicate have the right kind of concept in the right slot?"
 
 The Semantic Network KB builder is now scaffolded for `SRDEF`, `SRSTR`, and optional `SRSTRE1`/`SRSTRE2` files. It should remain a local type/relation spine until the medical lane has tests that justify consuming more of it at runtime.
 
-## Example Command
+## Current Runtime Path
 
-For compatibility batch experiments, older parser-lane tools can still load the
-profile assets explicitly:
-
-```powershell
-python kb_pipeline.py `
-  --backend lmstudio `
-  --base-url http://127.0.0.1:1234 `
-  --model qwen/qwen3.6-35b-a3b `
-  --scenario kb_scenarios/stage_02_rule_ingest.json `
-  --kb-name medical_profile_demo `
-  --predicate-registry modelfiles/predicate_registry.medical.json `
-  --strict-registry `
-  --type-schema modelfiles/type_schema.medical.example.json `
-  --prompt-file modelfiles/blank_prompt.md
-```
-
-In the canonical MCP/gateway path, `active_profile=medical@v0` now loads the profile assets and UMLS bridge automatically. Batch experiments can still pass assets explicitly when they need controlled comparisons.
+In the canonical MCP/gateway path, `active_profile=medical@v0` loads the
+profile assets and UMLS bridge automatically. The older direct parser-lane probe
+scripts have been retired; current medical experiments should exercise the
+router/Semantic IR/compiler workspace and deterministic mapper admission path.
 
 The active Semantic IR path also receives profile-owned context before the model proposes a workspace:
 
@@ -147,19 +133,6 @@ The active Semantic IR path also receives profile-owned context before the model
 - profile policy that explicit named patients are sufficiently grounded for this research profile, while unresolved pronouns, aliases, multiple candidates, vague measurements, and clinical advice requests still require clarification or rejection
 
 A live LM Studio smoke after this wiring normalized `Priya is taking Coumadin.` to `taking(priya, warfarin).` while still holding `His serum creatinine was repeated this afternoon.` for patient-identity clarification. The mapper remains authoritative; these profile hints improve the model's proposal rather than bypassing admission.
-
-The profile can now also be exercised as one manifest-driven package with:
-
-```powershell
-python scripts/run_medical_profile_suite.py --model qwen/qwen3.6-35b-a3b
-```
-
-That suite rolls up:
-
-- sharp-memory probe
-- clinical checks probe
-- medical prompt probe
-- clarification-aware medical probe
 
 Before model-backed runs, the bridge admission layer can be checked quickly with:
 

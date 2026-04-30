@@ -249,4 +249,4 @@ Older milestone ladders and superseded calibration packs are intentionally left 
 
 ## What Was Pruned
 
-Historical markdown reports, dated prompt snapshots, generated ladder/report HTML, stale run manifests, old parser-lane orchestration notes, the old ladder-era JSON fixture set, generated `kb_runs/`, generated `kb_store/`, and large session/source notes were removed from the forward-facing tree. Git history still carries them. The repo should now privilege source, compact current-state docs, small fixtures, and tests over a stack of stale status artifacts.
+Historical markdown reports, dated prompt snapshots, generated ladder/report HTML, stale run manifests, old parser-lane orchestration notes, old direct parser-probe scripts, the old ladder-era JSON fixture set, generated `kb_runs/`, generated `kb_store/`, and large session/source notes were removed from the forward-facing tree. Git history still carries them. The repo should now privilege source, compact current-state docs, small fixtures, and tests over a stack of stale status artifacts.

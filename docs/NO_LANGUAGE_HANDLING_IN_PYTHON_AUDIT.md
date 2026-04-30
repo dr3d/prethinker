@@ -149,10 +149,10 @@ This is not the immediate live frontier, but it matters because docs and tests c
 
 Current cleanup:
 
-The old parser-lane runners and prompt assets have now been removed from the
-working tree. Git history is the archive. Remaining `kb_pipeline.py` imports are
-for shared runtime/Prolog utilities until those pieces are split into smaller
-modules.
+The old parser-lane runners, prompt probes, generated frontier-pack builders,
+and prompt assets have now been removed from the working tree. Git history is
+the archive. Remaining `kb_pipeline.py` imports are for shared runtime/Prolog
+utilities until those pieces are split into smaller non-language modules.
 
 ## Yellow-Zone Python
 

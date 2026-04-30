@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """
-Build and validate runtime KBs from natural-language utterances via:
-1) local 9B semantic parsing (LM Studio or Ollama)
-2) deterministic runtime apply tools (local core interpreter by default; optional parse-only or MCP mode)
+Legacy compatibility module for early scenario runners plus shared Prolog runtime
+utilities.
 
-Designed to run standalone in this repo without sibling-repo requirements.
+Current Prethinker intake is the router/Semantic IR/mapper path in
+src/mcp_server.py and src/semantic_ir.py. This module remains because a few
+tests and tools still import deterministic runtime helpers from it while those
+pieces are being split into smaller non-language modules.
 """
 
 from __future__ import annotations
@@ -9612,7 +9614,7 @@ def _skip_validations(validations: list[dict[str, Any]], reason: str) -> list[di
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Build and validate a runtime KB from natural language using local 9B semantic parsing."
+        description="Legacy scenario runner retained for compatibility; current intake uses Semantic IR."
     )
     parser.add_argument(
         "--scenario",

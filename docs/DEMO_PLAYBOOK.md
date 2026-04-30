@@ -75,8 +75,9 @@ python scripts/run_mixed_domain_agility.py --help
 For focused current fixtures, start with:
 
 - `docs/data/frontier_packs/semantic_ir_cross_turn_frontier_pack_v1.json`
-- `docs/data/frontier_packs/process_utterance_temporal_pack_v1.json`
-- `docs/data/frontier_packs/process_utterance_correction_pack_v1.json`
+- `docs/data/frontier_packs/semantic_ir_lava_pack_v5.json`
+- `datasets/story_worlds/otters_clockwork_pie/`
+- `datasets/story_worlds/iron_harbor_water_crisis/`
 
 For the current "talk your rules into existence" frontier:
 
