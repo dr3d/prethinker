@@ -648,3 +648,69 @@ issues: witness statement metadata, bylaw identity, review-meeting support,
 confirmation/reporting attribution, and explicit policy-condition support.
 These should be handled by better source-document compilation and profile
 predicates, not by answer-time prose tricks.
+
+## 2026-04-30 - Run IHR-020 - Source Metadata Compile Surface
+
+Expanded the Iron Harbor registry with source-document metadata predicates:
+
+- `governing_bylaw/2`
+- `witness_statement/4`
+- `reported_event/4`
+- `review_meeting_attendee/2`
+- `correction_filing/3`
+- `policy_requirement/3`
+
+Then tightened generic document-compile guidance so witness/source statements,
+meeting attendees, filing dates, and statement-specific reported events are
+treated as high-query-value source metadata rather than optional narrative
+decoration.
+
+### Result
+
+Fresh compile:
+
+- `132` admitted operations
+- `7` skipped operations
+- all six named witness statements represented
+- reported events for Lindstrom pump failure/restoration, Okonkwo advisory
+  notification, and Patel Foundry Row notification
+- review meeting attendees represented individually
+- governing bylaw and policy requirement rows represented
+
+Targeted source-surface slice:
+
+- q037/q042/q043/q049/q055/q057/q058/q080/q089/q095/q097:
+  `8 exact / 1 partial / 2 miss`
+- before the metadata work, the same slice was `2 exact / 2 partial / 7 miss`
+
+Full Harbor 100-question rerun:
+
+- `81 exact / 14 partial / 5 miss`
+- previous best after IHR-019: `68 exact / 17 partial / 15 miss`
+- `100/100` parsed OK
+- `100/100` query rows
+- `0` write proposals during post-ingestion QA
+
+### What Improved
+
+This is the clearest evidence so far that the hard frontier is source-surface
+coverage, not model comprehension. Once the compiler preserved the document's
+epistemic metadata as queryable rows, the QA runner could answer by querying the
+KB rather than asking the model to remember the prose.
+
+### Current Edge
+
+The remaining misses and partials cluster around richer temporal/rule
+reasoning and still-thin source content:
+
+- statement content that needs exact quoted beliefs, such as Cheng's
+  notice-lift explanation;
+- temporal chains around the second clean reading and advisory lift;
+- correction/addendum enumeration detail;
+- facility restoration confirmation attribution;
+- exact multilingual collection window coverage (`March 6-7`, not just
+  `2026_03_06`).
+
+These are now good hard edges: the governance boundary held, the compiler can
+preserve the right source surface, and the remaining work is better temporal
+and statement-detail representation.

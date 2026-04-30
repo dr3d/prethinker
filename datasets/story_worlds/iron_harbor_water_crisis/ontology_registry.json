@@ -137,6 +137,12 @@
       "notes": "Required deadline for notifying Foundry Row of a contamination advisory."
     },
     {
+      "signature": "governing_bylaw/2",
+      "args": ["governed_subject", "bylaw_id"],
+      "category": "source_metadata",
+      "notes": "Source-stated bylaw or policy instrument governing a procedure, rule set, or document section."
+    },
+    {
       "signature": "inspection/3",
       "args": ["facility", "inspector", "inspected_on"],
       "category": "inspection",
@@ -179,6 +185,12 @@
       "notes": "Post-incident review meeting timestamp and participants."
     },
     {
+      "signature": "review_meeting_attendee/2",
+      "args": ["meeting_at", "attendee"],
+      "category": "review",
+      "notes": "One attendee at a post-incident review meeting; useful when list-valued meeting facts are hard to query."
+    },
+    {
       "signature": "source_claim/4",
       "args": ["speaker_or_source", "claim_subject", "claim_content", "status"],
       "category": "claim",
@@ -189,6 +201,30 @@
       "args": ["operating_condition", "hours"],
       "category": "policy_interval",
       "notes": "Required testing interval in hours for a condition."
+    },
+    {
+      "signature": "witness_statement/4",
+      "args": ["witness", "language", "collected_when", "content_summary"],
+      "category": "claim",
+      "notes": "Source-owned witness statement metadata and compact content; statement content remains a claim unless independently observed."
+    },
+    {
+      "signature": "reported_event/4",
+      "args": ["reporter", "event_subject", "reported_time", "source"],
+      "category": "claim",
+      "notes": "A source-attributed report of an event or status such as pump failure or facility restoration."
+    },
+    {
+      "signature": "correction_filing/3",
+      "args": ["record_kind", "filed_on", "subject"],
+      "category": "correction",
+      "notes": "Filing date for corrections or addenda, separate from the corrected fact itself."
+    },
+    {
+      "signature": "policy_requirement/3",
+      "args": ["bylaw_id", "requirement_kind", "requirement_summary"],
+      "category": "policy_requirement",
+      "notes": "A compact source-owned policy requirement when the rule is useful for QA but not yet admitted as an executable Prolog rule."
     }
   ]
 }
