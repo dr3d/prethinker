@@ -363,3 +363,68 @@ OTR-003 is still the best balanced point:
    repeated-structure names, or starter cases.
 3. Add phase-level QA scoring so we can see whether OTR-003's gains came from
    entity/static facts, chronology, speech, causality, or final state.
+
+## Run OTR-006 - Registry-Guided Profile Discovery
+
+- Timestamp: `2026-04-30T02:24:13Z`
+- Model: `qwen/qwen3.6-35b-a3b`
+- Mode: profile bootstrap with `ontology_registry.json` provided as a candidate
+  predicate roster. The registry supplied vocabulary only, not source facts or
+  expected answers.
+
+### Headline
+
+Big compile win, disappointing QA transfer.
+
+Profile rough score reached `0.944`, emitted/gold signature recall reached
+`0.195`, and emitted/gold precision reached `0.917`. That is the best compile
+alignment so far by a lot. First-20 QA, however, fell to `6 exact + 1 partial`.
+
+### Lesson
+
+Registry-guided discovery solves a large part of predicate drift, but it does
+not automatically solve coverage or query planning. The model can choose much
+better predicate surfaces and still omit support needed for early QA questions.
+
+## Run OTR-007 - Direct Registry Profile
+
+- Timestamp: `2026-04-30T02:30:35Z`
+- Model: `qwen/qwen3.6-35b-a3b`
+- Mode: bypass profile rediscovery and use `ontology_registry.json` directly as
+  the draft profile palette.
+
+### Headline
+
+Direct registry mode is precise but too broad.
+
+The profile exposed all `113` registry predicates. Emitted/gold precision reached
+`1.000`, but recall landed at `0.150`, compile coverage fell to `68` facts, and
+QA reached only `7 exact + 2 partial`.
+
+### Lesson
+
+A giant predicate menu is not enough. The model needs a narrowed working subset
+or profile plan, not every possible story-world predicate at once.
+
+## Run OTR-006Q - Query Strategy Rerun
+
+- Timestamp: `2026-04-30T02:37:03Z`
+- Model: `qwen/qwen3.6-35b-a3b`
+- Mode: rerun QA over OTR-006's compiled KB after adding generic story-world QA
+  query guidance.
+
+### Headline
+
+Query prompting alone did not rescue the run.
+
+Exact rose from `6` to `7`, but the single partial was lost. Net exact+partial
+support stayed `7/20`.
+
+### Current Read
+
+The fastest path upward is now clearer:
+
+1. Use registry-guided profile discovery, not direct full-registry mode.
+2. Improve compile coverage for early QA support: setting, kind/species,
+   location, errand, intended-user, event, and final-state facts.
+3. Add phase-level scoring so we stop treating all misses as one blob.

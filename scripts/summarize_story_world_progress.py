@@ -57,6 +57,7 @@ def _flatten_row(row: dict[str, Any]) -> dict[str, Any]:
         "run_id": row.get("run_id", ""),
         "timestamp": row.get("timestamp", ""),
         "mode": row.get("mode", ""),
+        "profile_registry": bool(row.get("profile_registry")),
         "profile_rough_score": compile_row.get("rough_score", ""),
         "candidate_predicates": compile_row.get("candidate_predicates", ""),
         "admitted_ops": compile_row.get("admitted_ops", ""),

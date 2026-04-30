@@ -85,6 +85,17 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Calibration-only mode: include expected Prolog predicate signatures in the LLM profile-bootstrap input.",
     )
+    parser.add_argument(
+        "--profile-registry",
+        type=Path,
+        default=None,
+        help="Optional source/domain ontology registry used as candidate profile vocabulary, not target facts.",
+    )
+    parser.add_argument(
+        "--use-profile-registry-direct",
+        action="store_true",
+        help="Use --profile-registry directly as the draft profile palette instead of asking the LLM to rediscover it.",
+    )
     parser.add_argument("--domain-hint", default="")
     parser.add_argument("--backend", choices=["lmstudio"], default="lmstudio")
     parser.add_argument("--model", default="qwen/qwen3.6-35b-a3b")
@@ -146,6 +157,14 @@ def main() -> int:
             "The LLM bootstrap pass must propose the candidate predicate/entity surface.",
         ],
     }
+    profile_registry = _load_profile_registry(args.profile_registry)
+    if profile_registry:
+        sample["candidate_profile_registry_v1"] = profile_registry
+        sample["context"].append(
+            "candidate_profile_registry_v1 is a source/domain ontology scaffold: predicate signatures, categories, "
+            "and notes only. It is not a gold fact set and it does not authorize writes. Prefer these signatures when "
+            "they fit the source and preserve epistemic boundaries; omit registry predicates that the source does not need."
+        )
     if expected_signatures:
         sample["target_prolog_signatures_for_calibration"] = expected_signatures
         sample["context"].append(
@@ -179,20 +198,28 @@ def main() -> int:
             sample["context"].append(
                 "The intake_plan_v1 object is an LLM-owned document-to-logic strategy. Use it as planning guidance, not as approved facts."
             )
-    messages = build_profile_bootstrap_messages(samples=[sample], domain_hint=str(args.domain_hint or ""))
     started = time.perf_counter()
-    response = _call_lmstudio_json_schema(
-        base_url=str(args.base_url),
-        model=str(args.model),
-        messages=messages,
-        schema=PROFILE_BOOTSTRAP_JSON_SCHEMA,
-        schema_name="profile_bootstrap_v1",
-        timeout=int(args.timeout),
-        temperature=float(args.temperature),
-        top_p=float(args.top_p),
-        max_tokens=int(args.max_tokens),
-    )
-    parsed, error = parse_profile_bootstrap_json(str(response.get("content", "")))
+    messages: list[dict[str, str]] = []
+    if bool(args.use_profile_registry_direct):
+        if not profile_registry:
+            raise ValueError("--use-profile-registry-direct requires --profile-registry")
+        parsed = _profile_from_registry(profile_registry, domain_hint=str(args.domain_hint or ""))
+        error = ""
+        response = {"content": json.dumps(parsed, ensure_ascii=False)}
+    else:
+        messages = build_profile_bootstrap_messages(samples=[sample], domain_hint=str(args.domain_hint or ""))
+        response = _call_lmstudio_json_schema(
+            base_url=str(args.base_url),
+            model=str(args.model),
+            messages=messages,
+            schema=PROFILE_BOOTSTRAP_JSON_SCHEMA,
+            schema_name="profile_bootstrap_v1",
+            timeout=int(args.timeout),
+            temperature=float(args.temperature),
+            top_p=float(args.top_p),
+            max_tokens=int(args.max_tokens),
+        )
+        parsed, error = parse_profile_bootstrap_json(str(response.get("content", "")))
     profile_retry: dict[str, Any] | None = None
     if not isinstance(parsed, dict):
         retry_sample = dict(sample)
@@ -227,7 +254,7 @@ def main() -> int:
             error = retry_error
     profile_review: dict[str, Any] | None = None
     profile_review_retry: dict[str, Any] | None = None
-    if bool(args.review_profile) and isinstance(parsed, dict):
+    if bool(args.review_profile) and isinstance(parsed, dict) and not bool(args.use_profile_registry_direct):
         profile_review = _review_profile_bootstrap(
             source_text=source_text,
             source_name=text_path.name,
@@ -299,6 +326,8 @@ def main() -> int:
         "domain_hint": str(args.domain_hint or ""),
         "backend": str(args.backend),
         "model": str(args.model),
+        "profile_registry": str(args.profile_registry or ""),
+        "profile_registry_direct": bool(args.use_profile_registry_direct),
         "latency_ms": int((time.perf_counter() - started) * 1000),
         "parsed_ok": isinstance(parsed, dict),
         "parse_error": error,
@@ -409,6 +438,90 @@ def _review_profile_bootstrap(
         "latency_ms": int((time.perf_counter() - started) * 1000),
         "parsed": parsed or {},
         "raw_content": str(response.get("content", ""))[:12000],
+    }
+
+
+def _load_profile_registry(path: Path | None) -> dict[str, Any]:
+    if path is None:
+        return {}
+    registry_path = path if path.is_absolute() else (REPO_ROOT / path).resolve()
+    parsed = json.loads(registry_path.read_text(encoding="utf-8-sig"))
+    if not isinstance(parsed, dict):
+        return {}
+    predicates = parsed.get("predicates", [])
+    compact_predicates: list[dict[str, str]] = []
+    if isinstance(predicates, list):
+        for item in predicates:
+            if not isinstance(item, dict):
+                continue
+            signature = str(item.get("signature", "")).strip()
+            if not signature:
+                continue
+            compact_predicates.append(
+                {
+                    "signature": signature,
+                    "category": str(item.get("category", "")).strip(),
+                    "notes": str(item.get("notes", "")).strip(),
+                }
+            )
+    return {
+        "schema": str(parsed.get("schema", "")).strip(),
+        "fixture": str(parsed.get("fixture", "")).strip(),
+        "source": str(parsed.get("source", "")).strip(),
+        "purpose": str(parsed.get("purpose", "")).strip(),
+        "predicates": compact_predicates,
+    }
+
+
+def _profile_from_registry(registry: dict[str, Any], *, domain_hint: str = "") -> dict[str, Any]:
+    predicates: list[dict[str, Any]] = []
+    for item in registry.get("predicates", []) if isinstance(registry.get("predicates"), list) else []:
+        if not isinstance(item, dict):
+            continue
+        signature = str(item.get("signature", "")).strip()
+        match = re.match(r"^[a-z][a-zA-Z0-9_]*\/(\d+)$", signature)
+        if not signature or not match:
+            continue
+        arity = int(match.group(1))
+        predicates.append(
+            {
+                "signature": signature,
+                "args": [f"arg_{index}" for index in range(1, arity + 1)],
+                "description": str(item.get("notes", "")).strip() or str(item.get("category", "")).strip(),
+                "why": f"registry_category={str(item.get('category', '')).strip()}",
+                "admission_notes": [
+                    "Registry-provided predicate candidate. Direct source support and mapper admission are still required."
+                ],
+            }
+        )
+    return {
+        "schema_version": "profile_bootstrap_v1",
+        "domain_guess": str(domain_hint or registry.get("fixture") or "registry_profile").strip(),
+        "domain_scope": str(registry.get("purpose", "")).strip(),
+        "confidence": 1.0,
+        "source_summary": [
+            "Profile generated directly from candidate_profile_registry_v1. The registry supplies predicate vocabulary only, not facts."
+        ],
+        "entity_types": [
+            {"name": "entity", "description": "Registry-backed story-world entity.", "examples": []}
+        ],
+        "candidate_predicates": predicates,
+        "repeated_structures": [],
+        "likely_functional_predicates": [],
+        "provenance_sensitive_predicates": [],
+        "admission_risks": [
+            "Registry predicates still require direct source support.",
+            "A broad registry can permit semantically weak writes if the compiler is not source-faithful.",
+        ],
+        "clarification_policy": [],
+        "unsafe_transformations": [
+            "Do not treat registry examples, categories, or notes as source facts."
+        ],
+        "starter_frontier_cases": [],
+        "self_check": {
+            "profile_authority": "proposal_only",
+            "notes": ["direct_registry_profile"],
+        },
     }
 
 

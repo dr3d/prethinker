@@ -92,6 +92,27 @@ POST_INGESTION_QA_QUERY_STRATEGY: dict[str, Any] = {
     ],
 }
 
+STORY_WORLD_QA_QUERY_STRATEGY: dict[str, Any] = {
+    "name": "story_world_qa_query_strategy_v1",
+    "authority": "query_planning_guidance_only_runtime_executes_queries",
+    "core_principle": (
+        "For story-world QA, ask primitive queries over the compiled narrative KB surface. "
+        "Do not answer from story memory or external tale templates."
+    ),
+    "query_patterns": [
+        "For species/kind/type questions, query kind(Entity, Kind), character(Entity), object(Entity), food(Entity), or place(Entity) when those predicates exist.",
+        "For household/resident questions, query lives_at(Character, Place) and optionally kind(Character, Kind) or household_member(Household, Character) when available.",
+        "For location questions, query initial_location(Entity, Place), location_after_event(Entity, Event, Place), located_in(Entity, Place), near(Entity, Place), under(Entity, Place), or lives_at(Character, Place), choosing the predicate that exposes the requested slot.",
+        "For errand/sent-by questions, query sent_by(Sender, Person, Errand), errand_item(Errand, Item), forgotten_by_during_story(Person, Item), or hazy_notion_by_during_story(Person, Item) when available.",
+        "For ownership/intended-user questions, query owned_by(Object, Owner), designed_for(Object, Character), intended_for(Object, Character), or belongs_to_household(Object, Household).",
+        "For event questions, query event(Event, Actor, Action, Object, Place) with variables in the answer slot, then add story_time(Event, Time) or before/after queries only when order matters.",
+        "For speech questions, query said(Event, Speaker, Quote). Do not query said/3 for non-speech facts such as who sent someone unless the compiled KB only represents that knowledge in speech.",
+        "For subjective fit/quality questions, query judged(Judge, Item, Dimension, Verdict), accepted_choice(Person, Item), rejected_choice(Person, Item), or pattern_choice(Group, Item, Verdict).",
+        "For why/causal questions, query causes(Event, Consequence), caused_by(Event, Cause), inferred_by(Character, Claim, Event), or evidence(Claim, Support) when present.",
+        "For final-state questions, query final_state(State), condition_after_story(Entity, Condition), repaired(Entity), recovered_wheel(Wheel), or restitution(Person, Action).",
+    ],
+}
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run QA probes against a domain bootstrap source-compile run.")
@@ -170,6 +191,7 @@ def main() -> int:
         "Keep QA workspaces compact: at most 4 query operations and at most 2 short self_check notes.",
         "For unsafe inference traps, preserve the difference between direct KB support, source claim, inference, and unknown.",
         "Use post_ingestion_qa_query_strategy_v1 in kb_context_pack as the query-planning procedure.",
+        "If the compiled inventory contains story-world predicates such as event/5, story_time/2, kind/2, lives_at/2, owned_by/2, said/3, judged/4, causes/2, initial_location/2, location_after_event/3, final_state/1, or condition_after_story/2, also use story_world_qa_query_strategy_v1.",
     ]
     config = SemanticIRCallConfig(
         backend=str(args.backend),
@@ -410,6 +432,7 @@ def run_one_question(
         "version": "semantic_ir_context_pack_v1",
         "mode": "post_ingestion_qa",
         "post_ingestion_qa_query_strategy": POST_INGESTION_QA_QUERY_STRATEGY,
+        "story_world_qa_query_strategy": STORY_WORLD_QA_QUERY_STRATEGY,
         "compiled_predicate_inventory": {
             "signatures": kb_inventory.get("signatures", [])[:120],
             "counts": kb_inventory.get("counts", {}),

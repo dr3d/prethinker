@@ -79,7 +79,7 @@ def test_otters_metadata_is_graph_ready() -> None:
     signatures = {item["signature"] for item in registry["predicates"]}
     for signature in ["event/5", "story_time/2", "before/2", "judged/4", "final_state/1"]:
         assert signature in signatures
-    assert [row["run_id"] for row in metrics] == sorted(row["run_id"] for row in metrics)
+    assert [row["timestamp"] for row in metrics] == sorted(row["timestamp"] for row in metrics)
 
 
 def test_otters_fixture_text_is_ascii_stable() -> None:
