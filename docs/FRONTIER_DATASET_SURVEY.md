@@ -74,6 +74,21 @@ source text -> semantic_ir_v1 proposal -> deterministic admission -> KB/query/tr
    FActScore/QAGS-inspired long summaries: every admitted atom must point to a
    minimal source span; unsupported narrative flourishes stay out of the KB.
 
+10. **Closed Story-World Pack**  
+    Curated fiction with a human-authored reference KB and QA oracle. This tests
+    source-local entity naming, famous-template contamination, chronology,
+    subjective judgments, final-state updates, speech-vs-truth, and moral/norm
+    abstraction without requiring external data access.
+
+## Curated Local Fixtures
+
+- `datasets/story_worlds/otters_clockwork_pie/` is the first closed story-world
+  fixture. It includes the source story, a reference Prolog KB, a 100-question
+  QA battery, machine-friendly QA JSONL, and an intake-plan note. It is designed
+  to catch the exact class of failure where a model imports Goldilocks/Bears
+  priors into a different local story about otters, clockwork pie, boats, mint,
+  and Tilly Tumbletop.
+
 ## Suggested First Pull
 
 Start with CUAD + MeetingBank/QMSum + PubMedQA because they cover the three
