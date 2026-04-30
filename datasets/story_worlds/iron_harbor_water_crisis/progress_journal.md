@@ -321,3 +321,34 @@ The remaining misses now look even more like true reasoning-substrate work:
 durable rule application, authorization-chain validity, multi-hop set
 difference, alias/person tracking, and richer temporal arithmetic such as
 duration calculations. These are the right hard problems to be seeing.
+
+## 2026-04-30 - Run IHR-013 - Query Slot Hygiene Probe
+
+Extended query-slot lifting for common structured placeholders such as `sender`,
+`lifter`, `level`, `role1`, `threshold2`, and `offlinestart`. These are not
+raw-language rules; they apply only after the model has already emitted a
+structured query operation and used a slot label where a Prolog variable was
+intended.
+
+Result against the IHR-011 flat-plus-focused compile:
+
+- full 100 QA: `64 exact + 15 partial + 21 miss`
+- query rows: `100/100`
+- runtime load errors: `0`
+- write-proposal leaks during QA: `0`
+
+### What Improved
+
+Several rows that previously failed because the query used literal slot names
+now retrieve the intended KB rows. For example, `sender` and `lifter` are lifted
+to variables in notification/notice-lift queries, allowing the runtime to return
+the actual actor and timestamp.
+
+### What This Exposed
+
+The next wall is temporal derivation rather than retrieval. A question such as
+"how long between the Eastgate 6-hour offline threshold and the notice" requires
+deriving a threshold moment (`08:00 + 6h = 14:00`) before comparing it with the
+notice time (`14:45`). Prompting alone should not be asked to fake that; the
+runtime needs a small temporal arithmetic surface that can produce and explain
+derived time anchors.

@@ -89,6 +89,7 @@ POST_INGESTION_QA_QUERY_STRATEGY: dict[str, Any] = {
         "For rule/consequence questions, query stored rules and supporting facts; do not write derived conclusions as durable facts.",
         "For policy-condition questions, retrieve both the governing policy rows and the observed event/measurement rows. Threshold, count, interval, and deadline predicates are answer-bearing evidence, not optional decoration.",
         "For comprehensive or multi-violation questions, plan one small support bundle per alleged violation: governing policy row, observed event row, and any timing/correction/source row needed to show why it is a violation. Prefer concrete event predicates such as inspection, notice/lift, notification, reading, authorization, and zone-scope predicates before broad before/after scans.",
+        "For threshold-elapsed questions, retrieve the starting state/event time, the threshold-hours policy row, and the later target event time. Do not replace the start time with a generic placeholder such as offlinestart.",
     ],
     "failure_policy": [
         "If no compiled predicate can faithfully answer the question, emit no write and explain the missing predicate/support in self_check.",

@@ -3348,6 +3348,8 @@ def _is_query_placeholder_arg(raw: str) -> bool:
         "methoddetail",
         "object",
         "observer",
+        "offlinestart",
+        "offline_start",
         "owner",
         "person",
         "place",
@@ -3361,6 +3363,7 @@ def _is_query_placeholder_arg(raw: str) -> bool:
         "result",
         "role",
         "rule",
+        "sender",
         "ruleid",
         "speaker",
         "source",
@@ -3384,6 +3387,7 @@ def _is_query_placeholder_arg(raw: str) -> bool:
         return True
     if value in {
         "interval",
+        "lifter",
         "mode",
         "noticeid",
         "noticedzone",
