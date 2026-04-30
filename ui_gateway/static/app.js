@@ -1834,6 +1834,63 @@ function appendDebugClauseList(parent, title, clauses) {
   parent.appendChild(section);
 }
 
+function buildEpistemicBoundaryPanel({ admitted, skipped, clauses, worlds }) {
+  const facts = debugClauseList(clauses?.facts);
+  const rules = debugClauseList(clauses?.rules);
+  const retracts = debugClauseList(clauses?.retracts);
+  const queries = debugClauseList(clauses?.queries);
+  const scopedClauses = debugClauseList(worlds?.clauses);
+  const worldRows = debugArray(worlds?.worlds);
+  const panel = document.createElement("div");
+  panel.className = "epistemic-boundary";
+
+  const globalZone = document.createElement("section");
+  globalZone.className = "epistemic-zone global-truth";
+  const globalTitle = document.createElement("p");
+  globalTitle.className = "epistemic-zone-title";
+  globalTitle.textContent = "Global KB truth";
+  const globalText = document.createElement("p");
+  globalText.className = "epistemic-zone-copy";
+  globalText.textContent =
+    admitted > 0
+      ? "Only admitted operations can mutate the durable Prolog KB."
+      : "No durable KB mutation survived admission in this turn.";
+  globalZone.appendChild(globalTitle);
+  globalZone.appendChild(globalText);
+  appendDebugKvGrid(globalZone, [
+    ["admitted operations", admitted],
+    ["facts", facts.length],
+    ["rules", rules.length],
+    ["retracts", retracts.length],
+    ["queries", queries.length],
+  ]);
+
+  const scopedZone = document.createElement("section");
+  scopedZone.className = "epistemic-zone scoped-worlds";
+  const scopedTitle = document.createElement("p");
+  scopedTitle.className = "epistemic-zone-title";
+  scopedTitle.textContent = "Scoped worlds";
+  const scopedText = document.createElement("p");
+  scopedText.className = "epistemic-zone-copy";
+  scopedText.textContent =
+    scopedClauses.length || worldRows.length
+      ? "Blocked, quarantined, or supported-but-skipped candidates are kept as isolated diagnostic memory."
+      : "No isolated diagnostic world was needed for this turn.";
+  scopedZone.appendChild(scopedTitle);
+  scopedZone.appendChild(scopedText);
+  appendDebugKvGrid(scopedZone, [
+    ["worlds", worlds?.world_count ?? worldRows.length],
+    ["scoped operations", worlds?.operation_count ?? debugArray(worlds?.operations).length],
+    ["wrapper clauses", scopedClauses.length],
+    ["skipped/challenged", skipped],
+    ["authority", worlds?.authority || "-"],
+  ]);
+
+  panel.appendChild(globalZone);
+  panel.appendChild(scopedZone);
+  return panel;
+}
+
 function createPipelineLayer(title, summary = "") {
   const layer = document.createElement("section");
   layer.className = "pipeline-layer";
@@ -2063,11 +2120,7 @@ function buildPipelineTraceBubble(turn) {
       "Layer 5 - Epistemic Worlds",
       "scoped memory for blocked candidates, not global truth"
     );
-    appendDebugKvGrid(worldsLayer, [
-      ["worlds", worlds.world_count ?? debugCount(worlds.worlds)],
-      ["scoped operations", worlds.operation_count ?? debugArray(worlds.operations).length],
-      ["authority", worlds.authority || "-"],
-    ]);
+    worldsLayer.appendChild(buildEpistemicBoundaryPanel({ admitted, skipped, clauses, worlds }));
     appendDebugTable(
       worldsLayer,
       ["world", "op", "predicate(args)", "policy", "reason"],

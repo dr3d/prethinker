@@ -24,6 +24,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 - Clarified medical restatements can now recover useful KB writes, such as resolving vague pressure language into a high blood-pressure measurement.
 - Session reset now clears pending clarification, recent runtime memory, trace state, and runtime KB state.
 - The UI can demonstrate write routes, query/clarification routes, mutation telemetry, and prompt-book-driven examples.
+- The UI pipeline trace now makes Epistemic Worlds visible as a two-zone firewall: admitted operations that can mutate the global KB versus scoped diagnostic worlds for blocked, quarantined, or supported-but-skipped candidates.
 - The UMLS Semantic Network builder produces local Prolog facts for semantic types, semantic relations, structural rows, and inherited relation closures.
 - The current Semantic IR runtime path can route and commit safe direct assertions without running the legacy parse-side English rescue chain.
 - The current semantic IR edge battery shows `qwen3.6:35b-a3b` holding difficult provenance, temporal, exception, correction, and counterfactual distinctions with `20/20` decision labels and `0.976` average score in runtime A/B.
