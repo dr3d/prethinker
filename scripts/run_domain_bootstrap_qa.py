@@ -502,6 +502,9 @@ def run_one_question(
             "self_check": ir.get("self_check", {}),
         }
     )
+    if include_model_input:
+        row["semantic_ir"] = ir
+        row["mapper_diagnostics"] = diagnostics
     row["oracle_match"] = score_oracle(row=row, oracle=oracle)
     return row
 

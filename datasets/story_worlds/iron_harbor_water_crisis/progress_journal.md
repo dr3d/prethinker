@@ -167,3 +167,47 @@ It exposes the next real frontier:
 
 This is a good benchmark shape: the system is clearly improving, but the test
 is still hard enough to reveal meaningful architecture work.
+
+## 2026-04-30 - Run IHR-009 - Query Projection Repair
+
+The facility-status failures were not an LLM understanding failure. A debug
+run with full Semantic IR rows showed the model emitted safe query operations
+such as:
+
+```prolog
+facility_status(eastgate_treatment_facility, offline, X).
+```
+
+The mapper projected the turn to `reject` because the clinical-advice guard was
+matching the substring `treatment` inside `eastgate_treatment_facility`. The
+mapper also treated explicit multiword query variables such as `Start_Time` as
+lowercase atoms.
+
+Both fixes are structured-operation repairs, not raw-prose NLP:
+
+- clinical-advice projection now requires specific dose/medication/advice
+  signals rather than the standalone token `treatment`;
+- query projection now preserves explicit multiword Prolog variables such as
+  `Start_Time` while still atomizing proper-name constants such as `Felix`.
+
+Result:
+
+- q014-q016 targeted facility-status probe: `3 exact + 0 miss`
+- first-20 QA: `19 exact + 1 partial + 0 miss`
+- full 100 QA: `48 exact + 15 partial + 37 miss`
+- query rows: `100/100`
+- runtime load errors: `0`
+- write-proposal leaks during QA: `0`
+
+### Remaining Edges
+
+The full battery is now more clearly about hard reasoning rather than failed
+query projection:
+
+- claim-vs-fact and source-fidelity questions need better parked source-claim
+  support for superseded/original statements;
+- temporal calculation questions need a durable temporal reasoning layer, not
+  just date retrieval;
+- rule and rule-application questions need deeper executable-rule support;
+- multi-hop set difference still needs better query planning over admitted
+  primitive facts.

@@ -798,6 +798,70 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         )
         self.assertEqual(parsed["epistemic_worlds"], worlds)
 
+    def test_treatment_facility_status_query_is_not_clinical_advice(self) -> None:
+        ir = _ir(
+            decision="answer",
+            turn_type="query",
+            candidate_operations=[
+                {
+                    "operation": "query",
+                    "predicate": "facility_status",
+                    "args": ["eastgate_treatment_facility", "offline", "X"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                }
+            ],
+        )
+        parsed, _warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=["facility_status/3"],
+            predicate_contracts=[
+                {"signature": "facility_status/3", "args": ["facility", "status", "timestamp"]},
+            ],
+        )
+        diagnostics = parsed["admission_diagnostics"]
+        self.assertEqual(diagnostics["projected_decision"], "answer")
+        self.assertEqual(parsed["queries"], ["facility_status(eastgate_treatment_facility, offline, X)."])
+
+    def test_query_projection_preserves_multiword_variables(self) -> None:
+        ir = _ir(
+            decision="answer",
+            turn_type="query",
+            candidate_operations=[
+                {
+                    "operation": "query",
+                    "predicate": "facility_status",
+                    "args": ["eastgate_treatment_facility", "offline", "Start_Time"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "query",
+                    "predicate": "facility_status",
+                    "args": ["eastgate_treatment_facility", "online", "End_Time"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+            ],
+        )
+        parsed, _warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=["facility_status/3"],
+            predicate_contracts=[
+                {"signature": "facility_status/3", "args": ["facility", "status", "timestamp"]},
+            ],
+        )
+        self.assertEqual(
+            parsed["queries"],
+            [
+                "facility_status(eastgate_treatment_facility, offline, Start_Time).",
+                "facility_status(eastgate_treatment_facility, online, End_Time).",
+            ],
+        )
+
     def test_mapper_admits_contract_role_shape_when_interval_is_grounded(self) -> None:
         ir = _ir(
             candidate_operations=[

@@ -3013,18 +3013,22 @@ def _normalize_decision(value: Any) -> str:
 
 
 def _has_clinical_advice_query(ir: dict[str, Any]) -> bool:
-    clinical_terms = {
+    direct_clinical_query_terms = {
         "dose",
         "dosage",
         "dose_recommendation",
-        "hold",
-        "held",
-        "start",
-        "stop",
-        "treatment",
-        "recommendation",
         "medication_change",
     }
+    medication_terms = {
+        "drug",
+        "med",
+        "medication",
+        "medicine",
+        "rx",
+        "warfarin",
+    }
+    action_terms = {"hold", "held", "start", "stop", "dose", "dosage"}
+    recommendation_terms = {"advice", "advise", "recommend", "recommendation", "should"}
     for op in _candidate_operations(ir):
         if str(op.get("operation") or "").strip().lower() != "query":
             continue
@@ -3036,7 +3040,14 @@ def _has_clinical_advice_query(ir: dict[str, Any]) -> bool:
             str(op.get("safety") or ""),
         ]
         text = _atomize(" ".join(text_parts))
-        if any(term in text for term in clinical_terms):
+        tokens = set(part for part in text.split("_") if part)
+        if direct_clinical_query_terms & tokens or any(term in text for term in direct_clinical_query_terms):
+            return True
+        if (action_terms & tokens) and (medication_terms & tokens):
+            return True
+        if "treatment" in tokens and (recommendation_terms & tokens):
+            return True
+        if (recommendation_terms & tokens) and (medication_terms & tokens):
             return True
     return False
 
@@ -3267,12 +3278,14 @@ def _term_from_arg(value: Any, *, entity_names: dict[str, str], for_query: bool)
     raw = str(value or "").strip()
     if raw in entity_names:
         raw = entity_names[raw]
+    if for_query and raw.startswith("?"):
+        return _variable_name(raw[1:] or "X")
+    if for_query and re.fullmatch(r"[A-Z][A-Za-z0-9]*(_[A-Z][A-Za-z0-9]*)+", raw):
+        return _variable_name(raw)
     if for_query and re.fullmatch(r"[A-Z]", raw):
         return _variable_name(raw)
     if for_query and raw in {"?", "X", "Y", "Z", "Who", "What", "Where", "When"}:
         return raw if raw in {"X", "Y", "Z"} else "X"
-    if for_query and raw.startswith("?"):
-        return _variable_name(raw[1:] or "X")
     if for_query and _is_query_placeholder_arg(raw):
         return _placeholder_variable_name(raw)
     if re.fullmatch(r"-?\d+(\.\d+)?", raw):
