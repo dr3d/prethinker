@@ -19,6 +19,8 @@ failures unless they appear in the source.
 - `qa_battery.jsonl`: machine-friendly QA rows with id, phase, question,
   expected answer, and likely mistake.
 - `intake_plan.md`: proposed benchmark/game-plan and failure buckets.
+- `progress_journal.md`: running mini-journal of benchmark attempts and lessons.
+- `progress_metrics.jsonl`: append-only metrics rows for progress graphs.
 
 ## Why It Matters
 
