@@ -24,6 +24,7 @@ def test_otters_story_world_bundle_is_complete() -> None:
         "qa_source.md",
         "qa.md",
         "qa_battery.jsonl",
+        "qa_support_map.jsonl",
         "intake_plan.md",
         "progress_journal.md",
         "progress_metrics.jsonl",
@@ -50,6 +51,23 @@ def test_otters_qa_battery_is_harness_ready() -> None:
     assert len(answers) == 100
     assert questions[0]["id"] == "q001"
     assert "Little Slip of an Otter" in answers["q001"]
+
+
+def test_otters_qa_support_map_is_harness_ready() -> None:
+    records = [
+        json.loads(line)
+        for line in (OTTERS / "qa_support_map.jsonl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    assert len(records) == 20
+    assert records[0]["id"] == "q001"
+    assert records[-1]["id"] == "q020"
+    assert all(row.get("required_support_any") for row in records)
+    assert all(row.get("failure_classes") for row in records)
+    assert any(
+        "query_planner_missed_available_support" in row["failure_classes"]
+        for row in records
+    )
 
 
 def test_otters_gold_kb_exercises_story_world_edges() -> None:

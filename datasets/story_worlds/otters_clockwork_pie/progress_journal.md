@@ -471,6 +471,11 @@ one-off compile recall observed during exploratory runs, but it ties the best
 exact-only QA result and ties the best exact+partial support while keeping the
 mapper cleaner.
 
+The new QA support map shows `8/20` first-20 questions have the required
+symbolic support in the compiled KB. Of those, `7` became exact answers. The
+remaining root-cause split is now visible: `12` compile-support gaps and `1`
+query-planner miss despite available support.
+
 ### What Improved
 
 - Early inventory questions finally landed better: little mug, middle boots,
@@ -488,6 +493,9 @@ mapper cleaner.
 - The half-birthday and swallowed-wheel support remains thin.
 - Query planning still misses some available support and sometimes asks overly
   narrow predicates.
+- Some exact answers are still too forgiving: species and errand-sender answers
+  can be judged exact even when the KB support is only character-level or has a
+  predicate argument-order problem. The support map now catches that.
 
 ### Lesson
 
