@@ -899,6 +899,32 @@ class SemanticIRRuntimeTests(unittest.TestCase):
                     "source": "direct",
                     "safety": "safe",
                 },
+                {
+                    "operation": "query",
+                    "predicate": "clean_threshold",
+                    "args": ["type", "threshold"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "query",
+                    "predicate": "audit_point",
+                    "args": [
+                        "time1",
+                        "actor1",
+                        "interval1",
+                        "value1",
+                        "count1",
+                        "requiredactor1",
+                        "role1",
+                        "level",
+                        "threshold2",
+                    ],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
             ],
         )
         parsed, _warnings = semantic_ir_to_legacy_parse(
@@ -908,6 +934,8 @@ class SemanticIRRuntimeTests(unittest.TestCase):
                 "bypass_authorization/3",
                 "bypass_inspection_validity_days/1",
                 "correction_record/4",
+                "clean_threshold/2",
+                "audit_point/9",
             ],
         )
         self.assertEqual(
@@ -917,6 +945,8 @@ class SemanticIRRuntimeTests(unittest.TestCase):
                 "bypass_authorization(pier_7, Authorizer, Authtime).",
                 "bypass_inspection_validity_days(Validitydays).",
                 "correction_record(Recordid, Originalvalue, Correctedvalue, Source).",
+                "clean_threshold(Type, Threshold).",
+                "audit_point(Time1, Actor1, Interval1, Value1, Count1, Requiredactor1, Role1, Level, Threshold2).",
             ],
         )
 

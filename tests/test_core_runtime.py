@@ -34,6 +34,41 @@ class CoreRuntimeTests(unittest.TestCase):
         self.assertIn("bob", values)
         self.assertIn("carol", values)
 
+    def test_conjunctive_query_shares_variable_bindings(self) -> None:
+        self.assertEqual(self.runtime.assert_fact("parent(alice, bob).").get("status"), "success")
+        self.assertEqual(self.runtime.assert_fact("parent(alice, dana).").get("status"), "success")
+        self.assertEqual(self.runtime.assert_fact("likes(bob, chess).").get("status"), "success")
+
+        query = self.runtime.query_rows("parent(alice, X), likes(X, chess).")
+
+        self.assertEqual(query.get("status"), "success")
+        self.assertEqual(query.get("rows"), [{"X": "bob"}])
+
+    def test_temporal_before_compares_bound_timestamp_atoms(self) -> None:
+        self.assertEqual(
+            self.runtime.assert_fact("boil_water_notice(millbrook, 2026_03_04t14_45, diane_cheng).").get("status"),
+            "success",
+        )
+
+        query = self.runtime.query_rows("boil_water_notice(Zone, Time, Issuer), before(Time, 2026_03_04t15_00).")
+
+        self.assertEqual(query.get("status"), "success")
+        self.assertEqual(
+            query.get("rows"),
+            [{"Zone": "millbrook", "Time": "2026_03_04t14_45", "Issuer": "diane_cheng"}],
+        )
+
+    def test_temporal_after_compares_bound_timestamp_atoms(self) -> None:
+        self.assertEqual(
+            self.runtime.assert_fact("notice_lifted(2026_03_05t20_30, diane_cheng).").get("status"),
+            "success",
+        )
+
+        query = self.runtime.query_rows("notice_lifted(Time, Actor), after(Time, 2026_03_05t16_00).")
+
+        self.assertEqual(query.get("status"), "success")
+        self.assertEqual(query.get("rows"), [{"Time": "2026_03_05t20_30", "Actor": "diane_cheng"}])
+
     def test_retract_fact(self) -> None:
         self.assertEqual(self.runtime.assert_fact("parent(alice, bob).").get("status"), "success")
         remove = self.runtime.retract_fact("parent(alice, bob).")

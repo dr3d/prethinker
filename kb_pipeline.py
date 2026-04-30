@@ -24,7 +24,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from engine.core import Clause, PrologEngine, Term
+from engine.core import Clause, PrologEngine, Substitution, Term
 from ingest_frontend import propose_frontend_parse
 
 PROJECT_ROOT = Path(__file__).resolve().parent
@@ -7880,6 +7880,100 @@ class CorePrologRuntime:
         walk(term)
         return names
 
+    @staticmethod
+    def _collect_query_variables_from_terms(terms: list[Term]) -> list[str]:
+        names: list[str] = []
+        for term in terms:
+            for name in CorePrologRuntime._collect_query_variables(term):
+                if name not in names:
+                    names.append(name)
+        return names
+
+    @staticmethod
+    def _temporal_sort_key(term: Term) -> tuple[int, int, int, int, int] | None:
+        if getattr(term, "is_variable", False) or getattr(term, "args", []):
+            return None
+        value = str(getattr(term, "name", "") or "").strip().lower()
+        match = re.fullmatch(r"(\d{4})_(\d{2})_(\d{2})(?:t(\d{1,2})_(\d{2}))?", value)
+        if not match:
+            return None
+        year, month, day, hour, minute = match.groups()
+        return (
+            int(year),
+            int(month),
+            int(day),
+            int(hour or 0),
+            int(minute or 0),
+        )
+
+    def _resolve_temporal_relation(self, goal: Term, subst: Substitution) -> list[Substitution]:
+        if goal.name not in {"before", "after"} or len(goal.args) != 2:
+            return []
+        left = subst.apply(goal.args[0])
+        right = subst.apply(goal.args[1])
+        left_key = self._temporal_sort_key(left)
+        right_key = self._temporal_sort_key(right)
+        if left_key is None or right_key is None:
+            return []
+        if goal.name == "before":
+            return [subst] if left_key < right_key else []
+        return [subst] if left_key > right_key else []
+
+    def _resolve_query_goals(self, goals: list[Term]) -> list[Substitution]:
+        solutions: list[Substitution] = [Substitution()]
+        for goal in goals:
+            next_solutions: list[Substitution] = []
+            for subst in solutions:
+                next_solutions.extend(self.engine.resolve(goal, subst))
+                next_solutions.extend(self._resolve_temporal_relation(goal, subst))
+            solutions = next_solutions
+            if not solutions:
+                break
+        return solutions
+
+    def _query_terms_rows(self, goals: list[Term], normalized: str) -> dict[str, Any]:
+        variable_names = self._collect_query_variables_from_terms(goals)
+        solutions = self._resolve_query_goals(goals)
+        predicate = goals[0].name if goals else ""
+        if not solutions:
+            return {
+                "status": "no_results",
+                "result_type": "no_result",
+                "predicate": predicate,
+                "prolog_query": normalized,
+                "variables": variable_names,
+                "rows": [],
+                "num_rows": 0,
+                "reasoning_basis": {"kind": "core-local"},
+            }
+
+        rows: list[dict[str, str]] = []
+        seen_rows: set[str] = set()
+        if variable_names:
+            for solution in solutions:
+                row: dict[str, str] = {}
+                for variable_name in variable_names:
+                    bound = solution.apply(Term(variable_name, is_variable=True))
+                    row[variable_name] = str(bound)
+                key = json.dumps(row, sort_keys=True)
+                if key in seen_rows:
+                    continue
+                seen_rows.add(key)
+                rows.append(row)
+        else:
+            rows.append({})
+
+        return {
+            "status": "success",
+            "result_type": "table",
+            "predicate": predicate,
+            "prolog_query": normalized,
+            "variables": variable_names,
+            "rows": rows,
+            "num_rows": len(rows),
+            "reasoning_basis": {"kind": "core-local"},
+        }
+
     def empty_kb(self) -> dict[str, Any]:
         self.engine.clauses.clear()
         return {
@@ -7971,9 +8065,15 @@ class CorePrologRuntime:
     def query_rows(self, query: str) -> dict[str, Any]:
         normalized = _normalize_clause(query)
         try:
-            query_term = self._parse_query_term(normalized)
-            variable_names = self._collect_query_variables(query_term)
-            solutions = self.engine.resolve(query_term)
+            body = normalized[:-1].strip() if normalized.endswith(".") else normalized
+            goal_texts = self._split_top_level(body, ",")
+            goals = [self.engine.parse_term(goal_text) for goal_text in goal_texts]
+            if not goals:
+                raise ValueError("Empty query.")
+            if len(goals) > 1:
+                return self._query_terms_rows(goals, normalized)
+            query_term = goals[0]
+            return self._query_terms_rows([query_term], normalized)
         except Exception as error:
             return {
                 "status": "error",
@@ -7984,44 +8084,6 @@ class CorePrologRuntime:
                 "reasoning_basis": {"kind": "core-local"},
             }
 
-        if not solutions:
-            return {
-                "status": "no_results",
-                "result_type": "no_result",
-                "predicate": query_term.name,
-                "prolog_query": normalized,
-                "variables": variable_names,
-                "rows": [],
-                "num_rows": 0,
-                "reasoning_basis": {"kind": "core-local"},
-            }
-
-        rows: list[dict[str, str]] = []
-        seen_rows: set[str] = set()
-        if variable_names:
-            for solution in solutions:
-                row: dict[str, str] = {}
-                for variable_name in variable_names:
-                    bound = solution.apply(Term(variable_name, is_variable=True))
-                    row[variable_name] = str(bound)
-                key = json.dumps(row, sort_keys=True)
-                if key in seen_rows:
-                    continue
-                seen_rows.add(key)
-                rows.append(row)
-        else:
-            rows.append({})
-
-        return {
-            "status": "success",
-            "result_type": "table",
-            "predicate": query_term.name,
-            "prolog_query": normalized,
-            "variables": variable_names,
-            "rows": rows,
-            "num_rows": len(rows),
-            "reasoning_basis": {"kind": "core-local"},
-        }
 
 
 class ParseOnlyRuntime:

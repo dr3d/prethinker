@@ -3297,7 +3297,10 @@ def _term_from_arg(value: Any, *, entity_names: dict[str, str], for_query: bool)
 
 def _is_query_placeholder_arg(raw: str) -> bool:
     value = _atomize(str(raw or ""))
-    if re.fullmatch(r"(arg|ledger|var)\d+", value):
+    if re.fullmatch(
+        r"(actor|arg|count|date|interval|ledger|level|person|point|requiredactor|role|rule|source|status|threshold|time|value|var|zone)\d+",
+        value,
+    ):
         return True
     if value in {
         "answer",
@@ -3314,6 +3317,7 @@ def _is_query_placeholder_arg(raw: str) -> bool:
         "candidate",
         "character",
         "content",
+        "count",
         "declaration",
         "entity",
         "entry",
@@ -3338,6 +3342,7 @@ def _is_query_placeholder_arg(raw: str) -> bool:
         "label",
         "ledger",
         "location",
+        "level",
         "method",
         "method_detail",
         "methoddetail",
@@ -3350,8 +3355,11 @@ def _is_query_placeholder_arg(raw: str) -> bool:
         "reason",
         "reading",
         "reporter",
+        "required_actor",
+        "requiredactor",
         "record",
         "result",
+        "role",
         "rule",
         "ruleid",
         "speaker",
@@ -3361,6 +3369,7 @@ def _is_query_placeholder_arg(raw: str) -> bool:
         "target",
         "tester",
         "thing",
+        "threshold",
         "timestamp",
         "time",
         "type",

@@ -87,6 +87,8 @@ POST_INGESTION_QA_QUERY_STRATEGY: dict[str, Any] = {
         "For questions about the current, corrected, final, authoritative, or confirmed value, query the authoritative fact predicate and optionally correction_record/4 for provenance.",
         "For ambiguity questions, query ambiguity and candidate-identity predicates when present rather than forcing a single identity.",
         "For rule/consequence questions, query stored rules and supporting facts; do not write derived conclusions as durable facts.",
+        "For policy-condition questions, retrieve both the governing policy rows and the observed event/measurement rows. Threshold, count, interval, and deadline predicates are answer-bearing evidence, not optional decoration.",
+        "For comprehensive or multi-violation questions, plan one small support bundle per alleged violation: governing policy row, observed event row, and any timing/correction/source row needed to show why it is a violation. Prefer concrete event predicates such as inspection, notice/lift, notification, reading, authorization, and zone-scope predicates before broad before/after scans.",
     ],
     "failure_policy": [
         "If no compiled predicate can faithfully answer the question, emit no write and explain the missing predicate/support in self_check.",
@@ -190,7 +192,7 @@ def main() -> int:
         "For reporter questions, include grievance_reporter(Grievance, Reporter) and a content-bearing predicate with the same Grievance variable; the thing reported may appear in an explanation or method label rather than in grievance_target.",
         "For source-owned record predicates, avoid putting role labels into arguments. Query alleged_violation(Grievance, Actor, Violation, Evidence), ledger_entry(Ledger, Entry, RecordType), or witness_observation(Observation, Observer, Content) unless a concrete atom is copied from relevant_clauses.",
         "When the question names a partial phrase such as blue sneezing, do not bind blue_sneezing unless that exact atom appears in relevant_clauses; use a variable over explanation/method slots so longer atoms can match.",
-        "Keep QA workspaces compact: at most 4 query operations and at most 2 short self_check notes.",
+        "Keep QA workspaces compact by default: at most 4 query operations and at most 2 short self_check notes. If the question asks for all conditions, a summary, or multiple violations, use up to 16 query operations rather than dropping whole support bundles.",
         "For unsafe inference traps, preserve the difference between direct KB support, source claim, inference, and unknown.",
         "Use post_ingestion_qa_query_strategy_v1 in kb_context_pack as the query-planning procedure.",
         "If the compiled inventory contains story-world predicates such as event/5, story_time/2, kind/2, lives_at/2, owned_by/2, said/3, judged/4, causes/2, initial_location/2, location_after_event/3, final_state/1, or condition_after_story/2, also use story_world_qa_query_strategy_v1.",
@@ -490,7 +492,7 @@ def run_one_question(
     queries = [str(q).strip() for q in clauses.get("queries", []) if str(q).strip()]
     facts_out = [str(q).strip() for q in clauses.get("facts", []) if str(q).strip()]
     rules_out = [str(q).strip() for q in clauses.get("rules", []) if str(q).strip()]
-    query_results = [{"query": query, "result": runtime.query_rows(query)} for query in queries]
+    query_results = run_query_plan(runtime, queries)
     row.update(
         {
             "projected_decision": diagnostics.get("projected_decision", ""),
@@ -509,6 +511,52 @@ def run_one_question(
         row["mapper_diagnostics"] = diagnostics
     row["oracle_match"] = score_oracle(row=row, oracle=oracle)
     return row
+
+
+def run_query_plan(runtime: CorePrologRuntime, queries: list[str]) -> list[dict[str, Any]]:
+    results: list[dict[str, Any]] = []
+    previous_queries: list[str] = []
+    for query in queries:
+        result = runtime.query_rows(query)
+        results.append({"query": query, "result": result})
+        temporal_join = _temporal_join_with_previous(runtime, previous_queries=previous_queries, query=query)
+        if temporal_join:
+            results.append(temporal_join)
+        previous_queries.append(query)
+    return results
+
+
+def _temporal_join_with_previous(
+    runtime: CorePrologRuntime,
+    *,
+    previous_queries: list[str],
+    query: str,
+) -> dict[str, Any] | None:
+    match = re.fullmatch(
+        r"\s*(before|after)\(\s*([A-Z][A-Za-z0-9_]*)\s*,\s*([a-z0-9_]+)\s*\)\.?\s*",
+        query,
+    )
+    if not match:
+        return None
+    _relation, variable, _ground_time = match.groups()
+    for prior in reversed(previous_queries):
+        if not re.search(rf"\b{re.escape(variable)}\b", prior):
+            continue
+        joined = f"{prior.rstrip('. ')}, {query.strip()}"
+        result = runtime.query_rows(joined)
+        if result.get("status") == "success":
+            return {
+                "query": joined,
+                "result": {
+                    **result,
+                    "reasoning_basis": {
+                        "kind": "core-local",
+                        "note": "conjunctive support query synthesized from structured query operations with a shared temporal variable",
+                    },
+                },
+                "derived_from_queries": [prior, query],
+            }
+    return None
 
 
 def score_oracle(*, row: dict[str, Any], oracle: dict[str, Any]) -> bool | None:

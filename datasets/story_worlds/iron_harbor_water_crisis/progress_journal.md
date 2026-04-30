@@ -280,3 +280,44 @@ The remaining misses are concentrated in rule application, authorization-chain
 reasoning, multi-hop enumeration/set difference, person tracking, source
 fidelity, and deeper temporal calculation. Those are increasingly reasoning
 substrate problems, not "could not query the KB" problems.
+
+## 2026-04-30 - Run IHR-012 - Structured Query And Temporal Support
+
+This run tightened the post-ingestion QA surface without adding prose parsing:
+
+- generic query slot names such as `threshold`, `level`, `role1`, `time1`,
+  `actor1`, and `requiredactor1` are now lifted to Prolog variables when they
+  appear inside already-structured query candidate operations;
+- the core runtime can execute conjunctive queries with shared variable
+  bindings, such as `parent(alice, X), likes(X, chess)`;
+- the core runtime can evaluate grounded temporal `before/2` and `after/2`
+  comparisons for atomized timestamps when they appear in a structured query
+  conjunction;
+- the QA runner can surface a diagnostic conjunctive support query when the
+  model emits a primitive retrieval query followed by a temporal comparison over
+  the retrieved variable;
+- QA guidance now allows larger support bundles for explicit "all conditions" or
+  multi-violation summary questions instead of forcing the model to drop whole
+  evidence bundles to stay under an arbitrary four-query cap.
+
+Result against the IHR-011 flat-plus-focused compile:
+
+- full 100 QA: `60 exact + 22 partial + 18 miss`
+- query rows: `100/100`
+- runtime load errors: `0`
+- write-proposal leaks during QA: `0`
+
+### What Improved
+
+The headline improvement is fewer hard misses: the full battery moved from
+`59/16/25` to `60/22/18`. A representative temporal row now succeeds because the
+runtime can prove that a retrieved notice time is before a deadline, rather than
+showing two unrelated primitive rows and leaving the judge to reject the missing
+join.
+
+### Remaining Frontier
+
+The remaining misses now look even more like true reasoning-substrate work:
+durable rule application, authorization-chain validity, multi-hop set
+difference, alias/person tracking, and richer temporal arithmetic such as
+duration calculations. These are the right hard problems to be seeing.
