@@ -714,3 +714,75 @@ reasoning and still-thin source content:
 These are now good hard edges: the governance boundary held, the compiler can
 preserve the right source surface, and the remaining work is better temporal
 and statement-detail representation.
+
+## 2026-04-30 - Run IHR-021 - Backbone-Plus-Detail Compile And QA Planner Tightening
+
+The next run pushed the IHR-020 edge without adding Python prose handling. The
+compiler guidance now treats detail predicates such as `statement_detail/3`,
+`source_claim/4`, and `disclosure/4` as additive layers rather than substitutes
+for the queryable source backbone. It also tells the model to map generic
+intake-plan purposes onto the actual Iron Harbor registry instead of compressing
+standing policy or source metadata when the plan names unavailable generic
+predicates.
+
+### Compile Result
+
+Fresh `flat-plus-plan-passes` compile:
+
+- `179` admitted operations
+- `0` skipped operations
+- `116` unique facts
+- restored `person_role/2` rows for all six named actors
+- restored all three `facility/2` rows, including `intake_point_alpha`
+- restored broad `policy_requirement/3` coverage
+- preserved `witness_statement/4`, `reported_event/4`, `correction_filing/3`,
+  `disclosure/4`, and `statement_detail/3` in the same compiled KB surface
+
+### QA Planner Tightening
+
+The QA planner gained more explicit support-selection guidance for:
+
+- "alone authorize" questions, which must query joint-role requirements rather
+  than only `person_role/2`;
+- temporal helper chains, where `add_hours/3` must precede dependent
+  `elapsed_minutes/3` calls;
+- advisory interval begin/end/revert questions, which need advisory state-event
+  rows instead of only `testing_interval/2`;
+- witness timing/consistency checks, which need both source-statement rows and
+  objective timeline rows.
+
+### Result
+
+Full Harbor 100-question rerun:
+
+- `86 exact / 14 partial / 0 miss`
+- previous best: `81 exact / 14 partial / 5 miss`
+- `100/100` parsed OK
+- `100/100` query rows
+- `0` runtime load errors
+- `0` write proposals during post-ingestion QA
+
+### What Improved
+
+This is the first full Harbor run with no misses. The remaining errors are now
+partial-support cases rather than outright failures. The largest jump came from
+keeping the source backbone and the richer epistemic/detail layer at the same
+time: roles, facilities, policy requirements, witness statements, reported
+events, disclosures, correction filings, and statement details all survived the
+same compile.
+
+### Current Edge
+
+The remaining partials are mostly substrate/profile questions:
+
+- explicit reversion semantics for "testing interval returns to normal";
+- richer derived temporal support around clean-reading intervals and bypass
+  duration proxies;
+- exact source-claim support for multilingual statement details;
+- queryable non-confirmation/negative epistemic status, such as "document does
+  not confirm untreated water reached residential zones";
+- comprehensive violation summaries that need omitted-zone support, timing
+  computations, and policy-rule support in one bundle.
+
+This is where Iron Harbor should keep applying pressure: not on basic parsing,
+but on temporal/rule/query support surfaces and epistemic non-fact answers.

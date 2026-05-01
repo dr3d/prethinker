@@ -50,7 +50,24 @@ NARRATIVE_SOURCE_COMPILER_CONTEXT_V1 = [
     "Narrative story-world setting coverage: when located_in/2, under/2, near/2, part_of/2, or initial_location/2 are available, preserve descriptive setting relations for the home/place, not only lives_at/2 for residents.",
     "Narrative story-world food/occasion coverage: when ingredient_of/2, contains_before_eating/2, occasion/1, honoree/2, served_for/2, property/2, or portion_of/2 are available, preserve named ingredients/components, special occasions, honorees, and portion/component relations instead of reducing food to a single object.",
     "Narrative story-world event-spine coverage: when event/5 and story_time/2 are available, preserve source-stated actions such as making/baking/placing/leaving/gathering/entering/eating/trying/finding/repairing as event rows with stable event ids and story_time anchors. Use why_did_* helper predicates only when the profile provides them and the source directly states the reason.",
+    "Narrative story-world backbone-plus-detail rule: rich detail predicates are additive layers, not substitutes for the queryable story backbone. Event, story_time, character, kind, lives_at, object/food/place, ownership/design, location, speech, judgment, cause, and final-state rows should survive in the same compile when the profile supports them.",
+    "Narrative story-world registry mapping rule: if an intake pass recommends generic story predicates that are not in the allowed profile, map the pass purpose onto the actual allowed story-world predicates instead. For this style of source, the actual backbone is usually character/1, kind/2, household_member/2, lives_at/2, object/1, food/1, place/1, owned_by/2, designed_for/2, initial_location/2, location_after_event/3, event/5, story_time/2, said/3, judged/4, causes/2, caused_by/2, final_state/1, condition_after_story/2, and restitution/2.",
+    "Narrative story-world entity-role rule: named characters, homes, object families, food/components, and important places are not merely entity metadata. If the profile supports typed rows and relationship rows, emit both the entity/type row and the relationship row so later queries can join them without guessing atoms.",
+    "Narrative story-world taxonomy mapping rule: if a pass recommends is_character/1, is_object/1, is_location/1, or has_type/2 but those predicates are not allowed, use the actual typed predicates from the profile such as character/1, otter/1, human/1, object/1, food/1, place/1, kind/2, name/2, size/2, household/1, and household_member/2.",
+    "Narrative story-world object-family join rule: for repeated sized possessions, use the same compact object atom across object/1, kind/2, size/2, owned_by/2, designed_for/2, initial_location/2, judged/4, event/5, and final-state rows. Do not emit owner-prefixed ownership atoms such as little_character_boots if the profile can represent ownership with owned_by(Object, Owner).",
+    "Narrative story-world object-family coverage rule: for a stated little/middle/great or small/medium/large family, preserve every family member with the same predicate pattern before moving to later action scenes. A useful family row set is object(Item), kind(Item, FamilyKind), size(Item, Size), owned_by(Item, Owner), and designed_for(Item, Owner) when those predicates are available and the source supports them.",
+    "Narrative story-world occasion/component rule: named food, ingredients, occasions, honorees, and reasons for leaving/returning are backbone rows when the profile has food/1, ingredient_of/2, contains_before_eating/2, occasion/1, honoree/2, served_for/2, event/5, story_time/2, and causes/2. Do not preserve only later eating/repair events while dropping the baked food, its components, and why characters left.",
     "Narrative source rule: if the profile lacks event, temporal-order, causal, or final-state predicates needed for the current pass, mention those missing capabilities in self_check rather than inventing out-of-palette predicates.",
+]
+
+DECLARATION_SOURCE_COMPILER_CONTEXT_V1 = [
+    "declaration_source_compiler_strategy_v1: Use this for declaration, proclamation, manifesto, petition, recall, independence, grievance-list, or source-bound accusation documents.",
+    "Declaration source rule: model the document's epistemic structure. The document is an actor making claims, asserting principles/rules, listing grievances or defects, and declaring actions; most accusations are source-bound claims rather than objective world facts.",
+    "Declaration source backbone-plus-detail rule: record/detail predicates are additive layers, not substitutes for the document backbone. Source identity, declaring body, core entities, principles/rules, repeated records, record status/provenance, final declaration/action, and pledges/commitments should survive in the same compile when the profile supports them.",
+    "Declaration source registry mapping rule: if an intake pass recommends generic predicates that are not in the allowed profile, map the pass purpose onto the actual allowed document predicates instead. Typical backbones include document/1, document_type/2, source_domain/2, declaring_body/2, organization/1, authority/1, group/1, institution/1, place/1, person/1, role/1, claim_made/3, principle/2, rule/2, rule_text/2, grievance/2, grievance_actor/2, grievance_target/2, method/2, purpose/2, condition_attached/2, evidence/2, status/provenance predicates, declaration_action/2, declared_independent/1, pledged/2, recall/2, impounded/2, and correction/status rows when available.",
+    "Declaration source repeated-record rule: for grievance, defect, recall, accusation, or complaint lists, use stable record ids and preserve both the record label and high-query-value attributes such as actor, target, method, purpose, condition, evidence, reporter/ledger/source, and epistemic status when the profile supports those predicates.",
+    "Declaration source status rule: if the profile offers a status predicate for grievances, claims, disclosures, allegations, recalls, or defects, emit it. Source-bound accusation, document_claim, disputed, recalled, impounded, corrected, or not-a-finding status should be queryable rather than hidden in a long label.",
+    "Declaration source final-action rule: do not let a long repeated grievance list crowd out the conclusion. Preserve final declarations, recalls, impoundments, separations, authorizations, pledges, remedies, and future-governance commitments as first-class rows.",
 ]
 
 SOURCE_ENTITY_LEDGER_SCHEMA: dict[str, Any] = {
@@ -97,6 +114,49 @@ SOURCE_ENTITY_LEDGER_SCHEMA: dict[str, Any] = {
     },
 }
 
+SOURCE_PASS_OPS_JSON_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": ["schema_version", "pass_id", "decision", "candidate_operations", "self_check"],
+    "properties": {
+        "schema_version": {"type": "string", "const": "source_pass_ops_v1"},
+        "pass_id": {"type": "string"},
+        "decision": {
+            "type": "string",
+            "enum": ["commit", "clarify", "quarantine", "reject", "answer", "mixed"],
+        },
+        "candidate_operations": {
+            "type": "array",
+            "maxItems": 64,
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["operation", "proposition_id", "predicate", "args", "polarity", "source", "safety"],
+                "properties": {
+                    "operation": {"type": "string", "enum": ["assert", "retract", "rule", "query", "none"]},
+                    "proposition_id": {"type": "string"},
+                    "predicate": {"type": "string"},
+                    "args": {"type": "array", "items": {"type": "string"}},
+                    "clause": {"type": "string"},
+                    "polarity": {"type": "string", "enum": ["positive", "negative"]},
+                    "source": {"type": "string", "enum": ["direct", "inferred", "context"]},
+                    "safety": {"type": "string", "enum": ["safe", "unsafe", "needs_clarification"]},
+                },
+            },
+        },
+        "self_check": {
+            "type": "object",
+            "additionalProperties": False,
+            "required": ["bad_commit_risk", "missing_slots", "notes"],
+            "properties": {
+                "bad_commit_risk": {"type": "string", "enum": ["low", "medium", "high"]},
+                "missing_slots": {"type": "array", "maxItems": 8, "items": {"type": "string"}},
+                "notes": {"type": "array", "maxItems": 12, "items": {"type": "string"}},
+            },
+        },
+    },
+}
+
 POLICY_INCIDENT_SOURCE_COMPILER_CONTEXT_V1 = [
     "policy_incident_source_compiler_strategy_v1: Use this for sources classified by the LLM intake plan or domain hint as policy, compliance, incident, operations log, regulatory record, timeline, or municipal/organizational procedure.",
     "Policy incident rule: separate standing rules from observed incident facts. A threshold, deadline, required role, exception, or validity condition is not the same kind of state as a timestamped reading, notification, outage, authorization, correction, or review statement.",
@@ -106,13 +166,40 @@ POLICY_INCIDENT_SOURCE_COMPILER_CONTEXT_V1 = [
     "Policy incident rule: preserve corrections as authoritative corrected facts plus parked claims or self_check notes for superseded values when the profile supports that distinction. Do not commit both old and corrected values as equal truth.",
     "Policy incident rule: when the selected profile offers source_claim/4 and correction_record/4, explicit language such as initially, wait no, correction, retracted, transcription error, badge log authoritative, or written log confirms should normally produce both a parked source_claim for the superseded statement and a correction_record linking original value, corrected value, and authority.",
     "Policy incident rule: preserve joint authorization and prerequisite validity as structured policy requirements and timestamped authorization/inspection facts when the profile supports them.",
+    "Policy incident rule: when a rule sentence says a role's authorization is valid only if a prerequisite inspection, review, test, or approval occurred within a time window, emit both the compact threshold predicate when available and a policy_requirement/3 row for the prerequisite itself. Do not leave the actor/prerequisite relationship only implicit in observed inspection rows.",
+    "Policy incident source-surface rule: statement_detail/3 and source_claim/4 are additive detail layers. They must not replace the backbone rows that make the KB queryable: person_role/2, facility/2, governing_bylaw/2, policy_requirement/3, witness_statement/4, reported_event/4, correction_filing/3, and the core timestamped event predicates.",
+    "Policy incident policy coverage rule: when the source has a standing-policy section and policy_requirement/3 is available, preserve every distinct stated requirement as a compact policy_requirement row, including triggers, thresholds, deadlines, notification scope, treatment path/prohibition, authorization roles, inspection prerequisites, and lift conditions. Do not emit only the requirements that later incident facts mention.",
+    "Policy incident registry mapping rule: if an intake plan recommends generic predicates such as policy_rule, threshold_value, interval_duration, event_occurred, administrative_action, witness_claimed, compliance_violation, or final_state but those predicates are not in the allowed profile, map the pass purpose onto the actual allowed policy-incident predicates instead. For this style of source, the actual backbone is usually governing_bylaw/2, person_role/2, facility/2, policy_requirement/3, threshold predicates, coliform_reading/4, facility_status/3, notification/5, bypass_authorization/3, inspection/3, witness_statement/4, reported_event/4, correction_record/4, disclosure/4, and correction_filing/3.",
+    "Policy incident entity-role rule: named people and facilities are not merely entity metadata. If person_role/2 or facility/2 is available, emit queryable role/facility rows for every explicitly named officer, technician, operator, manager, authority, intake point, treatment facility, or bypass unit.",
     "Policy incident rule: preserve notification recipients, notice type, time, method, and notifying actor separately when the profile supports those slots.",
     "Policy incident rule: preserve review-board statements, witness statements, disclosures, and allegations as claims or review records unless the source states an authoritative finding.",
+    "Policy incident rule: when the palette offers statement_detail/3 or an equivalent detail predicate, preserve source-owned explanations that later questions may ask about, such as why an officer believed a deadline or authorization was valid. These remain statement details, not review-board findings.",
+    "Policy incident rule: for correction/addendum sections, preserve each numbered correction and each addendum as its own filing/source-record row when the palette offers correction_filing/3 or equivalent. Do not compress three corrections plus one addendum into a single combined correction_addendum row.",
     "Policy incident coverage warning: a useful skeleton should include roles, scoped zones/entities, core facilities/systems, standing policy thresholds/deadlines, key measurements, advisory or trigger state, facility status changes, notifications, authorizations, inspections, corrections, and temporal order when the source and profile support them.",
     "Policy incident canonical palette warning: do not invent vague substitutes such as event_occurred/4, policy_constraint/3, or compliance_status/3 when the draft profile provides a more precise predicate for the same job.",
     "Policy incident atom ledger rule: choose one canonical atom for each person, facility, zone, system, and timestamp, then reuse it everywhere. Do not emit both given_surname and surname_given forms for the same person, and do not emit both a short facility atom and a long facility atom for the same facility unless the source distinguishes them.",
     "Policy incident atom ledger preference: for full personal names, prefer given_surname; for initial-plus-surname mentions, prefer initial_surname; for role-only mentions, reuse the named role-holder atom only when the source has already identified that role holder. For timestamps, use one normalized timestamp surface consistently across all predicates.",
     "Policy incident QA-readiness rule: if a person or facility appears in a role row and in later event, inspection, notification, authorization, correction, or disclosure rows, the same atom must connect those rows so later queries can join them without alias repair.",
+]
+
+PROCEDURAL_MISCONDUCT_SOURCE_COMPILER_CONTEXT_V1 = [
+    "procedural_misconduct_source_compiler_strategy_v1: Use this for research-misconduct, university investigation, procedural case, disciplinary, appeal, committee, or administrative proceeding sources.",
+    "Procedural misconduct rule: preserve the procedural backbone before narrative detail. Roles, organizational hierarchy, committees, proceeding events, deadline requirements, deadline outcomes, findings, sanctions, corrections, witness claims, advisory opinions, unresolved questions, federal notices, financial dependencies, and temporal order are distinct query surfaces.",
+    "Procedural misconduct backbone-plus-detail rule: witness claims, findings, and financial rows are additive layers, not substitutes for person_role/2, org_hierarchy/3, org_head/3, committee_member/3, proceeding_event/4, deadline_requirement/4, deadline_met/4, correction/4, and before/2 when those predicates are available.",
+    "Procedural misconduct role rule: every named respondent, complainant, RIO, Provost, chair, committee member, witness, general counsel, dean, department chair, federal agency, grant actor, and replacement appointee should get the profile's role/organization row when supported. Case roles such as respondent, complainant, witness, and recused_member are query-bearing roles even when the person also has an occupational title such as professor or postdoc. Emit both role types when directly stated. Do not represent a person's role only inside witness_claim/4.",
+    "Procedural misconduct committee rule: committee rosters and replacements are answer-bearing facts. Preserve Inquiry, Investigation, and FSRB membership separately from findings. If a member was erroneously listed and corrected, emit the correction and the corrected roster rather than treating the erroneous roster as current truth.",
+    "Procedural misconduct timeline rule: proceeding_event/4 rows are the skeleton for later deadline and chronology queries. Preserve discovery, filing, acknowledgment, scope determination, sequestration, first meetings, reports, notifications, appeal, FSRB convening, and FSRB decision when the profile supports proceeding_event/4.",
+    "Procedural misconduct deadline rule: deadline_requirement/4 and deadline_met/4 are policy/compliance backbone rows. Preserve amount, unit, anchor, start date, actual date, and yes/no status. Do not answer deadline questions from finding dates alone.",
+    "Procedural misconduct policy-surface rule: do not invent generic policy_requirement, policy_scope, or policy_rule predicates when the profile instead provides deadline_requirement/4, deadline_met/4, extension_authority/2, inquiry_minimum_size/1, investigation_minimum_size/1, is_research_misconduct/1, and not_research_misconduct/1. Map standing policy requirements onto those exact allowed predicates.",
+    "Procedural misconduct organization contract rule: org_hierarchy(Parent, Child, RelationType) should use the child relation class or source-stated relation type, such as college or department, not vague verbs like contains, has_head, or parent_of. org_head(Organization, Person, Role) must use the organization as the first argument and the named person as the second argument.",
+    "Procedural misconduct authority rule: inquiry-extension authority and investigation-extension authority may differ. Preserve extension_authority/2 and minimum-size predicates when the profile supports them; do not infer one authority from the other.",
+    "Procedural misconduct finding/sanction rule: findings and sanctions are separate. An appeal board may uphold the finding while modifying sanctions. Do not collapse sanction modification into finding reversal, and do not promote a non-finding into misconduct or exoneration.",
+    "Procedural misconduct epistemic rule: witness_claim/4, advisory_opinion/4, advisory_status/2, and unresolved_question/2 are not objective findings. Preserve their status so later queries can ask what was claimed, what was advisory, and what remained unresolved.",
+    "Procedural misconduct correction rule: correction/4 and clarification/3 rows are first-class. Preserve stale value, replacement value, date/detail rows, and the current corrected fact surface when supported.",
+    "Procedural misconduct federal/financial rule: grant, subgrant, equipment, depreciation, paper retraction, federal notification, and advisory fund-return rows are dependency surfaces. Preserve them separately instead of folding them into a single case summary.",
+    "Procedural misconduct multilingual rule: non-English witness statements are source-owned claims. Preserve the translated claim content and speaker/source; do not treat translation as external proof.",
+    "Procedural misconduct no-violation rule: if the source says every documented deadline was met, do not invent a procedural violation merely because a deadline looks close. Preserve positive deadline_met(..., yes) rows.",
+    "Procedural misconduct atom rule: use one canonical atom per person, committee, grant, paper, agency, role, and date. Prefer stable given_surname person atoms when the profile's registry uses that style, and reuse the same atom across role, committee, event, witness, conflict, and finding rows.",
 ]
 
 from src.profile_bootstrap import (  # noqa: E402
@@ -197,6 +284,34 @@ def parse_args() -> argparse.Namespace:
         help="Experimental: compile one broad flat pass plus focused LLM-authored pass_plan passes, then union admitted clauses.",
     )
     parser.add_argument("--max-plan-passes", type=int, default=8)
+    parser.add_argument(
+        "--intake-registry-context",
+        action="store_true",
+        help=(
+            "Experimental: pass --profile-registry into the LLM intake planner as vocabulary-only context. "
+            "Default is off because registry-visible planning can over-broaden dense pass plans."
+        ),
+    )
+    parser.add_argument(
+        "--focused-pass-operation-target",
+        type=int,
+        default=48,
+        help="Prompt target for candidate_operations emitted by each focused intake-plan compile pass.",
+    )
+    parser.add_argument(
+        "--focused-retry-operation-target",
+        type=int,
+        default=32,
+        help="Prompt target for candidate_operations emitted by the compact retry for an unparseable focused pass.",
+    )
+    parser.add_argument(
+        "--focused-pass-ops-schema",
+        action="store_true",
+        help=(
+            "Experimental: focused intake-plan passes ask the LLM for source_pass_ops_v1 "
+            "operations only, then wrap those proposals for the normal Semantic IR mapper."
+        ),
+    )
     parser.add_argument("--include-model-input", action="store_true")
     parser.add_argument(
         "--source-entity-ledger",
@@ -262,6 +377,7 @@ def main() -> int:
                 source_text=source_text,
                 source_name=text_path.name,
                 domain_hint=str(args.domain_hint or ""),
+                candidate_profile_registry=profile_registry if bool(args.intake_registry_context) else None,
             ),
             schema=INTAKE_PLAN_JSON_SCHEMA,
             schema_name="intake_plan_v1",
@@ -788,6 +904,7 @@ def _compile_source_with_draft_profile(
                 "When pass_plan names source boundary, principles/rules, repeated records, final declarations, appeals, or pledges, emit at least one representative safe operation from each supported pass before adding extra repeated-record details.",
                 "Use the breadth of the draft profile. If many allowed predicates are available, prefer a diverse skeleton that exercises distinct source/provenance, entity, claim, rule, repeated-record, declaration, and commitment predicate families over many operations using only one predicate family.",
                 "Predicate contracts are binding. Preserve the exact argument order from predicate_contracts/allowed profile args. Do not swap subject/object, actor/time, recipient/type, facility/officer, or status/timestamp slots to make a fact fit. If the source supports a fact but the argument order is uncertain, skip it or note the uncertainty in self_check instead of emitting a malformed clause.",
+                "For dense source compilation, entities/assertions/propositions are optional audit scaffolding. Keep them sparse or empty if they would consume output budget. Candidate_operations are the primary artifact; use normalized atoms directly in candidate_operations instead of first listing every source entity.",
                 "Avoid predicate canonicalization drift. If the allowed palette contains synonymous prefixed and reusable detail predicates, such as grievance_observation_location/2 and observation_location/2, prefer the reusable detail predicate when its first argument is already the grievance/incident/record id.",
                 "Use one canonical predicate surface consistently for a repeated slot. Do not mix grievance_method/2 with method/2, grievance_effect/2 with effect_claimed/2, or grievance_explanation_given/2 with explanation_given/2 unless their meanings are explicitly different in the profile contract.",
                 "Do not add facts not present in the source text.",
@@ -804,7 +921,8 @@ def _compile_source_with_draft_profile(
                 "For translated or multilingual witness/source statements, preserve the source-owned statement metadata even when the timeline already contains the same event. Do not drop the statement merely because an authoritative timeline fact also exists.",
                 "When a source document has a witness/source-statement section and the palette contains witness_statement, emit one witness_statement row for every named statement source, not a representative subset. Preserve stated source language, collection date/window, and a compact content label.",
                 "When a witness/source statement reports an event with a time, status, confirmation, or repair fact, and the palette contains reported_event or equivalent, emit a reported_event row in addition to any authoritative timeline fact. The reported row is source-attributed support, not objective truth.",
-                "For correction/addendum sections that state a shared filing date, emit a correction_filing or equivalent source-metadata row for the correction/addendum filing date when the palette supports it; do not hide filing date only in correction_record authority text.",
+                "When the palette contains statement_detail/3 or equivalent, emit statement-detail rows for each named source's explicit explanation, mistake, belief, or misunderstanding that a later QA question could ask about. Preserve details such as 'thought until midnight', 'did not realize the 4-hour clock started from second clean reading', and 'believed 30 days was inclusive' as source-owned statement details rather than objective findings.",
+                "For correction/addendum sections that state a shared filing date, emit a correction_filing or equivalent source-metadata row for every numbered correction and every addendum when the palette supports it; do not hide filing date only in correction_record authority text and do not compress multiple filings into a single combined row.",
                 "For recall, impoundment, remedy, declaration, and not-fit actions, keep item, status, location, label, authority, and condition queryable as separate attributes when the palette supports them. Do not hide Dock C or a quoted label only inside a long item atom if a later question may ask for it.",
                 "Do not emit source_priority, override, conflict, or authority-ranking facts unless the source explicitly ranks sources or states an override/conflict policy.",
                 "When a predicate contract names an argument source, source_document, or document, bind that argument to a stable source/document id such as doc_1 or a normalized document id. Do not put the speaker, claimant, or claim subject in a source/document argument.",
@@ -825,6 +943,7 @@ def _compile_source_with_draft_profile(
     ir = result.get("parsed") if isinstance(result, dict) else None
     if not isinstance(ir, dict):
         if compact_retry:
+            retry_target = max(1, int(getattr(args, "focused_retry_operation_target", 32) or 32))
             return _compile_source_with_draft_profile(
                 source_text=source_text,
                 parsed_profile=parsed_profile,
@@ -833,10 +952,13 @@ def _compile_source_with_draft_profile(
                 extra_context=[
                     *(extra_context or []),
                     "COMPACT RETRY: the previous Semantic IR response for this same planned pass was not parseable.",
-                    "Return a smaller valid semantic_ir_v1 object. Keep entities sparse and reusable.",
-                    "For repeated-record/evidence passes, emit at most 24 candidate_operations and at most 8 entities total.",
+                    "Return an operations-first valid semantic_ir_v1 object. Use entities=[], assertions=[], propositions=[], unsafe_implications=[] unless one tiny item is absolutely necessary for admission safety.",
+                    "Retry scope is section-local: choose only the source section(s) relevant to the current pass purpose/focus and ignore the rest of the document.",
+                    "The retry must not include entity catalogue rows. Set entities=[] and put all stable atoms directly in candidate_operations.",
+                    "Do not enumerate an entity catalogue in the retry. Put stable normalized atoms directly in candidate_operations args.",
+                    f"Emit at most {retry_target} safe candidate_operations that belong to this focused pass, plus empty truth_maintenance arrays and at most two short self_check notes.",
                     "Prioritize high-query-value details: reporting actors, complainants, ledger entries, conflicts between ledgers, affected items, locations, measurements, and rule violations.",
-                    "Keep self_check.notes to at most two short notes.",
+                    f"If the pass contains more than {retry_target} safe operations, choose the backbone rows first and put segment_required_for_complete_ingestion in self_check.missing_slots.",
                 ],
                 compact_retry=False,
             )
@@ -865,6 +987,145 @@ def _compile_source_with_draft_profile(
     }
 
 
+def _compile_source_pass_ops(
+    *,
+    source_text: str,
+    parsed_profile: dict[str, Any],
+    intake_plan: dict[str, Any],
+    args: argparse.Namespace,
+    pass_id: str,
+    purpose: str,
+    focus: str,
+    completion: str,
+    predicates: str,
+    coverage_goals: str,
+    extra_context: list[str] | None = None,
+) -> dict[str, Any]:
+    """Ask the LLM for focused operation proposals, then use the normal mapper."""
+
+    allowed_predicates = profile_bootstrap_allowed_predicates(parsed_profile)
+    predicate_contracts = profile_bootstrap_predicate_contracts(parsed_profile)
+    domain_context = profile_bootstrap_domain_context(parsed_profile)
+    source_compiler_context = _source_compiler_context(
+        intake_plan=intake_plan,
+        domain_hint=str(getattr(args, "domain_hint", "") or ""),
+    )
+    target = max(1, int(getattr(args, "focused_pass_operation_target", 48) or 48))
+    payload = {
+        "task": "Emit source_pass_ops_v1 JSON only for this focused source pass.",
+        "authority": "proposal_only_mapper_remains_authoritative",
+        "domain_hint": str(getattr(args, "domain_hint", "") or ""),
+        "raw_source_text": source_text,
+        "current_pass": {
+            "pass_id": pass_id,
+            "purpose": purpose,
+            "focus": focus,
+            "completion_policy": completion,
+            "recommended_predicates": predicates,
+            "coverage_goals": coverage_goals,
+            "operation_target": target,
+        },
+        "allowed_predicates": allowed_predicates,
+        "predicate_contracts": predicate_contracts,
+        "domain_context": domain_context,
+        "guidance_context": [
+            *intake_plan_context(intake_plan),
+            *source_compiler_context,
+            *(extra_context or []),
+            "This compact schema is for a focused pass only. Do not compile unrelated source sections.",
+            "Emit only candidate_operations. Do not emit entities, assertions, propositions, temporal_graph, or truth_maintenance here.",
+            "Use exact allowed predicate names and argument order from predicate_contracts.",
+            "Put stable normalized atoms directly in candidate_operations args.",
+            "Do not add facts not present in the source text.",
+            "If the pass has more support than fits, choose row-class floor operations first and list segment_required_for_complete_ingestion in self_check.missing_slots.",
+        ],
+    }
+    try:
+        response = _call_lmstudio_json_schema(
+            base_url=str(args.base_url),
+            model=str(args.model),
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You are a focused source-pass operation compiler for a governed symbolic memory system. "
+                        "You do not decide truth and you do not mutate the KB. "
+                        "Emit only source_pass_ops_v1 JSON; the deterministic mapper will decide admission."
+                    ),
+                },
+                {"role": "user", "content": "INPUT_JSON:\n" + json.dumps(payload, ensure_ascii=False, indent=2)},
+            ],
+            schema=SOURCE_PASS_OPS_JSON_SCHEMA,
+            schema_name="source_pass_ops_v1",
+            timeout=int(args.timeout),
+            temperature=float(args.temperature),
+            top_p=float(args.top_p),
+            max_tokens=min(int(args.max_tokens), max(4000, min(12000, target * 220))),
+        )
+        parsed = json.loads(str(response.get("content", "{}")))
+    except Exception as exc:
+        return {"ok": False, "error": f"source_pass_ops_failed:{exc}", "raw_content": ""}
+
+    if not isinstance(parsed, dict) or parsed.get("schema_version") != "source_pass_ops_v1":
+        return {
+            "ok": False,
+            "error": "source_pass_ops_parse_failed",
+            "raw_content": str(response.get("content", ""))[:4000] if "response" in locals() else "",
+        }
+    ir = _source_pass_ops_to_semantic_ir(parsed)
+    mapped, warnings = semantic_ir_to_legacy_parse(
+        ir,
+        allowed_predicates=allowed_predicates,
+        predicate_contracts=predicate_contracts,
+    )
+    diagnostics = mapped.get("admission_diagnostics", {}) if isinstance(mapped, dict) else {}
+    return {
+        "ok": True,
+        "mode": "source_pass_ops_v1",
+        "model_decision": ir.get("decision", ""),
+        "projected_decision": diagnostics.get("projected_decision", ""),
+        "admitted_count": int(diagnostics.get("admitted_count", 0) or 0),
+        "skipped_count": int(diagnostics.get("skipped_count", 0) or 0),
+        "warnings": warnings,
+        "facts": mapped.get("facts", []),
+        "rules": mapped.get("rules", []),
+        "queries": mapped.get("queries", []),
+        "self_check": ir.get("self_check", {}),
+        "source_pass_ops": parsed,
+    }
+
+
+def _source_pass_ops_to_semantic_ir(parsed: dict[str, Any]) -> dict[str, Any]:
+    self_check = parsed.get("self_check") if isinstance(parsed.get("self_check"), dict) else {}
+    return {
+        "schema_version": "semantic_ir_v1",
+        "decision": str(parsed.get("decision", "commit") or "commit"),
+        "turn_type": "state_update",
+        "entities": [],
+        "referents": [],
+        "assertions": [],
+        "propositions": [],
+        "unsafe_implications": [],
+        "candidate_operations": parsed.get("candidate_operations", [])
+        if isinstance(parsed.get("candidate_operations"), list)
+        else [],
+        "truth_maintenance": {
+            "support_links": [],
+            "conflicts": [],
+            "retraction_plan": [],
+            "derived_consequences": [],
+        },
+        "clarification_questions": [],
+        "self_check": {
+            "bad_commit_risk": str(self_check.get("bad_commit_risk", "low") or "low"),
+            "missing_slots": self_check.get("missing_slots", [])
+            if isinstance(self_check.get("missing_slots"), list)
+            else [],
+            "notes": self_check.get("notes", []) if isinstance(self_check.get("notes"), list) else [],
+        },
+    }
+
+
 def _compile_source_with_plan_passes(
     *,
     source_text: str,
@@ -882,6 +1143,7 @@ def _compile_source_with_plan_passes(
     seen_rules: set[str] = set()
     seen_queries: set[str] = set()
     max_passes = max(1, int(getattr(args, "max_plan_passes", 8) or 8))
+    focused_target = max(1, int(getattr(args, "focused_pass_operation_target", 48) or 48))
     for index, item in enumerate(pass_plan[:max_passes]):
         if not isinstance(item, dict):
             continue
@@ -889,33 +1151,62 @@ def _compile_source_with_plan_passes(
         purpose = str(item.get("purpose", "")).strip()
         focus = str(item.get("focus", "")).strip()
         completion = str(item.get("completion_policy", "")).strip()
+        coverage_goals = " | ".join(
+            str(row).strip()
+            for row in item.get("coverage_goals", [])
+            if str(row).strip()
+        ) if isinstance(item.get("coverage_goals"), list) else ""
         predicates = ", ".join(
             str(row).strip()
             for row in item.get("recommended_predicates", [])
             if str(row).strip()
         ) if isinstance(item.get("recommended_predicates"), list) else ""
-        compiled = _compile_source_with_draft_profile(
-            source_text=source_text,
-            parsed_profile=parsed_profile,
-            intake_plan=intake_plan,
-            args=args,
-            extra_context=[
-                "This is focused plan-pass compilation, not a whole-source gulp.",
-                *(extra_context or []),
-                f"current_intake_pass_id: {pass_id}",
-                f"current_intake_pass_purpose: {purpose}",
-                f"current_intake_pass_focus: {focus}",
-                f"current_intake_pass_completion_policy: {completion}",
-                f"current_intake_pass_recommended_predicates: {predicates}",
-                "For this call, emit only operations that belong to the current intake pass. Defer other source material to its own pass.",
-                "It is better to be complete for this pass than broadly summary-like across the entire source.",
-                "Keep focused pass JSON compact: reuse normalized atoms directly in candidate_operations instead of listing every named thing as an entity.",
-                "For focused pass compilation, aim for at most 12 entities, 32 candidate_operations, and 3 short self_check notes.",
-                "If source_entity_ledger_v1 includes object_families and this pass is about entity taxonomy, static properties, inventory, ownership, design, or source metadata, emit rows for every family member the allowed profile can represent: object/1 when available, size/2 when available, owned_by/2 or designed_for/2 when available, and initial_location/2 when directly stated. Do not stop after only the little/small member of a repeated family.",
-                "If this pass is about source metadata, witness statements, review meetings, corrections, addenda, or provenance, and the allowed profile contains witness_statement, review_meeting_attendee, correction_filing, reported_event, or governing_bylaw predicates, emit those rows before broad timeline or policy recap rows.",
-                "For a focused witness/source-statement pass, completeness means every named statement source gets a witness_statement/source_statement row, and every statement-specific reported time/status/confirmation gets a reported_event row when supported by the palette.",
-            ],
-        )
+        focused_context = [
+            "This is focused plan-pass compilation, not a whole-source gulp.",
+            *(extra_context or []),
+            f"current_intake_pass_id: {pass_id}",
+            f"current_intake_pass_purpose: {purpose}",
+            f"current_intake_pass_focus: {focus}",
+            f"current_intake_pass_completion_policy: {completion}",
+            f"current_intake_pass_recommended_predicates: {predicates}",
+            f"current_intake_pass_coverage_goals: {coverage_goals}",
+            "For this call, emit only operations that belong to the current intake pass. Defer other source material to its own pass.",
+            "Treat markdown/source headings as navigation aids. For this focused pass, mentally choose the source sections that match current_intake_pass_purpose/focus and ignore unrelated sections instead of compiling the whole document again.",
+            "If a source section is clearly outside the current pass, do not emit entities, assertions, or operations from it.",
+            "It is better to be complete for this pass than broadly summary-like across the entire source.",
+            "Treat current_intake_pass_coverage_goals as row-class floors, not decorative notes. If the source and allowed profile support a listed row class, emit at least one safe candidate_operation for that class before adding repeated detail from any one predicate family.",
+            "Keep focused pass JSON compact: reuse normalized atoms directly in candidate_operations instead of listing every named thing as an entity.",
+            "For focused long-source passes, set entities=[] unless a clarification requires one tiny entity record. Do not enumerate an entity catalogue. Put stable normalized atoms directly in candidate_operations.",
+            "For focused long-source passes, set assertions=[], propositions=[], unsafe_implications=[] unless needed to explain a blocked safety decision. The durable/queryable output lives in candidate_operations.",
+            f"For focused pass compilation, aim for entities=[], at most {focused_target} candidate_operations, and 2 short self_check notes. If a pass has more source support than fits, choose the row-class floor operations first and mark segment_required_for_complete_ingestion.",
+            "If source_entity_ledger_v1 includes object_families and this pass is about entity taxonomy, static properties, inventory, ownership, design, or source metadata, emit rows for every family member the allowed profile can represent: object/1 when available, size/2 when available, owned_by/2 or designed_for/2 when available, and initial_location/2 when directly stated. Do not stop after only the little/small member of a repeated family.",
+            "For a focused narrative taxonomy/static pass, completeness means typed rows for every main character, home/place, named food, and repeated object family, plus relationship rows that make them queryable: character/kind/lives_at for cast, place/location rows for setting, object/kind/size/owned_by/designed_for for object families, and food/ingredient/occasion rows for named food when the profile supports them.",
+            "If this pass is about source metadata, witness statements, review meetings, corrections, addenda, or provenance, and the allowed profile contains witness_statement, review_meeting_attendee, correction_filing, reported_event, or governing_bylaw predicates, emit those rows before broad timeline or policy recap rows.",
+            "For a focused witness/source-statement pass, completeness means every named statement source gets a witness_statement/source_statement row, every statement-specific reported time/status/confirmation gets a reported_event row when supported by the palette, and every explicit explanation or misunderstanding gets a statement_detail row when supported by the palette.",
+            "For a focused correction/addendum pass, completeness means each numbered correction and each addendum gets its own correction_filing row when supported by the palette.",
+        ]
+        if bool(getattr(args, "focused_pass_ops_schema", False)):
+            compiled = _compile_source_pass_ops(
+                source_text=source_text,
+                parsed_profile=parsed_profile,
+                intake_plan=intake_plan,
+                args=args,
+                pass_id=pass_id,
+                purpose=purpose,
+                focus=focus,
+                completion=completion,
+                predicates=predicates,
+                coverage_goals=coverage_goals,
+                extra_context=focused_context,
+            )
+        else:
+            compiled = _compile_source_with_draft_profile(
+                source_text=source_text,
+                parsed_profile=parsed_profile,
+                intake_plan=intake_plan,
+                args=args,
+                extra_context=focused_context,
+            )
         compiled["pass_id"] = pass_id
         compiled["purpose"] = purpose
         compiled["focus"] = focus
@@ -1053,6 +1344,22 @@ def _source_compiler_context(*, intake_plan: dict[str, Any] | None, domain_hint:
     if any(
         token in label
         for token in [
+            "declaration",
+            "proclamation",
+            "manifesto",
+            "petition",
+            "recall",
+            "independence",
+            "grievance",
+            "grievances",
+            "accusation",
+            "accusations",
+        ]
+    ):
+        contexts.extend(DECLARATION_SOURCE_COMPILER_CONTEXT_V1)
+    if any(
+        token in label
+        for token in [
             "policy",
             "compliance",
             "incident",
@@ -1066,6 +1373,20 @@ def _source_compiler_context(*, intake_plan: dict[str, Any] | None, domain_hint:
         ]
     ):
         contexts.extend(POLICY_INCIDENT_SOURCE_COMPILER_CONTEXT_V1)
+    if any(
+        token in label
+        for token in [
+            "misconduct",
+            "research_integrity",
+            "research integrity",
+            "disciplinary",
+            "university",
+            "procedural",
+            "proceeding",
+            "committee",
+        ]
+    ):
+        contexts.extend(PROCEDURAL_MISCONDUCT_SOURCE_COMPILER_CONTEXT_V1)
     return contexts
 
 

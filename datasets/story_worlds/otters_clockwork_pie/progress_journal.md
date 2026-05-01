@@ -646,3 +646,37 @@ to cash in every ledger object family also failed to improve the compile.
 The mechanism is now kept behind an explicit `--source-entity-ledger` flag. It
 is architecturally promising, but it should not become the default path until
 the ledger-to-compile handoff demonstrably beats the simpler current pipeline.
+
+## Run OTR-013 - Harbor Cross-Apply Recheck
+
+- Timestamp: `2026-05-01T00:18Z` through `2026-05-01T00:37Z`
+- Model: `qwen/qwen3.6-35b-a3b`
+- Mode: direct story-world registry with the newer Harbor-style
+  backbone-plus-detail compiler guidance, plus one optional
+  `source_entity_ledger_v1` probe.
+
+### Runs
+
+- `tmp/domain_bootstrap_file/domain_bootstrap_file_20260501T001821386397Z_story_qwen-qwen3-6-35b-a3b.json`
+  - first-20 QA: `8 exact / 1 partial / 11 miss`
+  - support-map score: `4/20`
+- `tmp/domain_bootstrap_file/domain_bootstrap_file_20260501T002648305451Z_story_qwen-qwen3-6-35b-a3b.json`
+  - first-20 QA: `6 exact / 2 partial / 12 miss`
+- `tmp/domain_bootstrap_file/domain_bootstrap_file_20260501T003502358556Z_story_qwen-qwen3-6-35b-a3b.json`
+  - first-20 QA: `5 exact / 3 partial / 12 miss`
+
+### Result
+
+The Harbor-style context changes did not beat the current Otters high-water
+mark. They improved some individual surfaces, such as taxonomy rows and errand
+rows, but they also caused coverage tradeoffs: more static rows sometimes meant
+less event/speech/judgment support, and the ledger path remained too timid.
+
+### Lesson
+
+Otters is now exposing a sharper frontier than simple guidance can solve:
+source-local story worlds need an explicit ledger-to-compile contract with row
+class floors or pass-specific completion checks. The model can build a strong
+ledger, but the subsequent compile must be made to cash in that ledger across
+typed/static/event/speech/judgment/final-state rows without Python interpreting
+the prose.

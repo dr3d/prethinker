@@ -1,0 +1,49 @@
+{
+  "buckets": [
+    {
+      "description": "Uses the wrong start event or wrong business/calendar day unit for a deadline.",
+      "id": "deadline_anchor_error"
+    },
+    {
+      "description": "Confuses RIO inquiry-extension authority with Provost investigation-extension authority.",
+      "id": "extension_authority_confusion"
+    },
+    {
+      "description": "Treats sanction modification as overturning or changing the misconduct finding.",
+      "id": "finding_sanction_collapse"
+    },
+    {
+      "description": "Promotes witness statements, respondent denials, or advisory opinions into objective facts.",
+      "id": "claim_fact_collapse"
+    },
+    {
+      "description": "Turns Petrova aware-but-no-finding into either misconduct or exoneration.",
+      "id": "non_finding_misread"
+    },
+    {
+      "description": "Answers the Tanaka reporting-obligation question as resolved despite explicit deferral.",
+      "id": "unresolved_question_overanswer"
+    },
+    {
+      "description": "Uses corrected-away committee membership or publication year as current fact.",
+      "id": "correction_stale_value"
+    },
+    {
+      "description": "Misses the 3-year coauthorship window and replacement deadline consequences.",
+      "id": "coi_window_error"
+    },
+    {
+      "description": "Fails grant/subgrant/equipment/depreciation/status dependency questions.",
+      "id": "financial_dependency_gap"
+    },
+    {
+      "description": "Drops or mistranslates Russian, German, or Japanese witness statements.",
+      "id": "multilingual_claim_loss"
+    },
+    {
+      "description": "Confuses journal, university, FSRB, NSF/OIG, RIO, or Provost authority.",
+      "id": "source_authority_confusion"
+    }
+  ],
+  "fixture": "blackthorn_misconduct_case"
+}

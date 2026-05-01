@@ -79,6 +79,86 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         ok, errors = _validate_parsed(parsed)
         self.assertTrue(ok, errors)
 
+    def test_mapper_carries_proposition_link_as_diagnostic_only(self) -> None:
+        ir = _ir(
+            propositions=[
+                {
+                    "id": "prop_owns_compass",
+                    "kind": "fact",
+                    "subject": "e1",
+                    "relation_concept": "ownership",
+                    "object": "e2",
+                    "polarity": "positive",
+                    "source_status": "direct_user_assertion",
+                    "temporal_scope": "current",
+                    "epistemic_status": "asserted",
+                    "commit_recommendation": "candidate",
+                    "confidence": 0.97,
+                }
+            ],
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "proposition_id": "prop_owns_compass",
+                    "predicate": "owns",
+                    "args": ["e1", "e2"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                }
+            ],
+        )
+
+        parsed, warnings = semantic_ir_to_legacy_parse(ir)
+
+        self.assertEqual(warnings, [])
+        self.assertEqual(parsed["facts"], ["owns(mara, silver_compass)."])
+        self.assertEqual(parsed["propositions"]["count"], 1)
+        operation = parsed["admission_diagnostics"]["operations"][0]
+        self.assertEqual(operation["proposition_id"], "prop_owns_compass")
+        self.assertEqual(operation["proposition"]["epistemic_status"], "asserted")
+
+    def test_speaker_or_source_contract_accepts_person_speaker(self) -> None:
+        ir = _ir(
+            entities=[
+                {
+                    "id": "e1",
+                    "surface": "Diane Cheng",
+                    "normalized": "Diane Cheng",
+                    "type": "person",
+                    "confidence": 0.99,
+                }
+            ],
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "proposition_id": "",
+                    "predicate": "statement_detail",
+                    "args": ["e1", "notice_lift_timing_belief", "thought_until_midnight"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                }
+            ],
+        )
+
+        parsed, warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=["statement_detail/3"],
+            predicate_contracts=[
+                {
+                    "signature": "statement_detail/3",
+                    "args": ["speaker_or_source", "detail_kind", "detail_value"],
+                }
+            ],
+        )
+
+        self.assertEqual(warnings, [])
+        self.assertEqual(
+            parsed["facts"],
+            ["statement_detail(diane_cheng, notice_lift_timing_belief, thought_until_midnight)."],
+        )
+
     def test_query_placeholder_args_become_variables(self) -> None:
         ir = _ir(
             decision="answer",

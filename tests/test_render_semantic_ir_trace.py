@@ -107,6 +107,21 @@ class RenderSemanticIRTraceTests(unittest.TestCase):
                         "certainty": 0.96,
                     }
                 ],
+                "propositions": [
+                    {
+                        "id": "prop_residence_correction",
+                        "kind": "correction",
+                        "subject": "e1",
+                        "relation_concept": "residence",
+                        "object": "e2",
+                        "polarity": "positive",
+                        "source_status": "direct_user_assertion",
+                        "temporal_scope": "current",
+                        "epistemic_status": "asserted",
+                        "commit_recommendation": "candidate",
+                        "confidence": 0.96,
+                    }
+                ],
                 "unsafe_implications": [],
                 "truth_maintenance": {
                     "support_links": [
@@ -162,6 +177,7 @@ class RenderSemanticIRTraceTests(unittest.TestCase):
                 "candidate_operations": [
                     {
                         "operation": "retract",
+                        "proposition_id": "prop_residence_correction",
                         "predicate": "lives_in",
                         "args": ["Mara", "London"],
                         "polarity": "negative",
@@ -170,6 +186,7 @@ class RenderSemanticIRTraceTests(unittest.TestCase):
                     },
                     {
                         "operation": "assert",
+                        "proposition_id": "prop_residence_correction",
                         "predicate": "lives_in",
                         "args": ["Mara", "Paris"],
                         "polarity": "positive",
@@ -205,6 +222,8 @@ class RenderSemanticIRTraceTests(unittest.TestCase):
         self.assertIn("Recorded model input / request envelope", rendered)
         self.assertIn("Exact chat messages sent to model", rendered)
         self.assertIn("Layer 2 - Parsed `semantic_ir_v1` Workspace", rendered)
+        self.assertIn("Propositions / Meaning Candidates", rendered)
+        self.assertIn("prop_residence_correction", rendered)
         self.assertIn("Layer 3 - Deterministic Mapper / Admission Gate", rendered)
         self.assertIn("Support / dependency links", rendered)
         self.assertIn("**Support / dependency links:**\n\n| op # | kind | role | support ref | confidence |", rendered)

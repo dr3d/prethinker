@@ -11,6 +11,7 @@ from scripts.run_domain_bootstrap_qa import (
 ROOT = Path(__file__).resolve().parents[1]
 OTTERS = ROOT / "datasets" / "story_worlds" / "otters_clockwork_pie"
 IRON_HARBOR = ROOT / "datasets" / "story_worlds" / "iron_harbor_water_crisis"
+BLACKTHORN = ROOT / "datasets" / "story_worlds" / "blackthorn_misconduct_case"
 
 
 def test_otters_story_world_bundle_is_complete() -> None:
@@ -212,3 +213,103 @@ def test_iron_harbor_traps_do_not_import_obvious_false_priors() -> None:
     assert "inspection(pier_7_chlorination_unit, luis_ferreira, '2026-01-28')" not in kb
     assert "source_claim(luis_ferreira, pier_7_inspection_date, '2026-01-28', retracted)." in kb
     assert "disclosure(diane_cheng, aware_of_pump_deterioration_feb_20" in kb
+
+
+def test_blackthorn_story_world_bundle_is_complete() -> None:
+    expected = {
+        "README.md",
+        "story.md",
+        "gold_kb.pl",
+        "gold_kb_notes.md",
+        "ontology_registry.json",
+        "failure_buckets.json",
+        "qa_source.md",
+        "qa.md",
+        "qa_battery.jsonl",
+        "qa_support_map.jsonl",
+        "intake_plan.md",
+        "progress_journal.md",
+        "progress_metrics.jsonl",
+    }
+
+    assert expected.issubset({path.name for path in BLACKTHORN.iterdir()})
+
+
+def test_blackthorn_qa_battery_is_harness_ready() -> None:
+    records = [
+        json.loads(line)
+        for line in (BLACKTHORN / "qa_battery.jsonl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    assert len(records) == 100
+    assert records[0]["id"] == "q001"
+    assert records[0]["source_id"] == "BT-001"
+    assert records[-1]["id"] == "q100"
+    assert records[-1]["source_id"] == "BT-100"
+    assert records[41]["expected_answer"].startswith("Yes")
+
+    qa_text = (BLACKTHORN / "qa.md").read_text(encoding="utf-8")
+    questions = parse_numbered_markdown_questions(qa_text)
+    answers = parse_markdown_answer_key(qa_text)
+    assert len(questions) == 100
+    assert len(answers) == 100
+    assert questions[0]["id"] == "q001"
+    assert "Elena Voss" in answers["q001"]
+
+
+def test_blackthorn_qa_support_map_is_harness_ready() -> None:
+    records = [
+        json.loads(line)
+        for line in (BLACKTHORN / "qa_support_map.jsonl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    assert len(records) == 20
+    assert records[0]["id"] == "q001"
+    assert records[-1]["id"] == "q020"
+    assert all(row.get("required_support_any") for row in records)
+    assert all(row.get("failure_classes") for row in records)
+    assert any("deadline_anchor_error" in row["failure_classes"] for row in records)
+    assert any("extension_authority_confusion" in row["failure_classes"] for row in records)
+
+
+def test_blackthorn_metadata_is_graph_ready() -> None:
+    buckets = json.loads((BLACKTHORN / "failure_buckets.json").read_text(encoding="utf-8"))
+    registry = json.loads((BLACKTHORN / "ontology_registry.json").read_text(encoding="utf-8"))
+    metrics = [
+        json.loads(line)
+        for line in (BLACKTHORN / "progress_metrics.jsonl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+
+    assert len(buckets["buckets"]) >= 10
+    assert any(item["id"] == "finding_sanction_collapse" for item in buckets["buckets"])
+    assert registry["source"] == "gold_kb.pl"
+    signatures = {item["signature"] for item in registry["predicates"]}
+    for signature in [
+        "person_role/2",
+        "committee_member/3",
+        "deadline_requirement/4",
+        "deadline_met/4",
+        "finding/4",
+        "sanction_modified/4",
+        "witness_claim/4",
+        "advisory_opinion/4",
+        "unresolved_question/2",
+        "before/2",
+    ]:
+        assert signature in signatures
+    assert [row["timestamp"] for row in metrics] == sorted(row["timestamp"] for row in metrics)
+
+
+def test_blackthorn_preserves_multilingual_and_epistemic_traps() -> None:
+    story = (BLACKTHORN / "story.md").read_text(encoding="utf-8")
+    kb = (BLACKTHORN / "gold_kb.pl").read_text(encoding="utf-8").casefold()
+
+    assert "Профессор Восс" in story
+    assert "Ich war an der Datenanalyse" in story
+    assert "両委員会の委員長として" in story
+    assert "finding(fsrb, misconduct_upheld, '2027-02-03', final)." in kb
+    assert "sanction_modified(fsrb, pi_suspension, 18_months, '2027-02-03')." in kb
+    assert "advisory_status(patricia_moynihan, not_university_position)." in kb
+    assert "unresolved_question(tanaka_reporting_obligation, rip_2024)." in kb
+    assert "correction(correction_1, inquiry_committee_membership, henrik_larsson, kenji_hayashi)." in kb

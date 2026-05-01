@@ -30,6 +30,7 @@ INTAKE_PLAN_CONTRACT: dict[str, Any] = {
             "focus": "",
             "operation_budget": "",
             "recommended_predicates": ["predicate_name/2"],
+            "coverage_goals": [""],
             "completion_policy": "",
         }
     ],
@@ -96,6 +97,7 @@ INTAKE_PLAN_JSON_SCHEMA: dict[str, Any] = {
                     "focus",
                     "operation_budget",
                     "recommended_predicates",
+                    "coverage_goals",
                     "completion_policy",
                 ],
                 "properties": {
@@ -104,6 +106,7 @@ INTAKE_PLAN_JSON_SCHEMA: dict[str, Any] = {
                     "focus": {"type": "string"},
                     "operation_budget": {"type": "string"},
                     "recommended_predicates": {"type": "array", "maxItems": 32, "items": {"type": "string"}},
+                    "coverage_goals": {"type": "array", "maxItems": 10, "items": {"type": "string"}},
                     "completion_policy": {"type": "string"},
                 },
             },
@@ -162,7 +165,19 @@ INTAKE_PLAN_GUIDANCE = (
     "before/after links, cause/consequence links, speech acts, subjective judgments, ownership/design relations, "
     "locations before/after events, and final-state facts. Do not encourage multiple near-synonym predicates for the "
     "same slot.\n"
-    "Every pass should say what it focuses on and what should be omitted or deferred when operation budget is limited.\n"
+    "When the source is a procedural investigation, misconduct case, disciplinary proceeding, appeal record, or "
+    "administrative case file, plan a procedural backbone rather than a summary. Include focused passes for roles and "
+    "organizational hierarchy, committee rosters and replacements, proceeding events, deadline requirements/outcomes, "
+    "findings and sanctions, witness/source claims, corrections/clarifications, advisory non-determinations, unresolved "
+    "questions, federal/external notices, financial dependencies, and temporal order when the source contains them.\n"
+    "For procedural sources, explicitly separate findings from sanctions, witness claims from findings, advisory "
+    "opinions from determinations, unresolved questions from answered policy questions, and corrected-away values from "
+    "current facts. These distinctions are usually what later QA will test.\n"
+    "Every pass should say what it focuses on, list explicit coverage_goals, and say what should be omitted or "
+    "deferred when operation budget is limited. A coverage goal is a row-class target such as: emit person_role rows "
+    "for every named case role; emit committee_member rows for each current roster member; emit deadline_requirement "
+    "and deadline_met pairs for each stated deadline; emit finding rows separately from sanction rows; emit "
+    "correction rows plus corrected-current facts.\n"
     "Python will only carry this plan forward; deterministic admission still owns writes."
 )
 
@@ -172,6 +187,7 @@ def build_intake_plan_messages(
     source_text: str,
     source_name: str = "",
     domain_hint: str = "",
+    candidate_profile_registry: dict[str, Any] | None = None,
 ) -> list[dict[str, str]]:
     payload = {
         "task": "Analyze raw source and emit intake_plan_v1 JSON only.",
@@ -181,10 +197,39 @@ def build_intake_plan_messages(
         "guidance": INTAKE_PLAN_GUIDANCE,
         "required_top_level_json_shape": INTAKE_PLAN_CONTRACT,
     }
+    if isinstance(candidate_profile_registry, dict) and candidate_profile_registry:
+        payload["candidate_profile_registry_v1"] = _compact_registry_for_intake(candidate_profile_registry)
+        payload["registry_policy"] = (
+            "The registry is vocabulary/context only, not facts and not authority. "
+            "When recommending predicates or coverage goals, prefer exact registry signatures that fit the source. "
+            "Do not invent alternate predicate names or arities when a registry signature already covers the row class."
+        )
     return [
         {"role": "system", "content": INTAKE_PLAN_SYSTEM},
         {"role": "user", "content": "INPUT_JSON:\n" + json.dumps(payload, ensure_ascii=False, indent=2)},
     ]
+
+
+def _compact_registry_for_intake(registry: dict[str, Any]) -> dict[str, Any]:
+    predicates: list[dict[str, Any]] = []
+    for item in registry.get("predicates", []) if isinstance(registry.get("predicates"), list) else []:
+        if not isinstance(item, dict):
+            continue
+        signature = str(item.get("signature", "")).strip()
+        if not signature:
+            continue
+        predicates.append(
+            {
+                "signature": signature,
+                "args": item.get("args", []) if isinstance(item.get("args"), list) else [],
+                "category": str(item.get("category", item.get("why", ""))).strip(),
+            }
+        )
+    return {
+        "fixture": str(registry.get("fixture", "")).strip(),
+        "purpose": str(registry.get("purpose", "")).strip(),
+        "predicates": predicates[:160],
+    }
 
 
 def parse_intake_plan_json(text: str) -> tuple[dict[str, Any] | None, str]:
@@ -250,9 +295,14 @@ def intake_plan_context(plan: dict[str, Any] | None) -> list[str]:
             for row in item.get("recommended_predicates", [])
             if str(row).strip()
         ) if isinstance(item.get("recommended_predicates"), list) else ""
+        goals = " | ".join(
+            str(row).strip()
+            for row in item.get("coverage_goals", [])
+            if str(row).strip()
+        ) if isinstance(item.get("coverage_goals"), list) else ""
         context.append(
             f"intake_pass: {pass_id}; purpose={purpose}; focus={focus}; budget={budget}; "
-            f"completion={policy}; predicates={predicates}"
+            f"completion={policy}; predicates={predicates}; coverage_goals={goals}"
         )
     for item in plan.get("risk_policy", []) if isinstance(plan.get("risk_policy"), list) else []:
         text = str(item).strip()

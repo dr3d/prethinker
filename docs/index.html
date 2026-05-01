@@ -137,6 +137,34 @@
       height: auto;
     }
 
+    .media-panel {
+      margin-top: 18px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: color-mix(in srgb, var(--panel) 94%, transparent);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .media-panel video {
+      display: block;
+      width: 100%;
+      max-height: 520px;
+      background: #050b13;
+    }
+
+    .media-caption {
+      padding: 12px 14px 14px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+      border-top: 1px solid var(--line);
+    }
+
+    .media-caption strong {
+      color: var(--ink);
+    }
+
     .hero strong { color: var(--ink); }
 
     .hero-actions {
@@ -383,6 +411,15 @@
         <a class="btn cool" href="https://github.com/dr3d/prethinker/blob/main/docs/EXPLAINER.md">Open Explainer</a>
         <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_RESEARCH_DIRECTION_REPORT.md">Open Semantic IR Report</a>
       </div>
+      <div class="media-panel">
+        <video controls preload="metadata" playsinline>
+          <source src="assets/Governed_Stenographer.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+        <div class="media-caption">
+          <strong>Governed Stenographer.</strong> A short visual pass at the current Prethinker idea: language can propose, but deterministic admission decides what becomes durable truth.
+        </div>
+      </div>
       <div class="jump">
         <a href="#status">Status</a>
         <a href="#start">Start Here</a>
@@ -394,7 +431,7 @@
       <div class="metrics">
         <div class="metric">
           <div class="k">Full Test Suite</div>
-          <div id="m-gate" class="v">394</div>
+          <div id="m-gate" class="v">354</div>
           <div class="hint">Latest local pytest pass count</div>
         </div>
         <div class="metric">
@@ -598,7 +635,7 @@
         <article class="card half">
           <span class="tag">Tests</span>
           <h3>Verification</h3>
-          <p>Latest lean full pytest suite: <strong>339 passed</strong> after retiring the legacy parser lane, unreachable JSON fixtures, the old clarification side surface, and parser-era family/social rewrite crutches. Lava v5 latest rerun: <strong>60/60</strong> admission-safe with <strong>0</strong> fuzzy edge kinds and <strong>0/60</strong> temp-0 signature variance groups.</p>
+          <p>Latest lean full pytest suite: <strong>354 passed</strong> after retiring the legacy parser lane, unreachable JSON fixtures, the old clarification side surface, and parser-era family/social rewrite crutches. Lava v5 latest rerun: <strong>60/60</strong> admission-safe with <strong>0</strong> fuzzy edge kinds and <strong>0/60</strong> temp-0 signature variance groups.</p>
         </article>
       </div>
     </section>

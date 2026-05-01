@@ -197,6 +197,12 @@
       "notes": "Records a source-attributed claim, initial statement, allegation, or retracted value without promoting it to objective fact."
     },
     {
+      "signature": "statement_detail/3",
+      "args": ["speaker_or_source", "detail_kind", "detail_value"],
+      "category": "claim",
+      "notes": "Records a queryable source-owned statement detail or explanation while preserving claim/statement status."
+    },
+    {
       "signature": "testing_interval/2",
       "args": ["operating_condition", "hours"],
       "category": "policy_interval",

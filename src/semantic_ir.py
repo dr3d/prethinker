@@ -40,6 +40,21 @@ SCHEMA_CONTRACT: dict[str, Any] = {
             "certainty": 0.0,
         }
     ],
+    "propositions": [
+        {
+            "id": "prop_1",
+            "kind": "fact|claim|observation|rule|query|correction|negation|hypothesis",
+            "subject": "e1",
+            "relation_concept": "",
+            "object": "e2",
+            "polarity": "positive|negative|unknown",
+            "source_status": "direct_user_assertion|speaker_claim|document_claim|context|inference|observation",
+            "temporal_scope": "timeless|current|bounded|event_relative|unknown",
+            "epistemic_status": "asserted|claimed|observed|inferred|hypothetical|ambiguous|contradicted",
+            "commit_recommendation": "candidate|quarantine|clarify|reject",
+            "confidence": 0.0,
+        }
+    ],
     "unsafe_implications": [
         {
             "candidate": "",
@@ -50,6 +65,7 @@ SCHEMA_CONTRACT: dict[str, Any] = {
     "candidate_operations": [
         {
             "operation": "assert|retract|rule|query|none",
+            "proposition_id": "prop_1",
             "predicate": "",
             "args": [],
             "clause": "ancestor(X, Y) :- parent(X, Y).",
@@ -168,7 +184,7 @@ SEMANTIC_IR_JSON_SCHEMA: dict[str, Any] = {
         },
         "entities": {
             "type": "array",
-            "maxItems": 64,
+            "maxItems": 8,
             "items": {
                 "type": "object",
                 "additionalProperties": False,
@@ -197,7 +213,7 @@ SEMANTIC_IR_JSON_SCHEMA: dict[str, Any] = {
         },
         "referents": {
             "type": "array",
-            "maxItems": 32,
+            "maxItems": 16,
             "items": {
                 "type": "object",
                 "additionalProperties": False,
@@ -212,7 +228,7 @@ SEMANTIC_IR_JSON_SCHEMA: dict[str, Any] = {
         },
         "assertions": {
             "type": "array",
-            "maxItems": 64,
+            "maxItems": 16,
             "items": {
                 "type": "object",
                 "additionalProperties": False,
@@ -229,7 +245,7 @@ SEMANTIC_IR_JSON_SCHEMA: dict[str, Any] = {
         },
         "unsafe_implications": {
             "type": "array",
-            "maxItems": 32,
+            "maxItems": 16,
             "items": {
                 "type": "object",
                 "additionalProperties": False,
@@ -241,15 +257,89 @@ SEMANTIC_IR_JSON_SCHEMA: dict[str, Any] = {
                 },
             },
         },
+        "propositions": {
+            "type": "array",
+            "maxItems": 64,
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": [
+                    "id",
+                    "kind",
+                    "subject",
+                    "relation_concept",
+                    "object",
+                    "polarity",
+                    "source_status",
+                    "temporal_scope",
+                    "epistemic_status",
+                    "commit_recommendation",
+                    "confidence",
+                ],
+                "properties": {
+                    "id": {"type": "string"},
+                    "kind": {
+                        "type": "string",
+                        "enum": [
+                            "fact",
+                            "claim",
+                            "observation",
+                            "rule",
+                            "query",
+                            "correction",
+                            "negation",
+                            "hypothesis",
+                        ],
+                    },
+                    "subject": {"type": "string"},
+                    "relation_concept": {"type": "string"},
+                    "object": {"type": "string"},
+                    "polarity": {"type": "string", "enum": ["positive", "negative", "unknown"]},
+                    "source_status": {
+                        "type": "string",
+                        "enum": [
+                            "direct_user_assertion",
+                            "speaker_claim",
+                            "document_claim",
+                            "context",
+                            "inference",
+                            "observation",
+                        ],
+                    },
+                    "temporal_scope": {
+                        "type": "string",
+                        "enum": ["timeless", "current", "bounded", "event_relative", "unknown"],
+                    },
+                    "epistemic_status": {
+                        "type": "string",
+                        "enum": [
+                            "asserted",
+                            "claimed",
+                            "observed",
+                            "inferred",
+                            "hypothetical",
+                            "ambiguous",
+                            "contradicted",
+                        ],
+                    },
+                    "commit_recommendation": {
+                        "type": "string",
+                        "enum": ["candidate", "quarantine", "clarify", "reject"],
+                    },
+                    "confidence": {"type": "number"},
+                },
+            },
+        },
         "candidate_operations": {
             "type": "array",
             "maxItems": 128,
             "items": {
                 "type": "object",
                 "additionalProperties": False,
-                "required": ["operation", "predicate", "args", "polarity", "source", "safety"],
+                "required": ["operation", "proposition_id", "predicate", "args", "polarity", "source", "safety"],
                 "properties": {
                     "operation": {"type": "string", "enum": ["assert", "retract", "rule", "query", "none"]},
+                    "proposition_id": {"type": "string"},
                     "predicate": {"type": "string"},
                     "args": {"type": "array", "items": {"type": "string"}},
                     "clause": {"type": "string"},
@@ -604,6 +694,9 @@ BEST_GUARDED_V2_GUIDANCE = (
     "- commit: direct state update or correction has a clear target and safe predicate mapping.\n"
     "Special guards:\n"
     "- Use compiler_strategy as the mental procedure before selecting predicates: establish source boundary, assertion status, entity value, predicate usefulness, repeated structure, and truth-maintenance implications.\n"
+    "- When useful, populate optional propositions[] before candidate_operations. A proposition is what the text appears to mean; a candidate_operation is what might be done with that meaning. Every candidate_operation must include proposition_id; use the matching proposition id when one exists, otherwise use an empty string.\n"
+    "- Use propositions[].source_status and propositions[].epistemic_status to preserve claim/fact/observation/hypothesis boundaries. Do not let a claim-shaped proposition become a fact-shaped operation unless the source context authorizes that promotion.\n"
+    "- Entities, assertions, propositions, truth_maintenance, and temporal_graph are audit/workspace aids. They must not crowd out candidate_operations. For dense source compilation, keep those audit arrays sparse or empty and put the durable/queryable work into candidate_operations using normalized atoms directly.\n"
     "- Completeness beats summary. For narrative ingestion, enumerate every concrete direct event/state that can be safely mapped to allowed predicates; do not compress a sequence into only the main plot points.\n"
     "- Source fidelity is mandatory. Durable candidate_operations must be grounded in the current utterance, provided context, selected domain_context, or kb_context_pack. Do not import names, aliases, roles, motives, or facts from general world knowledge, famous stories, common versions of tales, or likely background priors.\n"
     "- Normalize entity atoms only for spelling/case/spacing/plural cleanup, explicit aliases in the utterance/context/domain ontology, or KB-resolved identity. If the utterance says 'Little Wee Bear', do not write baby_bear unless the utterance/context explicitly says Little Wee Bear is Baby Bear. Keep the text-local name as little_wee_bear and list any tempting prior alias in self_check.notes or unsafe_implications instead of committing it.\n"
@@ -1141,6 +1234,7 @@ def semantic_ir_admission_diagnostics(
         contract_map=contract_map,
         contract_details=contract_details,
     )
+    propositions = _propositions_summary(ir_for_admission)
     truth_maintenance = _truth_maintenance_summary(ir_for_admission)
     temporal_graph = _temporal_graph_summary(ir_for_admission)
     epistemic_worlds = _epistemic_worlds_summary(
@@ -1175,6 +1269,7 @@ def semantic_ir_admission_diagnostics(
             for item in operations
             if isinstance(item, dict) and isinstance(item.get("admission_justification"), dict)
         ],
+        "propositions": propositions,
         "truth_maintenance": truth_maintenance,
         "temporal_graph": temporal_graph,
         "truth_maintenance_alignment": _truth_maintenance_alignment(
@@ -1271,6 +1366,7 @@ def semantic_ir_to_legacy_parse(
         "rationale": f"Mapped from semantic_ir_v1 decision={decision}; skipped={len(warnings)}",
         "admission_diagnostics": diagnostics,
         "clause_supports": diagnostics.get("clause_supports", {}),
+        "propositions": diagnostics.get("propositions", {}),
         "truth_maintenance": diagnostics.get("truth_maintenance", {}),
         "temporal_graph": diagnostics.get("temporal_graph", {}),
         "epistemic_worlds": diagnostics.get("epistemic_worlds", {}),
@@ -1278,6 +1374,50 @@ def semantic_ir_to_legacy_parse(
     if retracts:
         payload["correction_retract_clauses"] = retracts
     return payload, warnings
+
+
+def _propositions_summary(ir: dict[str, Any]) -> dict[str, Any]:
+    """Surface model-proposed proposition structure without authority."""
+    rows: list[dict[str, Any]] = []
+    raw = ir.get("propositions") if isinstance(ir, dict) else None
+    if not isinstance(raw, list):
+        raw = []
+    for item in raw:
+        if not isinstance(item, dict):
+            continue
+        prop_id = _bounded_text(item.get("id"), max_chars=120)
+        if not prop_id:
+            continue
+        rows.append(
+            {
+                "id": prop_id,
+                "kind": _bounded_text(item.get("kind"), max_chars=80),
+                "subject": _bounded_text(item.get("subject"), max_chars=160),
+                "relation_concept": _bounded_text(item.get("relation_concept"), max_chars=160),
+                "object": _bounded_text(item.get("object"), max_chars=160),
+                "polarity": _bounded_text(item.get("polarity"), max_chars=40),
+                "source_status": _bounded_text(item.get("source_status"), max_chars=80),
+                "temporal_scope": _bounded_text(item.get("temporal_scope"), max_chars=80),
+                "epistemic_status": _bounded_text(item.get("epistemic_status"), max_chars=80),
+                "commit_recommendation": _bounded_text(item.get("commit_recommendation"), max_chars=80),
+                "confidence": item.get("confidence"),
+            }
+        )
+    return {
+        "version": "semantic_ir_propositions_v1",
+        "authority": "proposal_only_candidate_operations_remain_authoritative",
+        "count": len(rows),
+        "items": rows,
+    }
+
+
+def _proposition_by_id(ir: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    summary = _propositions_summary(ir)
+    return {
+        str(item.get("id")): item
+        for item in summary.get("items", [])
+        if isinstance(item, dict) and str(item.get("id", "")).strip()
+    }
 
 
 def _temporal_graph_summary(ir: dict[str, Any]) -> dict[str, Any]:
@@ -1582,9 +1722,13 @@ def _diagnose_candidate_operation(
     polarity = str(op.get("polarity", "positive") or "positive").strip().lower()
     predicate = _predicate_name(op.get("predicate"))
     args = _operation_args(op.get("args"), entity_names=entity_names, for_query=operation == "query")
+    proposition_id = str(op.get("proposition_id") or "").strip()
+    proposition = _proposition_by_id(ir).get(proposition_id, {}) if proposition_id else {}
     base = {
         "index": index,
         "operation": operation,
+        "proposition_id": proposition_id,
+        "proposition": proposition,
         "predicate": predicate,
         "args": args,
         "polarity": polarity,
@@ -2745,7 +2889,7 @@ def _contract_role_kind(role: str) -> str:
     value = _atomize(role)
     if not value:
         return ""
-    if "speaker" in value and "document" in value:
+    if "speaker" in value and ("document" in value or "source" in value):
         return "person_or_document"
     if "interval" in value:
         return "interval"

@@ -1,6 +1,6 @@
 # Semantic IR v1 Prompt Contract
 
-Last updated: 2026-04-27
+Last updated: 2026-05-01
 
 `semantic_ir_v1` is the active intermediate representation for a stronger
 LLM semantic-workspace layer. The model does not write final Prolog and does not
@@ -55,6 +55,21 @@ clarify or quarantine.
       "certainty": 0.0
     }
   ],
+  "propositions": [
+    {
+      "id": "prop_1",
+      "kind": "fact|claim|observation|rule|query|correction|negation|hypothesis",
+      "subject": "e1",
+      "relation_concept": "",
+      "object": "e2",
+      "polarity": "positive|negative|unknown",
+      "source_status": "direct_user_assertion|speaker_claim|document_claim|context|inference|observation",
+      "temporal_scope": "timeless|current|bounded|event_relative|unknown",
+      "epistemic_status": "asserted|claimed|observed|inferred|hypothetical|ambiguous|contradicted",
+      "commit_recommendation": "candidate|quarantine|clarify|reject",
+      "confidence": 0.0
+    }
+  ],
   "unsafe_implications": [
     {
       "candidate": "",
@@ -65,6 +80,7 @@ clarify or quarantine.
   "candidate_operations": [
     {
       "operation": "assert|retract|rule|query|none",
+      "proposition_id": "prop_1",
       "predicate": "",
       "args": [],
       "clause": "",
@@ -127,6 +143,9 @@ clarify or quarantine.
   treatment-advice requests are `reject`, false/conflicting claims are
   `quarantine`, clear corrections can be `commit`, and mixed rule/query turns
   stay `mixed`.
+- `proposition_spine_v1`: optional v1-compatible bridge toward
+  `semantic_ir_v2`; the model may emit `propositions[]` for what the text
+  appears to mean, then link `candidate_operations[]` to those propositions.
 
 The current best candidate should be chosen by bad-commit behavior and
 clarification quality, not by raw verbosity.
@@ -179,6 +198,13 @@ Decision policy:
 Special guards:
 - Do not turn a claim into a fact. 'Bob says he has it' is a claim, not
   possession.
+- When useful, populate optional `propositions[]` before
+  `candidate_operations[]`. A proposition is meaning; a candidate operation is
+  a proposed effect. Every candidate operation includes `proposition_id`; use
+  the matching proposition id when one exists, otherwise use an empty string.
+- Preserve `source_status` and `epistemic_status` on propositions so claims,
+  observations, document claims, hypotheses, and direct assertions remain
+  distinct before mapper admission.
 - Do not infer diagnosis or staging from a single lab value request. Quarantine
   or clarify.
 - Do not infer allergy from nausea/vomiting alone. Clarify allergy vs side
@@ -332,17 +358,17 @@ kind of distinction the old Python rescue path struggled to express cleanly.
 
 ## Runtime Integration
 
-`semantic_ir_v1` is now available as an opt-in compiler path in the canonical
-runtime:
+`semantic_ir_v1` is the canonical compiler path in the current runtime:
 
 - `semantic_ir_enabled=true`
-- default semantic IR model: `qwen3.6:35b`
+- current development Semantic IR model: `qwen/qwen3.6-35b-a3b`
 - default controls: temperature `0.0`, top-p `0.82`, top-k `20`, thinking off
 
-When enabled, pre-think routing is projected from the semantic IR decision and
-the parse step maps safe `candidate_operations` directly into the legacy runtime
-parse shape. This intentionally bypasses the old parse-side English rescue chain.
-The deterministic gate still owns admission and execution.
+The router/context layer chooses the active profile, context modules, and
+actions. The compiler emits a semantic workspace, and the deterministic mapper
+projects safe `candidate_operations` into runtime mutations, queries, rules, or
+diagnostic worlds. The old parse-side English rescue chain is no longer part of
+the active path. The deterministic gate still owns admission and execution.
 
 Current mapper policy:
 
@@ -365,21 +391,24 @@ Rule-clause contract:
 - rule recognition without a `clause` remains useful semantic evidence, but it
   is not a durable rule mutation.
 
-Current structured-output schema limits live arrays to keep local models from
-looping or over-explaining:
+Current structured-output schema limits protect candidate-operation budget on
+long documents. Optional audit arrays are intentionally smaller than the write
+surface:
 
-- up to 12 entities;
-- up to 8 referents;
-- up to 8 assertions;
-- up to 8 unsafe implications;
-- up to 8 candidate operations;
-- up to 3 clarification questions;
-- up to 8 missing slots and 8 self-check notes.
+- up to 8 entities;
+- up to 16 referents;
+- up to 16 assertions;
+- up to 16 unsafe implications;
+- up to 64 propositions;
+- up to 128 candidate operations;
+- up to 6 clarification questions;
+- up to 8 missing slots and 12 self-check notes.
 
-The current prompt also tells the model to keep arrays compact, avoid repeated
-equivalent assertions, and choose clarification when ambiguous pronouns leave
-only a generic speech/container fact such as `told`, `said`, or `claimed` as a
-safe write.
+The current prompt also tells the model to keep audit arrays sparse for dense
+source compilation, avoid repeated equivalent assertions, and spend the budget
+on durable/queryable `candidate_operations` using normalized atoms directly. If
+safe direct facts exceed the schema cap, the model should mark
+`segment_required_for_complete_ingestion` instead of silently summarizing.
 
 ## LM Studio Structured Output Note
 

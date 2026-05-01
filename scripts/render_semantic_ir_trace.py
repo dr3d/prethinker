@@ -379,6 +379,30 @@ def _render_assertions(parsed: dict[str, Any]) -> list[str]:
     return _markdown_table(["kind", "subject", "relation", "object", "polarity", "certainty"], rows)
 
 
+def _render_propositions(parsed: dict[str, Any]) -> list[str]:
+    rows = []
+    for proposition in _as_list(parsed.get("propositions")):
+        if isinstance(proposition, dict):
+            rows.append(
+                [
+                    proposition.get("id", ""),
+                    proposition.get("kind", ""),
+                    proposition.get("source_status", ""),
+                    proposition.get("epistemic_status", ""),
+                    proposition.get("commit_recommendation", ""),
+                    proposition.get("relation_concept", ""),
+                    proposition.get("temporal_scope", ""),
+                    proposition.get("confidence", ""),
+                ]
+            )
+    if not rows:
+        return ["No explicit propositions emitted. Candidate operations are still interpreted through legacy assertions and truth-maintenance support."]
+    return _markdown_table(
+        ["id", "kind", "source", "epistemic", "recommendation", "relation", "temporal", "confidence"],
+        rows,
+    )
+
+
 def _render_unsafe(parsed: dict[str, Any]) -> list[str]:
     rows = []
     for item in _as_list(parsed.get("unsafe_implications")):
@@ -574,6 +598,7 @@ def _render_candidate_ops(parsed: dict[str, Any]) -> list[str]:
             rows.append(
                 [
                     index,
+                    op.get("proposition_id", ""),
                     op.get("operation", ""),
                     op.get("predicate", ""),
                     ", ".join(str(item) for item in _as_list(op.get("args"))),
@@ -585,7 +610,7 @@ def _render_candidate_ops(parsed: dict[str, Any]) -> list[str]:
             )
     if not rows:
         return ["No candidate operations proposed."]
-    return _markdown_table(["#", "op", "predicate", "args", "source", "safety", "polarity", "clause"], rows)
+    return _markdown_table(["#", "prop", "op", "predicate", "args", "source", "safety", "polarity", "clause"], rows)
 
 
 def _render_router_plan(record: dict[str, Any]) -> list[str]:
@@ -942,6 +967,9 @@ def _render_record(
     lines.extend(_render_referents(parsed))
     lines.append("")
     lines.extend(_render_assertions(parsed))
+    lines.append("")
+    lines.extend(["**Propositions / Meaning Candidates:**", ""])
+    lines.extend(_render_propositions(parsed))
     lines.append("")
     lines.extend(_render_unsafe(parsed))
     lines.append("")

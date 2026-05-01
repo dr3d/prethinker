@@ -56,6 +56,7 @@ be conservative in admission.
 | `entities` | Maps entity IDs to normalized terms | If an operation arg references `e1`, mapper resolves it through `entities`. |
 | `referents` | Exposes unresolved or ambiguous references | Ambiguous/unresolved referents become clarification ambiguities. |
 | `assertions` | High-level semantic evidence | Used for projection such as claim plus direct observation -> `mixed`. |
+| `propositions` | Optional v1-compatible meaning spine | Separates what the text appears to mean from what the model proposes to do with that meaning. Diagnostic only. |
 | `unsafe_implications` | Things the model considered but should not commit | Non-duplicate unsafe implications can project `commit` to `mixed`. |
 | `candidate_operations` | Only field that may produce clauses | Candidate operations still pass source/safety/polarity policy. |
 | `clarification_questions` | User-facing question source for `clarify` | First question is used when clarification is required. |
@@ -137,6 +138,15 @@ See [TEMPORAL_GRAPH_V1.md](https://github.com/dr3d/prethinker/blob/main/docs/TEM
 ## Operation Admission
 
 Only `candidate_operations` may become executable clauses.
+
+`propositions[]` are explicitly not an admission path. They are a thin bridge
+toward the `semantic_ir_v2` design: a proposition records what the model thinks
+the text means, while `candidate_operations[]` records what the model thinks
+could be done with that meaning. When a candidate operation contains
+`proposition_id`, mapper diagnostics carry the linked proposition through the
+trace, but the admission decision still depends only on structural operation
+policy, predicate contracts, source policy, safety, conflict gates, and runtime
+checks.
 
 | Operation condition | Mapper behavior | Why |
 | --- | --- | --- |

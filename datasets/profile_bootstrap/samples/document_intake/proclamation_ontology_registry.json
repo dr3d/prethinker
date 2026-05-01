@@ -1,0 +1,1078 @@
+{
+  "fixture": "proclamation_document_intake",
+  "predicates": [
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "added_ingredient/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "repeated_record_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "affected_group/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "affected_institution/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "repeated_record_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "affected_item/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "affected_ledger/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "affected_location/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "affected_object/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "affected_person/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "repeated_record_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "affected_role/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "repeated_record_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "ambiguity/2"
+    },
+    {
+      "args": [
+        "arg_1"
+      ],
+      "category": "epistemic_safety",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "ambiguous_alias/1"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2",
+        "arg_3"
+      ],
+      "category": "declaration_conclusion",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "appealed_to/3"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2",
+        "arg_3"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "appointed/3"
+    },
+    {
+      "args": [
+        "arg_1"
+      ],
+      "category": "entity_taxonomy",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "authority/1"
+    },
+    {
+      "args": [
+        "arg_1"
+      ],
+      "category": "entity_taxonomy",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "batch/1"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "derived_or_relationship",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "before/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "beyond/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "blocked_trade_with/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "buyer/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "epistemic_safety",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "candidate_identity/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "repeated_record_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "certified_temperature/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2",
+        "arg_3"
+      ],
+      "category": "epistemic_safety",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "claim_made/3"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "repeated_record_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "claimed_label/2"
+    },
+    {
+      "args": [
+        "arg_1"
+      ],
+      "category": "entity_taxonomy",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "colony/1"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "repeated_record_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "complainant/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "condition_claimed/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "condition_for/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2",
+        "arg_3"
+      ],
+      "category": "repeated_record_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "conflict_between_ledgers/3"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "consumer/2"
+    },
+    {
+      "args": [
+        "arg_1"
+      ],
+      "category": "entity_taxonomy",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "container/1"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "repeated_record_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "contrary_observation/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "principle_rule",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "declared_policy/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "declaration_conclusion",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "declares_impounded/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "declaration_conclusion",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "declares_recalled/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "source_metadata",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "declaring_body/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "repeated_record_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "departure_location/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "destination/2"
+    },
+    {
+      "args": [
+        "arg_1"
+      ],
+      "category": "source_metadata",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "document/1"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "source_metadata",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "document_type/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "duration/2"
+    },
+    {
+      "args": [
+        "arg_1"
+      ],
+      "category": "entity_taxonomy",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "equipment/1"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "explanation_given/2"
+    },
+    {
+      "args": [
+        "arg_1"
+      ],
+      "category": "entity_taxonomy",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "food_item/1"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "forbidden_activity/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "repeated_record_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "grievance/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "repeated_record_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "grievance_actor/2"
+    },
+    {
+      "args": [
+        "arg_1"
+      ],
+      "category": "entity_taxonomy",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "group/1"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "incident/2"
+    },
+    {
+      "args": [
+        "arg_1"
+      ],
+      "category": "entity_taxonomy",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "institution/1"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "invalid_certifier/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2",
+        "arg_3"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "invalid_serving/3"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2",
+        "arg_3"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "invalid_storage/3"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "label_text/2"
+    },
+    {
+      "args": [
+        "arg_1"
+      ],
+      "category": "entity_taxonomy",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "ledger/1"
+    },
+    {
+      "args": [
+        "arg_1"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "ledger_conflict/1"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "repeated_record_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "ledger_entry/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "less_than/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "location/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "repeated_record_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "measurement_device/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2",
+        "arg_3"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "minimum_separation/3"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "missing_identity/2"
+    },
+    {
+      "args": [
+        "arg_1"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "not_exoneration/1"
+    },
+    {
+      "args": [
+        "arg_1"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "not_fit_for_public_serving/1"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "principle_rule",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "not_fit_for_public_serving_until/2"
+    },
+    {
+      "args": [
+        "arg_1"
+      ],
+      "category": "epistemic_safety",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "not_objective_fact/1"
+    },
+    {
+      "args": [
+        "arg_1"
+      ],
+      "category": "entity_taxonomy",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "object/1"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "repeated_record_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "observation_location/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "repeated_record_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "observation_time/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "repeated_record_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "observed_temperature/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "repeated_record_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "observer_role/2"
+    },
+    {
+      "args": [
+        "arg_1"
+      ],
+      "category": "entity_taxonomy",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "organization/1"
+    },
+    {
+      "args": [
+        "arg_1"
+      ],
+      "category": "entity_taxonomy",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "person/1"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "person_role/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "petition_response/2"
+    },
+    {
+      "args": [
+        "arg_1"
+      ],
+      "category": "entity_taxonomy",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "place/1"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "declaration_conclusion",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "pledged/2"
+    },
+    {
+      "args": [
+        "arg_1"
+      ],
+      "category": "entity_taxonomy",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "polity/1"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "principle_rule",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "principle/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "principle_rule",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "principle_text/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2",
+        "arg_3"
+      ],
+      "category": "principle_rule",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "prohibits_serving_before/3"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "repeated_record_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "quantity/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "quantity_consumed/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "repeated_record_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "reason_claimed/2"
+    },
+    {
+      "args": [
+        "arg_1"
+      ],
+      "category": "declaration_conclusion",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "recalled_item/1"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "repeated_record_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "recorded_custodian/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "remaining_certifier/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2",
+        "arg_3"
+      ],
+      "category": "declaration_conclusion",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "reminded/3"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "repeated_record_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "removed_page/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "repeated_record_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "replacement_content/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "repeated_record_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "reported_observation/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "repeated_record_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "reported_symptom/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "required_surrender/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "principle_rule",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "requires_clearance_before_departure/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "principle_rule",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "requires_completion/2"
+    },
+    {
+      "args": [
+        "arg_1"
+      ],
+      "category": "principle_rule",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "requires_quarantine/1"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "principle_rule",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "requires_review/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "restriction_declared/2"
+    },
+    {
+      "args": [
+        "arg_1"
+      ],
+      "category": "entity_taxonomy",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "role/1"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "principle_rule",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "rule/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "principle_rule",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "rule_text/2"
+    },
+    {
+      "args": [
+        "arg_1"
+      ],
+      "category": "epistemic_safety",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "source_bound_claim/1"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "source_metadata",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "source_domain/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "repeated_record_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "stored_under/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "repeated_record_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "substituted_in/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "repeated_record_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "substituted_out/2"
+    },
+    {
+      "args": [
+        "arg_1"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "supports_quarantine/1"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "suspected_food/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "target_group/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "taxed_unit/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "repeated_record_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "temporal_condition/2"
+    },
+    {
+      "args": [
+        "arg_1"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "test_pressure/1"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "time_period/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "transported_through/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "epistemic_safety",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "unsafe_identity_commit/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "utterance_programmed/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "repeated_record_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "violated_rule/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2",
+        "arg_3"
+      ],
+      "category": "declaration_conclusion",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "warned/3"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "repeated_record_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "without_consent/2"
+    },
+    {
+      "args": [
+        "arg_1"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "without_napkin/1"
+    },
+    {
+      "args": [
+        "arg_1"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "without_notice/1"
+    },
+    {
+      "args": [
+        "arg_1"
+      ],
+      "category": "document_detail",
+      "notes": "Fixture/domain registry predicate; vocabulary only, not facts. Direct source support and mapper admission are still required.",
+      "signature": "without_vote/1"
+    }
+  ],
+  "purpose": "Narrow source-bound document-to-logic palette for proclamation/recall/grievance-list documents.",
+  "schema": "candidate_profile_registry_v1",
+  "source": "Curated predicate surface from proclamation.pl; vocabulary only, not facts."
+}

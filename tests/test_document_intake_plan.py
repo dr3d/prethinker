@@ -15,6 +15,17 @@ class DocumentIntakePlanTests(unittest.TestCase):
             source_text="We declare the harbor independent and list grievances.",
             source_name="declaration.md",
             domain_hint="declaration_style_document",
+            candidate_profile_registry={
+                "fixture": "declaration_fixture",
+                "purpose": "Document-intake vocabulary only.",
+                "predicates": [
+                    {
+                        "signature": "grievance/2",
+                        "args": ["record", "label"],
+                        "category": "repeated_records",
+                    }
+                ],
+            },
         )
 
         self.assertEqual(messages[0]["role"], "system")
@@ -28,6 +39,15 @@ class DocumentIntakePlanTests(unittest.TestCase):
         self.assertIn("Do not put a long list", messages[1]["content"])
         self.assertIn("source-record and reporting acts", messages[1]["content"])
         self.assertIn("epistemic status a first-class", messages[1]["content"])
+        self.assertIn("procedural investigation", messages[1]["content"])
+        self.assertIn("committee rosters and replacements", messages[1]["content"])
+        self.assertIn("advisory non-determinations", messages[1]["content"])
+        self.assertIn("corrected-away values", messages[1]["content"])
+        self.assertIn("coverage_goals", messages[1]["content"])
+        self.assertIn("row-class target", messages[1]["content"])
+        self.assertIn("candidate_profile_registry_v1", messages[1]["content"])
+        self.assertIn("registry_policy", messages[1]["content"])
+        self.assertIn("grievance/2", messages[1]["content"])
 
     def test_schema_is_strict_control_plane_object(self) -> None:
         self.assertEqual(INTAKE_PLAN_JSON_SCHEMA["type"], "object")
@@ -39,6 +59,7 @@ class DocumentIntakePlanTests(unittest.TestCase):
         self.assertFalse(family_schema["additionalProperties"])
         pass_schema = INTAKE_PLAN_JSON_SCHEMA["properties"]["pass_plan"]["items"]
         self.assertFalse(pass_schema["additionalProperties"])
+        self.assertIn("coverage_goals", pass_schema["required"])
 
     def test_parse_and_project_context(self) -> None:
         parsed, error = parse_intake_plan_json(
@@ -71,6 +92,7 @@ class DocumentIntakePlanTests(unittest.TestCase):
                             "focus": "document identity and speaker",
                             "operation_budget": "small",
                             "recommended_predicates": ["document/1", "document_type/2"],
+                            "coverage_goals": ["emit document identity and source type rows"],
                             "completion_policy": "always include",
                         }
                     ],
@@ -86,6 +108,7 @@ class DocumentIntakePlanTests(unittest.TestCase):
         self.assertTrue(any("source_claims_not_external_facts" in row for row in context))
         self.assertTrue(any("grievance/2" in row for row in context))
         self.assertTrue(any("pass_1" in row for row in context))
+        self.assertTrue(any("coverage_goals=emit document identity" in row for row in context))
         self.assertTrue(any("Do not collapse" in row for row in context))
 
 

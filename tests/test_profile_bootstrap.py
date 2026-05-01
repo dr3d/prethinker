@@ -46,9 +46,34 @@ class ProfileBootstrapTests(unittest.TestCase):
         self.assertIn("reporting/source actor", PROFILE_BOOTSTRAP_GUIDANCE)
         self.assertIn("epistemic-status/provenance predicate", PROFILE_BOOTSTRAP_GUIDANCE)
         self.assertIn("avoid unary relation-like forms", PROFILE_BOOTSTRAP_GUIDANCE)
+        self.assertIn("declaration, proclamation, manifesto", PROFILE_BOOTSTRAP_GUIDANCE)
+        self.assertIn("source metadata predicates", PROFILE_BOOTSTRAP_GUIDANCE)
+        self.assertIn("research-misconduct", PROFILE_BOOTSTRAP_GUIDANCE)
+        self.assertIn("proceeding_event/4", PROFILE_BOOTSTRAP_GUIDANCE)
         self.assertIn("source-record loss", PROFILE_BOOTSTRAP_REVIEW_GUIDANCE)
         self.assertIn("reporter loss", PROFILE_BOOTSTRAP_REVIEW_GUIDANCE)
         self.assertIn("conditional-rule loss", PROFILE_BOOTSTRAP_REVIEW_GUIDANCE)
+
+    def test_document_intake_registries_are_narrow_and_fact_free(self) -> None:
+        fixture_dir = Path("datasets/profile_bootstrap/samples/document_intake")
+        for registry_name, required in [
+            (
+                "declaration_ontology_registry.json",
+                {"document/1", "claim_made/3", "grievance/2", "method/2", "declares_status/3"},
+            ),
+            (
+                "proclamation_ontology_registry.json",
+                {"document/1", "principle/2", "grievance/2", "ledger_entry/2", "candidate_identity/2"},
+            ),
+        ]:
+            registry = json.loads((fixture_dir / registry_name).read_text(encoding="utf-8"))
+            self.assertEqual(registry["schema"], "candidate_profile_registry_v1")
+            self.assertIn("vocabulary only", registry["source"])
+            signatures = {item["signature"] for item in registry["predicates"]}
+            self.assertGreaterEqual(len(signatures), 40)
+            self.assertLessEqual(len(signatures), 130)
+            self.assertTrue(required.issubset(signatures))
+            self.assertFalse(any("fact" in item for item in registry["predicates"]))
 
     def test_profile_bootstrap_schema_is_strict_root_object(self) -> None:
         self.assertEqual(PROFILE_BOOTSTRAP_JSON_SCHEMA["type"], "object")

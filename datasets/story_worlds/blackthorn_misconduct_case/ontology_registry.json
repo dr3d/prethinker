@@ -1,0 +1,859 @@
+{
+  "fixture": "blackthorn_misconduct_case",
+  "predicates": [
+    {
+      "args": [
+        "source",
+        "detail"
+      ],
+      "category": "advisory_non_determination",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "advisory_detail/2"
+    },
+    {
+      "args": [
+        "source",
+        "topic",
+        "date",
+        "status"
+      ],
+      "category": "advisory_non_determination",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "advisory_opinion/4"
+    },
+    {
+      "args": [
+        "source",
+        "status"
+      ],
+      "category": "advisory_non_determination",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "advisory_status/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2",
+        "arg_3",
+        "arg_4"
+      ],
+      "category": "case_fact",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "allegation/4"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "case_fact",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "allegation_grant/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "case_fact",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "allegation_paper/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "case_fact",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "allegation_subject/2"
+    },
+    {
+      "args": [
+        "earlier",
+        "later"
+      ],
+      "category": "temporal_order",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "before/2"
+    },
+    {
+      "args": [
+        "clarification",
+        "topic",
+        "date"
+      ],
+      "category": "correction_clarification",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "clarification/3"
+    },
+    {
+      "args": [
+        "clarification",
+        "detail"
+      ],
+      "category": "correction_clarification",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "clarification_detail/2"
+    },
+    {
+      "args": [
+        "committee",
+        "person",
+        "institution"
+      ],
+      "category": "roles_and_organization",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "committee_institution/3"
+    },
+    {
+      "args": [
+        "committee",
+        "person",
+        "role"
+      ],
+      "category": "roles_and_organization",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "committee_member/3"
+    },
+    {
+      "args": [
+        "committee",
+        "removed_person",
+        "replacement_person",
+        "date"
+      ],
+      "category": "roles_and_organization",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "committee_member_replaced/4"
+    },
+    {
+      "args": [
+        "person",
+        "other_person",
+        "conflict_type",
+        "date"
+      ],
+      "category": "conflict_of_interest",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "conflict_of_interest/4"
+    },
+    {
+      "args": [
+        "person",
+        "other_person",
+        "publication",
+        "date"
+      ],
+      "category": "conflict_of_interest",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "conflict_publication/4"
+    },
+    {
+      "args": [
+        "person",
+        "committee",
+        "date"
+      ],
+      "category": "conflict_of_interest",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "conflict_recusal/3"
+    },
+    {
+      "args": [
+        "person",
+        "other_person",
+        "start",
+        "end"
+      ],
+      "category": "conflict_of_interest",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "conflict_window_active/4"
+    },
+    {
+      "args": [
+        "correction",
+        "field",
+        "old_value",
+        "new_value"
+      ],
+      "category": "correction_clarification",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "correction/4"
+    },
+    {
+      "args": [
+        "correction",
+        "detail"
+      ],
+      "category": "correction_clarification",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "correction_detail/2"
+    },
+    {
+      "args": [
+        "correction",
+        "date"
+      ],
+      "category": "correction_clarification",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "correction_filed/2"
+    },
+    {
+      "args": [
+        "requirement",
+        "start_date",
+        "actual_date",
+        "status"
+      ],
+      "category": "deadline_policy_and_compliance",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "deadline_met/4"
+    },
+    {
+      "args": [
+        "requirement",
+        "amount",
+        "unit",
+        "anchor"
+      ],
+      "category": "deadline_policy_and_compliance",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "deadline_requirement/4"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "financial_dependency",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "equipment/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2",
+        "arg_3"
+      ],
+      "category": "financial_dependency",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "equipment_book_value/3"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "financial_dependency",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "equipment_cost/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2",
+        "arg_3"
+      ],
+      "category": "financial_dependency",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "equipment_depreciation/3"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "financial_dependency",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "equipment_grant/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "financial_dependency",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "equipment_purchased/2"
+    },
+    {
+      "args": [
+        "arg_1"
+      ],
+      "category": "financial_dependency",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "equipment_reverts_to_department/1"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2",
+        "arg_3"
+      ],
+      "category": "financial_dependency",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "equipment_status/3"
+    },
+    {
+      "args": [
+        "stage",
+        "authority_role"
+      ],
+      "category": "rule_sketch",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "extension_authority/2"
+    },
+    {
+      "args": [
+        "agency",
+        "event",
+        "date"
+      ],
+      "category": "federal_reporting",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "federal_notification/3"
+    },
+    {
+      "args": [
+        "body",
+        "finding",
+        "date",
+        "status"
+      ],
+      "category": "finding_and_sanction_state",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "finding/4"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "finding_and_sanction_state",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "finding_detail/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2",
+        "arg_3"
+      ],
+      "category": "finding_and_sanction_state",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "finding_regarding/3"
+    },
+    {
+      "args": [
+        "arg_1"
+      ],
+      "category": "case_fact",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "fsrb_decision_final/1"
+    },
+    {
+      "args": [
+        "arg_1"
+      ],
+      "category": "case_fact",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "fsrb_may/1"
+    },
+    {
+      "args": [
+        "arg_1"
+      ],
+      "category": "case_fact",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "fsrb_rationale/1"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "financial_dependency",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "grant/2"
+    },
+    {
+      "args": [
+        "grant",
+        "amount",
+        "date"
+      ],
+      "category": "financial_dependency",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "grant_expended/3"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2",
+        "arg_3"
+      ],
+      "category": "financial_dependency",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "grant_expenditure_category/3"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2",
+        "arg_3"
+      ],
+      "category": "financial_dependency",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "grant_period/3"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "financial_dependency",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "grant_pi/2"
+    },
+    {
+      "args": [
+        "grant",
+        "amount",
+        "date"
+      ],
+      "category": "financial_dependency",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "grant_remaining/3"
+    },
+    {
+      "args": [
+        "grant",
+        "status",
+        "date"
+      ],
+      "category": "financial_dependency",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "grant_status/3"
+    },
+    {
+      "args": [
+        "grant",
+        "amount"
+      ],
+      "category": "financial_dependency",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "grant_total/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "case_fact",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "has_conflict/2"
+    },
+    {
+      "args": [
+        "minimum_size"
+      ],
+      "category": "rule_sketch",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "inquiry_minimum_size/1"
+    },
+    {
+      "args": [
+        "minimum_size"
+      ],
+      "category": "rule_sketch",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "investigation_minimum_size/1"
+    },
+    {
+      "args": [
+        "arg_1"
+      ],
+      "category": "rule_sketch",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "is_research_misconduct/1"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "case_fact",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "member/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2",
+        "arg_3",
+        "arg_4"
+      ],
+      "category": "case_fact",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "missing_notebook_pages/4"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2",
+        "arg_3"
+      ],
+      "category": "evidence_sequestration",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "missing_pages_discovered/3"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2",
+        "arg_3"
+      ],
+      "category": "evidence_sequestration",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "missing_pages_reported/3"
+    },
+    {
+      "args": [
+        "arg_1"
+      ],
+      "category": "rule_sketch",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "not_research_misconduct/1"
+    },
+    {
+      "args": [
+        "organization",
+        "person",
+        "role"
+      ],
+      "category": "roles_and_organization",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "org_head/3"
+    },
+    {
+      "args": [
+        "parent_org",
+        "child_org",
+        "relation_type"
+      ],
+      "category": "roles_and_organization",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "org_hierarchy/3"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "paper_record",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "paper/2"
+    },
+    {
+      "args": [
+        "paper",
+        "author"
+      ],
+      "category": "paper_record",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "paper_author/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "paper_record",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "paper_doi/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "paper_record",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "paper_journal/2"
+    },
+    {
+      "args": [
+        "paper",
+        "status",
+        "date"
+      ],
+      "category": "paper_record",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "paper_status/3"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2",
+        "arg_3",
+        "arg_4"
+      ],
+      "category": "paper_record",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "paper_volume/4"
+    },
+    {
+      "args": [
+        "person",
+        "department"
+      ],
+      "category": "roles_and_organization",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "person_department/2"
+    },
+    {
+      "args": [
+        "person",
+        "role"
+      ],
+      "category": "roles_and_organization",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "person_role/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2",
+        "arg_3",
+        "arg_4"
+      ],
+      "category": "case_fact",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "prior_complaint/4"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "case_fact",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "prior_complaint_action/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "case_fact",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "prior_complaint_disputed/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "case_fact",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "prior_complaint_subject/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2",
+        "arg_3",
+        "arg_4"
+      ],
+      "category": "case_fact",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "proceeding_event/4"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "paper_record",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "retraction_initiated_by/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "paper_record",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "retraction_reason/2"
+    },
+    {
+      "args": [
+        "body",
+        "sanction",
+        "value",
+        "date"
+      ],
+      "category": "finding_and_sanction_state",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "sanction/4"
+    },
+    {
+      "args": [
+        "body",
+        "sanction",
+        "value",
+        "date"
+      ],
+      "category": "finding_and_sanction_state",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "sanction_modified/4"
+    },
+    {
+      "args": [
+        "body",
+        "sanction",
+        "value",
+        "date"
+      ],
+      "category": "finding_and_sanction_state",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "sanction_upheld/4"
+    },
+    {
+      "args": [
+        "scope_or_grant",
+        "date",
+        "custodian"
+      ],
+      "category": "evidence_sequestration",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "sequestration/3"
+    },
+    {
+      "args": [
+        "scope_or_grant",
+        "custody"
+      ],
+      "category": "evidence_sequestration",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "sequestration_custody/2"
+    },
+    {
+      "args": [
+        "scope_or_grant",
+        "thing"
+      ],
+      "category": "evidence_sequestration",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "sequestration_scope/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2",
+        "arg_3"
+      ],
+      "category": "financial_dependency",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "subgrant/3"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "financial_dependency",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "subgrant_amount/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "financial_dependency",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "subgrant_expended/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "financial_dependency",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "subgrant_inherits_status/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "financial_dependency",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "subgrant_purpose/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2"
+      ],
+      "category": "financial_dependency",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "subgrant_remaining/2"
+    },
+    {
+      "args": [
+        "arg_1",
+        "arg_2",
+        "arg_3"
+      ],
+      "category": "financial_dependency",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "subgrant_status/3"
+    },
+    {
+      "args": [
+        "question",
+        "policy"
+      ],
+      "category": "unresolved_question",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "unresolved_question/2"
+    },
+    {
+      "args": [
+        "question",
+        "destination"
+      ],
+      "category": "unresolved_question",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "unresolved_question_referred/2"
+    },
+    {
+      "args": [
+        "question",
+        "status"
+      ],
+      "category": "unresolved_question",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "unresolved_question_status/2"
+    },
+    {
+      "args": [
+        "speaker",
+        "claim",
+        "subject",
+        "speaker_role"
+      ],
+      "category": "witness_claim_epistemics",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "witness_claim/4"
+    }
+  ],
+  "purpose": "Procedural research-misconduct investigation benchmark: policy deadlines, authority chains, findings, sanctions, corrections, witness claims, advisory non-determinations, financial dependencies, and unresolved questions.",
+  "schema": "candidate_profile_registry_v1",
+  "source": "gold_kb.pl"
+}
