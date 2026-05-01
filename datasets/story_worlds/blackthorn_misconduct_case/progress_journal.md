@@ -395,3 +395,190 @@ The right abstraction is not more prose guidance and not Python reading the
 source. It is a narrower LLM proposal schema for focused source passes, followed
 by the existing mapper firewall. The next move is to study the skipped
 operations and tighten row-class/argument contracts without reducing breadth.
+
+## BTC-016 - Source-Boundary Correction High-Water
+
+- Timestamp: `2026-05-01T05:40:06Z`
+- Compile artifact: `tmp/domain_bootstrap_file/domain_bootstrap_file_20260501T054006460252Z_story_qwen-qwen3-6-35b-a3b.json`
+- QA artifact: `tmp/domain_bootstrap_qa/domain_bootstrap_qa_20260501T054324965775Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Support artifact: `tmp/story_world_support/20260501T054337952383Z_domain_bootstrap_file_20260501T054006460252Z_story_qwen-qwen3-6-35b-a3b_support.json`
+
+### Headline
+
+The skipped-operation audit exposed a clean source-boundary bug in the context
+choreography: one focused pass was correctly proposing committee/procedural rows
+but marking them `source=context`, so the mapper correctly blocked them as
+context-sourced writes. Making the source policy explicit moved Blackthorn to
+`190` admitted operations, only `3` skipped operations, expected-signature recall
+`0.719`, and first-20 QA `15 exact / 2 partial / 3 miss`.
+
+### What Improved
+
+The authority boundary held. The LLM was not given write authority; it was told
+that `raw_source_text` is the direct source document being compiled, while the
+profile, registry, intake plan, ledger, and guidance are context guidance only.
+Once the model labeled source-grounded operations as `source=direct`, the normal
+mapper admitted the rows.
+
+Support diagnostics also jumped: loose predicate/arity support reached `20/20`,
+loose query-signature matches reached `35/37`, and exact support rose to `3/20`.
+The remaining first-20 misses concentrated around initial allegation timing
+(`q007`-`q009`) and temporal/deadline explanation detail (`q017`-`q018`).
+
+### Lesson
+
+This is the strongest Blackthorn evidence so far for the architecture: one
+sentence of context-boundary correction unlocked real rows without weakening the
+mapper. The model proposes; the mapper still decides. The next hard edge is not
+admission safety, but making the compiled procedural surface consistently expose
+date-bearing allegation/reporting rows and duration support.
+
+### Full-100 Follow-Up
+
+- QA artifact: `tmp/domain_bootstrap_qa/domain_bootstrap_qa_20260501T063746842876Z_qa_qwen-qwen3-6-35b-a3b.json`
+
+Running the BTC-016 compiled KB across all 100 Blackthorn QA probes produced
+`73 exact / 6 partial / 21 miss`, with `100/100` parsed QA workspaces,
+`100/100` query rows, `0` runtime load errors, and `0` write proposals during
+QA. The remaining misses cluster around initial allegation timing, duration and
+deadline explanation, conflict-window policy, finance/equipment consequences,
+prior-concern dispute tracking, chronological stage summaries, and multilingual
+witness-statement counting.
+
+## BTC-017 - Wider Focused Target Tradeoff
+
+- Timestamp: `2026-05-01T05:51:20Z`
+- Compile artifact: `tmp/domain_bootstrap_file/domain_bootstrap_file_20260501T055120274404Z_story_qwen-qwen3-6-35b-a3b.json`
+- QA artifact: `tmp/domain_bootstrap_qa/domain_bootstrap_qa_20260501T055445255894Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Support artifact: `tmp/story_world_support/20260501T055501408590Z_domain_bootstrap_file_20260501T055120274404Z_story_qwen-qwen3-6-35b-a3b_support.json`
+
+### Headline
+
+Increasing the focused-pass target to `64` operations produced a cleaner compile
+surface, `199` admitted operations, `0` skipped operations, expected-signature
+recall `0.742`, and exact support `5/20`, but first-20 QA stayed essentially
+flat at `15 exact / 1 partial / 4 miss`.
+
+### Lesson
+
+More admitted rows are not automatically better. Once loose support is already
+`20/20`, the bottleneck shifts to exact row shape and QA query use. This run
+improved structural coverage but did not beat BTC-016's first-20 answer quality.
+
+## BTC-018 - Contract-Order Migration Regression
+
+- Timestamp: `2026-05-01T06:02:00Z`
+- Compile artifact: `tmp/domain_bootstrap_file/domain_bootstrap_file_20260501T060200860082Z_story_qwen-qwen3-6-35b-a3b.json`
+- QA artifact: `tmp/domain_bootstrap_qa/domain_bootstrap_qa_20260501T060528440033Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Support artifact: `tmp/story_world_support/20260501T060546434902Z_domain_bootstrap_file_20260501T060200860082Z_story_qwen-qwen3-6-35b-a3b_support.json`
+
+### Headline
+
+Hardening several vague `arg_1`/`arg_2` registry contracts into meaningful slot
+names was architecturally appealing but regressed the benchmark to
+`10 exact / 3 partial / 7 miss`.
+
+### Lesson
+
+Predicate contracts matter, but changing argument meaning after a fixture has
+already developed compile/query habits is a migration, not a tuning knob. Future
+contract hardening should be introduced as a versioned profile change with a
+paired QA-query migration, not mixed into an active score run.
+
+## BTC-019 - Row-Class Floor Regression
+
+- Timestamp: `2026-05-01T06:10:39Z`
+- Compile artifact: `tmp/domain_bootstrap_file/domain_bootstrap_file_20260501T061039014208Z_story_qwen-qwen3-6-35b-a3b.json`
+- QA artifact: `tmp/domain_bootstrap_qa/domain_bootstrap_qa_20260501T061357936120Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Support artifact: `tmp/story_world_support/20260501T061412785657Z_domain_bootstrap_file_20260501T061039014208Z_story_qwen-qwen3-6-35b-a3b_support.json`
+
+### Headline
+
+Adding an explicit procedural allegation row-class floor preserved compile
+breadth (`190` admitted, `0` skipped, recall `0.742`) but regressed first-20 QA
+to `14 exact / 1 partial / 5 miss`.
+
+### Lesson
+
+Broad row-class floors can distract the model when the immediate bottleneck is
+exact support for a few early procedural questions. The row-class-floor idea is
+still likely useful, but it should be tested in narrower pass plans rather than
+added as global prose pressure.
+
+## BTC-020 - Intake Planner Allegation-Pass Regression
+
+- Timestamp: `2026-05-01T06:20:17Z`
+- Compile artifact: `tmp/domain_bootstrap_file/domain_bootstrap_file_20260501T062017942835Z_story_qwen-qwen3-6-35b-a3b.json`
+
+### Headline
+
+Adding a generic procedural instruction for the intake planner to allocate an
+initiating allegation/reporting pass caused compile breadth to collapse to `93`
+admitted operations, `6` skipped operations, and expected-signature recall
+`0.539`, so the run was not advanced to QA.
+
+### Lesson
+
+The missing initial allegation rows should probably be solved by a narrower
+pass-local refinement or a second-stage planner, not by forcing the top-level
+planner to add another broad pass inside the same `max-plan-passes` budget. The
+best current default remains BTC-016's source-boundary correction.
+
+## BTC-021 - Deadline Query-Planning Lift
+
+- Timestamp: `2026-05-01T12:12:57Z`
+- Compile artifact: `tmp/domain_bootstrap_file/domain_bootstrap_file_20260501T054006460252Z_story_qwen-qwen3-6-35b-a3b.json`
+- QA artifact: `tmp/domain_bootstrap_qa/domain_bootstrap_qa_20260501T121257287411Z_qa_qwen-qwen3-6-35b-a3b.json`
+
+### Headline
+
+Using the BTC-016 compiled KB, a narrow post-ingestion QA strategy update moved
+the full-100 score from `73 exact / 6 partial / 21 miss` to
+`75 exact / 4 partial / 21 miss`, with `100/100` parsed QA workspaces,
+`100/100` query rows, `0` runtime load errors, and `0` write proposals.
+
+### What Changed
+
+The retained guidance is intentionally small and generic: for duration/deadline
+questions, prefer an existing `deadline_met(Phase, StartDate, EndDate, Status)`
+row plus `elapsed_days(StartDate, EndDate, Days)` when that row represents the
+asked phase. This prevents the QA planner from computing durations from two
+start-event rows when the compiled KB already contains a source-grounded
+deadline/completion row.
+
+The deterministic temporal subset fallback also remains in the runtime query
+path. It recovers when an otherwise valid temporal helper query is
+over-constrained by a previous structured query that binds a date surface
+differently from the admitted deadline row.
+
+### Result Movement
+
+Compared with BTC-016 full-100, the run converted:
+
+- `q009` allegation filing timeframe from `miss` to `exact`.
+- `q017` inquiry duration from `partial` to `exact`.
+- `q036` FSRB decision from `miss` to `exact`.
+- `q059` federal-grant equipment disposition from `miss` to `exact`.
+
+It also exposed two unstable query-planning edges:
+
+- `q077` federal agency authority moved from `partial` to `miss` because the KB
+  still lacks an explicit authority/independent-review predicate.
+- `q080` FSRB final appealability moved from `exact` to `miss` in the retained
+  run because the planner chose deadline rows instead of final-status finding
+  rows. A proposed finality/appealability guidance line recovered `q080` in a
+  slice test but caused broader regressions, so it was not kept.
+
+### Lesson
+
+Blackthorn's current frontier is now split cleanly:
+
+- Compile/support gaps: initial allegation dates, conflict-window policy,
+  Petrova-specific findings, federal-agency authority, and finality rules need
+  better admitted source surface.
+- Query-planning gaps: duration/deadline questions benefit from a small
+  generic strategy rule, but broader procedural-finality guidance is too
+  disruptive unless the compile surface provides a clearer finality predicate.
+
+This is useful progress because it separates source ingestion work from
+post-ingestion reasoning work without adding Python prose interpretation.

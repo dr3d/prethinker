@@ -16,6 +16,7 @@ import time
 import urllib.error
 import urllib.request
 from datetime import datetime, timezone
+from itertools import combinations
 from pathlib import Path
 from typing import Any
 
@@ -95,6 +96,7 @@ POST_INGESTION_QA_QUERY_STRATEGY: dict[str, Any] = {
         "For questions using phrases such as revert to normal, take effect, interval ended, interval began, chronological sequence, or key authorization and notice events, include explicit state-event predicates such as contamination_advisory(triggered, StartTime) and contamination_advisory(lifted, EndTime) when those predicates exist. Interval-duration rows alone do not answer when the interval begins or ends.",
         "For omission and set-difference questions such as 'which required X did not receive Y', 'which X was omitted', or 'was Y issued to all required X', emit paired query operations: first the required/scope set with a shared variable, then the absent-side predicate with polarity='negative' and the same variable. Example operations: query residential_zone(Zone) polarity positive; query boil_water_notice(Zone, Time, Issuer) polarity negative. Do not emit the second operation as a positive query when the question asks for missing or omitted rows.",
         "For policy-condition questions, retrieve both the governing policy rows and the observed event/measurement rows. Threshold, count, interval, and deadline predicates are answer-bearing evidence, not optional decoration.",
+        "For duration/deadline questions, prefer an existing deadline_met(Phase, StartDate, EndDate, Status) row plus elapsed_days(StartDate, EndDate, Days) when that row represents the asked phase. Do not compute a duration from two start-event rows when the compiled KB has a deadline_met row for the report, completion, or decision being asked about.",
         "When a question asks what must happen, who must authorize, what conditions apply, what requirement governs, or what the rule says, query policy_requirement/3 and dedicated rule predicates such as bypass_requires_joint/2 or bypass_inspection_validity_days/1 before querying observed event rows such as bypass_authorization/3. Observed event rows answer what happened; policy rows answer what was required.",
         "For questions asking whether one role or person can authorize alone, query the governing joint/role requirement such as bypass_requires_joint(RoleA, RoleB) and person_role(Person, Role). Do not answer from person_role/2 alone; identity is not authorization.",
         "For questions about what additional requirement, validity condition, or prerequisite applies to Harbor Master bypass authorization, query bypass_inspection_validity_days(Days), inspection(Pier7Unit, HarborMaster, Date), and policy_requirement(Bylaw, harbor_master_inspection, Requirement) if available. Do not answer that question from bypass_requires_joint/2 alone; joint authorization is the base requirement, not the additional validity condition.",
@@ -728,6 +730,55 @@ def _temporal_join_with_previous(
             },
             "derived_from_queries": derived_from,
         }
+    subset_join = _temporal_subset_join(
+        runtime,
+        selected=selected,
+        query_for_join=query_for_join,
+        derived_query=query,
+    )
+    if subset_join is not None:
+        return subset_join
+    return None
+
+
+def _temporal_subset_join(
+    runtime: CorePrologRuntime,
+    *,
+    selected: list[str],
+    query_for_join: str,
+    derived_query: str,
+) -> dict[str, Any] | None:
+    """Recover when an extra prior temporal query over-constrains a helper.
+
+    The LLM sometimes emits both an event row and a deadline row with the same
+    variable name, but the compiled KB may use different date atom surfaces in
+    those predicates. The full conjunctive join then fails even though a smaller
+    symbolic support bundle is sufficient. This is query execution over already
+    admitted clauses, not prose interpretation.
+    """
+
+    if len(selected) < 2:
+        return None
+    seen: set[str] = set()
+    for size in range(len(selected) - 1, 0, -1):
+        for subset in combinations(selected, size):
+            joined = f"{', '.join(item.rstrip('. ') for item in subset)}, {query_for_join}"
+            if joined in seen:
+                continue
+            seen.add(joined)
+            result = runtime.query_rows(joined)
+            if result.get("status") == "success":
+                return {
+                    "query": joined,
+                    "result": {
+                        **result,
+                        "reasoning_basis": {
+                            "kind": "core-local",
+                            "note": "temporal helper support query recovered by dropping an over-constraining prior query",
+                        },
+                    },
+                    "derived_from_queries": [*subset, derived_query],
+                }
     return None
 
 

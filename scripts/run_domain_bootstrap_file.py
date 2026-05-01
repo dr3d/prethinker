@@ -1036,6 +1036,9 @@ def _compile_source_pass_ops(
             "Emit only candidate_operations. Do not emit entities, assertions, propositions, temporal_graph, or truth_maintenance here.",
             "Use exact allowed predicate names and argument order from predicate_contracts.",
             "Put stable normalized atoms directly in candidate_operations args.",
+            "Source field policy: raw_source_text is the direct source document being compiled. For candidate_operations grounded in raw_source_text, set source='direct'.",
+            "Do not mark source-file facts as source='context'. The profile, registry, intake plan, ledger, and guidance_context are context guidance only; context-sourced write operations are blocked by the mapper.",
+            "Use source='context' only when an operation is derived solely from supplied context rather than from raw_source_text, and expect that operation not to become durable truth.",
             "Do not add facts not present in the source text.",
             "If the pass has more support than fits, choose row-class floor operations first and list segment_required_for_complete_ingestion in self_check.missing_slots.",
         ],
@@ -1050,6 +1053,7 @@ def _compile_source_pass_ops(
                     "content": (
                         "You are a focused source-pass operation compiler for a governed symbolic memory system. "
                         "You do not decide truth and you do not mutate the KB. "
+                        "The supplied raw_source_text is direct evidence for this compile; context guidance is not evidence. "
                         "Emit only source_pass_ops_v1 JSON; the deterministic mapper will decide admission."
                     ),
                 },
@@ -1087,6 +1091,7 @@ def _compile_source_pass_ops(
         "admitted_count": int(diagnostics.get("admitted_count", 0) or 0),
         "skipped_count": int(diagnostics.get("skipped_count", 0) or 0),
         "warnings": warnings,
+        "admission_diagnostics": diagnostics,
         "facts": mapped.get("facts", []),
         "rules": mapped.get("rules", []),
         "queries": mapped.get("queries", []),

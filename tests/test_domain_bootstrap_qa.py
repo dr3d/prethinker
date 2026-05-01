@@ -236,6 +236,29 @@ def test_temporal_join_supports_elapsed_days_for_inspection_windows() -> None:
     assert any(str(row.get("Days")) == "31" for row in joined["result"]["rows"])
 
 
+def test_temporal_join_recovers_from_overconstrained_date_surface() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "proceeding_event(inquiry_committee_first_meeting, february_10_2026, inquiry_committee, first_meeting).",
+        "deadline_met(inquiry_report, 2026_02_10, 2026_04_25, yes).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    joined = _temporal_join_with_previous(
+        runtime,
+        previous_queries=[
+            "proceeding_event(inquiry_committee_first_meeting, Starttime, inquiry_committee, first_meeting).",
+            "deadline_met(inquiry_report, Starttime, Endtime, Status).",
+        ],
+        query="elapsed_days(Starttime, Endtime, Elapseddays).",
+    )
+
+    assert joined is not None
+    assert joined["result"]["status"] == "success"
+    assert "over-constraining prior query" in joined["result"]["reasoning_basis"]["note"]
+    assert any(str(row.get("Elapseddays")) == "74" for row in joined["result"]["rows"])
+
+
 def test_negative_query_join_supports_set_difference() -> None:
     runtime = CorePrologRuntime(max_depth=200)
     for fact in [
