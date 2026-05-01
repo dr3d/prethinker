@@ -582,3 +582,86 @@ Blackthorn's current frontier is now split cleanly:
 
 This is useful progress because it separates source ingestion work from
 post-ingestion reasoning work without adding Python prose interpretation.
+
+## BTC-022 - Procedural Surface Maturation
+
+- Timestamp: `2026-05-01T14:40:58Z`
+- Compile artifact: `tmp/domain_bootstrap_file/domain_bootstrap_file_20260501T134756047982Z_story_qwen-qwen3-6-35b-a3b.json`
+- QA artifact: `tmp/domain_bootstrap_qa/domain_bootstrap_qa_20260501T144058931677Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Support artifact: `tmp/story_world_support/20260501T134816111146Z_domain_bootstrap_file_20260501T134756047982Z_story_qwen-qwen3-6-35b-a3b_support.json`
+
+### Headline
+
+Blackthorn reached a new full-100 high-water mark:
+`82 exact / 9 partial / 9 miss`, with `100/100` parsed QA workspaces,
+`100/100` query rows, `0` runtime load errors, and `0` write proposals.
+The compile used `246` admitted operations, `0` skipped operations, and
+expected-signature recall `0.876`.
+
+### What Changed
+
+This run matured the procedural profile rather than adding Python language
+handling. The profile gained two narrow predicates for source-stated policy
+surface:
+
+- `federal_agency_authority/2`
+- `fsrb_decision_effect/2`
+
+The procedural compiler context also gained explicit pressure to preserve:
+
+- FSRB finality, sanction rationale, and sanction effective timing.
+- Federal independent-review authority and federal reporting consequences.
+- Conflict windows and corrected publication dates.
+- Prior complaints and unresolved/deferred reporting questions.
+- Title aliases as roles rather than person-atom prefixes.
+
+The QA planner gained two narrow distinctions:
+
+- Actual FSRB decision questions should query `finding`, `sanction`,
+  `sanction_modified`, `sanction_upheld`, and `fsrb_rationale` rather than
+  treating `fsrb_decision_effect/2` as the decision itself.
+- Counterfactual FSRB-overturn questions should query standing policy
+  consequences such as federal notification and expungement deadlines rather
+  than actual sanction rows from the source outcome.
+
+### Result Movement
+
+Compared with BTC-021 (`75 / 4 / 21`), BTC-022 converted major misses:
+
+- `q007` and `q008`: initial discovery/reporting dates.
+- `q026`: conflict-of-interest window.
+- `q030`: investigation duration.
+- `q033`: Petrova-specific investigation finding/non-finding support.
+- `q038`: FSRB suspension-reduction rationale.
+- `q047`: sequestration custody.
+- `q070` and `q071`: October 2025 prior-concern dispute.
+- `q090`: chronological proceeding stages.
+
+The run also exposed remaining tradeoffs:
+
+- `q019` inquiry-extension rationale and `q043` inquiry lateness regressed.
+- `q077` federal independent authority and `q080` FSRB finality remain misses
+  because the compile still does not reliably preserve those exact rows.
+- `q096` witness-statement count became partial; multilingual/language-count
+  support remains a weak edge.
+
+### Negative Experiment
+
+Hardening `proceeding_event/4` from vague `arg_1..arg_4` slots into a meaningful
+`case_or_proceeding/event_type/date/actor_or_authority` contract collapsed a
+compile to only `32` admitted operations and recall `0.146`. The change was
+reverted. This confirms the earlier lesson: contract hardening is a profile
+migration that needs a paired compiler/query migration, not a tuning knob inside
+an active benchmark run.
+
+### Lesson
+
+The strongest lever was not broader prose guidance. It was giving the profile
+named surfaces for source-stated procedural concepts, then telling the model
+which epistemic layer those concepts belong to. Blackthorn is now bottlenecked
+less by admission and more by:
+
+- stable event/date contract migration,
+- federal/finality policy surface,
+- witness-language counting,
+- and exact support-map atom alignment.

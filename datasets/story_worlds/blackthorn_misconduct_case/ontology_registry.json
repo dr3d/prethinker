@@ -370,6 +370,24 @@
     },
     {
       "args": [
+        "agency",
+        "authority"
+      ],
+      "category": "federal_reporting",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "federal_agency_authority/2"
+    },
+    {
+      "args": [
+        "condition",
+        "effect"
+      ],
+      "category": "finding_and_sanction_state",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "fsrb_decision_effect/2"
+    },
+    {
+      "args": [
         "arg_1",
         "arg_2"
       ],
