@@ -172,6 +172,34 @@
     },
     {
       "args": [
+        "policy",
+        "requirement"
+      ],
+      "category": "conflict_of_interest",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "conflict_policy/2"
+    },
+    {
+      "args": [
+        "policy",
+        "relationship"
+      ],
+      "category": "conflict_of_interest",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "conflict_policy_includes/2"
+    },
+    {
+      "args": [
+        "condition",
+        "appointing_authority",
+        "duration"
+      ],
+      "category": "conflict_of_interest",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "acting_rio_requirement/3"
+    },
+    {
+      "args": [
         "correction",
         "field",
         "old_value",
@@ -306,6 +334,15 @@
     },
     {
       "args": [
+        "extension_event",
+        "reason"
+      ],
+      "category": "deadline_policy_and_compliance",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "extension_reason/2"
+    },
+    {
+      "args": [
         "agency",
         "event",
         "date"
@@ -313,6 +350,16 @@
       "category": "federal_reporting",
       "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
       "signature": "federal_notification/3"
+    },
+    {
+      "args": [
+        "agency",
+        "request",
+        "reason"
+      ],
+      "category": "federal_reporting",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "federal_request_reason/3"
     },
     {
       "args": [
@@ -858,6 +905,26 @@
       "category": "unresolved_question",
       "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
       "signature": "unresolved_question_status/2"
+    },
+    {
+      "args": [
+        "question",
+        "detail"
+      ],
+      "category": "unresolved_question",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "unresolved_question_detail/2"
+    },
+    {
+      "args": [
+        "speaker",
+        "language",
+        "topic",
+        "speaker_role"
+      ],
+      "category": "witness_claim_epistemics",
+      "notes": "Blackthorn fixture registry predicate; vocabulary only, not facts. Direct source support and mapper admission remain required.",
+      "signature": "witness_statement/4"
     },
     {
       "args": [

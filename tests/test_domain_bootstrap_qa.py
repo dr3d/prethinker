@@ -135,6 +135,12 @@ def test_post_ingestion_qa_strategy_prefers_compiled_kb_surface() -> None:
     assert any("policy_requirement/3" in item for item in strategy["epistemic_policy"])
     assert "elapsed_days" in " ".join(strategy["epistemic_policy"])
     assert any("alternate atom order" in item for item in strategy["arity_and_variable_policy"])
+    assert any("federal_agency_authority" in item for item in strategy["epistemic_policy"])
+    assert any("conflict_policy" in item for item in strategy["epistemic_policy"])
+    assert any("witness_statement(Speaker, Language" in item for item in strategy["epistemic_policy"])
+    assert any("extension_reason" in item for item in strategy["epistemic_policy"])
+    assert any("subgrant_amount" in item for item in strategy["epistemic_policy"])
+    assert any("prior_complaint/4" in item for item in strategy["epistemic_policy"])
 
 
 def test_score_oracle_can_match_decision_predicate_and_answer_text() -> None:

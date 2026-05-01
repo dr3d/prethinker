@@ -665,3 +665,69 @@ less by admission and more by:
 - federal/finality policy surface,
 - witness-language counting,
 - and exact support-map atom alignment.
+
+## BTC-023 - Policy Surface / Witness Language Lift
+
+- Timestamp: `2026-05-01T15:42:11Z`
+- Compile artifact: `tmp/domain_bootstrap_file/domain_bootstrap_file_20260501T151949156190Z_story_qwen-qwen3-6-35b-a3b.json`
+- QA artifact: `tmp/domain_bootstrap_qa/domain_bootstrap_qa_20260501T154211107080Z_qa_qwen-qwen3-6-35b-a3b.json`
+
+### Headline
+
+Blackthorn moved to a new full-100 high-water mark:
+`83 exact / 10 partial / 7 miss`, with `100/100` parsed QA workspaces,
+`100/100` query rows, `0` runtime load errors, and `0` write proposals.
+The compile used `235` admitted operations, `10` skipped operations, and
+expected-signature recall `0.775`.
+
+### What Changed
+
+This run added narrow procedural-policy surfaces and query-planning guidance:
+
+- `conflict_policy/2`, `conflict_policy_includes/2`, and
+  `acting_rio_requirement/3` for standing conflict rules.
+- `federal_request_reason/3` for agency requests such as the NSF OIG interim
+  report request triggered by the journal retraction.
+- `extension_reason/2` for source-stated extension rationales.
+- `unresolved_question_detail/2` for prior-notice questions and outside-scope
+  determinations.
+- `witness_statement/4` for speaker, source language, topic, and role.
+
+The compiler context was tightened so those policy/status rows are additive
+layers, not replacements for findings, sanctions, witness claims, deadlines, or
+procedural events.
+
+### Result Movement
+
+Compared with BTC-022, this run converted several hard misses or partials:
+
+- `q018`, `q019`, `q031`, and `q043`: deadline/extension explanation support.
+- `q035` and `q091`: sanction/finality outcome support.
+- `q069` and `q073`: prior October 2025 concern / notice-clock support.
+- `q075`, `q077`, and `q080`: federal interim request, independent agency
+  authority, and FSRB finality.
+- `q084`, `q086`, `q096`, and `q097`: conflict-policy and witness-language
+  surfaces.
+
+The run also regressed some early structural rows:
+
+- `q003`, `q005`, `q011`, `q032`, `q038`, `q076`, and `q094` moved to miss.
+- Committee roster questions became more partial because atom surfaces shifted
+  toward title-prefixed variants.
+
+### Merge Probe
+
+A deterministic union of the BTC-022 admitted surface with the BTC-023 admitted
+surface produced a `453`-fact QA artifact candidate, but a full-100 QA run timed
+out at the current 20-minute ceiling before producing a scored record. This is
+useful evidence, not a default path yet: iterative source refinement may be the
+right architecture, but it needs a smarter QA context selector than handing the
+model a much larger representative-clause buffet.
+
+### Lesson
+
+The policy-surface idea is correct, but additive refinement competes with
+source-skeleton breadth when squeezed through the same compile shape. The next
+architectural move should preserve prior admitted source surfaces while adding
+focused refinement passes, then give QA a compact, question-shaped KB context
+instead of the whole merged clause surface.
