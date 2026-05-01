@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: 2026-04-30
+Last updated: 2026-05-01
 
 ## One-Sentence Shape
 
@@ -97,6 +97,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 - The Semantic IR candidate-operation cap is now `128` per turn, raised from `64` after Declaration/Proclamation calibration showed the previous cap was crowding out dense document sections.
 - A post-ingestion document QA runner now lives at `scripts/run_domain_bootstrap_qa.py`. It loads admitted facts/rules from a raw-file compile run, gives the QA model the actual compiled KB predicate inventory and representative clauses, maps question turns through Semantic IR, and executes admitted query clauses against the local Prolog runtime. The QA file can carry human reference answers without feeding them back into profile bootstrap or source compilation.
 - Post-ingestion QA now carries a first-class `post_ingestion_qa_query_strategy_v1` context object. It teaches the model to query the compiled KB predicate surface, preserve full arity, use uppercase Prolog variables for unknown slots, avoid invented composite predicates, and keep source-claim/observation boundaries visible.
+- Post-ingestion QA now has an exact-input per-question cache keyed by compiled KB artifact content, QA file content, question, reference answer, model/settings, prompt/runtime script hash, and judge/include flags. This avoids re-burning GPU on unchanged questions during frontier iteration, while `--no-cache` still gives a fresh validation or variance run.
 - Query candidate arguments now get a structural placeholder-to-variable normalization pass for generic slot labels such as `action`, `label`, `candidate`, `grievancelabel`, `violationlabel`, `rulecontent`, `recordtype`, and `methoddetail`. This operates on model-emitted query arguments, not raw user prose, and prevents accidental constants like `grievance(Grievance, label)` from causing false no-result answers.
 - Document-to-logic profile bootstrapping now explicitly asks for epistemic-status/provenance predicates on source-owned repeated records such as grievances, allegations, complaints, and accusations. A hint-free Proclamation recompile invented and used `grievance_status/2` with `source_bound_accusation`, proving the model can learn that missing structure through context pressure rather than Python NLP.
 - The mapper now admits positive direct `operation='rule'` records with predicate+args but no executable clause as fact-like rule records, with rationale `rule_label_demoted_to_fact_record`. This is a structural repair for model administrative labels; true executable rules still require a clause, and negative/general rule operations still do not become facts.

@@ -9,6 +9,7 @@ source compile run has produced admitted facts/rules.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import sys
@@ -23,6 +24,8 @@ from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUT_DIR = REPO_ROOT / "tmp" / "domain_bootstrap_qa"
+DEFAULT_CACHE_DIR = REPO_ROOT / "tmp" / "domain_bootstrap_qa_cache"
+CACHE_SCHEMA_VERSION = "domain_bootstrap_qa_cache_v1"
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
@@ -172,6 +175,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-tokens", type=int, default=6000)
     parser.add_argument("--limit", type=int, default=0)
     parser.add_argument("--only-ids", default="", help="Comma-separated QA ids to run, e.g. q006,q039.")
+    parser.add_argument("--cache-dir", type=Path, default=DEFAULT_CACHE_DIR, help="Per-question exact-input cache.")
+    parser.add_argument("--no-cache", action="store_true", help="Disable exact-input QA row cache for a fresh run.")
     parser.add_argument("--include-model-input", action="store_true")
     parser.add_argument(
         "--judge-reference-answers",
@@ -264,28 +269,63 @@ def main() -> int:
 
     rows: list[dict[str, Any]] = []
     started = time.perf_counter()
+    cache_hits = 0
+    cache_misses = 0
+    cache_dir = args.cache_dir if args.cache_dir.is_absolute() else (REPO_ROOT / args.cache_dir).resolve()
+    cache_enabled = not bool(args.no_cache)
+    cache_context = build_cache_context(
+        run_path=run_path,
+        qa_path=qa_path,
+        run_record=run_record,
+        facts=facts,
+        rules=rules,
+        allowed_predicates=allowed_predicates,
+        predicate_contracts=predicate_contracts,
+        domain_context=domain_context,
+        kb_inventory=kb_inventory,
+        config=config,
+        include_model_input=bool(args.include_model_input),
+        judge_reference_answers=bool(args.judge_reference_answers),
+    )
     for item in questions:
-        row = run_one_question(
-            item=item,
-            config=config,
-            allowed_predicates=allowed_predicates,
-            predicate_contracts=predicate_contracts,
-            domain_context=domain_context,
-            kb_inventory=kb_inventory,
-            facts=facts,
-            rules=rules,
-            runtime=runtime,
-            oracle=oracle.get(item["id"], {}),
-            include_model_input=bool(args.include_model_input),
-        )
-        if bool(args.judge_reference_answers):
-            row["reference_judge"] = judge_reference_answer(
-                row=row,
+        question_oracle = oracle.get(item["id"], {})
+        cache_key = cache_key_for_question(context=cache_context, item=item, oracle=question_oracle)
+        cached_row = read_cached_row(cache_dir=cache_dir, cache_key=cache_key) if cache_enabled else None
+        if cached_row is not None:
+            row = cached_row
+            row["cache_hit"] = True
+            row["cache_key"] = cache_key
+            cache_hits += 1
+        else:
+            cache_misses += 1
+            row = run_one_question(
+                item=item,
                 config=config,
+                allowed_predicates=allowed_predicates,
+                predicate_contracts=predicate_contracts,
+                domain_context=domain_context,
+                kb_inventory=kb_inventory,
+                facts=facts,
+                rules=rules,
+                runtime=runtime,
+                oracle=question_oracle,
+                include_model_input=bool(args.include_model_input),
             )
+            if bool(args.judge_reference_answers):
+                row["reference_judge"] = judge_reference_answer(
+                    row=row,
+                    config=config,
+                )
+            row["cache_hit"] = False
+            row["cache_key"] = cache_key
+            if cache_enabled and is_cacheable_row(row):
+                write_cached_row(cache_dir=cache_dir, cache_key=cache_key, row=row)
         rows.append(row)
 
     summary = summarize(rows=rows, load_errors=load_errors, elapsed_ms=int((time.perf_counter() - started) * 1000))
+    summary["cache_enabled"] = cache_enabled
+    summary["cache_hits"] = cache_hits
+    summary["cache_misses"] = cache_misses
     record = {
         "ts": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "run_json": str(run_path),
@@ -295,6 +335,13 @@ def main() -> int:
         "source_rule_count": len(rules),
         "runtime_load_errors": load_errors,
         "oracle_present": bool(oracle),
+        "cache": {
+            "enabled": cache_enabled,
+            "schema_version": CACHE_SCHEMA_VERSION,
+            "dir": str(cache_dir),
+            "hits": cache_hits,
+            "misses": cache_misses,
+        },
         "summary": summary,
         "rows": rows,
     }
@@ -309,6 +356,122 @@ def main() -> int:
     print(f"Wrote {md_path}")
     print(json.dumps(summary, ensure_ascii=False, sort_keys=True))
     return 0
+
+
+def build_cache_context(
+    *,
+    run_path: Path,
+    qa_path: Path,
+    run_record: dict[str, Any],
+    facts: list[str],
+    rules: list[str],
+    allowed_predicates: list[str],
+    predicate_contracts: list[dict[str, Any]],
+    domain_context: list[str],
+    kb_inventory: dict[str, Any],
+    config: SemanticIRCallConfig,
+    include_model_input: bool,
+    judge_reference_answers: bool,
+) -> dict[str, Any]:
+    return {
+        "schema_version": CACHE_SCHEMA_VERSION,
+        "script_hash": hash_text(Path(__file__).read_text(encoding="utf-8")),
+        "run_path": str(run_path),
+        "run_hash": hash_text(json.dumps(run_record, ensure_ascii=False, sort_keys=True)),
+        "qa_path": str(qa_path),
+        "qa_hash": hash_text(qa_path.read_text(encoding="utf-8-sig")),
+        "facts_hash": hash_text(json.dumps(facts, ensure_ascii=False, sort_keys=True)),
+        "rules_hash": hash_text(json.dumps(rules, ensure_ascii=False, sort_keys=True)),
+        "allowed_predicates_hash": hash_text(json.dumps(allowed_predicates, ensure_ascii=False, sort_keys=True)),
+        "predicate_contracts_hash": hash_text(json.dumps(predicate_contracts, ensure_ascii=False, sort_keys=True)),
+        "domain_context_hash": hash_text(json.dumps(domain_context, ensure_ascii=False, sort_keys=True)),
+        "kb_inventory_hash": hash_text(json.dumps(kb_inventory, ensure_ascii=False, sort_keys=True)),
+        "query_strategy_hash": hash_text(
+            json.dumps(
+                {
+                    "post_ingestion": POST_INGESTION_QA_QUERY_STRATEGY,
+                    "story_world": STORY_WORLD_QA_QUERY_STRATEGY,
+                    "temporal_virtual_signatures": TEMPORAL_VIRTUAL_SIGNATURES,
+                    "judge_schema": QA_JUDGE_SCHEMA,
+                },
+                ensure_ascii=False,
+                sort_keys=True,
+            )
+        ),
+        "config": {
+            "backend": str(config.backend),
+            "base_url": str(config.base_url),
+            "model": str(config.model),
+            "context_length": int(config.context_length),
+            "timeout": int(config.timeout),
+            "temperature": float(config.temperature),
+            "top_p": float(config.top_p),
+            "top_k": int(config.top_k),
+            "max_tokens": int(config.max_tokens),
+            "think_enabled": bool(config.think_enabled),
+            "reasoning_effort": str(config.reasoning_effort or ""),
+        },
+        "include_model_input": bool(include_model_input),
+        "judge_reference_answers": bool(judge_reference_answers),
+    }
+
+
+def cache_key_for_question(*, context: dict[str, Any], item: dict[str, Any], oracle: dict[str, Any]) -> str:
+    payload = {
+        "context": context,
+        "question": item,
+        "oracle": oracle,
+    }
+    return hash_text(json.dumps(payload, ensure_ascii=False, sort_keys=True))
+
+
+def read_cached_row(*, cache_dir: Path, cache_key: str) -> dict[str, Any] | None:
+    path = cache_dir / f"{cache_key}.json"
+    if not path.exists():
+        return None
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+    if not isinstance(payload, dict):
+        return None
+    if payload.get("schema_version") != CACHE_SCHEMA_VERSION:
+        return None
+    row = payload.get("row")
+    if not isinstance(row, dict):
+        return None
+    return dict(row)
+
+
+def write_cached_row(*, cache_dir: Path, cache_key: str, row: dict[str, Any]) -> None:
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "schema_version": CACHE_SCHEMA_VERSION,
+        "cache_key": cache_key,
+        "cached_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "row": row,
+    }
+    (cache_dir / f"{cache_key}.json").write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True),
+        encoding="utf-8",
+    )
+
+
+def is_cacheable_row(row: dict[str, Any]) -> bool:
+    if not bool(row.get("ok")):
+        return False
+    if str(row.get("error", "")).strip():
+        return False
+    judge = row.get("reference_judge")
+    if isinstance(judge, dict):
+        issues = " ".join(str(item) for item in judge.get("issues", []) if str(item).strip())
+        if "judge error:" in issues:
+            return False
+    return True
+
+
+def hash_text(text: str) -> str:
+    return hashlib.sha256(str(text or "").encode("utf-8")).hexdigest()
 
 
 def parse_numbered_markdown_questions(text: str) -> list[dict[str, Any]]:
@@ -1009,6 +1172,7 @@ def write_summary(record: dict[str, Any], path: Path) -> None:
         f"- Rows with proposed writes: `{summary.get('write_proposal_rows', 0)}`",
         f"- Oracle rows/matches: `{summary.get('oracle_rows', 0)}` / `{summary.get('oracle_match', 0)}`",
         f"- Reference judge: exact=`{summary.get('judge_exact', 0)}` partial=`{summary.get('judge_partial', 0)}` miss=`{summary.get('judge_miss', 0)}`",
+        f"- Cache: enabled=`{summary.get('cache_enabled', False)}` hits=`{summary.get('cache_hits', 0)}` misses=`{summary.get('cache_misses', 0)}`",
         "",
         "## Rows",
         "",

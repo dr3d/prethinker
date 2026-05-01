@@ -3,12 +3,17 @@ from scripts.run_domain_bootstrap_qa import (
     _negative_join_with_previous,
     _relaxed_constant_query,
     _temporal_join_with_previous,
+    cache_key_for_question,
     clause_signature,
     compiled_kb_inventory,
+    hash_text,
+    is_cacheable_row,
     parse_markdown_answer_key,
     parse_numbered_markdown_questions,
+    read_cached_row,
     score_oracle,
     summarize,
+    write_cached_row,
 )
 from kb_pipeline import CorePrologRuntime
 
@@ -61,6 +66,38 @@ def test_reference_answers_are_not_structured_oracle_expectations() -> None:
     row = {"projected_decision": "answer", "queries": [], "query_results": []}
 
     assert score_oracle(row=row, oracle={"reference_answer": "Unknown."}) is None
+
+
+def test_qa_cache_key_changes_when_question_changes() -> None:
+    context = {
+        "schema_version": "domain_bootstrap_qa_cache_v1",
+        "script_hash": hash_text("script"),
+        "run_hash": hash_text("run"),
+        "qa_hash": hash_text("qa"),
+        "config": {"model": "model"},
+    }
+    oracle = {"reference_answer": "A"}
+    first = cache_key_for_question(
+        context=context,
+        item={"id": "q001", "utterance": "Who signed?"},
+        oracle=oracle,
+    )
+    second = cache_key_for_question(
+        context=context,
+        item={"id": "q001", "utterance": "Who signed it?"},
+        oracle=oracle,
+    )
+
+    assert first != second
+
+
+def test_qa_cache_row_round_trips(tmp_path) -> None:
+    row = {"id": "q001", "ok": True, "queries": ["p(X)."], "reference_judge": {"verdict": "exact"}}
+
+    assert is_cacheable_row(row) is True
+    write_cached_row(cache_dir=tmp_path, cache_key="abc", row=row)
+
+    assert read_cached_row(cache_dir=tmp_path, cache_key="abc") == row
 
 
 def test_compiled_kb_inventory_uses_clause_surfaces_not_english() -> None:
