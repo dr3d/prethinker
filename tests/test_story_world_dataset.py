@@ -715,6 +715,24 @@ def test_temporal_hour_spacing_helper_accepts_clock_atoms() -> None:
     assert runtime.query_rows("hours_at_least(t1000, t1700, 6).")["status"] == "success"
 
 
+def test_support_count_helper_counts_distinct_supporters() -> None:
+    from kb_pipeline import CorePrologRuntime
+
+    runtime = CorePrologRuntime()
+    for fact in [
+        "supported(copper_rails_proposal, mara_vale).",
+        "supported(copper_rails_proposal, juno_vale).",
+        "supported(copper_rails_proposal, ilya_sen).",
+        "supported(copper_rails_proposal, tomas_reed).",
+    ]:
+        assert runtime.assert_fact(fact)["status"] == "success"
+
+    assert runtime.query_rows("support_count_at_least(copper_rails_proposal, 3).")["status"] == "success"
+    assert runtime.query_rows("support_count_at_least(copper_rails_proposal, 5).")["status"] == "no_results"
+    rows = runtime.query_rows("support_count_at_least(Proposal, 3).")
+    assert rows["rows"] == [{"Proposal": "copper_rails_proposal"}]
+
+
 def test_rule_probe_queries_score_positive_and_negative_expectations() -> None:
     from kb_pipeline import CorePrologRuntime
 

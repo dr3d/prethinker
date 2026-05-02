@@ -153,6 +153,7 @@ class PrologEngine:
             "value_greater_than": self._builtin_value_greater_than,
             "value_at_most": self._builtin_value_at_most,
             "hours_at_least": self._builtin_hours_at_least,
+            "support_count_at_least": self._builtin_support_count_at_least,
         }
     
     def add_clause(self, clause: Clause):
@@ -598,6 +599,39 @@ class PrologEngine:
             return []
         delta_hours = int((end_time - start_time).total_seconds() // 3600)
         return [subst] if delta_hours >= threshold else []
+
+    def _builtin_support_count_at_least(self, goal: Term, subst: Substitution, depth: int) -> List[Substitution]:
+        """support_count_at_least(Proposal, Threshold) via supported(Proposal, Officer)."""
+        if len(goal.args) != 2:
+            return []
+        proposal_arg = subst.apply(goal.args[0])
+        threshold = self._numeric_term_value(subst.apply(goal.args[1]))
+        if threshold is None:
+            return []
+        proposals: List[Term] = []
+        if proposal_arg.is_variable:
+            proposal_var = Term("_SupportCountProposal", is_variable=True)
+            officer_var = Term("_SupportCountOfficer", is_variable=True)
+            for next_subst in self.resolve(Term("supported", [proposal_var, officer_var]), subst, depth + 1):
+                proposal = next_subst.apply(proposal_var)
+                if proposal not in proposals:
+                    proposals.append(proposal)
+        else:
+            proposals = [proposal_arg]
+        out: List[Substitution] = []
+        for proposal in proposals:
+            officer_var = Term("_SupportCountOfficer", is_variable=True)
+            support_goal = Term("supported", [proposal, officer_var])
+            supporters = {
+                str(next_subst.apply(officer_var))
+                for next_subst in self.resolve(support_goal, subst, depth + 1)
+            }
+            if len(supporters) < threshold:
+                continue
+            new_subst = self.unify(goal.args[0], proposal, subst)
+            if new_subst is not None:
+                out.append(new_subst)
+        return out
 
     def _builtin_entity_value_threshold(
         self,

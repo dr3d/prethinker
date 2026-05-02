@@ -124,6 +124,13 @@ RULE_BODY_HELPER_PREDICATES = [
         "why": "rule_acquisition_temporal_helper",
         "admission_notes": ["Use only in rule bodies for source-stated minimum-hour spacing conditions."],
     },
+    {
+        "signature": "support_count_at_least/2",
+        "args": ["proposal", "threshold"],
+        "description": "Query-only deterministic helper: true when supported(Proposal, Officer) has at least Threshold distinct officers.",
+        "why": "rule_acquisition_aggregation_helper",
+        "admission_notes": ["Use only in rule bodies for source-stated vote-count thresholds."],
+    },
 ]
 
 CONTEXT_DEPENDENT_HELPER_SIGNATURES = {"hours_at_least/3"}
@@ -633,6 +640,7 @@ def _rule_guidance_context(*, target: int, rule_class: str, compact: bool) -> li
         "For derived_* head scope arguments, use the governed domain, action, or object from the source (for example harbor, glass_tide_repair, quarantine), not a rule id, proof reason, or clause label.",
         "For derived_reward_status/3, preserve the source reward-status atom such as salvage_reward or no_salvage_reward; do not shorten it to generic reward or no_reward.",
         "For value_greater_than/2 and value_at_most/2, the first argument is the entity being measured (for example Cargo), not the numeric Value variable from entity_property(Cargo, value, Value).",
+        "For support_count_at_least/2, do not add extra supported(Proposal, role_label) goals unless the source explicitly makes that officer role a condition. The helper already proves the threshold count from supported/2 rows.",
         "Set source='direct' only because the source document explicitly states the rule.",
     ]
     if compact:

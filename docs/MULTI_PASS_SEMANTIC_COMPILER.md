@@ -237,6 +237,12 @@ no-emergency-override rows. The verifier retained one promotion-ready
 budget-veto failure rule and dropped normal-vote branches that depended on
 unsupported negation or aggregation.
 
+GLT-037 adds the first aggregation helper, `support_count_at_least/2`, and
+keeps the negative result: the helper substrate works, but the rule lens still
+mixed support threshold with final passage. Future council aggregation should
+derive an intermediate threshold status before any veto/override branch decides
+final outcome.
+
 ## Open Problems
 
 - Pass planner: the router should choose lenses and source spans instead of

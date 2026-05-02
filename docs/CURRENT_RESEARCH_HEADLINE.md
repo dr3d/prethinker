@@ -69,6 +69,10 @@ Glass Tide is now exercising the harder rule-ingestion frontier:
 - council voting now has a first priority/override branch: the body-fact lens
   admitted proposal, support, veto, and no-override rows; the verifier retained
   the budget-veto failure rule and dropped unsupported normal-vote branches.
+- the first aggregation helper (`support_count_at_least/2`) is now in the
+  runtime, but GLT-037 showed the rule lens still needs sharper guidance:
+  threshold-met is not the same thing as final passage when veto/override logic
+  is also active.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 
@@ -100,7 +104,8 @@ The next work should stay on the sharp edges:
 
 1. **Glass Tide vote aggregation.** Tax, salvage, quarantine, and the council
    budget-veto branch now have promotion-ready rule slices. The remaining
-   council frontier is normal three-of-five aggregation plus override handling.
+   council frontier is normal three-of-five aggregation as an intermediate
+   threshold status, then separate override handling.
 2. **Rule probe discipline.** Recent preflight runs show that a rule can be
    body-supported but fail under the wrong scope atom, can become dormant by
    using lowercase placeholders such as `warden` and `repair_order`, or can look

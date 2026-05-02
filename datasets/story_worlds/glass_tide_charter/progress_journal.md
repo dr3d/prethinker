@@ -1001,3 +1001,45 @@ that required unsupported negation or normal-vote aggregation.
 This is the right incremental posture for council voting: acquire and verify
 the veto branch first, then add a separate count/aggregation helper substrate
 for the normal three-of-five pass rule.
+
+## GLT-037 - Council Aggregation Helper Negative Control
+
+- Timestamp: `2026-05-02T23:53:46Z`
+- Rule artifact: `tmp/domain_bootstrap_file/domain_bootstrap_file_20260502T235346602719Z_story-rules_qwen-qwen3-6-35b-a3b.json`
+- Mode: `council_aggregation_helper_trial`
+- Rule class: `aggregation`
+
+### Result
+
+- Runtime helper added: `support_count_at_least/2`.
+- Helper smoke passed: `support_count_at_least(copper_rails_proposal, 3)` succeeds and `support_count_at_least(copper_rails_proposal, 5)` fails.
+- The rule lens admitted `2` rules.
+- Isolated firing rules: `1`.
+- Promotion-ready rules: `1`, but only for the already-known budget-veto failure branch.
+- Positive aggregation probe: `0/1`.
+- Negative final-pass probe: `1/1`.
+- Probe-adjusted promotion ready for aggregation: `false`.
+
+### Lesson
+
+GLT-037 is a useful negative result. The deterministic helper substrate can
+count distinct support votes, but the LLM did not yet use it to produce a clean
+intermediate status such as `support_threshold_met`. Instead it either returned
+to the budget-veto failure rule or tried to encode final-passage logic with
+unsupported cut/disjunction:
+
+```prolog
+!, fail. ; derived_status(...)
+```
+
+The right next step is not a broader council profile. It is sharper rule-lens
+guidance for aggregation:
+
+```text
+support_count_at_least/2 proves a threshold condition.
+threshold condition is not the same as final proposal passage.
+veto/override belongs in a separate priority branch.
+```
+
+That keeps the helper useful without letting a count rule overclaim final
+governance outcome.

@@ -137,8 +137,10 @@ The same pattern appears across fixtures:
   supported when the isolated rule fires.
 - **Aggregation can be split from override logic.** GLT-036 retained a clean
   council budget-veto failure rule while dropping unsupported normal-vote
-  branches. The next council step is a count/aggregation helper, not more
-  default rule prose.
+  branches. GLT-037 added `support_count_at_least/2`, but the rule lens tried
+  to mix threshold counting with final passage and unsupported cut/disjunction.
+  The next council step is threshold-status guidance, not more default rule
+  prose.
 - **Promotion-ready is not durable.** Glass Tide now separates rule lifecycle
   labels: candidate, mapper-admitted, runtime-loadable, firing,
   promotion-ready, and durable. Durable remains `0` in these trials; the point is
