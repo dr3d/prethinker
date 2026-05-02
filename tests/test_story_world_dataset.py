@@ -11,6 +11,7 @@ from scripts.run_rule_acquisition_pass import (
     _probe_queries,
     _rule_lifecycle_counts,
     _rule_body_goal_support,
+    _runtime_trial,
     _rule_trial_item_lifecycle,
     _rule_trial_item_promotion_ready,
     _unsupported_body_fragments,
@@ -728,3 +729,25 @@ def test_rule_probe_queries_score_positive_and_negative_expectations() -> None:
     assert positive[0]["num_rows"] == 1
     assert negative[0]["passed"]
     assert negative[0]["num_rows"] == 0
+
+
+def test_rule_runtime_trial_scores_promotion_in_isolated_rule_scope() -> None:
+    trial = _runtime_trial(
+        facts=[
+            "p(a).",
+            "q(b).",
+        ],
+        backbone_rules=[],
+        rule_lens_rules=[
+            "derived_status(X, ok, scope) :- p(X).",
+            "derived_status(X, ok, scope) :- p(X), q(X).",
+        ],
+    )
+
+    assert trial["trial_scope"] == "isolated_rule_for_promotion_combined_rules_for_probes"
+    assert trial["promotion_ready_rule_count"] == 1
+    assert trial["firing_rule_count"] == 1
+    assert trial["combined_head_queries"][1]["num_rows"] == 1
+    assert trial["derived_head_queries"][1]["trial_scope"] == "isolated_rule"
+    assert trial["derived_head_queries"][1]["num_rows"] == 0
+    assert trial["derived_head_queries"][1]["lifecycle_status"] == "runtime_loadable_rule"

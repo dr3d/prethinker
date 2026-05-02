@@ -807,3 +807,48 @@ The verifier treated the leftover negation fragment as unsupported, and the
 union tool dropped that non-promotion-ready rule. This is exactly the intended
 safety posture: bad rule shapes can appear in proposals without becoming part
 of the accumulated executable surface.
+
+## GLT-030/031 - Isolated Per-Rule Promotion Trial
+
+- Timestamp: `2026-05-02T23:37:41Z`
+- Tax union artifact: `tmp/domain_bootstrap_file/domain_bootstrap_file_20260502T233741901432Z_glass-tide-tax-rule-union-glt030-isolated_qwen-qwen3-6-35b-a3b.json`
+- Salvage union artifact: `tmp/domain_bootstrap_file/domain_bootstrap_file_20260502T233741869423Z_glass-tide-salvage-rule-union-glt031-isolated_qwen-qwen3-6-35b-a3b.json`
+- Mode: `isolated_rule_for_promotion_combined_rules_for_probes`
+
+### Result
+
+Tax rerun:
+
+- `3` executable rules loaded.
+- Isolated firing rules: `3`.
+- Isolated promotion-ready rules: `3`.
+- Positive probes: `3/3`.
+- Negative probes: `1/1`.
+- Probe-adjusted promotion ready: `true`.
+
+Salvage rerun:
+
+- `2` executable rules loaded.
+- Isolated firing rules: `2`.
+- Isolated promotion-ready rules: `2`.
+- Positive probes: `1/1`.
+- Negative probes: `1/1`.
+- Probe-adjusted promotion ready: `true`.
+
+### Lesson
+
+The runtime verifier now separates two scopes:
+
+```text
+isolated rule trial -> promotion-readiness, firing, dormancy, fanout
+combined rule trial -> authored positive/negative probes over the accumulated surface
+```
+
+This matters because two sibling rules can share a derived head. A broad head
+query such as `derived_reward_status(V1, V2, V3)` can see rows produced by a
+previous sibling rule if all rules are already loaded into the same runtime.
+Promotion scoring now asks whether each rule fires by itself against the
+backbone before the union-level probe pass checks the accumulated behavior.
+
+The previous high-water results held under this stricter verifier: tax stayed
+at `3` promotion-ready rules and salvage stayed at `2`.

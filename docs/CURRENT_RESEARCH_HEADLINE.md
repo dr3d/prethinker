@@ -58,6 +58,10 @@ Glass Tide is now exercising the harder rule-ingestion frontier:
   `recovered_from_water/3`, `abandoned/1`, `sacred/1`, and `not_sacred/1` rows;
   a rule-lens union retained `2` promotion-ready salvage rules and passed both
   the Tomas reward positive probe and Nell sacred-cargo negative probe.
+- the verifier now scores promotion-readiness in isolated per-rule runtimes
+  before combined probes run over the accumulated surface. Tax stayed at `3`
+  promotion-ready rules and salvage stayed at `2`, so the gains survived the
+  stricter test.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 
@@ -93,9 +97,10 @@ The next work should stay on the sharp edges:
    applying the same union-and-probe pattern to quarantine and council vote
    rules after GLT-029 confirmed it for salvage.
 2. **Rule probe discipline.** Recent preflight runs show that a rule can be
-   body-supported but fail under the wrong scope atom, or can become dormant by
-   using lowercase placeholders such as `warden` and `repair_order`. Keep
-   positive/negative probes in the loop.
+   body-supported but fail under the wrong scope atom, can become dormant by
+   using lowercase placeholders such as `warden` and `repair_order`, or can look
+   firing only because a sibling rule shares its derived head. Keep isolated
+   per-rule promotion plus combined positive/negative probes in the loop.
 3. **Clarification Eagerness drift.** A post-move preflight run completed
    safely with `0` unsafe candidates and `0` context-write violations, but it
    over-asked badly. CET-008 later reached `39/40` with no context-write

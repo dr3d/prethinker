@@ -679,7 +679,8 @@ def _runtime_trial(
         if str(result.get("status", "")) != "success":
             backbone_rule_errors.append(f"{rule}: {result.get('message', result)}")
     loaded_rules: list[str] = []
-    derived_queries: list[dict[str, Any]] = []
+    combined_derived_queries: list[dict[str, Any]] = []
+    isolated_derived_queries: list[dict[str, Any]] = []
     for rule in rule_lens_rules:
         result = runtime.assert_rule(rule)
         if str(result.get("status", "")) == "success":
@@ -687,46 +688,29 @@ def _runtime_trial(
             query = _rule_head_query(rule)
             if query:
                 query_result = runtime.query_rows(query)
-                body_support = [
-                    {
-                        "signature": signature,
-                        "matching_fact_count": int(fact_signature_counts.get(signature, 0)),
-                    }
-                    for signature in _rule_body_signatures(rule)
-                ]
-                body_goal_support = _rule_body_goal_support(rule, facts, runtime=runtime)
-                supported_goal_signatures = {
-                    str(item.get("signature", ""))
-                    for item in body_goal_support
-                    if int(item.get("matching_fact_count", 0) or 0) > 0
-                }
-                unsupported_body_fragments = _unsupported_body_fragments(rule)
-                derived_queries.append(
+                combined_derived_queries.append(
                     {
                         "rule": rule,
                         "head_query": query,
+                        "trial_scope": "combined_rules",
                         "status": str(query_result.get("status", "")),
                         "num_rows": int(query_result.get("num_rows", 0) or 0),
                         "rows": query_result.get("rows", [])[:10] if isinstance(query_result.get("rows"), list) else [],
-                        "body_support": body_support,
-                        "unsupported_body_signatures": [
-                            item["signature"]
-                            for item in body_support
-                            if int(item["matching_fact_count"]) == 0
-                            and str(item.get("signature", "")) not in supported_goal_signatures
-                        ],
-                        "body_goal_support": body_goal_support,
-                        "unsupported_body_goals": [
-                            item["goal"] for item in body_goal_support if int(item["matching_fact_count"]) == 0
-                        ],
-                        "unsupported_body_fragments": unsupported_body_fragments,
                     }
+                )
+                isolated_derived_queries.append(
+                    _isolated_rule_trial_item(
+                        rule=rule,
+                        facts=facts,
+                        backbone_rules=backbone_rules,
+                        fact_signature_counts=fact_signature_counts,
+                    )
                 )
         else:
             rule_load_errors.append(f"{rule}: {result.get('message', result)}")
-    for item in derived_queries:
+    for item in isolated_derived_queries:
         item["lifecycle_status"] = _rule_trial_item_lifecycle(item)
-    promotion_ready_rule_count = sum(1 for item in derived_queries if _rule_trial_item_promotion_ready(item))
+    promotion_ready_rule_count = sum(1 for item in isolated_derived_queries if _rule_trial_item_promotion_ready(item))
     positive_probe_results = _probe_queries(runtime, positive_queries or [], expect_rows=True)
     negative_probe_results = _probe_queries(runtime, negative_queries or [], expect_rows=False)
     unexpected_solution_count = sum(
@@ -742,25 +726,27 @@ def _runtime_trial(
         "backbone_rule_load_errors": backbone_rule_errors[:20],
         "rule_load_errors": rule_load_errors[:40],
         "loaded_rule_examples": loaded_rules[:20],
-        "derived_head_queries": derived_queries,
-        "firing_rule_count": sum(1 for item in derived_queries if int(item.get("num_rows", 0) or 0) > 0),
-        "high_fanout_rule_count": sum(1 for item in derived_queries if int(item.get("num_rows", 0) or 0) > 5),
+        "trial_scope": "isolated_rule_for_promotion_combined_rules_for_probes",
+        "derived_head_queries": isolated_derived_queries,
+        "combined_head_queries": combined_derived_queries,
+        "firing_rule_count": sum(1 for item in isolated_derived_queries if int(item.get("num_rows", 0) or 0) > 0),
+        "high_fanout_rule_count": sum(1 for item in isolated_derived_queries if int(item.get("num_rows", 0) or 0) > 5),
         "promotion_ready_rule_count": promotion_ready_rule_count,
-        "lifecycle_counts": _rule_lifecycle_counts(derived_queries, rule_load_errors),
-        "dormant_rule_count": sum(1 for item in derived_queries if int(item.get("num_rows", 0) or 0) == 0),
+        "lifecycle_counts": _rule_lifecycle_counts(isolated_derived_queries, rule_load_errors),
+        "dormant_rule_count": sum(1 for item in isolated_derived_queries if int(item.get("num_rows", 0) or 0) == 0),
         "unsupported_body_signature_count": sum(
             len(item.get("unsupported_body_signatures", []))
-            for item in derived_queries
+            for item in isolated_derived_queries
             if isinstance(item.get("unsupported_body_signatures"), list)
         ),
         "unsupported_body_goal_count": sum(
             len(item.get("unsupported_body_goals", []))
-            for item in derived_queries
+            for item in isolated_derived_queries
             if isinstance(item.get("unsupported_body_goals"), list)
         ),
         "unsupported_body_fragment_count": sum(
             len(item.get("unsupported_body_fragments", []))
-            for item in derived_queries
+            for item in isolated_derived_queries
             if isinstance(item.get("unsupported_body_fragments"), list)
         ),
         "positive_probe_results": positive_probe_results,
@@ -779,12 +765,84 @@ def _runtime_trial(
     }
 
 
+def _isolated_rule_trial_item(
+    *,
+    rule: str,
+    facts: list[str],
+    backbone_rules: list[str],
+    fact_signature_counts: dict[str, int],
+) -> dict[str, Any]:
+    runtime = CorePrologRuntime(max_depth=500)
+    fact_errors: list[str] = []
+    backbone_rule_errors: list[str] = []
+    for fact in facts:
+        result = runtime.assert_fact(fact)
+        if str(result.get("status", "")) != "success":
+            fact_errors.append(f"{fact}: {result.get('message', result)}")
+    for backbone_rule in backbone_rules:
+        result = runtime.assert_rule(backbone_rule)
+        if str(result.get("status", "")) != "success":
+            backbone_rule_errors.append(f"{backbone_rule}: {result.get('message', result)}")
+    query = _rule_head_query(rule)
+    body_support = [
+        {
+            "signature": signature,
+            "matching_fact_count": int(fact_signature_counts.get(signature, 0)),
+        }
+        for signature in _rule_body_signatures(rule)
+    ]
+    result = runtime.assert_rule(rule)
+    if str(result.get("status", "")) != "success":
+        return {
+            "rule": rule,
+            "head_query": query,
+            "trial_scope": "isolated_rule",
+            "status": str(result.get("status", "")),
+            "num_rows": 0,
+            "rows": [],
+            "body_support": body_support,
+            "unsupported_body_signatures": [],
+            "body_goal_support": [],
+            "unsupported_body_goals": [],
+            "unsupported_body_fragments": _unsupported_body_fragments(rule),
+            "isolated_fact_load_errors": fact_errors[:10],
+            "isolated_backbone_rule_load_errors": backbone_rule_errors[:10],
+        }
+    query_result = runtime.query_rows(query) if query else {"status": "skipped", "num_rows": 0, "rows": []}
+    body_goal_support = _rule_body_goal_support(rule, facts, runtime=runtime)
+    supported_goal_signatures = {
+        str(item.get("signature", ""))
+        for item in body_goal_support
+        if int(item.get("matching_fact_count", 0) or 0) > 0
+    }
+    return {
+        "rule": rule,
+        "head_query": query,
+        "trial_scope": "isolated_rule",
+        "status": str(query_result.get("status", "")),
+        "num_rows": int(query_result.get("num_rows", 0) or 0),
+        "rows": query_result.get("rows", [])[:10] if isinstance(query_result.get("rows"), list) else [],
+        "body_support": body_support,
+        "unsupported_body_signatures": [
+            item["signature"]
+            for item in body_support
+            if int(item["matching_fact_count"]) == 0
+            and str(item.get("signature", "")) not in supported_goal_signatures
+        ],
+        "body_goal_support": body_goal_support,
+        "unsupported_body_goals": [item["goal"] for item in body_goal_support if int(item["matching_fact_count"]) == 0],
+        "unsupported_body_fragments": _unsupported_body_fragments(rule),
+        "isolated_fact_load_errors": fact_errors[:10],
+        "isolated_backbone_rule_load_errors": backbone_rule_errors[:10],
+    }
+
+
 def _rule_trial_item_lifecycle(item: dict[str, Any]) -> str:
     if _rule_trial_item_promotion_ready(item):
         return "promotion_ready_rule"
     if int(item.get("num_rows", 0) or 0) > 0:
         return "firing_rule"
-    if str(item.get("status", "")).strip() == "success":
+    if str(item.get("status", "")).strip() in {"success", "no_results"}:
         return "runtime_loadable_rule"
     return "mapper_admitted_rule"
 

@@ -200,6 +200,11 @@ diagnostic label; durable rule admission remains a separate product decision.
 Probe-adjusted promotion readiness additionally requires all supplied positive
 and negative probes to pass.
 
+Promotion scoring now uses an isolated per-rule runtime: each rule is tested by
+itself against the backbone surface, so a sibling rule with the same derived
+head cannot make a dormant rule look firing. The accumulated rule surface is
+still tested afterward with combined positive/negative probes.
+
 The deterministic compile-union utility can now run this same rule trial over
 an accumulated rule surface. With `--trial-backbone-json`,
 `--drop-non-promotion-ready-rules`, and authored positive/negative probes, it
@@ -213,6 +218,11 @@ because the backbone lacks the body facts a safe rule needs. A narrow body-fact
 lens over the salvage source span admitted `recovered_from_water/3`,
 `abandoned/1`, `sacred/1`, and `not_sacred/1`; the subsequent rule union retained
 `2` promotion-ready salvage rules and passed both reward probes.
+
+GLT-030/031 reran the tax and salvage unions under isolated per-rule promotion
+scoring. The high-water results held: tax stayed at `3` promotion-ready rules
+and salvage stayed at `2`, with all authored positive/negative probes still
+passing.
 
 ## Open Problems
 
