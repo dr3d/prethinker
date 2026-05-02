@@ -852,3 +852,82 @@ backbone before the union-level probe pass checks the accumulated behavior.
 
 The previous high-water results held under this stricter verifier: tax stayed
 at `3` promotion-ready rules and salvage stayed at `2`.
+
+## GLT-032/034 - Quarantine Temporal Clearance Rule
+
+- Timestamp: `2026-05-02T23:45:45Z`
+- Body-fact artifact: `tmp/domain_bootstrap_file/domain_bootstrap_file_20260502T234156001349Z_story-support_qwen-qwen3-6-35b-a3b.json`
+- Body/backbone union artifact: `tmp/domain_bootstrap_file/domain_bootstrap_file_20260502T234209792368Z_glass-tide-quarantine-body-union-glt032_qwen-qwen3-6-35b-a3b.json`
+- Rule artifact: `tmp/domain_bootstrap_file/domain_bootstrap_file_20260502T234310003740Z_story-rules_qwen-qwen3-6-35b-a3b.json`
+- Promotion-filtered union artifact: `tmp/domain_bootstrap_file/domain_bootstrap_file_20260502T234545984607Z_glass-tide-quarantine-rule-union-glt034_qwen-qwen3-6-35b-a3b.json`
+- Mode: `quarantine_temporal_helper_rule_trial`
+- Rule class: `temporal_window`
+
+### Result
+
+Body-fact lens:
+
+- `8` body facts admitted.
+- `0` skipped operations.
+- Runtime load errors after deterministic union with the backbone: `0`.
+
+Admitted body facts:
+
+```prolog
+quarantine_patient(dax_orr).
+no_fever(dax_orr, 10_00).
+negative_test(dax_orr, 10_00).
+negative_test(dax_orr, 17_00).
+quarantine_patient(mira_gale).
+no_fever(mira_gale, 12_00).
+negative_test(mira_gale, 12_00).
+negative_test(mira_gale, 17_00).
+```
+
+Rule union:
+
+- `1` executable rule retained after isolated promotion-readiness filtering.
+- Runtime rule load errors: `0`.
+- Promotion-ready rules: `1`.
+- Positive probes: `1/1`.
+- Negative probes: `1/1`.
+- Probe-adjusted promotion ready: `true`.
+
+Retained rule:
+
+```prolog
+derived_clearance_status(dax_orr, cleared, quarantine) :-
+    quarantine_patient(dax_orr),
+    no_fever(dax_orr, _),
+    negative_test(dax_orr, T1),
+    negative_test(dax_orr, T2),
+    hours_at_least(T1, T2, 6).
+```
+
+Passing probes:
+
+```prolog
+derived_clearance_status(dax_orr, cleared, quarantine).
+% and no rows for:
+derived_clearance_status(mira_gale, cleared, quarantine).
+```
+
+### Lesson
+
+GLT-032/034 adds the temporal-helper version of the rule-ingestion pattern.
+The source says two negative tests must be at least six hours apart. The LLM
+owns the body-fact rows and rule proposal; deterministic code supplies the
+query-only helper `hours_at_least/3`, admits only mapper-safe clauses, and tests
+the rule in isolated runtime scope.
+
+The first quarantine attempt was useful-bad: the LLM proposed the right general
+condition, but the mapper blocked generic scope arguments or the verifier
+treated `hours_at_least/3` as an unsupported standalone generator. The harness
+now distinguishes context-dependent helpers: if an isolated rule fires, the
+helper has proven itself inside the conjunction and does not count as an
+unsupported body goal.
+
+The retained rule is instance-shaped, not yet a durable generalized quarantine
+law. That is still progress: Prethinker can now acquire and verify a
+source-faithful temporal clearance consequence while rejecting the Mira case
+whose tests were only five hours apart.

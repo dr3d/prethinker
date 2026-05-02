@@ -705,6 +705,16 @@ def test_rule_body_goal_support_can_use_runtime_virtual_helpers() -> None:
     assert support[0]["virtual_row_examples"] == [{"Cargo": "glass_eels"}]
 
 
+def test_temporal_hour_spacing_helper_accepts_clock_atoms() -> None:
+    from kb_pipeline import CorePrologRuntime
+
+    runtime = CorePrologRuntime()
+
+    assert runtime.query_rows("hours_at_least(10_00, 17_00, 6).")["status"] == "success"
+    assert runtime.query_rows("hours_at_least(12_00, 17_00, 6).")["status"] == "no_results"
+    assert runtime.query_rows("hours_at_least(t1000, t1700, 6).")["status"] == "success"
+
+
 def test_rule_probe_queries_score_positive_and_negative_expectations() -> None:
     from kb_pipeline import CorePrologRuntime
 
@@ -751,3 +761,24 @@ def test_rule_runtime_trial_scores_promotion_in_isolated_rule_scope() -> None:
     assert trial["derived_head_queries"][1]["trial_scope"] == "isolated_rule"
     assert trial["derived_head_queries"][1]["num_rows"] == 0
     assert trial["derived_head_queries"][1]["lifecycle_status"] == "runtime_loadable_rule"
+
+
+def test_rule_runtime_trial_allows_context_dependent_temporal_helper_when_rule_fires() -> None:
+    trial = _runtime_trial(
+        facts=[
+            "quarantine_patient(dax_orr).",
+            "no_fever(dax_orr, 10_00).",
+            "negative_test(dax_orr, 10_00).",
+            "negative_test(dax_orr, 17_00).",
+        ],
+        backbone_rules=[],
+        rule_lens_rules=[
+            "derived_clearance_status(dax_orr, cleared, quarantine) :- "
+            "quarantine_patient(dax_orr), no_fever(dax_orr, _), "
+            "negative_test(dax_orr, T1), negative_test(dax_orr, T2), "
+            "hours_at_least(T1, T2, 6).",
+        ],
+    )
+
+    assert trial["promotion_ready_rule_count"] == 1
+    assert trial["derived_head_queries"][0]["unsupported_body_goals"] == []

@@ -126,6 +126,27 @@ BODY_FACT_PREDICATES = [
         "why": "body_fact_acquisition",
         "admission_notes": ["Use only for explicit not-sacred source statements."],
     },
+    {
+        "signature": "quarantine_patient/1",
+        "args": ["patient"],
+        "description": "Person directly stated to be a quarantine patient.",
+        "why": "body_fact_acquisition",
+        "admission_notes": ["Use only for source-stated quarantine-patient status."],
+    },
+    {
+        "signature": "no_fever/2",
+        "args": ["patient", "time"],
+        "description": "Physician record directly states that the patient had no fever at a time.",
+        "why": "body_fact_acquisition",
+        "admission_notes": ["Use only for source-stated physician no-fever records."],
+    },
+    {
+        "signature": "negative_test/2",
+        "args": ["patient", "time"],
+        "description": "Physician record directly states a negative quarantine test at a time.",
+        "why": "body_fact_acquisition",
+        "admission_notes": ["Use only for source-stated negative test records."],
+    },
 ]
 
 

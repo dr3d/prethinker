@@ -62,6 +62,10 @@ Glass Tide is now exercising the harder rule-ingestion frontier:
   before combined probes run over the accumulated surface. Tax stayed at `3`
   promotion-ready rules and salvage stayed at `2`, so the gains survived the
   stricter test.
+- quarantine now adds the temporal-helper branch: a body-fact lens admitted
+  `quarantine_patient/1`, `no_fever/2`, and `negative_test/2`; `hours_at_least/3`
+  let the verifier retain a Dax clearance rule while rejecting Mira's five-hour
+  test spacing.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 
@@ -91,11 +95,9 @@ That is the Glass Tide plus CE frontier.
 
 The next work should stay on the sharp edges:
 
-1. **Glass Tide exception branches.** Threshold helper rules now fire, but
-   high-value relief-cargo exemption should stay as a separate semantic lens
-   before deterministic rule-surface union. GLT-027 shows this works; next is
-   applying the same union-and-probe pattern to quarantine and council vote
-   rules after GLT-029 confirmed it for salvage.
+1. **Glass Tide council voting.** Tax, salvage, and quarantine now have
+   promotion-ready rule branches under probe gates. The next harder rule family
+   is council voting: aggregation, treasurer veto, and emergency override.
 2. **Rule probe discipline.** Recent preflight runs show that a rule can be
    body-supported but fail under the wrong scope atom, can become dormant by
    using lowercase placeholders such as `warden` and `repair_order`, or can look

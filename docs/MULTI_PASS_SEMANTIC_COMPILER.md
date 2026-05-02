@@ -224,6 +224,13 @@ scoring. The high-water results held: tax stayed at `3` promotion-ready rules
 and salvage stayed at `2`, with all authored positive/negative probes still
 passing.
 
+GLT-032/034 adds a temporal-helper branch. A narrow body-fact lens admitted
+quarantine patient, no-fever, and negative-test rows; `hours_at_least/3` then
+supported an isolated promotion-ready clearance rule for Dax while the Mira
+negative probe stayed empty because her tests were only five hours apart. This
+also sharpened the verifier: context-dependent helpers should be judged inside
+the rule conjunction, not as standalone row generators.
+
 ## Open Problems
 
 - Pass planner: the router should choose lenses and source spans instead of

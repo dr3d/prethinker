@@ -7896,6 +7896,11 @@ class CorePrologRuntime:
         if getattr(term, "is_variable", False) or getattr(term, "args", []):
             return None
         value = str(getattr(term, "name", "") or "").strip().lower()
+        match = re.fullmatch(r"t?(\d{1,2})[_:]?(\d{2})", value)
+        if match:
+            hour, minute = match.groups()
+            if int(hour) <= 23 and int(minute) <= 59:
+                return datetime(2000, 1, 1, int(hour), int(minute))
         match = re.fullmatch(
             r"(\d{4})[_-](\d{2})[_-](\d{2})(?:[t_](\d{1,2})[_:](\d{2})(?:[_:]\d{2})?(?:[_-]utc|z)?)?",
             value,
@@ -8041,6 +8046,17 @@ class CorePrologRuntime:
                 return [subst] if hour_count == computed_hours else []
             new_subst = self.engine.unify(hours, Term(str(computed_hours), is_number=True), subst)
             return [new_subst] if new_subst else []
+        if goal.name == "hours_at_least" and len(goal.args) == 3:
+            start = subst.apply(goal.args[0])
+            end = subst.apply(goal.args[1])
+            threshold = subst.apply(goal.args[2])
+            start_time = self._temporal_datetime(start)
+            end_time = self._temporal_datetime(end)
+            threshold_hours = self._numeric_value(threshold)
+            if start_time is None or end_time is None or threshold_hours is None:
+                return []
+            computed_hours = int((end_time - start_time).total_seconds() // 3600)
+            return [subst] if computed_hours >= threshold_hours else []
         if goal.name == "elapsed_days" and len(goal.args) == 3:
             start = subst.apply(goal.args[0])
             end = subst.apply(goal.args[1])

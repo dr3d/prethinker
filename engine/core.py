@@ -12,6 +12,7 @@ Pure Python Prolog interpreter with:
 from typing import Any, Dict, List, Optional, Tuple
 from dataclasses import dataclass
 from copy import deepcopy
+from datetime import datetime
 import re
 
 
@@ -151,6 +152,7 @@ class PrologEngine:
             "\\=": self._builtin_not_unify,
             "value_greater_than": self._builtin_value_greater_than,
             "value_at_most": self._builtin_value_at_most,
+            "hours_at_least": self._builtin_hours_at_least,
         }
     
     def add_clause(self, clause: Clause):
@@ -585,6 +587,18 @@ class PrologEngine:
         """value_at_most(Entity, Threshold) via entity_property(Entity, value, Value)."""
         return self._builtin_entity_value_threshold(goal, subst, depth, mode="at_most")
 
+    def _builtin_hours_at_least(self, goal: Term, subst: Substitution, depth: int) -> List[Substitution]:
+        """hours_at_least(Start, End, Threshold) for canonical time atoms."""
+        if len(goal.args) != 3:
+            return []
+        start_time = self._time_term_value(subst.apply(goal.args[0]))
+        end_time = self._time_term_value(subst.apply(goal.args[1]))
+        threshold = self._numeric_term_value(subst.apply(goal.args[2]))
+        if start_time is None or end_time is None or threshold is None:
+            return []
+        delta_hours = int((end_time - start_time).total_seconds() // 3600)
+        return [subst] if delta_hours >= threshold else []
+
     def _builtin_entity_value_threshold(
         self,
         goal: Term,
@@ -622,6 +636,19 @@ class PrologEngine:
             return float(term.name)
         except Exception:
             return None
+
+    @staticmethod
+    def _time_term_value(term: Term) -> Optional[datetime]:
+        if term.is_variable or term.args:
+            return None
+        value = str(term.name).strip().lower()
+        match = re.fullmatch(r"t?(\d{1,2})[_:]?(\d{2})", value)
+        if not match:
+            return None
+        hour, minute = match.groups()
+        if int(hour) > 23 or int(minute) > 59:
+            return None
+        return datetime(2000, 1, 1, int(hour), int(minute))
 
 
 if __name__ == "__main__":

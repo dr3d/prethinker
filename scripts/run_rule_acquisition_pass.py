@@ -117,7 +117,16 @@ RULE_BODY_HELPER_PREDICATES = [
         "why": "rule_acquisition_numeric_helper",
         "admission_notes": ["Use only in rule bodies; runtime resolves it from admitted value facts."],
     },
+    {
+        "signature": "hours_at_least/3",
+        "args": ["start_time", "end_time", "threshold_hours"],
+        "description": "Query-only deterministic helper: true when End is at least ThresholdHours after Start.",
+        "why": "rule_acquisition_temporal_helper",
+        "admission_notes": ["Use only in rule bodies for source-stated minimum-hour spacing conditions."],
+    },
 ]
+
+CONTEXT_DEPENDENT_HELPER_SIGNATURES = {"hours_at_least/3"}
 
 
 def parse_args() -> argparse.Namespace:
@@ -645,6 +654,7 @@ def _rule_guidance_context(*, target: int, rule_class: str, compact: bool) -> li
         "Prefer clauses that can actually fire against the current admitted backbone when the source contains an instance. General dormant rules are allowed only when the body predicates and argument contracts are visibly present but no current instance is stated.",
         "Avoid class-predicate fanout. Do not bind a head variable only with broad class predicates such as person/1, place/1, cargo/1, or vessel/1. Every head variable should either be a source-stated constant or be joined through a non-class relation such as event_at, status_at, certified_record, claim, permission_at, temporal_window, requirement, exception, override, taxable_if, or another admitted relation.",
         "Prefer source-stated constants over fake generality when the admitted backbone only contains instance-level facts. If the source says the relevant place is archive_vault, put archive_vault in the head/body rather than place(ArchiveVault).",
+        "For rule-head scope/context arguments, copy an existing admitted rule/source anchor atom from existing_admitted_backbone. Do not invent a generic scope atom merely because it describes the domain area.",
         "Do not use member/2, lists, square brackets, equality/unification goals such as X = value, comparison operators, \\+, not/1, or arithmetic in this rule-lens mode. If a source has multiple required signers or supports, use repeated admitted relation goals with source-stated constants.",
         "Match allowed rule-head arities exactly: derived_permission/4 needs four arguments; derived_authorization/3 needs three; derived_obligation/3 needs three.",
         "Do not infer permission from occurrence. An event_at row that someone entered, signed, recovered, baked, arrived, or voted is not by itself a rule body proving the action was permitted or authorized.",
@@ -809,28 +819,37 @@ def _isolated_rule_trial_item(
             "isolated_backbone_rule_load_errors": backbone_rule_errors[:10],
         }
     query_result = runtime.query_rows(query) if query else {"status": "skipped", "num_rows": 0, "rows": []}
+    num_rows = int(query_result.get("num_rows", 0) or 0)
     body_goal_support = _rule_body_goal_support(rule, facts, runtime=runtime)
     supported_goal_signatures = {
         str(item.get("signature", ""))
         for item in body_goal_support
         if int(item.get("matching_fact_count", 0) or 0) > 0
     }
+    runtime_supported_goal_signatures = set(supported_goal_signatures)
+    if num_rows > 0:
+        runtime_supported_goal_signatures.update(CONTEXT_DEPENDENT_HELPER_SIGNATURES)
     return {
         "rule": rule,
         "head_query": query,
         "trial_scope": "isolated_rule",
         "status": str(query_result.get("status", "")),
-        "num_rows": int(query_result.get("num_rows", 0) or 0),
+        "num_rows": num_rows,
         "rows": query_result.get("rows", [])[:10] if isinstance(query_result.get("rows"), list) else [],
         "body_support": body_support,
         "unsupported_body_signatures": [
             item["signature"]
             for item in body_support
             if int(item["matching_fact_count"]) == 0
-            and str(item.get("signature", "")) not in supported_goal_signatures
+            and str(item.get("signature", "")) not in runtime_supported_goal_signatures
         ],
         "body_goal_support": body_goal_support,
-        "unsupported_body_goals": [item["goal"] for item in body_goal_support if int(item["matching_fact_count"]) == 0],
+        "unsupported_body_goals": [
+            item["goal"]
+            for item in body_goal_support
+            if int(item["matching_fact_count"]) == 0
+            and str(item.get("signature", "")) not in runtime_supported_goal_signatures
+        ],
         "unsupported_body_fragments": _unsupported_body_fragments(rule),
         "isolated_fact_load_errors": fact_errors[:10],
         "isolated_backbone_rule_load_errors": backbone_rule_errors[:10],

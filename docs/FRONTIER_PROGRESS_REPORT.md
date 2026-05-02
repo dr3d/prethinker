@@ -68,7 +68,7 @@ The frontier fixtures are designed to hurt different parts of that path:
 | Blackthorn | `2 exact / 1 partial / 17 miss` on first-20 | `85 exact / 4 partial / 11 miss` exact high-water; `83 / 10 / 7` best exact-plus-partial split | Dense procedural documents need broad skeleton preservation plus targeted hard-row support, not simple profile widening. |
 | Kestrel Claim | `5 exact / 0 partial / 15 miss` first-20 cold baseline | `73 exact / 11 partial / 16 miss` profile-guided full-100; `30 / 12 / 58` best source-aware full-100 | Domain packs are legitimate product context, but cold/source-aware claims must be reported separately from profile-guided runs. |
 | Anaplan Polaris | `29 exact / 6 partial / 8 miss` full-43 baseline | `42 exact / 1 partial / 0 miss` | A safe union of independent mapper-admitted support views can outperform any single compile without using answer-key guidance. |
-| Glass Tide Charter | cold profile bootstrap initially failed JSON; assisted starter first-20 was `7 exact / 2 partial / 11 miss` | cold compact bootstrap first-20 `13 exact / 3 partial / 4 miss`; GLT-023 has a probe-gated role-joined repair rule with `1/1` positive and `1/1` negative probes; GLT-030 keeps the tax union at `3` promotion-ready rules under isolated per-rule scoring; GLT-031 keeps salvage at `2` promotion-ready rules with reward/negative probes passing | Rule ingestion needs planned semantic lenses, active predicate palettes, helper substrates, body-goal support checks, positive/negative probes, isolated per-rule promotion scoring, and runtime verifier diagnostics, not more rule prose inside the default compile. |
+| Glass Tide Charter | cold profile bootstrap initially failed JSON; assisted starter first-20 was `7 exact / 2 partial / 11 miss` | cold compact bootstrap first-20 `13 exact / 3 partial / 4 miss`; GLT-023 has a probe-gated role-joined repair rule; GLT-030 keeps tax at `3` promotion-ready rules; GLT-031 keeps salvage at `2`; GLT-034 adds a temporal quarantine clearance rule with Dax positive and Mira negative probes passing | Rule ingestion needs planned semantic lenses, active predicate palettes, helper substrates, body-goal support checks, positive/negative probes, isolated per-rule promotion scoring, and runtime verifier diagnostics, not more rule prose inside the default compile. |
 | Clarification Eagerness Trap | `30/40` first full CE baseline | CET-008 high-water `39/40`, `0` over-eager, `1` under-eager, `0` unsafe candidates, `0` context-write violations; CET-009 variance check regressed to `37/40` | CE must be measured as a first-class frontier: ask posture, safe partials, blocked rows, context-write hygiene, and run-to-run variance are separate surfaces. |
 
 ## What Improved The Scores
@@ -130,6 +130,11 @@ The same pattern appears across fixtures:
   salvage unions with per-rule isolated runtimes. A rule must fire by itself
   against the backbone before the combined accumulated surface is probed, so a
   sibling rule with the same derived head cannot mask dormancy.
+- **Temporal rule helpers need context-aware support checks.** GLT-034 added
+  `hours_at_least/3` for quarantine clearance. The helper does not generate
+  times by itself, but it can verify already-bound test times inside a rule
+  conjunction. The verifier now treats such context-dependent helpers as
+  supported when the isolated rule fires.
 - **Promotion-ready is not durable.** Glass Tide now separates rule lifecycle
   labels: candidate, mapper-admitted, runtime-loadable, firing,
   promotion-ready, and durable. Durable remains `0` in these trials; the point is
