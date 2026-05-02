@@ -68,7 +68,7 @@ The frontier fixtures are designed to hurt different parts of that path:
 | Blackthorn | `2 exact / 1 partial / 17 miss` on first-20 | `85 exact / 4 partial / 11 miss` exact high-water; `83 / 10 / 7` best exact-plus-partial split | Dense procedural documents need broad skeleton preservation plus targeted hard-row support, not simple profile widening. |
 | Kestrel Claim | `5 exact / 0 partial / 15 miss` first-20 cold baseline | `73 exact / 11 partial / 16 miss` profile-guided full-100; `30 / 12 / 58` best source-aware full-100 | Domain packs are legitimate product context, but cold/source-aware claims must be reported separately from profile-guided runs. |
 | Anaplan Polaris | `29 exact / 6 partial / 8 miss` full-43 baseline | `42 exact / 1 partial / 0 miss` | A safe union of independent mapper-admitted support views can outperform any single compile without using answer-key guidance. |
-| Glass Tide Charter | cold profile bootstrap initially failed JSON; assisted starter first-20 was `7 exact / 2 partial / 11 miss` | cold compact bootstrap first-20 `13 exact / 3 partial / 4 miss`; GLT-023 has a probe-gated role-joined repair rule with `1/1` positive and `1/1` negative probes; GLT-024 has threshold tax rules with `2/3` positives and `1/1` negative, exposing the relief-cargo exception gap | Rule ingestion needs planned semantic lenses, active predicate palettes, helper substrates, body-goal support checks, positive/negative probes, and runtime verifier diagnostics, not more rule prose inside the default compile. |
+| Glass Tide Charter | cold profile bootstrap initially failed JSON; assisted starter first-20 was `7 exact / 2 partial / 11 miss` | cold compact bootstrap first-20 `13 exact / 3 partial / 4 miss`; GLT-023 has a probe-gated role-joined repair rule with `1/1` positive and `1/1` negative probes; GLT-025 has a split exception lens deriving `lamp_rice` exempt with `1/1` positive and `1/1` negative; GLT-026 shows combined tax bundles can misuse numeric helpers and should not be promoted without verifier checks | Rule ingestion needs planned semantic lenses, active predicate palettes, helper substrates, body-goal support checks, positive/negative probes, and runtime verifier diagnostics, not more rule prose inside the default compile. |
 | Clarification Eagerness Trap | `30/40` first full CE baseline | strict authority-aware baseline `37/40`, `0` over-eager, `2` under-eager, `1` unsafe candidate, `2` context-write violations | CE must be measured as a first-class frontier: ask posture, safe partials, blocked rows, and context-write hygiene are separate surfaces. |
 
 ## What Improved The Scores
@@ -111,6 +111,12 @@ The same pattern appears across fixtures:
   authored positive/negative probes: the high-value and low-value threshold
   cases passed, but the high-value relief-cargo exemption did not. The next
   rule frontier is exception-branch acquisition, not generic threshold support.
+- **Helper contracts need semantic argument checks.** GLT-026 showed that a
+  model can select the right helper while calling it with the wrong argument:
+  `value_greater_than(Value, 100)` after
+  `entity_property(Cargo, value, Value)`. The verifier now flags this as an
+  unsupported body fragment because numeric helpers are entity helpers, not raw
+  comparison operators.
 - **Promotion-ready is not durable.** Glass Tide now separates rule lifecycle
   labels: candidate, mapper-admitted, runtime-loadable, firing,
   promotion-ready, and durable. Durable remains `0` in these trials; the point is

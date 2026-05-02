@@ -565,3 +565,88 @@ derived_tax_status(lamp_rice, taxable, harbor).
 ### Lesson
 
 The numeric helper substrate still works, and the taxable/non-taxable threshold rows remain clean. The new probe layer exposes the real remaining edge: high-value relief cargo is correctly not taxable, but the exemption rule is not yet acquired. That means rule promotion cannot rely only on load/firing/body-support checks. Exception-bearing rule classes need positive and negative probes that cover the exception branch, plus probably a dedicated exception lens or helper substrate.
+
+## GLT-025 - Relief-Cargo Exception Branch With Scope Discipline
+
+- Timestamp: `2026-05-02T22:40:21Z`
+- Rule artifact: `tmp/domain_bootstrap_file/domain_bootstrap_file_20260502T224021055106Z_story-rules_qwen-qwen3-6-35b-a3b.json`
+- Mode: `exception_branch_scope_disciplined_trial`
+- Rule class: `exception`
+- Source span: `story.md:L50`
+
+### Result
+
+- Source-pass LM Studio calls now send `reasoning_effort="none"` through the shared structured JSON helper, matching the main Semantic IR runtime policy.
+- `2` executable exception/low-value rules admitted.
+- Runtime rule load errors: `0`.
+- Firing rules: `2`.
+- Promotion-ready rules: `2`.
+- Unsupported body goals: `0`.
+- Positive probes: `1/1`.
+- Negative probes: `1/1`.
+- Unexpected probe solutions: `0`.
+- Probe-adjusted promotion ready: `true`.
+
+Passing positive probe:
+
+```prolog
+derived_tax_status(lamp_rice, exempt, harbor).
+```
+
+Passing negative probe:
+
+```prolog
+derived_tax_status(lamp_rice, taxable, harbor).
+```
+
+### Lesson
+
+The exception branch was not blocked by source understanding. The first narrow exception run derived `lamp_rice` as exempt, but used `tax_rule_relief` as the third argument instead of the governed scope `harbor`. The authored positive probe caught that right-body/wrong-head-scope error. Adding generic derived-head scope guidance fixed it: scope arguments should name the governed domain, action, or object from the source, not the rule id, proof reason, or clause label.
+
+This is a useful small victory for semantic parallax: the exception lens can acquire the high-value relief-cargo branch when it is isolated from the threshold bundle.
+
+## GLT-026 - Full Tax Bundle Exposes Numeric Helper Misuse
+
+- Timestamp: `2026-05-02T22:40:40Z`
+- Rule artifact: `tmp/domain_bootstrap_file/domain_bootstrap_file_20260502T224040840534Z_story-rules_qwen-qwen3-6-35b-a3b.json`
+- Mode: `combined_threshold_exception_helper_misuse_trial`
+- Rule class: `threshold_exception`
+- Source span: `story.md:L50`
+
+### Result
+
+- `4` executable rules admitted.
+- Runtime rule load errors: `0`.
+- Firing rules: `4`.
+- Recomputed promotion-ready rules after verifier hardening: `2`.
+- Unsupported body fragments after verifier hardening: `2`.
+- Positive probes: `1/3`.
+- Negative probes: `1/1`.
+- Unexpected probe solutions: `0`.
+- Probe-adjusted promotion ready: `false`.
+
+The model emitted the right kind of helper, but used the numeric value variable as the helper subject:
+
+```prolog
+derived_tax_status(Cargo, exempt, harbor) :-
+    entity_property(Cargo, value, Value),
+    value_at_most(Value, 100).
+
+derived_tax_status(Cargo, taxable, harbor) :-
+    entity_property(Cargo, value, Value),
+    value_greater_than(Value, 100),
+    entity_property(Cargo, relief_status, not_relief).
+```
+
+The helper contract is entity-based:
+
+```prolog
+value_at_most(Cargo, 100).
+value_greater_than(Cargo, 100).
+```
+
+### Lesson
+
+GLT-026 turns a subtle runtime/query miss into a structural verifier rule. The rule trial now flags `value_at_most(Value, 100)` and `value_greater_than(Value, 100)` when `Value` is the numeric variable from `entity_property(Cargo, value, Value)`. This is not language handling in Python; it is contract verification over proposed Prolog clauses.
+
+The combined tax bundle also remains operationally fragile: a later retry of the same combined shape stalled while the GPU was idle. For the next cycle, keep threshold and exception branches as separate semantic lenses, then accumulate mapper-admitted rules through deterministic union instead of forcing all branches into one LLM pass.

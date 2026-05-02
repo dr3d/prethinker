@@ -47,6 +47,10 @@ Glass Tide is now exercising the harder rule-ingestion frontier:
 - threshold tax rules now work over deterministic numeric helpers, but
   positive/negative probes exposed the next hard gap: exception-branch
   promotion for high-value relief cargo.
+- a split exception lens now derives `lamp_rice` as `exempt` under the correct
+  `harbor` scope and does not derive it as taxable; the combined threshold plus
+  exception bundle remains fragile and exposed numeric-helper argument misuse
+  (`value_greater_than(Value, 100)` instead of `value_greater_than(Cargo, 100)`).
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 
@@ -76,8 +80,9 @@ That is the Glass Tide plus CE frontier.
 The next work should stay on the sharp edges:
 
 1. **Glass Tide exception branches.** Threshold helper rules now fire, but
-   high-value relief-cargo exemption still needs a dedicated exception lens or
-   bounded helper shape.
+   high-value relief-cargo exemption should stay as a separate semantic lens
+   before deterministic rule-surface union. Do not force the whole tax bundle
+   into one pass yet.
 2. **Rule probe discipline.** Recent preflight runs show that a rule can be
    body-supported but fail under the wrong scope atom, or can become dormant by
    using lowercase placeholders such as `warden` and `repair_order`. Keep

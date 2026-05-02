@@ -602,6 +602,8 @@ def _rule_guidance_context(*, target: int, rule_class: str, compact: bool) -> li
         "Do not use lowercase role placeholders such as warden, engineer, repair_order, cargo, actor, patient, vessel, or person when a value must bind; use uppercase variables or source atoms from existing_admitted_backbone.",
         "Every body goal should match actual predicate/arity and argument patterns visible in existing_admitted_backbone.",
         "Do not derive current answers as facts. Rule heads should be query-only derived predicates.",
+        "For derived_* head scope arguments, use the governed domain, action, or object from the source (for example harbor, glass_tide_repair, quarantine), not a rule id, proof reason, or clause label.",
+        "For value_greater_than/2 and value_at_most/2, the first argument is the entity being measured (for example Cargo), not the numeric Value variable from entity_property(Cargo, value, Value).",
         "Set source='direct' only because the source document explicitly states the rule.",
     ]
     if compact:
@@ -923,6 +925,32 @@ def _unsupported_body_fragments(rule: str) -> list[str]:
         if re.fullmatch(r"[\s,]+", fragment):
             continue
         fragments.append(fragment)
+    fragments.extend(_unsupported_helper_goal_fragments(rule))
+    return fragments
+
+
+def _unsupported_helper_goal_fragments(rule: str) -> list[str]:
+    value_variables: set[str] = set()
+    fragments: list[str] = []
+    for goal_text in _rule_body_goal_texts(rule):
+        goal = _parse_simple_goal(goal_text)
+        if not goal:
+            continue
+        name, args = goal
+        if name == "entity_property" and len(args) == 3 and args[1] == "value" and _is_rule_variable(args[2]):
+            value_variables.add(args[2])
+    for goal_text in _rule_body_goal_texts(rule):
+        goal = _parse_simple_goal(goal_text)
+        if not goal:
+            continue
+        name, args = goal
+        if name not in {"value_greater_than", "value_at_most"} or len(args) != 2:
+            continue
+        first_arg = args[0]
+        if first_arg in value_variables:
+            fragments.append(f"{goal_text} uses value variable where entity argument is required")
+        elif re.fullmatch(r"-?\d+(?:\.\d+)?", first_arg):
+            fragments.append(f"{goal_text} uses numeric literal where entity argument is required")
     return fragments
 
 

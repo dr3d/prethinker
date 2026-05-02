@@ -1597,6 +1597,7 @@ def _call_lmstudio_json_schema(
     temperature: float,
     top_p: float,
     max_tokens: int,
+    reasoning_effort: str = "none",
 ) -> dict[str, Any]:
     payload: dict[str, Any] = {
         "model": model,
@@ -1613,6 +1614,8 @@ def _call_lmstudio_json_schema(
             },
         },
     }
+    if str(reasoning_effort or "").strip():
+        payload["reasoning_effort"] = str(reasoning_effort).strip()
     req = urllib.request.Request(
         f"{base_url.rstrip('/')}/v1/chat/completions",
         data=json.dumps(payload).encode("utf-8"),

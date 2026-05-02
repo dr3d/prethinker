@@ -175,6 +175,13 @@ The script now wraps LM Studio calls in a hard child-process deadline, so a
 stalled local model call returns a clean failed artifact instead of leaving a
 runaway Python process in the workspace.
 
+Source-pass structured-output calls should use the same no-thinking policy as
+the main Semantic IR path: `temperature=0.0` and `reasoning_effort="none"`.
+Glass Tide exposed a drift here after the rule/support pass helpers were added:
+the model could spend budget in `reasoning_content` while producing no JSON
+`content`. The shared source-pass helper now sends `reasoning_effort="none"` so
+rule-lens runs spend tokens on the schema body.
+
 Rule lifecycle is now reported separately:
 
 ```text

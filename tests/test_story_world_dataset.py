@@ -599,6 +599,19 @@ def test_rule_body_fragment_diagnostics_report_unsupported_constructs() -> None:
     assert _unsupported_body_fragments(rule) == ["Actor = person_recovers_abandoned_cargo"]
 
 
+def test_rule_body_fragment_diagnostics_report_numeric_helper_value_variable_misuse() -> None:
+    rule = (
+        "derived_tax_status(Cargo, taxable, harbor) :- "
+        "entity_property(Cargo, value, Value), "
+        "value_greater_than(Value, 100), "
+        "entity_property(Cargo, relief_status, not_relief)."
+    )
+
+    assert _unsupported_body_fragments(rule) == [
+        "value_greater_than(Value, 100) uses value variable where entity argument is required"
+    ]
+
+
 def test_rule_trial_promotion_ready_requires_clean_firing_rule() -> None:
     assert _rule_trial_item_promotion_ready(
         {
