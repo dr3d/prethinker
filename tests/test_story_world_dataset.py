@@ -7,6 +7,7 @@ from scripts.run_domain_bootstrap_qa import (
     parse_numbered_markdown_questions,
 )
 from scripts.run_rule_acquisition_pass import (
+    _derived_head_rules,
     _probe_queries,
     _rule_lifecycle_counts,
     _rule_body_goal_support,
@@ -676,6 +677,17 @@ def test_rule_trial_lifecycle_distinguishes_loaded_firing_and_promotion_ready() 
     assert counts["firing_rule"] == 2
     assert counts["promotion_ready_rule"] == 1
     assert counts["durable_rule"] == 0
+
+
+def test_rule_lens_keeps_only_derived_rule_heads() -> None:
+    rules = [
+        "derived_reward_status(Actor, salvage_reward, Cargo) :- recovered_from_water(Actor, Cargo, Time).",
+        "rule_exception(salvage_rule, sacred_cargo_no_reward) :- sacred(Cargo).",
+    ]
+
+    assert _derived_head_rules(rules) == [
+        "derived_reward_status(Actor, salvage_reward, Cargo) :- recovered_from_water(Actor, Cargo, Time)."
+    ]
 
 
 def test_rule_body_goal_support_can_use_runtime_virtual_helpers() -> None:

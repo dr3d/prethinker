@@ -97,6 +97,37 @@ SUPPORT_LIKE_SIGNATURES = {
     "validates_when_high/2",
 }
 
+BODY_FACT_PREDICATES = [
+    {
+        "signature": "recovered_from_water/3",
+        "args": ["person", "cargo", "time"],
+        "description": "A source-stated recovery event where a person recovered cargo from water at a time.",
+        "why": "body_fact_acquisition",
+        "admission_notes": ["Use only when directly stated in raw source text."],
+    },
+    {
+        "signature": "abandoned/1",
+        "args": ["cargo"],
+        "description": "Cargo or object directly stated as abandoned.",
+        "why": "body_fact_acquisition",
+        "admission_notes": ["Use only for source-stated abandoned cargo/items."],
+    },
+    {
+        "signature": "sacred/1",
+        "args": ["cargo"],
+        "description": "Cargo or object directly stated as marked sacred.",
+        "why": "body_fact_acquisition",
+        "admission_notes": ["Use only for source-stated sacred cargo/items."],
+    },
+    {
+        "signature": "not_sacred/1",
+        "args": ["cargo"],
+        "description": "Cargo or object directly stated as not marked sacred.",
+        "why": "body_fact_acquisition",
+        "admission_notes": ["Use only for explicit not-sacred source statements."],
+    },
+]
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -112,6 +143,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--top-p", type=float, default=0.82)
     parser.add_argument("--operation-target", type=int, default=48)
     parser.add_argument("--max-tokens", type=int, default=10000)
+    parser.add_argument("--lens", choices=["support", "body_fact"], default="support")
+    parser.add_argument("--source-line-start", type=int, default=0)
+    parser.add_argument("--source-line-end", type=int, default=0)
+    parser.add_argument(
+        "--allowed-predicate-filter",
+        default="",
+        help="Optional comma-separated predicate names/signatures to expose in the active lens palette.",
+    )
     return parser.parse_args()
 
 
@@ -123,9 +162,15 @@ def main() -> int:
     if not registry:
         raise SystemExit("--profile-registry did not load")
     parsed_profile = _support_acquisition_profile(
-        _profile_from_registry(registry, domain_hint=str(args.domain_hint or ""))
+        _profile_from_registry(registry, domain_hint=str(args.domain_hint or "")),
+        lens=str(args.lens or "support"),
     )
+    allowed_predicate_filter = _predicate_filter(str(args.allowed_predicate_filter or ""))
+    if allowed_predicate_filter:
+        parsed_profile = _filter_profile_predicates(parsed_profile, allowed_predicate_filter)
     source_text = text_path.read_text(encoding="utf-8-sig")
+    if int(args.source_line_start or 0) > 0 or int(args.source_line_end or 0) > 0:
+        source_text = _line_range(source_text, int(args.source_line_start or 0), int(args.source_line_end or 0))
     backbone = json.loads(backbone_path.read_text(encoding="utf-8-sig"))
     backbone_facts = _compile_items(backbone, "facts")
     backbone_rules = _compile_items(backbone, "rules")
@@ -147,6 +192,10 @@ def main() -> int:
         "model": str(args.model),
         "profile_registry": str(args.profile_registry),
         "support_backbone_json": str(backbone_path),
+        "lens": str(args.lens or "support"),
+        "source_line_start": int(args.source_line_start or 0),
+        "source_line_end": int(args.source_line_end or 0),
+        "allowed_predicate_filter": sorted(allowed_predicate_filter),
         "latency_ms": int((time.perf_counter() - started) * 1000),
         "parsed_ok": True,
         "score": {
@@ -183,7 +232,7 @@ def main() -> int:
     return 0
 
 
-def _support_acquisition_profile(profile: dict[str, Any]) -> dict[str, Any]:
+def _support_acquisition_profile(profile: dict[str, Any], *, lens: str = "support") -> dict[str, Any]:
     support_like = []
     for item in profile.get("candidate_predicates", []) if isinstance(profile.get("candidate_predicates"), list) else []:
         if not isinstance(item, dict):
@@ -196,16 +245,25 @@ def _support_acquisition_profile(profile: dict[str, Any]) -> dict[str, Any]:
         str(out.get("domain_scope", "")).strip()
         + " | support acquisition pass: rationale/effect/tradeoff rows only"
     ).strip(" |")
-    out["candidate_predicates"] = [*support_like, *SUPPORT_PREDICATES]
+    if str(lens).strip().lower() == "body_fact":
+        out["candidate_predicates"] = BODY_FACT_PREDICATES
+        out["domain_scope"] = (
+            str(out.get("domain_scope", "")).strip()
+            + " | body-fact acquisition pass: rule-body support rows only"
+        ).strip(" |")
+    else:
+        out["candidate_predicates"] = [*support_like, *SUPPORT_PREDICATES]
     out["admission_risks"] = [
         *[str(item) for item in out.get("admission_risks", []) if str(item).strip()],
         "Support acquisition must not introduce new backbone recommendations or facts.",
         "Support rows must be source-grounded and must link to existing admitted anchor atoms when using support_* predicates.",
+        "Body-fact acquisition must emit only source-stated rows needed by rule bodies.",
     ]
     out["self_check"] = {
         **(out.get("self_check") if isinstance(out.get("self_check"), dict) else {}),
         "profile_authority": "proposal_only",
-        "support_acquisition_only": True,
+        "support_acquisition_only": str(lens).strip().lower() != "body_fact",
+        "body_fact_acquisition_only": str(lens).strip().lower() == "body_fact",
     }
     return out
 
@@ -224,7 +282,7 @@ def _run_support_pass(
     domain_context = profile_bootstrap_domain_context(parsed_profile)
     target = max(1, int(args.operation_target or 48))
     payload = {
-        "task": "Emit support/rationale source_pass_ops_v1 rows for an existing safe compile.",
+        "task": "Emit pass-specific source_pass_ops_v1 rows for an existing safe compile.",
         "authority": "proposal_only_mapper_remains_authoritative",
         "domain_hint": str(args.domain_hint or ""),
         "source_name": source_name,
@@ -240,8 +298,13 @@ def _run_support_pass(
         },
         "current_pass": {
             "pass_id": "support_acquisition_v1",
-            "purpose": "Add source-grounded reasons, effects, tradeoffs, exceptions, and positive counterparts.",
-            "focus": "Only support/rationale rows that make existing admitted guidance more answerable.",
+            "lens": str(args.lens or "support"),
+            "purpose": "Add source-grounded rows for the current semantic lens.",
+            "focus": (
+                "Only rule-body support facts directly stated in the raw source span."
+                if str(args.lens or "support") == "body_fact"
+                else "Only support/rationale rows that make existing admitted guidance more answerable."
+            ),
             "completion_policy": "Prefer high-query-value support rows for why/how/tradeoff questions. Omit unsupported rows.",
             "operation_target": target,
         },
@@ -260,6 +323,7 @@ def _run_support_pass(
             "Preserve contrastive conditions exactly. A low-complexity/high-populated-cell case is not the same anchor as a high-complexity/high-cell-count case; if the source contrasts them, emit separate support rows.",
             "For avoid/use-instead questions, preserve the positive counterpart separately from the avoid anchor.",
             "Set source='direct' only for operations grounded in raw_source_text. Context anchors alone are not enough.",
+            "For body_fact lens, emit only assert operations using the allowed body-fact predicates. Do not emit rules, queries, support_* rows, or generic entity_property fallbacks.",
         ],
     }
     try:
@@ -315,6 +379,47 @@ def _run_support_pass(
 def _compile_items(record: dict[str, Any], key: str) -> list[str]:
     source_compile = record.get("source_compile") if isinstance(record.get("source_compile"), dict) else {}
     return [str(item).strip() for item in source_compile.get(key, []) if str(item).strip()]
+
+
+def _line_range(source_text: str, start: int, end: int) -> str:
+    lines = source_text.splitlines()
+    if start <= 0:
+        start = 1
+    if end <= 0:
+        end = len(lines)
+    if end < start:
+        raise SystemExit("--source-line-end must be greater than or equal to --source-line-start")
+    return "\n".join(lines[start - 1 : end]).strip() + "\n"
+
+
+def _predicate_filter(raw: str) -> set[str]:
+    values: set[str] = set()
+    for item in raw.split(","):
+        token = item.strip()
+        if not token:
+            continue
+        values.add(token)
+        if "/" in token:
+            values.add(token.split("/", 1)[0])
+    return values
+
+
+def _filter_profile_predicates(profile: dict[str, Any], predicate_filter: set[str]) -> dict[str, Any]:
+    rows = profile.get("candidate_predicates", [])
+    if not isinstance(rows, list):
+        return profile
+    kept = []
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        signature = str(row.get("signature", "")).strip()
+        name = signature.split("/", 1)[0] if signature else ""
+        if signature in predicate_filter or name in predicate_filter:
+            kept.append(row)
+    out = dict(profile)
+    out["candidate_predicates"] = kept
+    out["active_predicate_filter"] = sorted(predicate_filter)
+    return out
 
 
 if __name__ == "__main__":

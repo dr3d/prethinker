@@ -208,6 +208,12 @@ clauses, and score the accumulated temporary KB. Glass Tide GLT-027 used this to
 combine threshold and exception tax lenses into `3` promotion-ready rules that
 passed `3/3` positive and `1/1` negative probes.
 
+GLT-028/029 adds the companion lesson: sometimes the rule lens is not enough
+because the backbone lacks the body facts a safe rule needs. A narrow body-fact
+lens over the salvage source span admitted `recovered_from_water/3`,
+`abandoned/1`, `sacred/1`, and `not_sacred/1`; the subsequent rule union retained
+`2` promotion-ready salvage rules and passed both reward probes.
+
 ## Open Problems
 
 - Pass planner: the router should choose lenses and source spans instead of

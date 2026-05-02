@@ -54,6 +54,10 @@ Glass Tide is now exercising the harder rule-ingestion frontier:
 - deterministic rule-surface union now accumulates the separate threshold and
   exception lenses into `3` promotion-ready tax rules with `3/3` positive probes
   and `1/1` negative probe, without reading source prose or inventing new rules.
+- the same pattern now works for salvage: a body-fact lens admitted
+  `recovered_from_water/3`, `abandoned/1`, `sacred/1`, and `not_sacred/1` rows;
+  a rule-lens union retained `2` promotion-ready salvage rules and passed both
+  the Tomas reward positive probe and Nell sacred-cargo negative probe.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 
@@ -86,8 +90,8 @@ The next work should stay on the sharp edges:
 1. **Glass Tide exception branches.** Threshold helper rules now fire, but
    high-value relief-cargo exemption should stay as a separate semantic lens
    before deterministic rule-surface union. GLT-027 shows this works; next is
-   applying the same union-and-probe pattern to salvage, quarantine, and council
-   vote rules.
+   applying the same union-and-probe pattern to quarantine and council vote
+   rules after GLT-029 confirmed it for salvage.
 2. **Rule probe discipline.** Recent preflight runs show that a rule can be
    body-supported but fail under the wrong scope atom, or can become dormant by
    using lowercase placeholders such as `warden` and `repair_order`. Keep

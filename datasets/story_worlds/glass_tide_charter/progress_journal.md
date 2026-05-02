@@ -715,3 +715,95 @@ than either source pass and stronger than the one-pass bundle.
 
 This is semantic parallax as executable-rule engineering: depth came from
 accumulating safe views, not from asking one prompt to see everything at once.
+
+## GLT-028 - Salvage Body-Fact Acquisition Lens
+
+- Timestamp: `2026-05-02T23:28:42Z`
+- Body-fact artifact: `tmp/domain_bootstrap_file/domain_bootstrap_file_20260502T232842128309Z_story-support_qwen-qwen3-6-35b-a3b.json`
+- Body/backbone union artifact: `tmp/domain_bootstrap_file/domain_bootstrap_file_20260502T232859146524Z_glass-tide-salvage-body-union-glt028_qwen-qwen3-6-35b-a3b.json`
+- Mode: `salvage_body_fact_lens`
+- Source span: `story.md:L130-L132`
+
+### Result
+
+- `5` body facts admitted.
+- `0` skipped operations.
+- Runtime load errors after deterministic union with the backbone: `0`.
+
+Admitted body facts:
+
+```prolog
+recovered_from_water(tomas_reed, blue_salt_crate_c17, 21_10).
+abandoned(blue_salt_crate_c17).
+not_sacred(blue_salt_crate_c17).
+recovered_from_water(nell_quill, bell_of_saint_loam, 21_25).
+sacred(bell_of_saint_loam).
+```
+
+### Lesson
+
+The original backbone had cargo identities, sacred/not-sacred status, and
+locations, but it lacked the actor recovery relation needed by any safe salvage
+reward rule. A rule lens alone cannot fix missing body support. GLT-028 adds a
+body-fact acquisition lens: same raw source, narrow source span, narrow
+rule-body predicate palette, normal mapper admission.
+
+This is not Python NLP. Python selected an authored source span and predicate
+palette; the LLM proposed the rows, and the mapper admitted them.
+
+## GLT-029 - Salvage Rule Union With Sacred-Cargo Negative Probe
+
+- Timestamp: `2026-05-02T23:31:04Z`
+- Rule artifact: `tmp/domain_bootstrap_file/domain_bootstrap_file_20260502T233042669249Z_story-rules_qwen-qwen3-6-35b-a3b.json`
+- Union artifact: `tmp/domain_bootstrap_file/domain_bootstrap_file_20260502T233104630717Z_glass-tide-salvage-rule-union-glt029_qwen-qwen3-6-35b-a3b.json`
+- Mode: `salvage_rule_body_fact_union_trial`
+- Rule class: `exception`
+
+### Result
+
+- `2` accumulated executable rules retained after promotion-readiness filtering.
+- Runtime rule load errors: `0`.
+- Promotion-ready rules: `2`.
+- Positive probes: `1/1`.
+- Negative probes: `1/1`.
+- Unexpected probe solutions: `0`.
+- Probe-adjusted promotion ready: `true`.
+
+Accumulated rules:
+
+```prolog
+derived_reward_status(Actor, salvage_reward, Cargo) :-
+    recovered_from_water(Actor, Cargo, _Time),
+    abandoned(Cargo),
+    not_sacred(Cargo).
+
+derived_reward_status(Actor, no_salvage_reward, Cargo) :-
+    recovered_from_water(Actor, Cargo, _Time),
+    sacred(Cargo).
+```
+
+Passing probes:
+
+```prolog
+derived_reward_status(tomas_reed, salvage_reward, blue_salt_crate_c17).
+% and no rows for:
+derived_reward_status(nell_quill, salvage_reward, bell_of_saint_loam).
+```
+
+### Lesson
+
+GLT-029 confirms that the MPSC pattern transfers beyond tax thresholds:
+
+```text
+body-fact lens
+-> rule lens
+-> deterministic union
+-> promotion-ready filtering
+-> positive/negative probes
+```
+
+The rule lens also tried to emit a negation-based fallback rule using `\+`.
+The verifier treated the leftover negation fragment as unsupported, and the
+union tool dropped that non-promotion-ready rule. This is exactly the intended
+safety posture: bad rule shapes can appear in proposals without becoming part
+of the accumulated executable surface.

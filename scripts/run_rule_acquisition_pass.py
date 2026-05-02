@@ -549,7 +549,7 @@ def _run_rule_pass(
         "warnings": warnings,
         "admission_diagnostics": diagnostics,
         "facts": mapped.get("facts", []),
-        "rules": mapped.get("rules", []),
+        "rules": _derived_head_rules(mapped.get("rules", [])),
         "queries": mapped.get("queries", []),
         "self_check": ir.get("self_check", {}),
         "source_pass_ops": parsed if isinstance(parsed, dict) else {},
@@ -582,6 +582,24 @@ def _call_lmstudio_json_schema_with_deadline(*, deadline_seconds: int, **kwargs:
     raise RuntimeError(error)
 
 
+def _derived_head_rules(rules: Any) -> list[str]:
+    if not isinstance(rules, list):
+        return []
+    allowed_names = {str(item["signature"]).split("/", 1)[0] for item in RULE_HEAD_PREDICATES}
+    kept: list[str] = []
+    for rule in rules:
+        text = str(rule).strip()
+        if _rule_head_name(text) in allowed_names:
+            kept.append(text)
+    return kept
+
+
+def _rule_head_name(rule: str) -> str:
+    head = str(rule).split(":-", 1)[0].strip()
+    match = re.match(r"^([a-z_][a-z0-9_]*)\s*\(", head)
+    return match.group(1) if match else ""
+
+
 def _lmstudio_call_worker(queue: mp.Queue, kwargs: dict[str, Any]) -> None:
     try:
         response = _call_lmstudio_json_schema(**kwargs)
@@ -602,7 +620,9 @@ def _rule_guidance_context(*, target: int, rule_class: str, compact: bool) -> li
         "Do not use lowercase role placeholders such as warden, engineer, repair_order, cargo, actor, patient, vessel, or person when a value must bind; use uppercase variables or source atoms from existing_admitted_backbone.",
         "Every body goal should match actual predicate/arity and argument patterns visible in existing_admitted_backbone.",
         "Do not derive current answers as facts. Rule heads should be query-only derived predicates.",
+        "Executable rule heads in this lens must use derived_* predicates from the rule-head palette. Do not use source/backbone predicates such as rule_exception/2 as executable rule heads.",
         "For derived_* head scope arguments, use the governed domain, action, or object from the source (for example harbor, glass_tide_repair, quarantine), not a rule id, proof reason, or clause label.",
+        "For derived_reward_status/3, preserve the source reward-status atom such as salvage_reward or no_salvage_reward; do not shorten it to generic reward or no_reward.",
         "For value_greater_than/2 and value_at_most/2, the first argument is the entity being measured (for example Cargo), not the numeric Value variable from entity_property(Cargo, value, Value).",
         "Set source='direct' only because the source document explicitly states the rule.",
     ]
