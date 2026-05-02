@@ -127,6 +127,18 @@ class CoreRuntimeTests(unittest.TestCase):
             ],
         )
 
+    def test_numeric_value_threshold_virtual_predicates(self) -> None:
+        self.assertEqual(self.runtime.assert_fact("entity_property(glass_eels, value, 300).").get("status"), "success")
+        self.assertEqual(self.runtime.assert_fact("entity_property(seed_crystals, value, 80).").get("status"), "success")
+
+        greater = self.runtime.query_rows("value_greater_than(Cargo, 100).")
+        at_most = self.runtime.query_rows("value_at_most(Cargo, 100).")
+
+        self.assertEqual(greater.get("status"), "success")
+        self.assertEqual(greater.get("rows"), [{"Cargo": "glass_eels"}])
+        self.assertEqual(at_most.get("status"), "success")
+        self.assertEqual(at_most.get("rows"), [{"Cargo": "seed_crystals"}])
+
     def test_retract_fact(self) -> None:
         self.assertEqual(self.runtime.assert_fact("parent(alice, bob).").get("status"), "success")
         remove = self.runtime.retract_fact("parent(alice, bob).")

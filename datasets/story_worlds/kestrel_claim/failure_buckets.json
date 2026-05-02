@@ -1,0 +1,65 @@
+{
+  "fixture": "kestrel_claim",
+  "buckets": [
+    {
+      "id": "competing_accounts_collapse",
+      "description": "Collapses source-attributed competing survey, legal, or regulatory accounts into a single resolved fact."
+    },
+    {
+      "id": "source_attribution_loss",
+      "description": "Drops the surveyor, party, regulator, witness, or document that owns a claim."
+    },
+    {
+      "id": "financial_chain_gap",
+      "description": "Misses claim, deductible, share, attachment, limit, or net-difference arithmetic support."
+    },
+    {
+      "id": "dual_role_collapse",
+      "description": "Confuses Harbour Mutual H&M underwriter role with its P&I club role."
+    },
+    {
+      "id": "suspension_window_error",
+      "description": "Misstates cover suspension start, end, duration, or costs inside/outside the window."
+    },
+    {
+      "id": "reinsurance_threshold_error",
+      "description": "Confuses late notice, attachment trigger, conditional future trigger, and assured entitlement."
+    },
+    {
+      "id": "security_payment_confusion",
+      "description": "Treats salvage security or guarantee as an actual paid award."
+    },
+    {
+      "id": "resolved_nonissue_lost",
+      "description": "Drops the sanctions/trading-warranty chain because it is not presently raised as a defense."
+    },
+    {
+      "id": "jurisdiction_authority_confusion",
+      "description": "Confuses DAM, Panama, Lloyds arbitration, class society, and party positions."
+    },
+    {
+      "id": "multilingual_statement_loss",
+      "description": "Fails to preserve substantive technical content from Russian, Greek, or French witness statements."
+    },
+    {
+      "id": "navigation_dispute_resolution",
+      "description": "Resolves the five navigation positions instead of preserving their distinct epistemic status."
+    },
+    {
+      "id": "citation_as_fact",
+      "description": "Treats legal citations as case findings or endorsements rather than authority cited for an argument."
+    },
+    {
+      "id": "correction_propagation_gap",
+      "description": "Keeps superseded time, amount, or measurement as current, or misses significance of correction."
+    },
+    {
+      "id": "coverage_interpretation_collapse",
+      "description": "Treats loss-of-hire or cover-suspension interpretation as objective fact instead of unresolved dispute."
+    },
+    {
+      "id": "contract_boundary_confusion",
+      "description": "Mixes H&M, P&I, reinsurance, retrocession, salvage, and regulatory instruments."
+    }
+  ]
+}

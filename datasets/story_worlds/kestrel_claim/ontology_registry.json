@@ -1,0 +1,577 @@
+{
+  "fixture": "kestrel_claim",
+  "source": "starter_profile_not_gold_kb",
+  "oracle_policy": "Do not derive cold-run context from gold_kb.pl. This starter registry is a general maritime-insurance scaffold for profile-guided experiments only.",
+  "predicates": [
+    {
+      "signature": "vessel/2",
+      "args": [
+        "vessel",
+        "attribute_or_value"
+      ],
+      "category": "vessel_identity",
+      "notes": "Kestrel starter profile predicate. It is not a gold answer; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "company_role/3",
+      "args": [
+        "company",
+        "role",
+        "context"
+      ],
+      "category": "role_scope",
+      "notes": "Kestrel starter profile predicate. It is not a gold answer; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "dual_role/3",
+      "args": [
+        "entity",
+        "role",
+        "contract_or_context"
+      ],
+      "category": "role_scope",
+      "notes": "Kestrel starter profile predicate. It is not a gold answer; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "person_role/3",
+      "args": [
+        "person",
+        "role",
+        "context"
+      ],
+      "category": "role_scope",
+      "notes": "Kestrel starter profile predicate. It is not a gold answer; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "policy/3",
+      "args": [
+        "policy",
+        "policy_type",
+        "assured_or_subject"
+      ],
+      "category": "insurance_contract",
+      "notes": "Kestrel starter profile predicate. It is not a gold answer; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "policy_period/3",
+      "args": [
+        "policy",
+        "start_time",
+        "end_time"
+      ],
+      "category": "insurance_contract",
+      "notes": "Kestrel starter profile predicate. It is not a gold answer; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "insured_value/3",
+      "args": [
+        "asset_or_policy",
+        "amount",
+        "currency"
+      ],
+      "category": "insurance_contract",
+      "notes": "Generic maritime-insurance profile predicate. It is not derived from the Kestrel gold KB; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "underwriter_line/4",
+      "args": [
+        "policy",
+        "underwriter",
+        "share_percent",
+        "role"
+      ],
+      "category": "insurance_contract",
+      "notes": "Kestrel starter profile predicate. It is not a gold answer; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "deductible/3",
+      "args": [
+        "policy_or_cover",
+        "deductible_type",
+        "amount"
+      ],
+      "category": "insurance_contract",
+      "notes": "Kestrel starter profile predicate. It is not a gold answer; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "contract_clause/4",
+      "args": [
+        "contract",
+        "clause_id",
+        "topic",
+        "effect"
+      ],
+      "category": "insurance_contract",
+      "notes": "Kestrel starter profile predicate. It is not a gold answer; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "incident_event/4",
+      "args": [
+        "incident",
+        "event_type",
+        "time",
+        "source"
+      ],
+      "category": "incident",
+      "notes": "Kestrel starter profile predicate. It is not a gold answer; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "incident_cause/3",
+      "args": [
+        "incident",
+        "cause",
+        "source"
+      ],
+      "category": "incident",
+      "notes": "Generic maritime-insurance profile predicate. It is not derived from the Kestrel gold KB; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "incident_cargo/3",
+      "args": [
+        "incident",
+        "cargo_or_voyage",
+        "source"
+      ],
+      "category": "incident",
+      "notes": "Generic maritime-insurance profile predicate. It is not derived from the Kestrel gold KB; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "incident_location/3",
+      "args": [
+        "incident",
+        "place",
+        "source"
+      ],
+      "category": "incident",
+      "notes": "Kestrel starter profile predicate. It is not a gold answer; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "survey_report/4",
+      "args": [
+        "report",
+        "surveyor",
+        "party_or_scope",
+        "date"
+      ],
+      "category": "competing_accounts",
+      "notes": "Kestrel starter profile predicate. It is not a gold answer; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "survey_finding/5",
+      "args": [
+        "report_or_surveyor",
+        "subject",
+        "finding_type",
+        "value",
+        "status"
+      ],
+      "category": "competing_accounts",
+      "notes": "Kestrel starter profile predicate. It is not a gold answer; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "class_survey_scope/4",
+      "args": [
+        "class_society",
+        "subject",
+        "scope",
+        "status"
+      ],
+      "category": "competing_accounts",
+      "notes": "Generic maritime-insurance profile predicate. It is not derived from the Kestrel gold KB; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "survey_scope_exclusion/3",
+      "args": [
+        "survey_or_report",
+        "excluded_subject",
+        "source"
+      ],
+      "category": "competing_accounts",
+      "notes": "Generic maritime-insurance profile predicate. It is not derived from the Kestrel gold KB; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "measurement_claim/6",
+      "args": [
+        "source",
+        "subject",
+        "measurement_type",
+        "value",
+        "unit",
+        "methodology"
+      ],
+      "category": "competing_accounts",
+      "notes": "Kestrel starter profile predicate. It is not a gold answer; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "cost_claim/5",
+      "args": [
+        "source",
+        "item",
+        "amount",
+        "currency",
+        "basis"
+      ],
+      "category": "financial",
+      "notes": "Kestrel starter profile predicate. It is not a gold answer; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "claim_amount/5",
+      "args": [
+        "claim",
+        "position_source",
+        "amount_type",
+        "amount",
+        "currency"
+      ],
+      "category": "financial",
+      "notes": "Kestrel starter profile predicate. It is not a gold answer; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "repair_cost_item/5",
+      "args": [
+        "source",
+        "item",
+        "amount",
+        "currency",
+        "status"
+      ],
+      "category": "financial",
+      "notes": "Generic maritime-insurance profile predicate. It is not derived from the Kestrel gold KB; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "cost_agreement/4",
+      "args": [
+        "party_or_source",
+        "item",
+        "amount",
+        "status"
+      ],
+      "category": "financial",
+      "notes": "Generic maritime-insurance profile predicate. It is not derived from the Kestrel gold KB; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "cost_disagreement/5",
+      "args": [
+        "issue",
+        "party_a_position",
+        "party_b_position",
+        "amount_or_delta",
+        "source"
+      ],
+      "category": "financial",
+      "notes": "Generic maritime-insurance profile predicate. It is not derived from the Kestrel gold KB; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "calculation_step/5",
+      "args": [
+        "calculation",
+        "input_or_operation",
+        "value",
+        "unit_or_currency",
+        "result_role"
+      ],
+      "category": "financial",
+      "notes": "Kestrel starter profile predicate. It is not a gold answer; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "cover_suspension/4",
+      "args": [
+        "policy",
+        "start_time",
+        "end_time",
+        "basis"
+      ],
+      "category": "temporal_contract",
+      "notes": "Kestrel starter profile predicate. It is not a gold answer; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "loss_of_hire_period/4",
+      "args": [
+        "claim_or_policy",
+        "start_time",
+        "end_time",
+        "status"
+      ],
+      "category": "temporal_contract",
+      "notes": "Generic maritime-insurance profile predicate. It is not derived from the Kestrel gold KB; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "loss_of_hire_position/4",
+      "args": [
+        "party",
+        "issue",
+        "position",
+        "source"
+      ],
+      "category": "temporal_contract",
+      "notes": "Generic maritime-insurance profile predicate. It is not derived from the Kestrel gold KB; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "reinsurance_layer/5",
+      "args": [
+        "treaty_or_layer",
+        "reinsurer",
+        "attachment",
+        "limit",
+        "basis"
+      ],
+      "category": "reinsurance",
+      "notes": "Kestrel starter profile predicate. It is not a gold answer; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "notification_event/5",
+      "args": [
+        "sender",
+        "recipient",
+        "subject",
+        "time",
+        "status"
+      ],
+      "category": "notice",
+      "notes": "Kestrel starter profile predicate. It is not a gold answer; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "reinsurance_notice_effect/4",
+      "args": [
+        "treaty_or_layer",
+        "notice_event",
+        "effect",
+        "source"
+      ],
+      "category": "reinsurance",
+      "notes": "Generic maritime-insurance profile predicate. It is not derived from the Kestrel gold KB; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "attachment_comparison/5",
+      "args": [
+        "claim_or_loss",
+        "attachment",
+        "value",
+        "comparison",
+        "source"
+      ],
+      "category": "reinsurance",
+      "notes": "Generic maritime-insurance profile predicate. It is not derived from the Kestrel gold KB; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "regulatory_position/5",
+      "args": [
+        "authority",
+        "subject",
+        "position",
+        "date",
+        "status"
+      ],
+      "category": "regulatory",
+      "notes": "Kestrel starter profile predicate. It is not a gold answer; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "legal_position/5",
+      "args": [
+        "party",
+        "issue",
+        "position",
+        "support",
+        "status"
+      ],
+      "category": "legal_claim",
+      "notes": "Kestrel starter profile predicate. It is not a gold answer; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "citation_support/4",
+      "args": [
+        "party_or_document",
+        "citation",
+        "proposition",
+        "status"
+      ],
+      "category": "legal_claim",
+      "notes": "Kestrel starter profile predicate. It is not a gold answer; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "legal_citation/4",
+      "args": [
+        "citation",
+        "source_or_party",
+        "issue",
+        "use"
+      ],
+      "category": "legal_claim",
+      "notes": "Generic maritime-insurance profile predicate. It is not derived from the Kestrel gold KB; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "defense_status/4",
+      "args": [
+        "party",
+        "defense",
+        "status",
+        "source"
+      ],
+      "category": "legal_claim",
+      "notes": "Generic maritime-insurance profile predicate. It is not derived from the Kestrel gold KB; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "trading_warranty_status/4",
+      "args": [
+        "policy_or_voyage",
+        "subject",
+        "status",
+        "source"
+      ],
+      "category": "legal_claim",
+      "notes": "Generic maritime-insurance profile predicate. It is not derived from the Kestrel gold KB; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "sanctions_event/5",
+      "args": [
+        "actor",
+        "event_type",
+        "subject",
+        "time",
+        "status"
+      ],
+      "category": "legal_claim",
+      "notes": "Generic maritime-insurance profile predicate. It is not derived from the Kestrel gold KB; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "port_call/5",
+      "args": [
+        "vessel",
+        "port",
+        "time",
+        "status",
+        "source"
+      ],
+      "category": "legal_claim",
+      "notes": "Generic maritime-insurance profile predicate. It is not derived from the Kestrel gold KB; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "witness_statement/5",
+      "args": [
+        "speaker",
+        "language",
+        "subject",
+        "content",
+        "source"
+      ],
+      "category": "witness",
+      "notes": "Kestrel starter profile predicate. It is not a gold answer; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "source_detail/4",
+      "args": [
+        "source",
+        "subject",
+        "detail",
+        "status"
+      ],
+      "category": "witness",
+      "notes": "Generic source-detail predicate for preserving queryable statement/report details without asserting them as global truth."
+    },
+    {
+      "signature": "salvage_contract/4",
+      "args": [
+        "contract",
+        "salvor",
+        "basis",
+        "status"
+      ],
+      "category": "salvage",
+      "notes": "Kestrel starter profile predicate. It is not a gold answer; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "security_posted/4",
+      "args": [
+        "security",
+        "amount",
+        "currency",
+        "status"
+      ],
+      "category": "financial",
+      "notes": "Kestrel starter profile predicate. It is not a gold answer; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "correction_record/5",
+      "args": [
+        "correction",
+        "subject",
+        "old_value",
+        "new_value",
+        "reason"
+      ],
+      "category": "correction",
+      "notes": "Kestrel starter profile predicate. It is not a gold answer; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "epistemic_status/3",
+      "args": [
+        "subject",
+        "status",
+        "source"
+      ],
+      "category": "epistemic",
+      "notes": "Kestrel starter profile predicate. It is not a gold answer; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "p_i_cover/4",
+      "args": [
+        "cover_or_club",
+        "year_or_period",
+        "subject",
+        "status"
+      ],
+      "category": "liability_cover",
+      "notes": "Generic maritime-insurance profile predicate. It is not derived from the Kestrel gold KB; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "p_i_notification_requirement/3",
+      "args": [
+        "cover_or_club",
+        "trigger",
+        "requirement"
+      ],
+      "category": "liability_cover",
+      "notes": "Generic maritime-insurance profile predicate. It is not derived from the Kestrel gold KB; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "charter_rate/3",
+      "args": [
+        "charter_or_vessel",
+        "rate",
+        "currency_basis"
+      ],
+      "category": "commercial_context",
+      "notes": "Generic maritime-insurance profile predicate. It is not derived from the Kestrel gold KB; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "temporal_duration/4",
+      "args": [
+        "interval_or_event",
+        "start_time",
+        "end_time",
+        "duration_value"
+      ],
+      "category": "temporal_order",
+      "notes": "Generic temporal profile predicate for preserving source-stated durations; derived durations remain query-time helpers."
+    },
+    {
+      "signature": "before/2",
+      "args": [
+        "earlier",
+        "later"
+      ],
+      "category": "temporal_order",
+      "notes": "Kestrel starter profile predicate. It is not a gold answer; direct source support and mapper admission remain required."
+    },
+    {
+      "signature": "temporal_relation/3",
+      "args": [
+        "event_a",
+        "relation",
+        "event_b"
+      ],
+      "category": "temporal_order",
+      "notes": "Kestrel starter profile predicate. It is not a gold answer; direct source support and mapper admission remain required."
+    }
+  ]
+}

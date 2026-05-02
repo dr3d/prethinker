@@ -254,6 +254,36 @@
     .section h2 { font-size: clamp(24px, 4vw, 40px); line-height: 1.04; }
     .section .lede { margin: 8px 0 14px; color: var(--muted); max-width: 920px; font-size: 17px; }
 
+    .headline-card {
+      margin-top: 18px;
+      border: 1px solid color-mix(in srgb, var(--hot) 45%, var(--line));
+      border-radius: 18px;
+      padding: 16px;
+      background: linear-gradient(140deg, color-mix(in srgb, var(--hot) 14%, var(--panel)), color-mix(in srgb, var(--cool) 12%, var(--panel-2)));
+    }
+
+    .headline-card .eyebrow {
+      font-family: "JetBrains Mono", Consolas, monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--hot-2);
+      font-size: 11px;
+      margin-bottom: 7px;
+    }
+
+    .headline-card h2 {
+      font-size: clamp(24px, 4vw, 42px);
+      line-height: 1.02;
+    }
+
+    .headline-card p {
+      margin: 9px 0 0;
+      color: var(--muted);
+      max-width: 980px;
+      line-height: 1.48;
+      font-size: 16px;
+    }
+
     .grid {
       display: grid;
       grid-template-columns: repeat(12, minmax(0, 1fr));
@@ -405,11 +435,30 @@
       <div class="hero-actions">
         <a class="btn primary" href="https://github.com/dr3d/prethinker/blob/main/README.md">Open README</a>
         <a class="btn primary" href="https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md">Open Project State</a>
+        <a class="btn primary" href="https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md">Today's Headline</a>
         <a class="btn cool" href="https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md">Open Docs Guide</a>
         <a class="btn cool" href="https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_UTTERANCE_PIPELINE.md">Open Current Pipeline</a>
-        <a class="btn cool" href="https://github.com/dr3d/prethinker/blob/main/docs/CONTEXT_CONTROL_ARCHITECTURE_BRIEF.md">Open Context Control</a>
+        <a class="btn cool" href="https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md">Open Multi-Pass Compiler</a>
+        <a class="btn cool" href="https://github.com/dr3d/prethinker/blob/main/docs/CLARIFICATION_EAGERNESS_STRATEGY.md">Open CE Strategy</a>
         <a class="btn cool" href="https://github.com/dr3d/prethinker/blob/main/docs/EXPLAINER.md">Open Explainer</a>
-        <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_RESEARCH_DIRECTION_REPORT.md">Open Semantic IR Report</a>
+      </div>
+      <div class="headline-card">
+        <div class="eyebrow">Today's Research Headline</div>
+        <h2>Semantic Parallax: One Compile Is A Viewpoint.</h2>
+        <p>
+          The newest gain is multi-pass semantic compilation: backbone, support/source, temporal/status, and rule lenses
+          can each propose a different view of the same source. The mapper admits each view independently, and deterministic
+          union accumulates only admitted clauses.
+        </p>
+        <p>
+          Glass Tide is now the live frontier: broad compiles preserve charter rules as records, while separate rule lenses
+          now have probe-gated runtime trials for role joins and threshold rules. The next hard problem is exception-branch promotion.
+        </p>
+        <div class="actions">
+          <a class="btn primary" href="https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md">Read Headline</a>
+          <a class="btn cool" href="https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md">Architecture Note</a>
+          <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/datasets/story_worlds/glass_tide_charter/progress_journal.md">Glass Tide Journal</a>
+        </div>
       </div>
       <div class="media-panel">
         <video controls preload="metadata" playsinline>
@@ -431,7 +480,7 @@
       <div class="metrics">
         <div class="metric">
           <div class="k">Full Test Suite</div>
-          <div id="m-gate" class="v">354</div>
+          <div id="m-gate" class="v">386</div>
           <div class="hint">Latest local pytest pass count</div>
         </div>
         <div class="metric">
@@ -445,9 +494,9 @@
           <div class="hint">Parsed, routed, and admission-safe in latest scoped-world rerun</div>
         </div>
         <div class="metric">
-          <div class="k">Harbor Frontier</div>
-          <div id="m-runs" class="v">14/14</div>
-          <div class="hint" id="m-runs-hint">Mapper-projected decisions and admission contracts</div>
+          <div class="k">Glass Tide Cold</div>
+          <div id="m-runs" class="v">3 rules</div>
+          <div class="hint" id="m-runs-hint">GLT-024 probe-gated temporary rule trials</div>
         </div>
       </div>
     </section>
@@ -479,13 +528,12 @@
         <article class="card">
           <span class="tag">Architecture</span>
           <h3>Design Spine</h3>
-          <p>The durable system view: authority boundary, router/context control, Semantic IR admission, domain profiles, and hint-free profile bootstrapping.</p>
+          <p>The durable system view: authority boundary, router/context control, Semantic IR admission, domain profiles, semantic lenses, and safe-surface accumulation.</p>
           <div class="actions">
+            <a class="btn primary" href="https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md">Multi-Pass Compiler</a>
             <a class="btn cool" href="https://github.com/dr3d/prethinker/blob/main/docs/CONTEXT_CONTROL_ARCHITECTURE_BRIEF.md">Context Control</a>
             <a class="btn cool" href="https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_MAPPER_SPEC.md">Mapper Spec</a>
             <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/EXPLAINER.md">Explainer</a>
-            <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PROFILE_CATALOG.md">Domain Profiles</a>
-            <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_BOOTSTRAPPING_META_MODE.md">Bootstrap Mode</a>
           </div>
         </article>
       </div>
@@ -505,14 +553,22 @@
         </article>
         <article class="card">
           <span class="tag">2</span>
-          <h3>Context Control</h3>
-          <p>The near-future system view: router-owned profile selection, context engineering, semantic compilation, and deterministic admission.</p>
+          <h3>Multi-Pass Compiler</h3>
+          <p>The newest architecture: semantic lenses, mapper-admitted fragments, deterministic safe-surface union, and rule trial.</p>
           <div class="actions">
-            <a class="btn cool" href="https://github.com/dr3d/prethinker/blob/main/docs/CONTEXT_CONTROL_ARCHITECTURE_BRIEF.md">Open</a>
+            <a class="btn cool" href="https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md">Open</a>
           </div>
         </article>
         <article class="card">
           <span class="tag">3</span>
+          <h3>Clarification Eagerness</h3>
+          <p>When Prethinker should ask during ingestion or query instead of guessing, over-asking, or committing unsafe rows.</p>
+          <div class="actions">
+            <a class="btn cool" href="https://github.com/dr3d/prethinker/blob/main/docs/CLARIFICATION_EAGERNESS_STRATEGY.md">Open</a>
+          </div>
+        </article>
+        <article class="card">
+          <span class="tag">4</span>
           <h3>Current Pipeline</h3>
           <p>The current domain-aware, recent-context, KB-seeded Semantic IR path from utterance to query or mutation.</p>
           <div class="actions">
@@ -520,7 +576,7 @@
           </div>
         </article>
         <article class="card">
-          <span class="tag">4</span>
+          <span class="tag">5</span>
           <h3>Semantic IR Mapper</h3>
           <p>The current contract for turning semantic workspace proposals into admissible mutations, queries, clarifications, and quarantines.</p>
           <div class="actions">
@@ -574,12 +630,12 @@
       <p class="lede">These are the highest-signal artifacts for understanding what is holding, what recovered, and where the caveats still live.</p>
       <div class="grid">
         <article class="card half">
-          <span class="tag">Router</span>
-          <h3>Semantic Router Experiment</h3>
-          <p>The current evidence lane for model-owned profile/context planning before Semantic IR compilation.</p>
+          <span class="tag">Headline</span>
+          <h3>Semantic Parallax</h3>
+          <p>The current evidence lane for multi-pass compilation: independent semantic lenses over the same source, admitted independently, accumulated deterministically.</p>
           <div class="actions">
-            <a class="btn primary" href="https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md">Status</a>
-            <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_ROUTER_EXPERIMENT.md">Router Notes</a>
+            <a class="btn primary" href="https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md">Read Headline</a>
+            <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md">Architecture</a>
           </div>
         </article>
         <article class="card half">
@@ -592,12 +648,29 @@
           </div>
         </article>
         <article class="card half">
+          <span class="tag">CE</span>
+          <h3>Clarification Eagerness</h3>
+          <p>The new ask/no-ask lane: ingestion and query fixtures for when Prethinker should clarify, commit safe partials, quarantine, or answer from admitted state.</p>
+          <div class="actions">
+            <a class="btn primary" href="https://github.com/dr3d/prethinker/blob/main/docs/CLARIFICATION_EAGERNESS_STRATEGY.md">Strategy</a>
+            <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/datasets/clarification_eagerness/clarification_eagerness_trap/progress_journal.md">Fixture Journal</a>
+          </div>
+        </article>
+        <article class="card half">
           <span class="tag">Frontier</span>
           <h3>Lava Packs</h3>
           <p>Hard truth-maintenance, predicate-drift, segmentation, multilingual, and domain-routing pressure packs. Useful for finding compiler weaknesses, not for polished demo claims.</p>
           <div class="actions">
             <a class="btn primary" href="https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md">Latest Notes</a>
             <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_RESEARCH_DIRECTION_REPORT.md">Research Direction</a>
+          </div>
+        </article>
+        <article class="card half">
+          <span class="tag">Progress</span>
+          <h3>Frontier Progress Report</h3>
+          <p>Visitor-readable trajectories for Iron Harbor, Blackthorn, Kestrel, Anaplan, Glass Tide, and Clarification Eagerness Trap, including gains, regressions, and current hard problems.</p>
+          <div class="actions">
+            <a class="btn primary" href="https://github.com/dr3d/prethinker/blob/main/docs/FRONTIER_PROGRESS_REPORT.md">Open Report</a>
           </div>
         </article>
         <article class="card half">
@@ -608,6 +681,7 @@
             <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/EXPLAINER.md">Explainer</a>
             <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/PROJECT_HORIZON.md">Project Horizon</a>
             <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/CONTEXT_CONTROL_ARCHITECTURE_BRIEF.md">Context Control</a>
+            <a class="btn" href="https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md">Multi-Pass Compiler</a>
           </div>
         </article>
       </div>
@@ -615,17 +689,22 @@
 
     <section id="recent-results" class="section">
       <h2>Recent Results</h2>
-      <p class="lede">Only current April 2026 evidence is surfaced here; older generated reports and pre-pivot records stay in Git history.</p>
+      <p class="lede">Only current high-signal evidence is surfaced here; older generated reports and pre-pivot records stay in Git history.</p>
       <div class="grid">
         <article class="card half">
           <span class="tag">Latest</span>
-          <h3>Harbor Frontier</h3>
-          <p>Latest pass: <strong>14/14</strong> JSON/schema, mapper-projected decisions, admission contracts, and admission checks <strong>52/52</strong>; average rough score <strong>0.96</strong>.</p>
+          <h3>Glass Tide Rule Frontier</h3>
+          <p>Cold compact profile bootstrap recovered from JSON failure to <strong>274</strong> admitted operations and first-20 QA <strong>13 exact / 3 partial / 4 miss</strong>. GLT-023 probe-gated the role-joined repair rule; GLT-024 kept threshold tax rules clean but exposed the high-value relief-cargo exception gap.</p>
         </article>
         <article class="card half">
-          <span class="tag">Agility</span>
-          <h3>Lava V5 Scoped Worlds</h3>
-          <p>Latest 60-attempt hard run stayed <strong>60/60</strong> parsed JSON, <strong>60/60</strong> domain selector, <strong>60/60</strong> admission-safe, <strong>45/60</strong> semantic-clean, <strong>41/60</strong> full expectation score, <strong>0</strong> fuzzy edge kinds, and <strong>0/60</strong> temp-0 variance.</p>
+          <span class="tag">CE</span>
+          <h3>Clarification Eagerness Trap</h3>
+          <p>The first strict ask/no-ask fixture baseline is <strong>37/40</strong> correct with <strong>0</strong> over-eager asks, while exposing <strong>2</strong> under-eager cases and <strong>2</strong> context-write violations as authority-boundary work.</p>
+        </article>
+        <article class="card half">
+          <span class="tag">Enterprise</span>
+          <h3>Anaplan Polaris</h3>
+          <p>APR-016 multi-support safe-surface accumulation reached <strong>42 exact / 1 partial / 0 miss</strong> on a 43-question post-ingestion QA battery, with <strong>0</strong> runtime load errors and <strong>0</strong> QA write proposals.</p>
         </article>
         <article class="card half">
           <span class="tag">Runtime</span>
@@ -633,9 +712,14 @@
           <p>Edge runtime A/B: <strong>20/20</strong> decision labels, avg <strong>0.976</strong>. Weak-edge pass: <strong>10/10</strong>, avg <strong>1.000</strong>. Non-mapper parse rescues: <strong>0</strong>.</p>
         </article>
         <article class="card half">
+          <span class="tag">Agility</span>
+          <h3>Lava V5 Scoped Worlds</h3>
+          <p>Latest 60-attempt hard run stayed <strong>60/60</strong> parsed JSON, <strong>60/60</strong> domain selector, <strong>60/60</strong> admission-safe, <strong>45/60</strong> semantic-clean, <strong>41/60</strong> full expectation score, <strong>0</strong> fuzzy edge kinds, and <strong>0/60</strong> temp-0 variance.</p>
+        </article>
+        <article class="card half">
           <span class="tag">Tests</span>
           <h3>Verification</h3>
-          <p>Latest lean full pytest suite: <strong>354 passed</strong> after retiring the legacy parser lane, unreachable JSON fixtures, the old clarification side surface, and parser-era family/social rewrite crutches. Lava v5 latest rerun: <strong>60/60</strong> admission-safe with <strong>0</strong> fuzzy edge kinds and <strong>0/60</strong> temp-0 signature variance groups.</p>
+          <p>Latest lean full pytest suite: <strong>389 passed</strong> after retiring the legacy parser lane, unreachable JSON fixtures, the old clarification side surface, and parser-era family/social rewrite crutches. Lava v5 latest rerun: <strong>60/60</strong> admission-safe with <strong>0</strong> fuzzy edge kinds and <strong>0/60</strong> temp-0 signature variance groups.</p>
         </article>
       </div>
     </section>
@@ -673,7 +757,7 @@
     </section>
 
     <div class="footer-note">
-      Docs Hub refresh: April 27, 2026. This page favors current semantic IR status, public product framing,
+      Docs Hub refresh: May 2, 2026. This page favors current semantic IR status, public product framing,
       and curated evidence over retired handoff clutter or rolling migration notes.
     </div>
   </main>

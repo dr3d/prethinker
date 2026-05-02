@@ -41,6 +41,159 @@ from src.semantic_ir import (  # noqa: E402
     semantic_ir_to_legacy_parse,
 )
 
+GENERIC_QUERY_PLACEHOLDERS = {
+    "actor",
+    "amount",
+    "answer",
+    "authority",
+    "candidate",
+    "claim",
+    "claimant",
+    "claimant_amount",
+    "calculated_share",
+    "calculation",
+    "calculation_description",
+    "calculationformula",
+    "condition",
+    "content",
+    "costitem",
+    "currency",
+    "date",
+    "description",
+    "detail",
+    "delta",
+    "effect",
+    "event",
+    "explanation",
+    "formula",
+    "item",
+    "label",
+    "language",
+    "location",
+    "method",
+    "note",
+    "party",
+    "person",
+    "policy",
+    "reason",
+    "record",
+    "role",
+    "source",
+    "status",
+    "step",
+    "subject",
+    "supportrole",
+    "time",
+    "type",
+    "underwriter",
+    "underwriter_amount",
+    "shareamount",
+    "sharepercent",
+    "value",
+    "vessel",
+    "what",
+    "when",
+    "where",
+    "who",
+    "why",
+}
+
+EVIDENCE_TABLE_PREDICATES = {
+    "action_when",
+    "avoid_pattern",
+    "calculation_step",
+    "citation_support",
+    "claim_amount",
+    "correction_record",
+    "cost_agreement",
+    "cost_disagreement",
+    "debugging_tactic",
+    "delta_load_pattern",
+    "defense_status",
+    "does_not_directly_determine",
+    "enables",
+    "export_reason",
+    "export_rule",
+    "guard_effect",
+    "guard_mechanism",
+    "guard_value",
+    "higher_effort_aggregation",
+    "incremental_filter",
+    "intraday_update_rule",
+    "legal_position",
+    "list_load_risk",
+    "loss_of_hire_position",
+    "measurement_claim",
+    "metric_semantics",
+    "optimization_priority",
+    "prefer_aggregation",
+    "preferred_export",
+    "priority_reason",
+    "recommendation",
+    "reinsurance_notice_effect",
+    "summary_review_question",
+    "support_effect",
+    "support_exception",
+    "support_positive_counterpart",
+    "support_reason",
+    "support_tradeoff",
+    "tradeoff",
+    "source_detail",
+    "survey_finding",
+    "trading_warranty_status",
+    "underwriter_line",
+    "validates_when_high",
+    "witness_statement",
+}
+
+EVIDENCE_TABLE_VARIABLE_NAMES = {
+    "action_when": ["Condition", "Action"],
+    "avoid_pattern": ["Pattern"],
+    "calculation_step": ["Step", "Formula", "Amount", "Currency", "Note"],
+    "citation_support": ["Party", "Citation", "Point", "SupportRole"],
+    "claim_amount": ["Claim", "Party", "AmountType", "Amount", "Currency"],
+    "correction_record": ["Record", "Subject", "OriginalValue", "CorrectedValue", "Authority"],
+    "cost_agreement": ["Party", "Item", "Amount", "Status"],
+    "cost_disagreement": ["Item", "ClaimantAmount", "InsurerAmount", "Delta", "Reason"],
+    "debugging_tactic": ["Problem", "Step"],
+    "delta_load_pattern": ["PatternPart", "Implementation"],
+    "defense_status": ["Party", "Defense", "Status", "Detail"],
+    "does_not_directly_determine": ["Metric", "NonDeterminant"],
+    "enables": ["Design", "Capability"],
+    "export_reason": ["Context", "Reason"],
+    "export_rule": ["Context", "Rule"],
+    "guard_effect": ["Effect"],
+    "guard_mechanism": ["Mechanism"],
+    "guard_value": ["Value"],
+    "higher_effort_aggregation": ["Method"],
+    "incremental_filter": ["Filter"],
+    "intraday_update_rule": ["Context", "Rule"],
+    "legal_position": ["Party", "Issue", "Position", "Source", "Detail"],
+    "list_load_risk": ["Condition", "Risk"],
+    "loss_of_hire_position": ["Party", "Period", "Position", "Detail"],
+    "measurement_claim": ["Report", "Subject", "MeasurementType", "Value", "Unit", "Method"],
+    "metric_semantics": ["Metric", "Meaning"],
+    "optimization_priority": ["Target", "Rank"],
+    "prefer_aggregation": ["Method"],
+    "preferred_export": ["ExportType", "Purpose"],
+    "priority_reason": ["TargetClass", "Reason"],
+    "recommendation": ["Recommendation"],
+    "reinsurance_notice_effect": ["Treaty", "Notice", "Effect", "Source"],
+    "source_detail": ["Source", "DetailKind", "DetailValue", "Status"],
+    "summary_review_question": ["Question"],
+    "support_effect": ["Anchor", "Effect"],
+    "support_exception": ["Anchor", "Exception"],
+    "support_positive_counterpart": ["Anchor", "PreferredAction"],
+    "support_reason": ["Anchor", "Reason"],
+    "support_tradeoff": ["Anchor", "Benefit", "CostOrRisk"],
+    "survey_finding": ["Surveyor", "Subject", "Finding", "Value", "Source"],
+    "tradeoff": ["Choice", "Benefit", "CostOrRisk"],
+    "trading_warranty_status": ["Policy", "Subject", "Status", "Detail"],
+    "underwriter_line": ["Policy", "Underwriter", "SharePercent", "Role"],
+    "validates_when_high": ["Metric", "Meaning"],
+    "witness_statement": ["Speaker", "Language", "Subject", "Content", "Source"],
+}
+
 
 QA_JUDGE_SCHEMA: dict[str, Any] = {
     "type": "object",
@@ -52,6 +205,59 @@ QA_JUDGE_SCHEMA: dict[str, Any] = {
         "answer_supported": {"type": "boolean"},
         "concise_answer": {"type": "string", "maxLength": 600},
         "issues": {"type": "array", "maxItems": 8, "items": {"type": "string", "maxLength": 300}},
+    },
+}
+
+EVIDENCE_BUNDLE_PLAN_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": ["schema_version", "question_focus", "support_bundles", "warnings"],
+    "properties": {
+        "schema_version": {"type": "string", "const": "evidence_bundle_plan_v1"},
+        "question_focus": {"type": "string", "maxLength": 300},
+        "support_bundles": {
+            "type": "array",
+            "maxItems": 8,
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["bundle_id", "purpose", "query_templates", "missing_if_empty"],
+                "properties": {
+                    "bundle_id": {"type": "string", "maxLength": 80},
+                    "purpose": {"type": "string", "maxLength": 240},
+                    "query_templates": {
+                        "type": "array",
+                        "maxItems": 10,
+                        "items": {"type": "string", "maxLength": 240},
+                    },
+                    "missing_if_empty": {"type": "string", "maxLength": 240},
+                },
+            },
+        },
+        "warnings": {"type": "array", "maxItems": 6, "items": {"type": "string", "maxLength": 220}},
+    },
+}
+
+FAILURE_SURFACE_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": ["schema_version", "surface", "confidence", "rationale", "suggested_next_action"],
+    "properties": {
+        "schema_version": {"type": "string", "const": "qa_failure_surface_v1"},
+        "surface": {
+            "type": "string",
+            "enum": [
+                "compile_surface_gap",
+                "query_surface_gap",
+                "hybrid_join_gap",
+                "answer_surface_gap",
+                "judge_uncertain",
+                "not_applicable",
+            ],
+        },
+        "confidence": {"type": "number", "minimum": 0.0, "maximum": 1.0},
+        "rationale": {"type": "string", "maxLength": 500},
+        "suggested_next_action": {"type": "string", "maxLength": 360},
     },
 }
 
@@ -124,6 +330,19 @@ POST_INGESTION_QA_QUERY_STRATEGY: dict[str, Any] = {
         "For questions asking how many corrections/addenda were filed, query correction_filing/3 and count distinct record_kind values. If a run has individual correction_1/correction_2/correction_3/addendum rows, prefer those over a compressed correction_addendum row.",
         "For confirmation questions such as who confirmed a facility was back online or running again, query reported_event(Reporter, facility_restoration, Time, Source) and witness_statement/4 before boil_water_notice_lifted/2. The person lifting a notice is not necessarily the person confirming restoration.",
         "For comprehensive or multi-violation questions, plan one small support bundle per alleged violation: governing policy row, observed event row, and any timing/correction/source row needed to show why it is a violation. Prefer concrete event predicates such as inspection, notice/lift, notification, reading, authorization, and zone-scope predicates before broad before/after scans. If one violation is an omission, include the paired set-difference query pattern from this strategy: scope predicate with shared variable, then absent-side event predicate with polarity='negative'.",
+        "For marine-insurance or coverage-dispute financial questions, query numeric rows before legal-position rows. Use claim_amount/5 for gross or adjusted amounts, calculation_step/5 for net/share/difference values, cost_claim/5 for surveyor estimates, cost_agreement/4 for accepted items, cost_disagreement/5 for disputed deltas, deductible/3 for deductible values, underwriter_line/4 for share percentages, and attachment_comparison/5 for treaty threshold comparisons when those predicates exist.",
+        "For marine-insurance net-difference questions, retrieve both claimant and insurer net rows from calculation_step/5 or claim_amount/5 before asking legal_position/5. A legal position row usually explains the dispute, but it does not carry the arithmetic answer unless the numeric value appears in its returned atom.",
+        "For marine-insurance questions asking whether an insurer accepted the full claimed amount, query both sides of the amount surface: claim_amount/5 for claimant and insurer/adjusted positions, calculation_step/5 for net positions, and cost_disagreement/5 for disputed items. Do not query only one amount type such as gross_claim against the insurer if the compiled KB uses adjusted_claim or adjusted_total.",
+        "For marine-insurance hypothetical attachment questions such as 'even if the full claimant figure were accepted', retrieve the claimant net calculation_step/5, the lead underwriter share from underwriter_line/4, and attachment_comparison/5 or reinsurance_layer/5. Do not rely only on the actual adjusted-claim attachment row when the question asks about a different stated scenario.",
+        "For marine-insurance H&M cover-suspension or condition-of-class questions, do not query P&I predicates. Prefer cover_suspension/4, class_survey_scope/4, contract_clause/4, defense_status/4, temporal_relation/3, and correction_record/5 when those exist. P&I cover answers liability-club questions, not Hull and Machinery cover-state questions.",
+        "For marine-insurance P&I exposure questions, retrieve itemized exposure surfaces before role metadata: p_i_cover/4 for scope/year, p_i_notification_requirement/3 for notice duties, security_posted/4 for salvage security, cost_claim/5 or claim_amount/5 for cargo/pollution amounts, deductible/3 for P&I deductibles, and calculation_step/5 for total or derived exposure if present. Role rows such as dual_role/3 alone do not answer exposure totals.",
+        "For marine-insurance legal citation or clause questions, query legal_citation/4 and citation_support/4 before broad legal_position/5 rows. Citations support positions; they are not findings.",
+        "For marine-insurance reinsurance late-notice questions, query reinsurance_notice_effect/4 whenever it exists, alongside defense_status/4 and reinsurance_layer/5. defense_status/4 usually answers whether the issue affects the assured; reinsurance_notice_effect/4 answers what late notice does inside the treaty relationship.",
+        "For marine-insurance trading-warranty, sanctions, port-call, or defense-status questions, query the whole chain when available: contract_clause/4 for the warranty, sanctions_event/5 or port_call/5 for voyage/cancellation facts, trading_warranty_status/4 for breach/remedy/intent status, defense_status/4 for whether a party raised or declined a defense, and citation_support/4 or legal_citation/4 for statutory support. Do not invent a label such as trading_warranty_defense unless that exact atom appears in relevant_clauses. Do not stop after the first trading_warranty_status row if another row contains a party's intent or non-intent. For trading_warranty_status/4 intent/non-intent questions, query trading_warranty_status(Policy, Subject, Status, Detail) with all slots as variables unless exact constants appear in relevant_clauses; the intent may be embedded in the Detail slot rather than a party atom.",
+        "For marine-insurance surveyor agreement/disagreement questions, gather source-attributed report and technical rows: survey_report/4, survey_finding/5, measurement_claim/6, cost_claim/5, cost_agreement/4, cost_disagreement/5, class_survey_scope/4, survey_scope_exclusion/3, and correction_record/5 when present. Agreement questions often require both positive agreement rows and absence/outside-scope rows.",
+        "For marine-insurance loss-of-hire calculation questions, retrieve the amount or disagreement row plus the time/rate support: cost_disagreement/5 or claim_amount/5 for the claimed LOH amount, loss_of_hire_period/4 for interval support, charter_rate/3 for the daily rate, and loss_of_hire_position/4 or contract_clause/4 for coverage status. Do not drop charter_rate/3 when the question asks how an amount was calculated.",
+        "For maritime witness questions, the word 'Master' usually means the vessel's master/captain, not a harbour master. Query witness_statement(Speaker, Language, Subject, Content, Source) with Speaker as a variable unless the exact canonical speaker atom appears in relevant_clauses.",
+        "For marine-insurance witness or expert statement count questions, do not bind the second witness_statement/5 slot to the literal constant language. Query witness_statement(Speaker, Language, Subject, Content, Source), then add survey_report/4, legal_position/5, source_detail/4, and citation_support/4 only if the question asks for expert/legal statements beyond witness rows.",
         "For threshold-elapsed questions, retrieve the starting state/event time, the threshold-hours policy row, and the later target event time. Use add_hours(StartTime, ThresholdHours, ThresholdTime), then elapsed_minutes(ThresholdTime, LaterTime, Minutes). Do not measure from the raw start event when the question asks from the threshold moment.",
         "For temporal helper chains, emit prerequisite helper queries before dependent helper queries: add_hours(StartTime, Hours, ThresholdTime) must appear before elapsed_minutes(ThresholdTime, LaterTime, Minutes). Prefer elapsed_minutes/3 for answers that may be less than one whole hour, then convert to hours/minutes in the concise answer.",
         "For duration or deadline questions that name a state threshold, first retrieve the state-change predicate that carries the start timestamp, then retrieve the policy threshold, then call add_hours/3 or elapsed_minutes/3. Do not call temporal helpers with unbound invented lowercase constants.",
@@ -132,6 +351,37 @@ POST_INGESTION_QA_QUERY_STRATEGY: dict[str, Any] = {
         "For inspection-current or validity-window questions expressed in days, retrieve the inspection row and authorization row with shared variables, then call elapsed_days(InspectionDate, AuthorizationTime, ElapsedDays). Do not use add_hours/3 with a days-validity value.",
         "For questions asking when an advisory testing interval takes effect, ends, or reverts to normal, query both the interval rule and the advisory state event: testing_interval(contamination_advisory, Hours) or testing_interval(declared_contamination_advisory, Hours), plus contamination_advisory(triggered, StartTime) or contamination_advisory(lifted, EndTime).",
         "If the question specifically asks when the contamination advisory testing interval reverts to normal, emit all three support queries: contamination_advisory(lifted, EndTime), boil_water_notice_lifted(EndTime, Lifter), and policy_requirement(Bylaw, notice_lift_condition, Requirement) or policy_requirement(Bylaw, notice_lift_deadline, Requirement). Do not answer this question with testing_interval/2 alone.",
+        "For enterprise-guidance or technical-policy QA, distinguish recommendation, preference, avoid-pattern, priority, procedure, tradeoff, and rule predicates. Do not answer a prefer question only from avoid_pattern/1, and do not answer an avoid question only from recommendation/1.",
+        "For enterprise-guidance why/rationale questions, query the most specific available reason surface first: priority_reason/2 for ranked targets, export_reason/2 for export contexts, guard_effect/1 for guards, tradeoff/3 for benefit/downside pairs, summary_review_question/1 plus enables/2 for summary-method and On-Demand Calculation reasoning, debugging_tactic/2 or action_when/2 for procedural follow-ups, and support_reason/2, support_effect/2, support_tradeoff/3, support_exception/2, or support_positive_counterpart/2 when a support-acquisition pass has added source-grounded rationale rows.",
+        "For priority-order questions, query optimization_priority(Target, Rank) and priority_reason(Target, Reason). Do not use recommendation/1 as a substitute for ranked priority rows.",
+        "For enterprise-guidance questions asking whether a priority target is a risk or should be reviewed, query both optimization_priority(Target, Rank) and priority_reason(Target, Reason). The reason row often contains performance_risk or review rationale.",
+        "For metric-boundary questions, query metric_semantics/2, does_not_directly_determine/2, validates_when_high/2, and performance_metric/1 before generic recommendations.",
+        "For guard questions, query the whole guard support bundle when available: recommendation(use_guards_effectively), guard_value(Value), guard_mechanism(Mechanism), and guard_effect(Effect). If the question asks what guard does, guard_effect/1 is answer-bearing.",
+        "For guard questions asking which values are useful as guards, query guard_value(Value) directly. Do not answer only from a generic use-guards recommendation.",
+        "For guard questions asking how guards work or what pattern implements them, query guard_mechanism(Mechanism) and guard_effect(Effect).",
+        "For summary-method questions, query optimization_priority/2, summary_review_question/1, enables/2, and priority_reason/2. Summary methods are a priority/checklist surface, not just a generic recommendation.",
+        "For summary-method why questions, always include summary_review_question(Question), because the question rows may contain On-Demand Calculation and hierarchy-level support even when priority_reason/2 is missing.",
+        "For summary-method questions asking what to check, emit broad summary_review_question(Question) queries. For questions asking why moving summaries later can help, pair summary_review_question/1 with enables(Design, Capability).",
+        "For aggregation questions, query prefer_aggregation(Method) for 'which aggregation is fast/preferred' and higher_effort_aggregation(Method) for 'which methods require more effort'. Do not query only higher_effort_aggregation/1 when the question asks which aggregation is fast.",
+        "For lookup-vs-sum questions, query avoid_pattern(multiple_lookups_when_sum_possible) or avoid_pattern(lookup_against_very_large_data_sources) plus prefer_aggregation(sum) when available.",
+        "For export questions, keep export_rule/2, export_reason/2, and preferred_export/2 distinct. Combined Grids answer compact leaf-level export questions; Tabular Multiple Column Export answers export-type importance questions.",
+        "For export questions asking which export type is important in Polaris, query export_rule(Context, Rule) and export_reason(Context, Reason). For compact leaf-level export questions, query preferred_export(ExportType, Purpose).",
+        "For export questions asking why very large grids should not be pivot-exported, query export_reason(very_large_grids, Reason) and export_rule(very_large_grids, Rule) if those constants exist in relevant clauses.",
+        "For intraday update questions, query intraday_update_rule/2, delta_load_pattern/2, incremental_filter/1, and recovery_path/1. If the question asks what to use instead of full clear-and-reload, delta_load_pattern rows are answer-bearing.",
+        "For intraday update questions asking what not to rely on, query intraday_update_rule(Context, Rule). For questions asking what to use instead, query delta_load_pattern(ContextOrPart, Pattern) and incremental_filter(Filter).",
+        "For staging-pattern questions, query all delta_load_pattern/2 rows first, then incremental_filter/1. A single avoid/full-reload row is not enough support for the replacement pattern.",
+        "For filter/DCA/conditional-formatting questions, query avoid_pattern/1 for the problem, recommendation/1 for the replacement, debugging_tactic/2 for procedure, tradeoff/3 when the question asks why or downside, and support_positive_counterpart/2 or support_reason/2 when the KB contains support-acquisition rows.",
+        "For user-based filter questions, query avoid_pattern(Pattern) for the risk. If the question asks what to use instead, also query recommendation(Recommendation) and any native-UX/filter predicate present; if no positive alternative exists, return partial rather than inventing one.",
+        "For DCA or optimization debugging questions, query debugging_tactic(Problem, Step) and action_when(Condition, Action) broadly before generic recommendations.",
+        "For slow-line-item questions asking where to look after a line item is already optimized, query debugging_tactic(slow_line_item_with_high_optimization, Step) and debugging_tactic(slow_line_item, Step) before priority rows.",
+        "For computationally intensive function questions, query computationally_intensive_function(Function), optimization_priority(Target, Rank), priority_reason(Target, Reason), and debugging_tactic(Target, Step). The answer may require joining a function such as finditem to a target class such as line_items_with_high_calculation_effort_using_computationally_intensive_functions.",
+        "For All Cells/high-cell-count questions, query priority_reason(Target, Reason) and optimization_priority(Target, Rank) broadly with Target as a variable; do not stop after the rank alone.",
+        "For DEV model list-seeding questions, query recommendation(Recommendation) broadly and do not over-bind the recommendation atom; the answer may be a long normalized recommendation such as ensure_all_dimensions_in_dev_model_have_at_least_one_list_item.",
+        "For DEV model list-seeding why questions, pair the list-item recommendation with debugging_tactic(non_winding_cyclic_calculation_error, Step) when available; the causal support may be split between a setup recommendation and the error class it allows the model to catch.",
+        "For populated-cell questions that mention low complexity, high memory, or On-Demand Calculation, query metric_semantics/2, validates_when_high/2, does_not_directly_determine/2, summary_review_question/1, enables/2, and any debugging_tactic row mentioning end_of_chain or on_demand. Do not answer only from high-complexity priority rows.",
+        "For time-range or population-restriction questions, query recommendation(Recommendation) broadly and prefer rows mentioning time ranges, booleans, or restricted populations when returned.",
+        "For business-process model separation questions, query tradeoff/3 rather than only recommendation/1. The benefits and downsides are separate answer surfaces.",
+        "For list-load questions, query list_load_risk/2 and reduce_list_load_impact/1 together; one names the risk and the other names mitigation tactics.",
     ],
     "failure_policy": [
         "If no compiled predicate can faithfully answer the question, emit no write and explain the missing predicate/support in self_check.",
@@ -189,9 +439,38 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--no-cache", action="store_true", help="Disable exact-input QA row cache for a fresh run.")
     parser.add_argument("--include-model-input", action="store_true")
     parser.add_argument(
+        "--evidence-bundle-plan",
+        action="store_true",
+        help="Run a query-only LLM control-plane pass that proposes evidence bundles over the compiled KB surface.",
+    )
+    parser.add_argument(
+        "--execute-evidence-bundle-plan",
+        action="store_true",
+        help=(
+            "After creating an evidence-bundle plan, execute only validated query templates from that plan "
+            "as additional query-only diagnostic evidence."
+        ),
+    )
+    parser.add_argument(
+        "--evidence-bundle-context-filter",
+        action="store_true",
+        help=(
+            "Use predicates from evidence_bundle_plan_v1 query templates to build a compact question-shaped "
+            "relevant_clauses pack for the Semantic IR QA compiler."
+        ),
+    )
+    parser.add_argument(
         "--judge-reference-answers",
         action="store_true",
         help="Use the model in structured-output mode to compare query results with markdown reference answers.",
+    )
+    parser.add_argument(
+        "--classify-failure-surfaces",
+        action="store_true",
+        help=(
+            "For non-exact judged rows, use a structured scorer to classify whether the remaining miss is "
+            "a compile-surface, query-surface, hybrid-join, answer-surface, or uncertain problem."
+        ),
     )
     return parser.parse_args()
 
@@ -263,6 +542,18 @@ def main() -> int:
         "For omission/set-difference questions, the semantic IR operation itself must carry polarity='negative' on the absent-side predicate. The runtime can then build query-only negation; do not approximate omission by listing positive rows only.",
         "If the compiled inventory contains story-world predicates such as event/5, story_time/2, kind/2, lives_at/2, owned_by/2, said/3, judged/4, causes/2, initial_location/2, location_after_event/3, final_state/1, or condition_after_story/2, also use story_world_qa_query_strategy_v1.",
     ]
+    if bool(args.evidence_bundle_plan or args.execute_evidence_bundle_plan or args.evidence_bundle_context_filter):
+        domain_context.append(
+            "A separate evidence_bundle_plan_v1 control-plane pass may be present in kb_context_pack. Treat it as query-planning guidance only: it can suggest support bundles, but it cannot authorize writes or replace mapper admission."
+        )
+    if bool(args.execute_evidence_bundle_plan):
+        domain_context.append(
+            "If evidence-bundle plan queries are executed, they are query-only diagnostics validated against the compiled KB predicate inventory; they do not authorize writes or durable truth."
+        )
+    if bool(args.evidence_bundle_context_filter):
+        domain_context.append(
+            "If evidence-bundle context filtering is active, relevant_clauses has been compacted using predicates from the LLM-authored evidence bundle plan. Treat it as a focused KB view, not as the full KB."
+        )
     config = SemanticIRCallConfig(
         backend=str(args.backend),
         base_url=str(args.base_url),
@@ -296,6 +587,10 @@ def main() -> int:
         config=config,
         include_model_input=bool(args.include_model_input),
         judge_reference_answers=bool(args.judge_reference_answers),
+        evidence_bundle_plan=bool(args.evidence_bundle_plan or args.execute_evidence_bundle_plan or args.evidence_bundle_context_filter),
+        execute_evidence_bundle_plan=bool(args.execute_evidence_bundle_plan),
+        evidence_bundle_context_filter=bool(args.evidence_bundle_context_filter),
+        classify_failure_surfaces=bool(args.classify_failure_surfaces),
     )
     for item in questions:
         question_oracle = oracle.get(item["id"], {})
@@ -320,10 +615,21 @@ def main() -> int:
                 runtime=runtime,
                 oracle=question_oracle,
                 include_model_input=bool(args.include_model_input),
+                evidence_bundle_plan=bool(args.evidence_bundle_plan or args.execute_evidence_bundle_plan or args.evidence_bundle_context_filter),
+                execute_evidence_bundle_plan=bool(args.execute_evidence_bundle_plan),
+                evidence_bundle_context_filter=bool(args.evidence_bundle_context_filter),
             )
             if bool(args.judge_reference_answers):
                 row["reference_judge"] = judge_reference_answer(
                     row=row,
+                    config=config,
+                )
+            if bool(args.classify_failure_surfaces):
+                row["failure_surface"] = classify_failure_surface(
+                    row=row,
+                    kb_inventory=kb_inventory,
+                    facts=facts,
+                    rules=rules,
                     config=config,
                 )
             row["cache_hit"] = False
@@ -382,6 +688,10 @@ def build_cache_context(
     config: SemanticIRCallConfig,
     include_model_input: bool,
     judge_reference_answers: bool,
+    evidence_bundle_plan: bool,
+    execute_evidence_bundle_plan: bool,
+    evidence_bundle_context_filter: bool,
+    classify_failure_surfaces: bool,
 ) -> dict[str, Any]:
     return {
         "schema_version": CACHE_SCHEMA_VERSION,
@@ -403,6 +713,7 @@ def build_cache_context(
                     "story_world": STORY_WORLD_QA_QUERY_STRATEGY,
                     "temporal_virtual_signatures": TEMPORAL_VIRTUAL_SIGNATURES,
                     "judge_schema": QA_JUDGE_SCHEMA,
+                    "failure_surface_schema": FAILURE_SURFACE_SCHEMA,
                 },
                 ensure_ascii=False,
                 sort_keys=True,
@@ -423,6 +734,10 @@ def build_cache_context(
         },
         "include_model_input": bool(include_model_input),
         "judge_reference_answers": bool(judge_reference_answers),
+        "evidence_bundle_plan": bool(evidence_bundle_plan),
+        "execute_evidence_bundle_plan": bool(execute_evidence_bundle_plan),
+        "evidence_bundle_context_filter": bool(evidence_bundle_context_filter),
+        "classify_failure_surfaces": bool(classify_failure_surfaces),
     }
 
 
@@ -612,6 +927,71 @@ def split_top_level_args(text: str) -> list[str]:
     return parts
 
 
+def parse_prolog_query(query: str) -> tuple[str, list[str]] | None:
+    text = str(query or "").strip()
+    match = re.fullmatch(r"\s*([A-Za-z_][A-Za-z0-9_]*)\((.*)\)\.?\s*", text)
+    if not match:
+        return None
+    predicate, args_text = match.groups()
+    args = split_top_level_args(args_text)
+    if not args:
+        return None
+    return predicate, args
+
+
+def format_prolog_query(predicate: str, args: list[str]) -> str:
+    return f"{predicate}({', '.join(args)})."
+
+
+def _is_prolog_variable(value: str) -> bool:
+    return bool(re.fullmatch(r"[A-Z][A-Za-z0-9_]*", str(value or "").strip()))
+
+
+def _is_numeric_atom(value: str) -> bool:
+    return bool(re.fullmatch(r"-?\d+(?:\.\d+)?", str(value or "").strip()))
+
+
+def _variable_name_for_placeholder(value: str, index: int) -> str:
+    cleaned = re.sub(r"[^A-Za-z0-9_]+", "_", str(value or "")).strip("_")
+    if not cleaned:
+        return f"Slot{index}"
+    parts = [part for part in cleaned.split("_") if part]
+    name = "".join(part[:1].upper() + part[1:] for part in parts)
+    if not name or not name[0].isalpha():
+        return f"Slot{index}"
+    return name
+
+
+def _placeholder_repaired_query(query: str) -> dict[str, Any] | None:
+    parsed = parse_prolog_query(query)
+    if parsed is None:
+        return None
+    predicate, args = parsed
+    repaired_args: list[str] = []
+    repairs: list[dict[str, Any]] = []
+    for index, arg in enumerate(args, start=1):
+        item = str(arg or "").strip()
+        lowered = item.lower()
+        if _is_prolog_variable(item) or _is_numeric_atom(item):
+            repaired_args.append(item)
+            continue
+        if lowered in GENERIC_QUERY_PLACEHOLDERS:
+            variable = _variable_name_for_placeholder(item, index)
+            repaired_args.append(variable)
+            repairs.append({"index": index, "from": item, "to": variable})
+            continue
+        repaired_args.append(item)
+    if not repairs:
+        return None
+    repaired_query = format_prolog_query(predicate, repaired_args)
+    if repaired_query == str(query or "").strip():
+        return None
+    return {
+        "query": repaired_query,
+        "repairs": repairs,
+    }
+
+
 def load_oracle(path: Path | None) -> dict[str, dict[str, Any]]:
     if path is None:
         return {}
@@ -641,6 +1021,67 @@ def load_runtime(*, facts: list[str], rules: list[str]) -> tuple[CorePrologRunti
     return runtime, errors
 
 
+def build_evidence_bundle_plan(
+    *,
+    utterance: str,
+    kb_inventory: dict[str, Any],
+    facts: list[str],
+    rules: list[str],
+    config: SemanticIRCallConfig,
+) -> dict[str, Any]:
+    payload = {
+        "task": "Plan query evidence bundles over an already compiled Prolog KB.",
+        "authority": [
+            "You are a control-plane query planner only.",
+            "Do not answer the user.",
+            "Do not propose facts, rules, corrections, or writes.",
+            "Do not use the original source document; only use the compiled KB inventory and relevant clauses supplied here.",
+            "Do not invent predicates. Query templates must use predicates present in compiled_predicate_inventory.signatures or the listed temporal virtual predicates.",
+        ],
+        "question": str(utterance or ""),
+        "compiled_predicate_inventory": {
+            "signatures": kb_inventory.get("signatures", [])[:120],
+            "counts": kb_inventory.get("counts", {}),
+            "examples": kb_inventory.get("examples", {}),
+        },
+        "compiled_query_templates": kb_inventory.get("query_templates", [])[:120],
+        "relevant_clauses": [*facts[:600], *rules[:160]],
+        "planning_policy": [
+            "A support bundle is a small group of primitive Prolog queries that, together, can support an answer.",
+            "Prefer multiple primitive queries over an invented composite query.",
+            "Use uppercase variables for unknown answer slots.",
+            "If the KB appears to lack a needed row class, state that in missing_if_empty rather than inventing it.",
+            "For why questions, plan queries for reason/tradeoff/effect/procedure rows, not only the headline recommendation.",
+            "For policy or guidance questions, separate requirement, observed fact, preference, avoid-pattern, and rationale rows.",
+        ],
+    }
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "You produce evidence_bundle_plan_v1 JSON for a governed symbolic QA pipeline. "
+                "You only plan Prolog query evidence bundles over the supplied compiled KB surface."
+            ),
+        },
+        {"role": "user", "content": "INPUT_JSON:\n" + json.dumps(payload, ensure_ascii=False, indent=2)},
+    ]
+    try:
+        return call_lmstudio_json_schema(
+            config=config,
+            messages=messages,
+            schema_name="evidence_bundle_plan_v1",
+            schema=EVIDENCE_BUNDLE_PLAN_SCHEMA,
+            max_tokens=min(int(config.max_tokens), 1800),
+        )
+    except Exception as exc:
+        return {
+            "schema_version": "evidence_bundle_plan_v1",
+            "question_focus": "planner_error",
+            "support_bundles": [],
+            "warnings": [str(exc)[:220]],
+        }
+
+
 def run_one_question(
     *,
     item: dict[str, Any],
@@ -654,6 +1095,9 @@ def run_one_question(
     runtime: CorePrologRuntime,
     oracle: dict[str, Any],
     include_model_input: bool,
+    evidence_bundle_plan: bool,
+    execute_evidence_bundle_plan: bool,
+    evidence_bundle_context_filter: bool,
 ) -> dict[str, Any]:
     utterance = str(item.get("utterance", ""))
     kb_context_pack = {
@@ -671,6 +1115,34 @@ def run_one_question(
         "source_fact_count": len(facts),
         "source_rule_count": len(rules),
     }
+    evidence_plan: dict[str, Any] | None = None
+    if bool(evidence_bundle_plan):
+        evidence_plan = build_evidence_bundle_plan(
+            utterance=utterance,
+            kb_inventory=kb_inventory,
+            facts=facts,
+            rules=rules,
+            config=config,
+        )
+        kb_context_pack["evidence_bundle_plan_v1"] = evidence_plan
+        kb_context_pack["evidence_bundle_plan_policy"] = [
+            "This plan is LLM-authored query guidance only.",
+            "Use suggested query templates only if their predicates exist in compiled_predicate_inventory.",
+            "Do not write facts or rules because of the evidence bundle plan.",
+        ]
+        if bool(evidence_bundle_context_filter):
+            compact_clauses = compact_relevant_clauses_for_evidence_plan(
+                evidence_plan=evidence_plan,
+                facts=facts,
+                rules=rules,
+            )
+            if compact_clauses:
+                kb_context_pack["relevant_clauses"] = compact_clauses
+                kb_context_pack["evidence_bundle_context_filter"] = {
+                    "schema_version": "evidence_bundle_context_filter_v1",
+                    "clause_count": len(compact_clauses),
+                    "policy": "filtered by predicates from evidence_bundle_plan_v1 query templates; no raw-source or question parsing in Python",
+                }
     started = time.perf_counter()
     try:
         result = call_semantic_ir(
@@ -717,6 +1189,14 @@ def run_one_question(
     facts_out = [str(q).strip() for q in clauses.get("facts", []) if str(q).strip()]
     rules_out = [str(q).strip() for q in clauses.get("rules", []) if str(q).strip()]
     query_results = run_query_plan(runtime, queries)
+    evidence_plan_query_results: list[dict[str, Any]] = []
+    if evidence_plan is not None and bool(execute_evidence_bundle_plan):
+        evidence_plan_query_results = run_evidence_bundle_plan_queries(
+            runtime=runtime,
+            evidence_plan=evidence_plan,
+            kb_inventory=kb_inventory,
+        )
+        query_results = [*query_results, *evidence_plan_query_results]
     row.update(
         {
             "projected_decision": diagnostics.get("projected_decision", ""),
@@ -730,6 +1210,10 @@ def run_one_question(
             "self_check": ir.get("self_check", {}),
         }
     )
+    if evidence_plan is not None:
+        row["evidence_bundle_plan"] = evidence_plan
+        if bool(execute_evidence_bundle_plan):
+            row["evidence_bundle_plan_query_results"] = evidence_plan_query_results
     if include_model_input:
         row["semantic_ir"] = ir
         row["mapper_diagnostics"] = diagnostics
@@ -741,43 +1225,402 @@ def run_query_plan(runtime: CorePrologRuntime, queries: list[str]) -> list[dict[
     results: list[dict[str, Any]] = []
     previous_queries: list[str] = []
     for query in queries:
-        result = runtime.query_rows(query)
-        results.append({"query": query, "result": result})
         effective_query = query
-        if result.get("status") != "success":
+        placeholder_repair = _placeholder_repaired_query(query)
+        if placeholder_repair:
+            repaired_query = str(placeholder_repair.get("query", "")).strip()
+            repaired_result = runtime.query_rows(repaired_query)
+            if repaired_result.get("status") == "success":
+                effective_query = repaired_query
+                results.append(
+                    {
+                        "query": repaired_query,
+                        "result": {
+                            **repaired_result,
+                            "reasoning_basis": {
+                                "kind": "core-local",
+                                "note": "placeholder query repair converted generic lowercase slot labels to Prolog variables before execution",
+                                "original_query": query,
+                                "repairs": placeholder_repair.get("repairs", []),
+                            },
+                        },
+                        "derived_from_queries": [query],
+                    }
+                )
+            else:
+                result = runtime.query_rows(query)
+                results.append({"query": query, "result": result})
+        else:
+            result = runtime.query_rows(query)
+            results.append({"query": query, "result": result})
+
+        last_result = results[-1].get("result", {}) if results else {}
+        if isinstance(last_result, dict) and last_result.get("status") != "success":
             relaxed = _relaxed_constant_query(runtime, query=query)
             if relaxed:
                 results.append(relaxed)
                 effective_query = str(relaxed.get("query", query))
-        temporal_join = _temporal_join_with_previous(runtime, previous_queries=previous_queries, query=query)
+                last_result = relaxed.get("result", {})
+        companion = _evidence_table_companion_query(runtime, query=effective_query)
+        if companion:
+            results.append(companion)
+        for domain_companion in _domain_companion_queries(runtime, query=effective_query):
+            results.append(domain_companion)
+        temporal_join = _temporal_join_with_previous(runtime, previous_queries=previous_queries, query=effective_query)
         if temporal_join:
             results.append(temporal_join)
-        negative_join = _negative_join_with_previous(runtime, previous_queries=previous_queries, query=query)
+        negative_join = _negative_join_with_previous(runtime, previous_queries=previous_queries, query=effective_query)
         if negative_join:
             results.append(negative_join)
         previous_queries.append(effective_query)
     return results
 
 
+def _domain_companion_queries(runtime: CorePrologRuntime, *, query: str) -> list[dict[str, Any]]:
+    parsed = parse_prolog_query(query)
+    if parsed is None:
+        return []
+    predicate, args = parsed
+    if predicate == "committee_member" and len(args) >= 2:
+        out: list[dict[str, Any]] = []
+        committee_arg = str(args[0]).strip()
+        member_arg = str(args[1]).strip()
+        replacement_queries: list[str] = []
+        if committee_arg and not _is_prolog_variable(committee_arg):
+            replacement_queries.append(
+                format_prolog_query("committee_member_replaced", [committee_arg, "OldMember", "NewMember", "ReplacementDate"])
+            )
+        replacement_queries.append(format_prolog_query("committee_member_replaced", ["Committee", "OldMember", "NewMember", "ReplacementDate"]))
+        if member_arg and not _is_prolog_variable(member_arg):
+            replacement_queries.append(
+                format_prolog_query("committee_member_replaced", ["Committee", member_arg, "NewMember", "ReplacementDate"])
+            )
+            replacement_queries.append(
+                format_prolog_query("committee_member_replaced", ["Committee", "OldMember", member_arg, "ReplacementDate"])
+            )
+        for companion_query in _ordered_query_unique(replacement_queries):
+            result = runtime.query_rows(companion_query)
+            if result.get("status") != "success":
+                continue
+            out.append(
+                {
+                    "query": companion_query,
+                    "result": {
+                        **result,
+                        "reasoning_basis": {
+                            "kind": "core-local",
+                            "note": "domain companion query paired committee_member/3 with committee_member_replaced/4 replacement evidence",
+                            "original_query": query,
+                        },
+                    },
+                    "derived_from_queries": [query],
+                }
+            )
+        return out
+    if predicate in {"fsrb_may", "fsrb_decision_effect", "deadline_requirement"}:
+        out: list[dict[str, Any]] = []
+        companion_queries = [
+            "deadline_requirement(Deadline, Amount, Unit, fsrb_decision_date).",
+            "fsrb_may(Action).",
+            "fsrb_decision_effect(Condition, Effect).",
+            "fsrb_decision_final(Status).",
+        ]
+        for companion_query in _ordered_query_unique(companion_queries):
+            if companion_query == str(query or "").strip():
+                continue
+            result = runtime.query_rows(companion_query)
+            if result.get("status") != "success":
+                continue
+            out.append(
+                {
+                    "query": companion_query,
+                    "result": {
+                        **result,
+                        "reasoning_basis": {
+                            "kind": "core-local",
+                            "note": "domain companion query gathered standing FSRB decision deadlines/effects for counterfactual or finality questions",
+                            "original_query": query,
+                        },
+                    },
+                    "derived_from_queries": [query],
+                }
+            )
+        return out
+    if predicate == "subgrant_purpose" and args:
+        subgrant_arg = str(args[0]).strip()
+        if not subgrant_arg:
+            return []
+        if _is_prolog_variable(subgrant_arg):
+            companion_args = ["Subgrant"]
+        else:
+            companion_args = [subgrant_arg]
+        out: list[dict[str, Any]] = []
+        for companion_predicate, value_name in [
+            ("subgrant_amount", "Amount"),
+            ("subgrant_expended", "Expended"),
+            ("subgrant_remaining", "Remaining"),
+        ]:
+            companion_query = format_prolog_query(companion_predicate, [*companion_args, value_name])
+            result = runtime.query_rows(companion_query)
+            if result.get("status") != "success":
+                continue
+            out.append(
+                {
+                    "query": companion_query,
+                    "result": {
+                        **result,
+                        "reasoning_basis": {
+                            "kind": "core-local",
+                            "note": "domain companion query followed subgrant_purpose/2 to financial amount predicates using the same subgrant id",
+                            "original_query": query,
+                        },
+                    },
+                    "derived_from_queries": [query],
+                }
+            )
+        return out
+    if predicate in {
+        "action_when",
+        "avoid_pattern",
+        "debugging_tactic",
+        "does_not_directly_determine",
+        "enables",
+        "export_reason",
+        "guard_effect",
+        "guard_mechanism",
+        "guard_value",
+        "metric_semantics",
+        "optimization_priority",
+        "priority_reason",
+        "recommendation",
+        "summary_review_question",
+        "tradeoff",
+        "validates_when_high",
+    }:
+        companion_queries = [
+            "support_reason(Anchor, Reason).",
+            "support_effect(Anchor, Effect).",
+            "support_tradeoff(Anchor, Benefit, CostOrRisk).",
+            "support_exception(Anchor, Exception).",
+            "support_positive_counterpart(Anchor, PreferredAction).",
+        ]
+        out = []
+        for companion_query in companion_queries:
+            result = runtime.query_rows(companion_query)
+            if result.get("status") != "success":
+                continue
+            out.append(
+                {
+                    "query": companion_query,
+                    "result": {
+                        **result,
+                        "reasoning_basis": {
+                            "kind": "core-local",
+                            "note": "domain companion query gathered admitted support-acquisition rationale rows for enterprise-guidance evidence",
+                            "original_query": query,
+                        },
+                    },
+                    "derived_from_queries": [query],
+                }
+            )
+        return out
+    return []
+
+
+def _ordered_query_unique(queries: list[str]) -> list[str]:
+    seen: set[str] = set()
+    out: list[str] = []
+    for query in queries:
+        text = str(query or "").strip()
+        if not text or text in seen:
+            continue
+        seen.add(text)
+        out.append(text)
+    return out
+
+
+def run_evidence_bundle_plan_queries(
+    *,
+    runtime: CorePrologRuntime,
+    evidence_plan: dict[str, Any],
+    kb_inventory: dict[str, Any],
+) -> list[dict[str, Any]]:
+    signatures = {str(item).strip() for item in kb_inventory.get("signatures", []) if str(item).strip()}
+    signatures.update(str(item).strip() for item in TEMPORAL_VIRTUAL_SIGNATURES)
+    seen: set[str] = set()
+    results: list[dict[str, Any]] = []
+    bundles = evidence_plan.get("support_bundles", []) if isinstance(evidence_plan, dict) else []
+    for bundle in bundles:
+        if not isinstance(bundle, dict):
+            continue
+        bundle_id = str(bundle.get("bundle_id", "")).strip()
+        purpose = str(bundle.get("purpose", "")).strip()
+        for template in bundle.get("query_templates", []):
+            query = str(template or "").strip()
+            if not query or query in seen:
+                continue
+            seen.add(query)
+            parsed = parse_prolog_query(query)
+            if parsed is None:
+                results.append(
+                    {
+                        "query": query,
+                        "result": {
+                            "status": "error",
+                            "message": "evidence-bundle query template was not a single predicate query",
+                            "reasoning_basis": {
+                                "kind": "evidence-bundle-plan",
+                                "bundle_id": bundle_id,
+                                "purpose": purpose,
+                                "validation": "rejected",
+                            },
+                        },
+                        "derived_from_queries": [],
+                    }
+                )
+                continue
+            predicate, args = parsed
+            signature = f"{predicate}/{len(args)}"
+            if signature not in signatures:
+                results.append(
+                    {
+                        "query": query,
+                        "result": {
+                            "status": "error",
+                            "message": f"evidence-bundle query signature not in compiled inventory: {signature}",
+                            "reasoning_basis": {
+                                "kind": "evidence-bundle-plan",
+                                "bundle_id": bundle_id,
+                                "purpose": purpose,
+                                "validation": "rejected",
+                            },
+                        },
+                        "derived_from_queries": [],
+                    }
+                )
+                continue
+            for item in run_query_plan(runtime, [query]):
+                item = dict(item)
+                result = item.get("result", {})
+                if isinstance(result, dict):
+                    result = {
+                        **result,
+                        "reasoning_basis": {
+                            "kind": "evidence-bundle-plan",
+                            "bundle_id": bundle_id,
+                            "purpose": purpose,
+                            "validation": "predicate_and_arity_checked",
+                            "inner_basis": result.get("reasoning_basis", {}),
+                        },
+                    }
+                    item["result"] = result
+                item["derived_from_queries"] = [*item.get("derived_from_queries", []), query]
+                results.append(item)
+    return results
+
+
+def compact_relevant_clauses_for_evidence_plan(
+    *,
+    evidence_plan: dict[str, Any],
+    facts: list[str],
+    rules: list[str],
+    max_clauses: int = 220,
+    broad_floor: int = 80,
+) -> list[str]:
+    predicates: set[str] = set()
+    bundles = evidence_plan.get("support_bundles", []) if isinstance(evidence_plan, dict) else []
+    for bundle in bundles:
+        if not isinstance(bundle, dict):
+            continue
+        for template in bundle.get("query_templates", []):
+            parsed = parse_prolog_query(str(template or ""))
+            if parsed is None:
+                continue
+            predicate, _args = parsed
+            predicates.add(predicate)
+    if not predicates:
+        return []
+    selected: list[str] = []
+    seen: set[str] = set()
+    for clause in [*facts, *rules]:
+        signature = clause_signature(clause)
+        predicate = signature.split("/", 1)[0] if "/" in signature else ""
+        if predicate in predicates:
+            seen.add(clause)
+            selected.append(clause)
+        if len(selected) >= int(max_clauses):
+            break
+    for clause in [*facts, *rules]:
+        if len(selected) >= int(max_clauses):
+            break
+        if clause in seen:
+            continue
+        selected.append(clause)
+        seen.add(clause)
+        if len(selected) >= len(predicates) + int(broad_floor) and len(selected) >= int(broad_floor):
+            break
+    return selected
+
+
+def _evidence_table_companion_query(runtime: CorePrologRuntime, *, query: str) -> dict[str, Any] | None:
+    parsed = parse_prolog_query(query)
+    if parsed is None:
+        return None
+    predicate, args = parsed
+    if predicate not in EVIDENCE_TABLE_PREDICATES:
+        return None
+
+    companion_args: list[str] = []
+    role_names = EVIDENCE_TABLE_VARIABLE_NAMES.get(predicate, [])
+    for index, arg in enumerate(args, start=1):
+        item = str(arg or "").strip()
+        if _is_prolog_variable(item):
+            companion_args.append(role_names[index - 1] if index <= len(role_names) else item)
+            continue
+        # Keep a concrete leading policy/document/record key when present, but
+        # widen the remaining evidence slots. These predicates often spread the
+        # answer across sibling rows, so a narrowly successful query can still
+        # under-support the judge.
+        if index == 1 and not _is_numeric_atom(item) and item.lower() not in GENERIC_QUERY_PLACEHOLDERS:
+            companion_args.append(item)
+            continue
+        companion_args.append(role_names[index - 1] if index <= len(role_names) else f"Evidence{index}")
+    companion_query = format_prolog_query(predicate, companion_args)
+    if companion_query == str(query or "").strip():
+        return None
+    result = runtime.query_rows(companion_query)
+    if result.get("status") != "success":
+        return None
+    return {
+        "query": companion_query,
+        "result": {
+            **result,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": "evidence-table companion query widened non-key slots for a table-like predicate after structured query review",
+                "original_query": query,
+            },
+        },
+        "derived_from_queries": [query],
+    }
+
+
 def _relaxed_constant_query(runtime: CorePrologRuntime, *, query: str) -> dict[str, Any] | None:
     text = str(query or "").strip()
-    match = re.fullmatch(r"\s*([A-Za-z_][A-Za-z0-9_]*)\((.*)\)\.?\s*", text)
-    if not match:
+    parsed = parse_prolog_query(text)
+    if parsed is None:
         return None
-    predicate, args_text = match.groups()
+    predicate, args = parsed
     if predicate in {"before", "after", "add_hours", "elapsed_minutes", "elapsed_hours", "elapsed_days"}:
-        return None
-    args = split_top_level_args(args_text)
-    if not args:
         return None
     relaxed_args: list[str] = []
     relaxed_count = 0
     for index, arg in enumerate(args, start=1):
         item = str(arg or "").strip()
-        if re.fullmatch(r"[A-Z][A-Za-z0-9_]*", item):
+        if _is_prolog_variable(item):
             relaxed_args.append(item)
             continue
-        if re.fullmatch(r"-?\d+(?:\.\d+)?", item):
+        if _is_numeric_atom(item):
             relaxed_args.append(item)
             continue
         relaxed_count += 1
@@ -1045,6 +1888,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "Automatic-identity policy: candidate_identity(k_lume, kira_lume) does not authorize assigning k_lume to kira_lume. Unless query results include a resolved_identity/same_person/identified_as fact or a rule explicitly permitting assignment, candidate rows support 'No' for automatic assignment questions.",
             "Source-scope policy: if the reference answer says the event is not applicable to this source/document and all relevant queries return no matching rows while the source KB clearly concerns a different document/domain, this supports the reference. Use exact when this is the central answer.",
             "Normalized-atom policy: snake_case atoms are the KB's canonical surface. If a returned atom embeds the reference answer as a clear normalized phrase, such as departed_dock_c_before_yeast_inspection supporting 'Dock C', that can be exact support even when the value appears inside a method or explanation predicate.",
+            "Normalized legal/status atom policy: phrases such as does_not_intend_to_raise_the_defense, reserves_all_defenses, not_a_defense_to_assured, remedied_before_loss, no_contribution_to_loss, statement_not_finding, or accepted_without_prejudice are answer-bearing content when they appear in any returned row. Do not discard them merely because they appear in a Detail, Source, or evidence slot.",
             "Return the final judgment only. Do not include internal debate, alternative verdicts, or self-correction in concise_answer.",
         ],
     }
@@ -1090,6 +1934,98 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
         "concise_answer": "",
         "issues": [f"judge error: {last_error}"],
     }
+
+
+def classify_failure_surface(
+    *,
+    row: dict[str, Any],
+    kb_inventory: dict[str, Any],
+    facts: list[str],
+    rules: list[str],
+    config: SemanticIRCallConfig,
+) -> dict[str, Any]:
+    judge = row.get("reference_judge") if isinstance(row.get("reference_judge"), dict) else {}
+    verdict = str(judge.get("verdict", "")).strip()
+    if verdict == "exact":
+        return {
+            "schema_version": "qa_failure_surface_v1",
+            "surface": "not_applicable",
+            "confidence": 1.0,
+            "rationale": "Reference judge marked the row exact.",
+            "suggested_next_action": "No failure-surface action needed.",
+        }
+    reference = str(row.get("reference_answer", "")).strip()
+    if not reference:
+        return {
+            "schema_version": "qa_failure_surface_v1",
+            "surface": "judge_uncertain",
+            "confidence": 0.2,
+            "rationale": "No reference answer was available for failure classification.",
+            "suggested_next_action": "Supply a reference answer before classifying the failure surface.",
+        }
+    payload = {
+        "task": "Classify the remaining failure surface for a post-ingestion symbolic QA row.",
+        "authority": [
+            "You are a scorer and diagnostician only.",
+            "Do not answer the user.",
+            "Do not propose facts, rules, corrections, or writes.",
+            "Do not use the original source document; it is not available here.",
+            "Use only the compiled KB inventory, admitted clauses, query plan, query results, and reference answer.",
+        ],
+        "surface_definitions": {
+            "compile_surface_gap": "The query plan is reasonable, but the compiled KB appears to lack the facts/rules/relations needed to support the reference answer.",
+            "query_surface_gap": "The compiled KB appears to contain useful support, but the emitted query plan did not retrieve it or used neighboring/wrong predicates or overbound constants.",
+            "hybrid_join_gap": "Relevant rows were retrieved or appear available, but answering requires a multi-hop join, temporal helper, set difference, aggregation, arithmetic, or evidence bundle that the current query/runtime did not assemble.",
+            "answer_surface_gap": "The query results contain enough support, but the final judge/answer rendering did not recognize or express it cleanly.",
+            "judge_uncertain": "There is not enough information in this row to separate the failure surfaces confidently.",
+        },
+        "question_id": row.get("id", ""),
+        "question": row.get("utterance", ""),
+        "reference_answer": reference,
+        "reference_judge": judge,
+        "queries": row.get("queries", []),
+        "query_results": row.get("query_results", []),
+        "evidence_bundle_plan": row.get("evidence_bundle_plan", {}),
+        "compiled_predicate_inventory": {
+            "signatures": kb_inventory.get("signatures", [])[:120],
+            "counts": kb_inventory.get("counts", {}),
+            "examples": kb_inventory.get("examples", {}),
+        },
+        "relevant_clauses": [*facts[:600], *rules[:160]],
+        "classification_policy": [
+            "Choose compile_surface_gap only when the admitted KB rows shown here do not appear to contain the reference answer support.",
+            "Choose query_surface_gap when relevant support appears in admitted clauses or inventory examples but the emitted query set did not retrieve it.",
+            "Choose hybrid_join_gap when rows are present or retrieved but require joining, comparing, counting, set subtraction, temporal arithmetic, or aggregation.",
+            "Choose answer_surface_gap only when returned rows are plainly sufficient and the remaining problem is interpretation or wording.",
+            "If uncertain, use judge_uncertain with low confidence.",
+        ],
+    }
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "You classify post-ingestion QA failure surfaces for a governed symbolic KB. "
+                "Return qa_failure_surface_v1 JSON only. Do not use outside knowledge or the source document."
+            ),
+        },
+        {"role": "user", "content": "INPUT_JSON:\n" + json.dumps(payload, ensure_ascii=False, indent=2)},
+    ]
+    try:
+        return call_lmstudio_json_schema(
+            config=config,
+            messages=messages,
+            schema_name="qa_failure_surface_v1",
+            schema=FAILURE_SURFACE_SCHEMA,
+            max_tokens=min(int(config.max_tokens), 1000),
+        )
+    except Exception as exc:
+        return {
+            "schema_version": "qa_failure_surface_v1",
+            "surface": "judge_uncertain",
+            "confidence": 0.0,
+            "rationale": f"classifier error: {str(exc)[:440]}",
+            "suggested_next_action": "Inspect the row manually or rerun the failure classifier.",
+        }
 
 
 def call_lmstudio_json_schema(
@@ -1150,6 +2086,13 @@ def summarize(*, rows: list[dict[str, Any]], load_errors: list[str], elapsed_ms:
         for row in rows
         if isinstance(row.get("reference_judge"), dict)
     ]
+    failure_surface_counts: dict[str, int] = {}
+    for row in rows:
+        failure = row.get("failure_surface")
+        if not isinstance(failure, dict):
+            continue
+        surface = str(failure.get("surface", "")).strip() or "unknown"
+        failure_surface_counts[surface] = failure_surface_counts.get(surface, 0) + 1
     return {
         "question_count": len(rows),
         "reference_answer_rows": sum(1 for row in rows if row.get("reference_answer")),
@@ -1162,6 +2105,7 @@ def summarize(*, rows: list[dict[str, Any]], load_errors: list[str], elapsed_ms:
         "judge_exact": sum(1 for judge in judge_rows if judge.get("verdict") == "exact"),
         "judge_partial": sum(1 for judge in judge_rows if judge.get("verdict") == "partial"),
         "judge_miss": sum(1 for judge in judge_rows if judge.get("verdict") == "miss"),
+        "failure_surface_counts": failure_surface_counts,
         "runtime_load_error_count": len(load_errors),
         "elapsed_ms": elapsed_ms,
     }
@@ -1182,6 +2126,7 @@ def write_summary(record: dict[str, Any], path: Path) -> None:
         f"- Rows with proposed writes: `{summary.get('write_proposal_rows', 0)}`",
         f"- Oracle rows/matches: `{summary.get('oracle_rows', 0)}` / `{summary.get('oracle_match', 0)}`",
         f"- Reference judge: exact=`{summary.get('judge_exact', 0)}` partial=`{summary.get('judge_partial', 0)}` miss=`{summary.get('judge_miss', 0)}`",
+        f"- Failure surfaces: `{summary.get('failure_surface_counts', {})}`",
         f"- Cache: enabled=`{summary.get('cache_enabled', False)}` hits=`{summary.get('cache_hits', 0)}` misses=`{summary.get('cache_misses', 0)}`",
         "",
         "## Rows",
@@ -1199,6 +2144,7 @@ def write_summary(record: dict[str, Any], path: Path) -> None:
                 f"- Oracle match: `{row.get('oracle_match', None)}`",
                 f"- Reference answer: {row.get('reference_answer', '') or '-'}",
                 f"- Reference judge: `{(row.get('reference_judge') or {}).get('verdict', None)}`",
+                f"- Failure surface: `{(row.get('failure_surface') or {}).get('surface', None)}`",
                 "",
                 "```json",
                 json.dumps(row.get("query_results", []), ensure_ascii=False, indent=2),

@@ -7896,10 +7896,71 @@ class CorePrologRuntime:
         if getattr(term, "is_variable", False) or getattr(term, "args", []):
             return None
         value = str(getattr(term, "name", "") or "").strip().lower()
-        match = re.fullmatch(r"(\d{4})[_-](\d{2})[_-](\d{2})(?:[t_](\d{1,2})[_:](\d{2}))?", value)
+        match = re.fullmatch(
+            r"(\d{4})[_-](\d{2})[_-](\d{2})(?:[t_](\d{1,2})[_:](\d{2})(?:[_:]\d{2})?(?:[_-]utc|z)?)?",
+            value,
+        )
+        if match:
+            year, month, day, hour, minute = match.groups()
+            return datetime(
+                int(year),
+                int(month),
+                int(day),
+                int(hour or 0),
+                int(minute or 0),
+            )
+        month_numbers = {
+            "jan": 1,
+            "january": 1,
+            "feb": 2,
+            "february": 2,
+            "mar": 3,
+            "march": 3,
+            "apr": 4,
+            "april": 4,
+            "may": 5,
+            "jun": 6,
+            "june": 6,
+            "jul": 7,
+            "july": 7,
+            "aug": 8,
+            "august": 8,
+            "sep": 9,
+            "sept": 9,
+            "september": 9,
+            "oct": 10,
+            "october": 10,
+            "nov": 11,
+            "november": 11,
+            "dec": 12,
+            "december": 12,
+        }
+        match = re.fullmatch(
+            r"([a-z]+)[_-](\d{1,2})[_-](\d{4})(?:[_-](\d{1,2})[_:](\d{2})(?:[_-]utc|z)?)?",
+            value,
+        )
+        if match:
+            month_text, day, year, hour, minute = match.groups()
+            month = month_numbers.get(month_text)
+            if month is None:
+                return None
+            return datetime(
+                int(year),
+                month,
+                int(day),
+                int(hour or 0),
+                int(minute or 0),
+            )
+        match = re.fullmatch(
+            r"(\d{1,2})[_-]([a-z]+)[_-](\d{4})(?:[_-](\d{1,2})[_:](\d{2})(?:[_-]utc|z)?)?",
+            value,
+        )
         if not match:
             return None
-        year, month, day, hour, minute = match.groups()
+        day, month_text, year, hour, minute = match.groups()
+        month = month_numbers.get(month_text)
+        if month is None:
+            return None
         return datetime(
             int(year),
             int(month),

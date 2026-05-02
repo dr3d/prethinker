@@ -1,0 +1,38 @@
+{
+  "fixture": "anaplan_polaris_performance_rules",
+  "buckets": [
+    {
+      "id": "F1_recommendation_as_fact",
+      "description": "Treats a recommendation or warning as an already performed fact."
+    },
+    {
+      "id": "F2_priority_order_loss",
+      "description": "Extracts optimization targets but loses first-to-fifth priority order."
+    },
+    {
+      "id": "F3_metric_collapse",
+      "description": "Merges distinct Polaris metrics such as Calculation Effort, Complexity, GB, Memory, Cell Count, and Populated Cell Count."
+    },
+    {
+      "id": "F4_condition_loss",
+      "description": "Drops conditions such as when performance degrades, when SUM is possible, or when cell counts are high."
+    },
+    {
+      "id": "F5_tradeoff_loss",
+      "description": "Keeps only the positive recommendation and loses warnings or downsides."
+    },
+    {
+      "id": "F6_procedure_flattening",
+      "description": "Collapses a checklist or debugging sequence into one vague recommendation."
+    },
+    {
+      "id": "F7_absolute_overgeneralization",
+      "description": "Turns prefer/avoid/consider language into absolute universal rules."
+    },
+    {
+      "id": "F8_query_surface_thinness",
+      "description": "Uses broad summary predicates that cannot support the QA battery."
+    }
+  ]
+}
+

@@ -1,0 +1,58 @@
+{
+  "schema_version": "failure_buckets_v1",
+  "fixture": "glass_tide_charter",
+  "buckets": [
+    {
+      "id": "executable_rule_missing",
+      "description": "The compiler records source facts but fails to admit or preserve the executable rule needed for inference."
+    },
+    {
+      "id": "rule_as_fact_collapse",
+      "description": "A source-stated conditional rule is flattened into an already-executed fact."
+    },
+    {
+      "id": "permission_event_collapse",
+      "description": "Permission to do something is treated as proof that the event occurred."
+    },
+    {
+      "id": "claim_finding_collapse",
+      "description": "A source-owned claim becomes a supported finding without watch-log, instrument-record, or certified-log support."
+    },
+    {
+      "id": "exception_scope_error",
+      "description": "Unless/except/override clauses are dropped or applied to the wrong rule."
+    },
+    {
+      "id": "temporal_window_gap",
+      "description": "Glass tide, storm alarm, harbor closure, or revocation windows are missing or conflated."
+    },
+    {
+      "id": "threshold_reasoning_gap",
+      "description": "Numeric thresholds such as pressure/coolant, cargo value, or six-hour test separation are not represented for inference."
+    },
+    {
+      "id": "negation_closed_world_error",
+      "description": "Bounded absence such as no emergency signal or no signed clearance is mishandled."
+    },
+    {
+      "id": "source_priority_error",
+      "description": "Certified logs, uncertified notes, observations, and claims are not ranked correctly."
+    },
+    {
+      "id": "authority_substitution_error",
+      "description": "Permit authority is incorrectly generalized to repair authority or other roles."
+    },
+    {
+      "id": "priority_override_error",
+      "description": "Emergency priority, Treasurer veto, or Harbor Warden override rules are not preserved."
+    },
+    {
+      "id": "salvage_sacred_exception_error",
+      "description": "Sacred-cargo exception to salvage reward is lost."
+    },
+    {
+      "id": "query_planner_missed_available_support",
+      "description": "The KB contains support but post-ingestion QA queries the wrong predicate family."
+    }
+  ]
+}

@@ -1,0 +1,216 @@
+{
+  "schema_version": "ontology_registry_v1",
+  "fixture": "glass_tide_charter",
+  "source": "starter_profile_not_gold_kb",
+  "purpose": "Generic rule-ingestion starter profile for charter-like operational policies. It is intentionally not derived from gold_kb.pl and should not be used as cold-discovery evidence.",
+  "oracle_policy": "Do not derive cold-run context from gold_kb.pl, qa.md, qa_battery.jsonl, qa_support_map.jsonl, or gold_kb_notes.md. This starter profile is an assisted product-mode scaffold only.",
+  "predicates": [
+    {
+      "signature": "source_document/1",
+      "category": "source_metadata",
+      "args": [
+        "document"
+      ],
+      "notes": "Identify the source record."
+    },
+    {
+      "signature": "source_rule/2",
+      "category": "rule_source",
+      "args": [
+        "rule_id",
+        "rule_label"
+      ],
+      "notes": "Name an explicitly stated source rule."
+    },
+    {
+      "signature": "rule_text/2",
+      "category": "rule_source",
+      "args": [
+        "rule_id",
+        "text_atom"
+      ],
+      "notes": "Compact source-bound rule text label, not a fact outcome."
+    },
+    {
+      "signature": "person/1",
+      "category": "entity",
+      "args": [
+        "person"
+      ],
+      "notes": "Named person."
+    },
+    {
+      "signature": "role/2",
+      "category": "entity_role",
+      "args": [
+        "person",
+        "role"
+      ],
+      "notes": "Named role assignment."
+    },
+    {
+      "signature": "place/1",
+      "category": "entity",
+      "args": [
+        "place"
+      ],
+      "notes": "Named place."
+    },
+    {
+      "signature": "vessel/1",
+      "category": "entity",
+      "args": [
+        "vessel"
+      ],
+      "notes": "Named vessel."
+    },
+    {
+      "signature": "cargo/1",
+      "category": "entity",
+      "args": [
+        "cargo"
+      ],
+      "notes": "Named cargo/item."
+    },
+    {
+      "signature": "time_anchor/2",
+      "category": "temporal",
+      "args": [
+        "time_atom",
+        "minutes_after_midnight"
+      ],
+      "notes": "Comparable source time anchor."
+    },
+    {
+      "signature": "temporal_window/4",
+      "category": "temporal",
+      "args": [
+        "window",
+        "date_or_context",
+        "start",
+        "end"
+      ],
+      "notes": "Named interval/window."
+    },
+    {
+      "signature": "observation/3",
+      "category": "evidence",
+      "args": [
+        "observer_or_source",
+        "observation",
+        "time_or_context"
+      ],
+      "notes": "Source-stated observation."
+    },
+    {
+      "signature": "certified_record/3",
+      "category": "evidence",
+      "args": [
+        "source",
+        "recorded_fact",
+        "time_or_context"
+      ],
+      "notes": "Certified record/log entry."
+    },
+    {
+      "signature": "claim/3",
+      "category": "epistemic",
+      "args": [
+        "claimant",
+        "claim_content",
+        "time_or_context"
+      ],
+      "notes": "Claim only; not a finding."
+    },
+    {
+      "signature": "finding_support_source/1",
+      "category": "epistemic",
+      "args": [
+        "source_kind"
+      ],
+      "notes": "Allowed support source class for findings."
+    },
+    {
+      "signature": "event_at/3",
+      "category": "event",
+      "args": [
+        "event",
+        "actor_or_subject",
+        "time"
+      ],
+      "notes": "Source-stated event occurrence."
+    },
+    {
+      "signature": "status_at/3",
+      "category": "status",
+      "args": [
+        "subject",
+        "status",
+        "time"
+      ],
+      "notes": "Source-stated or admitted status at time."
+    },
+    {
+      "signature": "permission_at/4",
+      "category": "permission",
+      "args": [
+        "actor_or_subject",
+        "action",
+        "place_or_object",
+        "time"
+      ],
+      "notes": "Permission/authorization, not occurrence."
+    },
+    {
+      "signature": "requirement/3",
+      "category": "rule_requirement",
+      "args": [
+        "subject_or_rule",
+        "requirement",
+        "scope"
+      ],
+      "notes": "Source-stated requirement or condition."
+    },
+    {
+      "signature": "exception/3",
+      "category": "rule_exception",
+      "args": [
+        "rule_or_subject",
+        "exception",
+        "scope"
+      ],
+      "notes": "Source-stated exception."
+    },
+    {
+      "signature": "override/3",
+      "category": "priority",
+      "args": [
+        "overrider",
+        "overridden",
+        "scope"
+      ],
+      "notes": "Priority or override relation."
+    },
+    {
+      "signature": "taxable_if/3",
+      "category": "rule_summary",
+      "args": [
+        "cargo_or_class",
+        "condition",
+        "exception"
+      ],
+      "notes": "Rule summary for taxability; executable rule still requires assert_rule admission."
+    },
+    {
+      "signature": "rule_candidate/4",
+      "category": "rule_candidate",
+      "args": [
+        "rule_id",
+        "head_predicate",
+        "body_summary",
+        "risk"
+      ],
+      "notes": "Non-executable rule proposal summary for review."
+    }
+  ]
+}

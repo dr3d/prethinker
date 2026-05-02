@@ -1,0 +1,153 @@
+# Post-Ingestion QA Surfaces
+
+Prethinker has three distinct post-ingestion surfaces:
+
+```text
+compile surface -> query surface -> answer surface
+```
+
+This matters because a good KB does not automatically produce a good answer.
+
+## Compile Surface
+
+The compile surface is what the source-ingestion pipeline admitted into the KB.
+
+It answers:
+
+- What facts, rules, claims, events, priorities, tradeoffs, and source records survived mapper admission?
+- Did the compiler preserve the right row classes?
+- Did deterministic admission block unsafe or unsupported writes?
+
+Failures here are `compile_surface_gap` failures. A smarter query planner cannot recover a row the KB never admitted.
+
+## Query Surface
+
+The query surface is how a question is translated into Prolog queries over the admitted KB.
+
+It answers:
+
+- Did the QA planner ask the right predicate family?
+- Did it use variables instead of over-bound constants?
+- Did it gather the whole support bundle instead of one nearby row?
+- Did it include temporal helpers, source-status rows, rationale rows, or companion table predicates when needed?
+
+Failures here are `query_surface_gap` failures. The KB may already contain the support, but the planner does not retrieve it.
+
+## Answer Surface
+
+The answer surface is how query rows are compared or synthesized into the expected explanation.
+
+It answers:
+
+- Did the evidence bundle support the reference answer?
+- Did the final answer preserve uncertainty, source attribution, and claim/fact boundaries?
+- Did it combine rows correctly without inventing missing support?
+
+Failures here are `answer_surface_gap` or `hybrid_join_gap` failures. `answer_surface_gap` means the rows are essentially there but the answer/judge did not recognize the support. `hybrid_join_gap` means the rows exist but need a join, count, temporal comparison, set difference, or arithmetic helper that the current query surface did not assemble.
+
+## Evidence-Bundle Planning
+
+`scripts/run_domain_bootstrap_qa.py` has optional `--evidence-bundle-plan`, `--execute-evidence-bundle-plan`, and `--evidence-bundle-context-filter` modes.
+
+That mode adds an LLM-owned control-plane pass:
+
+```text
+question + compiled KB inventory + admitted clauses
+  -> evidence_bundle_plan_v1
+  -> Semantic IR query compiler
+  -> mapper-admitted query operations
+  -> Prolog runtime
+```
+
+The evidence-bundle planner:
+
+- sees only the compiled KB surface and the question
+- does not see the raw source document
+- does not see the answer key
+- cannot authorize writes
+- cannot bypass mapper admission
+
+`--execute-evidence-bundle-plan` is stricter and still query-only: it executes only plan templates whose predicate and arity already appear in the compiled KB inventory or the virtual temporal helper inventory. It is useful as a diagnostic, but APR-011 showed it should not be a default scoring path yet because extra query evidence can add answer-surface noise.
+
+`--evidence-bundle-context-filter` uses predicates from the LLM-owned plan to compact `relevant_clauses` before the normal Semantic IR QA compiler runs. BTC-026 showed the idea can rescue focused hard rows, but replacing the broad clause view too aggressively can lose partial support elsewhere. The likely next version should keep a small broad-context floor and add focused clauses on top.
+
+`--classify-failure-surfaces` adds a structured diagnostic pass after judging non-exact rows. It sees the reference answer, compiled KB inventory, admitted clauses, emitted queries, and query results. It does not see the raw source document and it cannot write. Its labels are:
+
+- `compile_surface_gap`
+- `query_surface_gap`
+- `hybrid_join_gap`
+- `answer_surface_gap`
+- `judge_uncertain`
+
+Existing QA artifacts can be classified without rerunning the QA pass:
+
+```powershell
+python scripts/classify_domain_bootstrap_qa_failures.py `
+  --qa-json tmp/domain_bootstrap_qa/<run>.json
+```
+
+That is the preferred efficiency path when a run already has judged rows. It spends model time only on the remaining non-exacts.
+
+This follows the project rule: no Python NLP over raw prose.
+
+## Support-Row Acquisition
+
+APR exposed a fourth practical move that still belongs to the compile surface:
+
+```text
+safe backbone compile
+  -> support-row acquisition pass
+  -> deterministic safe union
+  -> QA over the accumulated surface
+```
+
+`scripts/run_support_acquisition_pass.py` implements this as an experimental
+separate pass. It receives:
+
+- the raw source document as direct evidence;
+- an already-admitted compile surface as structured anchor context;
+- a support-only predicate palette.
+
+It may propose rows such as:
+
+- `support_reason/2`
+- `support_effect/2`
+- `support_tradeoff/3`
+- `support_exception/2`
+- `support_positive_counterpart/2`
+
+Those rows still go through the normal Semantic IR mapper. Python does not read
+the source prose to derive the support rows; it only supplies the raw source,
+structured admitted anchors, and predicate contracts.
+
+APR-016 is the current proof point: the default enterprise-guidance profile was
+not widened, but two independent support-only passes plus deterministic safe
+union moved the fixture from APR-010's `37 exact / 4 partial / 2 miss` to `42
+exact / 1 partial / 0 miss`.
+
+The lesson is:
+
+```text
+Do not widen the default profile to chase rationale rows.
+Acquire support rows in a separate pass and union only mapper-admitted clauses.
+Multiple independently admitted support views may be better than any one view.
+```
+
+## Current Lesson
+
+APR showed a clean distinction:
+
+```text
+Ingestion got the enterprise guidance fixture to useful.
+Query strategy got it to strong.
+Profile widening and generic rationale predicates regressed.
+Support-row acquisition plus safe union got it stronger.
+```
+
+The current design principle is:
+
+```text
+Specialize passes before widening the default predicate menu.
+```
+
+Adding broad or answer-shaped predicates can make the compiler less useful by pulling it away from the durable backbone. The better frontier is to preserve a balanced compile surface and improve how questions retrieve support from it.

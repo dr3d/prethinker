@@ -1,0 +1,99 @@
+# Current Research Headline
+
+Last updated: 2026-05-02
+
+## Semantic Parallax
+
+The newest insight is that one LLM compile is only one viewpoint.
+
+This page is a short lab-note headline, not a victory lap. It exists so a new
+reader can see what the project is learning right now before diving into the
+longer architecture notes and fixture journals.
+
+Prethinker is moving toward **multi-pass semantic compilation**: separate
+semantic lenses look at the same source for backbone facts, support/evidence,
+temporal state, and executable rules. Each lens proposes. The mapper admits or
+skips. Deterministic union accumulates only mapper-admitted clauses.
+
+```text
+source
+  -> backbone lens
+  -> support/source lens
+  -> temporal/status lens
+  -> rule lens
+  -> mapper admission per lens
+  -> deterministic safe-surface union
+  -> Prolog query / rule trial
+```
+
+## Why This Matters
+
+APR showed that a safe union of independent support views can beat any single
+compile: the Anaplan Polaris fixture reached `42 exact / 1 partial / 0 miss`
+without answer-key guidance.
+
+Glass Tide is now exercising the harder rule-ingestion frontier:
+
+- broad compiles preserve rules as source records, but do not yet make them
+  executable;
+- a separate rule lens can admit executable clauses, including a role-joined
+  repair rule that passes both positive and negative probes:
+  `derived_authorization(repair_order_71, valid, glass_tide_repair)` succeeds,
+  while the one-signer repair order does not;
+- runtime trial exposes the real risks: overgeneralized class-predicate fanout
+  versus clean but dormant rules whose bodies lack matching admitted facts;
+- the verifier now checks body-goal support, so a rule is not considered
+  promotion-ready merely because predicate signatures match.
+- threshold tax rules now work over deterministic numeric helpers, but
+  positive/negative probes exposed the next hard gap: exception-branch
+  promotion for high-value relief cargo.
+
+Clarification Eagerness Trap is exercising the companion governance frontier:
+
+- the first strict CE baseline is `37/40` correct with `0` over-eager asks;
+- the remaining errors expose unsupported correction/retraction and
+  context-write hygiene, not just "ask more" or "ask less";
+- CE must be measured across ingestion, query, safe partials, blocked rows, and
+  authority-boundary violations.
+
+The architecture is becoming sharper:
+
+```text
+multiple model views may propose;
+only deterministic admission decides what can accumulate.
+```
+
+## Current Hard Question
+
+Can Prethinker turn explicit English charter rules into executable Prolog rules
+without allowing a bad rule to generalize into false derived truth, and can it
+ask exactly when durable truth would otherwise require an unauthorized choice?
+
+That is the Glass Tide plus CE frontier.
+
+## Tonight's Research Queue
+
+The next work should stay on the sharp edges:
+
+1. **Glass Tide exception branches.** Threshold helper rules now fire, but
+   high-value relief-cargo exemption still needs a dedicated exception lens or
+   bounded helper shape.
+2. **Rule probe discipline.** Recent preflight runs show that a rule can be
+   body-supported but fail under the wrong scope atom, or can become dormant by
+   using lowercase placeholders such as `warden` and `repair_order`. Keep
+   positive/negative probes in the loop.
+3. **Clarification Eagerness drift.** A post-move preflight run completed
+   safely with `0` unsafe candidates and `0` context-write violations, but it
+   over-asked badly. That is a live calibration problem, not a safety failure.
+4. **Regression cadence.** Keep compact Anaplan/Glass Tide/CE checks running so
+   new rule machinery does not reopen older query, admission, or ask/no-ask
+   failures.
+
+## Read Next
+
+- [Multi-Pass Semantic Compiler](https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md)
+- [Frontier Progress Report](https://github.com/dr3d/prethinker/blob/main/docs/FRONTIER_PROGRESS_REPORT.md)
+- [Clarification Eagerness Strategy](https://github.com/dr3d/prethinker/blob/main/docs/CLARIFICATION_EAGERNESS_STRATEGY.md)
+- [Project State](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md)
+- [Glass Tide progress journal](https://github.com/dr3d/prethinker/blob/main/datasets/story_worlds/glass_tide_charter/progress_journal.md)
+- [Clarification Eagerness Trap journal](https://github.com/dr3d/prethinker/blob/main/datasets/clarification_eagerness/clarification_eagerness_trap/progress_journal.md)

@@ -70,6 +70,31 @@ DECLARATION_SOURCE_COMPILER_CONTEXT_V1 = [
     "Declaration source final-action rule: do not let a long repeated grievance list crowd out the conclusion. Preserve final declarations, recalls, impoundments, separations, authorizations, pledges, remedies, and future-governance commitments as first-class rows.",
 ]
 
+INSURANCE_DISPUTE_SOURCE_COMPILER_CONTEXT_V1 = [
+    "insurance_dispute_source_compiler_strategy_v1: Use this for sources classified by the LLM intake plan or domain hint as insurance, reinsurance, maritime loss, contract coverage, warranty, salvage, claims adjustment, or coverage dispute material.",
+    "Insurance dispute rule: preserve contract boundaries before claim summaries. H&M policy, P&I cover, reinsurance treaty, retrocession, salvage contract, regulatory action, and legal-citation support are separate instruments or authorities, even when the same entity appears in more than one role.",
+    "Insurance dispute role rule: role-scoped party rows are backbone facts. If the profile has party_role/3, company_role/3, contract_party/4, dual_role/3, underwriter_line/4, or equivalent, emit rows for every named owner, manager, underwriter, following underwriter, P&I club, reinsurer, retrocessionaire, salvor, class society, regulator, lawyer, surveyor, and witness before using long summary labels.",
+    "Insurance dispute vessel/asset rule: entity_type(vessel, vessel) is too weak when the source gives asset details. If the profile supports asset_attribute, vessel_attribute, vessel/2, insured_value, built_year, dwt, flag, class, owner, or manager predicates, preserve those queryable details rather than hiding them inside entity metadata.",
+    "Insurance dispute underwriter-share rule: if a policy lists insurer shares or lead/following status, preserve each party's share as a direct queryable row. Do not rely on a later net_exposure description to answer share questions.",
+    "Insurance dispute financial-chain rule: preserve gross claimed amount, adjusted amount, deductible, claimant net, adjusted net, share percentage, share amount, attachment point, limit, and difference as separate rows when the profile supports them. A total amount label is not enough for later arithmetic questions.",
+    "Insurance dispute source-attribution rule: expert reports, survey findings, legal positions, regulatory conclusions, witness statements, and party arguments are source-owned. Preserve source/speaker/report identity in the predicate arguments when available. Do not collapse competing accounts into a single fact.",
+    "Insurance dispute survey rule: when two surveyors disagree, preserve both measurements and the stated methodology or basis for each measurement if the profile has measurement_claim, survey_finding, finding_discrepancy, methodology, or detail predicates.",
+    "Insurance dispute class-scope rule: class society or survey rows often answer what was inspected and what was not inspected. If the profile has class_survey_scope, survey_scope_exclusion, source_detail, or equivalent predicates, emit scoped rows for inspected systems, excluded systems, conditions, and non-findings instead of burying them inside report summaries.",
+    "Insurance dispute temporal rule: incident time, initially reported time, corrected time, notification time, condition-of-class imposition/lift, cover suspension/resumption, off-hire periods, and filing dates are distinct temporal anchors. If the profile supports correction rows, emit both superseded and corrected values with the reason or authority.",
+    "Insurance dispute cover-window rule: cover suspension or reinstatement windows need start, end, policy, and basis/status. Do not answer suspension, duration, or cost-allocation questions from policy_clause text alone if the profile has cover_suspension or temporal predicates.",
+    "Insurance dispute deadline rule: notice windows, hours/days limits, awareness times, notice-sent times, and late/timely conclusions are query-bearing rows. If the profile has notification_event, temporal_duration, reinsurance_notice_effect, contract_clause, source_detail, or calculation_step predicates, preserve the raw anchors and the computed lateness or timeliness separately from the legal effect.",
+    "Insurance dispute loss-of-hire rule: loss-of-hire is not the same cover as hull damage. If the profile has loss_of_hire_period, loss_of_hire_position, charter_rate, temporal_duration, or equivalent predicates, preserve the claimed period, opposing coverage position, separate policy status, and rate basis as queryable rows.",
+    "Insurance dispute reinsurance rule: reinsurance late notice is not automatically a defense to the assured's claim unless the source says so. Preserve attachment/limit/current-trigger status and late-notice effect separately from the assured's entitlement.",
+    "Insurance dispute salvage rule: salvage security, guarantee, award, payment, and liability are different statuses. If the profile has security_posted, salvage_contract, or payment-status predicates, do not treat security as a paid award.",
+    "Insurance dispute sanctions rule: sanctions, trading warranties, cancellations, port calls, and defense status form a chain. If the profile has sanctions_event, port_call, trading_warranty_status, defense_status, legal_position, or source_detail predicates, preserve each link and mark whether a position was raised, withdrawn, conceded, or merely hypothetical.",
+    "Insurance dispute citation rule: legal citations support a party's position. If the profile has legal_citation or citation_support predicates, preserve the citation, the party/source using it, the issue, and the use/status. Do not turn citations into court findings or resolved truth about the dispute.",
+    "Insurance dispute repair-cost rule: repair estimates often contain agreed items, disputed items, excluded items, and deltas. If the profile has repair_cost_item, cost_agreement, cost_disagreement, cost_claim, or calculation_step predicates, preserve itemized amounts and agreement/disagreement status before emitting a summary total.",
+    "Insurance dispute claim-handler rule: claims-handler, broker, solicitor, adjuster, or party statements about acceptance, non-acceptance, reservation of rights, without-prejudice status, and full/partial agreement are source-owned position rows. Preserve the speaker and statement content with legal_position, source_detail, defense_status, cost_agreement, claim_amount, or equivalent predicates when available.",
+    "Insurance dispute witness-detail rule: witness statements with numbers, times, measurements, draft/depth values, route/chart details, or safety conclusions should preserve those details in source_detail, witness_statement content, measurement_claim, or statement-detail predicates when available. Do not compress quantitative testimony into a label if later questions may ask for the numbers.",
+    "Insurance dispute P&I rule: protection-and-indemnity cover has its own year/period, notification duties, exclusions, and club positions. If the profile has p_i_cover, p_i_notification_requirement, legal_position, or source_detail predicates, preserve those rows separately from hull-and-machinery and reinsurance rows.",
+    "Insurance dispute multilingual rule: witness statements in non-English languages are source-owned statement records. Preserve speaker, language, topic/content, and source context when the profile supports witness_statement or statement_detail predicates.",
+]
+
 SOURCE_ENTITY_LEDGER_SCHEMA: dict[str, Any] = {
     "type": "object",
     "additionalProperties": False,
@@ -180,6 +205,38 @@ POLICY_INCIDENT_SOURCE_COMPILER_CONTEXT_V1 = [
     "Policy incident atom ledger rule: choose one canonical atom for each person, facility, zone, system, and timestamp, then reuse it everywhere. Do not emit both given_surname and surname_given forms for the same person, and do not emit both a short facility atom and a long facility atom for the same facility unless the source distinguishes them.",
     "Policy incident atom ledger preference: for full personal names, prefer given_surname; for initial-plus-surname mentions, prefer initial_surname; for role-only mentions, reuse the named role-holder atom only when the source has already identified that role holder. For timestamps, use one normalized timestamp surface consistently across all predicates.",
     "Policy incident QA-readiness rule: if a person or facility appears in a role row and in later event, inspection, notification, authorization, correction, or disclosure rows, the same atom must connect those rows so later queries can join them without alias repair.",
+]
+
+RULE_INGESTION_SOURCE_COMPILER_CONTEXT_V1 = [
+    "rule_ingestion_source_compiler_strategy_v1: Use this for source documents classified by the LLM intake plan or domain hint as charters, standing rules, operational policies, bylaws, ordinances, contracts, eligibility rules, tax rules, permission rules, exception ladders, or priority rules.",
+    "Rule ingestion rule: preserve source-stated rules in two layers when the profile supports both layers. First emit source_rule/rule_text/requirement/exception/override rows that record the charter language. Second emit operation='rule' candidate_operations only for bounded executable Horn-style rules whose head and body predicates are all in the allowed profile.",
+    "Executable-rule boundary: a rule operation is a candidate, not truth by itself. Never use an executable rule to smuggle an inferred current violation, finding, clearance, tax liability, or permission as a fact. The mapper admits the clause; later Prolog queries derive consequences.",
+    "Executable-rule clause requirement: if operation='rule', candidate_operations[].clause must contain the actual Prolog-style clause. Do not emit safe rule operations with only a label. If the rule uses default, exception, unless, only-if, priority, or override semantics that cannot be safely expressed with the allowed predicates, record the source rule as source_rule/rule_text/requirement/exception/override and mark the executable version as missing or unsafe in self_check.",
+    "Rule-head discipline: choose a query-bearing head predicate that names the derived status, permission, obligation, tax status, authorization status, clearance status, access status, reward status, or source-priority result. Use allowed profile predicates only; do not invent a new head if the allowed palette lacks it.",
+    "Rule-body discipline: bodies should join admitted factual predicates, temporal predicates, role predicates, source-priority predicates, exception predicates, and negative conditions only when the source explicitly states the condition and the profile has the needed predicates. Prefer small clauses over giant prose-shaped clauses.",
+    "Exception discipline: unless/except/only-if language is not an ordinary positive fact. Preserve the exception row and, only if safe, encode the exception in the executable clause with a bounded negated predicate such as \\+ relief_cargo(Cargo), \\+ signed_clearance(Vessel), or \\+ emergency_override(Proposal).",
+    "Priority discipline: source-ranking rules should not collapse competing records into one fact. Preserve the weaker and stronger records separately, then use an executable rule only for the derived effective value or controlling source when the priority relation is explicit and the palette supports the required predicates.",
+    "Permission-event distinction: permission_at/authorization predicates mean an action is allowed, not that the action occurred. event_at/observed/certified_record predicates mean the source states occurrence. Emit both only when both are source-supported.",
+    "Claim-finding distinction: captain statements, clerk notes, party explanations, and witness reports remain claims or lower-priority records unless a certified log, watch log, instrument record, or other source-stated finding support makes them findings under the source's own evidence rules.",
+    "Temporal rule discipline: when a rule depends on a window, deadline, at-least duration, active alarm, reopened state, or following-day revocation, preserve the raw time anchors and the rule clause separately. Do not hide the temporal calculation in a long rule label.",
+    "Rule ingestion coverage warning: a useful skeleton for a charter source should include source identity, rule records, role/authority rows, time anchors/windows, factual event/status rows, permission/authorization rows, claim/evidence rows, exception/override rows, and executable rule clauses for the safe rule families supported by the selected profile.",
+]
+
+ENTERPRISE_GUIDANCE_SOURCE_COMPILER_CONTEXT_V1 = [
+    "enterprise_guidance_source_compiler_strategy_v1: Use this for sources classified by the LLM intake plan or domain hint as enterprise guidance, technical policy, performance guidance, modeling rules, operational best practices, or product optimization procedures.",
+    "Enterprise guidance rule: preserve the guidance structure, not only the headline recommendation. A useful compile keeps distinct rows for trigger/condition, recommendation/preference, avoid-pattern, reason/rationale, tradeoff, procedure/checklist step, metric boundary, and exception when the profile supports them.",
+    "Enterprise guidance rule: recommendations are not objective facts about the world. They are source-owned guidance. Use recommendation, action_when, prefer, avoid, priority, tradeoff, procedure, or rule predicates according to the allowed profile; do not turn a recommendation into a completed action.",
+    "Enterprise guidance rationale rule: if the source states why a practice matters, preserve the reason as a queryable row such as priority_reason/2, export_reason/2, tradeoff/3, guard_effect/1, source_detail/4, or an equivalent allowed predicate. Do not hide the reason inside the recommendation atom when a reason predicate exists.",
+    "Enterprise guidance avoid/alternative rule: when the source says avoid X and use Y instead, emit both sides if the profile supports them: avoid_pattern(X) plus recommendation(Y), preferred_export(Y, Purpose), delta_load_pattern(Part, Implementation), or another positive replacement row. Avoid rows alone are not enough for later 'what instead' questions.",
+    "Enterprise guidance metric-boundary rule: preserve what each metric means, what it does not directly determine, and what high values validate. For metrics such as size, GB, complexity, populated cells, or calculation effort, keep semantics and boundary rows separate from optimization recommendations.",
+    "Enterprise guidance priority rule: optimization order is answer-bearing. If the source ranks target classes, emit optimization_priority(Target, Rank) and a reason/rationale row when stated. Do not reduce ranked guidance to an unordered recommendation list.",
+    "Enterprise guidance guard rule: guards need value, mechanism, and effect surfaces. If the profile supports guard_value/1, guard_mechanism/1, and guard_effect/1, emit all source-stated guard values, the conditional mechanism, and each stated effect rather than only recommendation(use_guards_effectively).",
+    "Enterprise guidance procedure rule: debugging/checklist/procedure sentences should become queryable steps when the profile supports debugging_tactic/2, action_when/2, summary_review_question/1, or equivalent procedure predicates. Preserve conditions and steps separately.",
+    "Enterprise guidance export rule: export guidance often distinguishes export type, reason, and preferred purpose. Preserve export_rule/2, export_reason/2, and preferred_export/2 separately when available; do not collapse Tabular Multiple Column Export and Combined Grids into one generic export recommendation.",
+    "Enterprise guidance integration rule: for intraday or incremental-load guidance, preserve the anti-pattern, the positive replacement pattern, and the filter/condition logic. Full clear-and-reload, delta loads, staging model, current-vs-previous dimension, and current-not-equal-previous filter are separate query surfaces when stated.",
+    "Enterprise guidance feature-validity rule: when the source says to test with realistic load, seed a DEV list, or use a loaded test model so a product can validate/reject formulas, preserve both the recommended setup and the rationale/error class if the profile has recommendation, debugging_tactic, action_when, or detail predicates.",
+    "Enterprise guidance canonical palette warning: do not invent near-synonym predicates such as should_use/2, best_practice/2, reason_for/2, or optimize_by/2 when the draft profile provides exact enterprise-guidance predicates such as recommendation/1, action_when/2, priority_reason/2, tradeoff/3, debugging_tactic/2, export_reason/2, or delta_load_pattern/2.",
+    "Enterprise guidance coverage warning: a useful skeleton should include source metadata, performance metrics and metric boundaries, ranked optimization targets, guard values/mechanisms/effects, summary-method review checks, computationally intensive functions, avoid/prefer pairs, export guidance, incremental-load guidance, and debugging tactics when the source and profile support them.",
 ]
 
 PROCEDURAL_MISCONDUCT_SOURCE_COMPILER_CONTEXT_V1 = [
@@ -1198,6 +1255,21 @@ def _compile_source_with_plan_passes(
             "If this pass is about source metadata, witness statements, review meetings, corrections, addenda, or provenance, and the allowed profile contains witness_statement, review_meeting_attendee, correction_filing, reported_event, or governing_bylaw predicates, emit those rows before broad timeline or policy recap rows.",
             "For a focused witness/source-statement pass, completeness means every named statement source gets a witness_statement/source_statement row, every statement-specific reported time/status/confirmation gets a reported_event row when supported by the palette, and every explicit explanation or misunderstanding gets a statement_detail row when supported by the palette.",
             "For a focused correction/addendum pass, completeness means each numbered correction and each addendum gets its own correction_filing row when supported by the palette.",
+            "For a focused insurance/coverage-dispute role or contract pass, completeness means separate rows for every contract-scoped role, insurer/underwriter share, insured asset attribute, policy/treaty period, deductible, limit, attachment point, and dual-role capacity supported by the allowed profile. Do not replace these with entity_type summaries.",
+            "For a focused insurance/coverage-dispute financial pass, completeness means rows for gross claimed position, adjusted position, deductible, net position, party share, share amount, attachment comparison, and difference when those values are stated and the profile supports them.",
+            "For a focused insurance/coverage-dispute survey/evidence pass, completeness means source-attributed survey findings, measurement values, methodology/basis details, absences or no-finding statements, corrections, and dispute status where the profile supports them.",
+            "For a focused insurance/coverage-dispute timeline pass, completeness means incident/correction times, notification times, cover suspension/resumption anchors, condition-of-class dates, off-hire intervals, and temporal ordering rows where supported.",
+            "For a focused insurance/coverage-dispute legal/defense pass, completeness means legal citations, clause references, sanctions events, trading-warranty status, defense status, port calls, cancellations, and party positions where the profile supports them.",
+            "For a focused insurance/coverage-dispute repair/salvage/P&I pass, completeness means itemized repair-cost rows, agreed/disputed cost status, salvage security versus payment status, P&I cover period/year, P&I notice requirements, and separate loss-of-hire positions where the profile supports them.",
+            "For a focused insurance/coverage-dispute source-position pass, completeness means source-attributed positions from surveyors, masters, regulators, lawyers, underwriters, claim handlers, and clubs. Preserve speaker/source, issue, position/status, and detail separately; do not resolve competing accounts into one fact.",
+            "For a focused insurance/coverage-dispute operational-timeline pass, completeness means every dated or timed vessel-operation, notification, regulatory, salvage, cargo, inspection, repair, movement, cover, and condition-of-class event with its source/status when supported by the palette.",
+            "For a focused insurance/coverage-dispute itemized-finance pass, completeness means not just totals but claim components, agreed items, disputed items, excluded items, surveyor amounts, labor/material/testing/coating-like line items, deductibles, shares, attachment comparisons, and hypothetical calculation inputs where stated.",
+            "For a focused insurance/coverage-dispute statement-census pass, completeness means every statement-like source object: speaker, role, language if stated, subject, compact content atom, and source document. Multilingual statements, master/chief-engineer reports, surveyor reports, and claim-handler letters should remain separately queryable.",
+            "For a focused insurance/coverage-dispute authority/deadline pass, completeness means issuer, trigger, start anchor, deadline/window, compliance/timeliness status, retroactivity/status, and source basis for DAM/regulator/class/P&I/reinsurer/policy directives where supported.",
+            "For a focused enterprise-guidance metric/priority pass, completeness means performance metrics, metric semantics, metric-boundary rows, ranked optimization targets, and priority reasons where supported.",
+            "For a focused enterprise-guidance recommendation pass, completeness means recommendation, avoid-pattern, positive alternative/preference, reason, tradeoff, action_when, and debugging_tactic rows where supported. Avoid rows are not substitutes for replacement rows.",
+            "For a focused enterprise-guidance guard/procedure pass, completeness means guard values, guard mechanism, guard effects, summary review questions, and procedure/checklist rows where supported.",
+            "For a focused enterprise-guidance export/integration pass, completeness means separate export_rule, export_reason, preferred_export, intraday_update_rule, delta_load_pattern, and incremental_filter rows where supported.",
         ]
         if bool(getattr(args, "focused_pass_ops_schema", False)):
             compiled = _compile_source_pass_ops(
@@ -1374,6 +1446,31 @@ def _source_compiler_context(*, intake_plan: dict[str, Any] | None, domain_hint:
     if any(
         token in label
         for token in [
+            "charter",
+            "standing rule",
+            "standing rules",
+            "source-stated rule",
+            "source-stated rules",
+            "rule ingestion",
+            "rule_ingestion",
+            "bylaw",
+            "bylaws",
+            "ordinance",
+            "eligibility",
+            "permission rule",
+            "permission rules",
+            "priority rule",
+            "priority rules",
+            "tax rule",
+            "tax rules",
+            "quarantine rule",
+            "quarantine rules",
+        ]
+    ):
+        contexts.extend(RULE_INGESTION_SOURCE_COMPILER_CONTEXT_V1)
+    if any(
+        token in label
+        for token in [
             "policy",
             "compliance",
             "incident",
@@ -1387,6 +1484,40 @@ def _source_compiler_context(*, intake_plan: dict[str, Any] | None, domain_hint:
         ]
     ):
         contexts.extend(POLICY_INCIDENT_SOURCE_COMPILER_CONTEXT_V1)
+    if any(
+        token in label
+        for token in [
+            "insurance",
+            "reinsurance",
+            "maritime",
+            "coverage",
+            "underwriter",
+            "warranty",
+            "salvage",
+            "claim adjustment",
+            "claims adjustment",
+            "coverage dispute",
+            "contract coverage",
+        ]
+    ):
+        contexts.extend(INSURANCE_DISPUTE_SOURCE_COMPILER_CONTEXT_V1)
+    if any(
+        token in label
+        for token in [
+            "enterprise",
+            "guidance",
+            "best practice",
+            "best-practice",
+            "technical policy",
+            "performance",
+            "optimization",
+            "polaris",
+            "anaplan",
+            "modeling",
+            "model building",
+        ]
+    ):
+        contexts.extend(ENTERPRISE_GUIDANCE_SOURCE_COMPILER_CONTEXT_V1)
     if any(
         token in label
         for token in [

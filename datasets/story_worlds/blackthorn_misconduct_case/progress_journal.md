@@ -731,3 +731,79 @@ source-skeleton breadth when squeezed through the same compile shape. The next
 architectural move should preserve prior admitted source surfaces while adding
 focused refinement passes, then give QA a compact, question-shaped KB context
 instead of the whole merged clause surface.
+
+## BTC-024 - Post-Run Failure-Surface Classification
+
+- Timestamp: `2026-05-02T05:20:55Z`
+- Mode: `post_run_failure_surface_classification`
+- QA artifact classified: `tmp/domain_bootstrap_qa/domain_bootstrap_qa_20260501T154211107080Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Classified artifact: `tmp/domain_bootstrap_qa/domain_bootstrap_qa_20260501T154211107080Z_qa_qwen-qwen3-6-35b-a3b_failure_surface_20260502T052055673879Z.json`
+- Baseline score preserved: `83 exact / 10 partial / 7 miss`
+- Classified non-exacts: 17
+- Failure surfaces: 9 compile-surface gaps, 5 hybrid-join gaps, 2 query-surface gaps, 1 answer-surface gap.
+
+### Lesson
+
+Blackthorn is more ready for query/runtime work than Kestrel. The remaining errors are no longer just missing rows: several require committee-membership replacement joins, minimum-size counting, witness-claim comparison, FSRB hypothetical deadline joins, and subgrant/financial retrieval bundles. Compile-surface work still matters for policy definitions and final findings, but the next high-leverage Blackthorn move is compact question-shaped KB context plus hybrid join support rather than simply widening the source compile.
+
+## BTC-025 - Subgrant Companion Query Probe
+
+- Timestamp: `2026-05-02T05:45:44Z`
+- Mode: `symbolic_access_companion_probe`
+- Compile artifact: `tmp/domain_bootstrap_file/domain_bootstrap_file_20260501T151949156190Z_story_qwen-qwen3-6-35b-a3b.json`
+- QA artifact: `tmp/domain_bootstrap_qa/domain_bootstrap_qa_20260502T054544182719Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Change: when a structured query retrieves `subgrant_purpose/2`, the QA runtime now adds query-only companion lookups for `subgrant_amount/2`, `subgrant_expended/2`, and `subgrant_remaining/2` using the same subgrant id.
+- Targeted result: `q056` moved from partial to exact.
+- Full-100 rerun: `80 exact / 9 partial / 11 miss`, below BTC-023 and not a promoted high-water.
+
+### Lesson
+
+The subgrant companion is a legitimate symbolic-access improvement, but the full rerun also exposed ordinary query/judge variance across unrelated rows. Keep the companion because it is narrow, deterministic, query-only, and not prose-derived. Do not treat BTC-025 as a score improvement; treat it as evidence that domain-shaped companion queries can repair specific query-surface gaps while the broader Blackthorn frontier still needs compact question-shaped context and better hybrid joins.
+
+## BTC-026 - Evidence-Bundle Context Filter Probe
+
+- Timestamp: `2026-05-02T06:17:48Z`
+- Mode: `evidence_bundle_context_filter_probe`
+- Compile artifact: `tmp/domain_bootstrap_file/domain_bootstrap_file_20260501T151949156190Z_story_qwen-qwen3-6-35b-a3b.json`
+- Focused non-exact slice artifact: `tmp/domain_bootstrap_qa/domain_bootstrap_qa_20260502T055423116625Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Full-100 artifact: `tmp/domain_bootstrap_qa/domain_bootstrap_qa_20260502T061748198445Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Change: added `--evidence-bundle-context-filter`, which lets the LLM-owned `evidence_bundle_plan_v1` choose query predicates and then lets deterministic code filter `relevant_clauses` by those predicates before the normal Semantic IR QA compiler runs.
+- Focused prior-non-exact slice: 6 exact, 4 partial, 6 miss over 16 rows.
+- Full-100 rerun: 83 exact, 7 partial, 10 miss.
+- Write proposals during QA: 0.
+
+### Lesson
+
+Question-shaped KB context is promising but not yet a default. It rescued several prior non-exacts in focused mode (`q003`, `q013`, `q034`, `q056`, `q078`, `q088`) but the full battery only tied BTC-023 exact count and worsened exact-plus-partial. The next version should preserve a small broad-context floor while adding evidence-plan focused clauses, instead of replacing the clause view too aggressively.
+
+## BTC-027 - Evidence-Bundle Context Filter With Broad Floor
+
+- Timestamp: `2026-05-02T06:48:42Z`
+- Mode: `evidence_bundle_context_filter_broad_floor`
+- Compile artifact: `tmp/domain_bootstrap_file/domain_bootstrap_file_20260501T151949156190Z_story_qwen-qwen3-6-35b-a3b.json`
+- Focused prior-non-exact slice artifact: `tmp/domain_bootstrap_qa/domain_bootstrap_qa_20260502T062451448427Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Full-100 artifact: `tmp/domain_bootstrap_qa/domain_bootstrap_qa_20260502T064842744480Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Change: the context filter now keeps a small broad admitted-clause floor in addition to evidence-plan predicate-focused clauses.
+- Focused prior-non-exact slice: 8 exact, 2 partial, 6 miss over 16 rows.
+- Full-100 rerun: 85 exact, 4 partial, 11 miss.
+- Write proposals during QA: 0.
+
+### Lesson
+
+The broad floor is the right direction: exact high-water improved from BTC-023's 83 to 85, and the focused slice converted prior misses such as `q003`, `q005`, `q013`, `q034`, `q056`, `q078`, `q088`, and `q094`. The cost is a worse exact-plus-partial split, mostly around temporal/deadline and conflict-policy rows that still need hybrid joins or stronger compile support. The architecture should keep the broad-floor filter as an experimental adaptive QA mode, not the default for every row.
+
+## BTC-028 - Committee/FSRB Companion Query Probe
+
+- Timestamp: `2026-05-02T12:38:43Z`
+- Mode: `symbolic_access_companion_probe`
+- Compile artifact: `tmp/domain_bootstrap_file/domain_bootstrap_file_20260501T151949156190Z_story_qwen-qwen3-6-35b-a3b.json`
+- QA probe artifact: `tmp/domain_bootstrap_qa/domain_bootstrap_qa_20260502T123843822923Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Change: added query-only companion lookups from `committee_member/3` to `committee_member_replaced/4`, and from FSRB standing-policy predicates to `deadline_requirement(..., fsrb_decision_date)`, `fsrb_may/1`, `fsrb_decision_effect/2`, and `fsrb_decision_final/1`.
+- Probe scope: `q023`, `q029`, `q078`, `q088`, `q100`.
+- Result: 4 exact, 1 partial, 0 miss.
+- Converted rows on this probe: `q029`, `q078`, `q088`, `q100`.
+- Write proposals during QA: 0.
+
+### Lesson
+
+Structured companion queries continue to be useful when they follow already-admitted KB relations instead of raw prose. The FSRB and committee companions repair several hybrid/query-surface failures without touching source ingestion. `q023` remains partial because the admitted replacement row's committee surface does not exactly match the reference's investigation-committee phrasing; that is a source-surface/ontology-alignment issue, not a query companion issue.

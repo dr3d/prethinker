@@ -149,6 +149,8 @@ class PrologEngine:
             "findall": self._builtin_findall,
             "=": self._builtin_unify,
             "\\=": self._builtin_not_unify,
+            "value_greater_than": self._builtin_value_greater_than,
+            "value_at_most": self._builtin_value_at_most,
         }
     
     def add_clause(self, clause: Clause):
@@ -574,6 +576,52 @@ class PrologEngine:
             return []
         new_subst = self.unify(goal.args[0], goal.args[1], subst)
         return [subst] if not new_subst else []
+
+    def _builtin_value_greater_than(self, goal: Term, subst: Substitution, depth: int) -> List[Substitution]:
+        """value_greater_than(Entity, Threshold) via entity_property(Entity, value, Value)."""
+        return self._builtin_entity_value_threshold(goal, subst, depth, mode="greater_than")
+
+    def _builtin_value_at_most(self, goal: Term, subst: Substitution, depth: int) -> List[Substitution]:
+        """value_at_most(Entity, Threshold) via entity_property(Entity, value, Value)."""
+        return self._builtin_entity_value_threshold(goal, subst, depth, mode="at_most")
+
+    def _builtin_entity_value_threshold(
+        self,
+        goal: Term,
+        subst: Substitution,
+        depth: int,
+        *,
+        mode: str,
+    ) -> List[Substitution]:
+        if len(goal.args) != 2:
+            return []
+        entity = subst.apply(goal.args[0])
+        threshold = self._numeric_term_value(subst.apply(goal.args[1]))
+        if threshold is None:
+            return []
+        value_var = Term("_ValueThreshold", is_variable=True)
+        property_goal = Term("entity_property", [entity, Term("value"), value_var])
+        out: List[Substitution] = []
+        for next_subst in self.resolve(property_goal, subst, depth + 1):
+            value = self._numeric_term_value(next_subst.apply(value_var))
+            if value is None:
+                continue
+            if mode == "greater_than" and value > threshold:
+                out.append(next_subst)
+            elif mode == "at_most" and value <= threshold:
+                out.append(next_subst)
+        return out
+
+    @staticmethod
+    def _numeric_term_value(term: Term) -> Optional[float]:
+        if term.is_variable or term.args:
+            return None
+        if not term.is_number and not re.fullmatch(r"-?\d+(?:\.\d+)?", str(term.name)):
+            return None
+        try:
+            return float(term.name)
+        except Exception:
+            return None
 
 
 if __name__ == "__main__":

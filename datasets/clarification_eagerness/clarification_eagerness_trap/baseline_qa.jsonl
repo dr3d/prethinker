@@ -1,0 +1,10 @@
+{"id": "BASE-001", "question": "Who logged Inspection IN-22?", "expected_answer": "Elias Trent."}
+{"id": "BASE-002", "question": "What did Inspection IN-22 find?", "expected_answer": "A cracked bollard."}
+{"id": "BASE-003", "question": "What did Inspection IN-22 not find?", "expected_answer": "Structural failure."}
+{"id": "BASE-004", "question": "When was RP-8 filed?", "expected_answer": "Apr 4 at 16:00."}
+{"id": "BASE-005", "question": "When was EC-4 attached?", "expected_answer": "Apr 5 at 10:00."}
+{"id": "BASE-006", "question": "Who released the repair funds?", "expected_answer": "Imani Bell."}
+{"id": "BASE-007", "question": "What wake gauge readings triggered suspension?", "expected_answer": "19 at Apr 10 09:00 and 20 at Apr 10 18:00."}
+{"id": "BASE-008", "question": "When was the suspension lifted?", "expected_answer": "Apr 12 at 10:00."}
+{"id": "BASE-009", "question": "Who opened Claim SC-17?", "expected_answer": "Samir Cho."}
+{"id": "BASE-010", "question": "What was the final case status?", "expected_answer": "Case closed Apr 25 without assigning responsibility for Apr 13 confusion."}
