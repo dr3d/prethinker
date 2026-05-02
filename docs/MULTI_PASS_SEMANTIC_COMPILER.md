@@ -231,6 +231,12 @@ negative probe stayed empty because her tests were only five hours apart. This
 also sharpened the verifier: context-dependent helpers should be judged inside
 the rule conjunction, not as standalone row generators.
 
+GLT-035/036 adds the council priority/override branch. The body-fact lens
+captured proposal, budget-matter, support-vote, treasurer-veto, and
+no-emergency-override rows. The verifier retained one promotion-ready
+budget-veto failure rule and dropped normal-vote branches that depended on
+unsupported negation or aggregation.
+
 ## Open Problems
 
 - Pass planner: the router should choose lenses and source spans instead of

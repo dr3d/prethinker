@@ -931,3 +931,73 @@ The retained rule is instance-shaped, not yet a durable generalized quarantine
 law. That is still progress: Prethinker can now acquire and verify a
 source-faithful temporal clearance consequence while rejecting the Mira case
 whose tests were only five hours apart.
+
+## GLT-035/036 - Council Budget-Veto Rule Branch
+
+- Timestamp: `2026-05-02T23:49:27Z`
+- Body-fact artifact: `tmp/domain_bootstrap_file/domain_bootstrap_file_20260502T234841576063Z_story-support_qwen-qwen3-6-35b-a3b.json`
+- Body/backbone union artifact: `tmp/domain_bootstrap_file/domain_bootstrap_file_20260502T234855691562Z_glass-tide-council-body-union-glt035_qwen-qwen3-6-35b-a3b.json`
+- Rule artifact: `tmp/domain_bootstrap_file/domain_bootstrap_file_20260502T234910949153Z_story-rules_qwen-qwen3-6-35b-a3b.json`
+- Promotion-filtered union artifact: `tmp/domain_bootstrap_file/domain_bootstrap_file_20260502T234927415542Z_glass-tide-council-veto-rule-union-glt036_qwen-qwen3-6-35b-a3b.json`
+- Mode: `council_budget_veto_rule_trial`
+- Rule class: `priority_override`
+
+### Result
+
+Body-fact lens:
+
+- `8` body facts admitted.
+- `0` skipped operations.
+- Runtime load errors after deterministic union with the backbone: `0`.
+
+Admitted body facts:
+
+```prolog
+proposal(copper_rails_proposal).
+budget_matter(copper_rails_proposal).
+supported(copper_rails_proposal, mara_vale).
+supported(copper_rails_proposal, juno_vale).
+supported(copper_rails_proposal, ilya_sen).
+supported(copper_rails_proposal, tomas_reed).
+treasurer_veto(copper_rails_proposal, sera_voss).
+no_emergency_override(copper_rails_proposal).
+```
+
+Rule union:
+
+- `1` executable rule retained after isolated promotion-readiness filtering.
+- Runtime rule load errors: `0`.
+- Promotion-ready rules: `1`.
+- Positive probes: `1/1`.
+- Negative probes: `1/1`.
+- Probe-adjusted promotion ready: `true`.
+
+Retained rule:
+
+```prolog
+derived_status(Proposal, failed, council_budget_veto) :-
+    proposal(Proposal),
+    budget_matter(Proposal),
+    treasurer_veto(Proposal, _),
+    no_emergency_override(Proposal).
+```
+
+Passing probes:
+
+```prolog
+derived_status(copper_rails_proposal, failed, council_budget_veto).
+% and no rows for:
+derived_status(copper_rails_proposal, passed, council_budget_veto).
+```
+
+### Lesson
+
+GLT-035/036 adds the priority/override branch without yet solving vote-count
+aggregation. The body-fact lens captured support votes, veto, and explicit
+absence of emergency override. The rule lens proposed several branches, but
+the verifier retained only the clean veto/failure rule and dropped branches
+that required unsupported negation or normal-vote aggregation.
+
+This is the right incremental posture for council voting: acquire and verify
+the veto branch first, then add a separate count/aggregation helper substrate
+for the normal three-of-five pass rule.

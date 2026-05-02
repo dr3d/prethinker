@@ -147,6 +147,41 @@ BODY_FACT_PREDICATES = [
         "why": "body_fact_acquisition",
         "admission_notes": ["Use only for source-stated negative test records."],
     },
+    {
+        "signature": "proposal/1",
+        "args": ["proposal"],
+        "description": "A source-stated council proposal or motion.",
+        "why": "body_fact_acquisition",
+        "admission_notes": ["Use only for source-stated proposals/motions."],
+    },
+    {
+        "signature": "budget_matter/1",
+        "args": ["proposal"],
+        "description": "A proposal directly stated to be a budget matter.",
+        "why": "body_fact_acquisition",
+        "admission_notes": ["Use only for source-stated budget-matter classification."],
+    },
+    {
+        "signature": "supported/2",
+        "args": ["proposal", "officer"],
+        "description": "A source-stated council officer support vote for a proposal.",
+        "why": "body_fact_acquisition",
+        "admission_notes": ["Use only for explicit support votes."],
+    },
+    {
+        "signature": "treasurer_veto/2",
+        "args": ["proposal", "treasurer"],
+        "description": "A source-stated Treasurer veto of a proposal.",
+        "why": "body_fact_acquisition",
+        "admission_notes": ["Use only for explicit Treasurer veto statements."],
+    },
+    {
+        "signature": "no_emergency_override/1",
+        "args": ["proposal"],
+        "description": "Source directly states that no emergency override was issued for a proposal.",
+        "why": "body_fact_acquisition",
+        "admission_notes": ["Use only for explicit absence of emergency override."],
+    },
 ]
 
 
