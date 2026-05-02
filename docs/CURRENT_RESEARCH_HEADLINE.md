@@ -54,9 +54,10 @@ Glass Tide is now exercising the harder rule-ingestion frontier:
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 
-- the first strict CE baseline is `37/40` correct with `0` over-eager asks;
-- the remaining errors expose unsupported correction/retraction and
-  context-write hygiene, not just "ask more" or "ask less";
+- the current CE high-water is `39/40` correct with `0` over-eager asks,
+  `0` unsafe candidates, and `0` context-write violations;
+- the remaining errors expose blocked-slot question posture and run-to-run
+  variance, not just "ask more" or "ask less";
 - CE must be measured across ingestion, query, safe partials, blocked rows, and
   authority-boundary violations.
 
@@ -89,7 +90,9 @@ The next work should stay on the sharp edges:
    positive/negative probes in the loop.
 3. **Clarification Eagerness drift.** A post-move preflight run completed
    safely with `0` unsafe candidates and `0` context-write violations, but it
-   over-asked badly. That is a live calibration problem, not a safety failure.
+   over-asked badly. CET-008 later reached `39/40` with no context-write
+   violations; the next move is structural blocked-slot/context-support review,
+   not another broad prompt patch.
 4. **Regression cadence.** Keep compact Anaplan/Glass Tide/CE checks running so
    new rule machinery does not reopen older query, admission, or ask/no-ask
    failures.

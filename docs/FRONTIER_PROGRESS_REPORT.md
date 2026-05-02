@@ -69,7 +69,7 @@ The frontier fixtures are designed to hurt different parts of that path:
 | Kestrel Claim | `5 exact / 0 partial / 15 miss` first-20 cold baseline | `73 exact / 11 partial / 16 miss` profile-guided full-100; `30 / 12 / 58` best source-aware full-100 | Domain packs are legitimate product context, but cold/source-aware claims must be reported separately from profile-guided runs. |
 | Anaplan Polaris | `29 exact / 6 partial / 8 miss` full-43 baseline | `42 exact / 1 partial / 0 miss` | A safe union of independent mapper-admitted support views can outperform any single compile without using answer-key guidance. |
 | Glass Tide Charter | cold profile bootstrap initially failed JSON; assisted starter first-20 was `7 exact / 2 partial / 11 miss` | cold compact bootstrap first-20 `13 exact / 3 partial / 4 miss`; GLT-023 has a probe-gated role-joined repair rule with `1/1` positive and `1/1` negative probes; GLT-025 has a split exception lens deriving `lamp_rice` exempt with `1/1` positive and `1/1` negative; GLT-026 shows combined tax bundles can misuse numeric helpers and should not be promoted without verifier checks | Rule ingestion needs planned semantic lenses, active predicate palettes, helper substrates, body-goal support checks, positive/negative probes, and runtime verifier diagnostics, not more rule prose inside the default compile. |
-| Clarification Eagerness Trap | `30/40` first full CE baseline | strict authority-aware baseline `37/40`, `0` over-eager, `2` under-eager, `1` unsafe candidate, `2` context-write violations | CE must be measured as a first-class frontier: ask posture, safe partials, blocked rows, and context-write hygiene are separate surfaces. |
+| Clarification Eagerness Trap | `30/40` first full CE baseline | CET-008 high-water `39/40`, `0` over-eager, `1` under-eager, `0` unsafe candidates, `0` context-write violations; CET-009 variance check regressed to `37/40` | CE must be measured as a first-class frontier: ask posture, safe partials, blocked rows, context-write hygiene, and run-to-run variance are separate surfaces. |
 
 ## What Improved The Scores
 
@@ -124,7 +124,9 @@ The same pattern appears across fixtures:
 - **Clarification eagerness is not one dial.** CE has ingestion/query phases,
   ask/no-ask posture, safe partial preservation, and authority-surface hygiene.
   A run can have good ask precision while still leaking context-sourced candidate
-  writes, so the scorer now measures those separately.
+  writes, so the scorer now measures those separately. CET-008 reached `39/40`
+  by sharpening the authority surface for context-support rows rather than by
+  simply increasing or decreasing questions.
 
 ## Negative Results Worth Keeping
 
@@ -162,8 +164,9 @@ The remaining hard areas are now sharper:
   remains disputed.
 - **Clarification eagerness.** Prethinker must ask early enough to avoid unsafe
   writes, but not so eagerly that safe source-claim/quarantine paths become
-  needless dialogue. The current strict CE run still exposes unsupported
-  correction and context-write edges.
+  needless dialogue. The current high-water removes context-write violations,
+  but CET-009 shows the surface still varies and needs structural review for
+  blocked-slot questions.
 
 ## Where The Raw Evidence Lives
 

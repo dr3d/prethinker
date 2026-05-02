@@ -45,13 +45,18 @@ CE_DOMAIN_CONTEXT = [
     "Ask for clarification when durable truth, a correction target, rule scope, role identity, or query scope would otherwise require an unauthorized choice.",
     "Do not ask when the content can be safely represented as a source claim, safely quarantined, answered with multiple bindings, or answered broadly without guessing.",
     "For mixed clear/ambiguous ingestion, preserve safe candidate operations and mark only blocked operations as needs_clarification.",
+    "When a mixed ingestion turn has a safe partial plus an ambiguous blocked status, approval, payment, rule, or correction path, include a targeted clarification question for the blocked slot; do not only mark the blocked row unsafe.",
     "For query turns, clarify only when the user's question cannot be scoped against the available source/KB context without guessing.",
     "A clarification question should target the blocked slot directly; do not ask the user to restate the whole case.",
     "If a question names the claim, actor, accusation, rule, date, or document clearly, answer from context rather than asking because nearby concepts also exist.",
     "If source context has a direct local phrase match such as a named notice before a named closure, use that source-local event instead of asking about every possible closure-like word.",
+    "If the user says only 'the rule' and the context contains multiple named rules or rule-like requirements, ask which rule instead of selecting a nearby repair, filing, tax, or exception rule.",
     "If an utterance says 'according to', 'memo says', 'letter states', or similar source-attribution language, represent the content as a source claim when possible; do not emit the claimed proposition itself as a safe fact.",
+    "For source-attributed claim turns, the direct source_claim is the safe candidate surface; do not also emit context-derived adoption, not_adopted, disputed, contradicted, or finding-status rows as safe candidate operations.",
     "Do not treat a source_claim/claim row as committing the claim content as fact merely because the claim content is represented in arguments.",
     "Never propose a safe durable write from source='context'. Context may guide safety, conflict detection, or query answers, but context-sourced operations must be unsafe, skipped, or diagnostic unless the user directly restates them.",
+    "In this CE fixture, candidate_operations should not contain safe source='context' role, status, title, or support rows at all. Put context support in self_check or diagnostics instead.",
+    "Do not emit safe source='context' alias_of, maps_to, same_as, support, or rule-link rows as candidate operations; those are context explanations, not durable writes from the current utterance.",
     "If a role/title subject says 'she/he/they did X' and the pronoun could be the role-holder or another reported actor, ask who the pronoun refers to before committing the actor slot.",
     "That role/title pronoun rule is narrow: it applies to role/title subjects or competing actor slots, not to a named-person antecedent continuing their own action in the same sentence.",
     "Do not over-apply pronoun caution: if a named person is the only local antecedent in the same sentence and the pronoun continues that person's action, resolve it without asking.",
@@ -68,6 +73,8 @@ CE_DOMAIN_CONTEXT = [
     "Correction markers such as 'actually' require a clear correction target. If the target object or old fact is missing, ask for that target before proposing a durable replacement.",
     "A correction target is clear only when the old clause exists in the supplied KB context. A source document mentioning the old value is not enough by itself to authorize retraction.",
     "For explicit correction with old and new values, preserve safe clear details but mark the replacement/retraction path as needing clarification unless the matching old KB fact is supplied in context.",
+    "Do not mark retract or replacement operations safe merely because the utterance gives both old and new values. Without an old KB clause in context, the correction path is blocked and should request clarification or old-fact support.",
+    "If context explains that a claim is not adopted, disputed, contradicted, or background-only, record that support in diagnostics/self_check or an unsafe/quarantine operation; do not emit a safe source='context' candidate operation for the status row.",
 ]
 
 
@@ -295,6 +302,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--fixture", type=Path, default=DEFAULT_FIXTURE)
     parser.add_argument("--surface", choices=["ingestion", "query", "both"], default="both")
     parser.add_argument("--limit", type=int, default=0)
+    parser.add_argument(
+        "--case-id",
+        action="append",
+        default=[],
+        help="Optional fixture case id to run. May be supplied more than once. This is authored fixture selection, not prose parsing.",
+    )
     parser.add_argument("--backend", default="lmstudio")
     parser.add_argument("--base-url", default="http://127.0.0.1:1234/v1")
     parser.add_argument("--model", default="qwen/qwen3.6-35b-a3b")
@@ -308,6 +321,9 @@ def main(argv: list[str] | None = None) -> int:
 
     fixture = args.fixture.resolve()
     cases = _load_cases(fixture, args.surface)
+    wanted_case_ids = {str(item).strip() for item in args.case_id if str(item).strip()}
+    if wanted_case_ids:
+        cases = [case for case in cases if str(case.get("id", "")).strip() in wanted_case_ids]
     if args.limit > 0:
         cases = cases[: args.limit]
 

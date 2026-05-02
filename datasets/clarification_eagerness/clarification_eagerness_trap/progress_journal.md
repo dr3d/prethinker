@@ -173,3 +173,67 @@ Lesson: blunt prompt pressure saying "do not copy context rows" regressed the
 model. The right fix is likely structural: mapper-side context-write rejection,
 cleaner Semantic IR fields for context support versus candidate operations, and
 pass-specific CE diagnostics, not more global prose.
+
+## CET-008 - Context-Support Hygiene High-Water
+
+Date: 2026-05-02
+
+Run artifact: `tmp/clarification_eagerness_runs/cet-20260502T230526Z-both-40/`
+
+Result:
+
+- `40/40` parsed.
+- `39/40` correct.
+- `0` over-eager asks.
+- `1` under-eager miss.
+- `0` unsafe candidates.
+- `0` context-write violations.
+- `16/17` expected ask cases requested clarification.
+- `23/23` expected no-ask cases avoided clarification.
+- Clarification precision: `1.000`.
+- Clarification recall: `0.941`.
+- No-ask precision: `0.958`.
+
+Changes:
+
+- Added authored case-id filtering to the CE runner so weak cases can be
+  replayed directly without a full 40-case GPU sweep.
+- Tightened the source/context boundary for CE candidate operations: context
+  role, status, title, alias, support, same-as, and rule-link rows belong in
+  diagnostics/self-check, not safe candidate operations.
+- Tightened source-claim posture: direct `source_claim` is the safe candidate
+  surface; context-derived adoption or non-adoption status is diagnostic unless
+  directly restated by the user.
+- Tightened mixed safe-partial posture: if a blocked ambiguous status, payment,
+  rule, correction, or approval slot could be clarified, include a targeted
+  clarification question rather than only marking the blocked row unsafe.
+
+Lesson: CE calibration improved most when the prompt described the authority
+surface rather than saying "ask less" or "ask more." The high-water removed
+context-write violations entirely while preserving perfect clarification
+precision. The remaining miss was a safe partial plus unsafe blocked approval
+without a clarification question.
+
+## CET-009 - Variance Check After Alias Guard
+
+Date: 2026-05-02
+
+Run artifact: `tmp/clarification_eagerness_runs/cet-20260502T231602Z-both-40/`
+
+Result:
+
+- `40/40` parsed.
+- `37/40` correct.
+- `0` over-eager asks.
+- `2` under-eager misses.
+- `1` unsafe candidate.
+- `0` context-write violations.
+- Clarification precision: `0.933`.
+- Clarification recall: `0.824`.
+
+Lesson: the CE surface still has model-run variance even at `temperature=0.0`
+with no thinking. Targeted replays fixed individual leaks, but the full-run
+surface can shift. Treat CET-008 as the current high-water, not a guaranteed
+floor. The next CE move should be a structural mapper/review diagnostic for
+context-support rows and blocked-slot questions, not more one-line prompt
+patches.
