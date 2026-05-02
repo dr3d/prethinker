@@ -24,6 +24,10 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from kb_pipeline import CorePrologRuntime  # noqa: E402
+from scripts.run_rule_acquisition_pass import (  # noqa: E402
+    _runtime_trial,
+    _rule_trial_item_promotion_ready,
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -32,6 +36,29 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
     parser.add_argument("--label", default="union", help="Short label used in the output filename.")
     parser.add_argument("--domain-hint", default="", help="Optional domain hint override.")
+    parser.add_argument(
+        "--trial-backbone-json",
+        type=Path,
+        default=None,
+        help="Optional compile JSON whose admitted facts provide the temporary KB for rule trial.",
+    )
+    parser.add_argument(
+        "--positive-query",
+        action="append",
+        default=[],
+        help="Optional Prolog query expected to return rows after temporary rule loading.",
+    )
+    parser.add_argument(
+        "--negative-query",
+        action="append",
+        default=[],
+        help="Optional Prolog query expected to return no rows after temporary rule loading.",
+    )
+    parser.add_argument(
+        "--drop-non-promotion-ready-rules",
+        action="store_true",
+        help="When --trial-backbone-json is supplied, keep only rules that pass promotion-readiness diagnostics.",
+    )
     parser.add_argument(
         "--no-runtime-validation",
         action="store_true",
@@ -50,6 +77,35 @@ def main() -> int:
     facts = _ordered_unique(_source_compile_items(records, "facts"))
     rules = _ordered_unique(_source_compile_items(records, "rules"))
     queries = _ordered_unique(_source_compile_items(records, "queries"))
+    runtime_trial: dict[str, Any] = {}
+    trial_facts: list[str] = []
+    if args.trial_backbone_json is not None:
+        trial_backbone_path = args.trial_backbone_json
+        if not trial_backbone_path.is_absolute():
+            trial_backbone_path = (REPO_ROOT / trial_backbone_path).resolve()
+        trial_backbone = json.loads(trial_backbone_path.read_text(encoding="utf-8-sig"))
+        trial_facts = _compile_items(trial_backbone, "facts")
+        runtime_trial = _runtime_trial(
+            facts=trial_facts,
+            backbone_rules=[],
+            rule_lens_rules=rules,
+            positive_queries=[str(item) for item in args.positive_query if str(item).strip()],
+            negative_queries=[str(item) for item in args.negative_query if str(item).strip()],
+        )
+        if bool(args.drop_non_promotion_ready_rules):
+            ready_rules = {
+                str(item.get("rule", "")).strip()
+                for item in runtime_trial.get("derived_head_queries", [])
+                if isinstance(item, dict) and _rule_trial_item_promotion_ready(item)
+            }
+            rules = [rule for rule in rules if rule in ready_rules]
+            runtime_trial = _runtime_trial(
+                facts=trial_facts,
+                backbone_rules=[],
+                rule_lens_rules=rules,
+                positive_queries=[str(item) for item in args.positive_query if str(item).strip()],
+                negative_queries=[str(item) for item in args.negative_query if str(item).strip()],
+            )
     load_errors: list[str] = []
     if not bool(args.no_runtime_validation):
         facts, rules, load_errors = _runtime_validated(facts=facts, rules=rules)
@@ -87,6 +143,7 @@ def main() -> int:
                 "source_admitted_counts": source_counts,
                 "runtime_load_errors": load_errors,
             },
+            "runtime_trial": runtime_trial,
             "union_source_compile": {
                 "schema_version": "domain_bootstrap_compile_union_v1",
                 "created_at": now,
@@ -94,6 +151,11 @@ def main() -> int:
                 "source_counts": source_counts,
                 "runtime_validated": not bool(args.no_runtime_validation),
                 "runtime_load_errors": load_errors,
+                "trial_backbone_json": str(args.trial_backbone_json or ""),
+                "trial_fact_count": len(trial_facts),
+                "drop_non_promotion_ready_rules": bool(args.drop_non_promotion_ready_rules),
+                "positive_queries": [str(item) for item in args.positive_query if str(item).strip()],
+                "negative_queries": [str(item) for item in args.negative_query if str(item).strip()],
                 "policy": [
                     "No source prose was read.",
                     "No new facts or rules were inferred.",
@@ -120,6 +182,10 @@ def main() -> int:
                 "rules": len(rules),
                 "queries": len(queries),
                 "runtime_load_errors": len(load_errors),
+                "trial_promotion_ready_rules": runtime_trial.get("promotion_ready_rule_count") if runtime_trial else None,
+                "trial_positive_probe_passes": runtime_trial.get("positive_probe_pass_count") if runtime_trial else None,
+                "trial_negative_probe_passes": runtime_trial.get("negative_probe_pass_count") if runtime_trial else None,
+                "trial_probe_adjusted_promotion_ready": runtime_trial.get("probe_adjusted_promotion_ready") if runtime_trial else None,
                 "source_runs": len(run_paths),
             },
             sort_keys=True,

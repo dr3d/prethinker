@@ -51,6 +51,9 @@ Glass Tide is now exercising the harder rule-ingestion frontier:
   `harbor` scope and does not derive it as taxable; the combined threshold plus
   exception bundle remains fragile and exposed numeric-helper argument misuse
   (`value_greater_than(Value, 100)` instead of `value_greater_than(Cargo, 100)`).
+- deterministic rule-surface union now accumulates the separate threshold and
+  exception lenses into `3` promotion-ready tax rules with `3/3` positive probes
+  and `1/1` negative probe, without reading source prose or inventing new rules.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 
@@ -82,8 +85,9 @@ The next work should stay on the sharp edges:
 
 1. **Glass Tide exception branches.** Threshold helper rules now fire, but
    high-value relief-cargo exemption should stay as a separate semantic lens
-   before deterministic rule-surface union. Do not force the whole tax bundle
-   into one pass yet.
+   before deterministic rule-surface union. GLT-027 shows this works; next is
+   applying the same union-and-probe pattern to salvage, quarantine, and council
+   vote rules.
 2. **Rule probe discipline.** Recent preflight runs show that a rule can be
    body-supported but fail under the wrong scope atom, or can become dormant by
    using lowercase placeholders such as `warden` and `repair_order`. Keep

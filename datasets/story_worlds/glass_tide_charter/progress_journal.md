@@ -650,3 +650,68 @@ value_greater_than(Cargo, 100).
 GLT-026 turns a subtle runtime/query miss into a structural verifier rule. The rule trial now flags `value_at_most(Value, 100)` and `value_greater_than(Value, 100)` when `Value` is the numeric variable from `entity_property(Cargo, value, Value)`. This is not language handling in Python; it is contract verification over proposed Prolog clauses.
 
 The combined tax bundle also remains operationally fragile: a later retry of the same combined shape stalled while the GPU was idle. For the next cycle, keep threshold and exception branches as separate semantic lenses, then accumulate mapper-admitted rules through deterministic union instead of forcing all branches into one LLM pass.
+
+## GLT-027 - Deterministic Rule-Surface Union Beats One-Pass Tax Bundle
+
+- Timestamp: `2026-05-02T23:23:45Z`
+- Union artifact: `tmp/domain_bootstrap_file/domain_bootstrap_file_20260502T232345474313Z_glass-tide-tax-rule-union-glt027_qwen-qwen3-6-35b-a3b.json`
+- Source rule artifacts:
+  - `tmp/domain_bootstrap_file/domain_bootstrap_file_20260502T211100855690Z_story-rules_qwen-qwen3-6-35b-a3b.json`
+  - `tmp/domain_bootstrap_file/domain_bootstrap_file_20260502T224021055106Z_story-rules_qwen-qwen3-6-35b-a3b.json`
+- Mode: `deterministic_promotion_ready_rule_union`
+- Rule class: `threshold_exception`
+
+### Result
+
+- No source prose read during union.
+- No new rules inferred during union.
+- `3` accumulated executable rules retained after promotion-readiness filtering.
+- Runtime rule load errors: `0`.
+- Promotion-ready rules: `3`.
+- Unsupported body fragments: `0`.
+- Positive probes: `3/3`.
+- Negative probes: `1/1`.
+- Unexpected probe solutions: `0`.
+- Probe-adjusted promotion ready: `true`.
+
+Accumulated rules:
+
+```prolog
+derived_tax_status(Cargo, taxable, harbor) :-
+    entity_property(Cargo, value, Value),
+    value_greater_than(Cargo, 100),
+    entity_property(Cargo, relief_status, not_relief).
+
+derived_tax_status(Cargo, exempt, harbor) :-
+    entity_property(Cargo, value, Value),
+    value_at_most(Cargo, 100).
+
+derived_tax_status(Cargo, exempt, harbor) :-
+    entity_property(Cargo, type, relief_cargo).
+```
+
+Passing positive probes:
+
+```prolog
+derived_tax_status(glass_eels, taxable, harbor).
+derived_tax_status(seed_crystals, exempt, harbor).
+derived_tax_status(lamp_rice, exempt, harbor).
+```
+
+Passing negative probe:
+
+```prolog
+derived_tax_status(lamp_rice, taxable, harbor).
+```
+
+### Lesson
+
+This is the clearest Glass Tide proof for multi-pass semantic compilation so
+far. A forced combined tax pass produced right-looking but helper-misused rules.
+Separate threshold and exception lenses each captured a useful safe view.
+Deterministic union over mapper-admitted outputs, followed by promotion-ready
+filtering and authored probes, produced a stronger accumulated rule surface
+than either source pass and stronger than the one-pass bundle.
+
+This is semantic parallax as executable-rule engineering: depth came from
+accumulating safe views, not from asking one prompt to see everything at once.

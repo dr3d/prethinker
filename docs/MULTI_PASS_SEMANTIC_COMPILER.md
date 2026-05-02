@@ -200,6 +200,14 @@ diagnostic label; durable rule admission remains a separate product decision.
 Probe-adjusted promotion readiness additionally requires all supplied positive
 and negative probes to pass.
 
+The deterministic compile-union utility can now run this same rule trial over
+an accumulated rule surface. With `--trial-backbone-json`,
+`--drop-non-promotion-ready-rules`, and authored positive/negative probes, it
+can union separate mapper-admitted rule lenses, discard non-promotion-ready
+clauses, and score the accumulated temporary KB. Glass Tide GLT-027 used this to
+combine threshold and exception tax lenses into `3` promotion-ready rules that
+passed `3/3` positive and `1/1` negative probes.
+
 ## Open Problems
 
 - Pass planner: the router should choose lenses and source spans instead of
