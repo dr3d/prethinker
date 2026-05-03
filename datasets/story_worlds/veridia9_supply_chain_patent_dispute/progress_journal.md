@@ -104,3 +104,46 @@ kind detail, claim/source lineage, temporal notice math, financial joins, and
 regulatory/patent consequences. The next metric should pair pass health with
 question-support coverage: a pass can be structurally healthy and still miss the
 rows that later QA needs.
+
+## Run V9-003 - Evidence-Bundle Context Filtering
+
+- Timestamp: `2026-05-03T12:49Z` through `2026-05-03T12:59Z`
+- Evidence lane: `cold_after_general_architecture_change`
+- Model: `qwen/qwen3.6-35b-a3b`
+- Mode: post-ingestion QA replay over the unchanged V9-002 compile, with
+  `evidence_bundle_plan_v1` and evidence-bundle context filtering enabled.
+  This did not recompile the source, did not read a gold KB, did not use a
+  starter registry, and did not allow QA write proposals.
+
+### Artifacts
+
+- Compile reused:
+  `tmp/diagnostic_replays/veridia9_v9002/domain_bootstrap_file_20260503T121301361568Z_story_qwen-qwen3-6-35b-a3b.json`
+- QA:
+  `tmp/diagnostic_replays/veridia9_v9003/domain_bootstrap_qa_20260503T124919727431Z_qa_qwen-qwen3-6-35b-a3b.json`
+
+### Result
+
+- Compile: unchanged from V9-002, `61` unique facts, `0` rules.
+- QA: `22 exact / 4 partial / 14 miss` over `40` questions.
+- Delta from V9-002: `+3` exact, `-2` partial, `-1` miss.
+- Safety: `40/40` parsed, `40/40` query rows, `0` write-proposal rows, `0`
+  runtime load errors.
+- Failure surfaces: `15` compile-surface gaps, `1` hybrid-join gap, `1`
+  query-surface gap, `1` answer-surface gap.
+
+### Lesson
+
+V9-003 shows that post-ingestion access choreography is a real lever. The KB
+surface did not change, but evidence-bundle context filtering converted q021,
+q035, and q040 to exact. That supports the three-surface model:
+
+```text
+compile surface != query surface != answer surface
+```
+
+The improvement is not free. q012 and q034 regressed from partial to miss, so
+evidence-bundle context filtering should remain a measured query-strategy mode
+rather than an unquestioned default. It is best viewed as a targeted tool for
+near-miss rows where the KB contains relevant surface but ordinary query
+planning does not assemble the right support bundle.

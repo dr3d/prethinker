@@ -120,6 +120,11 @@ The cold generalization lane is now active:
   pain is not just empty retrieval. It is answer-bearing support: the query path
   often finds nearby symbolic surface without finding the exact row, join, or
   rule consequence needed by the question.
+- Veridia-9 V9-003 confirms that post-ingestion query choreography can lift a
+  cold run without touching the compile: evidence-bundle context filtering moved
+  the unchanged V9-002 surface from `19 / 6 / 15` to `22 / 4 / 14`. It also
+  regressed two partials, so this is a measured near-miss tool, not a blind
+  default.
 
 The architecture is becoming sharper:
 
@@ -149,7 +154,8 @@ The next work should stay on the sharp edges:
    sending through full QA and when the compile itself needs repair first. The
    newest evidence-return proxy says many misses already retrieve rows, so the
    next compile/query work should target answer-bearing support, not just more
-   rows.
+   rows. V9-003 shows evidence-bundle context filtering can help that query
+   surface, but it needs regression checks because it can perturb partial rows.
 1. **Glass Tide final-outcome composition.** Tax, salvage, quarantine, council
    veto, and council support-threshold conditions now have promotion-ready
    slices. The next frontier is a final outcome lens that joins intermediate
