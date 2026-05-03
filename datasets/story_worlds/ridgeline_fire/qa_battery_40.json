@@ -1,0 +1,282 @@
+[
+  {
+    "id": "RF-001",
+    "category": "basic_fact",
+    "question": "What was the initial estimated size of the fire when Engine Company 7 arrived?",
+    "answer": "15-20 acres (corrected from initially reported 15 acres; Fuentes's field notebook shows '15-20 acres, hard to tell with terrain')",
+    "notes": "Must use corrected range, not original single figure"
+  },
+  {
+    "id": "RF-002",
+    "category": "temporal",
+    "question": "When did the fire exceed the 50-acre threshold?",
+    "answer": "Approximately 13:30 on June 14, when Fuentes reported approximately 60 acres. Fuentes's witness statement suggests the fire may have crossed 50 acres around 13:00, but the official threshold report was at 13:30.",
+    "notes": "Must distinguish between Fuentes's speculation (13:00) and the official report time (13:30)"
+  },
+  {
+    "id": "RF-003",
+    "category": "deadline_compliance",
+    "question": "Was the Incident Commander assigned within the required 2-hour window?",
+    "answer": "Yes — the 2-hour clock started at 13:30 (threshold report) and Tanaka was assigned at 14:15, which is 45 minutes later, within the 2-hour requirement",
+    "notes": "Must use 13:30 as the reference, not 13:00"
+  },
+  {
+    "id": "RF-004",
+    "category": "role",
+    "question": "What certification level does IC Tanaka hold?",
+    "answer": "Type 1 IC certification, which exceeds the minimum Type 2 requirement",
+    "notes": "Exceeds requirement, not just meets it"
+  },
+  {
+    "id": "RF-005",
+    "category": "rule",
+    "question": "Who has authority to issue evacuation orders for WUI zones?",
+    "answer": "The County Emergency Manager (Sandra Obi), not the IC. The IC may recommend evacuation but cannot order it.",
+    "notes": "Authority distinction — IC recommends, Emergency Manager orders"
+  },
+  {
+    "id": "RF-006",
+    "category": "exclusion",
+    "question": "Is Mill District a WUI zone?",
+    "answer": "No — Mill District is a commercial zone and is not subject to the evacuation order protocol",
+    "notes": "Must exclude Mill District from WUI rules, parallel to Foundry Row in Iron Harbor"
+  },
+  {
+    "id": "RF-007",
+    "category": "exclusion",
+    "question": "Does Mill District have any notification requirement during WUI evacuations?",
+    "answer": "Yes — Mill District must receive a voluntary advisory within 3 hours of any evacuation order being issued to a WUI zone",
+    "notes": "Different requirement for non-WUI zone"
+  },
+  {
+    "id": "RF-008",
+    "category": "policy_violation",
+    "question": "Was the Mill District advisory issued on time?",
+    "answer": "No — the first WUI evacuation order was issued at 15:35 on June 14, giving a 3-hour deadline of 18:35. As of 03:30 on June 15 (12 hours later), Mill District had still not received an advisory. This is a violation.",
+    "notes": "Clear violation — advisory never sent"
+  },
+  {
+    "id": "RF-009",
+    "category": "policy_violation",
+    "question": "Was the aerial drop at 21:15 properly authorized?",
+    "answer": "No — two violations: (1) Tanaka authorized without Achondo's co-authorization, because Achondo was unreachable due to communications failure; (2) The flight hazard assessment had expired at 20:30, 45 minutes before the authorization. Achondo's retroactive concurrence does not cure either violation.",
+    "notes": "Dual violation — must identify both missing co-auth AND expired assessment"
+  },
+  {
+    "id": "RF-010",
+    "category": "rule",
+    "question": "Can the IC waive the 300-foot safety zone during a Red Flag Warning?",
+    "answer": "No — the IC does not have authority to waive the safety-zone requirement during a Red Flag Warning",
+    "notes": "Hard prohibition"
+  },
+  {
+    "id": "RF-011",
+    "category": "temporal",
+    "question": "When was the Red Flag Warning issued and when was it cancelled?",
+    "answer": "Issued June 14 at 14:00, cancelled June 16 at 08:00",
+    "notes": "Two timestamps"
+  },
+  {
+    "id": "RF-012",
+    "category": "policy_violation",
+    "question": "Was the Cedar Hollow evacuation order issued on time?",
+    "answer": "No — Tanaka recommended evacuation at 02:15 on June 15. Obi issued the order at 03:00, which is 45 minutes later, exceeding the 30-minute requirement by 15 minutes.",
+    "notes": "Clear violation — 45 minutes > 30 minutes"
+  },
+  {
+    "id": "RF-013",
+    "category": "policy_compliance",
+    "question": "Was the Pinecrest Heights evacuation order issued on time?",
+    "answer": "Yes — Tanaka recommended at 15:10, Obi issued at 15:35, which is 25 minutes later, within the 30-minute requirement",
+    "notes": "Must identify as COMPLIANT"
+  },
+  {
+    "id": "RF-014",
+    "category": "policy_compliance",
+    "question": "Was the Elk Meadow evacuation order issued on time?",
+    "answer": "Yes — Tanaka recommended at 15:45, Obi issued at 16:00, which is 15 minutes later, within the 30-minute requirement",
+    "notes": "Must identify as COMPLIANT"
+  },
+  {
+    "id": "RF-015",
+    "category": "policy_violation",
+    "question": "Was the lifting of evacuation orders for Pinecrest Heights and Elk Meadow timely?",
+    "answer": "No — Tanaka certified perimeter clearance at 10:00 on June 16, giving a 2-hour deadline of 12:00. Obi lifted the orders at 12:30, which is 30 minutes late.",
+    "notes": "Clear violation — 2.5 hours > 2 hours"
+  },
+  {
+    "id": "RF-016",
+    "category": "policy_compliance",
+    "question": "Was the lifting of the Cedar Hollow evacuation order timely?",
+    "answer": "Yes — Tanaka certified at 18:00 on June 16, Obi lifted at 19:45, which is 1 hour 45 minutes later, within the 2-hour requirement",
+    "notes": "Must identify as COMPLIANT"
+  },
+  {
+    "id": "RF-017",
+    "category": "authorization",
+    "question": "What two authorizations are required for aerial water drops?",
+    "answer": "Authorization from both the Incident Commander and the Air Operations Coordinator. Neither officer acting alone may authorize an aerial drop.",
+    "notes": "Conjunction requirement, parallel to Iron Harbor's bypass authorization"
+  },
+  {
+    "id": "RF-018",
+    "category": "authorization",
+    "question": "What additional condition applies to the Air Ops authorization?",
+    "answer": "A flight hazard assessment must have been completed within the preceding 4 hours. An assessment older than 4 hours does not count as current.",
+    "notes": "Nested condition, parallel to Iron Harbor's 30-day inspection requirement"
+  },
+  {
+    "id": "RF-019",
+    "category": "policy_compliance",
+    "question": "Was the first aerial drop at 17:00 properly authorized?",
+    "answer": "Yes — both Tanaka and Achondo authorized it, and the flight hazard assessment completed at 16:30 was 30 minutes old, within the 4-hour window",
+    "notes": "Must identify as COMPLIANT — both conditions met"
+  },
+  {
+    "id": "RF-020",
+    "category": "claim_vs_fact",
+    "question": "Did Achondo's retroactive concurrence at 21:30 cure the authorization violation?",
+    "answer": "No — the policy requires authorization from both officers, not retroactive concurrence after operations have begun. Additionally, the flight hazard assessment had expired regardless of Achondo's concurrence.",
+    "notes": "Retroactive agreement ≠ proper authorization"
+  },
+  {
+    "id": "RF-021",
+    "category": "temporal_calculation",
+    "question": "How long had the flight hazard assessment been expired when Tanaka authorized the second aerial drop?",
+    "answer": "45 minutes — the assessment expired at 20:30 and Tanaka authorized at 21:15",
+    "notes": "Simple temporal arithmetic"
+  },
+  {
+    "id": "RF-022",
+    "category": "correction",
+    "question": "What was the corrected duration of the communications outage with Achondo?",
+    "answer": "40 minutes, corrected from Tanaka's initial estimate of 30 minutes. Both Achondo's statement and the communications log confirm 40 minutes.",
+    "notes": "Must use corrected value, retract Tanaka's estimate"
+  },
+  {
+    "id": "RF-023",
+    "category": "correction",
+    "question": "What is the authoritative time for the first mutual aid request?",
+    "answer": "15:00, per Ridgeline's dispatch log. Nwosu's statement that he received the request at 15:05 reflects Jackson County's local receipt time. The dispatch log is authoritative for compliance purposes.",
+    "notes": "Source authority — dispatch log overrides witness statement"
+  },
+  {
+    "id": "RF-024",
+    "category": "claim_vs_fact",
+    "question": "Is Fuentes's suggestion that the fire may have crossed 50 acres around 13:00 an established fact?",
+    "answer": "No — it is Fuentes's retrospective estimate from her witness statement. The official threshold report was at 13:30. The 13:00 time is a claim, not a fact.",
+    "notes": "Claim/fact separation — 'maybe around 13:00' is speculation"
+  },
+  {
+    "id": "RF-025",
+    "category": "claim_vs_fact",
+    "question": "Is Tanaka's disclosure about the informal NWS briefing at 13:00 a policy violation?",
+    "answer": "The document does not establish this as a policy violation. It is Tanaka's disclosure, not a finding of the review board.",
+    "notes": "Must NOT promote disclosure to violation, parallel to Iron Harbor's Cheng disclosure"
+  },
+  {
+    "id": "RF-026",
+    "category": "multilingual",
+    "question": "What did Achondo say about the expired flight hazard assessment?",
+    "answer": "He said (in French) that his flight hazard assessment had expired at 20:30, wind conditions had changed since his assessment, and a new assessment would have been necessary",
+    "notes": "Extracted from French-language statement"
+  },
+  {
+    "id": "RF-027",
+    "category": "multilingual",
+    "question": "What did Obi say about the late Cedar Hollow evacuation order?",
+    "answer": "She said (in Dutch) that she acknowledges the order was late — 45 minutes instead of 30 — and that she had to map roads for a safe evacuation route because it was the middle of the night",
+    "notes": "Extracted from Dutch-language statement"
+  },
+  {
+    "id": "RF-028",
+    "category": "multilingual",
+    "question": "What did Nwosu say about ground crew compliance with the safety zone?",
+    "answer": "He said (in Indonesian) that when his crews arrived at 06:00 on June 15, all ground crews were maintaining the 300-foot safety zone per the rules",
+    "notes": "Extracted from Indonesian-language statement"
+  },
+  {
+    "id": "RF-029",
+    "category": "enumeration",
+    "question": "Which WUI zones received evacuation orders?",
+    "answer": "Pinecrest Heights (15:35 June 14), Elk Meadow (16:00 June 14), and Cedar Hollow (03:00 June 15)",
+    "notes": "All three WUI zones, with timestamps"
+  },
+  {
+    "id": "RF-030",
+    "category": "enumeration",
+    "question": "What mutual aid was received and from where?",
+    "answer": "Jackson County: two engine companies and one hand crew (arrived 06:00 June 15). Clearwater County: one engine company (arrived 06:00 June 15).",
+    "notes": "Mutual aid enumeration"
+  },
+  {
+    "id": "RF-031",
+    "category": "temporal",
+    "question": "How large was the fire when it was declared contained?",
+    "answer": "923 acres, declared contained on June 17 at 09:00",
+    "notes": "Final size and containment date"
+  },
+  {
+    "id": "RF-032",
+    "category": "deadline_compliance",
+    "question": "Was the post-incident review convened within the required timeframe?",
+    "answer": "Yes — the fire was declared contained on June 17 and the review was convened on June 25, which is 8 calendar days later, within the 10-day requirement",
+    "notes": "Post-incident deadline compliance"
+  },
+  {
+    "id": "RF-033",
+    "category": "rule",
+    "question": "What is the composition requirement for the post-incident review board?",
+    "answer": "The board must include at least one member from outside Ridgeline County",
+    "notes": "External member requirement"
+  },
+  {
+    "id": "RF-034",
+    "category": "compliance",
+    "question": "Does the review board meet the external member requirement?",
+    "answer": "Yes — Battalion Chief Yuki Sato is from Clearwater County and Dr. Elaine Whitford is from the University of Montana. Both are external members.",
+    "notes": "Two external members, exceeding the minimum of one"
+  },
+  {
+    "id": "RF-035",
+    "category": "violation_enumeration",
+    "question": "List all policy violations that occurred during the Ridgeline fire.",
+    "answer": "1) Aerial drop at 21:15 authorized by Tanaka alone without Achondo's co-authorization; 2) Aerial drop at 21:15 authorized with an expired flight hazard assessment (expired 20:30, 45 minutes prior); 3) Cedar Hollow evacuation order issued 45 minutes after recommendation, exceeding 30-minute requirement; 4) Mill District voluntary advisory never issued, violating 3-hour requirement; 5) Pinecrest Heights and Elk Meadow evacuation orders lifted 2.5 hours after IC certification, exceeding 2-hour requirement",
+    "notes": "Must identify all five violations and not include false positives"
+  },
+  {
+    "id": "RF-036",
+    "category": "false_positive_trap",
+    "question": "Was the mutual aid request a policy violation?",
+    "answer": "No — mutual aid was requested at 15:00, simultaneously with the threat determination, which is 0 minutes after and within the 1-hour requirement",
+    "notes": "Must correctly identify as COMPLIANT"
+  },
+  {
+    "id": "RF-037",
+    "category": "false_positive_trap",
+    "question": "Did Tanaka violate the safety-zone requirement?",
+    "answer": "No — the document records that Tanaka ordered all ground crews to maintain the 300-foot safety zone, and Nwosu confirmed compliance when mutual aid arrived. No violation of the safety-zone requirement is documented.",
+    "notes": "Must correctly identify as no violation documented"
+  },
+  {
+    "id": "RF-038",
+    "category": "claim_vs_fact",
+    "question": "Does Whitford's observation that no injuries resulted from the aerial operations excuse the protocol violation?",
+    "answer": "No — Whitford explicitly states that the absence of injuries 'does not excuse the protocol violation but is relevant context for the review.' The observation is context, not exoneration.",
+    "notes": "Must preserve Whitford's own framing"
+  },
+  {
+    "id": "RF-039",
+    "category": "temporal_ordering",
+    "question": "List the five evacuation-related events in chronological order.",
+    "answer": "1) 15:35 June 14 — Pinecrest Heights evacuation order issued; 2) 16:00 June 14 — Elk Meadow evacuation order issued; 3) 03:00 June 15 — Cedar Hollow evacuation order issued; 4) 12:30 June 16 — Pinecrest Heights and Elk Meadow orders lifted; 5) 19:45 June 16 — Cedar Hollow order lifted",
+    "notes": "Five events in order"
+  },
+  {
+    "id": "RF-040",
+    "category": "counterfactual",
+    "question": "If Obi had issued the Cedar Hollow evacuation order at 02:40 instead of 03:00, and had lifted the Pinecrest Heights/Elk Meadow orders at 11:55 instead of 12:30, and if Mill District had received its advisory at 18:30 on June 14, how many of the five identified policy violations would remain?",
+    "answer": "Two would remain: (1) the aerial drop at 21:15 without Achondo's co-authorization, and (2) the aerial drop at 21:15 with an expired flight hazard assessment. The Cedar Hollow timing, the order-lifting timing, and the Mill District advisory violations would all be resolved.",
+    "notes": "Counterfactual over three of five violations simultaneously"
+  }
+]

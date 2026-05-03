@@ -255,6 +255,11 @@ branch failed the proposal, while the final-passage probe remains empty.
 
 - Pass planner: the router should choose lenses and source spans instead of
   dumping a full document into every pass.
+- Anti-meta-rot: semantic lenses must not become a beautiful rut. Each run
+  should record why a lens was selected, what it was allowed to emit, what it
+  was forbidden to emit, and whether it added unique downstream value. New
+  fixtures should first receive frozen cold baselines before any fixture
+  hardening or domain-pack assistance.
 - Rule verifier: admitted rules need checks for fanout, dormant bodies,
   unsupported body predicates, unsupported body-goal argument patterns, and
   unsupported body fragments such as equality/comparison leftovers. Positive and
@@ -278,6 +283,25 @@ branch failed the proposal, while the final-passage probe remains empty.
   distinctions, synonym drift, or direct conflicts.
 - Metrics: track QA lift per admitted clause, duplicate rate, conflict rate,
   firing-rule count, high-fanout count, and rule-derived answer count.
+
+## Evidence Lanes
+
+Multi-pass results should be labeled before they are compared:
+
+- `cold_unseen`: source-only run on a fixture before tuning or profile help;
+- `cold_after_general_architecture_change`: rerun after a broadly motivated
+  harness change;
+- `assisted_domain_pack`: run with a non-oracle domain pack or starter profile;
+- `oracle_calibration`: run with reference signatures, gold KB, or answer-shaped
+  material intentionally exposed;
+- `hardened_variant`: a deliberately revised adversarial descendant of an
+  earlier fixture;
+- `regression_replay`: rerun of an older fixture to check that a general change
+  did not rot existing behavior.
+
+The label is part of the result. A high `oracle_calibration` score is useful
+for engineering but should not be compared to a `cold_unseen` generalization
+baseline.
 
 ## Current Lesson
 

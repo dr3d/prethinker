@@ -26,6 +26,9 @@ KESTREL = ROOT / "datasets" / "story_worlds" / "kestrel_claim"
 GLASS_TIDE = ROOT / "datasets" / "story_worlds" / "glass_tide_charter"
 BLACK_LANTERN = ROOT / "datasets" / "story_worlds" / "black_lantern_maze"
 THREE_MOLES = ROOT / "datasets" / "story_worlds" / "three_moles_moon_marmalade_machine"
+VERIDIA9 = ROOT / "datasets" / "story_worlds" / "veridia9_supply_chain_patent_dispute"
+RIDGELINE_FIRE = ROOT / "datasets" / "story_worlds" / "ridgeline_fire"
+CALDERS_REACH = ROOT / "datasets" / "story_worlds" / "ledger_at_calders_reach"
 
 
 def test_otters_story_world_bundle_is_complete() -> None:
@@ -147,6 +150,205 @@ def test_three_moles_story_preserves_source_local_identity() -> None:
     assert "no `gold_kb.pl`" in readme.casefold()
     assert metrics[0]["run_id"] == "MMM-000"
     assert metrics[0]["compile_run"] is False
+
+
+def test_veridia9_dispute_fixture_is_admitted_without_oracles() -> None:
+    expected = {
+        "README.md",
+        "story.md",
+        "source.md",
+        "qa_source.md",
+        "qa.md",
+        "progress_journal.md",
+        "progress_metrics.jsonl",
+    }
+    forbidden = {
+        "gold_kb.pl",
+        "gold_kb_notes.md",
+        "intake_plan.md",
+        "ontology_registry.json",
+        "failure_buckets.json",
+    }
+
+    assert VERIDIA9.exists()
+    names = {path.name for path in VERIDIA9.iterdir()}
+    assert expected.issubset(names)
+    assert forbidden.isdisjoint(names)
+
+
+def test_veridia9_qa_is_script_compatible() -> None:
+    qa_text = (VERIDIA9 / "qa.md").read_text(encoding="utf-8")
+    questions = parse_numbered_markdown_questions(qa_text)
+    answers = parse_markdown_answer_key(qa_text)
+
+    assert len(questions) == 40
+    assert len(answers) == 40
+    assert questions[0]["id"] == "q001"
+    assert "Biogenix Systems Ltd" in answers["q001"]
+    assert "+/-2 degrees C" in answers["q009"]
+    assert "No, it is active" in answers["q040"]
+
+
+def test_veridia9_metadata_marks_cold_dispute_lane() -> None:
+    story = (VERIDIA9 / "story.md").read_text(encoding="utf-8")
+    readme = (VERIDIA9 / "README.md").read_text(encoding="utf-8")
+    metrics = [
+        json.loads(line)
+        for line in (VERIDIA9 / "progress_metrics.jsonl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+
+    assert "Veridia-9" in story
+    assert "Supply Chain Liability" in story
+    assert "Nairobi Patent Tribunal" in story
+    assert "no `gold_kb.pl`" in readme.casefold()
+    assert "no benchmark run has been recorded yet" in readme.casefold()
+    assert metrics[0]["run_id"] == "V9-000"
+    assert metrics[0]["compile_run"] is False
+    assert metrics[0]["qa_rows"] == 40
+
+
+def test_veridia9_fixture_text_is_ascii_stable() -> None:
+    for path in VERIDIA9.iterdir():
+        if path.suffix.lower() not in {".md", ".jsonl"}:
+            continue
+        text = path.read_text(encoding="utf-8")
+        assert all(ord(char) < 128 for char in text), path.name
+
+
+def test_ridgeline_fire_fixture_is_admitted_without_oracles() -> None:
+    expected = {
+        "README.md",
+        "story.md",
+        "source.md",
+        "qa_battery_40.json",
+        "qa.md",
+        "progress_journal.md",
+        "progress_metrics.jsonl",
+    }
+    forbidden = {
+        "gold_kb.pl",
+        "gold_kb_notes.md",
+        "intake_plan.md",
+        "ontology_registry.json",
+        "failure_buckets.json",
+    }
+
+    assert RIDGELINE_FIRE.exists()
+    names = {path.name for path in RIDGELINE_FIRE.iterdir()}
+    assert expected.issubset(names)
+    assert forbidden.isdisjoint(names)
+
+
+def test_ridgeline_fire_qa_is_script_compatible() -> None:
+    qa_text = (RIDGELINE_FIRE / "qa.md").read_text(encoding="utf-8")
+    questions = parse_numbered_markdown_questions(qa_text)
+    answers = parse_markdown_answer_key(qa_text)
+    battery = json.loads((RIDGELINE_FIRE / "qa_battery_40.json").read_text(encoding="utf-8"))
+
+    assert len(battery) == 40
+    assert len(questions) == 40
+    assert len(answers) == 40
+    assert questions[0]["id"] == "q001"
+    assert "15-20 acres" in answers["q001"]
+    assert "flight hazard assessment had expired" in answers["q020"]
+    assert "Two would remain" in answers["q040"]
+
+
+def test_ridgeline_fire_metadata_marks_cold_rule_lane() -> None:
+    story = (RIDGELINE_FIRE / "story.md").read_text(encoding="utf-8")
+    readme = (RIDGELINE_FIRE / "README.md").read_text(encoding="utf-8")
+    metrics = [
+        json.loads(line)
+        for line in (RIDGELINE_FIRE / "progress_metrics.jsonl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+
+    assert "Ridgeline County Wildfire Suppression Protocol" in story
+    assert "Le problème de communication" in story
+    assert "Kami menerima permintaan bantuan" in story
+    assert "no `gold_kb.pl`" in readme.casefold()
+    assert "no benchmark run has been recorded yet" in readme.casefold()
+    assert metrics[0]["run_id"] == "RF-000"
+    assert metrics[0]["compile_run"] is False
+    assert metrics[0]["qa_rows"] == 40
+
+
+def test_ridgeline_fire_fixture_has_no_mojibake_artifacts() -> None:
+    bad_tokens = ("â", "Ã", "\ufffd")
+    for path in RIDGELINE_FIRE.iterdir():
+        if path.suffix.lower() not in {".md", ".json", ".jsonl"}:
+            continue
+        text = path.read_text(encoding="utf-8")
+        assert not any(token in text for token in bad_tokens), path.name
+
+
+def test_calders_reach_fixture_is_admitted_without_oracles() -> None:
+    expected = {
+        "README.md",
+        "story.md",
+        "source.md",
+        "qa.md",
+        "progress_journal.md",
+        "progress_metrics.jsonl",
+    }
+    forbidden = {
+        "gold_kb.pl",
+        "gold_kb_notes.md",
+        "intake_plan.md",
+        "ontology_registry.json",
+        "failure_buckets.json",
+        "qa_source.md",
+    }
+
+    assert CALDERS_REACH.exists()
+    names = {path.name for path in CALDERS_REACH.iterdir()}
+    assert expected.issubset(names)
+    assert forbidden.isdisjoint(names)
+
+
+def test_calders_reach_qa_is_script_compatible() -> None:
+    qa_text = (CALDERS_REACH / "qa.md").read_text(encoding="utf-8")
+    questions = parse_numbered_markdown_questions(qa_text)
+    answers = parse_markdown_answer_key(qa_text)
+
+    assert len(questions) == 110
+    assert len(answers) == 110
+    assert questions[0]["id"] == "q001"
+    assert "Celia Voss" in answers["q001"]
+    assert "Leona Voss" in answers["q038"]
+    assert "Mara owned it" in answers["q037"]
+    assert "one man operating under two names" in answers["q110"]
+
+
+def test_calders_reach_metadata_marks_extracted_qa_only() -> None:
+    story = (CALDERS_REACH / "story.md").read_text(encoding="utf-8")
+    readme = (CALDERS_REACH / "README.md").read_text(encoding="utf-8")
+    metrics = [
+        json.loads(line)
+        for line in (CALDERS_REACH / "progress_metrics.jsonl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+
+    assert "The Ledger at Calder" in story
+    assert "red ledger" in story
+    assert "suggested ontology/predicate families" in readme
+    assert "not" in readme.casefold()
+    assert "no `qa_source.md`" in readme.casefold()
+    assert metrics[0]["run_id"] == "CAL-000"
+    assert metrics[0]["qa_rows"] == 110
+    assert metrics[0]["qa_source_admitted"] is False
+    assert metrics[0]["compile_run"] is False
+
+
+def test_calders_reach_fixture_has_no_mojibake_artifacts() -> None:
+    bad_codepoints = {226, 195, 65533}
+    for path in CALDERS_REACH.iterdir():
+        if path.suffix.lower() not in {".md", ".jsonl"}:
+            continue
+        text = path.read_text(encoding="utf-8")
+        present = {ord(char) for char in text}.intersection(bad_codepoints)
+        assert not present, path.name
 
 
 def test_otters_qa_battery_is_harness_ready() -> None:

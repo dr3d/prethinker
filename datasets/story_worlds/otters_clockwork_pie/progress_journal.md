@@ -680,3 +680,60 @@ class floors or pass-specific completion checks. The model can build a strong
 ledger, but the subsequent compile must be made to cash in that ledger across
 typed/static/event/speech/judgment/final-state rows without Python interpreting
 the prose.
+
+## Run OTR-014 - Semantic Parallax 40-Question Baseline
+
+- Timestamp: `2026-05-03T03:44Z` through `2026-05-03T03:52Z`
+- Model: `qwen/qwen3.6-35b-a3b`
+- Mode: current harness only, direct story-world registry, flat-plus-focused
+  intake-plan compilation, compact focused-pass operations schema, and optional
+  LLM-authored `source_entity_ledger_v1` context. No expected-Prolog guidance
+  and no harness changes.
+
+### Artifacts
+
+- Compile:
+  `tmp/otters_parallax_baseline/domain_bootstrap_file_20260503T034444202509Z_story_qwen-qwen3-6-35b-a3b.json`
+- QA:
+  `tmp/otters_parallax_baseline/domain_bootstrap_qa_20260503T035235817672Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Support score:
+  `tmp/otters_parallax_baseline/20260503T035250372320Z_domain_bootstrap_file_20260503T034444202509Z_story_qwen-qwen3-6-35b-a3b_support.json`
+
+### Result
+
+The compile admitted `166` operations with `6` skips and produced `164` unique
+facts, `0` rules, and `0` queries. Runtime loading was clean.
+
+The first-40 QA baseline landed at:
+
+- `17 exact`
+- `4 partial`
+- `19 miss`
+- `40/40` parsed
+- `40/40` rows with queries
+- `0` write-proposal rows
+- `0` runtime load errors
+
+Failure-surface scoring over the first 40:
+
+- `17` not applicable/exact rows
+- `17` compile-surface gaps
+- `3` query-surface gaps
+- `3` answer-surface gaps
+
+The existing support map covers the first 20 questions. On that slice, strict
+support reached `9/20`; loose predicate/arity support reached `18/20`.
+
+### Lesson
+
+Semantic parallax substantially widened the admitted Otters surface compared
+with earlier single-compile runs, but it did not automatically translate into a
+dramatic QA jump. The first-40 result is now a current baseline for the richer
+pipeline: the remaining bottleneck is split between compile-support coverage
+and query/answer transfer over alternate but source-faithful predicate surfaces.
+
+This is a stronger diagnostic position than the old first-20 score alone. The
+next Otters move should be a true story-lens decomposition: ledger, static
+object-family rows, event spine, speech/judgment, causality, and final-state
+passes, each with a constrained output contract and deterministic admitted
+union.

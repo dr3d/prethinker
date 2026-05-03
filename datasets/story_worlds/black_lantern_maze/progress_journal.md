@@ -38,3 +38,37 @@ Expected research value:
 - Adds heavier identity/alias/title-time confusion than Iron Harbor.
 - Adds approval-semantics overload as a direct CE and predicate-surface trap.
 - Keeps claim/finding/fact separation central rather than decorative.
+
+## BLM-001 - Cold Semantic Parallax Baseline
+
+Date: 2026-05-03
+
+Evidence lane: `cold_unseen`
+
+Mode: source-only profile bootstrap plus current semantic-parallax compile:
+flat-plus-focused intake-plan passes, compact focused-pass operations schema,
+and LLM-authored source entity ledger. The fixture contains oracle materials,
+but they were not used during compilation or QA.
+
+Artifacts:
+
+- Compile:
+  `tmp/cold_baselines/black_lantern_maze/domain_bootstrap_file_20260503T055307250452Z_story_qwen-qwen3-6-35b-a3b.json`
+- QA:
+  `tmp/cold_baselines/black_lantern_maze/domain_bootstrap_qa_20260503T060152766469Z_qa_qwen-qwen3-6-35b-a3b.json`
+
+Result:
+
+- Compile: `299` admitted operations, `28` skips, `299` unique facts, `0`
+  rules.
+- QA: `27 exact / 7 partial / 6 miss` over `40` questions.
+- Safety: `40/40` parsed, `39/40` query rows, `0` write-proposal rows, `0`
+  runtime load errors.
+- Failure surfaces: `7` compile-surface gaps, `6` hybrid-join gaps.
+
+Lesson:
+
+Black Lantern is the strongest 40-question cold baseline in this batch. It
+suggests the current semantic-parallax compile can build a broad source surface
+when the document shape matches the policy/maze/governance lessons learned from
+recent fixtures, even without opening the local oracle materials.

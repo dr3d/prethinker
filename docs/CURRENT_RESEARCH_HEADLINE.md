@@ -109,6 +109,11 @@ That is the Glass Tide plus CE frontier.
 
 The next work should stay on the sharp edges:
 
+0. **Cold generalization baselines.** Five newly admitted fixtures now test
+   whether semantic parallax generalizes beyond the research stories that shaped
+   the harness: Three Moles, Veridia-9, Ridgeline Fire, Calder's Reach, and
+   Black Lantern. These should be run source-only first and labeled
+   `cold_unseen` before any domain-pack or hardened-variant work.
 1. **Glass Tide final-outcome composition.** Tax, salvage, quarantine, council
    veto, and council support-threshold conditions now have promotion-ready
    slices. The next frontier is a final outcome lens that joins intermediate
