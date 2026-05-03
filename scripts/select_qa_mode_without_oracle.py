@@ -82,6 +82,17 @@ def parse_args() -> argparse.Namespace:
         default=12,
         help="Maximum query result rows retained per executed query in selector evidence.",
     )
+    parser.add_argument(
+        "--selection-policy",
+        choices=["direct", "completeness"],
+        default="direct",
+        help="Selector policy. direct is the stable default; completeness is an experimental broad-support policy.",
+    )
+    parser.add_argument(
+        "--include-self-check",
+        action="store_true",
+        help="Include bounded QA self-check notes in selector evidence. Experimental; default excludes them.",
+    )
     parser.add_argument("--row-limit", type=int, default=0)
     parser.add_argument("--only-ids", default="")
     parser.add_argument("--out-json", type=Path, required=True)
@@ -92,7 +103,11 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     group = load_group(args.group)
-    rows = build_rows(group, sample_row_limit=int(args.sample_row_limit))
+    rows = build_rows(
+        group,
+        sample_row_limit=int(args.sample_row_limit),
+        include_self_check=bool(args.include_self_check),
+    )
     only_ids = {part.strip() for part in str(args.only_ids).split(",") if part.strip()}
     if only_ids:
         rows = [row for row in rows if row["id"] in only_ids]
@@ -113,6 +128,7 @@ def main() -> int:
                 max_tokens=int(args.max_tokens),
                 row=row,
                 mode_labels=group["labels"],
+                selection_policy=str(args.selection_policy),
             )
         except Exception as exc:  # pragma: no cover - live harness path
             selection_error = str(exc)
@@ -132,6 +148,8 @@ def main() -> int:
             "labels": group["labels"],
             "artifacts": [{"label": item["label"], "path": display_path(item["path"])} for item in group["artifacts"]],
         },
+        "selection_policy": str(args.selection_policy),
+        "include_self_check": bool(args.include_self_check),
         "summary": summarize(outputs),
         "rows": outputs,
     }
@@ -163,7 +181,7 @@ def load_group(spec: str) -> dict[str, Any]:
     return {"name": name.strip(), "artifacts": artifacts, "labels": [item["label"] for item in artifacts]}
 
 
-def build_rows(group: dict[str, Any], *, sample_row_limit: int) -> list[dict[str, Any]]:
+def build_rows(group: dict[str, Any], *, sample_row_limit: int, include_self_check: bool) -> list[dict[str, Any]]:
     rows_by_label = {
         artifact["label"]: {
             str(row.get("id", "")): row
@@ -185,7 +203,11 @@ def build_rows(group: dict[str, Any], *, sample_row_limit: int) -> list[dict[str
             modes.append(
                 {
                     "mode": label,
-                    "query_evidence": compact_query_evidence(row, sample_row_limit=sample_row_limit),
+                    "query_evidence": compact_query_evidence(
+                        row,
+                        sample_row_limit=sample_row_limit,
+                        include_self_check=include_self_check,
+                    ),
                     "verdict": row_verdict(row),
                 }
             )
@@ -193,7 +215,7 @@ def build_rows(group: dict[str, Any], *, sample_row_limit: int) -> list[dict[str
     return out
 
 
-def compact_query_evidence(row: dict[str, Any], *, sample_row_limit: int) -> dict[str, Any]:
+def compact_query_evidence(row: dict[str, Any], *, sample_row_limit: int, include_self_check: bool) -> dict[str, Any]:
     results = []
     for item in row.get("query_results", []) or []:
         if not isinstance(item, dict):
@@ -212,15 +234,17 @@ def compact_query_evidence(row: dict[str, Any], *, sample_row_limit: int) -> dic
                 "was_relaxed_fallback": bool(item.get("derived_from_queries")),
             }
         )
-    return {
+    evidence = {
         "model_decision": str(row.get("model_decision", "")),
         "projected_decision": str(row.get("projected_decision", "")),
-        "self_check": compact_self_check(row),
         "planned_queries": row.get("queries", []),
         "executed_results": results,
         "warnings": row.get("warnings", []),
         "parse_error": str(row.get("parse_error", "")),
     }
+    if include_self_check:
+        evidence["self_check"] = compact_self_check(row)
+    return evidence
 
 
 def compact_self_check(row: dict[str, Any]) -> dict[str, Any]:
@@ -244,17 +268,12 @@ def call_selector(
     max_tokens: int,
     row: dict[str, Any],
     mode_labels: list[str],
+    selection_policy: str,
 ) -> dict[str, Any]:
     messages = [
         {
             "role": "system",
-            "content": (
-                "You are a query-surface selector for Prethinker. Choose which existing evidence mode "
-                "best supports answering the user's question. You must not infer from outside knowledge. "
-                "Use only the structured query results provided. Do not ask for writes or new facts. "
-                "If two modes are close, prefer the mode with direct, specific, non-empty evidence over broad relaxed fallbacks. "
-                "Return strict JSON only."
-            ),
+            "content": selector_system_prompt(selection_policy),
         },
         {
             "role": "user",
@@ -308,6 +327,29 @@ def call_selector(
     if not isinstance(parsed, dict):
         raise RuntimeError("selector returned non-object JSON")
     return parsed
+
+
+def selector_system_prompt(selection_policy: str) -> str:
+    base = (
+        "You are a query-surface selector for Prethinker. Choose which existing evidence mode "
+        "best supports answering the user's question. You must not infer from outside knowledge. "
+        "Use only the structured query results provided. Do not ask for writes or new facts. "
+        "Return strict JSON only. "
+    )
+    if selection_policy == "completeness":
+        return (
+            base
+            + "Score evidence completeness before evidence directness: a direct-looking row is weak if it covers only one "
+            "subpart of the question, the wrong role, or the wrong scope. Prefer a broader or relaxed evidence bundle "
+            "when its returned rows cover more of the entities, statuses, contrasts, conditions, timestamps, or rule "
+            "consequences named by the question. If a mode retrieves an exact phrase but misses the question's decision, "
+            "status, exception, or counter-evidence, mark it partial rather than strong. If two modes are equally complete, "
+            "then prefer direct, specific, non-empty evidence over broad relaxed fallbacks."
+        )
+    return (
+        base
+        + "If two modes are close, prefer the mode with direct, specific, non-empty evidence over broad relaxed fallbacks."
+    )
 
 
 def score_selection(row: dict[str, Any], selection: dict[str, Any], error: str) -> dict[str, Any]:

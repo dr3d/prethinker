@@ -224,3 +224,42 @@ count by one but added a miss, so self-check context is not a clean fix.
 This is a useful negative result. Row-level activation needs calibration across
 fixture types before it becomes default. The selector must learn evidence
 completeness, not just evidence directness.
+
+## BLM-005 - Completeness-First Selector Recovery
+
+Date: 2026-05-03
+
+Evidence lane: `diagnostic_replay`
+
+Mode: replayed the non-oracle selector over the same baseline/narrow/broad
+query modes, but with a completeness-first policy and bounded QA self-check
+notes included in selector evidence.
+
+Artifact:
+
+- `tmp/cold_baselines/black_lantern_maze/query_modes_broad_replay/selector_full_completeness_v2.json`
+
+Result:
+
+```text
+31 exact / 6 partial / 3 miss
+selected best available mode on 38/40 rows
+selector errors: 0
+perfect-selector upper bound: 33 exact / 4 partial / 3 miss
+```
+
+Lesson:
+
+The selector can recover much of the Black Lantern transfer gap when it is told
+to score evidence completeness before directness. But the same policy regressed
+Avalon, so this is not a default replacement. The harness now treats selector
+posture as an explicit research dial:
+
+```text
+direct evidence policy: stable default
+completeness policy: useful for broad multi-part evidence gaps
+self-check notes: optional context, not baseline input
+```
+
+That keeps the result honest: row-level activation is promising, but policy
+selection itself needs fixture-agnostic calibration.

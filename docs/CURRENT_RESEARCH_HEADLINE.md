@@ -143,6 +143,12 @@ testing whether those gains transfer:
   modes, below the best individual modes. Adding QA self-check notes moved to
   `29 / 7 / 4`, not a clean fix. The mechanism exists; cross-fixture selector
   calibration is now the hard part.
+- The selector calibration surface is now explicit. `direct` remains the stable
+  default posture, while `completeness` and bounded self-check context are
+  research dials. The completeness+self-check policy recovered Black Lantern to
+  `31 / 6 / 3` and selected the best mode on `38/40` rows, but the same posture
+  regressed Avalon to `27 / 9 / 2` with two selector errors. Selector policy is
+  therefore a measured control problem, not a hidden prompt tweak.
 - Dulse Ledger is now scored cold at `27 exact / 7 partial / 6 miss`, Oxalis
   Recall scored `16 exact / 9 partial / 15 miss` despite `106` admitted
   operations and `0` skips, Sable Creek Budget scored `20 exact / 8 partial /

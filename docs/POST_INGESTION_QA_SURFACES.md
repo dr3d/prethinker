@@ -131,6 +131,42 @@ but the selector must learn evidence completeness, not merely evidence
 directness. It should not become the default until calibrated across fixture
 types.
 
+The first calibration check split that posture into explicit harness dials:
+
+```powershell
+python scripts/select_qa_mode_without_oracle.py `
+  --selection-policy direct `
+  --sample-row-limit 16 `
+  ...
+```
+
+Available selector policies:
+
+- `direct`: stable default; prefer direct, specific, non-empty evidence over
+  broad relaxed fallbacks when modes are close.
+- `completeness`: experimental; prefer broader evidence when it covers more
+  entities, statuses, contrasts, conditions, timestamps, or rule consequences
+  named by the question.
+
+`--include-self-check` optionally adds bounded QA self-check notes to selector
+evidence. It is not baseline input.
+
+Current calibration:
+
+```text
+Avalon direct replay:              30 exact / 9 partial / 1 miss
+Avalon completeness+self-check:    27 exact / 9 partial / 2 miss, 2 selector errors
+Black Lantern direct:              28 exact / 9 partial / 3 miss
+Black Lantern self-check:          29 exact / 7 partial / 4 miss
+Black Lantern completeness+self-check:
+                                   31 exact / 6 partial / 3 miss
+```
+
+The research lesson is that evidence-mode selection is itself a query-surface
+control problem. Completeness pressure helps broad multi-part questions but can
+overrule simpler direct-support rows. The safe default remains direct; alternate
+policies must be reported as diagnostic variants.
+
 `--classify-failure-surfaces` adds a structured diagnostic pass after judging non-exact rows. It sees the reference answer, compiled KB inventory, admitted clauses, emitted queries, and query results. It does not see the raw source document and it cannot write. Its labels are:
 
 - `compile_surface_gap`

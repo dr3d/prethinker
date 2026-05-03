@@ -383,3 +383,41 @@ The remaining misses are informative:
 Those failures point to selector calibration, not unsafe admission. The
 architecture gain is that row-level activation can be model-owned while the
 truth boundary remains unchanged.
+
+## Run AG-008 - Selector Policy Calibration Check
+
+- Timestamp: `2026-05-03T19:44Z`
+- Evidence lane: `diagnostic_replay`
+- Model: `qwen/qwen3.6-35b-a3b`
+- Mode: selector-policy replay over the AG-007 evidence modes.
+
+### Result
+
+The stable direct-evidence policy replayed at:
+
+```text
+30 exact / 9 partial / 1 miss
+selected best available mode on 38/40 rows
+selector errors: 0
+```
+
+The experimental completeness-first policy plus QA self-check notes replayed at:
+
+```text
+27 exact / 9 partial / 2 miss
+2 selector errors
+```
+
+### Lesson
+
+Selector calibration is now a real harness surface. The completeness-first
+policy helped Black Lantern, but it is not a safe default because it regressed
+Avalon. The selector harness now exposes:
+
+```text
+--selection-policy direct|completeness
+--include-self-check
+```
+
+The default remains direct evidence over broad relaxed fallbacks. Completeness
+and self-check notes are research dials, not baseline behavior.
