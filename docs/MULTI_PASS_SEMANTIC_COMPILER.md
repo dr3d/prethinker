@@ -1,6 +1,6 @@
 # Multi-Pass Semantic Compiler
 
-Last updated: 2026-05-02
+Last updated: 2026-05-03
 
 This note captures the current architecture direction exposed by the Anaplan
 and Glass Tide experiments.
@@ -210,6 +210,23 @@ non-promotion fragment. The mapper also skips fact-shaped clauses such as
 `voting_threshold(amendment_adoption, 4, 7).` when they are submitted as
 `operation="rule"`; those belong either as source facts through ordinary assert
 operations or as bodies/heads inside an executable rule.
+
+The follow-up Sable replay added a structural support index to the rule-lens
+payload: counts and examples of admitted fact signatures such as
+`amendment_introduced/4`. This does not interpret source prose; it summarizes
+already-admitted Prolog rows so the model can choose body predicates that exist
+in the backbone. With that support summary and a narrow active palette, the
+rule lens admitted a bounded public-hearing rule:
+
+```prolog
+derived_status(AmendmentId, requires_public_hearing, budget_amendment) :-
+    amendment_introduced(AmendmentId, _, _, Amount),
+    number_greater_than(Amount, 50000).
+```
+
+The companion low-threshold branch loaded cleanly but stayed dormant because no
+current Sable amendment amount is at most `50000`. That distinction matters:
+clean dormancy is not the same as unsupported body structure.
 
 Promotion scoring now uses an isolated per-rule runtime: each rule is tested by
 itself against the backbone surface, so a sibling rule with the same derived

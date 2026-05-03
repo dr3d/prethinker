@@ -111,6 +111,12 @@ Glass Tide is now exercising the harder rule-ingestion frontier:
   constraints as the full lens: real `Head :- Body` clauses only, all head
   variables body-bound, first-order lenses use admitted backbone predicates in
   bodies, and `derived_*` body goals require an explicit composition dependency.
+- Sable Creek then produced the first fresh-fixture promotion-ready rule under
+  those stricter gates: the rule lens used a deterministic admitted-fact
+  signature support summary to bind `AmendmentId` and `Amount` through
+  `amendment_introduced/4`, then composed `number_greater_than/2` to derive
+  `requires_public_hearing` without unbound head variables, fact-shaped rule
+  clauses, oracle rows, or Python prose interpretation.
 - Dulse Ledger is now scored cold at `27 exact / 7 partial / 6 miss`, Oxalis
   Recall scored `16 exact / 9 partial / 15 miss` despite `106` admitted
   operations and `0` skips, Sable Creek Budget scored `20 exact / 8 partial /

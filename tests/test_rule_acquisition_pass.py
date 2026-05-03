@@ -1,4 +1,5 @@
 from scripts.run_rule_acquisition_pass import (
+    _backbone_fact_signature_support,
     _drop_backbone_duplicate_rules,
     _rule_guidance_context,
     _runtime_trial,
@@ -97,6 +98,53 @@ def test_compact_rule_guidance_keeps_binding_and_horn_shape_constraints() -> Non
     assert "Every head variable must be bound" in guidance
     assert "Do not use derived_* predicates in the body" in guidance
     assert "fact-shaped clause" in guidance
+
+
+def test_backbone_fact_signature_support_is_structural_index() -> None:
+    support = _backbone_fact_signature_support(
+        [
+            "voting_threshold(amendment_adoption, 4, 7).",
+            "voting_threshold(amendment_recall, 4, 7).",
+            "charter_rule(9_1, amendment_adoption, threshold_4_of_7).",
+        ],
+        example_limit=1,
+    )
+
+    by_signature = {row["signature"]: row for row in support}
+    assert by_signature["voting_threshold/3"]["count"] == 2
+    assert by_signature["voting_threshold/3"]["examples"] == [
+        "voting_threshold(amendment_adoption, 4, 7)."
+    ]
+    assert by_signature["charter_rule/3"]["count"] == 1
+
+
+def test_number_helper_dormancy_is_not_missing_body_support() -> None:
+    rule = (
+        "derived_status(AmendmentId, no_hearing_required, budget_amendment) :- "
+        "amendment_introduced(AmendmentId, _, _, Amount), "
+        "number_at_most(Amount, 50000)."
+    )
+    trial = _runtime_trial(
+        facts=["amendment_introduced(ba_2026_07, councilmember_okafor, 2026_03_04, 185000)."],
+        backbone_rules=[],
+        rule_lens_rules=[rule],
+        positive_queries=[],
+        negative_queries=[],
+    )
+
+    item = trial["derived_head_queries"][0]
+    assert item["num_rows"] == 0
+    assert item["unsupported_body_goals"] == []
+    assert item["unsupported_body_fragments"] == []
+
+
+def test_number_helper_requires_bound_numeric_variable() -> None:
+    fragments = _unsupported_body_fragments(
+        "derived_status(AmendmentId, no_hearing_required, budget_amendment) :- "
+        "number_at_most(Amount, 50000)."
+    )
+
+    assert any("number_at_most(Amount, 50000) uses numeric value variable before it is bound" in item for item in fragments)
 
 
 def test_value_helpers_reject_measure_variables_and_computed_thresholds() -> None:

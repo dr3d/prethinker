@@ -535,6 +535,7 @@ def _run_rule_pass(
         "existing_admitted_backbone": {
             "facts": backbone_facts,
             "rules": backbone_rules,
+            "fact_signature_support": _backbone_fact_signature_support(backbone_facts),
             "policy": [
                 "These admitted clauses are context for rule bodies and anchors, not raw evidence by themselves.",
                 "Do not re-emit or rewrite these clauses as facts.",
@@ -998,6 +999,7 @@ def _isolated_rule_trial_item(
         if int(item.get("matching_fact_count", 0) or 0) > 0
     }
     runtime_supported_goal_signatures = set(supported_goal_signatures)
+    runtime_supported_goal_signatures.update(CONTEXT_DEPENDENT_HELPER_SIGNATURES)
     if num_rows > 0:
         runtime_supported_goal_signatures.update(CONTEXT_DEPENDENT_HELPER_SIGNATURES)
     return {
@@ -1122,6 +1124,26 @@ def _fact_signature_counts(facts: list[str]) -> dict[str, int]:
     return counts
 
 
+def _backbone_fact_signature_support(facts: list[str], *, example_limit: int = 4) -> list[dict[str, Any]]:
+    counts = _fact_signature_counts(facts)
+    examples_by_signature: dict[str, list[str]] = {signature: [] for signature in counts}
+    for fact in facts:
+        signature = _clause_head_signature(fact)
+        if not signature:
+            continue
+        examples = examples_by_signature.setdefault(signature, [])
+        if len(examples) < example_limit:
+            examples.append(str(fact).strip())
+    return [
+        {
+            "signature": signature,
+            "count": count,
+            "examples": examples_by_signature.get(signature, []),
+        }
+        for signature, count in sorted(counts.items())
+    ]
+
+
 def _clause_head_signature(clause: str) -> str:
     head = str(clause).split(":-", 1)[0].strip().rstrip(".")
     match = re.match(r"^([a-z_][a-z0-9_]*)\s*\((.*)\)\s*$", head)
@@ -1230,6 +1252,7 @@ def _rule_variables(text: str) -> set[str]:
 
 def _unsupported_helper_goal_fragments(rule: str) -> list[str]:
     value_variables: set[str] = set()
+    body_bound_variables: set[str] = set()
     fragments: list[str] = []
     for goal_text in _rule_body_goal_texts(rule):
         goal = _parse_simple_goal(goal_text)
@@ -1238,23 +1261,48 @@ def _unsupported_helper_goal_fragments(rule: str) -> list[str]:
         name, args = goal
         if name == "entity_property" and len(args) == 3 and args[1] == "value" and _is_rule_variable(args[2]):
             value_variables.add(args[2])
+        if name not in {
+            "value_greater_than",
+            "value_at_most",
+            "number_greater_than",
+            "number_at_most",
+            "hours_at_least",
+            "percent_at_least",
+            "percent_below",
+            "support_count_at_least",
+        }:
+            body_bound_variables.update(arg for arg in args if _is_rule_variable(arg))
     for goal_text in _rule_body_goal_texts(rule):
         goal = _parse_simple_goal(goal_text)
         if not goal:
             continue
         name, args = goal
-        if name not in {"value_greater_than", "value_at_most"} or len(args) != 2:
-            continue
-        first_arg = args[0]
-        threshold_arg = args[1]
-        if first_arg in value_variables:
-            fragments.append(f"{goal_text} uses value variable where entity argument is required")
-        elif _looks_like_numeric_measure_variable(first_arg):
-            fragments.append(f"{goal_text} uses numeric measure variable where entity argument is required")
-        elif re.fullmatch(r"-?\d+(?:\.\d+)?", first_arg):
-            fragments.append(f"{goal_text} uses numeric literal where entity argument is required")
-        if _looks_like_unsupported_helper_threshold(threshold_arg):
-            fragments.append(f"{goal_text} uses computed or variable threshold where literal threshold is required")
+        if name in {"value_greater_than", "value_at_most"} and len(args) == 2:
+            first_arg = args[0]
+            threshold_arg = args[1]
+            if first_arg in value_variables:
+                fragments.append(f"{goal_text} uses value variable where entity argument is required")
+            elif _looks_like_numeric_measure_variable(first_arg):
+                fragments.append(f"{goal_text} uses numeric measure variable where entity argument is required")
+            elif re.fullmatch(r"-?\d+(?:\.\d+)?", first_arg):
+                fragments.append(f"{goal_text} uses numeric literal where entity argument is required")
+            if _looks_like_unsupported_helper_threshold(threshold_arg):
+                fragments.append(f"{goal_text} uses computed or variable threshold where literal threshold is required")
+        elif name in {"number_greater_than", "number_at_most"} and len(args) == 2:
+            value_arg = args[0]
+            threshold_arg = args[1]
+            if not _is_rule_variable(value_arg) or value_arg not in body_bound_variables:
+                fragments.append(f"{goal_text} uses numeric value variable before it is bound by a body goal")
+            if _looks_like_unsupported_helper_threshold(threshold_arg):
+                fragments.append(f"{goal_text} uses computed or variable threshold where literal threshold is required")
+        elif name in {"percent_at_least", "percent_below"} and len(args) == 3:
+            part_arg, whole_arg, threshold_arg = args
+            for value_arg in (part_arg, whole_arg):
+                if not _is_rule_variable(value_arg) or value_arg not in body_bound_variables:
+                    fragments.append(f"{goal_text} uses percent value variable before it is bound by a body goal")
+                    break
+            if _looks_like_unsupported_helper_threshold(threshold_arg):
+                fragments.append(f"{goal_text} uses computed or variable threshold where literal threshold is required")
     return fragments
 
 

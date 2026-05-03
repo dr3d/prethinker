@@ -159,3 +159,50 @@ general improvement should help the rule planner choose body predicates that
 are both allowed and actually present in the admitted backbone, without widening
 the active palette enough to trigger slow or stalled generations.
 
+## Run SC-004 - First Fresh-Fixture Promotion-Ready Rule
+
+- Timestamp: `2026-05-03T17:01Z` through `2026-05-03T17:03Z`
+- Evidence lane: `diagnostic_replay`
+- Mode: tiny Section A rule lens with source-derived temporary registry,
+  deterministic admitted-fact signature support, and a narrow active palette.
+
+### Artifact
+
+- Rule replay:
+  `tmp/cold_baselines/sable_creek_budget/rules/domain_bootstrap_file_20260503T170243788202Z_story-rules_qwen-qwen3-6-35b-a3b.json`
+
+### Result
+
+- Rule lens: `2` mapper-admitted executable rules, `0` skips.
+- Runtime trial: `1` firing rule, `1` promotion-ready rule, `0` runtime rule
+  errors, `0` unsupported body goals.
+- Promotion-ready rule:
+
+```prolog
+derived_status(AmendmentId, requires_public_hearing, budget_amendment) :-
+    amendment_introduced(AmendmentId, _, _, Amount),
+    number_greater_than(Amount, 50000).
+```
+
+- It derives both admitted Sable amendments as requiring a public hearing:
+  `ba_2026_07` and `ba_2026_08`.
+- The companion low-threshold branch loads cleanly but stays dormant because no
+  admitted amendment amount is at most `50000`.
+
+### Lesson
+
+This is the first Sable rule-acquisition foothold under the stricter safety
+gates. Two general harness changes made the difference:
+
+- rule-lens payloads now include a deterministic admitted-fact signature
+  support summary, so the LLM can see which body predicates are actually
+  available without Python interpreting source prose;
+- runtime trial now treats deterministic numeric-helper dormancy as dormancy,
+  not missing body support, while still flagging unbound numeric-helper
+  variables as unsafe fragments.
+
+The result is still diagnostic replay, not a cold score. But it demonstrates
+the target architecture on a fresh governance fixture: source rule text plus
+admitted fact rows can produce a bounded, body-supported executable rule without
+gold KBs, answer keys, or fixture-specific Python language handling.
+
