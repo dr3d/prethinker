@@ -73,6 +73,9 @@ does not authorize writes. Early gold-KB probes showed a second useful signal:
 some risks are not bad semantics but missing helper substrate, such as raw
 arithmetic or negation that should be represented by bounded deterministic
 helpers before an LLM-acquired rule is promotion-ready.
+Rule-lens runtime artifacts now include this shortcut-audit summary alongside
+promotion-readiness metrics, so a rule can be loadable/firing/probe-clean while
+still carrying a visible semantic-risk note for review.
 
 ## Why This Exists
 

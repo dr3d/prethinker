@@ -1252,6 +1252,10 @@ def test_rule_runtime_trial_scores_promotion_in_isolated_rule_scope() -> None:
     assert trial["derived_head_queries"][1]["trial_scope"] == "isolated_rule"
     assert trial["derived_head_queries"][1]["num_rows"] == 0
     assert trial["derived_head_queries"][1]["lifecycle_status"] == "runtime_loadable_rule"
+    assert trial["semantic_shortcut_audit"]["summary"]["risk_counts"] == {
+        "broad_class_fanout_risk": 2,
+        "sibling_rule_masking_risk": 2,
+    }
 
 
 def test_rule_runtime_trial_allows_context_dependent_temporal_helper_when_rule_fires() -> None:
@@ -1273,3 +1277,4 @@ def test_rule_runtime_trial_allows_context_dependent_temporal_helper_when_rule_f
 
     assert trial["promotion_ready_rule_count"] == 1
     assert trial["derived_head_queries"][0]["unsupported_body_goals"] == []
+    assert trial["semantic_shortcut_audit"]["summary"]["finding_count"] == 0

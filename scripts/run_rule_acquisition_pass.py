@@ -40,6 +40,7 @@ from src.profile_bootstrap import (  # noqa: E402
     profile_bootstrap_domain_context,
     profile_bootstrap_predicate_contracts,
 )
+from scripts.run_semantic_shortcut_audit import audit_clauses, summarize as summarize_shortcut_findings  # noqa: E402
 from src.semantic_ir import semantic_ir_to_legacy_parse  # noqa: E402
 
 
@@ -847,6 +848,12 @@ def _runtime_trial(
         for item in negative_probe_results
         if not bool(item.get("passed", False))
     )
+    shortcut_findings = audit_clauses(rule_lens_rules)
+    shortcut_summary = summarize_shortcut_findings(
+        shortcut_findings,
+        clause_count=len(rule_lens_rules),
+        per_file_counts={"rule_lens_rules": len(rule_lens_rules)},
+    )
     return {
         "facts_loaded": len(facts) - len(fact_errors),
         "backbone_rules_loaded": len(backbone_rules) - len(backbone_rule_errors),
@@ -893,6 +900,18 @@ def _runtime_trial(
         "negative_probe_pass_count": sum(1 for item in negative_probe_results if bool(item.get("passed", False))),
         "missed_positive_count": sum(1 for item in positive_probe_results if not bool(item.get("passed", False))),
         "unexpected_solution_count": unexpected_solution_count,
+        "semantic_shortcut_audit": {
+            "summary": shortcut_summary,
+            "findings": [
+                {
+                    "risk": str(getattr(item, "risk", "")),
+                    "severity": str(getattr(item, "severity", "")),
+                    "clause": str(getattr(item, "clause", "")),
+                    "detail": str(getattr(item, "detail", "")),
+                }
+                for item in shortcut_findings[:50]
+            ],
+        },
         "probe_adjusted_promotion_ready": bool(
             promotion_ready_rule_count > 0
             and all(bool(item.get("passed", False)) for item in positive_probe_results)
