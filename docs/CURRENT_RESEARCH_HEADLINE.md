@@ -125,6 +125,10 @@ The cold generalization lane is now active:
   the unchanged V9-002 surface from `19 / 6 / 15` to `22 / 4 / 14`. It also
   regressed two partials, so this is a measured near-miss tool, not a blind
   default.
+- Black Lantern BLM-002 repeats the pattern on a second cold fixture: unchanged
+  compile, evidence-bundle context filtering, `27 / 7 / 6` to `32 / 3 / 5`.
+  It also regressed two rows, which sharpens the lesson: query choreography is
+  powerful, but it needs row-level risk prediction before it becomes default.
 
 The architecture is becoming sharper:
 
@@ -155,7 +159,8 @@ The next work should stay on the sharp edges:
    newest evidence-return proxy says many misses already retrieve rows, so the
    next compile/query work should target answer-bearing support, not just more
    rows. V9-003 shows evidence-bundle context filtering can help that query
-   surface, but it needs regression checks because it can perturb partial rows.
+   surface, and BLM-002 confirms the lift on another fixture, but both runs need
+   regression checks because they can perturb partial/exact rows.
 1. **Glass Tide final-outcome composition.** Tax, salvage, quarantine, council
    veto, and council support-threshold conditions now have promotion-ready
    slices. The next frontier is a final outcome lens that joins intermediate

@@ -72,3 +72,43 @@ Black Lantern is the strongest 40-question cold baseline in this batch. It
 suggests the current semantic-parallax compile can build a broad source surface
 when the document shape matches the policy/maze/governance lessons learned from
 recent fixtures, even without opening the local oracle materials.
+
+## BLM-002 - Evidence-Bundle Context Filtering Replay
+
+Date: 2026-05-03
+
+Evidence lane: `cold_after_general_architecture_change`
+
+Mode: post-ingestion QA replay over the unchanged BLM-001 compile, with
+`evidence_bundle_plan_v1` and evidence-bundle context filtering enabled. This
+did not recompile the source and did not expose the oracle KB or supplied
+strategy notes.
+
+Artifacts:
+
+- Compile reused:
+  `tmp/cold_baselines/black_lantern_maze/domain_bootstrap_file_20260503T055307250452Z_story_qwen-qwen3-6-35b-a3b.json`
+- QA:
+  `tmp/diagnostic_replays/black_lantern_blm002/domain_bootstrap_qa_20260503T130201865280Z_qa_qwen-qwen3-6-35b-a3b.json`
+
+Result:
+
+- Compile: unchanged from BLM-001, `299` unique facts, `0` rules.
+- QA: `32 exact / 3 partial / 5 miss` over `40` questions.
+- Delta from BLM-001: `+5` exact, `-4` partial, `-1` miss.
+- Safety: `40/40` parsed, `39/40` query rows, `0` write-proposal rows, `0`
+  runtime load errors.
+- Failure surfaces: `4` compile-surface gaps, `4` hybrid-join gaps.
+
+Changed rows:
+
+- Improved to exact: q007, q011, q015, q016, q035, q037.
+- Regressed: q021 partial -> miss; q040 exact -> partial.
+
+Lesson:
+
+BLM-002 confirms the Veridia V9-003 result on a second cold fixture:
+post-ingestion query choreography can extract more value from the same admitted
+KB surface. The gains are real, but so is volatility. Evidence-bundle context
+filtering should remain a measured replay/query strategy until the harness can
+predict which rows benefit and which rows risk losing already-good support.
