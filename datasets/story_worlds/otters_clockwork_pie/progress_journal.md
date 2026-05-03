@@ -737,3 +737,68 @@ next Otters move should be a true story-lens decomposition: ledger, static
 object-family rows, event spine, speech/judgment, causality, and final-state
 passes, each with a constrained output contract and deterministic admitted
 union.
+
+## Run OTR-015 - Post-Ingestion Evidence Filter Replay
+
+- Timestamp: `2026-05-03T20:33Z`
+- Evidence lane: `diagnostic_replay`
+- Model: `qwen/qwen3.6-35b-a3b`
+- Mode: QA replay over the unchanged OTR-014 compile, with
+  `evidence_bundle_plan_v1` and evidence-bundle context filtering enabled.
+  The source was not recompiled, no gold KB or answer key entered the query
+  planner, and QA write proposals remained disabled.
+
+### Artifacts
+
+- QA:
+  `tmp/cold_baselines/otters_clockwork_pie/query_modes/domain_bootstrap_qa_20260503T203327073794Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Comparison:
+  `tmp/cold_baselines/otters_clockwork_pie/query_modes/otters_query_mode_comparison.md`
+- Selector:
+  `tmp/cold_baselines/otters_clockwork_pie/query_modes/selector_direct_v1.json`
+
+### Result
+
+OTR-014 baseline:
+
+```text
+17 exact / 4 partial / 19 miss
+```
+
+Evidence-filter replay:
+
+```text
+22 exact / 5 partial / 13 miss
+```
+
+The replay rescued `9` baseline non-exact rows and caused `0` baseline-exact
+regressions. Diagnostic perfect-selector upper bound:
+
+```text
+22 exact / 6 partial / 12 miss
+```
+
+The direct non-oracle selector selected:
+
+```text
+22 exact / 5 partial / 13 miss
+selected best available mode on 39/40 rows
+selector errors: 0
+```
+
+### Lesson
+
+Otters now confirms that post-ingestion evidence access is not only a governance
+fixture trick. A source-local story-world compile with many remaining
+compile-surface gaps still gained substantially from better symbolic retrieval.
+
+This does not erase the need for better story-lens compilation; `11` non-exact
+rows still classify as compile-surface gaps. But it cleanly separates the
+frontiers:
+
+```text
+story compile surface: still too thin for many causal/final-state questions
+query surface: evidence filtering can recover answer support already present
+activation surface: selector mostly follows the safer evidence mode, but misses
+  one partial protection row
+```

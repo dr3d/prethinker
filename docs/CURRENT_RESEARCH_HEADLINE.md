@@ -158,6 +158,10 @@ testing whether those gains transfer:
   matched the best exact count, and selected the best available mode on `39/40`
   rows. It still missed one broad-mode partial rescue, so row-level activation
   is useful but not solved.
+- Otters OTR-015 shows the same post-ingestion access idea transfers back to a
+  source-local story world: replaying QA with evidence-bundle filtering over
+  the unchanged OTR-014 compile improved `17 / 4 / 19` to `22 / 5 / 13`, with
+  `9` rescued rows and `0` baseline-exact regressions.
 - Avalon AG-009 adds a clean Rule 2 exception-lens result: the lens admitted
   `3` rules, `2` were promotion-ready, and the prior-funding branch passed
   `3/3` positive and `2/2` negative probes. But globally unioning those
