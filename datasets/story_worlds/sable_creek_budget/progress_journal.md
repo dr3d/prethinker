@@ -206,3 +206,56 @@ the target architecture on a fresh governance fixture: source rule text plus
 admitted fact rows can produce a bounded, body-supported executable rule without
 gold KBs, answer keys, or fixture-specific Python language handling.
 
+## Run SC-005 - Shortcut-Audited Rule Replay
+
+- Timestamp: `2026-05-03T23:13Z`
+- Evidence lane: `diagnostic_replay`
+- Mode: compact threshold rule lens rerun with embedded semantic shortcut audit
+  and authored positive/negative probes.
+
+### Artifact
+
+- Rule replay:
+  `tmp/cold_baselines/sable_creek_budget/rules/domain_bootstrap_file_20260503T231310665426Z_source-rules_qwen-qwen3-6-35b-a3b.json`
+
+### Result
+
+- Rule lens: `4` mapper-admitted executable rules, `4` skips.
+- Runtime trial: `3` firing rules, `3` promotion-ready rules, `0` runtime rule
+  errors, `0` unsupported body goals.
+- Semantic shortcut audit: `4` clauses audited, `0` findings.
+- Negative probe: `1/1` passed.
+- Positive probes: `0/2` passed under exact authored probes.
+
+The apparent positive-probe failure was a useful probe-shape diagnostic rather
+than a body-support failure. The rule lens derived:
+
+```prolog
+derived_status(ba_2026_07, requires_public_hearing, charter_9.2).
+derived_status(ba_2026_08, requires_public_hearing, charter_9.2).
+```
+
+but the authored probes expected the coarser third argument
+`budget_amendment`:
+
+```prolog
+derived_status(ba_2026_07, requires_public_hearing, budget_amendment).
+derived_status(ba_2026_08, requires_public_hearing, budget_amendment).
+```
+
+### Lesson
+
+SC-005 separates three conditions that were previously easy to blur together:
+
+```text
+rule body support: good
+semantic shortcut audit: clean
+authored probe surface: too brittle about provenance/category slot
+```
+
+The next verifier improvement should allow authored probes to distinguish
+meaning-bearing slots from provenance/category slots, probably by permitting
+variables or explicit slot-equivalence policies in probe definitions. This keeps
+promotion gating strict where it matters while avoiding false negatives when a
+rule preserves a more precise source anchor than the probe expected.
+

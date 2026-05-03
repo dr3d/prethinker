@@ -348,6 +348,13 @@ promotion-ready under either isolated or dependency-composed trial.
   unsupported body fragments such as equality/comparison leftovers. Positive and
   negative probes should become standard for any rule class that might
   overgeneralize.
+- Probe role policy: SC-005 exposed a false-negative promotion probe when the
+  rule derived the right subject and status but preserved a more precise source
+  anchor (`charter_9.2`) where the authored probe expected a coarse category
+  (`budget_amendment`). Probe definitions should distinguish meaning-bearing
+  slots from provenance/category slots, using variables or explicit
+  slot-equivalence policies when the exact source anchor is not the target of
+  the test.
 - Helper substrate: threshold/exception rules such as taxability need
   deterministic helper predicates before the rule lens can safely emit
   executable clauses. Glass Tide now uses `value_greater_than/2` and
