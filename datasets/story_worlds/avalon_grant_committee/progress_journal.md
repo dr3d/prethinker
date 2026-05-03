@@ -697,3 +697,54 @@ The first body-fact attempt also shows a new alignment frontier: support/body
 rows must be source-faithful and atom-compatible with admitted body predicates.
 Pretty source-detail atoms are less useful than boring atoms that let rules
 join safely.
+
+## Run AG-013 - Rule 8 Union Full-QA Replay
+
+- Timestamp: `2026-05-03T23:35Z` through `2026-05-03T23:43Z`
+- Evidence lane: `diagnostic_replay`
+- Model: `qwen/qwen3.6-35b-a3b`
+- Mode: full 40-question QA over the AG-012 body-fact/rule union.
+
+### Artifact
+
+- QA replay:
+  `tmp/cold_baselines/avalon_grant_committee/union/domain_bootstrap_qa_20260503T233532995627Z_qa_qwen-qwen3-6-35b-a3b.json`
+
+### Result
+
+Compared with the AG-001 cold baseline:
+
+```text
+AG-001 baseline: 25 exact / 12 partial / 3 miss
+AG-013 Rule 8 union: 26 exact / 12 partial / 2 miss
+runtime load errors: 0
+write proposals during QA: 0
+```
+
+Row deltas:
+
+```text
+q010: miss -> partial
+q025: partial -> exact
+q029: partial -> exact
+q030: miss -> partial
+q039: exact -> miss
+```
+
+### Lesson
+
+The Rule 8 body-fact/rule surface is much safer under global QA than the earlier
+Rule 2 activation experiment: it produced a net gain without introducing runtime
+errors or write proposals. But q039 shows the remaining activation problem in a
+sharp form. A globally active rule surface can still perturb counterfactual
+questions, even when the rules are promotion-ready and probe-clean.
+
+This reinforces the current doctrine:
+
+```text
+promotion-ready rule != globally active rule
+```
+
+The next selector/QA work should decide when a question needs the rule union and
+when the baseline evidence surface should remain dominant, especially for
+counterfactual questions.
