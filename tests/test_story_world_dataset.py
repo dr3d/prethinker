@@ -25,6 +25,7 @@ BLACKTHORN = ROOT / "datasets" / "story_worlds" / "blackthorn_misconduct_case"
 KESTREL = ROOT / "datasets" / "story_worlds" / "kestrel_claim"
 GLASS_TIDE = ROOT / "datasets" / "story_worlds" / "glass_tide_charter"
 BLACK_LANTERN = ROOT / "datasets" / "story_worlds" / "black_lantern_maze"
+THREE_MOLES = ROOT / "datasets" / "story_worlds" / "three_moles_moon_marmalade_machine"
 
 
 def test_otters_story_world_bundle_is_complete() -> None:
@@ -94,6 +95,58 @@ def test_black_lantern_metadata_marks_oracle_boundary() -> None:
     assert metrics[0]["run_id"] == "BLM-000"
     assert metrics[0]["compile_run"] is False
     assert "derived_" in kb
+
+
+def test_three_moles_story_world_bundle_is_admitted_without_oracles() -> None:
+    expected = {
+        "README.md",
+        "story.md",
+        "source.md",
+        "qa_source.md",
+        "qa.md",
+        "progress_journal.md",
+        "progress_metrics.jsonl",
+    }
+    forbidden = {
+        "gold_kb.pl",
+        "gold_kb_notes.md",
+        "intake_plan.md",
+        "ontology_registry.json",
+        "failure_buckets.json",
+    }
+    assert THREE_MOLES.exists()
+    names = {path.name for path in THREE_MOLES.iterdir()}
+    assert expected.issubset(names)
+    assert forbidden.isdisjoint(names)
+
+
+def test_three_moles_qa_is_script_compatible() -> None:
+    qa_text = (THREE_MOLES / "qa.md").read_text(encoding="utf-8")
+    questions = parse_numbered_markdown_questions(qa_text)
+    answers = parse_markdown_answer_key(qa_text)
+    assert len(questions) == 40
+    assert len(answers) == 40
+    assert questions[0]["id"] == "q001"
+    assert "Little Nib Mole" in answers["q001"]
+    assert "Ask first" in answers["q040"]
+
+
+def test_three_moles_story_preserves_source_local_identity() -> None:
+    story = (THREE_MOLES / "story.md").read_text(encoding="utf-8")
+    readme = (THREE_MOLES / "README.md").read_text(encoding="utf-8")
+    metrics = [
+        json.loads(line)
+        for line in (THREE_MOLES / "progress_metrics.jsonl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+
+    assert "Mina Moonbutton" in story
+    assert "moon-marmalade" in story
+    assert "Tilly" not in story
+    assert "Goldilocks" not in story
+    assert "no `gold_kb.pl`" in readme.casefold()
+    assert metrics[0]["run_id"] == "MMM-000"
+    assert metrics[0]["compile_run"] is False
 
 
 def test_otters_qa_battery_is_harness_ready() -> None:

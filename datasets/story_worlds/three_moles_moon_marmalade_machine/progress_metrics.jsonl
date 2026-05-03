@@ -1,0 +1,1 @@
+{"run_id":"MMM-000","timestamp":"2026-05-03T00:00:00Z","mode":"fixture_admission_only","model_scored":false,"compile_run":false,"qa_run":false,"notes":"Promoted supplied story plus QA fixture into datasets/story_worlds/three_moles_moon_marmalade_machine. No gold KB, strategy, ontology registry, model run, or benchmark run included."}
