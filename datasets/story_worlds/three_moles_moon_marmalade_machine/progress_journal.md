@@ -163,3 +163,59 @@ recovered event rows were not yet the missing answer-bearing support. This is
 still a useful general harness repair, but it should not be sold as a score
 gain until it transfers to another fixture or becomes part of a broader lens
 quality improvement.
+
+## MMM-004 - Post-Ingestion Evidence Filter Replay
+
+Date: 2026-05-03
+
+Evidence lane: `diagnostic_replay`
+
+Mode: QA replay over the unchanged MMM-003 compile using
+`evidence_bundle_plan_v1` plus evidence-bundle context filtering. No source
+recompile, no gold KB, no strategy material, no QA answer key in query
+planning, and no QA write proposals.
+
+Artifacts:
+
+- QA:
+  `tmp/cold_baselines/three_moles/query_modes/domain_bootstrap_qa_20260503T204837495073Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Comparison:
+  `tmp/cold_baselines/three_moles/query_modes/three_moles_query_mode_comparison.md`
+- Selector:
+  `tmp/cold_baselines/three_moles/query_modes/selector_direct_v1.json`
+
+Result:
+
+MMM-003 baseline:
+
+```text
+10 exact / 7 partial / 23 miss
+```
+
+Evidence-filter replay:
+
+```text
+13 exact / 4 partial / 23 miss
+```
+
+Diagnostic perfect-selector upper bound:
+
+```text
+14 exact / 6 partial / 20 miss
+```
+
+Direct non-oracle selector:
+
+```text
+11 exact / 4 partial / 25 miss
+selected best available mode on 32/40 rows
+selector errors: 0
+```
+
+Lesson:
+
+Three Moles is the cautionary story-world counterexample to Otters. Evidence
+filtering improved exact count, but it did not reduce hard misses, and the
+selector regressed when asked to choose between thin evidence surfaces. The
+dominant problem remains compile/lens coverage, especially answer-bearing event,
+causal, and final-state rows.

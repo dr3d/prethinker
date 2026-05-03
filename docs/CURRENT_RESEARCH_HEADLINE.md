@@ -162,6 +162,11 @@ testing whether those gains transfer:
   source-local story world: replaying QA with evidence-bundle filtering over
   the unchanged OTR-014 compile improved `17 / 4 / 19` to `22 / 5 / 13`, with
   `9` rescued rows and `0` baseline-exact regressions.
+- Three Moles MMM-004 is the cautionary story-world contrast: evidence
+  filtering over the unchanged MMM-003 compile improved exact count from
+  `10` to `13`, but misses stayed at `23`, and the selector regressed to
+  `11 / 4 / 25`. Some stories still need better lens coverage more than better
+  retrieval.
 - Avalon AG-009 adds a clean Rule 2 exception-lens result: the lens admitted
   `3` rules, `2` were promotion-ready, and the prior-funding branch passed
   `3/3` positive and `2/2` negative probes. But globally unioning those
