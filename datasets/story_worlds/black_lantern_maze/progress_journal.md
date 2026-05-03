@@ -112,3 +112,50 @@ post-ingestion query choreography can extract more value from the same admitted
 KB surface. The gains are real, but so is volatility. Evidence-bundle context
 filtering should remain a measured replay/query strategy until the harness can
 predict which rows benefit and which rows risk losing already-good support.
+
+## BLM-003 - Broader Evidence-Bundle Context Floor
+
+Date: 2026-05-03
+
+Evidence lane: `cold_after_general_architecture_change`
+
+Mode: post-ingestion QA replay over the unchanged BLM-001 compile with
+evidence-bundle context filtering, but a broader fallback surface:
+`max_clauses=320`, `broad_floor=160`.
+
+Artifacts:
+
+- Compile reused:
+  `tmp/cold_baselines/black_lantern_maze/domain_bootstrap_file_20260503T055307250452Z_story_qwen-qwen3-6-35b-a3b.json`
+- QA:
+  `tmp/diagnostic_replays/black_lantern_blm003/domain_bootstrap_qa_20260503T131707556205Z_qa_qwen-qwen3-6-35b-a3b.json`
+
+Result:
+
+- Compile: unchanged from BLM-001, `299` unique facts, `0` rules.
+- QA: `32 exact / 5 partial / 3 miss` over `40` questions.
+- Delta from BLM-001: `+5` exact, `-2` partial, `-3` miss.
+- Delta from BLM-002: same exact count, `+2` partial, `-2` miss.
+- Safety: `40/40` parsed, `40/40` query rows, `0` write-proposal rows, `0`
+  runtime load errors.
+
+Changed rows versus BLM-001:
+
+- Improved to exact: q007, q011, q015, q016, q036, q037.
+- Improved to partial: q022.
+- Regressed: q040 exact -> partial.
+
+Changed rows versus BLM-002:
+
+- Recovered from miss to partial: q021, q022.
+- Improved from miss to exact: q036.
+- Regressed from exact to miss: q035.
+
+Lesson:
+
+The broader floor keeps BLM-002's exact-count gain while reducing hard misses.
+It does not eliminate volatility: q035 was exact under the narrower filter and
+missed under the broader one. The immediate design lesson is that the evidence
+filter needs a row-level activation policy, not just a global clause budget.
+Still, `32/5/3` is a better diagnostic posture than `32/3/5` because more
+failure cases remain partially supported instead of collapsing to miss.

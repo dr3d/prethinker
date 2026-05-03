@@ -460,6 +460,18 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--evidence-bundle-context-max-clauses",
+        type=int,
+        default=220,
+        help="Maximum relevant clauses retained by --evidence-bundle-context-filter.",
+    )
+    parser.add_argument(
+        "--evidence-bundle-context-broad-floor",
+        type=int,
+        default=80,
+        help="Minimum broad-context fallback clauses retained by --evidence-bundle-context-filter.",
+    )
+    parser.add_argument(
         "--judge-reference-answers",
         action="store_true",
         help="Use the model in structured-output mode to compare query results with markdown reference answers.",
@@ -590,6 +602,8 @@ def main() -> int:
         evidence_bundle_plan=bool(args.evidence_bundle_plan or args.execute_evidence_bundle_plan or args.evidence_bundle_context_filter),
         execute_evidence_bundle_plan=bool(args.execute_evidence_bundle_plan),
         evidence_bundle_context_filter=bool(args.evidence_bundle_context_filter),
+        evidence_bundle_context_max_clauses=int(args.evidence_bundle_context_max_clauses or 0),
+        evidence_bundle_context_broad_floor=int(args.evidence_bundle_context_broad_floor or 0),
         classify_failure_surfaces=bool(args.classify_failure_surfaces),
     )
     for item in questions:
@@ -618,6 +632,8 @@ def main() -> int:
                 evidence_bundle_plan=bool(args.evidence_bundle_plan or args.execute_evidence_bundle_plan or args.evidence_bundle_context_filter),
                 execute_evidence_bundle_plan=bool(args.execute_evidence_bundle_plan),
                 evidence_bundle_context_filter=bool(args.evidence_bundle_context_filter),
+                evidence_bundle_context_max_clauses=int(args.evidence_bundle_context_max_clauses or 0),
+                evidence_bundle_context_broad_floor=int(args.evidence_bundle_context_broad_floor or 0),
             )
             if bool(args.judge_reference_answers):
                 row["reference_judge"] = judge_reference_answer(
@@ -691,6 +707,8 @@ def build_cache_context(
     evidence_bundle_plan: bool,
     execute_evidence_bundle_plan: bool,
     evidence_bundle_context_filter: bool,
+    evidence_bundle_context_max_clauses: int,
+    evidence_bundle_context_broad_floor: int,
     classify_failure_surfaces: bool,
 ) -> dict[str, Any]:
     return {
@@ -737,6 +755,8 @@ def build_cache_context(
         "evidence_bundle_plan": bool(evidence_bundle_plan),
         "execute_evidence_bundle_plan": bool(execute_evidence_bundle_plan),
         "evidence_bundle_context_filter": bool(evidence_bundle_context_filter),
+        "evidence_bundle_context_max_clauses": int(evidence_bundle_context_max_clauses or 0),
+        "evidence_bundle_context_broad_floor": int(evidence_bundle_context_broad_floor or 0),
         "classify_failure_surfaces": bool(classify_failure_surfaces),
     }
 
@@ -1098,6 +1118,8 @@ def run_one_question(
     evidence_bundle_plan: bool,
     execute_evidence_bundle_plan: bool,
     evidence_bundle_context_filter: bool,
+    evidence_bundle_context_max_clauses: int,
+    evidence_bundle_context_broad_floor: int,
 ) -> dict[str, Any]:
     utterance = str(item.get("utterance", ""))
     kb_context_pack = {
@@ -1135,12 +1157,16 @@ def run_one_question(
                 evidence_plan=evidence_plan,
                 facts=facts,
                 rules=rules,
+                max_clauses=max(1, int(evidence_bundle_context_max_clauses or 220)),
+                broad_floor=max(0, int(evidence_bundle_context_broad_floor or 80)),
             )
             if compact_clauses:
                 kb_context_pack["relevant_clauses"] = compact_clauses
                 kb_context_pack["evidence_bundle_context_filter"] = {
                     "schema_version": "evidence_bundle_context_filter_v1",
                     "clause_count": len(compact_clauses),
+                    "max_clauses": max(1, int(evidence_bundle_context_max_clauses or 220)),
+                    "broad_floor": max(0, int(evidence_bundle_context_broad_floor or 80)),
                     "policy": "filtered by predicates from evidence_bundle_plan_v1 query templates; no raw-source or question parsing in Python",
                 }
     started = time.perf_counter()

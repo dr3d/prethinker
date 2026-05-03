@@ -129,6 +129,10 @@ The cold generalization lane is now active:
   compile, evidence-bundle context filtering, `27 / 7 / 6` to `32 / 3 / 5`.
   It also regressed two rows, which sharpens the lesson: query choreography is
   powerful, but it needs row-level risk prediction before it becomes default.
+- BLM-003 widened the evidence-filter fallback (`max_clauses=320`,
+  `broad_floor=160`) and kept `32` exact while moving hard misses down from `5`
+  to `3`. It still swapped which rows won and lost, so the next tool should
+  decide when to activate evidence filtering per row rather than globally.
 
 The architecture is becoming sharper:
 
@@ -160,7 +164,8 @@ The next work should stay on the sharp edges:
    next compile/query work should target answer-bearing support, not just more
    rows. V9-003 shows evidence-bundle context filtering can help that query
    surface, and BLM-002 confirms the lift on another fixture, but both runs need
-   regression checks because they can perturb partial/exact rows.
+   regression checks because they can perturb partial/exact rows. BLM-003 shows
+   broader context reduces hard misses, but volatility remains row-specific.
 1. **Glass Tide final-outcome composition.** Tax, salvage, quarantine, council
    veto, and council support-threshold conditions now have promotion-ready
    slices. The next frontier is a final outcome lens that joins intermediate
