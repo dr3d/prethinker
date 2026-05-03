@@ -213,6 +213,77 @@ New fixtures should be hostile, but clean:
   hybrid/reasoning, answer, CE, rule-composition.
 - Keep source-local names fresh so the harness cannot coast on prior fixtures.
 
+## Difficulty Calibration
+
+Fixtures should be difficult enough to expose failure structure, not so
+difficult that every row collapses into one undiagnosed miss bucket.
+
+For a new `cold_unseen` 40-question fixture, the ideal first baseline is roughly:
+
+```text
+exact: 40-60%
+exact+partial: 55-75%
+misses: enough to classify by surface
+runtime/write safety: clean or nearly clean
+```
+
+Interpretation:
+
+- `80%+` exact on the first cold run usually means the fixture is too easy or
+  too close to an already-trained harness shape. Harden it or move it to a
+  regression lane.
+- `10-20%` exact can still be valuable, but it is usually a diagnostic stressor
+  rather than a productive iterative benchmark. Use it to discover a missing
+  substrate, not to tune prompts blindly.
+- The best research fixtures produce mixed outcomes: some rows exact, some
+  partial with useful evidence, some clear misses, and failures distributed
+  across compile, query, hybrid/reasoning, answer, CE, or rule-composition
+  surfaces.
+
+If a fixture is too easy, harden it by adding interacting branches, temporal
+status questions, unresolved authority questions, counterfactuals, or
+near-miss negative cases. If it is too hard, split it into a smaller focused
+fixture so the first failure gradient is visible.
+
+## Cross-Fixture Replay Protocol
+
+A general harness change should not be trusted because it improves one active
+fixture. It should survive regression replay.
+
+Use this protocol after changes to any general component:
+
+- semantic lens planning;
+- source-pass output schema or retry policy;
+- mapper admission policy;
+- helper predicates or temporal substrate;
+- rule verifier or promotion filtering;
+- post-ingestion query planning or evidence-bundle selection;
+- answer/judge normalization.
+
+Minimum replay:
+
+```text
+1. Active target fixture.
+2. One cold fixture from a different domain shape.
+3. One older high-water fixture that previously looked strong.
+4. One known weak fixture whose failures should not be hidden.
+```
+
+Preferred replay, when GPU time allows:
+
+```text
+all admitted cold_unseen fixtures
++ Glass Tide rule probes
++ Clarification Eagerness hard set
++ APR or Iron Harbor high-water regression checks
+```
+
+Regressions on previously passing rows should be treated as bugs or documented
+tradeoffs, not silently accepted as the cost of improving the current fixture.
+If a change helps one fixture but hurts another, record the result as
+`diagnostic_replay`, classify the regression surface, and decide whether the
+change needs a selector, guard, or narrower activation condition.
+
 ## Current Recommendation
 
 Use Avalon Grant Committee as the immediate rule-composition baseline. It should
@@ -225,7 +296,10 @@ stress:
 - appeal body separation;
 - counterfactual procedure versus substantive outcome.
 
-After Avalon, generate one fixture that is deliberately CE-heavy during
-ingestion, and one fixture that is temporal-status-heavy with business-day and
-calendar-day windows. That gives three complementary pressure tests instead of
-over-baking one story family.
+Then run Ridgeline Fire as an anti-overfit replay for rule/deadline/authority
+logic, because it is adjacent to Iron Harbor but not the same fixture.
+
+After Avalon and Ridgeline, generate one fixture that is deliberately CE-heavy
+during ingestion, and one fixture that is temporal-status-heavy with
+business-day and calendar-day windows. That gives four complementary pressure
+tests instead of over-baking one story family.

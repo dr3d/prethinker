@@ -97,6 +97,11 @@ clauses, acquire body facts, union promotion-ready rule surfaces, and expose
 runtime fanout/dormancy risks before any rule is promoted as durable product
 behavior.
 
+The newest fixture-methodology work is the frontier fixture strategy: new
+benchmarks should target specific architectural weaknesses, declare their
+evidence lane before scoring, aim for a useful cold baseline difficulty band,
+and trigger cross-fixture replay after general harness changes.
+
 Clarification eagerness is now a named strategy surface, not just a UI behavior:
 Prethinker should ask during ingestion when identity, temporal anchors,
 correction targets, rule scope, or claim/fact boundaries block safe admission,
