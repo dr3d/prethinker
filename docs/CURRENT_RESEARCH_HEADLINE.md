@@ -148,6 +148,10 @@ Clarification Eagerness Trap is exercising the companion governance frontier:
   regressed to `24/40` with `15` over-eager asks, while the same fixture with
   source context returned to `40/40`. CE scores must say what authority surface
   was available.
+- CET-013 reran the source-context CE lane after the rule-admission changes and
+  held `40/40` correct with `0` unsafe candidates, `0` context-write
+  violations, and `10/10` blocked-slot coverage. The residual signal is
+  safe-partial richness (`11/13`), not ask/no-ask posture.
 
 The cold generalization lane is now active:
 

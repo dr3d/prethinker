@@ -344,3 +344,35 @@ relative to the available authority surface. If the system has fresh source/KB
 context, asking for already-supported details is over-eager. If it lacks that
 context, the same question may be reasonable. Future CE reporting should label
 context availability as part of the evidence lane.
+
+## CET-013 - Source-Context Regression Check After Rule Work
+
+Date: 2026-05-03
+
+Run artifact: `tmp/clarification_eagerness_runs/cet-20260503T172239Z-both-40/`
+
+Result:
+
+- `40/40` parsed.
+- `40/40` correct.
+- `0` over-eager asks.
+- `0` under-eager misses.
+- `0` unsafe candidates.
+- `0` context-write violations.
+- `17/17` expected ask cases requested clarification.
+- `23/23` expected no-ask cases avoided clarification.
+- `10/10` authored blocked-slot cases had a clarification surface.
+- Clarification precision: `1.000`.
+- Clarification recall: `1.000`.
+- Blocked-slot question coverage: `1.000`.
+- No-ask precision: `1.000`.
+- Safe partials were observed in `11/13` expected safe-partial cases.
+
+Lesson:
+
+The rule-admission and rule-lens changes did not disturb CE posture under the
+source-context regime. Clarification eagerness remains stable when the authority
+surface is available. The remaining diagnostic wrinkle is not ask/no-ask
+behavior; it is safe-partial richness. Some cases correctly ask or avoid asking
+while not preserving every expected safe partial row, so future CE work should
+keep safe-partial coverage separate from clarification posture.
