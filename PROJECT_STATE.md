@@ -12,13 +12,58 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 - Current pipeline reference: `docs/CURRENT_UTTERANCE_PIPELINE.md`.
 - UI: `ui_gateway/`, served locally by `python ui_gateway/main.py` using the stdlib `ThreadingHTTPServer`.
 - Active profile: `medical@v0`; active profile-lane experiments: `legal_courtlistener@v0` and `sec_contracts@v0`.
-- Active research asset: local UMLS Semantic Network KB built from `sn_current.tgz`.
+- Background domain asset: local UMLS Semantic Network KB built from `sn_current.tgz` for bounded medical type steering and explanation.
 - Active architecture pivot: two-pass `semantic_router_v1 -> semantic_ir_v1`, using the LLM as the context/profile/action planner and the deterministic mapper as the admission authority.
 - Active architecture frontier: multi-pass semantic compilation with safe-surface accumulation. Independent backbone/support/temporal/rule lenses can propose fragments, the mapper admits each lens independently, and deterministic union accumulates only admitted clauses.
 - Current development model: `qwen/qwen3.6-35b-a3b` through LM Studio/OpenAI-compatible structured output. This is the best-known local path, not a permanent product dependency.
 - Current demonstration surface: prompt-book UI plus live ledger cards showing route, semantic workspace, deterministic admission, clarification, blocked execution, and KB mutation outcomes.
 
-## What Works Now
+## Capabilities Live
+
+- `process_utterance()` in `src/mcp_server.py` is the canonical runtime entrypoint. The UI, prompt book, and command-line harnesses exercise the shared server path rather than a forked demo lane.
+- The active runtime path is `semantic_router_v1 -> semantic_ir_v1 -> deterministic mapper -> Prolog runtime`. Neural calls plan, segment, retrieve context, and propose operations; deterministic admission decides what can become KB state.
+- Python no longer owns English-language interpretation in the active lane. It owns structure: validation, normalization of model-emitted fields, admission, execution, caching, scoring, and trace assembly.
+- The mapper enforces predicate palettes, arity, argument-role contracts, placeholder guards, source/write boundaries, likely-functional conflict checks, temporal sanity checks, and profile-owned validators.
+- The console can show write, query, clarification, blocked-admission, and mixed write+query turns. Ledger cards expose route, semantic workspace, deterministic admission, scoped diagnostic worlds, and KB mutation outcomes.
+- Epistemic Worlds v1 preserves projection-blocked and supported-but-skipped candidates as scoped diagnostic memory rather than global truth.
+- `semantic_ir_v1` supports entities, referents, ambiguities, source claims, propositions, candidate operations, truth-maintenance proposals, temporal graph proposals, and self-check diagnostics. Durable truth still flows solely through mapper-admitted operations.
+- `kb_context_pack` gives the compiler exact relevant KB clauses, likely current-state candidates, entity candidates, recent committed logic, and a bounded fallback snapshot without granting context-sourced write authority.
+- Multi-pass semantic compilation is now a named frontier: backbone, support, temporal/status, claim/source, and rule lenses can emit constrained fragments; the mapper admits each independently; deterministic union accumulates only admitted clauses.
+- Rule ingestion now uses runtime verification: candidate clause admission, temporary load, body-goal/body-fragment support checks, fanout diagnostics, isolated per-rule trial, authored positive/negative probes, and promotion-ready filtering.
+- Post-ingestion QA has a governed symbolic retrieval path over compiled KB predicate inventories and admitted clauses. Evidence-bundle diagnostics can improve access, but cannot authorize writes.
+- Clarification Eagerness is measurable across ask/no-ask posture, safe partial preservation, blocked-slot coverage, unsafe candidates, context-write hygiene, and source-context availability.
+- `medical@v0` remains bounded to memory-style predicates for medications, conditions, symptoms, allergies, lab tests/results, and pregnancy. UMLS support is profile-owned type steering, not broad diagnosis or treatment advice.
+- CourtListener and SEC/contracts are starter domain lanes for claim/finding, citation-not-endorsement, docket-not-holding, filing/exhibit provenance, obligation-not-fact, condition-not-event, and breach-boundary tests.
+- The default development model is `qwen/qwen3.6-35b-a3b` through LM Studio/OpenAI-compatible structured output. Other models are comparison/runtime-portability questions, not release gates.
+
+## Recent Frontier Results
+
+- Full pytest after the move to `C:\prethinker`: `450 passed, 2 subtests passed`.
+- Iron Harbor: `86 exact / 14 partial / 0 miss` on a full 100-question source-document battery, with `0` write proposals during post-ingestion QA.
+- Blackthorn: baseline first-20 was `2 exact / 1 partial / 17 miss`; current diagnostic lanes include BTC-022 at `82 / 9 / 9` full-100 and BTC-027 at `85 / 4 / 11`. These are different configurations, so compare within lane rather than treating one number as a universal replacement.
+- Kestrel: profile-guided KCL-016 reached `73 exact / 11 partial / 16 miss` full-100 with `0` write proposals. Cold/source-aware evidence remains much lower, and the distinction is intentional.
+- Anaplan Polaris: APR-016 reached `42 exact / 1 partial / 0 miss` on 43 QA by accumulating independent mapper-admitted support views over an admitted backbone.
+- Glass Tide: separate rule lenses plus deterministic union now produce promotion-ready slices for role joins, threshold/exception rules, temporal clearance, salvage exceptions, budget-veto failure, and support-threshold conditions. Durable rule activation remains gated.
+- Clarification Eagerness Trap: source-context lane reached and held `40/40`, with `0` unsafe candidates, `0` context-write violations, and `10/10` blocked-slot coverage.
+- New held-out fixtures such as Black Lantern, Three Moles, Oxalis, Dulse, Avalon, Sable Creek, Ridgeline, Veridia, and Ledger are being used to test whether gains transfer beyond the original fixture families.
+- Declaration and Proclamation show that curated document/profile vocabulary can improve dense source compilation, but expected-signature recall alone is not enough; question-support coverage is the next scoring layer.
+- Otters remains a hard story-world frontier. Recent cross-apply work did not beat the earlier high-water; the next useful move is a ledger-to-compile contract with row-class floors.
+
+## Known Issues / Sharp Edges
+
+- Predicate canonicalization remains hard. Profile registries, aliases, argument-role contracts, and semantic shortcut audits reduce drift, but right-shaped/wrong-meaning candidates are still possible.
+- Temporal representation is useful but incomplete. Ordering and selected helpers work; richer date arithmetic, interval validity, status-at-time, and correction propagation need more substrate.
+- Rule promotion is not rule activation. A rule can pass isolated probes and still hurt global QA if activated indiscriminately; row-level activation and branch-union policy are active research.
+- Multi-pass lensing can add surface area without answer lift. Each lens needs contribution accounting, duplicate/conflict tracking, and QA lift per admitted clause.
+- Query and answer surfaces can bottleneck even when compile quality is good. APR made this especially clear: the KB already had useful rows before the QA planner learned how to ask for them.
+- Clarification Eagerness depends on an explicit authority surface. Runs without source-context support can regress even when the apparent ask/no-ask posture is reasonable.
+- Domain packs are legitimate product context; gold KBs, answer keys, and input-specific oracle hints are calibration material only. Evidence lanes must stay labeled.
+- Story-world ingestion still struggles with stable object identity, event spine completeness, causality, speech-vs-truth, subjective judgment, and final-state repair under one compact source surface.
+- The no-big-local-GPU path is planned but not yet a first-class setup. Hosted OpenAI-compatible backends need structured-output smoke allowlisting plus cost/latency guidance.
+
+## Detailed Current Notes
+
+This section keeps useful current detail for maintainers. Public-facing pages should lead with the capability and frontier-result summaries above, then link into fixture ledgers for the long run histories.
 
 - The medical profile normalizes a bounded predicate palette: medication use, conditions, symptoms, allergies, lab tests, lab result states, and pregnancy.
 - Clarification turns can prevent unsafe patient or lab-test guesses.
@@ -220,10 +265,10 @@ Recent verified results:
 
 - Post-move preflight on `C:\prethinker`: full pytest is `450 passed, 2 subtests passed`. Sable Creek produced the first fresh-fixture promotion-ready rule under the stricter rule gates. Avalon showed the mapper-side control-construct gate reduces harmful admitted-rule clutter while preserving helper-composed promotion-ready rules. CET-013 reran source-context CE after the rule-admission changes and held `40/40` correct with `0` unsafe candidates and `0` context-write violations.
 - Iron Harbor full 100-question source-document run: `86 exact / 14 partial / 0 miss`, `100/100` parsed OK, `100/100` query rows, `0` runtime load errors, and `0` write proposals during post-ingestion QA. The compiled KB used `179` admitted operations and `116` unique facts, preserving roles, facilities, policy requirements, witness statements, reported events, disclosures, correction filings, and statement details in the same source surface.
-- Blackthorn hostile procedural-misconduct fixture admission: full suite `355 passed`; fixture contains source story, gold KB, 100 QA probes, ontology registry, support map, failure buckets, and progress journal. Baseline first-20 QA was `2 exact / 1 partial / 17 miss`. BTC-016 fixed `source=context` proposals without weakening the mapper (`190` admitted, `3` skipped, recall `0.719`). BTC-021 lifted the same compiled KB to full-100 QA `75 exact / 4 partial / 21 miss` through narrow deadline/duration query planning. BTC-022 is the current high-water: procedural profile maturation plus title-alias discipline reached `246` admitted operations, `0` skipped operations, expected-signature recall `0.876`, first-40 QA `35 exact / 3 partial / 2 miss`, and full-100 QA `82 exact / 9 partial / 9 miss`, with `100/100` parsed workspaces, `100/100` query rows, `0` runtime load errors, and `0` write proposals. Negative lesson retained: hardening `proceeding_event/4` argument roles midstream collapsed one compile to `32` admitted operations, confirming that contract hardening is a versioned profile migration, not a tuning knob.
+- Blackthorn hostile procedural-misconduct fixture admission: baseline first-20 QA was `2 exact / 1 partial / 17 miss`. BTC-016 fixed `source=context` proposals without weakening the mapper, and BTC-021 reached full-100 QA `75 exact / 4 partial / 21 miss`. BTC-022 reached `82 exact / 9 partial / 9 miss`; BTC-027 later reached `85 exact / 4 partial / 11 miss` under a different evidence-filter configuration. Treat these as lane-specific results, not a single monotonic scoreboard. Fixture details and run-by-run lessons live in the Blackthorn progress journal.
 - Kestrel maritime-insurance fixture admission: cold source-profile baseline KCL-001 landed at `5 exact / 0 partial / 15 miss` on first-20 QA with only `20` admitted operations. General insurance profile/context work and LLM-owned profile review lifted the best non-registry source-aware run to KCL-007 at `14 exact / 2 partial / 4 miss` first-20 and `30 exact / 12 partial / 58 miss` full-100, with `0` write proposals. Starter-profile-assisted KCL-002 reached `14 exact / 3 partial / 3 miss` first-20 and `38 exact / 12 partial / 50 miss` full-100; KCL-009 expanded the generic maritime-insurance row classes and reached `17 exact / 1 partial / 2 miss` first-20 and `61 exact / 7 partial / 32 miss` full-100. KCL-013 added deterministic query-review and role-named evidence companions, moving the same compiled KB to `63 / 11 / 26`. KCL-014 strengthened generic insurance-detail compile coverage and reached `67 / 12 / 21`. KCL-015 deterministically unioned mapper-admitted facts from KCL-009 and KCL-014, reaching `20 exact / 0 partial / 0 miss` on first-20 and `72 / 10 / 18` full-100. KCL-016 added source-faithful temporal atom parsing (`october_15_2025_08_00_utc`, `2025_10_12t03_17_00z`) and reached the current high-water `73 / 11 / 16`, with `100/100` parsed, `99/100` query rows, `0` runtime load errors, and `0` write proposals. KCL-010 and KCL-011 remain negative lessons: a wider starter profile and prose row-class examples both reduced usefulness. These assisted/union runs are explicitly labeled profile-guided, not cold-discovery evidence; domain packs are legitimate product context, but gold KB/QA-derived prompt clues are not.
 - Anaplan Polaris enterprise-guidance fixture admission: APR-000 promoted the tmp seed into `datasets/enterprise_guidance/anaplan_polaris_performance_rules/` with source, oracle KB, starter profile, 43 QA probes, failure buckets, and progress ledger. APR-001 profile-guided baseline reached `29 exact / 6 partial / 8 miss`, with `43/43` parsed QA workspaces, `43/43` query rows, `0` runtime load errors, and `0` write proposals. APR-016 is the current high-water: multi-support safe-surface accumulation reached `42 exact / 1 partial / 0 miss`, `43/43` parsed, `43/43` query rows, `0` runtime load errors, and `0` write proposals. The remaining partial is a rationale compile-surface gap around summary-method high-cell-count memory/blocking effects.
-- Glass Tide Charter rule-ingestion fixture admission: GLT-000 promoted the tmp seed into `datasets/story_worlds/glass_tide_charter/` with source, oracle executable-rule KB, 100 QA probes, support map, starter profile, failure buckets, and progress ledger. GLT-002 assisted generic profile baseline reached first-20 QA `7 exact / 2 partial / 11 miss` with `92` admitted operations and `0` executable rules. GLT-009 cold compact-profile run reached `13 exact / 3 partial / 4 miss` first-20 with `274` admitted operations and no starter registry. The first rule-lens experiments admitted executable clauses (`3`, `9`, `11`, then stricter `10`) with `0` runtime rule load errors, but runtime trial exposed overgeneralized firing and dormant-rule bodies. GLT-021 admitted `1` role-joined repair-authorization rule with `1` promotion-ready firing rule and `0` unsupported body signatures/goals/fragments. GLT-022 added numeric helper substrate and admitted `2` threshold tax rules with `2` promotion-ready firing rules and `0` unsupported body signatures/goals/fragments. GLT-023 added authored positive/negative probe gates: the role-joined repair rule passed `1/1` positive and `1/1` negative probe, with `0` unexpected solutions. GLT-024 applied the same probe layer to threshold tax rules: `2/3` positives and `1/1` negative passed, exposing the high-value relief-cargo exemption as the next exception-branch gap. GLT-025 solved that branch in a split exception lens: `lamp_rice` derives `exempt` under `harbor` and does not derive taxable. GLT-026 then showed that a combined threshold/exception bundle can misuse numeric helpers (`value_greater_than(Value, 100)` instead of entity-first helper calls), so the verifier now flags numeric-helper argument misuse as an unsupported body fragment. GLT-027 deterministically unioned separate threshold and exception rule surfaces, dropped non-promotion-ready rules, and reached `3` promotion-ready tax rules with `3/3` positive probes and `1/1` negative probe. GLT-028 added a body-fact lens for salvage, admitting `recovered_from_water/3`, `abandoned/1`, `sacred/1`, and `not_sacred/1`; GLT-029 then unioned body facts plus salvage rules into `2` promotion-ready rules with both reward probes passing. GLT-030/031 reran tax and salvage under isolated per-rule promotion scoring so sibling rules with the same derived head cannot mask dormancy; the high-water results held at `3` tax and `2` salvage promotion-ready rules with all authored probes passing. GLT-032/034 added the temporal quarantine branch: the body-fact lens admitted `quarantine_patient/1`, `no_fever/2`, and `negative_test/2`, `hours_at_least/3` became a runtime helper, and the retained clearance rule derives Dax as cleared while the Mira five-hour negative probe stays empty. GLT-035/036 added council vote body facts and retained one promotion-ready budget-veto failure rule. GLT-037 added `support_count_at_least/2` as the first aggregation helper but exposed final-outcome overclaiming; GLT-038 added `derived_condition/3`, and the aggregation lens now derives `support_threshold_met` without claiming final passage. GLT-039 unioned the threshold and veto branches into one accumulated surface: `2` promotion-ready rules, `2/2` positive probes, `1/1` negative probe, and no final-passage leak. GLT-017 also upgraded the verifier to catch right-shaped/wrong-meaning body patterns such as `entity_property(Cargo, type, sacred_cargo)` when no matching admitted fact exists. Current lesson: rule ingestion needs planned semantic lenses, body-fact acquisition, active predicate palettes, body-goal/body-fragment verification, helper predicates for thresholds, temporal windows, and aggregation, intermediate condition surfaces, authored positive/negative probes, deterministic rule-surface union, isolated per-rule runtime trial, and combined-surface probe gates, not more rule prose in the default compile.
+- Glass Tide Charter rule-ingestion fixture admission: early broad compiles preserved source-rule records but admitted `0` executable rules. Separate rule lenses then exposed the real rule frontier: fanout, dormancy, body support, helper misuse, and promotion readiness. Current promotion-ready slices cover role-joined repair authorization, tax threshold plus relief exception, salvage reward exception, temporal quarantine clearance, council budget-veto failure, and support-threshold condition. The retained doctrine is staged rule acquisition: body-fact lens, active palette, mapper admission, runtime trial, positive/negative probes, deterministic rule-surface union, and promotion filtering before durable activation.
 - Clarification Eagerness Trap fixture admission: CET-000 promoted the tmp seed into `datasets/clarification_eagerness/clarification_eagerness_trap/` with `20` ingestion CE cases, `20` query CE cases, and `10` baseline QA probes. Expected behavior is balanced enough to expose both over-eagerness and under-eagerness: ingestion expects `10` ask/partial-ask and `10` no-ask outcomes; query expects `7` clarification outcomes and `13` no-ask outcomes. CET-006 established the first strict authority-aware baseline: `37/40` correct, `0` over-eager, `2` under-eager, `1` unsafe candidate, and `2` context-write violations. CET-010 reached `40/40`; CET-011/CET-012 exposed the importance of source-context availability; CET-013 held the source-context lane at `40/40` after the rule-admission changes, with `0` unsafe candidates, `0` context-write violations, `10/10` blocked-slot coverage, and safe partials at `11/13`. Lesson: CE gains come from structural authority-surface scoring for context support and blocked slots, not merely asking more or less.
 - Declaration document-intake cross-apply: hint-free recheck reached `211` admitted rows with expected-signature recall `0.116`; a narrow direct fixture registry reached `161` admitted rows and `0.391`; hybrid registry selection reached `323` admitted rows and `0.464`. This is current evidence that document profiles should supply a curated working vocabulary while still letting the LLM select the active compile surface.
 - Proclamation document-intake cross-apply: hint-free compile reached first-20 QA at `14 exact / 2 partial / 4 miss`; narrow direct registry improved signature precision but dropped to `12 / 1 / 7`; hybrid registry selection compiled `249` admitted rows with first-20 QA `13 / 2 / 4`. The lesson is that expected-signature recall is not enough; source-support coverage per question is the next scoring layer.
@@ -258,29 +303,37 @@ Older milestone ladders and superseded calibration packs are intentionally left 
 
 ## Reading Order
 
+If you read 3 things:
+
 1. `README.md`
 2. `docs/CURRENT_RESEARCH_HEADLINE.md`
-3. `docs/FRONTIER_PROGRESS_REPORT.md`
-4. `docs/MULTI_PASS_SEMANTIC_COMPILER.md`
-5. `docs/CLARIFICATION_EAGERNESS_STRATEGY.md`
-6. `docs/PUBLIC_DOCS_GUIDE.md`
+3. `docs/MULTI_PASS_SEMANTIC_COMPILER.md`
+
+If you have an hour:
+
+1. `docs/FRONTIER_PROGRESS_REPORT.md`
+2. `docs/CLARIFICATION_EAGERNESS_STRATEGY.md`
+3. `docs/CURRENT_UTTERANCE_PIPELINE.md`
+4. `docs/SEMANTIC_IR_MAPPER_SPEC.md`
+5. `docs/CONTEXT_CONTROL_ARCHITECTURE_BRIEF.md`
+6. `docs/PRETHINK_GATEWAY_MVP.md`
 7. `AGENT-README.md`
-8. `docs/PRETHINK_GATEWAY_MVP.md`
-9. `docs/CURRENT_UTTERANCE_PIPELINE.md`
-10. `docs/CONTEXT_CONTROL_ARCHITECTURE_BRIEF.md`
-11. `docs/SEMANTIC_IR_RESEARCH_DIRECTION_REPORT.md`
-12. `docs/SEMANTIC_IR_MAPPER_SPEC.md`
-13. `docs/PROJECT_HORIZON.md`
-14. `docs/SEMANTIC_ROUTER_EXPERIMENT.md`
-15. `docs/MULTILINGUAL_SEMANTIC_IR_PROBE.md`
-16. `docs/NO_LANGUAGE_HANDLING_IN_PYTHON_AUDIT.md`
-17. `docs/DOMAIN_PROFILE_CATALOG.md`
-18. `docs/COURTLISTENER_DOMAIN.md`
-19. `docs/SEC_CONTRACTS_DOMAIN.md`
-20. `docs/UMLS_MVP.md`
-21. `docs/MEDICAL_PROFILE.md`
-22. `docs/CONSOLE_TRYBOOK.md`
-23. `ui_gateway/README.md`
+
+Deep dives:
+
+1. `docs/PROJECT_HORIZON.md`
+2. `docs/SEMANTIC_IR_RESEARCH_DIRECTION_REPORT.md`
+3. `docs/SEMANTIC_ROUTER_EXPERIMENT.md`
+4. `docs/MULTILINGUAL_SEMANTIC_IR_PROBE.md`
+5. `docs/NO_LANGUAGE_HANDLING_IN_PYTHON_AUDIT.md`
+6. `docs/DOMAIN_PROFILE_CATALOG.md`
+7. `docs/COURTLISTENER_DOMAIN.md`
+8. `docs/SEC_CONTRACTS_DOMAIN.md`
+9. `docs/UMLS_MVP.md`
+10. `docs/MEDICAL_PROFILE.md`
+11. `docs/CONSOLE_TRYBOOK.md`
+12. `docs/PUBLIC_DOCS_GUIDE.md`
+13. `ui_gateway/README.md`
 
 ## What Was Pruned
 
