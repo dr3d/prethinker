@@ -137,6 +137,11 @@ The cold generalization lane is now active:
   hard miss but lost the exact gains from V9-003 (`22` exact back down to `19`).
   More context is not automatically better; the budget is a query-surface
   control parameter.
+- The first query-mode comparison report covers Veridia and Black Lantern across
+  baseline, narrow evidence filtering, and broad evidence filtering. Only `16`
+  of `80` rows are volatile; `12` baseline rows can be rescued by an alternate
+  mode, while only `1` baseline exact regresses. That makes row-level selection
+  worth pursuing, with exact-row protection as the first invariant.
 
 The architecture is becoming sharper:
 
@@ -171,7 +176,10 @@ The next work should stay on the sharp edges:
    regression checks because they can perturb partial/exact rows. BLM-003 shows
    broader context can reduce hard misses, while V9-004 shows the same broader
    setting can lose exact answers. The next version needs row-level activation
-   or a fallback ensemble policy.
+   or a fallback ensemble policy. The new query-mode comparison report shows a
+   diagnostic perfect-selector upper bound of `56` exact across 80 compared
+   rows, versus `46` baseline exacts, but that bound is for research only and
+   must not become an oracle selector.
 1. **Glass Tide final-outcome composition.** Tax, salvage, quarantine, council
    veto, and council support-threshold conditions now have promotion-ready
    slices. The next frontier is a final outcome lens that joins intermediate
