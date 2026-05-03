@@ -117,3 +117,45 @@ non-promotion fragment. Rule lenses must bind every head variable through body
 goals and must emit real executable clauses, not fact rows wearing a rule
 operation label.
 
+## Run SC-003 - Compact Rule-Lens Guidance Tightening
+
+- Timestamp: `2026-05-03T16:54Z` through `2026-05-03T16:59Z`
+- Evidence lane: `diagnostic_replay`
+- Mode: narrow Section A rule-lens retries after the SC-002 rule-safety gates.
+
+### Artifacts
+
+- Compact first-order replay:
+  `tmp/cold_baselines/sable_creek_budget/rules/domain_bootstrap_file_20260503T165414953882Z_story-rules_qwen-qwen3-6-35b-a3b.json`
+- Compact derived-body-block replay:
+  `tmp/cold_baselines/sable_creek_budget/rules/domain_bootstrap_file_20260503T165454479795Z_story-rules_qwen-qwen3-6-35b-a3b.json`
+
+### Result
+
+- Moving the hard rule-shape constraints into compact guidance changed the
+  failure mode from unsafe promotion to controlled rejection.
+- The first replay admitted `1` executable rule, but it depended on an
+  unsupported `derived_status/3` body goal and therefore stayed
+  non-promotable.
+- The second replay added the composition boundary: first-order rule lenses
+  should not use `derived_*` body goals unless an admitted dependency already
+  supplies them. It admitted `0` rules and skipped the unsafe candidates.
+- A broader palette retry stalled under the shell timeout and was killed. No
+  Python runners remained active afterward.
+
+### Lesson
+
+The compact rule lens is now safer and faster, but useful rule acquisition
+still needs better pass planning. There are three separate states:
+
+```text
+unsafe-looking useful rule -> blocked by mapper/verifier
+syntactically valid but unsupported rule -> admitted but non-promotable
+body-supported executable rule -> promotion candidate
+```
+
+Sable is currently reaching the first two states, not the third. The next
+general improvement should help the rule planner choose body predicates that
+are both allowed and actually present in the admitted backbone, without widening
+the active palette enough to trigger slow or stalled generations.
+

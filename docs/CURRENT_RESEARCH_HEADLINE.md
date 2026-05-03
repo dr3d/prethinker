@@ -107,6 +107,10 @@ Glass Tide is now exercising the harder rule-ingestion frontier:
   rules, but both had a head variable that did not appear in the body. The
   mapper and verifier now block unbound-head rules, and the mapper also rejects
   fact-shaped clauses submitted as `operation="rule"`.
+- The compact rule-lens prompt now carries the same non-negotiable rule-shape
+  constraints as the full lens: real `Head :- Body` clauses only, all head
+  variables body-bound, first-order lenses use admitted backbone predicates in
+  bodies, and `derived_*` body goals require an explicit composition dependency.
 - Dulse Ledger is now scored cold at `27 exact / 7 partial / 6 miss`, Oxalis
   Recall scored `16 exact / 9 partial / 15 miss` despite `106` admitted
   operations and `0` skips, Sable Creek Budget scored `20 exact / 8 partial /
@@ -223,7 +227,10 @@ The next work should stay on the sharp edges:
    and independently repeated the governance-fixture pain: useful procedural
    rows, no executable rules, and misses around dimensional/authority joins.
    Sable's rule-lens replay then found a more important safety edge: no
-   promotion credit for unbound-head rules or fact-shaped rule clauses.
+   promotion credit for unbound-head rules or fact-shaped rule clauses. The
+   latest compact-guidance replay moved the failure mode to a cleaner place:
+   valid-but-unsupported rules are admitted as non-promotable, while derived-body
+   composition attempts are held until a dependency exists.
 1. **Glass Tide final-outcome composition.** Tax, salvage, quarantine, council
    veto, and council support-threshold conditions now have promotion-ready
    slices. The next frontier is a final outcome lens that joins intermediate

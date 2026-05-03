@@ -1,5 +1,6 @@
 from scripts.run_rule_acquisition_pass import (
     _drop_backbone_duplicate_rules,
+    _rule_guidance_context,
     _runtime_trial,
     _unsupported_body_fragments,
 )
@@ -87,6 +88,15 @@ def test_runtime_trial_blocks_rules_with_unbound_head_variables() -> None:
     assert trial["promotion_ready_rule_count"] == 0
     assert item["unbound_head_variables"] == ["Amendment"]
     assert any("head variable Amendment is not bound" in fragment for fragment in item["unsupported_body_fragments"])
+
+
+def test_compact_rule_guidance_keeps_binding_and_horn_shape_constraints() -> None:
+    guidance = "\n".join(_rule_guidance_context(target=4, rule_class="threshold", compact=True))
+
+    assert "Head :- Body" in guidance
+    assert "Every head variable must be bound" in guidance
+    assert "Do not use derived_* predicates in the body" in guidance
+    assert "fact-shaped clause" in guidance
 
 
 def test_value_helpers_reject_measure_variables_and_computed_thresholds() -> None:
