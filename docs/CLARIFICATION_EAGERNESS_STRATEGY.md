@@ -42,11 +42,14 @@ first full baseline: 30/40 correct
 best pre-context-write-scoring posture: 38/40 correct, 0 over-eager
 first strict authority-aware baseline: 37/40 correct, 0 over-eager,
   2 under-eager, 1 unsafe candidate, 2 context-write violations
-CET-010 current high-water: 40/40 correct, 0 over-eager,
+CET-010 source-context high-water: 40/40 correct, 0 over-eager,
   0 under-eager, 0 unsafe candidates, 0 context-write violations,
   10/10 blocked-slot question coverage, 0 blocked-slot safe-write violations
 CET-011 no-source-context check: 24/40 correct, 15 over-eager, 0 context writes
 CET-012 source-context check: 40/40 correct, matching the high-water
+CET-013 source-context regression check after rule-admission work: 40/40
+  correct, 0 unsafe candidates, 0 context-write violations, 10/10
+  blocked-slot coverage, with safe partials at 11/13
 ```
 
 The most important lesson is that CE is not a single dial. Ask/no-ask posture,

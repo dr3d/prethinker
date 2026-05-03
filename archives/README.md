@@ -4,6 +4,8 @@ This folder stores crash-safe backup bundles that are intended for cloud commit.
 
 - Why: `tmp/` is intentionally gitignored for local iteration speed/noise control.
 - Goal: preserve full run/prompt history off-machine without flooding published docs.
+- Internal handoff notes may live here too. They are useful project memory, but
+  they do not belong in the public docs front door.
 
 ## Current Bundle Format
 

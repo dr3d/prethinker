@@ -8,7 +8,7 @@ The core bet is simple: **the model may propose, but deterministic code decides 
 
 This is not "English to Prolog by vibes." It is a research workbench for controlled memory admission: how much semantic understanding can a strong model contribute while a deterministic runtime prevents unsafe writes, ambiguity collapse, and claim/fact confusion?
 
-Current center: a live `ui_gateway` console backed by `src/mcp_server.py`, the two-pass `semantic_router_v1 -> semantic_ir_v1` runtime path with `qwen/qwen3.6-35b-a3b`, profile-aware admission, scoped Epistemic Worlds diagnostics, and three starter domain lanes: bounded medical/UMLS, CourtListener legal-source intake, and SEC/contracts obligation intake.
+Current center: a live `ui_gateway` console backed by `src/mcp_server.py`, the `semantic_router_v1 -> semantic_ir_v1` runtime path with `qwen/qwen3.6-35b-a3b`, profile-aware admission, scoped Epistemic Worlds diagnostics, multi-pass semantic compilation, and starter domain lanes for bounded medical/UMLS, legal-source intake, SEC/contracts, story worlds, and enterprise guidance.
 
 ![Prethinker semantic IR workspace](docs/assets/prethinker-semantic-ir-workspace.png)
 
@@ -27,12 +27,16 @@ Prethinker is testing whether multiple constrained semantic lenses over the
 same source can build a richer symbolic surface than a single giant pass, while
 keeping the authority boundary intact.
 
-The current hard fixture is **Glass Tide**, a dense charter/rule-ingestion case.
-Broad compiles preserve rules as source records; separate rule lenses can admit
-executable clauses; runtime trials now expose the real frontier, which is
-overgeneralized rule fanout, clean but dormant rules whose bodies lack matching
-admitted facts, and exception branches that only show up under positive/negative
-probes.
+The rule-ingestion frontier started in **Glass Tide** and is now transferring
+across fresh governance fixtures such as **Sable Creek** and **Avalon**. Broad
+compiles preserve rules as source records; separate rule lenses can admit
+executable clauses; runtime trials expose fanout, dormancy, unsupported body
+goals, and helper-substrate gaps before rules are promoted.
+
+The newest hard question is **row-level activation**: safe accumulated
+rule/evidence surfaces can rescue rows that need them, but global activation can
+also perturb rows that were already answered well. Prethinker is now measuring
+when to activate alternate symbolic surfaces without using oracle answers.
 
 For the freshest orientation, read the
 [current headline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md)
@@ -102,7 +106,7 @@ The public repo currently tracks `41` pytest files under [tests/](https://github
 
 ```powershell
 python -m pytest -q
-# 389 passed
+# 450 passed, 2 subtests passed
 ```
 
 Current high-signal evidence:
@@ -114,6 +118,10 @@ Current high-signal evidence:
 - Lava v5 latest 60-attempt rerun: `60/60` parsed JSON, `60/60` domain selector, `60/60` admission-safe, `45/60` semantic-clean, `41/60` full expectation score, `0/60` temp-0 signature variance groups, and `0` fuzzy edge kinds.
 - Policy/reimbursement cross-turn demo: English policy installed executable rules, derived query answers without writing derived `violation/2` facts, then corrected state and changed the answer.
 - Anaplan Polaris enterprise-guidance fixture: multi-support safe-surface accumulation reached `42 exact / 1 partial / 0 miss` on a 43-question post-ingestion QA battery, with `0` runtime load errors and `0` QA write proposals.
+- Sable Creek Budget rule replay: a narrow rule lens plus admitted-fact signature support produced the first fresh-fixture promotion-ready public-hearing rule without gold KBs, answer keys, or Python prose interpretation.
+- Avalon Grant Committee rule replay: mapper-side rule gates skip raw Prolog negation/disjunction/comparison constructs, while helper-composed matching-fund rules remain promotion-ready; post-gate rule union reached `27 exact / 10 partial / 3 miss`.
+- Clarification Eagerness source-context regression check: `40/40` correct, `0` unsafe candidates, `0` context-write violations, and `10/10` blocked-slot coverage after the rule-admission changes.
+- Cold generalization baseline: ten source-only fixtures currently total `245 exact / 81 partial / 144 miss` across `470` QA items, making overfit and fixture-transfer visible instead of assumed.
 - Temporal kernel slice: admitted `before/2` facts now support deterministic `after/2`, transitive `precedes/2`, and `follows/2` queries through Prolog rules; `temporal_graph_v1` remains proposal-only unless matching candidate operations pass admission.
 - Temporal correction guard: replacement `event_on/2`, `interval_start/2`, and `interval_end/2` anchors are blocked unless the model emits an explicit retract/correction plan.
 

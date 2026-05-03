@@ -32,7 +32,8 @@ APR showed that a safe union of independent support views can beat any single
 compile: the Anaplan Polaris fixture reached `42 exact / 1 partial / 0 miss`
 without answer-key guidance.
 
-Glass Tide is now exercising the harder rule-ingestion frontier:
+Glass Tide opened the harder rule-ingestion frontier, and Sable/Avalon are now
+testing whether those gains transfer:
 
 - broad compiles preserve rules as source records, but executable behavior
   comes from separate rule lenses plus runtime trial;
@@ -212,11 +213,12 @@ only deterministic admission decides what can accumulate.
 
 ## Current Hard Question
 
-Can Prethinker turn explicit English charter rules into executable Prolog rules
-without allowing a bad rule to generalize into false derived truth, and can it
-ask exactly when durable truth would otherwise require an unauthorized choice?
+Can Prethinker activate the right admitted symbolic surface for each question:
+facts when facts are enough, accumulated support when rationale is needed,
+promotion-ready rules when inference is needed, and clarification when durable
+truth would otherwise require an unauthorized choice?
 
-That is the Glass Tide plus CE frontier.
+That is the rule-composition, row-level activation, and CE frontier.
 
 ## Tonight's Research Queue
 
@@ -250,23 +252,21 @@ The next work should stay on the sharp edges:
    latest compact-guidance replay moved the failure mode to a cleaner place:
    valid-but-unsupported rules are admitted as non-promotable, while derived-body
    composition attempts are held until a dependency exists.
-1. **Glass Tide final-outcome composition.** Tax, salvage, quarantine, council
-   veto, and council support-threshold conditions now have promotion-ready
-   slices. The next frontier is a final outcome lens that joins intermediate
-   conditions without collapsing provenance or overclaiming state. GLT-040 now
-   makes duplicate branch echo visible as a non-contribution rather than a score
-   gain. Avalon AG-002 confirms the same discipline is needed outside Glass
-   Tide: rule lenses can emit executable clauses, but helper-shape and body
-   support decide promotion.
+1. **Rule composition transfer.** Glass Tide has promotion-ready slices for
+   tax, salvage, quarantine, council veto, and support-threshold conditions.
+   Sable and Avalon now show the discipline transfers: helper shape, body
+   support, mapper gates, and promotion trials decide usefulness, not the mere
+   presence of a Prolog-looking clause. The next frontier is joining
+   intermediate conditions without collapsing provenance or overclaiming state.
 2. **Rule probe discipline.** Recent preflight runs show that a rule can be
    body-supported but fail under the wrong scope atom, can become dormant by
    using lowercase placeholders such as `warden` and `repair_order`, or can look
    firing only because a sibling rule shares its derived head. Keep isolated
    per-rule promotion plus combined positive/negative probes in the loop.
-3. **Clarification Eagerness drift.** CET-010 reached `40/40` with perfect
-   ask/no-ask posture and `1.000` blocked-slot coverage after adding structural
-   scorer lanes. The next CE move is a small hard replay pack for variance, not
-   another broad prompt patch.
+3. **Clarification Eagerness drift.** CET-013 held the source-context lane at
+   `40/40` after the latest rule-admission changes. The next CE move is safe
+   partial richness and a small hard replay pack for variance, not another broad
+   prompt patch.
 4. **Regression cadence.** Keep compact Anaplan/Glass Tide/CE checks running so
    new rule machinery does not reopen older query, admission, or ask/no-ask
    failures.

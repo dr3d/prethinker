@@ -30,14 +30,14 @@ Read these first:
 
 1. [docs/CURRENT_RESEARCH_HEADLINE.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md)
 2. [docs/MULTI_PASS_SEMANTIC_COMPILER.md](https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md)
-3. [docs/FRONTIER_FIXTURE_STRATEGY.md](https://github.com/dr3d/prethinker/blob/main/docs/FRONTIER_FIXTURE_STRATEGY.md)
-4. [docs/CLARIFICATION_EAGERNESS_STRATEGY.md](https://github.com/dr3d/prethinker/blob/main/docs/CLARIFICATION_EAGERNESS_STRATEGY.md)
-5. [docs/EXPLAINER.md](https://github.com/dr3d/prethinker/blob/main/docs/EXPLAINER.md)
-6. [PROJECT_STATE.md](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md)
-7. [README.md](https://github.com/dr3d/prethinker/blob/main/README.md)
-8. [docs/CURRENT_UTTERANCE_PIPELINE.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_UTTERANCE_PIPELINE.md)
-9. [docs/SEMANTIC_IR_MAPPER_SPEC.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_MAPPER_SPEC.md)
-10. [docs/PRETHINK_GATEWAY_MVP.md](https://github.com/dr3d/prethinker/blob/main/docs/PRETHINK_GATEWAY_MVP.md)
+3. [docs/EXPLAINER.md](https://github.com/dr3d/prethinker/blob/main/docs/EXPLAINER.md)
+4. [docs/GENERALIZATION_BASELINE_MATRIX.md](https://github.com/dr3d/prethinker/blob/main/docs/GENERALIZATION_BASELINE_MATRIX.md)
+5. [docs/CURRENT_UTTERANCE_PIPELINE.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_UTTERANCE_PIPELINE.md)
+6. [docs/SEMANTIC_IR_MAPPER_SPEC.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_MAPPER_SPEC.md)
+7. [docs/CLARIFICATION_EAGERNESS_STRATEGY.md](https://github.com/dr3d/prethinker/blob/main/docs/CLARIFICATION_EAGERNESS_STRATEGY.md)
+8. [docs/FRONTIER_FIXTURE_STRATEGY.md](https://github.com/dr3d/prethinker/blob/main/docs/FRONTIER_FIXTURE_STRATEGY.md)
+9. [PROJECT_STATE.md](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md)
+10. [README.md](https://github.com/dr3d/prethinker/blob/main/README.md)
 
 ## Current Research Center
 
@@ -57,17 +57,17 @@ utterance + context
   -> KB mutation, query, clarification, quarantine, or rejection
 ```
 
-The newest console work extends that pivot to long narrative ingestion. Story-like
-utterances can be split into focused Semantic IR segments, processed through the
-same runtime path, and then shown as one deduped ledger turn. This is meant to
-exercise model semantic understanding while keeping admission deterministic and
-auditable.
+The current frontier extends that pivot to multi-pass compilation and rule
+promotion. Story-like, procedural, enterprise-guidance, and charter-rule
+sources can be viewed through separate backbone, support/source,
+temporal/status, and rule lenses. The model proposes each view; the mapper
+admits or skips each fragment; deterministic union accumulates only admitted
+clauses.
 
 The best current documents for that work are:
 
 - [docs/CURRENT_UTTERANCE_PIPELINE.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_UTTERANCE_PIPELINE.md)
 - [docs/CONTEXT_CONTROL_ARCHITECTURE_BRIEF.md](https://github.com/dr3d/prethinker/blob/main/docs/CONTEXT_CONTROL_ARCHITECTURE_BRIEF.md)
-- [docs/MULTI_PASS_SEMANTIC_COMPILER.md](https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md)
 - [docs/CLARIFICATION_EAGERNESS_STRATEGY.md](https://github.com/dr3d/prethinker/blob/main/docs/CLARIFICATION_EAGERNESS_STRATEGY.md)
 - [docs/FRONTIER_FIXTURE_STRATEGY.md](https://github.com/dr3d/prethinker/blob/main/docs/FRONTIER_FIXTURE_STRATEGY.md)
 - [docs/SEMANTIC_IR_RESEARCH_DIRECTION_REPORT.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_RESEARCH_DIRECTION_REPORT.md)
@@ -91,11 +91,17 @@ then ordinary Semantic IR and deterministic admission test whether the proposed
 predicate surface is usable. Human-authored expected Prolog files are
 calibration tools, not product-time hints.
 
-The newest rule-ingestion work is Glass Tide: broad compiles preserve charter
-rules as source records, while separate semantic lenses can admit executable
-clauses, acquire body facts, union promotion-ready rule surfaces, and expose
-runtime fanout/dormancy risks before any rule is promoted as durable product
-behavior.
+The newest rule-ingestion work started in Glass Tide and now transfers across
+Sable Creek and Avalon. Broad compiles preserve charter/policy rules as source
+records, while separate semantic lenses can admit executable clauses, acquire
+body facts, union promotion-ready rule surfaces, and expose fanout, dormancy,
+unsupported body goals, and helper-substrate gaps before any rule is promoted as
+durable product behavior.
+
+The newest query-surface work is row-level activation. Safe accumulated
+rule/evidence surfaces can rescue rows that need them, but global activation can
+perturb rows that were already good. Perfect-selector reports are diagnostic
+upper bounds, not runtime policies.
 
 The newest fixture-methodology work is the frontier fixture strategy: new
 benchmarks should target specific architectural weaknesses, declare their
@@ -151,8 +157,8 @@ Latest local verification:
 
 - Frontier fixture progress is summarized in [docs/FRONTIER_PROGRESS_REPORT.md](https://github.com/dr3d/prethinker/blob/main/docs/FRONTIER_PROGRESS_REPORT.md), with raw journals linked for Iron Harbor, Blackthorn, Kestrel, Anaplan Polaris, Glass Tide, and Clarification Eagerness Trap.
 - Multi-pass semantic compilation is now a named frontier: independent semantic lenses propose backbone, support/source, temporal/status, and rule fragments; the mapper admits each lens independently; deterministic union accumulates only admitted clauses.
-- Clarification eagerness now has a dedicated first fixture at `datasets/clarification_eagerness/clarification_eagerness_trap/`: `20` ingestion CE cases, `20` query CE cases, and `10` baseline QA probes. CET-010 is the current strict authority-aware high-water: `40/40` correct, `0` over-eager, `0` under-eager, `0` unsafe candidates, `0` context-write violations, `10/10` blocked-slot question coverage, and `0` blocked-slot safe-write violations.
-- Lean full pytest suite after retiring the legacy parser lane, unreachable JSON fixtures, the old clarification side surface, and parser-era family/social rewrite crutches: `404 passed`.
+- Clarification eagerness now has a dedicated first fixture at `datasets/clarification_eagerness/clarification_eagerness_trap/`: `20` ingestion CE cases, `20` query CE cases, and `10` baseline QA probes. CET-013 reran the source-context lane after the latest rule-admission work and held `40/40` correct, `0` over-eager, `0` under-eager, `0` unsafe candidates, `0` context-write violations, and `10/10` blocked-slot coverage. The remaining CE nuance is safe-partial richness, not ask/no-ask posture.
+- Lean full pytest suite: `450 passed, 2 subtests passed`.
 - Lava v5 latest 60-attempt rerun: `60/60` parsed JSON, `60/60` domain selector, `60/60` admission-safe, `45/60` semantic-clean, `41/60` full expectation score, `0` fuzzy edge kinds, and `0/60` temp-0 variance groups.
 - `active_profile=auto` now uses `semantic_router_v1` as the first-pass context/profile planner. The old Python catalog selector is no longer in the active runtime or research harnesses.
 - `semantic_ir_v1` now includes optional `temporal_graph_v1` proposal diagnostics: event nodes, time anchors, intervals, and temporal edges are visible in traces, but they cannot write durable KB facts unless matching `candidate_operations` pass admission.
@@ -168,7 +174,8 @@ Latest local verification:
 - SEC/contracts lane: `sec_contracts@v0`, `adapters/sec_edgar/`, and synthetic contract fixtures for obligation-not-fact, condition-not-event, temporal triggers, party scope, and breach-boundary tests.
 - Semantic IR runtime edge pack: `20/20` decision labels, `0.976` avg score.
 - Semantic IR weak-edge pack: `10/10` decision labels, `1.000` avg score.
-- Goldilocks full-story segmented smoke: `56` deduped mutations across `50` segments, with placeholder and vague-predicate bad writes removed after adding a generic story-world predicate palette.
+- Cold generalization baseline: ten source-only fixtures currently total `245 exact / 81 partial / 144 miss` across `470` QA items, making transfer and overfit visible instead of assumed.
+- Rule-lens transfer evidence: Sable Creek produced a body-supported public-hearing rule from admitted fact rows, and Avalon retained helper-composed matching-fund rules while the mapper skipped unsupported raw Prolog constructs.
 - Policy/reimbursement cross-turn demo: English policy installed executable rules, derived query answers without writing derived `violation/2` facts, then corrected state and changed the answer.
 - Anaplan Polaris enterprise-guidance fixture: multi-support safe-surface accumulation reached `42 exact / 1 partial / 0 miss` on a 43-question post-ingestion QA battery, with `0` runtime load errors and `0` QA write proposals.
 - Profile bootstrap closed-loop smoke: a model-proposed starter profile ran generated starter cases through the normal Semantic IR mapper with `8/8` valid workspaces and `7/8` expected-boundary hits.

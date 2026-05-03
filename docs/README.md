@@ -8,16 +8,21 @@ durable Prolog state, and the UI/trace layers show the decision path.
 
 ## Start Here
 
+Use this short path if you are new:
+
 1. [Current Research Headline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md) - the newest gain and why it matters.
-2. [Multi-Pass Semantic Compiler](https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md) - semantic lenses, mapper-admitted accumulation, and the rule-ingestion frontier.
-3. [Generalization Baseline Matrix](https://github.com/dr3d/prethinker/blob/main/docs/GENERALIZATION_BASELINE_MATRIX.md) - cold unseen fixture results for checking whether semantic parallax generalizes beyond the research stories that shaped it.
-4. [Cold Baseline Failure Rollup](https://github.com/dr3d/prethinker/blob/main/docs/COLD_BASELINE_FAILURE_ROLLUP.md) - cross-fixture failure-surface rollup for deciding which general problem to attack next.
-5. [Frontier Fixture Strategy](https://github.com/dr3d/prethinker/blob/main/docs/FRONTIER_FIXTURE_STRATEGY.md) - what new hostile fixtures should test next, how hard they should be, and how to avoid oracle leakage.
-6. [Frontier Progress Report](https://github.com/dr3d/prethinker/blob/main/docs/FRONTIER_PROGRESS_REPORT.md) - visitor-readable progress across Iron Harbor, Blackthorn, Kestrel, Anaplan, and Glass Tide.
-7. [Clarification Eagerness Strategy](https://github.com/dr3d/prethinker/blob/main/docs/CLARIFICATION_EAGERNESS_STRATEGY.md) - when Prethinker should ask instead of guessing during ingestion or query.
-8. [Explainer](https://github.com/dr3d/prethinker/blob/main/docs/EXPLAINER.md) - the plain-language project story.
-9. [Current Utterance Pipeline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_UTTERANCE_PIPELINE.md) - how a turn moves through router, context, Semantic IR, mapper, query, clarification, or mutation.
-10. [Semantic IR Mapper Spec](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_MAPPER_SPEC.md) - what the deterministic admission layer accepts, skips, blocks, or projects.
+2. [Explainer](https://github.com/dr3d/prethinker/blob/main/docs/EXPLAINER.md) - the plain-language project story.
+3. [Multi-Pass Semantic Compiler](https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md) - semantic lenses, mapper-admitted accumulation, and rule promotion.
+4. [Generalization Baseline Matrix](https://github.com/dr3d/prethinker/blob/main/docs/GENERALIZATION_BASELINE_MATRIX.md) - cold unseen fixture results for checking transfer.
+5. [Current Utterance Pipeline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_UTTERANCE_PIPELINE.md) - how a turn moves through router, context, Semantic IR, mapper, query, clarification, or mutation.
+
+Then go deeper:
+
+- [Semantic IR Mapper Spec](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_MAPPER_SPEC.md) - what the deterministic admission layer accepts, skips, blocks, or projects.
+- [Cold Baseline Failure Rollup](https://github.com/dr3d/prethinker/blob/main/docs/COLD_BASELINE_FAILURE_ROLLUP.md) - cross-fixture failure-surface rollup for deciding which general problem to attack next.
+- [Frontier Fixture Strategy](https://github.com/dr3d/prethinker/blob/main/docs/FRONTIER_FIXTURE_STRATEGY.md) - how hostile fixtures are designed without oracle leakage.
+- [Frontier Progress Report](https://github.com/dr3d/prethinker/blob/main/docs/FRONTIER_PROGRESS_REPORT.md) - visitor-readable progress across the major research fixtures.
+- [Clarification Eagerness Strategy](https://github.com/dr3d/prethinker/blob/main/docs/CLARIFICATION_EAGERNESS_STRATEGY.md) - when Prethinker should ask instead of guessing during ingestion or query.
 
 ## Current Research Lanes
 
