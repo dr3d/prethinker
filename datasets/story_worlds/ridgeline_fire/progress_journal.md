@@ -60,3 +60,65 @@ Ridgeline is already less dominated by pure compile gaps than the lower cold
 story baseline. The current surface often has pieces of the answer, but the
 deadline/authority/rule joins are not yet strong enough. This fixture should be
 a good cold counterpart to Iron Harbor and Glass Tide.
+
+## Run RF-002 - Focused Retry Diagnostic
+
+- Timestamp: `2026-05-03T06:53Z`
+- Evidence lane: `diagnostic_compile_only`
+- Model: `qwen/qwen3.6-35b-a3b`
+- Mode: source-only semantic-parallax compile after adding focused-pass
+  contribution accounting and compact source-pass JSON retry. No gold KB,
+  starter registry, or QA source was used.
+
+### Artifact
+
+- Compile:
+  `tmp/diagnostic_replays/ridgeline_rf002/domain_bootstrap_file_20260503T065349352859Z_story_qwen-qwen3-6-35b-a3b.json`
+
+### Result
+
+- Compile: `49` admitted operations, `20` skips, `49` unique facts, `0`
+  rules.
+- QA: not run because the compile surface visibly regressed.
+- Pass contribution: flat skeleton `0`, standing orders `30`, incident
+  timeline `0`, compliance findings `0`, witness statements `8`, corrections
+  `11`.
+
+### Lesson
+
+The new accounting exposed a different failure than Three Moles. The compact
+retry triggered for the incident-timeline pass, but the retry still failed to
+produce valid JSON at the default `32` operation target. This suggests dense
+timeline/event passes need either smaller retry targets or better source-pass
+budgeting. The run is a useful negative diagnostic, not a benchmark
+improvement.
+
+## Run RF-003 - Smaller Retry Target Diagnostic
+
+- Timestamp: `2026-05-03T06:57Z`
+- Evidence lane: `diagnostic_compile_only`
+- Model: `qwen/qwen3.6-35b-a3b`
+- Mode: source-only semantic-parallax compile with focused retry target reduced
+  from `32` to `16`. No gold KB, starter registry, or QA source was used.
+
+### Artifact
+
+- Compile:
+  `tmp/diagnostic_replays/ridgeline_rf003/domain_bootstrap_file_20260503T065711457800Z_story_qwen-qwen3-6-35b-a3b.json`
+
+### Result
+
+- Compile: `38` admitted operations, `73` skips, `38` unique facts, `0`
+  rules.
+- QA: not run because the compile surface visibly regressed.
+- Pass contribution: flat skeleton `5`, standing orders `25`, incident
+  timeline `2`, witness/analysis `0`, compliance synthesis `1`, final states
+  `5`.
+
+### Lesson
+
+Simply lowering the retry target is not enough. In this run the passes parsed,
+but the admitted surface was too thin and skip-heavy. Ridgeline now points at a
+general lens-quality problem: source-pass success must mean more than valid JSON
+and nonzero rows. It needs row-class contribution floors and skip diagnostics
+that can distinguish "parsed but too thin" from "failed to parse."

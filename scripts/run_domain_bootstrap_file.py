@@ -367,7 +367,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--focused-retry-operation-target",
         type=int,
-        default=32,
+        default=16,
         help="Prompt target for candidate_operations emitted by the compact retry for an unparseable focused pass.",
     )
     parser.add_argument(
@@ -1066,6 +1066,8 @@ def _compile_source_pass_ops(
     predicates: str,
     coverage_goals: str,
     extra_context: list[str] | None = None,
+    compact_retry: bool = True,
+    operation_target: int | None = None,
 ) -> dict[str, Any]:
     """Ask the LLM for focused operation proposals, then use the normal mapper."""
 
@@ -1076,7 +1078,7 @@ def _compile_source_pass_ops(
         intake_plan=intake_plan,
         domain_hint=str(getattr(args, "domain_hint", "") or ""),
     )
-    target = max(1, int(getattr(args, "focused_pass_operation_target", 48) or 48))
+    target = max(1, int(operation_target or getattr(args, "focused_pass_operation_target", 48) or 48))
     payload = {
         "task": "Emit source_pass_ops_v1 JSON only for this focused source pass.",
         "authority": "proposal_only_mapper_remains_authoritative",
@@ -1109,6 +1111,7 @@ def _compile_source_pass_ops(
             "If the pass has more support than fits, choose row-class floor operations first and list segment_required_for_complete_ingestion in self_check.missing_slots.",
         ],
     }
+    response: dict[str, Any] | None = None
     try:
         response = _call_lmstudio_json_schema(
             base_url=str(args.base_url),
@@ -1134,9 +1137,67 @@ def _compile_source_pass_ops(
         )
         parsed = json.loads(str(response.get("content", "{}")))
     except Exception as exc:
-        return {"ok": False, "error": f"source_pass_ops_failed:{exc}", "raw_content": ""}
+        raw_content = str((response or {}).get("content", ""))[:4000] if isinstance(response, dict) else ""
+        if compact_retry:
+            retry_target = max(1, int(getattr(args, "focused_retry_operation_target", 32) or 32))
+            retried = _compile_source_pass_ops(
+                source_text=source_text,
+                parsed_profile=parsed_profile,
+                intake_plan=intake_plan,
+                args=args,
+                pass_id=pass_id,
+                purpose=purpose,
+                focus=focus,
+                completion=completion,
+                predicates=predicates,
+                coverage_goals=coverage_goals,
+                extra_context=[
+                    *(extra_context or []),
+                    "COMPACT SOURCE_PASS_OPS RETRY: the previous focused pass response was invalid JSON or failed strict schema parsing.",
+                    "Return fewer operations and prioritize the current pass's highest-query-value rows.",
+                    "Do not include commentary, markdown, examples, or trailing text outside the JSON object.",
+                    f"Retry operation target: at most {retry_target} candidate_operations.",
+                ],
+                compact_retry=False,
+                operation_target=retry_target,
+            )
+            retried["compact_retry"] = {
+                "triggered": True,
+                "reason": f"source_pass_ops_failed:{str(exc)[:240]}",
+                "previous_raw_content": raw_content,
+            }
+            return retried
+        return {"ok": False, "error": f"source_pass_ops_failed:{exc}", "raw_content": raw_content}
 
     if not isinstance(parsed, dict) or parsed.get("schema_version") != "source_pass_ops_v1":
+        if compact_retry:
+            retry_target = max(1, int(getattr(args, "focused_retry_operation_target", 32) or 32))
+            retried = _compile_source_pass_ops(
+                source_text=source_text,
+                parsed_profile=parsed_profile,
+                intake_plan=intake_plan,
+                args=args,
+                pass_id=pass_id,
+                purpose=purpose,
+                focus=focus,
+                completion=completion,
+                predicates=predicates,
+                coverage_goals=coverage_goals,
+                extra_context=[
+                    *(extra_context or []),
+                    "COMPACT SOURCE_PASS_OPS RETRY: the previous focused pass response did not contain source_pass_ops_v1.",
+                    "Return the strict source_pass_ops_v1 object only, with no additional wrapper.",
+                    f"Retry operation target: at most {retry_target} candidate_operations.",
+                ],
+                compact_retry=False,
+                operation_target=retry_target,
+            )
+            retried["compact_retry"] = {
+                "triggered": True,
+                "reason": "source_pass_ops_parse_failed",
+                "previous_raw_content": str(response.get("content", ""))[:4000] if isinstance(response, dict) else "",
+            }
+            return retried
         return {
             "ok": False,
             "error": "source_pass_ops_parse_failed",
@@ -1320,6 +1381,7 @@ def _compile_source_with_plan_passes(
         "rules": unique_rules,
         "queries": unique_queries,
         "passes": pass_records,
+        "surface_contribution": _pass_surface_contribution(pass_records),
     }
 
 
@@ -1371,6 +1433,7 @@ def _compile_source_flat_plus_plan_passes(
         "queries": unique_queries,
         "flat_pass": flat,
         "focused_passes": focused,
+        "surface_contribution": _flat_plus_surface_contribution(flat=flat, focused=focused),
     }
 
 
@@ -1398,6 +1461,94 @@ def _union_clause_lists(
         merge(flat_rules, focused_rules),
         merge(flat_queries, focused_queries),
     )
+
+
+def _clause_list(values: Any) -> list[str]:
+    return [str(value).strip() for value in values if str(value).strip()] if isinstance(values, list) else []
+
+
+def _pass_surface_contribution(
+    pass_records: list[dict[str, Any]],
+    *,
+    initial_seen_facts: set[str] | None = None,
+    initial_seen_rules: set[str] | None = None,
+    initial_seen_queries: set[str] | None = None,
+) -> list[dict[str, Any]]:
+    seen_facts = set(initial_seen_facts or set())
+    seen_rules = set(initial_seen_rules or set())
+    seen_queries = set(initial_seen_queries or set())
+    rows: list[dict[str, Any]] = []
+    for index, record in enumerate(pass_records):
+        facts = _clause_list(record.get("facts", []))
+        rules = _clause_list(record.get("rules", []))
+        queries = _clause_list(record.get("queries", []))
+        new_facts = [item for item in facts if item not in seen_facts]
+        new_rules = [item for item in rules if item not in seen_rules]
+        new_queries = [item for item in queries if item not in seen_queries]
+        seen_facts.update(facts)
+        seen_rules.update(rules)
+        seen_queries.update(queries)
+        emitted_count = len(facts) + len(rules) + len(queries)
+        unique_count = len(new_facts) + len(new_rules) + len(new_queries)
+        admitted_count = int(record.get("admitted_count", 0) or 0)
+        skipped_count = int(record.get("skipped_count", 0) or 0)
+        health_flags: list[str] = []
+        ok = bool(record.get("ok", True))
+        if not ok:
+            health_flags.append("pass_not_ok")
+        if emitted_count == 0:
+            health_flags.append("zero_yield")
+        elif unique_count == 0:
+            health_flags.append("no_unique_surface")
+        elif unique_count < 3:
+            health_flags.append("thin_surface")
+        if skipped_count > admitted_count and skipped_count >= 8:
+            health_flags.append("skip_heavy")
+        rows.append(
+            {
+                "pass_index": index,
+                "pass_id": str(record.get("pass_id", f"pass_{index + 1}")).strip() or f"pass_{index + 1}",
+                "purpose": str(record.get("purpose", "")).strip(),
+                "focus": str(record.get("focus", "")).strip(),
+                "ok": ok,
+                "admitted_count": admitted_count,
+                "skipped_count": skipped_count,
+                "fact_count": len(facts),
+                "rule_count": len(rules),
+                "query_count": len(queries),
+                "unique_fact_count": len(new_facts),
+                "unique_rule_count": len(new_rules),
+                "unique_query_count": len(new_queries),
+                "duplicate_count": max(0, emitted_count - unique_count),
+                "unique_contribution_count": unique_count,
+                "unique_contribution_ratio": round(unique_count / emitted_count, 3) if emitted_count else 0.0,
+                "health_flags": health_flags,
+            }
+        )
+    return rows
+
+
+def _flat_plus_surface_contribution(*, flat: dict[str, Any], focused: dict[str, Any]) -> list[dict[str, Any]]:
+    flat_record = {
+        **flat,
+        "pass_id": "flat_skeleton",
+        "purpose": "broad skeleton",
+        "focus": "source-wide stable facts, roles, thresholds, core events, corrections",
+    }
+    flat_rows = _pass_surface_contribution([flat_record])
+    seen_facts = set(_clause_list(flat.get("facts", [])))
+    seen_rules = set(_clause_list(flat.get("rules", [])))
+    seen_queries = set(_clause_list(flat.get("queries", [])))
+    focused_passes = focused.get("passes", []) if isinstance(focused.get("passes"), list) else []
+    focused_rows = _pass_surface_contribution(
+        [row for row in focused_passes if isinstance(row, dict)],
+        initial_seen_facts=seen_facts,
+        initial_seen_rules=seen_rules,
+        initial_seen_queries=seen_queries,
+    )
+    for offset, row in enumerate(focused_rows, start=1):
+        row["pass_index"] = offset
+    return [*flat_rows, *focused_rows]
 
 
 def _source_compiler_context(*, intake_plan: dict[str, Any] | None, domain_hint: str = "") -> list[str]:
@@ -1739,6 +1890,24 @@ def _write_summary(record: dict[str, Any], path: Path) -> None:
     risks = [str(item).strip() for item in parsed.get("admission_risks", []) if str(item).strip()] if isinstance(parsed.get("admission_risks"), list) else []
     lines.extend([f"- {item}" for item in risks] or ["- none"])
     if compile_record:
+        contribution_lines = [
+            "| "
+            + " | ".join(
+                [
+                    f"`{row.get('pass_id', '')}`",
+                    str(row.get("unique_contribution_count", 0)),
+                    str(row.get("duplicate_count", 0)),
+                    str(row.get("fact_count", 0)),
+                    str(row.get("rule_count", 0)),
+                    str(row.get("query_count", 0)),
+                    ", ".join(str(flag) for flag in row.get("health_flags", []) if str(flag).strip()) or "ok",
+                    str(row.get("purpose", "")).replace("|", "/")[:120],
+                ]
+            )
+            + " |"
+            for row in compile_record.get("surface_contribution", [])
+            if isinstance(row, dict)
+        ] or ["| - | 0 | 0 | 0 | 0 | 0 | - | - |"]
         lines.extend(
             [
                 "",
@@ -1749,6 +1918,12 @@ def _write_summary(record: dict[str, Any], path: Path) -> None:
                 f"- Projected decision: `{compile_record.get('projected_decision', '')}`",
                 f"- Admitted: `{compile_record.get('admitted_count', 0)}`",
                 f"- Skipped: `{compile_record.get('skipped_count', 0)}`",
+                "",
+                "### Surface Contribution",
+                "",
+                "| Pass | Unique | Duplicates | Facts | Rules | Queries | Health | Purpose |",
+                "| --- | ---: | ---: | ---: | ---: | ---: | --- | --- |",
+                *contribution_lines,
                 "",
                 "### Facts",
                 "",

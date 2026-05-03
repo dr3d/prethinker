@@ -283,6 +283,17 @@ branch failed the proposal, while the final-passage probe remains empty.
   distinctions, synonym drift, or direct conflicts.
 - Metrics: track QA lift per admitted clause, duplicate rate, conflict rate,
   firing-rule count, high-fanout count, and rule-derived answer count.
+- Lens contribution accounting: every flat-plus-focused compile should record
+  per-pass unique rows, duplicate rows, fact/rule/query counts, and purpose.
+  A lens that emits no unique admitted surface is a research signal, not a
+  harmless implementation detail. MMM-002 exposed this directly when the
+  event/causal pass contributed `0` unique rows on a compile-gap-heavy cold
+  story replay.
+- Focused-pass retry is necessary but not sufficient. MMM-003 recovered a
+  failed event/causal pass from `0` to `28` unique rows, but QA stayed flat.
+  RF-002/RF-003 then showed the opposite failure: dense incident passes can
+  parse but remain too thin or skip-heavy. The next lens-quality metric should
+  flag zero-yield, thin-surface, and skip-heavy passes, not just `invalid_json`.
 
 ## Evidence Lanes
 

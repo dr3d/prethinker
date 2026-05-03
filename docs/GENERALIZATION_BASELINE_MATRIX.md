@@ -7,6 +7,8 @@ The goal is to detect meta-rot: cases where the harness becomes too good at the
 shape of its existing research fixtures instead of general governed
 language-to-truth transformation.
 
+Companion diagnostic: [Cold Baseline Failure Rollup](https://github.com/dr3d/prethinker/blob/main/docs/COLD_BASELINE_FAILURE_ROLLUP.md).
+
 All runs below used the same source-only semantic-parallax recipe:
 
 - source document only for compilation;

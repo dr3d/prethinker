@@ -90,6 +90,19 @@ Clarification Eagerness Trap is exercising the companion governance frontier:
 - CE must be measured across ingestion, query, safe partials, blocked rows, and
   authority-boundary violations.
 
+The cold generalization lane is now active:
+
+- five newly admitted source-only fixtures produced `137 exact / 39 partial /
+  94 miss` across `270` QA items;
+- the cross-fixture failure rollup shows `96` compile-surface gaps, `21`
+  hybrid/reasoning gaps, `13` query-surface gaps, and `3` answer-surface gaps;
+- a Three Moles diagnostic replay added pass-contribution accounting and showed
+  the event/causal lens contributing `0` unique rows, making lens usefulness
+  measurable instead of aesthetic;
+- a compact focused-pass JSON retry recovered that same event/causal lens to
+  `28` unique rows, but QA stayed essentially flat, proving that mechanical
+  lens recovery is necessary but not sufficient for answer-bearing coverage.
+
 The architecture is becoming sharper:
 
 ```text
@@ -111,9 +124,10 @@ The next work should stay on the sharp edges:
 
 0. **Cold generalization baselines.** Five newly admitted fixtures now test
    whether semantic parallax generalizes beyond the research stories that shaped
-   the harness: Three Moles, Veridia-9, Ridgeline Fire, Calder's Reach, and
-   Black Lantern. These should be run source-only first and labeled
-   `cold_unseen` before any domain-pack or hardened-variant work.
+   the harness. The current aggregate says compile-surface coverage is the
+   largest general issue, followed by hybrid/reasoning support. Next changes
+   should improve at least two cold fixtures or preserve older regression
+   lanes.
 1. **Glass Tide final-outcome composition.** Tax, salvage, quarantine, council
    veto, and council support-threshold conditions now have promotion-ready
    slices. The next frontier is a final outcome lens that joins intermediate
@@ -134,6 +148,7 @@ The next work should stay on the sharp edges:
 ## Read Next
 
 - [Multi-Pass Semantic Compiler](https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md)
+- [Cold Baseline Failure Rollup](https://github.com/dr3d/prethinker/blob/main/docs/COLD_BASELINE_FAILURE_ROLLUP.md)
 - [Frontier Progress Report](https://github.com/dr3d/prethinker/blob/main/docs/FRONTIER_PROGRESS_REPORT.md)
 - [Clarification Eagerness Strategy](https://github.com/dr3d/prethinker/blob/main/docs/CLARIFICATION_EAGERNESS_STRATEGY.md)
 - [Project State](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md)
