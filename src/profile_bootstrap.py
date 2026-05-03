@@ -105,8 +105,16 @@ PROFILE_BOOTSTRAP_JSON_SCHEMA: dict[str, Any] = {
                 "additionalProperties": False,
                 "required": ["signature", "args", "description", "why", "admission_notes"],
                 "properties": {
-                    "signature": {"type": "string"},
-                    "args": {"type": "array", "maxItems": 5, "items": {"type": "string"}},
+                    "signature": {"type": "string", "maxLength": 64},
+                    "args": {
+                        "type": "array",
+                        "maxItems": 5,
+                        "items": {
+                            "type": "string",
+                            "maxLength": 32,
+                            "pattern": "^[a-z][a-z0-9_]*$",
+                        },
+                    },
                     "description": {"type": "string"},
                     "why": {"type": "string"},
                     "admission_notes": {"type": "array", "maxItems": 4, "items": {"type": "string"}},

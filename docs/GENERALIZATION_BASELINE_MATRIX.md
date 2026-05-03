@@ -32,6 +32,7 @@ All runs below used the same source-only semantic-parallax recipe:
 | `AG-001` | Avalon Grant Committee | 40 | 25 | 12 | 3 | 37 | 114 | 6 | 109 | 0 | 40 | 40 | 0 | 0 |
 | `DL-001` | Dulse Ledger | 40 | 27 | 7 | 6 | 34 | 70 | 21 | 52 | 0 | 40 | 40 | 0 | 0 |
 | `OX-001` | Oxalis Recall | 40 | 16 | 9 | 15 | 25 | 106 | 0 | 94 | 0 | 40 | 40 | 0 | 0 |
+| `SC-001` | Sable Creek Budget | 40 | 20 | 8 | 12 | 28 | 58 | 9 | 49 | 0 | 40 | 40 | 0 | 0 |
 
 ## Pending Cold Fixtures
 
@@ -40,7 +41,6 @@ source-only cold recipe before any assisted or diagnostic lane is created.
 
 | Fixture | Questions | Primary Pressure |
 | --- | ---: | --- |
-| Sable Creek Budget | 40 | vote arithmetic, budget constraints, public-comment claims |
 | Thornfield Variance | 40 | zoning standards, notice defects, dimensional constraints |
 
 ## Failure Surface Snapshot
@@ -55,6 +55,7 @@ source-only cold recipe before any assisted or diagnostic lane is created.
 | `AG-001` | 11 | 2 | 2 | 0 |
 | `DL-001` | 9 | 0 | 4 | 0 |
 | `OX-001` | 16 | 2 | 6 | 0 |
+| `SC-001` | 13 | 5 | 1 | 1 |
 
 ## Early Read
 
@@ -85,6 +86,11 @@ right way:
   operations and `0` skips, it scored `16 exact / 9 partial / 15 miss`. That
   makes it a strong reminder that clean admission is not the same as
   answer-bearing regulatory coverage.
+- **Sable Creek Budget** scored `20 exact / 8 partial / 12 miss` after first
+  exposing a profile-bootstrap JSON role-field runaway. A general schema cap on
+  argument role names fixed the structural failure. The actual score points at
+  thin amendment-cycle passes, vote-record/tally coverage, reserve-balance
+  support, and public-comment authority boundaries.
 
 ## Guardrail
 
