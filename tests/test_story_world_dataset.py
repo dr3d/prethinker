@@ -29,6 +29,7 @@ THREE_MOLES = ROOT / "datasets" / "story_worlds" / "three_moles_moon_marmalade_m
 VERIDIA9 = ROOT / "datasets" / "story_worlds" / "veridia9_supply_chain_patent_dispute"
 RIDGELINE_FIRE = ROOT / "datasets" / "story_worlds" / "ridgeline_fire"
 CALDERS_REACH = ROOT / "datasets" / "story_worlds" / "ledger_at_calders_reach"
+AVALON_GRANT = ROOT / "datasets" / "story_worlds" / "avalon_grant_committee"
 
 
 def test_otters_story_world_bundle_is_complete() -> None:
@@ -277,6 +278,74 @@ def test_ridgeline_fire_metadata_marks_cold_rule_lane() -> None:
 def test_ridgeline_fire_fixture_has_no_mojibake_artifacts() -> None:
     bad_tokens = ("â", "Ã", "\ufffd")
     for path in RIDGELINE_FIRE.iterdir():
+        if path.suffix.lower() not in {".md", ".json", ".jsonl"}:
+            continue
+        text = path.read_text(encoding="utf-8")
+        assert not any(token in text for token in bad_tokens), path.name
+
+
+def test_avalon_grant_committee_fixture_is_admitted_without_oracles() -> None:
+    expected = {
+        "README.md",
+        "story.md",
+        "source.md",
+        "qa_battery_40.json",
+        "qa.md",
+        "progress_journal.md",
+        "progress_metrics.jsonl",
+    }
+    forbidden = {
+        "gold_kb.pl",
+        "gold_kb_notes.md",
+        "intake_plan.md",
+        "ontology_registry.json",
+        "failure_buckets.json",
+    }
+
+    assert AVALON_GRANT.exists()
+    names = {path.name for path in AVALON_GRANT.iterdir()}
+    assert expected.issubset(names)
+    assert forbidden.isdisjoint(names)
+
+
+def test_avalon_grant_committee_qa_is_script_compatible() -> None:
+    qa_text = (AVALON_GRANT / "qa.md").read_text(encoding="utf-8")
+    questions = parse_numbered_markdown_questions(qa_text)
+    answers = parse_markdown_answer_key(qa_text)
+    battery = json.loads((AVALON_GRANT / "qa_battery_40.json").read_text(encoding="utf-8"))
+
+    assert len(battery) == 40
+    assert len(questions) == 40
+    assert len(answers) == 40
+    assert questions[0]["id"] == "q001"
+    assert "Clara Mendes" in qa_text
+    assert "Rule 2" in answers["q001"]
+    assert "Foundation Director" in answers["q035"]
+    assert "procedural path would have been different" in answers["q040"]
+
+
+def test_avalon_grant_committee_metadata_marks_cold_rule_composition_lane() -> None:
+    story = (AVALON_GRANT / "story.md").read_text(encoding="utf-8")
+    readme = (AVALON_GRANT / "README.md").read_text(encoding="utf-8")
+    metrics = [
+        json.loads(line)
+        for line in (AVALON_GRANT / "progress_metrics.jsonl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+
+    assert "Avalon Foundation Grant Eligibility Rules" in story
+    assert "Foundation Director" in story
+    assert "Review Panel" in story
+    assert "no `gold_kb.pl`" in readme.casefold()
+    assert "no benchmark run has been recorded yet" in readme.casefold()
+    assert metrics[0]["run_id"] == "AG-000"
+    assert metrics[0]["compile_run"] is False
+    assert metrics[0]["qa_rows"] == 40
+
+
+def test_avalon_grant_committee_fixture_has_no_mojibake_artifacts() -> None:
+    bad_tokens = ("Ã¢", "Ãƒ", "\ufffd")
+    for path in AVALON_GRANT.iterdir():
         if path.suffix.lower() not in {".md", ".json", ".jsonl"}:
             continue
         text = path.read_text(encoding="utf-8")
