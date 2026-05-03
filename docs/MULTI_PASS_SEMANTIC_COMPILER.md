@@ -126,6 +126,8 @@ Rule candidates must:
 
 - use `operation="rule"`
 - include a one-line `candidate_operations[].clause`
+- be executable Horn clauses with a real `Head :- Body` shape, not fact-shaped
+  clauses submitted under `operation="rule"`
 - use only allowed predicates
 - keep head variables bound in the body
 - use uppercase Prolog variables when a value should bind across the head and
@@ -199,6 +201,15 @@ unsupported body signatures, goals, or fragments. Promotion-ready is still a
 diagnostic label; durable rule admission remains a separate product decision.
 Probe-adjusted promotion readiness additionally requires all supplied positive
 and negative probes to pass.
+
+Fresh Sable Creek rule-lens replay added an important safety guard: a rule whose
+head contains a variable absent from the body is an unsafe generalization even
+if the temporary runtime can produce a synthetic binding. The mapper now skips
+that rule before trial, and the verifier reports the same problem as a
+non-promotion fragment. The mapper also skips fact-shaped clauses such as
+`voting_threshold(amendment_adoption, 4, 7).` when they are submitted as
+`operation="rule"`; those belong either as source facts through ordinary assert
+operations or as bodies/heads inside an executable rule.
 
 Promotion scoring now uses an isolated per-rule runtime: each rule is tested by
 itself against the backbone surface, so a sibling rule with the same derived

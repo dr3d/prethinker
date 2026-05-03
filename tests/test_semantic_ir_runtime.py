@@ -1888,6 +1888,52 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         self.assertEqual(parsed["rules"], ["ancestor(X, Y) :- parent(X, Y)."])
         self.assertEqual(parsed["admission_diagnostics"]["admitted_count"], 1)
 
+    def test_mapper_skips_rule_with_unbound_head_variable(self) -> None:
+        ir = _ir(
+            decision="commit",
+            turn_type="rule_update",
+            candidate_operations=[
+                {
+                    "operation": "rule",
+                    "predicate": "derived_condition",
+                    "args": [],
+                    "clause": "derived_condition(Amendment, fiscal_certification_required, charter_9_3) :- charter_rule(9_3, fiscal_neutrality_certification, _).",
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                }
+            ],
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(ir)
+        self.assertEqual(parsed["intent"], "other")
+        self.assertEqual(parsed["rules"], [])
+        skipped = [row for row in parsed["admission_diagnostics"]["operations"] if not row["admitted"]]
+        self.assertEqual(skipped[0]["skip_reason"], "rule_head_variable_not_bound")
+        self.assertTrue(any("head variables are not bound" in warning for warning in warnings))
+
+    def test_mapper_skips_rule_operation_with_fact_shaped_clause(self) -> None:
+        ir = _ir(
+            decision="commit",
+            turn_type="rule_update",
+            candidate_operations=[
+                {
+                    "operation": "rule",
+                    "predicate": "voting_threshold",
+                    "args": [],
+                    "clause": "voting_threshold(amendment_adoption, 4, 7).",
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                }
+            ],
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(ir)
+        self.assertEqual(parsed["intent"], "other")
+        self.assertEqual(parsed["rules"], [])
+        skipped = [row for row in parsed["admission_diagnostics"]["operations"] if not row["admitted"]]
+        self.assertEqual(skipped[0]["skip_reason"], "rule_clause_not_executable")
+        self.assertTrue(any("not an executable Horn rule" in warning for warning in warnings))
+
     def test_mapper_admits_positive_rule_labeled_record_without_clause_as_fact(self) -> None:
         ir = _ir(
             decision="commit",

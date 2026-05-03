@@ -73,6 +73,22 @@ def test_union_promotion_filter_keeps_composition_ready_rules() -> None:
     assert _promotion_ready_rules_from_trial(runtime_trial) == {final_rule}
 
 
+def test_runtime_trial_blocks_rules_with_unbound_head_variables() -> None:
+    rule = "derived_condition(Amendment, fiscal_certification_required, charter_9_3) :- charter_rule(9_3, fiscal_neutrality_certification, source_text)."
+    trial = _runtime_trial(
+        facts=["charter_rule(9_3, fiscal_neutrality_certification, source_text)."],
+        backbone_rules=[],
+        rule_lens_rules=[rule],
+        positive_queries=[],
+        negative_queries=[],
+    )
+
+    item = trial["derived_head_queries"][0]
+    assert trial["promotion_ready_rule_count"] == 0
+    assert item["unbound_head_variables"] == ["Amendment"]
+    assert any("head variable Amendment is not bound" in fragment for fragment in item["unsupported_body_fragments"])
+
+
 def test_value_helpers_reject_measure_variables_and_computed_thresholds() -> None:
     fragments = _unsupported_body_fragments(
         "derived_status(Applicant, ineligible_matching, rule_5) :- "

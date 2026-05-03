@@ -74,3 +74,46 @@ counterfactual transfer-limit reasoning. This is a good rule/composition target:
 the source contains many explicit rules, but the cold compile admitted `0`
 executable rules.
 
+## Run SC-002 - Rule-Lens Safety Diagnostic
+
+- Timestamp: `2026-05-03T16:25Z` through `2026-05-03T16:29Z`
+- Evidence lane: `diagnostic_replay`
+- Mode: source-derived temporary registry from SC-001 plus a narrow Section A
+  rule lens. No gold KB, starter profile, QA answer key, or reference rule
+  surface was used.
+
+### Artifacts
+
+- Broad timed-out replay:
+  `tmp/cold_baselines/sable_creek_budget/rules/domain_bootstrap_file_20260503T162549707468Z_story-rules_qwen-qwen3-6-35b-a3b.json`
+- Narrow pre-guard replay:
+  `tmp/cold_baselines/sable_creek_budget/rules/domain_bootstrap_file_20260503T162626955801Z_story-rules_qwen-qwen3-6-35b-a3b.json`
+- Narrow post-guard replay:
+  `tmp/cold_baselines/sable_creek_budget/rules/domain_bootstrap_file_20260503T162938428253Z_story-rules_qwen-qwen3-6-35b-a3b.json`
+
+### Result
+
+- Broad rule lens: timed out under the hard child-process deadline and emitted
+  no rules.
+- Narrow rule lens before safety hardening: `2` mapper-admitted clauses appeared
+  promotion-ready, but both had an unbound head variable (`Amendment`) and were
+  unsafe generalizations.
+- New mapper/verifier guards:
+  - skip rule clauses whose head variables are not bound in the body;
+  - skip `operation="rule"` candidates whose clause is fact-shaped rather than
+    an executable `Head :- Body` Horn rule.
+- Narrow rule lens after safety hardening: `0` admitted rules, `6` skips.
+  The skips were `2` fact-shaped rule clauses, `2` unbound-head rules, and `2`
+  out-of-palette `append/6` attempts.
+
+### Lesson
+
+This is a safety-floor improvement, not a score lift. Fresh municipal-charter
+material exposed a rule-acquisition shortcut that Glass Tide had not made
+obvious: a rule can look promotion-ready if its head variable is free, because
+the temporary runtime can produce a synthetic binding. The mapper now blocks
+that before runtime trial, and the verifier reports the same condition as a
+non-promotion fragment. Rule lenses must bind every head variable through body
+goals and must emit real executable clauses, not fact rows wearing a rule
+operation label.
+

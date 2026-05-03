@@ -958,6 +958,7 @@ def _isolated_rule_trial_item(
         if str(result.get("status", "")) != "success":
             backbone_rule_errors.append(f"{backbone_rule}: {result.get('message', result)}")
     query = _rule_head_query(rule)
+    unbound_head_variables = _unbound_head_variables(rule)
     body_support = [
         {
             "signature": signature,
@@ -979,6 +980,7 @@ def _isolated_rule_trial_item(
             "body_goal_support": [],
             "unsupported_body_goals": [],
             "unsupported_body_fragments": _unsupported_body_fragments(rule),
+            "unbound_head_variables": unbound_head_variables,
             "isolated_fact_load_errors": fact_errors[:10],
             "isolated_backbone_rule_load_errors": backbone_rule_errors[:10],
         }
@@ -1015,6 +1017,7 @@ def _isolated_rule_trial_item(
             and str(item.get("signature", "")) not in runtime_supported_goal_signatures
         ],
         "unsupported_body_fragments": _unsupported_body_fragments(rule),
+        "unbound_head_variables": unbound_head_variables,
         "isolated_fact_load_errors": fact_errors[:10],
         "isolated_backbone_rule_load_errors": backbone_rule_errors[:10],
     }
@@ -1051,6 +1054,9 @@ def _rule_trial_item_promotion_ready(item: dict[str, Any]) -> bool:
         value = item.get(key, [])
         if isinstance(value, list) and value:
             return False
+    value = item.get("unbound_head_variables", [])
+    if isinstance(value, list) and value:
+        return False
     return str(item.get("status", "")).strip() == "success"
 
 
@@ -1187,7 +1193,34 @@ def _unsupported_body_fragments(rule: str) -> list[str]:
             continue
         fragments.append(fragment)
     fragments.extend(_unsupported_helper_goal_fragments(rule))
+    fragments.extend([f"head variable {name} is not bound in the rule body" for name in _unbound_head_variables(rule)])
     return fragments
+
+
+def _unbound_head_variables(rule: str) -> list[str]:
+    head_text, body_text = _rule_head_and_body_text(rule)
+    if not head_text or not body_text:
+        return []
+    head_vars = _rule_variables(head_text)
+    body_vars = _rule_variables(body_text)
+    return sorted(var for var in head_vars if var not in body_vars)
+
+
+def _rule_head_and_body_text(rule: str) -> tuple[str, str]:
+    text = str(rule or "").strip().rstrip(".")
+    if ":-" not in text:
+        return text, ""
+    head, body = text.split(":-", 1)
+    return head.strip(), body.strip()
+
+
+def _rule_variables(text: str) -> set[str]:
+    variables: set[str] = set()
+    for token in re.findall(r"\b[A-Z_][A-Za-z0-9_]*\b", str(text or "")):
+        if token == "_":
+            continue
+        variables.add(token)
+    return variables
 
 
 def _unsupported_helper_goal_fragments(rule: str) -> list[str]:

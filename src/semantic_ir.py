@@ -1866,6 +1866,22 @@ def _diagnose_candidate_operation(
                 warning="skipped rule operation without explicit clause",
                 codes=["rule_policy", "no_rule_synthesis"],
             )
+        if ":-" not in clause:
+            return skip(
+                "rule_clause_not_executable",
+                warning="skipped rule operation because clause is not an executable Horn rule",
+                codes=["rule_policy", "no_rule_synthesis"],
+            )
+        unbound_head_variables = _rule_unbound_head_variables(clause)
+        if unbound_head_variables:
+            return skip(
+                "rule_head_variable_not_bound",
+                warning=(
+                    "skipped rule operation because head variables are not bound in the body: "
+                    + ", ".join(unbound_head_variables)
+                ),
+                codes=["rule_policy", "unsafe_rule_generalization"],
+            )
         base["admitted"] = True
         base["effect"] = "rule"
         base["clauses"] = [_ensure_period(clause)]
@@ -1907,6 +1923,32 @@ def _operation_has_variable_like_raw_arg(op: dict[str, Any]) -> bool:
         if _raw_arg_looks_like_variable(item):
             return True
     return False
+
+
+def _rule_unbound_head_variables(clause: str) -> list[str]:
+    head, body = _rule_head_and_body(clause)
+    if not head or not body:
+        return []
+    head_vars = _rule_variables(head)
+    body_vars = _rule_variables(body)
+    return sorted(var for var in head_vars if var not in body_vars)
+
+
+def _rule_head_and_body(clause: str) -> tuple[str, str]:
+    text = str(clause or "").strip().rstrip(".")
+    if ":-" not in text:
+        return text, ""
+    head, body = text.split(":-", 1)
+    return head.strip(), body.strip()
+
+
+def _rule_variables(text: str) -> set[str]:
+    variables: set[str] = set()
+    for token in re.findall(r"\b[A-Z_][A-Za-z0-9_]*\b", str(text or "")):
+        if token == "_":
+            continue
+        variables.add(token)
+    return variables
 
 
 def _raw_arg_looks_like_variable(value: Any) -> bool:

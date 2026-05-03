@@ -102,6 +102,11 @@ Glass Tide is now exercising the harder rule-ingestion frontier:
   to `5`. This is the rule-side version of the APR lesson: safe accumulation is
   powerful, but global activation can perturb query planning. The next tool
   needs row-level activation or exact-answer protection.
+- Sable Creek added a rule-safety regression test from a fresh municipal-budget
+  fixture. A narrow rule lens initially appeared to produce `2` promotion-ready
+  rules, but both had a head variable that did not appear in the body. The
+  mapper and verifier now block unbound-head rules, and the mapper also rejects
+  fact-shaped clauses submitted as `operation="rule"`.
 - Dulse Ledger is now scored cold at `27 exact / 7 partial / 6 miss`, Oxalis
   Recall scored `16 exact / 9 partial / 15 miss` despite `106` admitted
   operations and `0` skips, Sable Creek Budget scored `20 exact / 8 partial /
@@ -217,6 +222,8 @@ The next work should stay on the sharp edges:
    values or prose alternatives. Thornfield completed the current cold batch
    and independently repeated the governance-fixture pain: useful procedural
    rows, no executable rules, and misses around dimensional/authority joins.
+   Sable's rule-lens replay then found a more important safety edge: no
+   promotion credit for unbound-head rules or fact-shaped rule clauses.
 1. **Glass Tide final-outcome composition.** Tax, salvage, quarantine, council
    veto, and council support-threshold conditions now have promotion-ready
    slices. The next frontier is a final outcome lens that joins intermediate
