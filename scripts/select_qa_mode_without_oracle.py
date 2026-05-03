@@ -84,9 +84,12 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--selection-policy",
-        choices=["direct", "completeness"],
+        choices=["direct", "completeness", "relevance"],
         default="direct",
-        help="Selector policy. direct is the stable default; completeness is an experimental broad-support policy.",
+        help=(
+            "Selector policy. direct is the stable default; completeness and relevance "
+            "are experimental calibration policies."
+        ),
     )
     parser.add_argument(
         "--include-self-check",
@@ -344,6 +347,15 @@ def selector_system_prompt(selection_policy: str) -> str:
             "when its returned rows cover more of the entities, statuses, contrasts, conditions, timestamps, or rule "
             "consequences named by the question. If a mode retrieves an exact phrase but misses the question's decision, "
             "status, exception, or counter-evidence, mark it partial rather than strong. If two modes are equally complete, "
+            "then prefer direct, specific, non-empty evidence over broad relaxed fallbacks."
+        )
+    if selection_policy == "relevance":
+        return (
+            base
+            + "Score entity and scope relevance before evidence directness. Evidence is weak when it is centered on a "
+            "different named person, organization, rule, event, deadline, correction, or decision than the question asks "
+            "about, even if that evidence is non-empty or direct. Prefer a mode whose returned rows mention or bind the "
+            "question's main subject, requested status, rule, or decision. If relevance and completeness are similar, "
             "then prefer direct, specific, non-empty evidence over broad relaxed fallbacks."
         )
     return (

@@ -147,6 +147,9 @@ Available selector policies:
 - `completeness`: experimental; prefer broader evidence when it covers more
   entities, statuses, contrasts, conditions, timestamps, or rule consequences
   named by the question.
+- `relevance`: experimental; penalize non-empty rows centered on a different
+  named person, organization, rule, event, deadline, correction, or decision
+  than the question asks about.
 
 `--include-self-check` optionally adds bounded QA self-check notes to selector
 evidence. It is not baseline input.
@@ -160,12 +163,16 @@ Black Lantern direct:              28 exact / 9 partial / 3 miss
 Black Lantern self-check:          29 exact / 7 partial / 4 miss
 Black Lantern completeness+self-check:
                                    31 exact / 6 partial / 3 miss
+Avalon relevance:                  30 exact / 8 partial / 2 miss
+Black Lantern relevance:           28 exact / 8 partial / 3 miss, 1 selector error
 ```
 
 The research lesson is that evidence-mode selection is itself a query-surface
 control problem. Completeness pressure helps broad multi-part questions but can
-overrule simpler direct-support rows. The safe default remains direct; alternate
-policies must be reported as diagnostic variants.
+overrule simpler direct-support rows. Relevance pressure names the wrong-subject
+failure mode but did not beat the other policies in this replay. The safe
+default remains direct; alternate policies must be reported as diagnostic
+variants.
 
 `--classify-failure-surfaces` adds a structured diagnostic pass after judging non-exact rows. It sees the reference answer, compiled KB inventory, admitted clauses, emitted queries, and query results. It does not see the raw source document and it cannot write. Its labels are:
 

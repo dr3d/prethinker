@@ -149,6 +149,10 @@ testing whether those gains transfer:
   `31 / 6 / 3` and selected the best mode on `38/40` rows, but the same posture
   regressed Avalon to `27 / 9 / 2` with two selector errors. Selector policy is
   therefore a measured control problem, not a hidden prompt tweak.
+- A third `relevance` selector policy now exists for the wrong-subject evidence
+  failure mode. It fixed one Avalon Rule2 activation miss, but full replays did
+  not beat the alternatives: Avalon scored `30 / 8 / 2`; Black Lantern scored
+  `28 / 8 / 3` with one selector error.
 - Avalon AG-009 adds a clean Rule 2 exception-lens result: the lens admitted
   `3` rules, `2` were promotion-ready, and the prior-funding branch passed
   `3/3` positive and `2/2` negative probes. But globally unioning those

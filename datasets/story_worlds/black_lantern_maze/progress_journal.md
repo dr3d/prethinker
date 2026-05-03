@@ -263,3 +263,32 @@ self-check notes: optional context, not baseline input
 
 That keeps the result honest: row-level activation is promising, but policy
 selection itself needs fixture-agnostic calibration.
+
+## BLM-006 - Relevance-First Selector Negative Probe
+
+Date: 2026-05-03
+
+Evidence lane: `diagnostic_replay`
+
+Mode: experimental relevance-first selector over baseline, narrow evidence
+filtering, and broad evidence filtering.
+
+Artifact:
+
+- `tmp/cold_baselines/black_lantern_maze/query_modes_broad_replay/selector_full_relevance_policy_v1.json`
+
+Result:
+
+```text
+28 exact / 8 partial / 3 miss
+selected best available mode on 34/40 rows
+selector errors: 1
+```
+
+Lesson:
+
+Relevance-first prompting did not repair Black Lantern. The selector still
+needs a deeper control signal than "direct," "complete," or "same-subject"
+posture alone. This strengthens the case for a structured pre-selector
+diagnostic that estimates whether a row needs rule, broad-context, or baseline
+evidence before asking the selector to choose.

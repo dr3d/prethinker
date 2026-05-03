@@ -511,3 +511,38 @@ activate for every question
 
 The next activation policy should know whether a question actually needs the
 derived rule surface before allowing it to displace baseline evidence.
+
+## Run AG-010 - Relevance-First Selector Probe
+
+- Timestamp: `2026-05-03T20:09Z`
+- Evidence lane: `diagnostic_replay`
+- Model: `qwen/qwen3.6-35b-a3b`
+- Mode: experimental selector posture that scores entity/scope relevance before
+  evidence directness.
+
+### Result
+
+On the Rule2-only two-mode comparison:
+
+```text
+25 exact / 12 partial / 3 miss
+selected best available mode on 38/40 rows
+```
+
+This recovered `q010` relative to the direct selector but still wrongly
+activated the Rule2 surface for `q020` and missed the `q030` partial rescue.
+
+On the full three-mode Avalon selector replay:
+
+```text
+30 exact / 8 partial / 2 miss
+selected best available mode on 37/40 rows
+selector errors: 0
+```
+
+### Lesson
+
+Relevance-first selection names a real failure mode: direct evidence can be
+about the wrong subject or neighboring rule. But it is not a replacement for
+the direct selector. It shifts which rows fail rather than closing the
+selector gap.
