@@ -376,3 +376,33 @@ surface is available. The remaining diagnostic wrinkle is not ask/no-ask
 behavior; it is safe-partial richness. Some cases correctly ask or avoid asking
 while not preserving every expected safe partial row, so future CE work should
 keep safe-partial coverage separate from clarification posture.
+
+## CET-014 - Post-Selector Source-Context Sentinel
+
+Date: 2026-05-03
+
+Run artifact: `tmp/clarification_eagerness_runs/cet-20260503T185109Z-both-40/`
+
+Result:
+
+- `40/40` parsed.
+- `40/40` correct.
+- `0` over-eager asks.
+- `0` under-eager misses.
+- `0` unsafe candidates.
+- `0` context-write violations.
+- `17/17` expected ask cases requested clarification.
+- `23/23` expected no-ask cases avoided clarification.
+- `10/10` authored blocked-slot cases had a clarification surface.
+- Clarification precision: `1.000`.
+- Clarification recall: `1.000`.
+- Blocked-slot question coverage: `1.000`.
+- No-ask precision: `1.000`.
+- Safe partials were observed in `11/13` expected safe-partial cases.
+
+Lesson:
+
+The non-oracle QA mode selector work did not disturb CE behavior. Under the
+source-context regime, CE remains stable at the CET-010/CET-012/CET-013
+high-water. Safe-partial richness remains the only visible wrinkle, so it should
+continue to be tracked separately from ask/no-ask correctness.

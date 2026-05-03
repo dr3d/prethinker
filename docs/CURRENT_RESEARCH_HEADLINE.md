@@ -127,6 +127,17 @@ testing whether those gains transfer:
   `27 exact / 10 partial / 3 miss`, improving the older rule union's miss count
   while preserving exact count. A diagnostic mode comparison shows a `29 exact`
   upper bound, so row-level activation remains the next query-surface frontier.
+- Avalon AG-007 adds the first non-oracle evidence-mode selector. It compared
+  baseline (`25 / 12 / 3`), post-gate rule union (`27 / 10 / 3`), and focused
+  evidence-context QA (`29 / 7 / 4`) without showing the selector source prose,
+  answer keys, judge labels, failure labels, or gold KBs. The selector chose
+  among stripped query-evidence bundles and reached `31 exact / 7 partial /
+  2 miss`, selecting the best available mode on `38/40` rows against a
+  diagnostic upper bound of `32 / 7 / 1`.
+- This is the practical bridge from semantic parallax to row-level activation:
+  safe symbolic surfaces can be accumulated independently, then selected per
+  question by a model-owned control plane that still has no write authority and
+  no oracle access.
 - Dulse Ledger is now scored cold at `27 exact / 7 partial / 6 miss`, Oxalis
   Recall scored `16 exact / 9 partial / 15 miss` despite `106` admitted
   operations and `0` skips, Sable Creek Budget scored `20 exact / 8 partial /
@@ -153,6 +164,9 @@ Clarification Eagerness Trap is exercising the companion governance frontier:
   held `40/40` correct with `0` unsafe candidates, `0` context-write
   violations, and `10/10` blocked-slot coverage. The residual signal is
   safe-partial richness (`11/13`), not ask/no-ask posture.
+- CET-014 repeated the source-context CE sentinel after the evidence-selector
+  work and again held `40/40` correct with `0` unsafe candidates, `0`
+  context-write violations, and `10/10` blocked-slot coverage.
 
 The cold generalization lane is now active:
 
