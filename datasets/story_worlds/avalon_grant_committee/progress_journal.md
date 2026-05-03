@@ -68,3 +68,43 @@ mechanics, eligible-category enumeration, Worthington's German ambiguity remark,
 and counterfactual procedure. This is a good target for the next pass: acquire
 body facts and executable rules without using the answer key or starter
 registry.
+
+## Run AG-002 - Section A Rule-Lens Diagnostic Replay
+
+- Timestamp: `2026-05-03T14:44Z`
+- Evidence lane: `diagnostic_replay`
+- Model: `qwen/qwen3.6-35b-a3b`
+- Mode: Section A rule-acquisition lens over the AG-001 mapper-admitted
+  backbone. The active predicate registry was derived from AG-001's own
+  source-only candidate profile and stored only as a temporary replay artifact;
+  no gold KB, starter profile, QA answer key, or reference rule surface was
+  used.
+
+### Artifacts
+
+- Temporary registry:
+  `tmp/cold_baselines/avalon_grant_committee/source_derived_registry_ag001.json`
+- Rule replay:
+  `tmp/cold_baselines/avalon_grant_committee/rules/domain_bootstrap_file_20260503T144419947611Z_story-rules_qwen-qwen3-6-35b-a3b.json`
+
+### Result
+
+- Rule lens: `8` admitted rule clauses, `3` skips, `0` facts.
+- Runtime trial: `1` firing rule, `1` promotion-ready rule, `0` runtime rule
+  errors.
+- Verifier diagnostics: `5` unsupported body goals, `3` unsupported body
+  signatures, and `4` unsupported body fragments.
+
+### Lesson
+
+Avalon reproduces the Glass Tide rule-acquisition shape: a narrow rule lens can
+create executable rules, but promotion depends on body support and helper-shape
+discipline. The useful firing rule was the Rule 3 individual plus
+for-profit-representative branch for `app3`. The matching-fund rule exposed a
+general verifier gap: the LLM wrote `value_greater_than(Amount, 25000)` and
+`value_at_most(Match, 0.3 * Amount)`, using numeric measure variables where
+the deterministic helper contract requires an entity argument and a literal
+threshold. The verifier now flags both the measure-variable misuse and computed
+threshold expression. The expiry rule also remains blocked on unsupported
+negation (`\+`). The next structural need is still body-fact/helper acquisition
+for rule families, not broader prose pressure.

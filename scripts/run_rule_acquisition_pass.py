@@ -1171,10 +1171,15 @@ def _unsupported_helper_goal_fragments(rule: str) -> list[str]:
         if name not in {"value_greater_than", "value_at_most"} or len(args) != 2:
             continue
         first_arg = args[0]
+        threshold_arg = args[1]
         if first_arg in value_variables:
             fragments.append(f"{goal_text} uses value variable where entity argument is required")
+        elif _looks_like_numeric_measure_variable(first_arg):
+            fragments.append(f"{goal_text} uses numeric measure variable where entity argument is required")
         elif re.fullmatch(r"-?\d+(?:\.\d+)?", first_arg):
             fragments.append(f"{goal_text} uses numeric literal where entity argument is required")
+        if _looks_like_unsupported_helper_threshold(threshold_arg):
+            fragments.append(f"{goal_text} uses computed or variable threshold where literal threshold is required")
     return fragments
 
 
@@ -1203,6 +1208,28 @@ def _goal_pattern_matches_fact(goal: tuple[str, list[str]], fact: tuple[str, lis
 def _is_rule_variable(value: str) -> bool:
     text = str(value or "").strip()
     return bool(text == "_" or re.match(r"^[A-Z][A-Za-z0-9_]*$", text))
+
+
+def _looks_like_numeric_measure_variable(value: str) -> bool:
+    text = str(value or "").strip()
+    if not _is_rule_variable(text):
+        return False
+    return bool(
+        re.search(
+            r"(amount|value|match|threshold|count|total|number|hours|days|percent|percentage|ratio|n)$",
+            text,
+            flags=re.IGNORECASE,
+        )
+    )
+
+
+def _looks_like_unsupported_helper_threshold(value: str) -> bool:
+    text = str(value or "").strip()
+    if not text:
+        return True
+    if re.fullmatch(r"-?\d+(?:\.\d+)?", text):
+        return False
+    return bool(_is_rule_variable(text) or re.search(r"[+*/]|(?<!^)-", text))
 
 
 def _format_goal(goal: tuple[str, list[str]]) -> str:

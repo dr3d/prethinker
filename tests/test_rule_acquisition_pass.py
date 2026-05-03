@@ -1,4 +1,8 @@
-from scripts.run_rule_acquisition_pass import _drop_backbone_duplicate_rules, _runtime_trial
+from scripts.run_rule_acquisition_pass import (
+    _drop_backbone_duplicate_rules,
+    _runtime_trial,
+    _unsupported_body_fragments,
+)
 from scripts.union_domain_bootstrap_compiles import _promotion_ready_rules_from_trial
 
 
@@ -67,3 +71,17 @@ def test_union_promotion_filter_keeps_composition_ready_rules() -> None:
     }
 
     assert _promotion_ready_rules_from_trial(runtime_trial) == {final_rule}
+
+
+def test_value_helpers_reject_measure_variables_and_computed_thresholds() -> None:
+    fragments = _unsupported_body_fragments(
+        "derived_status(Applicant, ineligible_matching, rule_5) :- "
+        "requested_amount(Applicant, Amount), "
+        "value_greater_than(Amount, 25000), "
+        "matching_fund_commitment(Applicant, Match, Source), "
+        "value_at_most(Match, 0.3 * Amount)."
+    )
+
+    assert any("value_greater_than(Amount, 25000) uses numeric measure variable" in item for item in fragments)
+    assert any("value_at_most(Match, 0.3 * Amount) uses numeric measure variable" in item for item in fragments)
+    assert any("value_at_most(Match, 0.3 * Amount) uses computed or variable threshold" in item for item in fragments)

@@ -88,6 +88,11 @@ Glass Tide is now exercising the harder rule-ingestion frontier:
   excluded. This is the next step toward safe final-outcome composition:
   intermediate conditions may support later rules without letting a neighboring
   final-status rule fake success.
+- Avalon reproduced the numeric-helper misuse edge on a fresh governance
+  fixture: the rule lens wrote amount/match variables into entity-first helper
+  calls. The verifier now flags measure-variable helper misuse and computed
+  thresholds, keeping those rules visibly non-promotable instead of merely
+  dormant.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 
@@ -196,7 +201,9 @@ The next work should stay on the sharp edges:
    slices. The next frontier is a final outcome lens that joins intermediate
    conditions without collapsing provenance or overclaiming state. GLT-040 now
    makes duplicate branch echo visible as a non-contribution rather than a score
-   gain.
+   gain. Avalon AG-002 confirms the same discipline is needed outside Glass
+   Tide: rule lenses can emit executable clauses, but helper-shape and body
+   support decide promotion.
 2. **Rule probe discipline.** Recent preflight runs show that a rule can be
    body-supported but fail under the wrong scope atom, can become dormant by
    using lowercase placeholders such as `warden` and `repair_order`, or can look
