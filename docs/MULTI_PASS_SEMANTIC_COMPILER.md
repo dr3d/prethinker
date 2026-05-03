@@ -378,6 +378,11 @@ promotion-ready under either isolated or dependency-composed trial.
   promotion trials. The verifier can now rescue rules that depend on upstream
   derived conditions, but the next fixture should stress longer chains,
   branch conflicts, and final-status projection policy.
+- Body-fact alignment: AG-012 shows the positive path for multi-condition rule
+  composition. A body-fact lens can add `required_condition/2` rows, but those
+  atoms must align with admitted body predicates such as `deadline_met/2`; rich
+  source-detail atoms that do not join are less useful than boring atoms that
+  let rules fire safely.
 - Metrics: track QA lift per admitted clause, duplicate rate, conflict rate,
   firing-rule count, high-fanout count, and rule-derived answer count.
 - Lens contribution accounting: every flat-plus-focused compile should record

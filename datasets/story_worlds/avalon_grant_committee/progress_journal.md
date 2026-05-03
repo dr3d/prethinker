@@ -615,3 +615,85 @@ or a separate body-fact lens that emits required_condition/2 rows
 The new shortcut-audit risk is structural and does not inspect source prose. It
 looks only at repeated body-goal shapes that can alias when a rule is trying to
 represent distinct requirements.
+
+## Run AG-012 - Body-Fact Anchors Rescue Rule 8 Composition
+
+- Timestamp: `2026-05-03T23:22Z` through `2026-05-03T23:25Z`
+- Evidence lane: `diagnostic_replay`
+- Model: `qwen/qwen3.6-35b-a3b`
+- Mode: body-fact acquisition plus Rule 8 rule lens over the AG-001 backbone.
+
+### Artifacts
+
+- First body-fact attempt:
+  `tmp/cold_baselines/avalon_grant_committee/support/domain_bootstrap_file_20260503T232259999645Z_source-support_qwen-qwen3-6-35b-a3b.json`
+- Atom-aligned body-fact attempt:
+  `tmp/cold_baselines/avalon_grant_committee/support/domain_bootstrap_file_20260503T232355724065Z_source-support_qwen-qwen3-6-35b-a3b.json`
+- Backbone plus aligned body facts:
+  `tmp/cold_baselines/avalon_grant_committee/union/domain_bootstrap_file_20260503T232406484376Z_avalon-ag001-plus-aligned-required-conditions_qwen-qwen3-6-35b-a3b.json`
+- Rule lens:
+  `tmp/cold_baselines/avalon_grant_committee/rules/domain_bootstrap_file_20260503T232444595365Z_source-rules_qwen-qwen3-6-35b-a3b.json`
+- Deterministic rule union:
+  `tmp/cold_baselines/avalon_grant_committee/union/domain_bootstrap_file_20260503T232509486037Z_avalon-rule8-bodyfact-rule-union_qwen-qwen3-6-35b-a3b.json`
+
+### Result
+
+The new body-fact lens predicate `required_condition/2` gives rule composition
+an explicit support surface for multi-condition rules. The first pass admitted
+`3` rows but chose richer source-detail atoms that did not align with the
+existing `deadline_met/2` body facts. The aligned replay admitted exactly the
+two body rows needed by Rule 8:
+
+```prolog
+required_condition(anya_petrov, submit_revised_budget).
+required_condition(anya_petrov, provide_matching_docs).
+```
+
+With those rows unioned into the backbone, the Rule 8 lens admitted `4`
+executable rules, all firing and promotion-ready. The main composed rule was:
+
+```prolog
+derived_status(Subject, conditional_approved, rule_8) :-
+    required_condition(Subject, submit_revised_budget),
+    required_condition(Subject, provide_matching_docs),
+    deadline_met(Subject, submit_revised_budget),
+    deadline_met(Subject, provide_matching_docs).
+```
+
+Runtime result:
+
+```text
+admitted rules: 4
+promotion-ready rules: 4
+firing rules: 4
+runtime errors: 0
+unsupported body goals: 0
+semantic shortcut findings: 0
+```
+
+The deterministic union replay over the aligned body-fact surface passed:
+
+```text
+positive probes: 4/4
+negative probes: 2/2
+probe-adjusted promotion ready: true
+```
+
+### Lesson
+
+AG-012 is the positive counterpart to AG-011. The rule lens did not need a
+cleverer prompt; it needed an explicit body-fact acquisition step that pinned
+the condition atoms used by later rule bodies. Multi-condition rule composition
+now has a repeatable pattern:
+
+```text
+body-fact lens -> aligned required_condition rows
+rule lens -> literal condition anchors
+shortcut audit -> no repeated-body aliasing
+deterministic union -> positive/negative probes
+```
+
+The first body-fact attempt also shows a new alignment frontier: support/body
+rows must be source-faithful and atom-compatible with admitted body predicates.
+Pretty source-detail atoms are less useful than boring atoms that let rules
+join safely.

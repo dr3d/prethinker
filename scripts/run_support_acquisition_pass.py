@@ -99,6 +99,13 @@ SUPPORT_LIKE_SIGNATURES = {
 
 BODY_FACT_PREDICATES = [
     {
+        "signature": "required_condition/2",
+        "args": ["anchor", "condition"],
+        "description": "A source-stated condition, requirement, or checklist item attached to an admitted anchor such as an applicant, proposal, approval, or procedure.",
+        "why": "body_fact_acquisition",
+        "admission_notes": ["Use only for explicitly stated required conditions needed by later rule bodies."],
+    },
+    {
         "signature": "recovered_from_water/3",
         "args": ["person", "cargo", "time"],
         "description": "A source-stated recovery event where a person recovered cargo from water at a time.",
