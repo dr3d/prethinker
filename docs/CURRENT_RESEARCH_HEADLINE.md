@@ -149,6 +149,12 @@ testing whether those gains transfer:
   `31 / 6 / 3` and selected the best mode on `38/40` rows, but the same posture
   regressed Avalon to `27 / 9 / 2` with two selector errors. Selector policy is
   therefore a measured control problem, not a hidden prompt tweak.
+- Avalon AG-009 adds a clean Rule 2 exception-lens result: the lens admitted
+  `3` rules, `2` were promotion-ready, and the prior-funding branch passed
+  `3/3` positive and `2/2` negative probes. But globally unioning those
+  promotion-ready rules regressed QA from `25 / 12 / 3` to `25 / 10 / 5`.
+  The lesson is now explicit: runtime promotion-ready does not mean activate
+  for every question.
 - Dulse Ledger is now scored cold at `27 exact / 7 partial / 6 miss`, Oxalis
   Recall scored `16 exact / 9 partial / 15 miss` despite `106` admitted
   operations and `0` skips, Sable Creek Budget scored `20 exact / 8 partial /

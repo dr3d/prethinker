@@ -421,3 +421,93 @@ Avalon. The selector harness now exposes:
 
 The default remains direct evidence over broad relaxed fallbacks. Completeness
 and self-check notes are research dials, not baseline behavior.
+
+## Run AG-009 - Rule 2 Exception Lens and Global-Union Regression
+
+- Timestamp: `2026-05-03T19:52Z`
+- Evidence lane: `diagnostic_replay`
+- Model: `qwen/qwen3.6-35b-a3b`
+- Mode: narrow Rule 2 prior-funding rule lens over the AG-001 backbone.
+
+### Method
+
+The lens was constrained to simple conjunctions over:
+
+```text
+applicant_id/2
+prior_grant_history/4
+derived_status/3
+```
+
+It was explicitly blocked from text-atom search, fiscal-year atom comparison,
+negation, equality, arithmetic, lists, disjunction, and derived-condition body
+goals.
+
+### Result
+
+The successful run admitted `3` executable rules:
+
+```prolog
+derived_status(Applicant, ineligible, prior_funding) :-
+    applicant_id(Applicant, _Name),
+    prior_grant_history(Applicant, _FY, _Amt, used_in_full).
+
+derived_status(Applicant, ineligible, prior_funding) :-
+    applicant_id(Applicant, _Name),
+    prior_grant_history(Applicant, _FY, _Amt, partial_return).
+
+derived_status(Applicant, eligible, prior_funding_reset) :-
+    applicant_id(Applicant, _Name),
+    prior_grant_history(Applicant, _FY, _Amt, returned_unused).
+```
+
+Verifier result:
+
+```text
+promotion-ready rules: 2
+firing rules: 2
+positive probes: 3/3
+negative probes: 2/2
+unsupported body goals: 1
+```
+
+The unsupported reset branch is correctly visible because the backbone has no
+`returned_unused` row.
+
+Unioning only the promotion-ready Rule 2 rules into AG-001 produced:
+
+```text
+25 exact / 10 partial / 5 miss
+```
+
+compared with the baseline:
+
+```text
+25 exact / 12 partial / 3 miss
+```
+
+The rule surface rescued `q010`, `q025`, and `q030`, but regressed `q003`,
+`q007`, `q008`, and `q020`. A two-mode selector over baseline and Rule2-union
+selected:
+
+```text
+25 exact / 11 partial / 4 miss
+```
+
+### Lesson
+
+This is a rule-ingestion win and a global-activation loss. The rule lens can
+now acquire a source-faithful, helper-free exception branch that passes
+positive and negative probes, but globally unioning even promotion-ready rules
+can still perturb answer planning.
+
+Rule promotion needs a second decision:
+
+```text
+promotion-ready for runtime
+!=
+activate for every question
+```
+
+The next activation policy should know whether a question actually needs the
+derived rule surface before allowing it to displace baseline evidence.
