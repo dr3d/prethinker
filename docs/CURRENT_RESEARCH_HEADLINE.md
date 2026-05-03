@@ -88,7 +88,11 @@ Clarification Eagerness Trap is exercising the companion governance frontier:
   fixture slots and model-emitted clarification surfaces; CET-010 reached
   `10/10` blocked-slot coverage and `0` blocked-slot safe-write violations;
 - CE must be measured across ingestion, query, safe partials, blocked rows, and
-  authority-boundary violations.
+  authority-boundary violations;
+- CET-011/CET-012 exposed a context-availability effect: no-source-context CE
+  regressed to `24/40` with `15` over-eager asks, while the same fixture with
+  source context returned to `40/40`. CE scores must say what authority surface
+  was available.
 
 The cold generalization lane is now active:
 

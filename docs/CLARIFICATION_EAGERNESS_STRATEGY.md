@@ -45,11 +45,19 @@ first strict authority-aware baseline: 37/40 correct, 0 over-eager,
 CET-010 current high-water: 40/40 correct, 0 over-eager,
   0 under-eager, 0 unsafe candidates, 0 context-write violations,
   10/10 blocked-slot question coverage, 0 blocked-slot safe-write violations
+CET-011 no-source-context check: 24/40 correct, 15 over-eager, 0 context writes
+CET-012 source-context check: 40/40 correct, matching the high-water
 ```
 
 The most important lesson is that CE is not a single dial. Ask/no-ask posture,
 safe partial preservation, blocked-slot question coverage, blocked-slot write
 hygiene, and context-write hygiene can move independently.
+
+The newest lesson is that CE is also context-relative. If fresh source/KB
+context is unavailable, a model may reasonably ask for details that would be
+over-eager when that context is present. CE reports should therefore label
+`include_source_context` or an equivalent authority-surface flag before scores
+are compared.
 
 ## Two Clarification Surfaces
 
@@ -111,6 +119,8 @@ base_ce
 effective_ce
 ce_mode
 ce_phase
+authority_surface_available
+include_source_context
 clarification_requested_count
 clarification_correct_count
 clarification_overeager_count

@@ -287,3 +287,60 @@ the right time"; it also checks whether authored blocked slots have an actual
 clarification surface and whether a blocked slot leaked as a safe candidate
 write. This matches the broader Prethinker pattern: better structure beats
 asking the prompt to be more or less eager.
+
+## CET-011 - No-Source-Context Regression Check
+
+Date: 2026-05-03
+
+Run artifact: `tmp/clarification_eagerness/cet-20260503T070059Z-both-40/`
+
+Result:
+
+- `40/40` parsed.
+- `24/40` correct.
+- `15` over-eager asks.
+- `0` under-eager misses.
+- `1` unsafe candidate.
+- `0` context-write violations.
+- `10/10` authored blocked-slot cases had a clarification surface.
+- Clarification precision: `0.531`.
+- Clarification recall: `1.000`.
+
+Lesson:
+
+This is a configuration/regime warning, not a prompt win/loss. Without source
+context, the model asked for many details that the fixture source would have
+supplied. The authority boundary held (`0` context-write violations), and
+blocked-slot coverage stayed perfect, but no-ask precision collapsed. CE results
+must therefore record whether fresh source/KB context was available.
+
+## CET-012 - Source-Context Variance Check
+
+Date: 2026-05-03
+
+Run artifact: `tmp/clarification_eagerness/cet-20260503T070524Z-both-40/`
+
+Result:
+
+- `40/40` parsed.
+- `40/40` correct.
+- `0` over-eager asks.
+- `0` under-eager misses.
+- `0` unsafe candidates.
+- `0` context-write violations.
+- `17/17` expected ask cases requested clarification.
+- `23/23` expected no-ask cases avoided clarification.
+- `10/10` authored blocked-slot cases had a clarification surface.
+- Clarification precision: `1.000`.
+- Clarification recall: `1.000`.
+- Blocked-slot question coverage: `1.000`.
+- No-ask precision: `1.000`.
+
+Lesson:
+
+With source context included, CE returned to the CET-010 high-water. This
+supports the ingestion-time CE theory: clarification eagerness should be judged
+relative to the available authority surface. If the system has fresh source/KB
+context, asking for already-supported details is over-eager. If it lacks that
+context, the same question may be reasonable. Future CE reporting should label
+context availability as part of the evidence lane.
