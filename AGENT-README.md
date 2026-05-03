@@ -99,6 +99,10 @@ Notes from the 2026-05-03 Codex upgrade/preflight:
   `C:\Program Files\WindowsApps\OpenAI.Codex_...\app\resources\rg.exe` returned
   `Access is denied`. If that happens, use PowerShell `Select-String` /
   `Get-ChildItem` until the bundled tool is available again.
+- LM Studio base URL expectations differ by runner. `run_domain_bootstrap_file.py`
+  expects `--base-url http://127.0.0.1:1234`; passing `/v1` produced an empty
+  profile response in a Three Moles replay. `run_domain_bootstrap_qa.py` and
+  the profile smoke scripts use `--base-url http://127.0.0.1:1234/v1`.
 - Keep `tmp/` lean. Fixture handoff folders and bulky scratch outputs can be
   moved to `C:\prethinker_tmp_archive`; active local keepers are currently
   `tmp/licensed`, `tmp/cold_baselines`, `tmp/clarification_eagerness_runs`, and

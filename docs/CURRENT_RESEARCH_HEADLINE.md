@@ -167,6 +167,12 @@ testing whether those gains transfer:
   `10` to `13`, but misses stayed at `23`, and the selector regressed to
   `11 / 4 / 25`. Some stories still need better lens coverage more than better
   retrieval.
+- Three Moles MMM-005 then found the compile-side story win: opt-in
+  `source_entity_ledger_v1` plus the current semantic-parallax passes admitted
+  `193` operations and lifted QA to `16 / 7 / 17`; evidence filtering stacked
+  to `18 / 5 / 17`. This is the first positive story-fixture evidence that the
+  ledger-to-compile handoff can transfer when later passes actually cash in the
+  ledger.
 - Avalon AG-009 adds a clean Rule 2 exception-lens result: the lens admitted
   `3` rules, `2` were promotion-ready, and the prior-funding branch passed
   `3/3` positive and `2/2` negative probes. But globally unioning those

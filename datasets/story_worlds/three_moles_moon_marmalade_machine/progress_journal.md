@@ -219,3 +219,61 @@ filtering improved exact count, but it did not reduce hard misses, and the
 selector regressed when asked to choose between thin evidence surfaces. The
 dominant problem remains compile/lens coverage, especially answer-bearing event,
 causal, and final-state rows.
+
+## MMM-005 - Source Entity Ledger Compile Transfer
+
+Date: 2026-05-03
+
+Evidence lane: `cold_after_general_architecture_change`
+
+Mode: source-only semantic-parallax replay with opt-in
+`source_entity_ledger_v1`, compact focused-pass operations schema, and the
+same no-oracle fixture discipline. No gold KB, strategy file, ontology
+registry, or QA source was used during compilation.
+
+Operational note: the first attempt accidentally passed LM Studio base URL as
+`http://127.0.0.1:1234/v1` to `run_domain_bootstrap_file.py` and produced an
+empty profile response. Rerunning with `http://127.0.0.1:1234` worked. This is
+recorded in `AGENT-README.md` for future sessions.
+
+Artifacts:
+
+- Compile:
+  `tmp/diagnostic_replays/three_moles_mmm005/domain_bootstrap_file_20260503T205739863995Z_story_qwen-qwen3-6-35b-a3b.json`
+- Plain QA:
+  `tmp/diagnostic_replays/three_moles_mmm005/domain_bootstrap_qa_20260503T210521403805Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Evidence-filter QA:
+  `tmp/diagnostic_replays/three_moles_mmm005/domain_bootstrap_qa_20260503T211629744776Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Mode comparison:
+  `tmp/diagnostic_replays/three_moles_mmm005/mmm005_query_mode_comparison.md`
+- Selector:
+  `tmp/diagnostic_replays/three_moles_mmm005/selector_direct_v1.json`
+
+Result:
+
+- Compile: `193` admitted operations, `9` skips.
+- Plain QA: `16 exact / 7 partial / 17 miss`.
+- Evidence-filter QA: `18 exact / 5 partial / 17 miss`.
+- Diagnostic perfect-selector upper bound across plain/evidence-filter:
+  `20 exact / 5 partial / 15 miss`.
+- Direct selector: `16 exact / 7 partial / 17 miss`.
+
+Lesson:
+
+This is the first positive source-ledger handoff transfer on a story fixture.
+Earlier Otters ledger probes were too timid; Three Moles shows that the ledger
+can materially improve the compile surface when the later passes cash it in.
+Evidence filtering stacks on top for exact count, but selector activation still
+fails over this thin story surface.
+
+The next story-world compiler target is not "more query filtering." It is a
+stronger ledger-to-pass contract:
+
+```text
+ledger object/entity families
+  -> required static rows
+  -> required event-spine rows
+  -> required state-change/final-state rows
+```
+
+without Python deriving any of those rows from prose.
