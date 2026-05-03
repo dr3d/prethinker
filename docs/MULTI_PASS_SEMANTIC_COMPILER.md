@@ -63,6 +63,17 @@ In Prethinker terms, predicate aliases, argument-role contracts, source-status
 validators, and clarification answers are **pins**. They reduce the space of
 valid-but-wrong mappings without weakening the authority boundary.
 
+The first practical hook is now `scripts/run_semantic_shortcut_audit.py`. It
+audits already-produced Prolog clauses or JSON compile artifacts for structural
+shortcut risks such as unbound head variables, helper-argument misuse,
+claim-to-fact collapse, broad class-predicate fanout, sibling-rule masking, and
+aggregation-to-final-outcome overclaiming. The audit is deliberately post hoc
+and structural: it reads admitted Prolog surfaces, not source prose, and it
+does not authorize writes. Early gold-KB probes showed a second useful signal:
+some risks are not bad semantics but missing helper substrate, such as raw
+arithmetic or negation that should be represented by bounded deterministic
+helpers before an LLM-acquired rule is promotion-ready.
+
 ## Why This Exists
 
 APR proved that a deterministic union of safe compiles can beat either compile
