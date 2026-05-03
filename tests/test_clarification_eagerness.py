@@ -1,5 +1,6 @@
 import unittest
 import json
+import importlib.util
 from pathlib import Path
 
 from kb_pipeline import _compute_effective_clarification_eagerness
@@ -7,6 +8,15 @@ from kb_pipeline import _compute_effective_clarification_eagerness
 
 ROOT = Path(__file__).resolve().parents[1]
 CE_TRAP = ROOT / "datasets" / "clarification_eagerness" / "clarification_eagerness_trap"
+
+RUNNER_SPEC = importlib.util.spec_from_file_location(
+    "run_clarification_eagerness_fixture",
+    ROOT / "scripts" / "run_clarification_eagerness_fixture.py",
+)
+assert RUNNER_SPEC is not None
+RUNNER_MODULE = importlib.util.module_from_spec(RUNNER_SPEC)
+assert RUNNER_SPEC.loader is not None
+RUNNER_SPEC.loader.exec_module(RUNNER_MODULE)
 
 
 class ClarificationEagernessTests(unittest.TestCase):
@@ -146,6 +156,116 @@ class ClarificationEagernessTests(unittest.TestCase):
                 continue
             text = path.read_text(encoding="utf-8")
             self.assertTrue(all(ord(char) < 128 for char in text), path.name)
+
+    def test_ce_runner_scores_blocked_slot_question_coverage(self) -> None:
+        case = {
+            "id": "SYN-001",
+            "surface": "ingestion",
+            "expected_behavior": "clarify",
+            "blocked_slots": ["actor"],
+            "safe_partials_expected": True,
+            "must_not_commit": [],
+        }
+        ir = {
+            "decision": "commit",
+            "candidate_operations": [
+                {
+                    "operation": "assert",
+                    "predicate": "logged_event",
+                    "args": ["nadia_rao", "inspection"],
+                    "safety": "safe",
+                    "source": "direct",
+                },
+                {
+                    "operation": "assert",
+                    "predicate": "approved",
+                    "args": ["unknown_actor", "repair_packet"],
+                    "safety": "needs_clarification",
+                    "source": "direct",
+                },
+            ],
+            "clarification_questions": ["Who approved the repair packet?"],
+        }
+        scored = RUNNER_MODULE._score_case(case, ir, parsed_ok=True)
+        self.assertEqual(scored["verdict"], "correct")
+        self.assertTrue(scored["blocked_slot_question_required"])
+        self.assertTrue(scored["blocked_slot_question_present"])
+        self.assertFalse(scored["blocked_slot_question_missing"])
+
+    def test_ce_runner_flags_missing_blocked_slot_question(self) -> None:
+        case = {
+            "id": "SYN-002",
+            "surface": "ingestion",
+            "expected_behavior": "clarify",
+            "blocked_slots": ["approval_semantics"],
+            "safe_partials_expected": True,
+            "must_not_commit": [],
+        }
+        ir = {
+            "decision": "commit",
+            "candidate_operations": [
+                {
+                    "operation": "assert",
+                    "predicate": "release_event",
+                    "args": ["payment"],
+                    "safety": "safe",
+                    "source": "direct",
+                },
+                {
+                    "operation": "assert",
+                    "predicate": "approved_payment",
+                    "args": ["nadia_rao", "repair_funds"],
+                    "safety": "unsafe",
+                    "source": "direct",
+                },
+            ],
+            "clarification_questions": [],
+            "self_check": {},
+        }
+        scored = RUNNER_MODULE._score_case(case, ir, parsed_ok=True)
+        summary = RUNNER_MODULE._summarize([scored])
+        self.assertEqual(scored["verdict"], "undereager")
+        self.assertTrue(scored["blocked_slot_question_required"])
+        self.assertTrue(scored["blocked_slot_question_missing"])
+        self.assertTrue(scored["blocked_slot_safe_write_violation"])
+        self.assertEqual(summary["blocked_slot_question_required_count"], 1)
+        self.assertEqual(summary["blocked_slot_question_present_count"], 0)
+        self.assertEqual(summary["blocked_slot_question_missing_count"], 1)
+        self.assertEqual(summary["blocked_slot_safe_write_violation_count"], 1)
+        self.assertEqual(summary["blocked_slot_question_coverage"], 0.0)
+
+    def test_ce_runner_does_not_treat_claim_content_as_fact_commit(self) -> None:
+        case = {
+            "id": "SYN-003",
+            "surface": "ingestion",
+            "expected_behavior": "clarify",
+            "blocked_slots": ["actor"],
+            "safe_partials_expected": True,
+            "must_not_commit": ["`approved(_, repair_packet)`"],
+        }
+        ir = {
+            "decision": "clarify",
+            "candidate_operations": [
+                {
+                    "operation": "assert",
+                    "predicate": "source_claim",
+                    "args": ["nadia_rao", "claim_1"],
+                    "safety": "safe",
+                    "source": "direct",
+                },
+                {
+                    "operation": "assert",
+                    "predicate": "claim_content",
+                    "args": ["claim_1", "approved_repair_packet"],
+                    "safety": "safe",
+                    "source": "direct",
+                },
+            ],
+            "clarification_questions": ["Who does she refer to?"],
+        }
+        scored = RUNNER_MODULE._score_case(case, ir, parsed_ok=True)
+        self.assertEqual(scored["verdict"], "correct")
+        self.assertEqual(scored["forbidden_hits"], [])
 
 
 if __name__ == "__main__":

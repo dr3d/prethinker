@@ -237,3 +237,53 @@ surface can shift. Treat CET-008 as the current high-water, not a guaranteed
 floor. The next CE move should be a structural mapper/review diagnostic for
 context-support rows and blocked-slot questions, not more one-line prompt
 patches.
+
+## CET-010 - Blocked-Slot Coverage Hardening
+
+Date: 2026-05-03
+
+Run artifact: `tmp/clarification_eagerness_runs/cet-20260503T031144Z-both-40/`
+
+Result:
+
+- `40/40` parsed.
+- `40/40` correct.
+- `0` over-eager asks.
+- `0` under-eager misses.
+- `0` unsafe candidates.
+- `0` context-write violations.
+- `17/17` expected ask cases requested clarification.
+- `23/23` expected no-ask cases avoided clarification.
+- `10/10` authored blocked-slot cases had a clarification surface.
+- `0` blocked-slot safe-write violations.
+- Clarification precision: `1.000`.
+- Clarification recall: `1.000`.
+- Blocked-slot question coverage: `1.000`.
+- No-ask precision: `1.000`.
+
+Changes:
+
+- Added structural CE scorer metrics for authored blocked slots:
+  `blocked_slot_question_required_count`,
+  `blocked_slot_question_present_count`,
+  `blocked_slot_question_missing_count`,
+  `blocked_slot_safe_write_violation_count`, and
+  `blocked_slot_question_coverage`.
+- Kept the metric structural: Python reads fixture-authored `blocked_slots` and
+  model-emitted Semantic IR fields. It does not infer ambiguity from prose.
+- Tightened claim-surface scoring so `claim_content/2` is not mistaken for a
+  forbidden fact commit when paired with a safe source-claim row.
+- Tightened ICT-016's forbidden surface so a generic `approved/2` shortcut is
+  caught as the same unsafe approval-semantics leak as
+  `approved_payment/2`.
+- Added CE context guidance that source-less safe event plus
+  disputed/not-approved status needs a correction/source-claim/status
+  clarification, and that blocked approval semantics must not emit generic
+  approval rows as safe writes merely because a question was asked.
+
+Lesson: the CE frontier moved from ask/no-ask posture into structural
+authority-surface scoring. The high-water is no longer just "the model asked at
+the right time"; it also checks whether authored blocked slots have an actual
+clarification surface and whether a blocked slot leaked as a safe candidate
+write. This matches the broader Prethinker pattern: better structure beats
+asking the prompt to be more or less eager.

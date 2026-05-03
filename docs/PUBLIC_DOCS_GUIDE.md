@@ -1,6 +1,6 @@
 # Public Docs Guide
 
-Last updated: 2026-05-02
+Last updated: 2026-05-03
 
 This page is the map for public readers. Git history keeps the older research
 trail; these docs should describe the project as it sits now.
@@ -90,9 +90,10 @@ predicate surface is usable. Human-authored expected Prolog files are
 calibration tools, not product-time hints.
 
 The newest rule-ingestion work is Glass Tide: broad compiles preserve charter
-rules as source records, while a separate rule lens can admit executable
-clauses and expose runtime fanout/dormancy risks before any rule is promoted as
-durable product behavior.
+rules as source records, while separate semantic lenses can admit executable
+clauses, acquire body facts, union promotion-ready rule surfaces, and expose
+runtime fanout/dormancy risks before any rule is promoted as durable product
+behavior.
 
 Clarification eagerness is now a named strategy surface, not just a UI behavior:
 Prethinker should ask during ingestion when identity, temporal anchors,
@@ -143,8 +144,8 @@ Latest local verification:
 
 - Frontier fixture progress is summarized in [docs/FRONTIER_PROGRESS_REPORT.md](https://github.com/dr3d/prethinker/blob/main/docs/FRONTIER_PROGRESS_REPORT.md), with raw journals linked for Iron Harbor, Blackthorn, Kestrel, Anaplan Polaris, Glass Tide, and Clarification Eagerness Trap.
 - Multi-pass semantic compilation is now a named frontier: independent semantic lenses propose backbone, support/source, temporal/status, and rule fragments; the mapper admits each lens independently; deterministic union accumulates only admitted clauses.
-- Clarification eagerness now has a dedicated first fixture at `datasets/clarification_eagerness/clarification_eagerness_trap/`: `20` ingestion CE cases, `20` query CE cases, and `10` baseline QA probes. The current strict authority-aware baseline is `37/40` correct, `0` over-eager, `2` under-eager, `1` unsafe candidate, and `2` context-write violations.
-- Lean full pytest suite after retiring the legacy parser lane, unreachable JSON fixtures, the old clarification side surface, and parser-era family/social rewrite crutches: `380 passed`.
+- Clarification eagerness now has a dedicated first fixture at `datasets/clarification_eagerness/clarification_eagerness_trap/`: `20` ingestion CE cases, `20` query CE cases, and `10` baseline QA probes. CET-010 is the current strict authority-aware high-water: `40/40` correct, `0` over-eager, `0` under-eager, `0` unsafe candidates, `0` context-write violations, `10/10` blocked-slot question coverage, and `0` blocked-slot safe-write violations.
+- Lean full pytest suite after retiring the legacy parser lane, unreachable JSON fixtures, the old clarification side surface, and parser-era family/social rewrite crutches: `398 passed`.
 - Lava v5 latest 60-attempt rerun: `60/60` parsed JSON, `60/60` domain selector, `60/60` admission-safe, `45/60` semantic-clean, `41/60` full expectation score, `0` fuzzy edge kinds, and `0/60` temp-0 variance groups.
 - `active_profile=auto` now uses `semantic_router_v1` as the first-pass context/profile planner. The old Python catalog selector is no longer in the active runtime or research harnesses.
 - `semantic_ir_v1` now includes optional `temporal_graph_v1` proposal diagnostics: event nodes, time anchors, intervals, and temporal edges are visible in traces, but they cannot write durable KB facts unless matching `candidate_operations` pass admission.

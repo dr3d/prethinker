@@ -1,6 +1,6 @@
 # Clarification Eagerness Strategy
 
-Last updated: 2026-05-02
+Last updated: 2026-05-03
 
 ## Why This Matters
 
@@ -35,18 +35,21 @@ What is missing is frontier-level measurement. Recent fixture journals track
 compile, query, and answer quality, but they do not yet treat CE as a first-class
 score dimension.
 
-That gap is now closing. The first CE Trap structured-output runs reached:
+That gap is now closing. The CE Trap structured-output runs now show the arc:
 
 ```text
 first full baseline: 30/40 correct
 best pre-context-write-scoring posture: 38/40 correct, 0 over-eager
-current strict authority-aware baseline: 37/40 correct, 0 over-eager,
+first strict authority-aware baseline: 37/40 correct, 0 over-eager,
   2 under-eager, 1 unsafe candidate, 2 context-write violations
+CET-010 current high-water: 40/40 correct, 0 over-eager,
+  0 under-eager, 0 unsafe candidates, 0 context-write violations,
+  10/10 blocked-slot question coverage, 0 blocked-slot safe-write violations
 ```
 
 The most important lesson is that CE is not a single dial. Ask/no-ask posture,
-safe partial preservation, blocked-row handling, and context-write hygiene can
-move independently.
+safe partial preservation, blocked-slot question coverage, blocked-slot write
+hygiene, and context-write hygiene can move independently.
 
 ## Two Clarification Surfaces
 

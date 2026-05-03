@@ -1,6 +1,6 @@
 # Frontier Progress Report
 
-Last updated: 2026-05-02
+Last updated: 2026-05-03
 
 This report collects the current hard-fixture evidence for Prethinker. The raw
 progress journals remain inside each dataset directory; this page is the
@@ -68,8 +68,8 @@ The frontier fixtures are designed to hurt different parts of that path:
 | Blackthorn | `2 exact / 1 partial / 17 miss` on first-20 | `85 exact / 4 partial / 11 miss` exact high-water; `83 / 10 / 7` best exact-plus-partial split | Dense procedural documents need broad skeleton preservation plus targeted hard-row support, not simple profile widening. |
 | Kestrel Claim | `5 exact / 0 partial / 15 miss` first-20 cold baseline | `73 exact / 11 partial / 16 miss` profile-guided full-100; `30 / 12 / 58` best source-aware full-100 | Domain packs are legitimate product context, but cold/source-aware claims must be reported separately from profile-guided runs. |
 | Anaplan Polaris | `29 exact / 6 partial / 8 miss` full-43 baseline | `42 exact / 1 partial / 0 miss` | A safe union of independent mapper-admitted support views can outperform any single compile without using answer-key guidance. |
-| Glass Tide Charter | cold profile bootstrap initially failed JSON; assisted starter first-20 was `7 exact / 2 partial / 11 miss` | cold compact bootstrap first-20 `13 exact / 3 partial / 4 miss`; GLT-023 has a probe-gated role-joined repair rule; GLT-030 keeps tax at `3` promotion-ready rules; GLT-031 keeps salvage at `2`; GLT-034 adds temporal quarantine clearance; GLT-036 adds council budget-veto failure | Rule ingestion needs planned semantic lenses, active predicate palettes, helper substrates, body-goal support checks, positive/negative probes, isolated per-rule promotion scoring, and runtime verifier diagnostics, not more rule prose inside the default compile. |
-| Clarification Eagerness Trap | `30/40` first full CE baseline | CET-008 high-water `39/40`, `0` over-eager, `1` under-eager, `0` unsafe candidates, `0` context-write violations; CET-009 variance check regressed to `37/40` | CE must be measured as a first-class frontier: ask posture, safe partials, blocked rows, context-write hygiene, and run-to-run variance are separate surfaces. |
+| Glass Tide Charter | cold profile bootstrap initially failed JSON; assisted starter first-20 was `7 exact / 2 partial / 11 miss` | cold compact bootstrap first-20 `13 exact / 3 partial / 4 miss`; GLT-030 keeps tax at `3` promotion-ready rules; GLT-031 keeps salvage at `2`; GLT-034 adds temporal quarantine clearance; GLT-036 adds council budget-veto failure; GLT-039 unions council threshold and veto branches without final-passage leakage | Rule ingestion needs planned semantic lenses, active predicate palettes, helper substrates, body-goal support checks, positive/negative probes, isolated per-rule promotion scoring, intermediate derived conditions, and runtime verifier diagnostics, not more rule prose inside the default compile. |
+| Clarification Eagerness Trap | `30/40` first full CE baseline | CET-010 `40/40`, `0` over-eager, `0` under-eager, `0` unsafe candidates, `0` context-write violations, `10/10` blocked-slot coverage, `0` blocked-slot safe-write violations | CE must be measured as a first-class frontier: ask posture, safe partials, blocked-slot question coverage, context-write hygiene, and run-to-run variance are separate surfaces. |
 
 ## What Improved The Scores
 
@@ -148,11 +148,12 @@ The same pattern appears across fixtures:
   promotion-ready, and durable. Durable remains `0` in these trials; the point is
   to verify rule behavior before anything can become product truth.
 - **Clarification eagerness is not one dial.** CE has ingestion/query phases,
-  ask/no-ask posture, safe partial preservation, and authority-surface hygiene.
-  A run can have good ask precision while still leaking context-sourced candidate
-  writes, so the scorer now measures those separately. CET-008 reached `39/40`
-  by sharpening the authority surface for context-support rows rather than by
-  simply increasing or decreasing questions.
+  ask/no-ask posture, safe partial preservation, blocked-slot question coverage,
+  and authority-surface hygiene. A run can have good ask precision while still
+  leaking context-sourced candidate writes or failing to ask about a blocked
+  status/approval slot, so the scorer now measures those separately. CET-010
+  reached `40/40` with `1.000` blocked-slot coverage by sharpening the
+  authority surface rather than simply increasing or decreasing questions.
 
 ## Negative Results Worth Keeping
 

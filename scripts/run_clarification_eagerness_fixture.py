@@ -39,6 +39,15 @@ NO_ASK_BEHAVIORS = {
     "reject_no_ask",
 }
 
+CLAIM_SURFACE_PREDICATES = {
+    "claim",
+    "claim_content",
+    "legal_position",
+    "reported_event",
+    "source_claim",
+    "witness_statement",
+}
+
 
 CE_DOMAIN_CONTEXT = [
     "clarification_eagerness_fixture_v1: This is a CE behavior test, not a final answer-quality test.",
@@ -46,6 +55,7 @@ CE_DOMAIN_CONTEXT = [
     "Do not ask when the content can be safely represented as a source claim, safely quarantined, answered with multiple bindings, or answered broadly without guessing.",
     "For mixed clear/ambiguous ingestion, preserve safe candidate operations and mark only blocked operations as needs_clarification.",
     "When a mixed ingestion turn has a safe partial plus an ambiguous blocked status, approval, payment, rule, or correction path, include a targeted clarification question for the blocked slot; do not only mark the blocked row unsafe.",
+    "If approval semantics are blocked, asking a question is not enough: do not emit generic approved/2, approved_payment/2, or payment_approved rows as safe candidate operations. Hold those rows as needs_clarification or unsafe until the approval meaning is specified.",
     "For query turns, clarify only when the user's question cannot be scoped against the available source/KB context without guessing.",
     "A clarification question should target the blocked slot directly; do not ask the user to restate the whole case.",
     "If a question names the claim, actor, accusation, rule, date, or document clearly, answer from context rather than asking because nearby concepts also exist.",
@@ -67,6 +77,7 @@ CE_DOMAIN_CONTEXT = [
     "If the user names the official body as the actor, as in 'the panel found X', treat the source as specified. If X conflicts with the body's adopted finding, quarantine no-ask rather than asking which source they meant.",
     "If a sentence combines a safe observation with a finding explicitly negated by source context, admit the safe observation and mark the negated finding unsafe rather than needs_clarification.",
     "If an utterance contains a safe event plus a conflicting status or finding, keep the event candidate safe and mark the conflicting status/finding needs_clarification or unsafe according to the expected conflict posture.",
+    "If a source-less utterance combines a safe event with a disputed/not-approved status such as 'it was approved', do not treat the disputed status as a complete safe source_claim with no question; ask whether it is a correction, a new source claim, or a separate status assertion.",
     "Questions asking what a panel, court, committee, or document 'actually found' should answer with adopted findings when the context has them; do not ask whether the user wanted non-adopted claims unless the question names those claims.",
     "A user asking 'Can I record that X caused Y?' for a disputed or non-adopted responsibility claim is not giving permission to write the fact. Clarify whether to record a source claim, correction, or new finding; do not simply store the embedded causal claim.",
     "If a user says an unnamed report, minority report, draft, claim, or statement 'became a finding' without identifying the adopted statement, ask which source document and which finding were adopted instead of quarantining silently.",
@@ -131,6 +142,22 @@ def _blocked_row_count(ir: dict[str, Any]) -> int:
     return count
 
 
+def _authored_blocked_slots(case: dict[str, Any]) -> list[str]:
+    raw = case.get("blocked_slots", [])
+    if not isinstance(raw, list):
+        return []
+    return [str(item).strip() for item in raw if str(item).strip()]
+
+
+def _clarification_surface_present(ir: dict[str, Any]) -> bool:
+    if _string_list(ir.get("clarification_questions")):
+        return True
+    self_check = ir.get("self_check", {})
+    if isinstance(self_check, dict) and _string_list(self_check.get("missing_slots")):
+        return True
+    return False
+
+
 def _op_surface(op: dict[str, Any]) -> str:
     predicate = str(op.get("predicate", "")).strip()
     args = op.get("args", [])
@@ -150,7 +177,7 @@ def _forbidden_hits(case: dict[str, Any], ir: dict[str, Any]) -> list[str]:
         if str(op.get("operation", "")).strip().lower() == "query":
             continue
         predicate = str(op.get("predicate", "")).strip().lower()
-        if predicate in {"source_claim", "claim", "witness_statement", "legal_position", "reported_event"}:
+        if predicate in CLAIM_SURFACE_PREDICATES:
             continue
         surfaces.append(_op_surface(op).lower())
     hits: list[str] = []
@@ -187,6 +214,14 @@ def _score_case(case: dict[str, Any], ir: dict[str, Any], *, parsed_ok: bool, er
     safe_partial = _has_safe_partial(ir) if parsed_ok else False
     forbidden_hits = _forbidden_hits(case, ir) if parsed_ok else []
     context_write_hits = _context_write_hits(ir) if parsed_ok else []
+    authored_blocked_slots = _authored_blocked_slots(case)
+    blocked_slot_question_required = bool(authored_blocked_slots) and expected_ask
+    blocked_slot_question_present = _clarification_surface_present(ir) if parsed_ok else False
+    blocked_slot_safe_write_violation = (
+        blocked_slot_question_required
+        and not blocked_slot_question_present
+        and safe_partial
+    )
 
     if not parsed_ok:
         verdict = "parse_error"
@@ -213,6 +248,11 @@ def _score_case(case: dict[str, Any], ir: dict[str, Any], *, parsed_ok: bool, er
         "verdict": verdict,
         "safe_partial_expected": bool(case.get("safe_partials_expected", False)),
         "safe_partial_seen": safe_partial,
+        "authored_blocked_slots": authored_blocked_slots,
+        "blocked_slot_question_required": blocked_slot_question_required,
+        "blocked_slot_question_present": blocked_slot_question_present,
+        "blocked_slot_question_missing": blocked_slot_question_required and not blocked_slot_question_present,
+        "blocked_slot_safe_write_violation": blocked_slot_safe_write_violation,
         "blocked_row_count": _blocked_row_count(ir) if parsed_ok else 0,
         "forbidden_hits": forbidden_hits,
         "context_write_hits": context_write_hits,
@@ -234,6 +274,13 @@ def _score_case(case: dict[str, Any], ir: dict[str, Any], *, parsed_ok: bool, er
         "parsed_ok": parsed_ok,
         "error": error,
     }
+
+
+def _bounded_preview(value: Any, *, max_chars: int = 800) -> str:
+    text = str(value or "").strip()
+    if len(text) <= max_chars:
+        return text
+    return text[: max_chars - 3] + "..."
 
 
 def _case_text(case: dict[str, Any]) -> str:
@@ -276,6 +323,14 @@ def _summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
     parse_errors = verdict_counts.get("parse_error", 0)
     safe_partial_expected = sum(1 for row in rows if row.get("safe_partial_expected"))
     safe_partial_seen = sum(1 for row in rows if row.get("safe_partial_expected") and row.get("safe_partial_seen"))
+    blocked_slot_question_required = sum(1 for row in rows if row.get("blocked_slot_question_required"))
+    blocked_slot_question_present = sum(
+        1
+        for row in rows
+        if row.get("blocked_slot_question_required") and row.get("blocked_slot_question_present")
+    )
+    blocked_slot_question_missing = sum(1 for row in rows if row.get("blocked_slot_question_missing"))
+    blocked_slot_safe_write_violations = sum(1 for row in rows if row.get("blocked_slot_safe_write_violation"))
     return {
         "case_count": len(rows),
         "expected_ask_count": expected_ask,
@@ -290,9 +345,17 @@ def _summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "context_write_violation_count": sum(1 for row in rows if row.get("context_write_hits")),
         "safe_partial_expected_count": safe_partial_expected,
         "safe_partial_seen_count": safe_partial_seen,
+        "blocked_slot_question_required_count": blocked_slot_question_required,
+        "blocked_slot_question_present_count": blocked_slot_question_present,
+        "blocked_slot_question_missing_count": blocked_slot_question_missing,
+        "blocked_slot_safe_write_violation_count": blocked_slot_safe_write_violations,
         "verdict_counts": verdict_counts,
         "clarification_precision": round(ask_correct / requested, 3) if requested else None,
         "clarification_recall": round(ask_correct / expected_ask, 3) if expected_ask else None,
+        "blocked_slot_question_coverage": round(
+            blocked_slot_question_present / blocked_slot_question_required,
+            3,
+        ) if blocked_slot_question_required else None,
         "noask_precision": round(noask_correct / (len(rows) - requested), 3) if len(rows) > requested else None,
     }
 
@@ -357,6 +420,7 @@ def main(argv: list[str] | None = None) -> int:
             parsed: dict[str, Any] = {}
             parsed_ok = False
             error = ""
+            content_preview = ""
             try:
                 result = call_semantic_ir(
                     utterance=text,
@@ -365,6 +429,7 @@ def main(argv: list[str] | None = None) -> int:
                     domain_context=CE_DOMAIN_CONTEXT,
                     domain="clarification_eagerness_trap",
                 )
+                content_preview = _bounded_preview(result.get("content", ""))
                 parsed = result.get("parsed", {}) if isinstance(result.get("parsed"), dict) else {}
                 parsed_ok = bool(parsed)
                 if not parsed_ok:
@@ -372,6 +437,8 @@ def main(argv: list[str] | None = None) -> int:
             except Exception as exc:  # pragma: no cover - external model path
                 error = str(exc)
             scored = _score_case(case, parsed, parsed_ok=parsed_ok, error=error)
+            if not parsed_ok and content_preview:
+                scored["content_preview"] = content_preview
             scored["latency_ms"] = int((time.perf_counter() - started) * 1000)
             scored["utterance_or_question"] = text
             rows.append(scored)

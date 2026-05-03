@@ -264,9 +264,9 @@ branch failed the proposal, while the final-passage probe remains empty.
   deterministic helper predicates before the rule lens can safely emit
   executable clauses. Glass Tide now uses `value_greater_than/2` and
   `value_at_most/2` as query-only helpers resolved from admitted value facts.
-- Exception substrate: GLT-024 shows threshold helpers are not enough for
-  exception branches. Relief-style exemptions need either a dedicated exception
-  lens or a bounded helper shape.
+- Exception substrate: GLT-025/027 show relief-style exemptions work better as
+  a separate exception lens that can be deterministically unioned with the
+  threshold branch after promotion filtering.
 - Scope and placeholder discipline: recent preflight runs showed that a
   role-joined rule can be body-supported but still fail probes if the model uses
   a neighboring scope atom, or can be syntactically admitted but dormant if it

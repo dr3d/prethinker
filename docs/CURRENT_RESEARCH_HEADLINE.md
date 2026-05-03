@@ -1,6 +1,6 @@
 # Current Research Headline
 
-Last updated: 2026-05-02
+Last updated: 2026-05-03
 
 ## Semantic Parallax
 
@@ -34,8 +34,8 @@ without answer-key guidance.
 
 Glass Tide is now exercising the harder rule-ingestion frontier:
 
-- broad compiles preserve rules as source records, but do not yet make them
-  executable;
+- broad compiles preserve rules as source records, but executable behavior
+  comes from separate rule lenses plus runtime trial;
 - a separate rule lens can admit executable clauses, including a role-joined
   repair rule that passes both positive and negative probes:
   `derived_authorization(repair_order_71, valid, glass_tide_repair)` succeeds,
@@ -44,9 +44,8 @@ Glass Tide is now exercising the harder rule-ingestion frontier:
   versus clean but dormant rules whose bodies lack matching admitted facts;
 - the verifier now checks body-goal support, so a rule is not considered
   promotion-ready merely because predicate signatures match.
-- threshold tax rules now work over deterministic numeric helpers, but
-  positive/negative probes exposed the next hard gap: exception-branch
-  promotion for high-value relief cargo.
+- threshold tax rules now work over deterministic numeric helpers, and a split
+  exception lens covers the high-value relief-cargo exemption.
 - a split exception lens now derives `lamp_rice` as `exempt` under the correct
   `harbor` scope and does not derive it as taxable; the combined threshold plus
   exception bundle remains fragile and exposed numeric-helper argument misuse
@@ -82,10 +81,12 @@ Glass Tide is now exercising the harder rule-ingestion frontier:
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 
-- the current CE high-water is `39/40` correct with `0` over-eager asks,
-  `0` unsafe candidates, and `0` context-write violations;
-- the remaining errors expose blocked-slot question posture and run-to-run
-  variance, not just "ask more" or "ask less";
+- the current CE high-water is `40/40` correct with `0` over-eager asks,
+  `0` under-eager misses, `0` unsafe candidates, and `0` context-write
+  violations;
+- blocked-slot question coverage is now measured structurally from authored
+  fixture slots and model-emitted clarification surfaces; CET-010 reached
+  `10/10` blocked-slot coverage and `0` blocked-slot safe-write violations;
 - CE must be measured across ingestion, query, safe partials, blocked rows, and
   authority-boundary violations.
 
@@ -117,11 +118,10 @@ The next work should stay on the sharp edges:
    using lowercase placeholders such as `warden` and `repair_order`, or can look
    firing only because a sibling rule shares its derived head. Keep isolated
    per-rule promotion plus combined positive/negative probes in the loop.
-3. **Clarification Eagerness drift.** A post-move preflight run completed
-   safely with `0` unsafe candidates and `0` context-write violations, but it
-   over-asked badly. CET-008 later reached `39/40` with no context-write
-   violations; the next move is structural blocked-slot/context-support review,
-   not another broad prompt patch.
+3. **Clarification Eagerness drift.** CET-010 reached `40/40` with perfect
+   ask/no-ask posture and `1.000` blocked-slot coverage after adding structural
+   scorer lanes. The next CE move is a small hard replay pack for variance, not
+   another broad prompt patch.
 4. **Regression cadence.** Keep compact Anaplan/Glass Tide/CE checks running so
    new rule machinery does not reopen older query, admission, or ask/no-ask
    failures.

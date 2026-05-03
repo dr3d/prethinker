@@ -290,9 +290,9 @@ That is also why the repo is careful about honesty:
 
 ## What We Know Today
 
-As of May 2, 2026:
+As of May 3, 2026:
 
-- the lean local pytest suite is green at `380 passed` after retiring the legacy parser-lane tests, unreachable JSON fixtures, the old clarification side surface, and parser-era family/social rewrite crutches
+- the lean local pytest suite is green at `398 passed` after retiring the legacy parser-lane tests, unreachable JSON fixtures, the old clarification side surface, and parser-era family/social rewrite crutches
 - the console is the canonical interactive front door
 - `semantic_router_v1 -> semantic_ir_v1` is the active research lane for model-owned context planning and richer model understanding before deterministic admission
 - the latest semantic IR edge runtime A/B is `20/20` decision labels with `0.976` average score
@@ -300,6 +300,7 @@ As of May 2, 2026:
 - the latest Lava v5 source-record alignment rerun stayed `60/60` parsed, `60/60` domain-routed, `60/60` admission-safe, reached `0` fuzzy edge kinds, and showed `0/60` temp-0 signature variance groups
 - the policy/reimbursement demo installs English rules, derives query answers, retracts a fact, and changes the answer without writing derived violations as facts
 - the Anaplan Polaris enterprise-guidance fixture reached `42 exact / 1 partial / 0 miss` on post-ingestion QA through multi-support safe-surface accumulation, with no QA write proposals
+- the Clarification Eagerness Trap fixture reached `40/40` under authority-aware scoring with perfect ask/no-ask posture, no context-write violations, and `10/10` blocked-slot question coverage
 - raw-file/domain bootstrapping now has an LLM-owned `intake_plan_v1 -> profile_bootstrap_v1` path for hint-free predicate discovery and later QA against the compiled KB
 - Epistemic Worlds v1 can preserve rejected, quarantined, or supported-but-skipped candidates as scoped diagnostics without asserting them as global truth
 - Silverton probate/noisy temporal packs are intentionally hard pressure gauges for policy labels, temporal representation, and claim/fact separation
