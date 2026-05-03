@@ -33,15 +33,17 @@ All runs below used the same source-only semantic-parallax recipe:
 | `DL-001` | Dulse Ledger | 40 | 27 | 7 | 6 | 34 | 70 | 21 | 52 | 0 | 40 | 40 | 0 | 0 |
 | `OX-001` | Oxalis Recall | 40 | 16 | 9 | 15 | 25 | 106 | 0 | 94 | 0 | 40 | 40 | 0 | 0 |
 | `SC-001` | Sable Creek Budget | 40 | 20 | 8 | 12 | 28 | 58 | 9 | 49 | 0 | 40 | 40 | 0 | 0 |
+| `TV-001` | Thornfield Variance | 40 | 20 | 6 | 14 | 26 | 67 | 7 | 63 | 0 | 40 | 40 | 0 | 0 |
 
 ## Pending Cold Fixtures
 
-These fixtures are admitted but not yet scored. They should use the same
-source-only cold recipe before any assisted or diagnostic lane is created.
+All fixtures admitted in this batch now have a first cold score. New fixtures
+should use the same source-only cold recipe before any assisted or diagnostic
+lane is created.
 
 | Fixture | Questions | Primary Pressure |
 | --- | ---: | --- |
-| Thornfield Variance | 40 | zoning standards, notice defects, dimensional constraints |
+| _none_ | 0 | _none_ |
 
 ## Failure Surface Snapshot
 
@@ -56,6 +58,7 @@ source-only cold recipe before any assisted or diagnostic lane is created.
 | `DL-001` | 9 | 0 | 4 | 0 |
 | `OX-001` | 16 | 2 | 6 | 0 |
 | `SC-001` | 13 | 5 | 1 | 1 |
+| `TV-001` | 14 | 4 | 1 | 1 |
 
 ## Early Read
 
@@ -91,6 +94,11 @@ right way:
   argument role names fixed the structural failure. The actual score points at
   thin amendment-cycle passes, vote-record/tally coverage, reserve-balance
   support, and public-comment authority boundaries.
+- **Thornfield Variance** scored `20 exact / 6 partial / 14 miss`, mirroring
+  Sable's score shape while testing zoning variance law instead of municipal
+  budgeting. It preserved many zoning, notice, hearing, and vote rows, but still
+  admitted `0` rules and missed survey authority, individual vote aggregation,
+  testimony detail, dimensional exceptions, and appeal state.
 
 ## Guardrail
 

@@ -1,17 +1,17 @@
 # Cold Baseline Failure Rollup
 
-Generated: 2026-05-03T16:04:04+00:00
+Generated: 2026-05-03T16:15:23+00:00
 
 This report aggregates existing `cold_unseen` QA artifacts. It does not read
 source prose, gold KBs, oracle strategies, or answer-shaped profile material.
 
 ## Headline
 
-- Runs: `9`
-- Questions: `430`
-- Exact / partial / miss: `225` / `75` / `130`
-- Exact rate: `0.523`
-- Exact+partial rate: `0.698`
+- Runs: `10`
+- Questions: `470`
+- Exact / partial / miss: `245` / `81` / `144`
+- Exact rate: `0.521`
+- Exact+partial rate: `0.694`
 
 ## Run Table
 
@@ -24,6 +24,7 @@ source prose, gold KBs, oracle strategies, or answer-shaped profile material.
 | `OX-001` | oxalis_recall | 40 | 16 | 9 | 15 | 106 | 0 | 94 | 0 | `tmp\cold_baselines\oxalis_recall\domain_bootstrap_qa_20260503T154413658124Z_qa_qwen-qwen3-6-35b-a3b.json` |
 | `RF-001` | ridgeline_fire | 40 | 17 | 10 | 13 | 133 | 27 | 130 | 0 | `tmp\cold_baselines\ridgeline_fire\domain_bootstrap_qa_20260503T051902240724Z_qa_qwen-qwen3-6-35b-a3b.json` |
 | `SC-001` | sable_creek_budget | 40 | 20 | 8 | 12 | 58 | 9 | 49 | 0 | `tmp\cold_baselines\sable_creek_budget\domain_bootstrap_qa_20260503T160232424514Z_qa_qwen-qwen3-6-35b-a3b.json` |
+| `TV-001` | thornfield_variance | 40 | 20 | 6 | 14 | 67 | 7 | 63 | 0 | `tmp\cold_baselines\thornfield_variance\domain_bootstrap_qa_20260503T161432730355Z_qa_qwen-qwen3-6-35b-a3b.json` |
 | `MMM-001` | three_moles_moon_marmalade_machine | 40 | 10 | 8 | 22 | 174 | 10 | 110 | 0 | `tmp\cold_baselines\three_moles\domain_bootstrap_qa_20260503T045525066737Z_qa_qwen-qwen3-6-35b-a3b.json` |
 | `V9-001` | veridia9_supply_chain_patent_dispute | 40 | 18 | 5 | 17 | 94 | 13 | 79 | 0 | `tmp\cold_baselines\veridia9\domain_bootstrap_qa_20260503T050519283344Z_qa_qwen-qwen3-6-35b-a3b.json` |
 
@@ -31,10 +32,10 @@ source prose, gold KBs, oracle strategies, or answer-shaped profile material.
 
 | Surface | Count | General next action |
 | --- | ---: | --- |
-| Compile | 145 | Improve lens coverage or acquisition passes; do not tune from one fixture alone. |
-| Hybrid/Reasoning | 34 | Add or exercise deterministic reasoning helpers, joins, set-difference, aggregation, or temporal substrate. |
-| Query | 22 | Improve post-ingestion query support bundles over already admitted rows. |
-| Answer | 4 | Tighten answer normalization or judge/verbalization policy without changing ingestion. |
+| Compile | 159 | Improve lens coverage or acquisition passes; do not tune from one fixture alone. |
+| Hybrid/Reasoning | 35 | Add or exercise deterministic reasoning helpers, joins, set-difference, aggregation, or temporal substrate. |
+| Query | 26 | Improve post-ingestion query support bundles over already admitted rows. |
+| Answer | 5 | Tighten answer normalization or judge/verbalization policy without changing ingestion. |
 
 ## Fixture Surface Matrix
 
@@ -47,6 +48,7 @@ source prose, gold KBs, oracle strategies, or answer-shaped profile material.
 | `OX-001` | 16 | 2 | 6 | 0 | 0 |
 | `RF-001` | 12 | 5 | 6 | 0 | 0 |
 | `SC-001` | 13 | 5 | 1 | 1 | 0 |
+| `TV-001` | 14 | 4 | 1 | 1 | 0 |
 | `MMM-001` | 22 | 2 | 4 | 2 | 0 |
 | `V9-001` | 18 | 0 | 3 | 1 | 0 |
 
@@ -59,17 +61,17 @@ surface to work with.
 
 | Evidence state | Count |
 | --- | ---: |
-| `rows_returned` | 110 |
-| `partial_rows_returned` | 90 |
+| `rows_returned` | 123 |
+| `partial_rows_returned` | 96 |
 | `no_queries` | 3 |
-| `no_rows_returned` | 2 |
+| `no_rows_returned` | 3 |
 
 | Surface | Rows returned | No rows returned | Partial rows returned | No queries |
 | --- | ---: | ---: | ---: | ---: |
-| Compile | 79 | 0 | 63 | 3 |
-| Hybrid/Reasoning | 19 | 0 | 15 | 0 |
-| Query | 8 | 2 | 12 | 0 |
-| Answer | 4 | 0 | 0 | 0 |
+| Compile | 88 | 1 | 67 | 3 |
+| Hybrid/Reasoning | 19 | 0 | 16 | 0 |
+| Query | 11 | 2 | 13 | 0 |
+| Answer | 5 | 0 | 0 | 0 |
 | Uncertain | 0 | 0 | 0 | 0 |
 
 ## Current Read
@@ -90,6 +92,7 @@ This is an index for choosing targeted replays. It is not a prompt source.
 | Run | Row | Verdict | Surface | Evidence | Suggested next action |
 | --- | --- | --- | --- | --- | --- |
 | `SC-001` | `q014` | partial | answer_surface_gap | `rows_returned`/1 rows | The query results provide the threshold amount ($25,000) and the role (mayor), but fail to include the critical condition 'without Council approval' and the requirement for Coun... |
+| `TV-001` | `q016` | partial | answer_surface_gap | `rows_returned`/1 rows | Update the answer renderer to map 'not_conditioned' in the context of 'home_occupation_permit' to a definitive 'No' or 'Not Issued' status, and optionally flag the pending appli... |
 | `MMM-001` | `q013` | partial | answer_surface_gap | `rows_returned`/10 rows | The system retrieved the attribute 'too_shiny' but failed to retrieve or render the specific descriptive phrase 'lit Mina’s ears from inside' because that specific string or its... |
 | `MMM-001` | `q019` | partial | answer_surface_gap | `rows_returned`/1 rows | The system needs to map the attribute 'too_telltale' with category 'privacy' to the natural language description 'announced every thought in her head'. This is a semantic interp... |
 | `V9-001` | `q007` | partial | answer_surface_gap | `rows_returned`/1 rows | Add a predicate such as `legal_name(org_aether_bio, 'Aether Bio-Ventures SA (Luxembourg)')` to the KB or update the query plan to join with a name resolution table if one exists... |
@@ -168,4 +171,3 @@ This is an index for choosing targeted replays. It is not a prompt source.
 | `OX-001` | `q026` | miss | compile_surface_gap | `rows_returned`/5 rows | The query plan failed to retrieve the necessary `termination_decision` and `termination_request_submitted` facts. The system should have queried these predicates instead of or i... |
 | `OX-001` | `q027` | miss | compile_surface_gap | `rows_returned`/15 rows | Query `termination_decision(oxalis_model_7200, Status, Date)` to retrieve the termination status and date. |
 | `OX-001` | `q028` | miss | compile_surface_gap | `rows_returned`/4 rows | Ingest clauses defining the initial recall scope (Lot C) and the expanded scope (Lots A-F) with their respective unit counts and effective dates. Specifically, ingest facts like... |
-| `OX-001` | `q033` | miss | compile_surface_gap | `rows_returned`/1 rows | Identify the predicate or clause type that captures 'CEO statements' or 'communication failure explanations' and ensure it is ingested into the KB. |
