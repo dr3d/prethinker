@@ -66,3 +66,55 @@ dispute summaries. This reinforces the cross-fixture theme: the next gains are
 not one fixture patch, but better temporal/status support, consequence rows,
 and row-level query activation over safe symbolic surfaces.
 
+## Run DL-002 - Post-Ingestion Evidence Filter Saturation Probe
+
+- Timestamp: `2026-05-03T21:45Z`
+- Evidence lane: `diagnostic_replay`
+- Model: `qwen/qwen3.6-35b-a3b`
+- Mode: QA replay over unchanged DL-001 compile with evidence-bundle planning
+  and evidence-bundle context filtering. No source recompile and no QA writes.
+
+### Artifacts
+
+- QA:
+  `tmp/cold_baselines/dulse_ledger/query_modes/domain_bootstrap_qa_20260503T214550100261Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Comparison:
+  `tmp/cold_baselines/dulse_ledger/query_modes/dulse_query_mode_comparison.md`
+- Selector:
+  `tmp/cold_baselines/dulse_ledger/query_modes/selector_direct_v1.json`
+
+### Result
+
+DL-001 baseline:
+
+```text
+27 exact / 7 partial / 6 miss
+```
+
+Evidence-filter replay:
+
+```text
+27 exact / 8 partial / 5 miss
+```
+
+Diagnostic perfect-selector upper bound:
+
+```text
+29 exact / 6 partial / 5 miss
+```
+
+Direct non-oracle selector:
+
+```text
+27 exact / 7 partial / 6 miss
+selected best available mode on 37/40 rows
+selector errors: 0
+```
+
+### Lesson
+
+Dulse is now the saturation case. Evidence filtering slightly reduced misses,
+but the selector stayed conservative and returned to the strong baseline shape.
+This is useful because it shows query-surface machinery is not automatically
+inflating scores on fixtures that are already well supported.
+

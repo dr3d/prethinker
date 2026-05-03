@@ -177,6 +177,10 @@ testing whether those gains transfer:
   evidence filtering improved `16 / 9 / 15` to `18 / 11 / 11`, while the direct
   selector chose `19 / 9 / 12`. Exact precision and miss reduction are still
   competing activation objectives.
+- Dulse DL-002 is the saturation check: a strong `27 / 7 / 6` cold baseline
+  moved only to `27 / 8 / 5` under evidence filtering, and the selector returned
+  to `27 / 7 / 6`. Query-surface tools help, but they do not automatically
+  inflate already-supported fixtures.
 - Avalon AG-009 adds a clean Rule 2 exception-lens result: the lens admitted
   `3` rules, `2` were promotion-ready, and the prior-funding branch passed
   `3/3` positive and `2/2` negative probes. But globally unioning those
