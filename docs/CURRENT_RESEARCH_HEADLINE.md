@@ -153,6 +153,11 @@ testing whether those gains transfer:
   failure mode. It fixed one Avalon Rule2 activation miss, but full replays did
   not beat the alternatives: Avalon scored `30 / 8 / 2`; Black Lantern scored
   `28 / 8 / 3` with one selector error.
+- Veridia V9-005 is a better selector transfer check: over baseline, narrow,
+  and broad query modes, the direct non-oracle selector reached `22 / 6 / 12`,
+  matched the best exact count, and selected the best available mode on `39/40`
+  rows. It still missed one broad-mode partial rescue, so row-level activation
+  is useful but not solved.
 - Avalon AG-009 adds a clean Rule 2 exception-lens result: the lens admitted
   `3` rules, `2` were promotion-ready, and the prior-funding branch passed
   `3/3` positive and `2/2` negative probes. But globally unioning those

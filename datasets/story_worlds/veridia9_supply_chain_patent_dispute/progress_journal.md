@@ -190,3 +190,50 @@ hard misses but lost the exact gains that the narrower evidence-filter run had
 found. The evidence-filter budget is therefore not a simple "more context is
 better" knob. It is a query-surface control parameter that needs row-level
 activation or fixture/lane evaluation.
+
+## Run V9-005 - Non-Oracle Evidence Mode Selector
+
+- Timestamp: `2026-05-03T20:18Z`
+- Evidence lane: `diagnostic_replay`
+- Model: `qwen/qwen3.6-35b-a3b`
+- Mode: direct-policy selector over V9-002 baseline, V9-003 narrow
+  evidence-filter QA, and V9-004 broad evidence-filter QA.
+
+### Artifacts
+
+- Mode comparison:
+  `tmp/cold_baselines/veridia9/veridia9_mode_comparison.md`
+- Selector:
+  `tmp/cold_baselines/veridia9/selector_direct_v1.json`
+
+### Result
+
+Mode scores:
+
+```text
+baseline: 19 exact / 6 partial / 15 miss
+narrow:   22 exact / 4 partial / 14 miss
+broad:    19 exact / 7 partial / 14 miss
+```
+
+Diagnostic perfect-selector upper bound:
+
+```text
+22 exact / 7 partial / 11 miss
+```
+
+Non-oracle direct selector:
+
+```text
+22 exact / 6 partial / 12 miss
+selected best available mode on 39/40 rows
+selector errors: 0
+```
+
+### Lesson
+
+Veridia is a better selector-transfer result than Black Lantern. The selector
+hit the best exact count without seeing source prose, answer keys, judge
+labels, failure labels, or gold KBs. It still missed one partial rescue
+(`q006`, where broad evidence was best), so row-level activation remains
+imperfect, but the mechanism is not Avalon-specific.
