@@ -118,3 +118,60 @@ but the selector stayed conservative and returned to the strong baseline shape.
 This is useful because it shows query-surface machinery is not automatically
 inflating scores on fixtures that are already well supported.
 
+## Run DL-003 - Cold Replay Compile-Health Warning
+
+- Timestamp: `2026-05-03T23:47Z` through `2026-05-03T23:55Z`
+- Evidence lane: `cold_after_general_architecture_change`
+- Model: `qwen/qwen3.6-35b-a3b`
+- Mode: source-only semantic-parallax replay after the rule/body-fact harness
+  changes. No gold KB, starter registry, strategy file, or QA source was used
+  during compilation.
+
+### Artifacts
+
+- Compile:
+  `tmp/cold_baselines/dulse_ledger/domain_bootstrap_file_20260503T234722435138Z_source_qwen-qwen3-6-35b-a3b.json`
+- QA:
+  `tmp/cold_baselines/dulse_ledger/domain_bootstrap_qa_20260503T235508010355Z_qa_qwen-qwen3-6-35b-a3b.json`
+
+### Result
+
+```text
+DL-001 cold baseline: 27 exact / 7 partial / 6 miss
+DL-003 cold replay:   24 exact / 8 partial / 8 miss
+```
+
+Compile:
+
+```text
+79 admitted operations
+35 skips
+0 rules
+compile health: poor
+unhealthy pass: flat_skeleton
+recommendation: repair_compile_before_qa
+```
+
+QA:
+
+```text
+40/40 parsed
+40/40 query rows
+0 runtime load errors
+0 write proposals
+failure surfaces: 9 compile-surface, 4 query-surface, 3 hybrid-join
+```
+
+### Lesson
+
+This is a useful negative replay. The broad skeleton pass failed and contributed
+`0` rows, while the focused passes still admitted a large surface. The compile
+looked superficially rich (`79` admitted rows) but the health gate correctly
+warned that it should be repaired before QA. The worse QA result confirms that
+compile-lens health is not cosmetic; losing the broad skeleton can reduce
+answer-bearing coverage even when focused passes are productive.
+
+The next Dulse work should not tune the QA planner against this weaker surface.
+It should either replay the cold compile until the skeleton is healthy or run a
+targeted skeleton repair pass, then compare against DL-001 and DL-002.
+
