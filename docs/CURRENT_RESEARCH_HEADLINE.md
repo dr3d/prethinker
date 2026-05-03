@@ -133,6 +133,10 @@ The cold generalization lane is now active:
   `broad_floor=160`) and kept `32` exact while moving hard misses down from `5`
   to `3`. It still swapped which rows won and lost, so the next tool should
   decide when to activate evidence filtering per row rather than globally.
+- V9-004 is the negative control: the same broader floor on Veridia reduced one
+  hard miss but lost the exact gains from V9-003 (`22` exact back down to `19`).
+  More context is not automatically better; the budget is a query-surface
+  control parameter.
 
 The architecture is becoming sharper:
 
@@ -165,7 +169,9 @@ The next work should stay on the sharp edges:
    rows. V9-003 shows evidence-bundle context filtering can help that query
    surface, and BLM-002 confirms the lift on another fixture, but both runs need
    regression checks because they can perturb partial/exact rows. BLM-003 shows
-   broader context reduces hard misses, but volatility remains row-specific.
+   broader context can reduce hard misses, while V9-004 shows the same broader
+   setting can lose exact answers. The next version needs row-level activation
+   or a fallback ensemble policy.
 1. **Glass Tide final-outcome composition.** Tax, salvage, quarantine, council
    veto, and council support-threshold conditions now have promotion-ready
    slices. The next frontier is a final outcome lens that joins intermediate

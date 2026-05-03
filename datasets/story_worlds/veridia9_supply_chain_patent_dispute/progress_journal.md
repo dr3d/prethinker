@@ -147,3 +147,46 @@ evidence-bundle context filtering should remain a measured query-strategy mode
 rather than an unquestioned default. It is best viewed as a targeted tool for
 near-miss rows where the KB contains relevant surface but ordinary query
 planning does not assemble the right support bundle.
+
+## Run V9-004 - Broader Evidence-Bundle Context Floor Negative Control
+
+- Timestamp: `2026-05-03T13:28Z` through `2026-05-03T13:38Z`
+- Evidence lane: `cold_after_general_architecture_change`
+- Model: `qwen/qwen3.6-35b-a3b`
+- Mode: post-ingestion QA replay over the unchanged V9-002 compile with
+  evidence-bundle context filtering and a broader fallback surface:
+  `max_clauses=320`, `broad_floor=160`.
+
+### Artifacts
+
+- Compile reused:
+  `tmp/diagnostic_replays/veridia9_v9002/domain_bootstrap_file_20260503T121301361568Z_story_qwen-qwen3-6-35b-a3b.json`
+- QA:
+  `tmp/diagnostic_replays/veridia9_v9004/domain_bootstrap_qa_20260503T132852446387Z_qa_qwen-qwen3-6-35b-a3b.json`
+
+### Result
+
+- Compile: unchanged from V9-002, `61` unique facts, `0` rules.
+- QA: `19 exact / 7 partial / 14 miss` over `40` questions.
+- Delta from V9-002: same exact count, `+1` partial, `-1` miss.
+- Delta from V9-003: `-3` exact, `+3` partial, same miss count.
+- Safety: `40/40` parsed, `40/40` query rows, `0` write-proposal rows, `0`
+  runtime load errors.
+
+Changed rows versus V9-002:
+
+- Improved to partial: q006, q035, q040.
+- Regressed: q012 partial -> miss; q034 partial -> miss.
+
+Changed rows versus V9-003:
+
+- Improved from miss to partial: q006.
+- Regressed from exact: q021 exact -> miss; q035/q040 exact -> partial.
+
+### Lesson
+
+V9-004 is the counterweight to BLM-003. A broader evidence-filter floor reduced
+hard misses but lost the exact gains that the narrower evidence-filter run had
+found. The evidence-filter budget is therefore not a simple "more context is
+better" knob. It is a query-surface control parameter that needs row-level
+activation or fixture/lane evaluation.
