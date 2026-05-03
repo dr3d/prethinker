@@ -97,6 +97,11 @@ Glass Tide is now exercising the harder rule-ingestion frontier:
   `_` occurrences were being treated as the same variable. After fixing that
   and adding bound-number plus percentage helpers, a narrow Rule 5 lens produced
   `3` promotion-ready threshold/ratio rules from `4` admitted clauses.
+- Deterministically unioning those Rule 5 rules into the Avalon QA surface
+  improved exact answers from `25` to `27`, but also increased misses from `3`
+  to `5`. This is the rule-side version of the APR lesson: safe accumulation is
+  powerful, but global activation can perturb query planning. The next tool
+  needs row-level activation or exact-answer protection.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 

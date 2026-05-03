@@ -145,3 +145,38 @@ fixing anonymous-variable semantics, the threshold-exceeded and ratio-met rules
 became promotion-ready. The ratio-failed branch remained dormant because the
 current admitted data has no below-30-percent case, which is correct dormancy
 rather than verifier failure.
+
+## Run AG-004 - AG-001 plus Rule 5 Ready-Rule Union QA
+
+- Timestamp: `2026-05-03T15:01Z` through `2026-05-03T15:10Z`
+- Evidence lane: `diagnostic_replay`
+- Model: `qwen/qwen3.6-35b-a3b`
+- Mode: deterministic union of the AG-001 cold compile and AG-003 Rule 5
+  promotion-ready rules, followed by the same 40-question QA runner. The union
+  read no source prose and inferred no new clauses; it only kept
+  mapper-admitted facts plus promotion-ready rules.
+
+### Artifacts
+
+- Union:
+  `tmp/cold_baselines/avalon_grant_committee/union/domain_bootstrap_file_20260503T150150892550Z_avalon-ag001-plus-rule5-ready_qwen-qwen3-6-35b-a3b.json`
+- QA:
+  `tmp/cold_baselines/avalon_grant_committee/union/domain_bootstrap_qa_20260503T151019375682Z_qa_qwen-qwen3-6-35b-a3b.json`
+
+### Result
+
+- Union surface: `109` facts, `3` rules, `0` runtime load errors.
+- QA: `27 exact / 8 partial / 5 miss` over `40` questions.
+- Safety: `40/40` parsed, `0` write-proposal rows, `0` runtime load errors.
+- Verdict deltas versus AG-001: exact improvements on q007, q011, q025, and
+  q030; regressions on q003, q008, and q020.
+
+### Lesson
+
+Rule accumulation helped some rows but is not yet safe as a blind global
+default. The added Rule 5 surface improved matching-fund and recusal-adjacent
+answers, but it also perturbed query planning for a few rows where the answer
+needed source-detail or deadline evidence rather than the new derived rules.
+This confirms the APR lesson in a rule setting: the right architecture is not
+"always add more admitted surface"; it is row-level activation, fallback
+selection, or answer-mode protection over a safely accumulated surface.
