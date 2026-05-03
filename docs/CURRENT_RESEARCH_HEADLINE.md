@@ -115,6 +115,11 @@ The cold generalization lane is now active:
   lenses improved slightly from `18 exact / 5 partial / 17 miss` to `19 / 6 /
   15` while admitting fewer rows, which is useful but also clarifies the next
   metric: healthy lenses still need question-support coverage.
+- the cold rollup now includes a non-exact query-evidence proxy. The surprising
+  result is that most misses still returned some Prolog rows, so the current
+  pain is not just empty retrieval. It is answer-bearing support: the query path
+  often finds nearby symbolic surface without finding the exact row, join, or
+  rule consequence needed by the question.
 
 The architecture is becoming sharper:
 
@@ -141,7 +146,10 @@ The next work should stay on the sharp edges:
    largest general issue, followed by hybrid/reasoning support. Next changes
    should improve at least two cold fixtures or preserve older regression
    lanes. The newest lens-health gate should help decide when a compile is worth
-   sending through full QA and when the compile itself needs repair first.
+   sending through full QA and when the compile itself needs repair first. The
+   newest evidence-return proxy says many misses already retrieve rows, so the
+   next compile/query work should target answer-bearing support, not just more
+   rows.
 1. **Glass Tide final-outcome composition.** Tax, salvage, quarantine, council
    veto, and council support-threshold conditions now have promotion-ready
    slices. The next frontier is a final outcome lens that joins intermediate

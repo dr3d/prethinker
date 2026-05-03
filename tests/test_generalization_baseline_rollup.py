@@ -24,6 +24,9 @@ def test_cold_rollup_preserves_failure_surface_counts() -> None:
     assert rollup["verdict_counts"]["exact"] >= 100
     assert rollup["surface_counts"]["compile_surface_gap"] >= 90
     assert rollup["surface_counts"]["hybrid_join_gap"] >= 20
+    assert "support_counts" in rollup
+    assert sum(rollup["support_counts"].values()) >= 100
+    assert "compile_surface_gap" in rollup["support_by_surface"]
     assert "Reads progress_metrics.jsonl and QA artifacts only." in rollup["policy"]
 
 
@@ -33,6 +36,7 @@ def test_cold_rollup_markdown_is_public_readable() -> None:
 
     assert "# Cold Baseline Failure Rollup" in markdown
     assert "## Cross-Fixture Failure Surfaces" in markdown
+    assert "## Non-Exact Query Evidence Return" in markdown
     assert "Compile gaps dominate the cold set" in markdown
     assert "source prose" in markdown
 

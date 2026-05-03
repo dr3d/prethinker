@@ -82,6 +82,7 @@ def _row_surface(row: dict[str, Any]) -> str:
 
 def _row_failure(row: dict[str, Any]) -> dict[str, Any]:
     failure = row.get("failure_surface") if isinstance(row.get("failure_surface"), dict) else {}
+    evidence = _row_evidence_stats(row)
     return {
         "id": row.get("id", ""),
         "verdict": _row_verdict(row),
@@ -90,6 +91,44 @@ def _row_failure(row: dict[str, Any]) -> dict[str, Any]:
         "question": row.get("utterance", ""),
         "reference_answer": row.get("reference_answer", ""),
         "suggested_next_action": failure.get("suggested_next_action", ""),
+        "evidence": evidence,
+    }
+
+
+def _row_evidence_stats(row: dict[str, Any]) -> dict[str, int | bool | str]:
+    query_results = row.get("query_results", [])
+    if not isinstance(query_results, list):
+        query_results = []
+    query_count = len(query_results)
+    successful_query_count = 0
+    nonempty_query_count = 0
+    returned_row_count = 0
+    for item in query_results:
+        if not isinstance(item, dict):
+            continue
+        result = item.get("result") if isinstance(item.get("result"), dict) else {}
+        if str(result.get("status", "")) == "success":
+            successful_query_count += 1
+        rows = result.get("rows", [])
+        row_count = len(rows) if isinstance(rows, list) else int(result.get("num_rows", 0) or 0)
+        returned_row_count += max(0, row_count)
+        if row_count > 0:
+            nonempty_query_count += 1
+    if query_count == 0:
+        support_state = "no_queries"
+    elif nonempty_query_count == 0:
+        support_state = "no_rows_returned"
+    elif nonempty_query_count < query_count:
+        support_state = "partial_rows_returned"
+    else:
+        support_state = "rows_returned"
+    return {
+        "query_count": query_count,
+        "successful_query_count": successful_query_count,
+        "nonempty_query_count": nonempty_query_count,
+        "returned_row_count": returned_row_count,
+        "has_returned_rows": returned_row_count > 0,
+        "support_state": support_state,
     }
 
 
@@ -131,6 +170,8 @@ def collect_runs(datasets_dir: Path, evidence_lane: str) -> list[dict[str, Any]]
 def build_rollup(runs: list[dict[str, Any]], evidence_lane: str) -> dict[str, Any]:
     surface_counts: Counter[str] = Counter()
     verdict_counts: Counter[str] = Counter()
+    support_counts: Counter[str] = Counter()
+    support_by_surface: dict[str, Counter[str]] = defaultdict(Counter)
     fixture_surface_counts: dict[str, Counter[str]] = {}
     top_non_exact: list[dict[str, Any]] = []
     for run in runs:
@@ -141,7 +182,10 @@ def build_rollup(runs: list[dict[str, Any]], evidence_lane: str) -> dict[str, An
         fixture_counter: Counter[str] = Counter()
         for failure in run.get("failures", []):
             surface = str(failure.get("surface", "unclassified"))
+            support_state = str((failure.get("evidence") or {}).get("support_state", "unknown"))
             surface_counts[surface] += 1
+            support_counts[support_state] += 1
+            support_by_surface[surface][support_state] += 1
             fixture_counter[surface] += 1
             top_non_exact.append({**failure, "run_id": run.get("run_id"), "fixture": run.get("fixture")})
         fixture_surface_counts[str(run.get("run_id"))] = fixture_counter
@@ -169,6 +213,8 @@ def build_rollup(runs: list[dict[str, Any]], evidence_lane: str) -> dict[str, An
         "run_count": len(runs),
         "verdict_counts": dict(verdict_counts),
         "surface_counts": dict(surface_counts),
+        "support_counts": dict(support_counts),
+        "support_by_surface": {surface: dict(counts) for surface, counts in support_by_surface.items()},
         "ranked_surfaces": ranked_surfaces,
         "runs": runs,
         "top_non_exact_rows": top_non_exact[:80],
@@ -245,6 +291,30 @@ def render_markdown(rollup: dict[str, Any]) -> str:
         lines.append(
             f"| `{run.get('run_id', '')}` | {counts.get('compile_surface_gap', 0)} | {counts.get('query_surface_gap', 0)} | {counts.get('hybrid_join_gap', 0)} | {counts.get('answer_surface_gap', 0)} | {counts.get('judge_uncertain', 0)} |"
         )
+    support_counts = rollup.get("support_counts", {}) if isinstance(rollup.get("support_counts"), dict) else {}
+    support_by_surface = rollup.get("support_by_surface", {}) if isinstance(rollup.get("support_by_surface"), dict) else {}
+    lines.extend(
+        [
+            "",
+            "## Non-Exact Query Evidence Return",
+            "",
+            "This is a post-run support proxy. It counts whether the generated Prolog",
+            "queries returned rows for non-exact QA items. Returned rows are not proof",
+            "of correctness; they only show that the query path found some symbolic",
+            "surface to work with.",
+            "",
+            "| Evidence state | Count |",
+            "| --- | ---: |",
+        ]
+    )
+    for state, count in Counter({str(k): int(v) for k, v in support_counts.items()}).most_common():
+        lines.append(f"| `{state}` | {count} |")
+    lines.extend(["", "| Surface | Rows returned | No rows returned | Partial rows returned | No queries |", "| --- | ---: | ---: | ---: | ---: |"])
+    for surface in ["compile_surface_gap", "hybrid_join_gap", "query_surface_gap", "answer_surface_gap", "judge_uncertain"]:
+        counts = support_by_surface.get(surface, {}) if isinstance(support_by_surface.get(surface, {}), dict) else {}
+        lines.append(
+            f"| {SURFACE_LABELS.get(surface, surface)} | {int(counts.get('rows_returned', 0) or 0)} | {int(counts.get('no_rows_returned', 0) or 0)} | {int(counts.get('partial_rows_returned', 0) or 0)} | {int(counts.get('no_queries', 0) or 0)} |"
+        )
     lines.extend(
         [
             "",
@@ -256,21 +326,24 @@ def render_markdown(rollup: dict[str, Any]) -> str:
             "  deterministic helper substrates, joins, aggregation, and rule-promotion probes.",
             "- Query and answer gaps are real but smaller in this snapshot; they should be",
             "  handled with targeted replay packs after compile/reasoning changes.",
+            "- Non-exact rows with returned query evidence are especially useful for",
+            "  separating query/answer/reasoning problems from pure acquisition gaps.",
             "",
             "## Non-Exact Row Index",
             "",
             "This is an index for choosing targeted replays. It is not a prompt source.",
             "",
-            "| Run | Row | Verdict | Surface | Suggested next action |",
-            "| --- | --- | --- | --- | --- |",
+            "| Run | Row | Verdict | Surface | Evidence | Suggested next action |",
+            "| --- | --- | --- | --- | --- | --- |",
         ]
     )
     for row in rollup.get("top_non_exact_rows", []):
         action = str(row.get("suggested_next_action", "")).replace("\n", " ").strip()
         if len(action) > 180:
             action = action[:177].rstrip() + "..."
+        evidence = row.get("evidence") if isinstance(row.get("evidence"), dict) else {}
         lines.append(
-            f"| `{row.get('run_id', '')}` | `{row.get('id', '')}` | {row.get('verdict', '')} | {row.get('surface', '')} | {action} |"
+            f"| `{row.get('run_id', '')}` | `{row.get('id', '')}` | {row.get('verdict', '')} | {row.get('surface', '')} | `{evidence.get('support_state', '')}`/{evidence.get('returned_row_count', 0)} rows | {action} |"
         )
     lines.append("")
     return "\n".join(lines)
