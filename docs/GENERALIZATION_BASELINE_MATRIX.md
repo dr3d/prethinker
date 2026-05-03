@@ -29,6 +29,7 @@ All runs below used the same source-only semantic-parallax recipe:
 | `RF-001` | Ridgeline Fire | 40 | 17 | 10 | 13 | 27 | 133 | 27 | 130 | 0 | 40 | 40 | 0 | 0 |
 | `CAL-001` | Calder's Reach | 110 | 65 | 9 | 36 | 74 | 187 | 23 | 180 | 0 | 109 | 108 | 0 | 0 |
 | `BLM-001` | Black Lantern Maze | 40 | 27 | 7 | 6 | 34 | 299 | 28 | 299 | 0 | 40 | 39 | 0 | 0 |
+| `AG-001` | Avalon Grant Committee | 40 | 25 | 12 | 3 | 37 | 114 | 6 | 109 | 0 | 40 | 40 | 0 | 0 |
 
 ## Failure Surface Snapshot
 
@@ -39,6 +40,7 @@ All runs below used the same source-only semantic-parallax recipe:
 | `RF-001` | 12 | 5 | 6 | 0 |
 | `CAL-001` | 37 | 6 | 2 | 0 |
 | `BLM-001` | 7 | 0 | 6 | 0 |
+| `AG-001` | 11 | 2 | 2 | 0 |
 
 ## Early Read
 
@@ -57,6 +59,10 @@ right way:
 - **Black Lantern Maze** is the strongest 40-question cold score, but because it
   is closer to the existing policy/governance fixture family, it should be used
   as a transfer check rather than proof of universal generality.
+- **Avalon Grant Committee** lands in the intended useful-difficulty band:
+  strong exact+partial coverage, very few hard misses, and no executable rules.
+  That makes it a good next rule-composition target rather than a finished
+  success.
 
 ## Guardrail
 

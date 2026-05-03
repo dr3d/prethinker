@@ -106,10 +106,15 @@ Clarification Eagerness Trap is exercising the companion governance frontier:
 
 The cold generalization lane is now active:
 
-- five newly admitted source-only fixtures produced `137 exact / 39 partial /
-  94 miss` across `270` QA items;
-- the cross-fixture failure rollup shows `96` compile-surface gaps, `21`
-  hybrid/reasoning gaps, `13` query-surface gaps, and `3` answer-surface gaps;
+- six newly admitted source-only fixtures produced `162 exact / 51 partial /
+  97 miss` across `310` QA items;
+- the cross-fixture failure rollup shows `107` compile-surface gaps, `23`
+  hybrid/reasoning gaps, `15` query-surface gaps, and `3` answer-surface gaps;
+- Avalon Grant Committee joins the cold lane at `25 exact / 12 partial /
+  3 miss` over `40` questions, with `114` admitted operations, `6` skips,
+  `0` runtime errors, and `0` write proposals during QA. It is strong enough
+  to show transfer, but it admitted `0` executable rules, making it a clean
+  rule-composition/body-fact acquisition target rather than a solved fixture.
 - a Three Moles diagnostic replay added pass-contribution accounting and showed
   the event/causal lens contributing `0` unique rows, making lens usefulness
   measurable instead of aesthetic;
@@ -168,7 +173,7 @@ That is the Glass Tide plus CE frontier.
 
 The next work should stay on the sharp edges:
 
-0. **Cold generalization baselines.** Five newly admitted fixtures now test
+0. **Cold generalization baselines.** Six newly admitted fixtures now test
    whether semantic parallax generalizes beyond the research stories that shaped
    the harness. The current aggregate says compile-surface coverage is the
    largest general issue, followed by hybrid/reasoning support. Next changes

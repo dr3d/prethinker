@@ -1,22 +1,23 @@
 # Cold Baseline Failure Rollup
 
-Generated: 2026-05-03T12:38:26+00:00
+Generated: 2026-05-03T14:37:44+00:00
 
 This report aggregates existing `cold_unseen` QA artifacts. It does not read
 source prose, gold KBs, oracle strategies, or answer-shaped profile material.
 
 ## Headline
 
-- Runs: `5`
-- Questions: `270`
-- Exact / partial / miss: `137` / `39` / `94`
-- Exact rate: `0.507`
-- Exact+partial rate: `0.652`
+- Runs: `6`
+- Questions: `310`
+- Exact / partial / miss: `162` / `51` / `97`
+- Exact rate: `0.523`
+- Exact+partial rate: `0.687`
 
 ## Run Table
 
 | Run | Fixture | Qs | Exact | Partial | Miss | Admitted | Skipped | Facts | Rules | Artifact |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| `AG-001` | avalon_grant_committee | 40 | 25 | 12 | 3 | 114 | 6 | 109 | 0 | `tmp\cold_baselines\avalon_grant_committee\domain_bootstrap_qa_20260503T143610001875Z_qa_qwen-qwen3-6-35b-a3b.json` |
 | `BLM-001` | black_lantern_maze | 40 | 27 | 7 | 6 | 299 | 28 | 299 | 0 | `tmp\cold_baselines\black_lantern_maze\domain_bootstrap_qa_20260503T060152766469Z_qa_qwen-qwen3-6-35b-a3b.json` |
 | `CAL-001` | ledger_at_calders_reach | 110 | 65 | 9 | 36 | 187 | 23 | 180 | 0 | `tmp\cold_baselines\ledger_at_calders_reach\domain_bootstrap_qa_20260503T054553171055Z_qa_qwen-qwen3-6-35b-a3b.json` |
 | `RF-001` | ridgeline_fire | 40 | 17 | 10 | 13 | 133 | 27 | 130 | 0 | `tmp\cold_baselines\ridgeline_fire\domain_bootstrap_qa_20260503T051902240724Z_qa_qwen-qwen3-6-35b-a3b.json` |
@@ -27,15 +28,16 @@ source prose, gold KBs, oracle strategies, or answer-shaped profile material.
 
 | Surface | Count | General next action |
 | --- | ---: | --- |
-| Compile | 96 | Improve lens coverage or acquisition passes; do not tune from one fixture alone. |
-| Hybrid/Reasoning | 21 | Add or exercise deterministic reasoning helpers, joins, set-difference, aggregation, or temporal substrate. |
-| Query | 13 | Improve post-ingestion query support bundles over already admitted rows. |
+| Compile | 107 | Improve lens coverage or acquisition passes; do not tune from one fixture alone. |
+| Hybrid/Reasoning | 23 | Add or exercise deterministic reasoning helpers, joins, set-difference, aggregation, or temporal substrate. |
+| Query | 15 | Improve post-ingestion query support bundles over already admitted rows. |
 | Answer | 3 | Tighten answer normalization or judge/verbalization policy without changing ingestion. |
 
 ## Fixture Surface Matrix
 
 | Run | Compile | Query | Hybrid/Reasoning | Answer | Uncertain |
 | --- | ---: | ---: | ---: | ---: | ---: |
+| `AG-001` | 11 | 2 | 2 | 0 | 0 |
 | `BLM-001` | 7 | 0 | 6 | 0 | 0 |
 | `CAL-001` | 37 | 6 | 2 | 0 | 0 |
 | `RF-001` | 12 | 5 | 6 | 0 | 0 |
@@ -51,15 +53,15 @@ surface to work with.
 
 | Evidence state | Count |
 | --- | ---: |
-| `rows_returned` | 79 |
-| `partial_rows_returned` | 51 |
+| `rows_returned` | 84 |
+| `partial_rows_returned` | 61 |
 | `no_queries` | 3 |
 
 | Surface | Rows returned | No rows returned | Partial rows returned | No queries |
 | --- | ---: | ---: | ---: | ---: |
-| Compile | 58 | 0 | 35 | 3 |
-| Hybrid/Reasoning | 12 | 0 | 9 | 0 |
-| Query | 6 | 0 | 7 | 0 |
+| Compile | 62 | 0 | 42 | 3 |
+| Hybrid/Reasoning | 13 | 0 | 10 | 0 |
+| Query | 6 | 0 | 9 | 0 |
 | Answer | 3 | 0 | 0 | 0 |
 | Uncertain | 0 | 0 | 0 | 0 |
 
@@ -83,6 +85,17 @@ This is an index for choosing targeted replays. It is not a prompt source.
 | `MMM-001` | `q013` | partial | answer_surface_gap | `rows_returned`/10 rows | The system retrieved the attribute 'too_shiny' but failed to retrieve or render the specific descriptive phrase 'lit Mina’s ears from inside' because that specific string or its... |
 | `MMM-001` | `q019` | partial | answer_surface_gap | `rows_returned`/1 rows | The system needs to map the attribute 'too_telltale' with category 'privacy' to the natural language description 'announced every thought in her head'. This is a semantic interp... |
 | `V9-001` | `q007` | partial | answer_surface_gap | `rows_returned`/1 rows | Add a predicate such as `legal_name(org_aether_bio, 'Aether Bio-Ventures SA (Luxembourg)')` to the KB or update the query plan to join with a name resolution table if one exists... |
+| `AG-001` | `q003` | partial | compile_surface_gap | `rows_returned`/4 rows | Retrieve `corrected_field` and `original_value` for the NYA correction to verify the 12,000/40,000 split. Investigate if 'committee disagreement' is encoded in `basis_finding` o... |
+| `AG-001` | `q006` | partial | compile_surface_gap | `partial_rows_returned`/6 rows | Check if the KB contains a `revised_amount` predicate or a `budget_revision` record linking to the exclusion of specific line items (e.g., food-truck bazaar) and the new total (... |
+| `AG-001` | `q007` | partial | compile_surface_gap | `partial_rows_returned`/10 rows | Check the source document for any specific project component details for anya_petrov that might map to an ineligible category or a 'food-truck bazaar' component, or verify if th... |
+| `AG-001` | `q008` | partial | compile_surface_gap | `rows_returned`/11 rows | Ingest the revised requested amount for app4 or the rule linking correction IDs to specific field updates. |
+| `AG-001` | `q010` | miss | compile_surface_gap | `rows_returned`/3 rows | Ingest the fact linking Lucia Bianchi to Sunrise Community Land Trust (e.g., `board_member(lucia_bianchi, sunrise_community_land_trust).`) and ensure the rule application logic... |
+| `AG-001` | `q014` | partial | compile_surface_gap | `partial_rows_returned`/6 rows | Ingest the missing prior grant history fact for sunrise_community_land_trust (app5) for FY2024 and ensure the eligibility logic correctly evaluates the 'awarded' vs 'disbursed'... |
+| `AG-001` | `q025` | partial | compile_surface_gap | `partial_rows_returned`/6 rows | Retrieve `original_value` and `corrected_field` for `corr_petrov_1` and `requested_amount` for `anya_petrov` to enable the numerical comparison required by the reference answer. |
+| `AG-001` | `q026` | miss | compile_surface_gap | `rows_returned`/3 rows | Check if the KB contains any interpretation records, meeting minutes, or basis findings specifically linked to Rule 3 or mentioning 'Worthington'. If absent, the KB is incomplet... |
+| `AG-001` | `q029` | partial | compile_surface_gap | `partial_rows_returned`/5 rows | The system needs to query the rule conditions for `rule_id(r4, project_category)` to extract the `eligible_categories` value, rather than querying the `project_category/2` predi... |
+| `AG-001` | `q030` | miss | compile_surface_gap | `partial_rows_returned`/6 rows | Check if the KB ingestion missed multi-category mappings for anya_petrov or if the reference answer relies on external knowledge not present in the symbolic KB. |
+| `AG-001` | `q038` | partial | compile_surface_gap | `partial_rows_returned`/7 rows | Check source document for application submission date, conditional approval vote date, and specific grant award amount. |
 | `BLM-001` | `q021` | partial | compile_surface_gap | `rows_returned`/20 rows | Retrieve `event_outcome` for the identified test events and `event_timestamp` for those same events to verify the 'negative' status and temporal gap. Additionally, query for any... |
 | `BLM-001` | `q022` | miss | compile_surface_gap | `no_queries`/0 rows | Ingest missing person and event data for Pavi Chen/Sin. |
 | `BLM-001` | `q029` | miss | compile_surface_gap | `rows_returned`/22 rows | The KB lacks the supporting fact for the reference answer and contains contradictory evidence. This is a compile surface gap because the necessary support is absent from the com... |
@@ -149,14 +162,3 @@ This is an index for choosing targeted replays. It is not a prompt source.
 | `MMM-001` | `q011` | partial | compile_surface_gap | `rows_returned`/7 rows | Ingest the specific narrative clause linking brightness to the 'shine through whiskers' detail and the causal link to the delay. |
 | `MMM-001` | `q016` | miss | compile_surface_gap | `rows_returned`/1 rows | Check source document for ingestion of 'beetle-keys' facts or rules linking them to Mina's actions. |
 | `MMM-001` | `q017` | miss | compile_surface_gap | `rows_returned`/10 rows | Check if the KB contains a clause linking the key-swallowing event to the humming event or if the `says` fact is misattributed to the wrong event ID. |
-| `MMM-001` | `q020` | miss | compile_surface_gap | `partial_rows_returned`/6 rows | Check source document for facts about 'little_nib_mole_cap' and 'secret' or 'privacy' attributes. |
-| `MMM-001` | `q022` | miss | compile_surface_gap | `rows_returned`/11 rows | Check source document for events involving 'pickled_thunder' or 'knock down'. |
-| `MMM-001` | `q023` | miss | compile_surface_gap | `partial_rows_returned`/26 rows | Check source document for 'shelf' and 'jump' events or statements. |
-| `MMM-001` | `q025` | partial | compile_surface_gap | `rows_returned`/11 rows | Check source document for explicit facts linking the middle cart to 'receipt', 'permission slip', and 'explanation', or if 'forms' is the sole supported element. |
-| `MMM-001` | `q026` | miss | compile_surface_gap | `rows_returned`/15 rows | Add a predicate such as `accepted/2` or `accepted_by/2` to the KB schema and ingest the corresponding facts from the source document. |
-| `MMM-001` | `q027` | miss | compile_surface_gap | `rows_returned`/2 rows | Check the source document for facts defining Mina's role as 'Postmistress of the Moon' and ingest them into the KB. |
-| `MMM-001` | `q028` | miss | compile_surface_gap | `partial_rows_returned`/6 rows | Ingest the clause defining the purpose/design of 'little_nib_mole_cart' (e.g., 'means(little_nib_mole_cart, carrying_turnips)' or similar) to support the reference answer. |
-| `MMM-001` | `q033` | miss | compile_surface_gap | `partial_rows_returned`/26 rows | Ingest physical state predicates (e.g., `has_appearance/2`, `wearing/2`, `holding/2`) and possession facts linking Mina to 'pickled thunder' and 'humming'. |
-| `MMM-001` | `q034` | miss | compile_surface_gap | `partial_rows_returned`/2 rows | Check if the source document contains a rule mapping 'says' or 'realizes' to 'learns' for this character, or if the ingestion process failed to ingest `learns(little_nib_mole, .... |
-| `MMM-001` | `q036` | miss | compile_surface_gap | `rows_returned`/1 rows | Check if the source document contains explicit statements about the number of keys removed. If so, the KB ingestion failed to capture quantitative facts or countable object inst... |
-| `MMM-001` | `q037` | miss | compile_surface_gap | `rows_returned`/43 rows | Ingest source text segments describing the physical attributes of keys or the specific incident involving a tooth mark. |
