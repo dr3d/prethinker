@@ -40,6 +40,32 @@ def test_audit_accepts_body_supported_role_join_shape() -> None:
     findings = risks_for(clause)
     assert "unbound_head_variable" not in findings
     assert "broad_class_fanout_risk" not in findings
+    assert "repeated_body_aliasing_risk" not in findings
+
+
+def test_audit_flags_repeated_body_aliasing_shortcut() -> None:
+    clause = (
+        "derived_status(Applicant, conditionally_eligible, rule_8) :- "
+        "conditional_approval(Applicant, Conditions), "
+        "deadline_requirement(Applicant, Cond1, Deadline), "
+        "deadline_requirement(Applicant, Cond2, Deadline), "
+        "deadline_met(Applicant, Cond1), "
+        "deadline_met(Applicant, Cond2)."
+    )
+    findings = risks_for(clause)
+    assert "repeated_body_aliasing_risk" in findings
+
+
+def test_audit_accepts_repeated_goals_with_literal_role_anchors() -> None:
+    clause = (
+        "derived_status(Applicant, conditionally_eligible, rule_8) :- "
+        "deadline_requirement(Applicant, submit_revised_budget, Deadline), "
+        "deadline_requirement(Applicant, provide_matching_docs, Deadline), "
+        "deadline_met(Applicant, submit_revised_budget), "
+        "deadline_met(Applicant, provide_matching_docs)."
+    )
+    findings = risks_for(clause)
+    assert "repeated_body_aliasing_risk" not in findings
 
 
 def test_parse_clause_splits_body_goals_at_top_level_only() -> None:

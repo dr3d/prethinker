@@ -308,6 +308,7 @@ def audit_clause(item: ParsedClause) -> list[ShortcutFinding]:
     findings.extend(audit_class_fanout(item))
     findings.extend(audit_claim_fact_collapse(item))
     findings.extend(audit_aggregation_overclaim(item))
+    findings.extend(audit_repeated_body_aliasing(item))
     return findings
 
 
@@ -446,6 +447,57 @@ def audit_aggregation_overclaim(item: ParsedClause) -> list[ShortcutFinding]:
     ]
 
 
+def audit_repeated_body_aliasing(item: ParsedClause) -> list[ShortcutFinding]:
+    buckets: dict[str, list[Goal]] = defaultdict(list)
+    for goal in item.body:
+        if goal.predicate in HELPER_PREDICATES:
+            continue
+        buckets[goal.signature].append(goal)
+
+    findings: list[ShortcutFinding] = []
+    for signature, goals in buckets.items():
+        if len(goals) <= 1:
+            continue
+        for left_index, left in enumerate(goals):
+            for right in goals[left_index + 1 :]:
+                if repeated_goals_have_aliasing_risk(left, right):
+                    findings.append(
+                        ShortcutFinding(
+                            risk="repeated_body_aliasing_risk",
+                            severity="medium",
+                            clause=item.clause,
+                            detail=(
+                                f"Repeated {signature} goals share multiple anchor variables without literal role anchors: "
+                                f"{left.text} / {right.text}. Distinct requirements may be satisfied by the same row."
+                            ),
+                        )
+                    )
+                    break
+            else:
+                continue
+            break
+    return findings
+
+
+def repeated_goals_have_aliasing_risk(left: Goal, right: Goal) -> bool:
+    if len(left.args) != len(right.args):
+        return False
+    shared_same_position_vars = [
+        left_arg
+        for left_arg, right_arg in zip(left.args, right.args)
+        if is_named_variable(left_arg) and left_arg == right_arg
+    ]
+    if len(shared_same_position_vars) < 2:
+        return False
+    has_distinct_literal_anchor = any(
+        is_literal_atom(left_arg)
+        and is_literal_atom(right_arg)
+        and left_arg != right_arg
+        for left_arg, right_arg in zip(left.args, right.args)
+    )
+    return not has_distinct_literal_anchor
+
+
 def audit_sibling_heads(parsed: list[ParsedClause]) -> list[ShortcutFinding]:
     buckets: dict[str, list[str]] = defaultdict(list)
     for item in parsed:
@@ -538,6 +590,15 @@ def variables_in_text(text: str) -> set[str]:
 
 def is_variable(value: str) -> bool:
     return bool(re.match(r"^[A-Z_][A-Za-z0-9_]*$", str(value or "").strip()))
+
+
+def is_named_variable(value: str) -> bool:
+    text = str(value or "").strip()
+    return is_variable(text) and not text.startswith("_")
+
+
+def is_literal_atom(value: str) -> bool:
+    return bool(re.match(r"^[a-z][a-z0-9_]*$", str(value or "").strip()))
 
 
 def is_numeric_literal(value: str) -> bool:

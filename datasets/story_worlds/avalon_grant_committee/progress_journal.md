@@ -546,3 +546,72 @@ Relevance-first selection names a real failure mode: direct evidence can be
 about the wrong subject or neighboring rule. But it is not a replacement for
 the direct selector. It shifts which rows fail rather than closing the
 selector gap.
+
+## Run AG-011 - Rule 8 Explicit-Condition Aliasing Diagnostic
+
+- Timestamp: `2026-05-03T23:17Z` through `2026-05-03T23:18Z`
+- Evidence lane: `diagnostic_replay`
+- Model: `qwen/qwen3.6-35b-a3b`
+- Mode: Rule 8 conditional-approval temporal/status lens over the AG-001
+  backbone.
+
+### Artifacts
+
+- List-membership attempt:
+  `tmp/cold_baselines/avalon_grant_committee/rules/domain_bootstrap_file_20260503T231748462003Z_source-rules_qwen-qwen3-6-35b-a3b.json`
+- Explicit-condition attempt:
+  `tmp/cold_baselines/avalon_grant_committee/rules/domain_bootstrap_file_20260503T231838103927Z_source-rules_qwen-qwen3-6-35b-a3b.json`
+- Post-run shortcut audit:
+  `tmp/diagnostic_replays/avalon_rule8_shortcut_audit_post_aliasing_guard.json`
+
+### Result
+
+The first Rule 8 pass emitted plausible rules, but `0` were admitted. The
+mapper correctly skipped `5` candidates that depended on `member/2` and `1`
+candidate that depended on negation/comparison control constructs.
+
+The second pass blocked list membership and negation in the context. It admitted
+`1` executable rule:
+
+```prolog
+derived_status(Applicant, conditionally_eligible, rule_8) :-
+    conditional_approval(Applicant, Conditions),
+    deadline_requirement(Applicant, Cond1, Deadline),
+    deadline_requirement(Applicant, Cond2, Deadline),
+    deadline_met(Applicant, Cond1),
+    deadline_met(Applicant, Cond2).
+```
+
+Verifier result:
+
+```text
+promotion-ready rules: 1
+firing rules: 1
+negative probes: 2/2
+positive probes: 0/2
+runtime errors: 0
+unsupported body goals: 0
+```
+
+The upgraded semantic shortcut audit then flagged the admitted rule with
+`repeated_body_aliasing_risk`: the two `deadline_requirement/3` goals share
+`Applicant` and `Deadline` but do not anchor `Cond1` and `Cond2` to distinct
+literal requirement atoms. The rule can therefore satisfy a two-condition
+requirement with the same admitted row twice.
+
+### Lesson
+
+This is the first clean Avalon example of a rule that is syntactically safe,
+body-supported, firing, and still semantically underconstrained. Rule
+composition over multiple required conditions needs one of these structural
+supports:
+
+```text
+literal condition anchors in the rule body
+or a deterministic all_required_conditions_met/1 helper
+or a separate body-fact lens that emits required_condition/2 rows
+```
+
+The new shortcut-audit risk is structural and does not inspect source prose. It
+looks only at repeated body-goal shapes that can alias when a rule is trying to
+represent distinct requirements.

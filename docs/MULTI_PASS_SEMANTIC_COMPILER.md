@@ -347,7 +347,10 @@ promotion-ready under either isolated or dependency-composed trial.
   unsupported body predicates, unsupported body-goal argument patterns, and
   unsupported body fragments such as equality/comparison leftovers. Positive and
   negative probes should become standard for any rule class that might
-  overgeneralize.
+  overgeneralize. AG-011 adds another structural shortcut: repeated body goals
+  can pretend to satisfy multiple distinct requirements while aliasing to the
+  same row unless the rule uses literal anchors, a deterministic helper, or
+  admitted `required_condition`-style body facts.
 - Probe role policy: SC-005 exposed a false-negative promotion probe when the
   rule derived the right subject and status but preserved a more precise source
   anchor (`charter_9.2`) where the authored probe expected a coarse category
