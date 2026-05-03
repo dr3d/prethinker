@@ -228,6 +228,16 @@ The companion low-threshold branch loaded cleanly but stayed dormant because no
 current Sable amendment amount is at most `50000`. That distinction matters:
 clean dormancy is not the same as unsupported body structure.
 
+Avalon then showed why the mapper should share part of the verifier's rule
+doctrine. A Section A eligibility replay kept useful helper-composed matching
+fund branches, but the model also proposed raw Prolog constructs such as
+negation, disjunction, equality, and comparisons. The verifier already withheld
+promotion for those clauses. Durable rule admission now goes further and skips
+them at the mapper boundary with `rule_contains_unsupported_construct`. In this
+phase, executable LLM-authored rules should compose safe helper predicates such
+as `number_greater_than/2` and `percent_at_least/3`, not invent low-level
+control semantics.
+
 Promotion scoring now uses an isolated per-rule runtime: each rule is tested by
 itself against the backbone surface, so a sibling rule with the same derived
 head cannot make a dormant rule look firing. The accumulated rule surface is

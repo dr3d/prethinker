@@ -117,6 +117,11 @@ Glass Tide is now exercising the harder rule-ingestion frontier:
   `amendment_introduced/4`, then composed `number_greater_than/2` to derive
   `requires_public_hearing` without unbound head variables, fact-shaped rule
   clauses, oracle rows, or Python prose interpretation.
+- Avalon then repeated the rule-lens transfer with a sharper mapper boundary:
+  raw Prolog negation, disjunction, lists, arithmetic, equality, and comparison
+  operators are now skipped at rule admission, so the post-gate Section A replay
+  retained only `3` executable clauses, including `2` promotion-ready
+  helper-composed matching-fund branches and `0` unsupported body goals.
 - Dulse Ledger is now scored cold at `27 exact / 7 partial / 6 miss`, Oxalis
   Recall scored `16 exact / 9 partial / 15 miss` despite `106` admitted
   operations and `0` skips, Sable Creek Budget scored `20 exact / 8 partial /

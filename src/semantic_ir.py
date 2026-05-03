@@ -1882,6 +1882,13 @@ def _diagnose_candidate_operation(
                 ),
                 codes=["rule_policy", "unsafe_rule_generalization"],
             )
+        unsupported_construct = _unsupported_rule_construct(clause)
+        if unsupported_construct:
+            return skip(
+                "rule_contains_unsupported_construct",
+                warning=f"skipped rule operation because durable rule mapper does not admit {unsupported_construct}",
+                codes=["rule_policy", "unsupported_rule_construct"],
+            )
         base["admitted"] = True
         base["effect"] = "rule"
         base["clauses"] = [_ensure_period(clause)]
@@ -1940,6 +1947,24 @@ def _rule_head_and_body(clause: str) -> tuple[str, str]:
         return text, ""
     head, body = text.split(":-", 1)
     return head.strip(), body.strip()
+
+
+def _unsupported_rule_construct(clause: str) -> str:
+    _head, body = _rule_head_and_body(clause)
+    if not body:
+        return ""
+    text = str(body)
+    if "\\+" in text or re.search(r"\bnot\s*\(", text):
+        return "negation/control constructs"
+    if ";" in text:
+        return "disjunction/control constructs"
+    if "[" in text or "]" in text:
+        return "list constructs"
+    if re.search(r"\bis\b", text):
+        return "raw arithmetic"
+    if re.search(r"(?<![A-Za-z0-9_])(?:=:=|=\\=|>=|=<|==|\\==|>|<|=)(?![A-Za-z0-9_])", text):
+        return "raw equality or comparison operators"
+    return ""
 
 
 def _rule_variables(text: str) -> set[str]:

@@ -180,3 +180,56 @@ needed source-detail or deadline evidence rather than the new derived rules.
 This confirms the APR lesson in a rule setting: the right architecture is not
 "always add more admitted surface"; it is row-level activation, fallback
 selection, or answer-mode protection over a safely accumulated surface.
+
+## Run AG-005 - Rule Mapper Control-Construct Gate
+
+- Timestamp: `2026-05-03T17:07Z` through `2026-05-03T17:09Z`
+- Evidence lane: `diagnostic_replay`
+- Model: `qwen/qwen3.6-35b-a3b`
+- Mode: replay of the Section A eligibility-rule lens after adding the Sable
+  backbone fact-signature support summary and then tightening durable rule
+  mapper admission against raw Prolog control constructs. The replay used the
+  AG-001 source-only backbone and source-derived temporary registry; no gold
+  KB, starter profile, QA answer key, or reference rule surface was used.
+
+### Artifacts
+
+- Pre-gate replay:
+  `tmp/cold_baselines/avalon_grant_committee/rules/domain_bootstrap_file_20260503T170704687082Z_source-rules_qwen-qwen3-6-35b-a3b.json`
+- Post-gate replay:
+  `tmp/cold_baselines/avalon_grant_committee/rules/domain_bootstrap_file_20260503T170921665371Z_source-rules_qwen-qwen3-6-35b-a3b.json`
+
+### Result
+
+- Pre-gate replay: `8` admitted executable rules, `0` skips, `2`
+  promotion-ready rules, `1` unsupported body goal, and `5` unsupported body
+  fragments.
+- Post-gate replay: `3` admitted executable rules, `5` skips, `2`
+  promotion-ready rules, `0` unsupported body goals, and `0` unsupported body
+  fragments.
+- The retained firing rules were the helper-composed Rule 5 matching-fund
+  branches:
+
+```prolog
+derived_status(Applicant, matching_funds_met, rule_5) :-
+    applicant_id(Applicant, _Name),
+    requested_amount(Applicant, Amount),
+    number_greater_than(Amount, 25000),
+    matching_fund_commitment(Applicant, Match, _Source),
+    percent_at_least(Match, Amount, 30).
+
+derived_status(Applicant, matching_funds_exempt, rule_5) :-
+    applicant_id(Applicant, _Name),
+    requested_amount(Applicant, Amount),
+    number_at_most(Amount, 25000).
+```
+
+### Lesson
+
+The Sable support-summary improvement transfers to Avalon, but the more
+important general fix is the mapper-side control-construct gate. Durable
+candidate rules are now skipped when they use raw negation, disjunction, lists,
+arithmetic, equality, or comparison operators. Those constructs must be
+represented through deterministic helper predicates or later explicit support
+substrates. This moves non-helper branches out of the admitted-rule surface
+instead of relying only on the promotion verifier to mark them non-promotable.

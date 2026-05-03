@@ -1934,6 +1934,57 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         self.assertEqual(skipped[0]["skip_reason"], "rule_clause_not_executable")
         self.assertTrue(any("not an executable Horn rule" in warning for warning in warnings))
 
+    def test_mapper_skips_rule_operation_with_raw_negation_or_disjunction(self) -> None:
+        for clause in [
+            "eligible(X) :- applicant(X), \\+ disqualified(X).",
+            "eligible(X) :- applicant_type(X, Type), (Type = individual ; Type = nonprofit).",
+        ]:
+            with self.subTest(clause=clause):
+                ir = _ir(
+                    decision="commit",
+                    turn_type="rule_update",
+                    candidate_operations=[
+                        {
+                            "operation": "rule",
+                            "predicate": "eligible",
+                            "args": [],
+                            "clause": clause,
+                            "polarity": "positive",
+                            "source": "direct",
+                            "safety": "safe",
+                        }
+                    ],
+                )
+                parsed, warnings = semantic_ir_to_legacy_parse(ir)
+                self.assertEqual(parsed["intent"], "other")
+                self.assertEqual(parsed["rules"], [])
+                skipped = [row for row in parsed["admission_diagnostics"]["operations"] if not row["admitted"]]
+                self.assertEqual(skipped[0]["skip_reason"], "rule_contains_unsupported_construct")
+                self.assertTrue(any("does not admit" in warning for warning in warnings))
+
+    def test_mapper_skips_rule_operation_with_raw_comparison(self) -> None:
+        ir = _ir(
+            decision="commit",
+            turn_type="rule_update",
+            candidate_operations=[
+                {
+                    "operation": "rule",
+                    "predicate": "over_limit",
+                    "args": [],
+                    "clause": "over_limit(X) :- requested_amount(X, Amount), Amount > 25000.",
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                }
+            ],
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(ir)
+        self.assertEqual(parsed["intent"], "other")
+        self.assertEqual(parsed["rules"], [])
+        skipped = [row for row in parsed["admission_diagnostics"]["operations"] if not row["admitted"]]
+        self.assertEqual(skipped[0]["skip_reason"], "rule_contains_unsupported_construct")
+        self.assertTrue(any("comparison" in warning for warning in warnings))
+
     def test_mapper_admits_positive_rule_labeled_record_without_clause_as_fact(self) -> None:
         ir = _ir(
             decision="commit",
