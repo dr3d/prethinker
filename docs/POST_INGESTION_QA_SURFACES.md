@@ -120,6 +120,17 @@ structured result rows. A five-row sample hid decisive support in wide result
 tables and scored `28 exact / 9 partial / 3 miss`; increasing the sample to
 sixteen rows produced the `31 exact` result.
 
+The next Black Lantern replay is the caution sign. The same selector mechanism
+ran cleanly over baseline, narrow evidence filtering, and broad evidence
+filtering, but selected only `28 exact / 9 partial / 3 miss` against a
+`33 exact / 4 partial / 3 miss` upper bound. Adding each mode's QA self-check
+notes moved exact count to `29` but increased misses to `4`.
+
+That negative transfer is useful: row-level activation is now a real mechanism,
+but the selector must learn evidence completeness, not merely evidence
+directness. It should not become the default until calibrated across fixture
+types.
+
 `--classify-failure-surfaces` adds a structured diagnostic pass after judging non-exact rows. It sees the reference answer, compiled KB inventory, admitted clauses, emitted queries, and query results. It does not see the raw source document and it cannot write. Its labels are:
 
 - `compile_surface_gap`

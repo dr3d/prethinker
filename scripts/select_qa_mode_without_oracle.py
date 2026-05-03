@@ -215,10 +215,22 @@ def compact_query_evidence(row: dict[str, Any], *, sample_row_limit: int) -> dic
     return {
         "model_decision": str(row.get("model_decision", "")),
         "projected_decision": str(row.get("projected_decision", "")),
+        "self_check": compact_self_check(row),
         "planned_queries": row.get("queries", []),
         "executed_results": results,
         "warnings": row.get("warnings", []),
         "parse_error": str(row.get("parse_error", "")),
+    }
+
+
+def compact_self_check(row: dict[str, Any]) -> dict[str, Any]:
+    self_check = row.get("self_check") if isinstance(row.get("self_check"), dict) else {}
+    notes = self_check.get("notes", []) if isinstance(self_check.get("notes"), list) else []
+    missing_slots = self_check.get("missing_slots", []) if isinstance(self_check.get("missing_slots"), list) else []
+    return {
+        "bad_commit_risk": str(self_check.get("bad_commit_risk", "")),
+        "missing_slots": missing_slots[:8],
+        "notes": [str(note)[:800] for note in notes[:4]],
     }
 
 

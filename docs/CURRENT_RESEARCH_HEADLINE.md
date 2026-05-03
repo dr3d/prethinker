@@ -138,6 +138,11 @@ testing whether those gains transfer:
   safe symbolic surfaces can be accumulated independently, then selected per
   question by a model-owned control plane that still has no write authority and
   no oracle access.
+- Black Lantern BLM-004 is the necessary caution: the same selector mechanism
+  ran cleanly but scored only `28 / 9 / 3` over baseline/narrow/broad query
+  modes, below the best individual modes. Adding QA self-check notes moved to
+  `29 / 7 / 4`, not a clean fix. The mechanism exists; cross-fixture selector
+  calibration is now the hard part.
 - Dulse Ledger is now scored cold at `27 exact / 7 partial / 6 miss`, Oxalis
   Recall scored `16 exact / 9 partial / 15 miss` despite `106` admitted
   operations and `0` skips, Sable Creek Budget scored `20 exact / 8 partial /

@@ -159,3 +159,68 @@ missed under the broader one. The immediate design lesson is that the evidence
 filter needs a row-level activation policy, not just a global clause budget.
 Still, `32/5/3` is a better diagnostic posture than `32/3/5` because more
 failure cases remain partially supported instead of collapsing to miss.
+
+## BLM-004 - Evidence Mode Selector Negative Transfer
+
+Date: 2026-05-03
+
+Evidence lane: `diagnostic_replay`
+
+Mode: replayed the BLM-002 and BLM-003 query-surface modes after the
+Avalon AG-007 selector result, then ran the non-oracle evidence-mode selector
+over baseline, narrow evidence filtering, and broad evidence filtering.
+
+Artifacts:
+
+- Narrow QA replay:
+  `tmp/cold_baselines/black_lantern_maze/query_modes_replay/domain_bootstrap_qa_20260503T190819241354Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Broad QA replay:
+  `tmp/cold_baselines/black_lantern_maze/query_modes_broad_replay/domain_bootstrap_qa_20260503T191952027537Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Mode comparison:
+  `tmp/cold_baselines/black_lantern_maze/query_modes_broad_replay/black_lantern_mode_comparison_replay.md`
+- Selector:
+  `tmp/cold_baselines/black_lantern_maze/query_modes_broad_replay/selector_full_sample16.json`
+- Selector with self-check notes:
+  `tmp/cold_baselines/black_lantern_maze/query_modes_broad_replay/selector_full_selfcheck_sample16.json`
+
+Result:
+
+Mode scores:
+
+```text
+baseline: 27 exact / 7 partial / 6 miss
+narrow:   32 exact / 3 partial / 5 miss
+broad:    32 exact / 5 partial / 3 miss
+```
+
+Diagnostic perfect-selector upper bound:
+
+```text
+33 exact / 4 partial / 3 miss
+```
+
+Non-oracle selector:
+
+```text
+28 exact / 9 partial / 3 miss
+selected best available mode on 35/40 rows
+```
+
+Selector with QA self-check notes added:
+
+```text
+29 exact / 7 partial / 4 miss
+selected best available mode on 35/40 rows
+```
+
+Lesson:
+
+The Avalon selector result transfers as a mechanism but not yet as a robust
+policy. On Black Lantern, the selector overvalued direct-looking but incomplete
+baseline evidence for rows q007, q011, q015, and q016, all of which were exact
+under both evidence-filtered modes. Adding QA self-check notes improved exact
+count by one but added a miss, so self-check context is not a clean fix.
+
+This is a useful negative result. Row-level activation needs calibration across
+fixture types before it becomes default. The selector must learn evidence
+completeness, not just evidence directness.
