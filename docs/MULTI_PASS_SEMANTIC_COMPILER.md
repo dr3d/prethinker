@@ -243,6 +243,10 @@ mixed support threshold with final passage. Future council aggregation should
 derive an intermediate threshold status before any veto/override branch decides
 final outcome.
 
+GLT-038 adds that intermediate condition surface. `derived_condition/3` lets an
+aggregation lens derive `support_threshold_met` without claiming the proposal
+passed. This creates a cleaner input for later rule composition.
+
 ## Open Problems
 
 - Pass planner: the router should choose lenses and source spans instead of

@@ -52,6 +52,13 @@ RULE_HEAD_PREDICATES = [
         "admission_notes": ["Use only as a rule head or directly stated status; never as a guessed fact."],
     },
     {
+        "signature": "derived_condition/3",
+        "args": ["subject", "condition", "scope"],
+        "description": "Query-only intermediate condition from source-stated rule prerequisites; not a final outcome.",
+        "why": "rule_acquisition",
+        "admission_notes": ["Use for threshold_met, veto_present, override_absent, and similar intermediate rule conditions."],
+    },
+    {
         "signature": "derived_permission/4",
         "args": ["actor_or_subject", "action", "place_or_object", "time_or_context"],
         "description": "Query-only derived permission from explicit source-stated authorization rules.",
@@ -643,6 +650,14 @@ def _rule_guidance_context(*, target: int, rule_class: str, compact: bool) -> li
         "For support_count_at_least/2, do not add extra supported(Proposal, role_label) goals unless the source explicitly makes that officer role a condition. The helper already proves the threshold count from supported/2 rows.",
         "Set source='direct' only because the source document explicitly states the rule.",
     ]
+    if "aggregation" in str(rule_class).casefold():
+        core.extend(
+            [
+                "For aggregation rule classes, prefer derived_condition/3 heads such as derived_condition(Proposal, support_threshold_met, council_vote).",
+                "Do not derive final passed/failed outcome from the aggregation lens when veto, override, exception, or priority rules also affect the outcome.",
+                "Use support_count_at_least(Proposal, Threshold) as the body proof for threshold_met and stop there.",
+            ]
+        )
     if compact:
         if "exception" in str(rule_class).casefold():
             core.extend(

@@ -1043,3 +1043,51 @@ veto/override belongs in a separate priority branch.
 
 That keeps the helper useful without letting a count rule overclaim final
 governance outcome.
+
+## GLT-038 - Council Aggregation As Intermediate Condition
+
+- Timestamp: `2026-05-03T02:48:02Z`
+- Rule artifact: `tmp/domain_bootstrap_file/domain_bootstrap_file_20260503T024746630584Z_story-rules_qwen-qwen3-6-35b-a3b.json`
+- Promotion-filtered union artifact: `tmp/domain_bootstrap_file/domain_bootstrap_file_20260503T024802537900Z_glass-tide-council-aggregation-condition-glt038_qwen-qwen3-6-35b-a3b.json`
+- Mode: `council_aggregation_intermediate_condition_trial`
+- Rule class: `aggregation`
+
+### Result
+
+- New rule-head option: `derived_condition/3`.
+- The rule lens admitted `1` rule.
+- Isolated firing rules: `1`.
+- Promotion-ready rules: `1`.
+- Positive threshold probe: `1/1`.
+- Negative final-passage probe: `1/1`.
+- Probe-adjusted promotion ready: `true`.
+
+Retained rule:
+
+```prolog
+derived_condition(Proposal, support_threshold_met, council_vote) :-
+    support_count_at_least(Proposal, 3).
+```
+
+Passing probes:
+
+```prolog
+derived_condition(copper_rails_proposal, support_threshold_met, council_vote).
+% and no rows for:
+derived_status(copper_rails_proposal, passed, council_vote).
+```
+
+### Lesson
+
+GLT-038 converts GLT-037's negative result into the intended architecture. The
+aggregation lens should produce an intermediate condition, not a final outcome.
+The final status belongs to a later priority/override lens that can join:
+
+```text
+support threshold met
+treasurer veto present
+emergency override absent/present
+```
+
+This keeps the count helper from overclaiming passage and creates a cleaner
+branch surface for future rule composition.

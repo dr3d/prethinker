@@ -139,8 +139,8 @@ The same pattern appears across fixtures:
   council budget-veto failure rule while dropping unsupported normal-vote
   branches. GLT-037 added `support_count_at_least/2`, but the rule lens tried
   to mix threshold counting with final passage and unsupported cut/disjunction.
-  The next council step is threshold-status guidance, not more default rule
-  prose.
+  GLT-038 added `derived_condition/3` and converted the count branch into a
+  clean support-threshold condition without overclaiming final passage.
 - **Promotion-ready is not durable.** Glass Tide now separates rule lifecycle
   labels: candidate, mapper-admitted, runtime-loadable, firing,
   promotion-ready, and durable. Durable remains `0` in these trials; the point is
