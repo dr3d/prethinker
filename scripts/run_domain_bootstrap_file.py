@@ -1381,8 +1381,10 @@ def _compile_source_with_plan_passes(
         "rules": unique_rules,
         "queries": unique_queries,
         "passes": pass_records,
-        "surface_contribution": _pass_surface_contribution(pass_records),
     }
+    result["surface_contribution"] = _pass_surface_contribution(pass_records)
+    result["compile_health"] = _compile_health_summary(result["surface_contribution"])
+    return result
 
 
 def _compile_source_flat_plus_plan_passes(
@@ -1419,7 +1421,7 @@ def _compile_source_flat_plus_plan_passes(
         flat.get("queries", []) if isinstance(flat, dict) else [],
         focused.get("queries", []) if isinstance(focused, dict) else [],
     )
-    return {
+    result = {
         "ok": bool(flat.get("ok")) and bool(focused.get("ok")) if isinstance(flat, dict) and isinstance(focused, dict) else False,
         "mode": "flat_plus_intake_plan_passes",
         "pass_count": 1 + int(focused.get("pass_count", 0) or 0) if isinstance(focused, dict) else 1,
@@ -1433,8 +1435,10 @@ def _compile_source_flat_plus_plan_passes(
         "queries": unique_queries,
         "flat_pass": flat,
         "focused_passes": focused,
-        "surface_contribution": _flat_plus_surface_contribution(flat=flat, focused=focused),
     }
+    result["surface_contribution"] = _flat_plus_surface_contribution(flat=flat, focused=focused)
+    result["compile_health"] = _compile_health_summary(result["surface_contribution"])
+    return result
 
 
 def _union_clause_lists(
@@ -1549,6 +1553,42 @@ def _flat_plus_surface_contribution(*, flat: dict[str, Any], focused: dict[str, 
     for offset, row in enumerate(focused_rows, start=1):
         row["pass_index"] = offset
     return [*flat_rows, *focused_rows]
+
+
+def _compile_health_summary(surface_contribution: list[dict[str, Any]]) -> dict[str, Any]:
+    flag_counts: dict[str, int] = {}
+    unhealthy_passes: list[str] = []
+    unique_total = 0
+    duplicate_total = 0
+    for row in surface_contribution:
+        unique_total += int(row.get("unique_contribution_count", 0) or 0)
+        duplicate_total += int(row.get("duplicate_count", 0) or 0)
+        flags = [str(flag).strip() for flag in row.get("health_flags", []) if str(flag).strip()] if isinstance(row.get("health_flags"), list) else []
+        if flags:
+            unhealthy_passes.append(str(row.get("pass_id", "")))
+        for flag in flags:
+            flag_counts[flag] = flag_counts.get(flag, 0) + 1
+    severe_flags = {"pass_not_ok", "zero_yield", "skip_heavy"}
+    if any(flag_counts.get(flag, 0) for flag in severe_flags):
+        verdict = "poor"
+        recommendation = "repair_compile_before_qa"
+    elif flag_counts:
+        verdict = "warning"
+        recommendation = "run_qa_but_treat_thin_lens_results_as_diagnostic"
+    else:
+        verdict = "healthy"
+        recommendation = "qa_run_reasonable"
+    return {
+        "schema_version": "compile_lens_health_v1",
+        "verdict": verdict,
+        "recommendation": recommendation,
+        "pass_count": len(surface_contribution),
+        "unhealthy_pass_count": len(unhealthy_passes),
+        "unhealthy_passes": unhealthy_passes,
+        "flag_counts": flag_counts,
+        "unique_contribution_total": unique_total,
+        "duplicate_total": duplicate_total,
+    }
 
 
 def _source_compiler_context(*, intake_plan: dict[str, Any] | None, domain_hint: str = "") -> list[str]:
@@ -1918,6 +1958,8 @@ def _write_summary(record: dict[str, Any], path: Path) -> None:
                 f"- Projected decision: `{compile_record.get('projected_decision', '')}`",
                 f"- Admitted: `{compile_record.get('admitted_count', 0)}`",
                 f"- Skipped: `{compile_record.get('skipped_count', 0)}`",
+                f"- Lens health: `{(compile_record.get('compile_health') or {}).get('verdict', '')}`",
+                f"- Lens health recommendation: `{(compile_record.get('compile_health') or {}).get('recommendation', '')}`",
                 "",
                 "### Surface Contribution",
                 "",

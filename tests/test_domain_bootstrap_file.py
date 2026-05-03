@@ -1,5 +1,6 @@
 from scripts.run_domain_bootstrap_file import (
     SOURCE_PASS_OPS_JSON_SCHEMA,
+    _compile_health_summary,
     _flat_plus_surface_contribution,
     _pass_surface_contribution,
     _source_pass_ops_to_semantic_ir,
@@ -122,3 +123,45 @@ def test_pass_surface_contribution_flags_zero_and_skip_heavy_passes() -> None:
     assert rows[0]["health_flags"] == ["pass_not_ok", "zero_yield"]
     assert "thin_surface" in rows[1]["health_flags"]
     assert "skip_heavy" in rows[1]["health_flags"]
+
+
+def test_compile_health_summary_classifies_pass_surface() -> None:
+    healthy = _compile_health_summary(
+        [
+            {
+                "pass_id": "p1",
+                "unique_contribution_count": 10,
+                "duplicate_count": 1,
+                "health_flags": [],
+            }
+        ]
+    )
+    warning = _compile_health_summary(
+        [
+            {
+                "pass_id": "p1",
+                "unique_contribution_count": 2,
+                "duplicate_count": 0,
+                "health_flags": ["thin_surface"],
+            }
+        ]
+    )
+    poor = _compile_health_summary(
+        [
+            {
+                "pass_id": "p1",
+                "unique_contribution_count": 0,
+                "duplicate_count": 0,
+                "health_flags": ["pass_not_ok", "zero_yield"],
+            }
+        ]
+    )
+
+    assert healthy["verdict"] == "healthy"
+    assert healthy["recommendation"] == "qa_run_reasonable"
+    assert warning["verdict"] == "warning"
+    assert warning["recommendation"] == "run_qa_but_treat_thin_lens_results_as_diagnostic"
+    assert poor["verdict"] == "poor"
+    assert poor["recommendation"] == "repair_compile_before_qa"
+    assert poor["flag_counts"]["zero_yield"] == 1
+    assert poor["unhealthy_passes"] == ["p1"]

@@ -105,7 +105,12 @@ The cold generalization lane is now active:
   measurable instead of aesthetic;
 - a compact focused-pass JSON retry recovered that same event/causal lens to
   `28` unique rows, but QA stayed essentially flat, proving that mechanical
-  lens recovery is necessary but not sufficient for answer-bearing coverage.
+  lens recovery is necessary but not sufficient for answer-bearing coverage;
+- compile-lens health now rolls per-pass diagnostics into a top-level
+  `healthy` / `warning` / `poor` verdict. A Veridia-9 cold replay with healthy
+  lenses improved slightly from `18 exact / 5 partial / 17 miss` to `19 / 6 /
+  15` while admitting fewer rows, which is useful but also clarifies the next
+  metric: healthy lenses still need question-support coverage.
 
 The architecture is becoming sharper:
 
@@ -131,7 +136,8 @@ The next work should stay on the sharp edges:
    the harness. The current aggregate says compile-surface coverage is the
    largest general issue, followed by hybrid/reasoning support. Next changes
    should improve at least two cold fixtures or preserve older regression
-   lanes.
+   lanes. The newest lens-health gate should help decide when a compile is worth
+   sending through full QA and when the compile itself needs repair first.
 1. **Glass Tide final-outcome composition.** Tax, salvage, quarantine, council
    veto, and council support-threshold conditions now have promotion-ready
    slices. The next frontier is a final outcome lens that joins intermediate

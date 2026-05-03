@@ -294,6 +294,13 @@ branch failed the proposal, while the final-passage probe remains empty.
   RF-002/RF-003 then showed the opposite failure: dense incident passes can
   parse but remain too thin or skip-heavy. The next lens-quality metric should
   flag zero-yield, thin-surface, and skip-heavy passes, not just `invalid_json`.
+- Compile-lens health now summarizes those pass diagnostics at the top level.
+  A compile can be marked `healthy`, `warning`, or `poor` with a recommendation
+  such as `qa_run_reasonable` or `repair_compile_before_qa`. V9-002 used this
+  gate on a cold Veridia replay: all seven lenses were healthy, the compile
+  admitted fewer rows than V9-001, and QA still improved from `18/5/17` to
+  `19/6/15`. The lesson is deliberately modest: pass health can screen out
+  obviously bad compiles, but it is not the same as answer-bearing coverage.
 
 ## Evidence Lanes
 
