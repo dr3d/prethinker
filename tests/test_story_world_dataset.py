@@ -24,6 +24,7 @@ IRON_HARBOR = ROOT / "datasets" / "story_worlds" / "iron_harbor_water_crisis"
 BLACKTHORN = ROOT / "datasets" / "story_worlds" / "blackthorn_misconduct_case"
 KESTREL = ROOT / "datasets" / "story_worlds" / "kestrel_claim"
 GLASS_TIDE = ROOT / "datasets" / "story_worlds" / "glass_tide_charter"
+BLACK_LANTERN = ROOT / "datasets" / "story_worlds" / "black_lantern_maze"
 
 
 def test_otters_story_world_bundle_is_complete() -> None:
@@ -44,6 +45,55 @@ def test_otters_story_world_bundle_is_complete() -> None:
     }
 
     assert expected.issubset({path.name for path in OTTERS.iterdir()})
+
+
+def test_black_lantern_story_world_bundle_is_admitted() -> None:
+    expected = {
+        "README.md",
+        "story.md",
+        "source.md",
+        "gold_kb.pl",
+        "gold_kb_notes.md",
+        "failure_buckets.json",
+        "qa_source.md",
+        "qa.md",
+        "intake_plan.md",
+        "ambiguity_and_chaos_overlay.md",
+        "progress_journal.md",
+        "progress_metrics.jsonl",
+    }
+
+    assert BLACK_LANTERN.exists()
+    assert expected.issubset({path.name for path in BLACK_LANTERN.iterdir()})
+
+
+def test_black_lantern_qa_is_script_compatible() -> None:
+    qa_text = (BLACK_LANTERN / "qa.md").read_text(encoding="utf-8")
+    questions = parse_numbered_markdown_questions(qa_text)
+    answers = parse_markdown_answer_key(qa_text)
+    assert len(questions) == 40
+    assert len(answers) == 40
+    assert questions[0]["id"] == "q001"
+    assert "Asha Rin" in answers["q001"]
+    assert "verified receipt" in answers["q039"]
+
+
+def test_black_lantern_metadata_marks_oracle_boundary() -> None:
+    buckets = json.loads((BLACK_LANTERN / "failure_buckets.json").read_text(encoding="utf-8"))
+    readme = (BLACK_LANTERN / "README.md").read_text(encoding="utf-8")
+    metrics = [
+        json.loads(line)
+        for line in (BLACK_LANTERN / "progress_metrics.jsonl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    kb = (BLACK_LANTERN / "gold_kb.pl").read_text(encoding="utf-8")
+
+    assert any(item["id"] == "approval_semantics_collapse" for item in buckets["buckets"])
+    assert "oracle for scoring only" in readme.casefold()
+    assert "No benchmark run has been recorded yet." in readme
+    assert metrics[0]["run_id"] == "BLM-000"
+    assert metrics[0]["compile_run"] is False
+    assert "derived_" in kb
 
 
 def test_otters_qa_battery_is_harness_ready() -> None:

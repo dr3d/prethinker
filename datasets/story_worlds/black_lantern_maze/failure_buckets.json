@@ -1,0 +1,65 @@
+{
+  "fixture_id": "black_lantern_maze_v1",
+  "buckets": [
+    {
+      "id": "claim_finding_collapse",
+      "label": "Claim/Finding Collapse",
+      "description": "A source claim, translated note, memo, or statement is promoted as a tribunal finding or durable fact."
+    },
+    {
+      "id": "source_status_loss",
+      "label": "Source Status Loss",
+      "description": "The compile loses whether a row is direct, corrected, retracted, not adopted, translated, or held for clarification."
+    },
+    {
+      "id": "identity_alias_drift",
+      "label": "Identity/Alias Drift",
+      "description": "Near-duplicate names, misspellings, or same-title actors are merged or split incorrectly."
+    },
+    {
+      "id": "title_time_scope_error",
+      "label": "Title/Time Scope Error",
+      "description": "A title-holder is resolved without respecting the relevant date or acting-role interval."
+    },
+    {
+      "id": "approval_semantics_collapse",
+      "label": "Approval Semantics Collapse",
+      "description": "Packet approval, payment release, receipt verification, relief certification, and translated approval language are flattened into one approval predicate."
+    },
+    {
+      "id": "correction_retraction_gap",
+      "label": "Correction/Retraction Gap",
+      "description": "A correction is admitted without preserving the old value, source authority, or clarification target."
+    },
+    {
+      "id": "temporal_helper_gap",
+      "label": "Temporal Helper Gap",
+      "description": "Duration, deadline, safety-hold, or quarantine-window reasoning lacks a supported helper or admitted body facts."
+    },
+    {
+      "id": "rule_priority_gap",
+      "label": "Rule Priority Gap",
+      "description": "A lower-level permission/rule fires even though an override, anti-rule, hold, veto, or exception should block the final outcome."
+    },
+    {
+      "id": "exception_branch_gap",
+      "label": "Exception Branch Gap",
+      "description": "A threshold rule works but the exception branch, such as relief cargo or sacred cargo, is missing or too broad."
+    },
+    {
+      "id": "ce_overeager",
+      "label": "CE Over-Eager",
+      "description": "The system asks when it could safely answer, source-attribute, quarantine, or commit clear partials."
+    },
+    {
+      "id": "ce_undereager",
+      "label": "CE Under-Eager",
+      "description": "The system commits or answers when an identity, status, rule, correction, or query scope should be clarified."
+    },
+    {
+      "id": "unsafe_context_write",
+      "label": "Unsafe Context Write",
+      "description": "Context support, non-adoption status, alias notes, or rule links are copied into safe candidate operations without direct source authority."
+    }
+  ]
+}
