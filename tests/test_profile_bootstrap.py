@@ -182,6 +182,49 @@ class ProfileBootstrapTests(unittest.TestCase):
         self.assertEqual(score["frontier_unknown_positive_predicate_refs"], [])
         self.assertGreater(score["rough_score"], 0.4)
 
+    def test_parse_normalizes_invalid_argument_role_labels(self) -> None:
+        parsed, error = parse_profile_bootstrap_json(
+            json.dumps(
+                {
+                    "schema_version": "profile_bootstrap_v1",
+                    "domain_guess": "municipal_budget",
+                    "domain_scope": "Budget votes and thresholds.",
+                    "confidence": 0.8,
+                    "source_summary": ["sample"],
+                    "entity_types": [{"name": "vote", "description": "Vote.", "examples": ["v1"]}],
+                    "candidate_predicates": [
+                        {
+                            "signature": "council_vote/6",
+                            "args": [
+                                "vote_id",
+                                "proposal_id",
+                                "date",
+                                "yes_votes",
+                                "votes_for_or_against_or_absent_and_every_possible_value",
+                            ],
+                            "description": "Vote record.",
+                            "why": "Votes matter.",
+                            "admission_notes": ["Role labels are not value slots."],
+                        }
+                    ],
+                    "likely_functional_predicates": [],
+                    "provenance_sensitive_predicates": [],
+                    "admission_risks": [],
+                    "clarification_policy": [],
+                    "unsafe_transformations": [],
+                    "starter_frontier_cases": [],
+                    "self_check": {"profile_authority": "proposal_only", "notes": []},
+                }
+            )
+        )
+
+        self.assertEqual(error, "")
+        self.assertIsNotNone(parsed)
+        self.assertEqual(
+            parsed["candidate_predicates"][0]["args"],
+            ["vote_id", "proposal_id", "date", "yes_votes", "arg_5"],
+        )
+
     def test_profile_bootstrap_projects_to_draft_semantic_ir_profile(self) -> None:
         parsed = {
             "schema_version": "profile_bootstrap_v1",

@@ -723,6 +723,31 @@ def build_profile_bootstrap_review_messages(
     ]
 
 
+_ARG_ROLE_RE = re.compile(r"^[a-z][a-z0-9_]{0,31}$")
+
+
+def _normalize_profile_bootstrap_arg_roles(parsed: dict[str, Any]) -> dict[str, Any]:
+    """Keep profile arg slots as structural role labels, not prose/value dumps."""
+    predicates = parsed.get("candidate_predicates", [])
+    if not isinstance(predicates, list):
+        return parsed
+    for item in predicates:
+        if not isinstance(item, dict):
+            continue
+        args = item.get("args", [])
+        if not isinstance(args, list):
+            item["args"] = []
+            continue
+        normalized: list[str] = []
+        for index, arg in enumerate(args, start=1):
+            role = str(arg or "").strip()
+            if not _ARG_ROLE_RE.match(role):
+                role = f"arg_{index}"
+            normalized.append(role)
+        item["args"] = normalized
+    return parsed
+
+
 def parse_profile_bootstrap_json(text: str) -> tuple[dict[str, Any] | None, str]:
     raw = str(text or "").strip()
     if not raw:
@@ -741,7 +766,7 @@ def parse_profile_bootstrap_json(text: str) -> tuple[dict[str, Any] | None, str]
         return None, "json_not_object"
     if parsed.get("schema_version") != "profile_bootstrap_v1":
         return None, "wrong_schema_version"
-    return parsed, ""
+    return _normalize_profile_bootstrap_arg_roles(parsed), ""
 
 
 def parse_profile_bootstrap_review_json(text: str) -> tuple[dict[str, Any] | None, str]:
