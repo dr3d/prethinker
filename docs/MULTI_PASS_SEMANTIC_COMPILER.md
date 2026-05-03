@@ -251,6 +251,13 @@ GLT-039 unions the council threshold and veto branches. The accumulated surface
 can now say both that the support threshold was met and that the budget-veto
 branch failed the proposal, while the final-passage probe remains empty.
 
+GLT-040 adds a restraint guard: rule-acquisition passes may not receive credit
+for re-emitting rules already present in their admitted backbone context. A
+final-outcome lens over the council branch surface declined to emit a generic
+`council_vote` failure rule because the source-stated outcome was already
+represented by the budget-veto branch. This keeps semantic parallax from
+becoming semantic echo.
+
 ## Open Problems
 
 - Pass planner: the router should choose lenses and source spans instead of

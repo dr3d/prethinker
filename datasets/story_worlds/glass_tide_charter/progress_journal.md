@@ -1147,3 +1147,37 @@ the proposal nevertheless failed under the budget-veto branch
 
 The next frontier is a final outcome lens that joins intermediate conditions
 without collapsing them into one prompt-owned conclusion too early.
+
+## GLT-040 - Final Outcome Lens Restraint And Duplicate-Rule Guard
+
+- Timestamp: `2026-05-03T12:27:50Z`
+- Rule artifact: `tmp/domain_bootstrap_file/domain_bootstrap_file_20260503T122750847064Z_story-rules_qwen-qwen3-6-35b-a3b.json`
+- Mode: `council_final_outcome_lens_duplicate_guard`
+- Rule class: `final_outcome`
+
+### Result
+
+- New harness guard: rule-acquisition passes may not receive credit for
+  re-emitting rules already present in the admitted backbone.
+- The final-outcome lens emitted `0` candidate operations after seeing that
+  the source-stated veto rule was already present in the council branch surface.
+- Runtime load errors: `0`.
+- Promotion-ready rules: `0`.
+- Positive final-outcome probe:
+  `derived_status(copper_rails_proposal, failed, council_vote).` -> `0/1`.
+- Negative final-passage probe:
+  `derived_status(copper_rails_proposal, passed, council_vote).` -> `1/1`.
+
+### Lesson
+
+GLT-040 is a useful restraint result. Before the guard, the model re-emitted the
+two existing branch rules and the harness could count them as admitted rule
+surface even though the pass added no new semantics. After the guard and prompt
+policy, the model declined to emit a generic final `council_vote` status because
+the source-stated outcome was already represented as the budget-veto branch.
+
+That is the right bias. Semantic parallax should accumulate independent safe
+views, not reward echo. The next final-outcome work should require either an
+explicit source sentence that names the final status or a deterministic,
+auditable composition policy that says when branch statuses may be projected
+into a broader outcome label.

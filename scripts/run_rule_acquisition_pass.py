@@ -502,6 +502,7 @@ def _run_rule_pass(
             "policy": [
                 "These admitted clauses are context for rule bodies and anchors, not raw evidence by themselves.",
                 "Do not re-emit or rewrite these clauses as facts.",
+                "Do not re-emit existing backbone rules; add only new rule clauses.",
                 "Use their predicate names and atoms when writing rule clauses.",
             ],
         },
@@ -562,17 +563,25 @@ def _run_rule_pass(
         predicate_contracts=predicate_contracts,
     )
     diagnostics = mapped.get("admission_diagnostics", {}) if isinstance(mapped, dict) else {}
+    raw_rules = _derived_head_rules(mapped.get("rules", []))
+    rules, duplicate_backbone_rules = _drop_backbone_duplicate_rules(raw_rules, backbone_rules)
+    warnings_out = list(warnings)
+    if duplicate_backbone_rules:
+        warnings_out.append(f"duplicate_backbone_rule_skipped:{len(duplicate_backbone_rules)}")
     return {
         "ok": bool(isinstance(parsed, dict) and parsed.get("schema_version") == "source_pass_ops_v1"),
         "mode": "rule_acquisition_pass",
         "model_decision": ir.get("decision", ""),
         "projected_decision": diagnostics.get("projected_decision", ""),
-        "admitted_count": int(diagnostics.get("admitted_count", 0) or 0),
-        "skipped_count": int(diagnostics.get("skipped_count", 0) or 0),
-        "warnings": warnings,
+        "admitted_count": len(mapped.get("facts", [])) + len(rules) + len(mapped.get("queries", [])),
+        "mapper_admitted_count": int(diagnostics.get("admitted_count", 0) or 0),
+        "skipped_count": int(diagnostics.get("skipped_count", 0) or 0) + len(duplicate_backbone_rules),
+        "duplicate_backbone_rule_count": len(duplicate_backbone_rules),
+        "duplicate_backbone_rules": duplicate_backbone_rules,
+        "warnings": warnings_out,
         "admission_diagnostics": diagnostics,
         "facts": mapped.get("facts", []),
-        "rules": _derived_head_rules(mapped.get("rules", [])),
+        "rules": rules,
         "queries": mapped.get("queries", []),
         "self_check": ir.get("self_check", {}),
         "source_pass_ops": parsed if isinstance(parsed, dict) else {},
@@ -617,6 +626,22 @@ def _derived_head_rules(rules: Any) -> list[str]:
     return kept
 
 
+def _drop_backbone_duplicate_rules(rules: list[str], backbone_rules: list[str]) -> tuple[list[str], list[str]]:
+    backbone_keys = {_clause_key(rule) for rule in backbone_rules}
+    kept: list[str] = []
+    duplicates: list[str] = []
+    for rule in rules:
+        if _clause_key(rule) in backbone_keys:
+            duplicates.append(rule)
+        else:
+            kept.append(rule)
+    return kept, duplicates
+
+
+def _clause_key(clause: str) -> str:
+    return re.sub(r"\s+", " ", str(clause).strip().rstrip("."))
+
+
 def _rule_head_name(rule: str) -> str:
     head = str(rule).split(":-", 1)[0].strip()
     match = re.match(r"^([a-z_][a-z0-9_]*)\s*\(", head)
@@ -637,6 +662,7 @@ def _rule_guidance_context(*, target: int, rule_class: str, compact: bool) -> li
         "Emit only operation='rule' candidate_operations. Do not emit assert/retract/query operations.",
         f"Hard cap: emit at most {target} candidate_operations total. Fewer is better than JSON overflow.",
         "Only emit rules explicitly supported by raw_source_text.",
+        "Do not re-emit an existing_admitted_backbone rule. Use those rules as body support or leave the pass empty.",
         "Every rule operation must include candidate_operations[].clause with one executable single-line Prolog-style clause.",
         "Use only predicate names and arities in allowed_predicates. The mapper will reject clauses outside this palette.",
         "Head variables must appear in the body. Prolog variables must start uppercase; lowercase tokens are constants.",
