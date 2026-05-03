@@ -112,9 +112,10 @@ def summarize_group(group: dict[str, Any]) -> dict[str, Any]:
     row_summaries: list[dict[str, Any]] = []
     best_counts: Counter[str] = Counter()
     for row_id in all_ids:
+        present_labels = [label for label in labels if row_id in rows_by_label[label]]
         verdicts = {
-            label: row_verdict(rows_by_label[label].get(row_id, {}))
-            for label in labels
+            label: row_verdict(rows_by_label[label][row_id])
+            for label in present_labels
         }
         scores = {label: VERDICT_SCORE.get(verdict, -1) for label, verdict in verdicts.items()}
         best_score = max(scores.values()) if scores else -1
@@ -130,6 +131,8 @@ def summarize_group(group: dict[str, Any]) -> dict[str, Any]:
                 "id": row_id,
                 "question": row_question(rows_by_label, row_id, labels),
                 "verdicts": verdicts,
+                "present_labels": present_labels,
+                "absent_labels": [label for label in labels if label not in present_labels],
                 "best_verdict": best_verdict,
                 "best_labels": best_labels,
                 "volatile": volatile,
@@ -260,7 +263,14 @@ def render_group(group: dict[str, Any]) -> list[str]:
         if not isinstance(row, dict) or not row.get("volatile"):
             continue
         verdicts = row.get("verdicts", {}) if isinstance(row.get("verdicts"), dict) else {}
-        verdict_text = ", ".join(f"{label}:{verdicts.get(label, '')}" for label in labels)
+        absent = set(row.get("absent_labels", [])) if isinstance(row.get("absent_labels"), list) else set()
+        verdict_parts = []
+        for label in labels:
+            if label in absent:
+                verdict_parts.append(f"{label}:not_run")
+            else:
+                verdict_parts.append(f"{label}:{verdicts.get(label, '')}")
+        verdict_text = ", ".join(verdict_parts)
         notes: list[str] = []
         if row.get("baseline_rescued"):
             notes.append("rescued")

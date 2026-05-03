@@ -71,6 +71,55 @@ The evidence-bundle planner:
 
 `--evidence-bundle-context-filter` uses predicates from the LLM-owned plan to compact `relevant_clauses` before the normal Semantic IR QA compiler runs. BTC-026 showed the idea can rescue focused hard rows, but replacing the broad clause view too aggressively can lose partial support elsewhere. The likely next version should keep a small broad-context floor and add focused clauses on top.
 
+## Evidence-Mode Selection
+
+Avalon AG-007 adds a row-level selector over already-executed evidence modes.
+This is different from rerunning compilation and different from a diagnostic
+perfect selector.
+
+The selector sees:
+
+- the question;
+- the mode labels;
+- planned queries;
+- executed query results;
+- bounded structured row samples.
+
+The selector does **not** see:
+
+- source prose;
+- answer keys;
+- reference answers;
+- judge labels;
+- failure-surface labels;
+- gold KBs.
+
+The first Avalon run compared three evidence modes:
+
+```text
+baseline:             25 exact / 12 partial / 3 miss
+postgate_rule_union:  27 exact / 10 partial / 3 miss
+focused_context:      29 exact /  7 partial / 4 miss
+```
+
+The non-oracle selector produced:
+
+```text
+31 exact / 7 partial / 2 miss
+selected best available mode on 38/40 rows
+perfect-selector upper bound: 32 exact / 7 partial / 1 miss
+```
+
+This is the first strong evidence that safe accumulated surfaces can be
+activated row-by-row instead of globally. The model owns evidence-mode choice,
+but it only chooses among already admitted/query-only evidence bundles. It
+cannot write, read the answer key, or bypass the mapper.
+
+One important operational lesson: selector evidence must include enough
+structured result rows. A five-row sample hid decisive support in wide result
+tables and scored `28 exact / 9 partial / 3 miss`; increasing the sample to
+sixteen rows produced the `31 exact` result.
+
 `--classify-failure-surfaces` adds a structured diagnostic pass after judging non-exact rows. It sees the reference answer, compiled KB inventory, admitted clauses, emitted queries, and query results. It does not see the raw source document and it cannot write. Its labels are:
 
 - `compile_surface_gap`

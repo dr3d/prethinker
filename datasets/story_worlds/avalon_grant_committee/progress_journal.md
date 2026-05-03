@@ -272,3 +272,114 @@ activation can still shift query planning. The next general mechanism should
 activate alternate evidence/rule surfaces only when pre-judge structural signals
 show near-miss risk, while preserving baseline-like rows that already have
 strong direct evidence.
+
+## Run AG-007 - Non-Oracle Evidence Mode Selector
+
+- Timestamp: `2026-05-03T18:46Z`
+- Evidence lane: `diagnostic_replay`
+- Model: `qwen/qwen3.6-35b-a3b`
+- Mode: LLM-owned selector over three already-executed QA evidence modes:
+  baseline, post-gate rule union, and focused evidence-context QA.
+
+### Method
+
+New selector harness:
+
+```text
+scripts/select_qa_mode_without_oracle.py
+```
+
+The selector receives only:
+
+```text
+question
+mode labels
+planned queries
+executed query results
+small structured row samples
+```
+
+It does **not** receive:
+
+```text
+source prose
+answer key
+reference answer
+judge label
+failure-surface label
+gold KB
+```
+
+Python packages structured evidence and scores the selected mode after the
+selection. It does not interpret source language or derive answers.
+
+### Artifacts
+
+- Focused-context full QA:
+  `tmp/cold_baselines/avalon_grant_committee/selector_probe_full/domain_bootstrap_qa_20260503T183704170227Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Three-mode comparison:
+  `tmp/cold_baselines/avalon_grant_committee/selector_probe_full/avalon_query_modes_comparison.md`
+- Selector run:
+  `tmp/cold_baselines/avalon_grant_committee/selector_probe_full/selector_full_sample16.json`
+- Selector report:
+  `tmp/cold_baselines/avalon_grant_committee/selector_probe_full/selector_full_sample16.md`
+
+### Result
+
+Mode scores:
+
+```text
+baseline:             25 exact / 12 partial / 3 miss
+postgate_rule_union:  27 exact / 10 partial / 3 miss
+focused_context:      29 exact /  7 partial / 4 miss
+```
+
+Diagnostic perfect-selector upper bound:
+
+```text
+32 exact / 7 partial / 1 miss
+```
+
+Non-oracle selector result:
+
+```text
+31 exact / 7 partial / 2 miss
+selected best available mode on 38/40 rows
+selector errors: 0
+write proposals: 0
+```
+
+The first selector pass used only five sampled rows per query result and scored
+`28 exact / 9 partial / 3 miss`. Widening the structured evidence sample to
+sixteen rows fixed hidden-support failures on wide result tables and raised the
+selector to `31 exact`.
+
+### Lesson
+
+AG-007 is the first strong row-level activation result. Safe accumulated
+surfaces do not need to be globally activated. A separate selector can choose
+among already-executed query-evidence modes without reading the answer key or
+source document.
+
+This turns the earlier perfect-selector measurement into a plausible runtime
+shape:
+
+```text
+compile surface A
+compile/rule/query surface B
+focused evidence surface C
+  -> strip oracle/judge/source fields
+  -> LLM selector chooses evidence mode
+  -> answer from selected support bundle
+```
+
+The remaining misses are informative:
+
+- `q003`: the phrase "why was the decision deferred" is scope-ambiguous between
+  the procedural quorum/recusal reason and the substantive Rule 2 dispute.
+- `q011`: the selector overvalued extra direct quorum evidence and undervalued
+  the more answer-complete rule text bundle.
+
+Those failures point to selector calibration, not unsafe admission. The
+architecture gain is that row-level activation can be model-owned while the
+truth boundary remains unchanged.
