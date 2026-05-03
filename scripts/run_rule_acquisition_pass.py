@@ -329,6 +329,8 @@ def main() -> int:
                 "runtime_rule_errors": len(runtime_trial.get("rule_load_errors", [])) if runtime_trial else None,
                 "firing_rules": runtime_trial.get("firing_rule_count") if runtime_trial else None,
                 "promotion_ready_rules": runtime_trial.get("promotion_ready_rule_count") if runtime_trial else None,
+                "composition_ready_rules": runtime_trial.get("composition_ready_rule_count") if runtime_trial else None,
+                "composition_rescued_rules": runtime_trial.get("composition_rescued_rule_count") if runtime_trial else None,
                 "unsupported_body_goals": runtime_trial.get("unsupported_body_goal_count") if runtime_trial else None,
                 "positive_probe_passes": runtime_trial.get("positive_probe_pass_count") if runtime_trial else None,
                 "negative_probe_passes": runtime_trial.get("negative_probe_pass_count") if runtime_trial else None,
@@ -769,7 +771,32 @@ def _runtime_trial(
             rule_load_errors.append(f"{rule}: {result.get('message', result)}")
     for item in isolated_derived_queries:
         item["lifecycle_status"] = _rule_trial_item_lifecycle(item)
+    composition_derived_queries = [
+        _composition_rule_trial_item(
+            rule=rule,
+            sibling_rules=loaded_rules,
+            facts=facts,
+            backbone_rules=backbone_rules,
+            fact_signature_counts=fact_signature_counts,
+        )
+        for rule in loaded_rules
+    ]
+    for item in composition_derived_queries:
+        item["lifecycle_status"] = _rule_trial_item_lifecycle(item)
     promotion_ready_rule_count = sum(1 for item in isolated_derived_queries if _rule_trial_item_promotion_ready(item))
+    composition_ready_rule_count = sum(
+        1 for item in composition_derived_queries if _rule_trial_item_promotion_ready(item)
+    )
+    isolated_ready_rules = {
+        str(item.get("rule", "")).strip()
+        for item in isolated_derived_queries
+        if _rule_trial_item_promotion_ready(item)
+    }
+    composition_ready_rules = {
+        str(item.get("rule", "")).strip()
+        for item in composition_derived_queries
+        if _rule_trial_item_promotion_ready(item)
+    }
     positive_probe_results = _probe_queries(runtime, positive_queries or [], expect_rows=True)
     negative_probe_results = _probe_queries(runtime, negative_queries or [], expect_rows=False)
     unexpected_solution_count = sum(
@@ -787,11 +814,18 @@ def _runtime_trial(
         "loaded_rule_examples": loaded_rules[:20],
         "trial_scope": "isolated_rule_for_promotion_combined_rules_for_probes",
         "derived_head_queries": isolated_derived_queries,
+        "composition_head_queries": composition_derived_queries,
         "combined_head_queries": combined_derived_queries,
         "firing_rule_count": sum(1 for item in isolated_derived_queries if int(item.get("num_rows", 0) or 0) > 0),
+        "composition_firing_rule_count": sum(
+            1 for item in composition_derived_queries if int(item.get("num_rows", 0) or 0) > 0
+        ),
         "high_fanout_rule_count": sum(1 for item in isolated_derived_queries if int(item.get("num_rows", 0) or 0) > 5),
         "promotion_ready_rule_count": promotion_ready_rule_count,
+        "composition_ready_rule_count": composition_ready_rule_count,
+        "composition_rescued_rule_count": len(composition_ready_rules - isolated_ready_rules),
         "lifecycle_counts": _rule_lifecycle_counts(isolated_derived_queries, rule_load_errors),
+        "composition_lifecycle_counts": _rule_lifecycle_counts(composition_derived_queries, rule_load_errors),
         "dormant_rule_count": sum(1 for item in isolated_derived_queries if int(item.get("num_rows", 0) or 0) == 0),
         "unsupported_body_signature_count": sum(
             len(item.get("unsupported_body_signatures", []))
@@ -821,7 +855,51 @@ def _runtime_trial(
             and all(bool(item.get("passed", False)) for item in positive_probe_results)
             and all(bool(item.get("passed", False)) for item in negative_probe_results)
         ),
+        "composition_probe_adjusted_promotion_ready": bool(
+            composition_ready_rule_count > 0
+            and all(bool(item.get("passed", False)) for item in positive_probe_results)
+            and all(bool(item.get("passed", False)) for item in negative_probe_results)
+        ),
     }
+
+
+def _composition_rule_trial_item(
+    *,
+    rule: str,
+    sibling_rules: list[str],
+    facts: list[str],
+    backbone_rules: list[str],
+    fact_signature_counts: dict[str, int],
+) -> dict[str, Any]:
+    target_head_signature = _clause_head_signature(rule)
+    dependency_signatures = {
+        signature
+        for signature in _rule_body_signatures(rule)
+        if signature.split("/", 1)[0].startswith("derived_")
+    }
+    dependency_rules = [
+        sibling
+        for sibling in sibling_rules
+        if sibling != rule
+        and _clause_head_signature(sibling) in dependency_signatures
+        and _clause_head_signature(sibling) != target_head_signature
+    ]
+    item = _isolated_rule_trial_item(
+        rule=rule,
+        facts=facts,
+        backbone_rules=[*backbone_rules, *dependency_rules],
+        fact_signature_counts=fact_signature_counts,
+    )
+    item["trial_scope"] = "composition_dependency_rule"
+    item["dependency_rule_count"] = len(dependency_rules)
+    item["dependency_rule_examples"] = dependency_rules[:10]
+    item["dependency_signatures"] = sorted(dependency_signatures)
+    item["same_head_sibling_rules_excluded"] = [
+        sibling
+        for sibling in sibling_rules
+        if sibling != rule and _clause_head_signature(sibling) == target_head_signature
+    ][:10]
+    return item
 
 
 def _isolated_rule_trial_item(

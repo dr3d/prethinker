@@ -258,6 +258,22 @@ final-outcome lens over the council branch surface declined to emit a generic
 represented by the budget-veto branch. This keeps semantic parallax from
 becoming semantic echo.
 
+The rule verifier now also distinguishes **isolated readiness** from
+**dependency-composed readiness**. Isolated readiness tests each rule by itself
+against the backbone so same-head siblings cannot make a dormant rule look
+successful. Dependency-composed readiness then retests the rule with only
+upstream sibling rules whose heads appear in the target rule body, while still
+excluding same-head siblings. This lets a final rule depend on an intermediate
+condition such as:
+
+```prolog
+derived_condition(Proposal, support_threshold_met, council_vote).
+```
+
+without letting another `derived_status/3` rule satisfy the target head by
+accident. The deterministic union promotion filter now keeps rules that are
+promotion-ready under either isolated or dependency-composed trial.
+
 ## Open Problems
 
 - Pass planner: the router should choose lenses and source spans instead of
@@ -288,6 +304,10 @@ becoming semantic echo.
   status/evidence/temporal predicates to fire without inventing facts.
 - Conflict-aware union: multiple admitted lenses may produce compatible
   distinctions, synonym drift, or direct conflicts.
+- Rule composition: final-outcome rules need explicit dependency-aware
+  promotion trials. The verifier can now rescue rules that depend on upstream
+  derived conditions, but the next fixture should stress longer chains,
+  branch conflicts, and final-status projection policy.
 - Metrics: track QA lift per admitted clause, duplicate rate, conflict rate,
   firing-rule count, high-fanout count, and rule-derived answer count.
 - Lens contribution accounting: every flat-plus-focused compile should record

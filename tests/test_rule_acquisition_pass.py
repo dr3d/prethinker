@@ -1,4 +1,5 @@
-from scripts.run_rule_acquisition_pass import _drop_backbone_duplicate_rules
+from scripts.run_rule_acquisition_pass import _drop_backbone_duplicate_rules, _runtime_trial
+from scripts.union_domain_bootstrap_compiles import _promotion_ready_rules_from_trial
 
 
 def test_drop_backbone_duplicate_rules_ignores_whitespace_and_periods() -> None:
@@ -18,3 +19,51 @@ def test_drop_backbone_duplicate_rules_ignores_whitespace_and_periods() -> None:
     assert duplicates == [
         "derived_status(copper_rails_proposal, failed, council_budget_veto) :- proposal(copper_rails_proposal)."
     ]
+
+
+def test_runtime_trial_marks_dependency_composed_rules_ready() -> None:
+    trial = _runtime_trial(
+        facts=[
+            "base_fact(alpha).",
+            "ok(alpha).",
+        ],
+        backbone_rules=[],
+        rule_lens_rules=[
+            "derived_condition(Item, ready, demo_scope) :- base_fact(Item).",
+            "derived_status(Item, final, demo_scope) :- derived_condition(Item, ready, demo_scope), ok(Item).",
+        ],
+        positive_queries=["derived_status(alpha, final, demo_scope)."],
+        negative_queries=["derived_status(beta, final, demo_scope)."],
+    )
+
+    isolated = {item["rule"]: item for item in trial["derived_head_queries"]}
+    composed = {item["rule"]: item for item in trial["composition_head_queries"]}
+    final_rule = "derived_status(Item, final, demo_scope) :- derived_condition(Item, ready, demo_scope), ok(Item)."
+
+    assert trial["promotion_ready_rule_count"] == 1
+    assert trial["composition_ready_rule_count"] == 2
+    assert trial["composition_rescued_rule_count"] == 1
+    assert isolated[final_rule]["num_rows"] == 0
+    assert composed[final_rule]["num_rows"] == 1
+    assert composed[final_rule]["dependency_rule_count"] == 1
+    assert trial["positive_probe_pass_count"] == 1
+    assert trial["negative_probe_pass_count"] == 1
+
+
+def test_union_promotion_filter_keeps_composition_ready_rules() -> None:
+    final_rule = "derived_status(Item, final, demo_scope) :- derived_condition(Item, ready, demo_scope), ok(Item)."
+    runtime_trial = {
+        "derived_head_queries": [{"rule": final_rule, "status": "no_results", "num_rows": 0}],
+        "composition_head_queries": [
+            {
+                "rule": final_rule,
+                "status": "success",
+                "num_rows": 1,
+                "unsupported_body_signatures": [],
+                "unsupported_body_goals": [],
+                "unsupported_body_fragments": [],
+            }
+        ],
+    }
+
+    assert _promotion_ready_rules_from_trial(runtime_trial) == {final_rule}

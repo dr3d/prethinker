@@ -82,6 +82,12 @@ Glass Tide is now exercising the harder rule-ingestion frontier:
   re-emitting existing backbone rules. The council final-outcome lens declined
   to invent a broader `council_vote` failure rule when the budget-veto branch
   already represented the source-stated outcome.
+- The rule verifier now has dependency-composed promotion trials. A rule is
+  still tested in isolation first, but it can also be retested with upstream
+  sibling rules whose heads appear in its body while same-head siblings remain
+  excluded. This is the next step toward safe final-outcome composition:
+  intermediate conditions may support later rules without letting a neighboring
+  final-status rule fake success.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 

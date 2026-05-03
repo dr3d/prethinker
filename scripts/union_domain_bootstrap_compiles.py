@@ -93,11 +93,7 @@ def main() -> int:
             negative_queries=[str(item) for item in args.negative_query if str(item).strip()],
         )
         if bool(args.drop_non_promotion_ready_rules):
-            ready_rules = {
-                str(item.get("rule", "")).strip()
-                for item in runtime_trial.get("derived_head_queries", [])
-                if isinstance(item, dict) and _rule_trial_item_promotion_ready(item)
-            }
+            ready_rules = _promotion_ready_rules_from_trial(runtime_trial)
             rules = [rule for rule in rules if rule in ready_rules]
             runtime_trial = _runtime_trial(
                 facts=trial_facts,
@@ -183,6 +179,8 @@ def main() -> int:
                 "queries": len(queries),
                 "runtime_load_errors": len(load_errors),
                 "trial_promotion_ready_rules": runtime_trial.get("promotion_ready_rule_count") if runtime_trial else None,
+                "trial_composition_ready_rules": runtime_trial.get("composition_ready_rule_count") if runtime_trial else None,
+                "trial_composition_rescued_rules": runtime_trial.get("composition_rescued_rule_count") if runtime_trial else None,
                 "trial_positive_probe_passes": runtime_trial.get("positive_probe_pass_count") if runtime_trial else None,
                 "trial_negative_probe_passes": runtime_trial.get("negative_probe_pass_count") if runtime_trial else None,
                 "trial_probe_adjusted_promotion_ready": runtime_trial.get("probe_adjusted_promotion_ready") if runtime_trial else None,
@@ -197,6 +195,20 @@ def main() -> int:
 def _compile_items(record: dict[str, Any], key: str) -> list[str]:
     source_compile = record.get("source_compile") if isinstance(record.get("source_compile"), dict) else {}
     return [str(item).strip() for item in source_compile.get(key, []) if str(item).strip()]
+
+
+def _promotion_ready_rules_from_trial(runtime_trial: dict[str, Any]) -> set[str]:
+    ready_rules: set[str] = set()
+    for key in ("derived_head_queries", "composition_head_queries"):
+        rows = runtime_trial.get(key, [])
+        if not isinstance(rows, list):
+            continue
+        ready_rules.update(
+            str(item.get("rule", "")).strip()
+            for item in rows
+            if isinstance(item, dict) and _rule_trial_item_promotion_ready(item)
+        )
+    return {rule for rule in ready_rules if rule}
 
 
 def _source_compile_items(records: list[dict[str, Any]], key: str) -> list[str]:
