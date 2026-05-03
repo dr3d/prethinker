@@ -76,6 +76,9 @@ Glass Tide is now exercising the harder rule-ingestion frontier:
 - GLT-038 fixed that shape: the aggregation lens now emits
   `derived_condition(Proposal, support_threshold_met, council_vote)` and leaves
   final passage to a later priority/override branch.
+- GLT-039 unions the council threshold and veto branches: the accumulated
+  surface proves both "threshold met" and "budget veto failure" while still not
+  deriving final passage.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 
@@ -105,10 +108,10 @@ That is the Glass Tide plus CE frontier.
 
 The next work should stay on the sharp edges:
 
-1. **Glass Tide rule composition.** Tax, salvage, quarantine, council veto, and
-   council support-threshold conditions now have promotion-ready slices. The
-   next frontier is composing intermediate conditions with priority/override
-   branches without overclaiming final state.
+1. **Glass Tide final-outcome composition.** Tax, salvage, quarantine, council
+   veto, and council support-threshold conditions now have promotion-ready
+   slices. The next frontier is a final outcome lens that joins intermediate
+   conditions without collapsing provenance or overclaiming state.
 2. **Rule probe discipline.** Recent preflight runs show that a rule can be
    body-supported but fail under the wrong scope atom, can become dormant by
    using lowercase placeholders such as `warden` and `repair_order`, or can look

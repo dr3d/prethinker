@@ -247,6 +247,10 @@ GLT-038 adds that intermediate condition surface. `derived_condition/3` lets an
 aggregation lens derive `support_threshold_met` without claiming the proposal
 passed. This creates a cleaner input for later rule composition.
 
+GLT-039 unions the council threshold and veto branches. The accumulated surface
+can now say both that the support threshold was met and that the budget-veto
+branch failed the proposal, while the final-passage probe remains empty.
+
 ## Open Problems
 
 - Pass planner: the router should choose lenses and source spans instead of

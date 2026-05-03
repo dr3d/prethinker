@@ -140,7 +140,9 @@ The same pattern appears across fixtures:
   branches. GLT-037 added `support_count_at_least/2`, but the rule lens tried
   to mix threshold counting with final passage and unsupported cut/disjunction.
   GLT-038 added `derived_condition/3` and converted the count branch into a
-  clean support-threshold condition without overclaiming final passage.
+  clean support-threshold condition without overclaiming final passage. GLT-039
+  then unioned threshold and veto branches so both facts can coexist without
+  forcing a premature final outcome.
 - **Promotion-ready is not durable.** Glass Tide now separates rule lifecycle
   labels: candidate, mapper-admitted, runtime-loadable, firing,
   promotion-ready, and durable. Durable remains `0` in these trials; the point is

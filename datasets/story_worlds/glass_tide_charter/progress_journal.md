@@ -1091,3 +1091,59 @@ emergency override absent/present
 
 This keeps the count helper from overclaiming passage and creates a cleaner
 branch surface for future rule composition.
+
+## GLT-039 - Council Branch Surface Union
+
+- Timestamp: `2026-05-03T02:50:02Z`
+- Union artifact: `tmp/domain_bootstrap_file/domain_bootstrap_file_20260503T025002263625Z_glass-tide-council-branch-surface-glt039_qwen-qwen3-6-35b-a3b.json`
+- Mode: `council_branch_surface_union`
+- Source rule artifacts:
+  - `tmp/domain_bootstrap_file/domain_bootstrap_file_20260502T234927415542Z_glass-tide-council-veto-rule-union-glt036_qwen-qwen3-6-35b-a3b.json`
+  - `tmp/domain_bootstrap_file/domain_bootstrap_file_20260503T024802537900Z_glass-tide-council-aggregation-condition-glt038_qwen-qwen3-6-35b-a3b.json`
+
+### Result
+
+- No source prose read during union.
+- No new rules inferred during union.
+- `2` accumulated executable rules retained after promotion-readiness filtering.
+- Runtime rule load errors: `0`.
+- Promotion-ready rules: `2`.
+- Positive probes: `2/2`.
+- Negative probes: `1/1`.
+- Probe-adjusted promotion ready: `true`.
+
+Accumulated council branch rules:
+
+```prolog
+derived_status(Proposal, failed, council_budget_veto) :-
+    proposal(Proposal),
+    budget_matter(Proposal),
+    treasurer_veto(Proposal, _),
+    no_emergency_override(Proposal).
+
+derived_condition(Proposal, support_threshold_met, council_vote) :-
+    support_count_at_least(Proposal, 3).
+```
+
+Passing probes:
+
+```prolog
+derived_condition(copper_rails_proposal, support_threshold_met, council_vote).
+derived_status(copper_rails_proposal, failed, council_budget_veto).
+% and no rows for:
+derived_status(copper_rails_proposal, passed, council_vote).
+```
+
+### Lesson
+
+GLT-039 shows safe branch composition before final-rule composition. The
+aggregation branch and veto branch can coexist in one accumulated surface while
+preserving their epistemic distinction:
+
+```text
+the support threshold was met
+the proposal nevertheless failed under the budget-veto branch
+```
+
+The next frontier is a final outcome lens that joins intermediate conditions
+without collapsing them into one prompt-owned conclusion too early.
