@@ -102,10 +102,10 @@ Glass Tide is now exercising the harder rule-ingestion frontier:
   to `5`. This is the rule-side version of the APR lesson: safe accumulation is
   powerful, but global activation can perturb query planning. The next tool
   needs row-level activation or exact-answer protection.
-- Four new cold fixtures are admitted and awaiting baseline runs: Dulse Ledger,
-  Oxalis Recall, Sable Creek Budget, and Thornfield Variance. They extend the
-  next generalization sweep into customary trade ledgers, medical-device recall
-  governance, municipal budget votes, and zoning variance procedure.
+- Dulse Ledger is now scored cold at `27 exact / 7 partial / 6 miss`, with
+  `70` admitted operations, `21` skips, `0` runtime errors, and `0` write
+  proposals during QA. Oxalis Recall, Sable Creek Budget, and Thornfield
+  Variance remain admitted and pending baseline runs.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 
@@ -124,9 +124,9 @@ Clarification Eagerness Trap is exercising the companion governance frontier:
 
 The cold generalization lane is now active:
 
-- six newly admitted source-only fixtures produced `162 exact / 51 partial /
-  97 miss` across `310` QA items;
-- the cross-fixture failure rollup shows `107` compile-surface gaps, `23`
+- seven newly admitted source-only fixtures produced `189 exact / 58 partial /
+  103 miss` across `350` QA items;
+- the cross-fixture failure rollup shows `116` compile-surface gaps, `27`
   hybrid/reasoning gaps, `15` query-surface gaps, and `3` answer-surface gaps;
 - Avalon Grant Committee joins the cold lane at `25 exact / 12 partial /
   3 miss` over `40` questions, with `114` admitted operations, `6` skips,
@@ -191,7 +191,7 @@ That is the Glass Tide plus CE frontier.
 
 The next work should stay on the sharp edges:
 
-0. **Cold generalization baselines.** Six newly admitted fixtures now test
+0. **Cold generalization baselines.** Seven newly admitted fixtures now test
    whether semantic parallax generalizes beyond the research stories that shaped
    the harness. The current aggregate says compile-surface coverage is the
    largest general issue, followed by hybrid/reasoning support. Next changes
@@ -208,8 +208,8 @@ The next work should stay on the sharp edges:
    or a fallback ensemble policy. The new query-mode comparison report shows a
    diagnostic perfect-selector upper bound of `56` exact across 80 compared
    rows, versus `46` baseline exacts, but that bound is for research only and
-   must not become an oracle selector. The next unscored cold queue is Dulse
-   Ledger, Oxalis Recall, Sable Creek Budget, and Thornfield Variance.
+   must not become an oracle selector. The next unscored cold queue is Oxalis
+   Recall, Sable Creek Budget, and Thornfield Variance.
 1. **Glass Tide final-outcome composition.** Tax, salvage, quarantine, council
    veto, and council support-threshold conditions now have promotion-ready
    slices. The next frontier is a final outcome lens that joins intermediate

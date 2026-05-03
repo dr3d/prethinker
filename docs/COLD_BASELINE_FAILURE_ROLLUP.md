@@ -1,17 +1,17 @@
 # Cold Baseline Failure Rollup
 
-Generated: 2026-05-03T14:37:44+00:00
+Generated: 2026-05-03T15:32:07+00:00
 
 This report aggregates existing `cold_unseen` QA artifacts. It does not read
 source prose, gold KBs, oracle strategies, or answer-shaped profile material.
 
 ## Headline
 
-- Runs: `6`
-- Questions: `310`
-- Exact / partial / miss: `162` / `51` / `97`
-- Exact rate: `0.523`
-- Exact+partial rate: `0.687`
+- Runs: `7`
+- Questions: `350`
+- Exact / partial / miss: `189` / `58` / `103`
+- Exact rate: `0.540`
+- Exact+partial rate: `0.706`
 
 ## Run Table
 
@@ -19,6 +19,7 @@ source prose, gold KBs, oracle strategies, or answer-shaped profile material.
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
 | `AG-001` | avalon_grant_committee | 40 | 25 | 12 | 3 | 114 | 6 | 109 | 0 | `tmp\cold_baselines\avalon_grant_committee\domain_bootstrap_qa_20260503T143610001875Z_qa_qwen-qwen3-6-35b-a3b.json` |
 | `BLM-001` | black_lantern_maze | 40 | 27 | 7 | 6 | 299 | 28 | 299 | 0 | `tmp\cold_baselines\black_lantern_maze\domain_bootstrap_qa_20260503T060152766469Z_qa_qwen-qwen3-6-35b-a3b.json` |
+| `DL-001` | dulse_ledger | 40 | 27 | 7 | 6 | 70 | 21 | 52 | 0 | `tmp\cold_baselines\dulse_ledger\domain_bootstrap_qa_20260503T153106149780Z_qa_qwen-qwen3-6-35b-a3b.json` |
 | `CAL-001` | ledger_at_calders_reach | 110 | 65 | 9 | 36 | 187 | 23 | 180 | 0 | `tmp\cold_baselines\ledger_at_calders_reach\domain_bootstrap_qa_20260503T054553171055Z_qa_qwen-qwen3-6-35b-a3b.json` |
 | `RF-001` | ridgeline_fire | 40 | 17 | 10 | 13 | 133 | 27 | 130 | 0 | `tmp\cold_baselines\ridgeline_fire\domain_bootstrap_qa_20260503T051902240724Z_qa_qwen-qwen3-6-35b-a3b.json` |
 | `MMM-001` | three_moles_moon_marmalade_machine | 40 | 10 | 8 | 22 | 174 | 10 | 110 | 0 | `tmp\cold_baselines\three_moles\domain_bootstrap_qa_20260503T045525066737Z_qa_qwen-qwen3-6-35b-a3b.json` |
@@ -28,8 +29,8 @@ source prose, gold KBs, oracle strategies, or answer-shaped profile material.
 
 | Surface | Count | General next action |
 | --- | ---: | --- |
-| Compile | 107 | Improve lens coverage or acquisition passes; do not tune from one fixture alone. |
-| Hybrid/Reasoning | 23 | Add or exercise deterministic reasoning helpers, joins, set-difference, aggregation, or temporal substrate. |
+| Compile | 116 | Improve lens coverage or acquisition passes; do not tune from one fixture alone. |
+| Hybrid/Reasoning | 27 | Add or exercise deterministic reasoning helpers, joins, set-difference, aggregation, or temporal substrate. |
 | Query | 15 | Improve post-ingestion query support bundles over already admitted rows. |
 | Answer | 3 | Tighten answer normalization or judge/verbalization policy without changing ingestion. |
 
@@ -39,6 +40,7 @@ source prose, gold KBs, oracle strategies, or answer-shaped profile material.
 | --- | ---: | ---: | ---: | ---: | ---: |
 | `AG-001` | 11 | 2 | 2 | 0 | 0 |
 | `BLM-001` | 7 | 0 | 6 | 0 | 0 |
+| `DL-001` | 9 | 0 | 4 | 0 | 0 |
 | `CAL-001` | 37 | 6 | 2 | 0 | 0 |
 | `RF-001` | 12 | 5 | 6 | 0 | 0 |
 | `MMM-001` | 22 | 2 | 4 | 2 | 0 |
@@ -53,14 +55,14 @@ surface to work with.
 
 | Evidence state | Count |
 | --- | ---: |
-| `rows_returned` | 84 |
-| `partial_rows_returned` | 61 |
+| `rows_returned` | 92 |
+| `partial_rows_returned` | 66 |
 | `no_queries` | 3 |
 
 | Surface | Rows returned | No rows returned | Partial rows returned | No queries |
 | --- | ---: | ---: | ---: | ---: |
-| Compile | 62 | 0 | 42 | 3 |
-| Hybrid/Reasoning | 13 | 0 | 10 | 0 |
+| Compile | 66 | 0 | 47 | 3 |
+| Hybrid/Reasoning | 17 | 0 | 10 | 0 |
 | Query | 6 | 0 | 9 | 0 |
 | Answer | 3 | 0 | 0 | 0 |
 | Uncertain | 0 | 0 | 0 | 0 |
@@ -103,6 +105,15 @@ This is an index for choosing targeted replays. It is not a prompt source.
 | `BLM-001` | `q035` | miss | compile_surface_gap | `rows_returned`/22 rows | Query `claim_content` and `claim_status` predicates to retrieve the specific claim and its adoption status. |
 | `BLM-001` | `q036` | miss | compile_surface_gap | `rows_returned`/22 rows | The KB appears to lack a direct link between the 'unadopted' claim regarding Kai Morano and a 'finding' that explicitly states the tribunal rejected this specific allegation, or... |
 | `BLM-001` | `q037` | miss | compile_surface_gap | `rows_returned`/22 rows | Query `claim_status(claim_eli_kest_witness, Status)` and `claim_content(claim_eli_kest_witness, Content)` to verify the status of Eli's witness statement. |
+| `DL-001` | `q009` | miss | compile_surface_gap | `rows_returned`/1 rows | Check if the due date is stored in a different predicate (e.g., `due_date/3` or within `salt_provision/4` if it tracks terms) or if `debt_status/4` is intended to store status f... |
+| `DL-001` | `q014` | partial | compile_surface_gap | `rows_returned`/17 rows | Check ingestion logs for clauses related to 'storm_exception' or 'custom_exception' negation. If absent, this is a KB coverage gap. |
+| `DL-001` | `q019` | miss | compile_surface_gap | `partial_rows_returned`/5 rows | Ingest restitution/return facts for Entry 7 or rules deriving them from the apprentice_exception violation. |
+| `DL-001` | `q020` | miss | compile_surface_gap | `rows_returned`/4 rows | Ingest restitution/return obligations rules and facts linking Entry 3 to the specific return duties of Yara Duvall and Luca Cole. |
+| `DL-001` | `q028` | miss | compile_surface_gap | `partial_rows_returned`/20 rows | ingest_general_trade_predicate |
+| `DL-001` | `q030` | miss | compile_surface_gap | `rows_returned`/1 rows | Check for predicates like 'clerk_disclaimer/2' or 'belief_status/2' that encode the epistemic limitation of the observation. |
+| `DL-001` | `q032` | partial | compile_surface_gap | `partial_rows_returned`/13 rows | Ingest quantity facts for Entry 1 and the rule definition for counsel_custom threshold logic. |
+| `DL-001` | `q036` | miss | compile_surface_gap | `partial_rows_returned`/14 rows | The KB lacks the necessary meta-data or negative facts to support the reference answer. This is a knowledge gap in the compiled inventory. |
+| `DL-001` | `q040` | partial | compile_surface_gap | `partial_rows_returned`/7 rows | Investigate if the source document contains explicit statements linking Entry 1 to the Counsel Custom and the execution status of Entry 3's restitution. If these facts exist in... |
 | `CAL-001` | `q002` | miss | compile_surface_gap | `partial_rows_returned`/27 rows | Check if 'celia_voss' has a residence fact pointing to 'vesper_house' in the source document, or if a rule exists linking her to that location. |
 | `CAL-001` | `q003` | miss | compile_surface_gap | `rows_returned`/27 rows | Check if the source document contains a specific fact or rule defining the parent-child relationship between Celia Voss and Leona Voss that was not ingested or indexed correctly. |
 | `CAL-001` | `q010` | miss | compile_surface_gap | `rows_returned`/20 rows | Check source document for explicit 'spouse' or 'husband' relations between Mireya Sol Elling and Iain Elling. If present, the KB is missing this relation (compile_surface_gap).... |
@@ -153,12 +164,3 @@ This is an index for choosing targeted replays. It is not a prompt source.
 | `RF-001` | `q034` | miss | compile_surface_gap | `rows_returned`/2 rows | Ingest member appointment facts and affiliation/origin data for board members. |
 | `RF-001` | `q039` | partial | compile_surface_gap | `partial_rows_returned`/67 rows | Check source document for Elk Meadow evacuation order lifting timestamp. |
 | `MMM-001` | `q002` | miss | compile_surface_gap | `rows_returned`/1 rows | Investigate if the descriptive location of the kettle_house is encoded in a different predicate (e.g., `located_at(kettle_house, ...)` or a `says/3` statement describing it) or... |
-| `MMM-001` | `q004` | miss | compile_surface_gap | `rows_returned`/30 rows | Ingest rules or facts defining 'outsider' status or parentage relationships. |
-| `MMM-001` | `q005` | miss | compile_surface_gap | `rows_returned`/21 rows | Ingest or verify facts defining the kinship between Mina Moonbutton and the Burrow Mole characters. |
-| `MMM-001` | `q007` | miss | compile_surface_gap | `rows_returned`/24 rows | Check source document for 'counting doorbells', 'chasing a backward frog', and 'listening to a squeaking fence' to verify if they are present but missing from the KB. |
-| `MMM-001` | `q008` | partial | compile_surface_gap | `rows_returned`/12 rows | Check source document for clauses linking Moles to the creation of marmalade. |
-| `MMM-001` | `q009` | miss | compile_surface_gap | `rows_returned`/36 rows | Check source document for 'contains' or 'ingredient' facts. |
-| `MMM-001` | `q010` | miss | compile_surface_gap | `rows_returned`/24 rows | Check source document for causal rules linking Moles' departure to fog-leaves. |
-| `MMM-001` | `q011` | partial | compile_surface_gap | `rows_returned`/7 rows | Ingest the specific narrative clause linking brightness to the 'shine through whiskers' detail and the causal link to the delay. |
-| `MMM-001` | `q016` | miss | compile_surface_gap | `rows_returned`/1 rows | Check source document for ingestion of 'beetle-keys' facts or rules linking them to Mina's actions. |
-| `MMM-001` | `q017` | miss | compile_surface_gap | `rows_returned`/10 rows | Check if the KB contains a clause linking the key-swallowing event to the humming event or if the `says` fact is misattributed to the wrong event ID. |
