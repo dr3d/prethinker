@@ -748,3 +748,54 @@ promotion-ready rule != globally active rule
 The next selector/QA work should decide when a question needs the rule union and
 when the baseline evidence surface should remain dominant, especially for
 counterfactual questions.
+
+## Run AG-014 - Rule 8 Row-Level Activation Selector
+
+- Timestamp: `2026-05-03T23:44Z` through `2026-05-03T23:47Z`
+- Evidence lane: `diagnostic_replay`
+- Model: `qwen/qwen3.6-35b-a3b`
+- Mode: non-oracle selector over baseline QA evidence and AG-013 Rule 8 union
+  QA evidence.
+
+### Artifacts
+
+- Mode comparison:
+  `tmp/cold_baselines/avalon_grant_committee/union/avalon_rule8_mode_comparison.json`
+- Selector:
+  `tmp/cold_baselines/avalon_grant_committee/union/selector_rule8_direct.json`
+
+### Result
+
+Individual modes:
+
+```text
+baseline: 25 exact / 12 partial / 3 miss
+Rule 8 union: 26 exact / 12 partial / 2 miss
+perfect selector upper bound: 27 exact / 12 partial / 1 miss
+```
+
+Non-oracle selector:
+
+```text
+selected result: 27 exact / 11 partial / 2 miss
+selected best available mode: 39/40
+selector errors: 0
+```
+
+The lone non-best row was `q030`, where the best available mode was only
+partial.
+
+### Lesson
+
+This is a stronger activation result than global Rule 8 union alone. The
+selector beats both individual modes on exact count without seeing source prose,
+answer keys, judge labels, failure labels, or gold KBs. It also supports the
+activation doctrine from AG-013:
+
+```text
+rules can be promoted to a candidate evidence mode
+without becoming the only evidence mode
+```
+
+Row-level activation is now the practical bridge between safe rule acquisition
+and downstream QA usefulness.
