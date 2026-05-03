@@ -122,6 +122,10 @@ Glass Tide is now exercising the harder rule-ingestion frontier:
   operators are now skipped at rule admission, so the post-gate Section A replay
   retained only `3` executable clauses, including `2` promotion-ready
   helper-composed matching-fund branches and `0` unsupported body goals.
+- Unioning those post-gate Avalon rules into the AG-001 surface produced
+  `27 exact / 10 partial / 3 miss`, improving the older rule union's miss count
+  while preserving exact count. A diagnostic mode comparison shows a `29 exact`
+  upper bound, so row-level activation remains the next query-surface frontier.
 - Dulse Ledger is now scored cold at `27 exact / 7 partial / 6 miss`, Oxalis
   Recall scored `16 exact / 9 partial / 15 miss` despite `106` admitted
   operations and `0` skips, Sable Creek Budget scored `20 exact / 8 partial /

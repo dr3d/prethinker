@@ -238,6 +238,14 @@ phase, executable LLM-authored rules should compose safe helper predicates such
 as `number_greater_than/2` and `percent_at_least/3`, not invent low-level
 control semantics.
 
+When the post-gate Avalon rules were unioned into the AG-001 QA surface, the
+result was `27 exact / 10 partial / 3 miss`: the same exact count as the older
+rule union, but fewer misses. The remaining mode comparison still shows
+volatile rows and a diagnostic perfect-selector upper bound of `29 exact`.
+That is the next query-side lesson for multi-pass compilation: accumulated
+surfaces need row-level activation or fallback selection, not blind global
+activation.
+
 Promotion scoring now uses an isolated per-rule runtime: each rule is tested by
 itself against the backbone surface, so a sibling rule with the same derived
 head cannot make a dormant rule look firing. The accumulated rule surface is

@@ -233,3 +233,42 @@ arithmetic, equality, or comparison operators. Those constructs must be
 represented through deterministic helper predicates or later explicit support
 substrates. This moves non-helper branches out of the admitted-rule surface
 instead of relying only on the promotion verifier to mark them non-promotable.
+
+## Run AG-006 - Post-Gate Rule Union QA
+
+- Timestamp: `2026-05-03T17:12Z` through `2026-05-03T17:20Z`
+- Evidence lane: `diagnostic_replay`
+- Model: `qwen/qwen3.6-35b-a3b`
+- Mode: deterministic union of AG-001 and the post-gate AG-005
+  promotion-ready rules, followed by the same 40-question QA runner. The union
+  read no source prose, inferred no new clauses, and kept only
+  promotion-ready rules from the rule-lens artifact.
+
+### Artifacts
+
+- Union:
+  `tmp/cold_baselines/avalon_grant_committee/union/domain_bootstrap_file_20260503T171222999543Z_avalon-ag001-plus-postgate-rules_qwen-qwen3-6-35b-a3b.json`
+- QA:
+  `tmp/cold_baselines/avalon_grant_committee/union/domain_bootstrap_qa_20260503T172017844591Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Mode comparison:
+  `tmp/cold_baselines/avalon_grant_committee/union/avalon_rule_union_mode_comparison.md`
+
+### Result
+
+- Union surface: `109` facts, `2` rules, `0` runtime load errors.
+- QA: `27 exact / 10 partial / 3 miss` over `40` questions.
+- Compared with AG-004's older rule union, the post-gate union kept the same
+  exact count while reducing misses from `5` to `3`.
+- Compared with AG-001 baseline, rule-union modes rescue `5` baseline
+  non-exact rows but can still regress `2` baseline-exact rows.
+- Diagnostic perfect-selector upper bound across baseline, old rule union, and
+  post-gate rule union: `29 exact / 9 partial / 2 miss`.
+
+### Lesson
+
+Mapper-side rule hygiene reduces harmful rule-surface perturbation but does not
+solve row-level selection. Safe accumulated rule surfaces are useful, yet global
+activation can still shift query planning. The next general mechanism should
+activate alternate evidence/rule surfaces only when pre-judge structural signals
+show near-miss risk, while preserving baseline-like rows that already have
+strong direct evidence.
