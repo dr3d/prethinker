@@ -31,6 +31,18 @@ All runs below used the same source-only semantic-parallax recipe:
 | `BLM-001` | Black Lantern Maze | 40 | 27 | 7 | 6 | 34 | 299 | 28 | 299 | 0 | 40 | 39 | 0 | 0 |
 | `AG-001` | Avalon Grant Committee | 40 | 25 | 12 | 3 | 37 | 114 | 6 | 109 | 0 | 40 | 40 | 0 | 0 |
 
+## Pending Cold Fixtures
+
+These fixtures are admitted but not yet scored. They should use the same
+source-only cold recipe before any assisted or diagnostic lane is created.
+
+| Fixture | Questions | Primary Pressure |
+| --- | ---: | --- |
+| Dulse Ledger | 40 | trade custom, witness validity, debt/offset state |
+| Oxalis Recall | 40 | recall classification, distributor compliance, corrective actions |
+| Sable Creek Budget | 40 | vote arithmetic, budget constraints, public-comment claims |
+| Thornfield Variance | 40 | zoning standards, notice defects, dimensional constraints |
+
 ## Failure Surface Snapshot
 
 | Run | Compile Gaps | Query Gaps | Hybrid Join Gaps | Answer Gaps |

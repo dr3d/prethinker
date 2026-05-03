@@ -102,6 +102,10 @@ Glass Tide is now exercising the harder rule-ingestion frontier:
   to `5`. This is the rule-side version of the APR lesson: safe accumulation is
   powerful, but global activation can perturb query planning. The next tool
   needs row-level activation or exact-answer protection.
+- Four new cold fixtures are admitted and awaiting baseline runs: Dulse Ledger,
+  Oxalis Recall, Sable Creek Budget, and Thornfield Variance. They extend the
+  next generalization sweep into customary trade ledgers, medical-device recall
+  governance, municipal budget votes, and zoning variance procedure.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 
@@ -204,7 +208,8 @@ The next work should stay on the sharp edges:
    or a fallback ensemble policy. The new query-mode comparison report shows a
    diagnostic perfect-selector upper bound of `56` exact across 80 compared
    rows, versus `46` baseline exacts, but that bound is for research only and
-   must not become an oracle selector.
+   must not become an oracle selector. The next unscored cold queue is Dulse
+   Ledger, Oxalis Recall, Sable Creek Budget, and Thornfield Variance.
 1. **Glass Tide final-outcome composition.** Tax, salvage, quarantine, council
    veto, and council support-threshold conditions now have promotion-ready
    slices. The next frontier is a final outcome lens that joins intermediate

@@ -30,6 +30,41 @@ VERIDIA9 = ROOT / "datasets" / "story_worlds" / "veridia9_supply_chain_patent_di
 RIDGELINE_FIRE = ROOT / "datasets" / "story_worlds" / "ridgeline_fire"
 CALDERS_REACH = ROOT / "datasets" / "story_worlds" / "ledger_at_calders_reach"
 AVALON_GRANT = ROOT / "datasets" / "story_worlds" / "avalon_grant_committee"
+DULSE_LEDGER = ROOT / "datasets" / "story_worlds" / "dulse_ledger"
+OXALIS_RECALL = ROOT / "datasets" / "story_worlds" / "oxalis_recall"
+SABLE_CREEK_BUDGET = ROOT / "datasets" / "story_worlds" / "sable_creek_budget"
+THORNFIELD_VARIANCE = ROOT / "datasets" / "story_worlds" / "thornfield_variance"
+
+NEW_COLD_FIXTURES = {
+    "dulse_ledger": {
+        "path": DULSE_LEDGER,
+        "run_id": "DL-000",
+        "first_id": "DL-001",
+        "story_phrase": "Fenwick Landing",
+        "answer_phrase": "Tin Rule",
+    },
+    "oxalis_recall": {
+        "path": OXALIS_RECALL,
+        "run_id": "OX-000",
+        "first_id": "OX-001",
+        "story_phrase": "Oxalis Model 7200",
+        "answer_phrase": "Veridian Medical Systems",
+    },
+    "sable_creek_budget": {
+        "path": SABLE_CREEK_BUDGET,
+        "run_id": "SC-000",
+        "first_id": "SC-001",
+        "story_phrase": "Sable Creek Municipal Charter",
+        "answer_phrase": "4 affirmative votes",
+    },
+    "thornfield_variance": {
+        "path": THORNFIELD_VARIANCE,
+        "run_id": "TV-000",
+        "first_id": "TV-001",
+        "story_phrase": "Thornfield Township Code",
+        "answer_phrase": "600 square feet",
+    },
+}
 
 
 def test_otters_story_world_bundle_is_complete() -> None:
@@ -350,6 +385,70 @@ def test_avalon_grant_committee_fixture_has_no_mojibake_artifacts() -> None:
             continue
         text = path.read_text(encoding="utf-8")
         assert not any(token in text for token in bad_tokens), path.name
+
+
+def test_new_cold_fixtures_are_admitted_without_oracles() -> None:
+    expected = {
+        "README.md",
+        "story.md",
+        "source.md",
+        "qa_battery_40.json",
+        "qa.md",
+        "progress_journal.md",
+        "progress_metrics.jsonl",
+    }
+    forbidden = {
+        "gold_kb.pl",
+        "gold_kb_notes.md",
+        "intake_plan.md",
+        "ontology_registry.json",
+        "failure_buckets.json",
+        "qa_source.md",
+    }
+
+    for name, fixture in NEW_COLD_FIXTURES.items():
+        path = fixture["path"]
+        assert path.exists(), name
+        names = {item.name for item in path.iterdir()}
+        assert expected.issubset(names), name
+        assert forbidden.isdisjoint(names), name
+
+
+def test_new_cold_fixture_qa_files_are_script_compatible() -> None:
+    for name, fixture in NEW_COLD_FIXTURES.items():
+        path = fixture["path"]
+        qa_text = (path / "qa.md").read_text(encoding="utf-8")
+        questions = parse_numbered_markdown_questions(qa_text)
+        answers = parse_markdown_answer_key(qa_text)
+        battery = json.loads((path / "qa_battery_40.json").read_text(encoding="utf-8"))
+
+        assert len(battery) == 40, name
+        assert len(questions) == 40, name
+        assert len(answers) == 40, name
+        assert questions[0]["id"] == "q001", name
+        assert fixture["first_id"] in questions[0]["utterance"], name
+        assert fixture["answer_phrase"] in answers["q001"], name
+
+
+def test_new_cold_fixture_metadata_marks_no_oracle_lane() -> None:
+    for name, fixture in NEW_COLD_FIXTURES.items():
+        path = fixture["path"]
+        story = (path / "story.md").read_text(encoding="utf-8")
+        readme = (path / "README.md").read_text(encoding="utf-8")
+        metrics = [
+            json.loads(line)
+            for line in (path / "progress_metrics.jsonl").read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        ]
+
+        assert fixture["story_phrase"] in story, name
+        assert "no `gold_kb.pl`" in readme.casefold(), name
+        assert "no benchmark run has been recorded yet" in readme.casefold(), name
+        assert metrics[0]["run_id"] == fixture["run_id"], name
+        assert metrics[0]["compile_run"] is False, name
+        assert metrics[0]["qa_rows"] == 40, name
+        assert metrics[0]["gold_kb_supplied"] is False, name
+        assert metrics[0]["starter_profile_supplied"] is False, name
 
 
 def test_calders_reach_fixture_is_admitted_without_oracles() -> None:
