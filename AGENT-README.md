@@ -61,4 +61,45 @@ python -m pytest tests/test_sec_edgar_adapter.py tests/test_domain_profiles.py -
 python -m pytest -q
 ```
 
-The latest full-suite result is `394 passed`. Recent focused batteries also cover CourtListener, SEC/contracts, domain profiles, Semantic IR runtime, UI gateway phases, trace rendering, router agility, router training data, Lava v5, UMLS builders, profile bootstrap, raw-file intake planning, post-ingestion QA, and profile-owned predicate aliases. Live/generated smoke traces belong under ignored paths such as `datasets/*/generated/` and `tmp/semantic_ir_trace_views/`.
+The latest full-suite result is `450 passed, 2 subtests passed`. Recent focused
+batteries also cover CourtListener, SEC/contracts, domain profiles, Semantic IR
+runtime, UI gateway phases, trace rendering, router agility, router training
+data, Lava v5, UMLS builders, profile bootstrap, raw-file intake planning,
+post-ingestion QA, story-world fixtures, CE, and rule acquisition. Live/generated
+smoke traces belong under ignored paths such as `datasets/*/generated/` and
+`tmp/`.
+
+## Harness Preflight Notes
+
+Before a long LM Studio/GPU research burn, run a small readiness pass:
+
+```powershell
+python -m pytest -q
+Invoke-RestMethod -Uri 'http://127.0.0.1:1234/v1/models' -TimeoutSec 5
+python scripts/run_clarification_eagerness_fixture.py --surface both --limit 1 --model qwen/qwen3.6-35b-a3b --temperature 0 --timeout-seconds 240 --max-tokens 4096 --out-dir tmp/preflight_lm_harness
+python scripts/run_umls_bridge_admission_probe.py
+python scripts/run_domain_profile_smoke.py --dataset datasets/courtlistener/samples/legal_seed_synthetic_5.jsonl --profile-id legal_courtlistener@v0 --domain legal_courtlistener --limit-per-dataset 1 --backend lmstudio --model qwen/qwen3.6-35b-a3b --base-url http://127.0.0.1:1234/v1 --timeout 240 --max-tokens 4096 --out tmp/preflight_lm_harness/legal_profile_smoke.jsonl
+python scripts/run_domain_profile_smoke.py --dataset datasets/sec_edgar/samples/sec_contracts_synthetic_5.jsonl --profile-id sec_contracts@v0 --domain sec_contracts --limit-per-dataset 1 --backend lmstudio --model qwen/qwen3.6-35b-a3b --base-url http://127.0.0.1:1234/v1 --timeout 240 --max-tokens 4096 --out tmp/preflight_lm_harness/sec_profile_smoke.jsonl
+```
+
+Notes from the 2026-05-03 Codex upgrade/preflight:
+
+- A raw LM Studio ping with `response_format={"type":"json_object"}` returned
+  HTTP 400. The project runners use strict `json_schema` payloads; verify with
+  the actual runners rather than a generic ping.
+- A tiny CE smoke with `--max-tokens 1200` produced a parse error because the
+  Semantic IR was clipped. Rerunning the same case with `--max-tokens 4096`
+  parsed and scored correctly. Treat low token caps as a likely cause of
+  `empty_or_unparseable_semantic_ir`.
+- The loaded Qwen endpoint may expose `reasoning_content` during raw manual
+  pings. The harness configs pass `think_enabled=False` and
+  `reasoning_effort=none`; use temperature `0` for research sweeps unless a run
+  is explicitly measuring variance.
+- After the Codex app upgrade, bundled `rg` at
+  `C:\Program Files\WindowsApps\OpenAI.Codex_...\app\resources\rg.exe` returned
+  `Access is denied`. If that happens, use PowerShell `Select-String` /
+  `Get-ChildItem` until the bundled tool is available again.
+- Keep `tmp/` lean. Fixture handoff folders and bulky scratch outputs can be
+  moved to `C:\prethinker_tmp_archive`; active local keepers are currently
+  `tmp/licensed`, `tmp/cold_baselines`, `tmp/clarification_eagerness_runs`, and
+  `tmp/domain_bootstrap_qa_cache`.
