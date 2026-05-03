@@ -108,3 +108,40 @@ threshold. The verifier now flags both the measure-variable misuse and computed
 threshold expression. The expiry rule also remains blocked on unsupported
 negation (`\+`). The next structural need is still body-fact/helper acquisition
 for rule families, not broader prose pressure.
+
+## Run AG-003 - Rule 5 Ratio Helper Lens
+
+- Timestamp: `2026-05-03T14:59Z`
+- Evidence lane: `diagnostic_replay`
+- Model: `qwen/qwen3.6-35b-a3b`
+- Mode: narrow Rule 5 threshold lens over the AG-001 backbone. This replay used
+  a source-derived temporary predicate registry plus a restricted active
+  predicate filter for applicant IDs, requested amounts, matching-fund
+  commitments, numeric helpers, percentage helpers, and derived conditions.
+  No QA answer key or reference Prolog was used.
+
+### Artifact
+
+- Rule replay:
+  `tmp/cold_baselines/avalon_grant_committee/rules/domain_bootstrap_file_20260503T145941969433Z_story-rules_qwen-qwen3-6-35b-a3b.json`
+
+### Result
+
+- Rule lens: `4` admitted rule clauses, `0` skips, `0` facts.
+- Runtime trial: `3` firing rules, `3` promotion-ready rules, `0` runtime rule
+  errors.
+- Unsupported body surface: `2` unsupported body goals, `0` unsupported body
+  fragments.
+
+### Lesson
+
+Rule 5 needed helper substrate, not a broader prompt. Adding generic
+`number_greater_than/2`, `number_at_most/2`, `percent_at_least/3`, and
+`percent_below/3` lets the rule lens express threshold and ratio branches
+without abusing entity-value helpers. The run also exposed and fixed a runtime
+bug: repeated anonymous variables (`_`) were being treated as the same variable
+inside a rule, which prevented otherwise valid ratio rules from firing. After
+fixing anonymous-variable semantics, the threshold-exceeded and ratio-met rules
+became promotion-ready. The ratio-failed branch remained dormant because the
+current admitted data has no below-30-percent case, which is correct dormancy
+rather than verifier failure.

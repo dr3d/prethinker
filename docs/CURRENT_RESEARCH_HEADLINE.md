@@ -93,6 +93,10 @@ Glass Tide is now exercising the harder rule-ingestion frontier:
   calls. The verifier now flags measure-variable helper misuse and computed
   thresholds, keeping those rules visibly non-promotable instead of merely
   dormant.
+- Avalon also exposed a runtime bug in anonymous-variable semantics: repeated
+  `_` occurrences were being treated as the same variable. After fixing that
+  and adding bound-number plus percentage helpers, a narrow Rule 5 lens produced
+  `3` promotion-ready threshold/ratio rules from `4` admitted clauses.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 

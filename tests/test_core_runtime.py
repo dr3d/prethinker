@@ -139,6 +139,79 @@ class CoreRuntimeTests(unittest.TestCase):
         self.assertEqual(at_most.get("status"), "success")
         self.assertEqual(at_most.get("rows"), [{"Cargo": "seed_crystals"}])
 
+    def test_percent_at_least_helper_for_bound_ratio_rules(self) -> None:
+        self.assertEqual(self.runtime.assert_fact("requested_amount(app2, 35000).").get("status"), "success")
+        self.assertEqual(self.runtime.assert_fact("requested_amount(app4, 30000).").get("status"), "success")
+        self.assertEqual(
+            self.runtime.assert_fact("matching_fund_commitment(app2, 12000, baxter_family_trust).").get("status"),
+            "success",
+        )
+        self.assertEqual(
+            self.runtime.assert_fact("matching_fund_commitment(app4, 8000, avalon_arts_council).").get("status"),
+            "success",
+        )
+        self.assertEqual(
+            self.runtime.assert_rule(
+                "derived_condition(Applicant, matching_threshold_met, rule_5) :- "
+                "requested_amount(Applicant, Amount), "
+                "matching_fund_commitment(Applicant, Match, _), "
+                "percent_at_least(Match, Amount, 30)."
+            ).get("status"),
+            "success",
+        )
+
+        query = self.runtime.query_rows("derived_condition(Applicant, matching_threshold_met, rule_5).")
+
+        self.assertEqual(query.get("status"), "success")
+        self.assertEqual(query.get("rows"), [{"Applicant": "app2"}])
+
+    def test_numeric_and_percent_below_helpers_for_bound_ratio_rules(self) -> None:
+        self.assertEqual(self.runtime.assert_fact("requested_amount(app2, 35000).").get("status"), "success")
+        self.assertEqual(self.runtime.assert_fact("requested_amount(app4, 30000).").get("status"), "success")
+        self.assertEqual(
+            self.runtime.assert_fact("matching_fund_commitment(app2, 12000, baxter_family_trust).").get("status"),
+            "success",
+        )
+        self.assertEqual(
+            self.runtime.assert_fact("matching_fund_commitment(app4, 8000, avalon_arts_council).").get("status"),
+            "success",
+        )
+        self.assertEqual(
+            self.runtime.assert_rule(
+                "derived_condition(Applicant, matching_threshold_missing, rule_5) :- "
+                "requested_amount(Applicant, Amount), "
+                "number_greater_than(Amount, 25000), "
+                "matching_fund_commitment(Applicant, Match, _), "
+                "percent_below(Match, Amount, 30)."
+            ).get("status"),
+            "success",
+        )
+
+        query = self.runtime.query_rows("derived_condition(Applicant, matching_threshold_missing, rule_5).")
+
+        self.assertEqual(query.get("status"), "success")
+        self.assertEqual(query.get("rows"), [{"Applicant": "app4"}])
+
+    def test_anonymous_variables_do_not_force_cross_goal_unification(self) -> None:
+        self.assertEqual(self.runtime.assert_fact("applicant_id(app2, northshore_youth_alliance).").get("status"), "success")
+        self.assertEqual(
+            self.runtime.assert_fact("matching_fund_commitment(app2, 12000, baxter_family_trust).").get("status"),
+            "success",
+        )
+        self.assertEqual(
+            self.runtime.assert_rule(
+                "has_matching_fund(Applicant) :- "
+                "applicant_id(Applicant, _), "
+                "matching_fund_commitment(Applicant, _Amount, _)."
+            ).get("status"),
+            "success",
+        )
+
+        query = self.runtime.query_rows("has_matching_fund(Applicant).")
+
+        self.assertEqual(query.get("status"), "success")
+        self.assertEqual(query.get("rows"), [{"Applicant": "app2"}])
+
     def test_retract_fact(self) -> None:
         self.assertEqual(self.runtime.assert_fact("parent(alice, bob).").get("status"), "success")
         remove = self.runtime.retract_fact("parent(alice, bob).")

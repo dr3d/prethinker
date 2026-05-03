@@ -137,6 +137,7 @@ class PrologEngine:
         self.clauses: List[Clause] = []
         self.max_depth = max_depth
         self._rename_counter = 0
+        self._anonymous_counter = 0
         self.builtins = {
             "is": self._builtin_is,
             ">": self._builtin_gt,
@@ -152,8 +153,12 @@ class PrologEngine:
             "\\=": self._builtin_not_unify,
             "value_greater_than": self._builtin_value_greater_than,
             "value_at_most": self._builtin_value_at_most,
+            "number_greater_than": self._builtin_number_greater_than,
+            "number_at_most": self._builtin_number_at_most,
             "hours_at_least": self._builtin_hours_at_least,
             "support_count_at_least": self._builtin_support_count_at_least,
+            "percent_at_least": self._builtin_percent_at_least,
+            "percent_below": self._builtin_percent_below,
         }
     
     def add_clause(self, clause: Clause):
@@ -179,6 +184,10 @@ class PrologEngine:
                 return Term(name, [])
             args = [self.parse_term(part.strip()) for part in self._split_top_level(raw_args, ",")]
             return Term(name, args)
+
+        if s == "_":
+            self._anonymous_counter += 1
+            return Term(f"_Anon{self._anonymous_counter}", is_variable=True)
 
         if s[0].isupper() or s.startswith("_"):
             return Term(s, is_variable=True)
@@ -588,6 +597,14 @@ class PrologEngine:
         """value_at_most(Entity, Threshold) via entity_property(Entity, value, Value)."""
         return self._builtin_entity_value_threshold(goal, subst, depth, mode="at_most")
 
+    def _builtin_number_greater_than(self, goal: Term, subst: Substitution, depth: int) -> List[Substitution]:
+        """number_greater_than(Value, Threshold) for already-bound numeric terms."""
+        return self._builtin_number_threshold(goal, subst, mode="greater_than")
+
+    def _builtin_number_at_most(self, goal: Term, subst: Substitution, depth: int) -> List[Substitution]:
+        """number_at_most(Value, Threshold) for already-bound numeric terms."""
+        return self._builtin_number_threshold(goal, subst, mode="at_most")
+
     def _builtin_hours_at_least(self, goal: Term, subst: Substitution, depth: int) -> List[Substitution]:
         """hours_at_least(Start, End, Threshold) for canonical time atoms."""
         if len(goal.args) != 3:
@@ -632,6 +649,54 @@ class PrologEngine:
             if new_subst is not None:
                 out.append(new_subst)
         return out
+
+    def _builtin_percent_at_least(self, goal: Term, subst: Substitution, depth: int) -> List[Substitution]:
+        """percent_at_least(Part, Whole, Percent) for already-bound numeric terms."""
+        return self._builtin_percent_threshold(goal, subst, mode="at_least")
+
+    def _builtin_percent_below(self, goal: Term, subst: Substitution, depth: int) -> List[Substitution]:
+        """percent_below(Part, Whole, Percent) for already-bound numeric terms."""
+        return self._builtin_percent_threshold(goal, subst, mode="below")
+
+    def _builtin_number_threshold(
+        self,
+        goal: Term,
+        subst: Substitution,
+        *,
+        mode: str,
+    ) -> List[Substitution]:
+        if len(goal.args) != 2:
+            return []
+        value = self._numeric_term_value(subst.apply(goal.args[0]))
+        threshold = self._numeric_term_value(subst.apply(goal.args[1]))
+        if value is None or threshold is None:
+            return []
+        if mode == "greater_than" and value > threshold:
+            return [subst]
+        if mode == "at_most" and value <= threshold:
+            return [subst]
+        return []
+
+    def _builtin_percent_threshold(
+        self,
+        goal: Term,
+        subst: Substitution,
+        *,
+        mode: str,
+    ) -> List[Substitution]:
+        if len(goal.args) != 3:
+            return []
+        part = self._numeric_term_value(subst.apply(goal.args[0]))
+        whole = self._numeric_term_value(subst.apply(goal.args[1]))
+        percent = self._numeric_term_value(subst.apply(goal.args[2]))
+        if part is None or whole is None or percent is None or whole == 0:
+            return []
+        actual = (part / whole) * 100
+        if mode == "at_least" and actual >= percent:
+            return [subst]
+        if mode == "below" and actual < percent:
+            return [subst]
+        return []
 
     def _builtin_entity_value_threshold(
         self,

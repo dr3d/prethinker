@@ -132,15 +132,49 @@ RULE_BODY_HELPER_PREDICATES = [
         "admission_notes": ["Use only in rule bodies for source-stated minimum-hour spacing conditions."],
     },
     {
+        "signature": "number_greater_than/2",
+        "args": ["value", "threshold"],
+        "description": "Query-only deterministic helper: true when an already-bound numeric Value is greater than Threshold.",
+        "why": "rule_acquisition_numeric_helper",
+        "admission_notes": ["Use only after a prior body goal binds Value to a number."],
+    },
+    {
+        "signature": "number_at_most/2",
+        "args": ["value", "threshold"],
+        "description": "Query-only deterministic helper: true when an already-bound numeric Value is at most Threshold.",
+        "why": "rule_acquisition_numeric_helper",
+        "admission_notes": ["Use only after a prior body goal binds Value to a number."],
+    },
+    {
         "signature": "support_count_at_least/2",
         "args": ["proposal", "threshold"],
         "description": "Query-only deterministic helper: true when supported(Proposal, Officer) has at least Threshold distinct officers.",
         "why": "rule_acquisition_aggregation_helper",
         "admission_notes": ["Use only in rule bodies for source-stated vote-count thresholds."],
     },
+    {
+        "signature": "percent_at_least/3",
+        "args": ["part_value", "whole_value", "threshold_percent"],
+        "description": "Query-only deterministic helper: true when PartValue is at least ThresholdPercent percent of WholeValue.",
+        "why": "rule_acquisition_ratio_helper",
+        "admission_notes": ["Use only after body goals bind numeric part and whole variables, such as Match and Amount."],
+    },
+    {
+        "signature": "percent_below/3",
+        "args": ["part_value", "whole_value", "threshold_percent"],
+        "description": "Query-only deterministic helper: true when PartValue is below ThresholdPercent percent of WholeValue.",
+        "why": "rule_acquisition_ratio_helper",
+        "admission_notes": ["Use only for explicit below-threshold or insufficient-percentage conditions."],
+    },
 ]
 
-CONTEXT_DEPENDENT_HELPER_SIGNATURES = {"hours_at_least/3"}
+CONTEXT_DEPENDENT_HELPER_SIGNATURES = {
+    "hours_at_least/3",
+    "number_greater_than/2",
+    "number_at_most/2",
+    "percent_at_least/3",
+    "percent_below/3",
+}
 
 
 def parse_args() -> argparse.Namespace:
@@ -675,6 +709,9 @@ def _rule_guidance_context(*, target: int, rule_class: str, compact: bool) -> li
         "For derived_* head scope arguments, use the governed domain, action, or object from the source (for example harbor, glass_tide_repair, quarantine), not a rule id, proof reason, or clause label.",
         "For derived_reward_status/3, preserve the source reward-status atom such as salvage_reward or no_salvage_reward; do not shorten it to generic reward or no_reward.",
         "For value_greater_than/2 and value_at_most/2, the first argument is the entity being measured (for example Cargo), not the numeric Value variable from entity_property(Cargo, value, Value).",
+        "For numeric variables already bound by prior body goals, use number_greater_than/2 or number_at_most/2 instead of value_greater_than/2 or value_at_most/2.",
+        "For percent_at_least/3, use numeric variables after they are bound by prior body goals: percent_at_least(PartValue, WholeValue, ThresholdPercent). Do not use it as a final outcome by itself.",
+        "For insufficient percentage or below-threshold exception branches, use percent_below(PartValue, WholeValue, ThresholdPercent), not percent_at_least/3 with a negative status.",
         "For support_count_at_least/2, do not add extra supported(Proposal, role_label) goals unless the source explicitly makes that officer role a condition. The helper already proves the threshold count from supported/2 rows.",
         "Set source='direct' only because the source document explicitly states the rule.",
     ]
