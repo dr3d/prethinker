@@ -1,17 +1,17 @@
 # Cold Baseline Failure Rollup
 
-Generated: 2026-05-03T15:32:07+00:00
+Generated: 2026-05-03T15:45:29+00:00
 
 This report aggregates existing `cold_unseen` QA artifacts. It does not read
 source prose, gold KBs, oracle strategies, or answer-shaped profile material.
 
 ## Headline
 
-- Runs: `7`
-- Questions: `350`
-- Exact / partial / miss: `189` / `58` / `103`
-- Exact rate: `0.540`
-- Exact+partial rate: `0.706`
+- Runs: `8`
+- Questions: `390`
+- Exact / partial / miss: `205` / `67` / `118`
+- Exact rate: `0.526`
+- Exact+partial rate: `0.697`
 
 ## Run Table
 
@@ -21,6 +21,7 @@ source prose, gold KBs, oracle strategies, or answer-shaped profile material.
 | `BLM-001` | black_lantern_maze | 40 | 27 | 7 | 6 | 299 | 28 | 299 | 0 | `tmp\cold_baselines\black_lantern_maze\domain_bootstrap_qa_20260503T060152766469Z_qa_qwen-qwen3-6-35b-a3b.json` |
 | `DL-001` | dulse_ledger | 40 | 27 | 7 | 6 | 70 | 21 | 52 | 0 | `tmp\cold_baselines\dulse_ledger\domain_bootstrap_qa_20260503T153106149780Z_qa_qwen-qwen3-6-35b-a3b.json` |
 | `CAL-001` | ledger_at_calders_reach | 110 | 65 | 9 | 36 | 187 | 23 | 180 | 0 | `tmp\cold_baselines\ledger_at_calders_reach\domain_bootstrap_qa_20260503T054553171055Z_qa_qwen-qwen3-6-35b-a3b.json` |
+| `OX-001` | oxalis_recall | 40 | 16 | 9 | 15 | 106 | 0 | 94 | 0 | `tmp\cold_baselines\oxalis_recall\domain_bootstrap_qa_20260503T154413658124Z_qa_qwen-qwen3-6-35b-a3b.json` |
 | `RF-001` | ridgeline_fire | 40 | 17 | 10 | 13 | 133 | 27 | 130 | 0 | `tmp\cold_baselines\ridgeline_fire\domain_bootstrap_qa_20260503T051902240724Z_qa_qwen-qwen3-6-35b-a3b.json` |
 | `MMM-001` | three_moles_moon_marmalade_machine | 40 | 10 | 8 | 22 | 174 | 10 | 110 | 0 | `tmp\cold_baselines\three_moles\domain_bootstrap_qa_20260503T045525066737Z_qa_qwen-qwen3-6-35b-a3b.json` |
 | `V9-001` | veridia9_supply_chain_patent_dispute | 40 | 18 | 5 | 17 | 94 | 13 | 79 | 0 | `tmp\cold_baselines\veridia9\domain_bootstrap_qa_20260503T050519283344Z_qa_qwen-qwen3-6-35b-a3b.json` |
@@ -29,9 +30,9 @@ source prose, gold KBs, oracle strategies, or answer-shaped profile material.
 
 | Surface | Count | General next action |
 | --- | ---: | --- |
-| Compile | 116 | Improve lens coverage or acquisition passes; do not tune from one fixture alone. |
-| Hybrid/Reasoning | 27 | Add or exercise deterministic reasoning helpers, joins, set-difference, aggregation, or temporal substrate. |
-| Query | 15 | Improve post-ingestion query support bundles over already admitted rows. |
+| Compile | 132 | Improve lens coverage or acquisition passes; do not tune from one fixture alone. |
+| Hybrid/Reasoning | 33 | Add or exercise deterministic reasoning helpers, joins, set-difference, aggregation, or temporal substrate. |
+| Query | 17 | Improve post-ingestion query support bundles over already admitted rows. |
 | Answer | 3 | Tighten answer normalization or judge/verbalization policy without changing ingestion. |
 
 ## Fixture Surface Matrix
@@ -42,6 +43,7 @@ source prose, gold KBs, oracle strategies, or answer-shaped profile material.
 | `BLM-001` | 7 | 0 | 6 | 0 | 0 |
 | `DL-001` | 9 | 0 | 4 | 0 | 0 |
 | `CAL-001` | 37 | 6 | 2 | 0 | 0 |
+| `OX-001` | 16 | 2 | 6 | 0 | 0 |
 | `RF-001` | 12 | 5 | 6 | 0 | 0 |
 | `MMM-001` | 22 | 2 | 4 | 2 | 0 |
 | `V9-001` | 18 | 0 | 3 | 1 | 0 |
@@ -55,15 +57,15 @@ surface to work with.
 
 | Evidence state | Count |
 | --- | ---: |
-| `rows_returned` | 92 |
-| `partial_rows_returned` | 66 |
+| `rows_returned` | 102 |
+| `partial_rows_returned` | 80 |
 | `no_queries` | 3 |
 
 | Surface | Rows returned | No rows returned | Partial rows returned | No queries |
 | --- | ---: | ---: | ---: | ---: |
-| Compile | 66 | 0 | 47 | 3 |
-| Hybrid/Reasoning | 17 | 0 | 10 | 0 |
-| Query | 6 | 0 | 9 | 0 |
+| Compile | 74 | 0 | 55 | 3 |
+| Hybrid/Reasoning | 18 | 0 | 15 | 0 |
+| Query | 7 | 0 | 10 | 0 |
 | Answer | 3 | 0 | 0 | 0 |
 | Uncertain | 0 | 0 | 0 | 0 |
 
@@ -151,16 +153,16 @@ This is an index for choosing targeted replays. It is not a prompt source.
 | `CAL-001` | `q095` | miss | compile_surface_gap | `partial_rows_returned`/6 rows | Verify if the KB supports deriving that 'finding Iain alive' constitutes 'resuming ordinary residence'. If not, the KB is missing the logical link between survival and residence... |
 | `CAL-001` | `q096` | miss | compile_surface_gap | `rows_returned`/3 rows | Check if the source document contains a clause linking Quinn's paper work to the marsh parcel location or the avulsion line. |
 | `CAL-001` | `q097` | miss | compile_surface_gap | `rows_returned`/5 rows | Ingest evidence linkage clauses. |
-| `RF-001` | `q004` | miss | compile_surface_gap | `rows_returned`/4 rows | Ingest facts linking `robert_tanaka` to `ic_certification_level` with value `type_1`. |
-| `RF-001` | `q006` | miss | compile_surface_gap | `rows_returned`/1 rows | Ingest zoning/land-use facts for 'Mill District' (e.g., `zoning(Mill_District, commercial).`) and WUI boundary facts. |
-| `RF-001` | `q007` | miss | compile_surface_gap | `rows_returned`/70 rows | Ingest location-entity mapping for 'Mill District' and link it to the relevant evacuation events or standing orders. |
-| `RF-001` | `q008` | miss | compile_surface_gap | `rows_returned`/91 rows | Ingest missing event data for Mill District or correct the entity name if it is a synonym for an existing district. |
-| `RF-001` | `q011` | miss | compile_surface_gap | `partial_rows_returned`/97 rows | Check source document for red flag warning cancellation details on June 16. |
-| `RF-001` | `q015` | miss | compile_surface_gap | `partial_rows_returned`/111 rows | Ingest missing event_timestamp facts for June 16 events (evt_lift_pinecrest, evt_lift_elk, and Tanaka's certification event). |
-| `RF-001` | `q017` | partial | compile_surface_gap | `rows_returned`/2 rows | Add a lookup table or definition clause mapping 'dual_authorization_ic_and_air_ops' to the specific roles 'Incident Commander' and 'Air Operations Coordinator', or add explicit... |
-| `RF-001` | `q030` | miss | compile_surface_gap | `rows_returned`/8 rows | The system lacks a structured representation of the aid details (e.g., a `aid_received/3` or `resource_dispatched/3` predicate) linked to the mutual aid events. The current quer... |
-| `RF-001` | `q031` | miss | compile_surface_gap | `partial_rows_returned`/45 rows | Check source document for '923 acres' and 'June 17' containment data; ingest if missing. |
-| `RF-001` | `q032` | miss | compile_surface_gap | `partial_rows_returned`/79 rows | Ingest the timestamp for evt_review_convened into event_timestamp/2. |
-| `RF-001` | `q034` | miss | compile_surface_gap | `rows_returned`/2 rows | Ingest member appointment facts and affiliation/origin data for board members. |
-| `RF-001` | `q039` | partial | compile_surface_gap | `partial_rows_returned`/67 rows | Check source document for Elk Meadow evacuation order lifting timestamp. |
-| `MMM-001` | `q002` | miss | compile_surface_gap | `rows_returned`/1 rows | Investigate if the descriptive location of the kettle_house is encoded in a different predicate (e.g., `located_at(kettle_house, ...)` or a `says/3` statement describing it) or... |
+| `OX-001` | `q006` | miss | compile_surface_gap | `rows_returned`/1 rows | Check if the source document contains a specific rule stating '24 hours' for Class I distributor notifications, which is missing from the compiled KB. |
+| `OX-001` | `q007` | miss | compile_surface_gap | `rows_returned`/1 rows | Check if there is a specific rule mapping recall_class to deadline_hours, or if the 'deadline_requirement' predicate needs to be parameterized by recall class. |
+| `OX-001` | `q008` | partial | compile_surface_gap | `partial_rows_returned`/2 rows | Check source document for notification deadline rules post-classification change. |
+| `OX-001` | `q010` | miss | compile_surface_gap | `partial_rows_returned`/20 rows | Check source document for FDA reclassification events and Veridian's notification logs. |
+| `OX-001` | `q015` | partial | compile_surface_gap | `partial_rows_returned`/18 rows | Expand KB ingestion to include all 12 distributors or verify if the question scope is limited to the available subset. |
+| `OX-001` | `q020` | miss | compile_surface_gap | `partial_rows_returned`/11 rows | Check if a rule exists linking unaccounted_units to termination_decision status, or if a 'threshold' constant/fact is missing from the KB inventory. |
+| `OX-001` | `q022` | partial | compile_surface_gap | `partial_rows_returned`/5 rows | Ingest the regulatory deadline rule for termination requests (e.g., `deadline_requirement(termination, regulator, 30, calendar_days).`) into the KB. |
+| `OX-001` | `q023` | miss | compile_surface_gap | `rows_returned`/10 rows | Ingest the regulatory rule specifying the 30-calendar-day deadline for termination requests. |
+| `OX-001` | `q026` | miss | compile_surface_gap | `rows_returned`/5 rows | The query plan failed to retrieve the necessary `termination_decision` and `termination_request_submitted` facts. The system should have queried these predicates instead of or i... |
+| `OX-001` | `q027` | miss | compile_surface_gap | `rows_returned`/15 rows | Query `termination_decision(oxalis_model_7200, Status, Date)` to retrieve the termination status and date. |
+| `OX-001` | `q028` | miss | compile_surface_gap | `rows_returned`/4 rows | Ingest clauses defining the initial recall scope (Lot C) and the expanded scope (Lots A-F) with their respective unit counts and effective dates. Specifically, ingest facts like... |
+| `OX-001` | `q033` | miss | compile_surface_gap | `rows_returned`/1 rows | Identify the predicate or clause type that captures 'CEO statements' or 'communication failure explanations' and ensure it is ingested into the KB. |
+| `OX-001` | `q034` | partial | compile_surface_gap | `rows_returned`/1 rows | Ingest granular temporal facts linking the firmware fix to specific dates (e.g., `firmware_fix_ready_date(oxalis_model_7200, 2026_02_12).`) and lot-specific impact windows (e.g.... |

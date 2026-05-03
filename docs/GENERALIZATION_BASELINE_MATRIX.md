@@ -31,6 +31,7 @@ All runs below used the same source-only semantic-parallax recipe:
 | `BLM-001` | Black Lantern Maze | 40 | 27 | 7 | 6 | 34 | 299 | 28 | 299 | 0 | 40 | 39 | 0 | 0 |
 | `AG-001` | Avalon Grant Committee | 40 | 25 | 12 | 3 | 37 | 114 | 6 | 109 | 0 | 40 | 40 | 0 | 0 |
 | `DL-001` | Dulse Ledger | 40 | 27 | 7 | 6 | 34 | 70 | 21 | 52 | 0 | 40 | 40 | 0 | 0 |
+| `OX-001` | Oxalis Recall | 40 | 16 | 9 | 15 | 25 | 106 | 0 | 94 | 0 | 40 | 40 | 0 | 0 |
 
 ## Pending Cold Fixtures
 
@@ -39,7 +40,6 @@ source-only cold recipe before any assisted or diagnostic lane is created.
 
 | Fixture | Questions | Primary Pressure |
 | --- | ---: | --- |
-| Oxalis Recall | 40 | recall classification, distributor compliance, corrective actions |
 | Sable Creek Budget | 40 | vote arithmetic, budget constraints, public-comment claims |
 | Thornfield Variance | 40 | zoning standards, notice defects, dimensional constraints |
 
@@ -54,6 +54,7 @@ source-only cold recipe before any assisted or diagnostic lane is created.
 | `BLM-001` | 7 | 0 | 6 | 0 |
 | `AG-001` | 11 | 2 | 2 | 0 |
 | `DL-001` | 9 | 0 | 4 | 0 |
+| `OX-001` | 16 | 2 | 6 | 0 |
 
 ## Early Read
 
@@ -80,6 +81,10 @@ right way:
   reasoning: `27 exact / 7 partial / 6 miss`, with non-exacts concentrated in
   temporal debt consequences, restitution, counterfactuals, and unresolved
   dispute summaries.
+- **Oxalis Recall** is deliberately less flattering: despite `106` admitted
+  operations and `0` skips, it scored `16 exact / 9 partial / 15 miss`. That
+  makes it a strong reminder that clean admission is not the same as
+  answer-bearing regulatory coverage.
 
 ## Guardrail
 
