@@ -405,6 +405,9 @@ promotion-ready under either isolated or dependency-composed trial.
   DL-005 then selected between the original and compact-flat QA evidence modes
   without source or answer-key access and reached `32 exact / 6 partial / 2
   miss`, which is the query-time form of the same parallax principle.
+  OX-003 confirmed the change transfers to a safety-adjacent regulatory recall
+  fixture: healthy compile, `91` admitted rows, only `4` skips, and QA moved
+  from `16/9/15` to `27/8/5`.
 - Compile-lens health now summarizes those pass diagnostics at the top level.
   A compile can be marked `healthy`, `warning`, or `poor` with a recommendation
   such as `qa_run_reasonable` or `repair_compile_before_qa`. V9-002 used this

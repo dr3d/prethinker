@@ -121,3 +121,68 @@ Evidence filtering reduced hard misses substantially, while the selector traded
 some miss reduction for higher exact count. The remaining gap is not one knob:
 activation needs to balance exact-answer precision against miss reduction.
 
+## Run OX-003 - Compact Flat-Skeleton Cold Replay
+
+- Timestamp: `2026-05-04T00:21Z` through `2026-05-04T00:29Z`
+- Evidence lane: `cold_after_general_architecture_change`
+- Model: `qwen/qwen3.6-35b-a3b`
+- Mode: source-only semantic-parallax replay after the compact flat-skeleton
+  harness change. No gold KB, starter registry, strategy file, or QA source was
+  used during compilation.
+
+### Artifacts
+
+- Compile:
+  `tmp/cold_baselines/oxalis_recall/domain_bootstrap_file_20260504T002108990486Z_source_qwen-qwen3-6-35b-a3b.json`
+- QA:
+  `tmp/cold_baselines/oxalis_recall/domain_bootstrap_qa_20260504T002915270497Z_qa_qwen-qwen3-6-35b-a3b.json`
+
+### Result
+
+Compile:
+
+```text
+91 admitted operations
+4 skips
+compile health: healthy
+flat_skeleton unique rows: 37
+unhealthy passes: 0
+```
+
+QA:
+
+```text
+OX-001 cold baseline: 16 exact / 9 partial / 15 miss
+OX-002 evidence replay: 18 exact / 11 partial / 11 miss
+OX-003 compact flat: 27 exact / 8 partial / 5 miss
+```
+
+Safety:
+
+```text
+40/40 parsed
+39/40 query rows
+0 runtime load errors
+0 write proposals
+```
+
+Failure surfaces:
+
+```text
+2 compile-surface gaps
+5 query-surface gaps
+6 hybrid-join gaps
+```
+
+### Lesson
+
+Oxalis is the strongest immediate transfer result for the compact flat-skeleton
+change. The same fixture that previously looked like an ingestion-coverage
+problem (`16` exact, `15` miss) now compiles as a healthy surface and reaches
+`27` exact with only `5` misses. This suggests the old full-IR flat pass was not
+only a Dulse issue; compact source-pass operations give dense regulatory
+documents a much better broad skeleton.
+
+The remaining Oxalis frontier is now post-ingestion access and joins, not broad
+source admission. Only `2` non-exacts are classified as compile-surface gaps.
+
