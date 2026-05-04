@@ -123,6 +123,9 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
   for Larkspur, Meridian, and Northbridge, it selected the best available mode
   on `30/30` rows and reached `26 exact / 2 partial / 2 miss` across that
   three-fixture slice without source prose or answer keys in selector input.
+  Transfer remains unsolved: Avalon still preferred `protected` for miss
+  control, and Sable still preferred `direct`, so guarded activation is
+  diagnostic machinery rather than a global default.
 - Incoming compile repair targets are now generated at
   `tmp/incoming_smoke_summaries/compile_repair_targets.{json,md}`. The current
   six-row queue splits into `2` row-selector calibration targets, `3` scoped

@@ -279,6 +279,11 @@ testing whether those gains transfer:
   uncertain rows. On the three imperfect first-10 fixtures, it selected the
   best available mode on `30/30` rows, preserving Larkspur at `8 / 2 / 0` while
   lifting Meridian and Northbridge to `9 / 0 / 1` each.
+- The transfer check keeps that result honest: guarded activation did not beat
+  `protected` on Avalon miss control and did not beat `direct` on Sable. The
+  harness now has a better named diagnostic policy, not a new universal default.
+  The next selector problem is deciding when a fixture/mode family is safe for
+  activation fallback at all.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 

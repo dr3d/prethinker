@@ -148,3 +148,6 @@ ledger diagnostic over Larkspur, Meridian, and Northbridge, guarded activation
 selected the best available mode on `30/30` rows: Larkspur stayed `8 / 2 / 0`,
 Meridian moved to `9 / 0 / 1`, and Northbridge moved to `9 / 0 / 1` without
 source prose, answer keys, judge labels, or failure labels in selector input.
+The immediate transfer check was mixed: Avalon preferred `protected` for miss
+control, and Sable still preferred `direct`. Guarded activation is therefore a
+named diagnostic policy, not a global daily-driver selector.
