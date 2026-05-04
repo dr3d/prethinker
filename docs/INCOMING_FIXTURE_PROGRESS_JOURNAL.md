@@ -269,3 +269,68 @@ Ignored local artifact references:
 - `tmp/selector_risk_gates/larkspur-guarded-activation-risk-gate.md`
 - `tmp/selector_risk_gates/meridian-guarded-activation-risk-gate.md`
 - `tmp/selector_risk_gates/northbridge-guarded-activation-risk-gate.md`
+
+## 2026-05-04 Scoped Compile Repair Diagnostic
+
+Two scoped cold compiles were run without answer keys in compile context:
+
+- Meridian: lot/use/occupant/zoning surface pressure.
+- Northbridge: resolution/vote/adoption/document-metadata surface pressure.
+
+Target-row checks:
+
+```text
+meridian q007: miss -> exact
+northbridge q010: miss -> exact when run alone
+```
+
+The full first-10 regression replay was more informative:
+
+| Fixture | Baseline | Scoped Candidate | Lesson |
+| --- | ---: | ---: | --- |
+| `meridian_permit_board` | `8 / 1 / 1` | `8 / 1 / 1` | q007 repaired, but q010 regressed from exact to miss. |
+| `northbridge_authority_packet` | `8 / 1 / 1` | `9 / 1 / 0` | q007 became exact and q010 improved from miss to partial. |
+
+Five-fixture scoped candidate:
+
+```text
+baseline: 44 exact / 4 partial / 2 miss
+candidate: 45 exact / 4 partial / 1 miss
+write proposals: 0
+```
+
+The scorecard comparer initially marked this as a promotion from aggregate
+deltas alone. That exposed a harness bug: aggregate exact gain can hide a
+baseline-exact row regression. The comparer now reports
+`baseline_exact_regression_rows` and returns `row_level_gate_required` when a
+candidate improves the batch while damaging a previously exact row.
+
+Current comparison:
+
+```text
+recommendation: row_level_gate_required
+exact delta: +1
+miss delta: -1
+baseline-exact regressions: 1
+regressed row: meridian_permit_board q010
+```
+
+Updated repair-target split:
+
+```text
+row-selector calibration: 3
+scoped source-surface repair: 2
+helper/query-join repair: 1
+```
+
+Discovery: scoped compile pressure can produce real batch lift, but daily-driver
+promotion must be row-gated. Northbridge's remaining q010 problem has shifted
+from compile-surface miss to query-surface partial; Meridian q010 is now the
+exact-protection regression that blocks promotion.
+
+Ignored local artifact references:
+
+- `tmp/incoming_smoke_summaries_scoped_repair/scorecard.md`
+- `tmp/incoming_smoke_summaries_scoped_repair/baseline_comparison.md`
+- `tmp/incoming_smoke_summaries_scoped_repair/row_mode_overlay_plan.md`
+- `tmp/incoming_smoke_summaries_scoped_repair/compile_repair_targets.md`

@@ -163,3 +163,11 @@ weak or unmeasured transfer it remains a calibration target. On the incoming
 guarded-activation replay, the gate preserved the Meridian/Northbridge rescues
 as calibration targets and pointed Larkspur plus unresolved Meridian/Northbridge
 rows back to compile repair instead of promoting guarded activation globally.
+
+`scripts/compare_incoming_smoke_scorecards.py` now also enforces exact-row
+protection. Aggregate gains no longer imply promotion if the candidate creates
+a baseline-exact row regression visible in `non_exact_rows`; that case returns
+`row_level_gate_required`. The scoped compile-repair diagnostic improved the
+incoming batch from `44 / 4 / 2` to `45 / 4 / 1`, but regressed Meridian q010,
+so the harness correctly keeps it behind a row-level gate instead of promoting
+the compile mode globally.

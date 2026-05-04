@@ -1,7 +1,15 @@
 from scripts.compare_incoming_smoke_scorecards import build_comparison, render_markdown
 
 
-def _scorecard(*, exact: int, partial: int, miss: int, failed: int = 0, writes: int = 0) -> dict:
+def _scorecard(
+    *,
+    exact: int,
+    partial: int,
+    miss: int,
+    failed: int = 0,
+    writes: int = 0,
+    non_exact_rows: list[dict] | None = None,
+) -> dict:
     qa_rows = exact + partial + miss
     return {
         "summary": {
@@ -25,6 +33,7 @@ def _scorecard(*, exact: int, partial: int, miss: int, failed: int = 0, writes: 
                 "semantic_progress_risk": "low" if not failed else "medium",
                 "profile_fallback": "",
                 "judge_counts": {"exact": exact, "partial": partial, "miss": miss},
+                "non_exact_rows": non_exact_rows or [],
             }
         ],
     }
@@ -61,3 +70,21 @@ def test_scorecard_compare_marks_neutral_candidate_as_mixed() -> None:
     assert report["summary"]["promotion_recommendation"] == "mixed_candidate"
     assert "Failure-surface deltas" in markdown
     assert "`alpha`" in markdown
+
+
+def test_scorecard_compare_requires_row_gate_for_baseline_exact_regression() -> None:
+    baseline = _scorecard(exact=8, partial=2, miss=0, non_exact_rows=[{"id": "q001", "verdict": "partial"}])
+    candidate = _scorecard(
+        exact=9,
+        partial=1,
+        miss=0,
+        non_exact_rows=[{"id": "q010", "verdict": "partial", "question": "Regressed row?"}],
+    )
+
+    report = build_comparison(baseline, candidate)
+    markdown = render_markdown(report)
+
+    assert report["summary"]["delta"]["baseline_exact_regression_rows"] == 1
+    assert report["summary"]["promotion_recommendation"] == "row_level_gate_required"
+    assert report["baseline_exact_regressions"][0]["id"] == "q010"
+    assert "Baseline-Exact Regressions" in markdown

@@ -53,6 +53,7 @@ def build_comparison(
     baseline_summary = _summary(baseline)
     candidate_summary = _summary(candidate)
     fixture_rows = _fixture_rows(baseline, candidate)
+    exact_regressions = _baseline_exact_regression_rows(baseline, candidate)
     delta = {
         "fixture_count": _int(candidate_summary, "fixture_count") - _int(baseline_summary, "fixture_count"),
         "compiled_count": _int(candidate_summary, "compiled_count") - _int(baseline_summary, "compiled_count"),
@@ -73,6 +74,7 @@ def build_comparison(
             baseline_summary.get("semantic_progress_risk_counts"),
             candidate_summary.get("semantic_progress_risk_counts"),
         ),
+        "baseline_exact_regression_rows": len(exact_regressions),
     }
     return {
         "schema_version": "incoming_fixture_smoke_scorecard_comparison_v1",
@@ -92,6 +94,7 @@ def build_comparison(
             "promotion_recommendation": _recommend(delta),
         },
         "fixtures": fixture_rows,
+        "baseline_exact_regressions": exact_regressions,
     }
 
 
@@ -112,6 +115,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Miss delta: `{delta.get('miss_rows', 0)}`",
         f"- Compile-failed delta: `{delta.get('compile_failed_count', 0)}`",
         f"- Write-proposal delta: `{delta.get('write_proposal_rows', 0)}`",
+        f"- Baseline-exact regressions: `{delta.get('baseline_exact_regression_rows', 0)}`",
         f"- Failure-surface deltas: `{delta.get('failure_surface_counts', {})}`",
         f"- Semantic-risk deltas: `{delta.get('semantic_progress_risk_counts', {})}`",
         "",
@@ -128,6 +132,17 @@ def render_markdown(report: dict[str, Any]) -> str:
             f"| `{row.get('fixture', '')}` | {delta_row.get('exact', 0)} | {delta_row.get('partial', 0)} | "
             f"{delta_row.get('miss', 0)} | `{row.get('baseline_label', '')}` | `{row.get('candidate_label', '')}` |"
         )
+    regressions = report.get("baseline_exact_regressions", [])
+    if regressions:
+        lines.extend(["", "## Baseline-Exact Regressions", "", "| Fixture | Row | Candidate Verdict | Question |", "| --- | --- | --- | --- |"])
+        for row in regressions:
+            if not isinstance(row, dict):
+                continue
+            question = str(row.get("question", "")).replace("|", "/")
+            lines.append(
+                f"| `{row.get('fixture', '')}` | `{row.get('id', '')}` | "
+                f"`{row.get('candidate_verdict', '')}` | {question} |"
+            )
     lines.append("")
     return "\n".join(lines)
 
@@ -173,9 +188,39 @@ def _recommend(delta: dict[str, Any]) -> str:
         return "reject_candidate"
     if delta.get("exact_rows", 0) < 0:
         return "reject_candidate"
+    if delta.get("baseline_exact_regression_rows", 0) > 0:
+        return "row_level_gate_required"
     if delta.get("exact_rows", 0) > 0:
         return "promote_candidate"
     return "mixed_candidate"
+
+
+def _baseline_exact_regression_rows(baseline: dict[str, Any], candidate: dict[str, Any]) -> list[dict[str, Any]]:
+    base_by_fixture = {str(row.get("fixture", "")): row for row in baseline.get("fixtures", []) if isinstance(row, dict)}
+    cand_by_fixture = {str(row.get("fixture", "")): row for row in candidate.get("fixtures", []) if isinstance(row, dict)}
+    out: list[dict[str, Any]] = []
+    for fixture in sorted(set(base_by_fixture) & set(cand_by_fixture)):
+        base = base_by_fixture.get(fixture, {})
+        cand = cand_by_fixture.get(fixture, {})
+        if "non_exact_rows" not in base or "non_exact_rows" not in cand:
+            continue
+        base_non_exact = _non_exact_by_id(base)
+        for row_id, row in _non_exact_by_id(cand).items():
+            if row_id not in base_non_exact:
+                out.append(
+                    {
+                        "fixture": fixture,
+                        "id": row_id,
+                        "candidate_verdict": str(row.get("verdict", "unknown") or "unknown"),
+                        "question": str(row.get("question", "")),
+                    }
+                )
+    return out
+
+
+def _non_exact_by_id(fixture_row: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    rows = fixture_row.get("non_exact_rows", []) if isinstance(fixture_row.get("non_exact_rows"), list) else []
+    return {str(row.get("id", "")): row for row in rows if isinstance(row, dict) and row.get("id")}
 
 
 def _summary(scorecard: dict[str, Any]) -> dict[str, Any]:

@@ -290,6 +290,11 @@ testing whether those gains transfer:
   Avalon/Sable transfer checks attached, the incoming guarded-activation
   rescues remain calibration targets rather than promotion targets, which is the
   right conservative behavior for a moving research instrument.
+- Scoped compile repair then produced a real but gated batch lift: the incoming
+  scorecard moved from `44 / 4 / 2` to `45 / 4 / 1`, with Northbridge improving
+  to `9 / 1 / 0`. The same run regressed Meridian q010 from exact to miss, so
+  the scorecard comparer now tracks baseline-exact row regressions and returns
+  `row_level_gate_required` instead of `promote_candidate` for this shape.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 
