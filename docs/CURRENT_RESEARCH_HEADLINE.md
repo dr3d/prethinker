@@ -364,6 +364,11 @@ testing whether those gains transfer:
   `18 / 10 / 12` full-40 and caused `7` baseline-exact regressions. The next
   repair needs narrower state-transition, custody, permission/rationale, and
   final-state passes with exact-row protection.
+- That narrower targeted-state lens is unsafe alone (`14 / 8 / 18`) but useful
+  row-gated. Its overlay target is `23 / 6 / 11`, and guarded activation with a
+  new identity-completeness uncertainty gate reaches `23 / 7 / 10` across
+  Larkspur full-40 with `38/40` best choices and no selector errors. The gate
+  protects who-is rows when a competing mode has explicit name support.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 

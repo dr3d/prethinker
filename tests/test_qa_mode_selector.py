@@ -10,6 +10,7 @@ from scripts.select_qa_mode_without_oracle import (
     protected_selector,
     score_selection,
     selector_system_prompt,
+    structural_identity_completeness_trap_reason,
     structural_mode_scores,
     structural_selector,
     structural_volume_trap_reason,
@@ -318,12 +319,85 @@ def test_volume_trap_does_not_double_penalize_relaxed_only_baseline() -> None:
     assert structural_volume_trap_reason(scored) == ""
 
 
+def test_hybrid_selector_calls_model_for_identity_name_completeness_trap() -> None:
+    row = {
+        "id": "q004d",
+        "question": "Who is Fair Warden Osric Thane?",
+        "modes": [
+            {
+                "mode": "baseline",
+                "query_evidence": {
+                    "executed_results": [
+                        {
+                            "status": "success",
+                            "num_rows": 1,
+                            "predicate": "person_name",
+                            "was_relaxed_fallback": False,
+                        },
+                        {
+                            "status": "success",
+                            "num_rows": 1,
+                            "predicate": "registered_as",
+                            "was_relaxed_fallback": False,
+                        },
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+            {
+                "mode": "authority_rows",
+                "query_evidence": {
+                    "executed_results": [
+                        {
+                            "status": "success",
+                            "num_rows": 8,
+                            "predicate": "ruled_by",
+                            "was_relaxed_fallback": False,
+                        },
+                        {
+                            "status": "success",
+                            "num_rows": 1,
+                            "predicate": "role_of",
+                            "was_relaxed_fallback": False,
+                        },
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+        ],
+    }
+    fallback_calls = 0
+
+    def fallback_selector(**_kwargs):
+        nonlocal fallback_calls
+        fallback_calls += 1
+        return {"selected_mode": "baseline", "selection_confidence": 0.7}
+
+    scored = structural_mode_scores(row=row, mode_labels=["baseline", "authority_rows"])
+    assert structural_identity_completeness_trap_reason(row=row, scored=scored)
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["baseline", "authority_rows"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=fallback_selector,
+    )
+
+    assert fallback_calls == 1
+    assert selected["selected_mode"] == "baseline"
+    assert "explicit name support" in selected["structural_uncertainty_reasons"][0]
+
+
 def test_activation_prompt_mentions_requirement_detail_completeness() -> None:
     prompt = selector_system_prompt("activation")
 
     assert "requirement questions" in prompt
     assert "count-only or status-only row is often partial" in prompt
     assert "spacing, interval, threshold" in prompt
+    assert "who-is identity questions" in prompt
 
 
 def test_hybrid_selector_falls_back_to_structural_when_model_fails() -> None:

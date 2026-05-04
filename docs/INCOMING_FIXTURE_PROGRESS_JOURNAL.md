@@ -732,3 +732,34 @@ but not a promotion path.
 Artifact:
 
 - `tmp/story_world_larkspur_state_custody_variant/larkspur_baseline_comparison.md`
+
+## 2026-05-04 Larkspur Targeted-State Selector Lift
+
+A narrower targeted-state compile variant is still unsafe globally, but it is a
+useful row-level lens:
+
+```text
+larkspur baseline full-40:        20 exact / 7 partial / 13 miss
+targeted-state compile alone:     14 exact / 8 partial / 18 miss
+judged row overlay target:        23 exact / 6 partial / 11 miss
+guarded selector + identity gate: 23 exact / 7 partial / 10 miss
+selected best rows:               38 / 40
+selector errors:                  0
+```
+
+Accepted variant rows are q015, q024, q034, and q035. The selector originally
+missed q009 because structural row volume preferred authority rows over the
+baseline's explicit name/identity support. The new identity-completeness
+uncertainty gate sends who-is rows to activation when a competing mode has
+explicit name predicates. That fixed q009 without source prose, answer keys,
+judge labels, or failure labels in selector input.
+
+Remaining missed-best rows are q023 and q029, where baseline partial should be
+protected over targeted-state miss. This is now the next selector guardrail
+frontier for rationale/contrast rows.
+
+Artifacts:
+
+- `tmp/story_world_larkspur_targeted_state_variant/compile_variant_overlay_plan.md`
+- `tmp/story_world_larkspur_targeted_state_variant/guarded_activation_selector_identity_gate_full40.md`
+- `tmp/story_world_larkspur_targeted_state_variant/variant_selector_training_plan.md`

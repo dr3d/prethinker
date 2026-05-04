@@ -550,6 +550,9 @@ def hybrid_selector(
     volume_trap_reason = structural_volume_trap_reason(scored)
     if volume_trap_reason:
         uncertain_reasons.append(volume_trap_reason)
+    identity_trap_reason = structural_identity_completeness_trap_reason(row=row, scored=scored)
+    if identity_trap_reason:
+        uncertain_reasons.append(identity_trap_reason)
     if not uncertain_reasons:
         selection = structural_selector(row=row, mode_labels=mode_labels)
         selection["selection_source"] = "hybrid_structural"
@@ -682,6 +685,29 @@ def structural_volume_trap_reason(scored: list[tuple[float, str, dict[str, Any]]
     return ""
 
 
+def structural_identity_completeness_trap_reason(
+    *,
+    row: dict[str, Any],
+    scored: list[tuple[float, str, dict[str, Any]]],
+) -> str:
+    """Return uncertainty when identity rows outrank explicit name support."""
+    if len(scored) < 2:
+        return ""
+    question = str(row.get("question", "")).casefold()
+    if not any(marker in question for marker in ["who is ", "who was ", "who were "]):
+        return ""
+    _best_score, _best_label, best_quality = scored[0]
+    best_predicates = set(best_quality.get("predicate_names", []) or [])
+    name_predicates = {"alias", "full_name", "name", "person_name", "preferred_name"}
+    if best_predicates.intersection(name_predicates):
+        return ""
+    for _score, _label, quality in scored[1:]:
+        predicates = set(quality.get("predicate_names", []) or [])
+        if predicates.intersection(name_predicates):
+            return "identity question has competing mode with explicit name support"
+    return ""
+
+
 def structural_evidence_quality(evidence: dict[str, Any]) -> dict[str, Any]:
     results = evidence.get("executed_results", []) if isinstance(evidence.get("executed_results"), list) else []
     row_total = 0
@@ -726,6 +752,7 @@ def structural_evidence_quality(evidence: dict[str, Any]) -> dict[str, Any]:
         "relaxed_rows": relaxed_row_total,
         "success_results": success_count,
         "non_empty_predicates": len(non_empty_predicates),
+        "predicate_names": sorted(non_empty_predicates),
         "warning_count": warning_count,
         "parse_error": parse_error,
         "reason": (
@@ -777,7 +804,9 @@ def selector_system_prompt(selection_policy: str) -> str:
             "For requirement questions, a count-only or status-only row is often partial when another mode returns "
             "answer-bearing requirement details such as spacing, interval, threshold, scope, exception, condition, "
             "duration, unit, or authority. Prefer the mode that covers the full requested requirement bundle, not "
-            "merely the mode whose document id or predicate name looks closest."
+            "merely the mode whose document id or predicate name looks closest. For who-is identity questions, "
+            "authority or action rows are useful but not sufficient by themselves when another mode includes explicit "
+            "name/identity support plus role or authority evidence."
         )
     return (
         base

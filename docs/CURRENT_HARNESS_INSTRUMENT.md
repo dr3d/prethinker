@@ -299,3 +299,11 @@ repair queue to `46` rows: `39` compile-surface gaps and `7` helper/query-join
 gaps. This redirects the next frontier away from selector prompting and toward
 scoped source-surface acquisition, especially Larkspur state/custody/rationale
 coverage.
+
+The Larkspur targeted-state lens shows the current harness shape. The compile
+variant alone is unsafe (`14 / 8 / 18`), but the judged row overlay exposes a
+`23 / 6 / 11` target with `4` accepted rows and `9` exact-protection rows. A
+new identity-completeness uncertainty gate prevents structural selection from
+preferring authority-row volume over explicit name support on who-is rows. With
+that gate, guarded activation selects `23 exact / 7 partial / 10 miss` across
+Larkspur full-40, `38/40` best rows, with no selector errors.

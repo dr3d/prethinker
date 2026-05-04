@@ -218,3 +218,39 @@ state/custody/rationale hint reduced mapper noise but did not preserve the
 right answer-bearing rows. The next Larkspur repair needs narrower source
 passes for specific object-state transitions, custody chain, and permission
 rationale rows, with exact-row protection from the current full-40 baseline.
+
+## LCF-008 - Targeted-State Row-Gated Selector
+
+Date: 2026-05-04
+
+Evidence lane: `selector_calibration_full40`
+
+Mode: narrower targeted state-transition/custody/rationale compile variant,
+then guarded activation with identity-completeness uncertainty gate.
+
+Artifacts:
+
+- Variant overlay:
+  `tmp/story_world_larkspur_targeted_state_variant/compile_variant_overlay_plan.md`
+- Selector replay:
+  `tmp/story_world_larkspur_targeted_state_variant/guarded_activation_selector_identity_gate_full40.md`
+
+Result:
+
+- Targeted compile alone is unsafe globally: `14 exact / 8 partial / 18 miss`.
+- Judged row overlay target: `23 exact / 6 partial / 11 miss`; `4` accepted
+  variant rows, `9` protected baseline-exact rows.
+- Non-oracle selector result: `23 exact / 7 partial / 10 miss`.
+- Selector selected best available mode on `38/40` rows.
+- Selector errors: `0`.
+- Remaining missed-best rows: q023 and q029, both baseline partial versus
+  targeted-state miss.
+
+Lesson:
+
+The targeted-state lens is a useful full-40 row variant, not a replacement
+compile. The new identity-completeness selector gate fixed the Fair Warden
+q009 protection case by refusing to let authority-row volume outrank explicit
+name/identity support. The remaining selector frontier is protecting partial
+baseline rationale rows when a variant has more but less answer-bearing event
+surface.
