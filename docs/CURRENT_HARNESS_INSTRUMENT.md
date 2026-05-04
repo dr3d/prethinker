@@ -27,6 +27,7 @@ python scripts/run_kb_pipeline_clean_harness.py --pack docs/data/frontier_packs/
 python scripts/validate_fixture_intake.py --root datasets/incoming_fixtures --out-json tmp/incoming_fixtures/intake_validation.json
 python scripts/stage_incoming_fixtures.py --root tmp/incoming --out-root tmp/incoming_staged
 python scripts/plan_incoming_fixture_runs.py --manifest tmp/incoming_staged/stage_manifest.json --out-json tmp/incoming_staged/cold_run_plan.json --out-md tmp/incoming_staged/cold_run_plan.md
+python scripts/plan_story_world_fixture_runs.py --fixture copperfall_deadline_docket --fixture harrowgate_witness_file --fixture larkspur_clockwork_fair --fixture meridian_permit_board --fixture northbridge_authority_packet --qa-limit 40 --out-json tmp/story_world_runs/promoted_incoming_cold_run_plan.json --out-md tmp/story_world_runs/promoted_incoming_cold_run_plan.md
 python scripts/summarize_incoming_fixture_smoke.py --fixture meridian_permit_board --compile-json <COMPILE_RUN_JSON> --qa-json <QA_RUN_JSON> --qa-json <FAILURE_SURFACE_RUN_JSON>
 python scripts/rollup_incoming_smoke_scorecard.py --root tmp/incoming_smoke_summaries --out-json tmp/incoming_smoke_summaries/scorecard.json --out-md tmp/incoming_smoke_summaries/scorecard.md
 python scripts/compare_incoming_smoke_scorecards.py --baseline-json tmp/incoming_smoke_summaries/scorecard.json --candidate-json tmp/incoming_smoke_summaries_detail_retry/scorecard.json --out-json tmp/incoming_smoke_summaries_detail_retry/baseline_comparison.json --out-md tmp/incoming_smoke_summaries_detail_retry/baseline_comparison.md
@@ -93,6 +94,19 @@ first cold run. As soon as the fixture is structurally valid, promote it into
 `progress_journal.md`, and `progress_metrics.jsonl`. Generated run JSON can
 stay under `tmp/`, but durable scorecard lessons and artifact references should
 be captured in the tracked fixture journal.
+
+`C:\prethinker_tmp_archive` is the lab's cold-storage/RAG shelf for bulky tmp
+evidence worth keeping but not worth carrying in the active tree or model
+context. Search it narrowly when a named prior artifact matters. Do not treat it
+as live guidance; if an archived run becomes an active lesson, summarize that
+lesson in tracked docs or the fixture's journal.
+
+`scripts/plan_story_world_fixture_runs.py` is the promoted-fixture daily-driver
+planner. It reads runnable fixtures directly from `datasets/story_worlds`,
+prefers `source.md` over `story.md`, uses `qa.md` as the question surface, and
+uses `oracle.jsonl` only for after-the-fact scoring when present. This is the
+normal path for seeing how current harness machinery responds to promoted
+fixtures; the older incoming planner remains intake/staging compatibility.
 
 Incoming challenge fixtures now have a two-step instrument panel:
 

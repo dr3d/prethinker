@@ -107,3 +107,8 @@ Notes from the 2026-05-03 Codex upgrade/preflight:
   moved to `C:\prethinker_tmp_archive`; active local keepers are currently
   `tmp/licensed`, `tmp/cold_baselines`, `tmp/clarification_eagerness_runs`, and
   `tmp/domain_bootstrap_qa_cache`.
+- Treat `C:\prethinker_tmp_archive` as the lab's cold-storage/RAG shelf. Search
+  it for named artifacts or prior run evidence when needed, but do not bulk-load
+  it into context. If an archived artifact becomes an active research result,
+  summarize the lesson in tracked docs or fixture journals and reference the
+  archive path.

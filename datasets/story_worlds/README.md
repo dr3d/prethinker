@@ -17,6 +17,12 @@ in that fixture's `progress_journal.md` and `progress_metrics.jsonl`. Generated
 compile/QA JSON can remain under `tmp/`, but scorecards, selector lessons, and
 artifact references should be summarized in tracked journals.
 
+Bulky scratch artifacts that are worth preserving but not worth keeping in the
+active repo live in `C:\prethinker_tmp_archive`. Treat that folder as a
+searchable cold-storage shelf, not live context. When archived evidence becomes
+important again, carry forward the lesson and artifact reference in the tracked
+fixture journal.
+
 Current fixtures:
 
 - `otters_clockwork_pie/`: a Goldilocks-shaped but source-local whimsical story
