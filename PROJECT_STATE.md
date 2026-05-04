@@ -207,8 +207,9 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
   is unsafe at `14 / 8 / 18`, but the overlay target is `23 / 6 / 11`. A new
   selector uncertainty trigger for who-is identity rows protects explicit
   name/identity support from being outranked by authority-row volume. Guarded
-  activation with that gate reaches `23 exact / 7 partial / 10 miss`, `38/40`
-  best choices, and `0` selector errors on Larkspur full-40.
+  activation with identity, rationale/contrast, and capability-failure guidance
+  reaches `23 exact / 8 partial / 9 miss`, `39/40` best choices, and `0`
+  selector errors on Larkspur full-40.
 - The five incoming challenge fixtures have been promoted into
   `datasets/story_worlds/` with standard source, QA, oracle-for-scoring,
   `progress_journal.md`, and `progress_metrics.jsonl` files. `tmp/incoming*`

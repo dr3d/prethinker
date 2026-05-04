@@ -240,11 +240,12 @@ Result:
 - Targeted compile alone is unsafe globally: `14 exact / 8 partial / 18 miss`.
 - Judged row overlay target: `23 exact / 6 partial / 11 miss`; `4` accepted
   variant rows, `9` protected baseline-exact rows.
-- Non-oracle selector result: `23 exact / 7 partial / 10 miss`.
-- Selector selected best available mode on `38/40` rows.
+- Non-oracle selector result after rationale/contrast and capability-failure
+  guidance: `23 exact / 8 partial / 9 miss`.
+- Selector selected best available mode on `39/40` rows.
 - Selector errors: `0`.
-- Remaining missed-best rows: q023 and q029, both baseline partial versus
-  targeted-state miss.
+- Remaining missed-best row: q023, where baseline partial still beats the
+  targeted-state seal/status explanation.
 
 Lesson:
 
@@ -252,5 +253,5 @@ The targeted-state lens is a useful full-40 row variant, not a replacement
 compile. The new identity-completeness selector gate fixed the Fair Warden
 q009 protection case by refusing to let authority-row volume outrank explicit
 name/identity support. The remaining selector frontier is protecting partial
-baseline rationale rows when a variant has more but less answer-bearing event
-surface.
+baseline capability-rationale rows when a variant has more but less
+answer-bearing event surface.

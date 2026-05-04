@@ -366,9 +366,10 @@ testing whether those gains transfer:
   final-state passes with exact-row protection.
 - That narrower targeted-state lens is unsafe alone (`14 / 8 / 18`) but useful
   row-gated. Its overlay target is `23 / 6 / 11`, and guarded activation with a
-  new identity-completeness uncertainty gate reaches `23 / 7 / 10` across
-  Larkspur full-40 with `38/40` best choices and no selector errors. The gate
-  protects who-is rows when a competing mode has explicit name support.
+  new identity-completeness uncertainty gate plus rationale/capability guidance
+  reaches `23 / 8 / 9` across Larkspur full-40 with `39/40` best choices and no
+  selector errors. The gate protects who-is rows when a competing mode has
+  explicit name support.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 

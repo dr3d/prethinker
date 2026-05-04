@@ -553,6 +553,9 @@ def hybrid_selector(
     identity_trap_reason = structural_identity_completeness_trap_reason(row=row, scored=scored)
     if identity_trap_reason:
         uncertain_reasons.append(identity_trap_reason)
+    rationale_trap_reason = structural_rationale_contrast_trap_reason(row=row, scored=scored)
+    if rationale_trap_reason:
+        uncertain_reasons.append(rationale_trap_reason)
     if not uncertain_reasons:
         selection = structural_selector(row=row, mode_labels=mode_labels)
         selection["selection_source"] = "hybrid_structural"
@@ -708,6 +711,40 @@ def structural_identity_completeness_trap_reason(
     return ""
 
 
+def structural_rationale_contrast_trap_reason(
+    *,
+    row: dict[str, Any],
+    scored: list[tuple[float, str, dict[str, Any]]],
+) -> str:
+    """Return uncertainty when why/contrast rows have competing reason support."""
+    if len(scored) < 2:
+        return ""
+    question = str(row.get("question", "")).casefold()
+    if not any(marker in question for marker in ["why ", "why can't", "why cannot", "difference between", "contrast"]):
+        return ""
+    _best_score, _best_label, best_quality = scored[0]
+    best_predicates = set(best_quality.get("predicate_names", []) or [])
+    rationale_predicates = {
+        "award_reason",
+        "awarded",
+        "cause",
+        "caused_by",
+        "disqualified_from",
+        "explanation",
+        "reason",
+        "result_reason",
+        "rule_applies_to",
+        "source_detail",
+    }
+    if best_predicates.intersection(rationale_predicates):
+        return ""
+    for _score, _label, quality in scored[1:]:
+        predicates = set(quality.get("predicate_names", []) or [])
+        if predicates.intersection(rationale_predicates):
+            return "why or contrast question has competing mode with explicit rationale support"
+    return ""
+
+
 def structural_evidence_quality(evidence: dict[str, Any]) -> dict[str, Any]:
     results = evidence.get("executed_results", []) if isinstance(evidence.get("executed_results"), list) else []
     row_total = 0
@@ -806,7 +843,12 @@ def selector_system_prompt(selection_policy: str) -> str:
             "duration, unit, or authority. Prefer the mode that covers the full requested requirement bundle, not "
             "merely the mode whose document id or predicate name looks closest. For who-is identity questions, "
             "authority or action rows are useful but not sufficient by themselves when another mode includes explicit "
-            "name/identity support plus role or authority evidence."
+            "name/identity support plus role or authority evidence. For why, cannot, and difference/contrast "
+            "questions, adjacent status/action rows are often partial when another mode returns explicit rationale, "
+            "rule-application, disqualification, award-reason, cause/result, or contrast evidence tied to the asked "
+            "capability or decision. For capability-failure questions, a generic restriction, seal, permission, or "
+            "status row is often weaker than evidence that names the affected function, mechanism, component, award "
+            "reason, or source-stated reason the capability cannot be demonstrated."
         )
     return (
         base

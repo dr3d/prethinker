@@ -739,12 +739,12 @@ A narrower targeted-state compile variant is still unsafe globally, but it is a
 useful row-level lens:
 
 ```text
-larkspur baseline full-40:        20 exact / 7 partial / 13 miss
-targeted-state compile alone:     14 exact / 8 partial / 18 miss
-judged row overlay target:        23 exact / 6 partial / 11 miss
-guarded selector + identity gate: 23 exact / 7 partial / 10 miss
-selected best rows:               38 / 40
-selector errors:                  0
+larkspur baseline full-40:                   20 exact / 7 partial / 13 miss
+targeted-state compile alone:                14 exact / 8 partial / 18 miss
+judged row overlay target:                   23 exact / 6 partial / 11 miss
+guarded selector + identity/rationale gates: 23 exact / 8 partial / 9 miss
+selected best rows:                          39 / 40
+selector errors:                             0
 ```
 
 Accepted variant rows are q015, q024, q034, and q035. The selector originally
@@ -754,12 +754,13 @@ uncertainty gate sends who-is rows to activation when a competing mode has
 explicit name predicates. That fixed q009 without source prose, answer keys,
 judge labels, or failure labels in selector input.
 
-Remaining missed-best rows are q023 and q029, where baseline partial should be
-protected over targeted-state miss. This is now the next selector guardrail
-frontier for rationale/contrast rows.
+Rationale/contrast guidance then protected q029. The remaining missed-best row
+is q023, where baseline partial should be protected over a targeted-state
+seal/status explanation. This is now the next selector guardrail frontier for
+capability-failure rationale rows.
 
 Artifacts:
 
 - `tmp/story_world_larkspur_targeted_state_variant/compile_variant_overlay_plan.md`
-- `tmp/story_world_larkspur_targeted_state_variant/guarded_activation_selector_identity_gate_full40.md`
+- `tmp/story_world_larkspur_targeted_state_variant/guarded_activation_selector_capability_gate_full40.md`
 - `tmp/story_world_larkspur_targeted_state_variant/variant_selector_training_plan.md`

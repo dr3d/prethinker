@@ -305,5 +305,6 @@ variant alone is unsafe (`14 / 8 / 18`), but the judged row overlay exposes a
 `23 / 6 / 11` target with `4` accepted rows and `9` exact-protection rows. A
 new identity-completeness uncertainty gate prevents structural selection from
 preferring authority-row volume over explicit name support on who-is rows. With
-that gate, guarded activation selects `23 exact / 7 partial / 10 miss` across
-Larkspur full-40, `38/40` best rows, with no selector errors.
+identity, rationale/contrast, and capability-failure guardrails, guarded
+activation selects `23 exact / 8 partial / 9 miss` across Larkspur full-40,
+`39/40` best rows, with no selector errors.

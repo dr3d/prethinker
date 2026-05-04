@@ -12,6 +12,7 @@ from scripts.select_qa_mode_without_oracle import (
     selector_system_prompt,
     structural_identity_completeness_trap_reason,
     structural_mode_scores,
+    structural_rationale_contrast_trap_reason,
     structural_selector,
     structural_volume_trap_reason,
 )
@@ -391,6 +392,78 @@ def test_hybrid_selector_calls_model_for_identity_name_completeness_trap() -> No
     assert "explicit name support" in selected["structural_uncertainty_reasons"][0]
 
 
+def test_hybrid_selector_calls_model_for_rationale_contrast_trap() -> None:
+    row = {
+        "id": "q004e",
+        "question": "What is the difference between the permitted repair and the modification?",
+        "modes": [
+            {
+                "mode": "baseline",
+                "query_evidence": {
+                    "executed_results": [
+                        {
+                            "status": "success",
+                            "num_rows": 1,
+                            "predicate": "rule_applies_to",
+                            "was_relaxed_fallback": False,
+                        },
+                        {
+                            "status": "success",
+                            "num_rows": 1,
+                            "predicate": "disqualified_from",
+                            "was_relaxed_fallback": False,
+                        },
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+            {
+                "mode": "status_rows",
+                "query_evidence": {
+                    "executed_results": [
+                        {
+                            "status": "success",
+                            "num_rows": 8,
+                            "predicate": "ruled_by",
+                            "was_relaxed_fallback": False,
+                        },
+                        {
+                            "status": "success",
+                            "num_rows": 2,
+                            "predicate": "results_in",
+                            "was_relaxed_fallback": False,
+                        },
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+        ],
+    }
+    fallback_calls = 0
+
+    def fallback_selector(**_kwargs):
+        nonlocal fallback_calls
+        fallback_calls += 1
+        return {"selected_mode": "baseline", "selection_confidence": 0.7}
+
+    scored = structural_mode_scores(row=row, mode_labels=["baseline", "status_rows"])
+    assert structural_rationale_contrast_trap_reason(row=row, scored=scored)
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["baseline", "status_rows"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=fallback_selector,
+    )
+
+    assert fallback_calls == 1
+    assert selected["selected_mode"] == "baseline"
+    assert "explicit rationale support" in selected["structural_uncertainty_reasons"][0]
+
+
 def test_activation_prompt_mentions_requirement_detail_completeness() -> None:
     prompt = selector_system_prompt("activation")
 
@@ -398,6 +471,8 @@ def test_activation_prompt_mentions_requirement_detail_completeness() -> None:
     assert "count-only or status-only row is often partial" in prompt
     assert "spacing, interval, threshold" in prompt
     assert "who-is identity questions" in prompt
+    assert "difference/contrast" in prompt
+    assert "capability-failure questions" in prompt
 
 
 def test_hybrid_selector_falls_back_to_structural_when_model_fails() -> None:
