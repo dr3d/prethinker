@@ -243,3 +243,51 @@ important. The flat skeleton should be a compact operation surface, not a giant
 workspace. Focused passes still need health repair, especially the thin/skip-heavy
 ledger-entry and dispute passes.
 
+## Run DL-005 - Compact Surface Row-Level Selector
+
+- Timestamp: `2026-05-04T00:14Z` through `2026-05-04T00:16Z`
+- Evidence lane: `diagnostic_replay`
+- Model: `qwen/qwen3.6-35b-a3b`
+- Mode: non-oracle selector over DL-001 baseline QA evidence and DL-004
+  compact-flat QA evidence.
+
+### Artifacts
+
+- Mode comparison:
+  `tmp/cold_baselines/dulse_ledger/dulse_compact_mode_comparison.json`
+- Selector:
+  `tmp/cold_baselines/dulse_ledger/selector_compact_direct.json`
+
+### Result
+
+Individual modes:
+
+```text
+DL-001 baseline:     27 exact / 7 partial / 6 miss
+DL-004 compact flat: 27 exact / 11 partial / 2 miss
+perfect selector:    35 exact / 5 partial / 0 miss
+```
+
+Non-oracle selector:
+
+```text
+selected result: 32 exact / 6 partial / 2 miss
+selected best available mode: 37/40
+selector errors: 0
+```
+
+The three non-best selections were `q030`, `q034`, and `q036`.
+
+### Lesson
+
+DL-005 is strong evidence for safe-surface parallax at query time. Neither
+individual compile surface exceeded `27` exact, but the non-oracle selector
+reached `32` exact by choosing between two independently safe evidence modes.
+This is not answer-key selection: the selector saw stripped query evidence only,
+not source prose, reference answers, judge labels, failure labels, or gold KBs.
+
+The practical conclusion is that compile improvements and row-level activation
+compound. A richer compact skeleton may help different questions than the older
+baseline, and the right runtime shape is not always a single globally preferred
+surface.
+

@@ -402,6 +402,9 @@ promotion-ready under either isolated or dependency-composed trial.
   `flat_skeleton` now also uses `source_pass_ops_v1`. On Dulse this moved the
   flat skeleton from `0` rows to `51` rows and reduced full-QA misses from `6`
   to `2`, while still leaving thin focused passes as the next repair target.
+  DL-005 then selected between the original and compact-flat QA evidence modes
+  without source or answer-key access and reached `32 exact / 6 partial / 2
+  miss`, which is the query-time form of the same parallax principle.
 - Compile-lens health now summarizes those pass diagnostics at the top level.
   A compile can be marked `healthy`, `warning`, or `poor` with a recommendation
   such as `qa_run_reasonable` or `repair_compile_before_qa`. V9-002 used this
