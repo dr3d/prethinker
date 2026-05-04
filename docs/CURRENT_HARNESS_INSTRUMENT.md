@@ -33,6 +33,7 @@ python scripts/compare_incoming_smoke_scorecards.py --baseline-json tmp/incoming
 python scripts/plan_incoming_row_mode_overlay.py --baseline-json tmp/incoming_smoke_summaries/scorecard.json --candidate-json tmp/incoming_smoke_summaries_evidence_nonexact/scorecard.json --out-json tmp/incoming_smoke_summaries_evidence_nonexact/row_mode_overlay_plan.json --out-md tmp/incoming_smoke_summaries_evidence_nonexact/row_mode_overlay_plan.md
 python scripts/plan_incoming_row_gated_scorecard.py --baseline-json tmp/incoming_smoke_summaries/scorecard.json --candidate-json tmp/incoming_smoke_summaries_scoped_repair/scorecard.json --row-overlay-json tmp/incoming_smoke_summaries_scoped_repair/row_mode_overlay_plan.json --out-json tmp/incoming_smoke_summaries_scoped_repair/row_gated_scorecard_plan.json --out-md tmp/incoming_smoke_summaries_scoped_repair/row_gated_scorecard_plan.md
 python scripts/plan_incoming_compile_variant_overlay.py --baseline-json tmp/incoming_smoke_summaries_scoped_evidence/scorecard.json --candidate-json shifted_compile_variants=tmp/incoming_smoke_summaries_compile_variant_selection/scorecard.json --out-json tmp/incoming_smoke_summaries_compile_variant_selection/compile_variant_overlay_plan.json --out-md tmp/incoming_smoke_summaries_compile_variant_selection/compile_variant_overlay_plan.md
+python scripts/plan_incoming_variant_selector_training.py --overlay-json tmp/incoming_smoke_summaries_official_companion_overlay/compile_variant_overlay_plan.json --out-json tmp/incoming_smoke_summaries_official_companion_overlay/variant_selector_training_plan.json --out-md tmp/incoming_smoke_summaries_official_companion_overlay/variant_selector_training_plan.md
 python scripts/plan_incoming_compile_repair_targets.py --scorecard-json tmp/incoming_smoke_summaries/scorecard.json --row-overlay-json tmp/incoming_smoke_summaries_evidence_nonexact/row_mode_overlay_plan.json --out-json tmp/incoming_smoke_summaries/compile_repair_targets.json --out-md tmp/incoming_smoke_summaries/compile_repair_targets.md
 python scripts/select_qa_mode_without_oracle.py --selection-policy protected --group <name>:baseline=<QA_JSON>,evidence=<QA_JSON> --out-json <OUT_JSON> --out-md <OUT_MD>
 python scripts/select_qa_mode_without_oracle.py --selection-policy guarded_activation --group <name>:baseline=<QA_JSON>+<FAILURE_SURFACE_QA_JSON>,candidate=<QA_JSON> --out-json <OUT_JSON> --out-md <OUT_MD>
@@ -222,3 +223,13 @@ overlay now exposes a judged `50 / 0 / 0` target with four accepted variant
 rows, three protected baseline-exact rows, and zero unchanged non-exacts. The
 next product step is selector/risk-gate machinery that can approximate that
 row choice without oracle verdicts.
+
+`scripts/plan_incoming_variant_selector_training.py` is the bridge artifact for
+that step. It reads the compile-variant overlay only and converts accepted rows
+into `activation_training_target`s and protected exact rows into
+`exact_protection_target`s. On the official-companion overlay it emits `7`
+training rows: `4` activation targets, `3` exact-protection targets, and `0`
+repair targets. Both nonbaseline variants are labeled
+`unsafe_global_variant_row_gate_required`, which is exactly the current lesson:
+the selector should learn row-level activation with exact protection, not
+global variant promotion.

@@ -164,6 +164,11 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
   q009, and the latest judged compile/query variant overlay target is
   `50 exact / 0 partial / 0 miss` with exact-row protection. This is a selector
   target, not a deployable oracle policy.
+- `scripts/plan_incoming_variant_selector_training.py` now converts that judged
+  overlay into selector/risk-gate training rows without reading source prose or
+  raw compile outputs. The current official-companion overlay yields `4`
+  activation targets, `3` exact-protection targets, and marks both nonbaseline
+  variants `unsafe_global_variant_row_gate_required`.
 - Incoming compile repair targets are now generated at
   `tmp/incoming_smoke_summaries/compile_repair_targets.{json,md}`. The current
   scoped-evidence queue is down to four partial rows: `3` scoped source-surface

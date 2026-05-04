@@ -322,6 +322,13 @@ testing whether those gains transfer:
   regresses, but the judged compile/query overlay target is now `50 / 0 / 0`
   with four accepted variant rows and three protected exact rows. The hard
   problem is learning a non-oracle selector/control signal for these variants.
+- The first bridge artifact for that control signal now exists:
+  `plan_incoming_variant_selector_training.py` turns the judged overlay into
+  `4` activation targets and `3` exact-protection targets without reading
+  source prose, gold KBs, answer keys, strategy files, or raw compile outputs.
+  Both nonbaseline variants are marked
+  `unsafe_global_variant_row_gate_required`, so the current evidence says
+  "train row-gated activation," not "promote a new global compile."
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 

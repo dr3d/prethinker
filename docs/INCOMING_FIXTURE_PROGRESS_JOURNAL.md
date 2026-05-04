@@ -547,6 +547,30 @@ next harness step is a non-oracle row-variant selector/risk gate that can learn
 from the four accepted rows and three protected exact rows without judge labels
 or source-prose access.
 
+That bridge now exists as `scripts/plan_incoming_variant_selector_training.py`.
+It reads the compile-variant overlay artifact only and emits selector/risk-gate
+training rows:
+
+```text
+training rows: 7
+activation targets: 4
+exact-protection targets: 3
+repair targets: 0
+recommendation: train_row_variant_selector_with_exact_protection
+```
+
+Variant risk buckets:
+
+| Variant | Accepted | Protected Regressions | Risk |
+| --- | ---: | ---: | --- |
+| `larkspur_attribute_duty_companion` | 2 | 1 | `unsafe_global_variant_row_gate_required` |
+| `shifted_compile_variants` | 2 | 2 | `unsafe_global_variant_row_gate_required` |
+
+Discovery: neither nonbaseline variant is safe as a global default. Both are
+useful row-level lenses and both damage exact rows elsewhere. This gives the
+next selector pass a compact calibration set rather than another broad prompt
+change.
+
 Ignored local artifact references:
 
 - `tmp/incoming_smoke_summaries_larkspur_attribute_duty_variant/scorecard.md`
@@ -555,3 +579,4 @@ Ignored local artifact references:
 - `tmp/incoming_smoke_summaries_official_companion_overlay/scorecard.md`
 - `tmp/incoming_smoke_summaries_official_companion_overlay/scoped_evidence_comparison.md`
 - `tmp/incoming_smoke_summaries_official_companion_overlay/compile_variant_overlay_plan.md`
+- `tmp/incoming_smoke_summaries_official_companion_overlay/variant_selector_training_plan.md`
