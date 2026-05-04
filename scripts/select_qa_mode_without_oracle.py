@@ -3,13 +3,13 @@
 
 This is a query-surface experiment. It reads existing QA artifacts, strips
 reference answers, judge labels, oracle fields, and failure-surface labels, then
-asks an LLM to choose which mode has the strongest structured evidence for each
-question.
+asks an LLM, or optionally a deterministic structural scorer, to choose which
+mode has the strongest structured evidence for each question.
 
 The selector does not read source prose, gold KBs, strategy files, or answer
 keys. Python does not derive answers from text; it packages already-executed
 query evidence and scores the selected mode against existing judge labels only
-after the model selection is complete.
+after the selection is complete.
 """
 
 from __future__ import annotations
@@ -84,11 +84,12 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--selection-policy",
-        choices=["direct", "completeness", "relevance"],
+        choices=["direct", "completeness", "relevance", "structural"],
         default="direct",
         help=(
             "Selector policy. direct is the stable default; completeness and relevance "
-            "are experimental calibration policies."
+            "are experimental LLM calibration policies. structural is a deterministic "
+            "query-evidence scorer that does not call the model."
         ),
     )
     parser.add_argument(
@@ -121,21 +122,24 @@ def main() -> int:
     for index, row in enumerate(rows, start=1):
         print(f"[{index}/{len(rows)}] {row['id']}")
         selection_error = ""
-        try:
-            selection = call_selector(
-                base_url=str(args.base_url),
-                model=str(args.model),
-                timeout=int(args.timeout),
-                temperature=float(args.temperature),
-                top_p=float(args.top_p),
-                max_tokens=int(args.max_tokens),
-                row=row,
-                mode_labels=group["labels"],
-                selection_policy=str(args.selection_policy),
-            )
-        except Exception as exc:  # pragma: no cover - live harness path
-            selection_error = str(exc)
-            selection = {}
+        if str(args.selection_policy) == "structural":
+            selection = structural_selector(row=row, mode_labels=group["labels"])
+        else:
+            try:
+                selection = call_selector(
+                    base_url=str(args.base_url),
+                    model=str(args.model),
+                    timeout=int(args.timeout),
+                    temperature=float(args.temperature),
+                    top_p=float(args.top_p),
+                    max_tokens=int(args.max_tokens),
+                    row=row,
+                    mode_labels=group["labels"],
+                    selection_policy=str(args.selection_policy),
+                )
+            except Exception as exc:  # pragma: no cover - live harness path
+                selection_error = str(exc)
+                selection = {}
         outputs.append(score_selection(row=row, selection=selection, error=selection_error))
 
     report = {
@@ -330,6 +334,94 @@ def call_selector(
     if not isinstance(parsed, dict):
         raise RuntimeError("selector returned non-object JSON")
     return parsed
+
+
+def structural_selector(*, row: dict[str, Any], mode_labels: list[str]) -> dict[str, Any]:
+    scored: list[tuple[float, str, dict[str, Any]]] = []
+    for mode in row.get("modes", []):
+        if not isinstance(mode, dict):
+            continue
+        label = str(mode.get("mode", "")).strip()
+        evidence = mode.get("query_evidence") if isinstance(mode.get("query_evidence"), dict) else {}
+        quality = structural_evidence_quality(evidence)
+        scored.append((float(quality["score"]), label, quality))
+    if not scored:
+        selected = mode_labels[0] if mode_labels else ""
+        scored = [(0.0, selected, {"quality": "weak", "reason": "no mode evidence"})]
+    scored.sort(
+        key=lambda item: (
+            item[0],
+            -mode_labels.index(item[1]) if item[1] in mode_labels else 0,
+        ),
+        reverse=True,
+    )
+    best_score, selected, _best_quality = scored[0]
+    return {
+        "schema_version": "qa_mode_selector_v1",
+        "selected_mode": selected,
+        "selection_confidence": min(1.0, max(0.0, round(best_score / 10.0, 3))),
+        "evidence_quality_by_mode": [
+            {
+                "mode": label,
+                "quality": str(quality.get("quality", "weak")),
+                "reason": str(quality.get("reason", "")),
+            }
+            for _score, label, quality in scored
+        ],
+        "rationale": f"deterministic structural query-evidence score selected {selected}",
+        "risks": [
+            "structural selector cannot judge answer meaning",
+            "row count can reward irrelevant evidence",
+        ],
+    }
+
+
+def structural_evidence_quality(evidence: dict[str, Any]) -> dict[str, Any]:
+    results = evidence.get("executed_results", []) if isinstance(evidence.get("executed_results"), list) else []
+    row_total = 0
+    direct_row_total = 0
+    relaxed_row_total = 0
+    success_count = 0
+    non_empty_predicates: set[str] = set()
+    for result in results:
+        if not isinstance(result, dict):
+            continue
+        rows = int(result.get("num_rows", 0) or 0)
+        row_total += rows
+        if str(result.get("status", "")) == "success":
+            success_count += 1
+        predicate = str(result.get("predicate", "")).strip()
+        if rows > 0 and predicate:
+            non_empty_predicates.add(predicate)
+        if bool(result.get("was_relaxed_fallback")):
+            relaxed_row_total += rows
+        else:
+            direct_row_total += rows
+    warning_count = len(evidence.get("warnings", [])) if isinstance(evidence.get("warnings"), list) else 0
+    parse_error = bool(str(evidence.get("parse_error", "")).strip())
+    score = 0.0
+    score += min(6, direct_row_total) * 1.0
+    score += min(6, relaxed_row_total) * 0.35
+    score += min(4, success_count) * 0.25
+    score += min(4, len(non_empty_predicates)) * 0.25
+    score -= min(3, warning_count) * 0.2
+    if parse_error:
+        score -= 2.0
+    if row_total == 0:
+        quality = "weak"
+    elif direct_row_total > 0 and score >= 3:
+        quality = "strong"
+    else:
+        quality = "partial"
+    return {
+        "score": round(score, 3),
+        "quality": quality,
+        "reason": (
+            f"direct_rows={direct_row_total}; relaxed_rows={relaxed_row_total}; "
+            f"success_results={success_count}; non_empty_predicates={len(non_empty_predicates)}; "
+            f"warnings={warning_count}"
+        ),
+    }
 
 
 def selector_system_prompt(selection_policy: str) -> str:

@@ -799,3 +799,34 @@ without becoming the only evidence mode
 
 Row-level activation is now the practical bridge between safe rule acquisition
 and downstream QA usefulness.
+
+## Run AG-015 - Structural Selector Negative Control
+
+- Timestamp: `2026-05-04T02:59Z`
+- Evidence lane: `diagnostic_replay`
+- Mode: deterministic structural selector over AG-001 baseline QA evidence and
+  AG-013 Rule 8 union QA evidence. The selector did not call an LLM and did not
+  see source prose, answer keys, judge labels, failure labels, or gold KBs.
+
+### Artifact
+
+- Selector:
+  `tmp/cold_baselines/avalon_grant_committee/union/selector_rule8_structural.json`
+
+### Result
+
+```text
+baseline:                  25 exact / 12 partial / 3 miss
+Rule 8 union:              26 exact / 12 partial / 2 miss
+direct LLM selector:       27 exact / 11 partial / 2 miss
+structural selector:       25 exact / 13 partial / 2 miss
+perfect selector upper:    27 exact / 12 partial / 1 miss
+```
+
+### Lesson
+
+The deterministic structural selector is useful as a cheap activation baseline,
+but it is not a replacement for semantic row-level selection. Avalon is the
+counterexample: row counts and relaxed/direct evidence metadata are not enough
+to choose the rule-union mode when the relevant difference is a narrow
+multi-condition eligibility interpretation.

@@ -354,6 +354,7 @@ Result:
 - Direct selector: `21 exact / 7 partial / 12 miss`.
 - Completeness selector: `21 exact / 8 partial / 11 miss`.
 - Relevance selector: `21 exact / 7 partial / 12 miss`.
+- Structural selector: `24 exact / 4 partial / 12 miss`.
 
 Lesson:
 
@@ -365,7 +366,9 @@ The selector regressed relative to the global evidence-filter mode, which means
 row-level activation still under-recognizes when a richer evidence bundle should
 be trusted. Prompt-only selector variants did not solve it: completeness reduced
 misses by one but did not improve exact count, and relevance matched the direct
-selector. The useful architecture lesson is:
+selector. A deterministic structural selector matched the global evidence-filter
+exact count without an LLM selector call, but with two more misses than global
+evidence-filter. The useful architecture lesson is:
 
 ```text
 ledger coverage targets -> broader safe surface

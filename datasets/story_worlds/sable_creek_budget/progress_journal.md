@@ -315,6 +315,7 @@ SC-001 baseline:        20 exact / 8 partial / 12 miss
 SC-006 threshold union: 20 exact / 7 partial / 13 miss
 perfect selector upper: 23 exact / 7 partial / 10 miss
 direct selector:        21 exact / 7 partial / 12 miss
+structural selector:    21 exact / 5 partial / 14 miss
 ```
 
 ### Lesson
@@ -327,7 +328,9 @@ predicates.
 
 The full-QA result is deliberately modest. The threshold rule union rescues
 some rows and regresses others; the non-oracle selector recovers one exact over
-both individual modes. This reinforces the broader rule doctrine:
+both individual modes. A deterministic structural selector ties direct selector
+on exact count but increases hard misses, so it is a cheap diagnostic baseline
+rather than a replacement policy. This reinforces the broader rule doctrine:
 
 ```text
 promotion-ready rule surface != globally dominant evidence mode

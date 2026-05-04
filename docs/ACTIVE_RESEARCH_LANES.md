@@ -95,3 +95,9 @@ powerless `coverage_targets`, but an anti-meta-rot replay on Oxalis regressed
 when the partial-skeleton recovery instruction was global. Keep that recovery
 scoped to ledger-backed narrative passes until another unlike fixture shows
 positive transfer.
+
+Activation update: deterministic structural query-mode selection is now a cheap
+diagnostic baseline. It matched Three Moles' high exact count without an LLM
+selector call, tied Sable on exact count while increasing misses, and regressed
+Avalon. Treat it as a triage/control lane, not a default replacement for
+semantic row-level selection.
