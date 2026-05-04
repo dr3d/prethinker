@@ -341,6 +341,12 @@ testing whether those gains transfer:
   condition, duration, unit, or authority. The same seven-row calibration slice
   now reaches `7 / 0 / 0` and `7/7` best choices without source prose, answer
   keys, judge labels, failure labels, or gold KBs in selector input.
+- Replaying that selector over the full first-10 Larkspur, Meridian, and
+  Northbridge variant groups reached `30 / 0 / 0` with `30/30` best choices and
+  no selector errors. Since Copperfall and Harrowgate were already clean at
+  `10/10`, the current best row-gated harness surface now has a first-10
+  `50 / 0 / 0` result across the promoted incoming batch. That is a selector
+  result over existing artifacts, not a single perfect cold compile.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 

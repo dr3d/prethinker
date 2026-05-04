@@ -139,3 +139,24 @@ Lesson:
 Requirement questions need detail-completeness selection. A count-only row can
 be true but partial when another mode has answer-bearing spacing, interval,
 threshold, condition, duration, unit, scope, or authority details.
+
+## NAP-005 - Full First-10 Variant Selector Replay
+
+Date: 2026-05-04
+
+Evidence lane: `selector_calibration`
+
+Artifact:
+
+- `tmp/incoming_variant_selector_runs/northbridge_guarded_activation_requirement_detail_first10.json`
+
+Result:
+
+- Northbridge first-10 selected `10/10` best choices.
+- QA verdict through selected modes: `10 exact / 0 partial / 0 miss`.
+- Selector errors: `0`.
+
+Lesson:
+
+The row-gated selector can safely combine scoped-evidence and hydrant-spacing
+compile views across the whole first-10 slice.

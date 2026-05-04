@@ -621,6 +621,22 @@ calibration proof on the seven rows that matter. This is still a calibration
 slice, not a global promotion claim, but the selector now has named guardrails
 for both row-volume traps and requirement-detail incompleteness.
 
+The same selector was replayed over the full first-10 variant groups for the
+three imperfect fixtures:
+
+```text
+larkspur:    10 exact / 0 partial / 0 miss, 10/10 best choices
+meridian:    10 exact / 0 partial / 0 miss, 10/10 best choices
+northbridge: 10 exact / 0 partial / 0 miss, 10/10 best choices
+combined:    30 exact / 0 partial / 0 miss, 30/30 best choices
+selector errors: 0
+```
+
+Together with Copperfall and Harrowgate's clean first-10 baseline rows, the
+current best row-gated incoming surface is `50 exact / 0 partial / 0 miss`.
+This is the harness behaving as an instrument: one compile did not become
+perfect, but the row-gated selector chose the safe semantic view for each row.
+
 Ignored local artifact references:
 
 - `tmp/incoming_smoke_summaries_larkspur_attribute_duty_variant/scorecard.md`
@@ -632,3 +648,4 @@ Ignored local artifact references:
 - `tmp/incoming_smoke_summaries_official_companion_overlay/variant_selector_training_plan.md`
 - `tmp/incoming_variant_selector_runs/incoming-variant-volume-gate-v2.md`
 - `tmp/incoming_variant_selector_runs/incoming-variant-requirement-detail-gate.md`
+- `tmp/incoming_variant_selector_runs/incoming-variant-requirement-detail-first10.md`

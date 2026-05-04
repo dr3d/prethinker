@@ -180,6 +180,11 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
   condition, duration, unit, or authority. The seven-row incoming variant
   calibration slice now reaches `7 exact / 0 partial / 0 miss` and `7/7` best
   choices without source prose or judge labels in selector input.
+- Full first-10 variant selection over Larkspur, Meridian, and Northbridge now
+  reaches `30 exact / 0 partial / 0 miss` and `30/30` best choices with no
+  selector errors. With Copperfall and Harrowgate's clean baseline rows, the
+  promoted incoming batch has a current best first-10 row-gated harness result
+  of `50 / 0 / 0`.
 - The five incoming challenge fixtures have been promoted into
   `datasets/story_worlds/` with standard source, QA, oracle-for-scoring,
   `progress_journal.md`, and `progress_metrics.jsonl` files. `tmp/incoming*`

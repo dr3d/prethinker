@@ -130,3 +130,24 @@ Result:
 Lesson:
 
 The requirement-detail guard did not perturb the Larkspur calibration rows.
+
+## LCF-005 - Full First-10 Variant Selector Replay
+
+Date: 2026-05-04
+
+Evidence lane: `selector_calibration`
+
+Artifact:
+
+- `tmp/incoming_variant_selector_runs/larkspur_guarded_activation_requirement_detail_first10.json`
+
+Result:
+
+- Larkspur first-10 selected `10/10` best choices.
+- QA verdict through selected modes: `10 exact / 0 partial / 0 miss`.
+- Selector errors: `0`.
+
+Lesson:
+
+The row-gated selector can safely combine the Larkspur baseline and
+attribute/duty companion views across the whole first-10 slice.

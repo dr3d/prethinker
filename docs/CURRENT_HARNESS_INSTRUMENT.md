@@ -260,3 +260,11 @@ That closed the Northbridge q007 calibration miss. The seven-row incoming
 variant selector replay now reaches `7/7` best choices and `7 exact / 0 partial
 / 0 miss`, without source prose, answer keys, judge labels, failure labels, or
 gold KBs in selector input.
+
+The same guarded selector was then replayed over the full first-10 slices for
+Larkspur, Meridian, and Northbridge. Across those `30` rows it selected `30/30`
+best modes and scored `30 exact / 0 partial / 0 miss`, with `0` selector
+errors. Combined with Copperfall and Harrowgate's baseline `10/10` runs, the
+current best harness surface has a first-10 `50 / 0 / 0` incoming-batch result.
+This is a row-gated selector result over existing compile/query artifacts, not
+a claim that one cold compile is now perfect.
