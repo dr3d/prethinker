@@ -197,6 +197,12 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
   surface is `154 exact / 20 partial / 26 miss`; active repairs are `39`
   compile-surface gaps and `7` helper/query-join gaps. The next frontier is
   scoped source-surface acquisition, not broader selector prompting.
+- A Larkspur source-entity-ledger/state-custody variant is a negative
+  diagnostic: compile shape improved to `149` admitted operations and `1` skip,
+  but full-40 QA regressed to `18 / 10 / 12` with `7` baseline-exact
+  regressions. Do not promote broad ledger prompting; use narrower
+  state-transition, custody-chain, permission/rationale, and final-state passes
+  with exact-row protection.
 - The five incoming challenge fixtures have been promoted into
   `datasets/story_worlds/` with standard source, QA, oracle-for-scoring,
   `progress_journal.md`, and `progress_metrics.jsonl` files. `tmp/incoming*`

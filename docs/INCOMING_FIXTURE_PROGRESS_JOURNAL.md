@@ -709,3 +709,26 @@ Ignored local artifact references:
 - `tmp/story_world_full40_classified_scorecards/scorecard.md`
 - `tmp/story_world_full40_classified_scorecards/compile_repair_targets.md`
 - `tmp/story_world_failure_classification/*/*.json`
+
+## 2026-05-04 Larkspur State/Custody Negative Diagnostic
+
+The first full-40 Larkspur repair attempt used a source-entity ledger and a
+broader state/custody/rationale domain hint. It improved compile shape but not
+answer behavior:
+
+```text
+baseline full-40: 20 exact / 7 partial / 13 miss
+ledger variant:   18 exact / 10 partial / 12 miss
+recommendation:   reject_candidate
+baseline exact regressions: 7
+```
+
+Discovery: a cleaner compile surface can still miss the answer-bearing rows.
+The next Larkspur repair needs narrower source-surface passes for object-state
+transitions, custody chain, permission/rationale, and final-state rows, plus
+exact-row protection. A broad source-entity ledger is useful diagnostic context
+but not a promotion path.
+
+Artifact:
+
+- `tmp/story_world_larkspur_state_custody_variant/larkspur_baseline_comparison.md`

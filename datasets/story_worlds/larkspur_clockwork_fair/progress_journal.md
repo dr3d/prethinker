@@ -182,3 +182,39 @@ selection worked, but full-40 reveals broader missing source surface around
 object state, custody, repair/permission rationale, motive, and final-state
 questions. The next repair should be a scoped source-surface pass for event
 state transitions and causal chains, not a broader selector prompt.
+
+## LCF-007 - State/Custody Ledger Variant
+
+Date: 2026-05-04
+
+Evidence lane: `negative_diagnostic`
+
+Mode: source-entity-ledger compile with explicit state/custody/rationale domain
+hint.
+
+Artifacts:
+
+- Compile:
+  `tmp/story_world_cold_runs/larkspur_state_custody_rationale_ledger/domain_bootstrap_file_20260504T173945847618Z_source_qwen-qwen3-6-35b-a3b.json`
+- QA:
+  `tmp/story_world_cold_qa/larkspur_state_custody_rationale_ledger_full40/domain_bootstrap_qa_20260504T175018471860Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Comparison:
+  `tmp/story_world_larkspur_state_custody_variant/larkspur_baseline_comparison.md`
+
+Result:
+
+- Compile shape improved: `149` admitted operations, `1` skip, profile score
+  `1.0`, and no unknown predicate refs.
+- QA full-40 regressed: `18 exact / 10 partial / 12 miss`.
+- Baseline comparison: `reject_candidate`, `7` baseline-exact regressions.
+- Failure surfaces: `17` compile-surface gaps, `4` helper/query-join gaps,
+  `1` answer-surface gap.
+- Safety: `0` write-proposal rows.
+
+Lesson:
+
+Cleaner compile shape is not enough. The source-entity ledger and broad
+state/custody/rationale hint reduced mapper noise but did not preserve the
+right answer-bearing rows. The next Larkspur repair needs narrower source
+passes for specific object-state transitions, custody chain, and permission
+rationale rows, with exact-row protection from the current full-40 baseline.

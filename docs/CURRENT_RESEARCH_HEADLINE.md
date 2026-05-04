@@ -358,6 +358,12 @@ testing whether those gains transfer:
   gaps plus `7` helper/query-join gaps. Larkspur is the hard source-surface
   generalization case; Meridian and Northbridge add smaller rule/quantity join
   pressure.
+- Larkspur's first repair attempt is a useful negative result: a source-entity
+  ledger plus broad state/custody/rationale hint cleaned compile shape
+  (`149` admitted, `1` skip, no unknown predicate refs) but scored only
+  `18 / 10 / 12` full-40 and caused `7` baseline-exact regressions. The next
+  repair needs narrower state-transition, custody, permission/rationale, and
+  final-state passes with exact-row protection.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 
