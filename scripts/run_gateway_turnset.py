@@ -156,15 +156,126 @@ def _request_json(
 
 
 def _phase_status(turn: dict[str, Any], phase_name: str) -> str:
+    row = _phase_record(turn, phase_name)
+    if not row:
+        return ""
+    return str(row.get("status", "")).strip().lower()
+
+
+def _phase_record(turn: dict[str, Any], phase_name: str) -> dict[str, Any]:
     phases = turn.get("phases", [])
     if not isinstance(phases, list):
-        return ""
+        return {}
     for row in phases:
         if not isinstance(row, dict):
             continue
         if str(row.get("phase", "")).strip() == phase_name:
-            return str(row.get("status", "")).strip().lower()
-    return ""
+            return row
+    return {}
+
+
+def _phase_data(turn: dict[str, Any], phase_name: str) -> dict[str, Any]:
+    row = _phase_record(turn, phase_name)
+    data = row.get("data", {}) if isinstance(row, dict) else {}
+    return data if isinstance(data, dict) else {}
+
+
+def _coerce_optional_bool(value: Any) -> bool | None:
+    if isinstance(value, bool):
+        return value
+    if value is None:
+        return None
+    text = str(value).strip().lower()
+    if not text:
+        return None
+    if text in {"true", "yes", "y", "1"}:
+        return True
+    if text in {"false", "no", "n", "0"}:
+        return False
+    return None
+
+
+def _int_value(value: Any, default: int = 0) -> int:
+    try:
+        return int(value)
+    except Exception:
+        return default
+
+
+def _commit_writes_applied(turn: dict[str, Any]) -> int:
+    return _int_value(_phase_data(turn, "commit").get("writes_applied"), 0)
+
+
+def _held_segment_count(turn: dict[str, Any]) -> int:
+    workspace = _phase_data(turn, "workspace")
+    if "held_count" in workspace:
+        return _int_value(workspace.get("held_count"), 0)
+    trace = turn.get("trace", {}) if isinstance(turn.get("trace"), dict) else {}
+    for key in ("segmented_story", "segmented_query_boundaries"):
+        row = trace.get(key) if isinstance(trace.get(key), dict) else {}
+        if "held_count" in row:
+            return _int_value(row.get("held_count"), 0)
+    return 0
+
+
+def _is_segmented_turn(turn: dict[str, Any]) -> bool:
+    trace = turn.get("trace", {}) if isinstance(turn.get("trace"), dict) else {}
+    return "segmented_story" in trace or "segmented_query_boundaries" in trace
+
+
+def _score_turn_expectations(
+    *,
+    row: dict[str, Any],
+    result: dict[str, Any],
+    pending_before: bool,
+) -> list[str]:
+    """Compare authored turn-level expectations with structured gateway output.
+
+    The JSONL author may provide these fields:
+    expected_status, expected_route, expected_clarify_status, expected_commit_status,
+    expected_pending_before, expected_pending_after, expected_min_writes,
+    expected_max_writes, expected_held_segments.
+    """
+
+    turn = result.get("turn", {}) if isinstance(result.get("turn"), dict) else {}
+    mismatches: list[str] = []
+    expected_status = str(row.get("expected_status", "")).strip()
+    if expected_status and expected_status != str(result.get("status", "")).strip():
+        mismatches.append(f"status expected {expected_status!r} got {str(result.get('status', '')).strip()!r}")
+
+    expected_route = str(row.get("expected_route", "")).strip()
+    if expected_route and expected_route != str(turn.get("route", "")).strip():
+        mismatches.append(f"route expected {expected_route!r} got {str(turn.get('route', '')).strip()!r}")
+
+    expected_clarify = str(row.get("expected_clarify_status", "")).strip().lower()
+    if expected_clarify and expected_clarify != _phase_status(turn, "clarify"):
+        mismatches.append(f"clarify expected {expected_clarify!r} got {_phase_status(turn, 'clarify')!r}")
+
+    expected_commit = str(row.get("expected_commit_status", "")).strip().lower()
+    if expected_commit and expected_commit != _phase_status(turn, "commit"):
+        mismatches.append(f"commit expected {expected_commit!r} got {_phase_status(turn, 'commit')!r}")
+
+    expected_pending_before = _coerce_optional_bool(row.get("expected_pending_before"))
+    if expected_pending_before is not None and expected_pending_before != pending_before:
+        mismatches.append(f"pending_before expected {expected_pending_before!r} got {pending_before!r}")
+
+    pending_after = bool(result.get("pending_clarification"))
+    expected_pending_after = _coerce_optional_bool(row.get("expected_pending_after"))
+    if expected_pending_after is not None and expected_pending_after != pending_after:
+        mismatches.append(f"pending_after expected {expected_pending_after!r} got {pending_after!r}")
+
+    writes = _commit_writes_applied(turn)
+    if "expected_min_writes" in row and writes < _int_value(row.get("expected_min_writes"), 0):
+        mismatches.append(f"writes_applied expected >= {row.get('expected_min_writes')} got {writes}")
+    if "expected_max_writes" in row and writes > _int_value(row.get("expected_max_writes"), 0):
+        mismatches.append(f"writes_applied expected <= {row.get('expected_max_writes')} got {writes}")
+
+    if "expected_held_segments" in row:
+        held = _held_segment_count(turn)
+        expected_held = _int_value(row.get("expected_held_segments"), 0)
+        if held != expected_held:
+            mismatches.append(f"held_segments expected {expected_held} got {held}")
+    return mismatches
 
 
 def _summarize(responses: list[dict[str, Any]]) -> dict[str, Any]:
@@ -175,6 +286,15 @@ def _summarize(responses: list[dict[str, Any]]) -> dict[str, Any]:
     commit_blocked = 0
     commit_failed = 0
     answer_error = 0
+    pending_before_count = 0
+    pending_after_count = 0
+    clarification_answer_turns = 0
+    delayed_commit_after_clarification = 0
+    segmented_turns = 0
+    held_segment_turns = 0
+    held_segments_total = 0
+    expectation_pass = 0
+    expectation_fail = 0
 
     for item in responses:
         turn = item.get("turn", {})
@@ -201,6 +321,28 @@ def _summarize(responses: list[dict[str, Any]]) -> dict[str, Any]:
         if answer_status in {"error", "failed"}:
             answer_error += 1
 
+        if bool(item.get("pending_before")):
+            pending_before_count += 1
+        if bool(item.get("pending_after")):
+            pending_after_count += 1
+        kind = str(item.get("kind", "")).strip()
+        if kind == "clarification_answer":
+            clarification_answer_turns += 1
+        if clarify_status == "resolved" and commit_status == "applied":
+            delayed_commit_after_clarification += 1
+        if _is_segmented_turn(turn):
+            segmented_turns += 1
+        held_count = _held_segment_count(turn)
+        if held_count:
+            held_segment_turns += 1
+            held_segments_total += held_count
+        mismatches = item.get("expectation_mismatches", [])
+        if isinstance(mismatches, list) and item.get("expectations_present"):
+            if mismatches:
+                expectation_fail += 1
+            else:
+                expectation_pass += 1
+
     return {
         "turns_total": len(responses),
         "route_counts": route_counts,
@@ -210,6 +352,15 @@ def _summarize(responses: list[dict[str, Any]]) -> dict[str, Any]:
         "commit_blocked": commit_blocked,
         "commit_failed": commit_failed,
         "answer_error": answer_error,
+        "pending_before_count": pending_before_count,
+        "pending_after_count": pending_after_count,
+        "clarification_answer_turns": clarification_answer_turns,
+        "delayed_commit_after_clarification": delayed_commit_after_clarification,
+        "segmented_turns": segmented_turns,
+        "held_segment_turns": held_segment_turns,
+        "held_segments_total": held_segments_total,
+        "expectation_pass": expectation_pass,
+        "expectation_fail": expectation_fail,
     }
 
 
@@ -312,6 +463,7 @@ def main() -> int:
 
     started_at = dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat()
     responses: list[dict[str, Any]] = []
+    pending_before = False
     for idx, row in enumerate(turns, start=1):
         utterance = str(row.get("utterance", "")).strip()
         if not utterance:
@@ -325,17 +477,46 @@ def main() -> int:
             timeout_seconds=timeout_seconds,
         )
         session_id = str(result.get("session_id", session_id)).strip() or session_id
+        kind = str(row.get("kind", "") or row.get("turn_kind", "") or "utterance").strip() or "utterance"
+        pending_after = bool(result.get("pending_clarification"))
+        expectation_keys = {
+            "expected_status",
+            "expected_route",
+            "expected_clarify_status",
+            "expected_commit_status",
+            "expected_pending_before",
+            "expected_pending_after",
+            "expected_min_writes",
+            "expected_max_writes",
+            "expected_held_segments",
+        }
+        expectations_present = any(key in row for key in expectation_keys)
+        mismatches = _score_turn_expectations(row=row, result=result, pending_before=pending_before)
         responses.append(
             {
                 "index": idx,
+                "turn_id": str(row.get("id", "") or row.get("turn_id", "")).strip(),
+                "kind": kind,
                 "utterance": utterance,
+                "input": row,
+                "pending_before": pending_before,
+                "pending_after": pending_after,
+                "expectations_present": expectations_present,
+                "expectation_mismatches": mismatches,
                 "response": result,
                 "turn": result.get("turn", {}),
             }
         )
         turn = result.get("turn", {}) if isinstance(result.get("turn"), dict) else {}
         route = str(turn.get("route", "other")).strip() or "other"
-        print(f"[{idx}/{len(turns)}] route={route} session={session_id}")
+        expectation_label = " expectations=ok" if expectations_present and not mismatches else (
+            f" expectations=fail:{len(mismatches)}" if mismatches else ""
+        )
+        print(
+            f"[{idx}/{len(turns)}] route={route} pending_before={pending_before} "
+            f"pending_after={pending_after}{expectation_label} session={session_id}"
+        )
+        pending_before = pending_after
 
     finished_at = dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat()
 
@@ -373,6 +554,8 @@ def main() -> int:
         f"turns={summary['turns_total']} "
         f"commit_applied={summary['commit_applied']} "
         f"clarify_required={summary['clarify_required']} "
+        f"pending_after={summary['pending_after_count']} "
+        f"expectation_fail={summary['expectation_fail']} "
         f"commit_failed={summary['commit_failed']}"
     )
     return 0

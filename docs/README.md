@@ -15,6 +15,7 @@ Use this short path if you are new:
 3. [Multi-Pass Semantic Compiler](https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md) - semantic lenses, mapper-admitted accumulation, and rule promotion.
 4. [Generalization Baseline Matrix](https://github.com/dr3d/prethinker/blob/main/docs/GENERALIZATION_BASELINE_MATRIX.md) - cold unseen fixture results for checking transfer.
 5. [Current Utterance Pipeline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_UTTERANCE_PIPELINE.md) - how a turn moves through router, context, Semantic IR, mapper, query, clarification, or mutation.
+6. [Stenographer Mode Simulation](https://github.com/dr3d/prethinker/blob/main/docs/STENOGRAPHER_MODE_SIMULATION.md) - turn-by-turn ingestion when the future document is not visible yet.
 
 Then go deeper:
 
@@ -33,6 +34,7 @@ Then go deeper:
 - [Frontier Progress Report](https://github.com/dr3d/prethinker/blob/main/docs/FRONTIER_PROGRESS_REPORT.md)
 - [Frontier Fixture Strategy](https://github.com/dr3d/prethinker/blob/main/docs/FRONTIER_FIXTURE_STRATEGY.md)
 - [Clarification Eagerness Strategy](https://github.com/dr3d/prethinker/blob/main/docs/CLARIFICATION_EAGERNESS_STRATEGY.md)
+- [Stenographer Mode Simulation](https://github.com/dr3d/prethinker/blob/main/docs/STENOGRAPHER_MODE_SIMULATION.md)
 - [Semantic Router Experiment](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_ROUTER_EXPERIMENT.md)
 - [Router Training Seed Audit](https://github.com/dr3d/prethinker/blob/main/docs/ROUTER_TRAINING_SEED_AUDIT.md)
 - [No Language Handling In Python Audit](https://github.com/dr3d/prethinker/blob/main/docs/NO_LANGUAGE_HANDLING_IN_PYTHON_AUDIT.md)

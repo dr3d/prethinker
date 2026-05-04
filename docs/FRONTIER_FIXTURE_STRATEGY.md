@@ -21,6 +21,8 @@ parts that are still brittle:
 - correction handling where the corrected value does or does not change an
   outcome;
 - query-surface mode selection without post-hoc oracle labels;
+- stenographer-mode turn streams where only the current utterance plus prior
+  admitted/pending state is visible;
 - anti-meta-rot checks on cold fixtures that resemble prior successes only in
   abstract shape, not in surface vocabulary.
 
@@ -94,6 +96,34 @@ This lane should score separately:
 - blocked-slot question coverage;
 - unsafe candidate count;
 - context-write violation count.
+
+### 2a. Stenographer-Mode Stream
+
+Goal: test the same source as a sequence of incoming utterances, not as a
+monolithic document.
+
+Required ingredients:
+
+- explicit turn order;
+- some turns that can commit immediately;
+- some turns that must create pending clarification before any mutation;
+- at least one clarification answer several turns after the ambiguous source
+  fragment in a controlled diagnostic variant;
+- at least one queued clarification that should not interrupt immediately;
+- one current-turn query boundary where setup and question arrive together;
+- final QA that can be compared with a document-ingestion replay without
+  merging the evidence lanes.
+
+Good questions:
+
+- What was safely admitted before the clarification?
+- Which turn opened the pending slot?
+- Which later turn closed it?
+- Which question should be queued instead of asked immediately?
+- Did the clarification answer mutate the original staged utterance rather than
+  the answer text itself?
+- Did sentence-at-a-time streaming preserve atom identity as well as document
+  ingestion?
 
 ### 3. Temporal-Status Ledger
 
