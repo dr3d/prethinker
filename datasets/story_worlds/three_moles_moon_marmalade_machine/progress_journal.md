@@ -277,3 +277,94 @@ ledger object/entity families
 ```
 
 without Python deriving any of those rows from prose.
+
+## MMM-006 - Ledger Coverage Targets
+
+Date: 2026-05-04
+
+Evidence lane: `cold_after_general_architecture_change`
+
+Mode: source-only semantic-parallax replay with `source_entity_ledger_v1`
+extended to include powerless `coverage_targets`. No gold KB, strategy file,
+ontology registry, or QA source was used during compilation.
+
+Artifacts:
+
+- Compile:
+  `tmp/diagnostic_replays/three_moles_mmm006/domain_bootstrap_file_20260504T010911557261Z_story_qwen-qwen3-6-35b-a3b.json`
+- Plain QA:
+  `tmp/diagnostic_replays/three_moles_mmm006/domain_bootstrap_qa_20260504T011617838520Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Evidence-filter QA:
+  `tmp/diagnostic_replays/three_moles_mmm006/domain_bootstrap_qa_20260504T012609486033Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Mode comparison:
+  `tmp/diagnostic_replays/three_moles_mmm006/mmm006_query_mode_comparison.md`
+- Selector:
+  `tmp/diagnostic_replays/three_moles_mmm006/selector_direct_v1.json`
+
+Result:
+
+- Compile: `170` admitted operations, `0` skips, `156` unique facts, `8`
+  ledger coverage targets.
+- Compile health: `poor` because the flat skeleton produced `0` rows, but
+  focused passes still produced a useful surface.
+- Plain QA: `21 exact / 6 partial / 13 miss`.
+- Evidence-filter QA: `20 exact / 6 partial / 14 miss`.
+- Diagnostic perfect-selector upper bound: `25 exact / 4 partial / 11 miss`.
+- Direct selector: `23 exact / 4 partial / 13 miss`.
+
+Lesson:
+
+Coverage targets worked as a story-world compile lever. MMM-006 beat MMM-005
+plain QA (`16/7/17`) and evidence-filter QA (`18/5/17`) without adding oracle
+context. The remaining problem was visible in the trace: the flat skeleton
+rejected itself because preferred narrative predicates from guidance were not
+present in the draft palette, even though nearby allowed predicates existed.
+
+## MMM-007 - Scoped Partial-Skeleton Recovery
+
+Date: 2026-05-04
+
+Evidence lane: `cold_after_general_architecture_change`
+
+Mode: same as MMM-006, plus a scoped ledger-backed instruction that missing
+illustrative narrative predicates should not collapse an entire pass when
+compatible allowed predicates can still preserve a partial skeleton.
+
+Artifacts:
+
+- Compile:
+  `tmp/diagnostic_replays/three_moles_mmm007/domain_bootstrap_file_20260504T013300268220Z_story_qwen-qwen3-6-35b-a3b.json`
+- Plain QA:
+  `tmp/diagnostic_replays/three_moles_mmm007/domain_bootstrap_qa_20260504T014005277734Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Evidence-filter QA:
+  `tmp/diagnostic_replays/three_moles_mmm007/domain_bootstrap_qa_20260504T014959553156Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Mode comparison:
+  `tmp/diagnostic_replays/three_moles_mmm007/mmm007_query_mode_comparison.md`
+- Selector:
+  `tmp/diagnostic_replays/three_moles_mmm007/selector_direct_v1.json`
+
+Result:
+
+- Compile: `218` admitted operations, `4` skips, `172` unique facts.
+- Compile health: `healthy`.
+- Flat skeleton contribution: `64` rows, up from `0` in MMM-006.
+- Plain QA: `20 exact / 5 partial / 15 miss`.
+- Evidence-filter QA: `24 exact / 6 partial / 10 miss`.
+- Diagnostic perfect-selector upper bound: `26 exact / 5 partial / 9 miss`.
+- Direct selector: `21 exact / 7 partial / 12 miss`.
+
+Lesson:
+
+Waking up the flat skeleton improved the compiled surface but did not improve
+plain QA by itself. The payoff appeared when evidence filtering had a richer
+surface to retrieve from: `24/6/10` is the current Three Moles high-water.
+
+The selector regressed relative to the global evidence-filter mode, which means
+row-level activation still under-recognizes when a richer evidence bundle should
+be trusted. The useful architecture lesson is:
+
+```text
+ledger coverage targets -> broader safe surface
+broader safe surface -> better evidence-filter retrieval
+row selector still needs better pre-judge activation signals
+```

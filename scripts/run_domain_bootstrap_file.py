@@ -98,7 +98,15 @@ INSURANCE_DISPUTE_SOURCE_COMPILER_CONTEXT_V1 = [
 SOURCE_ENTITY_LEDGER_SCHEMA: dict[str, Any] = {
     "type": "object",
     "additionalProperties": False,
-    "required": ["schema_version", "source_kind", "canonical_entities", "object_families", "alias_notes", "risk_notes"],
+    "required": [
+        "schema_version",
+        "source_kind",
+        "canonical_entities",
+        "object_families",
+        "coverage_targets",
+        "alias_notes",
+        "risk_notes",
+    ],
     "properties": {
         "schema_version": {"type": "string", "const": "source_entity_ledger_v1"},
         "source_kind": {"type": "string"},
@@ -131,6 +139,37 @@ SOURCE_ENTITY_LEDGER_SCHEMA: dict[str, Any] = {
                     "family": {"type": "string"},
                     "members": {"type": "array", "maxItems": 12, "items": {"type": "string"}},
                     "owner_or_intended_user_pattern": {"type": "string"},
+                },
+            },
+        },
+        "coverage_targets": {
+            "type": "array",
+            "maxItems": 40,
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["target_id", "lens", "anchor_atoms", "coverage_goal", "risk_note"],
+                "properties": {
+                    "target_id": {"type": "string"},
+                    "lens": {
+                        "type": "string",
+                        "enum": [
+                            "taxonomy_static",
+                            "event_spine",
+                            "state_change",
+                            "final_state",
+                            "speech_claim",
+                            "subjective_judgment",
+                            "causality",
+                            "rule_like_norm",
+                            "clarification_risk",
+                            "source_metadata",
+                            "other",
+                        ],
+                    },
+                    "anchor_atoms": {"type": "array", "maxItems": 12, "items": {"type": "string"}},
+                    "coverage_goal": {"type": "string"},
+                    "risk_note": {"type": "string"},
                 },
             },
         },
@@ -1775,6 +1814,8 @@ def _build_source_entity_ledger_messages(
             "This ledger is context guidance only. It does not authorize durable KB writes.",
             "Choose canonical snake_case atoms for recurring characters, places, foods, objects, groups, and important abstract states.",
             "For repeated sized object families, list all local family members and keep atom names mutually consistent.",
+            "Add compact coverage_targets for later passes: event spine, state changes, final state, speech/claims, subjective judgments, causality, rule-like norms, and clarification risks when the source contains them.",
+            "Coverage targets are not facts. They are a checklist of source regions and row classes that later passes should consider under the mapper.",
             "Record alias risks when the same source thing could otherwise receive two atom names.",
         ],
     }
@@ -1798,6 +1839,10 @@ def _source_entity_ledger_context(source_entity_ledger: dict[str, Any] | None) -
         "source_entity_ledger_v1 is LLM-authored context guidance, not truth and not a gold fact set.",
         "Reuse source_entity_ledger_v1 canonical atom names in candidate_operations whenever the source refers to the same character, place, object, food, family, or abstract state.",
         "If the ledger has an alias note for a thing, do not emit parallel atoms for that thing in later passes. Pick the ledger atom and keep support in self_check if uncertain.",
+        "If source_entity_ledger_v1 includes coverage_targets, treat them as powerless pass-coverage hints. When the current intake pass aligns with a target lens, emit source-supported rows for the target's anchor_atoms and coverage_goal if and only if the allowed profile has suitable predicates.",
+        "For narrative coverage targets, event_spine should preserve event/order rows, state_change should preserve before/after state rows, final_state should preserve ending/remediation rows, speech_claim should preserve said/source-claim rows, subjective_judgment should preserve judged/evaluation rows, causality should preserve cause/effect rows, and rule_like_norm should preserve norms without inventing executable rules.",
+        "Narrative coverage guidance may mention illustrative predicate names. If an illustrative or preferred predicate is not in allowed_predicates, do not reject the whole pass. Use the closest allowed predicate with a compatible contract when one exists; otherwise omit only that row class and note the omission in self_check.missing_slots.",
+        "For ledger-backed narrative skeleton passes, a partial safe skeleton is better than rejecting the pass because the palette cannot express every desired row class.",
         "source_entity_ledger_v1_payload: "
         + json.dumps(source_entity_ledger, ensure_ascii=False, sort_keys=True),
     ]

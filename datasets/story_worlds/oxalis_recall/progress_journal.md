@@ -186,3 +186,49 @@ documents a much better broad skeleton.
 The remaining Oxalis frontier is now post-ingestion access and joins, not broad
 source admission. Only `2` non-exacts are classified as compile-surface gaps.
 
+## Run OX-004 - Global Partial-Skeleton Transfer Check
+
+- Timestamp: `2026-05-04T01:55Z` through `2026-05-04T02:25Z`
+- Evidence lane: `anti_meta_rot_diagnostic_replay`
+- Model: `qwen/qwen3.6-35b-a3b`
+- Mode: source-only semantic-parallax replay after testing a global compact-pass
+  instruction that missing illustrative predicates should not collapse a whole
+  pass. No gold KB, starter registry, strategy file, or QA source was used
+  during compilation.
+
+### Artifacts
+
+- Compile:
+  `tmp/diagnostic_replays/oxalis_ox004/domain_bootstrap_file_20260504T015507244683Z_source_qwen-qwen3-6-35b-a3b.json`
+- Plain QA:
+  `tmp/diagnostic_replays/oxalis_ox004/domain_bootstrap_qa_20260504T020344155145Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Evidence-filter QA:
+  `tmp/diagnostic_replays/oxalis_ox004/domain_bootstrap_qa_20260504T021457168528Z_qa_qwen-qwen3-6-35b-a3b.json`
+
+### Result
+
+Compile:
+
+```text
+128 admitted operations
+12 skips
+101 unique facts
+compile health: healthy
+```
+
+QA:
+
+```text
+OX-003 compact flat: 27 exact / 8 partial / 5 miss
+OX-004 plain:        22 exact / 9 partial / 9 miss
+OX-004 evidence:     21 exact / 10 partial / 9 miss
+```
+
+### Lesson
+
+This is a useful failed transfer. The partial-skeleton instruction that helped
+Three Moles should not be a global compact-pass default. On Oxalis it widened
+the compile surface but reduced downstream QA quality. The fix was scoped back
+to ledger-backed narrative passes, where the failure mode was observed and where
+coverage targets give the instruction a bounded job.
+

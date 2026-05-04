@@ -1,10 +1,26 @@
 from scripts.run_domain_bootstrap_file import (
+    SOURCE_ENTITY_LEDGER_SCHEMA,
     SOURCE_PASS_OPS_JSON_SCHEMA,
     _compile_health_summary,
     _flat_plus_surface_contribution,
     _pass_surface_contribution,
     _source_pass_ops_to_semantic_ir,
 )
+
+
+def test_source_entity_ledger_schema_has_coverage_targets() -> None:
+    assert "coverage_targets" in SOURCE_ENTITY_LEDGER_SCHEMA["required"]
+    target_schema = SOURCE_ENTITY_LEDGER_SCHEMA["properties"]["coverage_targets"]["items"]
+    assert target_schema["required"] == [
+        "target_id",
+        "lens",
+        "anchor_atoms",
+        "coverage_goal",
+        "risk_note",
+    ]
+    assert "event_spine" in target_schema["properties"]["lens"]["enum"]
+    assert "final_state" in target_schema["properties"]["lens"]["enum"]
+    assert "causality" in target_schema["properties"]["lens"]["enum"]
 
 
 def test_source_pass_ops_schema_is_operations_only() -> None:

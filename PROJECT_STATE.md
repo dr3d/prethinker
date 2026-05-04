@@ -42,7 +42,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 
 ## Recent Frontier Results
 
-- Full pytest after queued clarification delivery instrumentation: `464 passed`.
+- Full pytest after ledger coverage-target instrumentation: `465 passed, 2 subtests passed`.
 - Iron Harbor: `86 exact / 14 partial / 0 miss` on a full 100-question source-document battery, with `0` write proposals during post-ingestion QA.
 - Blackthorn: baseline first-20 was `2 exact / 1 partial / 17 miss`; current diagnostic lanes include BTC-022 at `82 / 9 / 9` full-100 and BTC-027 at `85 / 4 / 11`. These are different configurations, so compare within lane rather than treating one number as a universal replacement.
 - Kestrel: profile-guided KCL-016 reached `73 exact / 11 partial / 16 miss` full-100 with `0` write proposals. Cold/source-aware evidence remains much lower, and the distinction is intentional.
@@ -51,6 +51,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 - Clarification Eagerness Trap: source-context lane reached and held `40/40`, with `0` unsafe candidates, `0` context-write violations, and `10/10` blocked-slot coverage.
 - New held-out fixtures such as Black Lantern, Three Moles, Oxalis, Dulse, Avalon, Sable Creek, Ridgeline, Veridia, and Ledger are being used to test whether gains transfer beyond the original fixture families.
 - Active lane triage now prioritizes source-surface acquisition first because the cold rollup shows `159` compile gaps versus `35` hybrid/reasoning, `26` query, and `5` answer gaps.
+- Three Moles: ledger `coverage_targets` plus scoped partial-skeleton recovery produced the current story-world high-water at `24 exact / 6 partial / 10 miss` under evidence-filter QA. The same broadening failed to transfer globally to Oxalis, so the recovery rule is scoped to ledger-backed narrative passes.
 - Declaration and Proclamation show that curated document/profile vocabulary can improve dense source compilation, but expected-signature recall alone is not enough; question-support coverage is the next scoring layer.
 - Otters remains a hard story-world frontier. Recent cross-apply work did not beat the earlier high-water; the next useful move is a ledger-to-compile contract with row-class floors.
 

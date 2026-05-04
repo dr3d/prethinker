@@ -89,3 +89,9 @@ success = at least two fixtures improve or one improves with zero regression
 
 That lane advances the most other lanes because better source rows feed rules,
 temporal helpers, query planning, CE decisions, and public demos.
+
+Current update: Three Moles improved when source_entity_ledger_v1 added
+powerless `coverage_targets`, but an anti-meta-rot replay on Oxalis regressed
+when the partial-skeleton recovery instruction was global. Keep that recovery
+scoped to ledger-backed narrative passes until another unlike fixture shows
+positive transfer.
