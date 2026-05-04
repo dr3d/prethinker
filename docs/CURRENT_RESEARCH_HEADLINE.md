@@ -304,6 +304,12 @@ testing whether those gains transfer:
   proposals, no baseline-exact row regressions, and a `promote_candidate`
   scorecard gate. The next incoming frontier is the four remaining partials,
   not miss recovery.
+- A follow-on compile-variant diagnostic found complementary surfaces rather
+  than a blanket replacement. Shifted Meridian/Northbridge compiles stay
+  aggregate-neutral at `46 / 4 / 0`, but row-level overlay across variants gives
+  a judged `48 / 2 / 0` upper target while protecting two baseline-exact rows.
+  The hard problem is now learning a non-oracle selector/control signal for
+  compile variants.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 

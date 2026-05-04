@@ -420,3 +420,59 @@ Ignored local artifact references:
 - `tmp/incoming_smoke_summaries_scoped_evidence/scorecard.md`
 - `tmp/incoming_smoke_summaries_scoped_evidence/baseline_comparison.md`
 - `tmp/incoming_smoke_summaries_scoped_evidence/compile_repair_targets.md`
+
+## 2026-05-04 Compile-Variant Overlay Diagnostic
+
+The next partial-reduction sweep tried three scoped compile variants:
+
+- Larkspur age/warden repair with source-entity ledger context.
+- Meridian spatial-distance repair.
+- Northbridge hydrant-spacing repair.
+
+Target-row results:
+
+| Fixture | Target | Result | Lesson |
+| --- | --- | --- | --- |
+| `larkspur_clockwork_fair` | q007/q009 | no promotion | New compile regressed the target rows; keep baseline. |
+| `meridian_permit_board` | q006 | exact under spatial compile | The river-distance surface can be recovered, but the same compile leaves q007 partial. |
+| `northbridge_authority_packet` | q007 | exact under hydrant compile | Hydrant count/spacing is recovered, but q004 becomes partial. |
+
+Five-fixture shifted-variant scorecard:
+
+```text
+baseline scoped-evidence recipe: 46 exact / 4 partial / 0 miss
+shifted compile variants:        46 exact / 4 partial / 0 miss
+scorecard gate: row_level_gate_required
+```
+
+The aggregate is neutral, but the rows are complementary. The new
+`scripts/plan_incoming_compile_variant_overlay.py` planner records this as a
+judged artifact upper bound:
+
+```text
+overlay target: 48 exact / 2 partial / 0 miss
+accepted variant rows: 2
+protected baseline-exact rows: 2
+unchanged non-exacts: 2
+```
+
+Accepted variant rows:
+
+- `meridian_permit_board q006`: partial -> exact via spatial-distance compile.
+- `northbridge_authority_packet q007`: partial -> exact via hydrant-spacing compile.
+
+Protected baseline-exact rows:
+
+- `meridian_permit_board q007`: keep baseline/scoped-evidence recipe.
+- `northbridge_authority_packet q004`: keep baseline/scoped-evidence recipe.
+
+Discovery: compile-side gains now exist as complementary surfaces rather than
+one better compile. The next harness problem is a non-oracle compile-variant
+selector with exact-row protection; the remaining true unresolved rows are
+Larkspur q007 and q009.
+
+Ignored local artifact references:
+
+- `tmp/incoming_smoke_summaries_compile_variant_selection/scorecard.md`
+- `tmp/incoming_smoke_summaries_compile_variant_selection/row_gated_scorecard_plan.md`
+- `tmp/incoming_smoke_summaries_compile_variant_selection/compile_variant_overlay_plan.md`

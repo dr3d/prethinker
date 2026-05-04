@@ -146,6 +146,11 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
   that target as an actual replay rather than a virtual overlay: the incoming
   high-water is `46 exact / 4 partial / 0 miss`, with `0` QA write proposals,
   `0` baseline-exact regressions, and a `promote_candidate` scorecard gate.
+- Compile-variant overlay planning is now available through
+  `scripts/plan_incoming_compile_variant_overlay.py`. A shifted
+  Meridian/Northbridge compile candidate is aggregate-neutral at `46 / 4 / 0`,
+  but complementary row surfaces imply a judged `48 exact / 2 partial / 0 miss`
+  overlay target with exact-row protection.
 - Incoming compile repair targets are now generated at
   `tmp/incoming_smoke_summaries/compile_repair_targets.{json,md}`. The current
   scoped-evidence queue is down to four partial rows: `3` scoped source-surface

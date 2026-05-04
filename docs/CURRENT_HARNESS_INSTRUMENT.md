@@ -32,6 +32,7 @@ python scripts/rollup_incoming_smoke_scorecard.py --root tmp/incoming_smoke_summ
 python scripts/compare_incoming_smoke_scorecards.py --baseline-json tmp/incoming_smoke_summaries/scorecard.json --candidate-json tmp/incoming_smoke_summaries_detail_retry/scorecard.json --out-json tmp/incoming_smoke_summaries_detail_retry/baseline_comparison.json --out-md tmp/incoming_smoke_summaries_detail_retry/baseline_comparison.md
 python scripts/plan_incoming_row_mode_overlay.py --baseline-json tmp/incoming_smoke_summaries/scorecard.json --candidate-json tmp/incoming_smoke_summaries_evidence_nonexact/scorecard.json --out-json tmp/incoming_smoke_summaries_evidence_nonexact/row_mode_overlay_plan.json --out-md tmp/incoming_smoke_summaries_evidence_nonexact/row_mode_overlay_plan.md
 python scripts/plan_incoming_row_gated_scorecard.py --baseline-json tmp/incoming_smoke_summaries/scorecard.json --candidate-json tmp/incoming_smoke_summaries_scoped_repair/scorecard.json --row-overlay-json tmp/incoming_smoke_summaries_scoped_repair/row_mode_overlay_plan.json --out-json tmp/incoming_smoke_summaries_scoped_repair/row_gated_scorecard_plan.json --out-md tmp/incoming_smoke_summaries_scoped_repair/row_gated_scorecard_plan.md
+python scripts/plan_incoming_compile_variant_overlay.py --baseline-json tmp/incoming_smoke_summaries_scoped_evidence/scorecard.json --candidate-json shifted_compile_variants=tmp/incoming_smoke_summaries_compile_variant_selection/scorecard.json --out-json tmp/incoming_smoke_summaries_compile_variant_selection/compile_variant_overlay_plan.json --out-md tmp/incoming_smoke_summaries_compile_variant_selection/compile_variant_overlay_plan.md
 python scripts/plan_incoming_compile_repair_targets.py --scorecard-json tmp/incoming_smoke_summaries/scorecard.json --row-overlay-json tmp/incoming_smoke_summaries_evidence_nonexact/row_mode_overlay_plan.json --out-json tmp/incoming_smoke_summaries/compile_repair_targets.json --out-md tmp/incoming_smoke_summaries/compile_repair_targets.md
 python scripts/select_qa_mode_without_oracle.py --selection-policy protected --group <name>:baseline=<QA_JSON>,evidence=<QA_JSON> --out-json <OUT_JSON> --out-md <OUT_MD>
 python scripts/select_qa_mode_without_oracle.py --selection-policy guarded_activation --group <name>:baseline=<QA_JSON>+<FAILURE_SURFACE_QA_JSON>,candidate=<QA_JSON> --out-json <OUT_JSON> --out-md <OUT_MD>
@@ -190,3 +191,14 @@ five-fixture scorecard is `46 / 4 / 0`, with `0` QA write proposals, `0`
 baseline-exact regressions, and a `promote_candidate` gate. This does not make
 evidence filtering a blind global default; it makes scoped compile plus bounded
 query choreography the current promoted incoming recipe.
+
+`scripts/plan_incoming_compile_variant_overlay.py` generalizes the row-gate
+idea across multiple compile/query scorecards. It is explicitly a judged
+artifact upper-bound planner, not a deployable selector policy: it reads
+scorecard verdict rows, treats missing `non_exact_rows` as exact within that
+artifact, and reports which variant rows are complementary while keeping
+baseline-exact rows protected. On the current incoming batch, shifted Meridian
+and Northbridge scoped compiles are aggregate-neutral at `46 / 4 / 0`, but the
+variant overlay exposes a `48 / 2 / 0` target: accept Meridian q006 and
+Northbridge q007 from the shifted variants, while protecting Meridian q007 and
+Northbridge q004 from baseline.
