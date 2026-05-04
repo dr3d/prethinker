@@ -341,3 +341,71 @@ surface is too thin to repair Larkspur. The next acquisition attempt should
 improve compact/focused source-pass acquisition while preserving the named lens
 contract; do not promote direct-profile compilation as the story-world repair
 path.
+
+## LCF-011 - URL-Fixed Permission/Rationale Acquisition
+
+Date: 2026-05-04
+
+Evidence lane: `source_surface_acquisition`
+
+Mode: fixed LM Studio `/v1` base-url normalization, then focused
+permission/rationale acquisition with compact source-pass operations.
+
+Artifacts:
+
+- URL-fixed object-state compile:
+  `tmp/story_world_larkspur_acquisition/object_state_urlfix_preflight/`
+- URL-fixed object-state targeted QA:
+  `tmp/story_world_larkspur_acquisition/object_state_urlfix_preflight_qa/`
+- URL-fixed object-custody compile:
+  `tmp/story_world_larkspur_acquisition/object_custody_urlfix_preflight/`
+- URL-fixed object-custody targeted QA:
+  `tmp/story_world_larkspur_acquisition/object_custody_urlfix_preflight_qa/`
+- URL-fixed permission/rationale compile:
+  `tmp/story_world_larkspur_acquisition/permission_rationale_urlfix_preflight/`
+- URL-fixed permission/rationale targeted QA:
+  `tmp/story_world_larkspur_acquisition/permission_rationale_urlfix_preflight_qa/`
+- URL-fixed permission/rationale full-40 QA:
+  `tmp/story_world_larkspur_acquisition/permission_rationale_urlfix_full40_qa/`
+- Candidate summary:
+  `tmp/story_world_larkspur_acquisition/permission_rationale_urlfix_summary/`
+
+Harness fix:
+
+`run_domain_bootstrap_file.py` now normalizes LM Studio base URLs before
+appending `/v1/chat/completions`, so both `http://127.0.0.1:1234` and
+`http://127.0.0.1:1234/v1` work for profile/intake calls. The prior empty
+profile/intake responses were caused by the doubled `/v1/v1` path.
+
+Targeted acquisition results:
+
+| Lens | Compile Shape | Target QA |
+| --- | --- | ---: |
+| `object_state_transition_surface` | `91` admitted / `79` skipped | `0 exact / 2 partial / 4 miss` |
+| `object_location_custody_surface` | `121` admitted / `13` skipped | `2 exact / 2 partial / 0 miss` |
+| `permission_rationale_surface` | `150` admitted / `14` skipped | `5 exact / 0 partial / 0 miss` |
+
+Permission/rationale full-40 result:
+
+```text
+baseline full-40:             20 exact / 7 partial / 13 miss
+permission/rationale variant: 31 exact / 3 partial / 6 miss
+write proposals:              0
+runtime load errors:          0
+```
+
+Row movement against the archived baseline QA verdicts:
+
+- Rescued/improved rows: `18`.
+- Regressed rows: `7`.
+- Baseline-exact regressions: `6` (`q002`, `q009`, `q018`, `q031`, `q032`,
+  `q033`).
+
+Lesson:
+
+The permission/rationale lens is the first strong full-40 Larkspur acquisition
+candidate after the promoted scorecard. It is not globally safe because it
+damages exact rows, but it gives a serious row-gated variant. The next harness
+step should compare it against baseline and targeted-state modes with exact-row
+protection, then decide whether the new rescues are selector-learnable without
+judge labels.

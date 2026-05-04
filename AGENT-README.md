@@ -59,7 +59,7 @@ python -m pytest tests/test_sec_edgar_adapter.py tests/test_domain_profiles.py -
 python -m pytest -q
 ```
 
-The latest full-suite result is `571 passed, 2 subtests passed`. Recent focused
+The latest full-suite result is `573 passed, 2 subtests passed`. Recent focused
 batteries also cover CourtListener, SEC/contracts, domain profiles, Semantic IR
 runtime, UI gateway phases, trace rendering, router agility, router training
 data, Lava v5, UMLS builders, profile bootstrap, raw-file intake planning,
@@ -85,6 +85,9 @@ Notes from the 2026-05-03 Codex upgrade/preflight:
 - A raw LM Studio ping with `response_format={"type":"json_object"}` returned
   HTTP 400. The project runners use strict `json_schema` payloads; verify with
   the actual runners rather than a generic ping.
+- `run_domain_bootstrap_file.py` accepts either `http://127.0.0.1:1234` or
+  `http://127.0.0.1:1234/v1` for `--base-url`; it normalizes before appending
+  the chat-completions path.
 - A tiny CE smoke with `--max-tokens 1200` produced a parse error because the
   Semantic IR was clipped. Rerunning the same case with `--max-tokens 4096`
   parsed and scored correctly. Treat low token caps as a likely cause of

@@ -2163,6 +2163,8 @@ def _call_lmstudio_json_schema(
     top_p: float,
     max_tokens: int,
     reasoning_effort: str = "none",
+    empty_response_retries: int = 2,
+    empty_response_backoff_seconds: float = 1.0,
 ) -> dict[str, Any]:
     payload: dict[str, Any] = {
         "model": model,
@@ -2181,30 +2183,53 @@ def _call_lmstudio_json_schema(
     }
     if str(reasoning_effort or "").strip():
         payload["reasoning_effort"] = str(reasoning_effort).strip()
-    req = urllib.request.Request(
-        f"{base_url.rstrip('/')}/v1/chat/completions",
-        data=json.dumps(payload).encode("utf-8"),
-        headers={"Content-Type": "application/json"},
-        method="POST",
-    )
     started = time.perf_counter()
-    try:
-        with urllib.request.urlopen(req, timeout=timeout) as response:
-            raw = json.loads(response.read().decode("utf-8"))
-    except urllib.error.HTTPError as exc:
-        body = exc.read().decode("utf-8", errors="replace")
-        raise RuntimeError(f"HTTP {exc.code}: {body}") from exc
-    except urllib.error.URLError as exc:
-        raise RuntimeError(str(exc)) from exc
-    choices = raw.get("choices", []) if isinstance(raw, dict) else []
-    message = choices[0].get("message", {}) if choices and isinstance(choices[0], dict) else {}
-    content = str(message.get("content", "") if isinstance(message, dict) else "").strip()
-    reasoning_content = str(message.get("reasoning_content", "") if isinstance(message, dict) else "").strip()
+    max_attempts = max(1, int(empty_response_retries or 0) + 1)
+    last_raw: dict[str, Any] = {}
+    for attempt in range(1, max_attempts + 1):
+        req = urllib.request.Request(
+            _lmstudio_chat_completions_url(base_url),
+            data=json.dumps(payload).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=timeout) as response:
+                raw = json.loads(response.read().decode("utf-8"))
+        except urllib.error.HTTPError as exc:
+            body = exc.read().decode("utf-8", errors="replace")
+            raise RuntimeError(f"HTTP {exc.code}: {body}") from exc
+        except urllib.error.URLError as exc:
+            raise RuntimeError(str(exc)) from exc
+        last_raw = raw if isinstance(raw, dict) else {}
+        choices = raw.get("choices", []) if isinstance(raw, dict) else []
+        message = choices[0].get("message", {}) if choices and isinstance(choices[0], dict) else {}
+        content = str(message.get("content", "") if isinstance(message, dict) else "").strip()
+        reasoning_content = str(message.get("reasoning_content", "") if isinstance(message, dict) else "").strip()
+        merged_content = content or reasoning_content
+        if merged_content or attempt >= max_attempts:
+            return {
+                "latency_ms": int((time.perf_counter() - started) * 1000),
+                "raw": raw,
+                "content": merged_content,
+                "attempts": attempt,
+                "empty_response_retries": attempt - 1,
+            }
+        time.sleep(max(0.0, float(empty_response_backoff_seconds)) * attempt)
     return {
         "latency_ms": int((time.perf_counter() - started) * 1000),
-        "raw": raw,
-        "content": content or reasoning_content,
+        "raw": last_raw,
+        "content": "",
+        "attempts": max_attempts,
+        "empty_response_retries": max_attempts - 1,
     }
+
+
+def _lmstudio_chat_completions_url(base_url: str) -> str:
+    root = str(base_url or "").strip().rstrip("/")
+    if root.endswith("/v1"):
+        root = root[:-3]
+    return f"{root}/v1/chat/completions"
 
 
 def _write_summary(record: dict[str, Any], path: Path) -> None:

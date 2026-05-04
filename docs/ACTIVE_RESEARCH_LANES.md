@@ -236,3 +236,11 @@ permission/rationale scored `0 / 0 / 5`, all with `0` write proposals. Treat
 this as a negative result: the next acquisition pass should keep the compact
 focused-pass machinery and improve the acquisition contract, not fall back to a
 direct registry-only compile.
+
+URL/preflight update: the failed profile/intake attempts were partly a harness
+URL issue. `run_domain_bootstrap_file.py` now normalizes LM Studio base URLs so
+both `http://127.0.0.1:1234` and `http://127.0.0.1:1234/v1` hit the same chat
+endpoint. After that fix, Larkspur permission/rationale acquisition became the
+best new source-surface candidate: `5 / 0 / 0` on its target rows and
+`31 / 3 / 6` on full-40. It still regresses `6` baseline-exact rows, so the
+lesson is row-gated acquisition, not global replacement.

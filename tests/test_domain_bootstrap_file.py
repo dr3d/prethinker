@@ -3,15 +3,18 @@ from scripts.run_domain_bootstrap_file import (
     PROFILE_SIGNATURE_ROSTER_JSON_SCHEMA,
     SOURCE_ENTITY_LEDGER_SCHEMA,
     SOURCE_PASS_OPS_JSON_SCHEMA,
+    _call_lmstudio_json_schema,
     _compile_health_summary,
     _compile_source_with_plan_passes,
     _flat_plus_surface_contribution,
     _invalid_profile_retry_context,
+    _lmstudio_chat_completions_url,
     _pass_surface_contribution,
     _profile_from_signature_roster,
     _source_pass_ops_to_semantic_ir,
 )
 import scripts.run_domain_bootstrap_file as domain_bootstrap_file
+import json
 
 
 def test_narrative_context_guards_attributes_and_official_duties() -> None:
@@ -329,3 +332,50 @@ def test_compile_source_with_plan_passes_reports_health(monkeypatch) -> None:
     assert result["surface_contribution"][0]["unique_contribution_count"] == 1
     assert result["surface_contribution"][1]["duplicate_count"] == 1
     assert result["compile_health"]["verdict"] in {"healthy", "warning"}
+
+
+def test_lmstudio_json_schema_retries_empty_content(monkeypatch) -> None:
+    calls = {"count": 0}
+
+    class FakeResponse:
+        def __init__(self, payload: dict):
+            self.payload = payload
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        def read(self) -> bytes:
+            return json.dumps(self.payload).encode("utf-8")
+
+    def fake_urlopen(request, timeout):
+        calls["count"] += 1
+        if calls["count"] == 1:
+            return FakeResponse({"choices": [{"message": {"content": ""}}]})
+        return FakeResponse({"choices": [{"message": {"content": '{"ok": true}'}}]})
+
+    monkeypatch.setattr(domain_bootstrap_file.urllib.request, "urlopen", fake_urlopen)
+    monkeypatch.setattr(domain_bootstrap_file.time, "sleep", lambda seconds: None)
+
+    result = _call_lmstudio_json_schema(
+        base_url="http://localhost:1234/v1",
+        model="model",
+        messages=[{"role": "user", "content": "hello"}],
+        schema={"type": "object"},
+        schema_name="test_schema",
+        timeout=5,
+        temperature=0,
+        top_p=1,
+        max_tokens=100,
+    )
+
+    assert result["content"] == '{"ok": true}'
+    assert result["attempts"] == 2
+    assert result["empty_response_retries"] == 1
+
+
+def test_lmstudio_chat_url_accepts_root_or_v1_base_url() -> None:
+    assert _lmstudio_chat_completions_url("http://127.0.0.1:1234") == "http://127.0.0.1:1234/v1/chat/completions"
+    assert _lmstudio_chat_completions_url("http://127.0.0.1:1234/v1") == "http://127.0.0.1:1234/v1/chat/completions"

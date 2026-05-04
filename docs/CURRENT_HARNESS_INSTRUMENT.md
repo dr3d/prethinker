@@ -332,3 +332,13 @@ admitted `6` rows and scored `0 / 2 / 2`; permission/rationale admitted `12`
 rows and scored `0 / 0 / 5`. All had `0` write proposals. The lesson is that
 the next source-surface move needs richer compact/focused acquisition, not a
 direct registry-only compile.
+
+The same work exposed a harness URL issue. `run_domain_bootstrap_file.py` now
+normalizes LM Studio base URLs before appending `/v1/chat/completions`, so
+operator commands work with either `http://127.0.0.1:1234` or
+`http://127.0.0.1:1234/v1`. After that fix, the focused
+permission/rationale acquisition path produced a real Larkspur candidate:
+`150` admitted rows, `14` skips, target QA `5 exact / 0 partial / 0 miss`, and
+full-40 QA `31 exact / 3 partial / 6 miss` with `0` write proposals. It also
+regressed `6` baseline-exact rows, so it remains a row-gated variant rather
+than a promoted global compile.
