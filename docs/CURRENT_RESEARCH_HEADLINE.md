@@ -347,6 +347,11 @@ testing whether those gains transfer:
   `10/10`, the current best row-gated harness surface now has a first-10
   `50 / 0 / 0` result across the promoted incoming batch. That is a selector
   result over existing artifacts, not a single perfect cold compile.
+- The requirement-detail guard was transfer-checked against older Avalon and
+  Sable rule-activation packs. Avalon moved to `28 / 10 / 2`, reducing guarded
+  misses by one but still trailing protected miss control; Sable stayed at
+  `25 / 6 / 9` and still prefers direct selection. The guard is useful harness
+  machinery, but not a global selector default.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 

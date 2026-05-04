@@ -268,3 +268,11 @@ errors. Combined with Copperfall and Harrowgate's baseline `10/10` runs, the
 current best harness surface has a first-10 `50 / 0 / 0` incoming-batch result.
 This is a row-gated selector result over existing compile/query artifacts, not
 a claim that one cold compile is now perfect.
+
+The transfer check remains deliberately conservative. Replaying the same
+requirement-detail guarded selector against older rule-activation packs moved
+Avalon to `28 exact / 10 partial / 2 miss` with `35/40` best choices, a small
+miss-control improvement over the previous guarded replay. Sable stayed at
+`25 exact / 6 partial / 9 miss` with `37/40` best choices, so Sable still
+prefers direct selection. The daily-driver lesson is row-gated activation with
+explicit risk gates, not blanket guarded activation.

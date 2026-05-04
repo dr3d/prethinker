@@ -185,6 +185,12 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
   selector errors. With Copperfall and Harrowgate's clean baseline rows, the
   promoted incoming batch has a current best first-10 row-gated harness result
   of `50 / 0 / 0`.
+- Requirement-detail guarded selection has been transfer-checked against older
+  Avalon/Sable rule-activation packs. Avalon moved to `28 exact / 10 partial /
+  2 miss` with `35/40` best choices, a small miss reduction versus the previous
+  guarded replay; Sable stayed at `25 / 6 / 9` and `37/40`, so direct selection
+  still wins there. Treat the guard as row-level harness machinery, not a
+  global default policy.
 - The five incoming challenge fixtures have been promoted into
   `datasets/story_worlds/` with standard source, QA, oracle-for-scoring,
   `progress_journal.md`, and `progress_metrics.jsonl` files. `tmp/incoming*`

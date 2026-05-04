@@ -637,6 +637,20 @@ current best row-gated incoming surface is `50 exact / 0 partial / 0 miss`.
 This is the harness behaving as an instrument: one compile did not become
 perfect, but the row-gated selector chose the safe semantic view for each row.
 
+Transfer replay against older rule-activation packs keeps the claim bounded:
+
+```text
+avalon requirement-detail guarded replay: 28 exact / 10 partial / 2 miss, 35/40 best choices
+sable requirement-detail guarded replay:  25 exact / 6 partial / 9 miss, 37/40 best choices
+```
+
+Avalon improves slightly over the previous guarded activation replay by moving
+one miss to partial, but it still does not beat the protected policy for miss
+control. Sable is unchanged from the earlier guarded activation totals and
+still prefers direct selection. The requirement-detail guard therefore remains
+a useful named selector guardrail for row-level activation, not a global selector
+default.
+
 Ignored local artifact references:
 
 - `tmp/incoming_smoke_summaries_larkspur_attribute_duty_variant/scorecard.md`
@@ -649,3 +663,5 @@ Ignored local artifact references:
 - `tmp/incoming_variant_selector_runs/incoming-variant-volume-gate-v2.md`
 - `tmp/incoming_variant_selector_runs/incoming-variant-requirement-detail-gate.md`
 - `tmp/incoming_variant_selector_runs/incoming-variant-requirement-detail-first10.md`
+- `tmp/selector_policy_comparisons/avalon_guarded_activation_requirement_transfer.md`
+- `tmp/selector_policy_comparisons/sable_guarded_activation_requirement_transfer.md`
