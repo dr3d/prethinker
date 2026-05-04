@@ -1,0 +1,40 @@
+{"category": "who_claimed", "id": "q001", "question": "What does Ashton claim Fraser told him?", "source_id": "HW-001"}
+{"category": "who_claimed", "id": "q002", "question": "What does Fraser say he told Ashton?", "source_id": "HW-002"}
+{"category": "who_claimed", "id": "q003", "question": "What does Mehta say she gave Fraser?", "source_id": "HW-003"}
+{"category": "who_claimed", "id": "q004", "question": "What does Fraser say Mehta gave him?", "source_id": "HW-004"}
+{"category": "who_claimed", "id": "q005", "question": "What does Tan say she observed?", "source_id": "HW-005"}
+{"category": "who_claimed", "id": "q006", "question": "What does Portillo's forensic review show?", "source_id": "HW-006"}
+{"category": "who_claimed", "id": "q007", "question": "What did Ashton argue in his objection?", "source_id": "HW-007"}
+{"category": "who_claimed", "id": "q008", "question": "What does Estrada note about the witness statements?", "source_id": "HW-008"}
+{"category": "who_claimed", "id": "q009", "question": "When did the dinner between Ashton and Fraser occur?", "source_id": "HW-009"}
+{"category": "who_claimed", "id": "q010", "question": "What period did the forensic review cover?", "source_id": "HW-010"}
+{"category": "official_finding", "id": "q011", "question": "What is Finding 5?", "source_id": "HW-011"}
+{"category": "official_finding", "id": "q012", "question": "Who made Finding 5?", "source_id": "HW-012"}
+{"category": "official_finding", "id": "q013", "question": "Did the Review Panel change Finding 5?", "source_id": "HW-013"}
+{"category": "official_finding", "id": "q014", "question": "What is the supplemental finding?", "source_id": "HW-014"}
+{"category": "official_finding", "id": "q015", "question": "Does the supplemental finding imply Mehta did something wrong?", "source_id": "HW-015"}
+{"category": "official_finding", "id": "q016", "question": "Who sits on the Review Panel?", "source_id": "HW-016"}
+{"category": "official_finding", "id": "q017", "question": "Is the Review Panel the same body as the investigation?", "source_id": "HW-017"}
+{"category": "official_finding", "id": "q018", "question": "What did the Panel explicitly decline to find?", "source_id": "HW-018"}
+{"category": "official_finding", "id": "q019", "question": "Does Finding 6 exonerate Mehta?", "source_id": "HW-019"}
+{"category": "official_finding", "id": "q020", "question": "What evidentiary gap does Okonkwo identify?", "source_id": "HW-020"}
+{"category": "contradiction", "id": "q021", "question": "On what material point do Ashton's and Fraser's accounts disagree?", "source_id": "HW-021"}
+{"category": "contradiction", "id": "q022", "question": "Is Ashton's account of what Fraser said firsthand or secondhand?", "source_id": "HW-022"}
+{"category": "contradiction", "id": "q023", "question": "Do Mehta and Fraser agree on what document was exchanged?", "source_id": "HW-023"}
+{"category": "contradiction", "id": "q024", "question": "Does Tan's statement support or undermine Mehta's account?", "source_id": "HW-024"}
+{"category": "contradiction", "id": "q025", "question": "Does the absence of evidence on Mehta's laptop prove she didn't access the pricing schedule?", "source_id": "HW-025"}
+{"category": "contradiction", "id": "q026", "question": "Is Ashton's objection point (a) — that Fraser's statement is self-serving — an established fact?", "source_id": "HW-026"}
+{"category": "contradiction", "id": "q027", "question": "Could the investigation have accessed the shared-drive logs if it had begun sooner?", "source_id": "HW-027"}
+{"category": "contradiction", "id": "q028", "question": "Is Ashton's characterization of Mehta as 'the only account manager covering the Midwest' consistent with the other evidence?", "source_id": "HW-028"}
+{"category": "contradiction", "id": "q029", "question": "Does the correction to the forensic review period (February 15 → February 10) change any finding?", "source_id": "HW-029"}
+{"category": "contradiction", "id": "q030", "question": "Does the correction to the dinner date (February 5 → February 7) change any finding?", "source_id": "HW-030"}
+{"category": "final_truth", "id": "q031", "question": "Did Mehta disclose proprietary pricing data?", "source_id": "HW-031"}
+{"category": "final_truth", "id": "q032", "question": "What is Mehta's current status regarding the allegation?", "source_id": "HW-032"}
+{"category": "final_truth", "id": "q033", "question": "What is the final disposition of Ashton's complaint?", "source_id": "HW-033"}
+{"category": "final_truth", "id": "q034", "question": "Does any existing Harrowgate policy prohibit sharing product catalogs at conferences?", "source_id": "HW-034"}
+{"category": "final_truth", "id": "q035", "question": "What document was given to Fraser?", "source_id": "HW-035"}
+{"category": "final_truth", "id": "q036", "question": "Is Fraser a reliable witness?", "source_id": "HW-036"}
+{"category": "final_truth", "id": "q037", "question": "What policy change resulted from this investigation?", "source_id": "HW-037"}
+{"category": "final_truth", "id": "q038", "question": "In how many languages are witness statements given?", "source_id": "HW-038"}
+{"category": "final_truth", "id": "q039", "question": "List all unresolved questions at the end of the document.", "source_id": "HW-039"}
+{"category": "final_truth", "id": "q040", "question": "If a future investigation found that Mehta did share the pricing schedule, would the current finding need to be changed?", "source_id": "HW-040"}

@@ -1,0 +1,40 @@
+{"category": "document_specific", "id": "q001", "question": "What pipe length does the Town Council Resolution specify?", "source_id": "NB-001"}
+{"category": "document_specific", "id": "q002", "question": "What pipe length does the SWIFA Loan Agreement specify?", "source_id": "NB-002"}
+{"category": "document_specific", "id": "q003", "question": "What pipe diameter does the Resolution specify?", "source_id": "NB-003"}
+{"category": "document_specific", "id": "q004", "question": "What pipe diameter does the SWIFA Agreement specify?", "source_id": "NB-004"}
+{"category": "document_specific", "id": "q005", "question": "What is the project completion timeline in the Resolution?", "source_id": "NB-005"}
+{"category": "document_specific", "id": "q006", "question": "What is the project completion timeline in the SWIFA Agreement?", "source_id": "NB-006"}
+{"category": "document_specific", "id": "q007", "question": "What does the SWIFA Agreement require regarding fire hydrants?", "source_id": "NB-007"}
+{"category": "document_specific", "id": "q008", "question": "Does the Town Council Resolution mention fire hydrants?", "source_id": "NB-008"}
+{"category": "document_specific", "id": "q009", "question": "What are the Town's customer notification requirements?", "source_id": "NB-009"}
+{"category": "document_specific", "id": "q010", "question": "What was the vote on Resolution 2026-14?", "source_id": "NB-010"}
+{"category": "cross_document", "id": "q011", "question": "Why do the Resolution and SWIFA Agreement state different pipe lengths?", "source_id": "NB-011"}
+{"category": "cross_document", "id": "q012", "question": "Why do the Resolution and SWIFA Agreement specify different pipe diameters?", "source_id": "NB-012"}
+{"category": "cross_document", "id": "q013", "question": "What is the cost impact of the pipe diameter discrepancy?", "source_id": "NB-013"}
+{"category": "cross_document", "id": "q014", "question": "Can the Town afford the additional $400,000?", "source_id": "NB-014"}
+{"category": "cross_document", "id": "q015", "question": "Do the two documents agree on customer notification requirements?", "source_id": "NB-015"}
+{"category": "cross_document", "id": "q016", "question": "Do the two documents agree on progress reporting?", "source_id": "NB-016"}
+{"category": "cross_document", "id": "q017", "question": "How many customers will be affected by the project?", "source_id": "NB-017"}
+{"category": "cross_document", "id": "q018", "question": "What construction standards apply?", "source_id": "NB-018"}
+{"category": "cross_document", "id": "q019", "question": "What is the penalty for missing the SWIFA timeline?", "source_id": "NB-019"}
+{"category": "cross_document", "id": "q020", "question": "Is there a penalty for missing the Resolution's 18-month timeline?", "source_id": "NB-020"}
+{"category": "authority", "id": "q021", "question": "When the Resolution and SWIFA Agreement conflict, which document controls?", "source_id": "NB-021"}
+{"category": "authority", "id": "q022", "question": "What is the correct pipe diameter for the project?", "source_id": "NB-022"}
+{"category": "authority", "id": "q023", "question": "What is the correct pipe length for the project?", "source_id": "NB-023"}
+{"category": "authority", "id": "q024", "question": "Which timeline should the project follow?", "source_id": "NB-024"}
+{"category": "authority", "id": "q025", "question": "Does Morimoto's memorandum have binding authority?", "source_id": "NB-025"}
+{"category": "authority", "id": "q026", "question": "Can SWIFA inspect the project?", "source_id": "NB-026"}
+{"category": "authority", "id": "q027", "question": "Can the Town use 12-inch pipe for the portion funded by the Water Enterprise Fund?", "source_id": "NB-027"}
+{"category": "authority", "id": "q028", "question": "Has the Council amended the Resolution to address the discrepancies?", "source_id": "NB-028"}
+{"category": "authority", "id": "q029", "question": "Who has authority to approve customer interruptions exceeding 8 hours?", "source_id": "NB-029"}
+{"category": "authority", "id": "q030", "question": "Can Morimoto proceed with 16-inch pipe before the Council amends the Resolution?", "source_id": "NB-030"}
+{"category": "final_status", "id": "q031", "question": "What is the corrected interest rate on the SWIFA loan?", "source_id": "NB-031"}
+{"category": "final_status", "id": "q032", "question": "What is the corrected Water Enterprise Fund balance?", "source_id": "NB-032"}
+{"category": "final_status", "id": "q033", "question": "What would the Water Enterprise Fund balance be after funding the Town's $1,000,000 share?", "source_id": "NB-033"}
+{"category": "final_status", "id": "q034", "question": "What is the total revised project cost?", "source_id": "NB-034"}
+{"category": "final_status", "id": "q035", "question": "How much of the project cost is covered by the SWIFA loan?", "source_id": "NB-035"}
+{"category": "final_status", "id": "q036", "question": "What is the current status of the Resolution's fire hydrant requirement?", "source_id": "NB-036"}
+{"category": "final_status", "id": "q037", "question": "What are the binding project parameters as of these documents?", "source_id": "NB-037"}
+{"category": "final_status", "id": "q038", "question": "What action has the Council taken on Morimoto's recommendations?", "source_id": "NB-038"}
+{"category": "final_status", "id": "q039", "question": "If the project takes 20 months from NTP, does it comply with both timelines?", "source_id": "NB-039"}
+{"category": "final_status", "id": "q040", "question": "List all unresolved discrepancies between the Resolution and the SWIFA Agreement.", "source_id": "NB-040"}

@@ -86,6 +86,14 @@ it is no longer making semantic progress.
 
 ## Incoming Fixture Scorecards
 
+Incoming is an intake state, not a research destination. Use `tmp/incoming*`
+only to validate a new drop, split source from scoring assets, and plan the
+first cold run. As soon as the fixture is structurally valid, promote it into
+`datasets/story_worlds/` with `README.md`, `source.md`/`story.md`, QA assets,
+`progress_journal.md`, and `progress_metrics.jsonl`. Generated run JSON can
+stay under `tmp/`, but durable scorecard lessons and artifact references should
+be captured in the tracked fixture journal.
+
 Incoming challenge fixtures now have a two-step instrument panel:
 
 1. `scripts/summarize_incoming_fixture_smoke.py` normalizes one fixture's

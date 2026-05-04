@@ -1,0 +1,40 @@
+{"category": "direct_event", "id": "q001", "question": "When was the complaint filed?", "source_id": "CD-001"}
+{"category": "direct_event", "id": "q002", "question": "When was the defendant served?", "source_id": "CD-002"}
+{"category": "direct_event", "id": "q003", "question": "When was the Motion to Dismiss filed?", "source_id": "CD-003"}
+{"category": "direct_event", "id": "q004", "question": "When was the Motion to Dismiss denied?", "source_id": "CD-004"}
+{"category": "direct_event", "id": "q005", "question": "When was the answer filed?", "source_id": "CD-005"}
+{"category": "direct_event", "id": "q006", "question": "When did the stay begin?", "source_id": "CD-006"}
+{"category": "direct_event", "id": "q007", "question": "When was the stay lifted?", "source_id": "CD-007"}
+{"category": "direct_event", "id": "q008", "question": "When was the dispositive motion denied?", "source_id": "CD-008"}
+{"category": "direct_event", "id": "q009", "question": "What trial date was set?", "source_id": "CD-009"}
+{"category": "direct_event", "id": "q010", "question": "Who is the judge?", "source_id": "CD-010"}
+{"category": "status_at_time", "id": "q011", "question": "What was the case status on January 20, 2026?", "source_id": "CD-011"}
+{"category": "status_at_time", "id": "q012", "question": "What was the case status on March 1, 2026?", "source_id": "CD-012"}
+{"category": "status_at_time", "id": "q013", "question": "What was the case status on April 1, 2026?", "source_id": "CD-013"}
+{"category": "status_at_time", "id": "q014", "question": "What was the case status on August 10, 2026?", "source_id": "CD-014"}
+{"category": "status_at_time", "id": "q015", "question": "What was the case status on September 1, 2026?", "source_id": "CD-015"}
+{"category": "status_at_time", "id": "q016", "question": "What was the case status on September 20, 2026?", "source_id": "CD-016"}
+{"category": "status_at_time", "id": "q017", "question": "What was the case status on December 10, 2026?", "source_id": "CD-017"}
+{"category": "status_at_time", "id": "q018", "question": "Was the answer deadline tolled on February 15, 2026?", "source_id": "CD-018"}
+{"category": "status_at_time", "id": "q019", "question": "Was discovery open on March 25, 2026?", "source_id": "CD-019"}
+{"category": "status_at_time", "id": "q020", "question": "Were deadlines running on August 12, 2026?", "source_id": "CD-020"}
+{"category": "status_at_time", "id": "q021", "question": "How many days of discovery remained when the stay began?", "source_id": "CD-021"}
+{"category": "status_at_time", "id": "q022", "question": "Was the case in Active-Discovery or Active-Pleadings on March 20, 2026?", "source_id": "CD-022"}
+{"category": "status_at_time", "id": "q023", "question": "Could either party have filed a stipulation extending the discovery deadline without court approval?", "source_id": "CD-023"}
+{"category": "status_at_time", "id": "q024", "question": "What was the original answer deadline before the motion to dismiss was filed?", "source_id": "CD-024"}
+{"category": "status_at_time", "id": "q025", "question": "What was the answer deadline after the motion to dismiss was denied?", "source_id": "CD-025"}
+{"category": "deadline_window", "id": "q026", "question": "What was the discovery deadline before any extension?", "source_id": "CD-026"}
+{"category": "deadline_window", "id": "q027", "question": "What extension was granted and what was the new discovery deadline?", "source_id": "CD-027"}
+{"category": "deadline_window", "id": "q028", "question": "What was the post-stay discovery deadline?", "source_id": "CD-028"}
+{"category": "deadline_window", "id": "q029", "question": "What was the dispositive motion deadline?", "source_id": "CD-029"}
+{"category": "deadline_window", "id": "q030", "question": "Was Orion's discovery extension request timely under LR 7.5?", "source_id": "CD-030"}
+{"category": "deadline_window", "id": "q031", "question": "What is the trial-setting window?", "source_id": "CD-031"}
+{"category": "deadline_window", "id": "q032", "question": "Is the set trial date within the trial-setting window?", "source_id": "CD-032"}
+{"category": "deadline_window", "id": "q033", "question": "When was the deadline for Sycamore's response to the summary judgment motion?", "source_id": "CD-033"}
+{"category": "deadline_window", "id": "q034", "question": "When was the deadline for Orion's reply?", "source_id": "CD-034"}
+{"category": "deadline_window", "id": "q035", "question": "If the stay had begun on August 5 (the uncorrected date) instead of August 8, what would the post-stay discovery deadline have been?", "source_id": "CD-035"}
+{"category": "correction", "id": "q036", "question": "What was corrected about the service date and how does it affect the case?", "source_id": "CD-036"}
+{"category": "correction", "id": "q037", "question": "What was corrected about the discovery extension?", "source_id": "CD-037"}
+{"category": "correction", "id": "q038", "question": "What was corrected about the stay effective date and why does it matter?", "source_id": "CD-038"}
+{"category": "correction", "id": "q039", "question": "Does the stay date correction change the trial date?", "source_id": "CD-039"}
+{"category": "correction", "id": "q040", "question": "What did the Clerk note about the stay date correction?", "source_id": "CD-040"}

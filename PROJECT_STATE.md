@@ -174,6 +174,11 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
   variant calibration rows, the non-oracle selector improved to `6 exact / 1
   partial / 0 miss` and `6/7` best choices. The remaining Northbridge q007
   error needs requirement-detail relevance, not more row-volume scoring.
+- The five incoming challenge fixtures have been promoted into
+  `datasets/story_worlds/` with standard source, QA, oracle-for-scoring,
+  `progress_journal.md`, and `progress_metrics.jsonl` files. `tmp/incoming*`
+  is now explicitly treated as short intake/staging only; the durable research
+  record lives beside the other fixtures.
 - Incoming compile repair targets are now generated at
   `tmp/incoming_smoke_summaries/compile_repair_targets.{json,md}`. The current
   scoped-evidence queue is down to four partial rows: `3` scoped source-surface

@@ -1,0 +1,242 @@
+[
+    {
+        "category":  "identity",
+        "id":  "q001",
+        "reference_answer":  "No â€” they share a surname but are not related. They are from different villages (Elara from Fiddler\u0027s Reach, Stellan from Cairnhollow). Both deny the relationship.",
+        "source_id":  "LK-001"
+    },
+    {
+        "category":  "identity",
+        "id":  "q002",
+        "reference_answer":  "Cassia is Tobias\u0027s granddaughter",
+        "source_id":  "LK-002"
+    },
+    {
+        "category":  "identity",
+        "id":  "q003",
+        "reference_answer":  "Tobias Wren â€” also known as \u0027the Tinker of Greystone Bridge\u0027",
+        "source_id":  "LK-003"
+    },
+    {
+        "category":  "identity",
+        "id":  "q004",
+        "reference_answer":  "Cassia Wren â€” the nickname distinguishes her from her grandfather Tobias",
+        "source_id":  "LK-004"
+    },
+    {
+        "category":  "identity",
+        "id":  "q005",
+        "reference_answer":  "Elara Voss",
+        "source_id":  "LK-005"
+    },
+    {
+        "category":  "identity",
+        "id":  "q006",
+        "reference_answer":  "No â€” Neve is Maren Blackwood\u0027s younger sister and is registered as an attendant, not an exhibitor. She did not enter a device.",
+        "source_id":  "LK-006"
+    },
+    {
+        "category":  "identity",
+        "id":  "q007",
+        "reference_answer":  "Cassia Wren, age 15",
+        "source_id":  "LK-007"
+    },
+    {
+        "category":  "identity",
+        "id":  "q008",
+        "reference_answer":  "A fair attendant (not an exhibitor) who accidentally swapped the thread spools while cleaning stalls on Day 2",
+        "source_id":  "LK-008"
+    },
+    {
+        "category":  "identity",
+        "id":  "q009",
+        "reference_answer":  "The official who inspects and certifies devices, investigates incidents, rules on modifications, and has authority over exhibition status",
+        "source_id":  "LK-009"
+    },
+    {
+        "category":  "identity",
+        "id":  "q010",
+        "reference_answer":  "Neve Blackwood â€” Maren\u0027s sister and attendant",
+        "source_id":  "LK-010"
+    },
+    {
+        "category":  "object_state",
+        "id":  "q011",
+        "reference_answer":  "Dyed Silk No. 7 (deep indigo) â€” substituted for the original Undyed Cotton No. 4 by Jem Harker accidentally on Day 2. The substitution is permanent because the silk has a fixative that blocks the temperature-chromatic reaction.",
+        "source_id":  "LK-011"
+    },
+    {
+        "category":  "object_state",
+        "id":  "q012",
+        "reference_answer":  "The gold paint on the left foreleg is scraped off, exposing bare copper. The copper joints were bent during the escape and repaired by Maren. The foreleg was not repainted â€” Maren said the bare copper \u0027gives it character.\u0027",
+        "source_id":  "LK-012"
+    },
+    {
+        "category":  "object_state",
+        "id":  "q013",
+        "reference_answer":  "The sphere has a hairline crack that developed during the Day 7 thunderstorm, sealed with wax by Tobias (permitted by Thane). The crack is sealed but visible. The Storm is operational at closing.",
+        "source_id":  "LK-013"
+    },
+    {
+        "category":  "object_state",
+        "id":  "q014",
+        "reference_answer":  "Blue â€” Cassia modified it from amber on Day 8. This modification led to its disqualification from judging.",
+        "source_id":  "LK-014"
+    },
+    {
+        "category":  "object_state",
+        "id":  "q015",
+        "reference_answer":  "Returned to Maren Blackwood by Cassia at the closing ceremony, undamaged. Its custody chain: Maren â†’ Cassia (Day 1 evening) â†’ Cassia held it through Day 9 â†’ returned to Maren (Day 10 closing).",
+        "source_id":  "LK-015"
+    },
+    {
+        "category":  "object_state",
+        "id":  "q016",
+        "reference_answer":  "No â€” it is not a registered exhibit and was not inspected",
+        "source_id":  "LK-016"
+    },
+    {
+        "category":  "object_state",
+        "id":  "q017",
+        "reference_answer":  "Exhibited with indigo cloth. Elara chose to continue exhibiting despite the compromised temperature-chromatic demonstration. Received honorable mention.",
+        "source_id":  "LK-017"
+    },
+    {
+        "category":  "object_state",
+        "id":  "q018",
+        "reference_answer":  "On display but disqualified from judging due to the unauthorized modification. Not eligible for awards.",
+        "source_id":  "LK-018"
+    },
+    {
+        "category":  "object_state",
+        "id":  "q019",
+        "reference_answer":  "Yes â€” Tobias\u0027s wax repair held and the Storm is operational at closing, despite the visible crack",
+        "source_id":  "LK-019"
+    },
+    {
+        "category":  "object_state",
+        "id":  "q020",
+        "reference_answer":  "Undyed Cotton No. 4, with a silver shuttle",
+        "source_id":  "LK-020"
+    },
+    {
+        "category":  "causal_chain",
+        "id":  "q021",
+        "reference_answer":  "The Gilt Salamander escaped its maze enclosure â†’ navigated toward the blacksmith\u0027s forge following heat gradients â†’ its lantern ignited a stack of parchment notices (corrected from \u0027fabric\u0027) near the Storm stall â†’ Tobias extinguished the fire before it reached the sphere",
+        "source_id":  "LK-021"
+    },
+    {
+        "category":  "causal_chain",
+        "id":  "q022",
+        "reference_answer":  "Cassia modified the light from amber to blue without seeking Thane\u0027s approval â†’ Thane discovered the modification â†’ ruled it was an alteration of the fundamental mechanism â†’ disqualified the Lantern from judging. The modification improved the device but was unauthorized.",
+        "source_id":  "LK-022"
+    },
+    {
+        "category":  "causal_chain",
+        "id":  "q023",
+        "reference_answer":  "Jem Harker accidentally swapped the thread on Day 2 â†’ Dyed Silk No. 7 replaced Undyed Cotton No. 4 â†’ the silk has a fixative that blocks the temperature-chromatic reaction â†’ the cloth is permanently indigo â†’ the demonstration is compromised. The Loom\u0027s mechanism itself is unimpaired.",
+        "source_id":  "LK-023"
+    },
+    {
+        "category":  "causal_chain",
+        "id":  "q024",
+        "reference_answer":  "He was seen near Elara\u0027s stall the previous evening, and his Resonance Bellows is in the adjacent stall. He denied touching the thread. He was cleared when Harker admitted to the accidental swap.",
+        "source_id":  "LK-024"
+    },
+    {
+        "category":  "causal_chain",
+        "id":  "q025",
+        "reference_answer":  "The Salamander escaped its maze â†’ navigated through the fairgrounds â†’ during its journey or recovery, its copper joints were bent and the gold paint on the left foreleg was scraped off â†’ Neve recovered it â†’ Maren repaired the joints but chose not to repaint",
+        "source_id":  "LK-025"
+    },
+    {
+        "category":  "causal_chain",
+        "id":  "q026",
+        "reference_answer":  "Thane ruled the wax repair was permitted because it does not alter the device\u0027s fundamental mechanism â€” it only stabilizes a containment failure",
+        "source_id":  "LK-026"
+    },
+    {
+        "category":  "causal_chain",
+        "id":  "q027",
+        "reference_answer":  "Thane ruled that changing the light frequency IS an alteration of the fundamental mechanism, because the amber wavelength is part of the design that selectively attracts moths over other insects. Unlike the Storm repair (stabilizing containment), the Lantern modification changed how the device functioned.",
+        "source_id":  "LK-027"
+    },
+    {
+        "category":  "causal_chain",
+        "id":  "q028",
+        "reference_answer":  "She observed that the amber light was attracting beetles in addition to moths, and the beetles were damaging the release mechanism. The blue light modification was intended to solve this problem.",
+        "source_id":  "LK-028"
+    },
+    {
+        "category":  "causal_chain",
+        "id":  "q029",
+        "reference_answer":  "The Storm repair stabilized a containment failure without changing the device\u0027s mechanism. The Lantern modification changed the light frequency, which Thane classified as an alteration of the fundamental mechanism. The distinction is between maintenance/stabilization and functional alteration.",
+        "source_id":  "LK-029"
+    },
+    {
+        "category":  "causal_chain",
+        "id":  "q030",
+        "reference_answer":  "Maren lent it to Cassia on Day 1 evening because Cassia was unfamiliar with the fairgrounds and her stall was far from the lodging tents. It was not returned until the closing ceremony on Day 10.",
+        "source_id":  "LK-030"
+    },
+    {
+        "category":  "final_state",
+        "id":  "q031",
+        "reference_answer":  "Dorian Hale\u0027s Tidal Clock, for \u0027most precise timekeeping under variable conditions\u0027",
+        "source_id":  "LK-031"
+    },
+    {
+        "category":  "final_state",
+        "id":  "q032",
+        "reference_answer":  "Maren Blackwood\u0027s Gilt Salamander, for \u0027most inventive navigation mechanism\u0027 â€” judges noted the damage but still awarded it",
+        "source_id":  "LK-032"
+    },
+    {
+        "category":  "final_state",
+        "id":  "q033",
+        "reference_answer":  "Honorable mention, with the notation \u0027Mechanism sound; demonstration compromised by circumstances beyond the exhibitor\u0027s control\u0027",
+        "source_id":  "LK-033"
+    },
+    {
+        "category":  "final_state",
+        "id":  "q034",
+        "reference_answer":  "No â€” Stellan was cleared when Jem Harker admitted to the accidental swap on Day 9",
+        "source_id":  "LK-034"
+    },
+    {
+        "category":  "final_state",
+        "id":  "q035",
+        "reference_answer":  "No â€” Harker admits it was accidental. He mistook Dyed Silk No. 7 from the adjacent overflow tent for Elara\u0027s Undyed Cotton No. 4 while cleaning stalls.",
+        "source_id":  "LK-035"
+    },
+    {
+        "category":  "final_state",
+        "id":  "q036",
+        "reference_answer":  "Not without damaging the mechanism â€” the Dyed Silk No. 7 has been partially woven into the cloth and cannot be separated without damaging the Loom\u0027s mechanism",
+        "source_id":  "LK-036"
+    },
+    {
+        "category":  "final_state",
+        "id":  "q037",
+        "reference_answer":  "Yes â€” it remains on display and functions with the blue light. It is disqualified from judging but not from display.",
+        "source_id":  "LK-037"
+    },
+    {
+        "category":  "final_state",
+        "id":  "q038",
+        "reference_answer":  "Pearlescent Loom: Elara Voss. Resonance Bellows: Stellan Voss. Gilt Salamander: Maren Blackwood. Compass Rose: Maren Blackwood (returned by Cassia). Bottled Storm: Tobias Wren. Moth Lantern: Cassia Wren. Tidal Clock: Dorian Hale.",
+        "source_id":  "LK-038"
+    },
+    {
+        "category":  "final_state",
+        "id":  "q039",
+        "reference_answer":  "Day 2 of Ashmonth â€” corrected from initially recorded Day 1. Harker\u0027s statement confirms the swap occurred during stall cleaning on Day 2.",
+        "source_id":  "LK-039"
+    },
+    {
+        "category":  "final_state",
+        "id":  "q040",
+        "reference_answer":  "A stack of parchment notices â€” corrected from initially recorded \u0027fabric.\u0027 The fire was near the Bottled Storm stall and was extinguished by Tobias before it reached the sphere.",
+        "source_id":  "LK-040"
+    }
+]

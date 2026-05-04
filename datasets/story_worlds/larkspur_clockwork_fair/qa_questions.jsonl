@@ -1,0 +1,40 @@
+{"category": "identity", "id": "q001", "question": "Are Elara Voss and Stellan Voss related?", "source_id": "LK-001"}
+{"category": "identity", "id": "q002", "question": "What is the relationship between Tobias Wren and Cassia Wren?", "source_id": "LK-002"}
+{"category": "identity", "id": "q003", "question": "Who is 'Old Wren'?", "source_id": "LK-003"}
+{"category": "identity", "id": "q004", "question": "Who is 'Little Wren'?", "source_id": "LK-004"}
+{"category": "identity", "id": "q005", "question": "Who is 'the Weaver of Fiddler's Reach'?", "source_id": "LK-005"}
+{"category": "identity", "id": "q006", "question": "Is Neve Blackwood an exhibitor?", "source_id": "LK-006"}
+{"category": "identity", "id": "q007", "question": "Which exhibitor is the youngest?", "source_id": "LK-007"}
+{"category": "identity", "id": "q008", "question": "Who is Jem Harker?", "source_id": "LK-008"}
+{"category": "identity", "id": "q009", "question": "Who is Fair Warden Osric Thane?", "source_id": "LK-009"}
+{"category": "identity", "id": "q010", "question": "Who recovered the Gilt Salamander after its escape?", "source_id": "LK-010"}
+{"category": "object_state", "id": "q011", "question": "What thread is currently in the Pearlescent Loom?", "source_id": "LK-011"}
+{"category": "object_state", "id": "q012", "question": "What is the current condition of the Gilt Salamander's appearance?", "source_id": "LK-012"}
+{"category": "object_state", "id": "q013", "question": "What is the current condition of the Bottled Storm's glass sphere?", "source_id": "LK-013"}
+{"category": "object_state", "id": "q014", "question": "What color light does the Moth Lantern currently emit?", "source_id": "LK-014"}
+{"category": "object_state", "id": "q015", "question": "Where is the Compass Rose at the end of the fair?", "source_id": "LK-015"}
+{"category": "object_state", "id": "q016", "question": "Was the Compass Rose ever inspected by Fair Warden Thane?", "source_id": "LK-016"}
+{"category": "object_state", "id": "q017", "question": "What is the exhibition status of the Pearlescent Loom at closing?", "source_id": "LK-017"}
+{"category": "object_state", "id": "q018", "question": "What is the exhibition status of the Moth Lantern at closing?", "source_id": "LK-018"}
+{"category": "object_state", "id": "q019", "question": "Is the Bottled Storm's internal weather system still operational at closing?", "source_id": "LK-019"}
+{"category": "object_state", "id": "q020", "question": "What was the original thread in the Pearlescent Loom at registration?", "source_id": "LK-020"}
+{"category": "causal_chain", "id": "q021", "question": "What caused the fire near the Bottled Storm stall?", "source_id": "LK-021"}
+{"category": "causal_chain", "id": "q022", "question": "Why was the Moth Lantern disqualified?", "source_id": "LK-022"}
+{"category": "causal_chain", "id": "q023", "question": "Why can't the Pearlescent Loom demonstrate its temperature-chromatic function?", "source_id": "LK-023"}
+{"category": "causal_chain", "id": "q024", "question": "Why was Stellan initially suspected of the thread substitution?", "source_id": "LK-024"}
+{"category": "causal_chain", "id": "q025", "question": "What chain of events led to the Salamander's damaged foreleg?", "source_id": "LK-025"}
+{"category": "causal_chain", "id": "q026", "question": "Why did Thane permit Tobias to repair the Bottled Storm?", "source_id": "LK-026"}
+{"category": "causal_chain", "id": "q027", "question": "Why did Thane NOT permit Cassia's Moth Lantern modification?", "source_id": "LK-027"}
+{"category": "causal_chain", "id": "q028", "question": "Why did Cassia modify the Moth Lantern?", "source_id": "LK-028"}
+{"category": "causal_chain", "id": "q029", "question": "What is the difference between the Storm repair (permitted) and the Lantern modification (not permitted)?", "source_id": "LK-029"}
+{"category": "causal_chain", "id": "q030", "question": "Why did Cassia have the Compass Rose?", "source_id": "LK-030"}
+{"category": "final_state", "id": "q031", "question": "Who won first place?", "source_id": "LK-031"}
+{"category": "final_state", "id": "q032", "question": "Who won second place?", "source_id": "LK-032"}
+{"category": "final_state", "id": "q033", "question": "What recognition did the Pearlescent Loom receive?", "source_id": "LK-033"}
+{"category": "final_state", "id": "q034", "question": "Is Stellan Voss still a suspect in the thread substitution?", "source_id": "LK-034"}
+{"category": "final_state", "id": "q035", "question": "Was the thread substitution deliberate?", "source_id": "LK-035"}
+{"category": "final_state", "id": "q036", "question": "Can the Pearlescent Loom be restored to its original temperature-chromatic function?", "source_id": "LK-036"}
+{"category": "final_state", "id": "q037", "question": "Is the Moth Lantern still functional?", "source_id": "LK-037"}
+{"category": "final_state", "id": "q038", "question": "What is the final ownership/custody of every named device?", "source_id": "LK-038"}
+{"category": "final_state", "id": "q039", "question": "When did the thread substitution actually occur?", "source_id": "LK-039"}
+{"category": "final_state", "id": "q040", "question": "What was ignited by the Salamander's lantern?", "source_id": "LK-040"}

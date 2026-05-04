@@ -1,0 +1,40 @@
+{"category": "direct_fact", "id": "q001", "question": "What is the lot area of Lot 7, Block 3?", "source_id": "MP-001"}
+{"category": "direct_fact", "id": "q002", "question": "When was the warehouse on Lot 7 built?", "source_id": "MP-002"}
+{"category": "direct_fact", "id": "q003", "question": "What is the existing footprint of Lindqvist's warehouse?", "source_id": "MP-003"}
+{"category": "direct_fact", "id": "q004", "question": "What overlays apply to Lot 7?", "source_id": "MP-004"}
+{"category": "direct_fact", "id": "q005", "question": "What is the maximum building height in the C-2 district?", "source_id": "MP-005"}
+{"category": "direct_fact", "id": "q006", "question": "How far is the front of Lot 7 from the Meridian River centerline?", "source_id": "MP-006"}
+{"category": "direct_fact", "id": "q007", "question": "What is the existing use of Lot 12?", "source_id": "MP-007"}
+{"category": "direct_fact", "id": "q008", "question": "Does any overlay apply to Lot 12?", "source_id": "MP-008"}
+{"category": "direct_fact", "id": "q009", "question": "What vote threshold is required for a use variance?", "source_id": "MP-009"}
+{"category": "direct_fact", "id": "q010", "question": "What vote threshold is required for a dimensional variance?", "source_id": "MP-010"}
+{"category": "direct_fact", "id": "q011", "question": "What does the HPO restrict?", "source_id": "MP-011"}
+{"category": "direct_fact", "id": "q012", "question": "What is the parking ratio in the C-2 district?", "source_id": "MP-012"}
+{"category": "direct_fact", "id": "q013", "question": "Who prepared the staff reports?", "source_id": "MP-013"}
+{"category": "direct_fact", "id": "q014", "question": "What materials does Lindqvist propose for the addition?", "source_id": "MP-014"}
+{"category": "direct_fact", "id": "q015", "question": "What is Oyelaran's proposed height change?", "source_id": "MP-015"}
+{"category": "rule_derived", "id": "q016", "question": "What is the maximum lot coverage under the REO?", "source_id": "MP-016"}
+{"category": "rule_derived", "id": "q017", "question": "Under the strict textual reading of the REO, is Lindqvist's proposed addition subject to the REO?", "source_id": "MP-017"}
+{"category": "rule_derived", "id": "q018", "question": "Under the 2021 Board interpretation, is Lindqvist's proposed addition subject to the REO?", "source_id": "MP-018"}
+{"category": "rule_derived", "id": "q019", "question": "Under which REO interpretation does Rule 4 (grandfathering) get triggered?", "source_id": "MP-019"}
+{"category": "rule_derived", "id": "q020", "question": "If Rule 4 is triggered, what is the consequence for Lindqvist's project?", "source_id": "MP-020"}
+{"category": "rule_derived", "id": "q021", "question": "Does Lindqvist's proposed addition comply with the HPO?", "source_id": "MP-021"}
+{"category": "rule_derived", "id": "q022", "question": "How many parking spaces does the Lindqvist project require?", "source_id": "MP-022"}
+{"category": "rule_derived", "id": "q023", "question": "Does the shared-parking arrangement require Board approval?", "source_id": "MP-023"}
+{"category": "rule_derived", "id": "q024", "question": "Under Rule 6, when the REO and HPO both apply, how are conflicts resolved?", "source_id": "MP-024"}
+{"category": "rule_derived", "id": "q025", "question": "Is the REO's lot coverage limit dimensional or appearance-related?", "source_id": "MP-025"}
+{"category": "rule_derived", "id": "q026", "question": "Does Rule 4 apply to Oyelaran's second-story addition under Herrera's interpretation?", "source_id": "MP-026"}
+{"category": "rule_derived", "id": "q027", "question": "Is Lindqvist's warehouse a nonconforming structure?", "source_id": "MP-027"}
+{"category": "rule_derived", "id": "q028", "question": "If the existing warehouse were damaged by fire to more than 50% of its assessed value, what would happen under §14.5-equivalent rules?", "source_id": "MP-028"}
+{"category": "rule_derived", "id": "q029", "question": "What would be the maximum allowable footprint for Lot 7 under the 2021 REO interpretation?", "source_id": "MP-029"}
+{"category": "rule_derived", "id": "q030", "question": "What would be the maximum allowable footprint for Lot 7 under the strict REO textual reading, for the rear 60 feet only?", "source_id": "MP-030"}
+{"category": "conflict_exception", "id": "q031", "question": "Which REO interpretation is correct — the 2021 Board interpretation or the strict textual reading?", "source_id": "MP-031"}
+{"category": "conflict_exception", "id": "q032", "question": "Does Rule 4 apply to Oyelaran's project?", "source_id": "MP-032"}
+{"category": "conflict_exception", "id": "q033", "question": "Is the Board's classification of a requirement as dimensional vs appearance-related binding on future applications?", "source_id": "MP-033"}
+{"category": "conflict_exception", "id": "q034", "question": "Can both the REO and HPO apply to the same property simultaneously?", "source_id": "MP-034"}
+{"category": "conflict_exception", "id": "q035", "question": "If Lindqvist modified the addition to use 1912-era brick and detailing, would the HPO objection be resolved?", "source_id": "MP-035"}
+{"category": "conflict_exception", "id": "q036", "question": "Is Herrera's staff analysis a Board determination?", "source_id": "MP-036"}
+{"category": "conflict_exception", "id": "q037", "question": "Could the Board resolve the Lindqvist REO dispute by granting a dimensional variance?", "source_id": "MP-037"}
+{"category": "conflict_exception", "id": "q038", "question": "What happens if the Board classifies the REO coverage limit as appearance-related instead of dimensional?", "source_id": "MP-038"}
+{"category": "conflict_exception", "id": "q039", "question": "Does the 2021 Board interpretation constitute codified law?", "source_id": "MP-039"}
+{"category": "conflict_exception", "id": "q040", "question": "If both applications were approved as submitted, would any rules have been violated?", "source_id": "MP-040"}

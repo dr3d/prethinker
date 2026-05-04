@@ -34,6 +34,43 @@ DULSE_LEDGER = ROOT / "datasets" / "story_worlds" / "dulse_ledger"
 OXALIS_RECALL = ROOT / "datasets" / "story_worlds" / "oxalis_recall"
 SABLE_CREEK_BUDGET = ROOT / "datasets" / "story_worlds" / "sable_creek_budget"
 THORNFIELD_VARIANCE = ROOT / "datasets" / "story_worlds" / "thornfield_variance"
+PROMOTED_INCOMING_FIXTURES = {
+    "copperfall_deadline_docket": {
+        "path": ROOT / "datasets" / "story_worlds" / "copperfall_deadline_docket",
+        "run_id": "CFD-000",
+        "first_run_id": "CFD-001",
+        "story_phrase": "Copperfall Deadline Docket",
+        "answer_phrase": "January 6, 2026",
+    },
+    "harrowgate_witness_file": {
+        "path": ROOT / "datasets" / "story_worlds" / "harrowgate_witness_file",
+        "run_id": "HWF-000",
+        "first_run_id": "HWF-001",
+        "story_phrase": "Harrowgate Witness File",
+        "answer_phrase": "wholesale pricing sheet",
+    },
+    "larkspur_clockwork_fair": {
+        "path": ROOT / "datasets" / "story_worlds" / "larkspur_clockwork_fair",
+        "run_id": "LCF-000",
+        "first_run_id": "LCF-001",
+        "story_phrase": "Larkspur Clockwork Fair",
+        "answer_phrase": "not related",
+    },
+    "meridian_permit_board": {
+        "path": ROOT / "datasets" / "story_worlds" / "meridian_permit_board",
+        "run_id": "MPB-000",
+        "first_run_id": "MPB-001",
+        "story_phrase": "Meridian Permit Board",
+        "answer_phrase": "12,000 sq ft",
+    },
+    "northbridge_authority_packet": {
+        "path": ROOT / "datasets" / "story_worlds" / "northbridge_authority_packet",
+        "run_id": "NAP-000",
+        "first_run_id": "NAP-001",
+        "story_phrase": "Northbridge Authority Packet",
+        "answer_phrase": "3,200 linear feet",
+    },
+}
 
 NEW_COLD_FIXTURES = {
     "dulse_ledger": {
@@ -449,6 +486,86 @@ def test_new_cold_fixture_metadata_marks_no_oracle_lane() -> None:
         assert metrics[0]["qa_rows"] == 40, name
         assert metrics[0]["gold_kb_supplied"] is False, name
         assert metrics[0]["starter_profile_supplied"] is False, name
+
+
+def test_promoted_incoming_fixtures_have_standard_research_shape() -> None:
+    expected = {
+        "README.md",
+        "story.md",
+        "source.md",
+        "fixture_notes.md",
+        "qa_battery_40.json",
+        "qa_questions.jsonl",
+        "qa.md",
+        "oracle.jsonl",
+        "qa_authored_with_answers.jsonl",
+        "progress_journal.md",
+        "progress_metrics.jsonl",
+    }
+    forbidden = {
+        "gold_kb.pl",
+        "gold_kb_notes.md",
+        "intake_plan.md",
+        "ontology_registry.json",
+        "failure_buckets.json",
+    }
+
+    for name, fixture in PROMOTED_INCOMING_FIXTURES.items():
+        path = fixture["path"]
+        assert path.exists(), name
+        names = {item.name for item in path.iterdir()}
+        assert expected.issubset(names), name
+        assert forbidden.isdisjoint(names), name
+
+
+def test_promoted_incoming_fixture_qa_assets_are_harness_ready() -> None:
+    for name, fixture in PROMOTED_INCOMING_FIXTURES.items():
+        path = fixture["path"]
+        qa_text = (path / "qa.md").read_text(encoding="utf-8")
+        questions = parse_numbered_markdown_questions(qa_text)
+        question_rows = [
+            json.loads(line)
+            for line in (path / "qa_questions.jsonl").read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        ]
+        oracle_rows = [
+            json.loads(line)
+            for line in (path / "oracle.jsonl").read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        ]
+        battery = json.loads((path / "qa_battery_40.json").read_text(encoding="utf-8"))
+
+        assert len(questions) == 40, name
+        assert len(question_rows) == 40, name
+        assert len(oracle_rows) == 40, name
+        assert len(battery) == 40, name
+        assert questions[0]["id"] == "q001", name
+        assert question_rows[0]["id"] == "q001", name
+        assert oracle_rows[0]["id"] == "q001", name
+        assert battery[0]["id"] == "q001", name
+        assert fixture["answer_phrase"] in oracle_rows[0]["reference_answer"], name
+
+
+def test_promoted_incoming_fixture_journals_capture_current_harness_response() -> None:
+    for name, fixture in PROMOTED_INCOMING_FIXTURES.items():
+        path = fixture["path"]
+        story = (path / "story.md").read_text(encoding="utf-8")
+        readme = (path / "README.md").read_text(encoding="utf-8")
+        journal = (path / "progress_journal.md").read_text(encoding="utf-8")
+        metrics = [
+            json.loads(line)
+            for line in (path / "progress_metrics.jsonl").read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        ]
+
+        assert fixture["story_phrase"] in story, name
+        assert "after-the-fact scoring" in readme, name
+        assert "tmp/" in journal, name
+        assert metrics[0]["run_id"] == fixture["run_id"], name
+        assert metrics[0]["compile_run"] is False, name
+        assert metrics[0]["qa_rows"] == 40, name
+        assert metrics[1]["run_id"] == fixture["first_run_id"], name
+        assert metrics[1]["qa"]["questions"] == 10, name
 
 
 def test_calders_reach_fixture_is_admitted_without_oracles() -> None:

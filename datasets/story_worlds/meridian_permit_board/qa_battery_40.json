@@ -1,0 +1,242 @@
+[
+    {
+        "category":  "direct_fact",
+        "id":  "q001",
+        "reference_answer":  "12,000 sq ft (corrected from initially recorded 12,800 sq ft)",
+        "source_id":  "MP-001"
+    },
+    {
+        "category":  "direct_fact",
+        "id":  "q002",
+        "reference_answer":  "1912 (corrected from initially reported 1908)",
+        "source_id":  "MP-002"
+    },
+    {
+        "category":  "direct_fact",
+        "id":  "q003",
+        "reference_answer":  "7,200 sq ft, which is 60% of the 12,000 sq ft lot",
+        "source_id":  "MP-003"
+    },
+    {
+        "category":  "direct_fact",
+        "id":  "q004",
+        "reference_answer":  "Both the Riverfront Environmental Overlay (REO) and the Historic Preservation Overlay (HPO)",
+        "source_id":  "MP-004"
+    },
+    {
+        "category":  "direct_fact",
+        "id":  "q005",
+        "reference_answer":  "45 feet or 3 stories, whichever is less",
+        "source_id":  "MP-005"
+    },
+    {
+        "category":  "direct_fact",
+        "id":  "q006",
+        "reference_answer":  "The front 90 feet is within 200 feet of the centerline; the rear 60 feet is outside 200 feet",
+        "source_id":  "MP-006"
+    },
+    {
+        "category":  "direct_fact",
+        "id":  "q007",
+        "reference_answer":  "Retail â€” a hardware store operated by Marcus Oyelaran",
+        "source_id":  "MP-007"
+    },
+    {
+        "category":  "direct_fact",
+        "id":  "q008",
+        "reference_answer":  "No â€” Lot 12 is outside both the REO and HPO boundaries",
+        "source_id":  "MP-008"
+    },
+    {
+        "category":  "direct_fact",
+        "id":  "q009",
+        "reference_answer":  "A supermajority of 4 of 5 Board members",
+        "source_id":  "MP-009"
+    },
+    {
+        "category":  "direct_fact",
+        "id":  "q010",
+        "reference_answer":  "A simple majority of 3 of 5 Board members",
+        "source_id":  "MP-010"
+    },
+    {
+        "category":  "direct_fact",
+        "id":  "q011",
+        "reference_answer":  "Exterior alterations â€” materials and styles must be consistent with the 1890-1920 architectural character. The HPO does not restrict lot coverage, height, or parking.",
+        "source_id":  "MP-011"
+    },
+    {
+        "category":  "direct_fact",
+        "id":  "q012",
+        "reference_answer":  "1 space per 300 square feet of gross floor area",
+        "source_id":  "MP-012"
+    },
+    {
+        "category":  "direct_fact",
+        "id":  "q013",
+        "reference_answer":  "Zoning Analyst TomÃ¡s Herrera",
+        "source_id":  "MP-013"
+    },
+    {
+        "category":  "direct_fact",
+        "id":  "q014",
+        "reference_answer":  "Steel frame and glass curtain wall â€” modern materials that are not consistent with the 1890-1920 historic character required by the HPO",
+        "source_id":  "MP-014"
+    },
+    {
+        "category":  "direct_fact",
+        "id":  "q015",
+        "reference_answer":  "From 14 feet (single story) to 30 feet (two stories), with no change in footprint",
+        "source_id":  "MP-015"
+    },
+    {
+        "category":  "rule_derived",
+        "id":  "q016",
+        "reference_answer":  "60%, compared to the base C-2 allowance of 75%. The REO takes priority over base zoning where they conflict.",
+        "source_id":  "MP-016"
+    },
+    {
+        "category":  "rule_derived",
+        "id":  "q017",
+        "reference_answer":  "No â€” the strict textual reading says \u0027only the portion within 200 feet is subject to the overlay.\u0027 The addition would be in the rear 60 feet, outside the 200-foot zone, and would be subject to base C-2 zoning only.",
+        "source_id":  "MP-017"
+    },
+    {
+        "category":  "rule_derived",
+        "id":  "q018",
+        "reference_answer":  "Yes â€” the 2021 interpretation applies the REO coverage limit to the entire lot for properties partially within the REO. Total coverage of 9,000 sq ft (75%) would exceed the 60% limit of 7,200 sq ft.",
+        "source_id":  "MP-018"
+    },
+    {
+        "category":  "rule_derived",
+        "id":  "q019",
+        "reference_answer":  "Under the 2021 interpretation. If the REO\u0027s 60% limit applies to the entire lot, adding to the footprint triggers Rule 4, which requires the entire structure to comply with current standards. Under the strict textual reading, the existing building already complies and Rule 4 is not triggered.",
+        "source_id":  "MP-019"
+    },
+    {
+        "category":  "rule_derived",
+        "id":  "q020",
+        "reference_answer":  "The entire project â€” existing building plus addition â€” must meet the 60% coverage limit. Since 60% of 12,000 sq ft is 7,200 sq ft, and the existing building already occupies 7,200 sq ft, no addition is possible.",
+        "source_id":  "MP-020"
+    },
+    {
+        "category":  "rule_derived",
+        "id":  "q021",
+        "reference_answer":  "No â€” the proposed modern materials (steel frame, glass curtain wall) are not consistent with the 1890-1920 architectural character required by the HPO. The addition\u0027s appearance would need to be modified or an HPO exception obtained.",
+        "source_id":  "MP-021"
+    },
+    {
+        "category":  "rule_derived",
+        "id":  "q022",
+        "reference_answer":  "Approximately 36 spaces (roughly 10,800 usable sq ft Ã· 300). Lindqvist proposes 28 on-site and 8 via shared-parking agreement with the municipal lot.",
+        "source_id":  "MP-022"
+    },
+    {
+        "category":  "rule_derived",
+        "id":  "q023",
+        "reference_answer":  "Yes â€” shared parking is permitted under C-2 but requires Board approval",
+        "source_id":  "MP-023"
+    },
+    {
+        "category":  "rule_derived",
+        "id":  "q024",
+        "reference_answer":  "Dimensional requirements follow the more restrictive overlay (REO). Appearance requirements follow the HPO. Ambiguous requirements must be classified by the Board before either overlay is applied.",
+        "source_id":  "MP-024"
+    },
+    {
+        "category":  "rule_derived",
+        "id":  "q025",
+        "reference_answer":  "Dimensional â€” Herrera explicitly states this and it follows logically from Rule 6\u0027s framework. Coverage is a dimensional parameter.",
+        "source_id":  "MP-025"
+    },
+    {
+        "category":  "rule_derived",
+        "id":  "q026",
+        "reference_answer":  "No â€” Herrera interprets \u0027exterior footprint\u0027 as ground-level area, and a second story does not change the ground-level footprint. He believes Rule 4 does not apply.",
+        "source_id":  "MP-026"
+    },
+    {
+        "category":  "rule_derived",
+        "id":  "q027",
+        "reference_answer":  "No â€” the existing warehouse at 7,200 sq ft and 60% coverage complies with the REO under either interpretation. It is not a nonconforming structure. The HPO applies to its appearance but does not create dimensional nonconformity.",
+        "source_id":  "MP-027"
+    },
+    {
+        "category":  "rule_derived",
+        "id":  "q028",
+        "reference_answer":  "Under Rule 4\u0027s nonconforming structure provision, it could not be rebuilt except in conformity with the current code. However, this is moot because the warehouse is not nonconforming â€” it complies with current dimensional requirements.",
+        "source_id":  "MP-028"
+    },
+    {
+        "category":  "rule_derived",
+        "id":  "q029",
+        "reference_answer":  "7,200 sq ft (60% of 12,000 sq ft lot area)",
+        "source_id":  "MP-029"
+    },
+    {
+        "category":  "rule_derived",
+        "id":  "q030",
+        "reference_answer":  "The rear 60 feet (60 Ã— 80 = 4,800 sq ft) would be subject to C-2 base zoning allowing 75% coverage = 3,600 sq ft. Combined with the existing 7,200 sq ft in the front zone, total could be up to 10,800 sq ft. But this calculation depends on whether coverage is measured per-zone or per-lot.",
+        "source_id":  "MP-030"
+    },
+    {
+        "category":  "conflict_exception",
+        "id":  "q031",
+        "reference_answer":  "This is unresolved. The Board has not yet ruled on Application 1. The 2021 interpretation has not been formally codified. Both readings are supportable. The system must preserve both without resolving the conflict.",
+        "source_id":  "MP-031"
+    },
+    {
+        "category":  "conflict_exception",
+        "id":  "q032",
+        "reference_answer":  "This is unresolved. Herrera says no (footprint unchanged). Nakashima says yes (exterior envelope changes). The Board has not ruled. Both positions are preserved.",
+        "source_id":  "MP-032"
+    },
+    {
+        "category":  "conflict_exception",
+        "id":  "q033",
+        "reference_answer":  "No â€” Rule 6 explicitly states the Board\u0027s classification \u0027is binding for the specific application but does not create precedent for future applications.\u0027",
+        "source_id":  "MP-033"
+    },
+    {
+        "category":  "conflict_exception",
+        "id":  "q034",
+        "reference_answer":  "Yes â€” Rule 3 explicitly states that the HPO and REO may both apply, and both sets of requirements must be satisfied independently.",
+        "source_id":  "MP-034"
+    },
+    {
+        "category":  "conflict_exception",
+        "id":  "q035",
+        "reference_answer":  "Likely yes â€” the HPO requires materials and styles consistent with 1890-1920 character. Using period-appropriate materials would address the appearance requirement. However, the dimensional issues (REO coverage, Rule 4 triggering) would remain.",
+        "source_id":  "MP-035"
+    },
+    {
+        "category":  "conflict_exception",
+        "id":  "q036",
+        "reference_answer":  "No â€” Herrera\u0027s analysis is a staff recommendation. The Board makes the determination. Herrera explicitly flags the REO interpretation as a question for the Board.",
+        "source_id":  "MP-036"
+    },
+    {
+        "category":  "conflict_exception",
+        "id":  "q037",
+        "reference_answer":  "Yes â€” if the Board applies the 2021 interpretation and finds the REO blocks the addition, Lindqvist could apply for a dimensional variance under Rule 5, which requires a simple majority of 3 members. But the variance would need to satisfy the three conditions: no reasonable return under permitted use, no neighborhood character change, and hardship not self-created.",
+        "source_id":  "MP-037"
+    },
+    {
+        "category":  "conflict_exception",
+        "id":  "q038",
+        "reference_answer":  "Under Rule 6, appearance requirements follow the HPO, not the REO. If coverage were classified as appearance-related (which Herrera says is clearly wrong), the REO coverage limit would not apply and only the HPO\u0027s appearance standards would govern. This is a trap â€” the correct answer is that coverage is dimensional, per Herrera\u0027s uncontested analysis.",
+        "source_id":  "MP-038"
+    },
+    {
+        "category":  "conflict_exception",
+        "id":  "q039",
+        "reference_answer":  "No â€” Herrera explicitly notes that the 2021 interpretation has not been formally codified. It is a prior Board interpretation that may inform the current Board but does not bind it.",
+        "source_id":  "MP-039"
+    },
+    {
+        "category":  "conflict_exception",
+        "id":  "q040",
+        "reference_answer":  "For Application 1 (Lindqvist): under the 2021 interpretation, yes â€” the REO coverage limit and Rule 4 grandfathering trigger. Under the strict textual reading, no dimensional violation, but the HPO appearance requirement remains unresolved. For Application 2 (Oyelaran): under Herrera\u0027s interpretation no violation; under Nakashima\u0027s interpretation Rule 4 would apply but the building already complies with all current standards so the consequence is minimal. Neither application has been decided.",
+        "source_id":  "MP-040"
+    }
+]

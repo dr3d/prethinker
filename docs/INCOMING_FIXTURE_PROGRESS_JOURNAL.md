@@ -14,6 +14,9 @@ The current batch lives under `tmp/incoming_staged`:
 - `meridian_permit_board`
 - `northbridge_authority_packet`
 
+These fixtures have now been promoted into `datasets/story_worlds/`. The `tmp`
+paths remain generated artifact/run locations, not the durable research home.
+
 ## Policy
 
 - Incoming fixtures start as `cold_unseen` unless explicitly labeled otherwise.
