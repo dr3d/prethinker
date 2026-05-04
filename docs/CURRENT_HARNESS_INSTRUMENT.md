@@ -202,3 +202,11 @@ and Northbridge scoped compiles are aggregate-neutral at `46 / 4 / 0`, but the
 variant overlay exposes a `48 / 2 / 0` target: accept Meridian q006 and
 Northbridge q007 from the shifted variants, while protecting Meridian q007 and
 Northbridge q004 from baseline.
+
+The Larkspur attribute/duty guardrail adds the next diagnostic row: narrative
+compilation now tells the model that numeric character attributes must not be
+encoded as names or aliases, and that named officials need duty/authority
+surface when the profile supports it. The first replay is not a blanket
+promotion because compile health is `poor`, but it repairs Larkspur q007. With
+that variant added, the judged compile-variant overlay target is `49 / 1 / 0`;
+only Larkspur q009 remains unresolved.

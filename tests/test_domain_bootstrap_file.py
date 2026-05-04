@@ -1,4 +1,5 @@
 from scripts.run_domain_bootstrap_file import (
+    NARRATIVE_SOURCE_COMPILER_CONTEXT_V1,
     PROFILE_SIGNATURE_ROSTER_JSON_SCHEMA,
     SOURCE_ENTITY_LEDGER_SCHEMA,
     SOURCE_PASS_OPS_JSON_SCHEMA,
@@ -11,6 +12,14 @@ from scripts.run_domain_bootstrap_file import (
     _source_pass_ops_to_semantic_ir,
 )
 import scripts.run_domain_bootstrap_file as domain_bootstrap_file
+
+
+def test_narrative_context_guards_attributes_and_official_duties() -> None:
+    context = "\n".join(NARRATIVE_SOURCE_COMPILER_CONTEXT_V1)
+
+    assert "numeric ages" in context
+    assert "not encode numeric ages or duties as names or aliases" in context
+    assert "official inspects, certifies, authorizes, investigates, or decides" in context
 
 
 def test_source_entity_ledger_schema_has_coverage_targets() -> None:

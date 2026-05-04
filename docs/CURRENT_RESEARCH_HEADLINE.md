@@ -308,8 +308,14 @@ testing whether those gains transfer:
   than a blanket replacement. Shifted Meridian/Northbridge compiles stay
   aggregate-neutral at `46 / 4 / 0`, but row-level overlay across variants gives
   a judged `48 / 2 / 0` upper target while protecting two baseline-exact rows.
-  The hard problem is now learning a non-oracle selector/control signal for
-  compile variants.
+- Larkspur then exposed a clean compiler guardrail: numeric character
+  attributes must not become names/aliases, and official roles need duty and
+  authority surfaces. The first guarded replay is high-risk as a compile, but
+  it repairs the youngest-exhibitor row. Added as a variant, the judged overlay
+  target is now `49 / 1 / 0`; the remaining stubborn row is Fair Warden Osric
+  Thane's duty/authority description.
+  The hard problem is learning a non-oracle selector/control signal for compile
+  variants.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 

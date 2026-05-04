@@ -476,3 +476,59 @@ Ignored local artifact references:
 - `tmp/incoming_smoke_summaries_compile_variant_selection/scorecard.md`
 - `tmp/incoming_smoke_summaries_compile_variant_selection/row_gated_scorecard_plan.md`
 - `tmp/incoming_smoke_summaries_compile_variant_selection/compile_variant_overlay_plan.md`
+
+## 2026-05-04 Larkspur Attribute/Duty Guardrail
+
+Larkspur q007 showed a right-shaped/wrong-slot failure: Cassia's age had been
+treated as name/alias-like surface instead of a query-bearing character
+attribute. The compiler context now has a general narrative guardrail:
+
+- numeric ages and other source-stated character attributes should not be
+  encoded as names, aliases, or role labels;
+- named officials need duty/authority surface when the profile supports it,
+  not just a role row.
+
+The first guarded Larkspur replay is diagnostic, not promotable:
+
+```text
+larkspur baseline: 8 exact / 2 partial / 0 miss
+guarded replay:    8 exact / 1 partial / 1 miss
+compile health: poor
+semantic action: stop_and_report_struggle
+scorecard gate: reject_candidate
+```
+
+Useful row movement:
+
+- `larkspur_clockwork_fair q007`: partial -> exact via `person_role(..., youngest_exhibitor)`.
+
+Regression held behind exact protection:
+
+- `larkspur_clockwork_fair q010`: exact -> miss in the guarded replay.
+
+Still unresolved:
+
+- `larkspur_clockwork_fair q009`: Fair Warden Osric Thane remains partial/miss
+  depending on mode; the compile has role/ruling fragments but not enough
+  answer-bearing duty/authority surface.
+
+Adding the guarded Larkspur replay as a compile variant raises the judged
+artifact overlay target:
+
+```text
+baseline scoped-evidence recipe: 46 exact / 4 partial / 0 miss
+variant overlay target:          49 exact / 1 partial / 0 miss
+accepted variant rows: 3
+protected baseline-exact rows: 3
+unchanged non-exacts: 1
+```
+
+Discovery: the instrument is now seeing complementary compiler views at the row
+level. The product problem is not "run the best compile"; it is "identify which
+compile view is safe for this question while protecting exact rows."
+
+Ignored local artifact references:
+
+- `tmp/incoming_smoke_summaries_larkspur_attribute_duty_variant/scorecard.md`
+- `tmp/incoming_smoke_summaries_larkspur_attribute_duty_variant/scoped_evidence_comparison.md`
+- `tmp/incoming_smoke_summaries_larkspur_attribute_duty_variant/compile_variant_overlay_plan.md`

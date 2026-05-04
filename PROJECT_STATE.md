@@ -151,6 +151,12 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
   Meridian/Northbridge compile candidate is aggregate-neutral at `46 / 4 / 0`,
   but complementary row surfaces imply a judged `48 exact / 2 partial / 0 miss`
   overlay target with exact-row protection.
+- Narrative compile context now includes an attribute/duty guardrail: numeric
+  character attributes should not be encoded as names or aliases, and named
+  officials should preserve duty/authority surfaces when the profile supports
+  them. The first Larkspur replay repaired q007 but stayed high-risk overall;
+  adding it as a row-gated variant raises the judged overlay target to
+  `49 exact / 1 partial / 0 miss`.
 - Incoming compile repair targets are now generated at
   `tmp/incoming_smoke_summaries/compile_repair_targets.{json,md}`. The current
   scoped-evidence queue is down to four partial rows: `3` scoped source-surface
