@@ -10,6 +10,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 
 - Runtime: `src/mcp_server.py`, especially `process_utterance()`.
 - Current pipeline reference: `docs/CURRENT_UTTERANCE_PIPELINE.md`.
+- Research prioritization: `docs/ACTIVE_RESEARCH_LANES.md`.
 - UI: `ui_gateway/`, served locally by `python ui_gateway/main.py` using the stdlib `ThreadingHTTPServer`.
 - Active profile: `medical@v0`; active profile-lane experiments: `legal_courtlistener@v0` and `sec_contracts@v0`.
 - Background domain asset: local UMLS Semantic Network KB built from `sn_current.tgz` for bounded medical type steering and explanation.
@@ -49,6 +50,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 - Glass Tide: separate rule lenses plus deterministic union now produce promotion-ready slices for role joins, threshold/exception rules, temporal clearance, salvage exceptions, budget-veto failure, and support-threshold conditions. Durable rule activation remains gated.
 - Clarification Eagerness Trap: source-context lane reached and held `40/40`, with `0` unsafe candidates, `0` context-write violations, and `10/10` blocked-slot coverage.
 - New held-out fixtures such as Black Lantern, Three Moles, Oxalis, Dulse, Avalon, Sable Creek, Ridgeline, Veridia, and Ledger are being used to test whether gains transfer beyond the original fixture families.
+- Active lane triage now prioritizes source-surface acquisition first because the cold rollup shows `159` compile gaps versus `35` hybrid/reasoning, `26` query, and `5` answer gaps.
 - Declaration and Proclamation show that curated document/profile vocabulary can improve dense source compilation, but expected-signature recall alone is not enough; question-support coverage is the next scoring layer.
 - Otters remains a hard story-world frontier. Recent cross-apply work did not beat the earlier high-water; the next useful move is a ledger-to-compile contract with row-class floors.
 
