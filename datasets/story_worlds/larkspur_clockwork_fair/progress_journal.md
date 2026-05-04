@@ -112,3 +112,21 @@ Lesson:
 Larkspur is now a compact selector calibration fixture: activate the
 attribute/duty companion for youngest-exhibitor and official-identity rows, but
 protect the baseline recovery-event row.
+
+## LCF-004 - Requirement-Detail Selector Replay
+
+Date: 2026-05-04
+
+Evidence lane: `selector_calibration`
+
+Artifact:
+
+- `tmp/incoming_variant_selector_runs/larkspur_guarded_activation_requirement_detail.json`
+
+Result:
+
+- Larkspur held `3/3` best choices under the requirement-detail selector replay.
+
+Lesson:
+
+The requirement-detail guard did not perturb the Larkspur calibration rows.

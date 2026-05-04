@@ -9,6 +9,7 @@ from scripts.select_qa_mode_without_oracle import (
     merge_qa_records,
     protected_selector,
     score_selection,
+    selector_system_prompt,
     structural_mode_scores,
     structural_selector,
     structural_volume_trap_reason,
@@ -315,6 +316,14 @@ def test_volume_trap_does_not_double_penalize_relaxed_only_baseline() -> None:
     scored = structural_mode_scores(row=row, mode_labels=["baseline", "variant"])
 
     assert structural_volume_trap_reason(scored) == ""
+
+
+def test_activation_prompt_mentions_requirement_detail_completeness() -> None:
+    prompt = selector_system_prompt("activation")
+
+    assert "requirement questions" in prompt
+    assert "count-only or status-only row is often partial" in prompt
+    assert "spacing, interval, threshold" in prompt
 
 
 def test_hybrid_selector_falls_back_to_structural_when_model_fails() -> None:

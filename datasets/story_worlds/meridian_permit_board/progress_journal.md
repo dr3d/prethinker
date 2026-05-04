@@ -110,3 +110,21 @@ Lesson:
 
 Structural row count was overconfident on both Meridian calibration rows until
 the selector learned to treat relaxed/broad row-volume dominance as uncertainty.
+
+## MPB-004 - Requirement-Detail Selector Replay
+
+Date: 2026-05-04
+
+Evidence lane: `selector_calibration`
+
+Artifact:
+
+- `tmp/incoming_variant_selector_runs/meridian_guarded_activation_requirement_detail.json`
+
+Result:
+
+- Meridian held `2/2` best choices under the requirement-detail selector replay.
+
+Lesson:
+
+The requirement-detail guard did not perturb the Meridian row-volume fix.

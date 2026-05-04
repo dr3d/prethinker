@@ -773,7 +773,11 @@ def selector_system_prompt(selection_policy: str) -> str:
             "For rule and counterfactual questions, prefer the mode that contains both the governing rule surface and "
             "the instance facts needed to apply it; if a mode has the rule text but lacks the named applicant/member/"
             "date outcome, mark it partial. Do not assume baseline is safest merely because it is direct; choose "
-            "baseline only when its support is at least as answer-bearing and less contradictory than the alternatives."
+            "baseline only when its support is at least as answer-bearing and less contradictory than the alternatives. "
+            "For requirement questions, a count-only or status-only row is often partial when another mode returns "
+            "answer-bearing requirement details such as spacing, interval, threshold, scope, exception, condition, "
+            "duration, unit, or authority. Prefer the mode that covers the full requested requirement bundle, not "
+            "merely the mode whose document id or predicate name looks closest."
         )
     return (
         base

@@ -335,6 +335,12 @@ testing whether those gains transfer:
   variant calibration rows, this moved the non-oracle selector to `6 / 1 / 0`
   with `6/7` best choices and no selector errors. The remaining Northbridge
   q007 partial is a requirement-detail relevance problem, not a volume problem.
+- The requirement-detail relevance guard now closes that last row: activation
+  selection treats count-only/status-only support as partial when another mode
+  returns requirement details such as spacing, interval, threshold, scope,
+  condition, duration, unit, or authority. The same seven-row calibration slice
+  now reaches `7 / 0 / 0` and `7/7` best choices without source prose, answer
+  keys, judge labels, failure labels, or gold KBs in selector input.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 

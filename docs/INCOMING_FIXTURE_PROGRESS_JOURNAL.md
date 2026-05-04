@@ -602,6 +602,25 @@ detail relevance: "12 new hydrants" is true but partial when the question asks
 what the agreement requires regarding hydrants and the variant has spacing
 support.
 
+The activation selector now has a requirement-detail completeness guardrail:
+for requirement questions, count-only or status-only rows are often partial when
+another mode returns answer-bearing details such as spacing, interval,
+threshold, scope, exception, condition, duration, unit, or authority.
+
+Replay result:
+
+```text
+variant calibration rows: 7
+guarded activation + volume gate + requirement detail: 7 exact / 0 partial / 0 miss
+selected best available mode: 7/7
+selector errors: 0
+```
+
+Discovery: the judged `50 / 0 / 0` overlay target now has a non-oracle selector
+calibration proof on the seven rows that matter. This is still a calibration
+slice, not a global promotion claim, but the selector now has named guardrails
+for both row-volume traps and requirement-detail incompleteness.
+
 Ignored local artifact references:
 
 - `tmp/incoming_smoke_summaries_larkspur_attribute_duty_variant/scorecard.md`
@@ -612,3 +631,4 @@ Ignored local artifact references:
 - `tmp/incoming_smoke_summaries_official_companion_overlay/compile_variant_overlay_plan.md`
 - `tmp/incoming_smoke_summaries_official_companion_overlay/variant_selector_training_plan.md`
 - `tmp/incoming_variant_selector_runs/incoming-variant-volume-gate-v2.md`
+- `tmp/incoming_variant_selector_runs/incoming-variant-requirement-detail-gate.md`

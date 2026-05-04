@@ -117,3 +117,25 @@ Lesson:
 
 Northbridge is now the active selector-relevance frontier. The remaining issue
 is requirement-detail completeness, not structural row volume.
+
+## NAP-004 - Requirement-Detail Selector Guard
+
+Date: 2026-05-04
+
+Evidence lane: `selector_calibration`
+
+Artifact:
+
+- `tmp/incoming_variant_selector_runs/northbridge_guarded_activation_requirement_detail.json`
+
+Result:
+
+- Northbridge moved from `1/2` to `2/2` best choices.
+- q004 stayed protected on baseline.
+- q007 selected the hydrant-spacing variant and became exact.
+
+Lesson:
+
+Requirement questions need detail-completeness selection. A count-only row can
+be true but partial when another mode has answer-bearing spacing, interval,
+threshold, condition, duration, unit, scope, or authority details.

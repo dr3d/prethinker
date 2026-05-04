@@ -251,3 +251,12 @@ incoming variant calibration rows, this moved guarded activation from `3/7`
 best choices to `6/7`, scoring `6 exact / 1 partial / 0 miss`. The remaining
 miss is Northbridge q007, where the selector still prefers count-only agreement
 support over spacing-bearing hydrant support.
+
+The activation selector now also carries a requirement-detail completeness
+guardrail: for requirement questions, count-only or status-only rows are often
+partial when another mode returns answer-bearing details such as spacing,
+interval, threshold, scope, exception, condition, duration, unit, or authority.
+That closed the Northbridge q007 calibration miss. The seven-row incoming
+variant selector replay now reaches `7/7` best choices and `7 exact / 0 partial
+/ 0 miss`, without source prose, answer keys, judge labels, failure labels, or
+gold KBs in selector input.

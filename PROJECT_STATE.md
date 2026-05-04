@@ -174,6 +174,12 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
   variant calibration rows, the non-oracle selector improved to `6 exact / 1
   partial / 0 miss` and `6/7` best choices. The remaining Northbridge q007
   error needs requirement-detail relevance, not more row-volume scoring.
+- Activation selection now has that requirement-detail relevance guard:
+  count-only/status-only support is partial when another mode returns
+  answer-bearing details such as spacing, interval, threshold, scope,
+  condition, duration, unit, or authority. The seven-row incoming variant
+  calibration slice now reaches `7 exact / 0 partial / 0 miss` and `7/7` best
+  choices without source prose or judge labels in selector input.
 - The five incoming challenge fixtures have been promoted into
   `datasets/story_worlds/` with standard source, QA, oracle-for-scoring,
   `progress_journal.md`, and `progress_metrics.jsonl` files. `tmp/incoming*`
