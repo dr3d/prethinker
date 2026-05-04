@@ -34,6 +34,7 @@ python scripts/plan_incoming_row_mode_overlay.py --baseline-json tmp/incoming_sm
 python scripts/plan_incoming_compile_repair_targets.py --scorecard-json tmp/incoming_smoke_summaries/scorecard.json --row-overlay-json tmp/incoming_smoke_summaries_evidence_nonexact/row_mode_overlay_plan.json --out-json tmp/incoming_smoke_summaries/compile_repair_targets.json --out-md tmp/incoming_smoke_summaries/compile_repair_targets.md
 python scripts/select_qa_mode_without_oracle.py --selection-policy protected --group <name>:baseline=<QA_JSON>,evidence=<QA_JSON> --out-json <OUT_JSON> --out-md <OUT_MD>
 python scripts/select_qa_mode_without_oracle.py --selection-policy guarded_activation --group <name>:baseline=<QA_JSON>+<FAILURE_SURFACE_QA_JSON>,candidate=<QA_JSON> --out-json <OUT_JSON> --out-md <OUT_MD>
+python scripts/plan_selector_risk_gate.py --baseline-run protected=<SELECTOR_JSON> --candidate-run guarded_activation=<SELECTOR_JSON> --transfer-comparison <SELECTOR_POLICY_COMPARISON_JSON> --out-dir tmp/selector_risk_gates
 ```
 
 ## Instrument Principles
@@ -151,3 +152,14 @@ source prose, answer keys, judge labels, or failure labels in selector input.
 The immediate transfer check was mixed: Avalon preferred `protected` for miss
 control, and Sable still preferred `direct`. Guarded activation is therefore a
 named diagnostic policy, not a global daily-driver selector.
+
+`scripts/plan_selector_risk_gate.py` is the risk-gate planner for that lesson.
+It reads selector-run artifacts plus optional selector-policy transfer
+comparisons and splits rows into `safe_activation_target`,
+`calibration_activation_target`, `protect_baseline_target`,
+`needs_compile_repair`, and `stable_no_action`. A candidate rescue is only
+called safe when the candidate policy also has measured transfer support; with
+weak or unmeasured transfer it remains a calibration target. On the incoming
+guarded-activation replay, the gate preserved the Meridian/Northbridge rescues
+as calibration targets and pointed Larkspur plus unresolved Meridian/Northbridge
+rows back to compile repair instead of promoting guarded activation globally.

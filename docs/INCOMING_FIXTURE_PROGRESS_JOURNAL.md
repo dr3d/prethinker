@@ -232,3 +232,40 @@ Ignored local artifact references:
 - `tmp/selector_policy_comparisons/sable-guarded-activation-transfer.md`
 - `tmp/rule_activation_mode_packs/avalon-rule-activation-guarded_activation_selector.md`
 - `tmp/rule_activation_mode_packs/sable-rule-activation-guarded_activation_selector.md`
+
+## 2026-05-04 Selector Risk-Gate Planner
+
+`scripts/plan_selector_risk_gate.py` now turns the transfer lesson into a
+named artifact-only planner. It compares a baseline selector run with a
+candidate selector run and optionally reads selector-policy comparison reports
+to decide whether the candidate policy has transfer support.
+
+Rows are split into:
+
+- `safe_activation_target`: candidate improves the baseline row and the
+  candidate policy has measured transfer support.
+- `calibration_activation_target`: candidate improves the baseline row, but
+  transfer support is weak or unmeasured.
+- `protect_baseline_target`: candidate regresses the baseline row.
+- `needs_compile_repair`: no compared mode has an exact row available.
+- `stable_no_action`: candidate does not change the row and an exact mode is
+  available.
+
+Incoming guarded-activation gate results using Avalon/Sable transfer checks:
+
+| Fixture | Recommendation | Transfer | Safe | Calibration | Protect | Compile Repair |
+| --- | --- | --- | ---: | ---: | ---: | ---: |
+| `larkspur_clockwork_fair` | `do_not_promote_candidate_policy` | `weak` | 0 | 0 | 0 | 2 |
+| `meridian_permit_board` | `do_not_promote_candidate_policy` | `weak` | 0 | 1 | 0 | 1 |
+| `northbridge_authority_packet` | `do_not_promote_candidate_policy` | `weak` | 0 | 1 | 0 | 1 |
+
+Discovery: the incoming policy win is real but remains calibration evidence.
+The planner now forces the correct next question: what policy-family signal
+would make a candidate activation rescue transfer-supported rather than merely
+locally attractive?
+
+Ignored local artifact references:
+
+- `tmp/selector_risk_gates/larkspur-guarded-activation-risk-gate.md`
+- `tmp/selector_risk_gates/meridian-guarded-activation-risk-gate.md`
+- `tmp/selector_risk_gates/northbridge-guarded-activation-risk-gate.md`

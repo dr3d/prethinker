@@ -126,6 +126,12 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
   Transfer remains unsolved: Avalon still preferred `protected` for miss
   control, and Sable still preferred `direct`, so guarded activation is
   diagnostic machinery rather than a global default.
+- Selector risk-gate planning is now available through
+  `scripts/plan_selector_risk_gate.py`. It reads selector artifacts and optional
+  transfer comparisons only, then labels rows as safe activation targets,
+  calibration activation targets, baseline-protection targets, compile-repair
+  targets, or stable. Current incoming guarded-activation rescues are
+  calibration targets because Avalon/Sable transfer support is weak.
 - Incoming compile repair targets are now generated at
   `tmp/incoming_smoke_summaries/compile_repair_targets.{json,md}`. The current
   six-row queue splits into `2` row-selector calibration targets, `3` scoped

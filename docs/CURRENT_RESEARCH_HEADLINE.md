@@ -284,6 +284,12 @@ testing whether those gains transfer:
   harness now has a better named diagnostic policy, not a new universal default.
   The next selector problem is deciding when a fixture/mode family is safe for
   activation fallback at all.
+- A selector risk-gate planner now makes that decision surface explicit. It
+  reads selector artifacts only and classifies rows as safe activation,
+  calibration activation, baseline protection, or compile repair. With
+  Avalon/Sable transfer checks attached, the incoming guarded-activation
+  rescues remain calibration targets rather than promotion targets, which is the
+  right conservative behavior for a moving research instrument.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 
