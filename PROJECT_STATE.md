@@ -42,12 +42,13 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 
 ## Recent Frontier Results
 
-- Full pytest after ledger coverage-target instrumentation: `465 passed, 2 subtests passed`.
+- Full pytest after any-of rule probe instrumentation: `466 passed, 2 subtests passed`.
 - Iron Harbor: `86 exact / 14 partial / 0 miss` on a full 100-question source-document battery, with `0` write proposals during post-ingestion QA.
 - Blackthorn: baseline first-20 was `2 exact / 1 partial / 17 miss`; current diagnostic lanes include BTC-022 at `82 / 9 / 9` full-100 and BTC-027 at `85 / 4 / 11`. These are different configurations, so compare within lane rather than treating one number as a universal replacement.
 - Kestrel: profile-guided KCL-016 reached `73 exact / 11 partial / 16 miss` full-100 with `0` write proposals. Cold/source-aware evidence remains much lower, and the distinction is intentional.
 - Anaplan Polaris: APR-016 reached `42 exact / 1 partial / 0 miss` on 43 QA by accumulating independent mapper-admitted support views over an admitted backbone.
 - Glass Tide: separate rule lenses plus deterministic union now produce promotion-ready slices for role joins, threshold/exception rules, temporal clearance, salvage exceptions, budget-veto failure, and support-threshold conditions. Durable rule activation remains gated.
+- Sable Creek: rule promotion probes now support structural any-of groups, so authored probes can stay strict on meaning-bearing slots while accepting controlled intermediate-condition versus final-status surfaces. SC-006 produced a promotion-clean threshold rule slice, but full-QA activation still requires row-level evidence selection.
 - Clarification Eagerness Trap: source-context lane reached and held `40/40`, with `0` unsafe candidates, `0` context-write violations, and `10/10` blocked-slot coverage.
 - New held-out fixtures such as Black Lantern, Three Moles, Oxalis, Dulse, Avalon, Sable Creek, Ridgeline, Veridia, and Ledger are being used to test whether gains transfer beyond the original fixture families.
 - Active lane triage now prioritizes source-surface acquisition first because the cold rollup shows `159` compile gaps versus `35` hybrid/reasoning, `26` query, and `5` answer gaps.

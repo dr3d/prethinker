@@ -56,6 +56,29 @@ def test_runtime_trial_marks_dependency_composed_rules_ready() -> None:
     assert trial["negative_probe_pass_count"] == 1
 
 
+def test_runtime_trial_supports_any_of_probe_groups() -> None:
+    trial = _runtime_trial(
+        facts=["amendment_introduced(ba_2026_07, councilmember_okafor, 2026_03_04, 185000)."],
+        backbone_rules=[],
+        rule_lens_rules=[
+            "derived_condition(Amendment, requires_public_hearing, budget_amendment) :- amendment_introduced(Amendment, _, _, Amount), number_greater_than(Amount, 50000).",
+        ],
+        positive_queries=[
+            "derived_status(ba_2026_07, requires_public_hearing, Source) || derived_condition(ba_2026_07, requires_public_hearing, Source)"
+        ],
+        negative_queries=[
+            "derived_status(ba_2026_07, no_hearing_required, Source) || derived_condition(ba_2026_07, no_hearing_required, Source)"
+        ],
+    )
+
+    assert trial["positive_probe_pass_count"] == 1
+    assert trial["negative_probe_pass_count"] == 1
+    positive = trial["positive_probe_results"][0]
+    assert positive["passed"] is True
+    assert len(positive["alternatives"]) == 2
+    assert positive["num_rows"] == 1
+
+
 def test_union_promotion_filter_keeps_composition_ready_rules() -> None:
     final_rule = "derived_status(Item, final, demo_scope) :- derived_condition(Item, ready, demo_scope), ok(Item)."
     runtime_trial = {

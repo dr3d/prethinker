@@ -259,3 +259,77 @@ variables or explicit slot-equivalence policies in probe definitions. This keeps
 promotion gating strict where it matters while avoiding false negatives when a
 rule preserves a more precise source anchor than the probe expected.
 
+## Run SC-006 - Any-Of Probe Groups For Promotion Verification
+
+- Timestamp: `2026-05-04T02:42Z` through `2026-05-04T02:53Z`
+- Evidence lane: `diagnostic_replay`
+- Mode: narrow Section A threshold rule lens with structural any-of authored
+  probes. The rule pass still received only raw source, the admitted backbone,
+  an active predicate palette, and authored probe queries. No answer key or
+  gold KB was used for rule acquisition or probe execution.
+
+### Artifacts
+
+- Rule replay:
+  `tmp/cold_baselines/sable_creek_budget/rules/domain_bootstrap_file_20260504T024213518238Z_source-rules_qwen-qwen3-6-35b-a3b.json`
+- Promotion-ready union:
+  `tmp/cold_baselines/sable_creek_budget/union/domain_bootstrap_file_20260504T024240433863Z_sable-threshold-anyof_qwen-qwen3-6-35b-a3b.json`
+- Union QA:
+  `tmp/cold_baselines/sable_creek_budget/union/domain_bootstrap_qa_20260504T025105893239Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Mode comparison:
+  `tmp/cold_baselines/sable_creek_budget/union/sable_threshold_mode_comparison.md`
+- Selector:
+  `tmp/cold_baselines/sable_creek_budget/union/selector_threshold_direct.json`
+
+### Result
+
+Rule lens:
+
+```text
+2 admitted executable rules
+2 skipped
+1 isolated promotion-ready rule
+1 composition-ready rule
+0 runtime rule errors
+0 unsupported body goals
+0 semantic shortcut findings
+positive probes: 2/2
+negative probes: 1/1
+```
+
+The promotion probe used structural any-of groups:
+
+```prolog
+derived_status(ba_2026_07, requires_public_hearing, Source)
+||
+derived_condition(ba_2026_07, requires_public_hearing, Source)
+```
+
+This keeps the amendment id and meaning-bearing requirement strict while
+allowing either final-status or intermediate-condition rule surfaces.
+
+Full QA:
+
+```text
+SC-001 baseline:        20 exact / 8 partial / 12 miss
+SC-006 threshold union: 20 exact / 7 partial / 13 miss
+perfect selector upper: 23 exact / 7 partial / 10 miss
+direct selector:        21 exact / 7 partial / 12 miss
+```
+
+### Lesson
+
+Any-of probe groups fix the brittle-probe problem identified in SC-005 without
+weakening the rule itself. Probes can now be strict about source-local actors,
+objects, statuses, and safety-relevant outcomes while allowing controlled
+surface variation in provenance/category slots or intermediate-vs-final derived
+predicates.
+
+The full-QA result is deliberately modest. The threshold rule union rescues
+some rows and regresses others; the non-oracle selector recovers one exact over
+both individual modes. This reinforces the broader rule doctrine:
+
+```text
+promotion-ready rule surface != globally dominant evidence mode
+```
+

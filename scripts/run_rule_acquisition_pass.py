@@ -221,7 +221,7 @@ def parse_args() -> argparse.Namespace:
         default=[],
         help=(
             "Optional authored Prolog query that should return at least one row after temporary rule loading. "
-            "May be supplied more than once."
+            "May be supplied more than once. Use 'query_a || query_b' for an any-of probe group."
         ),
     )
     parser.add_argument(
@@ -230,7 +230,7 @@ def parse_args() -> argparse.Namespace:
         default=[],
         help=(
             "Optional authored Prolog query that should return zero rows after temporary rule loading. "
-            "May be supplied more than once."
+            "May be supplied more than once. Use 'query_a || query_b' for an any-of probe group."
         ),
     )
     parser.add_argument(
@@ -1089,23 +1089,42 @@ def _rule_trial_item_promotion_ready(item: dict[str, Any]) -> bool:
 def _probe_queries(runtime: CorePrologRuntime, queries: list[str], *, expect_rows: bool) -> list[dict[str, Any]]:
     results: list[dict[str, Any]] = []
     for query in queries:
-        clean_query = str(query).strip()
-        if not clean_query:
+        alternatives = _probe_query_alternatives(query)
+        if not alternatives:
             continue
-        result = runtime.query_rows(clean_query)
-        num_rows = int(result.get("num_rows", 0) or 0)
-        passed = num_rows > 0 if expect_rows else num_rows == 0
+        alternative_results: list[dict[str, Any]] = []
+        for clean_query in alternatives:
+            result = runtime.query_rows(clean_query)
+            num_rows = int(result.get("num_rows", 0) or 0)
+            alternative_results.append(
+                {
+                    "query": clean_query,
+                    "status": str(result.get("status", "")),
+                    "num_rows": num_rows,
+                    "rows": result.get("rows", [])[:10] if isinstance(result.get("rows"), list) else [],
+                }
+            )
+        num_rows = sum(int(item.get("num_rows", 0) or 0) for item in alternative_results)
+        passed = any(int(item.get("num_rows", 0) or 0) > 0 for item in alternative_results) if expect_rows else num_rows == 0
+        rows: list[Any] = []
+        for item in alternative_results:
+            rows.extend(item.get("rows", []) if isinstance(item.get("rows"), list) else [])
         results.append(
             {
-                "query": clean_query,
+                "query": " || ".join(alternatives),
                 "expectation": "rows" if expect_rows else "no_rows",
-                "status": str(result.get("status", "")),
+                "status": "success" if any(str(item.get("status", "")) == "success" for item in alternative_results) else str(alternative_results[0].get("status", "")),
                 "num_rows": num_rows,
                 "passed": passed,
-                "rows": result.get("rows", [])[:10] if isinstance(result.get("rows"), list) else [],
+                "rows": rows[:10],
+                "alternatives": alternative_results if len(alternative_results) > 1 else [],
             }
         )
     return results
+
+
+def _probe_query_alternatives(query: str) -> list[str]:
+    return [part.strip() for part in str(query or "").split("||") if part.strip()]
 
 
 def _compile_items(record: dict[str, Any], key: str) -> list[str]:
