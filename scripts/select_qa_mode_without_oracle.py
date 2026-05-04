@@ -84,13 +84,32 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--selection-policy",
-        choices=["direct", "completeness", "relevance", "structural"],
+        choices=["direct", "completeness", "relevance", "structural", "hybrid"],
         default="direct",
         help=(
             "Selector policy. direct is the stable default; completeness and relevance "
             "are experimental LLM calibration policies. structural is a deterministic "
-            "query-evidence scorer that does not call the model."
+            "query-evidence scorer that does not call the model. hybrid uses the "
+            "structural scorer first and calls the LLM selector only on uncertain rows."
         ),
+    )
+    parser.add_argument(
+        "--hybrid-llm-policy",
+        choices=["direct", "completeness", "relevance"],
+        default="direct",
+        help="LLM selector policy used only for uncertain rows when --selection-policy hybrid.",
+    )
+    parser.add_argument(
+        "--hybrid-margin",
+        type=float,
+        default=1.5,
+        help="Minimum structural score gap required to avoid the LLM selector in hybrid mode.",
+    )
+    parser.add_argument(
+        "--hybrid-min-score",
+        type=float,
+        default=3.0,
+        help="Minimum top structural score required to avoid the LLM selector in hybrid mode.",
     )
     parser.add_argument(
         "--include-self-check",
@@ -124,6 +143,28 @@ def main() -> int:
         selection_error = ""
         if str(args.selection_policy) == "structural":
             selection = structural_selector(row=row, mode_labels=group["labels"])
+        elif str(args.selection_policy) == "hybrid":
+            try:
+                selection = hybrid_selector(
+                    row=row,
+                    mode_labels=group["labels"],
+                    margin=float(args.hybrid_margin),
+                    min_score=float(args.hybrid_min_score),
+                    fallback_selector=lambda *, row, mode_labels: call_selector(
+                        base_url=str(args.base_url),
+                        model=str(args.model),
+                        timeout=int(args.timeout),
+                        temperature=float(args.temperature),
+                        top_p=float(args.top_p),
+                        max_tokens=int(args.max_tokens),
+                        row=row,
+                        mode_labels=mode_labels,
+                        selection_policy=str(args.hybrid_llm_policy),
+                    ),
+                )
+            except Exception as exc:  # pragma: no cover - live harness path
+                selection_error = str(exc)
+                selection = {}
         else:
             try:
                 selection = call_selector(
@@ -156,6 +197,9 @@ def main() -> int:
             "artifacts": [{"label": item["label"], "path": display_path(item["path"])} for item in group["artifacts"]],
         },
         "selection_policy": str(args.selection_policy),
+        "hybrid_llm_policy": str(args.hybrid_llm_policy),
+        "hybrid_margin": float(args.hybrid_margin),
+        "hybrid_min_score": float(args.hybrid_min_score),
         "include_self_check": bool(args.include_self_check),
         "summary": summarize(outputs),
         "rows": outputs,
@@ -337,6 +381,91 @@ def call_selector(
 
 
 def structural_selector(*, row: dict[str, Any], mode_labels: list[str]) -> dict[str, Any]:
+    scored = structural_mode_scores(row=row, mode_labels=mode_labels)
+    best_score, selected, _best_quality = scored[0]
+    second_score = scored[1][0] if len(scored) > 1 else 0.0
+    return {
+        "schema_version": "qa_mode_selector_v1",
+        "selected_mode": selected,
+        "selection_confidence": min(1.0, max(0.0, round(best_score / 10.0, 3))),
+        "evidence_quality_by_mode": [
+            {
+                "mode": label,
+                "quality": str(quality.get("quality", "weak")),
+                "reason": str(quality.get("reason", "")),
+            }
+            for _score, label, quality in scored
+        ],
+        "rationale": f"deterministic structural query-evidence score selected {selected}",
+        "risks": [
+            "structural selector cannot judge answer meaning",
+            "row count can reward irrelevant evidence",
+        ],
+        "selection_source": "structural",
+        "structural_score": round(float(best_score), 3),
+        "structural_margin": round(float(best_score - second_score), 3),
+    }
+
+
+def hybrid_selector(
+    *,
+    row: dict[str, Any],
+    mode_labels: list[str],
+    margin: float,
+    min_score: float,
+    fallback_selector: Any,
+) -> dict[str, Any]:
+    scored = structural_mode_scores(row=row, mode_labels=mode_labels)
+    best_score, structural_choice, best_quality = scored[0]
+    second_score = scored[1][0] if len(scored) > 1 else 0.0
+    score_margin = float(best_score - second_score)
+    quality = str(best_quality.get("quality", "weak"))
+    direct_rows = int(best_quality.get("direct_rows", 0) or 0)
+    parse_error = bool(best_quality.get("parse_error", False))
+    warning_count = int(best_quality.get("warning_count", 0) or 0)
+    uncertain_reasons: list[str] = []
+    if best_score < min_score:
+        uncertain_reasons.append(f"top structural score {best_score:.3f} below {min_score:.3f}")
+    if score_margin < margin:
+        uncertain_reasons.append(f"score margin {score_margin:.3f} below {margin:.3f}")
+    if quality != "strong":
+        uncertain_reasons.append(f"top evidence quality is {quality}")
+    if direct_rows <= 0:
+        uncertain_reasons.append("top mode has no direct returned rows")
+    if parse_error:
+        uncertain_reasons.append("top mode has a parse error")
+    if warning_count:
+        uncertain_reasons.append("top mode has warnings")
+    if not uncertain_reasons:
+        selection = structural_selector(row=row, mode_labels=mode_labels)
+        selection["selection_source"] = "hybrid_structural"
+        selection["hybrid_decision"] = "structural_confident"
+        selection["structural_candidate"] = structural_choice
+        return selection
+
+    try:
+        selection = fallback_selector(row=row, mode_labels=mode_labels)
+    except Exception as exc:
+        selection = structural_selector(row=row, mode_labels=mode_labels)
+        selection["selection_source"] = "hybrid_structural_after_llm_error"
+        selection["hybrid_decision"] = "structural_after_llm_error"
+        selection["hybrid_llm_error"] = str(exc)
+        selection["structural_candidate"] = structural_choice
+        selection["structural_uncertainty_reasons"] = uncertain_reasons
+        selection.setdefault("risks", []).append("LLM fallback failed; deterministic structural choice used")
+        return selection
+    if not isinstance(selection, dict):
+        selection = {}
+    selection["selection_source"] = "hybrid_llm"
+    selection["hybrid_decision"] = "llm_due_to_uncertainty"
+    selection["structural_candidate"] = structural_choice
+    selection["structural_score"] = round(float(best_score), 3)
+    selection["structural_margin"] = round(score_margin, 3)
+    selection["structural_uncertainty_reasons"] = uncertain_reasons
+    return selection
+
+
+def structural_mode_scores(*, row: dict[str, Any], mode_labels: list[str]) -> list[tuple[float, str, dict[str, Any]]]:
     scored: list[tuple[float, str, dict[str, Any]]] = []
     for mode in row.get("modes", []):
         if not isinstance(mode, dict):
@@ -355,25 +484,7 @@ def structural_selector(*, row: dict[str, Any], mode_labels: list[str]) -> dict[
         ),
         reverse=True,
     )
-    best_score, selected, _best_quality = scored[0]
-    return {
-        "schema_version": "qa_mode_selector_v1",
-        "selected_mode": selected,
-        "selection_confidence": min(1.0, max(0.0, round(best_score / 10.0, 3))),
-        "evidence_quality_by_mode": [
-            {
-                "mode": label,
-                "quality": str(quality.get("quality", "weak")),
-                "reason": str(quality.get("reason", "")),
-            }
-            for _score, label, quality in scored
-        ],
-        "rationale": f"deterministic structural query-evidence score selected {selected}",
-        "risks": [
-            "structural selector cannot judge answer meaning",
-            "row count can reward irrelevant evidence",
-        ],
-    }
+    return scored
 
 
 def structural_evidence_quality(evidence: dict[str, Any]) -> dict[str, Any]:
@@ -416,6 +527,12 @@ def structural_evidence_quality(evidence: dict[str, Any]) -> dict[str, Any]:
     return {
         "score": round(score, 3),
         "quality": quality,
+        "direct_rows": direct_row_total,
+        "relaxed_rows": relaxed_row_total,
+        "success_results": success_count,
+        "non_empty_predicates": len(non_empty_predicates),
+        "warning_count": warning_count,
+        "parse_error": parse_error,
         "reason": (
             f"direct_rows={direct_row_total}; relaxed_rows={relaxed_row_total}; "
             f"success_results={success_count}; non_empty_predicates={len(non_empty_predicates)}; "
@@ -473,6 +590,13 @@ def score_selection(row: dict[str, Any], selection: dict[str, Any], error: str) 
         "best_labels": best_labels,
         "mode_verdicts": verdicts,
         "selection_confidence": selection.get("selection_confidence"),
+        "selection_source": selection.get("selection_source", ""),
+        "hybrid_decision": selection.get("hybrid_decision", ""),
+        "structural_candidate": selection.get("structural_candidate", ""),
+        "structural_score": selection.get("structural_score"),
+        "structural_margin": selection.get("structural_margin"),
+        "structural_uncertainty_reasons": selection.get("structural_uncertainty_reasons", []),
+        "hybrid_llm_error": selection.get("hybrid_llm_error", ""),
         "evidence_quality_by_mode": selection.get("evidence_quality_by_mode", []),
         "rationale": selection.get("rationale", ""),
         "risks": selection.get("risks", []),
@@ -487,10 +611,12 @@ def row_verdict(row: dict[str, Any]) -> str:
 
 def summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
     verdict_counts = Counter(str(row.get("selected_verdict", "unknown")) for row in rows)
+    source_counts = Counter(str(row.get("selection_source", "") or "unknown") for row in rows)
     return {
         "row_count": len(rows),
         "selector_error_count": sum(1 for row in rows if row.get("error")),
         "selected_best_count": sum(1 for row in rows if row.get("selected_is_best")),
+        "selection_source_counts": dict(source_counts),
         "selected_verdict_counts": dict(verdict_counts),
         "selected_exact": int(verdict_counts.get("exact", 0)),
         "selected_partial": int(verdict_counts.get("partial", 0)),
@@ -514,13 +640,14 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Rows: `{summary.get('row_count', 0)}`",
         f"- Selector errors: `{summary.get('selector_error_count', 0)}`",
         f"- Selected best available mode: `{summary.get('selected_best_count', 0)}`",
+        f"- Selection sources: `{summary.get('selection_source_counts', {})}`",
         f"- Selected verdicts: `{summary.get('selected_exact', 0)} exact / {summary.get('selected_partial', 0)} partial / {summary.get('selected_miss', 0)} miss`",
         f"- Perfect selector upper bound: `{summary.get('perfect_selector_counts', {})}`",
         "",
         "## Rows",
         "",
-        "| Row | Selected | Selected Verdict | Best | Mode Verdicts | Note |",
-        "| --- | --- | --- | --- | --- | --- |",
+        "| Row | Source | Selected | Selected Verdict | Best | Mode Verdicts | Note |",
+        "| --- | --- | --- | --- | --- | --- | --- |",
     ]
     for row in report.get("rows", []):
         if not isinstance(row, dict):
@@ -530,8 +657,9 @@ def render_markdown(report: dict[str, Any]) -> str:
         note = "best" if row.get("selected_is_best") else "missed-best"
         if row.get("error"):
             note = f"error: {row.get('error')}"
+        source = str(row.get("selection_source", "") or "")
         lines.append(
-            f"| `{row.get('id', '')}` | `{row.get('selected_mode', '')}` | `{row.get('selected_verdict', '')}` | `{','.join(row.get('best_labels', []))}` | {verdict_text} | {note} |"
+            f"| `{row.get('id', '')}` | `{source}` | `{row.get('selected_mode', '')}` | `{row.get('selected_verdict', '')}` | `{','.join(row.get('best_labels', []))}` | {verdict_text} | {note} |"
         )
     return "\n".join(lines).rstrip() + "\n"
 

@@ -42,14 +42,14 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 
 ## Recent Frontier Results
 
-- Full pytest after structural selector instrumentation: `468 passed, 2 subtests passed`.
+- Full pytest after hybrid selector instrumentation: `471 passed, 2 subtests passed`.
 - Iron Harbor: `86 exact / 14 partial / 0 miss` on a full 100-question source-document battery, with `0` write proposals during post-ingestion QA.
 - Blackthorn: baseline first-20 was `2 exact / 1 partial / 17 miss`; current diagnostic lanes include BTC-022 at `82 / 9 / 9` full-100 and BTC-027 at `85 / 4 / 11`. These are different configurations, so compare within lane rather than treating one number as a universal replacement.
 - Kestrel: profile-guided KCL-016 reached `73 exact / 11 partial / 16 miss` full-100 with `0` write proposals. Cold/source-aware evidence remains much lower, and the distinction is intentional.
 - Anaplan Polaris: APR-016 reached `42 exact / 1 partial / 0 miss` on 43 QA by accumulating independent mapper-admitted support views over an admitted backbone.
 - Glass Tide: separate rule lenses plus deterministic union now produce promotion-ready slices for role joins, threshold/exception rules, temporal clearance, salvage exceptions, budget-veto failure, and support-threshold conditions. Durable rule activation remains gated.
 - Sable Creek: rule promotion probes now support structural any-of groups, so authored probes can stay strict on meaning-bearing slots while accepting controlled intermediate-condition versus final-status surfaces. SC-006 produced a promotion-clean threshold rule slice, but full-QA activation still requires row-level evidence selection.
-- Query-mode activation now has a deterministic structural selector baseline. It is useful for cheap diagnostics and matched Three Moles' high exact count without an LLM selector call, but Sable and Avalon show it is not a replacement for semantic row-level selection.
+- Query-mode activation now has deterministic structural and hybrid structural+LLM selector controls. Hybrid reached the Avalon Rule8 perfect-selector upper bound at `27 exact / 12 partial / 1 miss` while saving `13/40` LLM choices, but Three Moles and Sable regressed when the LLM fallback overrode structurally exact relaxed evidence. Treat this as a measured control surface, not a default QA policy.
 - Clarification Eagerness Trap: source-context lane reached and held `40/40`, with `0` unsafe candidates, `0` context-write violations, and `10/10` blocked-slot coverage.
 - New held-out fixtures such as Black Lantern, Three Moles, Oxalis, Dulse, Avalon, Sable Creek, Ridgeline, Veridia, and Ledger are being used to test whether gains transfer beyond the original fixture families.
 - Active lane triage now prioritizes source-surface acquisition first because the cold rollup shows `159` compile gaps versus `35` hybrid/reasoning, `26` query, and `5` answer gaps.
@@ -64,6 +64,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 - Rule promotion is not rule activation. A rule can pass isolated probes and still hurt global QA if activated indiscriminately; row-level activation and branch-union policy are active research.
 - Multi-pass lensing can add surface area without answer lift. Each lens needs contribution accounting, duplicate/conflict tracking, and QA lift per admitted clause.
 - Query and answer surfaces can bottleneck even when compile quality is good. APR made this especially clear: the KB already had useful rows before the QA planner learned how to ask for them.
+- Hybrid query-mode selection is not automatically better than structural selection. On story-like evidence, the model can distrust relaxed but answer-bearing rows; fallback should be gated by row-level risk, not invoked just because structural evidence is partial.
 - Clarification Eagerness depends on an explicit authority surface. Runs without source-context support can regress even when the apparent ask/no-ask posture is reasonable.
 - Stenographer mode is only partially exercised. The gateway already handles turn-by-turn clarification, current-turn query-boundary segmentation, and a first `clarification_delivery_policy=queued` ledger. Fixture scoring for queued-slot closure, safe partial preservation under queued delivery, interrupted clarification, and sentence-at-a-time atom continuity is new.
 - Domain packs are legitimate product context; gold KBs, answer keys, and input-specific oracle hints are calibration material only. Evidence lanes must stay labeled.

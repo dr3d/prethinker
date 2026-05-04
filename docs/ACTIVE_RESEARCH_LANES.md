@@ -96,8 +96,10 @@ when the partial-skeleton recovery instruction was global. Keep that recovery
 scoped to ledger-backed narrative passes until another unlike fixture shows
 positive transfer.
 
-Activation update: deterministic structural query-mode selection is now a cheap
-diagnostic baseline. It matched Three Moles' high exact count without an LLM
-selector call, tied Sable on exact count while increasing misses, and regressed
-Avalon. Treat it as a triage/control lane, not a default replacement for
-semantic row-level selection.
+Activation update: query-mode selection now has deterministic structural and
+hybrid structural+LLM controls. The hybrid path saves LLM calls on confident
+rows and reached Avalon's Rule8 comparison upper bound (`27 exact / 12 partial
+/ 1 miss`) while using structural choice on `13/40` rows. It regressed Three
+Moles and Sable because LLM fallback overrode structurally exact relaxed
+evidence, so hybrid selection remains diagnostic-only until uncertainty gating
+transfers across unlike fixtures.

@@ -158,6 +158,12 @@ testing whether those gains transfer:
   matched the best exact count, and selected the best available mode on `39/40`
   rows. It still missed one broad-mode partial rescue, so row-level activation
   is useful but not solved.
+- A first hybrid selector now lets deterministic structure handle confident
+  rows and calls the LLM only for uncertainty. It reached the Avalon Rule8
+  comparison upper bound (`27 / 12 / 1`) while avoiding LLM choice on `13/40`
+  rows, but Three Moles and Sable regressed because the fallback LLM overrode
+  structurally correct relaxed evidence. The lesson is specific: uncertainty
+  gating needs row-level risk prediction, not just "ask the model when close."
 - Otters OTR-015 shows the same post-ingestion access idea transfers back to a
   source-local story world: replaying QA with evidence-bundle filtering over
   the unchanged OTR-014 compile improved `17 / 4 / 19` to `22 / 5 / 13`, with
