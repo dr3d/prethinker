@@ -352,6 +352,8 @@ Result:
 - Evidence-filter QA: `24 exact / 6 partial / 10 miss`.
 - Diagnostic perfect-selector upper bound: `26 exact / 5 partial / 9 miss`.
 - Direct selector: `21 exact / 7 partial / 12 miss`.
+- Completeness selector: `21 exact / 8 partial / 11 miss`.
+- Relevance selector: `21 exact / 7 partial / 12 miss`.
 
 Lesson:
 
@@ -361,7 +363,9 @@ surface to retrieve from: `24/6/10` is the current Three Moles high-water.
 
 The selector regressed relative to the global evidence-filter mode, which means
 row-level activation still under-recognizes when a richer evidence bundle should
-be trusted. The useful architecture lesson is:
+be trusted. Prompt-only selector variants did not solve it: completeness reduced
+misses by one but did not improve exact count, and relevance matched the direct
+selector. The useful architecture lesson is:
 
 ```text
 ledger coverage targets -> broader safe surface
