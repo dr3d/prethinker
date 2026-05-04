@@ -52,6 +52,16 @@ This says the most useful next work is not a UI flourish, a broader prompt, or
 a single fixture registry. The broadest payoff is better acquisition of the
 right source surface, followed by reusable reasoning/rule substrates.
 
+## Lens Roster Note
+
+The harness is now being treated as an artifact-first semantic instrument:
+compile once, persist the source/KB/IR/run artifacts, then run cheaper semantic
+parallax passes against frozen artifacts. `docs/SEMANTIC_LENS_ROSTER.md`
+captures the current taxonomy of lens facets and the uncertainty vocabulary
+that should stay distinct during future work. Use that roster when naming new
+lenses so names describe the guardrail or semantic reason, not the fixture that
+first exposed it.
+
 ## Representative Fixtures
 
 Use small sets rather than the whole zoo for each cycle:
