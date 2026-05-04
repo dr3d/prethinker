@@ -179,3 +179,14 @@ the baseline and leaves rejected rows at baseline. For the scoped compile-repair
 diagnostic, the row-gated scorecard is `46 / 4 / 0`: three accepted rescues
 and one rejected Meridian exact-row regression. This is the current activation
 target, not a global compile promotion.
+
+The first actual candidate to realize that row-gated target combines scoped
+compile repair with evidence-bundle query choreography:
+`--evidence-bundle-plan --execute-evidence-bundle-plan
+--evidence-bundle-context-filter`. Meridian's scoped compile repaired q007, and
+the evidence-filtered QA pass protected q010 instead of repeating the scoped
+compile-only regression. Northbridge moved to no misses as well. The resulting
+five-fixture scorecard is `46 / 4 / 0`, with `0` QA write proposals, `0`
+baseline-exact regressions, and a `promote_candidate` gate. This does not make
+evidence filtering a blind global default; it makes scoped compile plus bounded
+query choreography the current promoted incoming recipe.

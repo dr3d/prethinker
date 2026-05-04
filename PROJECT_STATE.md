@@ -142,10 +142,14 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
   candidate rows while rejecting the Meridian q010 regression gives a protected
   incoming target of `46 exact / 4 partial / 0 miss` over the current
   five-fixture first-10 scorecard.
+- Scoped compile repair plus evidence-bundle context filtering has now realized
+  that target as an actual replay rather than a virtual overlay: the incoming
+  high-water is `46 exact / 4 partial / 0 miss`, with `0` QA write proposals,
+  `0` baseline-exact regressions, and a `promote_candidate` scorecard gate.
 - Incoming compile repair targets are now generated at
   `tmp/incoming_smoke_summaries/compile_repair_targets.{json,md}`. The current
-  six-row queue splits into `2` row-selector calibration targets, `3` scoped
-  source-surface repair targets, and `1` helper/query-join repair target.
+  scoped-evidence queue is down to four partial rows: `3` scoped source-surface
+  repair targets and `1` helper/query-join repair target.
 - Clarification Eagerness Trap: source-context lane reached and held `40/40`, with `0` unsafe candidates, `0` context-write violations, and `10/10` blocked-slot coverage.
 - New held-out fixtures such as Black Lantern, Three Moles, Oxalis, Dulse, Avalon, Sable Creek, Ridgeline, Veridia, and Ledger are being used to test whether gains transfer beyond the original fixture families.
 - Active lane triage now prioritizes source-surface acquisition first because the cold rollup shows `159` compile gaps versus `35` hybrid/reasoning, `26` query, and `5` answer gaps.

@@ -298,7 +298,12 @@ testing whether those gains transfer:
 - The row-gated scorecard planner makes the opportunity concrete: accepting the
   three scoped-repair rescues while rejecting the Meridian q010 regression gives
   a protected target of `46 / 4 / 0` on the incoming five-fixture first-10
-  scorecard. That is now the selector/control objective.
+  scorecard.
+- Scoped compile repair plus evidence-bundle context filtering has now made
+  that target real: the batch replays at `46 / 4 / 0`, with no QA write
+  proposals, no baseline-exact row regressions, and a `promote_candidate`
+  scorecard gate. The next incoming frontier is the four remaining partials,
+  not miss recovery.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 

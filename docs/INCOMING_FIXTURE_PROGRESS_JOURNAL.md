@@ -367,3 +367,56 @@ scorecard.
 Ignored local artifact reference:
 
 - `tmp/incoming_smoke_summaries_scoped_repair/row_gated_scorecard_plan.md`
+
+## 2026-05-04 Scoped Evidence Candidate
+
+The row-gated target was then realized as an actual replay by combining scoped
+compile repair with evidence-bundle query choreography:
+
+- Meridian used the scoped lot/use/zoning compile plus evidence-bundle QA.
+- Northbridge used the scoped resolution/vote compile plus evidence-bundle QA.
+- Copperfall, Harrowgate, and Larkspur stayed on their current baseline paths.
+
+Result:
+
+```text
+baseline: 44 exact / 4 partial / 2 miss
+scoped evidence candidate: 46 exact / 4 partial / 0 miss
+write proposals: 0
+baseline-exact regressions: 0
+scorecard gate: promote_candidate
+```
+
+Fixture movement:
+
+| Fixture | Baseline | Candidate | Note |
+| --- | ---: | ---: | --- |
+| `meridian_permit_board` | `8 / 1 / 1` | `9 / 1 / 0` | q007 repaired and q010 protected by evidence query choreography. |
+| `northbridge_authority_packet` | `8 / 1 / 1` | `9 / 1 / 0` | q007 exact, q010 partial, no misses. |
+| `larkspur_clockwork_fair` | `8 / 2 / 0` | `8 / 2 / 0` | Still true compile-surface work. |
+
+Updated repair queue:
+
+```text
+targets: 4
+scoped source-surface repair: 3
+helper/query-join repair: 1
+miss rows: 0
+```
+
+Remaining rows:
+
+- `larkspur_clockwork_fair q007`: youngest exhibitor, compile surface.
+- `larkspur_clockwork_fair q009`: Fair Warden Osric Thane, compile surface.
+- `meridian_permit_board q006`: Lot 7 river-distance join, hybrid/query join.
+- `northbridge_authority_packet q007`: hydrant requirement detail, compile surface partial.
+
+Discovery: the first incoming batch now has a promoted diagnostic recipe with
+zero misses. The next frontier is reducing partials without reintroducing
+exact-row regressions.
+
+Ignored local artifact references:
+
+- `tmp/incoming_smoke_summaries_scoped_evidence/scorecard.md`
+- `tmp/incoming_smoke_summaries_scoped_evidence/baseline_comparison.md`
+- `tmp/incoming_smoke_summaries_scoped_evidence/compile_repair_targets.md`
