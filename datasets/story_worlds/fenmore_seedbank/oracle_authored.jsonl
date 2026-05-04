@@ -1,0 +1,25 @@
+{"id":"q001","answer":"Eight accessions: FB-2026-001 through FB-2026-008","behavior":"commit"}
+{"id":"q002","answer":"FB-2026-007 (Carex vulpinoidea, fox sedge) — condition D at intake, deaccessioned immediately as non-viable","behavior":"commit"}
+{"id":"q003","answer":"Dr. Rina Matsuda","behavior":"commit"}
+{"id":"q004","answer":"Vault 2 (wildflowers and forbs)","behavior":"commit"}
+{"id":"q005","answer":"Section 12 (corrected from initially recorded Section 11, per Dr. Matsuda's field notes)","behavior":"commit_after_correction"}
+{"id":"q006","answer":"6,800 (corrected from initially recorded 6,500, per Okoye's collection sheet)","behavior":"commit_after_correction"}
+{"id":"q007","answer":"38% — below the 40% threshold","behavior":"commit"}
+{"id":"q008","answer":"Condition D — the 38% germination rate is below the 40% threshold for mandatory reclassification","behavior":"commit"}
+{"id":"q009","answer":"FB-2026-005 (big bluestem, due May 11) and FB-2026-008 (American basswood, due June 6)","behavior":"commit"}
+{"id":"q010","answer":"May 11, 2026 — 90 days from the February 10 accession date","behavior":"commit"}
+{"id":"q011","answer":"Lot FB-2026-004 has only 2,100 seeds and is rated condition C. Bank policy requires maintaining at least 1,500 seeds for condition C lots. Transferring 1,000 would leave 1,100, below the threshold.","behavior":"commit"}
+{"id":"q012","answer":"Approximately 8,050 (8,500 original minus 450 transferred)","behavior":"commit"}
+{"id":"q013","answer":"Bank Director Helena Voss","behavior":"commit"}
+{"id":"q014","answer":"Vault 4 — cryogenic storage is assigned to Vault 4 regardless of species type","behavior":"commit"}
+{"id":"q015","answer":"Conservation measure — the species (Baptisia australis, blue false indigo) is regionally declining and the curator wanted a backup in case of a Vault 2 refrigeration event. The germination rate was good (68%).","behavior":"commit"}
+{"id":"q016","answer":"No — the curator explicitly states the split is a conservation measure, not a viability concern","behavior":"commit"}
+{"id":"q017","answer":"Below 40% germination rate","behavior":"commit"}
+{"id":"q018","answer":"FB-2026-002 (Rudbeckia hirta, ~8,050 remaining), FB-2026-004 (Asclepias tuberosa, 2,100), and FB-2026-006 (Baptisia australis, ~1,250 remaining after cryo split)","behavior":"commit"}
+{"id":"q019","answer":"Failed viability testing (38% germination, reclassified to D), scheduled for deaccession at the next monthly review. Not yet formally deaccessioned as of April 30.","behavior":"commit"}
+{"id":"q020","answer":"No — the viability test has not been performed yet. The lot is rated A at initial condition. No evidence of non-viability exists.","behavior":"not_established"}
+{"id":"q021","answer":"1,500 seeds","behavior":"commit"}
+{"id":"q022","answer":"Dr. Rina Matsuda with three accessions (FB-2026-001, FB-2026-003, FB-2026-006). Marcus Okoye also has three (FB-2026-002, FB-2026-005, FB-2026-008). It is a tie.","behavior":"commit"}
+{"id":"q023","answer":"Baptisia australis (blue false indigo)","behavior":"commit"}
+{"id":"q024","answer":"Not yet — it is scheduled for deaccession at the next monthly review but has not been formally deaccessioned as of April 30","behavior":"commit"}
+{"id":"q025","answer":"It would be reclassified to condition D (below 40% threshold) and scheduled for deaccession","behavior":"commit"}

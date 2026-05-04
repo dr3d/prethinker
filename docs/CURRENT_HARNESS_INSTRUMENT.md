@@ -103,6 +103,13 @@ context. Search it narrowly when a named prior artifact matters. Do not treat it
 as live guidance; if an archived run becomes an active lesson, summarize that
 lesson in tracked docs or the fixture's journal.
 
+The current incoming rule is now exercised on zip-delivered drops after
+extraction, as well as loose folders. The five 2026-05-04 zip fixtures were
+normalized, promoted into `datasets/story_worlds`, and given
+`progress_journal.md` plus `progress_metrics.jsonl` before baselining. The
+generated scorecard lives at `tmp/story_world_zip_baseline_summaries/scorecard.md`;
+the durable lesson lives beside each fixture.
+
 `scripts/plan_story_world_fixture_runs.py` is the promoted-fixture daily-driver
 planner. It reads runnable fixtures directly from `datasets/story_worlds`,
 prefers `source.md` over `story.md`, uses `qa.md` as the question surface, and

@@ -105,6 +105,15 @@ identity/action-volume, award/result, and direct status/rule rows. This is the
 current best example of using a focused compile lens while protecting exact
 baseline rows.
 
+New zip-batch update: Ashgrove Permit, Fenmore Seedbank, Greywell Pipeline,
+Heronvale Arts, and Veridia Intake are promoted into `datasets/story_worlds`
+and no longer live in `tmp/incoming`. The first-pass baseline over `123` QA
+rows is `94 / 13 / 16`; the classified repair rollup is `97 / 11 / 15` with
+`16` compile-surface targets, `8` hybrid/join targets, and `2` answer-surface
+targets. This batch is now the active cold generalization scorecard for
+permit/deadline, conservation ledger, incident investigation, grant-rule, and
+turnstream correction behavior.
+
 Activation update: query-mode selection now has deterministic structural and
 hybrid structural+LLM controls. The hybrid path saves LLM calls on confident
 rows and reached Avalon's Rule8 comparison upper bound (`27 exact / 12 partial

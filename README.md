@@ -110,7 +110,7 @@ The public repo currently tracks `61` pytest files under [tests/](https://github
 
 ```powershell
 python -m pytest -q
-# 576 passed, 2 subtests passed
+# 579 passed, 2 subtests passed
 ```
 
 Current high-signal evidence:

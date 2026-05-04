@@ -379,6 +379,15 @@ testing whether those gains transfer:
   `40/40` best choices, `0` selector errors. This is the cleanest current
   demonstration that focused acquisition and selector guardrails can compose
   without Python prose interpretation.
+- The new zipped fixture batch is onboarded and baselined as promoted
+  story-world data, not as lingering `tmp/incoming` material. Ashgrove,
+  Fenmore, Greywell, Heronvale, and Veridia all compile. First-pass QA over
+  `123` rows scores `94 / 13 / 16`; the classified repair rollup is
+  `97 / 11 / 15` with `16` compile-surface gaps, `8` hybrid/join gaps, and
+  `2` answer-surface gaps. Greywell is currently strongest (`22 / 2 / 1`
+  classified), Heronvale is the rule/eligibility risk with medium semantic
+  struggle, and Veridia gives the stenographer/correction lane a compact
+  turnstream fixture.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 

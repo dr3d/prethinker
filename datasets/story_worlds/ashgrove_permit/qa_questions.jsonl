@@ -1,0 +1,25 @@
+{"category": "commit_after_correction", "id": "q001", "question": "When was the permit issued?", "source_id": "q001"}
+{"category": "commit", "id": "q002", "question": "What is the original permit expiration date?", "source_id": "q002"}
+{"category": "commit", "id": "q003", "question": "Was construction commenced within the required timeframe?", "source_id": "q003"}
+{"category": "commit", "id": "q004", "question": "Why was the permit suspended?", "source_id": "q004"}
+{"category": "commit_after_correction", "id": "q005", "question": "How long was the suspension period?", "source_id": "q005"}
+{"category": "commit", "id": "q006", "question": "What is the adjusted permit expiration after reinstatement?", "source_id": "q006"}
+{"category": "commit", "id": "q007", "question": "What was the 15-business-day inspection scheduling deadline after reinstatement?", "source_id": "q007"}
+{"category": "commit", "id": "q008", "question": "Was the MEP inspection request filed on time after reinstatement?", "source_id": "q008"}
+{"category": "commit_after_correction", "id": "q009", "question": "Did the Inspector complete the MEP inspection within the required 5 business days?", "source_id": "q009"}
+{"category": "commit_after_correction", "id": "q010", "question": "How many extra business days did the MEP inspection take?", "source_id": "q010"}
+{"category": "commit", "id": "q011", "question": "What extension is Ashgrove Commons entitled to under §5.5?", "source_id": "q011"}
+{"category": "commit", "id": "q012", "question": "What is the final permit expiration date after all adjustments?", "source_id": "q012"}
+{"category": "commit", "id": "q013", "question": "What was the result of the final inspection?", "source_id": "q013"}
+{"category": "commit", "id": "q014", "question": "Was a Certificate of Occupancy issued?", "source_id": "q014"}
+{"category": "commit", "id": "q015", "question": "What was the permit status on May 1, 2026?", "source_id": "q015"}
+{"category": "commit", "id": "q016", "question": "What was the permit status on June 10, 2026?", "source_id": "q016"}
+{"category": "commit", "id": "q017", "question": "What was the permit status on October 1, 2026?", "source_id": "q017"}
+{"category": "commit", "id": "q018", "question": "If the foundation inspection had not been requested until August 1, 2026, what would have happened?", "source_id": "q018"}
+{"category": "commit_after_correction", "id": "q019", "question": "What correction changed the suspension duration?", "source_id": "q019"}
+{"category": "commit_after_correction", "id": "q020", "question": "Does Correction 3 change the §5.5 extension entitlement?", "source_id": "q020"}
+{"category": "commit_after_correction", "id": "q021", "question": "What is the corrected permit issuance date?", "source_id": "q021"}
+{"category": "commit", "id": "q022", "question": "What caused the MEP inspection delay?", "source_id": "q022"}
+{"category": "not_established", "id": "q023", "question": "Is the Inspector's apology a finding of fault?", "source_id": "q023"}
+{"category": "commit", "id": "q024", "question": "Could Ashgrove Commons have occupied the building on September 17?", "source_id": "q024"}
+{"category": "commit", "id": "q025", "question": "What inspection sequence is required?", "source_id": "q025"}

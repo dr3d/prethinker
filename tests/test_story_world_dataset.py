@@ -72,6 +72,44 @@ PROMOTED_INCOMING_FIXTURES = {
     },
 }
 
+PROMOTED_ZIP_INCOMING_FIXTURES = {
+    "ashgrove_permit": {
+        "path": ROOT / "datasets" / "story_worlds" / "ashgrove_permit",
+        "run_id": "AP-000",
+        "story_phrase": "Ashgrove Permit Lifecycle",
+        "answer_phrase": "January 10, 2026",
+        "qa_rows": 25,
+    },
+    "fenmore_seedbank": {
+        "path": ROOT / "datasets" / "story_worlds" / "fenmore_seedbank",
+        "run_id": "FS-000",
+        "story_phrase": "Fenmore Seed Bank Conservation Ledger",
+        "answer_phrase": "Eight accessions",
+        "qa_rows": 25,
+    },
+    "greywell_pipeline": {
+        "path": ROOT / "datasets" / "story_worlds" / "greywell_pipeline",
+        "run_id": "GP-000",
+        "story_phrase": "Greywell Pipeline Incident",
+        "answer_phrase": "14:20 on March 2",
+        "qa_rows": 25,
+    },
+    "heronvale_arts": {
+        "path": ROOT / "datasets" / "story_worlds" / "heronvale_arts",
+        "run_id": "HA-000",
+        "story_phrase": "Heronvale Arts Grant Program",
+        "answer_phrase": "Rule 3 exception applies",
+        "qa_rows": 25,
+    },
+    "veridia_intake": {
+        "path": ROOT / "datasets" / "story_worlds" / "veridia_intake",
+        "run_id": "VI-000",
+        "story_phrase": "Veridia Intake Log",
+        "answer_phrase": "Mara Chen",
+        "qa_rows": 23,
+    },
+}
+
 NEW_COLD_FIXTURES = {
     "dulse_ledger": {
         "path": DULSE_LEDGER,
@@ -566,6 +604,67 @@ def test_promoted_incoming_fixture_journals_capture_current_harness_response() -
         assert metrics[0]["qa_rows"] == 40, name
         assert metrics[1]["run_id"] == fixture["first_run_id"], name
         assert metrics[1]["qa"]["questions"] == 10, name
+
+
+def test_zip_incoming_fixtures_are_promoted_and_harness_ready() -> None:
+    expected = {
+        "README.md",
+        "story.md",
+        "source.md",
+        "fixture_notes.md",
+        "qa.md",
+        "qa_questions.jsonl",
+        "oracle.jsonl",
+        "qa_battery.json",
+        "progress_journal.md",
+        "progress_metrics.jsonl",
+    }
+    for name, fixture in PROMOTED_ZIP_INCOMING_FIXTURES.items():
+        path = fixture["path"]
+        names = {item.name for item in path.iterdir()}
+        qa_text = (path / "qa.md").read_text(encoding="utf-8")
+        questions = parse_numbered_markdown_questions(qa_text)
+        question_rows = [
+            json.loads(line)
+            for line in (path / "qa_questions.jsonl").read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        ]
+        oracle_rows = [
+            json.loads(line)
+            for line in (path / "oracle.jsonl").read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        ]
+        battery = json.loads((path / "qa_battery.json").read_text(encoding="utf-8"))
+
+        assert expected.issubset(names), name
+        assert len(questions) == fixture["qa_rows"], name
+        assert len(question_rows) == fixture["qa_rows"], name
+        assert len(oracle_rows) == fixture["qa_rows"], name
+        assert len(battery) == fixture["qa_rows"], name
+        assert questions[0]["id"] == "q001", name
+        assert question_rows[0]["id"] == "q001", name
+        assert oracle_rows[0]["id"] == "q001", name
+        assert fixture["answer_phrase"] in oracle_rows[0]["reference_answer"], name
+
+
+def test_zip_incoming_fixture_journals_mark_oracle_boundary() -> None:
+    for name, fixture in PROMOTED_ZIP_INCOMING_FIXTURES.items():
+        path = fixture["path"]
+        story = (path / "story.md").read_text(encoding="utf-8")
+        readme = (path / "README.md").read_text(encoding="utf-8")
+        journal = (path / "progress_journal.md").read_text(encoding="utf-8")
+        metrics = [
+            json.loads(line)
+            for line in (path / "progress_metrics.jsonl").read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        ]
+
+        assert fixture["story_phrase"] in story, name
+        assert "after-the-fact scoring" in readme, name
+        assert "No Python source-prose interpretation is allowed." in journal, name
+        assert metrics[0]["run_id"] == fixture["run_id"], name
+        assert metrics[0]["compile_run"] is False, name
+        assert metrics[0]["qa_rows"] == fixture["qa_rows"], name
 
 
 def test_calders_reach_fixture_is_admitted_without_oracles() -> None:

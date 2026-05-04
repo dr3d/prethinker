@@ -1,0 +1,202 @@
+[
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q001",
+    "question": "How many accessions were recorded in the ledger?",
+    "reference_answer": "Eight accessions: FB-2026-001 through FB-2026-008",
+    "source_id": "q001"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q002",
+    "question": "Which accession was deaccessioned at intake?",
+    "reference_answer": "FB-2026-007 (Carex vulpinoidea, fox sedge) — condition D at intake, deaccessioned immediately as non-viable",
+    "source_id": "q002"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q003",
+    "question": "Who collected FB-2026-003?",
+    "reference_answer": "Dr. Rina Matsuda",
+    "source_id": "q003"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q004",
+    "question": "What vault is FB-2026-004 stored in?",
+    "reference_answer": "Vault 2 (wildflowers and forbs)",
+    "source_id": "q004"
+  },
+  {
+    "behavior": "commit_after_correction",
+    "category": "commit_after_correction",
+    "id": "q005",
+    "question": "What is the corrected collection site for FB-2026-001?",
+    "reference_answer": "Section 12 (corrected from initially recorded Section 11, per Dr. Matsuda's field notes)",
+    "source_id": "q005"
+  },
+  {
+    "behavior": "commit_after_correction",
+    "category": "commit_after_correction",
+    "id": "q006",
+    "question": "What is the corrected seed count for FB-2026-005?",
+    "reference_answer": "6,800 (corrected from initially recorded 6,500, per Okoye's collection sheet)",
+    "source_id": "q006"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q007",
+    "question": "What was the germination rate for FB-2026-003?",
+    "reference_answer": "38% — below the 40% threshold",
+    "source_id": "q007"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q008",
+    "question": "What condition was FB-2026-003 reclassified to after viability testing?",
+    "reference_answer": "Condition D — the 38% germination rate is below the 40% threshold for mandatory reclassification",
+    "source_id": "q008"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q009",
+    "question": "Which accessions have not yet been viability tested?",
+    "reference_answer": "FB-2026-005 (big bluestem, due May 11) and FB-2026-008 (American basswood, due June 6)",
+    "source_id": "q009"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q010",
+    "question": "When is the viability test deadline for FB-2026-005?",
+    "reference_answer": "May 11, 2026 — 90 days from the February 10 accession date",
+    "source_id": "q010"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q011",
+    "question": "Why was the Transfer T-003 request denied?",
+    "reference_answer": "Lot FB-2026-004 has only 2,100 seeds and is rated condition C. Bank policy requires maintaining at least 1,500 seeds for condition C lots. Transferring 1,000 would leave 1,100, below the threshold.",
+    "source_id": "q011"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q012",
+    "question": "How many seeds from FB-2026-002 remain in storage after Transfer T-001?",
+    "reference_answer": "Approximately 8,050 (8,500 original minus 450 transferred)",
+    "source_id": "q012"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q013",
+    "question": "Who authorized Transfer T-001?",
+    "reference_answer": "Bank Director Helena Voss",
+    "source_id": "q013"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q014",
+    "question": "Which vault would a cryogenic seed lot be assigned to?",
+    "reference_answer": "Vault 4 — cryogenic storage is assigned to Vault 4 regardless of species type",
+    "source_id": "q014"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q015",
+    "question": "Why was FB-2026-006 split to Vault 4?",
+    "reference_answer": "Conservation measure — the species (Baptisia australis, blue false indigo) is regionally declining and the curator wanted a backup in case of a Vault 2 refrigeration event. The germination rate was good (68%).",
+    "source_id": "q015"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q016",
+    "question": "Is the Vault 4 split a viability concern?",
+    "reference_answer": "No — the curator explicitly states the split is a conservation measure, not a viability concern",
+    "source_id": "q016"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q017",
+    "question": "What germination rate threshold triggers reclassification to condition D?",
+    "reference_answer": "Below 40% germination rate",
+    "source_id": "q017"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q018",
+    "question": "Which accessions are currently in Vault 2?",
+    "reference_answer": "FB-2026-002 (Rudbeckia hirta, ~8,050 remaining), FB-2026-004 (Asclepias tuberosa, 2,100), and FB-2026-006 (Baptisia australis, ~1,250 remaining after cryo split)",
+    "source_id": "q018"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q019",
+    "question": "What is the current status of FB-2026-003?",
+    "reference_answer": "Failed viability testing (38% germination, reclassified to D), scheduled for deaccession at the next monthly review. Not yet formally deaccessioned as of April 30.",
+    "source_id": "q019"
+  },
+  {
+    "behavior": "not_established",
+    "category": "not_established",
+    "id": "q020",
+    "question": "Is there any evidence that FB-2026-005 is non-viable?",
+    "reference_answer": "No — the viability test has not been performed yet. The lot is rated A at initial condition. No evidence of non-viability exists.",
+    "source_id": "q020"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q021",
+    "question": "What is the minimum seed retention threshold for condition C lots?",
+    "reference_answer": "1,500 seeds",
+    "source_id": "q021"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q022",
+    "question": "Which collector has the most accessions?",
+    "reference_answer": "Dr. Rina Matsuda with three accessions (FB-2026-001, FB-2026-003, FB-2026-006). Marcus Okoye also has three (FB-2026-002, FB-2026-005, FB-2026-008). It is a tie.",
+    "source_id": "q022"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q023",
+    "question": "What species is FB-2026-006?",
+    "reference_answer": "Baptisia australis (blue false indigo)",
+    "source_id": "q023"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q024",
+    "question": "Has the bur oak lot been deaccessioned yet?",
+    "reference_answer": "Not yet — it is scheduled for deaccession at the next monthly review but has not been formally deaccessioned as of April 30",
+    "source_id": "q024"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q025",
+    "question": "If FB-2026-005 fails viability testing with a 35% germination rate, what would happen?",
+    "reference_answer": "It would be reclassified to condition D (below 40% threshold) and scheduled for deaccession",
+    "source_id": "q025"
+  }
+]

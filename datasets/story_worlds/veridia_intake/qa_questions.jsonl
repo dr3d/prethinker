@@ -1,0 +1,23 @@
+{"category": "commit", "id": "q001", "question": "Who is the facilities director at Veridia Research Campus?", "source_id": "q001"}
+{"category": "commit_after_correction", "id": "q002", "question": "Which building is the roof repair for?", "source_id": "q002"}
+{"category": "commit_after_correction", "id": "q003", "question": "What was the corrected bid date from Halloway & Sons?", "source_id": "q003"}
+{"category": "hold_pending", "id": "q004", "question": "After Turn 04 but before Turn 15, should the system commit the bid date as March 10?", "source_id": "q004"}
+{"category": "commit_after_correction", "id": "q005", "question": "Who works in the east wing — Javier or Priya?", "source_id": "q005"}
+{"category": "retract_and_assert", "id": "q006", "question": "After Turn 08, should the system retract Javier's association with the east wing?", "source_id": "q006"}
+{"category": "commit_with_update", "id": "q007", "question": "What did the board decide about the ventilation concern in Turn 06?", "source_id": "q007"}
+{"category": "clarify", "id": "q008", "question": "After Turn 12, what decision did the board reverse?", "source_id": "q008"}
+{"category": "commit", "id": "q009", "question": "After Turn 13, what is the board's current position on the ventilation concern?", "source_id": "q009"}
+{"category": "commit", "id": "q010", "question": "What is the HVAC efficiency percentage from Priya's report?", "source_id": "q010"}
+{"category": "commit", "id": "q011", "question": "Is the HVAC unit below the mandatory replacement threshold?", "source_id": "q011"}
+{"category": "commit_after_correction", "id": "q012", "question": "When was Priya's inspection report actually filed?", "source_id": "q012"}
+{"category": "commit", "id": "q013", "question": "Who originally flagged the parking lot drainage issue?", "source_id": "q013"}
+{"category": "commit", "id": "q014", "question": "What is Mara's budget authority limit?", "source_id": "q014"}
+{"category": "commit", "id": "q015", "question": "Does the roof repair require board approval?", "source_id": "q015"}
+{"category": "commit", "id": "q016", "question": "Does the ventilation repair require board approval?", "source_id": "q016"}
+{"category": "commit", "id": "q017", "question": "Has the board voted on ventilation repair funding?", "source_id": "q017"}
+{"category": "hold_pending", "id": "q018", "question": "After Turn 04, should the system hold the bid date pending clarification?", "source_id": "q018"}
+{"category": "hold_pending", "id": "q019", "question": "After Turn 16 but before Turn 23, should the system commit the lab exhaust fan recertification status?", "source_id": "q019"}
+{"category": "commit", "id": "q020", "question": "After Turn 23, what is the status of the lab exhaust fans?", "source_id": "q020"}
+{"category": "retract_and_assert", "id": "q021", "question": "After Turn 11, should the system retract the Building 7 reference and assert Building 9?", "source_id": "q021"}
+{"category": "commit", "id": "q022", "question": "What is the current unresolved item as of the end of the log?", "source_id": "q022"}
+{"category": "clarify", "id": "q023", "question": "After Turn 12 alone (before Turn 13), should the system ask what decision was reversed?", "source_id": "q023"}

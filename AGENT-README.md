@@ -59,7 +59,7 @@ python -m pytest tests/test_sec_edgar_adapter.py tests/test_domain_profiles.py -
 python -m pytest -q
 ```
 
-The latest full-suite result is `576 passed, 2 subtests passed`. Recent focused
+The latest full-suite result is `579 passed, 2 subtests passed`. Recent focused
 batteries also cover CourtListener, SEC/contracts, domain profiles, Semantic IR
 runtime, UI gateway phases, trace rendering, router agility, router training
 data, Lava v5, UMLS builders, profile bootstrap, raw-file intake planning,

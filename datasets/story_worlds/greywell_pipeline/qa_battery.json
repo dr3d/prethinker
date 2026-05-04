@@ -1,0 +1,202 @@
+[
+  {
+    "behavior": "commit_after_correction",
+    "category": "commit_after_correction",
+    "id": "q001",
+    "question": "When did the pressure alarm trigger?",
+    "reference_answer": "14:20 on March 2 (corrected from initially recorded 14:15)",
+    "source_id": "q001"
+  },
+  {
+    "behavior": "commit_after_correction",
+    "category": "commit_after_correction",
+    "id": "q002",
+    "question": "What was the corrected leak flow rate?",
+    "reference_answer": "200 gallons per hour (corrected from initially reported 250)",
+    "source_id": "q002"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q003",
+    "question": "Who isolated Segment 4?",
+    "reference_answer": "Rico Alvarez, by closing upstream valve V-410 and downstream valve V-414",
+    "source_id": "q003"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q004",
+    "question": "What was the maintenance work order number for the February 25 work?",
+    "reference_answer": "W-2026-0187",
+    "source_id": "q004"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q005",
+    "question": "Was V-412 the subject of the February 25 scheduled maintenance?",
+    "reference_answer": "No — the scheduled maintenance was on V-410, not V-412. They are about 50 meters apart.",
+    "source_id": "q005"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q006",
+    "question": "What did Hollis observe at 02:00 on March 2?",
+    "reference_answer": "A pressure drop of about 2 PSI on Segment 4, which he dismissed as a normal fluctuation because it stabilized within 10 minutes",
+    "source_id": "q006"
+  },
+  {
+    "behavior": "not_established",
+    "category": "not_established",
+    "id": "q007",
+    "question": "Did Hollis cause the V-412 leak?",
+    "reference_answer": "Not established. An anonymous tip alleges this but provides no evidence. Hollis denied involvement. Marchetti declined to investigate based on an unsupported tip. No finding has been made.",
+    "source_id": "q007"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q008",
+    "question": "Is Yeong's draft memo a formal investigation finding?",
+    "reference_answer": "No — Yeong explicitly states the memo is a preliminary assessment for the Operations Director's consideration, not a formal investigation report, and should not be treated as a finding or determination.",
+    "source_id": "q008"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q009",
+    "question": "Has Marchetti adopted Yeong's preliminary assessment as an official determination?",
+    "reference_answer": "No — Marchetti considers the matter 'operationally resolved' but did not adopt Yeong's assessment as an official determination and did not issue a formal finding on root cause.",
+    "source_id": "q009"
+  },
+  {
+    "behavior": "not_established",
+    "category": "not_established",
+    "id": "q010",
+    "question": "Is the anonymous tip about Hollis supported by evidence?",
+    "reference_answer": "No — the anonymous tip provides no supporting evidence. Marchetti explicitly noted this.",
+    "source_id": "q010"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q011",
+    "question": "Has a formal root-cause finding been issued?",
+    "reference_answer": "No — no formal root-cause finding has been issued. Yeong's memo is preliminary. Marchetti's 'operationally resolved' statement is not a finding.",
+    "source_id": "q011"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q012",
+    "question": "What is the current operational status of Segment 4?",
+    "reference_answer": "Returned to service on March 18 after the valve bonnet was re-seated. Pressure readings are normal.",
+    "source_id": "q012"
+  },
+  {
+    "behavior": "not_established",
+    "category": "not_established",
+    "id": "q013",
+    "question": "Is Ferris's observation about the pressure drop pattern an engineering assessment?",
+    "reference_answer": "No — Ferris explicitly says 'I'm not an engineer — that's just my observation.' Her assessment is an experienced operator's observation, not an engineering assessment.",
+    "source_id": "q013"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q014",
+    "question": "Did Saito's crew access V-412?",
+    "reference_answer": "All three crew members state they did not access V-412 and worked only on V-410. No evidence contradicts this.",
+    "source_id": "q014"
+  },
+  {
+    "behavior": "not_established",
+    "category": "not_established",
+    "id": "q015",
+    "question": "Could someone on Saito's crew have mistakenly accessed V-412?",
+    "reference_answer": "Saito acknowledges it is possible but says she has no evidence of it and will not speculate. The system should preserve this as an acknowledged possibility, not as an established fact.",
+    "source_id": "q015"
+  },
+  {
+    "behavior": "not_established",
+    "category": "not_established",
+    "id": "q016",
+    "question": "Was a contractor vehicle confirmed near Segment 4 on the night of March 1-2?",
+    "reference_answer": "Not confirmed. An unnamed source reported seeing a contractor vehicle via verbal report to Yeong. No plate number, company name, or corroboration exists. The February 25 crew does not recall seeing a contractor vehicle. This is unverified hearsay.",
+    "source_id": "q016"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q017",
+    "question": "What did Marchetti decide about the anonymous tip?",
+    "reference_answer": "Marchetti declined to open a formal investigation, stating there is no evidence supporting the allegation and that Hollis denied involvement.",
+    "source_id": "q017"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q018",
+    "question": "Is the matter formally resolved?",
+    "reference_answer": "Operationally resolved (valve repaired, segment back in service) but not formally resolved — no root-cause finding, no formal investigation, no official determination.",
+    "source_id": "q018"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q019",
+    "question": "Who prepared the draft findings memo?",
+    "reference_answer": "Shift Supervisor Janet Yeong",
+    "source_id": "q019"
+  },
+  {
+    "behavior": "should_not_commit",
+    "category": "should_not_commit",
+    "id": "q020",
+    "question": "Should the system commit \"Hollis caused the leak\" as a fact?",
+    "reference_answer": "No — this is not established. The anonymous tip is unsupported. Hollis denied involvement. No investigation has been conducted. The system must not commit this as fact.",
+    "source_id": "q020"
+  },
+  {
+    "behavior": "should_not_commit",
+    "category": "should_not_commit",
+    "id": "q021",
+    "question": "Should the system commit \"maintenance crew caused the leak\" as a fact?",
+    "reference_answer": "No — this is not established. Yeong's draft memo says it is the 'most likely cause' but the memo is explicitly preliminary, not a finding. The crew denied accessing V-412. Marchetti did not adopt the assessment. The system must not commit this as fact.",
+    "source_id": "q021"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q022",
+    "question": "What is the difference between Marchetti's \"operationally resolved\" statement and a formal finding?",
+    "reference_answer": "'Operationally resolved' means the physical problem is fixed and the segment is back in service. It is not a determination of cause, fault, or responsibility. No formal finding has been issued.",
+    "source_id": "q022"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q023",
+    "question": "What three recommendations did Yeong make?",
+    "reference_answer": "(1) Review maintenance procedures to require valve ID verification; (2) Interview the February 25 crew; (3) Tighten SCADA alarm thresholds to flag 2 PSI drops as anomalies",
+    "source_id": "q023"
+  },
+  {
+    "behavior": "not_established",
+    "category": "not_established",
+    "id": "q024",
+    "question": "After the crew interviews, does any evidence support accidental V-412 access?",
+    "reference_answer": "No — all three crew members denied accessing V-412. The interviews did not produce evidence supporting accidental access.",
+    "source_id": "q024"
+  },
+  {
+    "behavior": "not_established",
+    "category": "not_established",
+    "id": "q025",
+    "question": "What is the evidentiary status of the unnamed source report about the contractor vehicle?",
+    "reference_answer": "Unverified hearsay — from an unnamed source, via verbal report to a shift foreman, relayed to Yeong. No plate number, company name, or corroboration. None of the interviewed crew recall seeing a contractor vehicle. The system should preserve this as an unverified report, not as an established fact.",
+    "source_id": "q025"
+  }
+]

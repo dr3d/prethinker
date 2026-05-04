@@ -1,0 +1,23 @@
+{"id":"q001","answer":"Mara Chen","behavior":"commit"}
+{"id":"q002","answer":"Building 9 (corrected from Building 7 in Turn 11)","behavior":"commit_after_correction"}
+{"id":"q003","answer":"March 12 (confirmed in Turn 15; March 10 was incorrect)","behavior":"commit_after_correction"}
+{"id":"q004","answer":"No — Turn 04 introduces uncertainty about the bid date. The system should hold the date pending clarification rather than committing March 10.","behavior":"hold_pending"}
+{"id":"q005","answer":"Priya Lakshmi works in the east wing. Javier works in the west wing (corrected in Turn 08).","behavior":"commit_after_correction"}
+{"id":"q006","answer":"Yes — Turn 08 corrects Javier's location from east wing to west wing and identifies Priya as the east wing technician.","behavior":"retract_and_assert"}
+{"id":"q007","answer":"Initially deferred action until the next quarterly review (Turn 06). Later reversed to act immediately (Turn 13).","behavior":"commit_with_update"}
+{"id":"q008","answer":"After Turn 12 alone, the referent of 'that decision' is ambiguous. The system should ask which decision was reversed. Turn 13 resolves this.","behavior":"clarify"}
+{"id":"q009","answer":"The board decided to act immediately on the ventilation concern, reversing the earlier deferral.","behavior":"commit"}
+{"id":"q010","answer":"73% efficiency","behavior":"commit"}
+{"id":"q011","answer":"Yes — 73% is below the 80% mandatory replacement threshold stated in Turn 14","behavior":"commit"}
+{"id":"q012","answer":"March 15 (corrected from March 18 in Turn 22; March 18 was the receipt date, not the filing date)","behavior":"commit_after_correction"}
+{"id":"q013","answer":"Campus security officer Tom Whitfield, on January 8","behavior":"commit"}
+{"id":"q014","answer":"$50,000 for facilities repairs without board approval","behavior":"commit"}
+{"id":"q015","answer":"No — the Halloway bid is $47,500, which is below Mara's $50,000 authority. No board approval required.","behavior":"commit"}
+{"id":"q016","answer":"Yes — the ventilation repair estimate is $62,000, which exceeds Mara's $50,000 authority. Board approval is required.","behavior":"commit"}
+{"id":"q017","answer":"No — as of Turn 21, the board has not voted on ventilation repair funding.","behavior":"commit"}
+{"id":"q018","answer":"Yes — the system should hold the bid date pending because Turn 04 explicitly introduces uncertainty. It should not commit March 10 as established.","behavior":"hold_pending"}
+{"id":"q019","answer":"No — Turn 16 says Dr. Osei 'wasn't sure' and would 'check and get back.' The system should hold this pending until Turn 23.","behavior":"hold_pending"}
+{"id":"q020","answer":"Recertified last October. No action needed. (Resolved by Turn 23.)","behavior":"commit"}
+{"id":"q021","answer":"Yes — Turn 11 is an explicit correction. The system should retract Building 7 and assert Building 9 for the roof repair.","behavior":"retract_and_assert"}
+{"id":"q022","answer":"The parking lot drainage issue — flagged in January, nothing has happened, Mara wants to revisit it, but no action or decision is recorded.","behavior":"commit"}
+{"id":"q023","answer":"Yes — Turn 12 says 'the board later reversed that decision' without specifying which decision. Multiple board decisions exist (ventilation deferral, potentially others). The system should ask for clarification. Turn 13 provides it.","behavior":"clarify"}

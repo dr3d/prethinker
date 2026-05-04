@@ -1,0 +1,25 @@
+{"id":"q001","answer":"January 10, 2026 (corrected from initially recorded January 8)","behavior":"commit_after_correction"}
+{"id":"q002","answer":"January 10, 2027 — 12 months from the corrected issuance date","behavior":"commit"}
+{"id":"q003","answer":"Yes — foundation inspection was requested March 5 and passed March 10, well within the July 10, 2026 commencement deadline (6 months from issuance)","behavior":"commit"}
+{"id":"q004","answer":"A stop-work order was issued after the framing inspection failed on April 28 (load-bearing wall header undersized). Per §5.3, the permit was suspended.","behavior":"commit"}
+{"id":"q005","answer":"39 calendar days (April 28 to June 6, using the corrected reinstatement date). Initially calculated as 38 days using the uncorrected June 5 date.","behavior":"commit_after_correction"}
+{"id":"q006","answer":"February 18, 2027. The permit was 108 days old at suspension. 365 - 108 = 257 remaining days. June 6 + 257 = February 18, 2027.","behavior":"commit"}
+{"id":"q007","answer":"June 27, 2026 — 15 business days from the June 6 reinstatement","behavior":"commit"}
+{"id":"q008","answer":"Yes — requested June 20, which is 10 business days after reinstatement, within the 15-business-day deadline","behavior":"commit"}
+{"id":"q009","answer":"No — the MEP inspection was requested June 20 and completed July 2 (corrected from June 30). That is 8 business days, exceeding the 5-business-day requirement by 3 business days.","behavior":"commit_after_correction"}
+{"id":"q010","answer":"3 business days (8 actual minus 5 required). This is based on the corrected completion date of July 2; the uncorrected date of June 30 would have shown only 1 extra day.","behavior":"commit_after_correction"}
+{"id":"q011","answer":"A 3-business-day extension at no cost, per §5.5, because the Inspector exceeded the 5-business-day requirement by 3 days. Based on the corrected completion date.","behavior":"commit"}
+{"id":"q012","answer":"February 21, 2027 — the adjusted expiration of February 18 plus 3 business days (accounting for a weekend)","behavior":"commit"}
+{"id":"q013","answer":"PASSED — completed September 18, 2026","behavior":"commit"}
+{"id":"q014","answer":"Yes — issued September 18, 2026 upon passing the final inspection","behavior":"commit"}
+{"id":"q015","answer":"SUSPENDED — the suspension began April 28 and was not lifted until June 6. May 1 falls within the suspension period.","behavior":"commit"}
+{"id":"q016","answer":"ACTIVE (reinstated) — the suspension was lifted June 6. June 10 is after reinstatement. The permit is active with a tolled expiration.","behavior":"commit"}
+{"id":"q017","answer":"ACTIVE with Certificate of Occupancy issued — the CO was issued September 18. The permit is effectively complete.","behavior":"commit"}
+{"id":"q018","answer":"The permit would have expired automatically. §5.1 requires construction to commence within 6 months of issuance (by July 10). August 1 is past the deadline. The permit would expire without construction having commenced.","behavior":"commit"}
+{"id":"q019","answer":"Correction 2 — the reinstatement date changed from June 5 to June 6, which changed the suspension from 38 to 39 days and the adjusted expiration from February 19 to February 18.","behavior":"commit_after_correction"}
+{"id":"q020","answer":"Yes — Correction 3 changed the MEP completion from June 30 to July 2. Under June 30, the overage was 1 business day (6 minus 5), entitling 1 day of extension. Under July 2, the overage is 3 business days (8 minus 5), entitling 3 days. The correction tripled the extension entitlement.","behavior":"commit_after_correction"}
+{"id":"q021","answer":"January 10, 2026 — the township database initially had January 8, but the signed permit document shows January 10","behavior":"commit_after_correction"}
+{"id":"q022","answer":"A scheduling conflict with an emergency project on Birch Lane, per Inspector Ito's notes (in Italian)","behavior":"commit"}
+{"id":"q023","answer":"No — the Inspector's note is an explanation and apology, not a finding of fault. She confirms the applicant's §5.5 extension entitlement is legitimate.","behavior":"not_established"}
+{"id":"q024","answer":"No — the Certificate of Occupancy was not issued until September 18. §5.6 states no occupancy is permitted before the CO is issued. September 17 is before the CO.","behavior":"commit"}
+{"id":"q025","answer":"Foundation, framing, MEP (mechanical/electrical/plumbing), and final — in that order per §5.5","behavior":"commit"}

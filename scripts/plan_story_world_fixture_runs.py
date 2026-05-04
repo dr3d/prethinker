@@ -25,6 +25,11 @@ DOMAIN_HINTS = {
     "sable_creek_budget": "municipal charter budget rules voting thresholds exceptions",
     "avalon_grant_committee": "grant committee governance rule exceptions votes deadlines",
     "glass_tide_charter": "charter rule ingestion exceptions permissions temporal status",
+    "ashgrove_permit": "permit lifecycle deadline arithmetic business days corrections suspension status",
+    "fenmore_seedbank": "seed bank conservation ledger accessions viability storage transfers deaccessions",
+    "greywell_pipeline": "pipeline incident operations log witness accounts findings uncertainty corrections",
+    "heronvale_arts": "arts grant eligibility matching requirements exceptions funding decisions",
+    "veridia_intake": "turnstream facilities intake corrections pending uncertainty budget authority",
 }
 
 

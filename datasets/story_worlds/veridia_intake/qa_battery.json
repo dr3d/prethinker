@@ -1,0 +1,186 @@
+[
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q001",
+    "question": "Who is the facilities director at Veridia Research Campus?",
+    "reference_answer": "Mara Chen",
+    "source_id": "q001"
+  },
+  {
+    "behavior": "commit_after_correction",
+    "category": "commit_after_correction",
+    "id": "q002",
+    "question": "Which building is the roof repair for?",
+    "reference_answer": "Building 9 (corrected from Building 7 in Turn 11)",
+    "source_id": "q002"
+  },
+  {
+    "behavior": "commit_after_correction",
+    "category": "commit_after_correction",
+    "id": "q003",
+    "question": "What was the corrected bid date from Halloway & Sons?",
+    "reference_answer": "March 12 (confirmed in Turn 15; March 10 was incorrect)",
+    "source_id": "q003"
+  },
+  {
+    "behavior": "hold_pending",
+    "category": "hold_pending",
+    "id": "q004",
+    "question": "After Turn 04 but before Turn 15, should the system commit the bid date as March 10?",
+    "reference_answer": "No — Turn 04 introduces uncertainty about the bid date. The system should hold the date pending clarification rather than committing March 10.",
+    "source_id": "q004"
+  },
+  {
+    "behavior": "commit_after_correction",
+    "category": "commit_after_correction",
+    "id": "q005",
+    "question": "Who works in the east wing — Javier or Priya?",
+    "reference_answer": "Priya Lakshmi works in the east wing. Javier works in the west wing (corrected in Turn 08).",
+    "source_id": "q005"
+  },
+  {
+    "behavior": "retract_and_assert",
+    "category": "retract_and_assert",
+    "id": "q006",
+    "question": "After Turn 08, should the system retract Javier's association with the east wing?",
+    "reference_answer": "Yes — Turn 08 corrects Javier's location from east wing to west wing and identifies Priya as the east wing technician.",
+    "source_id": "q006"
+  },
+  {
+    "behavior": "commit_with_update",
+    "category": "commit_with_update",
+    "id": "q007",
+    "question": "What did the board decide about the ventilation concern in Turn 06?",
+    "reference_answer": "Initially deferred action until the next quarterly review (Turn 06). Later reversed to act immediately (Turn 13).",
+    "source_id": "q007"
+  },
+  {
+    "behavior": "clarify",
+    "category": "clarify",
+    "id": "q008",
+    "question": "After Turn 12, what decision did the board reverse?",
+    "reference_answer": "After Turn 12 alone, the referent of 'that decision' is ambiguous. The system should ask which decision was reversed. Turn 13 resolves this.",
+    "source_id": "q008"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q009",
+    "question": "After Turn 13, what is the board's current position on the ventilation concern?",
+    "reference_answer": "The board decided to act immediately on the ventilation concern, reversing the earlier deferral.",
+    "source_id": "q009"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q010",
+    "question": "What is the HVAC efficiency percentage from Priya's report?",
+    "reference_answer": "73% efficiency",
+    "source_id": "q010"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q011",
+    "question": "Is the HVAC unit below the mandatory replacement threshold?",
+    "reference_answer": "Yes — 73% is below the 80% mandatory replacement threshold stated in Turn 14",
+    "source_id": "q011"
+  },
+  {
+    "behavior": "commit_after_correction",
+    "category": "commit_after_correction",
+    "id": "q012",
+    "question": "When was Priya's inspection report actually filed?",
+    "reference_answer": "March 15 (corrected from March 18 in Turn 22; March 18 was the receipt date, not the filing date)",
+    "source_id": "q012"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q013",
+    "question": "Who originally flagged the parking lot drainage issue?",
+    "reference_answer": "Campus security officer Tom Whitfield, on January 8",
+    "source_id": "q013"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q014",
+    "question": "What is Mara's budget authority limit?",
+    "reference_answer": "$50,000 for facilities repairs without board approval",
+    "source_id": "q014"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q015",
+    "question": "Does the roof repair require board approval?",
+    "reference_answer": "No — the Halloway bid is $47,500, which is below Mara's $50,000 authority. No board approval required.",
+    "source_id": "q015"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q016",
+    "question": "Does the ventilation repair require board approval?",
+    "reference_answer": "Yes — the ventilation repair estimate is $62,000, which exceeds Mara's $50,000 authority. Board approval is required.",
+    "source_id": "q016"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q017",
+    "question": "Has the board voted on ventilation repair funding?",
+    "reference_answer": "No — as of Turn 21, the board has not voted on ventilation repair funding.",
+    "source_id": "q017"
+  },
+  {
+    "behavior": "hold_pending",
+    "category": "hold_pending",
+    "id": "q018",
+    "question": "After Turn 04, should the system hold the bid date pending clarification?",
+    "reference_answer": "Yes — the system should hold the bid date pending because Turn 04 explicitly introduces uncertainty. It should not commit March 10 as established.",
+    "source_id": "q018"
+  },
+  {
+    "behavior": "hold_pending",
+    "category": "hold_pending",
+    "id": "q019",
+    "question": "After Turn 16 but before Turn 23, should the system commit the lab exhaust fan recertification status?",
+    "reference_answer": "No — Turn 16 says Dr. Osei 'wasn't sure' and would 'check and get back.' The system should hold this pending until Turn 23.",
+    "source_id": "q019"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q020",
+    "question": "After Turn 23, what is the status of the lab exhaust fans?",
+    "reference_answer": "Recertified last October. No action needed. (Resolved by Turn 23.)",
+    "source_id": "q020"
+  },
+  {
+    "behavior": "retract_and_assert",
+    "category": "retract_and_assert",
+    "id": "q021",
+    "question": "After Turn 11, should the system retract the Building 7 reference and assert Building 9?",
+    "reference_answer": "Yes — Turn 11 is an explicit correction. The system should retract Building 7 and assert Building 9 for the roof repair.",
+    "source_id": "q021"
+  },
+  {
+    "behavior": "commit",
+    "category": "commit",
+    "id": "q022",
+    "question": "What is the current unresolved item as of the end of the log?",
+    "reference_answer": "The parking lot drainage issue — flagged in January, nothing has happened, Mara wants to revisit it, but no action or decision is recorded.",
+    "source_id": "q022"
+  },
+  {
+    "behavior": "clarify",
+    "category": "clarify",
+    "id": "q023",
+    "question": "After Turn 12 alone (before Turn 13), should the system ask what decision was reversed?",
+    "reference_answer": "Yes — Turn 12 says 'the board later reversed that decision' without specifying which decision. Multiple board decisions exist (ventilation deferral, potentially others). The system should ask for clarification. Turn 13 provides it.",
+    "source_id": "q023"
+  }
+]

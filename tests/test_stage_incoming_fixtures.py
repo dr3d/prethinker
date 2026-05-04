@@ -59,3 +59,40 @@ def test_stage_incoming_fixtures_fails_without_answers(tmp_path: Path) -> None:
 
     assert report["summary"]["failed_fixture_count"] == 1
     assert "qa_rows_missing_answer:AB-001" in report["fixtures"][0]["errors"]
+
+
+def test_stage_incoming_fixtures_promotes_isolated_markdown_oracle_shape(tmp_path: Path) -> None:
+    fixture = tmp_path / "veridia_intake"
+    out_root = tmp_path / "story_worlds"
+    fixture.mkdir(parents=True)
+    (fixture / "turns.md").write_text("# Turns\n\n### Turn 01\nMara spoke.\n", encoding="utf-8")
+    (fixture / "qa.md").write_text("q001: Who spoke?\nq002: What format is this?\n", encoding="utf-8")
+    (fixture / "oracle.jsonl").write_text(
+        "\n".join(
+            [
+                json.dumps({"id": "q001", "answer": "Mara", "behavior": "commit"}),
+                json.dumps({"id": "q002", "answer": "A turnstream", "behavior": "commit"}),
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    report = stage_fixtures(fixture_dirs=[fixture], out_root=out_root)
+
+    staged = out_root / "veridia_intake"
+    qa_md = (staged / "qa.md").read_text(encoding="utf-8")
+    questions = [json.loads(line) for line in (staged / "qa_questions.jsonl").read_text(encoding="utf-8").splitlines()]
+    oracle = [json.loads(line) for line in (staged / "oracle.jsonl").read_text(encoding="utf-8").splitlines()]
+    metrics = [json.loads(line) for line in (staged / "progress_metrics.jsonl").read_text(encoding="utf-8").splitlines()]
+
+    assert report["summary"]["staged_fixture_count"] == 1
+    assert (staged / "source.md").read_text(encoding="utf-8") == (fixture / "turns.md").read_text(encoding="utf-8")
+    assert (staged / "story.md").exists()
+    assert (staged / "turns.md").exists()
+    assert "1. Who spoke?" in qa_md
+    assert "Mara" not in qa_md
+    assert questions[0]["id"] == "q001"
+    assert oracle[1]["reference_answer"] == "A turnstream"
+    assert metrics[0]["run_id"] == "VI-000"
+    assert metrics[0]["qa_rows"] == 2

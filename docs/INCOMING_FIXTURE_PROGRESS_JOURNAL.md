@@ -764,3 +764,56 @@ Artifacts:
 - `tmp/story_world_larkspur_targeted_state_variant/compile_variant_overlay_plan.md`
 - `tmp/story_world_larkspur_targeted_state_variant/guarded_activation_selector_capability_gate_full40.md`
 - `tmp/story_world_larkspur_targeted_state_variant/variant_selector_training_plan.md`
+
+## 2026-05-04 Zip Fixture Promotion Batch
+
+Five zip-delivered fixtures were extracted, normalized, promoted into
+`datasets/story_worlds`, and removed from active `tmp/incoming`. The raw zips
+and temporary extraction/staging folders are archived at
+`C:\prethinker_tmp_archive\incoming_zip_batch_20260504_171258`.
+
+Promoted fixtures:
+
+| Fixture | Rows | First QA | Classified Repair Surface |
+| --- | ---: | ---: | --- |
+| `ashgrove_permit` | 25 | `19 / 2 / 4` | `2` compile gaps, `2` join gaps |
+| `fenmore_seedbank` | 25 | `20 / 1 / 4` | `5` compile gaps |
+| `greywell_pipeline` | 25 | `22 / 1 / 2` | `1` compile gap, `1` join gap, `1` answer gap |
+| `heronvale_arts` | 25 | `18 / 4 / 3` | `5` compile gaps, `1` join gap |
+| `veridia_intake` | 23 | `15 / 5 / 3` | `3` compile gaps, `4` join gaps, `1` answer gap |
+
+Batch rollup:
+
+```text
+fixtures compiled: 5 / 5
+qa rows: 123
+first QA exact / partial / miss: 94 / 13 / 16
+classified exact / partial / miss: 97 / 11 / 15
+write proposals: 0
+runtime load errors: 0
+failure surfaces: 16 compile_surface_gap, 8 hybrid_join_gap, 2 answer_surface_gap
+repair targets: 26
+```
+
+Discovery: the new batch confirms that cold generalization is still mainly a
+source-surface acquisition problem, but it adds two useful frontier pressures.
+Heronvale is the rule/eligibility fixture with medium semantic-progress risk,
+and Veridia is a compact turnstream correction fixture for
+stenographer-adjacent behavior. Treat the Ashgrove/Heronvale exact-count deltas
+between first QA and classified reruns as verdict volatility, not a promoted
+harness gain.
+
+Durable per-fixture records now live in:
+
+- `datasets/story_worlds/ashgrove_permit/progress_journal.md`
+- `datasets/story_worlds/fenmore_seedbank/progress_journal.md`
+- `datasets/story_worlds/greywell_pipeline/progress_journal.md`
+- `datasets/story_worlds/heronvale_arts/progress_journal.md`
+- `datasets/story_worlds/veridia_intake/progress_journal.md`
+
+Ignored local artifact references:
+
+- `tmp/story_world_runs/new_zip_fixtures_run_plan.md`
+- `tmp/story_world_zip_baseline_summaries/scorecard.md`
+- `tmp/story_world_zip_baseline_summaries/compile_repair_targets.md`
+- `tmp/story_world_failure_classification_zip/*/*.json`
