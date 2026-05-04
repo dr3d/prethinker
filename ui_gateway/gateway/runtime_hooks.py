@@ -257,6 +257,7 @@ class RuntimeHooks:
                 "session_id": session["session_id"],
                 "turn_count": len(session["turns"]),
                 "has_pending_clarification": bool(session["pending_clarification"]),
+                "queued_clarification_count": len(session.get("queued_clarifications", [])),
             }
         return result
 
@@ -287,6 +288,7 @@ class RuntimeHooks:
                     "session_id": session["session_id"],
                     "turn_count": len(session["turns"]),
                     "has_pending_clarification": bool(session["pending_clarification"]),
+                    "queued_clarification_count": len(session.get("queued_clarifications", [])),
                 },
                 "prethink": prethink,
             }

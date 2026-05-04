@@ -416,6 +416,13 @@
             <span>Clarification eagerness</span>
             <input name="clarification_eagerness" type="number" min="0" max="1" step="0.05">
           </label>
+          <label class="config-field">
+            <span>Clarification delivery</span>
+            <select name="clarification_delivery_policy">
+              <option value="immediate">immediate</option>
+              <option value="queued">queued</option>
+            </select>
+          </label>
           <label class="config-field config-flag">
             <span>Require final confirmation</span>
             <input name="require_final_confirmation" type="checkbox">

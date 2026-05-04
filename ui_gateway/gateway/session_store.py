@@ -11,6 +11,7 @@ class SessionState:
     created_at: float = field(default_factory=time.time)
     turns: list[dict] = field(default_factory=list)
     pending_clarification: dict | None = None
+    queued_clarifications: list[dict] = field(default_factory=list)
 
 
 class SessionStore:
@@ -29,6 +30,7 @@ class SessionStore:
         state = self.get_or_create(session_id)
         state.turns.clear()
         state.pending_clarification = None
+        state.queued_clarifications.clear()
         return state
 
     def get(self, session_id: str | None = None) -> SessionState | None:
@@ -46,5 +48,7 @@ class SessionStore:
             "created_at": state.created_at,
             "turn_count": len(state.turns),
             "pending_clarification": state.pending_clarification,
+            "queued_clarification_count": len(state.queued_clarifications),
+            "queued_clarifications": state.queued_clarifications,
             "turns": state.turns,
         }

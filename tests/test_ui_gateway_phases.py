@@ -374,6 +374,42 @@ class GatewayPhasesTests(unittest.TestCase):
             "Mara's pressure is bad lately.",
         )
 
+    def test_queued_clarification_policy_keeps_listening_without_pending_slot(self) -> None:
+        runtime = _FailingClarificationRuntime()
+        session = SessionState(session_id="session-stream")
+        config = {
+            "front_door_uri": "prethink://local/front-door",
+            "served_handoff_mode": "never",
+            "strict_mode": True,
+            "clarification_delivery_policy": "queued",
+        }
+
+        first = process_turn(
+            utterance="The payment was approved.",
+            session=session,
+            config=config,
+            runtime=runtime,
+            config_store=None,
+        )
+        second = process_turn(
+            utterance="The clerk logged the envelope.",
+            session=session,
+            config=config,
+            runtime=runtime,
+            config_store=None,
+        )
+
+        self.assertIsNone(first["pending_clarification"])
+        self.assertIsNone(second["pending_clarification"])
+        self.assertEqual(first["queued_clarification_count"], 1)
+        self.assertEqual(second["queued_clarification_count"], 2)
+        first_turn = first["turn"]
+        clarify_phase = next(phase for phase in first_turn["phases"] if phase["phase"] == "clarify")
+        self.assertEqual(clarify_phase["status"], "queued")
+        commit_phase = next(phase for phase in first_turn["phases"] if phase["phase"] == "commit")
+        self.assertEqual(commit_phase["status"], "blocked")
+        self.assertEqual(commit_phase["data"]["reason"], "queued_clarification")
+
     def test_medical_clarification_followup_can_commit_original_staged_turn(self) -> None:
         runtime = _MedicalClarificationRuntime()
         session = SessionState(session_id="session-medical")

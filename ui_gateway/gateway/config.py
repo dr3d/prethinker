@@ -41,6 +41,17 @@ def _normalize_reply_surface_policy(value: object, default: str = "deterministic
     return requested
 
 
+def _normalize_clarification_delivery_policy(value: object, default: str = "immediate") -> str:
+    allowed = {
+        "immediate",
+        "queued",
+    }
+    requested = str(value or default).strip().lower()
+    if requested not in allowed:
+        requested = str(default or "immediate").strip().lower() or "immediate"
+    return requested
+
+
 @dataclass
 class GatewayConfig:
     front_door_uri: str = "prethink://local/front-door"
@@ -69,6 +80,7 @@ class GatewayConfig:
     semantic_ir_top_k: int = 20
     semantic_ir_thinking: bool = False
     clarification_eagerness: float = 0.75
+    clarification_delivery_policy: str = "immediate"
     require_final_confirmation: bool = True
     strict_mode: bool = True
 
@@ -139,6 +151,10 @@ class ConfigStore:
         if "reply_surface_policy" in sanitized:
             sanitized["reply_surface_policy"] = _normalize_reply_surface_policy(
                 sanitized["reply_surface_policy"]
+            )
+        if "clarification_delivery_policy" in sanitized:
+            sanitized["clarification_delivery_policy"] = _normalize_clarification_delivery_policy(
+                sanitized["clarification_delivery_policy"]
             )
         if "compiler_context_length" in sanitized:
             try:

@@ -17,6 +17,70 @@ def _phase(name: str, status: str, summary: str, data: dict) -> dict:
     }
 
 
+def _queued_clarifications(session: SessionState) -> list[dict]:
+    queue = getattr(session, "queued_clarifications", None)
+    if isinstance(queue, list):
+        return queue
+    session.queued_clarifications = []
+    return session.queued_clarifications
+
+
+def _queued_clarification_payload(session: SessionState) -> dict:
+    queue = _queued_clarifications(session)
+    return {
+        "queued_clarification_count": len(queue),
+        "queued_clarifications": queue,
+    }
+
+
+def _response_payload(
+    *,
+    config: dict,
+    session: SessionState,
+    turn: dict,
+) -> dict:
+    payload = {
+        "status": "ok",
+        "front_door_uri": config["front_door_uri"],
+        "session_id": session.session_id,
+        "turn": turn,
+        "pending_clarification": session.pending_clarification,
+    }
+    payload.update(_queued_clarification_payload(session))
+    return payload
+
+
+def _clarification_delivery_policy(config: dict) -> str:
+    policy = str(config.get("clarification_delivery_policy", "immediate") or "immediate").strip().lower()
+    if policy not in {"immediate", "queued"}:
+        policy = "immediate"
+    return policy
+
+
+def _queue_clarification(
+    *,
+    session: SessionState,
+    question: str,
+    utterance: str,
+    front_door: dict,
+    reasons: list,
+) -> dict:
+    queue = _queued_clarifications(session)
+    item = {
+        "slot_id": f"queued-{len(queue) + 1:03d}",
+        "opened_turn_index": len(session.turns) + 1,
+        "question": question,
+        "original_utterance": utterance,
+        "front_door": front_door,
+        "prethink_id": str(front_door.get("prethink_id", "")).strip(),
+        "reasons": [str(reason).strip() for reason in reasons if str(reason).strip()],
+        "status": "open",
+        "delivery": "queued",
+    }
+    queue.append(item)
+    return item
+
+
 MAX_STORY_SEGMENTS = 80
 MIN_STORY_SEGMENTS = 4
 MIN_STORY_CHARS = 700
@@ -313,6 +377,7 @@ def _process_segmented_utterance(
                 "session_id": session.session_id,
                 "turns": session.turns,
                 "pending_clarification": None,
+                "queued_clarifications": _queued_clarifications(session),
             },
             context=segment_context,
         )
@@ -534,6 +599,7 @@ def _process_segmented_utterance(
         "session_id": session.session_id,
         "turn": turn,
         "pending_clarification": None,
+        **_queued_clarification_payload(session),
     }
 
     if not admission:
@@ -631,13 +697,7 @@ def process_turn(
             "trace": None,
         }
         session.turns.append(turn)
-        return {
-            "status": "ok",
-            "front_door_uri": config["front_door_uri"],
-            "session_id": session.session_id,
-            "turn": turn,
-            "pending_clarification": session.pending_clarification,
-        }
+        return _response_payload(config=config, session=session, turn=turn)
 
     if not session.pending_clarification and _should_segment_story(utterance, config):
         return _process_segmented_story(
@@ -716,6 +776,7 @@ def process_turn(
                     "session_id": session.session_id,
                     "turns": session.turns,
                     "pending_clarification": session.pending_clarification,
+                    "queued_clarifications": _queued_clarifications(session),
                 },
                 clarification_answer=utterance,
                 prethink_id=str(pending.get("prethink_id", "")).strip(),
@@ -753,6 +814,7 @@ def process_turn(
                 "session_id": session.session_id,
                 "turns": session.turns,
                 "pending_clarification": session.pending_clarification,
+                "queued_clarifications": _queued_clarifications(session),
             },
         )
         compiler_trace = (
@@ -808,32 +870,71 @@ def process_turn(
                 )
             else:
                 question = _clarification_question(front_door, utterance)
-                clarification = {
-                    "question": question,
-                    "reasons": front_door["reasons"],
-                }
-                phases.append(
-                    _phase(
-                        "clarify",
-                        "required",
-                        "Strict gateway is holding the turn for clarification.",
-                        clarification,
+                if _clarification_delivery_policy(config) == "queued":
+                    queued = _queue_clarification(
+                        session=session,
+                        question=question,
+                        utterance=utterance,
+                        front_door=front_door,
+                        reasons=front_door["reasons"],
                     )
-                )
-                phases.append(
-                    _phase(
-                        "commit",
-                        "blocked",
-                        "Commit blocked until clarification resolves.",
-                        {"reason": "needs_clarification"},
+                    phases.append(
+                        _phase(
+                            "clarify",
+                            "queued",
+                            "Clarification recorded for later; stenographer mode keeps listening.",
+                            {
+                                "question": question,
+                                "slot_id": queued["slot_id"],
+                                "delivery": "queued",
+                                "queue_count": len(_queued_clarifications(session)),
+                            },
+                        )
                     )
-                )
-                session.pending_clarification = {
-                    "question": question,
-                    "original_utterance": utterance,
-                    "front_door": front_door,
-                    "prethink_id": str(front_door.get("prethink_id", "")).strip(),
-                }
+                    execution = {
+                        "status": "success",
+                        "intent": str(front_door.get("compiler_intent", "other")).strip() or "other",
+                        "writes_applied": 0,
+                        "operations": [],
+                        "query_result": None,
+                        "parse": {},
+                        "errors": [],
+                    }
+                    phases.append(
+                        _phase(
+                            "commit",
+                            "blocked",
+                            "Commit blocked; clarification was queued instead of interrupting the stream.",
+                            {"reason": "queued_clarification", "slot_id": queued["slot_id"]},
+                        )
+                    )
+                else:
+                    clarification = {
+                        "question": question,
+                        "reasons": front_door["reasons"],
+                    }
+                    phases.append(
+                        _phase(
+                            "clarify",
+                            "required",
+                            "Strict gateway is holding the turn for clarification.",
+                            clarification,
+                        )
+                    )
+                    phases.append(
+                        _phase(
+                            "commit",
+                            "blocked",
+                            "Commit blocked until clarification resolves.",
+                            {"reason": "needs_clarification"},
+                        )
+                    )
+                    session.pending_clarification = {
+                        "question": question,
+                        "original_utterance": utterance,
+                        "front_door": front_door,
+                        "prethink_id": str(front_door.get("prethink_id", "")).strip(),
+                    }
         else:
             phases.append(
                 _phase(
@@ -895,13 +996,7 @@ def process_turn(
         "trace": compiler_trace,
     }
     session.turns.append(turn)
-    return {
-        "status": "ok",
-        "front_door_uri": config["front_door_uri"],
-        "session_id": session.session_id,
-        "turn": turn,
-        "pending_clarification": session.pending_clarification,
-    }
+    return _response_payload(config=config, session=session, turn=turn)
 
 
 def _clarification_question(front_door: dict, utterance: str) -> str:
@@ -1034,10 +1129,11 @@ def _handle_slash_command(
             "/show <key> - show one dial value\n"
             "/set <key> <value> - update a dial (persisted)\n"
             "/ce <0..1> - set clarification_eagerness\n"
+            "/delivery <immediate|queued> - set clarification delivery policy\n"
             "/kb [limit] - list KB clauses (default 80)\n"
             "/kb clear - empty runtime KB\n"
             "/state - show session state and pending clarification status\n"
-            "/cancel - cancel current pending clarification"
+            "/cancel - cancel current pending clarification and queued questions"
         )
     elif command in {"/config", "/dials"}:
         answer_text = _format_config_snapshot(active_config)
@@ -1107,6 +1203,19 @@ def _handle_slash_command(
                     "Updated clarification_eagerness="
                     f"{_format_config_value(updated_config.get('clarification_eagerness'))}."
                 )
+    elif command == "/delivery":
+        if argument not in {"immediate", "queued"}:
+            answer_text = "Usage: /delivery <immediate|queued>"
+        else:
+            updated_config = _apply_config_updates(
+                config=active_config,
+                config_store=config_store,
+                updates={"clarification_delivery_policy": argument},
+            )
+            answer_text = (
+                "Updated clarification_delivery_policy="
+                f"{_format_config_value(updated_config.get('clarification_delivery_policy'))}."
+            )
     elif command in {"/kb", "/emptykb"}:
         kb_parts = argument.split()
         kb_action = kb_parts[0].lower() if kb_parts else "list"
@@ -1140,12 +1249,20 @@ def _handle_slash_command(
             f"session_id={session.session_id}\n"
             f"turn_count={len(session.turns)}\n"
             f"pending_clarification={pending}\n"
+            f"queued_clarifications={len(_queued_clarifications(session))}\n"
             f"front_door_uri={active_config.get('front_door_uri', '')}"
         )
     elif command == "/cancel":
+        cancelled_queued = len(_queued_clarifications(session))
+        _queued_clarifications(session).clear()
         if session.pending_clarification:
             session.pending_clarification = None
-            answer_text = "Pending clarification cancelled."
+            answer_text = (
+                "Pending clarification cancelled."
+                + (f" Cleared {cancelled_queued} queued question(s)." if cancelled_queued else "")
+            )
+        elif cancelled_queued:
+            answer_text = f"Cleared {cancelled_queued} queued clarification question(s)."
         else:
             answer_text = "No pending clarification to cancel."
     else:

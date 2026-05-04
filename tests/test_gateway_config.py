@@ -19,6 +19,7 @@ class GatewayConfigTests(unittest.TestCase):
             self.assertEqual(config.get("semantic_ir_temperature"), 0.0)
             self.assertEqual(config.get("semantic_ir_top_p"), 0.82)
             self.assertEqual(config.get("semantic_ir_top_k"), 20)
+            self.assertEqual(config.get("clarification_delivery_policy"), "immediate")
 
     def test_invalid_semantic_ir_settings_are_sanitized(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -66,6 +67,22 @@ class GatewayConfigTests(unittest.TestCase):
             store = ConfigStore(Path(tmpdir) / "gateway_config.json")
             updated = store.update({"reply_surface_policy": "poetic"}).to_dict()
             self.assertEqual(updated.get("reply_surface_policy"), "deterministic_template")
+
+    def test_invalid_clarification_delivery_policy_is_sanitized(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            store = ConfigStore(Path(tmpdir) / "gateway_config.json")
+            self.assertEqual(
+                store.update({"clarification_delivery_policy": "queued"}).to_dict().get(
+                    "clarification_delivery_policy"
+                ),
+                "queued",
+            )
+            self.assertEqual(
+                store.update({"clarification_delivery_policy": "annoy_me_later"}).to_dict().get(
+                    "clarification_delivery_policy"
+                ),
+                "immediate",
+            )
 
     def test_invalid_served_provider_is_sanitized(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

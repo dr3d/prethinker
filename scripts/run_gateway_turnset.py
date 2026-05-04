@@ -233,8 +233,9 @@ def _score_turn_expectations(
 
     The JSONL author may provide these fields:
     expected_status, expected_route, expected_clarify_status, expected_commit_status,
-    expected_pending_before, expected_pending_after, expected_min_writes,
-    expected_max_writes, expected_held_segments.
+    expected_pending_before, expected_pending_after, expected_queue_min,
+    expected_queue_max, expected_min_writes, expected_max_writes,
+    expected_held_segments.
     """
 
     turn = result.get("turn", {}) if isinstance(result.get("turn"), dict) else {}
@@ -264,6 +265,12 @@ def _score_turn_expectations(
     if expected_pending_after is not None and expected_pending_after != pending_after:
         mismatches.append(f"pending_after expected {expected_pending_after!r} got {pending_after!r}")
 
+    queue_count = _int_value(result.get("queued_clarification_count"), 0)
+    if "expected_queue_min" in row and queue_count < _int_value(row.get("expected_queue_min"), 0):
+        mismatches.append(f"queued_clarifications expected >= {row.get('expected_queue_min')} got {queue_count}")
+    if "expected_queue_max" in row and queue_count > _int_value(row.get("expected_queue_max"), 0):
+        mismatches.append(f"queued_clarifications expected <= {row.get('expected_queue_max')} got {queue_count}")
+
     writes = _commit_writes_applied(turn)
     if "expected_min_writes" in row and writes < _int_value(row.get("expected_min_writes"), 0):
         mismatches.append(f"writes_applied expected >= {row.get('expected_min_writes')} got {writes}")
@@ -281,6 +288,7 @@ def _score_turn_expectations(
 def _summarize(responses: list[dict[str, Any]]) -> dict[str, Any]:
     route_counts: dict[str, int] = {}
     clarify_required = 0
+    clarify_queued = 0
     clarify_resolved = 0
     commit_applied = 0
     commit_blocked = 0
@@ -288,6 +296,8 @@ def _summarize(responses: list[dict[str, Any]]) -> dict[str, Any]:
     answer_error = 0
     pending_before_count = 0
     pending_after_count = 0
+    queued_after_max = 0
+    queued_turns = 0
     clarification_answer_turns = 0
     delayed_commit_after_clarification = 0
     segmented_turns = 0
@@ -306,6 +316,8 @@ def _summarize(responses: list[dict[str, Any]]) -> dict[str, Any]:
         clarify_status = _phase_status(turn, "clarify")
         if clarify_status == "required":
             clarify_required += 1
+        if clarify_status == "queued":
+            clarify_queued += 1
         if clarify_status == "resolved":
             clarify_resolved += 1
 
@@ -325,6 +337,10 @@ def _summarize(responses: list[dict[str, Any]]) -> dict[str, Any]:
             pending_before_count += 1
         if bool(item.get("pending_after")):
             pending_after_count += 1
+        queued_after = _int_value(item.get("queued_after"), 0)
+        queued_after_max = max(queued_after_max, queued_after)
+        if queued_after:
+            queued_turns += 1
         kind = str(item.get("kind", "")).strip()
         if kind == "clarification_answer":
             clarification_answer_turns += 1
@@ -347,6 +363,7 @@ def _summarize(responses: list[dict[str, Any]]) -> dict[str, Any]:
         "turns_total": len(responses),
         "route_counts": route_counts,
         "clarify_required": clarify_required,
+        "clarify_queued": clarify_queued,
         "clarify_resolved": clarify_resolved,
         "commit_applied": commit_applied,
         "commit_blocked": commit_blocked,
@@ -354,6 +371,8 @@ def _summarize(responses: list[dict[str, Any]]) -> dict[str, Any]:
         "answer_error": answer_error,
         "pending_before_count": pending_before_count,
         "pending_after_count": pending_after_count,
+        "queued_after_max": queued_after_max,
+        "queued_turns": queued_turns,
         "clarification_answer_turns": clarification_answer_turns,
         "delayed_commit_after_clarification": delayed_commit_after_clarification,
         "segmented_turns": segmented_turns,
@@ -479,6 +498,7 @@ def main() -> int:
         session_id = str(result.get("session_id", session_id)).strip() or session_id
         kind = str(row.get("kind", "") or row.get("turn_kind", "") or "utterance").strip() or "utterance"
         pending_after = bool(result.get("pending_clarification"))
+        queued_after = _int_value(result.get("queued_clarification_count"), 0)
         expectation_keys = {
             "expected_status",
             "expected_route",
@@ -486,6 +506,8 @@ def main() -> int:
             "expected_commit_status",
             "expected_pending_before",
             "expected_pending_after",
+            "expected_queue_min",
+            "expected_queue_max",
             "expected_min_writes",
             "expected_max_writes",
             "expected_held_segments",
@@ -501,6 +523,7 @@ def main() -> int:
                 "input": row,
                 "pending_before": pending_before,
                 "pending_after": pending_after,
+                "queued_after": queued_after,
                 "expectations_present": expectations_present,
                 "expectation_mismatches": mismatches,
                 "response": result,
@@ -514,7 +537,7 @@ def main() -> int:
         )
         print(
             f"[{idx}/{len(turns)}] route={route} pending_before={pending_before} "
-            f"pending_after={pending_after}{expectation_label} session={session_id}"
+            f"pending_after={pending_after} queued={queued_after}{expectation_label} session={session_id}"
         )
         pending_before = pending_after
 
@@ -554,7 +577,9 @@ def main() -> int:
         f"turns={summary['turns_total']} "
         f"commit_applied={summary['commit_applied']} "
         f"clarify_required={summary['clarify_required']} "
+        f"clarify_queued={summary['clarify_queued']} "
         f"pending_after={summary['pending_after_count']} "
+        f"queued_max={summary['queued_after_max']} "
         f"expectation_fail={summary['expectation_fail']} "
         f"commit_failed={summary['commit_failed']}"
     )

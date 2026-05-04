@@ -6,6 +6,7 @@ const state = {
   debugMode: false,
   turnInFlight: false,
   pendingClarification: null,
+  queuedClarifications: [],
   turns: [],
 };
 
@@ -515,7 +516,17 @@ function updatePendingBanner() {
   if (!banner) {
     return;
   }
+  const queued = Array.isArray(state.queuedClarifications)
+    ? state.queuedClarifications
+    : [];
   if (!state.pendingClarification || !state.pendingClarification.question) {
+    if (queued.length > 0) {
+      banner.hidden = false;
+      banner.textContent =
+        `${queued.length} clarification question${queued.length === 1 ? "" : "s"} queued. ` +
+        "Prethinker is still listening; use /state to inspect the queue.";
+      return;
+    }
     banner.hidden = true;
     banner.textContent = "";
     return;
@@ -1262,7 +1273,14 @@ function renderPathStrip(ledger) {
 
     const clarifyStatus = String(clarifyPhase?.status || "").trim().toLowerCase();
     const executionStatus = String(execution?.status || "").trim().toLowerCase();
-    if (clarifyStatus === "required" || state.pendingClarification) {
+    if (clarifyStatus === "queued") {
+      const question = String(clarifyPhase?.data?.question || "").trim();
+      setPathCard("gate", {
+        value: "Queued",
+        meta: question || "Clarification queued",
+        tone: "caution",
+      });
+    } else if (clarifyStatus === "required" || state.pendingClarification) {
       const question = String(
         clarifyPhase?.data?.question || state.pendingClarification?.question || ""
       ).trim();
@@ -2885,6 +2903,9 @@ async function submitUtterance(event) {
     });
     state.sessionId = payload.session_id;
     state.pendingClarification = payload.pending_clarification || null;
+    state.queuedClarifications = Array.isArray(payload.queued_clarifications)
+      ? payload.queued_clarifications
+      : [];
     state.turns.push(payload.turn);
     appendGatewayTurn(payload.turn);
     renderLedger();
@@ -3090,6 +3111,7 @@ async function resetSession() {
     state.sessionId = payload.session_id;
     state.turns = [];
     state.pendingClarification = null;
+    state.queuedClarifications = [];
     document.getElementById("chat-log").innerHTML = "";
     updatePendingBanner();
     updateEmptyState();

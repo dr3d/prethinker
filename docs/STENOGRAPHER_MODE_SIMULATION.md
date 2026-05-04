@@ -99,9 +99,20 @@ This creates two independent scores:
 - did Prethinker correctly identify the blocked slot?
 - did the runtime choose an appropriate interruption policy?
 
-The current gateway has a single pending clarification slot and treats the next
-non-command turn as the answer. That is useful for the manual UI, but it is not
-yet the full queued-stenographer behavior.
+The gateway now exposes a first delivery dial:
+
+```text
+clarification_delivery_policy = immediate | queued
+```
+
+`immediate` keeps the original manual UI behavior: one pending clarification
+slot, and the next non-command turn is treated as the answer.
+
+`queued` records the question in the session's queued clarification ledger and
+keeps listening. The blocked operation still cannot mutate durable memory. This
+is a first approximation of low-annoyance stenographer mode, not the full final
+behavior: safe partial commits and automatic queued-slot closure still need
+more work.
 
 ## What To Measure
 
@@ -174,7 +185,11 @@ Future work:
 - add a first cold fixture designed specifically for clarification-in-the-middle;
 - distinguish "next turn is a clarification answer" from "next turn is a new
   utterance while clarification remains pending";
-- add a queued clarification ledger with an interruption/annoyance dial;
+- score the queued clarification ledger with the interruption/annoyance dial;
+- let later turns close queued slots when they supply the missing role, date,
+  amount, authority, or referent;
+- preserve safe partial commits from a mixed turn even when another slot is
+  queued;
 - add pending-slot closure scoring against authored blocked-slot ids;
 - compare sentence-at-a-time stenographer runs against monolithic document runs
   without mixing evidence lanes.
