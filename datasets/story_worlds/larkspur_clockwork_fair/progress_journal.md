@@ -255,3 +255,89 @@ q009 protection case by refusing to let authority-row volume outrank explicit
 name/identity support. The remaining selector frontier is protecting partial
 baseline capability-rationale rows when a variant has more but less
 answer-bearing event surface.
+
+## LCF-009 - Full-40 Repair Target Planner
+
+Date: 2026-05-04
+
+Evidence lane: `artifact_only_repair_planning`
+
+Mode: story-world repair target planning from the promoted full-40 classified
+scorecard.
+
+Artifacts:
+
+- Full batch plan:
+  `tmp/story_world_repair_plans/full40_repair_targets.md`
+- Larkspur-only plan:
+  `tmp/story_world_repair_plans/larkspur_full40_repair_targets.md`
+
+Result:
+
+- Full promoted five-fixture queue: `46` targets.
+- Full queue lanes: `39` scoped source-surface repairs, `7` helper/query-join
+  repairs.
+- Larkspur-only queue: `20` compile-surface targets.
+- Larkspur lens split:
+  - `6` object-state transition targets.
+  - `5` object-location/custody targets.
+  - `4` permission/rationale targets.
+  - `2` outcome/status targets.
+  - `1` claim-truth target.
+  - `1` identity/role target.
+  - `1` temporal target.
+
+Lesson:
+
+The repair queue is now named by guardrail/reason rather than by fixture lore.
+The planner reads scorecard artifacts and query predicate names only; it does
+not inspect source prose, gold KBs, or answer keys for classification. The next
+Larkspur source-surface work should start with object-state and
+object-location/custody acquisition, then permission/rationale, with
+exact-row protection.
+
+## LCF-010 - Direct Registry Acquisition Negative Check
+
+Date: 2026-05-04
+
+Evidence lane: `negative_diagnostic`
+
+Mode: direct `story_world@v0` registry compiles for three named acquisition
+lenses after profile/intake pre-passes returned empty responses.
+
+Artifacts:
+
+- Object-state compile:
+  `tmp/story_world_larkspur_acquisition/object_state_direct_profile/`
+- Object-state targeted QA:
+  `tmp/story_world_larkspur_acquisition/object_state_direct_profile_qa/`
+- Object-custody compile:
+  `tmp/story_world_larkspur_acquisition/object_custody_direct_profile/`
+- Object-custody targeted QA:
+  `tmp/story_world_larkspur_acquisition/object_custody_direct_profile_qa/`
+- Permission/rationale compile:
+  `tmp/story_world_larkspur_acquisition/permission_rationale_direct_profile/`
+- Permission/rationale targeted QA:
+  `tmp/story_world_larkspur_acquisition/permission_rationale_direct_profile_qa/`
+
+Result:
+
+| Lens | Admitted Rows | Target QA |
+| --- | ---: | ---: |
+| `object_state_transition_surface` | `24` | `0 exact / 0 partial / 6 miss` |
+| `object_location_custody_surface` | `6` | `0 exact / 2 partial / 2 miss` |
+| `permission_rationale_surface` | `12` | `0 exact / 0 partial / 5 miss` |
+
+Safety:
+
+- Runtime load errors: `0`.
+- QA write proposals: `0`.
+
+Lesson:
+
+Bypassing profile discovery with the tracked registry prevents the empty
+profile/intake failure, but it starves the compile. The direct registry-only
+surface is too thin to repair Larkspur. The next acquisition attempt should
+improve compact/focused source-pass acquisition while preserving the named lens
+contract; do not promote direct-profile compilation as the story-world repair
+path.

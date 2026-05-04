@@ -36,6 +36,8 @@ python scripts/plan_incoming_row_gated_scorecard.py --baseline-json tmp/incoming
 python scripts/plan_incoming_compile_variant_overlay.py --baseline-json tmp/incoming_smoke_summaries_scoped_evidence/scorecard.json --candidate-json shifted_compile_variants=tmp/incoming_smoke_summaries_compile_variant_selection/scorecard.json --out-json tmp/incoming_smoke_summaries_compile_variant_selection/compile_variant_overlay_plan.json --out-md tmp/incoming_smoke_summaries_compile_variant_selection/compile_variant_overlay_plan.md
 python scripts/plan_incoming_variant_selector_training.py --overlay-json tmp/incoming_smoke_summaries_official_companion_overlay/compile_variant_overlay_plan.json --out-json tmp/incoming_smoke_summaries_official_companion_overlay/variant_selector_training_plan.json --out-md tmp/incoming_smoke_summaries_official_companion_overlay/variant_selector_training_plan.md
 python scripts/plan_incoming_compile_repair_targets.py --scorecard-json tmp/incoming_smoke_summaries/scorecard.json --row-overlay-json tmp/incoming_smoke_summaries_evidence_nonexact/row_mode_overlay_plan.json --out-json tmp/incoming_smoke_summaries/compile_repair_targets.json --out-md tmp/incoming_smoke_summaries/compile_repair_targets.md
+python scripts/plan_story_world_repair_targets.py --scorecard-json tmp/story_world_full40_classified_scorecards/scorecard.json --out-json tmp/story_world_repair_plans/full40_repair_targets.json --out-md tmp/story_world_repair_plans/full40_repair_targets.md
+python scripts/plan_story_world_repair_targets.py --scorecard-json tmp/story_world_full40_classified_scorecards/scorecard.json --fixture larkspur_clockwork_fair --out-json tmp/story_world_repair_plans/larkspur_full40_repair_targets.json --out-md tmp/story_world_repair_plans/larkspur_full40_repair_targets.md
 python scripts/select_qa_mode_without_oracle.py --selection-policy protected --group <name>:baseline=<QA_JSON>,evidence=<QA_JSON> --out-json <OUT_JSON> --out-md <OUT_MD>
 python scripts/select_qa_mode_without_oracle.py --selection-policy guarded_activation --group <name>:baseline=<QA_JSON>+<FAILURE_SURFACE_QA_JSON>,candidate=<QA_JSON> --out-json <OUT_JSON> --out-md <OUT_MD>
 python scripts/plan_selector_risk_gate.py --baseline-run protected=<SELECTOR_JSON> --candidate-run guarded_activation=<SELECTOR_JSON> --transfer-comparison <SELECTOR_POLICY_COMPARISON_JSON> --out-dir tmp/selector_risk_gates
@@ -308,3 +310,25 @@ preferring authority-row volume over explicit name support on who-is rows. With
 identity, rationale/contrast, and capability-failure guardrails, guarded
 activation selects `23 exact / 8 partial / 9 miss` across Larkspur full-40,
 `39/40` best rows, with no selector errors.
+
+`scripts/plan_story_world_repair_targets.py` is the promoted story-world repair
+planner. It reads full-QA scorecard artifacts only, extracts query predicate
+names, and groups non-exact rows into acquisition lenses without reading source
+prose, gold KBs, or answer keys for classification. On the promoted full-40
+scorecard it preserves the `46` target queue while naming the next work:
+`39` scoped source-surface repairs, `7` helper/query-join repairs, and lens
+buckets such as `rule_interpretation_surface`, `authority_document_surface`,
+`object_state_transition_surface`, `object_location_custody_surface`,
+`permission_rationale_surface`, and `temporal_deadline_surface`. The Larkspur
+fixture-specific plan has `20` compile-surface targets split into `6`
+object-state, `5` object-location/custody, `4` permission/rationale, `2`
+outcome/status, `1` claim-truth, `1` identity/role, and `1` temporal target.
+
+A direct-profile Larkspur acquisition check is a negative result. Bypassing
+profile discovery with `story_world@v0` avoided empty profile/intake responses,
+but the source compiles were too thin: object-state admitted `24` rows and
+scored `0 exact / 0 partial / 6 miss` on its target rows; object-custody
+admitted `6` rows and scored `0 / 2 / 2`; permission/rationale admitted `12`
+rows and scored `0 / 0 / 5`. All had `0` write proposals. The lesson is that
+the next source-surface move needs richer compact/focused acquisition, not a
+direct registry-only compile.

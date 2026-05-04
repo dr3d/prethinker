@@ -217,3 +217,22 @@ and `1` helper/query-join repair target. The artifact is
 `tmp/incoming_smoke_summaries/compile_repair_targets.md`; the next compile-side
 work should start with the three scoped source-surface rows rather than another
 global detail prompt.
+
+Promoted story-world repair update:
+`scripts/plan_story_world_repair_targets.py` now generalizes that idea for
+full-QA story-world scorecards. It reads scorecard artifacts only and classifies
+repair lenses from query predicate names rather than source prose. The full-40
+five-fixture queue remains `46` rows, but the planner makes the work legible:
+`39` scoped source-surface repairs, `7` helper/query-join repairs, with
+Larkspur as the top fixture (`20` targets). Larkspur splits into `6`
+object-state, `5` object-location/custody, `4` permission/rationale, `2`
+outcome/status, `1` claim-truth, `1` identity/role, and `1` temporal target.
+
+Larkspur direct-profile acquisition check: bypassing profile discovery with the
+tracked `story_world@v0` registry avoided the empty profile/intake responses,
+but the resulting compiles were too thin to help. Object-state scored
+`0 / 0 / 6` on target rows, custody scored `0 / 2 / 2`, and
+permission/rationale scored `0 / 0 / 5`, all with `0` write proposals. Treat
+this as a negative result: the next acquisition pass should keep the compact
+focused-pass machinery and improve the acquisition contract, not fall back to a
+direct registry-only compile.

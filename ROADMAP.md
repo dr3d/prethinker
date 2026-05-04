@@ -47,7 +47,7 @@ authority boundary.
 
 Latest local verification:
 
-- Full pytest suite: `568 passed, 2 subtests passed`
+- Full pytest suite: `571 passed, 2 subtests passed`
 - Edge runtime A/B: semantic IR `20/20`, `0.976` avg score, `0` non-mapper parse rescues
 - Weak-edge runtime A/B: semantic IR `10/10`, `1.000` avg score, `0` non-mapper parse rescues
 - Lava v5 source-record alignment rerun: `60/60` parsed, `60/60` domain selector,

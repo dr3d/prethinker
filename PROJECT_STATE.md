@@ -46,7 +46,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 
 ## Recent Frontier Results
 
-- Current full-suite verification: `568 passed, 2 subtests passed`.
+- Current full-suite verification: `571 passed, 2 subtests passed`.
 - Iron Harbor: `86 exact / 14 partial / 0 miss` on a full 100-question source-document battery, with `0` write proposals during post-ingestion QA.
 - Blackthorn: baseline first-20 was `2 exact / 1 partial / 17 miss`; current diagnostic lanes include BTC-022 at `82 / 9 / 9` full-100 and BTC-027 at `85 / 4 / 11`. These are different configurations, so compare within lane rather than treating one number as a universal replacement.
 - Kestrel: profile-guided KCL-016 reached `73 exact / 11 partial / 16 miss` full-100 with `0` write proposals. Cold/source-aware evidence remains much lower, and the distinction is intentional.
@@ -207,6 +207,16 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
   activation with identity, rationale/contrast, and capability-failure guidance
   reaches `23 exact / 8 partial / 9 miss`, `39/40` best choices, and `0`
   selector errors on Larkspur full-40.
+- Story-world full-40 repair planning is now artifact-only and lens-named:
+  `scripts/plan_story_world_repair_targets.py` reads scorecards, extracts query
+  predicate names, and groups repair targets without source-prose
+  interpretation. The five-fixture queue remains `46` rows, but Larkspur now
+  has a concrete acquisition split: `6` object-state, `5` object-location or
+  custody, `4` permission/rationale, `2` outcome/status, `1` claim-truth, `1`
+  identity/role, and `1` temporal target. A direct `story_world@v0` registry
+  compile was a negative acquisition check: clean but too thin (`0/0/6`,
+  `0/2/2`, and `0/0/5` on targeted Larkspur QA slices), so the next move is
+  richer focused acquisition rather than registry-only compilation.
 - The five incoming challenge fixtures have been promoted into
   `datasets/story_worlds/` with standard source, QA, oracle-for-scoring,
   `progress_journal.md`, and `progress_metrics.jsonl` files. `tmp/incoming*`
@@ -435,7 +445,7 @@ Domain/data lanes:
 
 ## Verification Snapshot
 
-**Current headline:** the lean full pytest suite is `568 passed, 2 subtests passed`. The current research center is semantic parallax: multi-pass semantic compilation, mapper-admitted safe-surface accumulation, rule-lens promotion trials, row-level activation, clarification eagerness under an explicit authority boundary, and stenographer-mode stream simulation.
+**Current headline:** the lean full pytest suite is `571 passed, 2 subtests passed`. The current research center is semantic parallax: multi-pass semantic compilation, mapper-admitted safe-surface accumulation, rule-lens promotion trials, row-level activation, clarification eagerness under an explicit authority boundary, and stenographer-mode stream simulation.
 
 Recent verified results:
 
