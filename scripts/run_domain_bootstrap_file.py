@@ -1080,7 +1080,7 @@ def _compile_source_pass_ops(
     )
     target = max(1, int(operation_target or getattr(args, "focused_pass_operation_target", 48) or 48))
     payload = {
-        "task": "Emit source_pass_ops_v1 JSON only for this focused source pass.",
+        "task": "Emit source_pass_ops_v1 JSON only for this source pass.",
         "authority": "proposal_only_mapper_remains_authoritative",
         "domain_hint": str(getattr(args, "domain_hint", "") or ""),
         "raw_source_text": source_text,
@@ -1100,7 +1100,7 @@ def _compile_source_pass_ops(
             *intake_plan_context(intake_plan),
             *source_compiler_context,
             *(extra_context or []),
-            "This compact schema is for a focused pass only. Do not compile unrelated source sections.",
+            "This compact schema is for one bounded source pass. Follow current_pass.focus: broad skeleton passes should cover source-wide stable structure, while focused passes should not compile unrelated source sections.",
             "Emit only candidate_operations. Do not emit entities, assertions, propositions, temporal_graph, or truth_maintenance here.",
             "Use exact allowed predicate names and argument order from predicate_contracts.",
             "Put stable normalized atoms directly in candidate_operations args.",
@@ -1120,7 +1120,7 @@ def _compile_source_pass_ops(
                 {
                     "role": "system",
                     "content": (
-                        "You are a focused source-pass operation compiler for a governed symbolic memory system. "
+                        "You are a source-pass operation compiler for a governed symbolic memory system. "
                         "You do not decide truth and you do not mutate the KB. "
                         "The supplied raw_source_text is direct evidence for this compile; context guidance is not evidence. "
                         "Emit only source_pass_ops_v1 JSON; the deterministic mapper will decide admission."
@@ -1395,17 +1395,43 @@ def _compile_source_flat_plus_plan_passes(
     args: argparse.Namespace,
     extra_context: list[str] | None = None,
 ) -> dict[str, Any]:
-    flat = _compile_source_with_draft_profile(
-        source_text=source_text,
-        parsed_profile=parsed_profile,
-        intake_plan=intake_plan,
-        args=args,
-        extra_context=[
-            *(extra_context or []),
-            "This is the broad skeleton pass for a flat-plus-focused compile. Preserve stable source-wide facts, roles, thresholds, core events, and high-value corrections.",
-            "Focused pass_plan calls will follow, so prefer a balanced skeleton over exhaustive local detail.",
-        ],
-    )
+    if bool(getattr(args, "focused_pass_ops_schema", False)):
+        flat = _compile_source_pass_ops(
+            source_text=source_text,
+            parsed_profile=parsed_profile,
+            intake_plan=intake_plan,
+            args=args,
+            pass_id="flat_skeleton",
+            purpose="broad skeleton",
+            focus="source-wide stable facts, roles, thresholds, core events, corrections",
+            completion=(
+                "Capture a balanced source-wide skeleton. Prefer stable facts, roles, thresholds, "
+                "core events, corrections, and high-value status rows over exhaustive local detail."
+            ),
+            predicates="Use the most relevant allowed predicates for source-wide skeleton coverage.",
+            coverage_goals=(
+                "Preserve enough source-wide structure for later focused passes and QA to join against: "
+                "key people/entities, rule/custom identifiers, dates, core events, corrections, and adjudication/status rows."
+            ),
+            extra_context=[
+                *(extra_context or []),
+                "This is the broad skeleton pass for a flat-plus-focused compile.",
+                "Focused pass_plan calls will follow, so prefer a balanced skeleton over exhaustive local detail.",
+            ],
+            operation_target=max(48, int(getattr(args, "focused_pass_operation_target", 80) or 80)),
+        )
+    else:
+        flat = _compile_source_with_draft_profile(
+            source_text=source_text,
+            parsed_profile=parsed_profile,
+            intake_plan=intake_plan,
+            args=args,
+            extra_context=[
+                *(extra_context or []),
+                "This is the broad skeleton pass for a flat-plus-focused compile. Preserve stable source-wide facts, roles, thresholds, core events, and high-value corrections.",
+                "Focused pass_plan calls will follow, so prefer a balanced skeleton over exhaustive local detail.",
+            ],
+        )
     focused = _compile_source_with_plan_passes(
         source_text=source_text,
         parsed_profile=parsed_profile,

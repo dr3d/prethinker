@@ -396,6 +396,12 @@ promotion-ready under either isolated or dependency-composed trial.
   RF-002/RF-003 then showed the opposite failure: dense incident passes can
   parse but remain too thin or skip-heavy. The next lens-quality metric should
   flag zero-yield, thin-surface, and skip-heavy passes, not just `invalid_json`.
+- Compact broad skeleton: DL-003/DL-004 exposed that the old full Semantic IR
+  flat pass can overflow on dense source material while compact focused passes
+  survive. When `--focused-pass-ops-schema` is enabled, the broad
+  `flat_skeleton` now also uses `source_pass_ops_v1`. On Dulse this moved the
+  flat skeleton from `0` rows to `51` rows and reduced full-QA misses from `6`
+  to `2`, while still leaving thin focused passes as the next repair target.
 - Compile-lens health now summarizes those pass diagnostics at the top level.
   A compile can be marked `healthy`, `warning`, or `poor` with a recommendation
   such as `qa_run_reasonable` or `repair_compile_before_qa`. V9-002 used this

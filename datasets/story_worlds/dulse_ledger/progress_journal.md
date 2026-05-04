@@ -175,3 +175,71 @@ The next Dulse work should not tune the QA planner against this weaker surface.
 It should either replay the cold compile until the skeleton is healthy or run a
 targeted skeleton repair pass, then compare against DL-001 and DL-002.
 
+## Run DL-004 - Compact Flat-Skeleton Replay
+
+- Timestamp: `2026-05-04T00:04Z` through `2026-05-04T00:12Z`
+- Evidence lane: `cold_after_general_architecture_change`
+- Model: `qwen/qwen3.6-35b-a3b`
+- Mode: replay after a general harness change: when
+  `--focused-pass-ops-schema` is enabled, the broad `flat_skeleton` pass now
+  also uses compact `source_pass_ops_v1` instead of the full Semantic IR
+  workspace.
+
+### Artifacts
+
+- Compile:
+  `tmp/cold_baselines/dulse_ledger/domain_bootstrap_file_20260504T000429764914Z_source_qwen-qwen3-6-35b-a3b.json`
+- QA:
+  `tmp/cold_baselines/dulse_ledger/domain_bootstrap_qa_20260504T001248841341Z_qa_qwen-qwen3-6-35b-a3b.json`
+
+### Result
+
+Compile:
+
+```text
+flat_skeleton unique rows: 51
+total admitted operations: 90
+total skips: 17
+compile health: poor
+unhealthy passes: pass_2, pass_3
+```
+
+QA:
+
+```text
+DL-001 cold baseline: 27 exact / 7 partial / 6 miss
+DL-003 weak replay:   24 exact / 8 partial / 8 miss
+DL-004 compact flat:  27 exact / 11 partial / 2 miss
+```
+
+Safety:
+
+```text
+40/40 parsed
+40/40 query rows
+0 runtime load errors
+0 write proposals
+```
+
+Notable row changes from DL-001:
+
+```text
+miss -> exact: q009, q028, q030, q036
+miss -> partial: q019, q020
+partial -> exact: q010, q014, q018, q026
+exact -> miss: q002
+partial -> miss: q038
+```
+
+### Lesson
+
+The compact flat-skeleton change fixes the failure exposed by DL-003. The broad
+pass no longer JSON-overflows into `semantic_ir_parse_failed`, and the resulting
+QA surface cuts misses from `6` to `2` while preserving the old exact count.
+
+This is not a clean monotonic win: several previously exact rows degrade to
+partial, and two rows become misses. But the direction is architecturally
+important. The flat skeleton should be a compact operation surface, not a giant
+workspace. Focused passes still need health repair, especially the thin/skip-heavy
+ledger-entry and dispute passes.
+
