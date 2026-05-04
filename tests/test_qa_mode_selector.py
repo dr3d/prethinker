@@ -1,9 +1,12 @@
 import json
+import sys
 
 from scripts import select_qa_mode_without_oracle
 from scripts.select_qa_mode_without_oracle import (
     call_selector,
     hybrid_selector,
+    load_group,
+    merge_qa_records,
     protected_selector,
     score_selection,
     structural_selector,
@@ -272,6 +275,109 @@ def test_score_selection_labels_llm_source_when_selector_has_no_source() -> None
 
     assert scored["selection_source"] == "llm"
     assert scored["selected_is_best"] is True
+
+
+def test_merge_qa_records_overlays_later_row_metadata() -> None:
+    base = {
+        "rows": [
+            {
+                "id": "q001",
+                "utterance": "Question?",
+                "reference_judge": {"verdict": "miss"},
+                "query_results": [{"result": {"num_rows": 0}}],
+            }
+        ]
+    }
+    failure = {
+        "rows": [
+            {
+                "id": "q001",
+                "reference_judge": {"verdict": "exact"},
+                "failure_surface": {"surface": "not_applicable"},
+            }
+        ]
+    }
+
+    merged = merge_qa_records([base, failure])
+
+    assert len(merged["rows"]) == 1
+    assert merged["rows"][0]["utterance"] == "Question?"
+    assert merged["rows"][0]["reference_judge"]["verdict"] == "exact"
+    assert merged["rows"][0]["failure_surface"]["surface"] == "not_applicable"
+
+
+def test_load_group_accepts_plus_merged_artifacts(tmp_path) -> None:
+    first = tmp_path / "first.json"
+    second = tmp_path / "second.json"
+    candidate = tmp_path / "candidate.json"
+    first.write_text(
+        json.dumps({"rows": [{"id": "q001", "reference_judge": {"verdict": "miss"}}]}),
+        encoding="utf-8",
+    )
+    second.write_text(
+        json.dumps({"rows": [{"id": "q001", "reference_judge": {"verdict": "exact"}}]}),
+        encoding="utf-8",
+    )
+    candidate.write_text(json.dumps({"rows": [{"id": "q001"}]}), encoding="utf-8")
+
+    group = load_group(f"demo:baseline={first}+{second},candidate={candidate}")
+
+    assert group["labels"] == ["baseline", "candidate"]
+    assert len(group["artifacts"][0]["paths"]) == 2
+    assert group["artifacts"][0]["record"]["rows"][0]["reference_judge"]["verdict"] == "exact"
+
+
+def test_guarded_activation_uses_activation_with_self_check(monkeypatch, tmp_path) -> None:
+    baseline = tmp_path / "baseline.json"
+    candidate = tmp_path / "candidate.json"
+    out_json = tmp_path / "selector.json"
+    out_md = tmp_path / "selector.md"
+    row = {
+        "id": "q001",
+        "utterance": "Question?",
+        "reference_judge": {"verdict": "partial"},
+        "queries": ["fact(X)."],
+        "query_results": [
+            {"query": "fact(X).", "result": {"status": "success", "num_rows": 1, "rows": ["x"], "predicate": "fact"}}
+        ],
+        "self_check": {"notes": ["bounded note"]},
+    }
+    baseline.write_text(json.dumps({"rows": [row]}), encoding="utf-8")
+    candidate_row = dict(row)
+    candidate_row["reference_judge"] = {"verdict": "exact"}
+    candidate.write_text(json.dumps({"rows": [candidate_row]}), encoding="utf-8")
+
+    def fake_call_selector(**kwargs):
+        assert kwargs["selection_policy"] == "activation"
+        assert "self_check" in kwargs["row"]["modes"][0]["query_evidence"]
+        return {"selected_mode": "candidate", "selection_confidence": 0.8}
+
+    monkeypatch.setattr(select_qa_mode_without_oracle, "call_selector", fake_call_selector)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "select_qa_mode_without_oracle.py",
+            "--selection-policy",
+            "guarded_activation",
+            "--group",
+            f"demo:baseline={baseline},candidate={candidate}",
+            "--out-json",
+            str(out_json),
+            "--out-md",
+            str(out_md),
+        ],
+    )
+
+    assert select_qa_mode_without_oracle.main() == 0
+    report = json.loads(out_json.read_text(encoding="utf-8"))
+
+    assert report["selection_policy"] == "guarded_activation"
+    assert report["hybrid_llm_policy"] == "activation"
+    assert report["hybrid_margin"] == 1.0
+    assert report["hybrid_min_score"] == 4.0
+    assert report["include_self_check"] is True
+    assert report["summary"]["selected_exact"] == 1
 
 
 def test_activation_selector_prompt_prioritizes_answer_bearing_support() -> None:

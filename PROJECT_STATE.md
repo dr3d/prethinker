@@ -115,6 +115,14 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
   high-volume nonbaseline overrides. Incoming first-10 improved to `24 / 4 / 2`
   on the three imperfect fixtures, and Avalon reduced misses by one at the same
   exact count, but Sable failed to transfer. Treat it as calibration machinery.
+- Guarded activation is the next named selector policy:
+  `--selection-policy guarded_activation` keeps structural scoring for confident
+  rows and uses activation plus bounded self-check evidence for uncertain rows.
+  The selector can merge canonical QA mode artifacts with `+`, matching the
+  smoke-scorecard first-pass + failure-classified view. On the ledger diagnostic
+  for Larkspur, Meridian, and Northbridge, it selected the best available mode
+  on `30/30` rows and reached `26 exact / 2 partial / 2 miss` across that
+  three-fixture slice without source prose or answer keys in selector input.
 - Incoming compile repair targets are now generated at
   `tmp/incoming_smoke_summaries/compile_repair_targets.{json,md}`. The current
   six-row queue splits into `2` row-selector calibration targets, `3` scoped

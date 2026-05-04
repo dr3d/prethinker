@@ -271,6 +271,14 @@ testing whether those gains transfer:
   three scoped source-surface repair rows, and one helper/query-join row. That
   is the next practical compiler frontier: repair missing answer-bearing source
   surface locally without promoting another global detail prompt.
+- A ledger compile diagnostic sharpened the selector frontier. Ledger mode is
+  not a default promotion: it raised the incoming batch to `45 exact / 2 partial
+  / 3 miss`, so the scorecard gate rejected it. But row-level selection can use
+  it: the new `guarded_activation` policy keeps structural choices for
+  confident rows and calls activation with bounded self-check evidence for
+  uncertain rows. On the three imperfect first-10 fixtures, it selected the
+  best available mode on `30/30` rows, preserving Larkspur at `8 / 2 / 0` while
+  lifting Meridian and Northbridge to `9 / 0 / 1` each.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 

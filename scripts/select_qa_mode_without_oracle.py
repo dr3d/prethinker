@@ -68,7 +68,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--group",
         required=True,
-        help="Comparison group in the form name:label=path,label=path.",
+        help=(
+            "Comparison group in the form name:label=path,label=path. "
+            "A mode can merge QA artifacts with +, e.g. baseline=qa.json+failure.json."
+        ),
     )
     parser.add_argument("--model", default="qwen/qwen3.6-35b-a3b")
     parser.add_argument("--base-url", default="http://127.0.0.1:1234/v1")
@@ -84,7 +87,16 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--selection-policy",
-        choices=["direct", "completeness", "relevance", "activation", "structural", "hybrid", "protected"],
+        choices=[
+            "direct",
+            "completeness",
+            "relevance",
+            "activation",
+            "structural",
+            "hybrid",
+            "protected",
+            "guarded_activation",
+        ],
         default="direct",
         help=(
             "Selector policy. direct is the stable default; completeness, relevance, "
@@ -92,7 +104,9 @@ def parse_args() -> argparse.Namespace:
             "a deterministic query-evidence scorer that does not call the model. "
             "hybrid uses the structural scorer first and calls the LLM selector only "
             "on uncertain rows. protected uses structural by default and calls the "
-            "activation selector only for high-volume non-baseline overrides."
+            "activation selector only for high-volume non-baseline overrides. "
+            "guarded_activation uses structural for confident rows and activation+self-check "
+            "for uncertain rows."
         ),
     )
     parser.add_argument(
@@ -127,11 +141,17 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
+    selection_policy = str(args.selection_policy)
+    guarded_activation = selection_policy == "guarded_activation"
+    effective_hybrid_llm_policy = "activation" if guarded_activation else str(args.hybrid_llm_policy)
+    effective_hybrid_margin = 1.0 if guarded_activation else float(args.hybrid_margin)
+    effective_hybrid_min_score = 4.0 if guarded_activation else float(args.hybrid_min_score)
+    effective_include_self_check = bool(args.include_self_check) or guarded_activation
     group = load_group(args.group)
     rows = build_rows(
         group,
         sample_row_limit=int(args.sample_row_limit),
-        include_self_check=bool(args.include_self_check),
+        include_self_check=effective_include_self_check,
     )
     only_ids = {part.strip() for part in str(args.only_ids).split(",") if part.strip()}
     if only_ids:
@@ -143,15 +163,15 @@ def main() -> int:
     for index, row in enumerate(rows, start=1):
         print(f"[{index}/{len(rows)}] {row['id']}")
         selection_error = ""
-        if str(args.selection_policy) == "structural":
+        if selection_policy == "structural":
             selection = structural_selector(row=row, mode_labels=group["labels"])
-        elif str(args.selection_policy) == "hybrid":
+        elif selection_policy in {"hybrid", "guarded_activation"}:
             try:
                 selection = hybrid_selector(
                     row=row,
                     mode_labels=group["labels"],
-                    margin=float(args.hybrid_margin),
-                    min_score=float(args.hybrid_min_score),
+                    margin=effective_hybrid_margin,
+                    min_score=effective_hybrid_min_score,
                     fallback_selector=lambda *, row, mode_labels: call_selector(
                         base_url=str(args.base_url),
                         model=str(args.model),
@@ -161,13 +181,13 @@ def main() -> int:
                         max_tokens=int(args.max_tokens),
                         row=row,
                         mode_labels=mode_labels,
-                        selection_policy=str(args.hybrid_llm_policy),
+                        selection_policy=effective_hybrid_llm_policy,
                     ),
                 )
             except Exception as exc:  # pragma: no cover - live harness path
                 selection_error = str(exc)
                 selection = {}
-        elif str(args.selection_policy) == "protected":
+        elif selection_policy == "protected":
             selection = protected_selector(
                 row=row,
                 mode_labels=group["labels"],
@@ -194,7 +214,7 @@ def main() -> int:
                     max_tokens=int(args.max_tokens),
                     row=row,
                     mode_labels=group["labels"],
-                    selection_policy=str(args.selection_policy),
+                    selection_policy=selection_policy,
                 )
             except Exception as exc:  # pragma: no cover - live harness path
                 selection_error = str(exc)
@@ -212,13 +232,16 @@ def main() -> int:
         "group": {
             "name": group["name"],
             "labels": group["labels"],
-            "artifacts": [{"label": item["label"], "path": display_path(item["path"])} for item in group["artifacts"]],
+            "artifacts": [
+                {"label": item["label"], "paths": [display_path(path) for path in item.get("paths", [])]}
+                for item in group["artifacts"]
+            ],
         },
-        "selection_policy": str(args.selection_policy),
-        "hybrid_llm_policy": str(args.hybrid_llm_policy),
-        "hybrid_margin": float(args.hybrid_margin),
-        "hybrid_min_score": float(args.hybrid_min_score),
-        "include_self_check": bool(args.include_self_check),
+        "selection_policy": selection_policy,
+        "hybrid_llm_policy": effective_hybrid_llm_policy,
+        "hybrid_margin": effective_hybrid_margin,
+        "hybrid_min_score": effective_hybrid_min_score,
+        "include_self_check": effective_include_self_check,
         "summary": summarize(outputs),
         "rows": outputs,
     }
@@ -243,11 +266,39 @@ def load_group(spec: str) -> dict[str, Any]:
         label, _, raw_path = part.partition("=")
         if not label.strip() or not raw_path.strip():
             raise SystemExit(f"invalid artifact spec {part!r}")
-        path = Path(raw_path.strip())
-        path = path if path.is_absolute() else REPO_ROOT / path
-        payload = json.loads(path.read_text(encoding="utf-8-sig"))
-        artifacts.append({"label": label.strip(), "path": path, "record": payload})
+        paths = [_resolve_path(token.strip()) for token in raw_path.split("+") if token.strip()]
+        if not paths:
+            raise SystemExit(f"invalid artifact path list {raw_path!r}")
+        records = [json.loads(path.read_text(encoding="utf-8-sig")) for path in paths]
+        artifacts.append({"label": label.strip(), "paths": paths, "record": merge_qa_records(records)})
     return {"name": name.strip(), "artifacts": artifacts, "labels": [item["label"] for item in artifacts]}
+
+
+def _resolve_path(raw_path: str) -> Path:
+    path = Path(raw_path)
+    return path if path.is_absolute() else REPO_ROOT / path
+
+
+def merge_qa_records(records: list[dict[str, Any]]) -> dict[str, Any]:
+    """Merge QA rows by id, letting later artifacts add/override row metadata."""
+    if not records:
+        return {"rows": []}
+    merged = dict(records[0])
+    by_id: dict[str, dict[str, Any]] = {}
+    order: list[str] = []
+    for record in records:
+        for row in record.get("rows", []) if isinstance(record.get("rows"), list) else []:
+            if not isinstance(row, dict):
+                continue
+            row_id = str(row.get("id", "")).strip()
+            if not row_id:
+                continue
+            if row_id not in by_id:
+                order.append(row_id)
+                by_id[row_id] = {}
+            by_id[row_id].update(row)
+    merged["rows"] = [by_id[row_id] for row_id in order]
+    return merged
 
 
 def build_rows(group: dict[str, Any], *, sample_row_limit: int, include_self_check: bool) -> list[dict[str, Any]]:

@@ -33,6 +33,7 @@ python scripts/compare_incoming_smoke_scorecards.py --baseline-json tmp/incoming
 python scripts/plan_incoming_row_mode_overlay.py --baseline-json tmp/incoming_smoke_summaries/scorecard.json --candidate-json tmp/incoming_smoke_summaries_evidence_nonexact/scorecard.json --out-json tmp/incoming_smoke_summaries_evidence_nonexact/row_mode_overlay_plan.json --out-md tmp/incoming_smoke_summaries_evidence_nonexact/row_mode_overlay_plan.md
 python scripts/plan_incoming_compile_repair_targets.py --scorecard-json tmp/incoming_smoke_summaries/scorecard.json --row-overlay-json tmp/incoming_smoke_summaries_evidence_nonexact/row_mode_overlay_plan.json --out-json tmp/incoming_smoke_summaries/compile_repair_targets.json --out-md tmp/incoming_smoke_summaries/compile_repair_targets.md
 python scripts/select_qa_mode_without_oracle.py --selection-policy protected --group <name>:baseline=<QA_JSON>,evidence=<QA_JSON> --out-json <OUT_JSON> --out-md <OUT_MD>
+python scripts/select_qa_mode_without_oracle.py --selection-policy guarded_activation --group <name>:baseline=<QA_JSON>+<FAILURE_SURFACE_QA_JSON>,candidate=<QA_JSON> --out-json <OUT_JSON> --out-md <OUT_MD>
 ```
 
 ## Instrument Principles
@@ -136,3 +137,14 @@ the activation selector because row volume can hide wrong-subject evidence. It
 helped the incoming first-10 slice and reduced Avalon misses, but failed to
 transfer to Sable, so the instrument keeps it as a comparison mode rather than
 daily-driver policy.
+
+`--selection-policy guarded_activation` is the next selector harness shape. It
+keeps deterministic structural scoring for confident rows, but sends uncertain
+rows through the activation selector with bounded QA self-check evidence. The
+selector can now merge multiple QA artifacts for one mode with `+`, so a
+baseline can be represented as the same canonical first-pass +
+failure-classified row view used by the incoming smoke scorecards. On the
+ledger diagnostic over Larkspur, Meridian, and Northbridge, guarded activation
+selected the best available mode on `30/30` rows: Larkspur stayed `8 / 2 / 0`,
+Meridian moved to `9 / 0 / 1`, and Northbridge moved to `9 / 0 / 1` without
+source prose, answer keys, judge labels, or failure labels in selector input.
