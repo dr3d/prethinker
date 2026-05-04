@@ -137,6 +137,11 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
   regression. The scoped compile repair candidate improved the incoming batch to
   `45 exact / 4 partial / 1 miss`, but regressed Meridian q010, so the comparer
   reports `row_level_gate_required`.
+- Row-gated incoming scorecard planning is now available through
+  `scripts/plan_incoming_row_gated_scorecard.py`. Applying accepted scoped
+  candidate rows while rejecting the Meridian q010 regression gives a protected
+  incoming target of `46 exact / 4 partial / 0 miss` over the current
+  five-fixture first-10 scorecard.
 - Incoming compile repair targets are now generated at
   `tmp/incoming_smoke_summaries/compile_repair_targets.{json,md}`. The current
   six-row queue splits into `2` row-selector calibration targets, `3` scoped

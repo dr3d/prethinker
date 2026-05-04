@@ -31,6 +31,7 @@ python scripts/summarize_incoming_fixture_smoke.py --fixture meridian_permit_boa
 python scripts/rollup_incoming_smoke_scorecard.py --root tmp/incoming_smoke_summaries --out-json tmp/incoming_smoke_summaries/scorecard.json --out-md tmp/incoming_smoke_summaries/scorecard.md
 python scripts/compare_incoming_smoke_scorecards.py --baseline-json tmp/incoming_smoke_summaries/scorecard.json --candidate-json tmp/incoming_smoke_summaries_detail_retry/scorecard.json --out-json tmp/incoming_smoke_summaries_detail_retry/baseline_comparison.json --out-md tmp/incoming_smoke_summaries_detail_retry/baseline_comparison.md
 python scripts/plan_incoming_row_mode_overlay.py --baseline-json tmp/incoming_smoke_summaries/scorecard.json --candidate-json tmp/incoming_smoke_summaries_evidence_nonexact/scorecard.json --out-json tmp/incoming_smoke_summaries_evidence_nonexact/row_mode_overlay_plan.json --out-md tmp/incoming_smoke_summaries_evidence_nonexact/row_mode_overlay_plan.md
+python scripts/plan_incoming_row_gated_scorecard.py --baseline-json tmp/incoming_smoke_summaries/scorecard.json --candidate-json tmp/incoming_smoke_summaries_scoped_repair/scorecard.json --row-overlay-json tmp/incoming_smoke_summaries_scoped_repair/row_mode_overlay_plan.json --out-json tmp/incoming_smoke_summaries_scoped_repair/row_gated_scorecard_plan.json --out-md tmp/incoming_smoke_summaries_scoped_repair/row_gated_scorecard_plan.md
 python scripts/plan_incoming_compile_repair_targets.py --scorecard-json tmp/incoming_smoke_summaries/scorecard.json --row-overlay-json tmp/incoming_smoke_summaries_evidence_nonexact/row_mode_overlay_plan.json --out-json tmp/incoming_smoke_summaries/compile_repair_targets.json --out-md tmp/incoming_smoke_summaries/compile_repair_targets.md
 python scripts/select_qa_mode_without_oracle.py --selection-policy protected --group <name>:baseline=<QA_JSON>,evidence=<QA_JSON> --out-json <OUT_JSON> --out-md <OUT_MD>
 python scripts/select_qa_mode_without_oracle.py --selection-policy guarded_activation --group <name>:baseline=<QA_JSON>+<FAILURE_SURFACE_QA_JSON>,candidate=<QA_JSON> --out-json <OUT_JSON> --out-md <OUT_MD>
@@ -171,3 +172,10 @@ a baseline-exact row regression visible in `non_exact_rows`; that case returns
 incoming batch from `44 / 4 / 2` to `45 / 4 / 1`, but regressed Meridian q010,
 so the harness correctly keeps it behind a row-level gate instead of promoting
 the compile mode globally.
+
+`scripts/plan_incoming_row_gated_scorecard.py` turns that row gate into a
+scorecard-shaped planning artifact. It applies only accepted candidate rows over
+the baseline and leaves rejected rows at baseline. For the scoped compile-repair
+diagnostic, the row-gated scorecard is `46 / 4 / 0`: three accepted rescues
+and one rejected Meridian exact-row regression. This is the current activation
+target, not a global compile promotion.

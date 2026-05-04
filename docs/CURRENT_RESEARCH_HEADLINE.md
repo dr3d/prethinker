@@ -295,6 +295,10 @@ testing whether those gains transfer:
   to `9 / 1 / 0`. The same run regressed Meridian q010 from exact to miss, so
   the scorecard comparer now tracks baseline-exact row regressions and returns
   `row_level_gate_required` instead of `promote_candidate` for this shape.
+- The row-gated scorecard planner makes the opportunity concrete: accepting the
+  three scoped-repair rescues while rejecting the Meridian q010 regression gives
+  a protected target of `46 / 4 / 0` on the incoming five-fixture first-10
+  scorecard. That is now the selector/control objective.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 

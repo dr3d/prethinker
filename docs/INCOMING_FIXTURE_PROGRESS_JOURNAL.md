@@ -334,3 +334,36 @@ Ignored local artifact references:
 - `tmp/incoming_smoke_summaries_scoped_repair/baseline_comparison.md`
 - `tmp/incoming_smoke_summaries_scoped_repair/row_mode_overlay_plan.md`
 - `tmp/incoming_smoke_summaries_scoped_repair/compile_repair_targets.md`
+
+## 2026-05-04 Row-Gated Scorecard Plan
+
+`scripts/plan_incoming_row_gated_scorecard.py` now computes the protected
+scorecard implied by a row overlay: accepted candidate rows are applied over
+the baseline, while rejected rows keep baseline behavior.
+
+For the scoped compile-repair candidate:
+
+```text
+baseline: 44 exact / 4 partial / 2 miss
+ungated candidate: 45 exact / 4 partial / 1 miss
+row-gated plan: 46 exact / 4 partial / 0 miss
+```
+
+Accepted rows:
+
+- `meridian_permit_board q007`: miss -> exact
+- `northbridge_authority_packet q007`: partial -> exact
+- `northbridge_authority_packet q010`: miss -> partial
+
+Rejected row:
+
+- `meridian_permit_board q010`: exact -> miss
+
+Discovery: the current best product-shaped goal is not another global compile
+prompt. It is row-gated activation over competing compile/query surfaces. The
+concrete target is now `46 / 4 / 0` on the incoming five-fixture first-10
+scorecard.
+
+Ignored local artifact reference:
+
+- `tmp/incoming_smoke_summaries_scoped_repair/row_gated_scorecard_plan.md`
