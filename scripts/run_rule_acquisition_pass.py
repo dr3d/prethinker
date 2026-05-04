@@ -732,6 +732,14 @@ def _rule_guidance_context(*, target: int, rule_class: str, compact: bool) -> li
                 "For vote-count aggregation, use one intermediate condition atom such as support_threshold_met. Do not emit neighboring interpretations such as majority_support, mayor_vote_not_required, recall_threshold_met, or final passage/failure labels unless raw_source_text explicitly states that exact condition as the rule target.",
             ]
         )
+    if "dependency" in str(rule_class).casefold() or "composition" in str(rule_class).casefold():
+        core.extend(
+            [
+                "For dependency-composition rule classes, consume existing upstream derived_condition/3 or derived_status/3 rows in the body instead of re-proving their source logic with helper predicates.",
+                "Do not re-emit an upstream intermediate condition that already exists in existing_admitted_backbone. Emit only the downstream composed rule for the current pass.",
+                "If the final status requires an upstream condition that is not already admitted, emit no rule rather than recreating the missing upstream branch in this pass.",
+            ]
+        )
     if compact:
         if "exception" in str(rule_class).casefold():
             core.extend(

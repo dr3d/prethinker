@@ -42,7 +42,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 
 ## Recent Frontier Results
 
-- Full pytest after Sable rule-composition instrumentation: `474 passed, 2 subtests passed`.
+- Full pytest after Sable dependency-composition instrumentation: `475 passed, 2 subtests passed`.
 - Iron Harbor: `86 exact / 14 partial / 0 miss` on a full 100-question source-document battery, with `0` write proposals during post-ingestion QA.
 - Blackthorn: baseline first-20 was `2 exact / 1 partial / 17 miss`; current diagnostic lanes include BTC-022 at `82 / 9 / 9` full-100 and BTC-027 at `85 / 4 / 11`. These are different configurations, so compare within lane rather than treating one number as a universal replacement.
 - Kestrel: profile-guided KCL-016 reached `73 exact / 11 partial / 16 miss` full-100 with `0` write proposals. Cold/source-aware evidence remains much lower, and the distinction is intentional.

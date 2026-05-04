@@ -441,3 +441,40 @@ Two general harness lessons came with it:
   A body-supported rule can still be semantically too broad if it emits sibling
   scopes or neighboring interpretations of the same threshold.
 
+## Run SC-008 - Final Vote-Status Dependency Composition Negative Control
+
+- Timestamp: `2026-05-04T03:55Z` through `2026-05-04T03:57Z`
+- Evidence lane: `diagnostic_replay`
+- Model: `qwen/qwen3.6-35b-a3b`
+- Mode: dependency-composition rule lens over the SC-007 threshold+vote union.
+
+### Artifacts
+
+- Rule-only span replay:
+  `tmp/cold_baselines/sable_creek_budget/rules/domain_bootstrap_file_20260504T035629364524Z_source-rules_qwen-qwen3-6-35b-a3b.json`
+- Deliberation/result span replay:
+  `tmp/cold_baselines/sable_creek_budget/rules/domain_bootstrap_file_20260504T035654731488Z_source-rules_qwen-qwen3-6-35b-a3b.json`
+
+### Result
+
+Both dependency-composition passes emitted `0` rules. This was not a parse
+failure. The model correctly recognized that the existing backbone already had
+the upstream condition rule:
+
+```prolog
+derived_condition(Proposal, support_threshold_met, council_vote) :-
+    support_count_at_least(Proposal, 4).
+```
+
+and declined to re-emit it. It also declined to create a downstream
+`derived_status(..., passed, council_vote)` rule from the vote-result narrative
+alone.
+
+### Lesson
+
+This is a useful negative control. Dependency-composition guidance now pushes
+the model to consume admitted upstream `derived_condition/3` rows rather than
+re-proving them. But a final-status rule still needs explicit downstream rule
+language, not merely an instance outcome plus an upstream condition. That is a
+safer failure than overclaiming passage from a partial rule branch.
+

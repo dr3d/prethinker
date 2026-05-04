@@ -132,6 +132,13 @@ def test_aggregation_rule_guidance_blocks_sibling_scope_leakage() -> None:
     assert "majority_support" in guidance
 
 
+def test_dependency_composition_guidance_consumes_upstream_conditions() -> None:
+    guidance = "\n".join(_rule_guidance_context(target=4, rule_class="dependency_composition", compact=True))
+
+    assert "consume existing upstream derived_condition/3" in guidance
+    assert "Do not re-emit an upstream intermediate condition" in guidance
+
+
 def test_backbone_fact_signature_support_is_structural_index() -> None:
     support = _backbone_fact_signature_support(
         [
