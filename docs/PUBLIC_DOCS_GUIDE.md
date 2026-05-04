@@ -1,6 +1,6 @@
 # Public Docs Guide
 
-Last updated: 2026-05-03
+Last updated: 2026-05-04
 
 This page is the map for public readers. Git history keeps the older research
 trail; these docs should describe the project as it sits now.
@@ -30,14 +30,17 @@ Read these first:
 
 1. [docs/CURRENT_RESEARCH_HEADLINE.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md)
 2. [docs/MULTI_PASS_SEMANTIC_COMPILER.md](https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md)
-3. [docs/EXPLAINER.md](https://github.com/dr3d/prethinker/blob/main/docs/EXPLAINER.md)
-4. [docs/GENERALIZATION_BASELINE_MATRIX.md](https://github.com/dr3d/prethinker/blob/main/docs/GENERALIZATION_BASELINE_MATRIX.md)
-5. [docs/CURRENT_UTTERANCE_PIPELINE.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_UTTERANCE_PIPELINE.md)
-6. [docs/SEMANTIC_IR_MAPPER_SPEC.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_MAPPER_SPEC.md)
-7. [docs/CLARIFICATION_EAGERNESS_STRATEGY.md](https://github.com/dr3d/prethinker/blob/main/docs/CLARIFICATION_EAGERNESS_STRATEGY.md)
-8. [docs/FRONTIER_FIXTURE_STRATEGY.md](https://github.com/dr3d/prethinker/blob/main/docs/FRONTIER_FIXTURE_STRATEGY.md)
-9. [PROJECT_STATE.md](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md)
-10. [README.md](https://github.com/dr3d/prethinker/blob/main/README.md)
+3. [PROJECT_STATE.md](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md)
+4. [docs/ACTIVE_RESEARCH_LANES.md](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md)
+5. [docs/CURRENT_HARNESS_INSTRUMENT.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_HARNESS_INSTRUMENT.md)
+6. [docs/README.md](https://github.com/dr3d/prethinker/blob/main/docs/README.md)
+7. [docs/EXPLAINER.md](https://github.com/dr3d/prethinker/blob/main/docs/EXPLAINER.md)
+8. [docs/GENERALIZATION_BASELINE_MATRIX.md](https://github.com/dr3d/prethinker/blob/main/docs/GENERALIZATION_BASELINE_MATRIX.md)
+9. [docs/CURRENT_UTTERANCE_PIPELINE.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_UTTERANCE_PIPELINE.md)
+10. [docs/SEMANTIC_IR_MAPPER_SPEC.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_MAPPER_SPEC.md)
+11. [docs/CLARIFICATION_EAGERNESS_STRATEGY.md](https://github.com/dr3d/prethinker/blob/main/docs/CLARIFICATION_EAGERNESS_STRATEGY.md)
+12. [docs/FRONTIER_FIXTURE_STRATEGY.md](https://github.com/dr3d/prethinker/blob/main/docs/FRONTIER_FIXTURE_STRATEGY.md)
+13. [README.md](https://github.com/dr3d/prethinker/blob/main/README.md)
 
 ## Current Research Center
 
@@ -66,6 +69,8 @@ clauses.
 
 The best current documents for that work are:
 
+- [docs/ACTIVE_RESEARCH_LANES.md](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md)
+- [docs/CURRENT_HARNESS_INSTRUMENT.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_HARNESS_INSTRUMENT.md)
 - [docs/CURRENT_UTTERANCE_PIPELINE.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_UTTERANCE_PIPELINE.md)
 - [docs/CONTEXT_CONTROL_ARCHITECTURE_BRIEF.md](https://github.com/dr3d/prethinker/blob/main/docs/CONTEXT_CONTROL_ARCHITECTURE_BRIEF.md)
 - [docs/CLARIFICATION_EAGERNESS_STRATEGY.md](https://github.com/dr3d/prethinker/blob/main/docs/CLARIFICATION_EAGERNESS_STRATEGY.md)
@@ -84,6 +89,18 @@ The best current documents for that work are:
 - [docs/NO_LANGUAGE_HANDLING_IN_PYTHON_AUDIT.md](https://github.com/dr3d/prethinker/blob/main/docs/NO_LANGUAGE_HANDLING_IN_PYTHON_AUDIT.md)
 - [docs/FRONTIER_DATASET_SURVEY.md](https://github.com/dr3d/prethinker/blob/main/docs/FRONTIER_DATASET_SURVEY.md)
 - [docs/prompts/SEMANTIC_IR_V1.md](https://github.com/dr3d/prethinker/blob/main/docs/prompts/SEMANTIC_IR_V1.md)
+
+Current query/QA instruments:
+
+- [docs/POST_INGESTION_QA_SURFACES.md](https://github.com/dr3d/prethinker/blob/main/docs/POST_INGESTION_QA_SURFACES.md)
+- [docs/QUERY_SURFACE_MODE_COMPARISON.md](https://github.com/dr3d/prethinker/blob/main/docs/QUERY_SURFACE_MODE_COMPARISON.md)
+- [docs/KB_INTERROGATOR.md](https://github.com/dr3d/prethinker/blob/main/docs/KB_INTERROGATOR.md)
+
+Secondary design and pattern notes:
+
+- [docs/PRETHINKER.md](https://github.com/dr3d/prethinker/blob/main/docs/PRETHINKER.md)
+- [ROADMAP.md](https://github.com/dr3d/prethinker/blob/main/ROADMAP.md)
+- [docs/CHAOS_PROVER_PATTERN_NOTES.md](https://github.com/dr3d/prethinker/blob/main/docs/CHAOS_PROVER_PATTERN_NOTES.md)
 
 The newest open-domain work is the hint-free profile/bootstrap path: raw text
 goes to an LLM-authored `intake_plan_v1` and `profile_bootstrap_v1` proposal,
@@ -151,6 +168,18 @@ The older English-parser lane is useful history, but it should not be mistaken
 for the preferred future architecture centered on router-owned context
 engineering, Semantic IR workspaces, and deterministic admission.
 
+## Public Link And HTML Policy
+
+GitHub Pages serves the public hub from `docs/index.html`. Public links to
+Markdown should use GitHub `blob/main/...` URLs so readers see rendered Markdown
+instead of raw or missing Pages output. Public links to HTML should use the
+Pages domain.
+
+Runtime/template HTML that belongs to the application stays with its owning
+code, such as `ui_gateway/static/index.html` and
+`scripts/templates/dialog-session-page.template.html`. Those files are not
+public docs pages.
+
 ## Current Evidence Snapshot
 
 Latest local verification:
@@ -158,7 +187,7 @@ Latest local verification:
 - Frontier fixture progress is summarized in [docs/FRONTIER_PROGRESS_REPORT.md](https://github.com/dr3d/prethinker/blob/main/docs/FRONTIER_PROGRESS_REPORT.md), with raw journals linked for Iron Harbor, Blackthorn, Kestrel, Anaplan Polaris, Glass Tide, and Clarification Eagerness Trap.
 - Multi-pass semantic compilation is now a named frontier: independent semantic lenses propose backbone, support/source, temporal/status, and rule fragments; the mapper admits each lens independently; deterministic union accumulates only admitted clauses.
 - Clarification eagerness now has a dedicated first fixture at `datasets/clarification_eagerness/clarification_eagerness_trap/`: `20` ingestion CE cases, `20` query CE cases, and `10` baseline QA probes. CET-013 reran the source-context lane after the latest rule-admission work and held `40/40` correct, `0` over-eager, `0` under-eager, `0` unsafe candidates, `0` context-write violations, and `10/10` blocked-slot coverage. The remaining CE nuance is safe-partial richness, not ask/no-ask posture.
-- Lean full pytest suite: `539 passed`.
+- Lean full pytest suite: `568 passed, 2 subtests passed`.
 - Lava v5 latest 60-attempt rerun: `60/60` parsed JSON, `60/60` domain selector, `60/60` admission-safe, `45/60` semantic-clean, `41/60` full expectation score, `0` fuzzy edge kinds, and `0/60` temp-0 variance groups.
 - `active_profile=auto` now uses `semantic_router_v1` as the first-pass context/profile planner. The old Python catalog selector is no longer in the active runtime or research harnesses.
 - `semantic_ir_v1` now includes optional `temporal_graph_v1` proposal diagnostics: event nodes, time anchors, intervals, and temporal edges are visible in traces, but they cannot write durable KB facts unless matching `candidate_operations` pass admission.

@@ -1,6 +1,7 @@
 # Prethinker
 
-This is the stable design overview for the project.
+This is the stable design overview for the project. It is intentionally
+secondary to the current snapshot and headline docs.
 
 If you want the current project snapshot, read [PROJECT_STATE.md](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md).
 
@@ -145,7 +146,7 @@ role.
 
 ## Current Reality
 
-As of May 2, 2026:
+As of May 4, 2026:
 
 - the canonical interactive entryway is `process_utterance()` in [src/mcp_server.py](https://github.com/dr3d/prethinker/blob/main/src/mcp_server.py)
 - the console in [ui_gateway/](https://github.com/dr3d/prethinker/tree/main/ui_gateway) is the main manual test cockpit

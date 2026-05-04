@@ -14,11 +14,14 @@ Current center: a live `ui_gateway` console backed by `src/mcp_server.py`, the `
 
 ## Read First
 
-- [Docs and evidence hub](https://dr3d.github.io/prethinker/) - public docs, run reports, and current research map.
 - [Current research headline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md) - the latest compact lab note.
-- [Full design explainer](https://github.com/dr3d/prethinker/blob/main/docs/EXPLAINER.md) - the short conceptual tour.
+- [Multi-pass semantic compiler](https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md) - semantic parallax, safe-surface accumulation, and rule-lens work.
 - [Project state](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md) - compact status snapshot for the repo as it sits now.
+- [Active research lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md) - how current GPU/research cycles are prioritized.
+- [Current harness instrument](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_HARNESS_INSTRUMENT.md) - scorecards, selectors, risk gates, and repair queues.
 - [Public docs guide](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md) - reading order for deeper technical material.
+- [Docs and evidence hub](https://dr3d.github.io/prethinker/) - public docs, current research map, and curated evidence.
+- [Full design explainer](https://github.com/dr3d/prethinker/blob/main/docs/EXPLAINER.md) - the short conceptual tour.
 
 ## Current Research Headline
 
@@ -107,7 +110,7 @@ The public repo currently tracks `61` pytest files under [tests/](https://github
 
 ```powershell
 python -m pytest -q
-# 539 passed
+# 568 passed, 2 subtests passed
 ```
 
 Current high-signal evidence:

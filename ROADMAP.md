@@ -1,6 +1,11 @@
 # Prethinker Roadmap
 
-Last updated: 2026-05-03
+Last updated: 2026-05-04
+
+This is a secondary planning note. Treat
+[PROJECT_STATE.md](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md)
+and [docs/CURRENT_RESEARCH_HEADLINE.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md)
+as the current truth surfaces.
 
 ## Current Positioning
 
@@ -42,7 +47,7 @@ authority boundary.
 
 Latest local verification:
 
-- Full pytest suite: `450 passed, 2 subtests passed`
+- Full pytest suite: `568 passed, 2 subtests passed`
 - Edge runtime A/B: semantic IR `20/20`, `0.976` avg score, `0` non-mapper parse rescues
 - Weak-edge runtime A/B: semantic IR `10/10`, `1.000` avg score, `0` non-mapper parse rescues
 - Lava v5 source-record alignment rerun: `60/60` parsed, `60/60` domain selector,

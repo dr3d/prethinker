@@ -46,7 +46,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 
 ## Recent Frontier Results
 
-- Full pytest after Sable dependency-composition instrumentation: `475 passed, 2 subtests passed`.
+- Current full-suite verification: `568 passed, 2 subtests passed`.
 - Iron Harbor: `86 exact / 14 partial / 0 miss` on a full 100-question source-document battery, with `0` write proposals during post-ingestion QA.
 - Blackthorn: baseline first-20 was `2 exact / 1 partial / 17 miss`; current diagnostic lanes include BTC-022 at `82 / 9 / 9` full-100 and BTC-027 at `85 / 4 / 11`. These are different configurations, so compare within lane rather than treating one number as a universal replacement.
 - Kestrel: profile-guided KCL-016 reached `73 exact / 11 partial / 16 miss` full-100 with `0` write proposals. Cold/source-aware evidence remains much lower, and the distinction is intentional.
@@ -80,14 +80,11 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
   duplicate body predicates that share multiple variables without distinct
   literal role anchors are unsupported fragments, while anchored Avalon-style
   multi-condition clauses remain allowed.
-- Incoming challenge fixtures are staged under `tmp/incoming_staged` with
-  source/question files separated from `oracle.jsonl`. The first five-fixture
-  incoming smoke scorecard is generated at
-  `tmp/incoming_smoke_summaries/scorecard.{json,md}`: `5/5` fixtures compiled
-  after Copperfall recovered through the compact profile retry path, and the
-  batch scored `44 exact / 4 partial / 2 miss` over `50` no-answer QA rows with
-  `0` write proposals. Classified non-exacts are dominated by compile-surface
-  gaps (`5`), with one hybrid join gap.
+- The five challenge fixtures that arrived through `tmp/incoming` are now
+  promoted into `datasets/story_worlds/`; `tmp/incoming*` is intake/staging
+  only. Their first smoke scorecard remains useful historical evidence:
+  `5/5` fixtures compiled, `44 exact / 4 partial / 2 miss` over `50`
+  no-answer QA rows, and `0` write proposals.
 - Incoming scorecard comparison is now an instrument gate:
   `scripts/compare_incoming_smoke_scorecards.py` compares baseline and
   candidate scorecards without source-prose interpretation. The first candidate
@@ -438,11 +435,11 @@ Domain/data lanes:
 
 ## Verification Snapshot
 
-**Current headline:** the lean full pytest suite is `539 passed`. The current research center is semantic parallax: multi-pass semantic compilation, mapper-admitted safe-surface accumulation, rule-lens promotion trials, row-level activation, clarification eagerness under an explicit authority boundary, and stenographer-mode stream simulation.
+**Current headline:** the lean full pytest suite is `568 passed, 2 subtests passed`. The current research center is semantic parallax: multi-pass semantic compilation, mapper-admitted safe-surface accumulation, rule-lens promotion trials, row-level activation, clarification eagerness under an explicit authority boundary, and stenographer-mode stream simulation.
 
 Recent verified results:
 
-- Post-move preflight on `C:\prethinker`: full pytest is `464 passed`. Sable Creek produced the first fresh-fixture promotion-ready rule under the stricter rule gates, then SC-005 exposed a probe role-policy issue where the rule preserved a more precise source anchor than the authored probe expected. Avalon AG-012 added a body-fact acquisition step for `required_condition/2`; aligned body facts plus a Rule 8 lens yielded `4` promotion-ready rules with `4/4` positive probes, `2/2` negative probes, and `0` semantic shortcut findings. CET-013 reran source-context CE after the rule-admission changes and held `40/40` correct with `0` unsafe candidates and `0` context-write violations. The newest harness addition is stenographer-mode stream accounting in `scripts/run_gateway_turnset.py`, covering pending state, queued clarification counts, delayed clarification commits, segment holds, and authored expectation checks.
+- Historical post-move preflight on `C:\prethinker`: an earlier branch point had full pytest at `464 passed`. Sable Creek produced the first fresh-fixture promotion-ready rule under the stricter rule gates, then SC-005 exposed a probe role-policy issue where the rule preserved a more precise source anchor than the authored probe expected. Avalon AG-012 added a body-fact acquisition step for `required_condition/2`; aligned body facts plus a Rule 8 lens yielded `4` promotion-ready rules with `4/4` positive probes, `2/2` negative probes, and `0` semantic shortcut findings. CET-013 reran source-context CE after the rule-admission changes and held `40/40` correct with `0` unsafe candidates and `0` context-write violations. The newest harness addition is stenographer-mode stream accounting in `scripts/run_gateway_turnset.py`, covering pending state, queued clarification counts, delayed clarification commits, segment holds, and authored expectation checks.
 - Dulse Ledger replay: DL-003 exposed a repeated broad-skeleton JSON failure that compile health correctly marked `poor`; DL-004 moved the broad skeleton to compact `source_pass_ops_v1`, producing `51` flat-skeleton rows and improving full QA from the original `27 exact / 7 partial / 6 miss` baseline to `27 exact / 11 partial / 2 miss`. DL-005 then used the non-oracle row-level selector over the baseline and compact-flat evidence modes to reach `32 exact / 6 partial / 2 miss`. This is a harness-level gain, not fixture-specific Python language handling.
 - Oxalis Recall replay: the same compact flat-skeleton change transferred to a safety-adjacent regulatory fixture. OX-003 produced a healthy compile with `91` admitted operations, `4` skips, and full QA `27 exact / 8 partial / 5 miss`, up from the original OX-001 `16 exact / 9 partial / 15 miss`.
 - Iron Harbor full 100-question source-document run: `86 exact / 14 partial / 0 miss`, `100/100` parsed OK, `100/100` query rows, `0` runtime load errors, and `0` write proposals during post-ingestion QA. The compiled KB used `179` admitted operations and `116` unique facts, preserving roles, facilities, policy requirements, witness statements, reported events, disclosures, correction filings, and statement details in the same source surface.
@@ -492,13 +489,13 @@ If you read 3 things:
 
 If you have an hour:
 
-1. `docs/FRONTIER_PROGRESS_REPORT.md`
-2. `docs/CLARIFICATION_EAGERNESS_STRATEGY.md`
-3. `docs/CURRENT_UTTERANCE_PIPELINE.md`
-4. `docs/SEMANTIC_IR_MAPPER_SPEC.md`
-5. `docs/CONTEXT_CONTROL_ARCHITECTURE_BRIEF.md`
-6. `docs/PRETHINK_GATEWAY_MVP.md`
-7. `AGENT-README.md`
+1. `PROJECT_STATE.md`
+2. `docs/ACTIVE_RESEARCH_LANES.md`
+3. `docs/CURRENT_HARNESS_INSTRUMENT.md`
+4. `docs/PUBLIC_DOCS_GUIDE.md`
+5. `docs/EXPLAINER.md`
+6. `docs/FRONTIER_PROGRESS_REPORT.md`
+7. `docs/CLARIFICATION_EAGERNESS_STRATEGY.md`
 
 Deep dives:
 
