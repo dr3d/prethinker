@@ -290,3 +290,12 @@ miss-control improvement over the previous guarded replay. Sable stayed at
 `25 exact / 6 partial / 9 miss` with `37/40` best choices, so Sable still
 prefers direct selection. The daily-driver lesson is row-gated activation with
 explicit risk gates, not blanket guarded activation.
+
+The promoted story-world full-40 replay is now the next generalization score.
+Using `scripts/plan_story_world_fixture_runs.py`, all five promoted challenge
+fixtures compiled and scored `154 exact / 20 partial / 26 miss` across `200`
+QA rows, with `0` write proposals. Failure classification reduced the active
+repair queue to `46` rows: `39` compile-surface gaps and `7` helper/query-join
+gaps. This redirects the next frontier away from selector prompting and toward
+scoped source-surface acquisition, especially Larkspur state/custody/rationale
+coverage.

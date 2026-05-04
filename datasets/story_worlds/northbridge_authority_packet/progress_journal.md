@@ -160,3 +160,32 @@ Lesson:
 
 The row-gated selector can safely combine scoped-evidence and hydrant-spacing
 compile views across the whole first-10 slice.
+
+## NAP-006 - Promoted Story-World Full-40 Run
+
+Date: 2026-05-04
+
+Evidence lane: `cold_unseen_full40`
+
+Mode: promoted story-world cold compile plus evidence-bundle QA, followed by
+failure-surface classification for non-exact rows.
+
+Artifacts:
+
+- Scorecard: `tmp/story_world_full40_classified_scorecards/scorecard.md`
+- Repair targets: `tmp/story_world_full40_classified_scorecards/compile_repair_targets.md`
+
+Result:
+
+- Compile: `105` admitted operations, `4` skips.
+- Compile health: `healthy`.
+- QA full-40 after classification merge: `31 exact / 3 partial / 6 miss`.
+- Failure surfaces: `8` compile-surface gaps and `1` helper/query-join gap.
+- Safety: `0` write-proposal rows.
+
+Lesson:
+
+Northbridge's full-40 frontier is mostly source-surface authority and
+requirement coverage: hydrants, votes, conflict control, inspection authority,
+customer impacts, and penalty/timeline details. The single helper/query-join
+gap is the affordability question.

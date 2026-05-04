@@ -151,3 +151,34 @@ Lesson:
 
 The row-gated selector can safely combine the Larkspur baseline and
 attribute/duty companion views across the whole first-10 slice.
+
+## LCF-006 - Promoted Story-World Full-40 Run
+
+Date: 2026-05-04
+
+Evidence lane: `cold_unseen_full40`
+
+Mode: promoted story-world cold compile plus evidence-bundle QA, followed by
+failure-surface classification for non-exact rows.
+
+Artifacts:
+
+- Scorecard: `tmp/story_world_full40_classified_scorecards/scorecard.md`
+- Repair targets: `tmp/story_world_full40_classified_scorecards/compile_repair_targets.md`
+
+Result:
+
+- Compile: `174` admitted operations, `41` skips.
+- Compile health: `healthy`; profile scoring still flagged unknown
+  `event_record/2` risk in the compile output.
+- QA full-40 after classification merge: `20 exact / 7 partial / 13 miss`.
+- Failure surfaces: `20` compile-surface gaps.
+- Safety: `0` write-proposal rows.
+
+Lesson:
+
+Larkspur is the current story-world generalization frontier. First-10 row-gated
+selection worked, but full-40 reveals broader missing source surface around
+object state, custody, repair/permission rationale, motive, and final-state
+questions. The next repair should be a scoped source-surface pass for event
+state transitions and causal chains, not a broader selector prompt.

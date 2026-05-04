@@ -352,6 +352,12 @@ testing whether those gains transfer:
   misses by one but still trailing protected miss control; Sable stayed at
   `25 / 6 / 9` and still prefers direct selection. The guard is useful harness
   machinery, but not a global selector default.
+- The same promoted incoming fixtures were then replayed as normal story-world
+  full-40 subjects. The classified scorecard is `154 / 20 / 26` over `200` rows
+  with `0` write proposals, and the repair queue is now `39` compile-surface
+  gaps plus `7` helper/query-join gaps. Larkspur is the hard source-surface
+  generalization case; Meridian and Northbridge add smaller rule/quantity join
+  pressure.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 

@@ -191,6 +191,12 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
   guarded replay; Sable stayed at `25 / 6 / 9` and `37/40`, so direct selection
   still wins there. Treat the guard as row-level harness machinery, not a
   global default policy.
+- Promoted story-world full-40 replay now gives the batch a broader scorecard:
+  all five fixtures compiled, `200/200` QA rows parsed, no runtime load errors,
+  and `0` write proposals. After failure-surface classification the scored
+  surface is `154 exact / 20 partial / 26 miss`; active repairs are `39`
+  compile-surface gaps and `7` helper/query-join gaps. The next frontier is
+  scoped source-surface acquisition, not broader selector prompting.
 - The five incoming challenge fixtures have been promoted into
   `datasets/story_worlds/` with standard source, QA, oracle-for-scoring,
   `progress_journal.md`, and `progress_metrics.jsonl` files. `tmp/incoming*`

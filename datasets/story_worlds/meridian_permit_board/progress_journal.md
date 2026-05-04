@@ -149,3 +149,31 @@ Lesson:
 
 The row-gated selector can safely combine scoped-evidence and spatial-distance
 compile views across the whole first-10 slice.
+
+## MPB-006 - Promoted Story-World Full-40 Run
+
+Date: 2026-05-04
+
+Evidence lane: `cold_unseen_full40`
+
+Mode: promoted story-world cold compile plus evidence-bundle QA, followed by
+failure-surface classification for non-exact rows.
+
+Artifacts:
+
+- Scorecard: `tmp/story_world_full40_classified_scorecards/scorecard.md`
+- Repair targets: `tmp/story_world_full40_classified_scorecards/compile_repair_targets.md`
+
+Result:
+
+- Compile: `126` admitted operations, `5` skips.
+- Compile health: `healthy`.
+- QA full-40 after classification merge: `27 exact / 8 partial / 5 miss`.
+- Failure surfaces: `8` compile-surface gaps and `5` helper/query-join gaps.
+- Safety: `0` write-proposal rows.
+
+Lesson:
+
+Meridian now separates into two repair lanes: source-surface coverage for
+materials, existing use, codification, and rule consequences; and helper/query
+composition for spatial/coverage computations and final rule-compliance joins.

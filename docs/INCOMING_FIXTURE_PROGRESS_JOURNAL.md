@@ -665,3 +665,47 @@ Ignored local artifact references:
 - `tmp/incoming_variant_selector_runs/incoming-variant-requirement-detail-first10.md`
 - `tmp/selector_policy_comparisons/avalon_guarded_activation_requirement_transfer.md`
 - `tmp/selector_policy_comparisons/sable_guarded_activation_requirement_transfer.md`
+
+## 2026-05-04 Promoted Story-World Full-40 Replay
+
+The five formerly incoming fixtures were replayed from their promoted
+`datasets/story_worlds/` homes using the story-world cold-run planner. This was
+not a first-10 selector overlay; it was a regular full-40 cold compile plus
+evidence-bundle QA pass, followed by failure-surface classification on the
+non-exact rows.
+
+Classified scorecard:
+
+```text
+fixtures compiled: 5 / 5
+qa rows: 200
+exact / partial / miss: 154 / 20 / 26
+write proposals: 0
+failure surfaces: 39 compile_surface_gap, 7 hybrid_join_gap
+repair targets: 46
+```
+
+Per fixture:
+
+| Fixture | Full-40 Result | Classified Repair Surface |
+| --- | ---: | --- |
+| `copperfall_deadline_docket` | `38 / 1 / 1` | `1` compile gap, `1` join gap |
+| `harrowgate_witness_file` | `38 / 1 / 1` | `2` compile gaps |
+| `larkspur_clockwork_fair` | `20 / 7 / 13` | `20` compile gaps |
+| `meridian_permit_board` | `27 / 8 / 5` | `8` compile gaps, `5` join gaps |
+| `northbridge_authority_packet` | `31 / 3 / 6` | `8` compile gaps, `1` join gap |
+
+Discovery: the first-10 row-gated result was real but narrow. Full-40
+generalization exposes a different frontier: mostly source-surface coverage,
+especially Larkspur object state/custody/rationale/final-state rows, with a
+smaller helper/query composition lane for Meridian spatial/coverage joins and
+Northbridge affordability. Selector work is not the next answer for this batch;
+scoped compile-surface acquisition is.
+
+Ignored local artifact references:
+
+- `tmp/story_world_runs/promoted_incoming_cold_run_plan.md`
+- `tmp/story_world_full40_scorecards/scorecard.md`
+- `tmp/story_world_full40_classified_scorecards/scorecard.md`
+- `tmp/story_world_full40_classified_scorecards/compile_repair_targets.md`
+- `tmp/story_world_failure_classification/*/*.json`

@@ -58,3 +58,32 @@ Lesson:
 Copperfall is a clean temporal-status/deadline smoke after compact profile retry.
 It should stay in the incoming calibration set as a regression guard for profile
 fallback recovery and deadline-status source coverage.
+
+## CFD-002 - Promoted Story-World Full-40 Run
+
+Date: 2026-05-04
+
+Evidence lane: `cold_unseen_full40`
+
+Mode: promoted story-world cold compile plus evidence-bundle QA, followed by
+failure-surface classification for non-exact rows.
+
+Artifacts:
+
+- Scorecard: `tmp/story_world_full40_classified_scorecards/scorecard.md`
+- Repair targets: `tmp/story_world_full40_classified_scorecards/compile_repair_targets.md`
+
+Result:
+
+- Compile: `129` admitted operations, `4` skips.
+- Compile health: `warning`.
+- Semantic progress: medium risk, `continue_only_with_named_expected_contribution`.
+- QA full-40 after classification merge: `38 exact / 1 partial / 1 miss`.
+- Failure surfaces: `1` compile-surface gap, `1` helper/query-join gap.
+- Safety: `0` write-proposal rows.
+
+Lesson:
+
+Copperfall remains a strong temporal-status fixture beyond the first ten rows.
+The remaining repairs are narrow: original-answer deadline source coverage and
+Orion reply-deadline helper/query composition.
