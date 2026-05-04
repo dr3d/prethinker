@@ -169,6 +169,11 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
   raw compile outputs. The current official-companion overlay yields `4`
   activation targets, `3` exact-protection targets, and marks both nonbaseline
   variants `unsafe_global_variant_row_gate_required`.
+- Guarded activation now treats relaxed-fallback-heavy and broad-row-volume
+  structural winners as uncertain instead of confident. On the seven incoming
+  variant calibration rows, the non-oracle selector improved to `6 exact / 1
+  partial / 0 miss` and `6/7` best choices. The remaining Northbridge q007
+  error needs requirement-detail relevance, not more row-volume scoring.
 - Incoming compile repair targets are now generated at
   `tmp/incoming_smoke_summaries/compile_repair_targets.{json,md}`. The current
   scoped-evidence queue is down to four partial rows: `3` scoped source-surface

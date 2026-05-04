@@ -547,6 +547,9 @@ def hybrid_selector(
         uncertain_reasons.append("top mode has a parse error")
     if warning_count:
         uncertain_reasons.append("top mode has warnings")
+    volume_trap_reason = structural_volume_trap_reason(scored)
+    if volume_trap_reason:
+        uncertain_reasons.append(volume_trap_reason)
     if not uncertain_reasons:
         selection = structural_selector(row=row, mode_labels=mode_labels)
         selection["selection_source"] = "hybrid_structural"
@@ -660,6 +663,23 @@ def structural_mode_scores(*, row: dict[str, Any], mode_labels: list[str]) -> li
         reverse=True,
     )
     return scored
+
+
+def structural_volume_trap_reason(scored: list[tuple[float, str, dict[str, Any]]]) -> str:
+    """Return an uncertainty reason when structural score is row-volume heavy."""
+    if len(scored) < 2:
+        return ""
+    _best_score, _best_label, best_quality = scored[0]
+    _second_score, _second_label, second_quality = scored[1]
+    direct_rows = int(best_quality.get("direct_rows", 0) or 0)
+    relaxed_rows = int(best_quality.get("relaxed_rows", 0) or 0)
+    top_volume = direct_rows + relaxed_rows
+    second_volume = int(second_quality.get("direct_rows", 0) or 0) + int(second_quality.get("relaxed_rows", 0) or 0)
+    if direct_rows > 0 and relaxed_rows >= 5 and relaxed_rows >= direct_rows * 3:
+        return "top structural score is dominated by relaxed fallback volume"
+    if top_volume >= 12 and second_volume > 0 and top_volume >= second_volume * 4:
+        return "top structural score is dominated by broad row-volume advantage"
+    return ""
 
 
 def structural_evidence_quality(evidence: dict[str, Any]) -> dict[str, Any]:

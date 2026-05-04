@@ -329,6 +329,12 @@ testing whether those gains transfer:
   Both nonbaseline variants are marked
   `unsafe_global_variant_row_gate_required`, so the current evidence says
   "train row-gated activation," not "promote a new global compile."
+- Guarded activation now has a structural volume-trap uncertainty trigger:
+  row-count-heavy or relaxed-fallback-heavy structural winners get sent to the
+  LLM selector instead of being treated as confident. On the seven incoming
+  variant calibration rows, this moved the non-oracle selector to `6 / 1 / 0`
+  with `6/7` best choices and no selector errors. The remaining Northbridge
+  q007 partial is a requirement-detail relevance problem, not a volume problem.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 

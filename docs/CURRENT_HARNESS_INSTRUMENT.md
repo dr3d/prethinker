@@ -233,3 +233,13 @@ repair targets. Both nonbaseline variants are labeled
 `unsafe_global_variant_row_gate_required`, which is exactly the current lesson:
 the selector should learn row-level activation with exact protection, not
 global variant promotion.
+
+The guarded selector now has a structural volume-trap uncertainty trigger. If
+the top structural score is inflated by relaxed fallback volume or broad row
+volume, guarded activation calls the LLM selector instead of treating row count
+as confidence. The trigger deliberately does not double-penalize relaxed-only
+baseline paths; those already carry ordinary uncertainty reasons. On the seven
+incoming variant calibration rows, this moved guarded activation from `3/7`
+best choices to `6/7`, scoring `6 exact / 1 partial / 0 miss`. The remaining
+miss is Northbridge q007, where the selector still prefers count-only agreement
+support over spacing-bearing hydrant support.

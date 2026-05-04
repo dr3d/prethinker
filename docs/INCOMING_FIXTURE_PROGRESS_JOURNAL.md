@@ -571,6 +571,34 @@ useful row-level lenses and both damage exact rows elsewhere. This gives the
 next selector pass a compact calibration set rather than another broad prompt
 change.
 
+The first selector replay over those seven rows exposed a specific structural
+failure. Plain structural selection reached only `2/7` best choices, and
+guarded activation reached `3/7`; Meridian stayed wrong because structural
+confidence was inflated by relaxed fallback volume and broad row-count volume.
+
+The guarded selector now treats those row-volume shapes as uncertainty triggers:
+
+```text
+variant calibration rows: 7
+guarded activation + volume gate: 6 exact / 1 partial / 0 miss
+selected best available mode: 6/7
+selector errors: 0
+```
+
+Per fixture:
+
+| Fixture | Result | Remaining Note |
+| --- | ---: | --- |
+| `larkspur_clockwork_fair` | `3 / 0 / 0` | q007 and q010 now route through LLM; q009 stays structural. |
+| `meridian_permit_board` | `2 / 0 / 0` | relaxed/broad volume trap sends both rows to activation. |
+| `northbridge_authority_packet` | `1 / 1 / 0` | q004 exact is protected; q007 still needs better requirement-detail relevance. |
+
+Discovery: the selector can now approximate most of the judged overlay without
+oracle labels, but the remaining problem is not volume. It is answer-bearing
+detail relevance: "12 new hydrants" is true but partial when the question asks
+what the agreement requires regarding hydrants and the variant has spacing
+support.
+
 Ignored local artifact references:
 
 - `tmp/incoming_smoke_summaries_larkspur_attribute_duty_variant/scorecard.md`
@@ -580,3 +608,4 @@ Ignored local artifact references:
 - `tmp/incoming_smoke_summaries_official_companion_overlay/scoped_evidence_comparison.md`
 - `tmp/incoming_smoke_summaries_official_companion_overlay/compile_variant_overlay_plan.md`
 - `tmp/incoming_smoke_summaries_official_companion_overlay/variant_selector_training_plan.md`
+- `tmp/incoming_variant_selector_runs/incoming-variant-volume-gate-v2.md`

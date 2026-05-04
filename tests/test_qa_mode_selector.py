@@ -9,7 +9,9 @@ from scripts.select_qa_mode_without_oracle import (
     merge_qa_records,
     protected_selector,
     score_selection,
+    structural_mode_scores,
     structural_selector,
+    structural_volume_trap_reason,
 )
 
 
@@ -209,6 +211,110 @@ def test_hybrid_selector_calls_model_when_structural_choice_is_uncertain() -> No
     assert selected["selected_mode"] == "evidence"
     assert selected["selection_source"] == "hybrid_llm"
     assert selected["structural_uncertainty_reasons"]
+
+
+def test_hybrid_selector_calls_model_when_relaxed_volume_dominates() -> None:
+    row = {
+        "id": "q004b",
+        "modes": [
+            {
+                "mode": "broad",
+                "query_evidence": {
+                    "executed_results": [
+                        {
+                            "status": "success",
+                            "num_rows": 1,
+                            "predicate": "broad_row",
+                            "was_relaxed_fallback": False,
+                        },
+                        {
+                            "status": "success",
+                            "num_rows": 8,
+                            "predicate": "broad_row",
+                            "was_relaxed_fallback": True,
+                        },
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+            {
+                "mode": "focused",
+                "query_evidence": {
+                    "executed_results": [
+                        {
+                            "status": "success",
+                            "num_rows": 1,
+                            "predicate": "focused_row",
+                            "was_relaxed_fallback": False,
+                        }
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+        ],
+    }
+    fallback_calls = 0
+
+    def fallback_selector(**_kwargs):
+        nonlocal fallback_calls
+        fallback_calls += 1
+        return {"selected_mode": "focused", "selection_confidence": 0.7}
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["broad", "focused"],
+        margin=1.0,
+        min_score=3.0,
+        fallback_selector=fallback_selector,
+    )
+
+    assert fallback_calls == 1
+    assert selected["selected_mode"] == "focused"
+    assert "relaxed fallback volume" in selected["structural_uncertainty_reasons"][0]
+
+
+def test_volume_trap_does_not_double_penalize_relaxed_only_baseline() -> None:
+    row = {
+        "id": "q004c",
+        "modes": [
+            {
+                "mode": "baseline",
+                "query_evidence": {
+                    "executed_results": [
+                        {
+                            "status": "success",
+                            "num_rows": 8,
+                            "predicate": "fallback_row",
+                            "was_relaxed_fallback": True,
+                        }
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+            {
+                "mode": "variant",
+                "query_evidence": {
+                    "executed_results": [
+                        {
+                            "status": "success",
+                            "num_rows": 1,
+                            "predicate": "direct_row",
+                            "was_relaxed_fallback": False,
+                        }
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+        ],
+    }
+
+    scored = structural_mode_scores(row=row, mode_labels=["baseline", "variant"])
+
+    assert structural_volume_trap_reason(scored) == ""
 
 
 def test_hybrid_selector_falls_back_to_structural_when_model_fails() -> None:
