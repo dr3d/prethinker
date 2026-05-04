@@ -556,6 +556,27 @@ def hybrid_selector(
     rationale_trap_reason = structural_rationale_contrast_trap_reason(row=row, scored=scored)
     if rationale_trap_reason:
         uncertain_reasons.append(rationale_trap_reason)
+    baseline_guard_reason = structural_baseline_answer_surface_guard_reason(
+        row=row,
+        scored=scored,
+        mode_labels=mode_labels,
+        structural_choice=structural_choice,
+    )
+    if baseline_guard_reason:
+        selection = structural_selector(row=row, mode_labels=mode_labels)
+        selection["selected_mode"] = mode_labels[0] if mode_labels else structural_choice
+        selection["selection_source"] = "hybrid_structural"
+        selection["hybrid_decision"] = "structural_baseline_answer_surface_guard"
+        selection["structural_candidate"] = structural_choice
+        selection["structural_score"] = round(float(best_score), 3)
+        selection["structural_margin"] = round(score_margin, 3)
+        selection["structural_uncertainty_reasons"] = uncertain_reasons
+        selection["baseline_guard_reason"] = baseline_guard_reason
+        selection["rationale"] = baseline_guard_reason
+        selection.setdefault("risks", []).append(
+            "baseline guard overrode a broad or self-check-heavy candidate surface"
+        )
+        return selection
     if not uncertain_reasons:
         selection = structural_selector(row=row, mode_labels=mode_labels)
         selection["selection_source"] = "hybrid_structural"
@@ -647,6 +668,60 @@ def _quality_for_label(scored: list[tuple[float, str, dict[str, Any]]], label: s
         if candidate_label == label:
             return quality
     return {}
+
+
+def structural_baseline_answer_surface_guard_reason(
+    *,
+    row: dict[str, Any],
+    scored: list[tuple[float, str, dict[str, Any]]],
+    mode_labels: list[str],
+    structural_choice: str,
+) -> str:
+    """Return a reason to keep baseline when a variant has answer-surface mismatch risk."""
+    if len(scored) < 2 or not mode_labels:
+        return ""
+    baseline_label = mode_labels[0]
+    baseline_quality = _quality_for_label(scored, baseline_label)
+    if not baseline_quality:
+        return ""
+    question = str(row.get("question", "")).casefold()
+    baseline_predicates = set(baseline_quality.get("predicate_names", []) or [])
+    top_quality = _quality_for_label(scored, structural_choice)
+    top_predicates = set(top_quality.get("predicate_names", []) or [])
+    baseline_direct = int(baseline_quality.get("direct_rows", 0) or 0)
+    if baseline_direct <= 0:
+        return ""
+
+    identity_markers = ["who is ", "who was ", "who were "]
+    identity_predicates = {"alias", "full_name", "name", "person_name", "preferred_name", "registered_as"}
+    broad_action_predicates = {"event_actor", "event_occurs"}
+    if (
+        structural_choice != baseline_label
+        and any(marker in question for marker in identity_markers)
+        and baseline_predicates.intersection(identity_predicates)
+        and top_predicates.intersection(broad_action_predicates)
+    ):
+        return "identity question has baseline name/role support and candidate is broad action-heavy"
+
+    award_markers = ["who won", "won first", "won second", "first place", "second place", "recognition", "award"]
+    if (
+        structural_choice != baseline_label
+        and any(marker in question for marker in award_markers)
+        and "awarded" in baseline_predicates
+        and "awarded" not in top_predicates
+    ):
+        return "award/result question has baseline awarded support and candidate lacks awarded rows"
+
+    status_markers = ["exhibition status", "eligibility", "eligible", "status at closing"]
+    direct_status_predicates = {"disqualified_from", "eligible_for", "exhibition_status", "rule_applies_to"}
+    if (
+        structural_choice == baseline_label
+        and any(marker in question for marker in status_markers)
+        and baseline_predicates.intersection(direct_status_predicates)
+    ):
+        return "status question has direct baseline status/rule support"
+
+    return ""
 
 
 def structural_mode_scores(*, row: dict[str, Any], mode_labels: list[str]) -> list[tuple[float, str, dict[str, Any]]]:
@@ -879,6 +954,7 @@ def score_selection(row: dict[str, Any], selection: dict[str, Any], error: str) 
         "structural_score": selection.get("structural_score"),
         "structural_margin": selection.get("structural_margin"),
         "structural_uncertainty_reasons": selection.get("structural_uncertainty_reasons", []),
+        "baseline_guard_reason": selection.get("baseline_guard_reason", ""),
         "hybrid_llm_error": selection.get("hybrid_llm_error", ""),
         "evidence_quality_by_mode": selection.get("evidence_quality_by_mode", []),
         "rationale": selection.get("rationale", ""),
@@ -929,8 +1005,8 @@ def render_markdown(report: dict[str, Any]) -> str:
         "",
         "## Rows",
         "",
-        "| Row | Source | Selected | Selected Verdict | Best | Mode Verdicts | Note |",
-        "| --- | --- | --- | --- | --- | --- | --- |",
+        "| Row | Source | Selected | Selected Verdict | Best | Mode Verdicts | Note | Guard |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- |",
     ]
     for row in report.get("rows", []):
         if not isinstance(row, dict):
@@ -941,8 +1017,11 @@ def render_markdown(report: dict[str, Any]) -> str:
         if row.get("error"):
             note = f"error: {row.get('error')}"
         source = str(row.get("selection_source", "") or "")
+        guard = str(row.get("baseline_guard_reason", "") or "")
         lines.append(
-            f"| `{row.get('id', '')}` | `{source}` | `{row.get('selected_mode', '')}` | `{row.get('selected_verdict', '')}` | `{','.join(row.get('best_labels', []))}` | {verdict_text} | {note} |"
+            f"| `{row.get('id', '')}` | `{source}` | `{row.get('selected_mode', '')}` | "
+            f"`{row.get('selected_verdict', '')}` | `{','.join(row.get('best_labels', []))}` | "
+            f"{verdict_text} | {note} | {guard} |"
         )
     return "\n".join(lines).rstrip() + "\n"
 

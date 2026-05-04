@@ -370,6 +370,15 @@ testing whether those gains transfer:
   reaches `23 / 8 / 9` across Larkspur full-40 with `39/40` best choices and no
   selector errors. The gate protects who-is rows when a competing mode has
   explicit name support.
+- The next Larkspur permission/rationale lens is much stronger as a row-gated
+  compile variant: baseline is `20 / 7 / 13`, the variant alone reaches
+  `31 / 3 / 6`, and the judged overlay target is `37 / 2 / 1`. The first
+  guarded selector reached `34 / 4 / 2` with three exact-row protection misses. Adding
+  answer-surface baseline guards for identity/action-volume, award/result, and
+  direct status/rule rows now reaches the overlay upper bound: `37 / 2 / 1`,
+  `40/40` best choices, `0` selector errors. This is the cleanest current
+  demonstration that focused acquisition and selector guardrails can compose
+  without Python prose interpretation.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 

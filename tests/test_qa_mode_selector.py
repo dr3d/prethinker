@@ -10,6 +10,7 @@ from scripts.select_qa_mode_without_oracle import (
     protected_selector,
     score_selection,
     selector_system_prompt,
+    structural_baseline_answer_surface_guard_reason,
     structural_identity_completeness_trap_reason,
     structural_mode_scores,
     structural_rationale_contrast_trap_reason,
@@ -462,6 +463,225 @@ def test_hybrid_selector_calls_model_for_rationale_contrast_trap() -> None:
     assert fallback_calls == 1
     assert selected["selected_mode"] == "baseline"
     assert "explicit rationale support" in selected["structural_uncertainty_reasons"][0]
+
+
+def test_hybrid_selector_keeps_baseline_for_broad_identity_action_override() -> None:
+    row = {
+        "id": "q004f",
+        "question": "Who is Fair Warden Osric Thane?",
+        "modes": [
+            {
+                "mode": "baseline",
+                "query_evidence": {
+                    "executed_results": [
+                        {
+                            "status": "success",
+                            "num_rows": 1,
+                            "predicate": "person_name",
+                            "was_relaxed_fallback": False,
+                        },
+                        {
+                            "status": "success",
+                            "num_rows": 1,
+                            "predicate": "registered_as",
+                            "was_relaxed_fallback": False,
+                        },
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+            {
+                "mode": "permission_rationale",
+                "query_evidence": {
+                    "executed_results": [
+                        {
+                            "status": "success",
+                            "num_rows": 8,
+                            "predicate": "event_actor",
+                            "was_relaxed_fallback": False,
+                        },
+                        {
+                            "status": "success",
+                            "num_rows": 1,
+                            "predicate": "person_role",
+                            "was_relaxed_fallback": False,
+                        },
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+        ],
+    }
+
+    fallback_calls = 0
+
+    def fallback_selector(**_kwargs):
+        nonlocal fallback_calls
+        fallback_calls += 1
+        return {"selected_mode": "permission_rationale"}
+
+    scored = structural_mode_scores(row=row, mode_labels=["baseline", "permission_rationale"])
+    assert structural_baseline_answer_surface_guard_reason(
+        row=row,
+        scored=scored,
+        mode_labels=["baseline", "permission_rationale"],
+        structural_choice="permission_rationale",
+    )
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["baseline", "permission_rationale"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=fallback_selector,
+    )
+
+    assert fallback_calls == 0
+    assert selected["selected_mode"] == "baseline"
+    assert selected["hybrid_decision"] == "structural_baseline_answer_surface_guard"
+    assert "broad action-heavy" in selected["baseline_guard_reason"]
+
+
+def test_hybrid_selector_keeps_baseline_for_explicit_awarded_support() -> None:
+    row = {
+        "id": "q004g",
+        "question": "Who won second place?",
+        "modes": [
+            {
+                "mode": "baseline",
+                "query_evidence": {
+                    "executed_results": [
+                        {
+                            "status": "success",
+                            "num_rows": 1,
+                            "predicate": "awarded",
+                            "was_relaxed_fallback": False,
+                        }
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+            {
+                "mode": "permission_rationale",
+                "query_evidence": {
+                    "executed_results": [
+                        {
+                            "status": "success",
+                            "num_rows": 9,
+                            "predicate": "person_name",
+                            "was_relaxed_fallback": False,
+                        },
+                        {
+                            "status": "success",
+                            "num_rows": 9,
+                            "predicate": "device_state",
+                            "was_relaxed_fallback": True,
+                        },
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+        ],
+    }
+
+    fallback_calls = 0
+
+    def fallback_selector(**_kwargs):
+        nonlocal fallback_calls
+        fallback_calls += 1
+        return {"selected_mode": "permission_rationale"}
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["baseline", "permission_rationale"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=fallback_selector,
+    )
+
+    assert fallback_calls == 0
+    assert selected["selected_mode"] == "baseline"
+    assert "awarded support" in selected["baseline_guard_reason"]
+
+
+def test_hybrid_selector_keeps_direct_status_rule_support() -> None:
+    row = {
+        "id": "q004h",
+        "question": "What is the exhibition status of the Moth Lantern at closing?",
+        "modes": [
+            {
+                "mode": "baseline",
+                "query_evidence": {
+                    "executed_results": [
+                        {
+                            "status": "success",
+                            "num_rows": 2,
+                            "predicate": "disqualified_from",
+                            "was_relaxed_fallback": False,
+                        },
+                        {
+                            "status": "success",
+                            "num_rows": 1,
+                            "predicate": "rule_applies_to",
+                            "was_relaxed_fallback": False,
+                        },
+                        {
+                            "status": "success",
+                            "num_rows": 9,
+                            "predicate": "device_state",
+                            "was_relaxed_fallback": True,
+                        },
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+            {
+                "mode": "permission_rationale",
+                "query_evidence": {
+                    "executed_results": [
+                        {
+                            "status": "success",
+                            "num_rows": 1,
+                            "predicate": "device_state",
+                            "was_relaxed_fallback": True,
+                        },
+                        {
+                            "status": "success",
+                            "num_rows": 1,
+                            "predicate": "ruling_basis",
+                            "was_relaxed_fallback": True,
+                        },
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+        ],
+    }
+
+    fallback_calls = 0
+
+    def fallback_selector(**_kwargs):
+        nonlocal fallback_calls
+        fallback_calls += 1
+        return {"selected_mode": "permission_rationale"}
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["baseline", "permission_rationale"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=fallback_selector,
+    )
+
+    assert fallback_calls == 0
+    assert selected["selected_mode"] == "baseline"
+    assert "status/rule support" in selected["baseline_guard_reason"]
 
 
 def test_activation_prompt_mentions_requirement_detail_completeness() -> None:

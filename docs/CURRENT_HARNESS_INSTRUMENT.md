@@ -180,6 +180,15 @@ The immediate transfer check was mixed: Avalon preferred `protected` for miss
 control, and Sable still preferred `direct`. Guarded activation is therefore a
 named diagnostic policy, not a global daily-driver selector.
 
+Guarded activation now also includes named answer-surface baseline guards:
+identity questions with broad action-heavy candidate overrides, award/result
+questions where baseline has explicit `awarded` support, and status questions
+where baseline has direct status/rule predicates. These guards are named for
+the reason they exist rather than the fixture that exposed them. On the
+Larkspur permission/rationale full-40 pair, they moved guarded activation from
+`34 / 4 / 2` and `37/40` best choices to the judged row-gated upper bound:
+`37 / 2 / 1`, `40/40` best choices, and `0` selector errors.
+
 `scripts/plan_selector_risk_gate.py` is the risk-gate planner for that lesson.
 It reads selector-run artifacts plus optional selector-policy transfer
 comparisons and splits rows into `safe_activation_target`,

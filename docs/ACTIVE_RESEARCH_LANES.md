@@ -96,6 +96,15 @@ when the partial-skeleton recovery instruction was global. Keep that recovery
 scoped to ledger-backed narrative passes until another unlike fixture shows
 positive transfer.
 
+Larkspur update: the URL-fixed permission/rationale acquisition lens is a
+strong row-gated source-surface variant, not a global compile. It scores
+`31 / 3 / 6` alone against the `20 / 7 / 13` baseline, with a judged row-gated
+upper bound of `37 / 2 / 1`. Guarded activation now reaches that upper bound
+with `40/40` best choices after adding answer-surface baseline guards for
+identity/action-volume, award/result, and direct status/rule rows. This is the
+current best example of using a focused compile lens while protecting exact
+baseline rows.
+
 Activation update: query-mode selection now has deterministic structural and
 hybrid structural+LLM controls. The hybrid path saves LLM calls on confident
 rows and reached Avalon's Rule8 comparison upper bound (`27 exact / 12 partial

@@ -409,3 +409,60 @@ damages exact rows, but it gives a serious row-gated variant. The next harness
 step should compare it against baseline and targeted-state modes with exact-row
 protection, then decide whether the new rescues are selector-learnable without
 judge labels.
+
+## LCF-012 - Permission/Rationale Row-Gated Selector Lift
+
+Date: 2026-05-04
+
+Evidence lane: `selector_calibration_full40`
+
+Mode: guarded activation over the archived baseline full-40 QA artifact and the
+URL-fixed permission/rationale full-40 QA artifact, with answer-surface baseline
+guards added to the selector.
+
+Artifacts:
+
+- Judged overlay upper bound:
+  `tmp/story_world_larkspur_acquisition/permission_rationale_overlay_plan.md`
+- Original guarded selector diagnostic:
+  `tmp/story_world_larkspur_acquisition/permission_rationale_guarded_selector.md`
+- Revised guarded selector diagnostic:
+  `tmp/story_world_larkspur_acquisition/permission_rationale_guarded_selector_baseline_guard.md`
+
+Result:
+
+```text
+baseline full-40:                         20 exact / 7 partial / 13 miss
+permission/rationale variant alone:       31 exact / 3 partial / 6 miss
+judged row-gated upper bound:             37 exact / 2 partial / 1 miss
+original guarded selector:                34 exact / 4 partial / 2 miss
+guarded selector + baseline guardrails:   37 exact / 2 partial / 1 miss
+selected best available mode:             40/40
+selector errors:                          0
+```
+
+Guardrails added:
+
+- `identity question has baseline name/role support and candidate is broad action-heavy`
+- `award/result question has baseline awarded support and candidate lacks awarded rows`
+- `status question has direct baseline status/rule support`
+
+The guardrails repaired the three selector mistakes from the first
+permission/rationale selector pass:
+
+| Row | Previous Choice | Revised Choice | Guard |
+| --- | --- | --- | --- |
+| `q009` | `permission_rationale` partial | `baseline` exact | identity/action-volume |
+| `q018` | `permission_rationale` partial | `baseline` exact | direct status/rule support |
+| `q032` | `permission_rationale` miss | `baseline` exact | explicit awarded support |
+
+Lesson:
+
+The permission/rationale acquisition lens is not a global compile replacement,
+but the harness can now use it as a row-gated source-surface variant without
+reading source prose, answer keys, judge labels, failure labels, gold KBs, or
+strategy files in selector input. The important design shape is not
+"Larkspur-specific protection"; it is answer-surface mismatch protection:
+identity, award/result, and direct status/rule questions should not be
+overridden by broader candidate evidence merely because that evidence has more
+rows or more persuasive self-check narration.
