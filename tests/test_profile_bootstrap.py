@@ -53,6 +53,8 @@ class ProfileBootstrapTests(unittest.TestCase):
         self.assertIn("source-record loss", PROFILE_BOOTSTRAP_REVIEW_GUIDANCE)
         self.assertIn("reporter loss", PROFILE_BOOTSTRAP_REVIEW_GUIDANCE)
         self.assertIn("conditional-rule loss", PROFILE_BOOTSTRAP_REVIEW_GUIDANCE)
+        self.assertIn("candidate_predicates[].args must be short schema role labels only", PROFILE_BOOTSTRAP_GUIDANCE)
+        self.assertIn("entity_type_N counters", PROFILE_BOOTSTRAP_GUIDANCE)
 
     def test_document_intake_registries_are_narrow_and_fact_free(self) -> None:
         fixture_dir = Path("datasets/profile_bootstrap/samples/document_intake")

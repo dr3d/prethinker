@@ -27,6 +27,82 @@ DEFAULT_OUT_DIR = REPO_ROOT / "tmp" / "domain_bootstrap_file"
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+PROFILE_SIGNATURE_ROSTER_JSON_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": [
+        "schema_version",
+        "domain_guess",
+        "domain_scope",
+        "confidence",
+        "source_summary",
+        "entity_types",
+        "candidate_signatures",
+        "repeated_structures",
+        "admission_risks",
+        "clarification_policy",
+        "unsafe_transformations",
+        "self_check",
+    ],
+    "properties": {
+        "schema_version": {"type": "string", "const": "profile_signature_roster_v1"},
+        "domain_guess": {"type": "string"},
+        "domain_scope": {"type": "string"},
+        "confidence": {"type": "number"},
+        "source_summary": {"type": "array", "maxItems": 3, "items": {"type": "string", "maxLength": 220}},
+        "entity_types": {
+            "type": "array",
+            "maxItems": 8,
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["name", "description"],
+                "properties": {
+                    "name": {"type": "string", "maxLength": 40},
+                    "description": {"type": "string", "maxLength": 180},
+                },
+            },
+        },
+        "candidate_signatures": {
+            "type": "array",
+            "maxItems": 48,
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["signature", "description", "admission_notes"],
+                "properties": {
+                    "signature": {"type": "string", "maxLength": 64, "pattern": "^[a-z][a-z0-9_]*/[1-5]$"},
+                    "description": {"type": "string", "maxLength": 180},
+                    "admission_notes": {"type": "array", "maxItems": 3, "items": {"type": "string", "maxLength": 160}},
+                },
+            },
+        },
+        "repeated_structures": {
+            "type": "array",
+            "maxItems": 4,
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["name", "record_predicate", "property_predicates"],
+                "properties": {
+                    "name": {"type": "string", "maxLength": 80},
+                    "record_predicate": {"type": "string", "maxLength": 64},
+                    "property_predicates": {"type": "array", "maxItems": 16, "items": {"type": "string", "maxLength": 64}},
+                },
+            },
+        },
+        "admission_risks": {"type": "array", "maxItems": 6, "items": {"type": "string", "maxLength": 180}},
+        "clarification_policy": {"type": "array", "maxItems": 6, "items": {"type": "string", "maxLength": 180}},
+        "unsafe_transformations": {"type": "array", "maxItems": 6, "items": {"type": "string", "maxLength": 180}},
+        "self_check": {
+            "type": "object",
+            "additionalProperties": False,
+            "required": ["notes"],
+            "properties": {"notes": {"type": "array", "maxItems": 6, "items": {"type": "string", "maxLength": 160}}},
+        },
+    },
+}
+
 NARRATIVE_SOURCE_COMPILER_CONTEXT_V1 = [
     "narrative_source_compiler_strategy_v1: Use this only for sources classified by the LLM intake plan or domain hint as story, narrative, fable, fiction, plot, or source-fidelity story-world material.",
     "Narrative source rule: compile the closed world of this source text. Do not import facts, character names, motives, objects, or endings from famous stories, genre priors, or likely variants.",
@@ -330,6 +406,7 @@ from src.semantic_ir import (  # noqa: E402
     call_semantic_ir,
     semantic_ir_to_legacy_parse,
 )
+from src.semantic_struggle import assess_semantic_progress  # noqa: E402
 
 
 def parse_args() -> argparse.Namespace:
@@ -524,9 +601,12 @@ def main() -> int:
     if not isinstance(parsed, dict):
         retry_sample = dict(sample)
         retry_context = list(sample.get("context", [])) if isinstance(sample.get("context"), list) else []
-        retry_context.append(
-            "Retry after invalid/truncated profile JSON: emit a compact profile with at most 80 unique predicate signatures. "
-            "Do not duplicate synonymous predicate surfaces; choose one canonical predicate for each role."
+        retry_context.extend(
+            _invalid_profile_retry_context(
+                parse_error=error,
+                raw_content=str(response.get("content", "")),
+                max_predicates=40,
+            )
         )
         retry_sample["context"] = retry_context
         retry_messages = build_profile_bootstrap_messages(samples=[retry_sample], domain_hint=str(args.domain_hint or ""))
@@ -540,7 +620,7 @@ def main() -> int:
             timeout=int(args.timeout),
             temperature=float(args.temperature),
             top_p=float(args.top_p),
-            max_tokens=min(int(args.max_tokens), 18000),
+            max_tokens=min(int(args.max_tokens), 9000),
         )
         retry_parsed, retry_error = parse_profile_bootstrap_json(str(retry_response.get("content", "")))
         profile_retry = {
@@ -552,6 +632,44 @@ def main() -> int:
         if isinstance(retry_parsed, dict):
             parsed = retry_parsed
             error = retry_error
+    profile_signature_roster_retry: dict[str, Any] | None = None
+    if not isinstance(parsed, dict) and not bool(args.use_profile_registry_direct):
+        roster_started = time.perf_counter()
+        roster_response = _call_lmstudio_json_schema(
+            base_url=str(args.base_url),
+            model=str(args.model),
+            messages=_build_profile_signature_roster_messages(
+                source_text=source_text,
+                source_name=text_path.name,
+                domain_hint=str(args.domain_hint or ""),
+                intake_plan=intake_plan,
+                parse_error=error,
+            ),
+            schema=PROFILE_SIGNATURE_ROSTER_JSON_SCHEMA,
+            schema_name="profile_signature_roster_v1",
+            timeout=int(args.timeout),
+            temperature=float(args.temperature),
+            top_p=float(args.top_p),
+            max_tokens=min(int(args.max_tokens), 5000),
+        )
+        try:
+            roster_parsed = json.loads(str(roster_response.get("content", "{}")))
+            roster_profile = _profile_from_signature_roster(roster_parsed)
+            roster_error = "" if roster_profile else "profile_signature_roster_empty"
+        except Exception as exc:
+            roster_parsed = {}
+            roster_profile = None
+            roster_error = str(exc)
+        profile_signature_roster_retry = {
+            "latency_ms": int((time.perf_counter() - roster_started) * 1000),
+            "parsed_ok": isinstance(roster_profile, dict),
+            "parse_error": roster_error,
+            "raw_content": str(roster_response.get("content", ""))[:12000],
+            "parsed": roster_parsed if isinstance(roster_parsed, dict) else {},
+        }
+        if isinstance(roster_profile, dict):
+            parsed = roster_profile
+            error = ""
     profile_review: dict[str, Any] | None = None
     profile_review_retry: dict[str, Any] | None = None
     if bool(args.review_profile) and isinstance(parsed, dict) and not bool(args.use_profile_registry_direct):
@@ -637,6 +755,8 @@ def main() -> int:
     }
     if profile_retry is not None:
         record["profile_retry"] = profile_retry
+    if profile_signature_roster_retry is not None:
+        record["profile_signature_roster_retry"] = profile_signature_roster_retry
     if profile_review is not None:
         record["profile_review"] = profile_review
     if profile_review_retry is not None:
@@ -744,6 +864,181 @@ def main() -> int:
         )
     )
     return 0
+
+
+def _invalid_profile_retry_context(*, parse_error: str, raw_content: str, max_predicates: int = 40) -> list[str]:
+    context = [
+        (
+            "Retry after invalid/truncated profile JSON: emit a compact profile with at most "
+            f"{max(1, int(max_predicates))} unique predicate signatures. Do not duplicate synonymous predicate "
+            "surfaces; choose one canonical predicate for each role."
+        ),
+        (
+            "Profile retry output budget: keep entity_types, source_summary, descriptions, why fields, admission_notes, "
+            "frontier cases, and self_check notes short. Complete source ingestion belongs to later Semantic IR passes."
+        ),
+        (
+            "Profile arg-role guardrail: candidate_predicates[].args are short structural role labels only, each under "
+            "32 characters. Use labels like case_id, party, role, date, status, amount, value, unit, source, or arg_1."
+        ),
+        (
+            "Never put source examples, entity ids, entity_type_N counters, generated numeric sequences, copied prose, "
+            "or alternative value lists inside candidate_predicates[].args."
+        ),
+    ]
+    lower_raw = str(raw_content or "").casefold()
+    if "entity_type_" in lower_raw or "_1_2_3_4" in lower_raw or "ref_entity_type" in lower_raw:
+        context.append(
+            "Previous failure signature: argument-role runaway was detected. Replace any giant role field with one "
+            "compact role label such as party, entity, or arg_N; do not continue a generated counter sequence."
+        )
+    if str(parse_error or "").strip():
+        context.append(f"Previous parse error: {str(parse_error).strip()[:240]}")
+    return context
+
+
+def _build_profile_signature_roster_messages(
+    *,
+    source_text: str,
+    source_name: str,
+    domain_hint: str,
+    intake_plan: dict[str, Any] | None,
+    parse_error: str,
+) -> list[dict[str, str]]:
+    payload = {
+        "task": "Emit profile_signature_roster_v1 JSON only as a degraded fallback profile surface.",
+        "source_name": source_name,
+        "domain_hint": domain_hint,
+        "raw_source_text": source_text,
+        "intake_plan_v1": intake_plan or {},
+        "previous_profile_parse_error": str(parse_error or "")[:240],
+        "rules": [
+            "This fallback proposes vocabulary only. It does not extract facts and does not authorize writes.",
+            "candidate_signatures contains predicate name/arity only plus short descriptions. Do not emit args.",
+            "Prefer reusable arity 2-4 predicates. Use arity 5 only when source identity, value, unit, and basis all need separate slots.",
+            "Include predicates for source identity, roles, records/events, dates/deadlines/status, corrections, rule records, and explicit details when the source needs them.",
+            "Keep every string short. Do not copy long source passages, entity lists, generated counters, or examples into schema slots.",
+        ],
+    }
+    return [
+        {
+            "role": "system",
+            "content": (
+                "You produce a compact predicate-signature roster for a governed semantic compiler. "
+                "You do not emit argument labels, facts, Prolog clauses, or answers. Return JSON only."
+            ),
+        },
+        {"role": "user", "content": "INPUT_JSON:\n" + json.dumps(payload, ensure_ascii=False, indent=2)},
+    ]
+
+
+def _profile_from_signature_roster(roster: dict[str, Any]) -> dict[str, Any] | None:
+    if not isinstance(roster, dict) or roster.get("schema_version") != "profile_signature_roster_v1":
+        return None
+    candidates: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for item in roster.get("candidate_signatures", []) if isinstance(roster.get("candidate_signatures"), list) else []:
+        if not isinstance(item, dict):
+            continue
+        signature = _normalized_signature(str(item.get("signature", "")))
+        if not signature or signature in seen:
+            continue
+        seen.add(signature)
+        arity = int(signature.rsplit("/", 1)[1])
+        candidates.append(
+            {
+                "signature": signature,
+                "args": [f"arg_{index}" for index in range(1, arity + 1)],
+                "description": str(item.get("description", "")).strip()[:400],
+                "why": "Recovered from compact signature-roster fallback after full profile JSON failed.",
+                "admission_notes": [
+                    str(note).strip()[:240]
+                    for note in item.get("admission_notes", [])
+                    if isinstance(item.get("admission_notes"), list) and str(note).strip()
+                ][:4],
+            }
+        )
+    if not candidates:
+        return None
+    entity_types = []
+    for item in roster.get("entity_types", []) if isinstance(roster.get("entity_types"), list) else []:
+        if not isinstance(item, dict):
+            continue
+        name = str(item.get("name", "")).strip()
+        if not name:
+            continue
+        entity_types.append(
+            {
+                "name": name,
+                "description": str(item.get("description", "")).strip(),
+                "examples": [],
+            }
+        )
+    repeated_structures = []
+    for item in roster.get("repeated_structures", []) if isinstance(roster.get("repeated_structures"), list) else []:
+        if not isinstance(item, dict):
+            continue
+        record = _normalized_signature(str(item.get("record_predicate", "")))
+        props = [
+            sig
+            for sig in (_normalized_signature(str(row)) for row in item.get("property_predicates", []) if isinstance(item.get("property_predicates"), list))
+            if sig
+        ]
+        if not record:
+            continue
+        repeated_structures.append(
+            {
+                "name": str(item.get("name", "")).strip(),
+                "why": "Compact signature-roster fallback repeated structure.",
+                "id_strategy": "Use source-local stable ids during Semantic IR compilation.",
+                "record_predicate": record,
+                "property_predicates": props,
+                "example_records": [],
+                "admission_notes": ["Recovered from compact signature-roster fallback."],
+            }
+        )
+    return {
+        "schema_version": "profile_bootstrap_v1",
+        "domain_guess": str(roster.get("domain_guess", "")).strip() or "signature_roster_fallback",
+        "domain_scope": str(roster.get("domain_scope", "")).strip(),
+        "confidence": float(roster.get("confidence", 0.0) or 0.0),
+        "source_summary": [str(row).strip() for row in roster.get("source_summary", []) if str(row).strip()]
+        if isinstance(roster.get("source_summary"), list)
+        else [],
+        "entity_types": entity_types,
+        "candidate_predicates": candidates,
+        "repeated_structures": repeated_structures,
+        "likely_functional_predicates": [],
+        "provenance_sensitive_predicates": [],
+        "admission_risks": [str(row).strip() for row in roster.get("admission_risks", []) if str(row).strip()]
+        if isinstance(roster.get("admission_risks"), list)
+        else [],
+        "clarification_policy": [str(row).strip() for row in roster.get("clarification_policy", []) if str(row).strip()]
+        if isinstance(roster.get("clarification_policy"), list)
+        else [],
+        "unsafe_transformations": [str(row).strip() for row in roster.get("unsafe_transformations", []) if str(row).strip()]
+        if isinstance(roster.get("unsafe_transformations"), list)
+        else [],
+        "starter_frontier_cases": [],
+        "self_check": {
+            "profile_authority": "proposal_only",
+            "notes": [
+                "compact_signature_roster_fallback",
+                *[
+                    str(row).strip()
+                    for row in (roster.get("self_check", {}) if isinstance(roster.get("self_check"), dict) else {}).get("notes", [])
+                    if str(row).strip()
+                ][:6],
+            ],
+        },
+    }
+
+
+def _normalized_signature(value: str) -> str:
+    match = re.fullmatch(r"\s*([a-z][a-z0-9_]*)\s*/\s*([1-5])\s*", str(value or "").casefold())
+    if not match:
+        return ""
+    return f"{match.group(1)}/{match.group(2)}"
 
 
 def _review_profile_bootstrap(
@@ -1370,6 +1665,8 @@ def _compile_source_with_plan_passes(
             "For a focused enterprise-guidance recommendation pass, completeness means recommendation, avoid-pattern, positive alternative/preference, reason, tradeoff, action_when, and debugging_tactic rows where supported. Avoid rows are not substitutes for replacement rows.",
             "For a focused enterprise-guidance guard/procedure pass, completeness means guard values, guard mechanism, guard effects, summary review questions, and procedure/checklist rows where supported.",
             "For a focused enterprise-guidance export/integration pass, completeness means separate export_rule, export_reason, preferred_export, intraday_update_rule, delta_load_pattern, and incremental_filter rows where supported.",
+            "For any focused detail/specification pass, explicit source values are row-class floors: existing/proposed use, age, diameter, class, spacing, count, vote tally, adopted/rejected status, stated rationale, role/authority, item recovery, and technical requirement rows should be preserved when the allowed profile has compatible predicates.",
+            "Do not let broad event or role rows crowd out small answer-bearing attributes. Numeric values, units, counts, distances, ages, votes, and named current uses are often the exact query surface.",
         ]
         if bool(getattr(args, "focused_pass_ops_schema", False)):
             compiled = _compile_source_pass_ops(
@@ -1407,7 +1704,7 @@ def _compile_source_with_plan_passes(
                 if text and text not in seen:
                     seen.add(text)
                     target.append(text)
-    return {
+    result = {
         "ok": all(bool(item.get("ok")) for item in pass_records) if pass_records else False,
         "mode": "intake_plan_passes",
         "pass_count": len(pass_records),
@@ -1633,8 +1930,9 @@ def _compile_health_summary(surface_contribution: list[dict[str, Any]]) -> dict[
             unhealthy_passes.append(str(row.get("pass_id", "")))
         for flag in flags:
             flag_counts[flag] = flag_counts.get(flag, 0) + 1
-    severe_flags = {"pass_not_ok", "zero_yield", "skip_heavy"}
-    if any(flag_counts.get(flag, 0) for flag in severe_flags):
+    semantic_progress = assess_semantic_progress(surface_contribution=surface_contribution)
+    severe_flags = {"pass_not_ok", "zero_yield"}
+    if any(flag_counts.get(flag, 0) for flag in severe_flags) or semantic_progress.get("zombie_risk") == "high":
         verdict = "poor"
         recommendation = "repair_compile_before_qa"
     elif flag_counts:
@@ -1653,6 +1951,7 @@ def _compile_health_summary(surface_contribution: list[dict[str, Any]]) -> dict[
         "flag_counts": flag_counts,
         "unique_contribution_total": unique_total,
         "duplicate_total": duplicate_total,
+        "semantic_progress": semantic_progress,
     }
 
 
@@ -2031,6 +2330,8 @@ def _write_summary(record: dict[str, Any], path: Path) -> None:
                 f"- Skipped: `{compile_record.get('skipped_count', 0)}`",
                 f"- Lens health: `{(compile_record.get('compile_health') or {}).get('verdict', '')}`",
                 f"- Lens health recommendation: `{(compile_record.get('compile_health') or {}).get('recommendation', '')}`",
+                f"- Semantic progress risk: `{(((compile_record.get('compile_health') or {}).get('semantic_progress') or {}).get('zombie_risk', ''))}`",
+                f"- Semantic progress action: `{(((compile_record.get('compile_health') or {}).get('semantic_progress') or {}).get('recommended_action', ''))}`",
                 "",
                 "### Surface Contribution",
                 "",

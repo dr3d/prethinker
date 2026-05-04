@@ -944,18 +944,11 @@ def _composition_rule_trial_item(
     fact_signature_counts: dict[str, int],
 ) -> dict[str, Any]:
     target_head_signature = _clause_head_signature(rule)
-    dependency_signatures = {
-        signature
-        for signature in _rule_body_signatures(rule)
-        if signature.split("/", 1)[0].startswith("derived_")
-    }
-    dependency_rules = [
-        sibling
-        for sibling in sibling_rules
-        if sibling != rule
-        and _clause_head_signature(sibling) in dependency_signatures
-        and _clause_head_signature(sibling) != target_head_signature
-    ]
+    dependency_signatures = _derived_body_signatures(rule)
+    dependency_rules, transitive_dependency_signatures = _composition_dependency_rules(
+        rule=rule,
+        sibling_rules=sibling_rules,
+    )
     item = _isolated_rule_trial_item(
         rule=rule,
         facts=facts,
@@ -966,12 +959,49 @@ def _composition_rule_trial_item(
     item["dependency_rule_count"] = len(dependency_rules)
     item["dependency_rule_examples"] = dependency_rules[:10]
     item["dependency_signatures"] = sorted(dependency_signatures)
+    item["transitive_dependency_signatures"] = sorted(transitive_dependency_signatures)
     item["same_head_sibling_rules_excluded"] = [
         sibling
         for sibling in sibling_rules
         if sibling != rule and _clause_head_signature(sibling) == target_head_signature
     ][:10]
     return item
+
+
+def _derived_body_signatures(rule: str) -> set[str]:
+    return {
+        signature
+        for signature in _rule_body_signatures(rule)
+        if signature.split("/", 1)[0].startswith("derived_")
+    }
+
+
+def _composition_dependency_rules(*, rule: str, sibling_rules: list[str]) -> tuple[list[str], set[str]]:
+    target_head_signature = _clause_head_signature(rule)
+    queued_signatures = list(_derived_body_signatures(rule))
+    seen_signatures: set[str] = set()
+    dependency_rules: list[str] = []
+    dependency_rule_set: set[str] = set()
+
+    while queued_signatures:
+        signature = queued_signatures.pop(0)
+        if signature in seen_signatures:
+            continue
+        seen_signatures.add(signature)
+        if signature == target_head_signature:
+            continue
+        for sibling in sibling_rules:
+            if sibling == rule or sibling in dependency_rule_set:
+                continue
+            if _clause_head_signature(sibling) != signature:
+                continue
+            dependency_rules.append(sibling)
+            dependency_rule_set.add(sibling)
+            for child_signature in _derived_body_signatures(sibling):
+                if child_signature != target_head_signature and child_signature not in seen_signatures:
+                    queued_signatures.append(child_signature)
+
+    return dependency_rules, {signature for signature in seen_signatures if signature != target_head_signature}
 
 
 def _isolated_rule_trial_item(
@@ -1268,6 +1298,7 @@ def _unsupported_body_fragments(rule: str) -> list[str]:
             continue
         fragments.append(fragment)
     fragments.extend(_unsupported_helper_goal_fragments(rule))
+    fragments.extend(_repeated_body_aliasing_fragments(rule))
     fragments.extend([f"head variable {name} is not bound in the rule body" for name in _unbound_head_variables(rule)])
     return fragments
 
@@ -1354,6 +1385,66 @@ def _unsupported_helper_goal_fragments(rule: str) -> list[str]:
     return fragments
 
 
+_RULE_BODY_HELPER_PREDICATES = {
+    "value_greater_than",
+    "value_at_most",
+    "number_greater_than",
+    "number_at_most",
+    "hours_at_least",
+    "elapsed_hours",
+    "elapsed_days",
+    "within_hours",
+    "percent_at_least",
+    "percent_below",
+    "support_count_at_least",
+}
+
+
+def _repeated_body_aliasing_fragments(rule: str) -> list[str]:
+    buckets: dict[str, list[tuple[str, list[str], str]]] = {}
+    for goal_text in _rule_body_goal_texts(rule):
+        goal = _parse_simple_goal(goal_text)
+        if not goal:
+            continue
+        name, args = goal
+        if name in _RULE_BODY_HELPER_PREDICATES:
+            continue
+        buckets.setdefault(f"{name}/{len(args)}", []).append((name, args, goal_text))
+
+    fragments: list[str] = []
+    for signature, goals in buckets.items():
+        if len(goals) <= 1:
+            continue
+        for left_index, (_, left_args, left_text) in enumerate(goals):
+            for _, right_args, right_text in goals[left_index + 1 :]:
+                if _repeated_goals_have_aliasing_risk(left_args, right_args):
+                    fragments.append(
+                        f"repeated {signature} goals share multiple anchor variables without literal role anchors: "
+                        f"{left_text} / {right_text}; distinct requirements may satisfy with the same row"
+                    )
+                    break
+            else:
+                continue
+            break
+    return fragments
+
+
+def _repeated_goals_have_aliasing_risk(left_args: list[str], right_args: list[str]) -> bool:
+    if len(left_args) != len(right_args):
+        return False
+    shared_same_position_vars = [
+        left_arg
+        for left_arg, right_arg in zip(left_args, right_args)
+        if _is_named_rule_variable(left_arg) and left_arg == right_arg
+    ]
+    if len(shared_same_position_vars) < 2:
+        return False
+    return not any(
+        _is_literal_atom(left_arg) and _is_literal_atom(right_arg) and left_arg != right_arg
+        for left_arg, right_arg in zip(left_args, right_args)
+    )
+
+
 def _parse_simple_goal(text: str) -> tuple[str, list[str]] | None:
     match = re.match(r"^\s*([a-z_][a-z0-9_]*)\s*\((.*)\)\s*$", str(text).strip())
     if not match:
@@ -1379,6 +1470,15 @@ def _goal_pattern_matches_fact(goal: tuple[str, list[str]], fact: tuple[str, lis
 def _is_rule_variable(value: str) -> bool:
     text = str(value or "").strip()
     return bool(text == "_" or re.match(r"^[A-Z][A-Za-z0-9_]*$", text))
+
+
+def _is_named_rule_variable(value: str) -> bool:
+    text = str(value or "").strip()
+    return bool(text and text != "_" and _is_rule_variable(text))
+
+
+def _is_literal_atom(value: str) -> bool:
+    return bool(re.match(r"^[a-z][a-z0-9_]*$", str(value or "").strip()))
 
 
 def _looks_like_numeric_measure_variable(value: str) -> bool:

@@ -61,14 +61,14 @@ Owns ordered structural normalizers. The proposed categories are:
 - `clarification_policy_normalizer`
 - `subject_anchor_normalizer`
 - `entity_type_normalizer`
-- `story_world_observation_normalizer`
-- `group_event_normalizer`
+- `nested_event_observation_normalizer`
+- `collective_actor_event_normalizer`
+- `possessive_target_normalizer`
 - `explicit_rule_normalizer`
 - `query_shape_normalizer`
 - `registry_schema_normalizer`
 - `temporal_namespace_normalizer`
-- `narrative_fact_normalizer`
-- `narrative_rule_normalizer`
+- `domain_schema_shape_normalizer`
 - `profile_parse_guard`
 
 Names are general; legacy fixture names are tracked only in the migration

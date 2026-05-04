@@ -84,18 +84,20 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--selection-policy",
-        choices=["direct", "completeness", "relevance", "structural", "hybrid"],
+        choices=["direct", "completeness", "relevance", "activation", "structural", "hybrid", "protected"],
         default="direct",
         help=(
-            "Selector policy. direct is the stable default; completeness and relevance "
-            "are experimental LLM calibration policies. structural is a deterministic "
-            "query-evidence scorer that does not call the model. hybrid uses the "
-            "structural scorer first and calls the LLM selector only on uncertain rows."
+            "Selector policy. direct is the stable default; completeness, relevance, "
+            "and activation are experimental LLM calibration policies. structural is "
+            "a deterministic query-evidence scorer that does not call the model. "
+            "hybrid uses the structural scorer first and calls the LLM selector only "
+            "on uncertain rows. protected uses structural by default and calls the "
+            "activation selector only for high-volume non-baseline overrides."
         ),
     )
     parser.add_argument(
         "--hybrid-llm-policy",
-        choices=["direct", "completeness", "relevance"],
+        choices=["direct", "completeness", "relevance", "activation"],
         default="direct",
         help="LLM selector policy used only for uncertain rows when --selection-policy hybrid.",
     )
@@ -165,6 +167,22 @@ def main() -> int:
             except Exception as exc:  # pragma: no cover - live harness path
                 selection_error = str(exc)
                 selection = {}
+        elif str(args.selection_policy) == "protected":
+            selection = protected_selector(
+                row=row,
+                mode_labels=group["labels"],
+                fallback_selector=lambda *, row, mode_labels: call_selector(
+                    base_url=str(args.base_url),
+                    model=str(args.model),
+                    timeout=int(args.timeout),
+                    temperature=float(args.temperature),
+                    top_p=float(args.top_p),
+                    max_tokens=int(args.max_tokens),
+                    row=row,
+                    mode_labels=mode_labels,
+                    selection_policy="activation",
+                ),
+            )
         else:
             try:
                 selection = call_selector(
@@ -321,7 +339,7 @@ def call_selector(
     mode_labels: list[str],
     selection_policy: str,
 ) -> dict[str, Any]:
-    messages = [
+    base_messages = [
         {
             "role": "system",
             "content": selector_system_prompt(selection_policy),
@@ -343,6 +361,50 @@ def call_selector(
             ),
         },
     ]
+    last_parse_error = ""
+    for attempt in range(2):
+        messages = list(base_messages)
+        if attempt:
+            messages.append(
+                {
+                    "role": "user",
+                    "content": (
+                        "Retry the previous selector response. Return exactly one valid "
+                        "qa_mode_selector_v1 JSON object and no prose."
+                    ),
+                }
+            )
+        content = _selector_completion_content(
+            base_url=base_url,
+            model=model,
+            timeout=timeout,
+            temperature=temperature,
+            top_p=top_p,
+            max_tokens=max_tokens,
+            messages=messages,
+        )
+        try:
+            parsed = json.loads(content)
+        except json.JSONDecodeError as exc:
+            last_parse_error = str(exc)
+            continue
+        if not isinstance(parsed, dict):
+            last_parse_error = "selector returned non-object JSON"
+            continue
+        return parsed
+    raise RuntimeError(last_parse_error or "selector returned invalid JSON")
+
+
+def _selector_completion_content(
+    *,
+    base_url: str,
+    model: str,
+    timeout: int,
+    temperature: float,
+    top_p: float,
+    max_tokens: int,
+    messages: list[dict[str, str]],
+) -> str:
     payload: dict[str, Any] = {
         "model": model,
         "messages": messages,
@@ -360,7 +422,9 @@ def call_selector(
         },
     }
     req = urllib.request.Request(
-        f"{base_url.rstrip('/')}/chat/completions" if base_url.rstrip("/").endswith("/v1") else f"{base_url.rstrip('/')}/v1/chat/completions",
+        f"{base_url.rstrip('/')}/chat/completions"
+        if base_url.rstrip("/").endswith("/v1")
+        else f"{base_url.rstrip('/')}/v1/chat/completions",
         data=json.dumps(payload).encode("utf-8"),
         headers={"Content-Type": "application/json"},
         method="POST",
@@ -373,11 +437,7 @@ def call_selector(
         raise RuntimeError(f"HTTP {exc.code}: {body}") from exc
     choices = raw.get("choices", []) if isinstance(raw, dict) else []
     message = choices[0].get("message", {}) if choices and isinstance(choices[0], dict) else {}
-    content = str(message.get("content", "") if isinstance(message, dict) else "").strip()
-    parsed = json.loads(content)
-    if not isinstance(parsed, dict):
-        raise RuntimeError("selector returned non-object JSON")
-    return parsed
+    return str(message.get("content", "") if isinstance(message, dict) else "").strip()
 
 
 def structural_selector(*, row: dict[str, Any], mode_labels: list[str]) -> dict[str, Any]:
@@ -463,6 +523,70 @@ def hybrid_selector(
     selection["structural_margin"] = round(score_margin, 3)
     selection["structural_uncertainty_reasons"] = uncertain_reasons
     return selection
+
+
+def protected_selector(*, row: dict[str, Any], mode_labels: list[str], fallback_selector: Any) -> dict[str, Any]:
+    structural = structural_selector(row=row, mode_labels=mode_labels)
+    structural_choice = str(structural.get("selected_mode", ""))
+    baseline_label = mode_labels[0] if mode_labels else ""
+    scored = structural_mode_scores(row=row, mode_labels=mode_labels)
+    top_score, _top_label, top_quality = scored[0]
+    baseline_quality = _quality_for_label(scored, baseline_label)
+    top_volume = int(top_quality.get("direct_rows", 0) or 0) + int(top_quality.get("relaxed_rows", 0) or 0)
+    top_direct = int(top_quality.get("direct_rows", 0) or 0)
+    baseline_volume = int(baseline_quality.get("direct_rows", 0) or 0) + int(baseline_quality.get("relaxed_rows", 0) or 0)
+    margin = float(structural.get("structural_margin", 0.0) or 0.0)
+    reasons: list[str] = []
+    if structural_choice == baseline_label:
+        reasons.append("structural selected baseline")
+    if top_volume < 12 and top_direct <= 2:
+        reasons.append("candidate override is compact enough for structural choice")
+    if margin < 1.0 and top_direct <= 2:
+        reasons.append("candidate override is close and focused; protect structural choice")
+    if baseline_volume <= 0:
+        reasons.append("baseline has no evidence to protect")
+    should_call_activation = (
+        structural_choice != baseline_label
+        and top_volume >= 12
+        and baseline_volume > 0
+        and not (margin < 1.0 and top_direct <= 2)
+    )
+    if not should_call_activation:
+        structural["selection_source"] = "protected_structural"
+        structural["protected_decision"] = "structural_guard"
+        structural["protected_reasons"] = reasons or ["structural evidence not risky enough for activation override"]
+        return structural
+    try:
+        selection = fallback_selector(row=row, mode_labels=mode_labels)
+    except Exception as exc:
+        structural["selection_source"] = "protected_structural_after_llm_error"
+        structural["protected_decision"] = "structural_after_llm_error"
+        structural["protected_llm_error"] = str(exc)
+        structural["protected_reasons"] = [
+            "activation fallback failed; protected selector kept structural choice",
+        ]
+        structural.setdefault("risks", []).append("activation fallback failed; structural choice used")
+        return structural
+    if not isinstance(selection, dict):
+        selection = {}
+    selection["selection_source"] = "protected_llm"
+    selection["protected_decision"] = "activation_for_high_volume_override"
+    selection["structural_candidate"] = structural_choice
+    selection["structural_score"] = round(float(top_score), 3)
+    selection["structural_margin"] = round(margin, 3)
+    selection["protected_reasons"] = [
+        f"structural candidate {structural_choice} overrode {baseline_label}",
+        f"candidate_volume={top_volume}",
+        f"baseline_volume={baseline_volume}",
+    ]
+    return selection
+
+
+def _quality_for_label(scored: list[tuple[float, str, dict[str, Any]]], label: str) -> dict[str, Any]:
+    for _score, candidate_label, quality in scored:
+        if candidate_label == label:
+            return quality
+    return {}
 
 
 def structural_mode_scores(*, row: dict[str, Any], mode_labels: list[str]) -> list[tuple[float, str, dict[str, Any]]]:
@@ -567,6 +691,19 @@ def selector_system_prompt(selection_policy: str) -> str:
             "question's main subject, requested status, rule, or decision. If relevance and completeness are similar, "
             "then prefer direct, specific, non-empty evidence over broad relaxed fallbacks."
         )
+    if selection_policy == "activation":
+        return (
+            base
+            + "Select the mode most likely to produce the answer-bearing support bundle for this exact question. "
+            "Direct non-empty rows are useful, but do not reward directness by itself. Prefer a focused, rule-union, "
+            "or relaxed-fallback mode when its returned rows and self-check notes cover the question's requested "
+            "why/how/counterfactual decision more completely than a narrower direct mode. Treat extra direct rows as "
+            "a risk when they introduce a conflicting status, neighboring date, wrong subject, or irrelevant rule. "
+            "For rule and counterfactual questions, prefer the mode that contains both the governing rule surface and "
+            "the instance facts needed to apply it; if a mode has the rule text but lacks the named applicant/member/"
+            "date outcome, mark it partial. Do not assume baseline is safest merely because it is direct; choose "
+            "baseline only when its support is at least as answer-bearing and less contradictory than the alternatives."
+        )
     return (
         base
         + "If two modes are close, prefer the mode with direct, specific, non-empty evidence over broad relaxed fallbacks."
@@ -590,7 +727,7 @@ def score_selection(row: dict[str, Any], selection: dict[str, Any], error: str) 
         "best_labels": best_labels,
         "mode_verdicts": verdicts,
         "selection_confidence": selection.get("selection_confidence"),
-        "selection_source": selection.get("selection_source", ""),
+        "selection_source": selection.get("selection_source", "") or ("llm" if selected else ""),
         "hybrid_decision": selection.get("hybrid_decision", ""),
         "structural_candidate": selection.get("structural_candidate", ""),
         "structural_score": selection.get("structural_score"),

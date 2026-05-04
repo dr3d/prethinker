@@ -40,15 +40,15 @@ avoid fixture-specific legacy labels.
 | `_rewrite_fact_subject_anchor`, `_apply_leading_subject_anchor_guard` | `parse_normalization.py` | `subject_anchor_normalizer` | Subject anchoring and predicate rewrite. |
 | `_apply_type_direction_guard` | `parse_normalization.py` | `entity_type_normalizer.type_direction` | Type relation orientation. |
 | `_apply_type_entity_alias_guard` | `parse_normalization.py` | `entity_type_normalizer.entity_alias` | Alias canonicalization. |
-| `_apply_observed_someone_event_guard` | `parse_normalization.py` | `story_world_observation_normalizer.observed_actor_event` | General observation event shape. |
-| `_apply_observed_asleep_event_guard` | `parse_normalization.py` | `story_world_observation_normalizer.observed_state_event` | General observed state. |
-| `_apply_observed_in_bed_event_guard` | `parse_normalization.py` | `story_world_observation_normalizer.observed_location_event` | General observed location. |
-| `_apply_observed_sat_possessive_chair_guard` | `parse_normalization.py` | `story_world_observation_normalizer.observed_possessive_object_event` | No fixture-specific name. |
-| `_apply_three_bears_observation_guard` | `parse_normalization.py` | `story_world_observation_normalizer.observation_cluster` | Preserve behavior under general cluster name. |
-| `_apply_group_returned_home_guard` | `parse_normalization.py` | `group_event_normalizer.returned_to_location` | Group event normalization. |
-| `_apply_observed_possessive_broken_guard` | `parse_normalization.py` | `story_world_observation_normalizer.observed_possessive_state` | General broken/state observation. |
-| `_apply_possessive_break_guard` | `parse_normalization.py` | `possessive_object_normalizer.break_event` | Structural possessive object event. |
-| `_apply_possessive_bed_target_guard` | `parse_normalization.py` | `possessive_object_normalizer.location_target` | Structural target normalization. |
+| `_apply_observed_someone_event_guard` | `parse_normalization.py` | `nested_event_observation_normalizer.observed_actor_event` | General observation event shape. |
+| `_apply_observed_asleep_event_guard` | `parse_normalization.py` | `nested_event_observation_normalizer.observed_state_event` | General observed state. |
+| `_apply_observed_in_bed_event_guard` | `parse_normalization.py` | `nested_event_observation_normalizer.observed_location_event` | General observed location. |
+| `_apply_observed_sat_possessive_chair_guard` | `parse_normalization.py` | `nested_event_observation_normalizer.observed_possessive_object_event` | No fixture-specific name. |
+| `_apply_three_bears_observation_guard` | `parse_normalization.py` | `nested_event_observation_normalizer.observation_cluster` | Preserve behavior under general cluster name. |
+| `_apply_group_returned_home_guard` | `parse_normalization.py` | `collective_actor_event_normalizer.returned_to_location` | Group event normalization. |
+| `_apply_observed_possessive_broken_guard` | `parse_normalization.py` | `nested_event_observation_normalizer.observed_possessive_state` | General broken/state observation. |
+| `_apply_possessive_break_guard` | `parse_normalization.py` | `possessive_target_normalizer.break_event` | Structural possessive object event. |
+| `_apply_possessive_bed_target_guard` | `parse_normalization.py` | `possessive_target_normalizer.location_target` | Structural target normalization. |
 | `_apply_explicit_if_then_rule_guard` | `parse_normalization.py` | `explicit_rule_normalizer.if_then_rule` | Rule shape correction. |
 | `_apply_query_open_variable_guard` | `parse_normalization.py` | `query_shape_normalizer.open_variable_query` | Query variable correction. |
 | `_apply_explicit_ground_fact_confidence_guard` | `parse_normalization.py` | `clarification_policy_normalizer.ground_fact_confidence` | Commit low-risk ground facts. |
@@ -59,8 +59,8 @@ avoid fixture-specific legacy labels.
 | `_apply_assert_fact_shape_sync_guard` | `parse_normalization.py` | `schema_field_normalizer.sync_assert_fact_shape` | Keep logic/components sync. |
 | `_rewrite_is_a_predicate_fact`, `_apply_predicate_name_sanity_guard` | `parse_normalization.py` | `registry_schema_normalizer.rewrite_phrase_predicates` | Registry-compatible unary facts. |
 | `_rewrite_reserved_temporal_predicate_fact`, `_apply_temporal_predicate_namespace_guard` | `parse_normalization.py` | `temporal_namespace_normalizer` | Reserved temporal predicate policy. |
-| `_rewrite_narrative_specific_fact`, `_apply_narrative_fact_normalization_guard` | `parse_normalization.py` | `narrative_fact_normalizer` | Registry-gated narrative facts. |
-| `_apply_narrative_rule_normalization_guard` | `parse_normalization.py` | `narrative_rule_normalizer` | Registry-gated narrative rules. |
+| `_rewrite_narrative_specific_fact`, `_apply_narrative_fact_normalization_guard` | `parse_normalization.py` | `domain_schema_shape_normalizer.fact_shape` | Registry-gated domain facts. |
+| `_apply_narrative_rule_normalization_guard` | `parse_normalization.py` | `domain_schema_shape_normalizer.rule_shape` | Registry-gated domain rules. |
 | `src.semantic_ir.semantic_ir_to_legacy_parse` | `semantic_mapper.py` | `SemanticIRMapper.to_legacy_parse` | Keep active mapper as authority. |
 | `src.semantic_ir.semantic_ir_to_prethink_payload` | `semantic_mapper.py` | `SemanticIRMapper.to_prethink_payload` | Pre-think projection. |
 | `src.semantic_ir.semantic_ir_admission_diagnostics` | `semantic_mapper.py` | `SemanticIRMapper.admission_diagnostics` | Diagnostic-only view. |

@@ -1,15 +1,19 @@
 # Project State
 
-Last updated: 2026-05-03
+Last updated: 2026-05-04
 
 ## One-Sentence Shape
 
-Prethinker is a governed natural-language-to-Prolog workbench: neural models propose semantic workspaces, deterministic gates decide what can become durable KB state, and the UI shows that process live.
+Prethinker is a governed natural-language-to-Prolog workbench: neural models propose semantic workspaces, deterministic gates decide what can become durable KB state, and the UI shows that process live. The product goal is not omniscience; it is to be hard to fool.
 
 ## Current Center
 
 - Runtime: `src/mcp_server.py`, especially `process_utterance()`.
 - Current pipeline reference: `docs/CURRENT_UTTERANCE_PIPELINE.md`.
+- Clean harness daily driver: `scripts/run_kb_pipeline_clean_harness.py`, backed
+  by `src/kb_pipeline_clean`, captures canonical structural signatures while
+  delegating behavior to the live compiler/runtime path.
+- Harness instrument reference: `docs/CURRENT_HARNESS_INSTRUMENT.md`.
 - Research prioritization: `docs/ACTIVE_RESEARCH_LANES.md`.
 - UI: `ui_gateway/`, served locally by `python ui_gateway/main.py` using the stdlib `ThreadingHTTPServer`.
 - Active profile: `medical@v0`; active profile-lane experiments: `legal_courtlistener@v0` and `sec_contracts@v0`.
@@ -50,6 +54,71 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 - Glass Tide: separate rule lenses plus deterministic union now produce promotion-ready slices for role joins, threshold/exception rules, temporal clearance, salvage exceptions, budget-veto failure, and support-threshold conditions. Durable rule activation remains gated.
 - Sable Creek: rule promotion probes now support structural any-of groups, and SC-007 shows rule composition improving full QA. A body-fact lens admitted `supported/2` vote rows; an aggregation lens derived `support_threshold_met`; the promotion-filtered threshold+vote union moved full QA from `20 exact / 8 partial / 12 miss` to `24 / 6 / 10` with `0` runtime errors and `0` write proposals.
 - Query-mode activation now has deterministic structural and hybrid structural+LLM selector controls. Hybrid reached the Avalon Rule8 perfect-selector upper bound at `27 exact / 12 partial / 1 miss` while saving `13/40` LLM choices, but Three Moles and Sable regressed when the LLM fallback overrode structurally exact relaxed evidence. Treat this as a measured control surface, not a default QA policy.
+- Clean KB pipeline factoring has a first daily-driver harness surface:
+  `src/kb_pipeline_clean` owns the structural parity inventory and
+  `scripts/run_kb_pipeline_clean_harness.py` replays current `process_utterance`
+  behavior into canonical signatures. This is harness organization, not a
+  behavior change.
+- Story-world rule activation now has a cross-fixture transfer summary harness:
+  `scripts/summarize_rule_activation_transfer.py` reads existing Sable/Avalon
+  activation comparison artifacts and reports rescues, regressions, volatile
+  rows, best-label counts, and activation-governor target buckets without
+  rerunning compile or reading source prose. The current direct-2400 Sable/Avalon
+  rollup has `54` stable rows, `15` nonbaseline rescue targets, `7`
+  baseline-exact protection targets, and `4` volatile baseline-preferred rows.
+  The direct selector now has an after-the-fact governor audit: `54/54` stable
+  rows, `11/15` rescue rows, `6/7` baseline-exact protection rows, and `2/4`
+  volatile baseline-preferred rows pass their target. The same report now emits
+  `semantic_progress_assessment_v1`; current selector-governor failures produce
+  `zombie_risk=medium` and
+  `continue_only_with_named_expected_contribution`.
+- Semantic struggle detection is now a named structural guardrail in
+  `src/semantic_struggle.py`. It turns pass contribution, duplicate, skip-heavy,
+  stale-tail, and selector-governor telemetry into a stop/continue
+  recommendation without reading source prose.
+- Rule-acquisition promotion scoring now blocks repeated body-goal aliasing:
+  duplicate body predicates that share multiple variables without distinct
+  literal role anchors are unsupported fragments, while anchored Avalon-style
+  multi-condition clauses remain allowed.
+- Incoming challenge fixtures are staged under `tmp/incoming_staged` with
+  source/question files separated from `oracle.jsonl`. The first five-fixture
+  incoming smoke scorecard is generated at
+  `tmp/incoming_smoke_summaries/scorecard.{json,md}`: `5/5` fixtures compiled
+  after Copperfall recovered through the compact profile retry path, and the
+  batch scored `44 exact / 4 partial / 2 miss` over `50` no-answer QA rows with
+  `0` write proposals. Classified non-exacts are dominated by compile-surface
+  gaps (`5`), with one hybrid join gap.
+- Incoming scorecard comparison is now an instrument gate:
+  `scripts/compare_incoming_smoke_scorecards.py` compares baseline and
+  candidate scorecards without source-prose interpretation. The first candidate
+  check rejected a broad detail/specification guidance retry: it helped
+  Meridian locally but regressed the batch to `41 exact / 4 partial / 5 miss`
+  and increased misses by `3`.
+- Incoming row-mode overlay planning is now available through
+  `scripts/plan_incoming_row_mode_overlay.py`. A narrow evidence-bundle rerun
+  over current non-exacts reached `46 exact / 1 partial / 3 miss`, which the
+  promotion gate rejects because misses increased. The row overlay artifact
+  still finds useful selector targets: two candidate rescues, one candidate
+  regression, and three unchanged non-exacts.
+- Selector comparison now handles fixture-scoped row ids and policy totals.
+  On the six-row incoming non-exact target, structural selection picked the best
+  available mode on `5/6` rows, while LLM `activation` selection picked `6/6`
+  without source prose, answers, judge labels, or failure labels.
+- A full first-10 replay over the three imperfect incoming fixtures tempered
+  that result: evidence mode stayed at `44` exact but increased misses, while
+  structural selector totals were `24 exact / 3 partial / 3 miss`. A selector
+  JSON retry guard removed the Larkspur parse failure; activation then reached
+  `23 / 5 / 2`, trading exact preservation for miss reduction. Activation
+  remains a research control surface, not a daily-driver default.
+- Protected selector mode is now implemented as `--selection-policy protected`.
+  It uses structural selection by default and calls activation only for
+  high-volume nonbaseline overrides. Incoming first-10 improved to `24 / 4 / 2`
+  on the three imperfect fixtures, and Avalon reduced misses by one at the same
+  exact count, but Sable failed to transfer. Treat it as calibration machinery.
+- Incoming compile repair targets are now generated at
+  `tmp/incoming_smoke_summaries/compile_repair_targets.{json,md}`. The current
+  six-row queue splits into `2` row-selector calibration targets, `3` scoped
+  source-surface repair targets, and `1` helper/query-join repair target.
 - Clarification Eagerness Trap: source-context lane reached and held `40/40`, with `0` unsafe candidates, `0` context-write violations, and `10/10` blocked-slot coverage.
 - New held-out fixtures such as Black Lantern, Three Moles, Oxalis, Dulse, Avalon, Sable Creek, Ridgeline, Veridia, and Ledger are being used to test whether gains transfer beyond the original fixture families.
 - Active lane triage now prioritizes source-surface acquisition first because the cold rollup shows `159` compile gaps versus `35` hybrid/reasoning, `26` query, and `5` answer gaps.
@@ -269,7 +338,7 @@ Domain/data lanes:
 
 ## Verification Snapshot
 
-**Current headline:** the lean full pytest suite is `464 passed`. The current research center is semantic parallax: multi-pass semantic compilation, mapper-admitted safe-surface accumulation, rule-lens promotion trials, row-level activation, clarification eagerness under an explicit authority boundary, and stenographer-mode stream simulation.
+**Current headline:** the lean full pytest suite is `539 passed`. The current research center is semantic parallax: multi-pass semantic compilation, mapper-admitted safe-surface accumulation, rule-lens promotion trials, row-level activation, clarification eagerness under an explicit authority boundary, and stenographer-mode stream simulation.
 
 Recent verified results:
 

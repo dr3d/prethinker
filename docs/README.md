@@ -14,9 +14,10 @@ Use this short path if you are new:
 2. [Explainer](https://github.com/dr3d/prethinker/blob/main/docs/EXPLAINER.md) - the plain-language project story.
 3. [Multi-Pass Semantic Compiler](https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md) - semantic lenses, mapper-admitted accumulation, and rule promotion.
 4. [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md) - how current GPU/research cycles are prioritized across many fixtures.
-5. [Generalization Baseline Matrix](https://github.com/dr3d/prethinker/blob/main/docs/GENERALIZATION_BASELINE_MATRIX.md) - cold unseen fixture results for checking transfer.
-6. [Current Utterance Pipeline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_UTTERANCE_PIPELINE.md) - how a turn moves through router, context, Semantic IR, mapper, query, clarification, or mutation.
-7. [Stenographer Mode Simulation](https://github.com/dr3d/prethinker/blob/main/docs/STENOGRAPHER_MODE_SIMULATION.md) - turn-by-turn ingestion when the future document is not visible yet.
+5. [Current Harness Instrument](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_HARNESS_INSTRUMENT.md) - the scorecard, selector, and repair-queue instrument that keeps research changes measurable.
+6. [Generalization Baseline Matrix](https://github.com/dr3d/prethinker/blob/main/docs/GENERALIZATION_BASELINE_MATRIX.md) - cold unseen fixture results for checking transfer.
+7. [Current Utterance Pipeline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_UTTERANCE_PIPELINE.md) - how a turn moves through router, context, Semantic IR, mapper, query, clarification, or mutation.
+8. [Stenographer Mode Simulation](https://github.com/dr3d/prethinker/blob/main/docs/STENOGRAPHER_MODE_SIMULATION.md) - turn-by-turn ingestion when the future document is not visible yet.
 
 Then go deeper:
 
@@ -31,6 +32,7 @@ Then go deeper:
 - [Current Research Headline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md)
 - [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md)
 - [Multi-Pass Semantic Compiler](https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md)
+- [Current Harness Instrument](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_HARNESS_INSTRUMENT.md)
 - [Generalization Baseline Matrix](https://github.com/dr3d/prethinker/blob/main/docs/GENERALIZATION_BASELINE_MATRIX.md)
 - [Cold Baseline Failure Rollup](https://github.com/dr3d/prethinker/blob/main/docs/COLD_BASELINE_FAILURE_ROLLUP.md)
 - [Frontier Progress Report](https://github.com/dr3d/prethinker/blob/main/docs/FRONTIER_PROGRESS_REPORT.md)

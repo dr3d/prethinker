@@ -1,7 +1,5 @@
-"""Isolated refactor proposal for the Prethinker KB pipeline."""
+"""Daily-driver harness surface for the cleaner KB pipeline factoring."""
 
-from .contracts import ApplyOptions, PendingPreThink, PreThinkSessionConfig
-from .gate_session import PreThinkGate
 from .parity_harness import (
     canonical_execution_result,
     canonical_parse_result,
@@ -9,20 +7,18 @@ from .parity_harness import (
     compare_signatures,
     normalizer_inventory_audit,
 )
+from .instrument import instrument_manifest, render_instrument_markdown
 from .parse_normalization import NORMALIZER_PIPELINE, legacy_symbol_index, trace_plan
 
 __all__ = [
-    "ApplyOptions",
     "NORMALIZER_PIPELINE",
-    "PendingPreThink",
-    "PreThinkGate",
-    "PreThinkSessionConfig",
     "canonical_execution_result",
     "canonical_parse_result",
     "canonical_process_result",
     "compare_signatures",
+    "instrument_manifest",
     "legacy_symbol_index",
     "normalizer_inventory_audit",
+    "render_instrument_markdown",
     "trace_plan",
 ]
-

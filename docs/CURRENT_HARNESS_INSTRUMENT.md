@@ -1,0 +1,138 @@
+# Current Harness Instrument
+
+Prethinker's harness is part of the product. It is the research instrument that
+lets the project replay live behavior, capture structural signatures, compare
+candidate extractions, and explain what changed without asking Python to
+interpret source prose.
+
+The product north star is **hard to fool**. The harness exists to make that
+measurable: claims stay separate from facts, rules stay separate from outcomes,
+authority boundaries stay visible, and zombie retries are stopped instead of
+rewarded.
+
+The daily-driver surface is `src/kb_pipeline_clean` plus
+`scripts/run_kb_pipeline_clean_harness.py`. The live behavior source remains
+`src/mcp_server.py` until each compiler, gate, apply, or normalization piece has
+been wrapped, replayed, extracted, compared, and only then retired from the
+legacy surface.
+
+## Operator Commands
+
+```powershell
+python scripts/run_kb_pipeline_clean_harness.py --instrument-md
+python scripts/run_kb_pipeline_clean_harness.py --instrument-manifest
+python scripts/run_kb_pipeline_clean_harness.py --audit-normalizers
+python scripts/run_kb_pipeline_clean_harness.py --trace-plan
+python scripts/run_kb_pipeline_clean_harness.py --pack docs/data/frontier_packs/semantic_ir_lava_pack_v5.json --limit 3 --compiler-backend lmstudio --compiler-base-url http://127.0.0.1:1234 --semantic-ir-enabled --active-profile auto
+python scripts/validate_fixture_intake.py --root datasets/incoming_fixtures --out-json tmp/incoming_fixtures/intake_validation.json
+python scripts/stage_incoming_fixtures.py --root tmp/incoming --out-root tmp/incoming_staged
+python scripts/plan_incoming_fixture_runs.py --manifest tmp/incoming_staged/stage_manifest.json --out-json tmp/incoming_staged/cold_run_plan.json --out-md tmp/incoming_staged/cold_run_plan.md
+python scripts/summarize_incoming_fixture_smoke.py --fixture meridian_permit_board --compile-json <COMPILE_RUN_JSON> --qa-json <QA_RUN_JSON> --qa-json <FAILURE_SURFACE_RUN_JSON>
+python scripts/rollup_incoming_smoke_scorecard.py --root tmp/incoming_smoke_summaries --out-json tmp/incoming_smoke_summaries/scorecard.json --out-md tmp/incoming_smoke_summaries/scorecard.md
+python scripts/compare_incoming_smoke_scorecards.py --baseline-json tmp/incoming_smoke_summaries/scorecard.json --candidate-json tmp/incoming_smoke_summaries_detail_retry/scorecard.json --out-json tmp/incoming_smoke_summaries_detail_retry/baseline_comparison.json --out-md tmp/incoming_smoke_summaries_detail_retry/baseline_comparison.md
+python scripts/plan_incoming_row_mode_overlay.py --baseline-json tmp/incoming_smoke_summaries/scorecard.json --candidate-json tmp/incoming_smoke_summaries_evidence_nonexact/scorecard.json --out-json tmp/incoming_smoke_summaries_evidence_nonexact/row_mode_overlay_plan.json --out-md tmp/incoming_smoke_summaries_evidence_nonexact/row_mode_overlay_plan.md
+python scripts/plan_incoming_compile_repair_targets.py --scorecard-json tmp/incoming_smoke_summaries/scorecard.json --row-overlay-json tmp/incoming_smoke_summaries_evidence_nonexact/row_mode_overlay_plan.json --out-json tmp/incoming_smoke_summaries/compile_repair_targets.json --out-md tmp/incoming_smoke_summaries/compile_repair_targets.md
+python scripts/select_qa_mode_without_oracle.py --selection-policy protected --group <name>:baseline=<QA_JSON>,evidence=<QA_JSON> --out-json <OUT_JSON> --out-md <OUT_MD>
+```
+
+## Instrument Principles
+
+- The harness measures structural behavior; it does not reward "better" model
+  answers during refactors.
+- Canonical signatures are calibration artifacts for extraction parity.
+- New public names should describe the guardrail or reason for being, not the
+  fixture that first exposed the issue.
+- Legacy symbol names may remain as migration references until the clean surface
+  proves parity.
+- Dead-code removal waits until the instrument can show that code is genuinely
+  unreachable rather than dormant migration scaffolding.
+- The harness should detect semantic struggle. If repeated passes add no unique
+  admitted surface, duplicate most of their output, go skip-heavy, or fail
+  activation-governor targets, the instrument should recommend stopping or
+  continuing only with a named expected contribution.
+
+## Extraction Rule
+
+```text
+wrap -> replay -> extract -> compare -> retire
+```
+
+That order keeps the moving platform usable while the workbench becomes easier
+for a human to understand.
+
+## Struggle Detection
+
+`src/semantic_struggle.py` owns the first structural circuit breaker. It reads
+only harness telemetry such as per-pass unique contribution counts, duplicate
+counts, health flags, and selector-governor compliance counts. It does not read
+source prose or infer answers.
+
+The current output is `semantic_progress_assessment_v1`:
+
+- `zombie_risk`: `low`, `medium`, or `high`
+- `recommended_action`: `continue`, `continue_only_with_named_expected_contribution`,
+  or `stop_and_report_struggle`
+- `semantic_progress_delta`: unique contribution total, duplicate total,
+  duplicate ratio, recent unique contribution count, and stale tail count
+- `stop_reasons` and `caution_reasons`
+
+This is the product behavior: Prethinker should be smart enough to notice when
+it is no longer making semantic progress.
+
+## Incoming Fixture Scorecards
+
+Incoming challenge fixtures now have a two-step instrument panel:
+
+1. `scripts/summarize_incoming_fixture_smoke.py` normalizes one fixture's
+   compile, QA, and failure-classification artifacts without rereading source
+   prose.
+2. `scripts/rollup_incoming_smoke_scorecard.py` rolls those fixture summaries
+   into a batch scorecard.
+3. `scripts/compare_incoming_smoke_scorecards.py` compares a candidate
+   scorecard against a baseline and emits an artifact-only promotion
+   recommendation.
+4. `scripts/plan_incoming_row_mode_overlay.py` compares row verdicts between
+   scorecards and identifies candidate row rescues, regressions, and unchanged
+   non-exacts for row-level selector research.
+5. `scripts/plan_incoming_compile_repair_targets.py` turns unresolved scorecard
+   rows into repair lanes such as row-selector calibration, scoped
+   source-surface repair, helper/query-join repair, query-planner repair, and
+   answer-surface repair.
+
+The first five-fixture incoming smoke scorecard is under
+`tmp/incoming_smoke_summaries/scorecard.{json,md}`. It covers `50` no-answer QA
+rows across five compiled fixtures and labels profile fallback paths, such as
+Copperfall's compact profile retry, separately from semantic QA performance.
+
+Promotion policy is deliberately conservative: a candidate can be promoted only
+when exact rows increase without increasing misses, compile failures, or QA
+write proposals. Neutral candidates are `mixed_candidate`; regressions are
+`reject_candidate`. Non-exact rows without failure classification are counted as
+`unclassified` rather than being treated as improved failure-surface behavior.
+
+The first evidence-bundle diagnostic over current non-exacts lifted the batch
+from `44 / 4 / 2` to `46 / 1 / 3`, so it is not a default promotion. The row
+overlay plan still found the useful shape: two candidate row rescues, one
+candidate regression, and three unchanged non-exacts. That is the next selector
+problem in miniature.
+
+Selector comparisons are fixture-aware: `scripts/compare_selector_runs.py`
+prefixes row ids by selector group when present and rolls up policy totals. On
+the first six-row incoming non-exact target, structural selection reached `5/6`
+best available choices while LLM `activation` selection reached `6/6`, both
+without giving the selector source prose, answer keys, judge labels, or failure
+labels.
+
+The full first-10 selector replay is the promotion guardrail: evidence mode over
+all rows stayed exact-flat but increased misses, structural selection reached
+`24 / 3 / 3` across the three imperfect fixtures, and activation reached
+`23 / 5 / 2` after selector JSON retry handling removed the Larkspur parse
+failure. The harness therefore labels activation as calibration signal until
+exact-row protection is stronger.
+
+`--selection-policy protected` is the first exact-protection experiment. It uses
+structural selection by default, but sends high-volume nonbaseline overrides to
+the activation selector because row volume can hide wrong-subject evidence. It
+helped the incoming first-10 slice and reduced Avalon misses, but failed to
+transfer to Sable, so the instrument keeps it as a comparison mode rather than
+daily-driver policy.

@@ -1,10 +1,14 @@
 # Current Research Headline
 
-Last updated: 2026-05-03
+Last updated: 2026-05-04
 
 ## Semantic Parallax
 
 The newest insight is that one LLM compile is only one viewpoint.
+
+The north star is **hard to fool**: Prethinker should not confuse claims with
+facts, rules with outcomes, missing evidence with permission to guess, or
+semantic struggle with a reason to keep burning passes.
 
 This page is a short lab-note headline, not a victory lap. It exists so a new
 reader can see what the project is learning right now before diving into the
@@ -118,6 +122,12 @@ testing whether those gains transfer:
   `amendment_introduced/4`, then composed `number_greater_than/2` to derive
   `requires_public_hearing` without unbound head variables, fact-shaped rule
   clauses, oracle rows, or Python prose interpretation.
+- The current Sable/Avalon parallax lesson is now a verifier rule instead of a
+  fixture note: repeated body predicates that share multiple variables need
+  distinct literal role anchors, otherwise they can falsely satisfy two
+  requirements with one admitted row. The promotion scorer blocks that aliasing
+  shape while still allowing anchored body-fact composition such as
+  `submit_revised_budget` plus `provide_matching_docs`.
 - Sable SC-007 crossed the important line from probe success to full-QA lift.
   A body-fact lens admitted `proposal/1` and `supported/2` vote rows, the
   aggregation lens derived only `support_threshold_met`, and the
@@ -146,6 +156,18 @@ testing whether those gains transfer:
   safe symbolic surfaces can be accumulated independently, then selected per
   question by a model-owned control plane that still has no write authority and
   no oracle access.
+- The transfer report now gives that bridge a sharper target surface. Existing
+  Sable/Avalon direct-2400 comparisons split into `54` stable rows, `15` clean
+  nonbaseline rescue rows, `7` baseline-exact protection rows, and `4` volatile
+  baseline-preferred rows. The next selector should learn those risk buckets
+  rather than simply choosing the most rule-heavy mode.
+- Joining the existing direct selector artifacts back into that report adds a
+  first governor-compliance audit: `54/54` stable rows, `11/15` rescue rows,
+  `6/7` baseline-exact protection rows, and `2/4` volatile baseline-preferred
+  rows pass. The visible misses are now a small, named calibration set instead
+  of a vague selector problem. This report now also carries
+  `semantic_progress_assessment_v1`; the selector lane is `medium` zombie risk
+  until the next pass names which miss class it expects to repair.
 - Black Lantern BLM-004 is the necessary caution: the same selector mechanism
   ran cleanly but scored only `28 / 9 / 3` over baseline/narrow/broad query
   modes, below the best individual modes. Adding QA self-check notes moved to
@@ -208,6 +230,47 @@ testing whether those gains transfer:
   Thornfield Variance scored `20 exact / 6 partial / 14 miss`. Together they
   sharpen the lesson: rotating fixtures matters because "clean admission,"
   "schema hygiene," and "answer-bearing coverage" are distinct surfaces.
+- The newest incoming challenge batch has a standard smoke scorecard generated
+  from compile/QA artifacts only. All five fixtures now compile after
+  Copperfall recovered through compact profile retry, and the batch scored `44
+  exact / 4 partial / 2 miss` over `50` no-answer QA rows with `0` write
+  proposals. Copperfall and Harrowgate were clean at `10/10`; Larkspur reached
+  `8 / 2 / 0`; Northbridge and Meridian landed at `8 / 1 / 1`. The non-exact
+  surface is still mostly compile coverage, so the next useful work is
+  acquisition and hybrid-helper substrate, not answer-key-shaped tuning.
+- The newest harness lesson is negative but valuable: broad global
+  detail/specification guidance improved Meridian locally but regressed the
+  five-fixture batch to `41 exact / 4 partial / 5 miss`. The new scorecard
+  comparer marks that run `reject_candidate`, so future policy changes should
+  be promoted by artifact deltas, not by one good-looking fixture.
+- A narrower evidence-bundle diagnostic over only the current non-exact rows
+  shows why row-level activation matters. It lifted exacts from `44` to `46`,
+  but also increased misses from `2` to `3`, so the batch remains rejected as a
+  default mode. The row overlay plan identifies two useful rescues and one
+  regression, turning "evidence mode helps sometimes" into a small selector
+  target.
+- On that six-row target, deterministic structural mode selection found `5/6`
+  best choices but still picked the harmful Larkspur q009 evidence row. The LLM
+  `activation` selector reached `6/6` best choices without source prose,
+  answers, judge labels, or failure labels. This is the clean next hint:
+  selector control should learn answer-bearing relevance, not just evidence
+  volume.
+- The full first-10 replay keeps that hint honest. Evidence mode over all smoke
+  rows stayed at `44` exact but increased misses; structural selection reached
+  `24 / 3 / 3` across the three imperfect fixtures. After adding a selector JSON
+  retry guard, activation reached `23 / 5 / 2`: fewer misses, but weaker exact
+  preservation. The selector frontier is exact-row protection, not blanket
+  activation.
+- A first protected selector now tests that idea: structural by default, with
+  activation only for high-volume nonbaseline overrides. It reached `24 / 4 /
+  2` on the incoming first-10 selector slice and reduced Avalon misses by one,
+  but it failed to transfer to Sable, where direct selection remains much
+  stronger. This keeps selector control in research mode and points back to
+  compile-side repair for the current incoming misses.
+- The incoming repair queue is now explicit: two row-selector calibration rows,
+  three scoped source-surface repair rows, and one helper/query-join row. That
+  is the next practical compiler frontier: repair missing answer-bearing source
+  surface locally without promoting another global detail prompt.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 

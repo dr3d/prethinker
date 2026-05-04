@@ -95,6 +95,26 @@ def _row_failure(row: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _aggregate_failure(surface: str, index: int) -> dict[str, Any]:
+    return {
+        "id": f"aggregate_{surface}_{index}",
+        "verdict": "non_exact",
+        "surface": surface,
+        "confidence": None,
+        "question": "",
+        "reference_answer": "",
+        "suggested_next_action": "Detailed QA artifact unavailable; use aggregate progress_metrics counts.",
+        "evidence": {
+            "query_count": 0,
+            "successful_query_count": 0,
+            "nonempty_query_count": 0,
+            "returned_row_count": 0,
+            "has_returned_rows": False,
+            "support_state": "artifact_missing",
+        },
+    }
+
+
 def _row_evidence_stats(row: dict[str, Any]) -> dict[str, int | bool | str]:
     query_results = row.get("query_results", [])
     if not isinstance(query_results, list):
@@ -149,6 +169,12 @@ def collect_runs(datasets_dir: Path, evidence_lane: str) -> list[dict[str, Any]]
             for row in qa_record.get("rows", []) if isinstance(qa_record.get("rows"), list) else []:
                 if isinstance(row, dict) and _row_verdict(row) != "exact":
                     failures.append(_row_failure(row))
+        elif isinstance(qa.get("failure_surface_counts"), dict):
+            for surface, count in sorted(qa.get("failure_surface_counts", {}).items()):
+                if str(surface) == "not_applicable":
+                    continue
+                for index in range(1, int(count or 0) + 1):
+                    failures.append(_aggregate_failure(str(surface), index))
         runs.append(
             {
                 "run_id": run.get("run_id", ""),
@@ -160,7 +186,7 @@ def collect_runs(datasets_dir: Path, evidence_lane: str) -> list[dict[str, Any]]
                 "model": run.get("model", ""),
                 "compile": compile_summary,
                 "qa": qa,
-                "qa_artifact": str(qa_path.relative_to(REPO_ROOT)) if qa_path and qa_path.exists() else "",
+                "qa_artifact": str(qa_path.relative_to(REPO_ROOT)) if qa_path else "",
                 "failures": failures,
             }
         )

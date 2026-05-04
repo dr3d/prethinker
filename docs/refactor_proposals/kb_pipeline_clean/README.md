@@ -1,8 +1,9 @@
 # KB Pipeline Clean Refactor Proposal
 
-This directory is an isolated proposal for replacing the current
-`kb_pipeline.py` plus MCP runtime design. It is not wired into production and
-does not modify the active files.
+This directory records the proposal for replacing the current `kb_pipeline.py`
+plus MCP runtime design. The daily-driver harness surface now lives in
+`src/kb_pipeline_clean`, with compatibility imports kept here for proposal
+readers.
 
 The design keeps Python structural. Python code may normalize structured model
 outputs, predicate clauses, schema fields, registry metadata, traces, and
@@ -61,10 +62,28 @@ runtime operation records. It must not infer source-language meaning from prose.
 Run these before and after each migration step:
 
 ```powershell
-python -m py_compile tmp/refactor_proposals/kb_pipeline_clean/*.py
+python scripts/run_kb_pipeline_clean_harness.py --audit-normalizers
+python scripts/run_kb_pipeline_clean_harness.py --trace-plan
+python -m pytest tests/test_kb_pipeline_clean_parity_harness.py
+Get-ChildItem docs/refactor_proposals/kb_pipeline_clean -Filter *.py | ForEach-Object { python -m py_compile $_.FullName }
+python docs/refactor_proposals/kb_pipeline_clean/scenario_cli.py --audit-normalizers
 python -m pytest tests/test_core_runtime.py tests/test_mcp_server.py tests/test_semantic_ir_runtime.py
 python -m pytest tests/test_clarification_eagerness.py tests/test_process_utterance_forge.py
 ```
+
+## Daily-Driver Harness
+
+Use the promoted clean harness when replaying current behavior for future
+compiler factoring:
+
+```powershell
+python scripts/run_kb_pipeline_clean_harness.py --pack path/to/frontier_pack.json --compiler-mode heuristic
+```
+
+The harness runs the live `process_utterance` path, writes raw results, and
+stores canonical signatures for parity comparison. It does not judge prose or
+reward improved behavior; it records the current structural shape so later
+extractions can prove they preserved it.
 
 For parity fixtures, compare:
 

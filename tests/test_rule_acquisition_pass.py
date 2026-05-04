@@ -56,6 +56,63 @@ def test_runtime_trial_marks_dependency_composed_rules_ready() -> None:
     assert trial["negative_probe_pass_count"] == 1
 
 
+def test_runtime_trial_follows_transitive_dependency_composition() -> None:
+    trial = _runtime_trial(
+        facts=[
+            "base_fact(alpha).",
+            "ok(alpha).",
+        ],
+        backbone_rules=[],
+        rule_lens_rules=[
+            "derived_condition(Item, ready, demo_scope) :- base_fact(Item).",
+            "derived_permission(Item, proceed, demo_object, demo_scope) :- derived_condition(Item, ready, demo_scope).",
+            "derived_status(Item, final, demo_scope) :- derived_permission(Item, proceed, demo_object, demo_scope), ok(Item).",
+        ],
+        positive_queries=["derived_status(alpha, final, demo_scope)."],
+        negative_queries=[],
+    )
+
+    composed = {item["rule"]: item for item in trial["composition_head_queries"]}
+    final_rule = "derived_status(Item, final, demo_scope) :- derived_permission(Item, proceed, demo_object, demo_scope), ok(Item)."
+
+    assert trial["promotion_ready_rule_count"] == 1
+    assert trial["composition_ready_rule_count"] == 3
+    assert trial["composition_rescued_rule_count"] == 2
+    assert composed[final_rule]["num_rows"] == 1
+    assert composed[final_rule]["dependency_rule_count"] == 2
+    assert composed[final_rule]["dependency_signatures"] == [
+        "derived_permission/4",
+    ]
+    assert composed[final_rule]["transitive_dependency_signatures"] == [
+        "derived_condition/3",
+        "derived_permission/4",
+    ]
+    assert trial["positive_probe_pass_count"] == 1
+
+
+def test_dependency_composition_excludes_same_head_sibling_rules_transitively() -> None:
+    target_rule = "derived_status(Item, final, demo_scope) :- derived_condition(Item, ready, demo_scope)."
+    sibling_same_head = "derived_status(Item, intermediate, demo_scope) :- ok(Item)."
+    trial = _runtime_trial(
+        facts=["ok(alpha)."],
+        backbone_rules=[],
+        rule_lens_rules=[
+            target_rule,
+            "derived_condition(Item, ready, demo_scope) :- derived_status(Item, intermediate, demo_scope).",
+            sibling_same_head,
+        ],
+        positive_queries=[],
+        negative_queries=[],
+    )
+
+    composed = {item["rule"]: item for item in trial["composition_head_queries"]}
+
+    assert composed[target_rule]["num_rows"] == 0
+    assert composed[target_rule]["dependency_rule_count"] == 1
+    assert composed[target_rule]["transitive_dependency_signatures"] == ["derived_condition/3"]
+    assert composed[target_rule]["same_head_sibling_rules_excluded"] == [sibling_same_head]
+
+
 def test_runtime_trial_supports_any_of_probe_groups() -> None:
     trial = _runtime_trial(
         facts=["amendment_introduced(ba_2026_07, councilmember_okafor, 2026_03_04, 185000)."],
@@ -112,6 +169,57 @@ def test_runtime_trial_blocks_rules_with_unbound_head_variables() -> None:
     assert trial["promotion_ready_rule_count"] == 0
     assert item["unbound_head_variables"] == ["Amendment"]
     assert any("head variable Amendment is not bound" in fragment for fragment in item["unsupported_body_fragments"])
+
+
+def test_repeated_body_aliasing_requires_literal_anchors() -> None:
+    fragments = _unsupported_body_fragments(
+        "derived_status(Applicant, eligible, rule8) :- "
+        "required_condition(Applicant, Condition), "
+        "deadline_met(Applicant, Condition), "
+        "required_condition(Applicant, Condition), "
+        "deadline_met(Applicant, Condition)."
+    )
+
+    assert any("repeated required_condition/2 goals share multiple anchor variables" in item for item in fragments)
+    assert any("distinct requirements may satisfy with the same row" in item for item in fragments)
+
+
+def test_repeated_body_goals_with_distinct_literal_anchors_are_allowed() -> None:
+    fragments = _unsupported_body_fragments(
+        "derived_status(Applicant, eligible, rule8) :- "
+        "required_condition(Applicant, submit_revised_budget), "
+        "deadline_met(Applicant, submit_revised_budget), "
+        "required_condition(Applicant, provide_matching_docs), "
+        "deadline_met(Applicant, provide_matching_docs)."
+    )
+
+    assert not any("repeated required_condition/2 goals" in item for item in fragments)
+    assert not any("repeated deadline_met/2 goals" in item for item in fragments)
+
+
+def test_runtime_trial_blocks_repeated_body_aliasing_rule() -> None:
+    rule = (
+        "derived_status(Applicant, eligible, rule8) :- "
+        "required_condition(Applicant, Condition), "
+        "deadline_met(Applicant, Condition), "
+        "required_condition(Applicant, Condition), "
+        "deadline_met(Applicant, Condition)."
+    )
+    trial = _runtime_trial(
+        facts=[
+            "required_condition(anya_petrov, submit_revised_budget).",
+            "deadline_met(anya_petrov, submit_revised_budget).",
+        ],
+        backbone_rules=[],
+        rule_lens_rules=[rule],
+        positive_queries=[],
+        negative_queries=[],
+    )
+
+    item = trial["derived_head_queries"][0]
+    assert item["num_rows"] == 1
+    assert trial["promotion_ready_rule_count"] == 0
+    assert any("repeated required_condition/2 goals" in fragment for fragment in item["unsupported_body_fragments"])
 
 
 def test_compact_rule_guidance_keeps_binding_and_horn_shape_constraints() -> None:

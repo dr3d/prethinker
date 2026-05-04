@@ -72,6 +72,7 @@ The short version:
 - [docs/EXPLAINER.md](https://github.com/dr3d/prethinker/blob/main/docs/EXPLAINER.md) - what Prethinker is and why the authority boundary matters.
 - [Docs hub](https://dr3d.github.io/prethinker/) - GitHub Pages index for public docs and evidence.
 - [PROJECT_STATE.md](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md) - current architecture, demo status, and next frontiers.
+- [docs/CURRENT_HARNESS_INSTRUMENT.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_HARNESS_INSTRUMENT.md) - current harness/instrument machinery for scorecards, selector comparison, and repair queues.
 - [docs/CURRENT_RESEARCH_HEADLINE.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md) - current research headline and newest public framing.
 - [docs/MULTI_PASS_SEMANTIC_COMPILER.md](https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md) - semantic parallax and safe-surface accumulation.
 - [docs/CLARIFICATION_EAGERNESS_STRATEGY.md](https://github.com/dr3d/prethinker/blob/main/docs/CLARIFICATION_EAGERNESS_STRATEGY.md) - ingestion/query clarification policy and the CE Trap fixture.
@@ -102,11 +103,11 @@ Open `http://127.0.0.1:8765` for the live console.
 
 ## Reproducibility Notes
 
-The public repo currently tracks `41` pytest files under [tests/](https://github.com/dr3d/prethinker/tree/main/tests). Latest lean local full-suite verification:
+The public repo currently tracks `61` pytest files under [tests/](https://github.com/dr3d/prethinker/tree/main/tests). Latest lean local full-suite verification:
 
 ```powershell
 python -m pytest -q
-# 450 passed, 2 subtests passed
+# 539 passed
 ```
 
 Current high-signal evidence:

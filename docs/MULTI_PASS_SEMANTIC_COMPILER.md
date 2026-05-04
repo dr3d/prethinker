@@ -242,6 +242,16 @@ The companion low-threshold branch loaded cleanly but stayed dormant because no
 current Sable amendment amount is at most `50000`. That distinction matters:
 clean dormancy is not the same as unsupported body structure.
 
+The AG-011 repeated-body lesson is now promoted from a shortcut-audit warning
+into the rule-acquisition verifier. Repeated body goals that share multiple
+same-position variables, and have no distinct literal role anchors, are treated
+as unsupported fragments during promotion scoring. This blocks rules that can
+appear to satisfy two distinct requirements with one admitted row. The positive
+AG-012 shape remains allowed: repeated predicates such as `required_condition/2`
+and `deadline_met/2` may compose safely when the requirement slots are anchored
+by source-admitted atoms like `submit_revised_budget` and
+`provide_matching_docs`.
+
 Avalon then showed why the mapper should share part of the verifier's rule
 doctrine. A Section A eligibility replay kept useful helper-composed matching
 fund branches, but the model also proposed raw Prolog constructs such as
@@ -334,6 +344,33 @@ without letting another `derived_status/3` rule satisfy the target head by
 accident. The deterministic union promotion filter now keeps rules that are
 promotion-ready under either isolated or dependency-composed trial.
 
+The dependency-composed trial now follows transitive derived dependencies across
+already-admitted sibling rules. A final rule can therefore be tested with a
+bounded chain such as `derived_condition/3 -> derived_permission/4 ->
+derived_status/3`, while same-head siblings for the target rule remain excluded
+so they cannot mask dormancy. This is structural composition over admitted
+clauses, not source-prose interpretation.
+
+Rule activation now has a small pack harness:
+`scripts/run_rule_activation_mode_pack.py`. It resolves fixture run ids from
+`progress_metrics.jsonl`, checks that the referenced QA artifacts are present,
+builds a mode-comparison report, and optionally runs the non-oracle selector
+over the same evidence modes. The pack is intentionally post-run: it reads
+existing QA artifacts and structured query evidence, not source prose, and it
+does not rerun compilation or judging.
+
+The first restored-artifact packs compare baseline, rule-union, and focused
+evidence modes for Sable and Avalon. Sable's three-mode rule pack has a
+diagnostic upper bound of `26 exact / 7 partial / 7 miss`; the direct selector
+with a larger JSON budget reached `25 / 8 / 7`, missing only one best-mode row.
+Avalon's four-mode pack has an upper bound of `32 / 7 / 1`; direct selection
+reached `28 / 10 / 2`, while direct selection with bounded self-check context
+reached `29 / 9 / 2`. A heavier experimental `activation` selector prompt
+regressed to `28 / 10 / 2`, so the useful signal is not "say activation more
+loudly." The current best Avalon next move is to understand the remaining
+four missed-best rows under the direct+self-check posture. Structural selection
+remains a cheap baseline, not a replacement policy.
+
 ## Open Problems
 
 - Pass planner: the router should choose lenses and source spans instead of
@@ -396,6 +433,12 @@ promotion-ready under either isolated or dependency-composed trial.
   RF-002/RF-003 then showed the opposite failure: dense incident passes can
   parse but remain too thin or skip-heavy. The next lens-quality metric should
   flag zero-yield, thin-surface, and skip-heavy passes, not just `invalid_json`.
+- Semantic struggle detection is now a named circuit breaker. The structural
+  `semantic_progress_assessment_v1` layer reports unique contribution totals,
+  duplicate ratios, stale pass tails, skip-heavy/thin-surface flags, and
+  selector-governor failures. A high-risk run should stop and report struggle;
+  a medium-risk run should continue only when the next pass states the expected
+  contribution it is meant to add.
 - Compact broad skeleton: DL-003/DL-004 exposed that the old full Semantic IR
   flat pass can overflow on dense source material while compact focused passes
   survive. When `--focused-pass-ops-schema` is enabled, the broad
