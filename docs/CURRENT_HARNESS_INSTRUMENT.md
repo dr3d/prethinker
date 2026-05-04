@@ -208,5 +208,17 @@ compilation now tells the model that numeric character attributes must not be
 encoded as names or aliases, and that named officials need duty/authority
 surface when the profile supports it. The first replay is not a blanket
 promotion because compile health is `poor`, but it repairs Larkspur q007. With
-that variant added, the judged compile-variant overlay target is `49 / 1 / 0`;
-only Larkspur q009 remains unresolved.
+that variant added, the judged compile-variant overlay target moved to
+`49 / 1 / 0`.
+
+The post-ingestion QA harness now adds a deterministic official-identity
+companion query: when `person_role(Constant, Role)` succeeds for a named
+official or role-holder, the runtime also checks admitted authority/action
+surfaces for the same person, such as `ruling_by/3`, `permission_granted/2`,
+`official_action/3`, and `event_affects_person/3`. This repaired Larkspur q009
+without Python source-prose interpretation. The Larkspur companion candidate is
+still rejected globally because q010 regresses, but the compile/query variant
+overlay now exposes a judged `50 / 0 / 0` target with four accepted variant
+rows, three protected baseline-exact rows, and zero unchanged non-exacts. The
+next product step is selector/risk-gate machinery that can approximate that
+row choice without oracle verdicts.

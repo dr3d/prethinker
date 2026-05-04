@@ -11,6 +11,7 @@ from scripts.run_domain_bootstrap_qa import (
     parse_markdown_answer_key,
     parse_numbered_markdown_questions,
     read_cached_row,
+    run_query_plan,
     score_oracle,
     summarize,
     write_cached_row,
@@ -342,3 +343,27 @@ def test_relaxed_constant_query_recovers_over_bound_atom_drift() -> None:
             "Date": "2026_02_01",
         }
     ]
+
+
+def test_query_strategy_mentions_official_identity_duty_rows() -> None:
+    policy = "\n".join(POST_INGESTION_QA_QUERY_STRATEGY["arity_and_variable_policy"])
+
+    assert "who-is or what-is identity questions about a named official" in policy
+    assert "Name plus role is often only partial support" in policy
+    assert "ruling_by/3" in policy
+
+
+def test_person_role_query_adds_official_action_companions() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "person_role(osric_thane, fair_warden).",
+        "ruling_by(osric_thane, moth_lantern, disqualified_from_judging).",
+        "permission_granted(osric_thane, tobias_wren_repair_request).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["person_role(osric_thane, Role)."])
+    queries = [str(row.get("query", "")) for row in rows]
+
+    assert "ruling_by(osric_thane, Subject, Outcome)." in queries
+    assert "permission_granted(osric_thane, Request)." in queries

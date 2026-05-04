@@ -290,6 +290,7 @@ POST_INGESTION_QA_QUERY_STRATEGY: dict[str, Any] = {
         "For where/location questions, prefer location predicates when they exist; otherwise retrieve method/explanation rows that may contain location-bearing labels instead of querying only object targets.",
         "For institution, ledger, record, or source questions, retrieve both the event text and the container/source slot with a shared record variable: for example grievance_method(Grievance, Method), grievance_explanation(Grievance, Explanation), and grievance_target(Grievance, Institution).",
         "For who-reported or reporter questions, query reporter predicates and the content predicates that describe what was reported, such as grievance_reporter(Grievance, Reporter) with grievance_explanation(Grievance, Explanation) or grievance_method(Grievance, Method). Do not rely only on target predicates.",
+        "For who-is or what-is identity questions about a named official, officer, warden, inspector, director, authority, or role-holder, retrieve both identity rows and authority/action rows when they exist. Name plus role is often only partial support; include predicates such as ruling_by/3, permission_granted/2, certification_status/3, disqualification_reason/2, director_recommendation/2, official_action/3, or equivalent inventory predicates that expose what the role-holder inspects, certifies, authorizes, recommends, or decides.",
         "When a question phrase may be only part of a longer normalized atom, do not bind the phrase as a lowercase constant. Query the whole slot as a variable and let returned rows expose atoms such as infirmary_ledger_recorded_blue_sneezing.",
         "Never use lowercase placeholder constants such as who, what, item, reason, source, or answer when a variable is intended.",
         "Words that merely name the slot, such as grievance_label, method_detail, explanation_detail, candidate, label, content, value, status, authority, or institution, are variables too; write them as GrievanceLabel, MethodDetail, ExplanationDetail, Candidate, Label, Content, Value, Status, Authority, or Institution.",
@@ -1307,6 +1308,35 @@ def _domain_companion_queries(runtime: CorePrologRuntime, *, query: str) -> list
     if parsed is None:
         return []
     predicate, args = parsed
+    if predicate == "person_role" and len(args) >= 2:
+        person_arg = str(args[0]).strip()
+        if person_arg and not _is_prolog_variable(person_arg):
+            out: list[dict[str, Any]] = []
+            companion_queries = [
+                format_prolog_query("ruling_by", [person_arg, "Subject", "Outcome"]),
+                format_prolog_query("permission_granted", [person_arg, "Request"]),
+                format_prolog_query("official_action", [person_arg, "Action", "Subject"]),
+                format_prolog_query("event_affects_person", ["Event", person_arg, "Action"]),
+            ]
+            for companion_query in _ordered_query_unique(companion_queries):
+                result = runtime.query_rows(companion_query)
+                if result.get("status") != "success":
+                    continue
+                out.append(
+                    {
+                        "query": companion_query,
+                        "result": {
+                            **result,
+                            "reasoning_basis": {
+                                "kind": "core-local",
+                                "note": "domain companion query expanded official identity role lookup with admitted authority/action evidence",
+                                "original_query": query,
+                            },
+                        },
+                        "derived_from_queries": [query],
+                    }
+                )
+            return out
     if predicate == "committee_member" and len(args) >= 2:
         out: list[dict[str, Any]] = []
         committee_arg = str(args[0]).strip()

@@ -155,8 +155,15 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
   character attributes should not be encoded as names or aliases, and named
   officials should preserve duty/authority surfaces when the profile supports
   them. The first Larkspur replay repaired q007 but stayed high-risk overall;
-  adding it as a row-gated variant raises the judged overlay target to
+  adding it as a row-gated variant raised the judged overlay target to
   `49 exact / 1 partial / 0 miss`.
+- Post-ingestion QA now has a deterministic official-identity companion over
+  admitted rows: successful `person_role(Constant, Role)` queries also check
+  authority/action predicates such as `ruling_by/3`, `permission_granted/2`,
+  `official_action/3`, and `event_affects_person/3`. This repaired Larkspur
+  q009, and the latest judged compile/query variant overlay target is
+  `50 exact / 0 partial / 0 miss` with exact-row protection. This is a selector
+  target, not a deployable oracle policy.
 - Incoming compile repair targets are now generated at
   `tmp/incoming_smoke_summaries/compile_repair_targets.{json,md}`. The current
   scoped-evidence queue is down to four partial rows: `3` scoped source-surface

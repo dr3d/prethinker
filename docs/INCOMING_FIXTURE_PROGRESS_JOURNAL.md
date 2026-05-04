@@ -477,7 +477,7 @@ Ignored local artifact references:
 - `tmp/incoming_smoke_summaries_compile_variant_selection/row_gated_scorecard_plan.md`
 - `tmp/incoming_smoke_summaries_compile_variant_selection/compile_variant_overlay_plan.md`
 
-## 2026-05-04 Larkspur Attribute/Duty Guardrail
+## 2026-05-04 Larkspur Attribute/Duty Guardrail And Official Companion
 
 Larkspur q007 showed a right-shaped/wrong-slot failure: Cassia's age had been
 treated as name/alias-like surface instead of a query-bearing character
@@ -508,27 +508,50 @@ Regression held behind exact protection:
 
 Still unresolved:
 
-- `larkspur_clockwork_fair q009`: Fair Warden Osric Thane remains partial/miss
-  depending on mode; the compile has role/ruling fragments but not enough
-  answer-bearing duty/authority surface.
+- `larkspur_clockwork_fair q009`: the compile had role/ruling fragments, but
+  the first QA plan still treated name plus role as enough identity support.
 
-Adding the guarded Larkspur replay as a compile variant raises the judged
-artifact overlay target:
+The query harness now has a structural companion for named official identity
+lookups. When a successful query asks `person_role(Constant, Role)`, the
+runtime also tries admitted authority/action companions for the same person,
+such as `ruling_by/3`, `permission_granted/2`, `official_action/3`, and
+`event_affects_person/3`. This is query-only expansion over admitted KB rows;
+it does not reread source prose or infer answers in Python.
+
+Targeted and full-slice movement:
+
+```text
+q009 official companion query: exact
+larkspur companion first-10:   9 exact / 0 partial / 1 miss
+candidate scorecard:           47 exact / 2 partial / 1 miss
+candidate gate:                reject_candidate
+```
+
+The candidate is rejected because `larkspur_clockwork_fair q010` regresses from
+exact to miss and the guarded compile is still high-risk. Adding the official
+companion replay as a compile/query variant raises the judged artifact overlay
+target:
 
 ```text
 baseline scoped-evidence recipe: 46 exact / 4 partial / 0 miss
-variant overlay target:          49 exact / 1 partial / 0 miss
-accepted variant rows: 3
+variant overlay target:          50 exact / 0 partial / 0 miss
+accepted variant rows: 4
 protected baseline-exact rows: 3
-unchanged non-exacts: 1
+unchanged non-exacts: 0
 ```
 
 Discovery: the instrument is now seeing complementary compiler views at the row
 level. The product problem is not "run the best compile"; it is "identify which
-compile view is safe for this question while protecting exact rows."
+compile/query view is safe for this question while protecting exact rows." The
+next harness step is a non-oracle row-variant selector/risk gate that can learn
+from the four accepted rows and three protected exact rows without judge labels
+or source-prose access.
 
 Ignored local artifact references:
 
 - `tmp/incoming_smoke_summaries_larkspur_attribute_duty_variant/scorecard.md`
 - `tmp/incoming_smoke_summaries_larkspur_attribute_duty_variant/scoped_evidence_comparison.md`
 - `tmp/incoming_smoke_summaries_larkspur_attribute_duty_variant/compile_variant_overlay_plan.md`
+- `tmp/incoming_smoke_summaries_official_companion_overlay/scorecard.md`
+- `tmp/incoming_smoke_summaries_official_companion_overlay/scoped_evidence_comparison.md`
+- `tmp/incoming_smoke_summaries_official_companion_overlay/compile_variant_overlay_plan.md`

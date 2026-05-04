@@ -312,10 +312,16 @@ testing whether those gains transfer:
   attributes must not become names/aliases, and official roles need duty and
   authority surfaces. The first guarded replay is high-risk as a compile, but
   it repairs the youngest-exhibitor row. Added as a variant, the judged overlay
-  target is now `49 / 1 / 0`; the remaining stubborn row is Fair Warden Osric
-  Thane's duty/authority description.
-  The hard problem is learning a non-oracle selector/control signal for compile
-  variants.
+  target reached `49 / 1 / 0`.
+- The remaining Larkspur row turned out to be a query-surface issue over an
+  admitted compile surface: `person_role(osric_thane, fair_warden)` was true
+  but too thin. The QA harness now adds structural official-identity companions
+  over admitted authority/action predicates such as `ruling_by/3` and
+  `permission_granted/2`, making Osric's row exact without Python prose
+  interpretation. The candidate remains unsafe globally because Larkspur q010
+  regresses, but the judged compile/query overlay target is now `50 / 0 / 0`
+  with four accepted variant rows and three protected exact rows. The hard
+  problem is learning a non-oracle selector/control signal for these variants.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 
