@@ -118,6 +118,14 @@ testing whether those gains transfer:
   `amendment_introduced/4`, then composed `number_greater_than/2` to derive
   `requires_public_hearing` without unbound head variables, fact-shaped rule
   clauses, oracle rows, or Python prose interpretation.
+- Sable SC-007 crossed the important line from probe success to full-QA lift.
+  A body-fact lens admitted `proposal/1` and `supported/2` vote rows, the
+  aggregation lens derived only `support_threshold_met`, and the
+  promotion-filtered threshold+vote union moved the full 40-question replay
+  from `20 / 8 / 12` to `24 / 6 / 10` with no runtime errors or QA write
+  proposals. The harness lesson was sharp: body-fact guidance must not confuse
+  `supported/2` vote facts with generic `support_*` rationale rows, and
+  aggregation lenses need condition-label restraint as well as scope restraint.
 - Avalon then repeated the rule-lens transfer with a sharper mapper boundary:
   raw Prolog negation, disjunction, lists, arithmetic, equality, and comparison
   operators are now skipped at rule admission, so the post-gate Section A replay

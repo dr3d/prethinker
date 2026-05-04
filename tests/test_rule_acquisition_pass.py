@@ -123,6 +123,15 @@ def test_compact_rule_guidance_keeps_binding_and_horn_shape_constraints() -> Non
     assert "fact-shaped clause" in guidance
 
 
+def test_aggregation_rule_guidance_blocks_sibling_scope_leakage() -> None:
+    guidance = "\n".join(_rule_guidance_context(target=4, rule_class="aggregation", compact=True))
+
+    assert "current raw_source_text rule span" in guidance
+    assert "Do not emit sibling scopes" in guidance
+    assert "support_threshold_met" in guidance
+    assert "majority_support" in guidance
+
+
 def test_backbone_fact_signature_support_is_structural_index() -> None:
     support = _backbone_fact_signature_support(
         [

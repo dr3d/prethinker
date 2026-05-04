@@ -374,20 +374,7 @@ def _run_support_pass(
         "allowed_predicates": allowed_predicates,
         "predicate_contracts": predicate_contracts,
         "domain_context": domain_context,
-        "guidance_context": [
-            "This is not a second default compile. It is a support-row acquisition pass.",
-            "The raw source text is direct evidence; the existing admitted backbone is anchor context only.",
-            "Do not create new recommendation families, new priority targets, or broad source facts.",
-            "Use support_* predicates only when the first argument is an atom already visible in existing_admitted_backbone or a directly matching source-local guidance anchor.",
-            "If an existing allowed support-like predicate fits exactly, prefer it over generic support_*.",
-            "For why questions, preserve directly stated reason/effect/tradeoff text as compact snake_case atoms.",
-            "Do not over-compress named examples, error classes, exception cases, or product feature names into generic categories. If the source says an action helps catch a named error class, preserve both the general class and the named example in the support atom when possible.",
-            "Preserve negative mechanisms as support rows, not only positive replacements. Blocking, increasing memory, increasing cell count, forcing more cells to calculate, preventing on-demand calculation, or creating dense line items are answer-bearing effects when directly stated.",
-            "Preserve contrastive conditions exactly. A low-complexity/high-populated-cell case is not the same anchor as a high-complexity/high-cell-count case; if the source contrasts them, emit separate support rows.",
-            "For avoid/use-instead questions, preserve the positive counterpart separately from the avoid anchor.",
-            "Set source='direct' only for operations grounded in raw_source_text. Context anchors alone are not enough.",
-            "For body_fact lens, emit only assert operations using the allowed body-fact predicates. Do not emit rules, queries, support_* rows, or generic entity_property fallbacks.",
-        ],
+        "guidance_context": _support_guidance_context(lens=str(args.lens or "support")),
     }
     try:
         response = _call_lmstudio_json_schema(
@@ -396,12 +383,7 @@ def _run_support_pass(
             messages=[
                 {
                     "role": "system",
-                    "content": (
-                        "You are a support-row acquisition compiler for a governed symbolic memory system. "
-                        "You do not decide truth and you do not mutate the KB. "
-                        "Your only job is to propose source-grounded rationale/effect/tradeoff rows that attach "
-                        "to an already-admitted backbone. Emit only source_pass_ops_v1 JSON."
-                    ),
+                    "content": _support_system_prompt(lens=str(args.lens or "support")),
                 },
                 {"role": "user", "content": "INPUT_JSON:\n" + json.dumps(payload, ensure_ascii=False, indent=2)},
             ],
@@ -437,6 +419,53 @@ def _run_support_pass(
         "self_check": ir.get("self_check", {}),
         "source_pass_ops": parsed if isinstance(parsed, dict) else {},
     }
+
+
+def _support_guidance_context(*, lens: str) -> list[str]:
+    common = [
+        "This is not a second default compile. It is a support-row acquisition pass.",
+        "The raw source text is direct evidence; the existing admitted backbone is anchor context only.",
+        "Do not create new recommendation families, new priority targets, or broad source facts.",
+        "Set source='direct' only for operations grounded in raw_source_text. Context anchors alone are not enough.",
+    ]
+    if str(lens or "").strip().lower() == "body_fact":
+        return [
+            *common,
+            "For body_fact lens, emit only assert operations using the active allowed body-fact predicates.",
+            "Do not emit rules, queries, generic entity_property fallbacks, or generic rationale predicates such as support_reason/2, support_effect/2, support_tradeoff/3, support_exception/2, or support_positive_counterpart/2.",
+            "Do not treat allowed vote predicates such as supported/2 as banned generic support_* rows; if supported/2 is active, it is a source-stated body fact for vote-count helpers.",
+            "Do not reject explicit instance rows merely because the backbone also has an aggregate result. Body-fact lenses intentionally expose atomic rows needed by helper predicates and later executable rule bodies.",
+            "If the active palette can represent an explicit source-stated instance needed by a helper or rule body, emit that row even when it is also implied by a summary line.",
+            "Emit no rows when the active allowed predicate palette cannot represent the source span.",
+        ]
+    return [
+        *common,
+        "Use support_* predicates only when the first argument is an atom already visible in existing_admitted_backbone or a directly matching source-local guidance anchor.",
+        "If an existing allowed support-like predicate fits exactly, prefer it over generic support_*.",
+        "For why questions, preserve directly stated reason/effect/tradeoff text as compact snake_case atoms.",
+        "Do not over-compress named examples, error classes, exception cases, or product feature names into generic categories. If the source says an action helps catch a named error class, preserve both the general class and the named example in the support atom when possible.",
+        "Preserve negative mechanisms as support rows, not only positive replacements. Blocking, increasing memory, increasing cell count, forcing more cells to calculate, preventing on-demand calculation, or creating dense line items are answer-bearing effects when directly stated.",
+        "Preserve contrastive conditions exactly. A low-complexity/high-populated-cell case is not the same anchor as a high-complexity/high-cell-count case; if the source contrasts them, emit separate support rows.",
+        "For avoid/use-instead questions, preserve the positive counterpart separately from the avoid anchor.",
+    ]
+
+
+def _support_system_prompt(*, lens: str) -> str:
+    base = (
+        "You are a pass-specific acquisition compiler for a governed symbolic memory system. "
+        "You do not decide truth and you do not mutate the KB. Emit only source_pass_ops_v1 JSON. "
+    )
+    if str(lens or "").strip().lower() == "body_fact":
+        return (
+            base
+            + "Your only job is to propose source-grounded body facts using the active allowed predicates, "
+            + "so later helper predicates and executable rule bodies can bind to explicit rows."
+        )
+    return (
+        base
+        + "Your only job is to propose source-grounded rationale/effect/tradeoff rows that attach "
+        + "to an already-admitted backbone."
+    )
 
 
 def _compile_items(record: dict[str, Any], key: str) -> list[str]:

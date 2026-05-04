@@ -728,6 +728,8 @@ def _rule_guidance_context(*, target: int, rule_class: str, compact: bool) -> li
                 "For aggregation rule classes, prefer derived_condition/3 heads such as derived_condition(Proposal, support_threshold_met, council_vote).",
                 "Do not derive final passed/failed outcome from the aggregation lens when veto, override, exception, or priority rules also affect the outcome.",
                 "Use support_count_at_least(Proposal, Threshold) as the body proof for threshold_met and stop there.",
+                "The head scope must come from the current raw_source_text rule span. Do not emit sibling scopes from other charter rules, profile summaries, or admitted backbone context just because they share the same threshold helper.",
+                "For vote-count aggregation, use one intermediate condition atom such as support_threshold_met. Do not emit neighboring interpretations such as majority_support, mayor_vote_not_required, recall_threshold_met, or final passage/failure labels unless raw_source_text explicitly states that exact condition as the rule target.",
             ]
         )
     if compact:

@@ -42,13 +42,13 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 
 ## Recent Frontier Results
 
-- Full pytest after hybrid selector instrumentation: `471 passed, 2 subtests passed`.
+- Full pytest after Sable rule-composition instrumentation: `474 passed, 2 subtests passed`.
 - Iron Harbor: `86 exact / 14 partial / 0 miss` on a full 100-question source-document battery, with `0` write proposals during post-ingestion QA.
 - Blackthorn: baseline first-20 was `2 exact / 1 partial / 17 miss`; current diagnostic lanes include BTC-022 at `82 / 9 / 9` full-100 and BTC-027 at `85 / 4 / 11`. These are different configurations, so compare within lane rather than treating one number as a universal replacement.
 - Kestrel: profile-guided KCL-016 reached `73 exact / 11 partial / 16 miss` full-100 with `0` write proposals. Cold/source-aware evidence remains much lower, and the distinction is intentional.
 - Anaplan Polaris: APR-016 reached `42 exact / 1 partial / 0 miss` on 43 QA by accumulating independent mapper-admitted support views over an admitted backbone.
 - Glass Tide: separate rule lenses plus deterministic union now produce promotion-ready slices for role joins, threshold/exception rules, temporal clearance, salvage exceptions, budget-veto failure, and support-threshold conditions. Durable rule activation remains gated.
-- Sable Creek: rule promotion probes now support structural any-of groups, so authored probes can stay strict on meaning-bearing slots while accepting controlled intermediate-condition versus final-status surfaces. SC-006 produced a promotion-clean threshold rule slice, but full-QA activation still requires row-level evidence selection.
+- Sable Creek: rule promotion probes now support structural any-of groups, and SC-007 shows rule composition improving full QA. A body-fact lens admitted `supported/2` vote rows; an aggregation lens derived `support_threshold_met`; the promotion-filtered threshold+vote union moved full QA from `20 exact / 8 partial / 12 miss` to `24 / 6 / 10` with `0` runtime errors and `0` write proposals.
 - Query-mode activation now has deterministic structural and hybrid structural+LLM selector controls. Hybrid reached the Avalon Rule8 perfect-selector upper bound at `27 exact / 12 partial / 1 miss` while saving `13/40` LLM choices, but Three Moles and Sable regressed when the LLM fallback overrode structurally exact relaxed evidence. Treat this as a measured control surface, not a default QA policy.
 - Clarification Eagerness Trap: source-context lane reached and held `40/40`, with `0` unsafe candidates, `0` context-write violations, and `10/10` blocked-slot coverage.
 - New held-out fixtures such as Black Lantern, Three Moles, Oxalis, Dulse, Avalon, Sable Creek, Ridgeline, Veridia, and Ledger are being used to test whether gains transfer beyond the original fixture families.

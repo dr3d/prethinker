@@ -336,3 +336,108 @@ rather than a replacement policy. This reinforces the broader rule doctrine:
 promotion-ready rule surface != globally dominant evidence mode
 ```
 
+## Run SC-007 - Vote Body Facts And Aggregation Rule Composition
+
+- Timestamp: `2026-05-04T03:35Z` through `2026-05-04T03:58Z`
+- Evidence lane: `diagnostic_replay`
+- Model: `qwen/qwen3.6-35b-a3b`
+- Mode: body-fact lens for vote support rows, aggregation rule lens, promotion
+  filtered union, and full-40 QA replay.
+
+### Artifacts
+
+- Initial zero-row body-fact pass:
+  `tmp/cold_baselines/sable_creek_budget/support/domain_bootstrap_file_20260504T033554649616Z_source-support_qwen-qwen3-6-35b-a3b.json`
+- Clarified body-fact pass:
+  `tmp/cold_baselines/sable_creek_budget/support/domain_bootstrap_file_20260504T033826824157Z_source-support_qwen-qwen3-6-35b-a3b.json`
+- Backbone plus vote body facts:
+  `tmp/cold_baselines/sable_creek_budget/union/domain_bootstrap_file_20260504T033843965231Z_sable-baseline-plus-vote-bodyfacts_qwen-qwen3-6-35b-a3b.json`
+- Final aggregation rule lens:
+  `tmp/cold_baselines/sable_creek_budget/rules/domain_bootstrap_file_20260504T034058660069Z_source-rules_qwen-qwen3-6-35b-a3b.json`
+- Threshold plus vote-aggregation union:
+  `tmp/cold_baselines/sable_creek_budget/union/domain_bootstrap_file_20260504T034135269693Z_sable-threshold-plus-vote-aggregation_qwen-qwen3-6-35b-a3b.json`
+- Full QA replay:
+  `tmp/cold_baselines/sable_creek_budget/union/domain_bootstrap_qa_20260504T035004854370Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Three-mode selector:
+  `tmp/cold_baselines/sable_creek_budget/union/selector_threshold_vote_direct.json`
+
+### Result
+
+The first body-fact pass emitted `0` rows because the prompt said not to emit
+`support_*` rows, and the model treated the allowed vote predicate
+`supported/2` as prohibited. The harness now names the banned generic rationale
+predicates exactly and tells the body-fact lens that `supported/2` is a vote
+fact when it is explicitly allowed.
+
+After that correction, the body-fact lens admitted `10` rows:
+
+```prolog
+proposal(ba_2026_07).
+proposal(ba_2026_08).
+supported(ba_2026_07, councilmember_okafor).
+supported(ba_2026_07, councilmember_medina).
+supported(ba_2026_07, councilmember_singh).
+supported(ba_2026_08, councilmember_okafor).
+supported(ba_2026_08, councilmember_medina).
+supported(ba_2026_08, councilmember_chen).
+supported(ba_2026_08, councilmember_singh).
+supported(ba_2026_08, councilmember_nakamura).
+```
+
+The aggregation rule lens initially overgenerated sibling scopes and neighboring
+condition labels. Tightening the aggregation guidance produced one clean
+promotion-ready rule:
+
+```prolog
+derived_condition(Proposal, support_threshold_met, council_vote) :-
+    support_count_at_least(Proposal, 4).
+```
+
+The final deterministic union retained `2` promotion-ready rules: the earlier
+public-hearing threshold rule and the new vote-threshold aggregation rule.
+
+Probe result:
+
+```text
+positive probes: 3/3
+negative probes: 3/3
+probe-adjusted promotion ready: true
+runtime load errors: 0
+```
+
+Full QA:
+
+```text
+SC-001 baseline:                       20 exact / 8 partial / 12 miss
+SC-006 threshold-only union:           20 exact / 7 partial / 13 miss
+SC-007 threshold + vote aggregation:   24 exact / 6 partial / 10 miss
+```
+
+The three-mode non-oracle selector scored:
+
+```text
+selected: 24 exact / 7 partial / 9 miss
+perfect selector upper: 26 exact / 7 partial / 7 miss
+selected best available mode: 37/40
+```
+
+### Lesson
+
+SC-007 is the first Sable result where rule composition improves the full QA
+surface, not just promotion probes. The winning path was:
+
+```text
+body-fact lens -> supported/2 vote rows
+aggregation lens -> intermediate derived_condition/3
+promotion filter -> deterministic union
+full QA replay
+```
+
+Two general harness lessons came with it:
+
+- body-fact prompts must distinguish generic `support_*` rationale predicates
+  from source-domain predicates such as `supported/2`;
+- aggregation rules need both scope restraint and condition-label restraint.
+  A body-supported rule can still be semantically too broad if it emits sibling
+  scopes or neighboring interpretations of the same threshold.
+

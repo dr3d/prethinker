@@ -103,3 +103,11 @@ rows and reached Avalon's Rule8 comparison upper bound (`27 exact / 12 partial
 Moles and Sable because LLM fallback overrode structurally exact relaxed
 evidence, so hybrid selection remains diagnostic-only until uncertainty gating
 transfers across unlike fixtures.
+
+Rule update: Sable SC-007 is the current rule-composition transfer win. A
+body-fact lens admitted `supported/2` vote rows, an aggregation lens derived
+only `support_threshold_met`, and the promotion-filtered threshold+vote union
+lifted full QA from `20 exact / 8 partial / 12 miss` to `24 / 6 / 10`. Keep
+pushing this pattern, but retain the new restraint: aggregation lenses must not
+emit sibling scopes or neighboring condition labels merely because the same
+threshold helper can fire.
