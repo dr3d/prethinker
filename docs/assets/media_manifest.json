@@ -1,6 +1,25 @@
 {
-  "generated_at_utc": "2026-04-19T20:05:59+00:00",
+  "generated_at_utc": "2026-05-05T13:45:00+00:00",
   "entries": [
+    {
+      "title": "The Architecture of Meaning",
+      "base": "assets/The_Architecture_of_Meaning",
+      "published_at": "2026-05-05T09:37:02-04:00",
+      "variants": [
+        {
+          "src": "assets/The_Architecture_of_Meaning.mp4",
+          "kind": "video",
+          "type": "video/mp4",
+          "label": "MP4"
+        },
+        {
+          "src": "assets/The_Eight_Facets_of_Meaning.png",
+          "kind": "image",
+          "type": "image/png",
+          "label": "Poster"
+        }
+      ]
+    },
     {
       "title": "The Governed Pipeline",
       "base": "assets/The_Governed_Pipeline",
