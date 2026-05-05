@@ -165,6 +165,17 @@ on only a two-row probe. Larkspur remains the hard source-surface frontier:
 why/custody/object-state rows are still mostly compile gaps. Treat this as a
 boundary marker for `rationale_contrast_source_note_lens`, not a reason to
 widen the prompt.
+Larkspur's next focused acquisition pass found the stronger shape:
+`final_object_state_transition_surface` is healthy and globally useful,
+reaching `36 / 2 / 2` full-40 with only q009 as a baseline-exact regression.
+Permission/motive remains row-useful but unsafe globally (`16 / 12 / 12`), and
+custody is weak except for q038. The artifact overlay target is now almost
+embarrassingly concrete: state for most rows, old permission/rationale for
+q011/q036, custody for q038, and protected original baseline q009 gives a
+judged `40 / 0 / 0` target. The next selector frontier is not more broad
+compile prompting; it is retained q009 identity evidence or a sharper
+official-role acquisition lens that gives the selector something honest to
+choose.
 
 Activation update: query-mode selection now has deterministic structural and
 hybrid structural+LLM controls. The hybrid path saves LLM calls on confident

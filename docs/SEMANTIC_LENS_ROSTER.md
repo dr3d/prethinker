@@ -89,6 +89,13 @@ The older-fixture transfer check marks the boundary: source-note rationale
 transfers to record/discrepancy/correction surfaces, but it does not solve
 Larkspur-style narrative motive, custody, or object-state coverage without a
 stronger source-surface acquisition contract.
+`final_object_state_transition_surface` is now separated from broad
+state/custody prompting. It asks for named-device initial/current/final
+condition, state-change event, repair/restoration possibility, and stated
+state-change reason. Its guardrail is that identity/role questions should not
+be overrun by object-state volume; Larkspur q009 is the active counterexample.
+`custody_ownership_chain_surface` remains narrower still: use it for final
+holder/ownership/custody rows such as q038, not as a general motive lens.
 
 Uncertainty is a domain language, not a tone. Future harness work should avoid
 collapsing these into a single "not sure" bucket:

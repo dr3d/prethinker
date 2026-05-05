@@ -432,6 +432,16 @@ testing whether those gains transfer:
   narrative motive, custody, and object-state rationale. The next acquisition
   work should sharpen those surfaces directly instead of broadening the
   rationale/contrast lens.
+- That sharper Larkspur acquisition now has a real candidate. The
+  `final_object_state_transition_surface` micro-lens compiled healthy (`98`
+  admitted / `14` skipped) and scored `36 exact / 2 partial / 2 miss` full-40,
+  improving `18` baseline non-exact rows with only one baseline-exact
+  regression: q009, "Who is Fair Warden Osric Thane?" Permission/motive is
+  still a row-level lens (`3 / 2 / 0` targeted, `16 / 12 / 12` globally), and
+  custody is only useful so far for q038. Combining judged artifacts now gives
+  a visible `40 / 0 / 0` row target, but the selector cannot honestly replay it
+  until q009 has retained baseline evidence or a better official-identity
+  acquisition surface.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 

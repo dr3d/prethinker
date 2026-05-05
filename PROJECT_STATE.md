@@ -303,6 +303,20 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
   gaps around narrative motive, custody, and object-state rationale. The next
   frontier is a stronger Larkspur acquisition contract, not a broader
   rationale prompt.
+- Larkspur now has that stronger acquisition contract in first form:
+  `final_object_state_transition_surface` compiled healthy (`98` admitted,
+  `14` skipped) and scored `36 exact / 2 partial / 2 miss` on full-40, with
+  `0` writes and `0` runtime errors. It improves `18` baseline non-exact rows
+  and creates one baseline-exact regression, q009 official identity. The
+  companion `permission_motive_rationale_surface` is target-useful (`3 / 2 /
+  0`) but globally unsafe (`16 / 12 / 12`); `custody_ownership_chain_surface`
+  is weak overall (`1 / 1 / 3`) but gives an exact q038 custody row; a new
+  official-identity micro-lens did not solve q009. The judged artifact overlay
+  opportunity is now visible: state lens for most rows, old permission/rationale
+  for q011/q036, custody for q038, and protected original baseline q009 gives a
+  `40 / 0 / 0` row target, but q009 still needs retained selector evidence or a
+  better official-identity acquisition surface before this can become a
+  non-oracle selector run.
 - Incoming compile repair targets are now generated at
   `tmp/incoming_smoke_summaries/compile_repair_targets.{json,md}`. The current
   scoped-evidence queue is down to four partial rows: `3` scoped source-surface

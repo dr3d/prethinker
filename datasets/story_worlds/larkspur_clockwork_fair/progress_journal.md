@@ -502,3 +502,80 @@ does not by itself recover story-world motive, custody, and object-state
 surface. The next Larkspur work should be a sharper acquisition contract for
 state transitions, custody/location, permission rationale, and final condition,
 with exact-row protection; broad source-note rationale is not enough.
+
+## LCF-014 - Final Object-State Micro-Lens
+
+Date: 2026-05-05
+
+Evidence lane: `source_surface_acquisition`
+
+Mode: three narrow Larkspur acquisition passes, followed by targeted QA and
+full-40 replay for the promising candidates. The passes were named for the
+guardrail they serve rather than the fixture that exposed them:
+
+- `final_object_state_transition_surface`
+- `custody_ownership_chain_surface`
+- `permission_motive_rationale_surface`
+- follow-up negative check: `official_identity_role_roster_surface`
+
+Artifacts:
+
+- State compile:
+  `tmp/story_world_larkspur_acquisition/final_object_state_micro_20260505/domain_bootstrap_file_20260505T123313203200Z_source_qwen-qwen3-6-35b-a3b.json`
+- State targeted QA:
+  `tmp/story_world_larkspur_acquisition/final_object_state_micro_qa_20260505/domain_bootstrap_qa_20260505T124110452883Z_qa_qwen-qwen3-6-35b-a3b.json`
+- State full-40 QA:
+  `tmp/story_world_larkspur_acquisition/final_object_state_micro_full40_qa_20260505/domain_bootstrap_qa_20260505T125748020331Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Custody compile:
+  `tmp/story_world_larkspur_acquisition/custody_chain_micro_20260505/domain_bootstrap_file_20260505T123639918995Z_source_qwen-qwen3-6-35b-a3b.json`
+- Custody targeted QA:
+  `tmp/story_world_larkspur_acquisition/custody_chain_micro_qa_20260505/domain_bootstrap_qa_20260505T124058205738Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Permission/motive compile:
+  `tmp/story_world_larkspur_acquisition/permission_motive_micro_20260505/domain_bootstrap_file_20260505T123545639802Z_source_qwen-qwen3-6-35b-a3b.json`
+- Permission/motive targeted QA:
+  `tmp/story_world_larkspur_acquisition/permission_motive_micro_qa_20260505/domain_bootstrap_qa_20260505T124033111821Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Permission/motive full-40 QA:
+  `tmp/story_world_larkspur_acquisition/permission_motive_micro_full40_qa_20260505/domain_bootstrap_qa_20260505T125925000046Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Baseline replay q009 negative:
+  `tmp/story_world_larkspur_acquisition/baseline_replay_q009_qa_20260505/domain_bootstrap_qa_20260505T130514522149Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Official identity q007/q009 negative:
+  `tmp/story_world_larkspur_acquisition/official_identity_micro_qa_20260505/domain_bootstrap_qa_20260505T130824236335Z_qa_qwen-qwen3-6-35b-a3b.json`
+
+Result:
+
+```text
+state compile:              98 admitted / 14 skipped, healthy
+state targeted QA:          4 exact / 1 partial / 1 miss
+state full-40 QA:           36 exact / 2 partial / 2 miss
+state full-40 movement:     18 improved rows, 1 baseline-exact regression
+state remaining non-exacts: q009 miss, q011 partial, q036 miss, q038 partial
+
+permission/motive target:   3 exact / 2 partial / 0 miss
+permission/motive full-40:  16 exact / 12 partial / 12 miss
+custody target:             1 exact / 1 partial / 3 miss
+official identity target:   0 exact / 1 partial / 1 miss
+write proposals:            0
+runtime load errors:        0
+```
+
+Row overlay opportunity:
+
+- Use `final_object_state_transition_surface` for most rows.
+- Use the older permission/rationale variant for q011 and q036.
+- Use the custody-chain targeted row for q038.
+- Protect q009 with the original baseline scorecard row until a retained
+  selector-evidence artifact or stronger official-identity lens exists.
+
+That judged artifact combination implies a `40 / 0 / 0` Larkspur full-40 row
+target. It is not yet a deployable non-oracle selector result because the old
+q009 exact evidence was only retained in a scorecard and the baseline replay did
+not reproduce it.
+
+Lesson:
+
+This is the strongest Larkspur source-surface gain so far. The important
+separation is now clear: object-state transition acquisition is globally useful;
+permission/motive and custody are row-level lenses; official identity remains
+its own acquisition problem. The next useful harness move is to make the
+selector replay this overlay honestly, especially q009, rather than broadening
+the compile prompt.
