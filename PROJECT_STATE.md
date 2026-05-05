@@ -89,6 +89,19 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
   guard return sites, `49` unique guard reasons, `7` semantic families, and
   `0` unclassified. Use the family count to detect lens sprawl; individual
   row guards should stay diagnostic until they transfer or fold into a family.
+- Broad score-hold check after the rule/selector guard work is clean: the main
+  frozen-artifact selector lanes still match documented results for Larkspur
+  (`40 / 0 / 0`), Calder (`14 / 3 / 3`), Oxalis (`33 / 6 / 1`), Avalon
+  (`32 / 7 / 1`), and Sable (`26 / 7 / 7`), each with perfect selected-best
+  counts and `0` selector errors. Full verification is now `607 passed`.
+- Cross-fixture repair planning is available through
+  `scripts/plan_cross_fixture_repair_slices.py`, with the current report at
+  `docs/CROSS_FIXTURE_REPAIR_SLICES.md`. It merges the older full-40 repair
+  targets and promoted zip-batch targets without source-prose interpretation:
+  `72` targets across `10` fixtures collapse into `9` multi-fixture repair
+  slices. The top repeated themes are rule interpretation/application,
+  object state/custody, rationale/claim uncertainty, and temporal/status
+  deadline repair.
 - Semantic struggle detection is now a named structural guardrail in
   `src/semantic_struggle.py`. It turns pass contribution, duplicate, skip-heavy,
   stale-tail, and selector-governor telemetry into a stop/continue

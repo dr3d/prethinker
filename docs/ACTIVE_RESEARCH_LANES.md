@@ -67,6 +67,12 @@ Selector guard growth is now tracked by
 `49` unique reasons across `7` families with `0` unclassified. Treat that
 family count, not the raw guard count, as the anti-sprawl metric.
 
+Cross-fixture repair growth is now tracked by
+`docs/CROSS_FIXTURE_REPAIR_SLICES.md`: the current planner reads repair-target
+artifacts only and turns `72` unresolved targets across `10` fixtures into `9`
+multi-fixture slices. Use this to pick GPU work that transfers before adding
+another lens or guard.
+
 ## Representative Fixtures
 
 Use small sets rather than the whole zoo for each cycle:
@@ -104,6 +110,10 @@ success = at least two fixtures improve or one improves with zero regression
 
 That lane advances the most other lanes because better source rows feed rules,
 temporal helpers, query planning, CE decisions, and public demos.
+
+Current score-hold check: Larkspur, Calder, Oxalis, Avalon, and Sable frozen
+selector lanes still match their documented results with perfect selected-best
+counts and `0` selector errors; full verification is `607 passed`.
 
 Current update: Three Moles improved when source_entity_ledger_v1 added
 powerless `coverage_targets`, but an anti-meta-rot replay on Oxalis regressed
