@@ -115,6 +115,13 @@ Current score-hold check: Larkspur, Calder, Oxalis, Avalon, and Sable frozen
 selector lanes still match their documented results with perfect selected-best
 counts and `0` selector errors; full verification is `607 passed`.
 
+First repair-slice action: the rule-interpretation/application pass is a
+Meridian win and a Heronvale boundary marker. Meridian full-40 now reaches
+`39 / 1 / 0` with `14` baseline rescues and `0` baseline-exact regressions.
+Heronvale's targeted rows were clean (`3 / 0 / 0`), but full QA is only
+`21 / 3 / 1` and regresses one baseline-exact row. Next use the surface as a
+candidate mode and transfer probe, not a global compile default.
+
 Current update: Three Moles improved when source_entity_ledger_v1 added
 powerless `coverage_targets`, but an anti-meta-rot replay on Oxalis regressed
 when the partial-skeleton recovery instruction was global. Keep that recovery

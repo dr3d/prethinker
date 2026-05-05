@@ -608,6 +608,12 @@ The next work should stay on the sharp edges:
    audit across the 80 rows now has `15/15` nonbaseline rescues protected,
    `7/7` baseline-exact protections preserved, and only one remaining volatile
    prefer-baseline failure.
+   The first cross-fixture repair-slice run then tested
+   `rule_interpretation_application` on Heronvale and Meridian. Meridian moved
+   to `39 exact / 1 partial / 0 miss` full-40 with no baseline-exact
+   regressions; Heronvale improved its cold baseline but regressed one exact row
+   and remains better served by row-gated selection. This is a transfer
+   candidate, not a global prompt promotion.
 2. **Rule probe discipline.** Recent preflight runs show that a rule can be
    body-supported but fail under the wrong scope atom, can become dormant by
    using lowercase placeholders such as `warden` and `repair_order`, or can look

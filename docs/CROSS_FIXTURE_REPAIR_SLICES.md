@@ -19,6 +19,17 @@ themes across fixtures. It is a planning tool, not a source interpreter.
 
 ## Recommended Slices
 
+## First Action Result
+
+The first run attacked `rule_interpretation_application` on Heronvale and
+Meridian with a scoped source-surface compile. Meridian is the clean win:
+full-40 improved from `26 / 10 / 4` in the archived comparison baseline to
+`39 / 1 / 0`, with `14` rescued rows and `0` baseline-exact regressions.
+Heronvale is useful but bounded: the targeted repair rows were `3 / 0 / 0`,
+but full QA was `21 / 3 / 1`, with one baseline-exact regression and a result
+below the existing row-selector high-water. Treat this as a candidate mode and
+transfer probe, not as a new global compile default.
+
 ### `rule_interpretation_application`
 
 - priority score: `115`

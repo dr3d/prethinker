@@ -212,3 +212,53 @@ The probe is clean but too small to claim broad transfer. Keep Meridian in the
 larger helper/query and source-surface lanes; this run mainly says the
 rationale/contrast lens did not disturb the report-authorship and
 counterfactual-objection rows it was asked to cover.
+
+## MPB-008 - Rule Interpretation/Application Full-40 Lift
+
+Date: 2026-05-05
+
+Evidence lane: `rule_interpretation_application_surface`
+
+Mode: scoped source-surface compile over the same source with guidance to
+preserve source-stated rule text, controlling interpretations, applicant or
+property being tested, activation conditions, eligibility/applicability
+results, exceptions, corrections, and consequences. This run did not use answer
+keys, oracle rows, failure labels, or gold KB material during compile.
+
+Artifacts:
+
+- Compile:
+  `tmp/rule_interpretation_application_runs/meridian_permit_board/domain_bootstrap_file_20260505T203403256220Z_source_qwen-qwen3-6-35b-a3b.json`
+- Targeted QA:
+  `tmp/rule_interpretation_application_qa/meridian_permit_board/domain_bootstrap_qa_20260505T203759072306Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Full QA:
+  `tmp/rule_interpretation_application_fullqa/meridian_permit_board/domain_bootstrap_qa_20260505T205339596169Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Failure classification:
+  `tmp/rule_interpretation_application_failures/meridian_permit_board/domain_bootstrap_qa_20260505T205339596169Z_qa_qwen-qwen3-6-35b-a3b_failure_surface_20260505T205410875691Z.json`
+- Comparison:
+  `tmp/rule_interpretation_application_comparisons/meridian_rule_interp_comparison.md`
+
+Result:
+
+```text
+compile shape:        80 admitted / 12 skipped, rough profile score 0.889
+targeted repair rows: 4 exact / 0 partial / 0 miss
+full QA candidate:    39 exact / 1 partial / 0 miss
+baseline comparison:  26 exact / 10 partial / 4 miss
+rescued rows:         14
+baseline regressions: 0
+failure surfaces:     1 compile-surface gap
+write proposals:      0
+runtime errors:       0
+```
+
+Lesson:
+
+This is the strongest current source-surface acquisition result on Meridian.
+The scoped rule-interpretation/application surface rescues materials,
+shared-parking approval, REO classification, codified-law status, and several
+rule-consequence/compliance rows without losing a baseline exact row. The
+remaining partial is `q007`, where Lot 12's existing use still lacks a direct
+lot-to-building/person linkage. Treat this as a strong Meridian-local compile
+candidate and a transfer candidate for unlike rule/application fixtures, not
+yet as a global default.

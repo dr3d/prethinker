@@ -204,3 +204,46 @@ Heronvale transfers cleanly. The rationale/contrast lens is useful on
 ineligibility, approval-reason, recusal, decision, correction, and unresolved
 question rows, while the existing applicant-type and resubmission proof/rule
 guards keep the Poetry Circle eligibility distinctions intact.
+
+## HA-007 - Rule Interpretation/Application Transfer Diagnostic
+
+Date: 2026-05-05
+
+Evidence lane: `rule_interpretation_application_surface`
+
+Mode: scoped source-surface compile over the same source with guidance to
+preserve source-stated rule text, controlling interpretations, applicants or
+applications being tested, activation conditions, eligibility/applicability
+results, exceptions, corrections, and consequences. This run did not use answer
+keys, oracle rows, failure labels, or gold KB material during compile.
+
+Artifacts:
+
+- Compile: `tmp/rule_interpretation_application_runs/heronvale_arts/`
+- Targeted QA: `tmp/rule_interpretation_application_qa/heronvale_arts/`
+- Full QA: `tmp/rule_interpretation_application_fullqa/heronvale_arts/`
+- Failure classification: `tmp/rule_interpretation_application_failures/heronvale_arts/`
+- Comparison: `tmp/rule_interpretation_application_comparisons/heronvale_rule_interp_comparison.md`
+
+Result:
+
+```text
+compile shape:        88 admitted / 7 skipped, rough profile score 0.889
+targeted repair rows: 3 exact / 0 partial / 0 miss
+full QA candidate:    21 exact / 3 partial / 1 miss
+baseline comparison:  18 exact / 4 partial / 3 miss
+rescued rows:         4
+baseline regressions: 1 exact row regressed to partial
+failure surfaces:     2 compile-surface gaps, 2 query-surface gaps
+write proposals:      0
+runtime errors:       0
+```
+
+Lesson:
+
+This is useful transfer evidence but not a promotion candidate for Heronvale.
+The lens rescues the intended rule/application rows (`q004`, `q009`, `q010`)
+and one additional correction row (`q022`), but it regresses the approved-list
+row `q013` and still trails the existing frozen selector high-water of
+`24 / 1 / 0`. Treat the surface as a candidate mode or diagnostic source
+acquisition shape, not a replacement for the current Heronvale selector stack.

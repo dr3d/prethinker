@@ -102,6 +102,16 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
   slices. The top repeated themes are rule interpretation/application,
   object state/custody, rationale/claim uncertainty, and temporal/status
   deadline repair.
+- First action from that planner: a scoped rule-interpretation/application
+  source-surface pass over Heronvale and Meridian. Meridian is a strong local
+  lift: full-40 moved from `26 exact / 10 partial / 4 miss` in the archived
+  baseline comparison to `39 / 1 / 0`, rescuing `14` rows with `0`
+  baseline-exact regressions, `0` write proposals, and `0` runtime errors.
+  Heronvale is mixed: targeted repair rows were `3/3` exact and full QA moved
+  from `18 / 4 / 3` to `21 / 3 / 1`, but it regressed one baseline-exact row
+  and remains below the existing row-selector high-water of `24 / 1 / 0`.
+  Treat the surface as a Meridian-local compile candidate and a transfer
+  candidate, not a global default.
 - Semantic struggle detection is now a named structural guardrail in
   `src/semantic_struggle.py`. It turns pass contribution, duplicate, skip-heavy,
   stale-tail, and selector-governor telemetry into a stop/continue
