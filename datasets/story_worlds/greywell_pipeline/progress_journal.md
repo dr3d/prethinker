@@ -120,3 +120,31 @@ Lesson:
 
 Greywell stays the anti-overfit check: it was already at its per-row selector
 upper bound, and the new baseline-readiness guard does not perturb it.
+
+## GP-004 - Rationale/Contrast Transfer Slice
+
+Date: 2026-05-05
+
+Evidence lane: `rationale_contrast_source_note_lens`
+
+Artifacts:
+
+- Compile: `tmp/story_world_rationale_contrast_variant/greywell_pipeline/`
+- Targeted QA: `tmp/story_world_rationale_contrast_qa_targeted/greywell_pipeline/`
+- Selector: `tmp/story_world_rationale_contrast_selector_transfer/greywell_pipeline-rationale_transfer_selector_v2.md`
+- Transfer scorecard: `tmp/story_world_rationale_contrast_selector_transfer/scorecard.md`
+
+Result:
+
+```text
+targeted rationale QA:       4 exact / 1 partial / 0 miss
+first transfer selector:     3 exact / 2 partial / 0 miss; selected-best 3 / 5
+guarded transfer selector:   5 exact / 0 partial / 0 miss; selected-best 5 / 5
+```
+
+Lesson:
+
+Greywell is the useful transfer trap. The rationale lens can answer the
+unnamed-source evidentiary-status row, but it should not win current
+operational status when the operational lens has explicit final-state surface.
+The new final-state and witness/report guards close both missed-best rows.

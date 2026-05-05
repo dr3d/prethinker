@@ -1563,6 +1563,198 @@ def test_hybrid_selector_prefers_pending_status_for_not_yet_tested_question() ->
     assert "pending test-status surface" in selected["specialized_guard_reason"]
 
 
+def test_hybrid_selector_prefers_final_state_for_current_operational_status() -> None:
+    row = {
+        "id": "q004z",
+        "question": "What is the current operational status of Segment 4?",
+        "modes": [
+            {
+                "mode": "baseline",
+                "query_evidence": {
+                    "executed_results": [
+                        {"status": "success", "num_rows": 3, "predicate": "investigation_status"},
+                        {"status": "success", "num_rows": 1, "predicate": "finding_not_made"},
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+            {
+                "mode": "operational_record",
+                "query_evidence": {
+                    "executed_results": [
+                        {"status": "success", "num_rows": 1, "predicate": "has_state"},
+                        {"status": "success", "num_rows": 1, "predicate": "is_final_state"},
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+            {
+                "mode": "rationale_contrast",
+                "query_evidence": {
+                    "executed_results": [
+                        {"status": "success", "num_rows": 4, "predicate": "event_occurred"},
+                        {"status": "success", "num_rows": 2, "predicate": "administrative_action"},
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["baseline", "operational_record", "rationale_contrast"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: {"selected_mode": "rationale_contrast"},
+    )
+
+    assert selected["selected_mode"] == "operational_record"
+    assert "explicit final-state surface" in selected["specialized_guard_reason"]
+
+
+def test_hybrid_selector_prefers_witness_report_surface_for_evidentiary_status() -> None:
+    row = {
+        "id": "q005a",
+        "question": "What is the evidentiary status of the unnamed source report about the contractor vehicle?",
+        "modes": [
+            {
+                "mode": "baseline",
+                "query_evidence": {
+                    "executed_results": [
+                        {"status": "success", "num_rows": 1, "predicate": "claim_epistemic_status"},
+                        {"status": "success", "num_rows": 1, "predicate": "claim_source_type"},
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+            {
+                "mode": "rationale_contrast",
+                "query_evidence": {
+                    "executed_results": [
+                        {"status": "success", "num_rows": 1, "predicate": "witness_statement"},
+                        {"status": "success", "num_rows": 1, "predicate": "allegation_tip"},
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["baseline", "rationale_contrast"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: {"selected_mode": "baseline"},
+    )
+
+    assert selected["selected_mode"] == "rationale_contrast"
+    assert "explicit witness/report surface" in selected["specialized_guard_reason"]
+
+
+def test_hybrid_selector_prefers_event_action_history_for_board_concern_decision() -> None:
+    row = {
+        "id": "q005b",
+        "question": "What did the board decide about the ventilation concern in Turn 06?",
+        "modes": [
+            {
+                "mode": "baseline",
+                "query_evidence": {
+                    "executed_results": [
+                        {"status": "success", "num_rows": 1, "predicate": "event_status"},
+                        {"status": "success", "num_rows": 1, "predicate": "pending_action"},
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+            {
+                "mode": "operational_record",
+                "query_evidence": {
+                    "executed_results": [
+                        {"status": "success", "num_rows": 1, "predicate": "event_defers"},
+                        {"status": "success", "num_rows": 1, "predicate": "pending_action"},
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+            {
+                "mode": "rationale_contrast",
+                "query_evidence": {
+                    "executed_results": [
+                        {"status": "success", "num_rows": 1, "predicate": "event_occurred"},
+                        {"status": "success", "num_rows": 1, "predicate": "action_taken"},
+                        {"status": "success", "num_rows": 1, "predicate": "concern_raised"},
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["baseline", "operational_record", "rationale_contrast"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: {"selected_mode": "operational_record"},
+    )
+
+    assert selected["selected_mode"] == "rationale_contrast"
+    assert "event/action concern history" in selected["specialized_guard_reason"]
+
+
+def test_hybrid_selector_commit_readiness_not_blocked_by_status_baseline_guard() -> None:
+    row = {
+        "id": "q005c",
+        "question": "After Turn 16 but before Turn 23, should the system commit the lab exhaust fan recertification status?",
+        "modes": [
+            {
+                "mode": "baseline",
+                "query_evidence": {
+                    "executed_results": [
+                        {"status": "success", "num_rows": 1, "predicate": "certification_status"},
+                        {"status": "success", "num_rows": 1, "predicate": "event_occurred"},
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+            {
+                "mode": "operational_record",
+                "query_evidence": {
+                    "executed_results": [
+                        {"status": "success", "num_rows": 6, "predicate": "requires_investigation"},
+                        {"status": "success", "num_rows": 7, "predicate": "pending_action"},
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["baseline", "operational_record"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: {"selected_mode": "baseline"},
+    )
+
+    assert selected["selected_mode"] == "operational_record"
+    assert selected.get("baseline_guard_reason", "") == ""
+    assert "unresolved process evidence" in selected["specialized_guard_reason"]
+
+
 def test_hybrid_selector_prefers_policy_threshold_for_failed_viability_hypothetical() -> None:
     row = {
         "id": "q004w",

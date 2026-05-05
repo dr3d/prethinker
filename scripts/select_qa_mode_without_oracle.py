@@ -758,7 +758,8 @@ def structural_baseline_answer_surface_guard_reason(
         "pending_action",
     }
     if (
-        "status" in question
+        "commit" not in question
+        and "status" in question
         and baseline_predicates.intersection(direct_application_status_predicates)
         and _competing_mode_is_broad_or_relaxed_heavy(scored=scored, baseline_label=baseline_label)
     ):
@@ -811,6 +812,24 @@ def structural_specialized_answer_surface_override(
                 return (
                     label,
                     "collector identity question needs direct collector predicate surface rather than broad status/note evidence",
+                )
+
+    if "current operational status" in question:
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if predicates.issuperset({"has_state", "is_final_state"}):
+                return (
+                    label,
+                    "current operational status question needs explicit final-state surface rather than adjacent event/action evidence",
+                )
+
+    if "evidentiary status" in question and ("report" in question or "source" in question):
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if "witness_statement" in predicates and predicates.intersection({"allegation_tip", "document_type"}):
+                return (
+                    label,
+                    "evidentiary-status report question needs explicit witness/report surface rather than generic claim-status surface",
                 )
 
     filing_markers = ["filed on time", "request filed", "filed", "request"]
@@ -891,6 +910,15 @@ def structural_specialized_answer_surface_override(
                 return (
                     label,
                     "decision-status question needs explicit decision surface rather than adjacent application/status evidence",
+                )
+
+    if "ventilation concern" in question and ("board decide" in question or "current position" in question):
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if predicates.issuperset({"event_occurred", "action_taken", "concern_raised"}):
+                return (
+                    label,
+                    "board-concern decision question needs event/action concern history rather than bare pending status",
                 )
 
     if "not yet" in question and "viability tested" in question:
@@ -1371,7 +1399,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         if row.get("error"):
             note = f"error: {row.get('error')}"
         source = str(row.get("selection_source", "") or "")
-        guard = str(row.get("baseline_guard_reason", "") or "")
+        guard = str(row.get("baseline_guard_reason", "") or row.get("specialized_guard_reason", "") or "")
         lines.append(
             f"| `{row.get('id', '')}` | `{source}` | `{row.get('selected_mode', '')}` | "
             f"`{row.get('selected_verdict', '')}` | `{','.join(row.get('best_labels', []))}` | "

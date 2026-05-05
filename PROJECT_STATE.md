@@ -46,7 +46,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 
 ## Recent Frontier Results
 
-- Current full-suite verification: `599 passed, 2 subtests passed`.
+- Current full-suite verification: `603 passed, 2 subtests passed`.
 - Iron Harbor: `86 exact / 14 partial / 0 miss` on a full 100-question source-document battery, with `0` write proposals during post-ingestion QA.
 - Blackthorn: baseline first-20 was `2 exact / 1 partial / 17 miss`; current diagnostic lanes include BTC-022 at `82 / 9 / 9` full-100 and BTC-027 at `85 / 4 / 11`. These are different configurations, so compare within lane rather than treating one number as a universal replacement.
 - Kestrel: profile-guided KCL-016 reached `73 exact / 11 partial / 16 miss` full-100 with `0` write proposals. Cold/source-aware evidence remains much lower, and the distinction is intentional.
@@ -282,6 +282,16 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
   `24 / 1 / 0` with `25/25` selected-best rows, matching the available
   three-mode upper bound. This is a compile-lens gain plus selector restraint,
   not a global prompt promotion.
+- The rationale/contrast lens now has a targeted transfer check across
+  Ashgrove, Fenmore, Greywell, Heronvale, and Veridia. On `52` rows that ask
+  about reasons, non-reasons, evidentiary status, current position/status,
+  correction, and commit-readiness, the selector reaches `49 / 3 / 0` and
+  `52/52` selected-best rows, matching the available upper bound. New named
+  guards cover current operational final-state, evidentiary report surface,
+  board concern event/action history, and commit-readiness process evidence.
+  Full-25 parallel QA over the four transfer fixtures was too heavy for the
+  current LM Studio setup, so targeted transfer slices are the practical lane
+  until the orchestration layer can throttle long judging runs.
 - Incoming compile repair targets are now generated at
   `tmp/incoming_smoke_summaries/compile_repair_targets.{json,md}`. The current
   scoped-evidence queue is down to four partial rows: `3` scoped source-surface
@@ -505,7 +515,7 @@ Domain/data lanes:
 
 ## Verification Snapshot
 
-**Current headline:** the lean full pytest suite is `599 passed, 2 subtests passed`. The current research center is semantic parallax: multi-pass semantic compilation, mapper-admitted safe-surface accumulation, rule-lens promotion trials, row-level activation, clarification eagerness under an explicit authority boundary, and stenographer-mode stream simulation.
+**Current headline:** the lean full pytest suite is `603 passed, 2 subtests passed`. The current research center is semantic parallax: multi-pass semantic compilation, mapper-admitted safe-surface accumulation, rule-lens promotion trials, row-level activation, clarification eagerness under an explicit authority boundary, and stenographer-mode stream simulation.
 
 Recent verified results:
 

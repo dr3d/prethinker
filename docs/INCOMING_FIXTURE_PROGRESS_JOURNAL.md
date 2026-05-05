@@ -918,6 +918,26 @@ rationale/contrast, and failed-viability threshold surfaces reaches `24 / 1 /
 progress: the compiler gained an answer-bearing lens, and the selector learned
 when to use it.
 
+Rationale/contrast transfer follow-up: the same lens was transfer-tested on
+targeted Ashgrove, Greywell, Heronvale, and Veridia rows. Four full-25 QA runs
+in parallel were too heavy for LM Studio and left no artifacts, so the harness
+switched to targeted rows for reasons, non-reasons, evidentiary status,
+current position/status, correction, and commit-readiness. The transfer rollup
+now reaches the available upper bound:
+
+```text
+targeted rows: 52
+selected: 49 exact / 3 partial / 0 miss
+upper bound: 49 exact / 3 partial / 0 miss
+selected-best: 52 / 52
+selector errors: 0
+```
+
+The useful new guard names are current operational final-state, evidentiary
+report surface, board concern event/action history, and commit-readiness
+process evidence. The retained negative lesson is important: rationale/contrast
+compiles are still row-level views, not global replacements.
+
 Artifacts:
 
 - `tmp/story_world_operational_record_variant_summaries/scorecard.md`
@@ -929,3 +949,4 @@ Artifacts:
 - `tmp/story_world_operational_record_selector_v5/scorecard.md`
 - `tmp/story_world_operational_record_selector_v7/scorecard.md`
 - `tmp/story_world_fenmore_rationale_contrast_selector/fenmore_seedbank-guarded_activation_rationale_selector_v4.md`
+- `tmp/story_world_rationale_contrast_selector_transfer/scorecard.md`

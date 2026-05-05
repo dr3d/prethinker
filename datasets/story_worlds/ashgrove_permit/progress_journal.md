@@ -183,3 +183,31 @@ Ashgrove now reaches its per-row selector upper bound. The added guard protects
 explicit rationale-note evidence for cause questions when the competing surface
 is broad record/event volume. This fixed the MEP inspection delay cause row
 without changing the request-filing guard.
+
+## AP-006 - Rationale/Contrast Transfer Slice
+
+Date: 2026-05-05
+
+Evidence lane: `rationale_contrast_source_note_lens`
+
+Artifacts:
+
+- Compile: `tmp/story_world_rationale_contrast_variant/ashgrove_permit/`
+- Targeted QA: `tmp/story_world_rationale_contrast_qa_targeted/ashgrove_permit/`
+- Selector: `tmp/story_world_rationale_contrast_selector_transfer/ashgrove_permit-rationale_transfer_selector.md`
+- Transfer scorecard: `tmp/story_world_rationale_contrast_selector_transfer/scorecard.md`
+
+Result:
+
+```text
+targeted rationale QA: 6 exact / 1 partial / 0 miss
+selector result:       6 exact / 1 partial / 0 miss
+selected-best rows:    7 / 7
+```
+
+Lesson:
+
+Ashgrove cleanly transfers the rationale/contrast lens on targeted permit
+status, correction, and suspension-cause rows. It does not raise the slice
+above the available upper bound, but it also does not damage the existing
+request-filing and rationale-note protections.

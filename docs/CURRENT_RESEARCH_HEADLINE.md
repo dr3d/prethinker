@@ -415,6 +415,14 @@ testing whether those gains transfer:
   to `24 / 1 / 0` and `25/25` selected-best rows. The product lesson is clean:
   source notes are answer-bearing for rationale/contrast questions, but they
   must not outrank direct identity or policy-threshold surfaces.
+- The lens now has a targeted transfer proof. Across Ashgrove, Fenmore,
+  Greywell, Heronvale, and Veridia, `52` reason/status/evidence/correction and
+  commit-readiness rows score `49 exact / 3 partial / 0 miss`, with `52/52`
+  selected-best rows and `0` selector errors. Greywell and Veridia exposed the
+  hardest guardrails: current operational status needs final-state surface,
+  evidentiary-status reports need witness/report surface, board concern rows
+  need event/action history, and commit readiness must bypass over-eager
+  baseline status protection.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 

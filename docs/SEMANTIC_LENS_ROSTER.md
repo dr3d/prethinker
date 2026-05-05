@@ -80,6 +80,11 @@ surface without promoting those notes into policy. Its selector companions
 prefer note rationale for why/contrast questions, direct collector predicates
 for identity questions, pending `test_status` for not-yet-tested questions, and
 threshold/storage policy surfaces for failed-viability hypotheticals.
+The first transfer additions are `current_operational_final_state_guard`,
+`evidentiary_report_surface_guard`, `board_concern_event_action_guard`, and
+`commit_readiness_process_guard`. Together they keep rationale/contrast useful
+for report, concern, and explanation rows while protecting final status and
+commit/hold decisions from attractive but incomplete note or event surfaces.
 
 Uncertainty is a domain language, not a tone. Future harness work should avoid
 collapsing these into a single "not sure" bucket:

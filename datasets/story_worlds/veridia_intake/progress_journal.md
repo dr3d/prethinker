@@ -150,3 +150,32 @@ The commit-readiness guard closes the remaining Veridia selector miss. A
 question asking whether the system should commit a status needs unresolved
 process evidence such as investigation or pending action, not only the bare
 status value already present in the KB.
+
+## VI-005 - Rationale/Contrast Transfer Slice
+
+Date: 2026-05-05
+
+Evidence lane: `rationale_contrast_source_note_lens`
+
+Artifacts:
+
+- Compile: `tmp/story_world_rationale_contrast_variant/veridia_intake/`
+- Targeted QA: `tmp/story_world_rationale_contrast_qa_targeted/veridia_intake/`
+- Selector: `tmp/story_world_rationale_contrast_selector_transfer/veridia_intake-rationale_transfer_selector_v2.md`
+- Transfer scorecard: `tmp/story_world_rationale_contrast_selector_transfer/scorecard.md`
+
+Result:
+
+```text
+targeted rationale QA:       4 exact / 1 partial / 0 miss
+first transfer selector:     2 exact / 2 partial / 1 miss; selected-best 2 / 5
+guarded transfer selector:   5 exact / 0 partial / 0 miss; selected-best 5 / 5
+```
+
+Lesson:
+
+Veridia is the hard transfer win. The rationale lens is better for ventilation
+concern decision/current-position rows, while operational-record evidence still
+owns the commit-readiness row. The prior baseline status guard was too eager
+and blocked that operational rescue; commit-readiness now bypasses that guard
+and selects unresolved-process evidence.

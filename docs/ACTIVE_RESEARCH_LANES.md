@@ -151,6 +151,12 @@ lens is weak globally (`17 / 1 / 7`) but, under row selection, closes Fenmore to
 `24 / 1 / 0` with `25/25` selected-best rows. Treat source-note rationale as a
 row-level lens for why/contrast questions, guarded by direct identity and
 threshold/status surfaces elsewhere.
+Targeted transfer now supports that treatment across the zip batch: Ashgrove,
+Fenmore, Greywell, Heronvale, and Veridia reach `49 / 3 / 0` over `52`
+reason/status/evidence/correction/commit rows with `52/52` selected-best
+choices. Next work should broaden the transfer check carefully, not by firing
+four full judged QA runs at once; the current LM Studio setup handled targeted
+parallel slices well but wedged under full-25 parallel judging.
 
 Activation update: query-mode selection now has deterministic structural and
 hybrid structural+LLM controls. The hybrid path saves LLM calls on confident

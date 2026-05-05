@@ -176,3 +176,31 @@ separates two Poetry Circle question acts: "as currently constituted" needs
 applicant-type plus controlling interpretation, while counterfactual
 resubmission with a named resident needs proof/rule resolution surface rather
 than current applicant status.
+
+## HA-006 - Rationale/Contrast Transfer Slice
+
+Date: 2026-05-05
+
+Evidence lane: `rationale_contrast_source_note_lens`
+
+Artifacts:
+
+- Compile: `tmp/story_world_rationale_contrast_variant/heronvale_arts/`
+- Targeted QA: `tmp/story_world_rationale_contrast_qa_targeted/heronvale_arts/`
+- Selector: `tmp/story_world_rationale_contrast_selector_transfer/heronvale_arts-rationale_transfer_selector.md`
+- Transfer scorecard: `tmp/story_world_rationale_contrast_selector_transfer/scorecard.md`
+
+Result:
+
+```text
+targeted rationale QA: 8 exact / 2 partial / 0 miss
+selector result:       9 exact / 1 partial / 0 miss
+selected-best rows:    10 / 10
+```
+
+Lesson:
+
+Heronvale transfers cleanly. The rationale/contrast lens is useful on
+ineligibility, approval-reason, recusal, decision, correction, and unresolved
+question rows, while the existing applicant-type and resubmission proof/rule
+guards keep the Poetry Circle eligibility distinctions intact.
