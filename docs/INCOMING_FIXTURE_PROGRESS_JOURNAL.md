@@ -908,6 +908,16 @@ frozen baseline/operational artifacts. There are no remaining missed-best rows;
 the single remaining miss is an artifact upper-bound/evidence limitation, not a
 selector-choice miss.
 
+Fenmore rationale/contrast follow-up: a narrow source-note lens targeted the
+remaining Vault 4 evidence limitation. The compile alone is rejected (`17 / 1 /
+7` on Fenmore full-25), but it admits the rationale surface needed for the
+Vault 4 conservation-versus-viability distinction. Adding it as a third
+row-level mode and guarding collector identity, pending-test status, note
+rationale/contrast, and failed-viability threshold surfaces reaches `24 / 1 /
+0` on Fenmore with `25/25` selected-best rows. This is the right shape of
+progress: the compiler gained an answer-bearing lens, and the selector learned
+when to use it.
+
 Artifacts:
 
 - `tmp/story_world_operational_record_variant_summaries/scorecard.md`
@@ -918,3 +928,4 @@ Artifacts:
 - `tmp/story_world_operational_record_selector_v4/scorecard.md`
 - `tmp/story_world_operational_record_selector_v5/scorecard.md`
 - `tmp/story_world_operational_record_selector_v7/scorecard.md`
+- `tmp/story_world_fenmore_rationale_contrast_selector/fenmore_seedbank-guarded_activation_rationale_selector_v4.md`

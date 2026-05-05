@@ -74,6 +74,12 @@ needs applicant type plus controlling interpretation; resubmission eligibility
 needs proof/rule resolution rather than merely current applicant status. This
 is selector calibration over persisted artifacts, not evidence that the compile
 surface itself is complete.
+`rationale_contrast_source_note_lens` captures source-stated reasons,
+non-reasons, judgment calls, and explicit contrasts as answer-bearing note
+surface without promoting those notes into policy. Its selector companions
+prefer note rationale for why/contrast questions, direct collector predicates
+for identity questions, pending `test_status` for not-yet-tested questions, and
+threshold/storage policy surfaces for failed-viability hypotheticals.
 
 Uncertainty is a domain language, not a tone. Future harness work should avoid
 collapsing these into a single "not sure" bucket:

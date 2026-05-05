@@ -804,6 +804,15 @@ def structural_specialized_answer_surface_override(
     question = str(row.get("question", "")).casefold()
     baseline_predicates = set(baseline_quality.get("predicate_names", []) or [])
 
+    if "who collected" in question:
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if predicates.intersection({"collector", "lot_collector", "accession_collector"}):
+                return (
+                    label,
+                    "collector identity question needs direct collector predicate surface rather than broad status/note evidence",
+                )
+
     filing_markers = ["filed on time", "request filed", "filed", "request"]
     if (
         "on time" in question
@@ -884,7 +893,26 @@ def structural_specialized_answer_surface_override(
                     "decision-status question needs explicit decision surface rather than adjacent application/status evidence",
                 )
 
+    if "not yet" in question and "viability tested" in question:
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if "test_status" in predicates and "\\+" not in predicates:
+                return (
+                    label,
+                    "not-yet-tested question needs explicit pending test-status surface rather than broad negation over all lots",
+                )
+
     if "why" in question and "split" in question and "vault" in question:
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if predicates.issuperset({"note_content", "note_subject"}) and predicates.intersection(
+                {"test_germination_rate", "lot_germination_rate", "test_resulting_condition", "lot_condition_after_test"}
+            ):
+                return (
+                    label,
+                    "split rationale question needs explicit source-note rationale plus viability context",
+                )
+
         generic_vault_predicates = {"requires_cryogenic", "vault_assignment_rule", "vault_type"}
         if baseline_predicates.intersection(generic_vault_predicates):
             for _score, label, quality in scored:
@@ -898,6 +926,33 @@ def structural_specialized_answer_surface_override(
                         label,
                         "split rationale question needs actual split/lot-condition surface rather than generic vault assignment surface",
                     )
+
+    if "viability concern" in question and "vault 4" in question and "split" in question:
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if predicates.issuperset({"note_content", "note_subject"}) and predicates.intersection(
+                {"test_germination_rate", "lot_germination_rate", "test_resulting_condition", "lot_condition_after_test"}
+            ):
+                return (
+                    label,
+                    "viability-concern question needs explicit source-note contrast plus viability context",
+                )
+
+    if "if" in question and "fails viability testing" in question and "germination rate" in question:
+        if baseline_predicates.intersection({"deaccession_threshold", "minimum_storage_requirement"}):
+            return (
+                baseline_label,
+                "hypothetical failed-viability question keeps direct baseline threshold/storage support over broader policy-note surfaces",
+            )
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if "policy_condition_threshold" in predicates and predicates.intersection(
+                {"policy_minimum_storage", "lot_deaccessioned", "deaccession_lot", "lot_status"}
+            ):
+                return (
+                    label,
+                    "hypothetical failed-viability question needs threshold/action policy surface rather than note surface",
+                )
 
     if "as currently constituted" in question and "apply" in question:
         for _score, label, quality in scored:

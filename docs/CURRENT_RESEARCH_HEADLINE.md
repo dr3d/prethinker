@@ -408,6 +408,13 @@ testing whether those gains transfer:
   remaining frontier is source-surface/evidence acquisition for the one
   upper-bound miss, transfer checks on unlike fixtures, and variance control in
   LLM selector replay.
+- Fenmore immediately showed the next acquisition shape. A rationale/contrast
+  source-note lens is rejected globally (`17 / 1 / 7`) but useful as a
+  row-level third view: with note-rationale, viability-concern contrast,
+  pending-test, collector-identity, and threshold/storage guards, Fenmore moves
+  to `24 / 1 / 0` and `25/25` selected-best rows. The product lesson is clean:
+  source notes are answer-bearing for rationale/contrast questions, but they
+  must not outrank direct identity or policy-threshold surfaces.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 

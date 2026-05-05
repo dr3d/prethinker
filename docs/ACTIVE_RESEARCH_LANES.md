@@ -146,6 +146,11 @@ selected-best rows against the frozen artifact upper bound. Next work is no
 longer more tiny selector repair on this batch; it is source-surface/evidence
 acquisition for the remaining miss, transfer replay on unlike fixtures, and
 selector variance control rather than more broad operational compile prompting.
+Fenmore immediately validated that next shape: a rationale/contrast source-note
+lens is weak globally (`17 / 1 / 7`) but, under row selection, closes Fenmore to
+`24 / 1 / 0` with `25/25` selected-best rows. Treat source-note rationale as a
+row-level lens for why/contrast questions, guarded by direct identity and
+threshold/status surfaces elsewhere.
 
 Activation update: query-mode selection now has deterministic structural and
 hybrid structural+LLM controls. The hybrid path saves LLM calls on confident

@@ -1382,6 +1382,273 @@ def test_hybrid_selector_prefers_actual_split_surface_for_split_rationale() -> N
     assert "actual split/lot-condition surface" in selected["specialized_guard_reason"]
 
 
+def test_hybrid_selector_prefers_source_note_for_split_rationale_when_available() -> None:
+    row = {
+        "id": "q004t",
+        "question": "Why was FB-2026-006 split to Vault 4?",
+        "modes": [
+            {
+                "mode": "baseline",
+                "query_evidence": {
+                    "executed_results": [
+                        {"status": "success", "num_rows": 1, "predicate": "vault_assignment_rule"},
+                        {"status": "success", "num_rows": 1, "predicate": "vault_type"},
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+            {
+                "mode": "operational_record",
+                "query_evidence": {
+                    "executed_results": [
+                        {"status": "success", "num_rows": 1, "predicate": "lot_vault_split"},
+                        {"status": "success", "num_rows": 1, "predicate": "lot_germination_rate"},
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+            {
+                "mode": "rationale_contrast",
+                "query_evidence": {
+                    "executed_results": [
+                        {"status": "success", "num_rows": 1, "predicate": "note_content"},
+                        {"status": "success", "num_rows": 1, "predicate": "note_subject"},
+                        {"status": "success", "num_rows": 1, "predicate": "test_germination_rate"},
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["baseline", "operational_record", "rationale_contrast"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: {"selected_mode": "baseline"},
+    )
+
+    assert selected["selected_mode"] == "rationale_contrast"
+    assert "source-note rationale plus viability context" in selected["specialized_guard_reason"]
+
+
+def test_hybrid_selector_prefers_direct_collector_surface_for_collector_identity() -> None:
+    row = {
+        "id": "q004x",
+        "question": "Who collected FB-2026-003?",
+        "modes": [
+            {
+                "mode": "baseline",
+                "query_evidence": {
+                    "executed_results": [
+                        {"status": "success", "num_rows": 1, "predicate": "collector"},
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+            {
+                "mode": "rationale_contrast",
+                "query_evidence": {
+                    "executed_results": [
+                        {"status": "success", "num_rows": 8, "predicate": "stored_in_vault"},
+                        {"status": "success", "num_rows": 5, "predicate": "test_status"},
+                        {"status": "success", "num_rows": 2, "predicate": "note_content"},
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["baseline", "rationale_contrast"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: {"selected_mode": "rationale_contrast"},
+    )
+
+    assert selected["selected_mode"] == "baseline"
+    assert "direct collector predicate surface" in selected["specialized_guard_reason"]
+
+
+def test_hybrid_selector_prefers_source_note_for_viability_concern_contrast() -> None:
+    row = {
+        "id": "q004u",
+        "question": "Is the Vault 4 split a viability concern?",
+        "modes": [
+            {
+                "mode": "baseline",
+                "query_evidence": {
+                    "executed_results": [
+                        {"status": "success", "num_rows": 8, "predicate": "stored_in_vault"},
+                        {"status": "success", "num_rows": 4, "predicate": "vault_type"},
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+            {
+                "mode": "rationale_contrast",
+                "query_evidence": {
+                    "executed_results": [
+                        {"status": "success", "num_rows": 1, "predicate": "note_content"},
+                        {"status": "success", "num_rows": 1, "predicate": "note_subject"},
+                        {"status": "success", "num_rows": 1, "predicate": "test_resulting_condition"},
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["baseline", "rationale_contrast"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: {"selected_mode": "baseline"},
+    )
+
+    assert selected["selected_mode"] == "rationale_contrast"
+    assert "source-note contrast plus viability context" in selected["specialized_guard_reason"]
+
+
+def test_hybrid_selector_prefers_pending_status_for_not_yet_tested_question() -> None:
+    row = {
+        "id": "q004v",
+        "question": "Which accessions have not yet been viability tested?",
+        "modes": [
+            {
+                "mode": "operational_record",
+                "query_evidence": {
+                    "executed_results": [
+                        {"status": "success", "num_rows": 8, "predicate": "lot_id"},
+                        {"status": "success", "num_rows": 3, "predicate": "\\+"},
+                        {"status": "success", "num_rows": 1, "predicate": "lot_deaccessioned"},
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+            {
+                "mode": "rationale_contrast",
+                "query_evidence": {
+                    "executed_results": [
+                        {"status": "success", "num_rows": 2, "predicate": "test_status"},
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["operational_record", "rationale_contrast"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: {"selected_mode": "operational_record"},
+    )
+
+    assert selected["selected_mode"] == "rationale_contrast"
+    assert "pending test-status surface" in selected["specialized_guard_reason"]
+
+
+def test_hybrid_selector_prefers_policy_threshold_for_failed_viability_hypothetical() -> None:
+    row = {
+        "id": "q004w",
+        "question": "If FB-2026-005 fails viability testing with a 35% germination rate, what would happen?",
+        "modes": [
+            {
+                "mode": "rationale_contrast",
+                "query_evidence": {
+                    "executed_results": [
+                        {"status": "success", "num_rows": 1, "predicate": "rule_threshold"},
+                        {"status": "success", "num_rows": 1, "predicate": "rule_action"},
+                        {"status": "success", "num_rows": 1, "predicate": "note_content"},
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+            {
+                "mode": "operational_record",
+                "query_evidence": {
+                    "executed_results": [
+                        {"status": "success", "num_rows": 1, "predicate": "policy_condition_threshold"},
+                        {"status": "success", "num_rows": 1, "predicate": "policy_minimum_storage"},
+                        {"status": "success", "num_rows": 1, "predicate": "lot_status"},
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["rationale_contrast", "operational_record"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: {"selected_mode": "rationale_contrast"},
+    )
+
+    assert selected["selected_mode"] == "operational_record"
+    assert "threshold/action policy surface" in selected["specialized_guard_reason"]
+
+
+def test_hybrid_selector_keeps_direct_threshold_storage_for_failed_viability_hypothetical() -> None:
+    row = {
+        "id": "q004y",
+        "question": "If FB-2026-005 fails viability testing with a 35% germination rate, what would happen?",
+        "modes": [
+            {
+                "mode": "baseline",
+                "query_evidence": {
+                    "executed_results": [
+                        {"status": "success", "num_rows": 1, "predicate": "deaccession_threshold"},
+                        {"status": "success", "num_rows": 1, "predicate": "minimum_storage_requirement"},
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+            {
+                "mode": "operational_record",
+                "query_evidence": {
+                    "executed_results": [
+                        {"status": "success", "num_rows": 1, "predicate": "policy_condition_threshold"},
+                        {"status": "success", "num_rows": 1, "predicate": "policy_minimum_storage"},
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["baseline", "operational_record"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: {"selected_mode": "operational_record"},
+    )
+
+    assert selected["selected_mode"] == "baseline"
+    assert "direct baseline threshold/storage support" in selected["specialized_guard_reason"]
+
+
 def test_hybrid_selector_prefers_applicant_type_for_current_constitution() -> None:
     row = {
         "id": "q004r",

@@ -148,3 +148,34 @@ question needs the actual split and lot-condition surface rather than only a
 generic vault-assignment rule. The remaining miss is an upper-bound limitation:
 neither baseline nor operational-record mode contains the conservation rationale
 needed for an exact answer.
+
+## FS-005 - Rationale/Contrast Row-Level Lens
+
+Date: 2026-05-05
+
+Evidence lane: `rationale_contrast_source_note_lens`
+
+Artifacts:
+
+- Compile: `tmp/story_world_fenmore_rationale_contrast_variant/domain_bootstrap_file_20260505T041446371503Z_source_qwen-qwen3-6-35b-a3b.md`
+- Full QA: `tmp/story_world_fenmore_rationale_contrast_qa_full/domain_bootstrap_qa_20260505T042253297606Z_qa_qwen-qwen3-6-35b-a3b.md`
+- Selector: `tmp/story_world_fenmore_rationale_contrast_selector/fenmore_seedbank-guarded_activation_rationale_selector_v4.md`
+
+Result:
+
+```text
+rationale/contrast compile alone: 17 exact / 1 partial / 7 miss
+selector over baseline + operational + rationale: 24 exact / 1 partial / 0 miss
+selected-best rows: 25 / 25
+perfect selector upper bound: 24 exact / 1 partial / 0 miss
+```
+
+Lesson:
+
+The remaining Vault 4 miss was a source-note rationale gap, not a selector
+choice gap. A narrow rationale/contrast lens admitted the curator note surface
+needed to distinguish conservation backup from viability concern, but the same
+compile is much weaker globally. The harness gain is row-level: explicit source
+notes are valuable when the question asks for rationale or contrast, while
+collector identity and failed-viability hypotheticals must be protected by
+direct collector and threshold/storage policy surfaces.
