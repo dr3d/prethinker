@@ -98,3 +98,29 @@ pending/reversal/unresolved surfaces, but they can also conflict with
 commit/hold judgment. The selector guard improves the row-level result, yet the
 remaining frontier is explicit commit-readiness versus unresolved-process
 status.
+
+## VI-003 - Baseline Readiness Selector Guard
+
+Date: 2026-05-05
+
+Evidence lane: `selector_baseline_readiness_guard`
+
+Artifacts:
+
+- Selector: `tmp/story_world_operational_record_selector_v3/veridia_intake-guarded_activation_baseline_readiness_guard_selector.md`
+- Batch scorecard: `tmp/story_world_operational_record_selector_v3/scorecard.md`
+
+Result:
+
+```text
+previous guarded selector: 16 exact / 6 partial / 1 miss; selected-best 21 / 23
+readiness-guard selector: 17 exact / 5 partial / 1 miss; selected-best 22 / 23
+delta:                    +1 exact / -1 partial / 0 miss
+```
+
+Lesson:
+
+The hold-pending row now stays with baseline when baseline is the structural top
+and carries direct event-status/pending-action support. The unresolved row is
+commit-readiness: Prethinker still needs a sharper distinction between "there
+is a certified status" and "the process should commit it now."

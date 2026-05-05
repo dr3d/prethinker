@@ -95,3 +95,30 @@ The lens finds application/correction/remedy rows but still confuses status and
 hypothetical eligibility rows. Heronvale remains a hard selector calibration
 fixture: row-gated upper bound is large, but no-oracle selection needs stronger
 baseline protection for application-status and counterfactual rule rows.
+
+## HA-003 - Baseline Readiness Selector Guard
+
+Date: 2026-05-05
+
+Evidence lane: `selector_baseline_readiness_guard`
+
+Artifacts:
+
+- Selector: `tmp/story_world_operational_record_selector_v3/heronvale_arts-guarded_activation_baseline_readiness_guard_selector.md`
+- Batch scorecard: `tmp/story_world_operational_record_selector_v3/scorecard.md`
+
+Result:
+
+```text
+previous guarded selector: 19 exact / 5 partial / 1 miss; selected-best 20 / 25
+readiness-guard selector: 22 exact / 2 partial / 1 miss; selected-best 23 / 25
+delta:                    +3 exact / -3 partial / 0 miss
+```
+
+Lesson:
+
+This is the strongest transfer from the new guard. Naming the hazard as
+baseline application/status and counterfactual rule support prevents the
+selector from over-trusting broad operational-record evidence on eligibility
+rows. The remaining misses are not the same hazard: they need entity mapping
+and community-priority selection work.

@@ -130,8 +130,12 @@ row-level lens but rejected as a global compile surface. Raw candidate score is
 artifact-only row gate says `111 / 11 / 1` is available. The no-oracle guarded
 selector now has an operational/status uncertainty guard and reaches
 `101 / 17 / 5`; Greywell hits its per-row selector upper bound at `24 / 1 / 0`.
-Next work is selector restraint for application-status, counterfactual
-eligibility, and commit-readiness rows rather than more broad operational
+The baseline-readiness guard then protects direct baseline application/status,
+counterfactual rule, and hold/readiness support from broad or relaxed-heavy
+candidate surfaces, moving the same frozen-artifact selector rollup to
+`106 / 12 / 5` with `117/123` selected-best rows and no new misses. Next work
+is commit-readiness, filing-vs-completion deadline selection, community-priority
+entity mapping, and cause/rationale rows rather than more broad operational
 compile prompting.
 
 Activation update: query-mode selection now has deterministic structural and

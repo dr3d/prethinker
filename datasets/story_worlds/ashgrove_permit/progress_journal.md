@@ -101,3 +101,32 @@ answer-surface partials on rationale/counterfactual rows. It is a row-level
 candidate, not a global compile default. The selector uncertainty guard helps
 by sending operational/status rows to activation when a competing mode has
 specialized record-state evidence.
+
+## AP-003 - Baseline Readiness Selector Guard
+
+Date: 2026-05-05
+
+Evidence lane: `selector_baseline_readiness_guard`
+
+Mode: selector-only replay over frozen baseline and operational-record QA
+artifacts. No source recompilation or new QA generation.
+
+Artifacts:
+
+- Selector: `tmp/story_world_operational_record_selector_v3/ashgrove_permit-guarded_activation_baseline_readiness_guard_selector.md`
+- Batch scorecard: `tmp/story_world_operational_record_selector_v3/scorecard.md`
+
+Result:
+
+```text
+previous guarded selector: 21 exact / 3 partial / 1 miss; selected-best 23 / 25
+readiness-guard selector: 21 exact / 3 partial / 1 miss; selected-best 23 / 25
+delta:                    0 exact / 0 partial / 0 miss
+```
+
+Lesson:
+
+Ashgrove remains the permit-deadline selector pressure case. The new baseline
+readiness guard does not move its score; the remaining misses are a deadline
+filing-vs-completion confusion and a cause/rationale row where structural
+volume still overvalues the operational lens.

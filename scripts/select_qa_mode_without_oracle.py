@@ -729,7 +729,60 @@ def structural_baseline_answer_surface_guard_reason(
     ):
         return "status question has direct baseline status/rule support"
 
+    direct_application_status_predicates = {
+        "application_status",
+        "certification_status",
+        "event_status",
+        "pending_action",
+    }
+    if (
+        "status" in question
+        and baseline_predicates.intersection(direct_application_status_predicates)
+        and _competing_mode_is_broad_or_relaxed_heavy(scored=scored, baseline_label=baseline_label)
+    ):
+        return "status question has direct baseline application/status support and candidate is broad or relaxed-heavy"
+
+    counterfactual_markers = ["if ", "would ", "what would happen", "should the system", "pending", "hold", "commit"]
+    counterfactual_support_predicates = {
+        "deaccession_threshold",
+        "denial_reason",
+        "event_occurred",
+        "event_status",
+        "has_residency_proof",
+        "pending_action",
+        "rule",
+        "rule_condition",
+        "species",
+    }
+    if (
+        structural_choice == baseline_label
+        and sum(1 for marker in counterfactual_markers if marker in question) >= 2
+        and baseline_predicates.intersection(counterfactual_support_predicates)
+        and _competing_mode_is_broad_or_relaxed_heavy(scored=scored, baseline_label=baseline_label)
+    ):
+        return "counterfactual or hold/readiness question has direct baseline rule/status support and candidate is broad or relaxed-heavy"
+
     return ""
+
+
+def _competing_mode_is_broad_or_relaxed_heavy(
+    *,
+    scored: list[tuple[float, str, dict[str, Any]]],
+    baseline_label: str,
+) -> bool:
+    for _score, label, quality in scored:
+        if label == baseline_label:
+            continue
+        direct_rows = int(quality.get("direct_rows", 0) or 0)
+        relaxed_rows = int(quality.get("relaxed_rows", 0) or 0)
+        predicate_count = int(quality.get("non_empty_predicates", 0) or 0)
+        if direct_rows <= 0 and relaxed_rows >= 6:
+            return True
+        if relaxed_rows >= 12 and relaxed_rows >= max(1, direct_rows) * 3:
+            return True
+        if direct_rows >= 6 and relaxed_rows >= 12 and predicate_count >= 5:
+            return True
+    return False
 
 
 def structural_mode_scores(*, row: dict[str, Any], mode_labels: list[str]) -> list[tuple[float, str, dict[str, Any]]]:

@@ -96,3 +96,27 @@ The compile health is poor, so the lens should not become global, but the
 selector can safely harvest the operational rows that answer who isolated the
 segment and current operational status while protecting the baseline
 recommendations row.
+
+## GP-003 - Baseline Readiness Selector Guard
+
+Date: 2026-05-05
+
+Evidence lane: `selector_baseline_readiness_guard`
+
+Artifacts:
+
+- Selector: `tmp/story_world_operational_record_selector_v3/greywell_pipeline-guarded_activation_baseline_readiness_guard_selector.md`
+- Batch scorecard: `tmp/story_world_operational_record_selector_v3/scorecard.md`
+
+Result:
+
+```text
+previous guarded selector: 24 exact / 1 partial / 0 miss; selected-best 25 / 25
+readiness-guard selector: 24 exact / 1 partial / 0 miss; selected-best 25 / 25
+delta:                    0 exact / 0 partial / 0 miss
+```
+
+Lesson:
+
+Greywell stays the anti-overfit check: it was already at its per-row selector
+upper bound, and the new baseline-readiness guard does not perturb it.

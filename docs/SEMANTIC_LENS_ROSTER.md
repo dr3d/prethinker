@@ -54,6 +54,13 @@ Current facet roster:
 
 ## Uncertainty Vocabulary
 
+Latest selector lesson: specialized lenses can be answer-bearing or dazzlingly
+irrelevant. `operational_record_status_v1` is not globally promoted; it is a
+row-level candidate. `selector_baseline_readiness_guard` is the companion
+restraint: if baseline has direct application/status, counterfactual rule, or
+hold-readiness support and the competing surface is broad or relaxed-heavy, the
+instrument keeps baseline rather than asking activation to admire extra rows.
+
 Uncertainty is a domain language, not a tone. Future harness work should avoid
 collapsing these into a single "not sure" bucket:
 

@@ -95,3 +95,29 @@ The lens helps threshold/status rows but weakens transfer/authorization and
 hypothetical consequence rows. For conservation ledgers, operational-record
 surface must not replace the richer baseline ledger unless a row-level selector
 has evidence that the question asks for status, thresholds, or split rationale.
+
+## FS-003 - Baseline Readiness Selector Guard
+
+Date: 2026-05-05
+
+Evidence lane: `selector_baseline_readiness_guard`
+
+Artifacts:
+
+- Selector: `tmp/story_world_operational_record_selector_v3/fenmore_seedbank-guarded_activation_baseline_readiness_guard_selector.md`
+- Batch scorecard: `tmp/story_world_operational_record_selector_v3/scorecard.md`
+
+Result:
+
+```text
+previous guarded selector: 21 exact / 2 partial / 2 miss; selected-best 23 / 25
+readiness-guard selector: 22 exact / 1 partial / 2 miss; selected-best 24 / 25
+delta:                    +1 exact / -1 partial / 0 miss
+```
+
+Lesson:
+
+The guard correctly protects a hypothetical consequence row where baseline has
+direct rule/status support and the operational candidate is broad fallback
+surface. The remaining missed-best row is split rationale: the operational lens
+has the better partial answer, but the selector still prefers baseline.

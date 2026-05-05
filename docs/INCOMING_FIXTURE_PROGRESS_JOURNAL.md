@@ -851,6 +851,7 @@ No-oracle selector results:
 structural selector:                 95 exact / 19 partial / 9 miss
 guarded activation before op guard:  99 exact / 17 partial / 7 miss
 guarded activation after op guard:  101 exact / 17 partial / 5 miss
+baseline-readiness guard selector:  106 exact / 12 partial / 5 miss
 ```
 
 Discovery: the lens reduces misses for status, correction, threshold,
@@ -864,9 +865,18 @@ and the question asks about status, timeliness, decisions, correction,
 thresholds, remedies, unresolved items, or isolation, call activation instead
 of trusting row volume.
 
+Follow-up guard: a second selector-only replay added
+`selector_baseline_readiness_guard`, protecting baseline when it has direct
+application/status, rule, or hold-readiness support and the competing surface is
+broad or relaxed-heavy. It moved the no-oracle selector from `101 / 17 / 5` to
+`106 / 12 / 5` over the same frozen `123` rows, with selected-best rows moving
+from `112/123` to `117/123`. This is a harness-control gain over frozen
+artifacts, not a new compile.
+
 Artifacts:
 
 - `tmp/story_world_operational_record_variant_summaries/scorecard.md`
 - `tmp/story_world_operational_record_variant_summaries/baseline_comparison.md`
 - `tmp/story_world_operational_record_variant_summaries/row_gated_scorecard_plan.md`
 - `tmp/story_world_operational_record_selector/guarded_activation_operational_guard_rollup.json`
+- `tmp/story_world_operational_record_selector_v3/scorecard.md`
