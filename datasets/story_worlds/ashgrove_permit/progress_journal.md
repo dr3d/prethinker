@@ -66,3 +66,38 @@ classification rerun. Treat the classified rollup as the repair ledger, but
 keep the first-pass score as the cold-contact score. The remaining durable
 pressure is deadline/status arithmetic and helper join behavior, not unsafe
 writes.
+
+## AP-002 - Operational Record Status Lens Trial
+
+Date: 2026-05-05
+
+Evidence lane: `operational_record_status_lens`
+
+Mode: `operational_record_status_strategy_v1` compile context plus full QA and
+baseline-vs-candidate selector comparison.
+
+Artifacts:
+
+- Compile: `tmp/story_world_operational_record_variant/ashgrove_permit/`
+- QA: `tmp/story_world_operational_record_variant_qa/ashgrove_permit/`
+- Scorecard: `tmp/story_world_operational_record_variant_summaries/scorecard.md`
+- Row gate: `tmp/story_world_operational_record_variant_summaries/row_gated_scorecard_plan.md`
+- Selector: `tmp/story_world_operational_record_selector/ashgrove_permit-guarded_activation_operational_guard_selector.md`
+
+Result:
+
+```text
+variant compile:      129 admitted / 0 skipped
+variant QA:           21 exact / 4 partial / 0 miss
+row-gated target:     accept q006, q015, q016, q017; reject q018, q022
+guarded selector:     21 exact / 3 partial / 1 miss
+selected best rows:   23 / 25
+```
+
+Lesson:
+
+The operational lens removes the permit-status misses but introduces
+answer-surface partials on rationale/counterfactual rows. It is a row-level
+candidate, not a global compile default. The selector uncertainty guard helps
+by sending operational/status rows to activation when a competing mode has
+specialized record-state evidence.

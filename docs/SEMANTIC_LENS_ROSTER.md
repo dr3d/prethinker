@@ -41,6 +41,7 @@ Current facet roster:
 | Facet | What It Measures | Example Pressure |
 | --- | --- | --- |
 | Source surface | Whether the KB admitted the facts, states, rules, actors, quantities, dates, corrections, and exceptions needed for later reasoning. | Compile gaps dominate current cold rollups. |
+| Operational record/status | Permit lifecycles, intake logs, conservation ledgers, application dockets, corrections, reversals, unresolved items, status before/after, and row-level commit readiness. | Ashgrove, Greywell, Heronvale, Veridia. |
 | Rule composition | Thresholds, precedence, activation, exception, vote, eligibility, override, and expiration behavior. | Glass Tide, Avalon, Sable, Oxalis. |
 | Temporal/status | Status-at-date, interval overlap, deadline arithmetic, business/calendar day distinctions, supersession, and effective/expired boundaries. | Iron Harbor, Oxalis, Dulse, Ashgrove. |
 | Authority | Which document, actor, correction, board, rule, vote, or finding controls when accounts conflict. | Northbridge, Greywell, Kestrel, CE. |

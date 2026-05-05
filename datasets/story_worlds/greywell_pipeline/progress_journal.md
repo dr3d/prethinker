@@ -64,3 +64,35 @@ Greywell is the strongest cold baseline in this zip batch. Its residual errors
 are split across compile, join, and answer surfaces, which makes it a good
 anti-overfit check: a repair that only expands source acquisition may not move
 all remaining rows.
+
+## GP-002 - Operational Record Status Lens Trial
+
+Date: 2026-05-05
+
+Evidence lane: `operational_record_status_lens`
+
+Artifacts:
+
+- Compile: `tmp/story_world_operational_record_variant/greywell_pipeline/`
+- QA: `tmp/story_world_operational_record_variant_qa_full/greywell_pipeline/`
+- Scorecard: `tmp/story_world_operational_record_variant_summaries/scorecard.md`
+- Row gate: `tmp/story_world_operational_record_variant_summaries/row_gated_scorecard_plan.md`
+- Selector: `tmp/story_world_operational_record_selector/greywell_pipeline-guarded_activation_operational_guard_selector.md`
+
+Result:
+
+```text
+variant compile:      83 admitted / 21 skipped
+variant QA:           23 exact / 1 partial / 1 miss
+row-gated target:     accept q003, q012; reject q023; q025 unchanged
+guarded selector:     24 exact / 1 partial / 0 miss
+selected best rows:   25 / 25
+```
+
+Lesson:
+
+This is the cleanest transfer win for the operational/status selector guard.
+The compile health is poor, so the lens should not become global, but the
+selector can safely harvest the operational rows that answer who isolated the
+segment and current operational status while protecting the baseline
+recommendations row.

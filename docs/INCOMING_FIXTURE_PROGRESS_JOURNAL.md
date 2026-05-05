@@ -817,3 +817,56 @@ Ignored local artifact references:
 - `tmp/story_world_zip_baseline_summaries/scorecard.md`
 - `tmp/story_world_zip_baseline_summaries/compile_repair_targets.md`
 - `tmp/story_world_failure_classification_zip/*/*.json`
+
+## 2026-05-05 Operational Record Status Lens Trial
+
+The first honing pass after the zip batch added a named
+`operational_record_status_strategy_v1` compiler context for permit lifecycles,
+intake/facilities logs, conservation ledgers, grant/application dockets,
+correction logs, and turnstream-style records. The lens is row-level useful but
+not globally promotable.
+
+Raw candidate scorecard:
+
+```text
+baseline:  97 exact / 11 partial / 15 miss
+candidate: 96 exact / 20 partial / 7 miss
+recommendation: reject_candidate
+baseline-exact regressions: 15
+```
+
+Oracle row-gated artifact target:
+
+```text
+row-gated: 111 exact / 11 partial / 1 miss
+delta vs baseline: +14 exact / 0 partial / -14 miss
+accepted candidate rows: 19
+rejected candidate rows: 17
+unchanged non-exacts: 5
+```
+
+No-oracle selector results:
+
+```text
+structural selector:                 95 exact / 19 partial / 9 miss
+guarded activation before op guard:  99 exact / 17 partial / 7 miss
+guarded activation after op guard:  101 exact / 17 partial / 5 miss
+```
+
+Discovery: the lens reduces misses for status, correction, threshold,
+operational-decision, and unresolved-item rows, with Greywell reaching its
+per-row upper bound (`24 / 1 / 0`) under the selector. It also weakens
+rationale, transfer/authorization, application-status, counterfactual
+eligibility, and hold-vs-commit rows when applied globally. The promoted lesson
+is therefore a selector uncertainty guard: if structural selection prefers the
+baseline but a competing mode has specialized operational record-state evidence
+and the question asks about status, timeliness, decisions, correction,
+thresholds, remedies, unresolved items, or isolation, call activation instead
+of trusting row volume.
+
+Artifacts:
+
+- `tmp/story_world_operational_record_variant_summaries/scorecard.md`
+- `tmp/story_world_operational_record_variant_summaries/baseline_comparison.md`
+- `tmp/story_world_operational_record_variant_summaries/row_gated_scorecard_plan.md`
+- `tmp/story_world_operational_record_selector/guarded_activation_operational_guard_rollup.json`

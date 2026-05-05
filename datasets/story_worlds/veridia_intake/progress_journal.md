@@ -66,3 +66,35 @@ turnstream with corrections, pending uncertainty, and budget authority. The
 compile is healthy, but most remaining failures are hybrid/join rather than
 pure source acquisition, so this should feed the stenographer and correction
 state lanes after the batch is safely admitted.
+
+## VI-002 - Operational Record Status Lens Trial
+
+Date: 2026-05-05
+
+Evidence lane: `operational_record_status_lens`
+
+Artifacts:
+
+- Compile: `tmp/story_world_operational_record_variant/veridia_intake/`
+- QA: `tmp/story_world_operational_record_variant_qa/veridia_intake/`
+- Scorecard: `tmp/story_world_operational_record_variant_summaries/scorecard.md`
+- Row gate: `tmp/story_world_operational_record_variant_summaries/row_gated_scorecard_plan.md`
+- Selector: `tmp/story_world_operational_record_selector/veridia_intake-guarded_activation_operational_guard_selector.md`
+
+Result:
+
+```text
+variant compile:      45 admitted / 27 skipped
+variant QA:           15 exact / 4 partial / 4 miss
+row-gated target:     accept q007, q013, q014, q019, q022; reject q001, q009, q015, q018, q020
+guarded selector:     16 exact / 6 partial / 1 miss
+selected best rows:   21 / 23
+```
+
+Lesson:
+
+Veridia confirms the stenographer-adjacent problem: operational rows can expose
+pending/reversal/unresolved surfaces, but they can also conflict with
+commit/hold judgment. The selector guard improves the row-level result, yet the
+remaining frontier is explicit commit-readiness versus unresolved-process
+status.

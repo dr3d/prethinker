@@ -124,6 +124,16 @@ targets. This batch is now the active cold generalization scorecard for
 permit/deadline, conservation ledger, incident investigation, grant-rule, and
 turnstream correction behavior.
 
+Operational-record honing update: `operational_record_status_v1` is useful as a
+row-level lens but rejected as a global compile surface. Raw candidate score is
+`96 / 20 / 7` against the zip-batch baseline `97 / 11 / 15`, while the
+artifact-only row gate says `111 / 11 / 1` is available. The no-oracle guarded
+selector now has an operational/status uncertainty guard and reaches
+`101 / 17 / 5`; Greywell hits its per-row selector upper bound at `24 / 1 / 0`.
+Next work is selector restraint for application-status, counterfactual
+eligibility, and commit-readiness rows rather than more broad operational
+compile prompting.
+
 Activation update: query-mode selection now has deterministic structural and
 hybrid structural+LLM controls. The hybrid path saves LLM calls on confident
 rows and reached Avalon's Rule8 comparison upper bound (`27 exact / 12 partial

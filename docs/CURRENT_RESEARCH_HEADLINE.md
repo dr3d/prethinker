@@ -388,6 +388,12 @@ testing whether those gains transfer:
   classified), Heronvale is the rule/eligibility risk with medium semantic
   struggle, and Veridia gives the stenographer/correction lane a compact
   turnstream fixture.
+- `operational_record_status_v1` is the newest lens honing result. It is
+  rejected as a global compile candidate (`96 / 20 / 7` versus `97 / 11 / 15`)
+  but valuable under row selection: row-gated target `111 / 11 / 1`, guarded
+  no-oracle selector now `101 / 17 / 5`, and Greywell reaches `24 / 1 / 0`.
+  The remaining frontier is selector restraint on application-status,
+  counterfactual eligibility, and commit-readiness rows.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 

@@ -324,6 +324,17 @@ POLICY_INCIDENT_SOURCE_COMPILER_CONTEXT_V1 = [
     "Policy incident QA-readiness rule: if a person or facility appears in a role row and in later event, inspection, notification, authorization, correction, or disclosure rows, the same atom must connect those rows so later queries can join them without alias repair.",
 ]
 
+OPERATIONAL_RECORD_STATUS_CONTEXT_V1 = [
+    "operational_record_status_strategy_v1: Use this for permit lifecycles, intake logs, facilities logs, conservation ledgers, grant/application dockets, accession records, deaccessions, correction logs, and turnstream-style records.",
+    "Operational record rule: preserve the record backbone before summary labels. A useful compile keeps stable rows for record id, subject/entity, actor/role, timestamp or turn, event/action, status before/after, governing rule/threshold, correction/reversal, and unresolved/pending items when the profile supports them.",
+    "Operational status rule: current status, prior status, suspended/reinstated/expired/denied/deaccessioned/pending/unresolved states, and status-at-date questions need explicit status surfaces plus time anchors. Do not hide status transitions inside long event labels when the profile offers status, event, date, correction, or temporal predicates.",
+    "Operational correction rule: corrections, reversals, reinstatements, and superseded values are not ordinary duplicate facts. Preserve the original/superseded value, corrected/current value, authority/source, and effective turn/date when the profile supports correction or source-claim predicates.",
+    "Operational threshold rule: numeric thresholds and retention/matching/authority limits are query-bearing. Preserve the threshold amount, unit, subject, governing rule, and observed/requested amount separately when available; do not collapse a denied or approved outcome into a single reason label.",
+    "Operational reason rule: if a decision, split, denial, remedy, or priority is explained by the source, preserve the stated reason/rationale as an additive detail row when the profile supports it. A decision row alone is partial support for why-questions.",
+    "Operational unresolved-item rule: pending, unresolved, referred, deferred, and not-yet-decided items are first-class epistemic states. Preserve the item, owner/source, current status, and any referred authority rather than answering them as yes/no outcomes.",
+    "Operational join-readiness rule: use one canonical atom for each record, person, role, facility, application, accession, lot, vault, concern, and date/turn. Reuse that atom across role rows, event rows, status rows, correction rows, threshold rows, and rationale rows so later QA can join without alias repair.",
+]
+
 RULE_INGESTION_SOURCE_COMPILER_CONTEXT_V1 = [
     "rule_ingestion_source_compiler_strategy_v1: Use this for source documents classified by the LLM intake plan or domain hint as charters, standing rules, operational policies, bylaws, ordinances, contracts, eligibility rules, tax rules, permission rules, exception ladders, or priority rules.",
     "Rule ingestion rule: preserve source-stated rules in two layers when the profile supports both layers. First emit source_rule/rule_text/requirement/exception/override rows that record the charter language. Second emit operation='rule' candidate_operations only for bounded executable Horn-style rules whose head and body predicates are all in the allowed profile.",
@@ -2040,9 +2051,29 @@ def _source_compiler_context(*, intake_plan: dict[str, Any] | None, domain_hint:
             "procedure",
             "threshold",
             "authorization",
+            "permit",
         ]
     ):
         contexts.extend(POLICY_INCIDENT_SOURCE_COMPILER_CONTEXT_V1)
+    if any(
+        token in label
+        for token in [
+            "permit",
+            "intake",
+            "turnstream",
+            "facilities",
+            "ledger",
+            "seed bank",
+            "accession",
+            "deaccession",
+            "conservation",
+            "grant",
+            "application docket",
+            "correction log",
+            "operations log",
+        ]
+    ):
+        contexts.extend(OPERATIONAL_RECORD_STATUS_CONTEXT_V1)
     if any(
         token in label
         for token in [

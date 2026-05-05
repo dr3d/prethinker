@@ -13,6 +13,7 @@ from scripts.select_qa_mode_without_oracle import (
     structural_baseline_answer_surface_guard_reason,
     structural_identity_completeness_trap_reason,
     structural_mode_scores,
+    structural_operational_record_status_trap_reason,
     structural_rationale_contrast_trap_reason,
     structural_selector,
     structural_volume_trap_reason,
@@ -214,6 +215,67 @@ def test_hybrid_selector_calls_model_when_structural_choice_is_uncertain() -> No
     assert fallback_calls == 1
     assert selected["selected_mode"] == "evidence"
     assert selected["selection_source"] == "hybrid_llm"
+
+
+def test_hybrid_selector_calls_model_for_operational_status_competing_lens() -> None:
+    row = {
+        "id": "q004b",
+        "question": "What is the current operational status of Segment 4?",
+        "modes": [
+            {
+                "mode": "baseline",
+                "query_evidence": {
+                    "executed_results": [
+                        {
+                            "status": "success",
+                            "num_rows": 8,
+                            "predicate": "investigation_status",
+                            "was_relaxed_fallback": False,
+                        }
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+            {
+                "mode": "operational_record",
+                "query_evidence": {
+                    "executed_results": [
+                        {
+                            "status": "success",
+                            "num_rows": 2,
+                            "predicate": "has_state",
+                            "was_relaxed_fallback": False,
+                        }
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+        ],
+    }
+    fallback_calls = 0
+
+    def fallback_selector(**_kwargs):
+        nonlocal fallback_calls
+        fallback_calls += 1
+        return {"selected_mode": "operational_record"}
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["baseline", "operational_record"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=fallback_selector,
+    )
+
+    assert fallback_calls == 1
+    assert selected["selected_mode"] == "operational_record"
+    assert selected["selection_source"] == "hybrid_llm"
+    assert (
+        "operational/status question has competing mode with specialized record-state evidence"
+        in selected["structural_uncertainty_reasons"]
+    )
     assert selected["structural_uncertainty_reasons"]
 
 

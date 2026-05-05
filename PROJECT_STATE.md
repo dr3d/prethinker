@@ -46,7 +46,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 
 ## Recent Frontier Results
 
-- Current full-suite verification: `579 passed, 2 subtests passed`.
+- Current full-suite verification: `582 passed, 2 subtests passed`.
 - Iron Harbor: `86 exact / 14 partial / 0 miss` on a full 100-question source-document battery, with `0` write proposals during post-ingestion QA.
 - Blackthorn: baseline first-20 was `2 exact / 1 partial / 17 miss`; current diagnostic lanes include BTC-022 at `82 / 9 / 9` full-100 and BTC-027 at `85 / 4 / 11`. These are different configurations, so compare within lane rather than treating one number as a universal replacement.
 - Kestrel: profile-guided KCL-016 reached `73 exact / 11 partial / 16 miss` full-100 with `0` write proposals. Cold/source-aware evidence remains much lower, and the distinction is intentional.
@@ -245,6 +245,14 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
   `97 / 11 / 15`, with failure surfaces `16` compile, `8` hybrid/join, and
   `2` answer. Heronvale is the only medium semantic-progress risk; Veridia is
   the new turnstream/stenographer-adjacent correction fixture.
+- The first honing pass on that batch produced `operational_record_status_v1`.
+  As a global compile candidate it is rejected (`96 / 20 / 7` versus baseline
+  `97 / 11 / 15`) because it creates `15` baseline-exact regressions, but the
+  row-gated artifact target is strong (`111 / 11 / 1`). A no-oracle selector
+  guard now sends operational/status rows to activation when structural
+  selection prefers baseline but a competing mode has specialized record-state
+  evidence. That lifts the selector from `99 / 17 / 7` to `101 / 17 / 5`;
+  Greywell reaches its per-row upper bound at `24 / 1 / 0`.
 - Incoming compile repair targets are now generated at
   `tmp/incoming_smoke_summaries/compile_repair_targets.{json,md}`. The current
   scoped-evidence queue is down to four partial rows: `3` scoped source-surface
@@ -468,7 +476,7 @@ Domain/data lanes:
 
 ## Verification Snapshot
 
-**Current headline:** the lean full pytest suite is `579 passed, 2 subtests passed`. The current research center is semantic parallax: multi-pass semantic compilation, mapper-admitted safe-surface accumulation, rule-lens promotion trials, row-level activation, clarification eagerness under an explicit authority boundary, and stenographer-mode stream simulation.
+**Current headline:** the lean full pytest suite is `582 passed, 2 subtests passed`. The current research center is semantic parallax: multi-pass semantic compilation, mapper-admitted safe-surface accumulation, rule-lens promotion trials, row-level activation, clarification eagerness under an explicit authority boundary, and stenographer-mode stream simulation.
 
 Recent verified results:
 

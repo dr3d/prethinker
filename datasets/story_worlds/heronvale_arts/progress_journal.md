@@ -64,3 +64,34 @@ Heronvale is the batch's rule/eligibility pressure case. It compiled enough to
 answer most rows, but the skip count and medium semantic-progress signal say
 future passes need a named expected contribution. Most remaining classified
 gaps are compile-surface acquisition, with one helper/join row.
+
+## HA-002 - Operational Record Status Lens Trial
+
+Date: 2026-05-05
+
+Evidence lane: `operational_record_status_lens`
+
+Artifacts:
+
+- Compile: `tmp/story_world_operational_record_variant/heronvale_arts/`
+- QA: `tmp/story_world_operational_record_variant_qa/heronvale_arts/`
+- Scorecard: `tmp/story_world_operational_record_variant_summaries/scorecard.md`
+- Row gate: `tmp/story_world_operational_record_variant_summaries/row_gated_scorecard_plan.md`
+- Selector: `tmp/story_world_operational_record_selector/heronvale_arts-guarded_activation_operational_guard_selector.md`
+
+Result:
+
+```text
+variant compile:      127 admitted / 24 skipped
+variant QA:           19 exact / 6 partial / 0 miss
+row-gated target:     accept q004, q009, q010, q011, q022; reject q006, q013, q015, q016, q017
+guarded selector:     19 exact / 5 partial / 1 miss
+selected best rows:   20 / 25
+```
+
+Lesson:
+
+The lens finds application/correction/remedy rows but still confuses status and
+hypothetical eligibility rows. Heronvale remains a hard selector calibration
+fixture: row-gated upper bound is large, but no-oracle selection needs stronger
+baseline protection for application-status and counterfactual rule rows.

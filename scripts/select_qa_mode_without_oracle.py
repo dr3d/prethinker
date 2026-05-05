@@ -556,6 +556,14 @@ def hybrid_selector(
     rationale_trap_reason = structural_rationale_contrast_trap_reason(row=row, scored=scored)
     if rationale_trap_reason:
         uncertain_reasons.append(rationale_trap_reason)
+    operational_trap_reason = structural_operational_record_status_trap_reason(
+        row=row,
+        scored=scored,
+        mode_labels=mode_labels,
+        structural_choice=structural_choice,
+    )
+    if operational_trap_reason:
+        uncertain_reasons.append(operational_trap_reason)
     baseline_guard_reason = structural_baseline_answer_surface_guard_reason(
         row=row,
         scored=scored,
@@ -817,6 +825,74 @@ def structural_rationale_contrast_trap_reason(
         predicates = set(quality.get("predicate_names", []) or [])
         if predicates.intersection(rationale_predicates):
             return "why or contrast question has competing mode with explicit rationale support"
+    return ""
+
+
+def structural_operational_record_status_trap_reason(
+    *,
+    row: dict[str, Any],
+    scored: list[tuple[float, str, dict[str, Any]]],
+    mode_labels: list[str],
+    structural_choice: str,
+) -> str:
+    """Return uncertainty when an operational/status lens may carry the answer surface."""
+    if len(scored) < 2 or len(mode_labels) < 2:
+        return ""
+    baseline_label = mode_labels[0]
+    if structural_choice != baseline_label:
+        return ""
+    question = str(row.get("question", "")).casefold()
+    operational_markers = [
+        "how long",
+        "period",
+        "deadline",
+        "on time",
+        "status",
+        "current",
+        "decide",
+        "decision",
+        "remedy",
+        "unresolved",
+        "threshold",
+        "trigger",
+        "priority",
+        "correction",
+        "corrected",
+        "reinstatement",
+        "reinstated",
+        "isolated",
+    ]
+    if not any(marker in question for marker in operational_markers):
+        return ""
+    operational_predicates = {
+        "asset_hierarchy",
+        "community_impact_priority",
+        "decision_reasoning",
+        "director_interpretation",
+        "event_corrects",
+        "event_date",
+        "event_defers",
+        "event_reverses",
+        "has_state",
+        "initiated_action",
+        "is_final_state",
+        "panel_decision",
+        "pending_action",
+        "permit_reinstated",
+        "permit_suspended",
+        "policy_condition_threshold",
+        "policy_vault_assignment",
+        "record_corrected",
+        "requires_investigation",
+        "rule_threshold_met",
+        "tolling_period",
+    }
+    for _score, label, quality in scored:
+        if label == baseline_label:
+            continue
+        predicates = set(quality.get("predicate_names", []) or [])
+        if predicates.intersection(operational_predicates):
+            return "operational/status question has competing mode with specialized record-state evidence"
     return ""
 
 
