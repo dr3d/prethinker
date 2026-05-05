@@ -884,6 +884,53 @@ def structural_specialized_answer_surface_override(
                     "decision-status question needs explicit decision surface rather than adjacent application/status evidence",
                 )
 
+    if "why" in question and "split" in question and "vault" in question:
+        generic_vault_predicates = {"requires_cryogenic", "vault_assignment_rule", "vault_type"}
+        if baseline_predicates.intersection(generic_vault_predicates):
+            for _score, label, quality in scored:
+                if label == baseline_label:
+                    continue
+                predicates = set(quality.get("predicate_names", []) or [])
+                if "lot_vault_split" in predicates and predicates.intersection(
+                    {"lot_germination_rate", "lot_condition_after_test", "policy_vault_assignment"}
+                ):
+                    return (
+                        label,
+                        "split rationale question needs actual split/lot-condition surface rather than generic vault assignment surface",
+                    )
+
+    if "as currently constituted" in question and "apply" in question:
+        for _score, label, quality in scored:
+            if label == baseline_label:
+                continue
+            predicates = set(quality.get("predicate_names", []) or [])
+            if predicates.issuperset({"applicant_type", "director_interpretation"}):
+                return (
+                    label,
+                    "current-constitution eligibility question needs applicant-type plus controlling interpretation surface",
+                )
+
+    if "resubmit" in question and "resident" in question:
+        resubmission_resolution_predicates = {
+            "applicant",
+            "director_interpretation",
+            "has_residency_proof",
+            "rule",
+            "rule_condition",
+        }
+        if baseline_predicates.intersection(resubmission_resolution_predicates):
+            for _score, label, quality in scored:
+                if label == baseline_label:
+                    continue
+                predicates = set(quality.get("predicate_names", []) or [])
+                if predicates.intersection({"applicant_type", "residency_status"}) and not predicates.intersection(
+                    {"has_residency_proof", "applicant"}
+                ):
+                    return (
+                        baseline_label,
+                        "resubmission eligibility question needs proof/rule resolution surface rather than current applicant status surface",
+                    )
+
     return None
 
 

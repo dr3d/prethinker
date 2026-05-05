@@ -139,9 +139,13 @@ request-filing timeliness and commit-readiness. In full replay, hard misses
 drop from `5` to `3` while exact count stays flat because unrelated Heronvale
 activation rows vary downward. The surface-specificity guard then reaches
 `110 / 10 / 3` with `121/123` selected-best rows by protecting explicit
-rationale-note, decision-status, and priority predicate surfaces. Next work is
-Fenmore split rationale, Heronvale Poetry Circle entity mapping, and selector
-variance control rather than more broad operational compile prompting.
+rationale-note, decision-status, and priority predicate surfaces. The
+complete-selector guard adds split-rationale, current-constitution, and
+resubmission proof/rule distinctions, reaching `111 / 11 / 1` with `123/123`
+selected-best rows against the frozen artifact upper bound. Next work is no
+longer more tiny selector repair on this batch; it is source-surface/evidence
+acquisition for the remaining miss, transfer replay on unlike fixtures, and
+selector variance control rather than more broad operational compile prompting.
 
 Activation update: query-mode selection now has deterministic structural and
 hybrid structural+LLM controls. The hybrid path saves LLM calls on confident

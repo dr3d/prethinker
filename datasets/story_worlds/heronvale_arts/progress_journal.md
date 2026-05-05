@@ -149,3 +149,30 @@ explicit decision surface rather than adjacent application/status evidence.
 Priority questions need an explicit priority predicate rather than an
 underlying condition predicate. The remaining miss is entity mapping for the
 Poetry Circle as currently constituted.
+
+## HA-005 - Complete Selector Guard
+
+Date: 2026-05-05
+
+Evidence lane: `selector_complete_guard`
+
+Artifacts:
+
+- Selector: `tmp/story_world_operational_record_selector_v7/heronvale_arts-guarded_activation_complete_selector.md`
+- Batch scorecard: `tmp/story_world_operational_record_selector_v7/scorecard.md`
+
+Result:
+
+```text
+previous completion selector: 23 exact / 2 partial / 0 miss; selected-best 24 / 25
+complete selector:            24 exact / 1 partial / 0 miss; selected-best 25 / 25
+delta:                        +1 exact / -1 partial / 0 miss
+```
+
+Lesson:
+
+Heronvale now reaches its per-row selector upper bound. The final guard
+separates two Poetry Circle question acts: "as currently constituted" needs
+applicant-type plus controlling interpretation, while counterfactual
+resubmission with a named resident needs proof/rule resolution surface rather
+than current applicant status.

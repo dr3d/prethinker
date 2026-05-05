@@ -1306,6 +1306,228 @@ def test_hybrid_selector_prefers_explicit_decision_surface() -> None:
     assert "explicit decision surface" in selected["specialized_guard_reason"]
 
 
+def test_hybrid_selector_prefers_actual_split_surface_for_split_rationale() -> None:
+    row = {
+        "id": "q004q",
+        "question": "Why was FB-2026-006 split to Vault 4?",
+        "modes": [
+            {
+                "mode": "baseline",
+                "query_evidence": {
+                    "executed_results": [
+                        {
+                            "status": "success",
+                            "num_rows": 1,
+                            "predicate": "requires_cryogenic",
+                            "was_relaxed_fallback": False,
+                        },
+                        {
+                            "status": "success",
+                            "num_rows": 1,
+                            "predicate": "vault_assignment_rule",
+                            "was_relaxed_fallback": False,
+                        },
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+            {
+                "mode": "operational_record",
+                "query_evidence": {
+                    "executed_results": [
+                        {
+                            "status": "success",
+                            "num_rows": 1,
+                            "predicate": "lot_vault_split",
+                            "was_relaxed_fallback": False,
+                        },
+                        {
+                            "status": "success",
+                            "num_rows": 1,
+                            "predicate": "lot_germination_rate",
+                            "was_relaxed_fallback": True,
+                        },
+                        {
+                            "status": "success",
+                            "num_rows": 1,
+                            "predicate": "lot_condition_after_test",
+                            "was_relaxed_fallback": False,
+                        },
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+        ],
+    }
+
+    fallback_calls = 0
+
+    def fallback_selector(**_kwargs):
+        nonlocal fallback_calls
+        fallback_calls += 1
+        return {"selected_mode": "baseline"}
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["baseline", "operational_record"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=fallback_selector,
+    )
+
+    assert fallback_calls == 0
+    assert selected["selected_mode"] == "operational_record"
+    assert "actual split/lot-condition surface" in selected["specialized_guard_reason"]
+
+
+def test_hybrid_selector_prefers_applicant_type_for_current_constitution() -> None:
+    row = {
+        "id": "q004r",
+        "question": "Can the Heronvale Poetry Circle apply as currently constituted?",
+        "modes": [
+            {
+                "mode": "baseline",
+                "query_evidence": {
+                    "executed_results": [
+                        {
+                            "status": "success",
+                            "num_rows": 1,
+                            "predicate": "applicant",
+                            "was_relaxed_fallback": False,
+                        },
+                        {
+                            "status": "success",
+                            "num_rows": 1,
+                            "predicate": "director_interpretation",
+                            "was_relaxed_fallback": False,
+                        },
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+            {
+                "mode": "operational_record",
+                "query_evidence": {
+                    "executed_results": [
+                        {
+                            "status": "success",
+                            "num_rows": 1,
+                            "predicate": "applicant_type",
+                            "was_relaxed_fallback": False,
+                        },
+                        {
+                            "status": "success",
+                            "num_rows": 1,
+                            "predicate": "director_interpretation",
+                            "was_relaxed_fallback": False,
+                        },
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+        ],
+    }
+
+    fallback_calls = 0
+
+    def fallback_selector(**_kwargs):
+        nonlocal fallback_calls
+        fallback_calls += 1
+        return {"selected_mode": "baseline"}
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["baseline", "operational_record"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=fallback_selector,
+    )
+
+    assert fallback_calls == 0
+    assert selected["selected_mode"] == "operational_record"
+    assert "applicant-type plus controlling interpretation" in selected["specialized_guard_reason"]
+
+
+def test_hybrid_selector_keeps_rule_proof_surface_for_resubmission_resolution() -> None:
+    row = {
+        "id": "q004s",
+        "question": "If the Poetry Circle resubmits with a named Heronvale resident as applicant, would the eligibility objection be resolved?",
+        "modes": [
+            {
+                "mode": "baseline",
+                "query_evidence": {
+                    "executed_results": [
+                        {
+                            "status": "success",
+                            "num_rows": 2,
+                            "predicate": "director_interpretation",
+                            "was_relaxed_fallback": True,
+                        },
+                        {
+                            "status": "success",
+                            "num_rows": 3,
+                            "predicate": "has_residency_proof",
+                            "was_relaxed_fallback": True,
+                        },
+                        {
+                            "status": "success",
+                            "num_rows": 1,
+                            "predicate": "rule_condition",
+                            "was_relaxed_fallback": True,
+                        },
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+            {
+                "mode": "operational_record",
+                "query_evidence": {
+                    "executed_results": [
+                        {
+                            "status": "success",
+                            "num_rows": 1,
+                            "predicate": "applicant_type",
+                            "was_relaxed_fallback": False,
+                        },
+                        {
+                            "status": "success",
+                            "num_rows": 4,
+                            "predicate": "residency_status",
+                            "was_relaxed_fallback": True,
+                        },
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+        ],
+    }
+
+    fallback_calls = 0
+
+    def fallback_selector(**_kwargs):
+        nonlocal fallback_calls
+        fallback_calls += 1
+        return {"selected_mode": "operational_record"}
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["baseline", "operational_record"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=fallback_selector,
+    )
+
+    assert fallback_calls == 0
+    assert selected["selected_mode"] == "baseline"
+    assert "proof/rule resolution surface" in selected["specialized_guard_reason"]
+
+
 def test_activation_prompt_mentions_requirement_detail_completeness() -> None:
     prompt = selector_system_prompt("activation")
 

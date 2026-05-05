@@ -854,6 +854,7 @@ guarded activation after op guard:  101 exact / 17 partial / 5 miss
 baseline-readiness guard selector:  106 exact / 12 partial / 5 miss
 question-act guard replay:          106 exact / 14 partial / 3 miss
 surface-specificity guard selector: 110 exact / 10 partial / 3 miss
+complete selector guard:            111 exact / 11 partial / 1 miss
 ```
 
 Discovery: the lens reduces misses for status, correction, threshold,
@@ -895,6 +896,18 @@ condition predicates. The selector replay reaches `110 / 10 / 3` and
 per-row selector upper bounds. Remaining missed-best rows are Fenmore q015
 split rationale and Heronvale q009 Poetry Circle entity mapping.
 
+Complete-selector follow-up: the final two missed-best shapes became named
+guards rather than fixture labels. Split-rationale questions now prefer actual
+split plus lot-condition/policy surfaces over generic vault-assignment rows.
+Current-constitution eligibility questions prefer applicant-type plus
+controlling interpretation surface, while resubmission eligibility questions
+protect the baseline proof/rule resolution surface over a current applicant
+status surface. The selector replay now reaches `111 / 11 / 1`, selected-best
+`123/123`, exactly matching the diagnostic upper bound available from the
+frozen baseline/operational artifacts. There are no remaining missed-best rows;
+the single remaining miss is an artifact upper-bound/evidence limitation, not a
+selector-choice miss.
+
 Artifacts:
 
 - `tmp/story_world_operational_record_variant_summaries/scorecard.md`
@@ -904,3 +917,4 @@ Artifacts:
 - `tmp/story_world_operational_record_selector_v3/scorecard.md`
 - `tmp/story_world_operational_record_selector_v4/scorecard.md`
 - `tmp/story_world_operational_record_selector_v5/scorecard.md`
+- `tmp/story_world_operational_record_selector_v7/scorecard.md`

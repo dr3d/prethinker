@@ -67,6 +67,13 @@ pending/investigation process surface rather than a bare status value.
 `selector_surface_specificity_guard` adds explicit surface preference for
 cause/rationale notes, decision predicates, and priority predicates when nearby
 status, condition, or event rows are tempting but less answer-bearing.
+`selector_complete_operational_guard` closes the current frozen operational
+record batch by naming the last distinction set: split-rationale questions need
+actual split and lot-condition/policy surfaces; current-constitution eligibility
+needs applicant type plus controlling interpretation; resubmission eligibility
+needs proof/rule resolution rather than merely current applicant status. This
+is selector calibration over persisted artifacts, not evidence that the compile
+surface itself is complete.
 
 Uncertainty is a domain language, not a tone. Future harness work should avoid
 collapsing these into a single "not sure" bucket:

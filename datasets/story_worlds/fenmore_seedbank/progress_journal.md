@@ -121,3 +121,30 @@ The guard correctly protects a hypothetical consequence row where baseline has
 direct rule/status support and the operational candidate is broad fallback
 surface. The remaining missed-best row is split rationale: the operational lens
 has the better partial answer, but the selector still prefers baseline.
+
+## FS-004 - Complete Selector Guard
+
+Date: 2026-05-05
+
+Evidence lane: `selector_complete_guard`
+
+Artifacts:
+
+- Selector: `tmp/story_world_operational_record_selector_v7/fenmore_seedbank-guarded_activation_complete_selector.md`
+- Batch scorecard: `tmp/story_world_operational_record_selector_v7/scorecard.md`
+
+Result:
+
+```text
+previous surface-specificity selector: 22 exact / 1 partial / 2 miss; selected-best 24 / 25
+complete selector:                     22 exact / 2 partial / 1 miss; selected-best 25 / 25
+delta:                                 0 exact / +1 partial / -1 miss
+```
+
+Lesson:
+
+The split-rationale row now selects the best available mode. A why/split/vault
+question needs the actual split and lot-condition surface rather than only a
+generic vault-assignment rule. The remaining miss is an upper-bound limitation:
+neither baseline nor operational-record mode contains the conservation rationale
+needed for an exact answer.

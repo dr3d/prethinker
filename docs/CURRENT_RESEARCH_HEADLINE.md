@@ -402,8 +402,12 @@ testing whether those gains transfer:
   hard misses drop by two. The surface-specificity guard then reaches
   `110 / 10 / 3` with `121/123` selected-best rows by protecting explicit
   rationale-note, decision-status, and priority predicate surfaces. The
-  remaining frontier is Fenmore split rationale, Heronvale Poetry Circle entity
-  mapping, and variance control in LLM selector replay.
+  complete-selector guard adds split-rationale, current-constitution, and
+  resubmission proof/rule distinctions, reaching `111 / 11 / 1` with
+  `123/123` selected-best rows against the frozen artifact upper bound. The
+  remaining frontier is source-surface/evidence acquisition for the one
+  upper-bound miss, transfer checks on unlike fixtures, and variance control in
+  LLM selector replay.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 
