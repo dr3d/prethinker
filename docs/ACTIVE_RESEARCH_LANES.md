@@ -137,9 +137,11 @@ candidate surfaces, moving the same frozen-artifact selector rollup to
 question-act guard then fixes the two cleanest remaining hard misses:
 request-filing timeliness and commit-readiness. In full replay, hard misses
 drop from `5` to `3` while exact count stays flat because unrelated Heronvale
-activation rows vary downward. Next work is community-priority entity mapping,
-cause/rationale rows, and selector variance control rather than more broad
-operational compile prompting.
+activation rows vary downward. The surface-specificity guard then reaches
+`110 / 10 / 3` with `121/123` selected-best rows by protecting explicit
+rationale-note, decision-status, and priority predicate surfaces. Next work is
+Fenmore split rationale, Heronvale Poetry Circle entity mapping, and selector
+variance control rather than more broad operational compile prompting.
 
 Activation update: query-mode selection now has deterministic structural and
 hybrid structural+LLM controls. The hybrid path saves LLM calls on confident

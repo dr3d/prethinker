@@ -399,8 +399,11 @@ testing whether those gains transfer:
   question-act guard then fixes request-filing timeliness and commit-readiness:
   Ashgrove q008 and Veridia q019 both move from miss to exact. The full replay
   is `106 / 14 / 3`, so exact count stays flat under LLM selector variance but
-  hard misses drop by two. The remaining frontier is community-priority entity
-  mapping, cause/rationale rows, and variance control in LLM selector replay.
+  hard misses drop by two. The surface-specificity guard then reaches
+  `110 / 10 / 3` with `121/123` selected-best rows by protecting explicit
+  rationale-note, decision-status, and priority predicate surfaces. The
+  remaining frontier is Fenmore split rationale, Heronvale Poetry Circle entity
+  mapping, and variance control in LLM selector replay.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 

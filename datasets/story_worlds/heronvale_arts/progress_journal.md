@@ -122,3 +122,30 @@ baseline application/status and counterfactual rule support prevents the
 selector from over-trusting broad operational-record evidence on eligibility
 rows. The remaining misses are not the same hazard: they need entity mapping
 and community-priority selection work.
+
+## HA-004 - Surface Specificity Selector Guard
+
+Date: 2026-05-05
+
+Evidence lane: `selector_surface_specificity_guard`
+
+Artifacts:
+
+- Selector: `tmp/story_world_operational_record_selector_v5/heronvale_arts-guarded_activation_surface_specificity_selector.md`
+- Batch scorecard: `tmp/story_world_operational_record_selector_v5/scorecard.md`
+
+Result:
+
+```text
+previous question-act replay: 20 exact / 4 partial / 1 miss; selected-best 21 / 25
+surface-specificity selector: 23 exact / 1 partial / 1 miss; selected-best 24 / 25
+delta:                        +3 exact / -3 partial / 0 miss
+```
+
+Lesson:
+
+Heronvale benefits from two new selector labels. Decision-status questions need
+explicit decision surface rather than adjacent application/status evidence.
+Priority questions need an explicit priority predicate rather than an
+underlying condition predicate. The remaining miss is entity mapping for the
+Poetry Circle as currently constituted.

@@ -837,6 +837,53 @@ def structural_specialized_answer_surface_override(
                         "commit-readiness question needs unresolved process evidence rather than a bare status value",
                     )
 
+    if any(marker in question for marker in ["what caused", "why ", "cause of", "caused the"]):
+        rationale_note_predicates = {"inspector_note", "source_detail", "explanation", "reason", "cause", "caused_by"}
+        if baseline_predicates.intersection(rationale_note_predicates):
+            top_quality = _quality_for_label(scored, structural_choice)
+            top_predicates = set(top_quality.get("predicate_names", []) or [])
+            broad_record_predicates = {
+                "event_occurs",
+                "extension_granted",
+                "inspection_completed",
+                "inspection_requested",
+                "observation_by",
+                "permit_suspended",
+                "record_corrected",
+                "stop_work_order",
+            }
+            if structural_choice != baseline_label and top_predicates.intersection(broad_record_predicates):
+                return (
+                    baseline_label,
+                    "cause question has explicit baseline rationale-note support and candidate is broad record/event surface",
+                )
+
+    if "priority" in question:
+        for _score, label, quality in scored:
+            if label == baseline_label:
+                continue
+            predicates = set(quality.get("predicate_names", []) or [])
+            if any("priority" in predicate for predicate in predicates) and not any(
+                "priority" in predicate for predicate in baseline_predicates
+            ):
+                return (
+                    label,
+                    "priority question needs explicit priority predicate surface rather than an underlying condition predicate",
+                )
+
+    if "decided" in question or "decision" in question:
+        for _score, label, quality in scored:
+            if label == baseline_label:
+                continue
+            predicates = set(quality.get("predicate_names", []) or [])
+            if predicates.intersection({"panel_decision", "decision_reasoning", "final_decision"}) and not baseline_predicates.intersection(
+                {"panel_decision", "decision_reasoning", "final_decision"}
+            ):
+                return (
+                    label,
+                    "decision-status question needs explicit decision surface rather than adjacent application/status evidence",
+                )
+
     return None
 
 

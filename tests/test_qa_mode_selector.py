@@ -1114,6 +1114,198 @@ def test_hybrid_selector_prefers_process_surface_for_commit_readiness() -> None:
     assert "unresolved process evidence" in selected["specialized_guard_reason"]
 
 
+def test_hybrid_selector_keeps_rationale_note_for_cause_question() -> None:
+    row = {
+        "id": "q004n",
+        "question": "What caused the MEP inspection delay?",
+        "modes": [
+            {
+                "mode": "baseline",
+                "query_evidence": {
+                    "executed_results": [
+                        {
+                            "status": "success",
+                            "num_rows": 1,
+                            "predicate": "inspector_note",
+                            "was_relaxed_fallback": True,
+                        }
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+            {
+                "mode": "operational_record",
+                "query_evidence": {
+                    "executed_results": [
+                        {
+                            "status": "success",
+                            "num_rows": 12,
+                            "predicate": "record_corrected",
+                            "was_relaxed_fallback": False,
+                        },
+                        {
+                            "status": "success",
+                            "num_rows": 6,
+                            "predicate": "inspection_requested",
+                            "was_relaxed_fallback": False,
+                        },
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+        ],
+    }
+
+    fallback_calls = 0
+
+    def fallback_selector(**_kwargs):
+        nonlocal fallback_calls
+        fallback_calls += 1
+        return {"selected_mode": "operational_record"}
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["baseline", "operational_record"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=fallback_selector,
+    )
+
+    assert fallback_calls == 0
+    assert selected["selected_mode"] == "baseline"
+    assert "rationale-note support" in selected["specialized_guard_reason"]
+
+
+def test_hybrid_selector_prefers_explicit_priority_surface() -> None:
+    row = {
+        "id": "q004o",
+        "question": "Which applications have community impact priority?",
+        "modes": [
+            {
+                "mode": "baseline",
+                "query_evidence": {
+                    "executed_results": [
+                        {
+                            "status": "success",
+                            "num_rows": 3,
+                            "predicate": "has_community_impact",
+                            "was_relaxed_fallback": False,
+                        }
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+            {
+                "mode": "operational_record",
+                "query_evidence": {
+                    "executed_results": [
+                        {
+                            "status": "success",
+                            "num_rows": 3,
+                            "predicate": "community_impact_priority",
+                            "was_relaxed_fallback": False,
+                        }
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+        ],
+    }
+
+    fallback_calls = 0
+
+    def fallback_selector(**_kwargs):
+        nonlocal fallback_calls
+        fallback_calls += 1
+        return {"selected_mode": "baseline"}
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["baseline", "operational_record"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=fallback_selector,
+    )
+
+    assert fallback_calls == 0
+    assert selected["selected_mode"] == "operational_record"
+    assert "explicit priority predicate" in selected["specialized_guard_reason"]
+
+
+def test_hybrid_selector_prefers_explicit_decision_surface() -> None:
+    row = {
+        "id": "q004p",
+        "question": "Was the public-access question for Application D decided?",
+        "modes": [
+            {
+                "mode": "baseline",
+                "query_evidence": {
+                    "executed_results": [
+                        {
+                            "status": "success",
+                            "num_rows": 1,
+                            "predicate": "application_status",
+                            "was_relaxed_fallback": False,
+                        },
+                        {
+                            "status": "success",
+                            "num_rows": 1,
+                            "predicate": "pending_requirement",
+                            "was_relaxed_fallback": True,
+                        },
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+            {
+                "mode": "operational_record",
+                "query_evidence": {
+                    "executed_results": [
+                        {
+                            "status": "success",
+                            "num_rows": 1,
+                            "predicate": "panel_decision",
+                            "was_relaxed_fallback": True,
+                        },
+                        {
+                            "status": "success",
+                            "num_rows": 1,
+                            "predicate": "decision_reasoning",
+                            "was_relaxed_fallback": False,
+                        },
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+        ],
+    }
+
+    fallback_calls = 0
+
+    def fallback_selector(**_kwargs):
+        nonlocal fallback_calls
+        fallback_calls += 1
+        return {"selected_mode": "baseline"}
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["baseline", "operational_record"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=fallback_selector,
+    )
+
+    assert fallback_calls == 0
+    assert selected["selected_mode"] == "operational_record"
+    assert "explicit decision surface" in selected["specialized_guard_reason"]
+
+
 def test_activation_prompt_mentions_requirement_detail_completeness() -> None:
     prompt = selector_system_prompt("activation")
 

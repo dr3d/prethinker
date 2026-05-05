@@ -157,3 +157,29 @@ an inspection request was filed on time after reinstatement needs request,
 reinstatement, and threshold evidence, not completion-window evidence. The
 remaining selector miss is cause/rationale: structural row volume still prefers
 the operational lens even when baseline has the explicit inspector-note cause.
+
+## AP-005 - Surface Specificity Selector Guard
+
+Date: 2026-05-05
+
+Evidence lane: `selector_surface_specificity_guard`
+
+Artifacts:
+
+- Selector: `tmp/story_world_operational_record_selector_v5/ashgrove_permit-guarded_activation_surface_specificity_selector.md`
+- Batch scorecard: `tmp/story_world_operational_record_selector_v5/scorecard.md`
+
+Result:
+
+```text
+previous question-act selector: 22 exact / 3 partial / 0 miss; selected-best 24 / 25
+surface-specificity selector:  23 exact / 2 partial / 0 miss; selected-best 25 / 25
+delta:                         +1 exact / -1 partial / 0 miss
+```
+
+Lesson:
+
+Ashgrove now reaches its per-row selector upper bound. The added guard protects
+explicit rationale-note evidence for cause questions when the competing surface
+is broad record/event volume. This fixed the MEP inspection delay cause row
+without changing the request-filing guard.

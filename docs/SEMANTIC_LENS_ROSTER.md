@@ -64,6 +64,9 @@ instrument keeps baseline rather than asking activation to admire extra rows.
 question asks about request filing, use request/reinstatement/threshold surface
 rather than completion windows; if it asks whether to commit a status, use
 pending/investigation process surface rather than a bare status value.
+`selector_surface_specificity_guard` adds explicit surface preference for
+cause/rationale notes, decision predicates, and priority predicates when nearby
+status, condition, or event rows are tempting but less answer-bearing.
 
 Uncertainty is a domain language, not a tone. Future harness work should avoid
 collapsing these into a single "not sure" bucket:

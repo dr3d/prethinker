@@ -853,6 +853,7 @@ guarded activation before op guard:  99 exact / 17 partial / 7 miss
 guarded activation after op guard:  101 exact / 17 partial / 5 miss
 baseline-readiness guard selector:  106 exact / 12 partial / 5 miss
 question-act guard replay:          106 exact / 14 partial / 3 miss
+surface-specificity guard selector: 110 exact / 10 partial / 3 miss
 ```
 
 Discovery: the lens reduces misses for status, correction, threshold,
@@ -884,6 +885,16 @@ Heronvale activation rows varied downward, but hard misses dropped from `5` to
 `3`. Treat the durable lesson as a named question-act guard plus a new warning:
 LLM selector replay variance must be separated from deterministic guard deltas.
 
+Surface-specificity follow-up: three more narrow guard labels now protect
+answer-bearing surfaces from adjacent evidence. Cause questions prefer explicit
+rationale-note support over broad record/event volume; decision-status
+questions prefer explicit decision predicates over adjacent application/status
+evidence; priority questions prefer explicit priority predicates over underlying
+condition predicates. The selector replay reaches `110 / 10 / 3` and
+`121/123` selected-best rows. Ashgrove, Greywell, and Veridia are now at their
+per-row selector upper bounds. Remaining missed-best rows are Fenmore q015
+split rationale and Heronvale q009 Poetry Circle entity mapping.
+
 Artifacts:
 
 - `tmp/story_world_operational_record_variant_summaries/scorecard.md`
@@ -892,3 +903,4 @@ Artifacts:
 - `tmp/story_world_operational_record_selector/guarded_activation_operational_guard_rollup.json`
 - `tmp/story_world_operational_record_selector_v3/scorecard.md`
 - `tmp/story_world_operational_record_selector_v4/scorecard.md`
+- `tmp/story_world_operational_record_selector_v5/scorecard.md`
