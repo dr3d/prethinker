@@ -62,6 +62,11 @@ that should stay distinct during future work. Use that roster when naming new
 lenses so names describe the guardrail or semantic reason, not the fixture that
 first exposed it.
 
+Selector guard growth is now tracked by
+`docs/SELECTOR_GUARD_FAMILY_ROLLUP.md`: `50` guard return sites collapse to
+`49` unique reasons across `7` families with `0` unclassified. Treat that
+family count, not the raw guard count, as the anti-sprawl metric.
+
 ## Representative Fixtures
 
 Use small sets rather than the whole zoo for each cycle:
