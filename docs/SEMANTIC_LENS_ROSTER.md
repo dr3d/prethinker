@@ -116,6 +116,14 @@ Calder adds the longitudinal conflict family:
 `guardianship_resumption_condition_guard`. These exist to separate stale
 current-state rows, possession versus ownership, trust/default title, contract
 authority, and non-retroactive guardianship effects.
+Oxalis adds a regulatory access family that acts after a healthy compile rather
+than replacing it: `universal_scope_enumeration_guard`,
+`termination_denial_quantity_threshold_guard`,
+`lot_affected_target_exclusion_guard`, and
+`counterfactual_reclassification_deadline_guard`. These route all/any scoped
+sets, denial rationales with threshold quantities, explicit negative lot checks,
+and reclassification-deadline counterfactuals to evidence surfaces that carry
+the relevant access pattern.
 
 Uncertainty is a domain language, not a tone. Future harness work should avoid
 collapsing these into a single "not sure" bucket:

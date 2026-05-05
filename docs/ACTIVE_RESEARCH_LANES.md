@@ -204,6 +204,13 @@ their frozen selector artifacts. The clean replay covers `163` rows and reaches
 selected-best rows. One initial Ashgrove pass hit transient LM Studio HTTP 500
 fallbacks and recovered on rerun; keep recording selector/orchestration
 variance separately from semantic regressions.
+Oxalis pushes the unlike-domain access lane: over the frozen OX-003 compile,
+evidence-bundle access improved full-40 from `27 / 8 / 5` to `32 / 6 / 2`, and
+new regulatory access guards let guarded selection match the two-mode upper
+bound at `33 / 6 / 1`. The lesson is not more source prompting; it is that
+healthy compiles still need access surfaces for universal-scope rows, denial
+threshold rationale, explicit negative lot checks, and counterfactual deadline
+classification.
 
 Activation update: query-mode selection now has deterministic structural and
 hybrid structural+LLM controls. The hybrid path saves LLM calls on confident

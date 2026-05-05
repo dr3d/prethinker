@@ -232,3 +232,53 @@ the compile surface but reduced downstream QA quality. The fix was scoped back
 to ledger-backed narrative passes, where the failure mode was observed and where
 coverage targets give the instruction a bounded job.
 
+## Run OX-005 - Evidence-Bundle Access and Regulatory Selector Guards
+
+- Timestamp: `2026-05-05T18:39Z` through `2026-05-05T18:46Z`
+- Evidence lane: `post_ingestion_access_selector`
+- Model: `qwen/qwen3.6-35b-a3b`
+- Mode: QA replay over the frozen OX-003 compact-flat compile with
+  evidence-bundle planning, validated evidence-bundle execution, and compact
+  evidence-bundle context filtering. No source recompile, no gold KB, no
+  strategy file, no QA-derived compile context, and no QA write proposals.
+
+### Artifacts
+
+- Evidence-bundle QA:
+  `tmp/oxalis_access_replay/ox003_evidence_bundle_20260505/domain_bootstrap_qa_20260505T183919321569Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Plain-vs-evidence comparison:
+  `tmp/oxalis_access_replay/ox003_plain_vs_evidence_comparison_20260505.md`
+- Guarded selector before access guards:
+  `tmp/oxalis_access_replay/ox003_guarded_selector_20260505.json`
+- Guarded selector after access guards:
+  `tmp/oxalis_access_replay/ox003_guarded_selector_refined_access_guards_20260505.json`
+
+### Result
+
+```text
+OX-003 plain QA:              27 exact / 8 partial / 5 miss
+evidence-bundle QA:           32 exact / 6 partial / 2 miss
+two-mode upper bound:         33 exact / 6 partial / 1 miss
+guarded selector before:      30 exact / 8 partial / 2 miss
+guarded selector after:       33 exact / 6 partial / 1 miss
+selected-best rows after:     40/40
+selector errors after:        0
+```
+
+New reason-named selector guards:
+
+- `universal_scope_enumeration_guard`
+- `termination_denial_quantity_threshold_guard`
+- `lot_affected_target_exclusion_guard`
+- `counterfactual_reclassification_deadline_guard`
+
+### Lesson
+
+Oxalis confirms a different kind of harness gain: after the compact compile
+surface was already healthy, post-ingestion access and regulatory answer-surface
+routing mattered more than another compile prompt. Evidence-bundle mode alone
+was strong, but still regressed one exact row. The selector reached the
+two-mode upper bound only after adding guards for universal-scope enumeration,
+denial rationale with quantity support, explicit lot exclusion, and
+classification-bound counterfactual deadlines.
+

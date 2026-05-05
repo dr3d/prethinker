@@ -922,6 +922,52 @@ def structural_specialized_answer_surface_override(
                     "contract-validity question needs authority-source surface rather than unrelated ownership or entity rows",
                 )
 
+    if question.startswith("did all ") or " did all " in question:
+        universal_scope_predicates = {"acknowledgment_received", "deadline_met", "deadline_exceeded"}
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if universal_scope_predicates.issubset(predicates) and "report_submitted" not in predicates:
+                return (
+                    label,
+                    "universal-scope question needs broad set-enumeration surface rather than narrower report-detail joins",
+                )
+
+    if "why" in question and "termination" in question and "denied" in question:
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if predicates.issuperset({"termination_status", "clarification_provided", "unit_count"}):
+                return (
+                    label,
+                    "termination-denial question needs rationale plus quantity-threshold support rather than status text alone",
+                )
+
+    if "affected by the recall" in question and "lot" in question:
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if "lot_affected" in predicates and predicates.intersection({"correction_applied", "unit_count"}):
+                return (
+                    label,
+                    "lot-affected question needs explicit target-lot exclusion/check surface rather than broad affected-lot listing",
+                )
+
+    if "had not been reclassified" in question and "deadline" in question:
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if "deadline_requirement" in predicates and "recall_classification" in predicates:
+                return (
+                    label,
+                    "counterfactual reclassification deadline question needs classification-bound deadline surface",
+                )
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if "deadline_requirement" in predicates and predicates.intersection(
+                {"classification_change"}
+            ):
+                return (
+                    label,
+                    "counterfactual reclassification deadline question needs classification-bound deadline surface",
+                )
+
     if "guardianship" in question and any(marker in question for marker in ["invalid", "valid", "retroactive"]):
         for _score, label, quality in scored:
             predicates = set(quality.get("predicate_names", []) or [])

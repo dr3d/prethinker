@@ -471,6 +471,10 @@ testing whether those gains transfer:
   guards landed gives `153 / 10 / 0` over `163` rows, matching each available
   upper bound with `163/163` selected-best rows. One Ashgrove attempt exposed
   transient LM Studio HTTP 500 fallback variance and recovered on rerun.
+- Oxalis adds the unlike-domain access win: evidence-bundle replay over a
+  frozen healthy compile moves full-40 from `27 / 8 / 5` to `32 / 6 / 2`, and
+  regulatory access guards lift guarded selection to the two-mode upper bound
+  of `33 / 6 / 1` with `40/40` selected-best rows.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 

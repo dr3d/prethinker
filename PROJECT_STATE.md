@@ -354,6 +354,14 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
   run exposed a transient LM Studio HTTP 500 fallback on q005; rerun recovered
   the prior upper-bound result, so record this as orchestration variance rather
   than a semantic regression.
+- Oxalis now shows the next non-story-world access frontier. Replaying
+  evidence-bundle planning/execution/context filtering over the frozen OX-003
+  compact-flat compile moved full-40 QA from `27 / 8 / 5` to `32 / 6 / 2`.
+  Plain-vs-evidence artifacts expose a `33 / 6 / 1` upper bound; refined
+  regulatory answer-surface guards for universal-scope enumeration,
+  termination-denial quantity thresholds, target-lot exclusion, and
+  counterfactual reclassification deadlines let guarded selection reach that
+  upper bound with `40/40` selected-best rows and `0` selector errors.
 - Incoming compile repair targets are now generated at
   `tmp/incoming_smoke_summaries/compile_repair_targets.{json,md}`. The current
   scoped-evidence queue is down to four partial rows: `3` scoped source-surface
