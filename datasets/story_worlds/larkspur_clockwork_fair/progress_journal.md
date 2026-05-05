@@ -466,3 +466,39 @@ strategy files in selector input. The important design shape is not
 identity, award/result, and direct status/rule questions should not be
 overridden by broader candidate evidence merely because that evidence has more
 rows or more persuasive self-check narration.
+
+## LCF-013 - Rationale/Contrast Older Transfer Diagnostic
+
+Date: 2026-05-05
+
+Evidence lane: `rationale_contrast_transfer`
+
+Mode: focused rationale/contrast source-note compile over the older promoted
+fixture, followed by targeted QA on reason, custody, object-state, and status
+rows.
+
+Artifacts:
+
+- Compile:
+  `tmp/story_world_rationale_contrast_variant_older/larkspur_clockwork_fair/domain_bootstrap_file_20260505T120645091683Z_source_qwen-qwen3-6-35b-a3b.json`
+- Targeted QA:
+  `tmp/story_world_rationale_contrast_qa_older_targeted/larkspur_clockwork_fair/domain_bootstrap_qa_20260505T122135211160Z_qa_qwen-qwen3-6-35b-a3b.json`
+
+Result:
+
+```text
+target rows:          14
+targeted QA:          4 exact / 6 partial / 4 miss
+failure surfaces:     8 compile-surface gaps, 1 hybrid-join gap, 1 query gap
+write proposals:      0
+runtime load errors:  0
+compile shape:        70 admitted / 16 skipped, rough profile score 0.746
+```
+
+Lesson:
+
+This is a negative transfer result for Larkspur. The rationale/contrast lens
+does not by itself recover story-world motive, custody, and object-state
+surface. The next Larkspur work should be a sharper acquisition contract for
+state transitions, custody/location, permission rationale, and final condition,
+with exact-row protection; broad source-note rationale is not enough.

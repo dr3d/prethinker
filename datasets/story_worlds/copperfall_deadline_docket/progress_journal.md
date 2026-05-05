@@ -87,3 +87,38 @@ Lesson:
 Copperfall remains a strong temporal-status fixture beyond the first ten rows.
 The remaining repairs are narrow: original-answer deadline source coverage and
 Orion reply-deadline helper/query composition.
+
+## CFD-003 - Rationale/Contrast Older Transfer Diagnostic
+
+Date: 2026-05-05
+
+Evidence lane: `rationale_contrast_transfer`
+
+Mode: focused rationale/contrast source-note compile over the older promoted
+fixture, followed by targeted QA on judge, status-at-date, correction, trial
+effect, and clerk-note rows.
+
+Artifacts:
+
+- Compile:
+  `tmp/story_world_rationale_contrast_variant_older/copperfall_deadline_docket/domain_bootstrap_file_20260505T121214309995Z_source_qwen-qwen3-6-35b-a3b.json`
+- Targeted QA:
+  `tmp/story_world_rationale_contrast_qa_older_targeted/copperfall_deadline_docket/domain_bootstrap_qa_20260505T122103307691Z_qa_qwen-qwen3-6-35b-a3b.json`
+
+Result:
+
+```text
+target rows:          11
+targeted QA:          7 exact / 2 partial / 2 miss
+failure surfaces:     2 compile-surface gaps, 2 hybrid-join gaps
+write proposals:      0
+runtime load errors:  0
+compile shape:        96 admitted / 0 skipped, rough profile score 0.750
+```
+
+Lesson:
+
+The lens transfers to correction/status notes, including the stay effective-date
+correction and clerk-note surface. The misses cluster later in the temporal
+ledger, so the next Copperfall work is not more rationale prose; it is stronger
+date/status continuation and helper/query composition for deadline effects.

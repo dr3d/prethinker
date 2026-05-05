@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: 2026-05-04
+Last updated: 2026-05-05
 
 ## One-Sentence Shape
 
@@ -292,6 +292,17 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
   Full-25 parallel QA over the four transfer fixtures was too heavy for the
   current LM Studio setup, so targeted transfer slices are the practical lane
   until the orchestration layer can throttle long judging runs.
+- The older-fixture rationale/contrast transfer diagnostic keeps that result
+  bounded. Four focused compiles plus targeted QA over Larkspur, Northbridge,
+  Copperfall, and Meridian scored `17 exact / 9 partial / 7 miss` across `33`
+  reason/status/authority/correction rows with `0` write proposals and `0`
+  runtime load errors. Northbridge (`4 / 1 / 1`), Copperfall (`7 / 2 / 2`), and
+  Meridian (`2 / 0 / 0` on a tiny slice) show useful transfer for
+  discrepancy/authority, correction/status, and counterfactual surfaces.
+  Larkspur stayed hard at `4 / 6 / 4`; its misses are mostly compile-surface
+  gaps around narrative motive, custody, and object-state rationale. The next
+  frontier is a stronger Larkspur acquisition contract, not a broader
+  rationale prompt.
 - Incoming compile repair targets are now generated at
   `tmp/incoming_smoke_summaries/compile_repair_targets.{json,md}`. The current
   scoped-evidence queue is down to four partial rows: `3` scoped source-surface

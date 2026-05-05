@@ -189,3 +189,38 @@ Northbridge's full-40 frontier is mostly source-surface authority and
 requirement coverage: hydrants, votes, conflict control, inspection authority,
 customer impacts, and penalty/timeline details. The single helper/query-join
 gap is the affordability question.
+
+## NAP-007 - Rationale/Contrast Older Transfer Diagnostic
+
+Date: 2026-05-05
+
+Evidence lane: `rationale_contrast_transfer`
+
+Mode: focused rationale/contrast source-note compile over the older promoted
+fixture, followed by targeted QA on discrepancy, authority, current status, and
+unresolved-record rows.
+
+Artifacts:
+
+- Compile:
+  `tmp/story_world_rationale_contrast_variant_older/northbridge_authority_packet/domain_bootstrap_file_20260505T120416786937Z_source_qwen-qwen3-6-35b-a3b.json`
+- Targeted QA:
+  `tmp/story_world_rationale_contrast_qa_older_targeted/northbridge_authority_packet/domain_bootstrap_qa_20260505T121821415529Z_qa_qwen-qwen3-6-35b-a3b.json`
+
+Result:
+
+```text
+target rows:          6
+targeted QA:          4 exact / 1 partial / 1 miss
+failure surfaces:     2 compile-surface gaps
+write proposals:      0
+runtime load errors:  0
+compile shape:        75 admitted / 3 skipped, rough profile score 0.861
+```
+
+Lesson:
+
+The rationale/contrast lens transfers usefully to record discrepancy and
+authority notes, but it still misses some durable authority actors and unresolved
+detail lists. Northbridge remains a good check that explanation surfaces should
+carry the controlling document/actor, not only the reason text.

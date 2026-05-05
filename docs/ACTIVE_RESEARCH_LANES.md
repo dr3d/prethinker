@@ -157,6 +157,14 @@ reason/status/evidence/correction/commit rows with `52/52` selected-best
 choices. Next work should broaden the transfer check carefully, not by firing
 four full judged QA runs at once; the current LM Studio setup handled targeted
 parallel slices well but wedged under full-25 parallel judging.
+The older-fixture transfer check is intentionally more sobering: Larkspur,
+Northbridge, Copperfall, and Meridian targeted rows scored `17 / 9 / 7` over
+`33` rows. Northbridge and Copperfall show positive transfer on
+discrepancy/authority and correction/status surfaces, while Meridian was clean
+on only a two-row probe. Larkspur remains the hard source-surface frontier:
+why/custody/object-state rows are still mostly compile gaps. Treat this as a
+boundary marker for `rationale_contrast_source_note_lens`, not a reason to
+widen the prompt.
 
 Activation update: query-mode selection now has deterministic structural and
 hybrid structural+LLM controls. The hybrid path saves LLM calls on confident

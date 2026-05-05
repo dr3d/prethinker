@@ -423,6 +423,15 @@ testing whether those gains transfer:
   evidentiary-status reports need witness/report surface, board concern rows
   need event/action history, and commit readiness must bypass over-eager
   baseline status protection.
+- The same lens now has an older-fixture boundary check. Larkspur,
+  Northbridge, Copperfall, and Meridian targeted transfer scored `17 exact / 9
+  partial / 7 miss` over `33` rows with no writes or runtime load errors.
+  Northbridge and Copperfall transfer usefully on discrepancy, authority,
+  correction, and status rows; Meridian was clean but tiny at `2/2`. Larkspur
+  stays the active hard case at `4 / 6 / 4`, mostly compile-surface gaps for
+  narrative motive, custody, and object-state rationale. The next acquisition
+  work should sharpen those surfaces directly instead of broadening the
+  rationale/contrast lens.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 

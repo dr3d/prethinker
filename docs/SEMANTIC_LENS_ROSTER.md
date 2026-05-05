@@ -85,6 +85,10 @@ The first transfer additions are `current_operational_final_state_guard`,
 `commit_readiness_process_guard`. Together they keep rationale/contrast useful
 for report, concern, and explanation rows while protecting final status and
 commit/hold decisions from attractive but incomplete note or event surfaces.
+The older-fixture transfer check marks the boundary: source-note rationale
+transfers to record/discrepancy/correction surfaces, but it does not solve
+Larkspur-style narrative motive, custody, or object-state coverage without a
+stronger source-surface acquisition contract.
 
 Uncertainty is a domain language, not a tone. Future harness work should avoid
 collapsing these into a single "not sure" bucket:

@@ -177,3 +177,38 @@ Lesson:
 Meridian now separates into two repair lanes: source-surface coverage for
 materials, existing use, codification, and rule consequences; and helper/query
 composition for spatial/coverage computations and final rule-compliance joins.
+
+## MPB-007 - Rationale/Contrast Older Transfer Diagnostic
+
+Date: 2026-05-05
+
+Evidence lane: `rationale_contrast_transfer`
+
+Mode: focused rationale/contrast source-note compile over the older promoted
+fixture, followed by a tiny targeted QA probe on report authorship and
+counterfactual objection rows.
+
+Artifacts:
+
+- Compile:
+  `tmp/story_world_rationale_contrast_variant_older/meridian_permit_board/domain_bootstrap_file_20260505T121132429657Z_source_qwen-qwen3-6-35b-a3b.json`
+- Targeted QA:
+  `tmp/story_world_rationale_contrast_qa_older_targeted/meridian_permit_board/domain_bootstrap_qa_20260505T121446323770Z_qa_qwen-qwen3-6-35b-a3b.json`
+
+Result:
+
+```text
+target rows:          2
+targeted QA:          2 exact / 0 partial / 0 miss
+failure surfaces:     none
+write proposals:      0
+runtime load errors:  0
+compile shape:        79 admitted / 1 skipped, rough profile score 1.000
+```
+
+Lesson:
+
+The probe is clean but too small to claim broad transfer. Keep Meridian in the
+larger helper/query and source-surface lanes; this run mainly says the
+rationale/contrast lens did not disturb the report-authorship and
+counterfactual-objection rows it was asked to cover.
