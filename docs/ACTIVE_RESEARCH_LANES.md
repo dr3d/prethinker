@@ -176,6 +176,19 @@ judged `40 / 0 / 0` target. The next selector frontier is not more broad
 compile prompting; it is retained q009 identity evidence or a sharper
 official-role acquisition lens that gives the selector something honest to
 choose.
+That frontier closed with a row lens, not a global compile:
+`official_role_authority_definition_surface` makes q009 exact by preserving role
+authority/duties separately from action examples, while its full-40 result
+(`21 / 9 / 10`) keeps it selector-only. Guarded activation over state,
+permission/rationale, role-authority, and custody artifacts now reaches
+`40 / 0 / 0` on Larkspur full-40 after five reason-named guards:
+superlative identity, official-role definition, current component state,
+custody-transfer rationale, and award placement. This is selector closure over
+frozen artifacts, not a new monolithic prompt.
+Transfer also stays honest: the same state lens scored `0 / 2 / 7` on Three
+Moles final-state rows, `1 / 0 / 14` on Otters final-state/restitution rows,
+and `10 / 2 / 8` on Calder's Reach final ownership/status rows. Larkspur's
+state gain transfers as a method, not as a universal prompt.
 
 Activation update: query-mode selection now has deterministic structural and
 hybrid structural+LLM controls. The hybrid path saves LLM calls on confident

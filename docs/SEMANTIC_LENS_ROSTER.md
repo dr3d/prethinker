@@ -96,6 +96,16 @@ state-change reason. Its guardrail is that identity/role questions should not
 be overrun by object-state volume; Larkspur q009 is the active counterexample.
 `custody_ownership_chain_surface` remains narrower still: use it for final
 holder/ownership/custody rows such as q038, not as a general motive lens.
+`official_role_authority_definition_surface` covers who-is questions where a
+title alone is not enough. It asks for the role holder plus source-stated duties
+and authority scope, so the selector can distinguish "this person made rulings"
+from "this is the official role and what it controls."
+The newest selector guards are named by answer surface:
+`superlative_identity_surface_guard`, `official_role_definition_surface_guard`,
+`current_component_state_surface_guard`, `custody_transfer_rationale_guard`,
+and `award_placement_surface_guard`. They close the Larkspur overlay by routing
+age/identity, role-authority, current component, custody why-have, and award
+placement questions to the surface that actually carries the answer.
 
 Uncertainty is a domain language, not a tone. Future harness work should avoid
 collapsing these into a single "not sure" bucket:

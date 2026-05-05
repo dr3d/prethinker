@@ -317,6 +317,25 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
   `40 / 0 / 0` row target, but q009 still needs retained selector evidence or a
   better official-identity acquisition surface before this can become a
   non-oracle selector run.
+- That last Larkspur obstacle is now solved as a row lens. The
+  `official_role_authority_definition_surface` compile scored q009 exact by
+  preserving role authority/duties separately from action examples; globally it
+  is unsafe (`21 / 9 / 10`), so it remains a selector-only surface. The
+  guarded selector over four persisted artifacts - state, old
+  permission/rationale, role-authority, and custody - initially reached `35 /
+  3 / 2`; after reason-named surface guards for superlative identity,
+  official-role definition, current component state, custody-transfer
+  rationale, and award placement, it reaches `40 / 0 / 0` and `40/40`
+  selected-best rows without source prose, answer keys, judge labels, failure
+  labels, or gold KBs in selector input. This is the first full Larkspur
+  selector closure over frozen artifacts.
+- State-lens transfer is now bounded. The same final-state acquisition contract
+  is not a universal story-world fix: Three Moles targeted final-state rows
+  scored `0 / 2 / 7`, Otters scored `1 / 0 / 14`, and Calder's Reach scored
+  `10 / 2 / 8` on a final-status/ownership slice. The useful distinction is
+  now sharper: Larkspur had compact named-device state transitions that the
+  lens could acquire; Otters/Three Moles need richer event-spine/restitution
+  coverage, while Calder needs correction/current-state conflict resolution.
 - Incoming compile repair targets are now generated at
   `tmp/incoming_smoke_summaries/compile_repair_targets.{json,md}`. The current
   scoped-evidence queue is down to four partial rows: `3` scoped source-surface

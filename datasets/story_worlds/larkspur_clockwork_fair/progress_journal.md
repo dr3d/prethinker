@@ -579,3 +579,56 @@ permission/motive and custody are row-level lenses; official identity remains
 its own acquisition problem. The next useful harness move is to make the
 selector replay this overlay honestly, especially q009, rather than broadening
 the compile prompt.
+
+## LCF-015 - Role-Authority Lens and Selector Closure
+
+Date: 2026-05-05
+
+Evidence lane: `selector_calibration_full40`
+
+Mode: q009 role-authority acquisition, full-40 safety check, then non-oracle
+selector replay over four persisted artifacts: state, permission/rationale,
+role-authority, and custody.
+
+Artifacts:
+
+- Role-authority compile:
+  `tmp/story_world_larkspur_acquisition/official_role_authority_micro_20260505/domain_bootstrap_file_20260505T141914545752Z_source_qwen-qwen3-6-35b-a3b.json`
+- Role-authority q009 QA:
+  `tmp/story_world_larkspur_acquisition/official_role_authority_micro_qa_20260505/domain_bootstrap_qa_20260505T141939332800Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Role-authority full-40 QA:
+  `tmp/story_world_larkspur_acquisition/official_role_authority_micro_full40_qa_20260505/domain_bootstrap_qa_20260505T142941190104Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Structural selector:
+  `tmp/story_world_larkspur_acquisition/state_role_permission_custody_structural_selector_20260505.json`
+- Guarded selector before new guards:
+  `tmp/story_world_larkspur_acquisition/state_role_permission_custody_guarded_selector_20260505.json`
+- Guarded selector after new guards:
+  `tmp/story_world_larkspur_acquisition/state_role_permission_custody_guarded_selector_surface_guards_20260505.json`
+
+Result:
+
+```text
+role-authority q009:        1 exact / 0 partial / 0 miss
+role-authority full-40:     21 exact / 9 partial / 10 miss
+four-mode upper bound:      40 exact / 0 partial / 0 miss
+structural selector:        27 exact / 5 partial / 8 miss, 27/40 best
+guarded selector before:    35 exact / 3 partial / 2 miss, 35/40 best
+guarded selector after:     40 exact / 0 partial / 0 miss, 40/40 best
+selector errors:            0
+```
+
+New reason-named selector guards:
+
+- `superlative_identity_surface_guard`
+- `official_role_definition_surface_guard`
+- `current_component_state_surface_guard`
+- `custody_transfer_rationale_guard`
+- `award_placement_surface_guard`
+
+Lesson:
+
+This is the first full Larkspur selector closure over frozen artifacts. The
+important product shape is not a single smarter compile; it is a pegboard of
+named surfaces plus a selector that can route to the right surface without
+seeing source prose, answer keys, judge labels, failure labels, gold KBs, or
+strategy files.

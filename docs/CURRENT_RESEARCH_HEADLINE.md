@@ -442,6 +442,23 @@ testing whether those gains transfer:
   a visible `40 / 0 / 0` row target, but the selector cannot honestly replay it
   until q009 has retained baseline evidence or a better official-identity
   acquisition surface.
+- Larkspur now has the honest replay. A new
+  `official_role_authority_definition_surface` makes q009 exact by acquiring
+  role authority and duties instead of only identity/title/action examples; it
+  is unsafe globally (`21 / 9 / 10`) and therefore stays row-gated. Guarded
+  activation over state, permission/rationale, role-authority, and custody
+  artifacts first reached `35 / 3 / 2`; after adding reason-named selector
+  guards for superlative identity, official-role definition, current component
+  state, custody-transfer rationale, and award placement, it reaches `40 exact
+  / 0 partial / 0 miss`, with `40/40` selected-best rows and `0` selector
+  errors. No source prose, answers, judge labels, failure labels, gold KBs, or
+  strategy files enter selector input.
+- The state lens also has a transfer boundary. Three Moles final-state rows
+  scored `0 / 2 / 7`, Otters final-state/restitution rows scored `1 / 0 / 14`,
+  and Calder's Reach final ownership/status rows scored `10 / 2 / 8`. The
+  lesson is precise: final object-state acquisition works when the source has
+  compact named-device state transitions; it does not replace event-spine,
+  restitution, or longitudinal current-state conflict coverage.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 

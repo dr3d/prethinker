@@ -802,3 +802,37 @@ query surface: evidence filtering can recover answer support already present
 activation surface: selector mostly follows the safer evidence mode, but misses
   one partial protection row
 ```
+
+## Run OTR-016 - Final Object-State Lens Transfer Diagnostic
+
+- Timestamp: `2026-05-05T14:01Z` through `2026-05-05T14:13Z`
+- Evidence lane: `state_lens_transfer`
+- Model: `qwen/qwen3.6-35b-a3b`
+- Mode: Larkspur-derived `final_object_state_transition_surface` compile over
+  Otters, followed by targeted QA on discovery, condition, wheel recovery,
+  restitution, and final-state rows.
+
+### Artifacts
+
+- Compile:
+  `tmp/state_lens_transfer/otters_final_state_20260505/domain_bootstrap_file_20260505T140133338338Z_story_qwen-qwen3-6-35b-a3b.json`
+- Targeted QA:
+  `tmp/state_lens_transfer/otters_final_state_targeted_qa_20260505/domain_bootstrap_qa_20260505T141347016609Z_qa_qwen-qwen3-6-35b-a3b.json`
+
+### Result
+
+```text
+compile:              60 admitted / 4 skipped
+targeted rows:        15
+targeted QA:          1 exact / 0 partial / 14 miss
+failure surfaces:     14 compile-surface gaps
+write proposals:      0
+runtime load errors:  0
+```
+
+### Lesson
+
+Negative transfer. The compact final-state lens is too thin for Otters'
+restoration/restitution ending. The next Otters compile work should keep the
+previous story-lens decomposition plan: ledger, static object-family rows,
+event spine, speech/judgment, causality, and final-state passes.

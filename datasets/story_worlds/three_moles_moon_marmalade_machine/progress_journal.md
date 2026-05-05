@@ -375,3 +375,37 @@ ledger coverage targets -> broader safe surface
 broader safe surface -> better evidence-filter retrieval
 row selector still needs better pre-judge activation signals
 ```
+
+## MMM-008 - Final Object-State Lens Transfer Diagnostic
+
+Date: 2026-05-05
+
+Evidence lane: `state_lens_transfer`
+
+Mode: Larkspur-derived `final_object_state_transition_surface` compile over
+Three Moles, followed by targeted QA on final location, reveal, condition,
+recovery, restitution, and end-state rows.
+
+Artifacts:
+
+- Compile:
+  `tmp/state_lens_transfer/three_moles_final_state_20260505/domain_bootstrap_file_20260505T140237039803Z_source_qwen-qwen3-6-35b-a3b.json`
+- Targeted QA:
+  `tmp/state_lens_transfer/three_moles_final_state_targeted_qa_20260505/domain_bootstrap_qa_20260505T141022223202Z_qa_qwen-qwen3-6-35b-a3b.json`
+
+Result:
+
+```text
+compile:              56 admitted / 51 skipped
+targeted rows:        9
+targeted QA:          0 exact / 2 partial / 7 miss
+failure surfaces:     8 compile-surface gaps, 1 hybrid-join gap
+write proposals:      0
+runtime load errors:  0
+```
+
+Lesson:
+
+Negative transfer. The Larkspur state lens does not recover the Three Moles
+event-spine/restitution ending by itself. Three Moles still needs the broader
+ledger/event-spine surface from MMM-007 rather than a narrow final-state prompt.

@@ -58,3 +58,37 @@ pipeline handles many state-at-time and identity questions without oracle
 material, but the misses still cluster around missing compiled support and a
 few query-surface failures. This should become the main anti-meta-rot story
 fixture for long-range state tracking.
+
+## Run CAL-002 - Final State Lens Transfer Diagnostic
+
+- Timestamp: `2026-05-05T14:03Z` through `2026-05-05T14:15Z`
+- Evidence lane: `state_lens_transfer`
+- Model: `qwen/qwen3.6-35b-a3b`
+- Mode: Larkspur-derived `final_object_state_transition_surface` variant
+  narrowed for final ownership, custody, residence, role, trust/admin, and
+  carried-versus-owned rows, followed by targeted QA.
+
+### Artifacts
+
+- Compile:
+  `tmp/state_lens_transfer/calders_final_state_20260505/domain_bootstrap_file_20260505T140303209218Z_source_qwen-qwen3-6-35b-a3b.json`
+- Targeted QA:
+  `tmp/state_lens_transfer/calders_final_state_targeted_qa_20260505/domain_bootstrap_qa_20260505T141524873700Z_qa_qwen-qwen3-6-35b-a3b.json`
+
+### Result
+
+```text
+compile:              89 admitted / 36 skipped
+targeted rows:        20
+targeted QA:          10 exact / 2 partial / 8 miss
+failure surfaces:     9 compile-surface gaps, 1 hybrid-join gap
+write proposals:      0
+runtime load errors:  0
+```
+
+### Lesson
+
+Mixed transfer. The lens can answer some final ownership, residence, trust, and
+carried-versus-owned questions, but it preserves stale current-state conflicts
+on mayor, Dock 7, Iain's role, and Jonas residence. Calder needs a
+correction/current-state conflict lens, not just final-state extraction.

@@ -814,6 +814,57 @@ def structural_specialized_answer_surface_override(
                     "collector identity question needs direct collector predicate surface rather than broad status/note evidence",
                 )
 
+    if any(marker in question for marker in ["youngest", "oldest"]) and any(
+        marker in question for marker in ["exhibitor", "person", "child", "member"]
+    ):
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if predicates.intersection({"age", "person_age", "person_identity", "registered_age"}):
+                return (
+                    label,
+                    "superlative identity question needs explicit age/identity surface rather than broad role membership rows",
+                )
+
+    if any(marker in question for marker in ["who is ", "who was "]) and any(
+        marker in question for marker in ["warden", "official", "inspector", "authority"]
+    ):
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if predicates.intersection({"person_name", "name", "canonical_person"}) and predicates.intersection(
+                {"role_authority", "role_duty", "ruling_by", "ruling_made_by", "inspected_by", "official_action"}
+            ):
+                return (
+                    label,
+                    "official identity question needs role-authority definition surface rather than action volume or title-only rows",
+                )
+
+    if "what thread" in question and any(marker in question for marker in ["currently", "current", " in the "]):
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if predicates.intersection({"device_state", "current_state", "contained_thread", "component_state"}):
+                return (
+                    label,
+                    "current object-component question needs direct current-state/component surface rather than transition history volume",
+                )
+
+    if "why" in question and "have" in question:
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if predicates.intersection({"custody_transfer", "custody_reason", "loaned_to", "transferred_to"}):
+                return (
+                    label,
+                    "why-have question needs custody-transfer surface rather than adjacent action or object-property rows",
+                )
+
+    if any(marker in question for marker in ["who won", "won first", "won second", "first place", "second place"]):
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if predicates.intersection({"award_given", "awarded", "award_result", "placement_awarded"}):
+                return (
+                    label,
+                    "award placement question needs explicit award-result surface rather than nearby device/person rows",
+                )
+
     if "current operational status" in question:
         for _score, label, quality in scored:
             predicates = set(quality.get("predicate_names", []) or [])
