@@ -865,6 +865,72 @@ def structural_specialized_answer_surface_override(
                     "award placement question needs explicit award-result surface rather than nearby device/person rows",
                 )
 
+    if "reinstated" in question:
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            direct_rows = int(quality.get("direct_rows", 0) or 0)
+            relaxed_rows = int(quality.get("relaxed_rows", 0) or 0)
+            if "holds_role" in predicates and direct_rows > 0 and relaxed_rows == 0 and len(predicates) <= 2:
+                return (
+                    label,
+                    "reinstatement question needs focused role-history surface rather than broad current-role or rule evidence",
+                )
+
+    carry_markers = ["carried", "carry", "carries"]
+    if any(marker in question for marker in carry_markers):
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if "possesses" in predicates:
+                return (
+                    label,
+                    "carry question needs direct possession surface rather than broad title or event evidence",
+                )
+
+    possession_markers = [*carry_markers, "possess", "loan", "owns", "own ", "owned", "inherit"]
+    if any(marker in question for marker in possession_markers):
+        possession_predicates = {"inherits", "owns", "possesses", "transferred_ownership"}
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if len(predicates.intersection(possession_predicates)) >= 2:
+                return (
+                    label,
+                    "possession-versus-ownership question needs inherit/own/possess distinction surface rather than broad event/rule evidence",
+                )
+
+    if "legal title" in question or "stronger title" in question:
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if "claimed_by" in predicates or predicates.intersection({"transferred_ownership", "trust_administered_by"}):
+                return (
+                    label,
+                    "legal-title contest question needs claim/default/transfer surface rather than static ownership rows",
+                )
+
+    if "contract" in question and any(marker in question for marker in ["survive", "void", "valid"]):
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if predicates.intersection({"authority_source", "acting_role_holder"}):
+                return (
+                    label,
+                    "contract-validity question needs explicit acting-authority surface rather than generic rule evidence",
+                )
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if "rule_condition" in predicates:
+                return (
+                    label,
+                    "contract-validity question needs authority-source surface rather than unrelated ownership or entity rows",
+                )
+
+    if "guardianship" in question and any(marker in question for marker in ["invalid", "valid", "retroactive"]):
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if "resides_at" in predicates and predicates.intersection({"charter_clause", "rule_condition"}):
+                return (
+                    label,
+                    "guardianship-validity question needs residence/resumption condition surface rather than bare guardianship status",
+                )
+
     if "current operational status" in question:
         for _score, label, quality in scored:
             predicates = set(quality.get("predicate_names", []) or [])

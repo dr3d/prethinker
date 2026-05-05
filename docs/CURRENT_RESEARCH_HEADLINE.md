@@ -459,6 +459,13 @@ testing whether those gains transfer:
   lesson is precise: final object-state acquisition works when the source has
   compact named-device state transitions; it does not replace event-spine,
   restitution, or longitudinal current-state conflict coverage.
+- Calder's follow-up turns that boundary into a selector win. Current-state
+  conflict alone scored `6 / 2 / 12`, possession/inheritance scored `10 / 1 /
+  9`, and legal-title/default scored `6 / 2 / 12`; together with final-state
+  they expose a `14 / 3 / 3` upper bound. Refined answer-surface guards let the
+  guarded selector match it with `20/20` selected-best rows and `0` selector
+  errors, without source prose, answers, judge labels, failure labels, gold KBs,
+  or strategy files in selector input.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 

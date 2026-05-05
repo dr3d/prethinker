@@ -92,3 +92,64 @@ Mixed transfer. The lens can answer some final ownership, residence, trust, and
 carried-versus-owned questions, but it preserves stale current-state conflicts
 on mayor, Dock 7, Iain's role, and Jonas residence. Calder needs a
 correction/current-state conflict lens, not just final-state extraction.
+
+## Run CAL-003 - Current-State Conflict Overlay
+
+- Timestamp: `2026-05-05T14:48Z` through `2026-05-05T15:15Z`
+- Evidence lane: `state_conflict_selector_overlay`
+- Model: `qwen/qwen3.6-35b-a3b`
+- Mode: four narrow source-bound surfaces over the same 20-row final/current
+  state slice: final-state, current-state conflict, possession/inheritance, and
+  legal-title/default.
+
+### Artifacts
+
+- Current-state conflict compile:
+  `tmp/state_conflict_lens/calders_current_conflict_20260505/domain_bootstrap_file_20260505T144843688670Z_source_qwen-qwen3-6-35b-a3b.json`
+- Current-state conflict QA:
+  `tmp/state_conflict_lens/calders_current_conflict_targeted_qa_20260505/domain_bootstrap_qa_20260505T145330261788Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Possession/inheritance compile:
+  `tmp/state_conflict_lens/calders_possession_inheritance_20260505/domain_bootstrap_file_20260505T150113635745Z_source_qwen-qwen3-6-35b-a3b.json`
+- Possession/inheritance QA:
+  `tmp/state_conflict_lens/calders_possession_inheritance_targeted_qa_20260505/domain_bootstrap_qa_20260505T151010205938Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Legal-title/default compile:
+  `tmp/state_conflict_lens/calders_legal_title_default_20260505/domain_bootstrap_file_20260505T150055572000Z_source_qwen-qwen3-6-35b-a3b.json`
+- Legal-title/default QA:
+  `tmp/state_conflict_lens/calders_legal_title_default_targeted_qa_20260505/domain_bootstrap_qa_20260505T150933998374Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Four-surface comparison:
+  `tmp/state_conflict_lens/calders_four_surface_comparison_20260505.md`
+- Final guarded selector:
+  `tmp/state_conflict_lens/calders_four_surface_guarded_selector_refined_guards_20260505.json`
+
+### Result
+
+```text
+final-state surface:             10 exact / 2 partial / 8 miss
+current-conflict surface:         6 exact / 2 partial / 12 miss
+possession/inheritance surface:  10 exact / 1 partial / 9 miss
+legal-title/default surface:      6 exact / 2 partial / 12 miss
+four-surface upper bound:        14 exact / 3 partial / 3 miss
+guarded selector before guards:   9 exact / 2 partial / 9 miss
+guarded selector after guards:   14 exact / 3 partial / 3 miss
+selected-best rows:              20/20
+selector errors:                 0
+```
+
+New reason-named selector guards:
+
+- `role_reinstatement_history_guard`
+- `carry_possession_surface_guard`
+- `possession_ownership_distinction_guard`
+- `legal_title_transfer_guard`
+- `contract_authority_surface_guard`
+- `guardianship_resumption_condition_guard`
+
+### Lesson
+
+Calder confirms the Larkspur pattern on a very different long-state ledger: a
+single compact lens is not the product. The useful shape is persisted semantic
+surfaces plus row-level routing. Current-state conflict alone was weaker than
+final-state extraction, but it supplied critical reinstatement/title rows.
+Possession/inheritance supplied carry-versus-own and non-retroactive inheritance
+rows. The selector reached the artifact upper bound only after the guards were
+named by answer surface rather than by fixture row.

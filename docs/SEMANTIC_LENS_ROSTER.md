@@ -106,6 +106,16 @@ The newest selector guards are named by answer surface:
 and `award_placement_surface_guard`. They close the Larkspur overlay by routing
 age/identity, role-authority, current component, custody why-have, and award
 placement questions to the surface that actually carries the answer.
+Calder adds the longitudinal conflict family:
+`current_state_correction_conflict_surface`,
+`possession_ownership_inheritance_distinction_surface`, and
+`legal_title_default_transfer_surface`. Their guards are
+`role_reinstatement_history_guard`, `carry_possession_surface_guard`,
+`possession_ownership_distinction_guard`, `legal_title_transfer_guard`,
+`contract_authority_surface_guard`, and
+`guardianship_resumption_condition_guard`. These exist to separate stale
+current-state rows, possession versus ownership, trust/default title, contract
+authority, and non-retroactive guardianship effects.
 
 Uncertainty is a domain language, not a tone. Future harness work should avoid
 collapsing these into a single "not sure" bucket:

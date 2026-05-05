@@ -189,6 +189,14 @@ Transfer also stays honest: the same state lens scored `0 / 2 / 7` on Three
 Moles final-state rows, `1 / 0 / 14` on Otters final-state/restitution rows,
 and `10 / 2 / 8` on Calder's Reach final ownership/status rows. Larkspur's
 state gain transfers as a method, not as a universal prompt.
+Calder's follow-up confirms the method: current-state conflict, possession /
+inheritance, and legal-title/default surfaces are each unsafe as broad
+replacements, but the four-surface overlay reaches `14 / 3 / 3` over the
+20-row final/current-state slice, up from final-state alone at `10 / 2 / 8`.
+The guarded selector now matches that upper bound with `20/20` selected-best
+rows after role-reinstatement, carry/possession, legal-title, contract-authority,
+and guardianship-resumption guards. Treat this as evidence for artifact-first
+surface routing, not permission to widen compile prompts.
 
 Activation update: query-mode selection now has deterministic structural and
 hybrid structural+LLM controls. The hybrid path saves LLM calls on confident

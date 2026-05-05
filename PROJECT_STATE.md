@@ -336,6 +336,15 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
   now sharper: Larkspur had compact named-device state transitions that the
   lens could acquire; Otters/Three Moles need richer event-spine/restitution
   coverage, while Calder needs correction/current-state conflict resolution.
+- Calder now validates the multi-surface overlay shape on a long-state ledger.
+  Current-state conflict alone was weaker (`6 / 2 / 12`), possession/inheritance
+  tied final-state exact count (`10 / 1 / 9`), and legal-title/default was
+  weak globally (`6 / 2 / 12`), but the four persisted artifacts expose a
+  `14 / 3 / 3` upper bound on the same 20-row final/current-state slice.
+  Refined reason-named guards for role reinstatement, carry/possession,
+  possession-vs-ownership, legal title transfer, contract authority, and
+  guardianship resumption let the guarded selector reach that upper bound with
+  `20/20` selected-best rows and `0` selector errors.
 - Incoming compile repair targets are now generated at
   `tmp/incoming_smoke_summaries/compile_repair_targets.{json,md}`. The current
   scoped-evidence queue is down to four partial rows: `3` scoped source-surface
