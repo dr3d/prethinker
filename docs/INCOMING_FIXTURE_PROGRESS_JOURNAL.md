@@ -852,6 +852,7 @@ structural selector:                 95 exact / 19 partial / 9 miss
 guarded activation before op guard:  99 exact / 17 partial / 7 miss
 guarded activation after op guard:  101 exact / 17 partial / 5 miss
 baseline-readiness guard selector:  106 exact / 12 partial / 5 miss
+question-act guard replay:          106 exact / 14 partial / 3 miss
 ```
 
 Discovery: the lens reduces misses for status, correction, threshold,
@@ -873,6 +874,16 @@ broad or relaxed-heavy. It moved the no-oracle selector from `101 / 17 / 5` to
 from `112/123` to `117/123`. This is a harness-control gain over frozen
 artifacts, not a new compile.
 
+Question-act follow-up: `selector_question_act_guard` added two narrow
+deterministic overrides. Request-filing timeliness now prefers
+request/reinstatement/threshold evidence over completion-window evidence, and
+commit-readiness now prefers unresolved-process evidence over a bare status
+value. These guards fired on Ashgrove q008 and Veridia q019, turning both
+misses into exacts. The full replay held exact count flat because unrelated
+Heronvale activation rows varied downward, but hard misses dropped from `5` to
+`3`. Treat the durable lesson as a named question-act guard plus a new warning:
+LLM selector replay variance must be separated from deterministic guard deltas.
+
 Artifacts:
 
 - `tmp/story_world_operational_record_variant_summaries/scorecard.md`
@@ -880,3 +891,4 @@ Artifacts:
 - `tmp/story_world_operational_record_variant_summaries/row_gated_scorecard_plan.md`
 - `tmp/story_world_operational_record_selector/guarded_activation_operational_guard_rollup.json`
 - `tmp/story_world_operational_record_selector_v3/scorecard.md`
+- `tmp/story_world_operational_record_selector_v4/scorecard.md`

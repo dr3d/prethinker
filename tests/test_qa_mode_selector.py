@@ -962,6 +962,158 @@ def test_hybrid_selector_keeps_baseline_for_hold_readiness_status_support() -> N
     assert "counterfactual or hold/readiness question" in selected["baseline_guard_reason"]
 
 
+def test_hybrid_selector_prefers_request_surface_for_filing_timeliness() -> None:
+    row = {
+        "id": "q004l",
+        "question": "Was the MEP inspection request filed on time after reinstatement?",
+        "modes": [
+            {
+                "mode": "baseline",
+                "query_evidence": {
+                    "executed_results": [
+                        {
+                            "status": "success",
+                            "num_rows": 2,
+                            "predicate": "inspection_completed_on",
+                            "was_relaxed_fallback": False,
+                        },
+                        {
+                            "status": "success",
+                            "num_rows": 2,
+                            "predicate": "business_days_between",
+                            "was_relaxed_fallback": False,
+                        },
+                        {
+                            "status": "success",
+                            "num_rows": 1,
+                            "predicate": "deadline_requirement",
+                            "was_relaxed_fallback": False,
+                        },
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+            {
+                "mode": "operational_record",
+                "query_evidence": {
+                    "executed_results": [
+                        {
+                            "status": "success",
+                            "num_rows": 2,
+                            "predicate": "permit_reinstated",
+                            "was_relaxed_fallback": False,
+                        },
+                        {
+                            "status": "success",
+                            "num_rows": 2,
+                            "predicate": "inspection_requested",
+                            "was_relaxed_fallback": False,
+                        },
+                        {
+                            "status": "success",
+                            "num_rows": 1,
+                            "predicate": "rule_threshold_met",
+                            "was_relaxed_fallback": False,
+                        },
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+        ],
+    }
+
+    fallback_calls = 0
+
+    def fallback_selector(**_kwargs):
+        nonlocal fallback_calls
+        fallback_calls += 1
+        return {"selected_mode": "baseline"}
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["baseline", "operational_record"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=fallback_selector,
+    )
+
+    assert fallback_calls == 0
+    assert selected["selected_mode"] == "operational_record"
+    assert "request/reinstatement threshold evidence" in selected["specialized_guard_reason"]
+
+
+def test_hybrid_selector_prefers_process_surface_for_commit_readiness() -> None:
+    row = {
+        "id": "q004m",
+        "question": "After Turn 16 but before Turn 23, should the system commit the lab exhaust fan recertification status?",
+        "modes": [
+            {
+                "mode": "baseline",
+                "query_evidence": {
+                    "executed_results": [
+                        {
+                            "status": "success",
+                            "num_rows": 1,
+                            "predicate": "certification_status",
+                            "was_relaxed_fallback": False,
+                        },
+                        {
+                            "status": "success",
+                            "num_rows": 1,
+                            "predicate": "event_occurred",
+                            "was_relaxed_fallback": False,
+                        },
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+            {
+                "mode": "operational_record",
+                "query_evidence": {
+                    "executed_results": [
+                        {
+                            "status": "success",
+                            "num_rows": 1,
+                            "predicate": "requires_investigation",
+                            "was_relaxed_fallback": False,
+                        },
+                        {
+                            "status": "success",
+                            "num_rows": 4,
+                            "predicate": "pending_action",
+                            "was_relaxed_fallback": True,
+                        },
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+        ],
+    }
+
+    fallback_calls = 0
+
+    def fallback_selector(**_kwargs):
+        nonlocal fallback_calls
+        fallback_calls += 1
+        return {"selected_mode": "baseline"}
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["baseline", "operational_record"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=fallback_selector,
+    )
+
+    assert fallback_calls == 0
+    assert selected["selected_mode"] == "operational_record"
+    assert "unresolved process evidence" in selected["specialized_guard_reason"]
+
+
 def test_activation_prompt_mentions_requirement_detail_completeness() -> None:
     prompt = selector_system_prompt("activation")
 

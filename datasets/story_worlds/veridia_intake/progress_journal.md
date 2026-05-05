@@ -124,3 +124,29 @@ The hold-pending row now stays with baseline when baseline is the structural top
 and carries direct event-status/pending-action support. The unresolved row is
 commit-readiness: Prethinker still needs a sharper distinction between "there
 is a certified status" and "the process should commit it now."
+
+## VI-004 - Question-Act Selector Guard
+
+Date: 2026-05-05
+
+Evidence lane: `selector_question_act_guard`
+
+Artifacts:
+
+- Selector: `tmp/story_world_operational_record_selector_v4/veridia_intake-guarded_activation_question_act_guard_selector.md`
+- Batch scorecard: `tmp/story_world_operational_record_selector_v4/scorecard.md`
+
+Result:
+
+```text
+previous readiness selector: 17 exact / 5 partial / 1 miss; selected-best 22 / 23
+question-act selector:       18 exact / 5 partial / 0 miss; selected-best 23 / 23
+delta:                       +1 exact / 0 partial / -1 miss
+```
+
+Lesson:
+
+The commit-readiness guard closes the remaining Veridia selector miss. A
+question asking whether the system should commit a status needs unresolved
+process evidence such as investigation or pending action, not only the bare
+status value already present in the KB.

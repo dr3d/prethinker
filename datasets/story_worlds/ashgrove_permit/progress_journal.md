@@ -130,3 +130,30 @@ Ashgrove remains the permit-deadline selector pressure case. The new baseline
 readiness guard does not move its score; the remaining misses are a deadline
 filing-vs-completion confusion and a cause/rationale row where structural
 volume still overvalues the operational lens.
+
+## AP-004 - Question-Act Selector Guard
+
+Date: 2026-05-05
+
+Evidence lane: `selector_question_act_guard`
+
+Artifacts:
+
+- Selector: `tmp/story_world_operational_record_selector_v4/ashgrove_permit-guarded_activation_question_act_guard_selector.md`
+- Batch scorecard: `tmp/story_world_operational_record_selector_v4/scorecard.md`
+
+Result:
+
+```text
+previous readiness selector: 21 exact / 3 partial / 1 miss; selected-best 23 / 25
+question-act selector:       22 exact / 3 partial / 0 miss; selected-best 24 / 25
+delta:                       +1 exact / 0 partial / -1 miss
+```
+
+Lesson:
+
+The request-filing guard fixes the AP-003 tender row: a question asking whether
+an inspection request was filed on time after reinstatement needs request,
+reinstatement, and threshold evidence, not completion-window evidence. The
+remaining selector miss is cause/rationale: structural row volume still prefers
+the operational lens even when baseline has the explicit inspector-note cause.

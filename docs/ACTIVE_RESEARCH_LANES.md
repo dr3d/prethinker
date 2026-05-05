@@ -133,10 +133,13 @@ selector now has an operational/status uncertainty guard and reaches
 The baseline-readiness guard then protects direct baseline application/status,
 counterfactual rule, and hold/readiness support from broad or relaxed-heavy
 candidate surfaces, moving the same frozen-artifact selector rollup to
-`106 / 12 / 5` with `117/123` selected-best rows and no new misses. Next work
-is commit-readiness, filing-vs-completion deadline selection, community-priority
-entity mapping, and cause/rationale rows rather than more broad operational
-compile prompting.
+`106 / 12 / 5` with `117/123` selected-best rows and no new misses. The
+question-act guard then fixes the two cleanest remaining hard misses:
+request-filing timeliness and commit-readiness. In full replay, hard misses
+drop from `5` to `3` while exact count stays flat because unrelated Heronvale
+activation rows vary downward. Next work is community-priority entity mapping,
+cause/rationale rows, and selector variance control rather than more broad
+operational compile prompting.
 
 Activation update: query-mode selection now has deterministic structural and
 hybrid structural+LLM controls. The hybrid path saves LLM calls on confident

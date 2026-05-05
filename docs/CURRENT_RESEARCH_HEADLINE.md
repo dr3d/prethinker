@@ -396,8 +396,11 @@ testing whether those gains transfer:
   direct baseline application/status, counterfactual rule, and hold/readiness
   support when a competing lens is broad or relaxed-heavy, lifting the rollup
   to `106 / 12 / 5` with `117/123` selected-best rows and no new misses. The
-  remaining frontier is commit-readiness, filing-vs-completion deadlines,
-  community-priority entity mapping, and cause/rationale rows.
+  question-act guard then fixes request-filing timeliness and commit-readiness:
+  Ashgrove q008 and Veridia q019 both move from miss to exact. The full replay
+  is `106 / 14 / 3`, so exact count stays flat under LLM selector variance but
+  hard misses drop by two. The remaining frontier is community-priority entity
+  mapping, cause/rationale rows, and variance control in LLM selector replay.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 

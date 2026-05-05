@@ -60,6 +60,10 @@ row-level candidate. `selector_baseline_readiness_guard` is the companion
 restraint: if baseline has direct application/status, counterfactual rule, or
 hold-readiness support and the competing surface is broad or relaxed-heavy, the
 instrument keeps baseline rather than asking activation to admire extra rows.
+`selector_question_act_guard` adds the other side of that restraint: if the
+question asks about request filing, use request/reinstatement/threshold surface
+rather than completion windows; if it asks whether to commit a status, use
+pending/investigation process surface rather than a bare status value.
 
 Uncertainty is a domain language, not a tone. Future harness work should avoid
 collapsing these into a single "not sure" bucket:
