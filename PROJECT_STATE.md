@@ -72,6 +72,17 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
   `semantic_progress_assessment_v1`; current selector-governor failures produce
   `zombie_risk=medium` and
   `continue_only_with_named_expected_contribution`.
+- Rule-activation selection has its first cleaner surface-guard replay across
+  the same Sable/Avalon frozen artifacts. Reason-named guards now cover
+  deferment rationale, component/rule-condition questions, recusal rationale,
+  counterfactual recusal outcome, three-year window merit, amendment recall,
+  rejection cause, and hypothetical reserve-status rows. Avalon reaches its
+  upper bound at `32 exact / 7 partial / 1 miss` with `40/40` selected-best;
+  Sable reaches its upper bound at `26 / 7 / 7` with `40/40` selected-best.
+  The combined governor audit improves from `7` direct selector failures to
+  `1`, with all `15/15` nonbaseline rescue targets and `7/7` baseline-exact
+  protection targets passing. The remaining failure is a volatile
+  prefer-baseline target, not a selected miss.
 - Semantic struggle detection is now a named structural guardrail in
   `src/semantic_struggle.py`. It turns pass contribution, duplicate, skip-heavy,
   stale-tail, and selector-governor telemetry into a stop/continue

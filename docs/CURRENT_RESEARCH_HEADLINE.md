@@ -602,6 +602,12 @@ The next work should stay on the sharp edges:
    support, mapper gates, and promotion trials decide usefulness, not the mere
    presence of a Prolog-looking clause. The next frontier is joining
    intermediate conditions without collapsing provenance or overclaiming state.
+   The latest frozen-artifact activation replay adds row-level selector
+   restraint: Avalon reaches `32 exact / 7 partial / 1 miss`, Sable reaches
+   `26 / 7 / 7`, both at `40/40` selected-best rows. The activation-governor
+   audit across the 80 rows now has `15/15` nonbaseline rescues protected,
+   `7/7` baseline-exact protections preserved, and only one remaining volatile
+   prefer-baseline failure.
 2. **Rule probe discipline.** Recent preflight runs show that a rule can be
    body-supported but fail under the wrong scope atom, can become dormant by
    using lowercase placeholders such as `warden` and `repair_order`, or can look

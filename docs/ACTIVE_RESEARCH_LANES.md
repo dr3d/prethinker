@@ -1,6 +1,6 @@
 # Active Research Lanes
 
-Last updated: 2026-05-04
+Last updated: 2026-05-05
 
 This page is the short operational map for choosing the next few hours of work.
 It is intentionally stricter than a brainstorm: new ideas belong here only if
@@ -105,6 +105,16 @@ powerless `coverage_targets`, but an anti-meta-rot replay on Oxalis regressed
 when the partial-skeleton recovery instruction was global. Keep that recovery
 scoped to ledger-backed narrative passes until another unlike fixture shows
 positive transfer.
+
+Rule-activation update: Sable/Avalon now have a cleaner frozen-artifact
+selector replay for promoted rule surfaces. The guarded selector reaches the
+available upper bound on both fixtures: Avalon `32 / 7 / 1`, Sable `26 / 7 / 7`,
+and `80/80` selected-best rows. The cross-fixture activation governor improves
+from `7` failures under the older direct selector to `1` failure, while all
+nonbaseline rescue and baseline-exact protection targets pass. The remaining
+work is not more fixture-local selector polish; it is source/rule evidence
+acquisition for the rows whose upper bound is still partial or miss, plus
+transfer checks on unlike rule fixtures.
 
 Larkspur update: the URL-fixed permission/rationale acquisition lens is a
 strong row-gated source-surface variant, not a global compile. It scores

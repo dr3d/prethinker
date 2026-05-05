@@ -830,3 +830,45 @@ but it is not a replacement for semantic row-level selection. Avalon is the
 counterexample: row counts and relaxed/direct evidence metadata are not enough
 to choose the rule-union mode when the relevant difference is a narrow
 multi-condition eligibility interpretation.
+
+## Run AG-016 - Rule Activation Surface-Guard Replay
+
+- Timestamp: `2026-05-05T15:32Z`
+- Evidence lane: `diagnostic_replay`
+- Mode: guarded activation selector over frozen baseline, postgate-rule,
+  Rule 8 union, and focused-context QA artifacts. The selector did not read
+  source prose, answer keys, judge labels, failure labels, gold KBs, or
+  strategy files.
+
+### Local Artifacts
+
+- Selector:
+  `tmp/rule_activation_next/avalon_rule_activation_guarded_surface_guards_v3_20260505.json`
+- Selector summary:
+  `tmp/rule_activation_next/avalon_rule_activation_guarded_surface_guards_v3_20260505.md`
+- Cross-fixture governor rollup:
+  `tmp/rule_activation_next/rule-activation-surface-guard-v3-recheck.json`
+
+### Result
+
+```text
+available upper bound: 32 exact / 7 partial / 1 miss
+selected result:       32 exact / 7 partial / 1 miss
+selected best rows:    40/40
+selector errors:       0
+```
+
+### Lesson
+
+The remaining Avalon activation problem was not "more activation." It was
+answer-surface routing for promoted rule evidence. Two named guards carried the
+last useful movement:
+
+```text
+window-merit questions need explicit rule-condition plus prior-history surface
+counterfactual-recusal outcome questions need both procedure path and eligibility surface
+```
+
+This closes Avalon against the frozen artifacts while preserving the core
+boundary: row-level activation can choose among persisted evidence modes, but
+it cannot manufacture source surface that the compile did not admit.

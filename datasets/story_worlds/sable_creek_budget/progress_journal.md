@@ -478,3 +478,38 @@ re-proving them. But a final-status rule still needs explicit downstream rule
 language, not merely an instance outcome plus an upstream condition. That is a
 safer failure than overclaiming passage from a partial rule branch.
 
+## Run SC-009 - Rule Activation Surface-Guard Replay
+
+- Timestamp: `2026-05-05T15:32Z`
+- Evidence lane: `diagnostic_replay`
+- Mode: guarded activation selector over frozen baseline, threshold-rule, and
+  threshold+vote-rule QA artifacts. The selector did not read source prose,
+  answer keys, judge labels, failure labels, gold KBs, or strategy files.
+
+### Local Artifacts
+
+- Selector:
+  `tmp/rule_activation_next/sable_rule_activation_guarded_surface_guards_v2_20260505.json`
+- Selector summary:
+  `tmp/rule_activation_next/sable_rule_activation_guarded_surface_guards_v2_20260505.md`
+- Cross-fixture governor rollup:
+  `tmp/rule_activation_next/rule-activation-surface-guard-v3-recheck.json`
+
+### Result
+
+```text
+available upper bound: 26 exact / 7 partial / 7 miss
+selected result:       26 exact / 7 partial / 7 miss
+selected best rows:    40/40
+selector errors:       0
+```
+
+### Lesson
+
+Sable's last selector miss was an amendment-recall row whose question named
+`BA-2026-08` rather than saying "amendment." The guard now treats recall plus a
+budget-amendment identifier as the same semantic act and prefers
+recall-authority evidence with reserve/emergency context over a legal-opinion
+surface. This is a guardrail against a known activation trap, not a new rule
+claim.
+

@@ -124,6 +124,23 @@ than replacing it: `universal_scope_enumeration_guard`,
 sets, denial rationales with threshold quantities, explicit negative lot checks,
 and reclassification-deadline counterfactuals to evidence surfaces that carry
 the relevant access pattern.
+Rule activation now has a parallel family for promoted rule surfaces:
+`deferment_rationale_interpretation_guard`,
+`component_rule_condition_surface_guard`,
+`recusal_rationale_rule_surface_guard`,
+`post_recusal_vote_surface_guard`,
+`counterfactual_recusal_outcome_guard`,
+`window_merit_rule_condition_guard`,
+`amendment_recall_authority_surface_guard`,
+`rejection_cause_correction_surface_guard`, and
+`hypothetical_reserve_status_arithmetic_guard`. These guards route questions
+to the surface that carries the reason for activation: interpreted decision
+support, project-category/rule-condition pairs, recusal procedure, combined
+procedure-plus-eligibility counterfactuals, explicit window conditions,
+recall-authority evidence, correction/clarification records, or reserve
+arithmetic inputs. The Sable/Avalon replay reaches both fixtures' frozen
+upper bounds without source prose, answer keys, judge labels, failure labels,
+gold KBs, or strategy files in selector input.
 
 Uncertainty is a domain language, not a tone. Future harness work should avoid
 collapsing these into a single "not sure" bucket:

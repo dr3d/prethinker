@@ -968,6 +968,109 @@ def structural_specialized_answer_surface_override(
                     "counterfactual reclassification deadline question needs classification-bound deadline surface",
                 )
 
+    if "why" in question and "deferred" in question:
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if predicates.issuperset({"vote_result", "recusal_member", "eligibility_determination", "interpretation_text"}):
+                return (
+                    label,
+                    "deferment-rationale question needs interpreted decision support rather than rule text alone",
+                )
+
+    if "component" in question and "problem" in question:
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if predicates.issuperset({"project_category", "rule_condition"}):
+                return (
+                    label,
+                    "component-problem question needs project-category plus rule-condition surface",
+                )
+
+    if (
+        "if " in question
+        and "what would have been different" in question
+        and ("recuse" in question or "recusal" in question)
+    ):
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if predicates.issuperset(
+                {"recusal_member", "quorum_status", "vote_result", "eligibility_determination"}
+            ):
+                return (
+                    label,
+                    "counterfactual-recusal outcome question needs both procedure path and eligibility surface",
+                )
+
+    if "recuse" in question or "recusal" in question:
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if predicates.issuperset({"recusal_member", "vote_result", "rule_text"}) and "eligibility_determination" not in predicates:
+                return (
+                    label,
+                    "recusal-rationale question needs recusal rule surface rather than eligibility determination surface",
+                )
+
+    if "couldn" in question and "vote" in question and "recusal" in question:
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if predicates.issuperset({"recusal_member", "vote_result", "rule_text"}) and "quorum_status" not in predicates:
+                return (
+                    label,
+                    "post-recusal vote question needs recusal/vote/rule surface without misleading quorum-status volume",
+                )
+
+    if "3-year window" in question or "three-year window" in question:
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if predicates.issuperset({"prior_grant_history", "interpretation_text", "rule_condition"}):
+                return (
+                    label,
+                    "window-merit question needs explicit rule-condition plus prior-history surface",
+                )
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if predicates.issuperset({"prior_grant_history", "interpretation_text"}) and predicates.intersection(
+                {"rule_interpreted", "rule_condition"}
+            ) and "applicant_id" not in predicates:
+                return (
+                    label,
+                    "window-merit question needs prior-history plus interpretation surface",
+                )
+
+    if "recall" in question and ("amendment" in question or "ba-" in question):
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if predicates.issuperset({"charter_rule", "voting_threshold"}) and predicates.intersection(
+                {"reserve_balance", "emergency_declared"}
+            ) and "legal_opinion" not in predicates:
+                return (
+                    label,
+                    "amendment-recall question needs recall-authority surface rather than threshold-only legal-opinion rows",
+                )
+
+    if "rejected on the merits" in question or "because of absences" in question:
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if predicates.intersection({"correction_to_record", "clarification_of_record"}) and "derived_status" not in predicates:
+                return (
+                    label,
+                    "rejection-cause question needs correction/clarification surface rather than derived status alone",
+                )
+
+    if "if " in question and "reserve status" in question:
+        if baseline_predicates.issuperset({"reserve_balance", "minimum_reserve_policy", "expenditure_authorized"}):
+            return (
+                baseline_label,
+                "hypothetical reserve-status question keeps baseline arithmetic inputs over derived rule status",
+            )
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if predicates.issuperset({"reserve_balance", "minimum_reserve_policy", "expenditure_authorized"}) and "derived_status" not in predicates:
+                return (
+                    label,
+                    "hypothetical reserve-status question needs baseline arithmetic inputs rather than derived rule status",
+                )
+
     if "guardianship" in question and any(marker in question for marker in ["invalid", "valid", "retroactive"]):
         for _score, label, quality in scored:
             predicates = set(quality.get("predicate_names", []) or [])
