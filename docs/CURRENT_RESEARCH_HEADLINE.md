@@ -466,6 +466,11 @@ testing whether those gains transfer:
   guarded selector match it with `20/20` selected-best rows and `0` selector
   errors, without source prose, answers, judge labels, failure labels, gold KBs,
   or strategy files in selector input.
+- Anti-overtune replay is clean so far. Rerunning Larkspur, Fenmore, Ashgrove,
+  Greywell, Heronvale, and Veridia frozen selector artifacts after the Calder
+  guards landed gives `153 / 10 / 0` over `163` rows, matching each available
+  upper bound with `163/163` selected-best rows. One Ashgrove attempt exposed
+  transient LM Studio HTTP 500 fallback variance and recovered on rerun.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 

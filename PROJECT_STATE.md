@@ -345,6 +345,15 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
   possession-vs-ownership, legal title transfer, contract authority, and
   guardianship resumption let the guarded selector reach that upper bound with
   `20/20` selected-best rows and `0` selector errors.
+- The new selector guards have an anti-overtune replay: Larkspur state overlay,
+  Fenmore rationale/contrast, and the Ashgrove/Greywell/Heronvale/Veridia
+  operational-record overlays were rerun against frozen artifacts after the
+  Calder guards landed. The clean replay covers `163` rows and matches each
+  fixture's available upper bound: `153 exact / 10 partial / 0 miss`,
+  `163/163` selected-best rows, and `0` selector errors. An initial Ashgrove
+  run exposed a transient LM Studio HTTP 500 fallback on q005; rerun recovered
+  the prior upper-bound result, so record this as orchestration variance rather
+  than a semantic regression.
 - Incoming compile repair targets are now generated at
   `tmp/incoming_smoke_summaries/compile_repair_targets.{json,md}`. The current
   scoped-evidence queue is down to four partial rows: `3` scoped source-surface

@@ -197,6 +197,13 @@ The guarded selector now matches that upper bound with `20/20` selected-best
 rows after role-reinstatement, carry/possession, legal-title, contract-authority,
 and guardianship-resumption guards. Treat this as evidence for artifact-first
 surface routing, not permission to widen compile prompts.
+Anti-overtune replay is currently clean: after the Calder guards landed,
+Larkspur, Fenmore, Ashgrove, Greywell, Heronvale, and Veridia were rerun against
+their frozen selector artifacts. The clean replay covers `163` rows and reaches
+`153 / 10 / 0`, matching each fixture's available upper bound with `163/163`
+selected-best rows. One initial Ashgrove pass hit transient LM Studio HTTP 500
+fallbacks and recovered on rerun; keep recording selector/orchestration
+variance separately from semantic regressions.
 
 Activation update: query-mode selection now has deterministic structural and
 hybrid structural+LLM controls. The hybrid path saves LLM calls on confident
