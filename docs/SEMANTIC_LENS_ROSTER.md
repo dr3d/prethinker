@@ -141,6 +141,14 @@ recall-authority evidence, correction/clarification records, or reserve
 arithmetic inputs. The Sable/Avalon replay reaches both fixtures' frozen
 upper bounds without source prose, answer keys, judge labels, failure labels,
 gold KBs, or strategy files in selector input.
+The latest object/state/custody replay is intentionally negative: a combined
+object-state-custody surface blurred too many rows on Fenmore and Larkspur.
+The harness gain was instead a narrower selector distinction:
+`deaccession_yet_status_surface_guard` routes "has X been deaccessioned yet?"
+questions to compact scheduled/not-formally-completed status evidence instead
+of broad lot-history volume. This keeps deaccession-yet status separate from
+conservation rationale, operational thresholds, final object state, and custody
+roster evidence.
 
 Uncertainty is a domain language, not a tone. Future harness work should avoid
 collapsing these into a single "not sure" bucket:
@@ -182,7 +190,7 @@ Companion inventory:
 [Selector Guard Family Rollup](https://github.com/dr3d/prethinker/blob/main/docs/SELECTOR_GUARD_FAMILY_ROLLUP.md) is generated
 from `scripts/select_qa_mode_without_oracle.py` and tracks whether many
 individual selector guards are collapsing into a small number of semantic
-families. The current rollup has `50` guard return sites, `49` unique guard
+families. The current rollup has `51` guard return sites, `50` unique guard
 reasons, `7` families, and `0` unclassified reasons.
 
 [Cross-Fixture Repair Slices](https://github.com/dr3d/prethinker/blob/main/docs/CROSS_FIXTURE_REPAIR_SLICES.md) is generated

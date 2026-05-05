@@ -614,6 +614,12 @@ The next work should stay on the sharp edges:
    regressions; Heronvale improved its cold baseline but regressed one exact row
    and remains better served by row-gated selection. This is a transfer
    candidate, not a global prompt promotion.
+   The next repair-slice run tested a combined object/state/custody surface on
+   Fenmore and Larkspur and rejected it as a global compile. Its value was a
+   selector lesson instead: Fenmore now reaches the `25 / 0 / 0` frozen-artifact
+   upper bound after adding a deaccession-yet status guard, while Larkspur
+   confirms that final state, custody roster, motive, role authority, and award
+   results must remain separate surfaces.
 2. **Rule probe discipline.** Recent preflight runs show that a rule can be
    body-supported but fail under the wrong scope atom, can become dormant by
    using lowercase placeholders such as `warden` and `repair_order`, or can look

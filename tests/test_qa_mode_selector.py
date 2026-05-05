@@ -1563,6 +1563,65 @@ def test_hybrid_selector_prefers_pending_status_for_not_yet_tested_question() ->
     assert "pending test-status surface" in selected["specialized_guard_reason"]
 
 
+def test_hybrid_selector_prefers_compact_deaccession_status_for_yet_question() -> None:
+    row = {
+        "id": "q004v2",
+        "question": "Has the bur oak lot been deaccessioned yet?",
+        "modes": [
+            {
+                "mode": "baseline",
+                "query_evidence": {
+                    "executed_results": [
+                        {"status": "success", "num_rows": 8, "predicate": "lot_id"},
+                        {"status": "success", "num_rows": 4, "predicate": "lot_condition_update"},
+                        {"status": "success", "num_rows": 3, "predicate": "lot_deaccessioned"},
+                        {
+                            "status": "success",
+                            "num_rows": 11,
+                            "predicate": "lot_viability_test_result",
+                            "was_relaxed_fallback": True,
+                        },
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+            {
+                "mode": "object_state_custody",
+                "query_evidence": {
+                    "executed_results": [
+                        {
+                            "status": "success",
+                            "num_rows": 1,
+                            "predicate": "lot_deaccessioned",
+                            "was_relaxed_fallback": False,
+                        },
+                        {
+                            "status": "success",
+                            "num_rows": 9,
+                            "predicate": "lot_id",
+                            "was_relaxed_fallback": False,
+                        },
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["baseline", "object_state_custody"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: {"selected_mode": "baseline"},
+    )
+
+    assert selected["selected_mode"] == "object_state_custody"
+    assert "scheduled/not-formally-completed status surface" in selected["specialized_guard_reason"]
+
+
 def test_hybrid_selector_prefers_final_state_for_current_operational_status() -> None:
     row = {
         "id": "q004z",

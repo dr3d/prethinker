@@ -112,6 +112,17 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
   and remains below the existing row-selector high-water of `24 / 1 / 0`.
   Treat the surface as a Meridian-local compile candidate and a transfer
   candidate, not a global default.
+- Second action from the planner: a combined object/state/custody compile over
+  Fenmore and Larkspur is rejected as a global surface. Fenmore fell to
+  `12 / 3 / 10` against its `20 / 1 / 4` baseline, and Larkspur fell to
+  `27 / 7 / 6` against the sharper final-state lens at `36 / 2 / 2`. The useful
+  harness gain is selector-level: the rejected Fenmore object/status artifact
+  supplies `q024`, creating a four-surface `25 / 0 / 0` upper bound, and a new
+  reason-named deaccession-yet status guard reaches `25 / 0 / 0` with `25/25`
+  selected-best rows and `0` selector errors. This reinforces the pegboard
+  rule: separate final object state, custody roster, rationale, operational
+  threshold/status, and deaccession-yet surfaces instead of broadening one
+  compile prompt.
 - Semantic struggle detection is now a named structural guardrail in
   `src/semantic_struggle.py`. It turns pass contribution, duplicate, skip-heavy,
   stale-tail, and selector-governor telemetry into a stop/continue

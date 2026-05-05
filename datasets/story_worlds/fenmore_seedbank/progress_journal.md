@@ -179,3 +179,60 @@ compile is much weaker globally. The harness gain is row-level: explicit source
 notes are valuable when the question asks for rationale or contrast, while
 collector identity and failed-viability hypotheticals must be protected by
 direct collector and threshold/storage policy surfaces.
+
+## FS-006 - Object/State/Custody Surface Boundary and Deaccession Guard
+
+Date: 2026-05-05
+
+Evidence lane: `object_state_custody_surface`
+
+Mode: scoped source-surface compile with the same reason-named object/state/
+custody acquisition contract used in transfer testing. The compile asked for
+current state, condition, location, custody/ownership, storage placement,
+transition events, viability or condition rationale, final status, and
+chain-of-events rows. It did not use answer keys, oracle rows, failure labels,
+or gold KB material during compile.
+
+Artifacts:
+
+- Compile:
+  `tmp/object_state_custody_runs/fenmore_seedbank/domain_bootstrap_file_20260505T231906010069Z_source_qwen-qwen3-6-35b-a3b.json`
+- Targeted QA:
+  `tmp/object_state_custody_judged_qa/fenmore_seedbank/domain_bootstrap_qa_20260505T232432633642Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Targeted failure classification:
+  `tmp/object_state_custody_failures/fenmore_seedbank/domain_bootstrap_qa_20260505T232432633642Z_qa_qwen-qwen3-6-35b-a3b_failure_surface_20260505T232545640824Z.json`
+- Full QA:
+  `tmp/object_state_custody_fullqa/fenmore_seedbank/domain_bootstrap_qa_20260505T233422942262Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Surface roster comparison:
+  `tmp/object_state_custody_comparisons/fenmore_surface_roster_comparison.md`
+- Selector after guard:
+  `tmp/object_state_custody_selector/fenmore_surface_roster_guarded_activation_deaccession_guard.md`
+
+Result:
+
+```text
+compile shape:                 48 admitted / 6 skipped, rough score 0.889
+targeted QA:                   1 exact / 2 partial / 2 miss
+targeted failure surfaces:      3 compile-surface gaps, 1 query-surface gap
+full QA candidate:              12 exact / 3 partial / 10 miss
+baseline comparison:            20 exact / 1 partial / 4 miss
+candidate rescues:              q019, q024
+candidate baseline regressions: 10 exact rows
+four-surface upper bound:       25 exact / 0 partial / 0 miss
+guarded selector before guard:  24 exact / 1 partial / 0 miss
+guarded selector after guard:   25 exact / 0 partial / 0 miss
+selector errors:                0
+```
+
+Lesson:
+
+This broad object/state/custody acquisition shape is rejected as a global
+Fenmore compile. It is too lossy on collector, transfer, and policy rows.
+However, it contributed the missing deaccession-yet status surface for `q024`.
+The new reason-named selector guard is
+`deaccession-yet question needs explicit scheduled/not-formally-completed status surface rather than broad lot-history volume`.
+With that guard, the selector reaches the full frozen-artifact upper bound
+(`25 / 0 / 0`) across baseline, operational, rationale, and object/state
+artifacts. The instrument lesson is pegboard, not bigger bag: conservation
+rationale, operational threshold/status, and deaccession-yet status are
+separate hooks.

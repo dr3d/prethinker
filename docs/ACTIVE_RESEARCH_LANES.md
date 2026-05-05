@@ -122,6 +122,17 @@ Heronvale's targeted rows were clean (`3 / 0 / 0`), but full QA is only
 `21 / 3 / 1` and regresses one baseline-exact row. Next use the surface as a
 candidate mode and transfer probe, not a global compile default.
 
+Second repair-slice action: the combined `object_state_custody` compile is a
+negative transfer result and should not become a default. Fenmore fell to
+`12 / 3 / 10` versus its `20 / 1 / 4` baseline, and Larkspur fell to
+`27 / 7 / 6` versus the sharper final-state artifact at `36 / 2 / 2`. The
+positive result is selector-level: adding the dangerous Fenmore object/status
+artifact to the frozen roster creates a `25 / 0 / 0` upper bound, and the new
+`deaccession-yet` status guard reaches `25 / 0 / 0` with `25/25`
+selected-best rows. This reinforces the pegboard model: object final state,
+custody roster, rationale, operational threshold/status, and deaccession-yet
+status are separate hooks.
+
 Current update: Three Moles improved when source_entity_ledger_v1 added
 powerless `coverage_targets`, but an anti-meta-rot replay on Oxalis regressed
 when the partial-skeleton recovery instruction was global. Keep that recovery

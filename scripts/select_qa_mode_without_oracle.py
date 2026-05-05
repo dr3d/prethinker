@@ -1196,6 +1196,23 @@ def structural_specialized_answer_surface_override(
                     "not-yet-tested question needs explicit pending test-status surface rather than broad negation over all lots",
                 )
 
+    if "deaccessioned" in question and "yet" in question:
+        deaccession_status_predicates = {
+            "deaccession_lot",
+            "deaccession_status",
+            "lot_deaccessioned",
+            "scheduled_deaccession",
+        }
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            direct_rows = int(quality.get("direct_rows", 0) or 0)
+            relaxed_rows = int(quality.get("relaxed_rows", 0) or 0)
+            if predicates.intersection(deaccession_status_predicates) and direct_rows > 0 and relaxed_rows == 0:
+                return (
+                    label,
+                    "deaccession-yet question needs explicit scheduled/not-formally-completed status surface rather than broad lot-history volume",
+                )
+
     if "why" in question and "split" in question and "vault" in question:
         for _score, label, quality in scored:
             predicates = set(quality.get("predicate_names", []) or [])

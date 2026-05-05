@@ -632,3 +632,51 @@ important product shape is not a single smarter compile; it is a pegboard of
 named surfaces plus a selector that can route to the right surface without
 seeing source prose, answer keys, judge labels, failure labels, gold KBs, or
 strategy files.
+
+## LCF-016 - Combined Object/State/Custody Transfer Rejection
+
+Date: 2026-05-05
+
+Evidence lane: `object_state_custody_surface`
+
+Mode: transfer replay of the combined object/state/custody acquisition
+contract used against Fenmore. The compile asked for current state, condition,
+location, custody/ownership, storage placement, transition events, viability or
+condition rationale, final status, and chain-of-events rows. It did not use
+answer keys, oracle rows, failure labels, or gold KB material during compile.
+
+Artifacts:
+
+- Compile:
+  `tmp/object_state_custody_runs/larkspur_clockwork_fair/domain_bootstrap_file_20260505T231754503184Z_source_qwen-qwen3-6-35b-a3b.json`
+- Targeted QA:
+  `tmp/object_state_custody_judged_qa/larkspur_clockwork_fair/domain_bootstrap_qa_20260505T232448808826Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Targeted failure classification:
+  `tmp/object_state_custody_failures/larkspur_clockwork_fair/domain_bootstrap_qa_20260505T232448808826Z_qa_qwen-qwen3-6-35b-a3b_failure_surface_20260505T232545500307Z.json`
+- Full QA:
+  `tmp/object_state_custody_fullqa/larkspur_clockwork_fair/domain_bootstrap_qa_20260505T233617221342Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Comparison against sharper final-state lens:
+  `tmp/object_state_custody_comparisons/larkspur_object_state_custody_comparison.md`
+
+Result:
+
+```text
+compile shape:                    138 admitted / 0 skipped, rough score 0.889
+targeted QA:                      4 exact / 1 partial / 3 miss
+targeted failure surfaces:         3 compile-surface gaps, 1 hybrid-join gap
+full QA candidate:                 27 exact / 7 partial / 6 miss
+sharper final-state lens baseline: 36 exact / 2 partial / 2 miss
+candidate rescues vs final-state:  1 row, q009 partial
+candidate exact regressions:       9
+write proposals:                   0
+runtime errors:                    0
+```
+
+Lesson:
+
+The combined object/state/custody surface is rejected for Larkspur. It confirms
+the earlier decomposition: final object-state transition is the strong global
+surface, while custody roster, permission/motive, role authority, and
+award/result must remain separate selector-addressable hooks. Combining them
+into one broader acquisition prompt blurs evidence and loses nine exact rows
+relative to the sharper final-state artifact.

@@ -30,6 +30,20 @@ but full QA was `21 / 3 / 1`, with one baseline-exact regression and a result
 below the existing row-selector high-water. Treat this as a candidate mode and
 transfer probe, not as a new global compile default.
 
+## Second Action Result
+
+The next run attacked `object_state_custody` on Fenmore and Larkspur with a
+combined object/state/custody compile. The result is a useful rejection:
+Fenmore's combined compile scored only `12 / 3 / 10` against a `20 / 1 / 4`
+baseline, and Larkspur scored `27 / 7 / 6` against the sharper final-state
+lens at `36 / 2 / 2`. The broad surface is not promotable. The positive gain
+is selector machinery: on Fenmore, adding the rejected object/status artifact
+to the frozen roster creates a `25 / 0 / 0` upper bound, and a new
+reason-named deaccession-yet status guard reaches it with `25/25` selected-best
+rows and `0` selector errors. Treat object state, custody roster,
+permission/motive, conservation rationale, and deaccession status as separate
+surfaces.
+
 ### `rule_interpretation_application`
 
 - priority score: `115`
