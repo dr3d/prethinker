@@ -236,3 +236,57 @@ With that guard, the selector reaches the full frozen-artifact upper bound
 artifacts. The instrument lesson is pegboard, not bigger bag: conservation
 rationale, operational threshold/status, and deaccession-yet status are
 separate hooks.
+
+## FS-007 - Autolab Heavy-Lane Smoke and Command-Shape Boundary
+
+Date: 2026-05-06
+
+Evidence lane: `autolab_heavy_orchestration_smoke`
+
+Mode: laptop Autolab cron/poller queued bounded shell jobs while desktop LM
+Studio at `http://192.168.0.150:1234/v1` served the heavy
+`qwen/qwen3.6-35b-a3b` Prethinker compile/QA calls. No harness code was edited
+by Hermes; Codex authored the job packets and reviewed the artifacts.
+
+Artifacts:
+
+- Minimal compile/QA smoke:
+  `\\192.168.0.103\c\prethinker\tmp\hermes_mailbox\runs\0014_fenmore_heavy_smoke`
+- Shaped compile/QA smoke:
+  `\\192.168.0.103\c\prethinker\tmp\hermes_mailbox\runs\0016_fenmore_shaped_compile_smoke`
+
+Result:
+
+```text
+0014 minimal single-gulp compile:
+  compile: 16 admitted / 0 skipped
+  first-3 QA: 1 exact / 0 partial / 2 miss
+  signal: captured only first two accession rows
+
+0016 shaped flat+focused compile:
+  compile: 94 admitted / 1 skipped / 86 unique facts
+  compile health: healthy
+  first-5 QA: 2 exact / 1 partial / 2 miss
+  accession_id rows visible to q001: 2
+
+archived promoted cold baseline for comparison:
+  compile: 195 admitted / 4 skipped
+  full-25 QA: 20 exact / 1 partial / 4 miss
+```
+
+Lesson:
+
+Autolab is now a working control plane for desktop-heavy Prethinker jobs, but
+bounded smoke commands are not equivalent to the current best harness. The
+minimal smoke was intentionally underpowered. The shaped smoke still drifted
+into a weaker predicate/profile surface (`accession_id/1`, role-mismatch
+warnings, and only two accession rows in early QA) than the archived promoted
+cold baseline, which had a richer profile and 195 admitted rows.
+
+Treat this as a command-shape boundary marker, not a new Fenmore score. Future
+Autolab heavy jobs should reference the exact promoted run shape when the goal
+is score comparison, and should label exploratory smoke runs as diagnostic
+orchestration artifacts. The semantic signal remains useful: partial repeated
+ledger acquisition is easy to expose with q001-q003, so source-surface work
+should preserve full accession identity/attribute rows before adding narrower
+rationale or status views.

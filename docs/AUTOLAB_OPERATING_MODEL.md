@@ -197,6 +197,14 @@ The result was useful because it proved both sides of the system:
 That is the intended shape. Autolab should produce real signals, not just green
 toy checks.
 
+Follow-up job `0016_fenmore_shaped_compile_smoke` proved the caution that
+Autolab smoke runs are not automatically score comparisons. A shaped
+flat-plus-focused compile admitted `94` rows and scored `2 / 1 / 2` over the
+first five QA rows, still below the archived promoted cold baseline with `195`
+admitted rows and `20 / 1 / 4` full-25. Treat bounded smoke packets as
+orchestration or diagnostic artifacts unless the job explicitly reproduces the
+promoted run shape.
+
 ## Working Metaphor
 
 Prethinker is the instrument.
