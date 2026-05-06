@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib
 import json
+import os
 
 
 def _load_poller(monkeypatch, tmp_path):
@@ -51,6 +52,10 @@ def test_poller_prefers_repo_venv_for_shell_jobs(monkeypatch, tmp_path) -> None:
     poller.ensure_dirs()
     venv_bin = poller.REPO / ".venv" / "bin"
     venv_bin.mkdir(parents=True)
+    if os.name != "nt":
+        python = venv_bin / "python"
+        python.write_text("#!/usr/bin/env sh\npython3 \"$@\"\n", encoding="utf-8")
+        python.chmod(0o755)
     job = {
         "job_id": "venv_python",
         "kind": "shell",
@@ -101,15 +106,15 @@ def test_poller_processes_at_most_one_job_per_invocation(monkeypatch, tmp_path) 
         "commands": ["echo second"],
         "timeout_seconds": 30,
     }
-    (poller.INBOX / "first_smoke.json").write_text(json.dumps(first), encoding="utf-8")
-    (poller.INBOX / "second_smoke.json").write_text(json.dumps(second), encoding="utf-8")
+    (poller.INBOX / "0001_first_smoke.json").write_text(json.dumps(first), encoding="utf-8")
+    (poller.INBOX / "0002_second_smoke.json").write_text(json.dumps(second), encoding="utf-8")
 
     assert poller.process_one() == 0
 
     assert (poller.OUTBOX / "first_smoke_result.md").exists()
     assert not (poller.OUTBOX / "second_smoke_result.md").exists()
-    assert not (poller.INBOX / "first_smoke.json").exists()
-    assert (poller.INBOX / "second_smoke.json").exists()
+    assert not (poller.INBOX / "0001_first_smoke.json").exists()
+    assert (poller.INBOX / "0002_second_smoke.json").exists()
 
 
 def test_prompt_job_without_runner_fails_with_actionable_result(monkeypatch, tmp_path) -> None:
