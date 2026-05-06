@@ -16,7 +16,7 @@ def _write_source_candidate(path: Path) -> None:
                 "why_it_is_hard": ["authority_chain", "temporal_status"],
                 "expected_sparse_score": "medium",
                 "provenance_notes": "Public meeting minutes with amendment language.",
-                "source_text_path": "tmp/hermes_mailbox/runs/board_minutes_001/source.md",
+                "source_text_path": "tmp/autolab_mailbox/runs/board_minutes_001/source.md",
                 "do_not_use_reason": "",
             }
         ),

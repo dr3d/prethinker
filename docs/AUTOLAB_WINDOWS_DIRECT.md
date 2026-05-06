@@ -6,10 +6,10 @@ Last updated: 2026-05-06
 
 Autolab now runs simplest as Windows Python plus repo scripts.
 
-Hermes, WSL, and the old mailbox runner are not required for the current
-Autolab loop. Remote agents can use the clone at `C:\prethinker`, run the same
-Python scripts Codex runs locally, and leave artifacts under ignored `tmp/`
-paths for Codex to review.
+WSL and mailbox polling are not required for the current Autolab loop. Remote
+agents can use the clone at `C:\prethinker`, run the same Python scripts Codex
+runs locally, and leave artifacts under ignored `tmp/` paths for Codex to
+review.
 
 ```text
 Codex or remote agent
@@ -60,7 +60,7 @@ artifacts=2 pass=2 warning=0 fail=0
 ```
 
 This proves the source-hunter artifact contracts without web search, model
-calls, WSL, Hermes, mailbox polling, or source-prose interpretation.
+calls, WSL, mailbox polling, or source-prose interpretation.
 
 ## Windows Cron
 
@@ -80,7 +80,7 @@ Register-ScheduledTask `
   -TaskName "PrethinkerAutolabTick" `
   -Action $Action `
   -Trigger $Trigger `
-  -Description "Runs a small direct Autolab artifact cycle without Hermes or WSL." `
+  -Description "Runs a small direct Autolab artifact cycle without WSL or mailbox polling." `
   -User $env:USERNAME
 ```
 
@@ -119,8 +119,8 @@ Unregister-ScheduledTask -TaskName "PrethinkerAutolabTick" -Confirm:$false
 - If a recurring task starts producing stale or unhelpful artifacts, disable it
   before adding more automation.
 
-## Legacy Note
+## Retired Runner Note
 
-The old Hermes/WSL/mailbox path taught useful lessons about artifact contracts:
+The retired WSL/mailbox path taught useful lessons about artifact contracts:
 stdout claims do not count, files must exist, and validator reports must pass.
 Those lessons remain. The machinery is no longer the default.

@@ -11,7 +11,7 @@ def test_wildbench_pilot_job_has_bounded_contract() -> None:
     assert "If you are not holding a usable source packet by minute four" in markdown
     assert "prefer accessible static sources first" in markdown
     assert "python scripts/validate_autolab_candidate_artifacts.py" in markdown
-    assert "required_validation_report: /mnt/c/prethinker/tmp/hermes_mailbox/runs/wild_demo/candidate_validation.json" in markdown
+    assert "required_validation_report: tmp/autolab_mailbox/runs/wild_demo/candidate_validation.json" in markdown
     assert "source_hunt_blocked.json" in markdown
     assert "autolab_source_hunt_blocked_v1" in markdown
     assert "wildbench_pilot_summary.md" in markdown
@@ -42,13 +42,13 @@ def test_wildbench_source_only_job_omits_qa_work() -> None:
     assert "A timeout with only running summaries is a failed job" in markdown
 
 
-def test_wildbench_job_accepts_custom_wsl_mailbox() -> None:
+def test_wildbench_job_accepts_custom_run_root() -> None:
     markdown = build_job_markdown(
         job_id="wild_demo",
         candidate_count=1,
         qa_rows=10,
         source_only=True,
-        wsl_mailbox="/custom/mailbox",
+        run_root="/custom/mailbox",
     )
 
     assert "required_artifact: /custom/mailbox/runs/wild_demo/wildbench_pilot_summary.md" in markdown

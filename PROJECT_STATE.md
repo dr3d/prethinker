@@ -16,8 +16,8 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 - Harness instrument reference: `docs/CURRENT_HARNESS_INSTRUMENT.md`.
 - Autolab reference: `docs/AUTOLAB.md`; current default is Windows direct mode
   (`docs/AUTOLAB_WINDOWS_DIRECT.md`), where local or remote Python runs known
-  repo scripts, validators, planners, and artifact drills without
-  Hermes/WSL/mailbox in the middle.
+  repo scripts, validators, planners, and artifact drills without the retired
+  WSL/mailbox runner in the middle.
 - Compiled artifact doctrine: `docs/COMPILED_KB_ARTIFACT_PACKAGE.md`.
 - Research prioritization: `docs/ACTIVE_RESEARCH_LANES.md`.
 - UI: `ui_gateway/`, served locally by `python ui_gateway/main.py` using the stdlib `ThreadingHTTPServer`.

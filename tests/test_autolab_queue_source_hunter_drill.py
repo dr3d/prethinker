@@ -9,7 +9,7 @@ def test_blocked_report_drill_requires_validation_report() -> None:
     assert "role: autolab_source_hunter_drill" in markdown
     assert "source_hunt_blocked.json" in markdown
     assert "autolab_source_hunt_blocked_v1" in markdown
-    assert "required_validation_report: /mnt/c/prethinker/tmp/hermes_mailbox/runs/blocked_drill/candidate_validation.json" in markdown
+    assert "required_validation_report: tmp/autolab_mailbox/runs/blocked_drill/candidate_validation.json" in markdown
     assert "Do not merely describe files in stdout" in markdown
 
 

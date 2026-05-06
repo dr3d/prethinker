@@ -27,7 +27,7 @@ Codex improves the instrument.
 - [Active research lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md) - how current GPU/research cycles are prioritized.
 - [Current harness instrument](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_HARNESS_INSTRUMENT.md) - scorecards, selectors, risk gates, and repair queues.
 - [Prethinker Autolab](https://github.com/dr3d/prethinker/blob/main/docs/AUTOLAB.md) - direct artifact-first research support loop.
-- [Autolab Windows Direct Mode](https://github.com/dr3d/prethinker/blob/main/docs/AUTOLAB_WINDOWS_DIRECT.md) - remote Windows Python setup and scheduled ticks without Hermes or WSL.
+- [Autolab Windows Direct Mode](https://github.com/dr3d/prethinker/blob/main/docs/AUTOLAB_WINDOWS_DIRECT.md) - remote Windows Python setup and scheduled ticks without WSL or mailbox polling.
 - [Autolab operating model](https://github.com/dr3d/prethinker/blob/main/docs/AUTOLAB_OPERATING_MODEL.md) - lab roles: Autolab lines up challenges, Prethinker produces artifacts, Codex improves the instrument.
 - [Public docs guide](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md) - reading order for deeper technical material.
 - [Docs and evidence hub](https://dr3d.github.io/prethinker/) - public docs, current research map, and curated evidence.

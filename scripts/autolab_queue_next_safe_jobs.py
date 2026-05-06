@@ -11,7 +11,7 @@ from typing import Any
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_MAILBOX = Path(r"\\192.168.0.103\c\prethinker\tmp\hermes_mailbox")
+DEFAULT_MAILBOX = Path(r"\\192.168.0.103\c\prethinker\tmp\autolab_mailbox")
 DEFAULT_QUEUE_STATE = REPO_ROOT / "tmp" / "autolab_queue" / "last_queue_plan.json"
 SAFE_JOB_TEMPLATES = (
     {
@@ -28,7 +28,7 @@ SAFE_JOB_TEMPLATES = (
         "title": "Focused reporter and planner tests",
         "commands": [
             "git pull --ff-only origin main",
-            "python -m pytest tests/test_rollup_domain_bootstrap_qa_scorecard.py tests/test_story_world_repair_targets.py tests/test_compare_domain_bootstrap_compiles.py tests/test_plan_story_world_fixture_runs.py tests/test_hermes_poll_mailbox.py tests/test_validate_autolab_candidate_artifacts.py",
+            "python -m pytest tests/test_rollup_domain_bootstrap_qa_scorecard.py tests/test_story_world_repair_targets.py tests/test_compare_domain_bootstrap_compiles.py tests/test_plan_story_world_fixture_runs.py tests/test_validate_autolab_candidate_artifacts.py",
         ],
         "timeout_seconds": 240,
     },
@@ -46,7 +46,7 @@ SAFE_JOB_TEMPLATES = (
         "title": "Stdlib compile check for Autolab reporter modules",
         "commands": [
             "git pull --ff-only origin main",
-            "python -m py_compile scripts/compare_domain_bootstrap_compiles.py scripts/rollup_domain_bootstrap_qa_scorecard.py scripts/plan_story_world_repair_targets.py scripts/plan_story_world_fixture_runs.py scripts/hermes_poll_mailbox.py scripts/autolab_queue_next_safe_jobs.py scripts/validate_autolab_candidate_artifacts.py scripts/summarize_autolab_candidate_batch.py",
+            "python -m py_compile scripts/compare_domain_bootstrap_compiles.py scripts/rollup_domain_bootstrap_qa_scorecard.py scripts/plan_story_world_repair_targets.py scripts/plan_story_world_fixture_runs.py scripts/autolab_queue_next_safe_jobs.py scripts/validate_autolab_candidate_artifacts.py scripts/summarize_autolab_candidate_batch.py",
         ],
         "timeout_seconds": 180,
     },

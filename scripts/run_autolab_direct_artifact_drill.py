@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run a direct Autolab artifact drill without Hermes, WSL, or a mailbox.
+"""Run a direct Autolab artifact drill without WSL or a mailbox.
 
 This is a deterministic local cycle: materialize small source-hunter artifacts,
 validate them with the existing candidate validator, summarize them with the
@@ -74,7 +74,7 @@ def run_cycle(*, out_dir: Path, include_blocked: bool = True, include_source: bo
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "out_dir": _display_path(out_dir),
         "policy": [
-            "No Hermes, WSL, mailbox, remote agent, source prose interpretation, compile, query, judge, or promotion.",
+            "No WSL, mailbox polling, remote agent, source prose interpretation, compile, query, judge, or promotion.",
             "Materializes deterministic artifacts and runs the same validators/summarizers used by Autolab review.",
         ],
         "validation_path": _display_path(validation_path),

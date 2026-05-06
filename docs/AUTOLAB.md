@@ -2,386 +2,138 @@
 
 Last updated: 2026-05-06
 
-## What Autolab Is
+## Short Version
 
-Prethinker Autolab is the out-of-band harness tester and research factory.
-Current operating mode is **direct Autolab**: Codex and remote agents run repo
-scripts, validators, planners, and artifact drills with ordinary Python.
-Hermes and WSL are not required. The remote useful resources are Windows
-Python and LM Studio/compute, not a standing Hermes agent, WSL worker, or
-prose-driven file writer.
+Autolab is the research-support division for Prethinker. It lines up bounded
+work, runs known scripts, preserves artifacts, and reports what happened.
 
-For the higher-level research loop and division of labor, see
-[Autolab Operating Model](https://github.com/dr3d/prethinker/blob/main/docs/AUTOLAB_OPERATING_MODEL.md).
-For the first source-hunter and QA-drafter skill shapes, see
-[Autolab Agent Skill Evolution](https://github.com/dr3d/prethinker/blob/main/docs/AUTOLAB_AGENT_SKILL_EVOLUTION.md).
-For remote Windows setup and scheduled ticks, see
-[Autolab Windows Direct Mode](https://github.com/dr3d/prethinker/blob/main/docs/AUTOLAB_WINDOWS_DIRECT.md).
-
-Autolab is not a second source of truth. It is an artifact-first research
-rhythm:
+The current default is Windows direct mode:
 
 ```text
-Codex
-  -> runs a bounded planner, validator, compile/QA, or artifact drill
-  -> writes artifacts under tmp/autolab_direct_cycles/ or another ignored run dir
-  -> inspects the artifacts
-  -> journals durable lessons
-  -> changes repo code/docs only when the evidence earns it
+Codex chooses a bounded research question
+  -> local or remote Windows Python runs a known repo script
+  -> artifacts land under ignored tmp paths
+  -> validators and summarizers produce structured reports
+  -> Codex reviews evidence, updates journals/docs/code, tests, commits, and pushes
 ```
 
-The earlier Hermes/mailbox/WSL loop is now a legacy experiment. It remains in
-this document as historical operating evidence until the repo is fully cleaned
-up, but it is not required for current Autolab work.
+No standing WSL runner, mailbox poller, or chat loop is required.
 
-## Roles
+## Current Worker Lane
 
-| Part | Role |
+Remote Windows clone:
+
+```text
+\\192.168.0.103\c\prethinker
+```
+
+Recommended scratch roots:
+
+| Path | Use |
 | --- | --- |
-| Codex | Lab lead, job author, result reviewer, repo/doc/journal steward. |
-| Autolab | Research department: fixture farming, source/QA artifact contracts, planners, validators, scorecards, and drill cycles. |
-| Local/direct scripts | Current operating lane for no-model planning, artifact drills, validation, summarization, and focused test cycles. |
-| Desktop LM Studio | Heavy Prethinker semantic engine, currently exposed at `http://192.168.0.150:1234/v1`. |
-| Repo docs/journals | Durable research memory. |
-| `tmp/autolab_direct_cycles` | Current ignored scratch space for direct proof cycles. |
-| `tmp/hermes_mailbox` | Legacy operational workbench; mostly disposable. |
-| `prethinker_tmp_archive` | Useful retained scratch/RAG-adjacent lab archive. |
+| `tmp/autolab_direct_cycles/` | Direct artifact drills and scheduled ticks. |
+| `tmp/autolab_mailbox/` | Optional packet staging if a future worker needs a file queue. |
+| `tmp/autolab_queue/` | Local queue previews, plans, and disposable status snapshots. |
 
-## Direct Cycles
+See [Autolab Windows Direct Mode](https://github.com/dr3d/prethinker/blob/main/docs/AUTOLAB_WINDOWS_DIRECT.md)
+for the remote setup, Task Scheduler tick, and first proof command.
 
-Use direct cycles when Codex is present:
+## Artifact Discipline
+
+Autolab work only counts when it leaves inspectable files.
+
+Useful outputs include:
+
+- structured JSON reports;
+- markdown summaries;
+- compile/QA scorecards;
+- validation reports;
+- fixture/source candidates under ignored staging paths;
+- notes that Codex can promote into journals or docs.
+
+Stdout-only success is not success. A blocked source hunt is allowed, but it
+must be written as `source_hunt_blocked.json` and pass validation.
+
+## Current Scripts
+
+Direct artifact drill:
 
 ```powershell
-python -m pytest tests/test_run_autolab_direct_artifact_drill.py tests/test_validate_autolab_candidate_artifacts.py tests/test_summarize_autolab_candidate_batch.py -q
-python scripts/plan_story_world_fixture_runs.py --fixture avalon_grant_committee --fixture oxalis_recall --fixture three_moles_moon_marmalade_machine --qa-limit 40 --max-plan-passes 6 --classify-failure-surfaces --out-json tmp/autolab_direct_cycles/story_frontier_plan.json --out-md tmp/autolab_direct_cycles/story_frontier_plan.md
 python scripts/run_autolab_direct_artifact_drill.py --out-dir tmp/autolab_direct_cycles/artifact_drill --include-blocked --include-source
 ```
 
-The first command verifies the direct artifact contracts. The second generates
-a no-model fixture-farming plan. The third materializes a valid blocked report
-and a valid source candidate, then validates and summarizes them without
-Hermes, WSL, a mailbox, source-prose interpretation, compile, query, judging,
-or promotion.
-
-This direct path is the current default. Add background automation only when a
-repeated need justifies it. Prefer a Windows-native Python runner over WSL or
-Hermes if the laptop needs to process queued work.
-
-## Legacy Mailbox Contract
-
-The shared mailbox root is:
-
-```text
-Windows: \\192.168.0.103\c\prethinker\tmp\hermes_mailbox
-WSL:     /mnt/c/prethinker/tmp/hermes_mailbox
-```
-
-The tracked poller is:
-
-```text
-scripts/hermes_poll_mailbox.py
-```
-
-Cron should run that script once per minute from a current Prethinker checkout.
-The poller processes at most one job per invocation.
-
-The laptop checkout should have a repo-local virtual environment:
-
-```bash
-cd /home/scott/prethinker
-python3 -m venv .venv
-. .venv/bin/activate
-python -m pip install -U pip pytest
-```
-
-The tracked poller automatically activates that environment for child jobs when
-`.venv/bin` exists by prepending it to `PATH` and setting `VIRTUAL_ENV`. Shell
-jobs should therefore use `python`, not system `python3`, for Prethinker code.
-Cron may still launch the poller with system `python3`; the child job
-environment is what matters for tests, planners, reporters, and harness
-commands.
-
-This one-shot behavior is a safety rail. Autolab cron should not run a
-long-lived `while true` watcher, should not keep an interactive Hermes chat
-session open, and should not copy jobs out of `inbox/` while leaving the
-original file behind. A job is consumed by rename, then moved to `archive/` or
-`failed/` after the result is written.
-
-Mailbox folders:
-
-| Folder | Purpose |
-| --- | --- |
-| `inbox/` | New markdown or JSON jobs. |
-| `claimed/` | Atomically claimed jobs before running. |
-| `running/` | The currently active job packet. |
-| `outbox/` | Result markdown files. |
-| `failed/` | Failed job packets preserved for inspection. |
-| `archive/` | Completed operational job packets, not permanent research memory. |
-| `logs/` | Poller and job logs. |
-| `state/` | Poller state, lock files, endpoint records, Hermes runner adapter. |
-| `control/` | Future control-plane files. |
-
-The pause file is:
-
-```text
-tmp/hermes_mailbox/PAUSE_HERMES.flag
-```
-
-If that file exists, the poller exits without claiming new work.
-
-## Job Types
-
-Markdown jobs are instruction packets for Hermes. They should include a small
-YAML-like header with a `job_id`, `kind`, priority, endpoints, and expected
-result shape, followed by precise instructions.
-
-Markdown jobs that must produce files should declare them with repeated
-`required_artifact:` header lines. The poller marks a prompt job failed if the
-Hermes runner exits successfully but those artifacts are missing. This prevents
-stdout-only "success" when the research product was supposed to be files.
-Jobs can also declare `required_validation_report:` for a JSON validator output
-that contains `summary.failed_artifact_count`; the poller marks the job failed
-if that count is nonzero. Use this when mere file existence is not enough.
-
-JSON jobs are deterministic smoke jobs for the poller itself. The tracked
-poller currently supports `kind: "shell"` JSON jobs for simple plumbing checks.
-Those are not the normal research lane.
-
-The laptop checkout may still be intentionally lean, but it should have
-`pytest` in `.venv` for focused Autolab tests. For lightweight verification,
-prefer stdlib checks such as `python -m py_compile ...` plus no-model
-planner/report commands. Use full pytest verification on the main desktop
-checkout unless a job explicitly provisions the laptop environment.
-
-Normal research jobs should be markdown packets because Hermes needs to read,
-reason, and report, not blindly execute arbitrary model-generated commands.
-
-When a markdown job asks Hermes to summarize, plan, grade, or propose a next
-job, prefer laptop LM Studio structured output with a small JSON schema. The
-useful pattern is:
-
-```text
-Hermes returns bounded JSON for machine checks
-Hermes also writes a short markdown summary for humans
-Hermes stops
-```
-
-Good schema-shaped outputs include job proposals, run summaries, scorecard
-summaries, artifact comparison reports, and failure triage rows. Bad outputs
-include open-ended architecture plans, silent code edits, or unbounded chat
-transcripts.
-
-For hunter and QA-drafter candidate packets, use:
-
-```bash
-python scripts/validate_autolab_candidate_artifacts.py --root tmp/hermes_mailbox/runs/candidate_batch
-```
-
-That validator checks JSON shape and oracle-boundary hygiene only. It does not
-interpret source prose or decide whether a candidate deserves promotion.
-
-Codex can queue a bounded wildbench hunter/QA pilot with:
+Validate candidate artifacts:
 
 ```powershell
-python scripts/autolab_queue_wildbench_pilot.py --candidate-count 2 --qa-rows 12
+python scripts/validate_autolab_candidate_artifacts.py --root tmp/autolab_direct_cycles/artifact_drill --out-json tmp/autolab_direct_cycles/artifact_drill/candidate_validation.json
 ```
 
-This creates a markdown job for Hermes rather than a shell smoke job. It is
-allowed to hunt public source packets and draft candidate QA artifacts, then it
-must run the validator and stop at the review gate.
-
-If the laptop model times out or struggles, stage the work:
+Summarize candidate batches:
 
 ```powershell
-python scripts/autolab_queue_wildbench_pilot.py --source-only --candidate-count 1
+python scripts/summarize_autolab_candidate_batch.py --root tmp/autolab_direct_cycles/artifact_drill --out-md tmp/autolab_direct_cycles/artifact_drill/candidate_summary.md
 ```
 
-That asks only for one source candidate and validation. QA drafting can follow
-after Codex reviews whether the source is real and useful.
-
-If source access is blocked, a source-only job should write a valid
-`autolab_source_hunt_blocked_v1` report such as
-`source_hunt_blocked.json`, then run the same validator. This is the honest
-success path for "no candidate produced because access failed." It is distinct
-from a missing-artifact failure and distinct from a usable source candidate.
-The hunter should not bury blocked findings only in stdout, and it should not
-fabricate a `source.md` to satisfy a file contract.
-
-The live runner should remain bounded. A 600-second timeout is a better default
-for small-model markdown jobs than the original 180-second smoke value, and it
-can be overridden with `HERMES_RUNNER_TIMEOUT_SECONDS` when needed.
-
-Important runner lesson from the first wildbench pilots: without the `chat`
-subcommand, Hermes may emit tool-call-looking text without actually creating
-files. The mailbox runner should use the `chat` subcommand for markdown jobs
-that need filesystem artifacts, and the poller should enforce
-`required_artifact:` postconditions.
-
-Review a completed candidate batch with:
-
-```bash
-python scripts/summarize_autolab_candidate_batch.py --root tmp/hermes_mailbox/runs/<job_id> --out-md tmp/hermes_mailbox/runs/<job_id>/candidate_summary.md
-```
-
-## Safe Conveyor Belt
-
-Codex is not an always-on daemon. To keep the laptop useful while Codex is away,
-use a bounded queue of safe jobs:
+Optional packet-generation helpers remain available for future worker trials:
 
 ```powershell
-python scripts/autolab_queue_next_safe_jobs.py --limit 3
+python scripts/autolab_queue_source_hunter_drill.py --drill blocked_report --dry-run
+python scripts/autolab_queue_wildbench_pilot.py --source-only --candidate-count 1 --dry-run
+python scripts/autolab_queue_next_safe_jobs.py --dry-run
 ```
 
-The queue planner writes JSON shell jobs into the mailbox inbox only from known
-safe templates. These jobs may pull `main`, run focused tests, perform
-`py_compile`, generate run plans, or roll up existing artifacts. They must not
-run heavy 35B compiles, harvest sources, edit tracked code, delete files, or
-make promotion decisions.
+Those helpers generate bounded packets and plans. They are not the current
+execution requirement.
 
-The default prefix is stable, so a queue batch will not refill itself forever.
-When Codex wants another bounded batch, use a fresh `--prefix` such as
-`autolab_safe_20260506_pm`. This keeps the laptop busy without turning cron
-into an unreviewed research loop.
+## Worker Rules
 
-This is the operating split:
+Autolab may:
 
-```text
-Autolab keeps doing chores.
-Hermes writes outbox reports.
-Codex reviews reports before heavier work or code changes.
-```
+- run deterministic planners, validators, summarizers, and focused tests;
+- run bounded Prethinker compile/QA jobs when explicitly requested;
+- collect source candidates and QA drafts as artifacts;
+- classify obvious operational failures from structured JSON;
+- keep run outputs under ignored `tmp/` paths.
 
-## Heavy Work Routing
+Autolab must not:
 
-Hermes may use laptop-local LM Studio for light planning. Real Prethinker
-semantic compilation, judging, and classifier jobs that require the 35B lane
-must use the desktop endpoint:
+- edit tracked harness code as scratch;
+- promote a local score gain into a default;
+- delete or rewrite research history;
+- call a heavy model endpoint unless the job explicitly asks for it;
+- run an unbounded chat loop;
+- treat prose claims as artifacts.
+
+## Promotion Discipline
+
+A candidate improvement needs evidence before it becomes part of the
+instrument:
+
+- target fixture lift;
+- no visible exact-row regression;
+- transfer check on unrelated fixtures for broad changes;
+- named guard, helper, or lens reason;
+- durable artifact trail;
+- tests proportional to risk.
+
+This is the same pegboard discipline used for semantic lenses: add a new hook
+only when the current set cannot expose the meaning surface, and record why the
+new hook earned its slot.
+
+## Heavy Work
+
+Desktop LM Studio remains the heavy semantic lane when a run needs model work:
 
 ```text
 http://192.168.0.150:1234/v1
 ```
 
-Job packets should say this explicitly when they ask for heavy work.
+Use explicit scripts with structured outputs and deterministic validators.
+Compile once, persist everything, then run cheaper parallax, selector, QA, and
+diagnostic passes against frozen artifacts.
 
-## Hermes Model Policy
+## Retired Runner Lesson
 
-The Hermes lane is a control plane, so prefer small instruction-following
-models or instruct variants with thinking disabled when possible. It should
-read one bounded job packet, perform the requested bounded work, write one
-result, and exit.
-
-For Qwen-family Hermes models that honor prompt switches, the default mailbox
-prompt prefix is:
-
-```text
-/no_think
-```
-
-Keep that prefix in `state/hermes_prompt_prefix.txt` on the laptop mailbox and
-have the runner adapter prepend it to markdown jobs. If the selected model uses
-`/nothink` instead, change the state file, not the job packets. Do not prepend
-this switch to Prethinker semantic prompts; it is only for Hermes control-plane
-orchestration.
-
-Avoid using a thinking-heavy chat session for mailbox polling. Long hidden
-reasoning and accumulated chat history are useful for exploration, but they are
-bad defaults for cron work because they make progress hard to observe and can
-turn a tiny control job into a long completion. The heavy desktop model is for
-Prethinker semantic compilation and judging, not Hermes orchestration chatter.
-
-## Durable Memory Policy
-
-Keep the durable story in the repo:
-
-- current architecture and research state in `PROJECT_STATE.md`;
-- public orientation in `docs/`;
-- fixture-specific lessons in fixture `progress_journal.md` and
-  `progress_metrics.jsonl`;
-- reusable code in tracked scripts and tests.
-
-Keep `tmp/hermes_mailbox` operational. Do not preserve every false start just
-because it happened. Old smoke jobs, duplicate cron experiments, stale root
-notes, and one-off test packets can be deleted or left to vanish once their
-lesson is captured elsewhere.
-
-Retain only the parts that teach how Autolab is built:
-
-- mailbox protocol decisions;
-- cron/poller contract changes;
-- endpoint/routing decisions;
-- job-result summaries that reveal harness behavior;
-- design notes that would help future Codex or Hermes continue the work.
-
-Use `prethinker_tmp_archive` for useful retained scratch that should not fill
-the repo, and use Git history for source evolution.
-
-## First Bootstrap
-
-The first laptop bootstrap is manual:
-
-1. Codex writes `HERMES_READ_THIS_NEXT.md` and a critical bootstrap job into
-   the laptop mailbox.
-2. Scott points Hermes at that file once.
-3. Hermes pulls `origin/main`, installs the tracked poller into cron, writes a
-   bootstrap result to `outbox/`, and removes the pause flag only after smoke
-   verification.
-4. After that, Codex can queue new jobs by writing mailbox packets.
-
-The first real post-bootstrap job should be tiny and verifiable. Autolab earns
-larger autonomy only after the small path is boring.
-
-Early reporter verification:
-
-- `0017_autolab_reporter_verification` pulled `main` successfully but failed
-  because laptop Python did not have `pytest` installed.
-- `0018_autolab_stdlib_reporter_verification` succeeded with stdlib
-  `py_compile` checks and a no-model story-world run-plan generation command.
-- After `.venv` provisioning, Autolab shell jobs should use `python`; the
-  poller activates `.venv` for child commands.
-
-That is the preferred pattern for laptop smoke checks: minimal dependencies,
-bounded output, and one outbox report.
-
-## Runaway Recovery
-
-If Hermes appears to loop on the same job, first stop new claims by creating:
-
-```text
-/mnt/c/prethinker/tmp/hermes_mailbox/PAUSE_HERMES.flag
-```
-
-Then stop the live Hermes process manually from WSL if needed:
-
-```bash
-pkill -f "/home/scott/.local/bin/hermes" || true
-pkill -f "hermes.*chat" || true
-```
-
-Before restoring or deleting anything, capture the laptop checkout state into
-`outbox/` with `git status --short --branch`, `git diff --stat`, and focused
-diffs for tracked files. If the laptop poller has drifted from `origin/main`,
-preserve the report, then restore the tracked poller from GitHub. Do not let
-Hermes use tracked source files as local scratch.
-
-Known bad pattern: a custom long-running poller that uses `.poll.lock`, copies
-`inbox/<job>.json` into `claimed/`, writes `outbox/result_<job>_<timestamp>.json`,
-and leaves the original inbox file in place. That repeats the same job forever.
-The tracked poller uses `state/poller.lock`, renames the job, processes once,
-writes `<job_id>_result.md`, and exits.
-
-## Idle And Control
-
-When Codex says Autolab should idle, create `PAUSE_HERMES.flag`. That keeps cron
-installed but prevents new job claims.
-
-When the desktop needs the heavy GPU for local work, Autolab jobs should either
-pause or run only light laptop-local tasks. Heavy work should never be started
-silently while the main lab is using the desktop model.
-
-## Naming
-
-Use **Prethinker Autolab** for the subsystem. It is the harness tester and
-research factory: it runs honing jobs, finds material, drafts QA, runs smoke and
-regression jobs, and reports results back for Codex to integrate.
-
-The mailbox is plumbing. The repo is memory. Autolab is the loop.
+The retired WSL/mailbox experiment taught one durable lesson: artifact
+contracts matter more than worker chatter. The direct Windows lane keeps the
+lesson and removes the baggage.

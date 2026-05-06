@@ -39,9 +39,9 @@ Treat older reports and prompt snapshots as Git history, not live guidance.
 - Prethinker Autolab is the remote research-support division, not the product
   and not the coder. Current default is Windows direct mode: local or remote
   Python runs known repo scripts, validators, planners, and artifact drills.
-  Hermes/WSL/mailbox is legacy evidence, not the required path. Codex remains
-  responsible for harness code changes, promotion decisions, tests, journals,
-  and pushes.
+  The retired WSL/mailbox experiment is legacy evidence, not the required path.
+  Codex remains responsible for harness code changes, promotion decisions,
+  tests, journals, and pushes.
 - `medical@v0` Semantic IR calls include profile-owned predicate contracts and compact UMLS bridge context; the generic mapper should remain structural rather than accumulating medical type lists.
 - `modelfiles/domain_profile_catalog.v0.json` is the thin skill-like roster. `profile.story_world.v0.json`, `profile.probate.v0.json`, `profile.legal_courtlistener.v0.json`, and `profile.sec_contracts.v0.json` are declarative thick-context packages for routing/profile experiments.
 - `adapters/courtlistener/` is a conservative legal-source adapter. Keep live generated data under ignored `datasets/courtlistener/generated/`; do not commit raw API caches.

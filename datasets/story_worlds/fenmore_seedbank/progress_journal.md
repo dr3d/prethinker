@@ -246,14 +246,14 @@ Evidence lane: `autolab_heavy_orchestration_smoke`
 Mode: laptop Autolab cron/poller queued bounded shell jobs while desktop LM
 Studio at `http://192.168.0.150:1234/v1` served the heavy
 `qwen/qwen3.6-35b-a3b` Prethinker compile/QA calls. No harness code was edited
-by Hermes; Codex authored the job packets and reviewed the artifacts.
+by the background worker; Codex authored the job packets and reviewed the artifacts.
 
 Artifacts:
 
 - Minimal compile/QA smoke:
-  `\\192.168.0.103\c\prethinker\tmp\hermes_mailbox\runs\0014_fenmore_heavy_smoke`
+  `\\192.168.0.103\c\prethinker\tmp\autolab_mailbox\runs\0014_fenmore_heavy_smoke`
 - Shaped compile/QA smoke:
-  `\\192.168.0.103\c\prethinker\tmp\hermes_mailbox\runs\0016_fenmore_shaped_compile_smoke`
+  `\\192.168.0.103\c\prethinker\tmp\autolab_mailbox\runs\0016_fenmore_shaped_compile_smoke`
 
 Result:
 
@@ -336,6 +336,6 @@ The reporter turns Autolab from "it ran" into "what surface changed?" without
 asking the laptop model to interpret meaning. It confirms that the shaped smoke
 rescued storage/deaccession-adjacent surface while losing six accession,
 collector, and initial-condition rows relative to the promoted baseline. That
-is an artifact-shape diagnosis, not a new score. Future Hermes grader work
+is an artifact-shape diagnosis, not a new score. Future Autolab grader work
 should prefer this kind of structural report and leave harness interpretation
 to Codex.

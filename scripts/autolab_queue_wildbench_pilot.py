@@ -9,8 +9,8 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_MAILBOX = Path(r"\\192.168.0.103\c\prethinker\tmp\hermes_mailbox")
-DEFAULT_WSL_MAILBOX = "/mnt/c/prethinker/tmp/hermes_mailbox"
+DEFAULT_MAILBOX = Path(r"\\192.168.0.103\c\prethinker\tmp\autolab_mailbox")
+DEFAULT_RUN_ROOT = "tmp/autolab_mailbox"
 
 
 def parse_args() -> argparse.Namespace:
@@ -20,7 +20,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--candidate-count", type=int, default=2)
     parser.add_argument("--qa-rows", type=int, default=12)
     parser.add_argument("--source-only", action="store_true", help="Queue only source-hunter artifacts.")
-    parser.add_argument("--wsl-mailbox", default=DEFAULT_WSL_MAILBOX)
+    parser.add_argument("--run-root", default=DEFAULT_RUN_ROOT)
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--out-md", type=Path, default=None)
     return parser.parse_args()
@@ -37,7 +37,7 @@ def main() -> int:
         candidate_count=candidate_count,
         qa_rows=qa_rows,
         source_only=bool(args.source_only),
-        wsl_mailbox=str(args.wsl_mailbox).rstrip("/"),
+        run_root=str(args.run_root).rstrip("/"),
     )
     out_path = _resolve_out_path(args.out_md, mailbox=mailbox, job_id=job_id)
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -54,9 +54,9 @@ def build_job_markdown(
     candidate_count: int,
     qa_rows: int,
     source_only: bool = False,
-    wsl_mailbox: str = DEFAULT_WSL_MAILBOX,
+    run_root: str = DEFAULT_RUN_ROOT,
 ) -> str:
-    run_dir = f"{wsl_mailbox.rstrip('/')}/runs/{job_id}"
+    run_dir = f"{run_root.rstrip('/')}/runs/{job_id}"
     role = "autolab_source_hunter" if source_only else "autolab_source_hunter_and_qa_drafter"
     candidate_dirs = [f"`{run_dir}/candidate_{index:03d}/`" for index in range(1, candidate_count + 1)]
     lines = [
@@ -73,7 +73,7 @@ def build_job_markdown(
         "",
         "# Autolab Wildbench Pilot",
         "",
-        "You are Hermes acting as a bounded Prethinker Autolab researcher.",
+        "You are acting as a bounded Prethinker Autolab researcher.",
         "Do not edit tracked repo files. Do not run Prethinker heavy compiles.",
         "Do not call the desktop heavy LM Studio endpoint for this job.",
         "Do not loop or wait for chat. Produce artifacts, validate them, summarize, and stop.",
@@ -217,7 +217,7 @@ def build_job_markdown(
             "",
             "## Summary",
             "",
-            "Your final Hermes response should be short and include:",
+            "Your final response should be short and include:",
             "",
             "- candidate count;",
             "- validation pass/fail counts;",

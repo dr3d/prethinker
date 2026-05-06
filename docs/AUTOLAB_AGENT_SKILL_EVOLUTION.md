@@ -92,18 +92,18 @@ python scripts/run_autolab_direct_artifact_drill.py --out-dir tmp/autolab_direct
 
 That materializes one valid blocked-hunt report and one valid source candidate,
 then runs the same validator and summarizer used by Autolab review. It does not
-need Hermes, WSL, a mailbox, a remote agent, source-prose interpretation,
-compile, query, judge, or promotion.
+need WSL, mailbox polling, a remote agent, source-prose interpretation, compile,
+query, judge, or promotion.
 
-The legacy mailbox pilot can still generate instruction packets:
+The retired mailbox pilot can still generate instruction packets:
 
 ```powershell
 python scripts/autolab_queue_wildbench_pilot.py --candidate-count 2 --qa-rows 12
 ```
 
-That writes a markdown job packet for the old mailbox/Hermes experiment. This
-path is historical until a background worker proves it can write files and pass
-the direct validators.
+That writes a markdown job packet for the retired mailbox experiment. This path
+is historical until a background worker proves it can write files and pass the
+direct validators.
 
 For the small laptop control model, prefer staged pilots first:
 
@@ -123,7 +123,7 @@ python scripts/summarize_autolab_candidate_batch.py --root tmp/autolab_direct_cy
 The summarizer reads only candidate JSON and validation JSON. It does not score
 source quality or decide promotion.
 
-Early live result from the mailbox/Hermes experiment: the first source-only
+Early live result from the retired mailbox experiment: the first source-only
 wildbench pilots proved the review gate is necessary. The worker could identify
 plausible public-source targets and report government-site access blocks, but
 it tended to put the report in stdout instead of writing the requested
@@ -169,8 +169,8 @@ the file discipline test. The worker reported a blocked JSON object in stdout,
 including one invalid "success" failure mode and `candidate_count: 1`, while
 the actual `source_hunt_blocked.json` and `candidate_validation.json` files were
 missing. The poller correctly failed the job. This earned a smaller training
-step: source-hunter drills. Before more open-ended hunting, Hermes should prove
-it can write and validate two tiny artifact shapes:
+step: source-hunter drills. Before more open-ended hunting, a worker should
+prove it can write and validate two tiny artifact shapes:
 
 - `blocked_report`: write only a valid `source_hunt_blocked.json`.
 - `static_source`: write one fixed `source.md` plus `source_candidate.json`.

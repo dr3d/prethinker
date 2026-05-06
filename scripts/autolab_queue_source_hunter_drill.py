@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Queue tiny Hermes source-hunter skill drills.
+"""Queue tiny Autolab source-hunter skill drills.
 
 These drills train artifact discipline before open-ended source hunting. They
-ask Hermes to write a small, known artifact shape, run the validator, and stop.
+ask a worker to write a small, known artifact shape, run the validator, and stop.
 """
 
 from __future__ import annotations
@@ -13,15 +13,15 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_MAILBOX = Path(r"\\192.168.0.103\c\prethinker\tmp\hermes_mailbox")
-DEFAULT_WSL_MAILBOX = "/mnt/c/prethinker/tmp/hermes_mailbox"
+DEFAULT_MAILBOX = Path(r"\\192.168.0.103\c\prethinker\tmp\autolab_mailbox")
+DEFAULT_RUN_ROOT = "tmp/autolab_mailbox"
 DRILLS = {"blocked_report", "static_source"}
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--mailbox", type=Path, default=DEFAULT_MAILBOX)
-    parser.add_argument("--wsl-mailbox", default=DEFAULT_WSL_MAILBOX)
+    parser.add_argument("--run-root", default=DEFAULT_RUN_ROOT)
     parser.add_argument("--job-id", default="")
     parser.add_argument("--drill", choices=sorted(DRILLS), required=True)
     parser.add_argument("--dry-run", action="store_true")
@@ -36,7 +36,7 @@ def main() -> int:
     markdown = build_job_markdown(
         job_id=job_id,
         drill=str(args.drill),
-        wsl_mailbox=str(args.wsl_mailbox).rstrip("/"),
+        run_root=str(args.run_root).rstrip("/"),
     )
     out_path = _resolve_out_path(args.out_md, mailbox=mailbox, job_id=job_id)
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -47,10 +47,10 @@ def main() -> int:
     return 0
 
 
-def build_job_markdown(*, job_id: str, drill: str, wsl_mailbox: str = DEFAULT_WSL_MAILBOX) -> str:
+def build_job_markdown(*, job_id: str, drill: str, run_root: str = DEFAULT_RUN_ROOT) -> str:
     if drill not in DRILLS:
         raise ValueError(f"unknown drill: {drill}")
-    run_dir = f"{wsl_mailbox.rstrip('/')}/runs/{job_id}"
+    run_dir = f"{run_root.rstrip('/')}/runs/{job_id}"
     lines = [
         f"job_id: {job_id}",
         "kind: markdown",
@@ -65,7 +65,7 @@ def build_job_markdown(*, job_id: str, drill: str, wsl_mailbox: str = DEFAULT_WS
         "",
         "# Autolab Source-Hunter Drill",
         "",
-        "You are Hermes doing a tiny Prethinker Autolab source-hunter skill drill.",
+        "You are doing a tiny Prethinker Autolab source-hunter skill drill.",
         "Do not search the web unless this packet explicitly says to.",
         "Do not edit tracked repo files. Do not run heavy compiles. Do not use the desktop LM Studio endpoint.",
         "Write the required files, run validation, update the summaries, and stop.",

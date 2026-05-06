@@ -7,7 +7,7 @@ Last updated: 2026-05-06
 Prethinker Autolab is a research division inside the Prethinker lab: the group
 that lines up challenges, runs bounded experiments, and reports what broke.
 
-Current Autolab does not require Hermes or WSL. Codex can run useful research
+Current Autolab does not require WSL or mailbox polling. Codex can run useful research
 cycles directly, and remote agents can run the same repo scripts through
 Windows Python when they are available. Prethinker does governed semantic
 compilation and QA through the heavy workhorse model when needed. Codex reviews
@@ -58,7 +58,7 @@ For the current remote Windows setup, see
 | Grader/diagnostic role | Summarize scores, classify operational failures, compare structured run artifacts, and cluster failure signals without changing harness code. |
 | Prethinker | Semantic engine. Uses LLM calls to propose structured semantic workspaces, then deterministic Python admits, rejects, queries, and scores. |
 | Desktop LM Studio | Heavy semantic lane for Prethinker compile, QA, judging, and classification jobs; currently the 35B workhorse. |
-| Remote Windows Python | Optional direct execution lane for known repo scripts, without WSL or Hermes. |
+| Remote Windows Python | Optional direct execution lane for known repo scripts, without WSL or mailbox polling. |
 | Remote LM Studio | Optional model endpoint/compute resource. |
 | Codex | Code-master, lab lead, and instrument engineer. Reads results, detects patterns, changes harness code, updates docs/journals, runs tests, commits, and pushes. |
 | GitHub | Durable source history and recovery line. |
