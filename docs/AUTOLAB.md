@@ -8,6 +8,9 @@ Prethinker Autolab is the out-of-band harness tester and research factory.
 It lets a remote Hermes worker run queued jobs while Codex remains the lab lead,
 repo steward, and integration point.
 
+For the higher-level research loop and division of labor, see
+[Autolab Operating Model](https://github.com/dr3d/prethinker/blob/main/docs/AUTOLAB_OPERATING_MODEL.md).
+
 Autolab is not a second source of truth. It is a work queue plus a worker loop:
 cron wakes the laptop, the poller claims one mailbox job, Hermes does bounded
 work, and the result comes back as an inspectable artifact.
