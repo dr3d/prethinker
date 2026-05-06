@@ -54,3 +54,31 @@ def test_summarize_autolab_candidate_batch_reads_nested_artifacts(tmp_path: Path
     assert report["summary"]["hard_surface_counts"]["absence"] == 1
     assert "sparse_minutes" in markdown
     assert "https://example.test/minutes" in markdown
+
+
+def test_summarize_autolab_candidate_batch_reads_blocked_reports(tmp_path: Path) -> None:
+    run = tmp_path / "run"
+    run.mkdir()
+    (run / "source_hunt_blocked.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "autolab_source_hunt_blocked_v1",
+                "job_id": "wild_blocked",
+                "attempted_urls": [
+                    {"url": "https://example.test/search", "failure_mode": "no_results"},
+                    {"url": "https://example.test/archive", "failure_mode": "bot_block"},
+                ],
+                "candidate_count": 0,
+                "recommendation": "use_local_cache",
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    report = build_report(root=run)
+    markdown = render_markdown(report)
+
+    assert report["summary"]["blocked_report_count"] == 1
+    assert report["blocked_reports"][0]["attempted_url_count"] == 2
+    assert "Blocked Reports" in markdown
+    assert "use_local_cache" in markdown

@@ -52,6 +52,25 @@ def _write_qa_candidate(path: Path, *, include_answer: bool = False, mode: str =
     )
 
 
+def _write_blocked_report(path: Path) -> None:
+    path.write_text(
+        json.dumps(
+            {
+                "schema_version": "autolab_source_hunt_blocked_v1",
+                "job_id": "wild_blocked_001",
+                "attempted_urls": [
+                    {"url": "https://example.test/search", "failure_mode": "no_results"},
+                    {"url": "https://example.test/archive", "failure_mode": "access_denied"},
+                ],
+                "candidate_count": 0,
+                "recommendation": "retry_domain",
+                "notes": "Search path was blocked before a source packet could be validated.",
+            }
+        ),
+        encoding="utf-8",
+    )
+
+
 def test_autolab_candidate_validator_accepts_hunter_and_qa_shapes(tmp_path: Path) -> None:
     source = tmp_path / "source_candidate.json"
     qa = tmp_path / "qa_candidate.json"
@@ -63,6 +82,25 @@ def test_autolab_candidate_validator_accepts_hunter_and_qa_shapes(tmp_path: Path
     assert report["summary"]["passed_artifact_count"] == 2
     assert report["summary"]["failed_artifact_count"] == 0
     assert report["artifacts"][1]["qa"]["row_count"] == 10
+
+
+def test_autolab_candidate_validator_accepts_blocked_report(tmp_path: Path) -> None:
+    blocked = tmp_path / "source_hunt_blocked.json"
+    _write_blocked_report(blocked)
+
+    report = build_report(source_paths=[], qa_paths=[], blocked_paths=[blocked])
+
+    assert report["summary"]["blocked_report_count"] == 1
+    assert report["summary"]["passed_artifact_count"] == 1
+    assert report["summary"]["failed_artifact_count"] == 0
+    assert report["artifacts"][0]["blocked"]["attempted_url_count"] == 2
+
+
+def test_autolab_candidate_validator_rejects_empty_scan(tmp_path: Path) -> None:
+    report = build_report(source_paths=[], qa_paths=[], blocked_paths=[])
+
+    assert report["summary"]["failed_artifact_count"] == 1
+    assert "no_source_qa_or_blocked_artifacts_found" in report["artifacts"][0]["errors"]
 
 
 def test_autolab_candidate_validator_blocks_answer_keys(tmp_path: Path) -> None:
@@ -123,3 +161,26 @@ def test_autolab_candidate_validator_root_scan_finds_nested_candidates(tmp_path:
     report = json.loads(out_json.read_text(encoding="utf-8"))
     assert report["summary"]["artifact_count"] == 2
     assert report["summary"]["passed_artifact_count"] == 2
+
+
+def test_autolab_candidate_validator_root_scan_finds_blocked_report(tmp_path: Path, monkeypatch) -> None:
+    run = tmp_path / "run"
+    run.mkdir()
+    _write_blocked_report(run / "source_hunt_blocked.json")
+    out_json = run / "validation.json"
+
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            "validate_autolab_candidate_artifacts.py",
+            "--root",
+            str(run),
+            "--out-json",
+            str(out_json),
+        ],
+    )
+
+    assert validator_main() == 0
+    report = json.loads(out_json.read_text(encoding="utf-8"))
+    assert report["summary"]["artifact_count"] == 1
+    assert report["summary"]["blocked_report_count"] == 1

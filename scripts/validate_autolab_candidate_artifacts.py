@@ -18,10 +18,23 @@ from typing import Any
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SOURCE_SCHEMA = "autolab_source_candidate_v1"
 QA_SCHEMA = "autolab_candidate_qa_v1"
+BLOCKED_SCHEMA = "autolab_source_hunt_blocked_v1"
 SOURCE_REQUIRED = ("schema_version", "candidate_id", "domain_label", "why_it_is_hard", "source_text_path")
 QA_REQUIRED = ("schema_version", "source_candidate_id", "rows")
 QA_ROW_REQUIRED = ("qid", "question", "surface_family", "expected_answer_mode", "why_this_is_hard")
+BLOCKED_REQUIRED = ("schema_version", "job_id", "attempted_urls", "candidate_count", "recommendation")
 ALLOWED_EXPECTED_MODES = {"exact", "uncertain", "not_established", "clarification"}
+ALLOWED_BLOCKED_FAILURE_MODES = {
+    "bot_block",
+    "404",
+    "timeout",
+    "no_results",
+    "network_blocked",
+    "access_denied",
+    "parse_error",
+    "other",
+}
+ALLOWED_BLOCKED_RECOMMENDATIONS = {"retry_domain", "use_local_cache", "reject_hunt"}
 ANSWERISH_KEYS = {"answer", "answers", "reference_answer", "gold_answer", "expected_answer", "oracle_answer"}
 
 
@@ -29,6 +42,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source-candidate", action="append", type=Path, default=[])
     parser.add_argument("--qa-candidate", action="append", type=Path, default=[])
+    parser.add_argument("--blocked-report", action="append", type=Path, default=[])
     parser.add_argument("--root", type=Path, default=None, help="Directory to scan for candidate JSON files.")
     parser.add_argument("--out-json", type=Path, default=None)
     return parser.parse_args()
@@ -38,6 +52,7 @@ def main() -> int:
     args = parse_args()
     source_paths = [_resolve(path) for path in args.source_candidate]
     qa_paths = [_resolve(path) for path in args.qa_candidate]
+    blocked_paths = [_resolve(path) for path in args.blocked_report]
     if args.root:
         root = _resolve(args.root)
         if root.exists():
@@ -47,7 +62,9 @@ def main() -> int:
                     source_paths.append(path)
                 elif schema == QA_SCHEMA:
                     qa_paths.append(path)
-    report = build_report(source_paths=source_paths, qa_paths=qa_paths)
+                elif schema == BLOCKED_SCHEMA:
+                    blocked_paths.append(path)
+    report = build_report(source_paths=source_paths, qa_paths=qa_paths, blocked_paths=blocked_paths)
     if args.out_json:
         out = _resolve(args.out_json)
         out.parent.mkdir(parents=True, exist_ok=True)
@@ -57,9 +74,24 @@ def main() -> int:
     return 0 if report["summary"]["failed_artifact_count"] == 0 else 1
 
 
-def build_report(*, source_paths: list[Path], qa_paths: list[Path]) -> dict[str, Any]:
+def build_report(
+    *, source_paths: list[Path], qa_paths: list[Path], blocked_paths: list[Path] | None = None
+) -> dict[str, Any]:
     artifacts = [validate_source_candidate(path) for path in source_paths]
     artifacts.extend(validate_qa_candidate(path) for path in qa_paths)
+    artifacts.extend(validate_blocked_report(path) for path in blocked_paths or [])
+    if not artifacts:
+        artifacts.append(
+            {
+                "artifact": "",
+                "path": "",
+                "kind": "candidate_batch",
+                "status": "fail",
+                "errors": ["no_source_qa_or_blocked_artifacts_found"],
+                "warnings": [],
+                "id": "",
+            }
+        )
     status_counts = Counter(str(item.get("status", "unknown")) for item in artifacts)
     return {
         "schema_version": "autolab_candidate_artifact_validation_v1",
@@ -70,6 +102,9 @@ def build_report(*, source_paths: list[Path], qa_paths: list[Path]) -> dict[str,
         ],
         "summary": {
             "artifact_count": len(artifacts),
+            "source_candidate_count": len(source_paths),
+            "qa_candidate_count": len(qa_paths),
+            "blocked_report_count": len(blocked_paths or []),
             "passed_artifact_count": int(status_counts.get("pass", 0)),
             "warning_artifact_count": int(status_counts.get("warning", 0)),
             "failed_artifact_count": int(status_counts.get("fail", 0)),
@@ -158,6 +193,55 @@ def validate_qa_candidate(path: Path) -> dict[str, Any]:
     return result
 
 
+def validate_blocked_report(path: Path) -> dict[str, Any]:
+    payload, load_errors = _read_object(path)
+    errors = list(load_errors)
+    warnings: list[str] = []
+    attempted_count = 0
+    failure_counts: Counter[str] = Counter()
+    if payload:
+        if payload.get("schema_version") != BLOCKED_SCHEMA:
+            errors.append(f"schema_version_expected_{BLOCKED_SCHEMA}")
+        _require_keys(payload, BLOCKED_REQUIRED, errors)
+        if not _safe_slug(str(payload.get("job_id", ""))):
+            errors.append("job_id_not_safe_slug")
+        if payload.get("candidate_count") != 0:
+            errors.append("candidate_count_must_be_0_for_blocked_report")
+        recommendation = str(payload.get("recommendation", "")).strip()
+        if recommendation and recommendation not in ALLOWED_BLOCKED_RECOMMENDATIONS:
+            errors.append(f"bad_recommendation:{recommendation}")
+        attempted_urls = payload.get("attempted_urls")
+        if not isinstance(attempted_urls, list) or not attempted_urls:
+            errors.append("attempted_urls_must_be_nonempty_list")
+            attempted_urls = []
+        attempted_count = len(attempted_urls)
+        for index, item in enumerate(attempted_urls, start=1):
+            if not isinstance(item, dict):
+                errors.append(f"attempted_url_{index}_not_object")
+                continue
+            url = str(item.get("url", "")).strip()
+            failure_mode = str(item.get("failure_mode", "")).strip()
+            if not url:
+                errors.append(f"attempted_url_{index}_missing_url")
+            elif not (url.startswith("http://") or url.startswith("https://")):
+                warnings.append(f"attempted_url_{index}_not_http_url")
+            if not failure_mode:
+                errors.append(f"attempted_url_{index}_missing_failure_mode")
+            elif failure_mode not in ALLOWED_BLOCKED_FAILURE_MODES:
+                errors.append(f"attempted_url_{index}_bad_failure_mode:{failure_mode}")
+            if failure_mode:
+                failure_counts[failure_mode] += 1
+        if attempted_count < 2:
+            warnings.append("blocked_report_has_fewer_than_two_attempts")
+    result = _artifact_result(path, "blocked_report", payload, errors, warnings)
+    result["blocked"] = {
+        "attempted_url_count": attempted_count,
+        "failure_mode_counts": dict(sorted(failure_counts.items())),
+        "recommendation": str(payload.get("recommendation", "")).strip() if payload else "",
+    }
+    return result
+
+
 def render_text(report: dict[str, Any]) -> str:
     summary = report.get("summary", {}) if isinstance(report.get("summary"), dict) else {}
     lines = [
@@ -174,6 +258,8 @@ def render_text(report: dict[str, Any]) -> str:
         ]
         if artifact.get("qa"):
             bits.append(f"rows={artifact['qa'].get('row_count', 0)}")
+        if artifact.get("blocked"):
+            bits.append(f"attempts={artifact['blocked'].get('attempted_url_count', 0)}")
         if artifact.get("errors"):
             bits.append("errors=" + ",".join(str(item) for item in artifact.get("errors", [])[:3]))
         if artifact.get("warnings"):

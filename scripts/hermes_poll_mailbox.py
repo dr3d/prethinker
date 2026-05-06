@@ -202,6 +202,20 @@ def run_prompt_job(running_path: Path) -> tuple[bool, str, dict[str, Any]]:
                     "venv": venv_metadata(env),
                 },
             )
+        failed_validations = failed_required_validation_reports(running_path) if ok else []
+        if failed_validations:
+            return (
+                False,
+                "Hermes runner finished, but required validation reports had failures.",
+                {
+                    "returncode": proc.returncode,
+                    "stdout_tail": proc.stdout[-8000:],
+                    "stderr_tail": proc.stderr[-8000:],
+                    "runner": str(runner),
+                    "failed_required_validation_reports": failed_validations,
+                    "venv": venv_metadata(env),
+                },
+            )
         return (
             ok,
             "Hermes runner finished.",
@@ -231,6 +245,16 @@ def required_artifacts_for_markdown(path: Path) -> list[str]:
     return artifacts
 
 
+def required_validation_reports_for_markdown(path: Path) -> list[str]:
+    text = path.read_text(encoding="utf-8", errors="replace")
+    reports: list[str] = []
+    for match in re.finditer(r"(?m)^required_validation_report:\s*(.+?)\s*$", text):
+        report = match.group(1).strip().strip("`")
+        if report:
+            reports.append(report)
+    return reports
+
+
 def missing_required_artifacts(path: Path) -> list[str]:
     missing: list[str] = []
     for artifact in required_artifacts_for_markdown(path):
@@ -240,6 +264,30 @@ def missing_required_artifacts(path: Path) -> list[str]:
         if not resolved.exists():
             missing.append(str(resolved))
     return missing
+
+
+def failed_required_validation_reports(path: Path) -> list[dict[str, Any]]:
+    failures: list[dict[str, Any]] = []
+    for report in required_validation_reports_for_markdown(path):
+        resolved = Path(report)
+        if not resolved.is_absolute():
+            resolved = REPO / resolved
+        if not resolved.exists():
+            failures.append({"path": str(resolved), "error": "validation_report_missing"})
+            continue
+        try:
+            payload = json.loads(resolved.read_text(encoding="utf-8-sig"))
+        except json.JSONDecodeError as exc:
+            failures.append({"path": str(resolved), "error": f"validation_report_invalid_json:{exc.msg}"})
+            continue
+        if not isinstance(payload, dict):
+            failures.append({"path": str(resolved), "error": "validation_report_root_not_object"})
+            continue
+        summary = payload.get("summary", {}) if isinstance(payload.get("summary"), dict) else {}
+        failed_count = int(summary.get("failed_artifact_count", 0) or 0)
+        if failed_count:
+            failures.append({"path": str(resolved), "failed_artifact_count": failed_count})
+    return failures
 
 
 def autolab_env() -> dict[str, str]:

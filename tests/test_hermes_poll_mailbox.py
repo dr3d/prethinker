@@ -157,3 +157,61 @@ def test_prompt_job_required_artifact_parser_resolves_relative_paths(monkeypatch
     missing = poller.missing_required_artifacts(prompt)
     assert str(existing) not in missing
     assert any(item.replace("\\", "/").endswith("/missing/absolute/report.json") for item in missing)
+
+
+def test_prompt_job_required_validation_report_detects_failures(monkeypatch, tmp_path) -> None:
+    poller = _load_poller(monkeypatch, tmp_path)
+    prompt = poller.REPO / "job.md"
+    prompt.write_text(
+        "\n".join(
+            [
+                "job_id: validation_check",
+                "required_validation_report: validation/candidate_validation.json",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    validation = poller.REPO / "validation" / "candidate_validation.json"
+    validation.parent.mkdir(parents=True)
+    validation.write_text(
+        json.dumps(
+            {
+                "schema_version": "autolab_candidate_artifact_validation_v1",
+                "summary": {"failed_artifact_count": 1},
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    assert poller.required_validation_reports_for_markdown(prompt) == ["validation/candidate_validation.json"]
+    failures = poller.failed_required_validation_reports(prompt)
+    assert failures == [{"path": str(validation), "failed_artifact_count": 1}]
+
+
+def test_prompt_job_required_validation_report_accepts_zero_failures(monkeypatch, tmp_path) -> None:
+    poller = _load_poller(monkeypatch, tmp_path)
+    prompt = poller.REPO / "job.md"
+    prompt.write_text(
+        "\n".join(
+            [
+                "job_id: validation_check",
+                "required_validation_report: validation/candidate_validation.json",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    validation = poller.REPO / "validation" / "candidate_validation.json"
+    validation.parent.mkdir(parents=True)
+    validation.write_text(
+        json.dumps(
+            {
+                "schema_version": "autolab_candidate_artifact_validation_v1",
+                "summary": {"failed_artifact_count": 0},
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    assert poller.failed_required_validation_reports(prompt) == []

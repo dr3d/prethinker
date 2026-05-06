@@ -14,6 +14,7 @@ from typing import Any
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SOURCE_SCHEMA = "autolab_source_candidate_v1"
 QA_SCHEMA = "autolab_candidate_qa_v1"
+BLOCKED_SCHEMA = "autolab_source_hunt_blocked_v1"
 
 
 def parse_args() -> argparse.Namespace:
@@ -45,6 +46,7 @@ def main() -> int:
 def build_report(*, root: Path) -> dict[str, Any]:
     source_candidates: list[dict[str, Any]] = []
     qa_candidates: list[dict[str, Any]] = []
+    blocked_reports: list[dict[str, Any]] = []
     validation_reports: list[dict[str, Any]] = []
     for path in sorted(root.rglob("*.json")) if root.exists() else []:
         payload = _read_json(path)
@@ -53,6 +55,8 @@ def build_report(*, root: Path) -> dict[str, Any]:
             source_candidates.append(_source_summary(path, payload))
         elif schema == QA_SCHEMA:
             qa_candidates.append(_qa_summary(path, payload))
+        elif schema == BLOCKED_SCHEMA:
+            blocked_reports.append(_blocked_summary(path, payload))
         elif schema == "autolab_candidate_artifact_validation_v1":
             validation_reports.append(_validation_summary(path, payload))
     hard_surface_counts = Counter(
@@ -75,12 +79,14 @@ def build_report(*, root: Path) -> dict[str, Any]:
         "summary": {
             "source_candidate_count": len(source_candidates),
             "qa_candidate_count": len(qa_candidates),
+            "blocked_report_count": len(blocked_reports),
             "validation_report_count": len(validation_reports),
             "hard_surface_counts": dict(sorted(hard_surface_counts.items())),
             "qa_surface_counts": dict(sorted(qa_surface_counts.items())),
         },
         "source_candidates": source_candidates,
         "qa_candidates": qa_candidates,
+        "blocked_reports": blocked_reports,
         "validation_reports": validation_reports,
     }
 
@@ -91,6 +97,7 @@ def render_text(report: dict[str, Any]) -> str:
         "Autolab candidate batch summary\n"
         f"sources={summary.get('source_candidate_count', 0)} "
         f"qa={summary.get('qa_candidate_count', 0)} "
+        f"blocked={summary.get('blocked_report_count', 0)} "
         f"validations={summary.get('validation_report_count', 0)}"
     )
 
@@ -102,6 +109,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- root: `{report.get('root', '')}`",
         f"- source candidates: `{report.get('summary', {}).get('source_candidate_count', 0)}`",
         f"- QA candidates: `{report.get('summary', {}).get('qa_candidate_count', 0)}`",
+        f"- blocked reports: `{report.get('summary', {}).get('blocked_report_count', 0)}`",
         f"- validation reports: `{report.get('summary', {}).get('validation_report_count', 0)}`",
         "",
         "## Source Candidates",
@@ -123,6 +131,20 @@ def render_markdown(report: dict[str, Any]) -> str:
         )
     if not report.get("source_candidates"):
         lines.extend(["No source candidates found.", ""])
+    if report.get("blocked_reports"):
+        lines.extend(["## Blocked Reports", ""])
+        for blocked in report.get("blocked_reports", []):
+            lines.extend(
+                [
+                    f"### {blocked.get('job_id', '')}",
+                    "",
+                    f"- recommendation: `{blocked.get('recommendation', '')}`",
+                    f"- attempted_urls: `{blocked.get('attempted_url_count', 0)}`",
+                    f"- failure_modes: `{blocked.get('failure_mode_counts', {})}`",
+                    f"- artifact: `{blocked.get('path', '')}`",
+                    "",
+                ]
+            )
     if report.get("qa_candidates"):
         lines.extend(["## QA Candidates", ""])
         for candidate in report.get("qa_candidates", []):
@@ -163,6 +185,20 @@ def _qa_summary(path: Path, payload: dict[str, Any]) -> dict[str, Any]:
         "row_count": len(rows),
         "surface_counts": dict(sorted((key, value) for key, value in surface_counts.items() if key)),
         "mode_counts": dict(sorted((key, value) for key, value in mode_counts.items() if key)),
+    }
+
+
+def _blocked_summary(path: Path, payload: dict[str, Any]) -> dict[str, Any]:
+    attempted_urls = payload.get("attempted_urls", []) if isinstance(payload.get("attempted_urls", []), list) else []
+    failure_counts = Counter(
+        str(item.get("failure_mode", "")).strip() for item in attempted_urls if isinstance(item, dict)
+    )
+    return {
+        "job_id": str(payload.get("job_id", "")).strip(),
+        "path": _display_path(path),
+        "attempted_url_count": len(attempted_urls),
+        "failure_mode_counts": dict(sorted((key, value) for key, value in failure_counts.items() if key)),
+        "recommendation": str(payload.get("recommendation", "")).strip(),
     }
 
 

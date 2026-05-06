@@ -121,6 +121,31 @@ a failed job when `required_artifact:` paths are missing. The next hunter skill
 iteration should be even more artifact-first: create the run directory and a
 summary file before web search, then update those files as work proceeds.
 
+The next iteration adds a first-class blocked-hunt artifact. This is not a
+loophole for doing less work; it is the honest source-hunter equivalent of an
+epistemic state. If access fails before a real source packet can be validated,
+the hunter should write `source_hunt_blocked.json`, run the validator, update
+the summary files, and stop without fabricating candidates.
+
+```json
+{
+  "schema_version": "autolab_source_hunt_blocked_v1",
+  "job_id": "wildbench_source_only_...",
+  "attempted_urls": [
+    {"url": "https://...", "failure_mode": "bot_block | 404 | timeout | no_results | network_blocked | access_denied | parse_error | other"}
+  ],
+  "candidate_count": 0,
+  "recommendation": "retry_domain | use_local_cache | reject_hunt",
+  "notes": "short operational note"
+}
+```
+
+Meaning lesson: a blocked source hunt is different from a failed agent. The
+artifact says the bench attempted bounded source acquisition, found no
+admissible source packet, and preserved the operational reason. That lets Codex
+choose a better hunting ground, local cache, or rejection without rewarding
+stdout-only "success" or encouraging the agent to invent evidence.
+
 ## Skill 2: QA Drafter
 
 Purpose: draft questions that expose whether the compiled KB captured the

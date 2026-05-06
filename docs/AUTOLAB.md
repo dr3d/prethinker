@@ -111,6 +111,9 @@ Markdown jobs that must produce files should declare them with repeated
 `required_artifact:` header lines. The poller marks a prompt job failed if the
 Hermes runner exits successfully but those artifacts are missing. This prevents
 stdout-only "success" when the research product was supposed to be files.
+Jobs can also declare `required_validation_report:` for a JSON validator output
+that contains `summary.failed_artifact_count`; the poller marks the job failed
+if that count is nonzero. Use this when mere file existence is not enough.
 
 JSON jobs are deterministic smoke jobs for the poller itself. The tracked
 poller currently supports `kind: "shell"` JSON jobs for simple plumbing checks.
@@ -167,6 +170,14 @@ python scripts/autolab_queue_wildbench_pilot.py --source-only --candidate-count 
 
 That asks only for one source candidate and validation. QA drafting can follow
 after Codex reviews whether the source is real and useful.
+
+If source access is blocked, a source-only job should write a valid
+`autolab_source_hunt_blocked_v1` report such as
+`source_hunt_blocked.json`, then run the same validator. This is the honest
+success path for "no candidate produced because access failed." It is distinct
+from a missing-artifact failure and distinct from a usable source candidate.
+The hunter should not bury blocked findings only in stdout, and it should not
+fabricate a `source.md` to satisfy a file contract.
 
 The live runner should remain bounded. A 600-second timeout is a better default
 for small-model markdown jobs than the original 180-second smoke value, and it
