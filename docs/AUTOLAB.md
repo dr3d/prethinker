@@ -172,6 +172,12 @@ The live runner should remain bounded. A 600-second timeout is a better default
 for small-model markdown jobs than the original 180-second smoke value, and it
 can be overridden with `HERMES_RUNNER_TIMEOUT_SECONDS` when needed.
 
+Important runner lesson from the first wildbench pilots: without the `chat`
+subcommand, Hermes may emit tool-call-looking text without actually creating
+files. The mailbox runner should use the `chat` subcommand for markdown jobs
+that need filesystem artifacts, and the poller should enforce
+`required_artifact:` postconditions.
+
 Review a completed candidate batch with:
 
 ```bash

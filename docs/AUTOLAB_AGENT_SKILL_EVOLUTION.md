@@ -113,6 +113,14 @@ python scripts/summarize_autolab_candidate_batch.py --root tmp/hermes_mailbox/ru
 The summarizer reads only candidate JSON and validation JSON. It does not score
 source quality or decide promotion.
 
+Early live result: the first source-only wildbench pilots proved the review
+gate is necessary. Hermes could identify plausible public-source targets and
+report government-site access blocks, but it tended to put the report in stdout
+instead of writing the requested candidate files. The poller now treats that as
+a failed job when `required_artifact:` paths are missing. The next hunter skill
+iteration should be even more artifact-first: create the run directory and a
+summary file before web search, then update those files as work proceeds.
+
 ## Skill 2: QA Drafter
 
 Purpose: draft questions that expose whether the compiled KB captured the

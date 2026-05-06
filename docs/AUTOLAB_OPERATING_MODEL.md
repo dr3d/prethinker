@@ -127,8 +127,12 @@ Autolab researchers can safely do work like this:
 Hermes should prefer one-shot mode, currently:
 
 ```bash
-hermes -z "<bounded prompt>"
+hermes -z "<bounded prompt>" -m "$MODEL" --provider custom --yolo chat
 ```
+
+The `chat` subcommand matters for artifact-producing jobs. Without it, Hermes
+can return tool-call-looking text without actually writing the files that
+Autolab needs to review.
 
 For Qwen-family control-plane prompts, prepend the mailbox state prefix:
 
