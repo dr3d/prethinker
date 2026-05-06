@@ -4,14 +4,16 @@ Last updated: 2026-05-06
 
 ## The Short Version
 
-Prethinker Autolab is a research factory for the harness.
+Prethinker Autolab is a research division inside the Prethinker lab: the group
+that lines up challenges, runs bounded experiments, and reports what broke.
 
-Hermes does bounded worker jobs on the laptop. Prethinker does governed
-semantic compilation and QA. Codex reviews the evidence, changes the harness,
-updates the durable record, and pushes the repo.
+Hermes and its possible subagents are the non-coding research staff on the
+laptop. Prethinker does governed semantic compilation and QA through the heavy
+workhorse model. Codex reviews the evidence, changes the harness, updates the
+durable record, and pushes the repo.
 
 ```text
-Hermes farms work.
+Autolab lines up challenges.
 Prethinker produces governed artifacts.
 Codex improves the instrument.
 ```
@@ -42,18 +44,41 @@ helpers, admission policies, repair gates, and documentation.
 
 | Actor | Job |
 | --- | --- |
-| Hermes | Worker. Runs bounded mailbox jobs, farms fixtures, drafts QA, launches compile/QA commands, writes outbox summaries. |
+| Autolab | Research division. Organizes challenge hunting, fixture farming, QA drafting, scoring runs, summaries, and artifact flow. |
+| Hermes | Worker/research coordinator. Runs bounded mailbox jobs and may delegate to specialized subagents when the job benefits from separate roles. |
+| Finder subagents | Hunt for source material, fixture candidates, domain surfaces, and useful challenge shapes. |
+| QA subagents | Draft candidate questions, answer expectations, and coverage rosters as artifacts for later scoring and review. |
+| Grader/diagnostic subagents | Summarize scores, classify operational failures, and cluster failure signals without changing harness code. |
 | Prethinker | Semantic engine. Uses LLM calls to propose structured semantic workspaces, then deterministic Python admits, rejects, queries, and scores. |
-| Desktop LM Studio | Heavy semantic lane for Prethinker compile, QA, judging, and classification jobs. |
+| Desktop LM Studio | Heavy semantic lane for Prethinker compile, QA, judging, and classification jobs; currently the 35B workhorse. |
 | Laptop LM Studio | Light Hermes control-plane lane. It should follow instructions, not architect the project. |
-| Codex | Lab lead and instrument engineer. Reads results, detects patterns, changes harness code, updates docs/journals, runs tests, commits, and pushes. |
+| Codex | Code-master, lab lead, and instrument engineer. Reads results, detects patterns, changes harness code, updates docs/journals, runs tests, commits, and pushes. |
 | GitHub | Durable source history and recovery line. |
 | Mailbox | Operational queue and scratch space, not the permanent research record. |
 
-Hermes is deliberately treated as a diligent but literal worker. That is a
-strength. The small model should not be asked to redesign the compiler, invent
-global lenses, or silently edit tracked harness files. It should do small,
-observable jobs and stop.
+The Autolab researchers can be capable. They may need to understand what kind
+of source surface is being hunted, what makes a good hostile QA row, or what
+kind of failure signal is worth surfacing. But they are not the coders. The
+small model should not be asked to redesign the compiler, invent global lenses,
+or silently edit tracked harness files. It should do small, observable jobs and
+stop.
+
+## Research Roles
+
+Autolab can grow specialized roles as the work becomes clearer:
+
+| Role | Hunts For | Output |
+| --- | --- | --- |
+| Source finder | Real documents with rules, dates, entities, corrections, claims, thresholds, and exceptions. | Clean source packet plus provenance notes. |
+| Domain scout | Repeated domain patterns that might stress profiles or lens coverage. | Domain surface brief and fixture candidate list. |
+| Fixture builder | Source-to-fixture packaging and metadata alignment. | Staged fixture folder or intake packet. |
+| QA drafter | Questions that expose direct facts, authority, temporal state, counterfactuals, absences, and rule composition. | Candidate QA battery and coverage notes. |
+| Grader | Score summaries and artifact rollups. | Outbox report with exact/partial/miss counts and failure surfaces. |
+| Failure scout | Cross-run patterns such as compile gaps, query gaps, selector risks, and zombie loops. | Pattern report for Codex review. |
+
+These roles are allowed to line up better challenges. They are not allowed to
+promote harness behavior. Promotion remains a Codex decision backed by tests,
+scorecards, transfer checks, and repo docs.
 
 ## The Research Loop
 
@@ -74,7 +99,7 @@ That turns the GPU from one big thinker into a small research factory.
 
 ## What Hermes May Do
 
-Hermes can safely do work like this:
+Autolab researchers can safely do work like this:
 
 - run no-model smoke checks;
 - pull `origin/main` when explicitly asked;
