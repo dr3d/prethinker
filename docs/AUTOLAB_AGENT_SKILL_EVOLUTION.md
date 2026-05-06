@@ -78,6 +78,12 @@ Hunter output should be structured:
 The hunter must not rewrite source facts into a cleaner story. It can clean
 HTML/PDF clutter, preserve provenance, and label why the source looks useful.
 
+Candidate source artifacts can be checked with:
+
+```bash
+python scripts/validate_autolab_candidate_artifacts.py --source-candidate path/to/source_candidate.json
+```
+
 ## Skill 2: QA Drafter
 
 Purpose: draft questions that expose whether the compiled KB captured the
@@ -121,6 +127,12 @@ QA output should be structured:
 The QA drafter should not write oracle answers unless a later job explicitly
 asks for answer-key drafting. In the wildbench path, source-faithful judging can
 compare Prethinker answers to the source packet later.
+
+Candidate QA artifacts can be checked with:
+
+```bash
+python scripts/validate_autolab_candidate_artifacts.py --qa-candidate path/to/qa_candidate.json
+```
 
 ## Zombie-Inducing Content
 

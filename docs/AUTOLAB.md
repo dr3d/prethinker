@@ -135,6 +135,15 @@ summaries, artifact comparison reports, and failure triage rows. Bad outputs
 include open-ended architecture plans, silent code edits, or unbounded chat
 transcripts.
 
+For hunter and QA-drafter candidate packets, use:
+
+```bash
+python scripts/validate_autolab_candidate_artifacts.py --root tmp/hermes_mailbox/runs/candidate_batch
+```
+
+That validator checks JSON shape and oracle-boundary hygiene only. It does not
+interpret source prose or decide whether a candidate deserves promotion.
+
 ## Safe Conveyor Belt
 
 Codex is not an always-on daemon. To keep the laptop useful while Codex is away,
