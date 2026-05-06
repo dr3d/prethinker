@@ -10,6 +10,12 @@ This is not "English to Prolog by vibes." It is a research workbench for control
 
 Current center: a live `ui_gateway` console backed by `src/mcp_server.py`, the `semantic_router_v1 -> semantic_ir_v1` runtime path with `qwen/qwen3.6-35b-a3b`, profile-aware admission, scoped Epistemic Worlds diagnostics, multi-pass semantic compilation, and starter domain lanes for bounded medical/UMLS, legal-source intake, SEC/contracts, story worlds, and enterprise guidance.
 
+```text
+Autolab lines up challenges.
+Prethinker produces governed artifacts.
+Codex improves the instrument.
+```
+
 ![Prethinker semantic IR workspace](docs/assets/prethinker-semantic-ir-workspace.png)
 
 ## Read First
@@ -21,6 +27,7 @@ Current center: a live `ui_gateway` console backed by `src/mcp_server.py`, the `
 - [Active research lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md) - how current GPU/research cycles are prioritized.
 - [Current harness instrument](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_HARNESS_INSTRUMENT.md) - scorecards, selectors, risk gates, and repair queues.
 - [Prethinker Autolab](https://github.com/dr3d/prethinker/blob/main/docs/AUTOLAB.md) - mailbox/cron/Hermes loop for out-of-band harness testing.
+- [Autolab operating model](https://github.com/dr3d/prethinker/blob/main/docs/AUTOLAB_OPERATING_MODEL.md) - lab roles: Autolab lines up challenges, Prethinker produces artifacts, Codex improves the instrument.
 - [Public docs guide](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md) - reading order for deeper technical material.
 - [Docs and evidence hub](https://dr3d.github.io/prethinker/) - public docs, current research map, and curated evidence.
 - [Full design explainer](https://github.com/dr3d/prethinker/blob/main/docs/EXPLAINER.md) - the short conceptual tour.

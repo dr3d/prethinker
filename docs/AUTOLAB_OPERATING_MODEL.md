@@ -67,6 +67,10 @@ stop.
 
 Autolab can grow specialized roles as the work becomes clearer:
 
+These roles are planned operating shapes. The current pilot uses Hermes
+directly for all of them until repeated failure surfaces justify splitting a
+job into a specialized agent role.
+
 | Role | Hunts For | Output |
 | --- | --- | --- |
 | Source finder | Real documents with rules, dates, entities, corrections, claims, thresholds, and exceptions. | Clean source packet plus provenance notes. |
@@ -92,6 +96,9 @@ Codex writes a job packet
   -> a result summary lands in tmp/hermes_mailbox/outbox/
   -> Codex reviews, journals durable lessons, and changes the harness if warranted
 ```
+
+If `PAUSE_HERMES.flag` exists in the mailbox root, Autolab must stop claiming
+jobs and wait. This is the human kill switch.
 
 The loop is artifact-first. Compile once, persist everything, then run many
 cheap parallax, selector, QA, and diagnostic passes against frozen artifacts.
