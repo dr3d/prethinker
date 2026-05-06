@@ -194,6 +194,12 @@ should use artifact-level row selection or focused variants, not global prompt
 growth. The reproducible scorecard command is
 `scripts/rollup_domain_bootstrap_qa_scorecard.py`, with the current local
 artifact at `tmp/story_world_cold_qa/avalon_oxalis_three_moles_scorecard.md`.
+The repair planner now accepts that generic scorecard shape and names the
+frontier slices as `narrative_event_detail_surface`
+(`12` targets), `governance_authority_rationale_surface` (`6`), and
+`object_state_transition_surface` (`1`), plus `4` rows still too generic for a
+named acquisition family. This is the next useful pegboard: narrative concrete
+detail and governance authority/rationale, not another broad compile prompt.
 
 New zip-batch update: Ashgrove Permit, Fenmore Seedbank, Greywell Pipeline,
 Heronvale Arts, and Veridia Intake are promoted into `datasets/story_worlds`

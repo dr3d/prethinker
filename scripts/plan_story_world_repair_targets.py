@@ -18,6 +18,33 @@ PREDICATE_RE = re.compile(r"\b([a-z][A-Za-z0-9_]*)\s*\(")
 
 LENS_RULES: tuple[tuple[str, set[str], str], ...] = (
     (
+        "governance_authority_rationale_surface",
+        {
+            "application_status",
+            "eligibility_determination",
+            "interpretation_text",
+            "member_recused",
+            "prior_grant_history",
+            "quorum_met",
+            "rule_clarified",
+            "rule_exception",
+            "vote_result",
+        },
+        "governance authority, recusal, quorum, interpretation, and eligibility-rationale rows need source-surface coverage",
+    ),
+    (
+        "narrative_event_detail_surface",
+        {
+            "causes",
+            "event",
+            "has_property",
+            "judged",
+            "precedes",
+            "said",
+        },
+        "narrative event, speech, judgment, and concrete-detail predicates need source-surface coverage",
+    ),
+    (
         "object_state_transition_surface",
         {
             "initial_state",
@@ -231,10 +258,11 @@ def build_repair_plan(
 ) -> dict[str, Any]:
     fixture_filter = fixture_filter or set()
     targets: list[dict[str, Any]] = []
-    for fixture in scorecard.get("fixtures", []) if isinstance(scorecard.get("fixtures"), list) else []:
+    fixture_rows = _scorecard_fixture_rows(scorecard)
+    for fixture in fixture_rows:
         if not isinstance(fixture, dict):
             continue
-        fixture_name = str(fixture.get("fixture", ""))
+        fixture_name = str(fixture.get("fixture") or fixture.get("label") or "")
         if fixture_filter and fixture_name not in fixture_filter:
             continue
         for row in fixture.get("non_exact_rows", []) if isinstance(fixture.get("non_exact_rows"), list) else []:
@@ -266,6 +294,16 @@ def build_repair_plan(
         },
         "targets": targets,
     }
+
+
+def _scorecard_fixture_rows(scorecard: dict[str, Any]) -> list[Any]:
+    fixtures = scorecard.get("fixtures")
+    if isinstance(fixtures, list):
+        return fixtures
+    artifacts = scorecard.get("artifacts")
+    if isinstance(artifacts, list):
+        return artifacts
+    return []
 
 
 def render_markdown(report: dict[str, Any]) -> str:

@@ -104,6 +104,10 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
   instruction regressed to `16 / 9 / 15`, and a cleaner Oxalis
   recall/regulatory domain hint regressed to `24 / 11 / 5`. The batch is now
   reproducible through `scripts/rollup_domain_bootstrap_qa_scorecard.py`.
+  `scripts/plan_story_world_repair_targets.py` now accepts that generic
+  scorecard shape and names the current top slices as
+  `narrative_event_detail_surface` and
+  `governance_authority_rationale_surface`.
 - Cross-fixture repair planning is available through
   `scripts/plan_cross_fixture_repair_slices.py`, with the current report at
   `docs/CROSS_FIXTURE_REPAIR_SLICES.md`. It merges the older full-40 repair
