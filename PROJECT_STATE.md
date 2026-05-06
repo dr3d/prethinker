@@ -14,6 +14,8 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
   by `src/kb_pipeline_clean`, captures canonical structural signatures while
   delegating behavior to the live compiler/runtime path.
 - Harness instrument reference: `docs/CURRENT_HARNESS_INSTRUMENT.md`.
+- Autolab reference: `docs/AUTOLAB.md`, the mailbox/cron/Hermes loop for
+  out-of-band harness testing and research-factory jobs.
 - Research prioritization: `docs/ACTIVE_RESEARCH_LANES.md`.
 - UI: `ui_gateway/`, served locally by `python ui_gateway/main.py` using the stdlib `ThreadingHTTPServer`.
 - Active profile: `medical@v0`; active profile-lane experiments: `legal_courtlistener@v0` and `sec_contracts@v0`.
