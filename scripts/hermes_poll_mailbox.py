@@ -79,6 +79,13 @@ def write_result(job_id: str, title: str, body: str, extra: dict[str, Any] | Non
     return result
 
 
+def read_json(path: Path) -> dict[str, Any]:
+    data = json.loads(path.read_text(encoding="utf-8-sig"))
+    if isinstance(data, dict):
+        return data
+    return {}
+
+
 def parse_job_id(path: Path) -> str:
     text = path.read_text(encoding="utf-8", errors="replace")[:2000]
     match = re.search(r"(?m)^job_id:\s*([A-Za-z0-9_.:-]+)\s*$", text)
@@ -86,7 +93,7 @@ def parse_job_id(path: Path) -> str:
         return re.sub(r"[^A-Za-z0-9_.-]+", "_", match.group(1))
     if path.suffix.lower() == ".json":
         try:
-            data = json.loads(path.read_text(encoding="utf-8"))
+            data = read_json(path)
         except Exception:
             data = {}
         if isinstance(data, dict) and str(data.get("job_id", "")).strip():
@@ -195,7 +202,7 @@ def run_prompt_job(running_path: Path) -> tuple[bool, str, dict[str, Any]]:
 
 def process_running_job(job_id: str, running_path: Path) -> tuple[bool, str, dict[str, Any]]:
     if running_path.suffix.lower() == ".json":
-        data = json.loads(running_path.read_text(encoding="utf-8"))
+        data = read_json(running_path)
         if data.get("kind") == "shell":
             return run_shell_job(data)
         return False, f"Unsupported JSON job kind: {data.get('kind')!r}", {"job": data}

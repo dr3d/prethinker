@@ -46,6 +46,26 @@ def test_poller_runs_json_shell_job_once(monkeypatch, tmp_path) -> None:
     assert list(poller.ARCHIVE.glob("*shell_smoke.json"))
 
 
+def test_json_shell_job_accepts_utf8_bom(monkeypatch, tmp_path) -> None:
+    poller = _load_poller(monkeypatch, tmp_path)
+    poller.ensure_dirs()
+    job = {
+        "job_id": "bom_smoke",
+        "kind": "shell",
+        "commands": ["echo bom_smoke"],
+        "timeout_seconds": 30,
+    }
+    (poller.INBOX / "bom_smoke.json").write_text(json.dumps(job), encoding="utf-8-sig")
+
+    assert poller.process_one() == 0
+
+    result = poller.OUTBOX / "bom_smoke_result.md"
+    assert result.exists()
+    assert "Hermes Mailbox Job Success" in result.read_text(encoding="utf-8")
+    assert not (poller.INBOX / "bom_smoke.json").exists()
+    assert list(poller.ARCHIVE.glob("*bom_smoke.json"))
+
+
 def test_poller_processes_at_most_one_job_per_invocation(monkeypatch, tmp_path) -> None:
     poller = _load_poller(monkeypatch, tmp_path)
     poller.ensure_dirs()
