@@ -95,6 +95,15 @@ packets, cleaned source text, source-candidate JSON, QA-candidate JSON, a local
 validator run, and a short summary. It explicitly forbids tracked code edits,
 heavy compiles, and desktop-model calls.
 
+For the small laptop control model, prefer staged pilots first:
+
+```powershell
+python scripts/autolab_queue_wildbench_pilot.py --source-only --candidate-count 1
+```
+
+Source-only hunting is intentionally humbler. It proves the web/provenance and
+candidate-artifact path before asking the same small model to draft QA.
+
 ## Skill 2: QA Drafter
 
 Purpose: draft questions that expose whether the compiled KB captured the

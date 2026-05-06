@@ -18,6 +18,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--job-id", default="")
     parser.add_argument("--candidate-count", type=int, default=2)
     parser.add_argument("--qa-rows", type=int, default=12)
+    parser.add_argument("--source-only", action="store_true", help="Queue only source-hunter artifacts.")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--out-md", type=Path, default=None)
     return parser.parse_args()
@@ -29,7 +30,12 @@ def main() -> int:
     candidate_count = max(1, min(int(args.candidate_count), 4))
     qa_rows = max(10, min(int(args.qa_rows), 25))
     mailbox = _resolve_mailbox(args.mailbox)
-    markdown = build_job_markdown(job_id=job_id, candidate_count=candidate_count, qa_rows=qa_rows)
+    markdown = build_job_markdown(
+        job_id=job_id,
+        candidate_count=candidate_count,
+        qa_rows=qa_rows,
+        source_only=bool(args.source_only),
+    )
     out_path = _resolve_out_path(args.out_md, mailbox=mailbox, job_id=job_id)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(markdown, encoding="utf-8")
@@ -39,13 +45,15 @@ def main() -> int:
     return 0
 
 
-def build_job_markdown(*, job_id: str, candidate_count: int, qa_rows: int) -> str:
+def build_job_markdown(*, job_id: str, candidate_count: int, qa_rows: int, source_only: bool = False) -> str:
     run_dir = f"tmp/hermes_mailbox/runs/{job_id}"
+    role = "autolab_source_hunter" if source_only else "autolab_source_hunter_and_qa_drafter"
+    candidate_dirs = [f"`{run_dir}/candidate_{index:03d}/`" for index in range(1, candidate_count + 1)]
     lines = [
         f"job_id: {job_id}",
         "kind: markdown",
         "priority: exploratory",
-        "role: autolab_source_hunter_and_qa_drafter",
+        f"role: {role}",
         "local_lmstudio_base_url: http://127.0.0.1:1234/v1",
         "heavy_lmstudio_base_url: http://192.168.0.150:1234/v1",
         "",
@@ -72,8 +80,7 @@ def build_job_markdown(*, job_id: str, candidate_count: int, qa_rows: int) -> st
         "",
         "For each candidate, create a subdirectory:",
         "",
-        f"`{run_dir}/candidate_001/`",
-        f"`{run_dir}/candidate_002/`",
+        *candidate_dirs,
         "",
         "Use more candidate directories only if this job asked for more than two candidates.",
         "",
@@ -81,79 +88,100 @@ def build_job_markdown(*, job_id: str, candidate_count: int, qa_rows: int) -> st
         "",
         "- `source.md`: cleaned source text with provenance URL at the top.",
         "- `source_candidate.json`: one source-hunter artifact.",
-        "- `qa_candidate.json`: one QA-drafter artifact.",
-        "",
-        "Also write:",
-        "",
-        f"- `{run_dir}/wildbench_pilot_summary.md`",
-        f"- `{run_dir}/wildbench_pilot_summary.json`",
-        "",
-        "## Source Candidate JSON",
-        "",
-        "Use exactly this schema shape:",
-        "",
-        "```json",
-        "{",
-        '  "schema_version": "autolab_source_candidate_v1",',
-        '  "candidate_id": "short_safe_slug",',
-        '  "source_url": "https://...",',
-        '  "domain_label": "regulatory | governance | archive | safety | policy | other",',
-        '  "why_it_is_hard": ["temporal_status", "authority_chain"],',
-        '  "expected_sparse_score": "low | medium | high",',
-        '  "provenance_notes": "short note",',
-        f'  "source_text_path": "{run_dir}/candidate_001/source.md",',
-        '  "do_not_use_reason": ""',
-        "}",
-        "```",
-        "",
-        "## QA Candidate JSON",
-        "",
-        f"Write exactly {qa_rows} QA rows per candidate. Do not include answer keys.",
-        "At least one row should have `expected_answer_mode` of `uncertain`, `not_established`, or `clarification`.",
-        "Cover at least three `surface_family` values.",
-        "",
-        "Use exactly this schema shape:",
-        "",
-        "```json",
-        "{",
-        '  "schema_version": "autolab_candidate_qa_v1",',
-        '  "source_candidate_id": "short_safe_slug",',
-        '  "rows": [',
-        "    {",
-        '      "qid": "q001",',
-        '      "question": "What does the source establish about X?",',
-        '      "surface_family": "temporal_status",',
-        '      "expected_answer_mode": "exact | uncertain | not_established | clarification",',
-        '      "source_anchor": "short section label or short quote",',
-        '      "why_this_is_hard": "short reason"',
-        "    }",
-        "  ]",
-        "}",
-        "```",
-        "",
-        "## Validation",
-        "",
-        "After writing the artifacts, run:",
-        "",
-        "```bash",
-        f"python scripts/validate_autolab_candidate_artifacts.py --root {run_dir} --out-json {run_dir}/candidate_validation.json",
-        "```",
-        "",
-        "If the validator fails, fix your JSON artifacts once and rerun the validator. If it still fails, leave the failed validation report and explain the failure in the summary.",
-        "",
-        "## Summary",
-        "",
-        "Your final Hermes response should be short and include:",
-        "",
-        "- candidate count;",
-        "- validation pass/fail counts;",
-        "- source URLs;",
-        "- the hardest surface each candidate appears to stress;",
-        "- whether Codex should review, reject, or ask for a different hunter job.",
-        "",
-        "Then stop.",
-        "",
     ]
+    if not source_only:
+        lines.extend(["- `qa_candidate.json`: one QA-drafter artifact.", ""])
+    else:
+        lines.extend(
+            [
+                "",
+                "This source-only pilot should not draft QA yet. The next job will draft QA after Codex sees whether the source candidate is real and useful.",
+                "",
+            ]
+        )
+    lines.extend(
+        [
+            "Also write:",
+            "",
+            f"- `{run_dir}/wildbench_pilot_summary.md`",
+            f"- `{run_dir}/wildbench_pilot_summary.json`",
+            "",
+            "## Source Candidate JSON",
+            "",
+            "Use exactly this schema shape:",
+            "",
+            "```json",
+            "{",
+            '  "schema_version": "autolab_source_candidate_v1",',
+            '  "candidate_id": "short_safe_slug",',
+            '  "source_url": "https://...",',
+            '  "domain_label": "regulatory | governance | archive | safety | policy | other",',
+            '  "why_it_is_hard": ["temporal_status", "authority_chain"],',
+            '  "expected_sparse_score": "low | medium | high",',
+            '  "provenance_notes": "short note",',
+            f'  "source_text_path": "{run_dir}/candidate_001/source.md",',
+            '  "do_not_use_reason": ""',
+            "}",
+            "```",
+            "",
+        ]
+    )
+    if not source_only:
+        lines.extend(
+            [
+                "## QA Candidate JSON",
+                "",
+                f"Write exactly {qa_rows} QA rows per candidate. Do not include answer keys.",
+                "At least one row should have `expected_answer_mode` of `uncertain`, `not_established`, or `clarification`.",
+                "Cover at least three `surface_family` values.",
+                "",
+                "Use exactly this schema shape:",
+                "",
+                "```json",
+                "{",
+                '  "schema_version": "autolab_candidate_qa_v1",',
+                '  "source_candidate_id": "short_safe_slug",',
+                '  "rows": [',
+                "    {",
+                '      "qid": "q001",',
+                '      "question": "What does the source establish about X?",',
+                '      "surface_family": "temporal_status",',
+                '      "expected_answer_mode": "exact | uncertain | not_established | clarification",',
+                '      "source_anchor": "short section label or short quote",',
+                '      "why_this_is_hard": "short reason"',
+                "    }",
+                "  ]",
+                "}",
+                "```",
+                "",
+            ]
+        )
+    lines.extend(
+        [
+            "## Validation",
+            "",
+            "After writing the artifacts, run:",
+            "",
+            "```bash",
+            f"python scripts/validate_autolab_candidate_artifacts.py --root {run_dir} --out-json {run_dir}/candidate_validation.json",
+            "```",
+            "",
+            "If the validator fails, fix your JSON artifacts once and rerun the validator. If it still fails, leave the failed validation report and explain the failure in the summary.",
+            "",
+            "## Summary",
+            "",
+            "Your final Hermes response should be short and include:",
+            "",
+            "- candidate count;",
+            "- validation pass/fail counts;",
+            "- source URLs;",
+            "- the hardest surface each candidate appears to stress;",
+            "- whether Codex should review, reject, or ask for a different hunter job.",
+            "",
+            "Then stop.",
+            "",
+        ]
+    )
     return "\n".join(lines)
 
 

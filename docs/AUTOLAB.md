@@ -154,6 +154,19 @@ This creates a markdown job for Hermes rather than a shell smoke job. It is
 allowed to hunt public source packets and draft candidate QA artifacts, then it
 must run the validator and stop at the review gate.
 
+If the laptop model times out or struggles, stage the work:
+
+```powershell
+python scripts/autolab_queue_wildbench_pilot.py --source-only --candidate-count 1
+```
+
+That asks only for one source candidate and validation. QA drafting can follow
+after Codex reviews whether the source is real and useful.
+
+The live runner should remain bounded. A 600-second timeout is a better default
+for small-model markdown jobs than the original 180-second smoke value, and it
+can be overridden with `HERMES_RUNNER_TIMEOUT_SECONDS` when needed.
+
 ## Safe Conveyor Belt
 
 Codex is not an always-on daemon. To keep the laptop useful while Codex is away,
