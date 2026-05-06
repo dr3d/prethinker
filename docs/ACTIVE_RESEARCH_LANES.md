@@ -181,6 +181,18 @@ identity/action-volume, award/result, and direct status/rule rows. This is the
 current best example of using a focused compile lens while protecting exact
 baseline rows.
 
+Current score-hold/frontier replay: Avalon, Oxalis, and Three Moles were rerun
+with the current flat-plus-focused harness and markdown answer-key judging.
+The combined result is `97 exact / 10 partial / 13 miss` across `120` rows:
+Avalon `34 / 2 / 4`, Oxalis `36 / 4 / 0`, and Three Moles `27 / 4 / 9`, all
+with `0` write proposals and `0` runtime load errors. Two tempting prompt/hint
+probes were rejected: a broad Three Moles micro-detail narrative instruction
+fell to `16 / 9 / 15`, and a cleaner Oxalis recall/regulatory hint fell to
+`24 / 11 / 5`. Lesson: current acquisition progress is real, but broad
+descriptive prompts and prettier domain labels can thin the profile. Next work
+should use artifact-level row selection or focused variants, not global prompt
+growth.
+
 New zip-batch update: Ashgrove Permit, Fenmore Seedbank, Greywell Pipeline,
 Heronvale Arts, and Veridia Intake are promoted into `datasets/story_worlds`
 and no longer live in `tmp/incoming`. The first-pass baseline over `123` QA

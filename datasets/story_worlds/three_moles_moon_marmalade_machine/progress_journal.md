@@ -409,3 +409,51 @@ Lesson:
 Negative transfer. The Larkspur state lens does not recover the Three Moles
 event-spine/restitution ending by itself. Three Moles still needs the broader
 ledger/event-spine surface from MMM-007 rather than a narrow final-state prompt.
+
+## MMM-009 - Current Harness Replay and Micro-Detail Negative Probe
+
+Date: 2026-05-06
+
+Evidence lane: `source_surface_acquisition_frontier`
+
+Mode: current flat-plus-focused story-world compile with markdown answer-key
+judging and failure-surface classification. The follow-up micro-detail probe
+added a broad narrative instruction to preserve whimsical distractions, odd
+object actions, tool/manner details, pretend roles, and morals. No gold KB,
+oracle rows, or QA-derived compile context was used.
+
+Artifacts:
+
+- Current-harness compile:
+  `tmp/story_world_cold_runs/three_moles_moon_marmalade_machine/domain_bootstrap_file_20260506T051635702903Z_source_qwen-qwen3-6-35b-a3b.json`
+- Current-harness QA:
+  `tmp/story_world_cold_qa/three_moles_moon_marmalade_machine/domain_bootstrap_qa_20260506T055258954404Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Micro-detail compile:
+  `tmp/story_world_cold_runs/three_moles_moon_marmalade_machine_microdetail/domain_bootstrap_file_20260506T055735050592Z_source_qwen-qwen3-6-35b-a3b.json`
+- Micro-detail QA:
+  `tmp/story_world_cold_qa/three_moles_moon_marmalade_machine_microdetail/domain_bootstrap_qa_20260506T060918313540Z_qa_qwen-qwen3-6-35b-a3b.json`
+
+Result:
+
+```text
+current harness:
+  compile: 275 admitted / 8 skipped
+  QA:      27 exact / 4 partial / 9 miss
+  failures: 10 compile, 1 hybrid, 2 answer
+
+micro-detail broad prompt:
+  compile: 192 admitted / 29 skipped
+  QA:      16 exact / 9 partial / 15 miss
+  failures: 19 compile, 2 hybrid, 1 query, 2 answer
+```
+
+Lesson:
+
+Rejected as a global narrative prompt. The problem is real: Three Moles still
+misses fine-grained source details such as early distractions, odd cart actions,
+jar contents, pretend-role speech, tool/manner details, and the explicit moral.
+But naming all of those as a broad compile instruction made the profile thinner
+and increased misses. The next attempt should be row-gated or artifact-level:
+compare the successful broad ledger/event-spine surface against a narrow detail
+variant and select only rows it actually rescues, rather than making
+micro-detail coverage a default narrative lens.

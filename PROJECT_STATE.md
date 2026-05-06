@@ -96,6 +96,13 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
   (`40 / 0 / 0`), Calder (`14 / 3 / 3`), Oxalis (`33 / 6 / 1`), Avalon
   (`32 / 7 / 1`), and Sable (`26 / 7 / 7`), each with perfect selected-best
   counts and `0` selector errors. Full verification is now `614 passed`.
+- Current-harness cold replay over Avalon, Oxalis, and Three Moles produced
+  `97 exact / 10 partial / 13 miss` across `120` judged rows with `0` write
+  proposals and `0` runtime load errors: Avalon `34 / 2 / 4`, Oxalis
+  `36 / 4 / 0`, Three Moles `27 / 4 / 9`. Two tempting acquisition changes
+  were rejected by measurement: a broad Three Moles micro-detail narrative
+  instruction regressed to `16 / 9 / 15`, and a cleaner Oxalis
+  recall/regulatory domain hint regressed to `24 / 11 / 5`.
 - Cross-fixture repair planning is available through
   `scripts/plan_cross_fixture_repair_slices.py`, with the current report at
   `docs/CROSS_FIXTURE_REPAIR_SLICES.md`. It merges the older full-40 repair

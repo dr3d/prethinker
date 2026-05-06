@@ -6,7 +6,7 @@ from scripts.plan_story_world_fixture_runs import build_plan, render_markdown
 def _write_story_fixture(path: Path, *, oracle: bool = True) -> None:
     path.mkdir(parents=True)
     (path / "source.md").write_text("Source text for the compiler.\n", encoding="utf-8")
-    (path / "qa.md").write_text("1. What happened?\n\n## Answer Key\n\n1. It happened.\n", encoding="utf-8")
+    (path / "qa.md").write_text("1. What happened?\n\n## Answers\n\n1. It happened.\n", encoding="utf-8")
     if oracle:
         (path / "oracle.jsonl").write_text('{"id":"q001","answer":"It happened."}\n', encoding="utf-8")
 
@@ -26,6 +26,7 @@ def test_story_world_run_plan_reads_promoted_fixture_shape(tmp_path: Path) -> No
         qa_out_root=tmp_path / "qa",
         qa_limit=12,
         max_plan_passes=5,
+        classify_failure_surfaces=True,
     )
 
     fixture = plan["fixtures"][0]
@@ -37,6 +38,7 @@ def test_story_world_run_plan_reads_promoted_fixture_shape(tmp_path: Path) -> No
     assert "--qa-file" in fixture["qa_command_template"]
     assert "--oracle-jsonl" in fixture["qa_command_template"]
     assert "--judge-reference-answers" in fixture["qa_command_template"]
+    assert "--classify-failure-surfaces" in fixture["qa_command_template"]
     assert "--evidence-bundle-context-filter" in fixture["qa_command_template"]
     assert "--limit 12" in fixture["qa_command_template"]
 
@@ -59,9 +61,36 @@ def test_story_world_run_plan_can_omit_oracle_and_evidence_bundle(tmp_path: Path
 
     fixture = plan["fixtures"][0]
     assert fixture["oracle_jsonl"] is None
+    assert fixture["markdown_answer_key"] is True
     assert "--oracle-jsonl" not in fixture["qa_command_template"]
-    assert "--judge-reference-answers" not in fixture["qa_command_template"]
+    assert "--judge-reference-answers" in fixture["qa_command_template"]
     assert "--evidence-bundle-plan" not in fixture["qa_command_template"]
+
+
+def test_story_world_run_plan_can_omit_reference_judging_without_answer_key(tmp_path: Path) -> None:
+    dataset_root = tmp_path / "story_worlds"
+    fixture_dir = dataset_root / "question_only_fixture"
+    fixture_dir.mkdir(parents=True)
+    (fixture_dir / "source.md").write_text("Source text for the compiler.\n", encoding="utf-8")
+    (fixture_dir / "qa.md").write_text("1. What happened?\n", encoding="utf-8")
+
+    plan = build_plan(
+        dataset_root=dataset_root,
+        fixture_names=[],
+        model="test-model",
+        base_url="http://127.0.0.1:1234",
+        compile_out_root=tmp_path / "compile",
+        qa_out_root=tmp_path / "qa",
+        qa_limit=3,
+        max_plan_passes=2,
+        include_evidence_bundle=False,
+        classify_failure_surfaces=True,
+    )
+
+    fixture = plan["fixtures"][0]
+    assert fixture["markdown_answer_key"] is False
+    assert "--judge-reference-answers" not in fixture["qa_command_template"]
+    assert "--classify-failure-surfaces" not in fixture["qa_command_template"]
 
 
 def test_story_world_run_plan_markdown_lists_commands() -> None:
@@ -74,6 +103,7 @@ def test_story_world_run_plan_markdown_lists_commands() -> None:
                 "qa_limit": 5,
                 "max_plan_passes": 4,
                 "include_evidence_bundle": True,
+                "classify_failure_surfaces": False,
             },
             "fixtures": [
                 {

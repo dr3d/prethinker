@@ -872,3 +872,40 @@ counterfactual-recusal outcome questions need both procedure path and eligibilit
 This closes Avalon against the frozen artifacts while preserving the core
 boundary: row-level activation can choose among persisted evidence modes, but
 it cannot manufacture source surface that the compile did not admit.
+
+## Run AG-017 - Current Harness Cold Replay
+
+Date: 2026-05-06
+
+Evidence lane: `anti_meta_rot_score_hold`
+
+Mode: current flat-plus-focused source compile with markdown answer-key judging,
+evidence-bundle QA, and failure-surface classification. No gold KB, oracle rows,
+or QA-derived compile context was used.
+
+Artifacts:
+
+- Compile:
+  `tmp/story_world_cold_runs/avalon_grant_committee/domain_bootstrap_file_20260506T051626915612Z_source_qwen-qwen3-6-35b-a3b.json`
+- QA:
+  `tmp/story_world_cold_qa/avalon_grant_committee/domain_bootstrap_qa_20260506T055305172915Z_qa_qwen-qwen3-6-35b-a3b.json`
+
+Result:
+
+```text
+compile: 196 admitted / 2 skipped
+QA:      34 exact / 2 partial / 4 miss
+failures: 6 compile-surface gaps
+write proposals: 0
+runtime load errors: 0
+```
+
+Lesson:
+
+The current cold compile is stronger than the older baseline evidence mode on
+exact count, but still misses authority/rationale rows: Bianchi's recusal
+reason, Worthington's Rule 3 ambiguity statement, April 15 quorum support, and
+the Foundation Director interpretation authority. This reinforces the existing
+Avalon doctrine: rule/evidence activation is powerful only after the source
+surface preserves speaker, authority, meeting attendance, and interpretation
+issuer rows.

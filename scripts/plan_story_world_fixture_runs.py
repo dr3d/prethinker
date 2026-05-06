@@ -55,6 +55,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Omit the current evidence-bundle query choreography from QA commands.",
     )
+    parser.add_argument(
+        "--classify-failure-surfaces",
+        action="store_true",
+        help="Add after-the-fact failure-surface classification to QA commands when reference answers are available.",
+    )
     return parser.parse_args()
 
 
@@ -71,6 +76,7 @@ def main() -> int:
         qa_limit=int(args.qa_limit),
         max_plan_passes=int(args.max_plan_passes),
         include_evidence_bundle=not bool(args.no_evidence_bundle),
+        classify_failure_surfaces=bool(args.classify_failure_surfaces),
     )
     out_json = _absolute_repo_path(args.out_json)
     out_md = _absolute_repo_path(args.out_md)
@@ -94,6 +100,7 @@ def build_plan(
     qa_limit: int,
     max_plan_passes: int,
     include_evidence_bundle: bool = True,
+    classify_failure_surfaces: bool = False,
 ) -> dict[str, Any]:
     selected = {name for name in fixture_names if name}
     fixture_dirs = _fixture_paths_with_required_assets(dataset_root, selected)
@@ -107,6 +114,7 @@ def build_plan(
             qa_limit=qa_limit,
             max_plan_passes=max_plan_passes,
             include_evidence_bundle=include_evidence_bundle,
+            classify_failure_surfaces=classify_failure_surfaces,
         )
         for fixture_dir in fixture_dirs
     ]
@@ -126,6 +134,7 @@ def build_plan(
             "qa_limit": qa_limit,
             "max_plan_passes": max_plan_passes,
             "include_evidence_bundle": include_evidence_bundle,
+            "classify_failure_surfaces": classify_failure_surfaces,
         },
         "fixtures": fixtures,
     }
@@ -145,6 +154,7 @@ def render_markdown(plan: dict[str, Any]) -> str:
         f"- QA limit: `{summary.get('qa_limit', 0)}`",
         f"- Max plan passes: `{summary.get('max_plan_passes', 0)}`",
         f"- Evidence bundle QA: `{summary.get('include_evidence_bundle', False)}`",
+        f"- Failure-surface classification: `{summary.get('classify_failure_surfaces', False)}`",
         "",
         "## Commands",
         "",
@@ -203,11 +213,13 @@ def _fixture_run_item(
     qa_limit: int,
     max_plan_passes: int,
     include_evidence_bundle: bool,
+    classify_failure_surfaces: bool,
 ) -> dict[str, Any]:
     fixture = fixture_dir.name
     source = _cold_source_path(fixture_dir)
     qa_file = fixture_dir / "qa.md"
     oracle = fixture_dir / "oracle.jsonl"
+    has_markdown_answers = _qa_markdown_has_answer_key(qa_file)
     compile_out = compile_out_root / fixture
     qa_out = qa_out_root / fixture
     domain_hint = DOMAIN_HINTS.get(fixture, "story-world source fidelity temporal rule fixture")
@@ -223,7 +235,10 @@ def _fixture_run_item(
     ]
     if oracle.exists():
         qa_parts.append(f"--oracle-jsonl {_display_path(oracle)}")
+    if oracle.exists() or has_markdown_answers:
         qa_parts.append("--judge-reference-answers")
+    if classify_failure_surfaces and (oracle.exists() or has_markdown_answers):
+        qa_parts.append("--classify-failure-surfaces")
     if include_evidence_bundle:
         qa_parts.extend(
             [
@@ -246,6 +261,7 @@ def _fixture_run_item(
         "source": _display_path(source),
         "qa_file": _display_path(qa_file),
         "oracle_jsonl": _display_path(oracle) if oracle.exists() else None,
+        "markdown_answer_key": has_markdown_answers,
         "compile_out_dir": _display_path(compile_out),
         "qa_out_dir": _display_path(qa_out),
         "compile_command": compile_command,
@@ -256,6 +272,14 @@ def _fixture_run_item(
 def _cold_source_path(fixture_dir: Path) -> Path:
     source = fixture_dir / "source.md"
     return source if source.exists() else fixture_dir / "story.md"
+
+
+def _qa_markdown_has_answer_key(path: Path) -> bool:
+    try:
+        text = path.read_text(encoding="utf-8-sig")
+    except OSError:
+        return False
+    return any(line.strip().lower() == "## answers" for line in text.splitlines())
 
 
 def _absolute_repo_path(value: Path) -> Path:

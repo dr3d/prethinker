@@ -132,6 +132,13 @@ For Qwen-family control-plane prompts, prepend the mailbox state prefix:
 The no-think switch is only for Hermes orchestration. It is not a Prethinker
 semantic prompt policy.
 
+When Hermes needs to summarize, plan, or claim work, prefer structured output
+with a small JSON schema through the laptop LM Studio control-plane model. That
+keeps Autolab interactions machine-checkable: job packets, run summaries,
+grader reports, and handoff notes should be bounded JSON first and markdown
+second. The laptop model may produce schemas; it still must not decide harness
+architecture or edit tracked code.
+
 ## What Hermes Must Not Do
 
 Hermes should not:

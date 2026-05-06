@@ -282,3 +282,48 @@ two-mode upper bound only after adding guards for universal-scope enumeration,
 denial rationale with quantity support, explicit lot exclusion, and
 classification-bound counterfactual deadlines.
 
+## Run OX-006 - Current Harness Score Hold and Domain-Hint Negative Probe
+
+Date: 2026-05-06
+
+Evidence lane: `anti_meta_rot_score_hold`
+
+Mode: current flat-plus-focused source compile with markdown answer-key judging,
+evidence-bundle QA, and failure-surface classification. A follow-up probe tried
+a cleaner recall/regulatory domain hint instead of the broader story-world
+source-fidelity hint used by the shared story-world planner. No gold KB,
+oracle rows, or QA-derived compile context was used.
+
+Artifacts:
+
+- Current-harness compile:
+  `tmp/story_world_cold_runs/oxalis_recall/domain_bootstrap_file_20260506T051515844149Z_source_qwen-qwen3-6-35b-a3b.json`
+- Current-harness QA:
+  `tmp/story_world_cold_qa/oxalis_recall/domain_bootstrap_qa_20260506T055218233575Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Regulatory-hint compile:
+  `tmp/story_world_cold_runs/oxalis_recall_regulatory_hint/domain_bootstrap_file_20260506T061217973824Z_source_qwen-qwen3-6-35b-a3b.json`
+- Regulatory-hint QA:
+  `tmp/story_world_cold_qa/oxalis_recall_regulatory_hint/domain_bootstrap_qa_20260506T062409905100Z_qa_qwen-qwen3-6-35b-a3b.json`
+
+Result:
+
+```text
+current harness:
+  compile: 162 admitted / 0 skipped
+  QA:      36 exact / 4 partial / 0 miss
+  failures: 2 compile, 1 hybrid, 1 answer
+
+recall/regulatory hint probe:
+  compile: 73 admitted / 15 skipped
+  QA:      24 exact / 11 partial / 5 miss
+  failures: 10 compile, 6 hybrid
+```
+
+Lesson:
+
+Rejected. A cleaner-looking domain hint was worse than the current broader
+source-fidelity run shape. Oxalis is now a score-hold fixture for acquisition
+experiments: do not replace the current compact source surface merely because a
+domain label reads more specific. The frontier remains post-ingestion access,
+deadline/status helpers, and row-level selector protection.
+
