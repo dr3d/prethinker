@@ -10,6 +10,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_MAILBOX = Path(r"\\192.168.0.103\c\prethinker\tmp\hermes_mailbox")
+DEFAULT_WSL_MAILBOX = "/mnt/c/prethinker/tmp/hermes_mailbox"
 
 
 def parse_args() -> argparse.Namespace:
@@ -19,6 +20,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--candidate-count", type=int, default=2)
     parser.add_argument("--qa-rows", type=int, default=12)
     parser.add_argument("--source-only", action="store_true", help="Queue only source-hunter artifacts.")
+    parser.add_argument("--wsl-mailbox", default=DEFAULT_WSL_MAILBOX)
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--out-md", type=Path, default=None)
     return parser.parse_args()
@@ -35,6 +37,7 @@ def main() -> int:
         candidate_count=candidate_count,
         qa_rows=qa_rows,
         source_only=bool(args.source_only),
+        wsl_mailbox=str(args.wsl_mailbox).rstrip("/"),
     )
     out_path = _resolve_out_path(args.out_md, mailbox=mailbox, job_id=job_id)
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -45,8 +48,15 @@ def main() -> int:
     return 0
 
 
-def build_job_markdown(*, job_id: str, candidate_count: int, qa_rows: int, source_only: bool = False) -> str:
-    run_dir = f"tmp/hermes_mailbox/runs/{job_id}"
+def build_job_markdown(
+    *,
+    job_id: str,
+    candidate_count: int,
+    qa_rows: int,
+    source_only: bool = False,
+    wsl_mailbox: str = DEFAULT_WSL_MAILBOX,
+) -> str:
+    run_dir = f"{wsl_mailbox.rstrip('/')}/runs/{job_id}"
     role = "autolab_source_hunter" if source_only else "autolab_source_hunter_and_qa_drafter"
     candidate_dirs = [f"`{run_dir}/candidate_{index:03d}/`" for index in range(1, candidate_count + 1)]
     lines = [
@@ -54,6 +64,11 @@ def build_job_markdown(*, job_id: str, candidate_count: int, qa_rows: int, sourc
         "kind: markdown",
         "priority: exploratory",
         f"role: {role}",
+        f"required_artifact: {run_dir}/wildbench_pilot_summary.md",
+        f"required_artifact: {run_dir}/wildbench_pilot_summary.json",
+        f"required_artifact: {run_dir}/candidate_validation.json",
+        f"required_artifact: {run_dir}/candidate_001/source.md",
+        f"required_artifact: {run_dir}/candidate_001/source_candidate.json",
         "local_lmstudio_base_url: http://127.0.0.1:1234/v1",
         "heavy_lmstudio_base_url: http://192.168.0.150:1234/v1",
         "",

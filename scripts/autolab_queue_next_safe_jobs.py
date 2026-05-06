@@ -46,7 +46,7 @@ SAFE_JOB_TEMPLATES = (
         "title": "Stdlib compile check for Autolab reporter modules",
         "commands": [
             "git pull --ff-only origin main",
-            "python -m py_compile scripts/compare_domain_bootstrap_compiles.py scripts/rollup_domain_bootstrap_qa_scorecard.py scripts/plan_story_world_repair_targets.py scripts/plan_story_world_fixture_runs.py scripts/hermes_poll_mailbox.py scripts/autolab_queue_next_safe_jobs.py scripts/validate_autolab_candidate_artifacts.py",
+            "python -m py_compile scripts/compare_domain_bootstrap_compiles.py scripts/rollup_domain_bootstrap_qa_scorecard.py scripts/plan_story_world_repair_targets.py scripts/plan_story_world_fixture_runs.py scripts/hermes_poll_mailbox.py scripts/autolab_queue_next_safe_jobs.py scripts/validate_autolab_candidate_artifacts.py scripts/summarize_autolab_candidate_batch.py",
         ],
         "timeout_seconds": 180,
     },

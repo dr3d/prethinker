@@ -107,6 +107,11 @@ Markdown jobs are instruction packets for Hermes. They should include a small
 YAML-like header with a `job_id`, `kind`, priority, endpoints, and expected
 result shape, followed by precise instructions.
 
+Markdown jobs that must produce files should declare them with repeated
+`required_artifact:` header lines. The poller marks a prompt job failed if the
+Hermes runner exits successfully but those artifacts are missing. This prevents
+stdout-only "success" when the research product was supposed to be files.
+
 JSON jobs are deterministic smoke jobs for the poller itself. The tracked
 poller currently supports `kind: "shell"` JSON jobs for simple plumbing checks.
 Those are not the normal research lane.
@@ -166,6 +171,12 @@ after Codex reviews whether the source is real and useful.
 The live runner should remain bounded. A 600-second timeout is a better default
 for small-model markdown jobs than the original 180-second smoke value, and it
 can be overridden with `HERMES_RUNNER_TIMEOUT_SECONDS` when needed.
+
+Review a completed candidate batch with:
+
+```bash
+python scripts/summarize_autolab_candidate_batch.py --root tmp/hermes_mailbox/runs/<job_id> --out-md tmp/hermes_mailbox/runs/<job_id>/candidate_summary.md
+```
 
 ## Safe Conveyor Belt
 

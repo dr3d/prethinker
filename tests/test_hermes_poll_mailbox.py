@@ -130,3 +130,30 @@ def test_prompt_job_without_runner_fails_with_actionable_result(monkeypatch, tmp
     assert "Hermes Mailbox Job Failed" in text
     assert "state/hermes_runner.sh" in text
     assert list(poller.FAILED.glob("*prompt.md"))
+
+
+def test_prompt_job_required_artifact_parser_resolves_relative_paths(monkeypatch, tmp_path) -> None:
+    poller = _load_poller(monkeypatch, tmp_path)
+    prompt = poller.REPO / "job.md"
+    prompt.write_text(
+        "\n".join(
+            [
+                "job_id: artifact_check",
+                "required_artifact: existing/report.json",
+                "required_artifact: /missing/absolute/report.json",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    existing = poller.REPO / "existing" / "report.json"
+    existing.parent.mkdir(parents=True)
+    existing.write_text("{}", encoding="utf-8")
+
+    assert poller.required_artifacts_for_markdown(prompt) == [
+        "existing/report.json",
+        "/missing/absolute/report.json",
+    ]
+    missing = poller.missing_required_artifacts(prompt)
+    assert str(existing) not in missing
+    assert any(item.replace("\\", "/").endswith("/missing/absolute/report.json") for item in missing)

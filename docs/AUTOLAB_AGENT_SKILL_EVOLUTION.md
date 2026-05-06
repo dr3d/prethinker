@@ -104,6 +104,15 @@ python scripts/autolab_queue_wildbench_pilot.py --source-only --candidate-count 
 Source-only hunting is intentionally humbler. It proves the web/provenance and
 candidate-artifact path before asking the same small model to draft QA.
 
+After a candidate batch exists, summarize the structured artifacts for review:
+
+```bash
+python scripts/summarize_autolab_candidate_batch.py --root tmp/hermes_mailbox/runs/wildbench_source_only_20260506_pm1 --out-md tmp/hermes_mailbox/runs/wildbench_source_only_20260506_pm1/candidate_summary.md
+```
+
+The summarizer reads only candidate JSON and validation JSON. It does not score
+source quality or decide promotion.
+
 ## Skill 2: QA Drafter
 
 Purpose: draft questions that expose whether the compiled KB captured the

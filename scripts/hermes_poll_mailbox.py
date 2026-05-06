@@ -187,8 +187,23 @@ def run_prompt_job(running_path: Path) -> tuple[bool, str, dict[str, Any]]:
             timeout=3600,
             env=env,
         )
+        ok = proc.returncode == 0
+        missing = missing_required_artifacts(running_path) if ok else []
+        if missing:
+            return (
+                False,
+                "Hermes runner finished, but required artifacts were missing.",
+                {
+                    "returncode": proc.returncode,
+                    "stdout_tail": proc.stdout[-8000:],
+                    "stderr_tail": proc.stderr[-8000:],
+                    "runner": str(runner),
+                    "missing_required_artifacts": missing,
+                    "venv": venv_metadata(env),
+                },
+            )
         return (
-            proc.returncode == 0,
+            ok,
             "Hermes runner finished.",
             {
                 "returncode": proc.returncode,
@@ -204,6 +219,27 @@ def run_prompt_job(running_path: Path) -> tuple[bool, str, dict[str, Any]]:
         "No executable state/hermes_runner.sh is installed. Manual Hermes must create this adapter so the poller can hand markdown prompts to Hermes. The claimed job was preserved; no model work was attempted.",
         {"expected_runner": str(runner), "job_path": str(running_path)},
     )
+
+
+def required_artifacts_for_markdown(path: Path) -> list[str]:
+    text = path.read_text(encoding="utf-8", errors="replace")
+    artifacts: list[str] = []
+    for match in re.finditer(r"(?m)^required_artifact:\s*(.+?)\s*$", text):
+        artifact = match.group(1).strip().strip("`")
+        if artifact:
+            artifacts.append(artifact)
+    return artifacts
+
+
+def missing_required_artifacts(path: Path) -> list[str]:
+    missing: list[str] = []
+    for artifact in required_artifacts_for_markdown(path):
+        resolved = Path(artifact)
+        if not resolved.is_absolute():
+            resolved = REPO / resolved
+        if not resolved.exists():
+            missing.append(str(resolved))
+    return missing
 
 
 def autolab_env() -> dict[str, str]:

@@ -9,6 +9,7 @@ def test_wildbench_pilot_job_has_bounded_contract() -> None:
     assert "Do not run Prethinker heavy compiles" in markdown
     assert "Do not call the desktop heavy LM Studio endpoint" in markdown
     assert "python scripts/validate_autolab_candidate_artifacts.py" in markdown
+    assert "required_artifact: /mnt/c/prethinker/tmp/hermes_mailbox/runs/wild_demo/candidate_001/source_candidate.json" in markdown
     assert "wildbench_pilot_summary.md" in markdown
 
 
@@ -33,3 +34,16 @@ def test_wildbench_source_only_job_omits_qa_work() -> None:
     assert "source_candidate.json" in markdown
     assert "qa_candidate.json" not in markdown
     assert "should not draft QA yet" in markdown
+
+
+def test_wildbench_job_accepts_custom_wsl_mailbox() -> None:
+    markdown = build_job_markdown(
+        job_id="wild_demo",
+        candidate_count=1,
+        qa_rows=10,
+        source_only=True,
+        wsl_mailbox="/custom/mailbox",
+    )
+
+    assert "required_artifact: /custom/mailbox/runs/wild_demo/wildbench_pilot_summary.md" in markdown
+    assert "`/custom/mailbox/runs/wild_demo/candidate_001/`" in markdown
