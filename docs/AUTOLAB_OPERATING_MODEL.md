@@ -48,7 +48,7 @@ helpers, admission policies, repair gates, and documentation.
 | Hermes | Worker/research coordinator. Runs bounded mailbox jobs and may delegate to specialized subagents when the job benefits from separate roles. |
 | Finder subagents | Hunt for source material, fixture candidates, domain surfaces, and useful challenge shapes. |
 | QA subagents | Draft candidate questions, answer expectations, and coverage rosters as artifacts for later scoring and review. |
-| Grader/diagnostic subagents | Summarize scores, classify operational failures, and cluster failure signals without changing harness code. |
+| Grader/diagnostic subagents | Summarize scores, classify operational failures, compare structured run artifacts, and cluster failure signals without changing harness code. |
 | Prethinker | Semantic engine. Uses LLM calls to propose structured semantic workspaces, then deterministic Python admits, rejects, queries, and scores. |
 | Desktop LM Studio | Heavy semantic lane for Prethinker compile, QA, judging, and classification jobs; currently the 35B workhorse. |
 | Laptop LM Studio | Light Hermes control-plane lane. It should follow instructions, not architect the project. |
@@ -113,7 +113,7 @@ Autolab researchers can safely do work like this:
 - run bounded Prethinker compile/QA jobs;
 - generate candidate QA batteries as draft artifacts;
 - harvest source material into staging areas;
-- summarize run artifacts into outbox reports;
+- summarize run artifacts into outbox reports from structured JSON, including compile/QA comparison reports;
 - classify obvious operational failures;
 - keep the four LM Studio lanes busy when Codex has queued a batch.
 
@@ -211,6 +211,13 @@ first five QA rows, still below the archived promoted cold baseline with `195`
 admitted rows and `20 / 1 / 4` full-25. Treat bounded smoke packets as
 orchestration or diagnostic artifacts unless the job explicitly reproduces the
 promoted run shape.
+
+`scripts/compare_domain_bootstrap_compiles.py` is the first dedicated Autolab
+run-reporter helper. It compares compile and QA JSON artifacts structurally:
+admitted rows, skipped rows, unique facts, candidate predicate rosters, fact
+predicate counts, compile health, focus predicate counts, and QA judge
+summaries. It does not read source prose or make semantic claims. This is the
+right boundary for Hermes: report instrument surfaces, then stop.
 
 ## Working Metaphor
 

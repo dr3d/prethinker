@@ -290,3 +290,52 @@ orchestration artifacts. The semantic signal remains useful: partial repeated
 ledger acquisition is easy to expose with q001-q003, so source-surface work
 should preserve full accession identity/attribute rows before adding narrower
 rationale or status views.
+
+## FS-008 - Autolab Structured Run Reporter
+
+Date: 2026-05-06
+
+Evidence lane: `autolab_artifact_first_run_reporting`
+
+Mode: structural comparison of existing domain bootstrap compile/QA JSON
+artifacts. The reporter reads admitted counts, skipped counts, candidate
+predicate rosters, fact predicate counts, compile health, focus predicate
+counts, and QA judge summaries. It does not read source prose or perform
+Python NLP interpretation.
+
+Artifacts:
+
+- Reporter:
+  `scripts/compare_domain_bootstrap_compiles.py`
+- Unit tests:
+  `tests/test_compare_domain_bootstrap_compiles.py`
+- Local comparison output:
+  `tmp/autolab_compile_comparisons/fenmore_autolab_compile_comparison.md`
+
+Result:
+
+```text
+promoted cold baseline:
+  compile: 195 admitted / 4 skipped / 132 unique facts
+  focus rows: accession_id=8, collector=8, initial_condition=8, stored_in_vault=7
+
+0014 minimal Autolab smoke:
+  compile: 16 admitted / 0 skipped
+  focus rows: has_accession_id=2; accession_id=0, collector=0, initial_condition=0
+  first-3 QA: 1 exact / 0 partial / 2 miss
+
+0016 shaped Autolab smoke:
+  compile: 94 admitted / 1 skipped / 86 unique facts
+  focus rows: accession_id=2, collector=2, initial_condition=2, stored_in_vault=8
+  first-5 QA: 2 exact / 1 partial / 2 miss
+```
+
+Lesson:
+
+The reporter turns Autolab from "it ran" into "what surface changed?" without
+asking the laptop model to interpret meaning. It confirms that the shaped smoke
+rescued storage/deaccession-adjacent surface while losing six accession,
+collector, and initial-condition rows relative to the promoted baseline. That
+is an artifact-shape diagnosis, not a new score. Future Hermes grader work
+should prefer this kind of structural report and leave harness interpretation
+to Codex.
