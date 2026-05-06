@@ -93,8 +93,29 @@ JSON jobs are deterministic smoke jobs for the poller itself. The tracked
 poller currently supports `kind: "shell"` JSON jobs for simple plumbing checks.
 Those are not the normal research lane.
 
+The laptop checkout may be intentionally minimal. Do not assume `pytest` or
+project development dependencies are installed there. For lightweight Autolab
+verification, prefer stdlib checks such as `python3 -m py_compile ...` plus
+no-model planner/report commands. Use full pytest verification on the main
+desktop checkout unless a job explicitly provisions the laptop environment.
+
 Normal research jobs should be markdown packets because Hermes needs to read,
 reason, and report, not blindly execute arbitrary model-generated commands.
+
+When a markdown job asks Hermes to summarize, plan, grade, or propose a next
+job, prefer laptop LM Studio structured output with a small JSON schema. The
+useful pattern is:
+
+```text
+Hermes returns bounded JSON for machine checks
+Hermes also writes a short markdown summary for humans
+Hermes stops
+```
+
+Good schema-shaped outputs include job proposals, run summaries, scorecard
+summaries, artifact comparison reports, and failure triage rows. Bad outputs
+include open-ended architecture plans, silent code edits, or unbounded chat
+transcripts.
 
 ## Heavy Work Routing
 
@@ -174,6 +195,16 @@ The first laptop bootstrap is manual:
 
 The first real post-bootstrap job should be tiny and verifiable. Autolab earns
 larger autonomy only after the small path is boring.
+
+Early reporter verification:
+
+- `0017_autolab_reporter_verification` pulled `main` successfully but failed
+  because laptop Python did not have `pytest` installed.
+- `0018_autolab_stdlib_reporter_verification` succeeded with stdlib
+  `py_compile` checks and a no-model story-world run-plan generation command.
+
+That is the preferred pattern for laptop smoke checks: minimal dependencies,
+bounded output, and one outbox report.
 
 ## Runaway Recovery
 
