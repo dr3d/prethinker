@@ -11,11 +11,11 @@ durable Prolog state, and the UI/trace layers show the decision path.
 Use this short path if you are new:
 
 1. [Current Research Headline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md) - the newest gain and why it matters.
-2. [Multi-Pass Semantic Compiler](https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md) - semantic lenses, mapper-admitted accumulation, and rule promotion.
-3. [Project State](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md) - compact current architecture, status, and verification snapshot.
-4. [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md) - how current GPU/research cycles are prioritized across many fixtures.
-5. [Current Harness Instrument](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_HARNESS_INSTRUMENT.md) - the scorecard, selector, and repair-queue instrument that keeps research changes measurable.
-6. [Semantic Lens Roster](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_LENS_ROSTER.md) - the emerging roster of lens facets, artifact-first orchestration, and uncertainty states.
+2. [Semantic Instrument](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_INSTRUMENT.md) - public-facing guide to artifact-first orchestration, lens facets, selector guards, and uncertainty states.
+3. [Multi-Pass Semantic Compiler](https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md) - semantic lenses, mapper-admitted accumulation, and rule promotion.
+4. [Project State](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md) - compact current architecture, status, and verification snapshot.
+5. [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md) - how current GPU/research cycles are prioritized across many fixtures.
+6. [Current Harness Instrument](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_HARNESS_INSTRUMENT.md) - the scorecard, selector, and repair-queue instrument that keeps research changes measurable.
 7. [Public Docs Guide](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md) - the full reading map.
 8. [Explainer](https://github.com/dr3d/prethinker/blob/main/docs/EXPLAINER.md) - the plain-language project story.
 9. [Generalization Baseline Matrix](https://github.com/dr3d/prethinker/blob/main/docs/GENERALIZATION_BASELINE_MATRIX.md) - cold unseen fixture results for checking transfer.
@@ -41,7 +41,8 @@ Then go deeper:
 - [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md)
 - [Multi-Pass Semantic Compiler](https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md)
 - [Current Harness Instrument](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_HARNESS_INSTRUMENT.md)
-- [Semantic Lens Roster](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_LENS_ROSTER.md)
+- [Semantic Instrument](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_INSTRUMENT.md)
+- [Semantic Lens Roster](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_LENS_ROSTER.md) - deeper lab calibration roster.
 - [Incoming Fixture Progress Journal](https://github.com/dr3d/prethinker/blob/main/docs/INCOMING_FIXTURE_PROGRESS_JOURNAL.md)
 - [Generalization Baseline Matrix](https://github.com/dr3d/prethinker/blob/main/docs/GENERALIZATION_BASELINE_MATRIX.md)
 - [Cold Baseline Failure Rollup](https://github.com/dr3d/prethinker/blob/main/docs/COLD_BASELINE_FAILURE_ROLLUP.md)

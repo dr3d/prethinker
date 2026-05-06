@@ -56,11 +56,11 @@ right source surface, followed by reusable reasoning/rule substrates.
 
 The harness is now being treated as an artifact-first semantic instrument:
 compile once, persist the source/KB/IR/run artifacts, then run cheaper semantic
-parallax passes against frozen artifacts. `docs/SEMANTIC_LENS_ROSTER.md`
-captures the current taxonomy of lens facets and the uncertainty vocabulary
-that should stay distinct during future work. Use that roster when naming new
-lenses so names describe the guardrail or semantic reason, not the fixture that
-first exposed it.
+parallax passes against frozen artifacts. `docs/SEMANTIC_INSTRUMENT.md` is the
+public companion for that idea. `docs/SEMANTIC_LENS_ROSTER.md` remains the
+deeper lab roster for current lens facets, selector guardrails, and uncertainty
+vocabulary. Use that roster when naming new lenses so names describe the
+guardrail or semantic reason, not the fixture that first exposed it.
 
 Selector guard growth is now tracked by
 `docs/SELECTOR_GUARD_FAMILY_ROLLUP.md`: `53` guard return sites collapse to

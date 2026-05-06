@@ -55,7 +55,9 @@ python scripts/plan_selector_risk_gate.py --baseline-run protected=<SELECTOR_JSO
   fixture that first exposed the issue.
 - Maintain a lens roster for meaning surfaces such as source acquisition, rule
   composition, temporal/status, authority, uncertainty, query, selector, answer,
-  and struggle detection. See `docs/SEMANTIC_LENS_ROSTER.md`.
+  and struggle detection. See `docs/SEMANTIC_INSTRUMENT.md` for the public
+  reader-facing instrument spec and `docs/SEMANTIC_LENS_ROSTER.md` for the
+  deeper lab calibration roster.
 - Legacy symbol names may remain as migration references until the clean surface
   proves parity.
 - Dead-code removal waits until the instrument can show that code is genuinely
