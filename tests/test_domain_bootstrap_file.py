@@ -12,7 +12,9 @@ from scripts.run_domain_bootstrap_file import (
     _lmstudio_chat_completions_url,
     _pass_surface_contribution,
     _profile_from_signature_roster,
+    _should_build_source_entity_ledger,
     _source_compiler_context,
+    _source_entity_ledger_context,
     _source_pass_ops_to_semantic_ir,
 )
 import scripts.run_domain_bootstrap_file as domain_bootstrap_file
@@ -60,6 +62,52 @@ def test_source_entity_ledger_schema_has_coverage_targets() -> None:
     assert "event_spine" in target_schema["properties"]["lens"]["enum"]
     assert "final_state" in target_schema["properties"]["lens"]["enum"]
     assert "causality" in target_schema["properties"]["lens"]["enum"]
+
+
+def test_source_entity_ledger_is_scoped_to_narrative_lanes() -> None:
+    assert _should_build_source_entity_ledger(
+        intake_plan={"pass_plan": [{"purpose": "story event spine"}]},
+        domain_hint="story_world",
+    )
+    assert _should_build_source_entity_ledger(
+        intake_plan={"pass_plan": [{"purpose": "fable final state"}]},
+        domain_hint="",
+    )
+    assert not _should_build_source_entity_ledger(
+        intake_plan={"pass_plan": [{"purpose": "regulatory recall access deadlines"}]},
+        domain_hint="regulatory recall ledger",
+    )
+    assert not _should_build_source_entity_ledger(
+        intake_plan={"pass_plan": [{"purpose": "grant committee eligibility rules"}]},
+        domain_hint="governance records",
+    )
+
+
+def test_source_entity_ledger_context_marks_partial_skeleton_as_ledger_backed() -> None:
+    context = "\n".join(
+        _source_entity_ledger_context(
+            {
+                "schema_version": "source_entity_ledger_v1",
+                "canonical_atoms": [],
+                "object_families": [],
+                "coverage_targets": [
+                    {
+                        "target_id": "final_state",
+                        "lens": "final_state",
+                        "anchor_atoms": ["little_mole"],
+                        "coverage_goal": "preserve ending state",
+                        "risk_note": "palette may not express every row class",
+                    }
+                ],
+                "alias_risks": [],
+                "notes": [],
+            }
+        )
+    )
+
+    assert "ledger-backed narrative skeleton passes" in context
+    assert "partial safe skeleton is better than rejecting the pass" in context
+    assert "coverage_targets, treat them as powerless pass-coverage hints" in context
 
 
 def test_source_pass_ops_schema_is_operations_only() -> None:
