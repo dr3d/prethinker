@@ -1402,6 +1402,27 @@ def _domain_companion_queries(runtime: CorePrologRuntime, *, query: str) -> list
                 }
             )
         return out
+    if predicate == "deadline_calculated" and len(args) == 5:
+        companion_query = "deadline_calculated(Deadline, Type, StartDate, Duration, EndDate)."
+        if companion_query == str(query or "").strip():
+            return []
+        result = runtime.query_rows(companion_query)
+        if result.get("status") != "success":
+            return []
+        return [
+            {
+                "query": companion_query,
+                "result": {
+                    **result,
+                    "reasoning_basis": {
+                        "kind": "core-local",
+                        "note": "domain companion query gathered sibling deadline_calculated/5 rows so deadline-family questions can distinguish answer, response, reply, discovery, and dispositive deadlines",
+                        "original_query": query,
+                    },
+                },
+                "derived_from_queries": [query],
+            }
+        ]
     if predicate == "subgrant_purpose" and args:
         subgrant_arg = str(args[0]).strip()
         if not subgrant_arg:

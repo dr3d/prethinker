@@ -171,3 +171,55 @@ worse than the existing high-water, so the next Copperfall move is not another
 broad temporal compile. It needs deadline-family disambiguation in the query
 planner or helper layer: original answer deadline, resumed answer deadline, and
 later reply deadline must remain separate temporal families.
+
+## CFD-005 - Deadline-Family Query Companion
+
+Date: 2026-05-06
+
+Evidence lane: `deadline_family_query_surface`
+
+Mode: query-only companion retrieval over admitted `deadline_calculated/5`
+rows. When a QA query touches one deadline calculation, the runtime now also
+retrieves the sibling deadline table:
+`deadline_calculated(Deadline, Type, StartDate, Duration, EndDate).` This is
+query support over existing KB facts only. It does not read source prose, add
+new facts, use answer keys for planning, or authorize writes.
+
+Artifacts:
+
+- Targeted q024/q034 replay:
+  `tmp/deadline_family_companion_qa/copperfall_deadline_docket/domain_bootstrap_qa_20260506T012633272137Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Deadline-cluster replay:
+  `tmp/deadline_family_companion_cluster_qa/copperfall_deadline_docket/domain_bootstrap_qa_20260506T012909203020Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Full QA replay:
+  `tmp/deadline_family_companion_fullqa/copperfall_deadline_docket/domain_bootstrap_qa_20260506T013654291947Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Comparison:
+  `tmp/deadline_family_companion_comparisons/copperfall_deadline_family_full.md`
+- Failure classification:
+  `tmp/deadline_family_companion_failures/copperfall_deadline_docket/domain_bootstrap_qa_20260506T013654291947Z_qa_qwen-qwen3-6-35b-a3b_failure_surface_20260506T013745775081Z.json`
+
+Result:
+
+```text
+q024/q034 targeted replay:      2 exact / 0 partial / 0 miss
+deadline cluster q024-q035:     11 exact / 1 partial / 0 miss
+full QA before companion:       25 exact / 5 partial / 10 miss
+full QA after companion:        30 exact / 5 partial / 5 miss
+rescued rows:                   8
+baseline-exact regressions:     0
+failure surfaces after replay:  6 compile, 3 query, 1 hybrid
+write proposals:                0
+runtime errors:                 0
+```
+
+Lesson:
+
+The compile already contained the correct reply-deadline row, but q034 queried
+the neighboring answer-resumed deadline family. The query companion makes the
+deadline family visible without hiding the original query mistake. This is a
+good harness-level support pattern: when a predicate represents a family of
+typed deadlines, retrieve the family table so the answer/judge surface can
+distinguish `answer`, `response`, `reply`, `discovery`, and `dispositive`
+deadlines. Copperfall is still below its older high-water, so the remaining
+work is compile coverage plus narrower query joins, not another broad temporal
+compile.

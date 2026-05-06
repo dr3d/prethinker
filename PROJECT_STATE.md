@@ -46,7 +46,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 
 ## Recent Frontier Results
 
-- Current full-suite verification: `613 passed`.
+- Current full-suite verification: `614 passed`.
 - Iron Harbor: `86 exact / 14 partial / 0 miss` on a full 100-question source-document battery, with `0` write proposals during post-ingestion QA.
 - Blackthorn: baseline first-20 was `2 exact / 1 partial / 17 miss`; current diagnostic lanes include BTC-022 at `82 / 9 / 9` full-100 and BTC-027 at `85 / 4 / 11`. These are different configurations, so compare within lane rather than treating one number as a universal replacement.
 - Kestrel: profile-guided KCL-016 reached `73 exact / 11 partial / 16 miss` full-100 with `0` write proposals. Cold/source-aware evidence remains much lower, and the distinction is intentional.
@@ -93,7 +93,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
   frozen-artifact selector lanes still match documented results for Larkspur
   (`40 / 0 / 0`), Calder (`14 / 3 / 3`), Oxalis (`33 / 6 / 1`), Avalon
   (`32 / 7 / 1`), and Sable (`26 / 7 / 7`), each with perfect selected-best
-  counts and `0` selector errors. Full verification is now `613 passed`.
+  counts and `0` selector errors. Full verification is now `614 passed`.
 - Cross-fixture repair planning is available through
   `scripts/plan_cross_fixture_repair_slices.py`, with the current report at
   `docs/CROSS_FIXTURE_REPAIR_SLICES.md`. It merges the older full-40 repair
@@ -133,6 +133,13 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
   to `25 / 5 / 10` against the documented `38 / 1 / 1` high-water, while still
   rescuing the original-answer-deadline row. The next frontier is deadline
   family disambiguation in query/helper logic, not a broader temporal lens.
+- Deadline-family disambiguation now has a first query-only support helper.
+  When a QA query touches `deadline_calculated/5`, the runtime also retrieves
+  the sibling deadline table over admitted rows. On the same Copperfall temporal
+  compile, this moves full QA from `25 / 5 / 10` to `30 / 5 / 5`, rescues `8`
+  rows including q034's reply deadline, and causes `0` baseline-exact
+  regressions or writes. The remaining Copperfall failures are now classified
+  as `6` compile, `3` query, and `1` hybrid gap.
 - Semantic struggle detection is now a named structural guardrail in
   `src/semantic_struggle.py`. It turns pass contribution, duplicate, skip-heavy,
   stale-tail, and selector-governor telemetry into a stop/continue
@@ -646,7 +653,7 @@ Domain/data lanes:
 
 ## Verification Snapshot
 
-**Current headline:** the lean full pytest suite is `613 passed`. The current research center is semantic parallax: multi-pass semantic compilation, mapper-admitted safe-surface accumulation, rule-lens promotion trials, row-level activation, clarification eagerness under an explicit authority boundary, and stenographer-mode stream simulation.
+**Current headline:** the lean full pytest suite is `614 passed`. The current research center is semantic parallax: multi-pass semantic compilation, mapper-admitted safe-surface accumulation, rule-lens promotion trials, row-level activation, clarification eagerness under an explicit authority boundary, and stenographer-mode stream simulation.
 
 Recent verified results:
 

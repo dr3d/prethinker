@@ -367,3 +367,27 @@ def test_person_role_query_adds_official_action_companions() -> None:
 
     assert "ruling_by(osric_thane, Subject, Outcome)." in queries
     assert "permission_granted(osric_thane, Request)." in queries
+
+
+def test_deadline_calculated_query_adds_deadline_family_companion() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "deadline_calculated(deadline_answer_resumed, answer, march_18_2026, 14_calendar_days, april_1_2026).",
+        "deadline_calculated(reply_deadline, reply, october_28_2026, 14_calendar_days, november_11_2026).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(
+        runtime,
+        ["deadline_calculated(deadline_answer_resumed, Answer, X, Y, Z)."],
+    )
+    companion = [
+        row
+        for row in rows
+        if row.get("query") == "deadline_calculated(Deadline, Type, StartDate, Duration, EndDate)."
+    ]
+
+    assert companion
+    result_rows = companion[0]["result"]["rows"]
+    assert any(row.get("Deadline") == "reply_deadline" and row.get("Type") == "reply" for row in result_rows)
+    assert "deadline-family questions" in companion[0]["result"]["reasoning_basis"]["note"]

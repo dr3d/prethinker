@@ -159,6 +159,11 @@ expiration questions to explicit current-expiration predicates, and
 questions to entitlement-rule plus extension-effect evidence. Copperfall keeps
 the next boundary visible: original answer deadlines, resumed answer deadlines,
 and later reply deadlines must be disambiguated as separate deadline families.
+The first deadline-family helper lives on the query side, not the compile side:
+`deadline_calculated_family_companion` retrieves sibling `deadline_calculated/5`
+rows whenever a deadline calculation is already being queried. This exposes
+typed deadline families such as `answer`, `response`, `reply`, `discovery`, and
+`dispositive` without adding facts or reading source prose.
 
 Uncertainty is a domain language, not a tone. Future harness work should avoid
 collapsing these into a single "not sure" bucket:

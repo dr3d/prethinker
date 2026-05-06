@@ -113,7 +113,7 @@ temporal helpers, query planning, CE decisions, and public demos.
 
 Current score-hold check: Larkspur, Calder, Oxalis, Avalon, and Sable frozen
 selector lanes still match their documented results with perfect selected-best
-counts and `0` selector errors; full verification is `613 passed`.
+counts and `0` selector errors; full verification is `614 passed`.
 
 First repair-slice action: the rule-interpretation/application pass is a
 Meridian win and a Heronvale boundary marker. Meridian full-40 now reaches
@@ -140,6 +140,12 @@ adjusted-expiration and correction-entitlement guards lift the frozen selector
 to `24 / 1 / 0` with `25/25` selected-best rows. Copperfall's broad temporal
 compile regresses to `25 / 5 / 10` against its `38 / 1 / 1` high-water; q024 is
 rescued, but q034 points to deadline-family query disambiguation.
+
+Follow-up query-surface action: deadline-family disambiguation is now a
+query-only companion over admitted `deadline_calculated/5` rows. On Copperfall's
+same rejected temporal compile, full QA improves from `25 / 5 / 10` to
+`30 / 5 / 5`, with `8` rescues and `0` exact regressions. This helper is
+support retrieval, not a new compile lens.
 
 Current update: Three Moles improved when source_entity_ledger_v1 added
 powerless `coverage_targets`, but an anti-meta-rot replay on Oxalis regressed

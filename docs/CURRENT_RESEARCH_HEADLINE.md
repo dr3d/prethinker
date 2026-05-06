@@ -483,6 +483,11 @@ testing whether those gains transfer:
   need entitlement-rule plus extension-effect surface. Ashgrove reaches
   `24 / 1 / 0` with `25/25` selected-best rows; Copperfall points the next
   work at deadline-family query disambiguation.
+- That next Copperfall bite produced a small but real harness helper:
+  `deadline_calculated/5` queries now get a query-only sibling deadline table.
+  The rejected temporal compile improves from `25 / 5 / 10` to `30 / 5 / 5`
+  with `8` rescues and no exact regressions, because q034 can see the `reply`
+  deadline family instead of only the neighboring `answer` deadline.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 
@@ -632,6 +637,9 @@ The next work should stay on the sharp edges:
    Ashgrove improves through row-level selector guards (`24 / 1 / 0`, `25/25`
    selected-best), while Copperfall rejects the broad temporal compile and
    exposes deadline-family disambiguation as the next helper/query problem.
+   A query-only deadline-family companion now addresses the first part of that
+   Copperfall problem: `deadline_calculated/5` queries retrieve sibling
+   deadline rows, lifting the rejected temporal full replay to `30 / 5 / 5`.
 2. **Rule probe discipline.** Recent preflight runs show that a rule can be
    body-supported but fail under the wrong scope atom, can become dormant by
    using lowercase placeholders such as `warden` and `repair_order`, or can look
