@@ -46,6 +46,26 @@ def test_poller_runs_json_shell_job_once(monkeypatch, tmp_path) -> None:
     assert list(poller.ARCHIVE.glob("*shell_smoke.json"))
 
 
+def test_poller_prefers_repo_venv_for_shell_jobs(monkeypatch, tmp_path) -> None:
+    poller = _load_poller(monkeypatch, tmp_path)
+    poller.ensure_dirs()
+    venv_bin = poller.REPO / ".venv" / "bin"
+    venv_bin.mkdir(parents=True)
+    job = {
+        "job_id": "venv_python",
+        "kind": "shell",
+        "commands": ["python -c \"import os; print(os.environ.get('VIRTUAL_ENV', ''))\""],
+        "timeout_seconds": 30,
+    }
+    (poller.INBOX / "venv_python.json").write_text(json.dumps(job), encoding="utf-8")
+
+    assert poller.process_one() == 0
+
+    text = (poller.OUTBOX / "venv_python_result.md").read_text(encoding="utf-8")
+    assert '"venv_present": true' in text
+    assert ".venv" in text
+
+
 def test_json_shell_job_accepts_utf8_bom(monkeypatch, tmp_path) -> None:
     poller = _load_poller(monkeypatch, tmp_path)
     poller.ensure_dirs()

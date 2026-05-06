@@ -35,6 +35,7 @@ PAUSE = MAILBOX / "PAUSE_HERMES.flag"
 LOCK = STATE / "poller.lock"
 HEAVY_BASE_URL = os.environ.get("HERMES_HEAVY_LMSTUDIO_BASE_URL", "http://192.168.0.150:1234/v1")
 LOCAL_BASE_URL = os.environ.get("HERMES_LOCAL_LMSTUDIO_BASE_URL", "http://127.0.0.1:1234/v1")
+VENV_DIR = Path(os.environ.get("PRETHINKER_VENV", str(REPO / ".venv")))
 
 
 def utcstamp() -> str:
@@ -148,6 +149,7 @@ def run_shell_job(data: dict[str, Any]) -> tuple[bool, str, dict[str, Any]]:
 
     outputs: list[dict[str, Any]] = []
     timeout = int(data.get("timeout_seconds", 3600))
+    env = autolab_env()
     for command in commands:
         if not isinstance(command, str) or not command.strip():
             continue
@@ -158,6 +160,7 @@ def run_shell_job(data: dict[str, Any]) -> tuple[bool, str, dict[str, Any]]:
             text=True,
             capture_output=True,
             timeout=timeout,
+            env=env,
         )
         outputs.append(
             {
@@ -169,18 +172,20 @@ def run_shell_job(data: dict[str, Any]) -> tuple[bool, str, dict[str, Any]]:
         )
         if proc.returncode != 0:
             return False, f"Command failed: `{command}`", {"outputs": outputs}
-    return True, "Shell job completed.", {"outputs": outputs}
+    return True, "Shell job completed.", {"outputs": outputs, "venv": venv_metadata(env)}
 
 
 def run_prompt_job(running_path: Path) -> tuple[bool, str, dict[str, Any]]:
     runner = STATE / "hermes_runner.sh"
     if runner.exists() and os.access(runner, os.X_OK):
+        env = autolab_env()
         proc = subprocess.run(
             [str(runner), str(running_path)],
             cwd=str(REPO),
             text=True,
             capture_output=True,
             timeout=3600,
+            env=env,
         )
         return (
             proc.returncode == 0,
@@ -190,6 +195,7 @@ def run_prompt_job(running_path: Path) -> tuple[bool, str, dict[str, Any]]:
                 "stdout_tail": proc.stdout[-8000:],
                 "stderr_tail": proc.stderr[-8000:],
                 "runner": str(runner),
+                "venv": venv_metadata(env),
             },
         )
 
@@ -198,6 +204,27 @@ def run_prompt_job(running_path: Path) -> tuple[bool, str, dict[str, Any]]:
         "No executable state/hermes_runner.sh is installed. Manual Hermes must create this adapter so the poller can hand markdown prompts to Hermes. The claimed job was preserved; no model work was attempted.",
         {"expected_runner": str(runner), "job_path": str(running_path)},
     )
+
+
+def autolab_env() -> dict[str, str]:
+    env = dict(os.environ)
+    bin_dir = VENV_DIR / "bin"
+    if bin_dir.exists():
+        old_path = env.get("PATH", "")
+        env["PATH"] = f"{bin_dir}{os.pathsep}{old_path}" if old_path else str(bin_dir)
+        env["VIRTUAL_ENV"] = str(VENV_DIR)
+        env["PYTHONNOUSERSITE"] = "1"
+    return env
+
+
+def venv_metadata(env: dict[str, str]) -> dict[str, Any]:
+    return {
+        "repo": str(REPO),
+        "venv_dir": str(VENV_DIR),
+        "venv_present": (VENV_DIR / "bin").exists(),
+        "virtual_env": env.get("VIRTUAL_ENV", ""),
+        "path_head": env.get("PATH", "").split(os.pathsep)[:3],
+    }
 
 
 def process_running_job(job_id: str, running_path: Path) -> tuple[bool, str, dict[str, Any]]:

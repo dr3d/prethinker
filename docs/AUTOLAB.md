@@ -55,6 +55,22 @@ scripts/hermes_poll_mailbox.py
 Cron should run that script once per minute from a current Prethinker checkout.
 The poller processes at most one job per invocation.
 
+The laptop checkout should have a repo-local virtual environment:
+
+```bash
+cd /home/scott/prethinker
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install -U pip pytest
+```
+
+The tracked poller automatically activates that environment for child jobs when
+`.venv/bin` exists by prepending it to `PATH` and setting `VIRTUAL_ENV`. Shell
+jobs should therefore use `python`, not system `python3`, for Prethinker code.
+Cron may still launch the poller with system `python3`; the child job
+environment is what matters for tests, planners, reporters, and harness
+commands.
+
 This one-shot behavior is a safety rail. Autolab cron should not run a
 long-lived `while true` watcher, should not keep an interactive Hermes chat
 session open, and should not copy jobs out of `inbox/` while leaving the
@@ -93,11 +109,11 @@ JSON jobs are deterministic smoke jobs for the poller itself. The tracked
 poller currently supports `kind: "shell"` JSON jobs for simple plumbing checks.
 Those are not the normal research lane.
 
-The laptop checkout may be intentionally minimal. Do not assume `pytest` or
-project development dependencies are installed there. For lightweight Autolab
-verification, prefer stdlib checks such as `python3 -m py_compile ...` plus
-no-model planner/report commands. Use full pytest verification on the main
-desktop checkout unless a job explicitly provisions the laptop environment.
+The laptop checkout may still be intentionally lean, but it should have
+`pytest` in `.venv` for focused Autolab tests. For lightweight verification,
+prefer stdlib checks such as `python -m py_compile ...` plus no-model
+planner/report commands. Use full pytest verification on the main desktop
+checkout unless a job explicitly provisions the laptop environment.
 
 Normal research jobs should be markdown packets because Hermes needs to read,
 reason, and report, not blindly execute arbitrary model-generated commands.
@@ -202,6 +218,8 @@ Early reporter verification:
   because laptop Python did not have `pytest` installed.
 - `0018_autolab_stdlib_reporter_verification` succeeded with stdlib
   `py_compile` checks and a no-model story-world run-plan generation command.
+- After `.venv` provisioning, Autolab shell jobs should use `python`; the
+  poller activates `.venv` for child commands.
 
 That is the preferred pattern for laptop smoke checks: minimal dependencies,
 bounded output, and one outbox report.
