@@ -46,6 +46,32 @@ def test_poller_runs_json_shell_job_once(monkeypatch, tmp_path) -> None:
     assert list(poller.ARCHIVE.glob("*shell_smoke.json"))
 
 
+def test_poller_processes_at_most_one_job_per_invocation(monkeypatch, tmp_path) -> None:
+    poller = _load_poller(monkeypatch, tmp_path)
+    poller.ensure_dirs()
+    first = {
+        "job_id": "first_smoke",
+        "kind": "shell",
+        "commands": ["echo first"],
+        "timeout_seconds": 30,
+    }
+    second = {
+        "job_id": "second_smoke",
+        "kind": "shell",
+        "commands": ["echo second"],
+        "timeout_seconds": 30,
+    }
+    (poller.INBOX / "first_smoke.json").write_text(json.dumps(first), encoding="utf-8")
+    (poller.INBOX / "second_smoke.json").write_text(json.dumps(second), encoding="utf-8")
+
+    assert poller.process_one() == 0
+
+    assert (poller.OUTBOX / "first_smoke_result.md").exists()
+    assert not (poller.OUTBOX / "second_smoke_result.md").exists()
+    assert not (poller.INBOX / "first_smoke.json").exists()
+    assert (poller.INBOX / "second_smoke.json").exists()
+
+
 def test_prompt_job_without_runner_fails_with_actionable_result(monkeypatch, tmp_path) -> None:
     poller = _load_poller(monkeypatch, tmp_path)
     poller.ensure_dirs()

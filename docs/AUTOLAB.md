@@ -52,6 +52,12 @@ scripts/hermes_poll_mailbox.py
 Cron should run that script once per minute from a current Prethinker checkout.
 The poller processes at most one job per invocation.
 
+This one-shot behavior is a safety rail. Autolab cron should not run a
+long-lived `while true` watcher, should not keep an interactive Hermes chat
+session open, and should not copy jobs out of `inbox/` while leaving the
+original file behind. A job is consumed by rename, then moved to `archive/` or
+`failed/` after the result is written.
+
 Mailbox folders:
 
 | Folder | Purpose |
@@ -99,6 +105,19 @@ http://192.168.0.150:1234/v1
 
 Job packets should say this explicitly when they ask for heavy work.
 
+## Hermes Model Policy
+
+The Hermes lane is a control plane, so prefer small instruction-following
+models or instruct variants with thinking disabled when possible. It should
+read one bounded job packet, perform the requested bounded work, write one
+result, and exit.
+
+Avoid using a thinking-heavy chat session for mailbox polling. Long hidden
+reasoning and accumulated chat history are useful for exploration, but they are
+bad defaults for cron work because they make progress hard to observe and can
+turn a tiny control job into a long completion. The heavy desktop model is for
+Prethinker semantic compilation and judging, not Hermes orchestration chatter.
+
 ## Durable Memory Policy
 
 Keep the durable story in the repo:
@@ -139,6 +158,33 @@ The first laptop bootstrap is manual:
 
 The first real post-bootstrap job should be tiny and verifiable. Autolab earns
 larger autonomy only after the small path is boring.
+
+## Runaway Recovery
+
+If Hermes appears to loop on the same job, first stop new claims by creating:
+
+```text
+/mnt/c/prethinker/tmp/hermes_mailbox/PAUSE_HERMES.flag
+```
+
+Then stop the live Hermes process manually from WSL if needed:
+
+```bash
+pkill -f "/home/scott/.local/bin/hermes" || true
+pkill -f "hermes.*chat" || true
+```
+
+Before restoring or deleting anything, capture the laptop checkout state into
+`outbox/` with `git status --short --branch`, `git diff --stat`, and focused
+diffs for tracked files. If the laptop poller has drifted from `origin/main`,
+preserve the report, then restore the tracked poller from GitHub. Do not let
+Hermes use tracked source files as local scratch.
+
+Known bad pattern: a custom long-running poller that uses `.poll.lock`, copies
+`inbox/<job>.json` into `claimed/`, writes `outbox/result_<job>_<timestamp>.json`,
+and leaves the original inbox file in place. That repeats the same job forever.
+The tracked poller uses `state/poller.lock`, renames the job, processes once,
+writes `<job_id>_result.md`, and exits.
 
 ## Idle And Control
 
