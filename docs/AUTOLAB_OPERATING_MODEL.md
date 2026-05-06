@@ -7,10 +7,12 @@ Last updated: 2026-05-06
 Prethinker Autolab is a research division inside the Prethinker lab: the group
 that lines up challenges, runs bounded experiments, and reports what broke.
 
-Hermes and its possible subagents are the non-coding research staff on the
-laptop. Prethinker does governed semantic compilation and QA through the heavy
-workhorse model. Codex reviews the evidence, changes the harness, updates the
-durable record, and pushes the repo.
+Current Autolab does not require Hermes or WSL. Codex can run useful research
+cycles directly, and remote agents can run the same repo scripts through
+Windows Python when they are available. Prethinker does governed semantic
+compilation and QA through the heavy workhorse model when needed. Codex reviews
+the evidence, changes the harness, updates the durable record, and pushes the
+repo.
 
 ```text
 Autolab lines up challenges.
@@ -42,22 +44,25 @@ helpers, admission policies, repair gates, and documentation.
 
 For the emerging source-hunter and QA-drafter role design, see
 [Autolab Agent Skill Evolution](https://github.com/dr3d/prethinker/blob/main/docs/AUTOLAB_AGENT_SKILL_EVOLUTION.md).
+For the current remote Windows setup, see
+[Autolab Windows Direct Mode](https://github.com/dr3d/prethinker/blob/main/docs/AUTOLAB_WINDOWS_DIRECT.md).
 
 ## The Division Of Labor
 
 | Actor | Job |
 | --- | --- |
 | Autolab | Research division. Organizes challenge hunting, fixture farming, QA drafting, scoring runs, summaries, and artifact flow. |
-| Hermes | Worker/research coordinator. Runs bounded mailbox jobs and may delegate to specialized subagents when the job benefits from separate roles. |
-| Finder subagents | Hunt for source material, fixture candidates, domain surfaces, and useful challenge shapes. |
-| QA subagents | Draft candidate questions, answer expectations, and coverage rosters as artifacts for later scoring and review. |
-| Grader/diagnostic subagents | Summarize scores, classify operational failures, compare structured run artifacts, and cluster failure signals without changing harness code. |
+| Direct scripts | Current worker lane for no-model planning, artifact drills, validation, summarization, and focused verification through local or remote Windows Python. |
+| Finder role | Hunt for source material, fixture candidates, domain surfaces, and useful challenge shapes. This can be Codex-driven until a background worker earns its keep. |
+| QA role | Draft candidate questions, answer expectations, and coverage rosters as artifacts for later scoring and review. |
+| Grader/diagnostic role | Summarize scores, classify operational failures, compare structured run artifacts, and cluster failure signals without changing harness code. |
 | Prethinker | Semantic engine. Uses LLM calls to propose structured semantic workspaces, then deterministic Python admits, rejects, queries, and scores. |
 | Desktop LM Studio | Heavy semantic lane for Prethinker compile, QA, judging, and classification jobs; currently the 35B workhorse. |
-| Laptop LM Studio | Light Hermes control-plane lane. It should follow instructions, not architect the project. |
+| Remote Windows Python | Optional direct execution lane for known repo scripts, without WSL or Hermes. |
+| Remote LM Studio | Optional model endpoint/compute resource. |
 | Codex | Code-master, lab lead, and instrument engineer. Reads results, detects patterns, changes harness code, updates docs/journals, runs tests, commits, and pushes. |
 | GitHub | Durable source history and recovery line. |
-| Mailbox | Operational queue and scratch space, not the permanent research record. |
+| Legacy mailbox | Historical queue/scratch experiment, not the permanent research record and not currently required. |
 
 The Autolab researchers can be capable. They may need to understand what kind
 of source surface is being hunted, what makes a good hostile QA row, or what
@@ -70,9 +75,9 @@ stop.
 
 Autolab can grow specialized roles as the work becomes clearer:
 
-These roles are planned operating shapes. The current pilot uses Hermes
-directly for all of them until repeated failure surfaces justify splitting a
-job into a specialized agent role.
+These roles are planned operating shapes. The current pilot uses direct Codex
+cycles and deterministic scripts until repeated failure surfaces justify a
+background worker or specialized agent role.
 
 The same discipline applies to agents that applies to lenses: failures beget
 creations, creations earn their names, and names earn permanent slots only
@@ -94,29 +99,22 @@ scorecards, transfer checks, and repo docs.
 ## The Research Loop
 
 ```text
-Codex writes a job packet
-  -> cron wakes the laptop
-  -> scripts/hermes_poll_mailbox.py claims one job
-  -> Hermes runs local light work or calls Prethinker commands
-  -> heavy Prethinker calls route to http://192.168.0.150:1234/v1
-  -> artifacts are written under tmp/hermes_mailbox/runs/
-  -> a result summary lands in tmp/hermes_mailbox/outbox/
+Codex chooses a bounded research question
+  -> local or remote Windows Python runs planners, validators, compile/QA, or artifact drills
+  -> heavy Prethinker calls can route to http://192.168.0.150:1234/v1
+  -> artifacts are written under ignored tmp paths
   -> Codex reviews, journals durable lessons, and changes the harness if warranted
 ```
-
-If `PAUSE_HERMES.flag` exists in the mailbox root, Autolab must stop claiming
-jobs and wait. This is the human kill switch.
 
 The loop is artifact-first. Compile once, persist everything, then run many
 cheap parallax, selector, QA, and diagnostic passes against frozen artifacts.
 That turns the GPU from one big thinker into a small research factory.
 
-## What Hermes May Do
+## Direct Worker Rules
 
-Autolab researchers can safely do work like this:
+Autolab cycles can safely do work like this:
 
 - run no-model smoke checks;
-- pull `origin/main` when explicitly asked;
 - run bounded Prethinker compile/QA jobs;
 - generate candidate QA batteries as draft artifacts;
 - harvest source material into staging areas;
@@ -124,35 +122,14 @@ Autolab researchers can safely do work like this:
 - classify obvious operational failures;
 - keep the four LM Studio lanes busy when Codex has queued a batch.
 
-Hermes should prefer one-shot mode, currently:
+When a cycle needs model work, prefer explicit scripts with structured JSON
+outputs and deterministic validators. Avoid prose-only file production. If a
+background worker is reintroduced later, it must prove file discipline through
+the same validators before doing open-ended hunting.
 
-```bash
-hermes -z "<bounded prompt>" -m "$MODEL" --provider custom --yolo chat
-```
+## What Autolab Must Not Do
 
-The `chat` subcommand matters for artifact-producing jobs. Without it, Hermes
-can return tool-call-looking text without actually writing the files that
-Autolab needs to review.
-
-For Qwen-family control-plane prompts, prepend the mailbox state prefix:
-
-```text
-/no_think
-```
-
-The no-think switch is only for Hermes orchestration. It is not a Prethinker
-semantic prompt policy.
-
-When Hermes needs to summarize, plan, or claim work, prefer structured output
-with a small JSON schema through the laptop LM Studio control-plane model. That
-keeps Autolab interactions machine-checkable: job packets, run summaries,
-grader reports, and handoff notes should be bounded JSON first and markdown
-second. The laptop model may produce schemas; it still must not decide harness
-architecture or edit tracked code.
-
-## What Hermes Must Not Do
-
-Hermes should not:
+Autolab should not:
 
 - run a persistent chat loop as the worker;
 - process the same inbox file repeatedly;
@@ -160,11 +137,10 @@ Hermes should not:
 - redesign `kb_pipeline`, selectors, lenses, or admission policy on its own;
 - decide that a local score gain is a global promotion;
 - delete or rewrite research history;
-- call the heavy desktop endpoint unless the job packet explicitly asks for it;
-- keep going when `PAUSE_HERMES.flag` exists.
+- call the heavy desktop endpoint unless the run explicitly asks for it.
 
-If Hermes finds a possible improvement, the output should be a report or a
-small proposed patch scope, not a silent architecture change.
+If a cycle finds a possible improvement, the output should be a report or a
+small proposed patch scope. Codex decides whether to change the harness.
 
 ## What Codex Does With Results
 
@@ -235,7 +211,7 @@ run-reporter helper. It compares compile and QA JSON artifacts structurally:
 admitted rows, skipped rows, unique facts, candidate predicate rosters, fact
 predicate counts, compile health, focus predicate counts, and QA judge
 summaries. It does not read source prose or make semantic claims. This is the
-right boundary for Hermes: report instrument surfaces, then stop.
+right boundary for any Autolab worker: report instrument surfaces, then stop.
 
 `scripts/rollup_domain_bootstrap_qa_scorecard.py` is the matching judged-QA
 batch reporter. It reads only QA JSON artifacts and reports exact/partial/miss
@@ -249,11 +225,11 @@ Prethinker is the instrument.
 
 Autolab is the sample feeder and sensor array.
 
-Hermes is the lab assistant who can keep loading samples and writing down
-measurements.
+Windows Python scripts are the current loading bench: boring, inspectable, and
+easy to replace.
 
 Codex tunes the instrument.
 
-The point is not to make Hermes brilliant. The point is to make the whole lab
-hard to fool, hard to derail, and good at noticing when meaning has not yet
-been captured.
+The point is not to make a background agent brilliant. The point is to make the
+whole lab hard to fool, hard to derail, and good at noticing when meaning has
+not yet been captured.

@@ -5,41 +5,69 @@ Last updated: 2026-05-06
 ## What Autolab Is
 
 Prethinker Autolab is the out-of-band harness tester and research factory.
-It lets a remote Hermes worker run queued jobs while Codex remains the lab lead,
-repo steward, and integration point.
+Current operating mode is **direct Autolab**: Codex and remote agents run repo
+scripts, validators, planners, and artifact drills with ordinary Python.
+Hermes and WSL are not required. The remote useful resources are Windows
+Python and LM Studio/compute, not a standing Hermes agent, WSL worker, or
+prose-driven file writer.
 
 For the higher-level research loop and division of labor, see
 [Autolab Operating Model](https://github.com/dr3d/prethinker/blob/main/docs/AUTOLAB_OPERATING_MODEL.md).
 For the first source-hunter and QA-drafter skill shapes, see
 [Autolab Agent Skill Evolution](https://github.com/dr3d/prethinker/blob/main/docs/AUTOLAB_AGENT_SKILL_EVOLUTION.md).
+For remote Windows setup and scheduled ticks, see
+[Autolab Windows Direct Mode](https://github.com/dr3d/prethinker/blob/main/docs/AUTOLAB_WINDOWS_DIRECT.md).
 
-Autolab is not a second source of truth. It is a work queue plus a worker loop:
-cron wakes the laptop, the poller claims one mailbox job, Hermes does bounded
-work, and the result comes back as an inspectable artifact.
+Autolab is not a second source of truth. It is an artifact-first research
+rhythm:
 
 ```text
 Codex
-  -> writes a mailbox job
-  -> Hermes claims the job
-  -> Hermes runs cheap work locally or routes heavy Prethinker work to desktop LM Studio
-  -> Hermes writes an outbox result
-  -> Codex inspects, journals durable lessons, changes repo code/docs, and pushes
+  -> runs a bounded planner, validator, compile/QA, or artifact drill
+  -> writes artifacts under tmp/autolab_direct_cycles/ or another ignored run dir
+  -> inspects the artifacts
+  -> journals durable lessons
+  -> changes repo code/docs only when the evidence earns it
 ```
+
+The earlier Hermes/mailbox/WSL loop is now a legacy experiment. It remains in
+this document as historical operating evidence until the repo is fully cleaned
+up, but it is not required for current Autolab work.
 
 ## Roles
 
 | Part | Role |
 | --- | --- |
 | Codex | Lab lead, job author, result reviewer, repo/doc/journal steward. |
-| Hermes | Remote worker agent running on the laptop. |
-| Autolab | Mailbox, cron poller, job protocol, and harness work queue. |
-| Laptop LM Studio | Light Hermes planning/model lane. |
+| Autolab | Research department: fixture farming, source/QA artifact contracts, planners, validators, scorecards, and drill cycles. |
+| Local/direct scripts | Current operating lane for no-model planning, artifact drills, validation, summarization, and focused test cycles. |
 | Desktop LM Studio | Heavy Prethinker semantic engine, currently exposed at `http://192.168.0.150:1234/v1`. |
 | Repo docs/journals | Durable research memory. |
-| `tmp/hermes_mailbox` | Operational workbench; mostly disposable. |
+| `tmp/autolab_direct_cycles` | Current ignored scratch space for direct proof cycles. |
+| `tmp/hermes_mailbox` | Legacy operational workbench; mostly disposable. |
 | `prethinker_tmp_archive` | Useful retained scratch/RAG-adjacent lab archive. |
 
-## Mailbox Contract
+## Direct Cycles
+
+Use direct cycles when Codex is present:
+
+```powershell
+python -m pytest tests/test_run_autolab_direct_artifact_drill.py tests/test_validate_autolab_candidate_artifacts.py tests/test_summarize_autolab_candidate_batch.py -q
+python scripts/plan_story_world_fixture_runs.py --fixture avalon_grant_committee --fixture oxalis_recall --fixture three_moles_moon_marmalade_machine --qa-limit 40 --max-plan-passes 6 --classify-failure-surfaces --out-json tmp/autolab_direct_cycles/story_frontier_plan.json --out-md tmp/autolab_direct_cycles/story_frontier_plan.md
+python scripts/run_autolab_direct_artifact_drill.py --out-dir tmp/autolab_direct_cycles/artifact_drill --include-blocked --include-source
+```
+
+The first command verifies the direct artifact contracts. The second generates
+a no-model fixture-farming plan. The third materializes a valid blocked report
+and a valid source candidate, then validates and summarizes them without
+Hermes, WSL, a mailbox, source-prose interpretation, compile, query, judging,
+or promotion.
+
+This direct path is the current default. Add background automation only when a
+repeated need justifies it. Prefer a Windows-native Python runner over WSL or
+Hermes if the laptop needs to process queued work.
+
+## Legacy Mailbox Contract
 
 The shared mailbox root is:
 

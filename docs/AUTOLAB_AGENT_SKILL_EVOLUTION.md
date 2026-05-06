@@ -70,7 +70,7 @@ Hunter output should be structured:
   "why_it_is_hard": ["temporal_status", "authority_chain"],
   "expected_sparse_score": "low | medium | high",
   "provenance_notes": "short human-readable note",
-  "source_text_path": "tmp/hermes_mailbox/runs/.../source.md",
+  "source_text_path": "tmp/autolab_direct_cycles/.../source.md",
   "do_not_use_reason": ""
 }
 ```
@@ -84,16 +84,26 @@ Candidate source artifacts can be checked with:
 python scripts/validate_autolab_candidate_artifacts.py --source-candidate path/to/source_candidate.json
 ```
 
-Codex can queue the first bounded hunter/QA pilot with:
+Current direct artifact drills can be run with:
+
+```powershell
+python scripts/run_autolab_direct_artifact_drill.py --out-dir tmp/autolab_direct_cycles/artifact_drill --include-blocked --include-source
+```
+
+That materializes one valid blocked-hunt report and one valid source candidate,
+then runs the same validator and summarizer used by Autolab review. It does not
+need Hermes, WSL, a mailbox, a remote agent, source-prose interpretation,
+compile, query, judge, or promotion.
+
+The legacy mailbox pilot can still generate instruction packets:
 
 ```powershell
 python scripts/autolab_queue_wildbench_pilot.py --candidate-count 2 --qa-rows 12
 ```
 
-That writes a markdown job packet for Hermes. The packet asks for public source
-packets, cleaned source text, source-candidate JSON, QA-candidate JSON, a local
-validator run, and a short summary. It explicitly forbids tracked code edits,
-heavy compiles, and desktop-model calls.
+That writes a markdown job packet for the old mailbox/Hermes experiment. This
+path is historical until a background worker proves it can write files and pass
+the direct validators.
 
 For the small laptop control model, prefer staged pilots first:
 
@@ -107,19 +117,18 @@ candidate-artifact path before asking the same small model to draft QA.
 After a candidate batch exists, summarize the structured artifacts for review:
 
 ```bash
-python scripts/summarize_autolab_candidate_batch.py --root tmp/hermes_mailbox/runs/wildbench_source_only_20260506_pm1 --out-md tmp/hermes_mailbox/runs/wildbench_source_only_20260506_pm1/candidate_summary.md
+python scripts/summarize_autolab_candidate_batch.py --root tmp/autolab_direct_cycles/artifact_drill --out-md tmp/autolab_direct_cycles/artifact_drill/candidate_summary.md
 ```
 
 The summarizer reads only candidate JSON and validation JSON. It does not score
 source quality or decide promotion.
 
-Early live result: the first source-only wildbench pilots proved the review
-gate is necessary. Hermes could identify plausible public-source targets and
-report government-site access blocks, but it tended to put the report in stdout
-instead of writing the requested candidate files. The poller now treats that as
-a failed job when `required_artifact:` paths are missing. The next hunter skill
-iteration should be even more artifact-first: create the run directory and a
-summary file before web search, then update those files as work proceeds.
+Early live result from the mailbox/Hermes experiment: the first source-only
+wildbench pilots proved the review gate is necessary. The worker could identify
+plausible public-source targets and report government-site access blocks, but
+it tended to put the report in stdout instead of writing the requested
+candidate files. The lesson survives even though the worker path is no longer
+current: artifact files and validator reports are the work product.
 
 The next iteration adds a first-class blocked-hunt artifact. This is not a
 loophole for doing less work; it is the honest source-hunter equivalent of an
@@ -156,7 +165,7 @@ The lesson is about agency shape: a bounded Autolab worker must preserve the
 state of failure before it runs out of time.
 
 Second live result: the timeout-contract job improved again but still failed
-the file discipline test. Hermes reported a blocked JSON object in stdout,
+the file discipline test. The worker reported a blocked JSON object in stdout,
 including one invalid "success" failure mode and `candidate_count: 1`, while
 the actual `source_hunt_blocked.json` and `candidate_validation.json` files were
 missing. The poller correctly failed the job. This earned a smaller training
@@ -170,6 +179,12 @@ Meaning lesson: skill onboarding needs isolated motor practice. Source hunting
 mixes search, judgment, extraction, schema writing, and validation; when that
 bundle fails, split it until the worker can reliably make files before it tries
 to make discoveries.
+
+Direct proof result: `scripts/run_autolab_direct_artifact_drill.py` now runs
+that isolated motor practice without a background agent. The direct cycle wrote
+both artifact shapes under `tmp/autolab_direct_cycles/cycle2_artifact_drill`
+and validation reported `2` passing artifacts, `0` failures. That is the
+current simple baseline for source-hunter artifact contracts.
 
 ## Skill 2: QA Drafter
 
