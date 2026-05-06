@@ -226,6 +226,12 @@ predicate counts, compile health, focus predicate counts, and QA judge
 summaries. It does not read source prose or make semantic claims. This is the
 right boundary for Hermes: report instrument surfaces, then stop.
 
+`scripts/rollup_domain_bootstrap_qa_scorecard.py` is the matching judged-QA
+batch reporter. It reads only QA JSON artifacts and reports exact/partial/miss
+counts, failure-surface counts, runtime errors, write proposals, and copied
+non-exact row metadata. This gives Autolab a deterministic "how did the batch
+score?" tool before any human or model interpretation.
+
 ## Working Metaphor
 
 Prethinker is the instrument.

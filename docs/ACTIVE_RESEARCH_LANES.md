@@ -191,7 +191,9 @@ fell to `16 / 9 / 15`, and a cleaner Oxalis recall/regulatory hint fell to
 `24 / 11 / 5`. Lesson: current acquisition progress is real, but broad
 descriptive prompts and prettier domain labels can thin the profile. Next work
 should use artifact-level row selection or focused variants, not global prompt
-growth.
+growth. The reproducible scorecard command is
+`scripts/rollup_domain_bootstrap_qa_scorecard.py`, with the current local
+artifact at `tmp/story_world_cold_qa/avalon_oxalis_three_moles_scorecard.md`.
 
 New zip-batch update: Ashgrove Permit, Fenmore Seedbank, Greywell Pipeline,
 Heronvale Arts, and Veridia Intake are promoted into `datasets/story_worlds`

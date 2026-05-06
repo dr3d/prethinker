@@ -102,7 +102,8 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
   `36 / 4 / 0`, Three Moles `27 / 4 / 9`. Two tempting acquisition changes
   were rejected by measurement: a broad Three Moles micro-detail narrative
   instruction regressed to `16 / 9 / 15`, and a cleaner Oxalis
-  recall/regulatory domain hint regressed to `24 / 11 / 5`.
+  recall/regulatory domain hint regressed to `24 / 11 / 5`. The batch is now
+  reproducible through `scripts/rollup_domain_bootstrap_qa_scorecard.py`.
 - Cross-fixture repair planning is available through
   `scripts/plan_cross_fixture_repair_slices.py`, with the current report at
   `docs/CROSS_FIXTURE_REPAIR_SLICES.md`. It merges the older full-40 repair
