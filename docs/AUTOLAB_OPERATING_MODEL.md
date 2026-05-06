@@ -40,6 +40,9 @@ This is not model fine-tuning. The model weights are frozen. The thing being
 trained is the context-engineering instrument: lenses, selector guards, query
 helpers, admission policies, repair gates, and documentation.
 
+For the emerging source-hunter and QA-drafter role design, see
+[Autolab Agent Skill Evolution](https://github.com/dr3d/prethinker/blob/main/docs/AUTOLAB_AGENT_SKILL_EVOLUTION.md).
+
 ## The Division Of Labor
 
 | Actor | Job |
@@ -70,6 +73,10 @@ Autolab can grow specialized roles as the work becomes clearer:
 These roles are planned operating shapes. The current pilot uses Hermes
 directly for all of them until repeated failure surfaces justify splitting a
 job into a specialized agent role.
+
+The same discipline applies to agents that applies to lenses: failures beget
+creations, creations earn their names, and names earn permanent slots only
+after they prove useful across more than one local accident.
 
 | Role | Hunts For | Output |
 | --- | --- | --- |

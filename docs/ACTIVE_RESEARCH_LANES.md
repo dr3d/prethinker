@@ -119,7 +119,7 @@ temporal helpers, query planning, CE decisions, and public demos.
 
 Current score-hold check: Larkspur, Calder, Oxalis, Avalon, and Sable frozen
 selector lanes still match their documented results with perfect selected-best
-counts and `0` selector errors; full verification is `632 passed`.
+counts and `0` selector errors; full verification is `637 passed`.
 
 First repair-slice action: the rule-interpretation/application pass is a
 Meridian win and a Heronvale boundary marker. Meridian full-40 now reaches

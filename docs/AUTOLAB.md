@@ -10,6 +10,8 @@ repo steward, and integration point.
 
 For the higher-level research loop and division of labor, see
 [Autolab Operating Model](https://github.com/dr3d/prethinker/blob/main/docs/AUTOLAB_OPERATING_MODEL.md).
+For the first source-hunter and QA-drafter skill shapes, see
+[Autolab Agent Skill Evolution](https://github.com/dr3d/prethinker/blob/main/docs/AUTOLAB_AGENT_SKILL_EVOLUTION.md).
 
 Autolab is not a second source of truth. It is a work queue plus a worker loop:
 cron wakes the laptop, the poller claims one mailbox job, Hermes does bounded
@@ -132,6 +134,34 @@ Good schema-shaped outputs include job proposals, run summaries, scorecard
 summaries, artifact comparison reports, and failure triage rows. Bad outputs
 include open-ended architecture plans, silent code edits, or unbounded chat
 transcripts.
+
+## Safe Conveyor Belt
+
+Codex is not an always-on daemon. To keep the laptop useful while Codex is away,
+use a bounded queue of safe jobs:
+
+```powershell
+python scripts/autolab_queue_next_safe_jobs.py --limit 3
+```
+
+The queue planner writes JSON shell jobs into the mailbox inbox only from known
+safe templates. These jobs may pull `main`, run focused tests, perform
+`py_compile`, generate run plans, or roll up existing artifacts. They must not
+run heavy 35B compiles, harvest sources, edit tracked code, delete files, or
+make promotion decisions.
+
+The default prefix is stable, so a queue batch will not refill itself forever.
+When Codex wants another bounded batch, use a fresh `--prefix` such as
+`autolab_safe_20260506_pm`. This keeps the laptop busy without turning cron
+into an unreviewed research loop.
+
+This is the operating split:
+
+```text
+Autolab keeps doing chores.
+Hermes writes outbox reports.
+Codex reviews reports before heavier work or code changes.
+```
 
 ## Heavy Work Routing
 
