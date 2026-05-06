@@ -62,6 +62,12 @@ deeper lab roster for current lens facets, selector guardrails, and uncertainty
 vocabulary. Use that roster when naming new lenses so names describe the
 guardrail or semantic reason, not the fixture that first exposed it.
 
+The compile product doctrine is now explicit in
+`docs/COMPILED_KB_ARTIFACT_PACKAGE.md`: source text is input, while the durable
+answer product is the compiled package (`world.pl`, `epistemic.pl`, helpers,
+manifest, diagnostics). Query-time uncertainty and clarification should come
+from compiled symbolic state, not hidden source RAG.
+
 Selector guard growth is now tracked by
 `docs/SELECTOR_GUARD_FAMILY_ROLLUP.md`: `53` guard return sites collapse to
 `52` unique reasons across `7` families with `0` unclassified. Treat that

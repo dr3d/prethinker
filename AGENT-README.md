@@ -12,13 +12,14 @@ This is the short handoff for coding agents working in Prethinker.
 6. [docs/CURRENT_HARNESS_INSTRUMENT.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_HARNESS_INSTRUMENT.md)
 7. [docs/AUTOLAB.md](https://github.com/dr3d/prethinker/blob/main/docs/AUTOLAB.md)
 8. [docs/AUTOLAB_OPERATING_MODEL.md](https://github.com/dr3d/prethinker/blob/main/docs/AUTOLAB_OPERATING_MODEL.md)
-9. [docs/SEMANTIC_LENS_ROSTER.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_LENS_ROSTER.md)
-10. [docs/PUBLIC_DOCS_GUIDE.md](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md)
-11. [docs/SEMANTIC_IR_MAPPER_SPEC.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_MAPPER_SPEC.md)
-12. [docs/DOMAIN_PROFILE_CATALOG.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PROFILE_CATALOG.md)
-13. [docs/NO_LANGUAGE_HANDLING_IN_PYTHON_AUDIT.md](https://github.com/dr3d/prethinker/blob/main/docs/NO_LANGUAGE_HANDLING_IN_PYTHON_AUDIT.md)
-14. [docs/PRETHINK_GATEWAY_MVP.md](https://github.com/dr3d/prethinker/blob/main/docs/PRETHINK_GATEWAY_MVP.md)
-15. [ui_gateway/README.md](https://github.com/dr3d/prethinker/blob/main/ui_gateway/README.md)
+9. [docs/COMPILED_KB_ARTIFACT_PACKAGE.md](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md)
+10. [docs/SEMANTIC_LENS_ROSTER.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_LENS_ROSTER.md)
+11. [docs/PUBLIC_DOCS_GUIDE.md](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md)
+12. [docs/SEMANTIC_IR_MAPPER_SPEC.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_MAPPER_SPEC.md)
+13. [docs/DOMAIN_PROFILE_CATALOG.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PROFILE_CATALOG.md)
+14. [docs/NO_LANGUAGE_HANDLING_IN_PYTHON_AUDIT.md](https://github.com/dr3d/prethinker/blob/main/docs/NO_LANGUAGE_HANDLING_IN_PYTHON_AUDIT.md)
+15. [docs/PRETHINK_GATEWAY_MVP.md](https://github.com/dr3d/prethinker/blob/main/docs/PRETHINK_GATEWAY_MVP.md)
+16. [ui_gateway/README.md](https://github.com/dr3d/prethinker/blob/main/ui_gateway/README.md)
 
 Treat older reports and prompt snapshots as Git history, not live guidance.
 
@@ -43,6 +44,10 @@ Treat older reports and prompt snapshots as Git history, not live guidance.
 - `adapters/sec_edgar/` is a conservative SEC/contract adapter shell. Keep live generated data under ignored `datasets/sec_edgar/generated/`; do not commit raw API caches.
 - `src/umls_mvp.py` and `scripts/build_umls_semantic_network_kb.py` contain the current UMLS bridge/Semantic Network work.
 - The Prolog KB receives committed facts/rules only after runtime gates accept them.
+- For document/source compilation, the durable product is the compiled KB
+  artifact package: admitted world state, admitted epistemic/provenance state,
+  deterministic helpers, manifest metadata, and non-truth diagnostics. Q&A
+  should answer from the package, not by rereading source prose.
 
 ## Core Invariants
 

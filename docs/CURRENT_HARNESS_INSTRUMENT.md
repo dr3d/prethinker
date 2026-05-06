@@ -50,6 +50,10 @@ python scripts/plan_selector_risk_gate.py --baseline-run protected=<SELECTOR_JSO
 - Prefer artifact-first orchestration: compile once, persist the source/KB/IR
   and run metadata, then run many cheaper semantic parallax passes against
   frozen artifacts.
+- Treat the compile product as a durable KB artifact package. Ordinary Q&A
+  should answer from admitted world state, admitted epistemic/provenance state,
+  deterministic helpers, and manifest metadata, not by rereading source prose.
+  See `docs/COMPILED_KB_ARTIFACT_PACKAGE.md`.
 - Canonical signatures are calibration artifacts for extraction parity.
 - New public names should describe the guardrail or reason for being, not the
   fixture that first exposed the issue.

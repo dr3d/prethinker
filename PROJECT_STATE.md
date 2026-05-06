@@ -16,6 +16,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 - Harness instrument reference: `docs/CURRENT_HARNESS_INSTRUMENT.md`.
 - Autolab reference: `docs/AUTOLAB.md`, the mailbox/cron/Hermes loop for
   out-of-band harness testing and research-factory jobs.
+- Compiled artifact doctrine: `docs/COMPILED_KB_ARTIFACT_PACKAGE.md`.
 - Research prioritization: `docs/ACTIVE_RESEARCH_LANES.md`.
 - UI: `ui_gateway/`, served locally by `python ui_gateway/main.py` using the stdlib `ThreadingHTTPServer`.
 - Active profile: `medical@v0`; active profile-lane experiments: `legal_courtlistener@v0` and `sec_contracts@v0`.
@@ -31,6 +32,11 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 - `process_utterance()` in `src/mcp_server.py` is the canonical runtime entrypoint. The UI, prompt book, and command-line harnesses exercise the shared server path rather than a forked demo lane.
 - The active runtime path is `semantic_router_v1 -> semantic_ir_v1 -> deterministic mapper -> Prolog runtime`. Neural calls plan, segment, retrieve context, and propose operations; deterministic admission decides what can become KB state.
 - Python no longer owns English-language interpretation in the active lane. It owns structure: validation, normalization of model-emitted fields, admission, execution, caching, scoring, and trace assembly.
+- For source/document compilation, ordinary Q&A should answer from the compiled
+  artifact package rather than raw source prose. The package conceptually
+  separates admitted world state, admitted epistemic/provenance state,
+  deterministic helpers, reproducibility manifest, and non-truth diagnostics.
+  Uncertainty must be compiled too if later answers should rely on it.
 - The mapper enforces predicate palettes, arity, argument-role contracts, placeholder guards, source/write boundaries, likely-functional conflict checks, temporal sanity checks, and profile-owned validators.
 - The console can show write, query, clarification, blocked-admission, and mixed write+query turns. Ledger cards expose route, semantic workspace, deterministic admission, scoped diagnostic worlds, and KB mutation outcomes.
 - Epistemic Worlds v1 preserves projection-blocked and supported-but-skipped candidates as scoped diagnostic memory rather than global truth.
