@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 from scripts.validate_autolab_candidate_artifacts import build_report
+from scripts.validate_autolab_candidate_artifacts import main as validator_main
 
 
 def _write_source_candidate(path: Path) -> None:
@@ -98,3 +99,27 @@ def test_autolab_candidate_validator_requires_sparse_qa_size(tmp_path: Path) -> 
     report = build_report(source_paths=[], qa_paths=[qa])
 
     assert "row_count_expected_10_to_25_got_1" in report["artifacts"][0]["errors"]
+
+
+def test_autolab_candidate_validator_root_scan_finds_nested_candidates(tmp_path: Path, monkeypatch) -> None:
+    candidate = tmp_path / "run" / "candidate_001"
+    candidate.mkdir(parents=True)
+    _write_source_candidate(candidate / "source_candidate.json")
+    _write_qa_candidate(candidate / "qa_candidate.json")
+    out_json = tmp_path / "run" / "validation.json"
+
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            "validate_autolab_candidate_artifacts.py",
+            "--root",
+            str(tmp_path / "run"),
+            "--out-json",
+            str(out_json),
+        ],
+    )
+
+    assert validator_main() == 0
+    report = json.loads(out_json.read_text(encoding="utf-8"))
+    assert report["summary"]["artifact_count"] == 2
+    assert report["summary"]["passed_artifact_count"] == 2

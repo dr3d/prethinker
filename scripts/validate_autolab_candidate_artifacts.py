@@ -41,7 +41,7 @@ def main() -> int:
     if args.root:
         root = _resolve(args.root)
         if root.exists():
-            for path in sorted(root.glob("*.json")):
+            for path in sorted(root.rglob("*.json")):
                 schema = _peek_schema(path)
                 if schema == SOURCE_SCHEMA:
                     source_paths.append(path)

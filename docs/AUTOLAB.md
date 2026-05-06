@@ -144,6 +144,16 @@ python scripts/validate_autolab_candidate_artifacts.py --root tmp/hermes_mailbox
 That validator checks JSON shape and oracle-boundary hygiene only. It does not
 interpret source prose or decide whether a candidate deserves promotion.
 
+Codex can queue a bounded wildbench hunter/QA pilot with:
+
+```powershell
+python scripts/autolab_queue_wildbench_pilot.py --candidate-count 2 --qa-rows 12
+```
+
+This creates a markdown job for Hermes rather than a shell smoke job. It is
+allowed to hunt public source packets and draft candidate QA artifacts, then it
+must run the validator and stop at the review gate.
+
 ## Safe Conveyor Belt
 
 Codex is not an always-on daemon. To keep the laptop useful while Codex is away,

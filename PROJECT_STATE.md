@@ -54,7 +54,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 
 ## Recent Frontier Results
 
-- Current full-suite verification: `640 passed`.
+- Current full-suite verification: `643 passed`.
 - Iron Harbor: `86 exact / 14 partial / 0 miss` on a full 100-question source-document battery, with `0` write proposals during post-ingestion QA.
 - Blackthorn: baseline first-20 was `2 exact / 1 partial / 17 miss`; current diagnostic lanes include BTC-022 at `82 / 9 / 9` full-100 and BTC-027 at `85 / 4 / 11`. These are different configurations, so compare within lane rather than treating one number as a universal replacement.
 - Kestrel: profile-guided KCL-016 reached `73 exact / 11 partial / 16 miss` full-100 with `0` write proposals. Cold/source-aware evidence remains much lower, and the distinction is intentional.
@@ -101,7 +101,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
   frozen-artifact selector lanes still match documented results for Larkspur
   (`40 / 0 / 0`), Calder (`14 / 3 / 3`), Oxalis (`33 / 6 / 1`), Avalon
   (`32 / 7 / 1`), and Sable (`26 / 7 / 7`), each with perfect selected-best
-  counts and `0` selector errors. Full verification is now `640 passed`.
+  counts and `0` selector errors. Full verification is now `643 passed`.
 - Current-harness cold replay over Avalon, Oxalis, and Three Moles produced
   `97 exact / 10 partial / 13 miss` across `120` judged rows with `0` write
   proposals and `0` runtime load errors: Avalon `34 / 2 / 4`, Oxalis

@@ -84,6 +84,17 @@ Candidate source artifacts can be checked with:
 python scripts/validate_autolab_candidate_artifacts.py --source-candidate path/to/source_candidate.json
 ```
 
+Codex can queue the first bounded hunter/QA pilot with:
+
+```powershell
+python scripts/autolab_queue_wildbench_pilot.py --candidate-count 2 --qa-rows 12
+```
+
+That writes a markdown job packet for Hermes. The packet asks for public source
+packets, cleaned source text, source-candidate JSON, QA-candidate JSON, a local
+validator run, and a short summary. It explicitly forbids tracked code edits,
+heavy compiles, and desktop-model calls.
+
 ## Skill 2: QA Drafter
 
 Purpose: draft questions that expose whether the compiled KB captured the
