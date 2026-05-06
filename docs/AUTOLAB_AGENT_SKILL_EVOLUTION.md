@@ -155,6 +155,22 @@ minute, write the blocked report and validate it before the runner timeout.
 The lesson is about agency shape: a bounded Autolab worker must preserve the
 state of failure before it runs out of time.
 
+Second live result: the timeout-contract job improved again but still failed
+the file discipline test. Hermes reported a blocked JSON object in stdout,
+including one invalid "success" failure mode and `candidate_count: 1`, while
+the actual `source_hunt_blocked.json` and `candidate_validation.json` files were
+missing. The poller correctly failed the job. This earned a smaller training
+step: source-hunter drills. Before more open-ended hunting, Hermes should prove
+it can write and validate two tiny artifact shapes:
+
+- `blocked_report`: write only a valid `source_hunt_blocked.json`.
+- `static_source`: write one fixed `source.md` plus `source_candidate.json`.
+
+Meaning lesson: skill onboarding needs isolated motor practice. Source hunting
+mixes search, judgment, extraction, schema writing, and validation; when that
+bundle fails, split it until the worker can reliably make files before it tries
+to make discoveries.
+
 ## Skill 2: QA Drafter
 
 Purpose: draft questions that expose whether the compiled KB captured the
