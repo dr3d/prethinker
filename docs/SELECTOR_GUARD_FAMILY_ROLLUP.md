@@ -9,8 +9,8 @@ Generated from `scripts/select_qa_mode_without_oracle.py`.
 
 ## Summary
 
-- guard return sites: `51`
-- unique guard reasons: `50`
+- guard return sites: `53`
+- unique guard reasons: `52`
 - classified families: `7`
 - unclassified reasons: `0`
 
@@ -19,11 +19,11 @@ Generated from `scripts/select_qa_mode_without_oracle.py`.
 | Family | Count | Purpose |
 | --- | ---: | --- |
 | `entity_role_authority` | 8 | Separate identity, role definition, acting authority, collector, contract authority, and guardianship rows from broad action or title-only evidence. |
-| `operational_record_status` | 12 | Protect current status, request timing, commit readiness, decision, priority, concern, constitution, and resubmission rows from nearby but less answer-bearing record/event surfaces. |
+| `operational_record_status` | 13 | Protect current status, request timing, commit readiness, decision, priority, concern, constitution, and resubmission rows from nearby but less answer-bearing record/event surfaces. |
 | `rationale_evidence_contrast` | 6 | Route why/cause, witness/report, source-note, split rationale, viability contrast, and pending test questions to explicit rationale or evidentiary support instead of adjacent status rows. |
 | `regulatory_access_scope` | 5 | Route all/any scope, termination denial, affected-lot exclusion, and reclassification-deadline questions to access surfaces that carry the right set, threshold, target, or temporal boundary. |
 | `rule_activation_surface` | 11 | Route promoted rule, eligibility, recall, recusal, window, rejection, and reserve questions to the evidence surface that contains both the governing condition and the instance facts needed to apply it. |
-| `state_custody_ownership` | 7 | Separate current object state, custody transfer, possession, ownership, legal title, and award/result surfaces from generic event, property, or person rows. |
+| `state_custody_ownership` | 8 | Separate current object state, custody transfer, possession, ownership, legal title, and award/result surfaces from generic event, property, or person rows. |
 | `threshold_policy_arithmetic` | 2 | Prefer direct threshold, quantity, storage, policy-action, and arithmetic inputs when a broader policy or derived-status surface is tempting but incomplete. |
 
 ## Guard Reasons
@@ -45,23 +45,24 @@ Generated from `scripts/select_qa_mode_without_oracle.py`.
 - `status question has direct baseline application/status support and candidate is broad or relaxed-heavy` (scripts/select_qa_mode_without_oracle.py:766)
 - `counterfactual or hold/readiness question has direct baseline rule/status support and candidate is broad or relaxed-heavy` (scripts/select_qa_mode_without_oracle.py:786)
 - `current operational status question needs explicit final-state surface rather than adjacent event/action evidence` (scripts/select_qa_mode_without_oracle.py:1089)
-- `request filing timeliness question needs request/reinstatement threshold evidence rather than completion-window evidence` (scripts/select_qa_mode_without_oracle.py:1117)
-- `commit-readiness question needs unresolved process evidence rather than a bare status value` (scripts/select_qa_mode_without_oracle.py:1131)
-- `priority question needs explicit priority predicate surface rather than an underlying condition predicate` (scripts/select_qa_mode_without_oracle.py:1165)
-- `decision-status question needs explicit decision surface rather than adjacent application/status evidence` (scripts/select_qa_mode_without_oracle.py:1178)
-- `board-concern decision question needs event/action concern history rather than bare pending status` (scripts/select_qa_mode_without_oracle.py:1187)
-- `deaccession-yet question needs explicit scheduled/not-formally-completed status surface rather than broad lot-history volume` (scripts/select_qa_mode_without_oracle.py:1213)
-- `current-constitution eligibility question needs applicant-type plus controlling interpretation surface` (scripts/select_qa_mode_without_oracle.py:1276)
-- `resubmission eligibility question needs proof/rule resolution surface rather than current applicant status surface` (scripts/select_qa_mode_without_oracle.py:1297)
+- `adjusted-expiration question needs explicit current-expiration surface rather than extension-label or original-date evidence` (scripts/select_qa_mode_without_oracle.py:1099)
+- `request filing timeliness question needs request/reinstatement threshold evidence rather than completion-window evidence` (scripts/select_qa_mode_without_oracle.py:1140)
+- `commit-readiness question needs unresolved process evidence rather than a bare status value` (scripts/select_qa_mode_without_oracle.py:1154)
+- `priority question needs explicit priority predicate surface rather than an underlying condition predicate` (scripts/select_qa_mode_without_oracle.py:1188)
+- `decision-status question needs explicit decision surface rather than adjacent application/status evidence` (scripts/select_qa_mode_without_oracle.py:1201)
+- `board-concern decision question needs event/action concern history rather than bare pending status` (scripts/select_qa_mode_without_oracle.py:1210)
+- `deaccession-yet question needs explicit scheduled/not-formally-completed status surface rather than broad lot-history volume` (scripts/select_qa_mode_without_oracle.py:1236)
+- `current-constitution eligibility question needs applicant-type plus controlling interpretation surface` (scripts/select_qa_mode_without_oracle.py:1299)
+- `resubmission eligibility question needs proof/rule resolution surface rather than current applicant status surface` (scripts/select_qa_mode_without_oracle.py:1320)
 
 ### `rationale_evidence_contrast`
 
-- `evidentiary-status report question needs explicit witness/report surface rather than generic claim-status surface` (scripts/select_qa_mode_without_oracle.py:1098)
-- `cause question has explicit baseline rationale-note support and candidate is broad record/event surface` (scripts/select_qa_mode_without_oracle.py:1152)
-- `not-yet-tested question needs explicit pending test-status surface rather than broad negation over all lots` (scripts/select_qa_mode_without_oracle.py:1196)
-- `split rationale question needs explicit source-note rationale plus viability context` (scripts/select_qa_mode_without_oracle.py:1224)
-- `split rationale question needs actual split/lot-condition surface rather than generic vault assignment surface` (scripts/select_qa_mode_without_oracle.py:1238)
-- `viability-concern question needs explicit source-note contrast plus viability context` (scripts/select_qa_mode_without_oracle.py:1249)
+- `evidentiary-status report question needs explicit witness/report surface rather than generic claim-status surface` (scripts/select_qa_mode_without_oracle.py:1121)
+- `cause question has explicit baseline rationale-note support and candidate is broad record/event surface` (scripts/select_qa_mode_without_oracle.py:1175)
+- `not-yet-tested question needs explicit pending test-status surface rather than broad negation over all lots` (scripts/select_qa_mode_without_oracle.py:1219)
+- `split rationale question needs explicit source-note rationale plus viability context` (scripts/select_qa_mode_without_oracle.py:1247)
+- `split rationale question needs actual split/lot-condition surface rather than generic vault assignment surface` (scripts/select_qa_mode_without_oracle.py:1261)
+- `viability-concern question needs explicit source-note contrast plus viability context` (scripts/select_qa_mode_without_oracle.py:1272)
 
 ### `regulatory_access_scope`
 
@@ -94,11 +95,12 @@ Generated from `scripts/select_qa_mode_without_oracle.py`.
 - `carry question needs direct possession surface rather than broad title or event evidence` (scripts/select_qa_mode_without_oracle.py:886)
 - `possession-versus-ownership question needs inherit/own/possess distinction surface rather than broad event/rule evidence` (scripts/select_qa_mode_without_oracle.py:897)
 - `legal-title contest question needs claim/default/transfer surface rather than static ownership rows` (scripts/select_qa_mode_without_oracle.py:906)
+- `correction-entitlement question needs entitlement rule plus extension effect surface rather than correction/admission rows alone` (scripts/select_qa_mode_without_oracle.py:1112)
 
 ### `threshold_policy_arithmetic`
 
-- `hypothetical failed-viability question keeps direct baseline threshold/storage support over broader policy-note surfaces` (scripts/select_qa_mode_without_oracle.py:1256)
-- `hypothetical failed-viability question needs threshold/action policy surface rather than note surface` (scripts/select_qa_mode_without_oracle.py:1265)
+- `hypothetical failed-viability question keeps direct baseline threshold/storage support over broader policy-note surfaces` (scripts/select_qa_mode_without_oracle.py:1279)
+- `hypothetical failed-viability question needs threshold/action policy surface rather than note surface` (scripts/select_qa_mode_without_oracle.py:1288)
 
 ## Promotion Discipline
 

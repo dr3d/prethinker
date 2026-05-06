@@ -1,6 +1,6 @@
 # Current Research Headline
 
-Last updated: 2026-05-04
+Last updated: 2026-05-06
 
 ## Semantic Parallax
 
@@ -475,6 +475,14 @@ testing whether those gains transfer:
   frozen healthy compile moves full-40 from `27 / 8 / 5` to `32 / 6 / 2`, and
   regulatory access guards lift guarded selection to the two-mode upper bound
   of `33 / 6 / 1` with `40/40` selected-best rows.
+- The newest repair-slice result keeps the pegboard discipline. A broad
+  temporal/status/deadline compile is not promoted globally: Ashgrove uses it
+  only row-gated, while Copperfall rejects it outright. The useful harness
+  change is smaller and named by semantic reason: adjusted-expiration questions
+  need explicit current-expiration surface, and correction-entitlement questions
+  need entitlement-rule plus extension-effect surface. Ashgrove reaches
+  `24 / 1 / 0` with `25/25` selected-best rows; Copperfall points the next
+  work at deadline-family query disambiguation.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 
@@ -620,6 +628,10 @@ The next work should stay on the sharp edges:
    upper bound after adding a deaccession-yet status guard, while Larkspur
    confirms that final state, custody roster, motive, role authority, and award
    results must remain separate surfaces.
+   The temporal/status/deadline slice repeats the same instrument lesson:
+   Ashgrove improves through row-level selector guards (`24 / 1 / 0`, `25/25`
+   selected-best), while Copperfall rejects the broad temporal compile and
+   exposes deadline-family disambiguation as the next helper/query problem.
 2. **Rule probe discipline.** Recent preflight runs show that a rule can be
    body-supported but fail under the wrong scope atom, can become dormant by
    using lowercase placeholders such as `warden` and `repair_order`, or can look

@@ -1,6 +1,6 @@
 # Active Research Lanes
 
-Last updated: 2026-05-05
+Last updated: 2026-05-06
 
 This page is the short operational map for choosing the next few hours of work.
 It is intentionally stricter than a brainstorm: new ideas belong here only if
@@ -63,8 +63,8 @@ lenses so names describe the guardrail or semantic reason, not the fixture that
 first exposed it.
 
 Selector guard growth is now tracked by
-`docs/SELECTOR_GUARD_FAMILY_ROLLUP.md`: `50` guard return sites collapse to
-`49` unique reasons across `7` families with `0` unclassified. Treat that
+`docs/SELECTOR_GUARD_FAMILY_ROLLUP.md`: `53` guard return sites collapse to
+`52` unique reasons across `7` families with `0` unclassified. Treat that
 family count, not the raw guard count, as the anti-sprawl metric.
 
 Cross-fixture repair growth is now tracked by
@@ -113,7 +113,7 @@ temporal helpers, query planning, CE decisions, and public demos.
 
 Current score-hold check: Larkspur, Calder, Oxalis, Avalon, and Sable frozen
 selector lanes still match their documented results with perfect selected-best
-counts and `0` selector errors; full verification is `607 passed`.
+counts and `0` selector errors; full verification is `613 passed`.
 
 First repair-slice action: the rule-interpretation/application pass is a
 Meridian win and a Heronvale boundary marker. Meridian full-40 now reaches
@@ -132,6 +132,14 @@ artifact to the frozen roster creates a `25 / 0 / 0` upper bound, and the new
 selected-best rows. This reinforces the pegboard model: object final state,
 custody roster, rationale, operational threshold/status, and deaccession-yet
 status are separate hooks.
+
+Third repair-slice action: `temporal_status_deadline` also split cleanly into
+row-level selector gain and global compile rejection. Ashgrove's broad temporal
+compile is not a default (`19 / 5 / 1` versus operational `21 / 4 / 0`), but
+adjusted-expiration and correction-entitlement guards lift the frozen selector
+to `24 / 1 / 0` with `25/25` selected-best rows. Copperfall's broad temporal
+compile regresses to `25 / 5 / 10` against its `38 / 1 / 1` high-water; q024 is
+rescued, but q034 points to deadline-family query disambiguation.
 
 Current update: Three Moles improved when source_entity_ledger_v1 added
 powerless `coverage_targets`, but an anti-meta-rot replay on Oxalis regressed

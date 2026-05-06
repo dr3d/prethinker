@@ -149,6 +149,16 @@ questions to compact scheduled/not-formally-completed status evidence instead
 of broad lot-history volume. This keeps deaccession-yet status separate from
 conservation rationale, operational thresholds, final object state, and custody
 roster evidence.
+The latest temporal/status/deadline replay repeats that shape. Broad temporal
+surface is not a default compile mode: Ashgrove benefits only when the selector
+uses the right row-level surface, and Copperfall regresses globally. The new
+guards are named for the semantic reason rather than the fixture:
+`adjusted_expiration_current_surface_guard` routes reinstatement/adjusted
+expiration questions to explicit current-expiration predicates, and
+`correction_entitlement_effect_surface_guard` routes correction-entitlement
+questions to entitlement-rule plus extension-effect evidence. Copperfall keeps
+the next boundary visible: original answer deadlines, resumed answer deadlines,
+and later reply deadlines must be disambiguated as separate deadline families.
 
 Uncertainty is a domain language, not a tone. Future harness work should avoid
 collapsing these into a single "not sure" bucket:
@@ -190,7 +200,7 @@ Companion inventory:
 [Selector Guard Family Rollup](https://github.com/dr3d/prethinker/blob/main/docs/SELECTOR_GUARD_FAMILY_ROLLUP.md) is generated
 from `scripts/select_qa_mode_without_oracle.py` and tracks whether many
 individual selector guards are collapsing into a small number of semantic
-families. The current rollup has `51` guard return sites, `50` unique guard
+families. The current rollup has `53` guard return sites, `52` unique guard
 reasons, `7` families, and `0` unclassified reasons.
 
 [Cross-Fixture Repair Slices](https://github.com/dr3d/prethinker/blob/main/docs/CROSS_FIXTURE_REPAIR_SLICES.md) is generated

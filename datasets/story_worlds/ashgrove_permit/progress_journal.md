@@ -211,3 +211,67 @@ Ashgrove cleanly transfers the rationale/contrast lens on targeted permit
 status, correction, and suspension-cause rows. It does not raise the slice
 above the available upper bound, but it also does not damage the existing
 request-filing and rationale-note protections.
+
+## AP-007 - Temporal Status/Deadline Surface and Selector Guards
+
+Date: 2026-05-05
+
+Evidence lane: `temporal_status_deadline_surface`
+
+Mode: scoped temporal/status/deadline compile over the same source. The compile
+asked for source-stated dates, event order, effective dates,
+suspension/reinstatement periods, tolling or non-tolling intervals, adjusted
+expirations, filing/request/completion deadlines, status-at-date facts, grace
+periods, and unresolved temporal conditions. It did not use answer keys,
+oracle rows, failure labels, or gold KB material during compile.
+
+Artifacts:
+
+- Compile:
+  `tmp/temporal_status_deadline_runs/ashgrove_permit/domain_bootstrap_file_20260506T005608533188Z_source_qwen-qwen3-6-35b-a3b.json`
+- Targeted QA:
+  `tmp/temporal_status_deadline_targeted_qa/ashgrove_permit/domain_bootstrap_qa_20260506T005806682931Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Targeted failure classification:
+  `tmp/temporal_status_deadline_failures/ashgrove_permit/domain_bootstrap_qa_20260506T005806682931Z_qa_qwen-qwen3-6-35b-a3b_failure_surface_20260506T005837553341Z.json`
+- Full QA:
+  `tmp/temporal_status_deadline_fullqa/ashgrove_permit/domain_bootstrap_qa_20260506T010820879280Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Full failure classification:
+  `tmp/temporal_status_deadline_full_failures/ashgrove_permit/domain_bootstrap_qa_20260506T010820879280Z_qa_qwen-qwen3-6-35b-a3b_failure_surface_20260506T011153017962Z.json`
+- Comparison:
+  `tmp/temporal_status_deadline_comparisons/ashgrove_temporal_status_deadline_comparison.md`
+- Selector after deadline guards:
+  `tmp/temporal_status_deadline_selector/ashgrove_temporal_guarded_activation_deadline_guards.md`
+
+Result:
+
+```text
+compile shape:                 78 admitted / 28 skipped, rough score 0.778
+targeted temporal rows:         3 exact / 0 partial / 1 miss
+targeted failure surfaces:      1 hybrid-join gap
+full QA temporal candidate:     19 exact / 5 partial / 1 miss
+baseline comparison:            19 exact / 2 partial / 4 miss
+operational comparison:         21 exact / 4 partial / 0 miss
+full failure surfaces:          1 compile-surface gap, 5 hybrid-join gaps
+three-surface upper bound:      24 exact / 1 partial / 0 miss
+selector before deadline guards:22 exact / 3 partial / 0 miss, 23/25 best
+selector after deadline guards: 24 exact / 1 partial / 0 miss, 25/25 best
+selector errors:                0
+write proposals:                0
+runtime errors:                 0
+```
+
+New reason-named selector guards:
+
+- `adjusted-expiration question needs explicit current-expiration surface rather than extension-label or original-date evidence`
+- `correction-entitlement question needs entitlement rule plus extension effect surface rather than correction/admission rows alone`
+
+Lesson:
+
+The temporal/status/deadline surface is useful as a row-level artifact, not as
+a global compile default. It gives the selector the exact adjusted-expiration
+surface for `q006` and preserves the date/status rows, but it blurs unrelated
+permit-rule and correction rows when used alone. The new guards close Ashgrove
+to the measured frozen-artifact upper bound (`24 / 1 / 0`): adjusted expiration
+prefers explicit current-expiration evidence, while correction/entitlement
+questions require rule-plus-extension-effect evidence rather than a bare
+correction/admission pair.

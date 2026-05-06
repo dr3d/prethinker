@@ -122,3 +122,52 @@ The lens transfers to correction/status notes, including the stay effective-date
 correction and clerk-note surface. The misses cluster later in the temporal
 ledger, so the next Copperfall work is not more rationale prose; it is stronger
 date/status continuation and helper/query composition for deadline effects.
+
+## CFD-004 - Temporal Status/Deadline Transfer Rejection
+
+Date: 2026-05-05
+
+Evidence lane: `temporal_status_deadline_surface`
+
+Mode: scoped temporal/status/deadline compile over the same source. The compile
+asked for source-stated dates, event order, effective dates, original and
+revised deadlines, filing dates, response/reply deadlines, stays, tolling or
+non-tolling intervals, status-at-date facts, grace periods, and unresolved
+temporal conditions. It did not use answer keys, oracle rows, failure labels,
+or gold KB material during compile.
+
+Artifacts:
+
+- Compile:
+  `tmp/temporal_status_deadline_runs/copperfall_deadline_docket/domain_bootstrap_file_20260506T005656146629Z_source_qwen-qwen3-6-35b-a3b.json`
+- Targeted QA:
+  `tmp/temporal_status_deadline_targeted_qa/copperfall_deadline_docket/domain_bootstrap_qa_20260506T005753214377Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Targeted failure classification:
+  `tmp/temporal_status_deadline_failures/copperfall_deadline_docket/domain_bootstrap_qa_20260506T005753214377Z_qa_qwen-qwen3-6-35b-a3b_failure_surface_20260506T005837348308Z.json`
+- Full QA:
+  `tmp/temporal_status_deadline_fullqa/copperfall_deadline_docket/domain_bootstrap_qa_20260506T011040521274Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Full failure classification:
+  `tmp/temporal_status_deadline_full_failures/copperfall_deadline_docket/domain_bootstrap_qa_20260506T011040521274Z_qa_qwen-qwen3-6-35b-a3b_failure_surface_20260506T011226035888Z.json`
+
+Result:
+
+```text
+compile shape:                  100 admitted / 6 skipped, rough score 1.000
+targeted temporal rows:          1 exact / 0 partial / 1 miss
+targeted failure surfaces:       1 query-surface gap
+full QA temporal candidate:      25 exact / 5 partial / 10 miss
+journaled high-water comparison: 38 exact / 1 partial / 1 miss
+full failure surfaces:           7 compile-surface gaps, 3 hybrid-join gaps, 5 query-surface gaps
+write proposals:                 0
+runtime errors:                  0
+```
+
+Lesson:
+
+The temporal/status/deadline surface is rejected for Copperfall. It recovers
+the original answer deadline (`q024`) but confuses Orion's later reply deadline
+(`q034`) by querying the wrong 14-day deadline family. Full replay is much
+worse than the existing high-water, so the next Copperfall move is not another
+broad temporal compile. It needs deadline-family disambiguation in the query
+planner or helper layer: original answer deadline, resumed answer deadline, and
+later reply deadline must remain separate temporal families.

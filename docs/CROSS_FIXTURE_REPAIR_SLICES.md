@@ -44,6 +44,21 @@ rows and `0` selector errors. Treat object state, custody roster,
 permission/motive, conservation rationale, and deaccession status as separate
 surfaces.
 
+## Third Action Result
+
+The next run attacked `temporal_status_deadline` on Ashgrove and Copperfall.
+Ashgrove shows the useful path: the broad temporal compile is weaker as a
+standalone mode (`19 / 5 / 1`) than the operational variant (`21 / 4 / 0`), but
+it carries an adjusted-expiration surface that the selector can use. Adding
+adjusted-expiration and correction-entitlement guards moves Ashgrove's frozen
+selector from `22 / 3 / 0` to the `24 / 1 / 0` upper bound with `25/25`
+selected-best rows and `0` selector errors. Copperfall is the boundary marker:
+the same broad temporal surface regresses full QA to `25 / 5 / 10` against the
+documented `38 / 1 / 1` high-water. It rescues the original-answer-deadline row
+but still chooses the wrong deadline family for the later reply-deadline row.
+Treat temporal status, adjusted expiration, correction entitlement, and
+deadline-family query disambiguation as separate surfaces.
+
 ### `rule_interpretation_application`
 
 - priority score: `115`

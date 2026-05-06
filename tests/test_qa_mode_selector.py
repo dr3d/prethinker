@@ -1675,6 +1675,111 @@ def test_hybrid_selector_prefers_final_state_for_current_operational_status() ->
     assert "explicit final-state surface" in selected["specialized_guard_reason"]
 
 
+def test_hybrid_selector_prefers_current_expiration_for_adjusted_reinstatement_expiration() -> None:
+    row = {
+        "id": "q004z2",
+        "question": "What is the adjusted permit expiration after reinstatement?",
+        "modes": [
+            {
+                "mode": "baseline",
+                "query_evidence": {
+                    "executed_results": [
+                        {"status": "success", "num_rows": 1, "predicate": "permit_expires_on"},
+                        {"status": "success", "num_rows": 1, "predicate": "permit_status_at"},
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+            {
+                "mode": "operational_record",
+                "query_evidence": {
+                    "executed_results": [
+                        {"status": "success", "num_rows": 1, "predicate": "permit_expiration"},
+                        {
+                            "status": "success",
+                            "num_rows": 5,
+                            "predicate": "permit_expiration",
+                            "was_relaxed_fallback": True,
+                        },
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+            {
+                "mode": "temporal_status",
+                "query_evidence": {
+                    "executed_results": [
+                        {
+                            "status": "success",
+                            "num_rows": 2,
+                            "predicate": "permit_current_expiration",
+                            "was_relaxed_fallback": False,
+                        }
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["baseline", "operational_record", "temporal_status"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: {"selected_mode": "operational_record"},
+    )
+
+    assert selected["selected_mode"] == "temporal_status"
+    assert "explicit current-expiration surface" in selected["specialized_guard_reason"]
+
+
+def test_hybrid_selector_prefers_entitlement_effect_for_correction_entitlement_question() -> None:
+    row = {
+        "id": "q004z3",
+        "question": "Does Correction 3 change the section 5.5 extension entitlement?",
+        "modes": [
+            {
+                "mode": "baseline",
+                "query_evidence": {
+                    "executed_results": [
+                        {"status": "success", "num_rows": 1, "predicate": "deadline_requirement"},
+                        {"status": "success", "num_rows": 1, "predicate": "extension_approved_on"},
+                        {"status": "success", "num_rows": 1, "predicate": "extension_duration_days"},
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+            {
+                "mode": "temporal_status",
+                "query_evidence": {
+                    "executed_results": [
+                        {"status": "success", "num_rows": 1, "predicate": "corrected_value"},
+                        {"status": "success", "num_rows": 1, "predicate": "inspector_admission"},
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["baseline", "temporal_status"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: {"selected_mode": "temporal_status"},
+    )
+
+    assert selected["selected_mode"] == "baseline"
+    assert "entitlement rule plus extension effect surface" in selected["specialized_guard_reason"]
+
+
 def test_hybrid_selector_prefers_witness_report_surface_for_evidentiary_status() -> None:
     row = {
         "id": "q005a",

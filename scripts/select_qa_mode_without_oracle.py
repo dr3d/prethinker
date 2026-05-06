@@ -1089,6 +1089,29 @@ def structural_specialized_answer_surface_override(
                     "current operational status question needs explicit final-state surface rather than adjacent event/action evidence",
                 )
 
+    if "adjusted" in question and "expiration" in question and "reinstatement" in question:
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            direct_rows = int(quality.get("direct_rows", 0) or 0)
+            if "permit_current_expiration" in predicates and direct_rows > 0:
+                return (
+                    label,
+                    "adjusted-expiration question needs explicit current-expiration surface rather than extension-label or original-date evidence",
+                )
+
+    if "correction" in question and "extension entitlement" in question and any(
+        marker in question for marker in ["change", "changed", "affect"]
+    ):
+        entitlement_predicates = {"deadline_requirement", "rule_threshold_met"}
+        extension_predicates = {"extension_approved_on", "extension_duration_days", "extension_granted"}
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if predicates.intersection(entitlement_predicates) and predicates.intersection(extension_predicates):
+                return (
+                    label,
+                    "correction-entitlement question needs entitlement rule plus extension effect surface rather than correction/admission rows alone",
+                )
+
     if "evidentiary status" in question and ("report" in question or "source" in question):
         for _score, label, quality in scored:
             predicates = set(quality.get("predicate_names", []) or [])
