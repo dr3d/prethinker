@@ -112,6 +112,19 @@ models or instruct variants with thinking disabled when possible. It should
 read one bounded job packet, perform the requested bounded work, write one
 result, and exit.
 
+For Qwen-family Hermes models that honor prompt switches, the default mailbox
+prompt prefix is:
+
+```text
+/no_think
+```
+
+Keep that prefix in `state/hermes_prompt_prefix.txt` on the laptop mailbox and
+have the runner adapter prepend it to markdown jobs. If the selected model uses
+`/nothink` instead, change the state file, not the job packets. Do not prepend
+this switch to Prethinker semantic prompts; it is only for Hermes control-plane
+orchestration.
+
 Avoid using a thinking-heavy chat session for mailbox polling. Long hidden
 reasoning and accumulated chat history are useful for exploration, but they are
 bad defaults for cron work because they make progress hard to observe and can
