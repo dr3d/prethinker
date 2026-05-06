@@ -147,6 +147,15 @@ same rejected temporal compile, full QA improves from `25 / 5 / 10` to
 `30 / 5 / 5`, with `8` rescues and `0` exact regressions. This helper is
 support retrieval, not a new compile lens.
 
+Second query-surface action: sparse status anchors now get query-only interval
+support. When exact `case_status_at_date/3` lookup misses for a concrete
+case/date, the harness exposes the latest prior admitted status anchor and the
+next later anchor without writing a derived fact. On Copperfall this lifts the
+same artifact to `35 / 4 / 1`, with `6` more rescues and `0` exact
+regressions. The remaining status problem is the stay overlay, which should be
+made explicit as compile/status-override surface rather than inferred from
+nearby prose-shaped docket atoms.
+
 Current update: Three Moles improved when source_entity_ledger_v1 added
 powerless `coverage_targets`, but an anti-meta-rot replay on Oxalis regressed
 when the partial-skeleton recovery instruction was global. Keep that recovery

@@ -223,3 +223,49 @@ distinguish `answer`, `response`, `reply`, `discovery`, and `dispositive`
 deadlines. Copperfall is still below its older high-water, so the remaining
 work is compile coverage plus narrower query joins, not another broad temporal
 compile.
+
+## CFD-006 - Status-at-Date Interval Support
+
+Date: 2026-05-06
+
+Evidence lane: `status_interval_query_surface`
+
+Mode: query-only temporal support over admitted `case_status_at_date/3`
+transition anchors. When a QA query asks for a concrete case/date status and
+the exact date lookup misses, the harness now derives one transparent support
+row from the latest prior admitted status anchor plus the next later anchor.
+This is structural temporal interval support over compiled KB rows. It does
+not read source prose, add durable facts, use answer keys for planning, or
+authorize writes.
+
+Artifacts:
+
+- Status-band q011-q017 replay:
+  `tmp/status_interval_support_qa/domain_bootstrap_qa_20260506T015302220204Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Full QA replay:
+  `tmp/status_interval_support_fullqa/domain_bootstrap_qa_20260506T020047458491Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Comparison:
+  `tmp/status_interval_support_comparisons/copperfall_status_interval.md`
+
+Result:
+
+```text
+status band q011-q017:          5 exact / 1 partial / 1 miss
+full QA before interval helper: 30 exact / 5 partial / 5 miss
+full QA after interval helper:  35 exact / 4 partial / 1 miss
+rescued rows:                   6
+baseline-exact regressions:     0
+failure surfaces after replay:  1 compile, 2 query, 2 hybrid
+write proposals:                0
+runtime errors:                 0
+```
+
+Lesson:
+
+Sparse status anchors are not enough by themselves: questions usually ask for
+interior dates. The new helper exposes the active interval implied by admitted
+transition anchors and makes atom-surface drift visible through `ObservedCase`
+and `CaseMatch` fields rather than hiding it. The remaining hard Copperfall
+status rows are the stay overlay: `stayed` was not admitted as a status anchor,
+so deriving it from docket/correction rows would be a future explicit
+status-override surface, not a silent Python guess.

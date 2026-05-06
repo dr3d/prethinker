@@ -391,3 +391,30 @@ def test_deadline_calculated_query_adds_deadline_family_companion() -> None:
     result_rows = companion[0]["result"]["rows"]
     assert any(row.get("Deadline") == "reply_deadline" and row.get("Type") == "reply" for row in result_rows)
     assert "deadline-family questions" in companion[0]["result"]["reasoning_basis"]["note"]
+
+
+def test_case_status_at_date_query_derives_interval_support_from_transition_anchors() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "case_status_at_date(case_2026_cv_1847, 2026_03_31, active_discovery).",
+        "case_status_at_date(case_2026cv1847, 2026_09_15, active_dispositive).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(
+        runtime,
+        ["case_status_at_date(case_2026_cv_1847, 2026_08_10, Status)."],
+    )
+    companion = [
+        row
+        for row in rows
+        if row.get("query")
+        == "case_status_at_date_interval_support(QueryCase, RequestedDate, Status, EffectiveFrom, EffectiveUntil)."
+    ]
+
+    assert companion
+    result_row = companion[0]["result"]["rows"][0]
+    assert result_row["Status"] == "active_discovery"
+    assert result_row["EffectiveFrom"] == "2026_03_31"
+    assert result_row["EffectiveUntil"] == "2026_09_15"
+    assert "interval support" in companion[0]["result"]["reasoning_basis"]["note"]

@@ -164,6 +164,13 @@ The first deadline-family helper lives on the query side, not the compile side:
 rows whenever a deadline calculation is already being queried. This exposes
 typed deadline families such as `answer`, `response`, `reply`, `discovery`, and
 `dispositive` without adding facts or reading source prose.
+`case_status_interval_support` is the next helper in the same family: exact
+date misses over `case_status_at_date/3` can receive a query-only interval row
+computed from admitted transition anchors. It is not a new lens and not a write
+path; it exists so sparse status timelines behave like timelines instead of
+isolated point facts. The boundary is equally important: temporary stay/override
+status must be explicitly compiled as a status surface before the helper can
+return it.
 
 Uncertainty is a domain language, not a tone. Future harness work should avoid
 collapsing these into a single "not sure" bucket:

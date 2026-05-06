@@ -140,6 +140,15 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
   rows including q034's reply deadline, and causes `0` baseline-exact
   regressions or writes. The remaining Copperfall failures are now classified
   as `6` compile, `3` query, and `1` hybrid gap.
+- Status-at-date now has the matching query-only interval helper. If an exact
+  `case_status_at_date(Case, Date, Status)` lookup misses, the QA harness can
+  expose the latest prior admitted transition anchor plus the next later anchor
+  as transparent interval support. On the same Copperfall artifact this moves
+  full QA from `30 / 5 / 5` to `35 / 4 / 1`, with `6` rescued rows, `0`
+  baseline-exact regressions, `0` writes, and `0` runtime load errors. The
+  remaining hard status rows are the stay overlay: `stayed` was not admitted as
+  a status transition, so that belongs to explicit compile/status-override
+  surface rather than hidden Python interpretation.
 - Semantic struggle detection is now a named structural guardrail in
   `src/semantic_struggle.py`. It turns pass contribution, duplicate, skip-heavy,
   stale-tail, and selector-governor telemetry into a stop/continue

@@ -1283,6 +1283,11 @@ def run_query_plan(runtime: CorePrologRuntime, queries: list[str]) -> list[dict[
 
         last_result = results[-1].get("result", {}) if results else {}
         if isinstance(last_result, dict) and last_result.get("status") != "success":
+            status_interval = _status_at_date_interval_companion(runtime, query=effective_query)
+            if status_interval:
+                results.append(status_interval)
+                last_result = status_interval.get("result", {})
+        if isinstance(last_result, dict) and last_result.get("status") != "success":
             relaxed = _relaxed_constant_query(runtime, query=query)
             if relaxed:
                 results.append(relaxed)
@@ -1502,6 +1507,122 @@ def _domain_companion_queries(runtime: CorePrologRuntime, *, query: str) -> list
             )
         return out
     return []
+
+
+def _case_atom_key(value: str) -> str:
+    return re.sub(r"_+", "", str(value or "").strip().lower())
+
+
+def _runtime_temporal_datetime(runtime: CorePrologRuntime, value: str) -> datetime | None:
+    try:
+        term = runtime.engine.parse_term(str(value or "").strip())
+    except Exception:
+        return None
+    try:
+        return runtime._temporal_datetime(term)
+    except Exception:
+        return None
+
+
+def _status_at_date_interval_companion(runtime: CorePrologRuntime, *, query: str) -> dict[str, Any] | None:
+    parsed = parse_prolog_query(query)
+    if parsed is None:
+        return None
+    predicate, args = parsed
+    if predicate != "case_status_at_date" or len(args) != 3:
+        return None
+
+    case_arg = str(args[0]).strip()
+    date_arg = str(args[1]).strip()
+    status_arg = str(args[2]).strip()
+    if not case_arg or not date_arg or _is_prolog_variable(case_arg) or _is_prolog_variable(date_arg):
+        return None
+
+    requested_at = _runtime_temporal_datetime(runtime, date_arg)
+    if requested_at is None:
+        return None
+
+    timeline = runtime.query_rows("case_status_at_date(Case, Date, Status).")
+    if timeline.get("status") != "success":
+        return None
+
+    requested_case_key = _case_atom_key(case_arg)
+    anchors: list[dict[str, Any]] = []
+    for row in timeline.get("rows", []) or []:
+        if not isinstance(row, dict):
+            continue
+        observed_case = str(row.get("Case", "")).strip()
+        observed_date = str(row.get("Date", "")).strip()
+        observed_status = str(row.get("Status", "")).strip()
+        if not observed_case or not observed_date or not observed_status:
+            continue
+        case_match = "exact" if observed_case == case_arg else "canonical_atom"
+        if case_match != "exact" and _case_atom_key(observed_case) != requested_case_key:
+            continue
+        observed_at = _runtime_temporal_datetime(runtime, observed_date)
+        if observed_at is None:
+            continue
+        anchors.append(
+            {
+                "observed_case": observed_case,
+                "observed_date": observed_date,
+                "observed_status": observed_status,
+                "observed_at": observed_at,
+                "case_match": case_match,
+            }
+        )
+
+    if not anchors:
+        return None
+    anchors.sort(key=lambda item: item["observed_at"])
+    previous_anchor: dict[str, Any] | None = None
+    next_anchor: dict[str, Any] | None = None
+    for anchor in anchors:
+        if anchor["observed_at"] <= requested_at:
+            previous_anchor = anchor
+            continue
+        next_anchor = anchor
+        break
+    if previous_anchor is None:
+        return None
+
+    requested_status = "" if _is_prolog_variable(status_arg) else status_arg
+    status_matches = ""
+    if requested_status:
+        status_matches = "true" if requested_status == previous_anchor["observed_status"] else "false"
+
+    row: dict[str, str] = {
+        "QueryCase": case_arg,
+        "RequestedDate": date_arg,
+        "Status": previous_anchor["observed_status"],
+        "EffectiveFrom": previous_anchor["observed_date"],
+        "EffectiveUntil": str(next_anchor["observed_date"]) if next_anchor else "",
+        "ObservedCase": previous_anchor["observed_case"],
+        "CaseMatch": previous_anchor["case_match"],
+    }
+    if requested_status:
+        row["RequestedStatus"] = requested_status
+        row["StatusMatches"] = status_matches
+
+    result = {
+        "status": "success",
+        "result_type": "table",
+        "predicate": "case_status_at_date",
+        "prolog_query": "case_status_at_date_interval_support(QueryCase, RequestedDate, Status, EffectiveFrom, EffectiveUntil).",
+        "variables": list(row.keys()),
+        "rows": [row],
+        "num_rows": 1,
+        "reasoning_basis": {
+            "kind": "core-local",
+            "note": "query-only interval support derived status at an interior date from admitted case_status_at_date/3 transition anchors; no durable fact was written",
+            "original_query": query,
+        },
+    }
+    return {
+        "query": result["prolog_query"],
+        "result": result,
+        "derived_from_queries": [query, "case_status_at_date(Case, Date, Status)."],
+    }
 
 
 def _ordered_query_unique(queries: list[str]) -> list[str]:

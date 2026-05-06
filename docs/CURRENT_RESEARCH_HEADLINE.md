@@ -488,6 +488,12 @@ testing whether those gains transfer:
   The rejected temporal compile improves from `25 / 5 / 10` to `30 / 5 / 5`
   with `8` rescues and no exact regressions, because q034 can see the `reply`
   deadline family instead of only the neighboring `answer` deadline.
+- The following Copperfall bite adds status interval support without adding a
+  new lens: exact-date misses over admitted `case_status_at_date/3` anchors now
+  get a query-only interval row. The same artifact improves again to
+  `35 / 4 / 1`, with `6` more rescues and no exact regressions. The remaining
+  hard edge is explicit status override: `stayed` must be compiled as a status
+  surface before the runtime should return it.
 
 Clarification Eagerness Trap is exercising the companion governance frontier:
 
@@ -640,6 +646,9 @@ The next work should stay on the sharp edges:
    A query-only deadline-family companion now addresses the first part of that
    Copperfall problem: `deadline_calculated/5` queries retrieve sibling
    deadline rows, lifting the rejected temporal full replay to `30 / 5 / 5`.
+   A second query-only status interval helper lifts it again to `35 / 4 / 1`;
+   the next Copperfall frontier is explicit stay/status-override acquisition,
+   not another broad temporal lens.
 2. **Rule probe discipline.** Recent preflight runs show that a rule can be
    body-supported but fail under the wrong scope atom, can become dormant by
    using lowercase placeholders such as `warden` and `repair_order`, or can look
