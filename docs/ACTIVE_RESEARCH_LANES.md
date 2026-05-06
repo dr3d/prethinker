@@ -200,6 +200,11 @@ frontier slices as `narrative_event_detail_surface`
 `object_state_transition_surface` (`1`), plus `4` rows still too generic for a
 named acquisition family. This is the next useful pegboard: narrative concrete
 detail and governance authority/rationale, not another broad compile prompt.
+Avalon governance/rationale then validated the row-gated framing: the focused
+variant regressed to `25 / 8 / 7` globally but rescued `q014`, partially
+rescued `q026`, and fixed `q035`, producing a two-mode upper bound of
+`36 / 2 / 2` while regressing `11` baseline-exact rows. Keep it as selector
+training/evidence mode, not a default compile.
 
 New zip-batch update: Ashgrove Permit, Fenmore Seedbank, Greywell Pipeline,
 Heronvale Arts, and Veridia Intake are promoted into `datasets/story_worlds`

@@ -909,3 +909,42 @@ the Foundation Director interpretation authority. This reinforces the existing
 Avalon doctrine: rule/evidence activation is powerful only after the source
 surface preserves speaker, authority, meeting attendance, and interpretation
 issuer rows.
+
+## Run AG-018 - Governance/Rationale Variant Boundary
+
+Date: 2026-05-06
+
+Evidence lane: `governance_authority_rationale_surface`
+
+Mode: focused domain-hint variant over the same source, aimed at recusal,
+quorum/attendance, formal interpretation issuer, eligibility rationale, and
+Rule 3 ambiguity rows. This was a candidate evidence mode only; it did not
+replace the current harness compile.
+
+Artifacts:
+
+- Compile:
+  `tmp/story_world_cold_runs/avalon_governance_rationale_variant/domain_bootstrap_file_20260506T063459150425Z_source_qwen-qwen3-6-35b-a3b.json`
+- QA:
+  `tmp/story_world_cold_qa/avalon_governance_rationale_variant/domain_bootstrap_qa_20260506T064713235581Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Mode comparison:
+  `tmp/story_world_cold_qa/avalon_governance_variant_comparison.md`
+
+Result:
+
+```text
+current harness:       34 exact / 2 partial / 4 miss
+governance variant:    25 exact / 8 partial / 7 miss
+perfect two-mode upper:36 exact / 2 partial / 2 miss
+rescues:               q014, q026(partial), q035
+baseline regressions:  11 exact rows
+```
+
+Lesson:
+
+Rejected as a global compile, accepted as a useful row-gated signal. The
+variant found the formal-interpretation authority row (`q035`) and improved
+Rule 2/Rule 3 rationale rows, but it thinned too many ordinary eligibility and
+timeline rows. This confirms the pegboard model: governance authority/rationale
+is a separate evidence surface that a selector may activate for specific rows;
+it should not displace the broader Avalon compile.
