@@ -146,6 +146,15 @@ admissible source packet, and preserved the operational reason. That lets Codex
 choose a better hunting ground, local cache, or rejection without rewarding
 stdout-only "success" or encouraging the agent to invent evidence.
 
+Follow-up live result: the first blocked-report contract exercise created the
+summary placeholders correctly, then timed out before writing either a source
+candidate or a blocked report. That is still a failure. The hunter skill now
+needs a hard self-stop rule: prefer accessible static sources first, avoid
+bot-protected search portals, and if no usable packet exists by the fourth
+minute, write the blocked report and validate it before the runner timeout.
+The lesson is about agency shape: a bounded Autolab worker must preserve the
+state of failure before it runs out of time.
+
 ## Skill 2: QA Drafter
 
 Purpose: draft questions that expose whether the compiled KB captured the

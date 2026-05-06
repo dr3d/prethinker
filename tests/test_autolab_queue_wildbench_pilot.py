@@ -8,6 +8,8 @@ def test_wildbench_pilot_job_has_bounded_contract() -> None:
     assert "Do not edit tracked repo files" in markdown
     assert "Do not run Prethinker heavy compiles" in markdown
     assert "Do not call the desktop heavy LM Studio endpoint" in markdown
+    assert "If you are not holding a usable source packet by minute four" in markdown
+    assert "prefer accessible static sources first" in markdown
     assert "python scripts/validate_autolab_candidate_artifacts.py" in markdown
     assert "required_validation_report: /mnt/c/prethinker/tmp/hermes_mailbox/runs/wild_demo/candidate_validation.json" in markdown
     assert "source_hunt_blocked.json" in markdown
@@ -37,6 +39,7 @@ def test_wildbench_source_only_job_omits_qa_work() -> None:
     assert "qa_candidate.json" not in markdown
     assert "should not draft QA yet" in markdown
     assert "A blocked hunt should not create fake candidate directories" in markdown
+    assert "A timeout with only running summaries is a failed job" in markdown
 
 
 def test_wildbench_job_accepts_custom_wsl_mailbox() -> None:
