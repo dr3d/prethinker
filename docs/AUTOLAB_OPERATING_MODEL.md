@@ -57,9 +57,9 @@ For the current remote Windows setup, see
 | QA role | Draft candidate questions, answer expectations, and coverage rosters as artifacts for later scoring and review. |
 | Grader/diagnostic role | Summarize scores, classify operational failures, compare structured run artifacts, and cluster failure signals without changing harness code. |
 | Prethinker | Semantic engine. Uses LLM calls to propose structured semantic workspaces, then deterministic Python admits, rejects, queries, and scores. |
-| Desktop LM Studio | Heavy semantic lane for Prethinker compile, QA, judging, and classification jobs; currently the 35B workhorse. |
+| Desktop LM Studio | Heavy semantic lane for Prethinker compile, QA, judging, and classification jobs; currently the 35B workhorse on POWER. |
 | Remote Windows Python | Optional direct execution lane for known repo scripts, without WSL or mailbox polling. |
-| Remote LM Studio | Optional model endpoint/compute resource. |
+| Remote LM Studio | Optional sidecar model endpoint/compute resource. Check VRAM, loaded model, context window, and response channel before assigning work. |
 | Codex | Code-master, lab lead, and instrument engineer. Reads results, detects patterns, changes harness code, updates docs/journals, runs tests, commits, and pushes. |
 | GitHub | Durable source history and recovery line. |
 | Legacy mailbox | Historical queue/scratch experiment, not the permanent research record and not currently required. |
@@ -109,6 +109,26 @@ Codex chooses a bounded research question
 The loop is artifact-first. Compile once, persist everything, then run many
 cheap parallax, selector, QA, and diagnostic passes against frozen artifacts.
 That turns the GPU from one big thinker into a small research factory.
+
+Current host split:
+
+- POWER runs the heavy 35B Prethinker compile, QA, judging, and classification
+  lane.
+- NITRO is an 8GB annex and large-context small-model sidecar lane. It is
+  useful for shared filesystem artifacts, Task Scheduler ticks, deterministic
+  scripts, compact structured digests, QA-draft packets, source review, and
+  narrow probes.
+- Before whole-source fixture work goes to NITRO, verify both context and model
+  quality for that exact lane. A 2026-05-06 Dulse smoke against NITRO's Qwen
+  35B endpoint failed with `n_ctx: 4096`, while `qwen3.5-4b:2` later accepted a
+  synthetic `120030` prompt-token probe. The latter is large enough for long
+  sidecar reading and drafting, but still should not be treated as the main 35B
+  semantic compiler.
+- Some Qwen responses on NITRO may arrive in `reasoning_content` even when
+  `/no_think`, `think=false`, and `reasoning_effort=none` are supplied. Repo
+  runners that merge `content` and `reasoning_content` can still consume
+  structured outputs, but raw-chat workers should be treated as unproven until
+  the runtime behavior is fixed.
 
 ## Direct Worker Rules
 

@@ -119,6 +119,27 @@ Unregister-ScheduledTask -TaskName "PrethinkerAutolabTick" -Confirm:$false
 - If a recurring task starts producing stale or unhelpful artifacts, disable it
   before adding more automation.
 
+## Host And Model Lanes
+
+POWER is the heavy desktop lane for 35B Prethinker compile/QA/judge work.
+NITRO is currently an 8GB Windows annex and large-context small-model sidecar
+lane: filesystem artifacts, Task Scheduler ticks, deterministic repo scripts,
+compact structured digests, QA drafting, source review, and narrow model
+probes.
+
+Before routing full fixture compilation to NITRO, verify the loaded LM Studio
+context window. A 2026-05-06 Dulse smoke against NITRO's Qwen 35B endpoint
+failed because the loaded runtime reported `n_ctx: 4096`, which is too small
+for whole-source fixture compilation. Later the same evening, `qwen3.5-4b:2`
+accepted a synthetic `120030` prompt-token probe, which is enough context for
+long sidecar reading and drafting even if the model remains too small to
+replace POWER's 35B semantic lane.
+
+Qwen small-model calls on NITRO may return structured JSON through
+`reasoning_content` even when `/no_think` and no-reasoning flags are supplied.
+That is acceptable only for runners that explicitly merge `content` and
+`reasoning_content`; it is not yet a clean raw-chat worker contract.
+
 ## Retired Runner Note
 
 The retired WSL/mailbox path taught useful lessons about artifact contracts:

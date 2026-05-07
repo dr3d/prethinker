@@ -128,6 +128,16 @@ Desktop LM Studio remains the heavy semantic lane when a run needs model work:
 http://192.168.0.150:1234/v1
 ```
 
+NITRO's LM Studio endpoint is useful as a large-context small-model sidecar
+lane. Check the loaded model and context window for each job: on 2026-05-06,
+NITRO's Qwen 35B endpoint rejected a Dulse compile because that loaded runtime
+reported `n_ctx: 4096`, while `qwen3.5-4b:2` later accepted a synthetic
+`120030` prompt-token probe. That makes NITRO appropriate for long source
+review, QA drafting, failure digests, and compact structured sidecar jobs, but
+not the default lane for full Prethinker semantic compilation away from POWER's
+35B workhorse. Some Qwen responses may arrive through `reasoning_content`;
+runners must merge `content` and `reasoning_content` when using that lane.
+
 Use explicit scripts with structured outputs and deterministic validators.
 Compile once, persist everything, then run cheaper parallax, selector, QA, and
 diagnostic passes against frozen artifacts.
