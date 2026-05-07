@@ -1,6 +1,6 @@
 # Prethinker Project Horizon
 
-Last updated: 2026-04-27
+Last updated: 2026-05-06
 
 Prethinker's current aim is governed semantic intake into auditable symbolic
 state.
@@ -122,6 +122,52 @@ systems can ask better questions:
 
 That is the project direction: not bigger hidden belief, but better governed
 state.
+
+## Public Chat-Site Guidepost
+
+A plausible product horizon is a public chat-shaped site where visitors can
+kick Prethinker directly. The surface can look simple: one bucket where a user
+can paste a document, dump a family story, type ordinary facts, ask questions,
+or correct something they said earlier.
+
+The product should not depend on giving Prethinker a charming assistant
+persona. The wow should come from instrument behavior:
+
+- it notices whether a turn is adding world state, asking a question,
+  correcting prior state, or exposing ambiguity;
+- it answers from admitted symbolic memory rather than smoothing everything
+  into a fluent guess;
+- it distinguishes known, inferred, ambiguous, contradicted, superseded, and
+  missing evidence;
+- it asks sharp clarifying questions when a pronoun, identity, time boundary, or
+  conflict matters;
+- it can say "I can infer this, but here is the assumption" instead of hiding
+  the assumption.
+
+For casual use, a visitor might type:
+
+```text
+My mom is Ann, my dad is Ian, my brother is Blake, and his sons are Will and
+Pierce. They live in Morro Bay, California.
+```
+
+The product behavior to earn is not only answering "Who are my nephews?" It is
+also noticing that "they" has an interpretation boundary, answering with that
+boundary visible, and later handling "Pierce moved to Oregon last year" as a
+time-aware update rather than a flat overwrite.
+
+For document use, the same surface should let a visitor paste large messy text,
+watch Prethinker compile an inspectable world/package, then interrogate it. The
+answer panel should make evidence, uncertainty, conflicts, and missing support
+visible enough that the user feels the difference between a governed instrument
+and an ordinary chatbot.
+
+This guidepost is aspirational. A public v1 would need the current harness
+wrapped around a strong structured-output model lane, likely through a hosted
+provider such as OpenRouter only after context, JSON-schema behavior, latency,
+cost, and transfer scores match the local POWER 35B lane closely enough. NITRO's
+small-model sidecar lane may draft QA or summarize artifacts, but it is not hot
+enough to serve as the Prethinker instrument.
 
 ## Near-Term Research Pressure
 

@@ -47,6 +47,14 @@ So the console is not just a developer toy.
 
 It is the first place where the product behavior becomes legible.
 
+There is also a public chat-site horizon: a visitor-facing surface where people
+can casually talk world state into a bucket, paste large source text, ask
+questions, and receive answers from the governed instrument rather than from a
+freeform persona. The product magic should be sharp memory behavior: noticing
+questions, corrections, ambiguity, conflict, and missing support. See
+[Project Horizon](https://github.com/dr3d/prethinker/blob/main/docs/PROJECT_HORIZON.md)
+for the guidepost.
+
 ## Current Shape
 
 - browser UI served from `ui_gateway/static`
