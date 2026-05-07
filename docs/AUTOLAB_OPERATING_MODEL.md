@@ -110,7 +110,7 @@ The loop is artifact-first. Compile once, persist everything, then run many
 cheap parallax, selector, QA, and diagnostic passes against frozen artifacts.
 That turns the GPU from one big thinker into a small research factory.
 
-Current host split:
+## Host Notes
 
 - POWER runs the heavy 35B Prethinker compile, QA, judging, and classification
   lane.
