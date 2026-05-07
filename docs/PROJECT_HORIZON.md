@@ -20,12 +20,17 @@ utterance + context
 
 The model proposes meaning. The runtime owns admission.
 
+The current POWER/NITRO lab is the research rig, not the product boundary. A
+future hosted lane must prove model-transfer evidence before it replaces the
+local 35B workhorse.
+
 For the detailed technical contract, see:
 
 - [Semantic IR Mapper Spec](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_MAPPER_SPEC.md)
 - [Semantic IR Research Direction](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_RESEARCH_DIRECTION_REPORT.md)
 - [Domain Profile Catalog](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PROFILE_CATALOG.md)
 - [Public Docs Guide](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md)
+- [Portability And Model Transfer](https://github.com/dr3d/prethinker/blob/main/docs/PORTABILITY_AND_MODEL_TRANSFER.md)
 
 ## What Exists Today
 

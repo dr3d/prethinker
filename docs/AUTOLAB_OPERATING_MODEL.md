@@ -46,6 +46,8 @@ For the emerging source-hunter and QA-drafter role design, see
 [Autolab Agent Skill Evolution](https://github.com/dr3d/prethinker/blob/main/docs/AUTOLAB_AGENT_SKILL_EVOLUTION.md).
 For the current remote Windows setup, see
 [Autolab Windows Direct Mode](https://github.com/dr3d/prethinker/blob/main/docs/AUTOLAB_WINDOWS_DIRECT.md).
+For portability and future backend-transfer discipline, see
+[Portability And Model Transfer](https://github.com/dr3d/prethinker/blob/main/docs/PORTABILITY_AND_MODEL_TRANSFER.md).
 
 ## The Division Of Labor
 
@@ -111,6 +113,10 @@ cheap parallax, selector, QA, and diagnostic passes against frozen artifacts.
 That turns the GPU from one big thinker into a small research factory.
 
 ## Host Notes
+
+These are operational notes about the current rig, not permanent product
+requirements. The instrument should remain portable even while the lab uses
+POWER and NITRO for throughput.
 
 - POWER runs the heavy 35B Prethinker compile, QA, judging, and classification
   lane.
