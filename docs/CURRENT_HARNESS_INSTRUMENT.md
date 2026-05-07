@@ -23,7 +23,6 @@ python scripts/run_kb_pipeline_clean_harness.py --instrument-md
 python scripts/run_kb_pipeline_clean_harness.py --instrument-manifest
 python scripts/run_kb_pipeline_clean_harness.py --audit-normalizers
 python scripts/run_kb_pipeline_clean_harness.py --trace-plan
-python scripts/run_kb_pipeline_clean_harness.py --pack docs/data/frontier_packs/semantic_ir_lava_pack_v5.json --limit 3 --compiler-backend lmstudio --compiler-base-url http://127.0.0.1:1234 --semantic-ir-enabled --active-profile auto
 python scripts/validate_fixture_intake.py --root datasets/incoming_fixtures --out-json tmp/incoming_fixtures/intake_validation.json
 python scripts/stage_incoming_fixtures.py --root tmp/incoming --out-root tmp/incoming_staged
 python scripts/plan_incoming_fixture_runs.py --manifest tmp/incoming_staged/stage_manifest.json --out-json tmp/incoming_staged/cold_run_plan.json --out-md tmp/incoming_staged/cold_run_plan.md
@@ -41,6 +40,13 @@ python scripts/plan_story_world_repair_targets.py --scorecard-json tmp/story_wor
 python scripts/select_qa_mode_without_oracle.py --selection-policy protected --group <name>:baseline=<QA_JSON>,evidence=<QA_JSON> --out-json <OUT_JSON> --out-md <OUT_MD>
 python scripts/select_qa_mode_without_oracle.py --selection-policy guarded_activation --group <name>:baseline=<QA_JSON>+<FAILURE_SURFACE_QA_JSON>,candidate=<QA_JSON> --out-json <OUT_JSON> --out-md <OUT_MD>
 python scripts/plan_selector_risk_gate.py --baseline-run protected=<SELECTOR_JSON> --candidate-run guarded_activation=<SELECTOR_JSON> --transfer-comparison <SELECTOR_POLICY_COMPARISON_JSON> --out-dir tmp/selector_risk_gates
+```
+
+Historical Lava stress packs remain available for calibration/regression
+questions, but they are no longer the daily active frontier:
+
+```powershell
+python scripts/run_kb_pipeline_clean_harness.py --pack docs/data/frontier_packs/semantic_ir_lava_pack_v5.json --limit 3 --compiler-backend lmstudio --compiler-base-url http://127.0.0.1:1234 --semantic-ir-enabled --active-profile auto
 ```
 
 ## Instrument Principles

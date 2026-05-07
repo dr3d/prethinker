@@ -50,9 +50,6 @@ Latest local verification:
 - Full pytest suite: `647 passed`
 - Edge runtime A/B: semantic IR `20/20`, `0.976` avg score, `0` non-mapper parse rescues
 - Weak-edge runtime A/B: semantic IR `10/10`, `1.000` avg score, `0` non-mapper parse rescues
-- Lava v5 source-record alignment rerun: `60/60` parsed, `60/60` domain selector,
-  `60/60` admission-safe, `45/60` semantic-clean, `41/60` full expectation score,
-  `0/60` temp-0 signature variance groups
 - Policy/reimbursement demo: `4/4` parsed, `4/4` apply-error-free, `4/4`
   expected query matches, no derived violation write leak
 - Multilingual router probe: `10/10` router choices and `10/10` compiler JSON
@@ -96,7 +93,8 @@ truth-maintenance dependency depth, and safe partial-operation handling.
    - Add focused tests before allowing new durable rule shapes.
 
 4. **Noisy and multilingual semantic pressure**
-   - Keep Silverton, Harbor, Lava, story-world, and raw-document lanes hard.
+   - Keep Silverton, Harbor, story-world, and raw-document lanes hard.
+   - Preserve Lava packs as historical calibration data, not the active frontier.
    - Add small batteries for typos, code-switching, foreign fragments, and
      ambiguous initials/pronouns.
    - Score semantic preservation separately from final admission policy.

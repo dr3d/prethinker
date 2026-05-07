@@ -325,7 +325,6 @@ As of May 6, 2026:
 - `semantic_router_v1 -> semantic_ir_v1` is the active research lane for model-owned context planning and richer model understanding before deterministic admission
 - the latest semantic IR edge runtime A/B is `20/20` decision labels with `0.976` average score
 - the latest weak-edge runtime A/B is `10/10` decision labels with `1.000` average score
-- the latest Lava v5 source-record alignment rerun stayed `60/60` parsed, `60/60` domain-routed, `60/60` admission-safe, reached `0` fuzzy edge kinds, and showed `0/60` temp-0 signature variance groups
 - the policy/reimbursement demo installs English rules, derives query answers, retracts a fact, and changes the answer without writing derived violations as facts
 
 ### Benchmark Evidence

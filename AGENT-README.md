@@ -78,7 +78,7 @@ python -m pytest -q
 The latest full-suite result is `647 passed`. Recent focused
 batteries also cover CourtListener, SEC/contracts, domain profiles, Semantic IR
 runtime, UI gateway phases, trace rendering, router agility, router training
-data, Lava v5, UMLS builders, profile bootstrap, raw-file intake planning,
+data, archived Lava stress packs, UMLS builders, profile bootstrap, raw-file intake planning,
 post-ingestion QA, story-world fixtures, CE, and rule acquisition. Live/generated
 smoke traces belong under ignored paths such as `datasets/*/generated/` and
 `tmp/`.
