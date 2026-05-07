@@ -54,123 +54,122 @@ Current facet roster:
 
 ## Uncertainty Vocabulary
 
-Latest selector lesson: specialized lenses can be answer-bearing or dazzlingly
-irrelevant. `operational_record_status_v1` is not globally promoted; it is a
-row-level candidate. `selector_baseline_readiness_guard` is the companion
-restraint: if baseline has direct application/status, counterfactual rule, or
-hold-readiness support and the competing surface is broad or relaxed-heavy, the
-instrument keeps baseline rather than asking activation to admire extra rows.
-`selector_question_act_guard` adds the other side of that restraint: if the
-question asks about request filing, use request/reinstatement/threshold surface
-rather than completion windows; if it asks whether to commit a status, use
-pending/investigation process surface rather than a bare status value.
-`selector_surface_specificity_guard` adds explicit surface preference for
-cause/rationale notes, decision predicates, and priority predicates when nearby
-status, condition, or event rows are tempting but less answer-bearing.
-`selector_complete_operational_guard` closes the current frozen operational
-record batch by naming the last distinction set: split-rationale questions need
-actual split and lot-condition/policy surfaces; current-constitution eligibility
-needs applicant type plus controlling interpretation; resubmission eligibility
-needs proof/rule resolution rather than merely current applicant status. This
-is selector calibration over persisted artifacts, not evidence that the compile
-surface itself is complete.
-`rationale_contrast_source_note_lens` captures source-stated reasons,
-non-reasons, judgment calls, and explicit contrasts as answer-bearing note
-surface without promoting those notes into policy. Its selector companions
-prefer note rationale for why/contrast questions, direct collector predicates
-for identity questions, pending `test_status` for not-yet-tested questions, and
-threshold/storage policy surfaces for failed-viability hypotheticals.
-The first transfer additions are `current_operational_final_state_guard`,
-`evidentiary_report_surface_guard`, `board_concern_event_action_guard`, and
-`commit_readiness_process_guard`. Together they keep rationale/contrast useful
-for report, concern, and explanation rows while protecting final status and
-commit/hold decisions from attractive but incomplete note or event surfaces.
-The older-fixture transfer check marks the boundary: source-note rationale
-transfers to record/discrepancy/correction surfaces, but it does not solve
-Larkspur-style narrative motive, custody, or object-state coverage without a
-stronger source-surface acquisition contract.
-`final_object_state_transition_surface` is now separated from broad
-state/custody prompting. It asks for named-device initial/current/final
-condition, state-change event, repair/restoration possibility, and stated
-state-change reason. Its guardrail is that identity/role questions should not
-be overrun by object-state volume; Larkspur q009 is the active counterexample.
-`custody_ownership_chain_surface` remains narrower still: use it for final
-holder/ownership/custody rows such as q038, not as a general motive lens.
-`official_role_authority_definition_surface` covers who-is questions where a
-title alone is not enough. It asks for the role holder plus source-stated duties
-and authority scope, so the selector can distinguish "this person made rulings"
-from "this is the official role and what it controls."
-The newest selector guards are named by answer surface:
-`superlative_identity_surface_guard`, `official_role_definition_surface_guard`,
-`current_component_state_surface_guard`, `custody_transfer_rationale_guard`,
-and `award_placement_surface_guard`. They close the Larkspur overlay by routing
-age/identity, role-authority, current component, custody why-have, and award
-placement questions to the surface that actually carries the answer.
-Calder adds the longitudinal conflict family:
-`current_state_correction_conflict_surface`,
-`possession_ownership_inheritance_distinction_surface`, and
-`legal_title_default_transfer_surface`. Their guards are
-`role_reinstatement_history_guard`, `carry_possession_surface_guard`,
-`possession_ownership_distinction_guard`, `legal_title_transfer_guard`,
-`contract_authority_surface_guard`, and
-`guardianship_resumption_condition_guard`. These exist to separate stale
-current-state rows, possession versus ownership, trust/default title, contract
-authority, and non-retroactive guardianship effects.
-Oxalis adds a regulatory access family that acts after a healthy compile rather
-than replacing it: `universal_scope_enumeration_guard`,
-`termination_denial_quantity_threshold_guard`,
-`lot_affected_target_exclusion_guard`, and
-`counterfactual_reclassification_deadline_guard`. These route all/any scoped
-sets, denial rationales with threshold quantities, explicit negative lot checks,
-and reclassification-deadline counterfactuals to evidence surfaces that carry
-the relevant access pattern.
-Rule activation now has a parallel family for promoted rule surfaces:
-`deferment_rationale_interpretation_guard`,
-`component_rule_condition_surface_guard`,
-`recusal_rationale_rule_surface_guard`,
-`post_recusal_vote_surface_guard`,
-`counterfactual_recusal_outcome_guard`,
-`window_merit_rule_condition_guard`,
-`amendment_recall_authority_surface_guard`,
-`rejection_cause_correction_surface_guard`, and
-`hypothetical_reserve_status_arithmetic_guard`. These guards route questions
-to the surface that carries the reason for activation: interpreted decision
-support, project-category/rule-condition pairs, recusal procedure, combined
-procedure-plus-eligibility counterfactuals, explicit window conditions,
-recall-authority evidence, correction/clarification records, or reserve
-arithmetic inputs. The Sable/Avalon replay reaches both fixtures' frozen
-upper bounds without source prose, answer keys, judge labels, failure labels,
-gold KBs, or strategy files in selector input.
-The latest object/state/custody replay is intentionally negative: a combined
-object-state-custody surface blurred too many rows on Fenmore and Larkspur.
-The harness gain was instead a narrower selector distinction:
-`deaccession_yet_status_surface_guard` routes "has X been deaccessioned yet?"
-questions to compact scheduled/not-formally-completed status evidence instead
-of broad lot-history volume. This keeps deaccession-yet status separate from
-conservation rationale, operational thresholds, final object state, and custody
-roster evidence.
-The latest temporal/status/deadline replay repeats that shape. Broad temporal
-surface is not a default compile mode: Ashgrove benefits only when the selector
-uses the right row-level surface, and Copperfall regresses globally. The new
-guards are named for the semantic reason rather than the fixture:
-`adjusted_expiration_current_surface_guard` routes reinstatement/adjusted
-expiration questions to explicit current-expiration predicates, and
-`correction_entitlement_effect_surface_guard` routes correction-entitlement
-questions to entitlement-rule plus extension-effect evidence. Copperfall keeps
-the next boundary visible: original answer deadlines, resumed answer deadlines,
-and later reply deadlines must be disambiguated as separate deadline families.
-The first deadline-family helper lives on the query side, not the compile side:
-`deadline_calculated_family_companion` retrieves sibling `deadline_calculated/5`
-rows whenever a deadline calculation is already being queried. This exposes
-typed deadline families such as `answer`, `response`, `reply`, `discovery`, and
-`dispositive` without adding facts or reading source prose.
-`case_status_interval_support` is the next helper in the same family: exact
-date misses over `case_status_at_date/3` can receive a query-only interval row
-computed from admitted transition anchors. It is not a new lens and not a write
-path; it exists so sparse status timelines behave like timelines instead of
-isolated point facts. The boundary is equally important: temporary stay/override
-status must be explicitly compiled as a status surface before the helper can
-return it.
+### Selector Calibration Lessons
+
+- Specialized lenses can be answer-bearing or dazzlingly irrelevant.
+  `operational_record_status_v1` is not globally promoted; it is a row-level
+  candidate.
+- `selector_baseline_readiness_guard` protects direct application/status,
+  counterfactual rule, and hold-readiness support when a competing surface is
+  broad or relaxed-heavy.
+- `selector_question_act_guard` routes request-filing questions to
+  request/reinstatement/threshold surface and status-commit questions to
+  pending/investigation process surface.
+- `selector_surface_specificity_guard` prefers cause/rationale notes,
+  decision predicates, and priority predicates over nearby status, condition,
+  or event rows when those rows are less answer-bearing.
+- `selector_complete_operational_guard` closes the frozen operational batch by
+  naming the last distinctions: split rationale, lot-condition/policy surface,
+  applicant type plus controlling interpretation, and proof/rule resolution.
+  This is selector calibration over persisted artifacts, not evidence that the
+  compile surface itself is complete.
+
+### Rationale And Source Notes
+
+- `rationale_contrast_source_note_lens` captures source-stated reasons,
+  non-reasons, judgment calls, and explicit contrasts as answer-bearing note
+  surface without promoting those notes into policy.
+- Its selector companions prefer note rationale for why/contrast questions,
+  direct collector predicates for identity questions, pending `test_status` for
+  not-yet-tested questions, and threshold/storage policy surfaces for
+  failed-viability hypotheticals.
+- `current_operational_final_state_guard`,
+  `evidentiary_report_surface_guard`, `board_concern_event_action_guard`, and
+  `commit_readiness_process_guard` preserve useful rationale/contrast rows
+  while protecting final status and commit/hold decisions from incomplete note
+  or event surfaces.
+- Older-fixture transfer marks the boundary: source-note rationale transfers to
+  record/discrepancy/correction surfaces, but it does not solve Larkspur-style
+  narrative motive, custody, or object-state coverage without a stronger
+  source-surface acquisition contract.
+
+### Object, Custody, And Role Surfaces
+
+- `final_object_state_transition_surface` covers named-device initial/current/
+  final condition, state-change event, repair/restoration possibility, and
+  stated state-change reason. Its guardrail is that identity/role questions
+  must not be overrun by object-state volume; Larkspur q009 remains the active
+  counterexample.
+- `custody_ownership_chain_surface` is narrower: use it for final holder,
+  ownership, or custody rows such as q038, not as a general motive lens.
+- `official_role_authority_definition_surface` covers who-is questions where a
+  title alone is not enough: role holder, source-stated duties, and authority
+  scope.
+- New selector guards are named by answer surface:
+  `superlative_identity_surface_guard`,
+  `official_role_definition_surface_guard`,
+  `current_component_state_surface_guard`,
+  `custody_transfer_rationale_guard`, and `award_placement_surface_guard`.
+
+### Conflict, Access, And Rule Activation
+
+- Calder adds the longitudinal conflict family:
+  `current_state_correction_conflict_surface`,
+  `possession_ownership_inheritance_distinction_surface`, and
+  `legal_title_default_transfer_surface`.
+- Its guards separate stale current-state rows, possession versus ownership,
+  trust/default title, contract authority, and non-retroactive guardianship:
+  `role_reinstatement_history_guard`, `carry_possession_surface_guard`,
+  `possession_ownership_distinction_guard`, `legal_title_transfer_guard`,
+  `contract_authority_surface_guard`, and
+  `guardianship_resumption_condition_guard`.
+- Oxalis adds a regulatory access family that acts after a healthy compile:
+  `universal_scope_enumeration_guard`,
+  `termination_denial_quantity_threshold_guard`,
+  `lot_affected_target_exclusion_guard`, and
+  `counterfactual_reclassification_deadline_guard`.
+- Rule activation has a parallel promoted-rule family:
+  `deferment_rationale_interpretation_guard`,
+  `component_rule_condition_surface_guard`,
+  `recusal_rationale_rule_surface_guard`,
+  `post_recusal_vote_surface_guard`,
+  `counterfactual_recusal_outcome_guard`,
+  `window_merit_rule_condition_guard`,
+  `amendment_recall_authority_surface_guard`,
+  `rejection_cause_correction_surface_guard`, and
+  `hypothetical_reserve_status_arithmetic_guard`.
+- The Sable/Avalon replay reaches both fixtures' frozen upper bounds without
+  source prose, answer keys, judge labels, failure labels, gold KBs, or strategy
+  files in selector input.
+
+### Negative Replays And Query Helpers
+
+- The latest object/state/custody replay is intentionally negative: a combined
+  object-state-custody surface blurred too many Fenmore and Larkspur rows.
+  The harness gain was the narrower `deaccession_yet_status_surface_guard`.
+- `deaccession_yet_status_surface_guard` routes "has X been deaccessioned
+  yet?" questions to compact scheduled/not-formally-completed status evidence,
+  keeping deaccession-yet status separate from conservation rationale,
+  operational thresholds, final object state, and custody roster evidence.
+- Broad temporal surface is not a default compile mode. Ashgrove benefits only
+  when the selector uses the right row-level surface, and Copperfall regresses
+  globally.
+- `adjusted_expiration_current_surface_guard` routes reinstatement/adjusted
+  expiration questions to explicit current-expiration predicates.
+- `correction_entitlement_effect_surface_guard` routes correction-entitlement
+  questions to entitlement-rule plus extension-effect evidence.
+- Copperfall keeps the next boundary visible: original answer deadlines,
+  resumed answer deadlines, and later reply deadlines must be disambiguated as
+  separate deadline families.
+- `deadline_calculated_family_companion` is query-side support, not a compile
+  lens. It retrieves sibling `deadline_calculated/5` rows whenever a deadline
+  calculation is already being queried, exposing typed families such as
+  `answer`, `response`, `reply`, `discovery`, and `dispositive`.
+- `case_status_interval_support` is query-side support for exact date misses
+  over `case_status_at_date/3`. It computes interval rows from admitted
+  transition anchors, without adding facts or reading source prose. Temporary
+  stay/override status still must be compiled explicitly before the helper can
+  return it.
 
 Uncertainty is a domain language, not a tone. Future harness work should avoid
 collapsing these into a single "not sure" bucket:

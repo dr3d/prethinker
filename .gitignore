@@ -2,6 +2,11 @@ tmp/
 .tmp*
 .env.local
 .env.*.local
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.log
 __pycache__/
 *.pyc
 *.pyo
@@ -18,3 +23,4 @@ docs/reports/mid_pack-stress.html
 docs/reports/upper_mid_pack-stress.html
 datasets/courtlistener/generated/
 datasets/sec_edgar/generated/
+ui_gateway/state/gateway_config.json

@@ -25,6 +25,7 @@
   "semantic_ir_top_k": 20,
   "semantic_ir_thinking": false,
   "clarification_eagerness": 0.75,
+  "clarification_delivery_policy": "immediate",
   "require_final_confirmation": true,
   "strict_mode": true
 }

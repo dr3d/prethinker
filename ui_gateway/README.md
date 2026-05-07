@@ -71,7 +71,7 @@ This keeps the console as a hard MITM bouncer and prevents served-LLM bypass pat
 - `GET /api/config`
   - returns current local console config
 - `POST /api/config`
-  - persists config to `ui_gateway/state/gateway_config.json`
+  - persists local config to `ui_gateway/state/gateway_config.json`
 - `GET /api/session/reset`
   - resets the current in-memory session
 - `GET /api/session/state?session_id=...`
@@ -115,7 +115,8 @@ parallel UI-only parser.
 - `static/index.html`: chat UI shell
 - `static/app.js`: browser client
 - `static/styles.css`: visual treatment
-- `state/gateway_config.json`: default local config persisted by the UI/server
+- `state/gateway_config.example.json`: checked-in local config template
+- `state/gateway_config.json`: ignored operator-local config persisted by the UI/server; created from defaults when absent
 
 ## Sample Transcript
 
