@@ -19,6 +19,21 @@ The right metaphor is not just "memory."
 
 It is closer to a governed stenographer and compiler.
 
+## Why This Is Interesting
+
+If language can be compiled into durable symbolic state under governance, then a
+user can:
+
+- narrate a world
+- revise it
+- query it
+- inspect the record of how it changed
+
+without giving a probabilistic conversational model silent authority over the
+world state.
+
+That is the interesting bet here.
+
 ## Why This Exists
 
 Ordinary chat systems are good at sounding coherent across a conversation, but they are weak at durable state discipline.
@@ -63,9 +78,7 @@ It is a governed stenographer:
 - it can refuse a write
 - it can show exactly what it believes was committed
 
-## The Two Roles We Care About
-
-### Prethinker
+## The Authority Boundary
 
 `Prethinker` is the strict role.
 
@@ -170,6 +183,19 @@ Examples:
 - "Keep the prior timeline but retract the false transfer."
 
 Those are the kinds of turns where deterministic memory discipline matters more than conversational style.
+
+Current benchmark evidence gives that claim some teeth. The instrument has been
+calibrated against `25` hostile benchmarks across `14` domain types, including
+municipal water contamination, medical device recalls, zoning hearings,
+botanical seed banks, maritime insurance, and regulatory access ledgers. On the
+current surgical fixture batch, it is at `284 / 303` exact answers (`94%`), with
+only `3` misses, `7` zero-miss fixtures, Fenmore and Greywell both perfect, and
+zero unauthorized writes across the corpus.
+
+That is not perfection. Story-world longitudinal tracking, row-level activation,
+rule composition, and temporal arithmetic are still frontier work. But the
+governance layer is doing the thing it was built to do: keep model proposals
+from silently becoming durable authority.
 
 ## Domain Fit And Necessary Brittleness
 
@@ -292,6 +318,8 @@ That is also why the repo is careful about honesty:
 
 As of May 6, 2026:
 
+### Internal Health
+
 - the lean local pytest suite is green at `647 passed`
 - the console is the canonical interactive front door
 - `semantic_router_v1 -> semantic_ir_v1` is the active research lane for model-owned context planning and richer model understanding before deterministic admission
@@ -299,8 +327,14 @@ As of May 6, 2026:
 - the latest weak-edge runtime A/B is `10/10` decision labels with `1.000` average score
 - the latest Lava v5 source-record alignment rerun stayed `60/60` parsed, `60/60` domain-routed, `60/60` admission-safe, reached `0` fuzzy edge kinds, and showed `0/60` temp-0 signature variance groups
 - the policy/reimbursement demo installs English rules, derives query answers, retracts a fact, and changes the answer without writing derived violations as facts
+
+### Benchmark Evidence
+
+- the current surgical fixture batch spans `9` fixtures and `303` questions, with `284` exact answers (`94%`), only `3` misses, `7` zero-miss fixtures, and zero unauthorized writes
 - the Anaplan Polaris enterprise-guidance fixture reached `42 exact / 1 partial / 0 miss` on post-ingestion QA through multi-support safe-surface accumulation, with no QA write proposals
 - the Clarification Eagerness Trap fixture reached `40/40` under authority-aware scoring with perfect ask/no-ask posture, no context-write violations, and `10/10` blocked-slot question coverage
+- Fenmore Seedbank and Greywell Pipeline are current perfect surgical-batch fixtures
+- Meridian Permit Board shows the largest single-fixture lens gain so far, moving from `27` exact baseline answers to `39` exact under the rule-interpretation lane, while still needing transfer proof before broad promotion
 - Sable Creek and Avalon show the current rule-ingestion transfer path: separate rule lenses, admitted-fact support summaries, mapper gates against unsupported raw Prolog constructs, runtime trial, and promotion filtering
 - the next hard problem is row-level activation: accumulated symbolic surfaces can rescue weak answers, but global activation can perturb rows that were already good
 - raw-file/domain bootstrapping now has an LLM-owned `intake_plan_v1 -> profile_bootstrap_v1` path for hint-free predicate discovery and later QA against the compiled KB
@@ -331,18 +365,12 @@ What it does claim is narrower:
 - explicit trust boundaries
 - a measurable path for improvement
 
-## Why This Is Interesting
-
-If language can be compiled into durable symbolic state under governance, then a user can:
-
-- narrate a world
-- revise it
-- query it
-- inspect the record of how it changed
-
-without giving a probabilistic conversational model silent authority over the world state.
-
-That is the interesting bet here.
+The full evidence lives in the progress journals and scorecards, including
+[Semantic Instrument](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_INSTRUMENT.md),
+[Frontier Progress Report](https://github.com/dr3d/prethinker/blob/main/docs/FRONTIER_PROGRESS_REPORT.md),
+[Current Research Headline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md),
+and
+[Cross-Fixture Repair Slices](https://github.com/dr3d/prethinker/blob/main/docs/CROSS_FIXTURE_REPAIR_SLICES.md).
 
 Not "a chatbot that sounds smarter."
 
