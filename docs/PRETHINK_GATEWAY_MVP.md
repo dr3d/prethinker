@@ -1,5 +1,8 @@
 # Prethinker Console
 
+Sharp memory behavior: noticing questions, corrections, ambiguity, conflict,
+and missing support.
+
 This note documents the current UI/front-door shape for Prethinker.
 
 It is both:
@@ -50,8 +53,7 @@ It is the first place where the product behavior becomes legible.
 There is also a public chat-site horizon: a visitor-facing surface where people
 can casually talk world state into a bucket, paste large source text, ask
 questions, and receive answers from the governed instrument rather than from a
-freeform persona. The product magic should be sharp memory behavior: noticing
-questions, corrections, ambiguity, conflict, and missing support. See
+freeform persona. See
 [Project Horizon](https://github.com/dr3d/prethinker/blob/main/docs/PROJECT_HORIZON.md)
 for the guidepost.
 
@@ -73,6 +75,11 @@ for the guidepost.
 - the semantic IR path can be enabled to show richer model workspace proposals before deterministic mapper/admission policy decides what survives
 - long story-like utterances can be processed as multiple focused Semantic IR segments, then shown as one deduped console turn with segment-level trace data
 - long or mixed utterances can split at query boundaries so a question does not share one semantic workspace with surrounding write facts
+
+The console presents the compiled artifact package described in
+[Compiled KB Artifact Package](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md).
+Turn outcome cards expose the admitted surface from that package, while debug
+details expose the workspace, diagnostics, and mutation trail behind it.
 
 ## Newbie-Friendly Surface
 
