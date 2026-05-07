@@ -44,6 +44,15 @@ The strongest current claim is narrow:
 Prethinker can make language-to-state mutation more explicit, testable, and
 auditable than a normal freeform chat transcript.
 
+The measured trajectory is broader than a toy demo. The instrument has been
+calibrated against `25` hostile benchmarks across `14` domain types. The
+current surgical fixture batch covers `9` fixtures and `303` questions, with
+`284` exact answers (`94%`), only `3` misses, `7` zero-miss fixtures, Fenmore
+and Greywell both perfect, and zero unauthorized writes across the checked
+corpus. The evidence trail lives in
+[Semantic Instrument](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_INSTRUMENT.md)
+and the active progress journals.
+
 ## What Does Not Exist Yet
 
 The horizon is broader than today's implementation.
@@ -99,6 +108,12 @@ support links, conflicts, retraction plans, and derived consequences. That block
 is not an execution surface. It is how the larger model can use more of its
 semantic intelligence while deterministic admission still decides what becomes
 state.
+
+In practice, that means the model can say "this proposed correction depends on
+turn 12, conflicts with the current holder row, and would imply retracting the
+older status." The mapper can then inspect that dependency shape, admit the safe
+pieces, quarantine the unsafe pieces, and preserve the diagnostic structure
+without letting the diagnostic itself become truth.
 
 ## Why This Horizon Matters
 
@@ -182,6 +197,11 @@ docs:
 - domain type ambiguity;
 - noisy or multilingual phrasing;
 - profile-owned validators that avoid English-specific Python patches.
+
+Those pressures map directly to the concrete work plan in
+[Cross-Fixture Repair Slices](https://github.com/dr3d/prethinker/blob/main/docs/CROSS_FIXTURE_REPAIR_SLICES.md),
+where recurring failures are grouped into multi-fixture repair slices rather
+than chased as one-off local accidents.
 
 Those are not distractions from the main project. They are the path to making
 the authority boundary real.
