@@ -437,7 +437,12 @@ def test_clinic_recall_companion_derives_official_source_record_support() -> Non
         "source_record_text_atom(src_line_0022, v_1_000_hours_of_use).",
         "source_record_line(src_line_0022, 22).",
         "source_record_text_atom(src_line_0027, manufacturer_contact_k_halberg_regional_liaison_eastern_network).",
+        "source_record_text_atom(src_line_0074, nbfh_northbridge_family_health).",
         "source_record_text_atom(src_line_0075, epa_eastfield_pediatric_associates).",
+        "source_record_text_atom(src_line_0076, cim_crestmont_internal_medicine).",
+        "source_record_section(src_line_0074, section_3_network_inventory_table).",
+        "source_record_section(src_line_0075, section_3_network_inventory_table).",
+        "source_record_section(src_line_0076, section_3_network_inventory_table).",
         "source_record_text_atom(src_line_0116, procedure_mv_vp_04_a).",
         "source_record_text_atom(src_line_0196, been_sealed_with_tamper_evident_tape_seal_numbers_seal_nbfh_04_001).",
         "source_record_text_atom(src_line_0197, through_seal_nbfh_04_003_one_seal_per_shelf_i_will_retain_the_keys).",
@@ -476,6 +481,18 @@ def test_clinic_recall_companion_derives_official_source_record_support() -> Non
         row.get("SupportKind") == "recall_failure_rate"
         and row.get("Value") == "0.7 per 1,000 hours of use"
         and row.get("HelperClass") == "clean-helper"
+        for row in rows
+    )
+    assert any(
+        row.get("SupportKind") == "clinic_abbreviation"
+        and row.get("Value") == "EPA"
+        and row.get("HelperClass") == "clean-helper"
+        for row in rows
+    )
+    assert any(
+        row.get("SupportKind") == "clinic_abbreviation"
+        and row.get("Value") == "NBFH"
+        and row.get("HelperClass") == "candidate-helper"
         for row in rows
     )
     assert any(

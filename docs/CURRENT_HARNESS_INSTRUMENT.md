@@ -236,6 +236,10 @@ not contain that failure-rate source row, so its class counts do not move; the
 refreshed clinic source-record artifact audits at 19 `clean-helper` and 10
 `candidate-helper` rows, confirming the helper is generic where the source
 ledger acquired the needed line.
+The clinic abbreviation parser now promotes only mechanically derivable
+acronym/name rows to `clean-helper`; `EPA` and `CIM` move clean, while
+non-initialism `NBFH` remains candidate. That brings the six-fixture transfer
+audit to 194 `clean-helper` and 154 `candidate-helper` rows.
 The complementary precision-batch audit over `tmp/openrouter_precision_20260509`
 shows `source_record_clock_sync_support` as clean deterministic substrate:
 2 rows, both `clean-helper`, with zero unlabeled rows.

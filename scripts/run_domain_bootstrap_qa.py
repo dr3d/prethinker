@@ -3360,12 +3360,18 @@ def _clinic_device_recall_companion(
         )
 
     for source_row, text_atom in text_by_row.items():
-        if text_atom.startswith("epa_eastfield_pediatric_associates"):
-            add_candidate("clinic_abbreviation", "Eastfield Pediatric Associates", "EPA", "EPA = Eastfield Pediatric Associates.", source_row)
-        if text_atom.startswith("nbfh_northbridge_family_health"):
-            add_candidate("clinic_abbreviation", "Northbridge Family Health", "NBFH", "NBFH = Northbridge Family Health.", source_row)
-        if text_atom.startswith("cim_crestmont_internal_medicine"):
-            add_candidate("clinic_abbreviation", "Crestmont Internal Medicine", "CIM", "CIM = Crestmont Internal Medicine.", source_row)
+        section_atom = section_by_row.get(source_row, "")
+        abbreviation = _clinic_abbreviation_from_atom(text_atom) if "inventory" in section_atom else None
+        if abbreviation:
+            subject, value, helper_class = abbreviation
+            add(
+                "clinic_abbreviation",
+                subject,
+                value,
+                f"{value} = {subject}.",
+                source_row,
+                helper_class=helper_class,
+            )
         liaison_match = re.search(r"manufacturer_contact_(?P<person>[a-z]_[a-z]+)_regional_liaison", text_atom)
         if liaison_match:
             liaison_name = _display_person_atom(liaison_match.group("person"))
@@ -3595,6 +3601,20 @@ def _clinic_failure_rate_display(text_atom: str, next_text_atom: str) -> str:
     if next_match:
         denominator = f"{int(next_match.group('denom').replace('_', '')):,} hours of use"
     return f"{rate} per {denominator}" if denominator else f"{rate} per"
+
+
+def _clinic_abbreviation_from_atom(text_atom: str) -> tuple[str, str, str] | None:
+    match = re.fullmatch(r"(?P<abbr>[a-z]{2,6})_(?P<name>[a-z]+(?:_[a-z]+){1,6})", text_atom)
+    if not match:
+        return None
+    abbr = match.group("abbr").upper()
+    name_parts = [part for part in match.group("name").split("_") if part]
+    if len(name_parts) < 2:
+        return None
+    display_name = " ".join(part.title() for part in name_parts)
+    initials = "".join(part[0] for part in name_parts).upper()
+    helper_class = "clean-helper" if initials == abbr else "candidate-helper"
+    return display_name, abbr, helper_class
 
 
 def _display_device_atom(value: str) -> str:
