@@ -186,8 +186,11 @@ prose directly and do not mutate the KB. Current active examples include:
   support, full device serial displays, pending-determination correspondence,
   and medical-director authority from admitted source-record rows.
 - `source_record_packet_metadata_support`: surfaces exact packet IDs, policy
-  IDs, appeal IDs, score correction memo IDs, recusal memo IDs, device IDs,
-  physical retention locations, pending packet items, and role-scope notes.
+  IDs, appeal IDs, score correction memo IDs, recusal memo IDs, and device IDs.
+  Its emitted rows now carry `HelperClass`: generic identifier/metadata rows are
+  `clean-helper`, while packet-family facts such as physical retention
+  locations, pending packet items, and role-scope notes remain
+  `candidate-helper`.
 - `source_record_section_display`: renders normalized section atoms such as
   `v_9_2_fall_2026_cycle_carryover` into human section labels.
 - authority/custody helpers: join possession, legal title, access, custody, and

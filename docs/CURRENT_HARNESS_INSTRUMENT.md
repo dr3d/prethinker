@@ -193,7 +193,10 @@ python scripts/run_kb_pipeline_clean_harness.py --pack docs/data/frontier_packs/
 Under `docs/ARTIFACT_UNIT_AND_HELPER_CLASSIFICATION.md`, these recent
 helper-assisted high-water results are candidate-helper evidence until the
 mixed helpers are split into clean generic substrate, declared lens companions,
-or transfer-proven helpers without fixture-shaped constants.
+or transfer-proven helpers without fixture-shaped constants. The
+source-record packet metadata helper has begun that cleanup: emitted metadata
+rows now label generic identifier extraction as `clean-helper` and quarantine
+packet-family facts as `candidate-helper`.
 
 ## Extraction Rule
 

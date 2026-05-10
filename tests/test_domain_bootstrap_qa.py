@@ -1058,16 +1058,19 @@ def test_source_record_packet_metadata_surfaces_identifiers_and_pending_items() 
         row.get("Kind") == "policy_identifier"
         and row.get("Value") == "sco_ch_3"
         and row.get("DisplayValue") == "SCO-CH-3"
+        and row.get("HelperClass") == "clean-helper"
         for row in result_rows
     )
     assert any(
         row.get("Kind") == "packet_identifier"
         and row.get("DisplayValue") == "CHMS-RSO-2026-T07"
+        and row.get("HelperClass") == "clean-helper"
         for row in result_rows
     )
     assert any(
         row.get("Kind") == "policy_name"
         and row.get("DisplayValue") == "SCO-CH-3 (Chaperone Counting Rules)"
+        and row.get("HelperClass") == "candidate-helper"
         for row in result_rows
     )
     assert any(
@@ -1080,15 +1083,31 @@ def test_source_record_packet_metadata_surfaces_identifiers_and_pending_items() 
         and row.get("DisplayValue") == "CDL-MA-44291"
         for row in result_rows
     )
-    assert any(row.get("Kind") == "observer_permission_scope" for row in result_rows)
-    assert any(row.get("Kind") == "pending_packet_item" for row in result_rows)
+    assert any(
+        row.get("Kind") == "observer_permission_scope"
+        and row.get("HelperClass") == "candidate-helper"
+        for row in result_rows
+    )
+    assert any(
+        row.get("Kind") == "pending_packet_item"
+        and row.get("HelperClass") == "candidate-helper"
+        for row in result_rows
+    )
     assert any(
         row.get("Kind") == "transport_departure"
         and "06:30" in row.get("DisplayValue", "")
         for row in result_rows
     )
-    assert any(row.get("Kind") == "adult_lodging_location" for row in result_rows)
-    assert any(row.get("Kind") == "physical_retention_location" for row in result_rows)
+    assert any(
+        row.get("Kind") == "adult_lodging_location"
+        and row.get("HelperClass") == "candidate-helper"
+        for row in result_rows
+    )
+    assert any(
+        row.get("Kind") == "physical_retention_location"
+        and row.get("HelperClass") == "candidate-helper"
+        for row in result_rows
+    )
 
 
 def test_source_record_packet_metadata_exposes_grant_packet_identifiers_and_rules() -> None:
@@ -1120,8 +1139,24 @@ def test_source_record_packet_metadata_exposes_grant_packet_identifiers_and_rule
     assert any(row.get("Kind") == "score_correction_memo_identifier" and row.get("DisplayValue") == "SC-2026-04-22" for row in result_rows)
     assert any(row.get("Kind") == "recusal_memo_identifier" and row.get("DisplayValue") == "RC-2026-04-20-V" for row in result_rows)
     assert any(row.get("Kind") == "appeal_identifier" and row.get("DisplayValue") == "AP-2026-0429-A" for row in result_rows)
-    assert any(row.get("Kind") == "procedure_manual_scope" and "BWCF-CP-2025" in row.get("DisplayValue", "") for row in result_rows)
-    assert any(row.get("Kind") == "appeal_window_rule" and row.get("DisplayValue") == "14 days from the decision letter" for row in result_rows)
+    assert any(
+        row.get("Kind") == "appeal_identifier"
+        and row.get("DisplayValue") == "AP-2026-0429-A"
+        and row.get("HelperClass") == "clean-helper"
+        for row in result_rows
+    )
+    assert any(
+        row.get("Kind") == "procedure_manual_scope"
+        and "BWCF-CP-2025" in row.get("DisplayValue", "")
+        and row.get("HelperClass") == "candidate-helper"
+        for row in result_rows
+    )
+    assert any(
+        row.get("Kind") == "appeal_window_rule"
+        and row.get("DisplayValue") == "14 days from the decision letter"
+        and row.get("HelperClass") == "candidate-helper"
+        for row in result_rows
+    )
 
 
 def test_grant_award_support_derives_counts_caps_recusals_and_appeal_status() -> None:

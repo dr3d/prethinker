@@ -122,7 +122,7 @@ This is a working classification, not a final ledger.
 | grant award support | Mixed | Field-driven award/cap arithmetic is legitimate; text-specific appeal/recusal rows need generic rewrite or quarantine. |
 | industrial sensor support | Mixed | Field-driven event/timestamp/count work is legitimate; exact sensor/ticket/prose recognizers need generic rewrite or quarantine. |
 | clinic recall support | Mixed | Field-driven device/serial lookup is legitimate; named-clinic, liaison, cabinet, and seal literals need generic rewrite or quarantine. |
-| source-record packet metadata | Mixed | Identifier regex patterns are legitimate; embedded school/grant packet facts should be split from the generic extractor. |
+| source-record packet metadata | Split, audit ongoing | Generic identifier/metadata rows are labeled `clean-helper`; embedded school/grant packet facts are now labeled `candidate-helper` in the emitted rows. |
 
 ## Doctrine
 
@@ -135,4 +135,3 @@ The honest unit of evaluation is the whole artifact package:
 ```text
 source + lens set + deterministic ledgers + admitted predicates + helper set
 ```
-
