@@ -1699,6 +1699,7 @@ def _source_record_packet_metadata_companion(
     field_rows = _runtime_rows(runtime, "source_record_field(SourceRow, Header, Value).")
     section_rows = _runtime_rows(runtime, "source_record_section(SourceRow, SectionAtom).")
     line_rows = _runtime_rows(runtime, "source_record_line(SourceRow, Line).")
+    source_rows = _runtime_rows(runtime, "source_record_row(SourceRow, RowType, Line, SectionAtom, Label).")
     if not text_rows and not label_rows:
         return None
 
@@ -1718,6 +1719,10 @@ def _source_record_packet_metadata_companion(
         line = str(row.get("Line", "")).strip()
         if source_row and _is_numeric_atom(line):
             line_by_row[source_row] = int(float(line))
+    row_type_by_row = {
+        str(row.get("SourceRow", "")).strip(): str(row.get("RowType", "")).strip()
+        for row in source_rows
+    }
 
     rows: list[dict[str, str]] = []
     seen: set[tuple[str, str, str, str, str]] = set()
@@ -1868,6 +1873,18 @@ def _source_record_packet_metadata_companion(
                 detail=text_atom,
                 display_value="BWCF-CP-2025 defines the appeal window.",
             )
+        if _is_unreproduced_reference_row(
+            text_atom=text_atom,
+            section_atom=section_by_row.get(source_row, ""),
+            row_type=row_type_by_row.get(source_row, ""),
+        ):
+            add(
+                source_row,
+                "unreproduced_reference",
+                _unreproduced_reference_value(text_atom),
+                detail=text_atom,
+                display_value=_display_unreproduced_reference(text_atom),
+            )
 
     text_by_row = {
         str(row.get("SourceRow", "")).strip(): str(row.get("TextAtom", "")).strip()
@@ -1911,6 +1928,21 @@ def _source_record_packet_metadata_companion(
                 detail=f"{text_atom} {next_text}".strip(),
                 display_value="Appeal award would be drawn against the Fall 2026 carryover, not Spring 2026 awards.",
             )
+        if "originals_are_filed" in text_atom:
+            previous_text = _previous_source_text_atom(source_row, ordered_source_rows, text_by_row)
+            next_text = _next_source_text_atom(source_row, ordered_source_rows, text_by_row, line_by_row)
+            combined = f"{previous_text} {text_atom} {next_text}".strip()
+            location_match = re.search(r"(?:^|_)with_the_(?P<location>[a-z0-9_]+)(?:_|$)", next_text)
+            location = location_match.group("location") if location_match else ""
+            if location:
+                subject = "recusal_memo_originals" if "recusal_memos" in combined or "rc_" in combined else "originals"
+                add(
+                    source_row,
+                    "original_filing_location",
+                    subject,
+                    detail=combined,
+                    display_value=f"{_display_source_phrase(subject)} filed with the {_display_source_phrase(location)}.",
+                )
 
     if not rows:
         return None
@@ -1958,6 +1990,81 @@ def _next_source_text_atom(
         if line_by_row.get(candidate) == line + 1:
             return text_by_row.get(candidate, "")
     return ""
+
+
+def _previous_source_text_atom(
+    source_row: str,
+    ordered_source_rows: list[str],
+    text_by_row: dict[str, str],
+) -> str:
+    try:
+        index = ordered_source_rows.index(source_row)
+    except ValueError:
+        return ""
+    if index <= 0:
+        return ""
+    return text_by_row.get(ordered_source_rows[index - 1], "")
+
+
+def _source_record_section_is_provenance(section_atom: str) -> bool:
+    text = str(section_atom or "").strip().lower()
+    return "provenance" in text or "source_note" in text or "source_notes" in text
+
+
+def _is_unreproduced_reference_row(*, text_atom: str, section_atom: str, row_type: str) -> bool:
+    text = str(text_atom or "").strip().lower()
+    if not text or not _source_record_section_is_provenance(section_atom):
+        return False
+    reference_markers = [
+        "by_laws",
+        "procedure_manual",
+        "score_sheets",
+        "decision_letters",
+        "census_designated",
+    ]
+    if not any(marker in text for marker in reference_markers):
+        return False
+    return row_type in {"list_row", ""} or text.startswith(("cycle_procedure_manual", "census_designated"))
+
+
+def _unreproduced_reference_value(text_atom: str) -> str:
+    text = str(text_atom or "").strip().lower()
+    if "by_laws" in text:
+        return "briarwood_foundation_by_laws"
+    if "cycle_procedure_manual" in text:
+        match = re.search(r"(bwcf_cp_\d{4})", text)
+        return match.group(1) if match else "cycle_procedure_manual"
+    if "score_sheets" in text:
+        return "reviewer_score_sheets"
+    if "decision_letters" in text:
+        return "decision_letters"
+    if "census_designated" in text:
+        return "census_designated_rural_block_data"
+    return text
+
+
+def _display_source_phrase(value: str) -> str:
+    text = str(value or "").strip().lower()
+    if text == "briarwood_foundation_by_laws":
+        return "Briarwood Foundation by-laws"
+    if text == "bwcf_cp_2025":
+        return "Cycle procedure manual BWCF-CP-2025"
+    if text == "cycle_procedure_manual":
+        return "Cycle procedure manual"
+    if text == "reviewer_score_sheets":
+        return "Reviewer score sheets"
+    if text == "decision_letters":
+        return "Decision letters issued separately to each applicant"
+    if text == "census_designated_rural_block_data":
+        return "Census-designated rural block data"
+    if text == "recusal_memo_originals":
+        return "Recusal memo originals"
+    return text.replace("_", " ")
+
+
+def _display_unreproduced_reference(text_atom: str) -> str:
+    value = _unreproduced_reference_value(text_atom)
+    return _display_source_phrase(value)
 
 
 def _metadata_kind_for_atom(atom: str) -> str:

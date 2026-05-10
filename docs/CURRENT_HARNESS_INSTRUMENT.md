@@ -323,6 +323,12 @@ app/date atoms, and the current transfer class audit reads `32` clean /
 but it is still reported as candidate-helper evidence until sibling transfer or
 source-record acquisition closes the filing-location and unreproduced-reference
 gaps.
+The filing/reference gaps then closed through generic source-record packet
+metadata: Section 11 `unreproduced_reference` list rows and
+`original_filing_location` rows are now queryable without a new lens. The grant
+full replay reaches `40 / 0 / 0` with zero writes. This is still helper-labeled
+evidence, but the final lift came from deterministic source addressability
+rather than a grant-specific semantic patch.
 Clinic helper cleanup then promoted explicit glossary abbreviations and
 manufacturer visit-date ranges over generic source-record atoms/sections. The
 stale six-fixture transfer audit now stands at 209 `clean-helper` and 136

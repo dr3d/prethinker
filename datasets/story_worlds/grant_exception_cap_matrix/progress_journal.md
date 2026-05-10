@@ -151,3 +151,47 @@ rows and a fresh replay that still depends heavily on
 candidate-helper evidence. The next clean move is source-record acquisition for
 unreproduced-reference and filing-location rows, or a sibling transfer proof
 before any broader claim.
+
+## GECM-004 - Section 11 Source-Reference Addressability
+
+Date: 2026-05-10
+
+Evidence lane: `deterministic_source_addressability`
+
+Artifacts:
+
+- targeted q039/q040 replay:
+  `tmp/transfer_fixtures_20260510/grant_source_reference_q039_q040_20260510/domain_bootstrap_qa_20260510T213250326030Z_qa_qwen-qwen3-6-35b-a3b.json`
+- full replay:
+  `tmp/transfer_fixtures_20260510/grant_source_reference_full_replay_20260510/domain_bootstrap_qa_20260510T213830351421Z_qa_qwen-qwen3-6-35b-a3b.json`
+- helper class audit:
+  `tmp/helper_usage_audit_20260510/helper_class_audit_transfer_after_grant_reference.md`
+
+Code change:
+
+- Added generic packet metadata rows for Section 11-style
+  `unreproduced_reference` list items.
+- Added generic `original_filing_location` extraction when adjacent
+  source-record lines say originals are filed with a named office/person.
+
+Results:
+
+- targeted q039/q040 replay: `2 exact / 0 partial / 0 miss`
+- full replay: `40 exact / 0 partial / 0 miss`
+- write proposals: `0`
+- full replay helper rows:
+  - `grant_award_support`: `992 clean / 248 candidate`
+  - `source_record_packet_metadata_support`: `1350 clean / 450 candidate`
+- transfer class audit now reads:
+  - `grant_award_support`: `32 clean / 5 candidate`
+  - `source_record_packet_metadata_support`: `171 clean / 26 candidate`
+
+Lesson:
+
+The final two misses were not semantic reasoning failures. The source lines were
+already preserved as deterministic `source_record_text_atom` rows, but the query
+surface did not expose them as source references and filing-location facts. This
+is the durable-memory thesis in miniature: official-document answers often live
+in addressability, not in a new lens. The result is still labeled with helper
+provenance, but the repair itself is generic source-record substrate rather than
+fixture-specific answer injection.

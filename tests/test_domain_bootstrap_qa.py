@@ -1412,6 +1412,24 @@ def test_source_record_packet_metadata_exposes_grant_packet_identifiers_and_rule
         "source_record_text_atom(src_line_0223, cycle_procedure_manual_bwcf_cp_2025_defines_threshold_vote).",
         "source_record_line(src_line_0224, 224).",
         "source_record_text_atom(src_line_0224, requirement_for_borderline_scores_appeal_window_and_supplementary).",
+        "source_record_row(src_line_0221, list_row, 221, section_11_provenance_and_source_notes, briarwood_foundation_by_laws_defines_committee_composition_and).",
+        "source_record_section(src_line_0221, section_11_provenance_and_source_notes).",
+        "source_record_text_atom(src_line_0221, briarwood_foundation_by_laws_defines_committee_composition_and).",
+        "source_record_row(src_line_0226, list_row, 226, section_11_provenance_and_source_notes, reviewer_score_sheets_paper_originals_filed_in_audit_binder_the).",
+        "source_record_section(src_line_0226, section_11_provenance_and_source_notes).",
+        "source_record_text_atom(src_line_0226, reviewer_score_sheets_paper_originals_filed_in_audit_binder_the).",
+        "source_record_row(src_line_0228, list_row, 228, section_11_provenance_and_source_notes, decision_letters_issued_separately_to_each_applicant_not_in).",
+        "source_record_section(src_line_0228, section_11_provenance_and_source_notes).",
+        "source_record_text_atom(src_line_0228, decision_letters_issued_separately_to_each_applicant_not_in).",
+        "source_record_row(src_line_0230, list_row, 230, section_11_provenance_and_source_notes, census_designated_rural_block_data_most_recent_decennial_census).",
+        "source_record_section(src_line_0230, section_11_provenance_and_source_notes).",
+        "source_record_text_atom(src_line_0230, census_designated_rural_block_data_most_recent_decennial_census).",
+        "source_record_line(src_line_0233, 233).",
+        "source_record_text_atom(src_line_0233, not_the_operational_composite_recusal_memos_rc_2026_04_20_v_and).",
+        "source_record_line(src_line_0234, 234).",
+        "source_record_text_atom(src_line_0234, rc_2026_04_20_k_are_summarized_in_section_6_the_originals_are_filed).",
+        "source_record_line(src_line_0235, 235).",
+        "source_record_text_atom(src_line_0235, with_the_foundation_secretary).",
     ]:
         assert runtime.assert_fact(fact).get("status") == "success"
 
@@ -1441,6 +1459,25 @@ def test_source_record_packet_metadata_exposes_grant_packet_identifiers_and_rule
         row.get("Kind") == "appeal_window_rule"
         and row.get("DisplayValue") == "14 days from the decision letter"
         and row.get("HelperClass") == "candidate-helper"
+        for row in result_rows
+    )
+    assert any(
+        row.get("Kind") == "unreproduced_reference"
+        and row.get("Value") == "briarwood_foundation_by_laws"
+        and row.get("HelperClass") == "clean-helper"
+        for row in result_rows
+    )
+    assert any(
+        row.get("Kind") == "unreproduced_reference"
+        and row.get("Value") == "reviewer_score_sheets"
+        and row.get("HelperClass") == "clean-helper"
+        for row in result_rows
+    )
+    assert any(
+        row.get("Kind") == "original_filing_location"
+        and row.get("Value") == "recusal_memo_originals"
+        and "foundation secretary" in row.get("DisplayValue", "")
+        and row.get("HelperClass") == "clean-helper"
         for row in result_rows
     )
 
