@@ -1617,6 +1617,22 @@ def test_roster_state_support_handles_homeroom_table_and_semantic_rows() -> None
         for row in result_rows
     )
 
+    focused_rows = run_query_plan(runtime, ["student_in_homeroom(stu_1023, 7_a, v1_3)."])
+    focused_companion = next(
+        item for item in focused_rows if item["result"].get("predicate") == "roster_state_support"
+    )
+    first_row = focused_companion["result"]["rows"][0]
+    assert first_row.get("SupportKind") == "source_record_student_group_assignment"
+    assert first_row.get("Person") == "stu_1023"
+    assert first_row.get("Group") == "7_a"
+    assert first_row.get("Version") == "v1_3"
+
+    latest_rows = run_query_plan(runtime, ["student_in_homeroom(stu_1023, homeroom, version)."])
+    latest_companion = next(
+        item for item in latest_rows if item["result"].get("predicate") == "roster_state_support"
+    )
+    assert latest_companion["result"]["rows"][0].get("Version") == "v1_3"
+
 
 def test_roster_state_support_joins_adult_roles_to_ratio_scope() -> None:
     runtime = CorePrologRuntime(max_depth=200)

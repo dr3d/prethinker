@@ -117,3 +117,71 @@ Results:
 
 Lesson: all rows are reachable from the current candidate set. The remaining
 gap is row routing or a narrow count/query helper, not compile acquisition.
+
+## CCR-005 - Roster Helper Sibling Replay
+
+Date: 2026-05-10
+
+Evidence lane: `candidate_helper_sibling_replay`
+
+Artifacts:
+
+- source-record V2 compile:
+  `tmp/openrouter_precision_20260509/source_record_facts_v2_compile_no_llm/count_composition_roster/`
+- judged QA replay:
+  `tmp/openrouter_precision_20260509/roster_sibling_helper_judged_replay_20260510/count_composition_roster/`
+- helper usage audit:
+  `tmp/helper_usage_audit_20260510/helper_usage_audit.md`
+
+Result:
+
+- judged replay: `24 / 3 / 13`
+- zero write proposals
+- `roster_state_support` companion rows: `4386`
+- helper classes: `1326 clean-helper / 3060 candidate-helper`
+
+Comparison:
+
+- older source-record V2 QA on the same compile family: `27 / 4 / 9`
+
+Lesson: the generalized roster helper is now present in completed QA artifacts
+for a sibling fixture, so it is no longer merely a one-fixture parser probe.
+However, the judged replay did not improve the sibling score. Several misses had
+useful roster helper rows present while the model-selected direct homeroom
+predicate was empty, so the hard edge is query/selector discrimination over
+helper surfaces, not source-record parser transfer. Keep roster rows
+candidate-labeled until a selector replay proves lift without fixture constants.
+
+## CCR-006 - Focused Roster Helper Replay
+
+Date: 2026-05-10
+
+Evidence lane: `candidate_helper_focused_replay`
+
+Artifacts:
+
+- focused targeted replay:
+  `tmp/openrouter_precision_20260509/roster_sibling_focused_replay_20260510/count_composition_roster/`
+- focused full replay:
+  `tmp/openrouter_precision_20260509/roster_sibling_focused_full_replay_20260510/count_composition_roster/`
+
+Result:
+
+- focused targeted replay on `q016,q024,q034`: `2 / 0 / 1`
+- focused full replay: `29 / 2 / 9`
+- zero write proposals
+- focused full helper classes: `1209 clean-helper / 2790 candidate-helper`
+
+Comparison:
+
+- older source-record V2 QA: `27 / 4 / 9`
+- unfocused roster-helper sibling replay: `24 / 3 / 13`
+
+Lesson: `student_in_homeroom/3` needed roster-specific prioritization. Once the
+companion treats its argument order as `(student, homeroom, version)` and sorts
+wildcard-version questions latest-first, exact homeroom-count/current-homeroom
+rows such as `q016` and `q024` become judgeable from helper output. The full run
+improves the standalone source-record V2 result by two exact rows, but row-level
+churn remains: some older exact rows regress because query generation still
+misses chaperone/count compliance surfaces. This is useful candidate-helper
+transfer evidence, not yet clean promotion.

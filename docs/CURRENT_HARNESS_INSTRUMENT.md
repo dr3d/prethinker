@@ -324,6 +324,16 @@ finds 108 candidate assignment rows on `school_activity_roster_reconciliation`
 and 78 on `count_composition_roster`. The completed QA usage audit still sees
 roster support on one fixture, so the next promotion gate is a sibling QA replay,
 not a clean-helper relabel.
+A sibling `count_composition_roster` QA replay made that pressure concrete:
+`roster_state_support` appeared in completed QA output, and the usage audit now
+sees roster support on two fixtures. The first replay scored only `24 / 3 / 13`
+because several misses had useful roster helper rows present but the
+query/selector path treated empty direct homeroom predicates as controlling.
+After focused `student_in_homeroom/3` prioritization and latest-version ordering,
+the same source-record V2 artifact scored `29 / 2 / 9` with 1,209 clean-helper
+and 2,790 candidate-helper row emissions, improving on the older source-record
+V2 QA's `27 / 4 / 9`. This is still candidate-helper evidence with row-level
+churn, not clean-helper promotion.
 
 `scripts/audit_helper_usage.py` adds the complementary transfer-pressure view:
 fixtures per helper and helpers per fixture across QA artifacts. The first scan

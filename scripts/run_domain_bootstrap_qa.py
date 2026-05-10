@@ -4630,13 +4630,24 @@ def _prioritize_roster_state_rows(
             return True
         return str(value or "").strip() == requested
 
-    def score(row: dict[str, Any]) -> tuple[int, str, str, str]:
+    def requested_is_wildcard(index: int) -> bool:
+        if index >= len(args):
+            return True
+        requested = str(args[index] or "").strip()
+        return (
+            not requested
+            or _is_prolog_variable(requested)
+            or requested.lower() in {"adult", "count", "counts", "group", "homeroom", "person", "role", "student", "version", "x"}
+        )
+
+    def score(row: dict[str, Any]) -> tuple[int, int, str, str]:
         support_kind = str(row.get("SupportKind", "")).strip()
         person = str(row.get("Person", "")).strip()
         group = str(row.get("Group", "")).strip()
         version = str(row.get("Version", "")).strip()
         role = str(row.get("Role", "")).strip()
         priority = 50
+        version_priority = _roster_version_rank(version)
 
         if predicate == "student_group_assignment" and len(args) >= 3:
             person_ok = is_requested(person, args[0])
@@ -4648,6 +4659,18 @@ def _prioritize_roster_state_rows(
                 priority = 5
             elif version_ok:
                 priority = 12
+        elif predicate == "student_in_homeroom" and len(args) >= 3:
+            person_ok = is_requested(person, args[0])
+            group_ok = is_requested(group, args[1])
+            version_ok = is_requested(version, args[2])
+            if person_ok and version_ok and group_ok:
+                priority = 0 if support_kind == "source_record_student_group_assignment" else 2
+            elif version_ok and group_ok:
+                priority = 5
+            elif person_ok or version_ok:
+                priority = 12
+            if requested_is_wildcard(2):
+                version_priority = -version_priority
         elif predicate in {"adult_role", "role_counts_towards_ratio"}:
             if support_kind in {"adult_role", "ratio_counted_adults", "role_ratio_scope"}:
                 priority = 0
@@ -4661,9 +4684,19 @@ def _prioritize_roster_state_rows(
         elif support_kind in {"group_count", "source_record_student_group_assignment", "student_group_assignment"}:
             priority = 10
 
-        return (priority, version, group, person or role)
+        return (priority, version_priority, group, person or role)
 
     return sorted(rows, key=score)
+
+
+def _roster_version_rank(version: str) -> int:
+    text = str(version or "").strip().lower()
+    match = re.fullmatch(r"v(?P<major>\d+)(?:_(?P<minor>\d+))?", text)
+    if not match:
+        return 0
+    major = int(match.group("major"))
+    minor = int(match.group("minor") or 0)
+    return major * 100 + minor
 
 
 def _source_record_roster_assignment_support(runtime: CorePrologRuntime) -> list[dict[str, Any]]:
