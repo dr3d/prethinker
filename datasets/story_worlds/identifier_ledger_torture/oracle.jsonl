@@ -1,0 +1,40 @@
+{"category": "lookup", "id": "q001", "reference_answer": "EX-C-01", "source_id": "q001"}
+{"category": "lookup", "id": "q002", "reference_answer": "EX-D-04", "source_id": "q002"}
+{"category": "lookup", "id": "q003", "reference_answer": "SLIP-7712A", "source_id": "q003"}
+{"category": "lookup", "id": "q004", "reference_answer": "SLIP-7712-A", "source_id": "q004"}
+{"category": "lookup", "id": "q005", "reference_answer": "BC-883014", "source_id": "q005"}
+{"category": "lookup", "id": "q006", "reference_answer": "BC-833014. This was the mistaken intake scan on 2026-04-04 and was superseded on 2026-04-08; it must not appear in current reports.", "source_id": "q006"}
+{"category": "supersession", "id": "q007", "reference_answer": "BC-883014, scanned 2026-04-08 by OFC-7741.", "source_id": "q007"}
+{"category": "lookup", "id": "q008", "reference_answer": "BAY-04-L, Shelf 3.", "source_id": "q008"}
+{"category": "lookup", "id": "q009", "reference_answer": "BAY-04-I.", "source_id": "q009"}
+{"category": "composition", "id": "q010", "reference_answer": "BAY-04-L (the left-side open shelving unit on the south wall) and BAY-04-I (the interior locker behind the bay's mesh door).", "source_id": "q010"}
+{"category": "provenance", "id": "q011", "reference_answer": "EX-C-1.", "source_id": "q011"}
+{"category": "provenance", "id": "q012", "reference_answer": "EX-E-9.", "source_id": "q012"}
+{"category": "composition", "id": "q013", "reference_answer": "The iPhone. Its current label is EX-E-10.", "source_id": "q013"}
+{"category": "lookup", "id": "q014", "reference_answer": "EX-E-09.", "source_id": "q014"}
+{"category": "composition", "id": "q015", "reference_answer": "No. EX-E-09 is the Samsung Galaxy; EX-E-10 is the iPhone. They are two physically distinct phones; only the visually adjacent numbering invites confusion.", "source_id": "q015"}
+{"category": "unresolved", "id": "q016", "reference_answer": "The .38 revolver (EX-C-01) at BAY-04-L Shelf 3. Physical custody is confirmed; legal disposition is pending Judge Anwar's order, expected no earlier than 2026-05-20.", "source_id": "q016"}
+{"category": "count", "id": "q017", "reference_answer": "Twelve.", "source_id": "q017"}
+{"category": "count", "id": "q018", "reference_answer": "Two: EX-C-1 (2026-03-22) and EX-E-9 (2026-03-29).", "source_id": "q018"}
+{"category": "count", "id": "q019", "reference_answer": "Three (Exceptions A, B, and C).", "source_id": "q019"}
+{"category": "composition", "id": "q020", "reference_answer": "Folder labels EX-P-3 (financial papers, in BIN-A12) and EX-P-3B (correspondence, in BIN-A1-2).", "source_id": "q020"}
+{"category": "lookup", "id": "q021", "reference_answer": "REC-A-118.", "source_id": "q021"}
+{"category": "lookup", "id": "q022", "reference_answer": "REC-A-1-18.", "source_id": "q022"}
+{"category": "composition", "id": "q023", "reference_answer": "TAG-R-9 belongs to the black canvas jacket EX-J-7 at SHELF-N-2; TAG-R-G belongs to the toolbox EX-T-2 at SHELF-N-Z.", "source_id": "q023"}
+{"category": "lookup", "id": "q024", "reference_answer": "LK-03, in the basement.", "source_id": "q024"}
+{"category": "lookup", "id": "q025", "reference_answer": "LK-3, on the ground floor.", "source_id": "q025"}
+{"category": "composition", "id": "q026", "reference_answer": "LK-3 (ground floor) holds EX-U-1, the USB thumb drive; LK-03 (basement) holds EX-C-02, the currency bag of $4,200 USD.", "source_id": "q026"}
+{"category": "lookup", "id": "q027", "reference_answer": "OFC-7714.", "source_id": "q027"}
+{"category": "lookup", "id": "q028", "reference_answer": "OFC-7741.", "source_id": "q028"}
+{"category": "provenance", "id": "q029", "reference_answer": "SLIP-7691, voided on 2026-03-19.", "source_id": "q029"}
+{"category": "provenance", "id": "q030", "reference_answer": "SLIP-7720, issued for the rebagged Sony external drive (EX-D-04R).", "source_id": "q030"}
+{"category": "supersession", "id": "q031", "reference_answer": "CASE-22-O917 (with capital letter O) was corrected to CASE-22-0917 (with numeral zero) on 2026-04-15.", "source_id": "q031"}
+{"category": "provenance", "id": "q032", "reference_answer": "CASE-22-0917.", "source_id": "q032"}
+{"category": "composition", "id": "q033", "reference_answer": "EX-C-01; SLIP-7712A; BC-883014; BAY-04-L Shelf 3.", "source_id": "q033"}
+{"category": "composition", "id": "q034", "reference_answer": "EX-D-04; SLIP-7712-A; BC-883104; BAY-04-I.", "source_id": "q034"}
+{"category": "temporal", "id": "q035", "reference_answer": "Released to owner on 2026-03-12.", "source_id": "q035"}
+{"category": "temporal", "id": "q036", "reference_answer": "2026-04-08.", "source_id": "q036"}
+{"category": "temporal_interval", "id": "q037", "reference_answer": "From 2026-04-04 (mistaken intake scan recorded as BC-833014) until 2026-04-08 (re-scan recorded as BC-883014). The packet treats those dates as the boundary events.", "source_id": "q037"}
+{"category": "negative_existential", "id": "q038", "reference_answer": "No. Sergeant Vidal flagged the pair for relabeling at the next intake cycle, but no relabeling occurred during this window. Exception B remains open.", "source_id": "q038"}
+{"category": "unresolved", "id": "q039", "reference_answer": "Expected no earlier than 2026-05-20. The order has not yet issued at packet close (2026-05-04); only the earliest expected date is on record.", "source_id": "q039"}
+{"category": "count", "id": "q040", "reference_answer": "Eleven. The twelve active labels minus EX-D-04 (laptop, released 2026-03-12) leaves eleven items physically held.", "source_id": "q040"}

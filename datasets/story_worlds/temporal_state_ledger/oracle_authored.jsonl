@@ -1,0 +1,40 @@
+{"id": "q001", "source_id": "temporal_state_ledger", "category": "temporal", "reference_answer": "2026-04-28 08:00."}
+{"id": "q002", "source_id": "temporal_state_ledger", "category": "lookup", "reference_answer": "LFT-2026-05-04."}
+{"id": "q003", "source_id": "temporal_state_ledger", "category": "lookup", "reference_answer": "Service Zone 2."}
+{"id": "q004", "source_id": "temporal_state_ledger", "category": "lookup", "reference_answer": "Service Zone 3."}
+{"id": "q005", "source_id": "temporal_state_ledger", "category": "lookup", "reference_answer": "Power supply fault."}
+{"id": "q006", "source_id": "temporal_state_ledger", "category": "lookup", "reference_answer": "Routine sampler maintenance."}
+{"id": "q007", "source_id": "temporal_state_ledger", "category": "lookup", "reference_answer": "Operations Officer K. Alvarez."}
+{"id": "q008", "source_id": "temporal_state_ledger", "category": "lookup", "reference_answer": "D. Pham."}
+{"id": "q009", "source_id": "temporal_state_ledger", "category": "lookup", "reference_answer": "M. Cortes, Communications Officer."}
+{"id": "q010", "source_id": "temporal_state_ledger", "category": "lookup", "reference_answer": "2026-05-02."}
+{"id": "q011", "source_id": "temporal_state_ledger", "category": "temporal", "reference_answer": "2026-04-29 03:45 (one hour earlier than the as-logged 04:45 because the sampler controller clock had drifted one hour ahead; corrected under §6.5)."}
+{"id": "q012", "source_id": "temporal_state_ledger", "category": "temporal", "reference_answer": "2026-04-29 04:45 as logged on the local controller; this timestamp is not operative for rule computations."}
+{"id": "q013", "source_id": "temporal_state_ledger", "category": "temporal", "reference_answer": "2026-05-01 17:00 (Friday). 24 hours of clear-sample time accumulated across two active segments separated by a §6.2a pause from 09:00 to 11:00 on 2026-05-01."}
+{"id": "q014", "source_id": "temporal_state_ledger", "category": "temporal", "reference_answer": "2026-05-01 17:30, when Operations Officer Alvarez logged §6.1 satisfied (event E-11)."}
+{"id": "q015", "source_id": "temporal_state_ledger", "category": "temporal", "reference_answer": "2026-05-03 17:00 (Sunday), i.e., 48 hours after §6.1 was met at 2026-05-01 17:00."}
+{"id": "q016", "source_id": "temporal_state_ledger", "category": "temporal", "reference_answer": "2026-05-04 17:00. The unshifted Sunday deadline shifts to close of business (17:00) on the next business day, Monday 2026-05-04."}
+{"id": "q017", "source_id": "temporal_state_ledger", "category": "temporal_interval", "reference_answer": "6 days, 4 hours (from issuance at 2026-04-28 08:00 to lift at 2026-05-04 12:00)."}
+{"id": "q018", "source_id": "temporal_state_ledger", "category": "temporal_interval", "reference_answer": "6 days, 3 hours, 30 minutes (from issuance at 2026-04-28 09:30 to lift at 2026-05-04 13:00)."}
+{"id": "q019", "source_id": "temporal_state_ledger", "category": "temporal_interval", "reference_answer": "10 hours, 35 minutes (from corrected E-04 time 2026-04-29 03:45 to E-05 at 2026-04-29 14:20)."}
+{"id": "q020", "source_id": "temporal_state_ledger", "category": "temporal_interval", "reference_answer": "2 hours (from E-08 at 2026-05-01 09:00 to E-09 at 2026-05-01 11:00)."}
+{"id": "q021", "source_id": "temporal_state_ledger", "category": "temporal_interval", "reference_answer": "2026-05-01 09:00 to 2026-05-01 11:00 (the E-08 / E-09 maintenance window; the §6.2a pause is the only pause that occurred during the active clear-sample countdown)."}
+{"id": "q022", "source_id": "temporal_state_ledger", "category": "count", "reference_answer": "2 (the power-supply-fault interval starting at corrected 03:45 on 2026-04-29 and the maintenance interval on 2026-05-01)."}
+{"id": "q023", "source_id": "temporal_state_ledger", "category": "count", "reference_answer": "2 (E-01 on 2026-04-28 06:14 and E-06 on 2026-04-30 09:00)."}
+{"id": "q024", "source_id": "temporal_state_ledger", "category": "count", "reference_answer": "3 (BWN-2026-04-28-A, RUN-2026-04-28-B, and LFT-2026-05-04)."}
+{"id": "q025", "source_id": "temporal_state_ledger", "category": "count", "reference_answer": "13 (E-01 through E-13)."}
+{"id": "q026", "source_id": "temporal_state_ledger", "category": "count", "reference_answer": "3 (engineering review report on contamination cause; procedure review on OPS-PROJ-04-29; and formal filing of the metrology technician's clock-drift report)."}
+{"id": "q027", "source_id": "temporal_state_ledger", "category": "composition", "reference_answer": "Offline (since 03:45 corrected). The first sampler-offline interval was in progress."}
+{"id": "q028", "source_id": "temporal_state_ledger", "category": "composition", "reference_answer": "Lifted. The BWN was lifted at 2026-05-04 12:00, and 13:00 on the same date is after that lift time."}
+{"id": "q029", "source_id": "temporal_state_ledger", "category": "composition", "reference_answer": "Paused under §6.2a, with 18 hours counted at that moment."}
+{"id": "q030", "source_id": "temporal_state_ledger", "category": "composition", "reference_answer": "Operational. The sampler had been restored at 2026-04-29 14:20 and was operational through 2026-05-01 09:00."}
+{"id": "q031", "source_id": "temporal_state_ledger", "category": "supersession", "reference_answer": "No. OPS-PROJ-04-29 was an internal projection circulated 2026-04-29 16:00 and was conditional on no further positive samples; it was not a binding announcement, schedule, or commitment, and the packet explicitly states it should not be cited as one."}
+{"id": "q032", "source_id": "temporal_state_ledger", "category": "supersession", "reference_answer": "The second positive sample (event E-06) on 2026-04-30 09:00 superseded the projection by triggering a §6.2 clear-sample-clock reset."}
+{"id": "q033", "source_id": "temporal_state_ledger", "category": "authority", "reference_answer": "§6.5 (Timestamp correction)."}
+{"id": "q034", "source_id": "temporal_state_ledger", "category": "authority", "reference_answer": "§6.2a (Clock pause on sampler offline)."}
+{"id": "q035", "source_id": "temporal_state_ledger", "category": "authority", "reference_answer": "§6.3 (specifically the weekend/holiday clause that shifts the deadline to close of business 17:00 on the next business day)."}
+{"id": "q036", "source_id": "temporal_state_ledger", "category": "unresolved", "reference_answer": "Not yet issued as of packet close on 2026-05-05; expected by 2026-05-19. Preliminary attribution is a main-line break upstream of Station S-3, but final attribution awaits the written engineering review report and may revise the cause."}
+{"id": "q037", "source_id": "temporal_state_ledger", "category": "unresolved", "reference_answer": "Scheduled for 2026-05-13; the review's findings have not been issued as of packet close."}
+{"id": "q038", "source_id": "temporal_state_ledger", "category": "negative_existential", "reference_answer": "No. Under §6.2a a sampler-offline pause does not constitute a positive sample and does not trigger §6.2; only the actual positive sample at E-06 on 2026-04-30 09:00 triggered the reset."}
+{"id": "q039", "source_id": "temporal_state_ledger", "category": "negative_existential", "reference_answer": "No. The RUN closure on 2026-05-04 13:00 is recorded under E-13 and is not a separate Lift Notice; LFT-2026-05-04 is the only Lift Notice issued and applies to the BWN in Zone 2."}
+{"id": "q040", "source_id": "temporal_state_ledger", "category": "composition", "reference_answer": "19 hours (the unshifted deadline would have been 2026-05-03 17:00 and the lift was issued 2026-05-04 12:00; this is the figure stated in §4)."}

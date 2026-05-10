@@ -1,0 +1,322 @@
+[
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q001",
+    "question": "When did Aldric Pethwick die?",
+    "reference_answer": "February 9, 2025",
+    "source_id": "q001"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q002",
+    "question": "Who is the executor of Aldric's estate?",
+    "reference_answer": "Esme Pethwick-Dorsey, his niece",
+    "source_id": "q002"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q003",
+    "question": "Where was the accounts ledger found?",
+    "reference_answer": "In the front desk",
+    "source_id": "q003"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q004",
+    "question": "How many different inks appear in the ledger corrections?",
+    "reference_answer": "At least three: blue ballpoint (original entries), black gel ink (Aldric's later corrections), and a third hand in unknown ink in the parts ledger",
+    "source_id": "q004"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q005",
+    "question": "Who deposited the Whitford bracket clock for restoration?",
+    "reference_answer": "Greta Lundquist",
+    "source_id": "q005"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q006",
+    "question": "What was the total restoration fee for the Whitford bracket clock?",
+    "reference_answer": "£1,400 (£700 deposit plus £700 balance)",
+    "source_id": "q006"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q007",
+    "question": "According to the client ledger, when was the Whitford bracket clock picked up?",
+    "reference_answer": "March 2021",
+    "source_id": "q007"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q008",
+    "question": "According to the parts ledger correction, was the Whitford bracket clock collected?",
+    "reference_answer": "No. The parts ledger correction (P-094) claims the clock was still in the shop as of August 2023 and that Lundquist never collected it.",
+    "source_id": "q008"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q009",
+    "question": "Who made the parts ledger correction claiming the clock was never collected?",
+    "reference_answer": "An unidentified writer. Keates could not confirm the writer's identity, noting it appears in a third hand, possibly a shop assistant.",
+    "source_id": "q009"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q010",
+    "question": "Which account of the Whitford clock's collection status is supported by more sources?",
+    "reference_answer": "The accounts ledger (balance paid, A-062) and client ledger (picked up March 2021, C-017) both indicate collection. Only the unidentified third-hand correction in the parts ledger claims otherwise. Two sources versus one unverified source.",
+    "source_id": "q010"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q011",
+    "question": "Who consigned the Dearborn regulator?",
+    "reference_answer": "Clive Maughton",
+    "source_id": "q011"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q012",
+    "question": "What was the agreed commission rate in the original consignment entry?",
+    "reference_answer": "15%",
+    "source_id": "q012"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q013",
+    "question": "What commission rate does the accounts ledger marginal note claim?",
+    "reference_answer": "20%, stating it was a revised agreement",
+    "source_id": "q013"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q014",
+    "question": "What commission rate does the client ledger note defend?",
+    "reference_answer": "15%, with Aldric's note saying to keep at 15% until Maughton provides written confirmation",
+    "source_id": "q014"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q015",
+    "question": "Which commission rate does Keates recommend treating as authoritative, and why?",
+    "reference_answer": "The 15% rate from the client ledger. Keates recommends this because the client ledger note references the dispute explicitly and appears to be the later, more considered position, while the accounts note reads as an initial concession that Aldric later reconsidered.",
+    "source_id": "q015"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q016",
+    "question": "How much does Maughton owe the estate — or does the estate owe Maughton?",
+    "reference_answer": "Under the recommended 15% rate, the estate owes Maughton £2,720 from the sale proceeds. If the 20% rate applied, it would be £2,560, meaning the estate already overpaid by £160.",
+    "source_id": "q016"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q017",
+    "question": "Was there a written record of the changed commission agreement?",
+    "reference_answer": "No. The client ledger note (C-024) explicitly states there is no written record of the changed agreement.",
+    "source_id": "q017"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q018",
+    "question": "Who bought the Dearborn regulator?",
+    "reference_answer": "Someone named Barnett",
+    "source_id": "q018"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q019",
+    "question": "What replacement part was installed in the Dearborn regulator?",
+    "reference_answer": "A replacement pendulum bob",
+    "source_id": "q019"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q020",
+    "question": "Where did the replacement pendulum bob come from?",
+    "reference_answer": "A new-old-stock Dearborn part from Haverstock auction lot 12",
+    "source_id": "q020"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q021",
+    "question": "Who brought in the Hartley marine chronometer?",
+    "reference_answer": "Oona Selkirk",
+    "source_id": "q021"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q022",
+    "question": "What was the assessment conclusion for the Hartley chronometer?",
+    "reference_answer": "Recommended against restoration — escapement damage too extensive",
+    "source_id": "q022"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q023",
+    "question": "Was the replacement balance spring installed in the chronometer?",
+    "reference_answer": "No. Aldric's marginal note on P-101 explicitly instructs 'Do NOT install.'",
+    "source_id": "q023"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q024",
+    "question": "Why was the balance spring not installed?",
+    "reference_answer": "Because the assessment concluded the escapement damage was too extensive for restoration",
+    "source_id": "q024"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q025",
+    "question": "Where is the balance spring currently stored?",
+    "reference_answer": "Parts drawer H-7",
+    "source_id": "q025"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q026",
+    "question": "What instruction did Selkirk give on January 14?",
+    "reference_answer": "She wants the clock returned. It should be shipped by registered post. Do NOT attempt repair.",
+    "source_id": "q026"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q027",
+    "question": "Has the Hartley chronometer been shipped to Selkirk?",
+    "reference_answer": "The document does not confirm whether it has been shipped. The instruction was given January 14, and Aldric died February 9. The executor lists this as an open question.",
+    "source_id": "q027"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q028",
+    "question": "Who brought in the Ansonia shelf clock?",
+    "reference_answer": "Denny Vickers",
+    "source_id": "q028"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q029",
+    "question": "What was done to the Ansonia shelf clock?",
+    "reference_answer": "Movement cleaning and mainspring replacement",
+    "source_id": "q029"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q030",
+    "question": "What ongoing issue does the Ansonia clock have after repair?",
+    "reference_answer": "It gains 4 minutes per day",
+    "source_id": "q030"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q031",
+    "question": "Did Vickers accept the 4-minutes-per-day gain?",
+    "reference_answer": "Yes. The marginal note states Vickers accepted the condition as suitable for decorative use, not precision.",
+    "source_id": "q031"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q032",
+    "question": "Has the Ansonia shelf clock been picked up by Vickers?",
+    "reference_answer": "The document does not confirm pickup. The January 2025 inventory lists it as 'COMPLETE, awaiting pickup.' The executor lists this as unresolved.",
+    "source_id": "q032"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q033",
+    "question": "What is the current location of the Dearborn regulator?",
+    "reference_answer": "It was sold to Barnett in June 2023. It is no longer in the shop.",
+    "source_id": "q033"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q034",
+    "question": "How much is owed to Maughton under the 15% commission rate?",
+    "reference_answer": "£2,720",
+    "source_id": "q034"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q035",
+    "question": "How much is owed to Maughton under the 20% commission rate?",
+    "reference_answer": "£2,560",
+    "source_id": "q035"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q036",
+    "question": "Who is the forensic document examiner?",
+    "reference_answer": "Marion Keates",
+    "source_id": "q036"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q037",
+    "question": "Can Keates confirm who wrote the parts ledger correction about the Whitford clock?",
+    "reference_answer": "No. Keates noted it appears in a third hand, possibly a shop assistant, but could not confirm the writer's identity.",
+    "source_id": "q037"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q038",
+    "question": "What did Aldric's marginal note on the balance spring order say?",
+    "reference_answer": "'Do NOT install. Assessment concluded escapement damage too extensive. Spring stored in parts drawer H-7.'",
+    "source_id": "q038"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q039",
+    "question": "According to the January 2025 inventory check, what is the status of each item?",
+    "reference_answer": "Dearborn regulator: SOLD. Whitford bracket clock: IN SHOP (per the P-094 correction). Hartley marine chronometer: IN STORAGE, return to client pending. Ansonia shelf clock: COMPLETE, awaiting pickup.",
+    "source_id": "q039"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q040",
+    "question": "List all items whose current physical location or ownership status remains unresolved at the end of the document.",
+    "reference_answer": "The Whitford bracket clock (disputed whether collected or in shop), the Hartley marine chronometer (instruction to ship given but not confirmed completed), the Ansonia shelf clock (complete but not confirmed picked up), the Maughton commission dispute (15% vs 20%), and the balance spring disposition.",
+    "source_id": "q040"
+  }
+]

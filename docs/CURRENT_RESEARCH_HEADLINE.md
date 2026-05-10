@@ -1,673 +1,136 @@
 # Current Research Headline
 
-Last updated: 2026-05-06
+Last updated: 2026-05-08
 
-## Semantic Parallax
+## Row-Gated Semantic Parallax
 
-The newest insight is that one LLM compile is only one viewpoint.
+The current research center is not one bigger compile. It is a measured
+pegboard of semantic surfaces over frozen artifacts.
 
-The north star is **hard to fool**: Prethinker should not confuse claims with
-facts, rules with outcomes, missing evidence with permission to guess, or
-semantic struggle with a reason to keep burning passes.
-
-This page is a short lab-note headline, not a victory lap. It exists so a new
-reader can see what the project is learning right now before diving into the
-longer architecture notes and fixture journals.
-
-Prethinker is moving toward **multi-pass semantic compilation**: separate
-semantic lenses look at the same source for backbone facts, support/evidence,
-temporal state, and executable rules. Each lens proposes. The mapper admits or
-skips. Deterministic union accumulates only mapper-admitted clauses.
+Prethinker compiles source material into a governed KB package, then tests
+questions against candidate surfaces: baseline compile, focused lenses,
+registry-scaffolded vocabularies, query helpers, evidence bundles, selector
+policies, and guarded activation. Each surface may help some rows and hurt
+others. The instrument's job is to measure that without letting the model see
+answer keys, judge labels, gold KBs, or source prose during selector choice.
 
 ```text
-source
-  -> backbone lens
-  -> support/source lens
-  -> temporal/status lens
-  -> rule lens
-  -> mapper admission per lens
-  -> deterministic safe-surface union
-  -> Prolog query / rule trial
+compiled KB = durable state
+row = measured encounter with that state
+selector = chooses the best encounter surface
+guard = prevents a tempting wrong surface
+verdict = records what happened
 ```
 
-## Why This Matters
+Rows are not where truth lives. Truth lives in the compiled KB, especially the
+admitted `world.pl` and `epistemic.pl` surfaces. A row is where a question tests
+whether that truth is present, retrievable, and safe to answer from.
 
-APR showed that a safe union of independent support views can beat any single
-compile: the Anaplan Polaris fixture reached `42 exact / 1 partial / 0 miss`
-without answer-key guidance.
+The selector is the steering wheel. Guards are the rumble strips. A selector
+chooses the best available encounter surface for one row; a guard blocks or
+downranks a tempting surface when it has the wrong kind of evidence.
 
-Glass Tide opened the harder rule-ingestion frontier, and Sable/Avalon are now
-testing whether those gains transfer:
+## What Changed
 
-- broad compiles preserve rules as source records, but executable behavior
-  comes from separate rule lenses plus runtime trial;
-- a separate rule lens can admit executable clauses, including a role-joined
-  repair rule that passes both positive and negative probes:
-  `derived_authorization(repair_order_71, valid, glass_tide_repair)` succeeds,
-  while the one-signer repair order does not;
-- runtime trial exposes the real risks: overgeneralized class-predicate fanout
-  versus clean but dormant rules whose bodies lack matching admitted facts;
-- the verifier now checks body-goal support, so a rule is not considered
-  promotion-ready merely because predicate signatures match.
-- threshold tax rules now work over deterministic numeric helpers, and a split
-  exception lens covers the high-value relief-cargo exemption.
-- a split exception lens now derives `lamp_rice` as `exempt` under the correct
-  `harbor` scope and does not derive it as taxable; the combined threshold plus
-  exception bundle remains fragile and exposed numeric-helper argument misuse
-  (`value_greater_than(Value, 100)` instead of `value_greater_than(Cargo, 100)`).
-- deterministic rule-surface union now accumulates the separate threshold and
-  exception lenses into `3` promotion-ready tax rules with `3/3` positive probes
-  and `1/1` negative probe, without reading source prose or inventing new rules.
-- the same pattern now works for salvage: a body-fact lens admitted
-  `recovered_from_water/3`, `abandoned/1`, `sacred/1`, and `not_sacred/1` rows;
-  a rule-lens union retained `2` promotion-ready salvage rules and passed both
-  the Tomas reward positive probe and Nell sacred-cargo negative probe.
-- the verifier now scores promotion-readiness in isolated per-rule runtimes
-  before combined probes run over the accumulated surface. Tax stayed at `3`
-  promotion-ready rules and salvage stayed at `2`, so the gains survived the
-  stricter test.
-- quarantine now adds the temporal-helper branch: a body-fact lens admitted
-  `quarantine_patient/1`, `no_fever/2`, and `negative_test/2`; `hours_at_least/3`
-  let the verifier retain a Dax clearance rule while rejecting Mira's five-hour
-  test spacing.
-- council voting now has a first priority/override branch: the body-fact lens
-  admitted proposal, support, veto, and no-override rows; the verifier retained
-  the budget-veto failure rule and dropped unsupported normal-vote branches.
-- the first aggregation helper (`support_count_at_least/2`) is now in the
-  runtime, but GLT-037 showed the rule lens still needs sharper guidance:
-  threshold-met is not the same thing as final passage when veto/override logic
-  is also active.
-- GLT-038 fixed that shape: the aggregation lens now emits
-  `derived_condition(Proposal, support_threshold_met, council_vote)` and leaves
-  final passage to a later priority/override branch.
-- GLT-039 unions the council threshold and veto branches: the accumulated
-  surface proves both "threshold met" and "budget veto failure" while still not
-  deriving final passage.
-- GLT-040 adds a restraint guard: rule lenses no longer get credit for
-  re-emitting existing backbone rules. The council final-outcome lens declined
-  to invent a broader `council_vote` failure rule when the budget-veto branch
-  already represented the source-stated outcome.
-- The rule verifier now has dependency-composed promotion trials. A rule is
-  still tested in isolation first, but it can also be retested with upstream
-  sibling rules whose heads appear in its body while same-head siblings remain
-  excluded. This is the next step toward safe final-outcome composition:
-  intermediate conditions may support later rules without letting a neighboring
-  final-status rule fake success.
-- Avalon reproduced the numeric-helper misuse edge on a fresh governance
-  fixture: the rule lens wrote amount/match variables into entity-first helper
-  calls. The verifier now flags measure-variable helper misuse and computed
-  thresholds, keeping those rules visibly non-promotable instead of merely
-  dormant.
-- Avalon also exposed a runtime bug in anonymous-variable semantics: repeated
-  `_` occurrences were being treated as the same variable. After fixing that
-  and adding bound-number plus percentage helpers, a narrow Rule 5 lens produced
-  `3` promotion-ready threshold/ratio rules from `4` admitted clauses.
-- Deterministically unioning those Rule 5 rules into the Avalon QA surface
-  improved exact answers from `25` to `27`, but also increased misses from `3`
-  to `5`. This is the rule-side version of the APR lesson: safe accumulation is
-  powerful, but global activation can perturb query planning. The next tool
-  needs row-level activation or exact-answer protection.
-- Sable Creek added a rule-safety regression test from a fresh municipal-budget
-  fixture. A narrow rule lens initially appeared to produce `2` promotion-ready
-  rules, but both had a head variable that did not appear in the body. The
-  mapper and verifier now block unbound-head rules, and the mapper also rejects
-  fact-shaped clauses submitted as `operation="rule"`.
-- The compact rule-lens prompt now carries the same non-negotiable rule-shape
-  constraints as the full lens: real `Head :- Body` clauses only, all head
-  variables body-bound, first-order lenses use admitted backbone predicates in
-  bodies, and `derived_*` body goals require an explicit composition dependency.
-- Sable Creek then produced the first fresh-fixture promotion-ready rule under
-  those stricter gates: the rule lens used a deterministic admitted-fact
-  signature support summary to bind `AmendmentId` and `Amount` through
-  `amendment_introduced/4`, then composed `number_greater_than/2` to derive
-  `requires_public_hearing` without unbound head variables, fact-shaped rule
-  clauses, oracle rows, or Python prose interpretation.
-- The current Sable/Avalon parallax lesson is now a verifier rule instead of a
-  fixture note: repeated body predicates that share multiple variables need
-  distinct literal role anchors, otherwise they can falsely satisfy two
-  requirements with one admitted row. The promotion scorer blocks that aliasing
-  shape while still allowing anchored body-fact composition such as
-  `submit_revised_budget` plus `provide_matching_docs`.
-- Sable SC-007 crossed the important line from probe success to full-QA lift.
-  A body-fact lens admitted `proposal/1` and `supported/2` vote rows, the
-  aggregation lens derived only `support_threshold_met`, and the
-  promotion-filtered threshold+vote union moved the full 40-question replay
-  from `20 / 8 / 12` to `24 / 6 / 10` with no runtime errors or QA write
-  proposals. The harness lesson was sharp: body-fact guidance must not confuse
-  `supported/2` vote facts with generic `support_*` rationale rows, and
-  aggregation lenses need condition-label restraint as well as scope restraint.
-- Avalon then repeated the rule-lens transfer with a sharper mapper boundary:
-  raw Prolog negation, disjunction, lists, arithmetic, equality, and comparison
-  operators are now skipped at rule admission, so the post-gate Section A replay
-  retained only `3` executable clauses, including `2` promotion-ready
-  helper-composed matching-fund branches and `0` unsupported body goals.
-- Unioning those post-gate Avalon rules into the AG-001 surface produced
-  `27 exact / 10 partial / 3 miss`, improving the older rule union's miss count
-  while preserving exact count. A diagnostic mode comparison shows a `29 exact`
-  upper bound, so row-level activation remains the next query-surface frontier.
-- Avalon AG-007 adds the first non-oracle evidence-mode selector. It compared
-  baseline (`25 / 12 / 3`), post-gate rule union (`27 / 10 / 3`), and focused
-  evidence-context QA (`29 / 7 / 4`) without showing the selector source prose,
-  answer keys, judge labels, failure labels, or gold KBs. The selector chose
-  among stripped query-evidence bundles and reached `31 exact / 7 partial /
-  2 miss`, selecting the best available mode on `38/40` rows against a
-  diagnostic upper bound of `32 / 7 / 1`.
-- This is the practical bridge from semantic parallax to row-level activation:
-  safe symbolic surfaces can be accumulated independently, then selected per
-  question by a model-owned control plane that still has no write authority and
-  no oracle access.
-- The transfer report now gives that bridge a sharper target surface. Existing
-  Sable/Avalon direct-2400 comparisons split into `54` stable rows, `15` clean
-  nonbaseline rescue rows, `7` baseline-exact protection rows, and `4` volatile
-  baseline-preferred rows. The next selector should learn those risk buckets
-  rather than simply choosing the most rule-heavy mode.
-- Joining the existing direct selector artifacts back into that report adds a
-  first governor-compliance audit: `54/54` stable rows, `11/15` rescue rows,
-  `6/7` baseline-exact protection rows, and `2/4` volatile baseline-preferred
-  rows pass. The visible misses are now a small, named calibration set instead
-  of a vague selector problem. This report now also carries
-  `semantic_progress_assessment_v1`; the selector lane is `medium` zombie risk
-  until the next pass names which miss class it expects to repair.
-- Black Lantern BLM-004 is the necessary caution: the same selector mechanism
-  ran cleanly but scored only `28 / 9 / 3` over baseline/narrow/broad query
-  modes, below the best individual modes. Adding QA self-check notes moved to
-  `29 / 7 / 4`, not a clean fix. The mechanism exists; cross-fixture selector
-  calibration is now the hard part.
-- The selector calibration surface is now explicit. `direct` remains the stable
-  default posture, while `completeness` and bounded self-check context are
-  research dials. The completeness+self-check policy recovered Black Lantern to
-  `31 / 6 / 3` and selected the best mode on `38/40` rows, but the same posture
-  regressed Avalon to `27 / 9 / 2` with two selector errors. Selector policy is
-  therefore a measured control problem, not a hidden prompt tweak.
-- A third `relevance` selector policy now exists for the wrong-subject evidence
-  failure mode. It fixed one Avalon Rule2 activation miss, but full replays did
-  not beat the alternatives: Avalon scored `30 / 8 / 2`; Black Lantern scored
-  `28 / 8 / 3` with one selector error.
-- Veridia V9-005 is a better selector transfer check: over baseline, narrow,
-  and broad query modes, the direct non-oracle selector reached `22 / 6 / 12`,
-  matched the best exact count, and selected the best available mode on `39/40`
-  rows. It still missed one broad-mode partial rescue, so row-level activation
-  is useful but not solved.
-- A first hybrid selector now lets deterministic structure handle confident
-  rows and calls the LLM only for uncertainty. It reached the Avalon Rule8
-  comparison upper bound (`27 / 12 / 1`) while avoiding LLM choice on `13/40`
-  rows, but Three Moles and Sable regressed because the fallback LLM overrode
-  structurally correct relaxed evidence. The lesson is specific: uncertainty
-  gating needs row-level risk prediction, not just "ask the model when close."
-- Otters OTR-015 shows the same post-ingestion access idea transfers back to a
-  source-local story world: replaying QA with evidence-bundle filtering over
-  the unchanged OTR-014 compile improved `17 / 4 / 19` to `22 / 5 / 13`, with
-  `9` rescued rows and `0` baseline-exact regressions.
-- Three Moles MMM-004 is the cautionary story-world contrast: evidence
-  filtering over the unchanged MMM-003 compile improved exact count from
-  `10` to `13`, but misses stayed at `23`, and the selector regressed to
-  `11 / 4 / 25`. Some stories still need better lens coverage more than better
-  retrieval.
-- Three Moles MMM-005 then found the compile-side story win: opt-in
-  `source_entity_ledger_v1` plus the current semantic-parallax passes admitted
-  `193` operations and lifted QA to `16 / 7 / 17`; evidence filtering stacked
-  to `18 / 5 / 17`. This is the first positive story-fixture evidence that the
-  ledger-to-compile handoff can transfer when later passes actually cash in the
-  ledger.
-- Oxalis OX-002 carries the post-ingestion pattern into regulatory recall:
-  evidence filtering improved `16 / 9 / 15` to `18 / 11 / 11`, while the direct
-  selector chose `19 / 9 / 12`. Exact precision and miss reduction are still
-  competing activation objectives.
-- Dulse DL-002 is the saturation check: a strong `27 / 7 / 6` cold baseline
-  moved only to `27 / 8 / 5` under evidence filtering, and the selector returned
-  to `27 / 7 / 6`. Query-surface tools help, but they do not automatically
-  inflate already-supported fixtures.
-- Avalon AG-009 adds a clean Rule 2 exception-lens result: the lens admitted
-  `3` rules, `2` were promotion-ready, and the prior-funding branch passed
-  `3/3` positive and `2/2` negative probes. But globally unioning those
-  promotion-ready rules regressed QA from `25 / 12 / 3` to `25 / 10 / 5`.
-  The lesson is now explicit: runtime promotion-ready does not mean activate
-  for every question.
-- Dulse Ledger is now scored cold at `27 exact / 7 partial / 6 miss`, Oxalis
-  Recall scored `16 exact / 9 partial / 15 miss` despite `106` admitted
-  operations and `0` skips, Sable Creek Budget scored `20 exact / 8 partial /
-  12 miss` after exposing a profile-bootstrap role-field JSON runaway, and
-  Thornfield Variance scored `20 exact / 6 partial / 14 miss`. Together they
-  sharpen the lesson: rotating fixtures matters because "clean admission,"
-  "schema hygiene," and "answer-bearing coverage" are distinct surfaces.
-- The newest incoming challenge batch has a standard smoke scorecard generated
-  from compile/QA artifacts only. All five fixtures now compile after
-  Copperfall recovered through compact profile retry, and the batch scored `44
-  exact / 4 partial / 2 miss` over `50` no-answer QA rows with `0` write
-  proposals. Copperfall and Harrowgate were clean at `10/10`; Larkspur reached
-  `8 / 2 / 0`; Northbridge and Meridian landed at `8 / 1 / 1`. The non-exact
-  surface is still mostly compile coverage, so the next useful work is
-  acquisition and hybrid-helper substrate, not answer-key-shaped tuning.
-- The newest harness lesson is negative but valuable: broad global
-  detail/specification guidance improved Meridian locally but regressed the
-  five-fixture batch to `41 exact / 4 partial / 5 miss`. The new scorecard
-  comparer marks that run `reject_candidate`, so future policy changes should
-  be promoted by artifact deltas, not by one good-looking fixture.
-- A narrower evidence-bundle diagnostic over only the current non-exact rows
-  shows why row-level activation matters. It lifted exacts from `44` to `46`,
-  but also increased misses from `2` to `3`, so the batch remains rejected as a
-  default mode. The row overlay plan identifies two useful rescues and one
-  regression, turning "evidence mode helps sometimes" into a small selector
-  target.
-- On that six-row target, deterministic structural mode selection found `5/6`
-  best choices but still picked the harmful Larkspur q009 evidence row. The LLM
-  `activation` selector reached `6/6` best choices without source prose,
-  answers, judge labels, or failure labels. This is the clean next hint:
-  selector control should learn answer-bearing relevance, not just evidence
-  volume.
-- The full first-10 replay keeps that hint honest. Evidence mode over all smoke
-  rows stayed at `44` exact but increased misses; structural selection reached
-  `24 / 3 / 3` across the three imperfect fixtures. After adding a selector JSON
-  retry guard, activation reached `23 / 5 / 2`: fewer misses, but weaker exact
-  preservation. The selector frontier is exact-row protection, not blanket
-  activation.
-- A first protected selector now tests that idea: structural by default, with
-  activation only for high-volume nonbaseline overrides. It reached `24 / 4 /
-  2` on the incoming first-10 selector slice and reduced Avalon misses by one,
-  but it failed to transfer to Sable, where direct selection remains much
-  stronger. This keeps selector control in research mode and points back to
-  compile-side repair for the current incoming misses.
-- The incoming repair queue is now explicit: two row-selector calibration rows,
-  three scoped source-surface repair rows, and one helper/query-join row. That
-  is the next practical compiler frontier: repair missing answer-bearing source
-  surface locally without promoting another global detail prompt.
-- A ledger compile diagnostic sharpened the selector frontier. Ledger mode is
-  not a default promotion: it raised the incoming batch to `45 exact / 2 partial
-  / 3 miss`, so the scorecard gate rejected it. But row-level selection can use
-  it: the new `guarded_activation` policy keeps structural choices for
-  confident rows and calls activation with bounded self-check evidence for
-  uncertain rows. On the three imperfect first-10 fixtures, it selected the
-  best available mode on `30/30` rows, preserving Larkspur at `8 / 2 / 0` while
-  lifting Meridian and Northbridge to `9 / 0 / 1` each.
-- The transfer check keeps that result honest: guarded activation did not beat
-  `protected` on Avalon miss control and did not beat `direct` on Sable. The
-  harness now has a better named diagnostic policy, not a new universal default.
-  The next selector problem is deciding when a fixture/mode family is safe for
-  activation fallback at all.
-- A selector risk-gate planner now makes that decision surface explicit. It
-  reads selector artifacts only and classifies rows as safe activation,
-  calibration activation, baseline protection, or compile repair. With
-  Avalon/Sable transfer checks attached, the incoming guarded-activation
-  rescues remain calibration targets rather than promotion targets, which is the
-  right conservative behavior for a moving research instrument.
-- Scoped compile repair then produced a real but gated batch lift: the incoming
-  scorecard moved from `44 / 4 / 2` to `45 / 4 / 1`, with Northbridge improving
-  to `9 / 1 / 0`. The same run regressed Meridian q010 from exact to miss, so
-  the scorecard comparer now tracks baseline-exact row regressions and returns
-  `row_level_gate_required` instead of `promote_candidate` for this shape.
-- The row-gated scorecard planner makes the opportunity concrete: accepting the
-  three scoped-repair rescues while rejecting the Meridian q010 regression gives
-  a protected target of `46 / 4 / 0` on the incoming five-fixture first-10
-  scorecard.
-- Scoped compile repair plus evidence-bundle context filtering has now made
-  that target real: the batch replays at `46 / 4 / 0`, with no QA write
-  proposals, no baseline-exact row regressions, and a `promote_candidate`
-  scorecard gate. The next incoming frontier is the four remaining partials,
-  not miss recovery.
-- A follow-on compile-variant diagnostic found complementary surfaces rather
-  than a blanket replacement. Shifted Meridian/Northbridge compiles stay
-  aggregate-neutral at `46 / 4 / 0`, but row-level overlay across variants gives
-  a judged `48 / 2 / 0` upper target while protecting two baseline-exact rows.
-- Larkspur then exposed a clean compiler guardrail: numeric character
-  attributes must not become names/aliases, and official roles need duty and
-  authority surfaces. The first guarded replay is high-risk as a compile, but
-  it repairs the youngest-exhibitor row. Added as a variant, the judged overlay
-  target reached `49 / 1 / 0`.
-- The remaining Larkspur row turned out to be a query-surface issue over an
-  admitted compile surface: `person_role(osric_thane, fair_warden)` was true
-  but too thin. The QA harness now adds structural official-identity companions
-  over admitted authority/action predicates such as `ruling_by/3` and
-  `permission_granted/2`, making Osric's row exact without Python prose
-  interpretation. The candidate remains unsafe globally because Larkspur q010
-  regresses, but the judged compile/query overlay target is now `50 / 0 / 0`
-  with four accepted variant rows and three protected exact rows. The hard
-  problem is learning a non-oracle selector/control signal for these variants.
-- The first bridge artifact for that control signal now exists:
-  `plan_incoming_variant_selector_training.py` turns the judged overlay into
-  `4` activation targets and `3` exact-protection targets without reading
-  source prose, gold KBs, answer keys, strategy files, or raw compile outputs.
-  Both nonbaseline variants are marked
-  `unsafe_global_variant_row_gate_required`, so the current evidence says
-  "train row-gated activation," not "promote a new global compile."
-- Guarded activation now has a structural volume-trap uncertainty trigger:
-  row-count-heavy or relaxed-fallback-heavy structural winners get sent to the
-  LLM selector instead of being treated as confident. On the seven incoming
-  variant calibration rows, this moved the non-oracle selector to `6 / 1 / 0`
-  with `6/7` best choices and no selector errors. The remaining Northbridge
-  q007 partial is a requirement-detail relevance problem, not a volume problem.
-- The requirement-detail relevance guard now closes that last row: activation
-  selection treats count-only/status-only support as partial when another mode
-  returns requirement details such as spacing, interval, threshold, scope,
-  condition, duration, unit, or authority. The same seven-row calibration slice
-  now reaches `7 / 0 / 0` and `7/7` best choices without source prose, answer
-  keys, judge labels, failure labels, or gold KBs in selector input.
-- Replaying that selector over the full first-10 Larkspur, Meridian, and
-  Northbridge variant groups reached `30 / 0 / 0` with `30/30` best choices and
-  no selector errors. Since Copperfall and Harrowgate were already clean at
-  `10/10`, the current best row-gated harness surface now has a first-10
-  `50 / 0 / 0` result across the promoted incoming batch. That is a selector
-  result over existing artifacts, not a single perfect cold compile.
-- The requirement-detail guard was transfer-checked against older Avalon and
-  Sable rule-activation packs. Avalon moved to `28 / 10 / 2`, reducing guarded
-  misses by one but still trailing protected miss control; Sable stayed at
-  `25 / 6 / 9` and still prefers direct selection. The guard is useful harness
-  machinery, but not a global selector default.
-- The same promoted incoming fixtures were then replayed as normal story-world
-  full-40 subjects. The classified scorecard is `154 / 20 / 26` over `200` rows
-  with `0` write proposals, and the repair queue is now `39` compile-surface
-  gaps plus `7` helper/query-join gaps. Larkspur is the hard source-surface
-  generalization case; Meridian and Northbridge add smaller rule/quantity join
-  pressure.
-- Larkspur's first repair attempt is a useful negative result: a source-entity
-  ledger plus broad state/custody/rationale hint cleaned compile shape
-  (`149` admitted, `1` skip, no unknown predicate refs) but scored only
-  `18 / 10 / 12` full-40 and caused `7` baseline-exact regressions. The next
-  repair needs narrower state-transition, custody, permission/rationale, and
-  final-state passes with exact-row protection.
-- That narrower targeted-state lens is unsafe alone (`14 / 8 / 18`) but useful
-  row-gated. Its overlay target is `23 / 6 / 11`, and guarded activation with a
-  new identity-completeness uncertainty gate plus rationale/capability guidance
-  reaches `23 / 8 / 9` across Larkspur full-40 with `39/40` best choices and no
-  selector errors. The gate protects who-is rows when a competing mode has
-  explicit name support.
-- The next Larkspur permission/rationale lens is much stronger as a row-gated
-  compile variant: baseline is `20 / 7 / 13`, the variant alone reaches
-  `31 / 3 / 6`, and the judged overlay target is `37 / 2 / 1`. The first
-  guarded selector reached `34 / 4 / 2` with three exact-row protection misses. Adding
-  answer-surface baseline guards for identity/action-volume, award/result, and
-  direct status/rule rows now reaches the overlay upper bound: `37 / 2 / 1`,
-  `40/40` best choices, `0` selector errors. This is the cleanest current
-  demonstration that focused acquisition and selector guardrails can compose
-  without Python prose interpretation.
-- The new zipped fixture batch is onboarded and baselined as promoted
-  story-world data, not as lingering `tmp/incoming` material. Ashgrove,
-  Fenmore, Greywell, Heronvale, and Veridia all compile. First-pass QA over
-  `123` rows scores `94 / 13 / 16`; the classified repair rollup is
-  `97 / 11 / 15` with `16` compile-surface gaps, `8` hybrid/join gaps, and
-  `2` answer-surface gaps. Greywell is currently strongest (`22 / 2 / 1`
-  classified), Heronvale is the rule/eligibility risk with medium semantic
-  struggle, and Veridia gives the stenographer/correction lane a compact
-  turnstream fixture.
-- `operational_record_status_v1` is the newest lens honing result. It is
-  rejected as a global compile candidate (`96 / 20 / 7` versus `97 / 11 / 15`)
-  but valuable under row selection: row-gated target `111 / 11 / 1`, guarded
-  no-oracle selector now `101 / 17 / 5`, and Greywell reaches `24 / 1 / 0`.
-  A follow-up baseline-readiness guard over the same frozen artifacts protects
-  direct baseline application/status, counterfactual rule, and hold/readiness
-  support when a competing lens is broad or relaxed-heavy, lifting the rollup
-  to `106 / 12 / 5` with `117/123` selected-best rows and no new misses. The
-  question-act guard then fixes request-filing timeliness and commit-readiness:
-  Ashgrove q008 and Veridia q019 both move from miss to exact. The full replay
-  is `106 / 14 / 3`, so exact count stays flat under LLM selector variance but
-  hard misses drop by two. The surface-specificity guard then reaches
-  `110 / 10 / 3` with `121/123` selected-best rows by protecting explicit
-  rationale-note, decision-status, and priority predicate surfaces. The
-  complete-selector guard adds split-rationale, current-constitution, and
-  resubmission proof/rule distinctions, reaching `111 / 11 / 1` with
-  `123/123` selected-best rows against the frozen artifact upper bound. The
-  remaining frontier is source-surface/evidence acquisition for the one
-  upper-bound miss, transfer checks on unlike fixtures, and variance control in
-  LLM selector replay.
-- Fenmore immediately showed the next acquisition shape. A rationale/contrast
-  source-note lens is rejected globally (`17 / 1 / 7`) but useful as a
-  row-level third view: with note-rationale, viability-concern contrast,
-  pending-test, collector-identity, and threshold/storage guards, Fenmore moves
-  to `24 / 1 / 0` and `25/25` selected-best rows. The product lesson is clean:
-  source notes are answer-bearing for rationale/contrast questions, but they
-  must not outrank direct identity or policy-threshold surfaces.
-- The lens now has a targeted transfer proof. Across Ashgrove, Fenmore,
-  Greywell, Heronvale, and Veridia, `52` reason/status/evidence/correction and
-  commit-readiness rows score `49 exact / 3 partial / 0 miss`, with `52/52`
-  selected-best rows and `0` selector errors. Greywell and Veridia exposed the
-  hardest guardrails: current operational status needs final-state surface,
-  evidentiary-status reports need witness/report surface, board concern rows
-  need event/action history, and commit readiness must bypass over-eager
-  baseline status protection.
-- The same lens now has an older-fixture boundary check. Larkspur,
-  Northbridge, Copperfall, and Meridian targeted transfer scored `17 exact / 9
-  partial / 7 miss` over `33` rows with no writes or runtime load errors.
-  Northbridge and Copperfall transfer usefully on discrepancy, authority,
-  correction, and status rows; Meridian was clean but tiny at `2/2`. Larkspur
-  stays the active hard case at `4 / 6 / 4`, mostly compile-surface gaps for
-  narrative motive, custody, and object-state rationale. The next acquisition
-  work should sharpen those surfaces directly instead of broadening the
-  rationale/contrast lens.
-- That sharper Larkspur acquisition now has a real candidate. The
-  `final_object_state_transition_surface` micro-lens compiled healthy (`98`
-  admitted / `14` skipped) and scored `36 exact / 2 partial / 2 miss` full-40,
-  improving `18` baseline non-exact rows with only one baseline-exact
-  regression: q009, "Who is Fair Warden Osric Thane?" Permission/motive is
-  still a row-level lens (`3 / 2 / 0` targeted, `16 / 12 / 12` globally), and
-  custody is only useful so far for q038. Combining judged artifacts now gives
-  a visible `40 / 0 / 0` row target, but the selector cannot honestly replay it
-  until q009 has retained baseline evidence or a better official-identity
-  acquisition surface.
-- Larkspur now has the honest replay. A new
-  `official_role_authority_definition_surface` makes q009 exact by acquiring
-  role authority and duties instead of only identity/title/action examples; it
-  is unsafe globally (`21 / 9 / 10`) and therefore stays row-gated. Guarded
-  activation over state, permission/rationale, role-authority, and custody
-  artifacts first reached `35 / 3 / 2`; after adding reason-named selector
-  guards for superlative identity, official-role definition, current component
-  state, custody-transfer rationale, and award placement, it reaches `40 exact
-  / 0 partial / 0 miss`, with `40/40` selected-best rows and `0` selector
-  errors. No source prose, answers, judge labels, failure labels, gold KBs, or
-  strategy files enter selector input.
-- The state lens also has a transfer boundary. Three Moles final-state rows
-  scored `0 / 2 / 7`, Otters final-state/restitution rows scored `1 / 0 / 14`,
-  and Calder's Reach final ownership/status rows scored `10 / 2 / 8`. The
-  lesson is precise: final object-state acquisition works when the source has
-  compact named-device state transitions; it does not replace event-spine,
-  restitution, or longitudinal current-state conflict coverage.
-- Calder's follow-up turns that boundary into a selector win. Current-state
-  conflict alone scored `6 / 2 / 12`, possession/inheritance scored `10 / 1 /
-  9`, and legal-title/default scored `6 / 2 / 12`; together with final-state
-  they expose a `14 / 3 / 3` upper bound. Refined answer-surface guards let the
-  guarded selector match it with `20/20` selected-best rows and `0` selector
-  errors, without source prose, answers, judge labels, failure labels, gold KBs,
-  or strategy files in selector input.
-- Anti-overtune replay is clean so far. Rerunning Larkspur, Fenmore, Ashgrove,
-  Greywell, Heronvale, and Veridia frozen selector artifacts after the Calder
-  guards landed gives `153 / 10 / 0` over `163` rows, matching each available
-  upper bound with `163/163` selected-best rows. One Ashgrove attempt exposed
-  transient LM Studio HTTP 500 fallback variance and recovered on rerun.
-- Oxalis adds the unlike-domain access win: evidence-bundle replay over a
-  frozen healthy compile moves full-40 from `27 / 8 / 5` to `32 / 6 / 2`, and
-  regulatory access guards lift guarded selection to the two-mode upper bound
-  of `33 / 6 / 1` with `40/40` selected-best rows.
-- The newest repair-slice result keeps the pegboard discipline. A broad
-  temporal/status/deadline compile is not promoted globally: Ashgrove uses it
-  only row-gated, while Copperfall rejects it outright. The useful harness
-  change is smaller and named by semantic reason: adjusted-expiration questions
-  need explicit current-expiration surface, and correction-entitlement questions
-  need entitlement-rule plus extension-effect surface. Ashgrove reaches
-  `24 / 1 / 0` with `25/25` selected-best rows; Copperfall points the next
-  work at deadline-family query disambiguation.
-- That next Copperfall bite produced a small but real harness helper:
-  `deadline_calculated/5` queries now get a query-only sibling deadline table.
-  The rejected temporal compile improves from `25 / 5 / 10` to `30 / 5 / 5`
-  with `8` rescues and no exact regressions, because q034 can see the `reply`
-  deadline family instead of only the neighboring `answer` deadline.
-- The following Copperfall bite adds status interval support without adding a
-  new lens: exact-date misses over admitted `case_status_at_date/3` anchors now
-  get a query-only interval row. The same artifact improves again to
-  `35 / 4 / 1`, with `6` more rescues and no exact regressions. The remaining
-  hard edge is explicit status override: `stayed` must be compiled as a status
-  surface before the runtime should return it.
+The older headline was semantic parallax: one compile is one viewpoint. That is
+still true, but the sharper lesson is now row-level governance over parallax.
 
-Clarification Eagerness Trap is exercising the companion governance frontier:
+Recent cold fixture work showed why:
 
-- the current CE high-water is `40/40` correct with `0` over-eager asks,
-  `0` under-eager misses, `0` unsafe candidates, and `0` context-write
-  violations;
-- blocked-slot question coverage is now measured structurally from authored
-  fixture slots and model-emitted clarification surfaces; CET-010 reached
-  `10/10` blocked-slot coverage and `0` blocked-slot safe-write violations;
-- CE must be measured across ingestion, query, safe partials, blocked rows, and
-  authority-boundary violations;
-- CET-011/CET-012 exposed a context-availability effect: no-source-context CE
-  regressed to `24/40` with `15` over-eager asks, while the same fixture with
-  source context returned to `40/40`. CE scores must say what authority surface
-  was available.
-- CET-013 reran the source-context CE lane after the rule-admission changes and
-  held `40/40` correct with `0` unsafe candidates, `0` context-write
-  violations, and `10/10` blocked-slot coverage. The residual signal is
-  safe-partial richness (`11/13`), not ask/no-ask posture.
-- CET-014 repeated the source-context CE sentinel after the evidence-selector
-  work and again held `40/40` correct with `0` unsafe candidates, `0`
-  context-write violations, and `10/10` blocked-slot coverage.
+- the 2026-05-07 sealed story batch has a row-gated high-water of
+  `361 exact / 16 partial / 23 miss` over `400` rows (`90.25%`);
+- the 2026-05-08 incoming-six full-40 batch moved from cold
+  `186 / 16 / 38` to a diagnostic row-gated `240 / 0 / 0` over `240` rows;
+- the 2026-05-08 Claude 8 dense operational-record batch moved from cold
+  `145 / 45 / 130` to source-record `256 / 23 / 41`, then to archival
+  identifier-ledger selected `273 / 20 / 27` over `320` rows (`85.31%`);
+- those gains came from bounded candidate surfaces and selector gates, not
+  from a universal prompt or global replacement compile;
+- several useful candidates are bad standalone compilers, which is exactly why
+  the pegboard model matters.
 
-The cold generalization lane is now active:
+The useful candidates now include source-period/deadline scaffolds, evidence
+provenance surfaces, planning/staff-report surfaces, board-recusal conflict
+surface, lease financial-correction surface, deadline/status helpers,
+classification conversion conservation helpers, and the newest incoming-six
+row shapes: source lists, last-confirmed-at, unresolved authority-question
+answer surfaces, rejected-version planning state, and procedural date-event
+anchors. The newest dense-record candidate is `archival_row_ledger_v1`, which
+preserves printed source labels, exhibit IDs, catalog IDs, docket IDs, system
+names, and row addresses as first-class answer surfaces. Some candidates are
+live helpers. Some are temporary registry scaffolds. Most are row-gated until
+transfer proves them.
 
-- ten newly admitted source-only fixtures produced `245 exact / 81 partial /
-  144 miss` across `470` QA items;
-- the cross-fixture failure rollup shows `159` compile-surface gaps, `35`
-  hybrid/reasoning gaps, `26` query-surface gaps, and `5` answer-surface gaps;
-- Avalon Grant Committee joins the cold lane at `25 exact / 12 partial /
-  3 miss` over `40` questions, with `114` admitted operations, `6` skips,
-  `0` runtime errors, and `0` write proposals during QA. It is strong enough
-  to show transfer, but it admitted `0` executable rules, making it a clean
-  rule-composition/body-fact acquisition target rather than a solved fixture.
-- a Three Moles diagnostic replay added pass-contribution accounting and showed
-  the event/causal lens contributing `0` unique rows, making lens usefulness
-  measurable instead of aesthetic;
-- a compact focused-pass JSON retry recovered that same event/causal lens to
-  `28` unique rows, but QA stayed essentially flat, proving that mechanical
-  lens recovery is necessary but not sufficient for answer-bearing coverage;
-- compile-lens health now rolls per-pass diagnostics into a top-level
-  `healthy` / `warning` / `poor` verdict. A Veridia-9 cold replay with healthy
-  lenses improved slightly from `18 exact / 5 partial / 17 miss` to `19 / 6 /
-  15` while admitting fewer rows, which is useful but also clarifies the next
-  metric: healthy lenses still need question-support coverage.
-- the cold rollup now includes a non-exact query-evidence proxy. The surprising
-  result is that most misses still returned some Prolog rows, so the current
-  pain is not just empty retrieval. It is answer-bearing support: the query path
-  often finds nearby symbolic surface without finding the exact row, join, or
-  rule consequence needed by the question.
-- Veridia-9 V9-003 confirms that post-ingestion query choreography can lift a
-  cold run without touching the compile: evidence-bundle context filtering moved
-  the unchanged V9-002 surface from `19 / 6 / 15` to `22 / 4 / 14`. It also
-  regressed two partials, so this is a measured near-miss tool, not a blind
-  default.
-- Black Lantern BLM-002 repeats the pattern on a second cold fixture: unchanged
-  compile, evidence-bundle context filtering, `27 / 7 / 6` to `32 / 3 / 5`.
-  It also regressed two rows, which sharpens the lesson: query choreography is
-  powerful, but it needs row-level risk prediction before it becomes default.
-- BLM-003 widened the evidence-filter fallback (`max_clauses=320`,
-  `broad_floor=160`) and kept `32` exact while moving hard misses down from `5`
-  to `3`. It still swapped which rows won and lost, so the next tool should
-  decide when to activate evidence filtering per row rather than globally.
-- V9-004 is the negative control: the same broader floor on Veridia reduced one
-  hard miss but lost the exact gains from V9-003 (`22` exact back down to `19`).
-  More context is not automatically better; the budget is a query-surface
-  control parameter.
-- The first query-mode comparison report covers Veridia and Black Lantern across
-  baseline, narrow evidence filtering, and broad evidence filtering. Only `16`
-  of `80` rows are volatile; `12` baseline rows can be rescued by an alternate
-  mode, while only `1` baseline exact regresses. That makes row-level selection
-  worth pursuing, with exact-row protection as the first invariant.
+## Guard Pressure
 
-The architecture is becoming sharper:
+Selector guard growth is now a first-class design pressure, not background
+noise.
+
+The current rollup from `scripts/select_qa_mode_without_oracle.py` reports:
 
 ```text
-multiple model views may propose;
-only deterministic admission decides what can accumulate.
+guard return sites: 244
+unique guard reasons: 244
+semantic families: 7
+unclassified reasons: 0
+guards per family: 34.86
+duplicate guard reasons: 0
 ```
 
-## Current Hard Question
+That is a healthy discovery state, not a final design. The family count has
+stayed small while the fixture count grew, which suggests the guards are
+finding recurring question/evidence mismatches. But the raw count is still a
+warning light.
 
-Can Prethinker activate the right admitted symbolic surface for each question:
-facts when facts are enough, accumulated support when rationale is needed,
-promotion-ready rules when inference is needed, and clarification when durable
-truth would otherwise require an unauthorized choice?
+Current discipline:
 
-That is the rule-composition, row-level activation, and CE frontier.
+- add a guard when it names a semantic mismatch;
+- distrust a guard that only names a fixture;
+- merge guards before parameterizing them;
+- never hide guard growth inside a parameter bag or private enum table;
+- retire guards when better compile or helper surfaces make them unnecessary;
+- replay the rows that gave birth to a guard before merging or deleting it.
 
-## Tonight's Research Queue
+Parameterization can wait. The project is still discovering the shape of the
+guard surface. The right next move is finding duplicate or near-duplicate
+guards, proving safe merges, and watching whether the seven families continue
+to hold.
 
-The next work should stay on the sharp edges:
+## Current Itinerary
 
-0. **Cold generalization baselines.** Ten newly admitted fixtures now test
-   whether semantic parallax generalizes beyond the research stories that shaped
-   the harness. The current aggregate says compile-surface coverage is the
-   largest general issue, followed by hybrid/reasoning support. Next changes
-   should improve at least two cold fixtures or preserve older regression
-   lanes. The newest lens-health gate should help decide when a compile is worth
-   sending through full QA and when the compile itself needs repair first. The
-   newest evidence-return proxy says many misses already retrieve rows, so the
-   next compile/query work should target answer-bearing support, not just more
-   rows. V9-003 shows evidence-bundle context filtering can help that query
-   surface, and BLM-002 confirms the lift on another fixture, but both runs need
-   regression checks because they can perturb partial/exact rows. BLM-003 shows
-   broader context can reduce hard misses, while V9-004 shows the same broader
-   setting can lose exact answers. The next version needs row-level activation
-   or a fallback ensemble policy. The new query-mode comparison report shows a
-   diagnostic perfect-selector upper bound of `56` exact across 80 compared
-   rows, versus `46` baseline exacts, but that bound is for research only and
-   must not become an oracle selector. Sable Creek added a new general harness
-   lesson: profile argument-role slots now have deterministic length/pattern
-   constraints, because role names are schema labels, not places for source
-   values or prose alternatives. Thornfield completed the current cold batch
-   and independently repeated the governance-fixture pain: useful procedural
-   rows, no executable rules, and misses around dimensional/authority joins.
-   Sable's rule-lens replay then found a more important safety edge: no
-   promotion credit for unbound-head rules or fact-shaped rule clauses. The
-   latest compact-guidance replay moved the failure mode to a cleaner place:
-   valid-but-unsupported rules are admitted as non-promotable, while derived-body
-   composition attempts are held until a dependency exists.
-1. **Rule composition transfer.** Glass Tide has promotion-ready slices for
-   tax, salvage, quarantine, council veto, and support-threshold conditions.
-   Sable and Avalon now show the discipline transfers: helper shape, body
-   support, mapper gates, and promotion trials decide usefulness, not the mere
-   presence of a Prolog-looking clause. The next frontier is joining
-   intermediate conditions without collapsing provenance or overclaiming state.
-   The latest frozen-artifact activation replay adds row-level selector
-   restraint: Avalon reaches `32 exact / 7 partial / 1 miss`, Sable reaches
-   `26 / 7 / 7`, both at `40/40` selected-best rows. The activation-governor
-   audit across the 80 rows now has `15/15` nonbaseline rescues protected,
-   `7/7` baseline-exact protections preserved, and only one remaining volatile
-   prefer-baseline failure.
-   The first cross-fixture repair-slice run then tested
-   `rule_interpretation_application` on Heronvale and Meridian. Meridian moved
-   to `39 exact / 1 partial / 0 miss` full-40 with no baseline-exact
-   regressions; Heronvale improved its cold baseline but regressed one exact row
-   and remains better served by row-gated selection. This is a transfer
-   candidate, not a global prompt promotion.
-   The next repair-slice run tested a combined object/state/custody surface on
-   Fenmore and Larkspur and rejected it as a global compile. Its value was a
-   selector lesson instead: Fenmore now reaches the `25 / 0 / 0` frozen-artifact
-   upper bound after adding a deaccession-yet status guard, while Larkspur
-   confirms that final state, custody roster, motive, role authority, and award
-   results must remain separate surfaces.
-   The temporal/status/deadline slice repeats the same instrument lesson:
-   Ashgrove improves through row-level selector guards (`24 / 1 / 0`, `25/25`
-   selected-best), while Copperfall rejects the broad temporal compile and
-   exposes deadline-family disambiguation as the next helper/query problem.
-   A query-only deadline-family companion now addresses the first part of that
-   Copperfall problem: `deadline_calculated/5` queries retrieve sibling
-   deadline rows, lifting the rejected temporal full replay to `30 / 5 / 5`.
-   A second query-only status interval helper lifts it again to `35 / 4 / 1`;
-   the next Copperfall frontier is explicit stay/status-override acquisition,
-   not another broad temporal lens.
-2. **Rule probe discipline.** Recent preflight runs show that a rule can be
-   body-supported but fail under the wrong scope atom, can become dormant by
-   using lowercase placeholders such as `warden` and `repair_order`, or can look
-   firing only because a sibling rule shares its derived head. Keep isolated
-   per-rule promotion plus combined positive/negative probes in the loop.
-3. **Clarification Eagerness drift.** CET-013 held the source-context lane at
-   `40/40` after the latest rule-admission changes. The next CE move is safe
-   partial richness and a small hard replay pack for variance, not another broad
-   prompt patch.
-4. **Regression cadence.** Keep compact Anaplan/Glass Tide/CE checks running so
-   new rule machinery does not reopen older query, admission, or ask/no-ask
-   failures.
+1. **Move from solved-batch proof to transfer pressure.** Incoming-six is
+   exhausted diagnostically; the active question is whether its row shapes
+   transfer to unlike fixtures without becoming fixture-specific prompt
+   crutches.
+2. **Promote only transfer-backed surfaces.** A registry scaffold may earn a
+   candidate slot after one fixture; it earns a roster slot only after unlike
+   transfer and exact-row protection.
+3. **Deepen helpers where rows prove the shape.** Temporal slots, deadline
+   families, status intervals, classification conversions, quantity
+   conservation, and financial corrections are helper candidates when they
+   compose admitted rows instead of interpreting source prose.
+4. **Hunt guard merges and retirements.** Use the duplicate-reason report and
+   near-duplicate review as an Autolab task. A merged guard should lose fixture
+   vocabulary and keep the semantic reason.
+5. **Keep the lab portable.** The current POWER/NITRO/LM Studio rig is a
+   research convenience, not the product. Docs should describe endpoint
+   configuration and artifact contracts, not a permanent home-lab dependency.
+
+## What Not To Do
+
+- Do not turn a local candidate registry into a global compiler because it
+  fixed one row.
+- Do not treat a perfect first-10 slice as a solved fixture.
+- Do not call a selector policy promoted because it matches an oracle overlay.
+- Do not let guard count shrink cosmetically by hiding enumerations inside a
+  parameterized family.
+- Do not revive historical Lava-style calibration as the active frontier. Keep
+  it as useful history, not the center of the story.
 
 ## Read Next
 
-- [Multi-Pass Semantic Compiler](https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md)
-- [Cold Baseline Failure Rollup](https://github.com/dr3d/prethinker/blob/main/docs/COLD_BASELINE_FAILURE_ROLLUP.md)
-- [Frontier Progress Report](https://github.com/dr3d/prethinker/blob/main/docs/FRONTIER_PROGRESS_REPORT.md)
-- [Clarification Eagerness Strategy](https://github.com/dr3d/prethinker/blob/main/docs/CLARIFICATION_EAGERNESS_STRATEGY.md)
+- [Selector Guard Family Rollup](https://github.com/dr3d/prethinker/blob/main/docs/SELECTOR_GUARD_FAMILY_ROLLUP.md)
+- [Semantic Lens Roster](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_LENS_ROSTER.md)
+- [Current Harness Instrument](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_HARNESS_INSTRUMENT.md)
+- [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md)
 - [Project State](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md)
-- [Glass Tide progress journal](https://github.com/dr3d/prethinker/blob/main/datasets/story_worlds/glass_tide_charter/progress_journal.md)
-- [Clarification Eagerness Trap journal](https://github.com/dr3d/prethinker/blob/main/datasets/clarification_eagerness/clarification_eagerness_trap/progress_journal.md)

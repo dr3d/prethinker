@@ -5,6 +5,18 @@ instrument. It is not a prompt grab bag. It is the start of a roster of the
 meaning surfaces the harness should measure, hone, and compare as fixtures get
 harder and scores climb.
 
+Current shorthand:
+
+```text
+compiled KB = durable state
+row = measured encounter with that state
+selector = chooses the best encounter surface
+guard = prevents a tempting wrong surface
+verdict = records what happened
+```
+
+Truth lives in the compiled KB. Rows are the unit of measurement and replay.
+
 ## Artifact-First Orchestration
 
 Prethinker should prefer artifact-first orchestration:
@@ -45,12 +57,92 @@ Current facet roster:
 | Rule composition | Thresholds, precedence, activation, exception, vote, eligibility, override, and expiration behavior. | Glass Tide, Avalon, Sable, Oxalis. |
 | Temporal/status | Status-at-date, interval overlap, deadline arithmetic, business/calendar day distinctions, supersession, and effective/expired boundaries. | Iron Harbor, Oxalis, Dulse, Ashgrove. |
 | Authority | Which document, actor, correction, board, rule, vote, or finding controls when accounts conflict. | Northbridge, Greywell, Kestrel, CE. |
+| Evidence provenance | Who prepared, presented, dated, admitted, relied on, commissioned, corrected, or physically located a source document, exhibit, survey, receipt, photograph, ledger, or intake item. | Nested Puppet Court, Clockmakers Three Ledgers, Museum/audit lanes. |
+| Archival row ledger | Whether exact printed source labels, exhibit IDs, catalog IDs, docket IDs, system names, roster rows, table rows, and source-section labels survive as addressable facts. | Claude 8 dense operational-record batch: Hospital, Maritime, School, Estate. |
 | Epistemic uncertainty | Whether the system distinguishes unknown, unstated, pending, disputed, retracted, superseded, unsupported, provisional, inferred, and resolved-negative states. | CE, Veridia Intake, stenographer/turnstream work. |
 | Entity and role | Aliases, identity, titles, role changes, custody, ownership, membership, family, organization, and responsibility relationships. | Larkspur, Calder, Three Moles. |
 | Query surface | Whether the post-compile query planner asks for the right predicates and joins already present in the KB. | APR, Veridia, Greywell. |
 | Selector surface | Whether baseline, direct, protected, activation, evidence, or other modes are chosen under measured risk. | Larkspur, Avalon, Sable, incoming batches. |
 | Answer surface | Whether the answer should be concise, hedged, cite uncertainty, refuse, stay quiet, or report insufficient support. | CE, Veridia, answer-surface gaps. |
 | Struggle detection | Whether repeated passes have stopped adding unique semantic surface and should stop or continue only with a named expected contribution. | `semantic_progress_assessment_v1`. |
+
+## Evidence Provenance And Registry Scaffolds
+
+The 2026-05-07 cold-injected story-world batch added a new pegboard lesson:
+some missing facts are not hidden in deeper narrative reasoning. They are
+provenance roles for source artifacts and intake objects.
+
+Two narrow registry-scaffolded candidate modes now sit on the pegboard as
+row-gated research lenses:
+
+- `hearing_evidence_provenance_registry_v1` supplies vocabulary for who
+  presented, dated, prepared, commissioned, admitted, or relied on evidence
+  items such as reports, surveys, photographs, receipts, and exhibits. On
+  `nested_puppet_court`, it recovered the photograph years and the authority
+  who commissioned the Voss survey, but scored poorly as a global compile. It
+  is therefore a surgical evidence-provenance lane, not a replacement lens.
+- `ledger_object_provenance_registry_v1` supplies vocabulary for where ledgers
+  were found, who brought workshop/intake items in, correction ink/hand status,
+  current item status, and client instructions. On
+  `clockmakers_three_ledgers`, it recovered the accounts-ledger location and
+  Ansonia intake actor, but regressed most broad financial/status rows as a
+  standalone compile.
+
+The semantic lesson is durable: source/document provenance and object-intake
+provenance are distinct from source content. A ledger entry can say what
+happened; a provenance row says where the ledger was found, who brought the
+object in, who prepared a report, or who commissioned a survey. These roles
+earn explicit predicate scaffolds only when free profile discovery repeatedly
+misses them and row-gated replay proves exact-row protection.
+
+The selector guards added by this lesson are named by answer surface:
+`survey_commission_provenance_guard`,
+`source_claim_witness_statement_guard`,
+`permission_request_witness_statement_guard`,
+`disputed_strip_object_location_guard`,
+`client_ledger_pickup_asset_state_guard`,
+`item_received_from_intake_actor_guard`, and
+`correction_authorship_expert_attribution_guard`.
+
+## Archival Row Ledger
+
+The Claude 8 dense operational-record batch exposed a separate archival
+semantics layer. The source-record V2 scaffold captured what packets said, but
+many remaining rows needed the packet's own address system: exact source names,
+exhibit labels, catalog IDs, docket IDs, system names, row labels, and table
+entries.
+
+`archival_row_ledger_v1` is the current candidate lens for this surface. It
+adds predicates such as `record_row/4`, `row_time/2`, `row_actor/2`,
+`row_subject/2`, `row_event/2`, `row_value/3`, `row_source_name/2`,
+`row_display_label/2`, `document_identifier/3`, `exhibit_label/2`,
+`catalog_identifier/2`, `receipt_identifier/2`, `case_number/2`, and
+`source_section_label/3`.
+
+The first proof moved the Claude 8 batch from source-record `256 / 23 / 41` to
+an archival selected mix of `273 / 20 / 27` over `320` rows (`85.31%`). It helped
+Hospital, Maritime, School, and Estate, but regressed University, Arts,
+Municipal, and Wildfire as whole-run swaps. That is the lesson: archival row
+ledger is a measured candidate lane, not a universal default.
+
+The selector guard added by this lesson is:
+
+`printed source-provenance question needs archival row/source labels rather than generic packet identifiers`
+
+This guard is classified under `rationale_evidence_contrast` because it protects
+source/provenance answer surfaces from adjacent but less precise packet IDs.
+
+`archival_identifier_ledger_v1` is the companion lexical pinboard. It
+deterministically extracts exact identifier-like spans and line numbers as
+context guidance only; it does not admit facts or interpret source meaning. The
+first Hospital probe showed both why it matters and why it must stay row-gated:
+it rescued one source-record row, but its full QA run regressed because badge
+exit rows looked like timekeeping clock-out evidence. The guard added by that
+lesson is:
+
+`timekeeping clock-out question needs timekeeping or assignment interval surface rather than badge-exit event rows`
+
+That guard is classified under `operational_record_status`.
 
 ## Uncertainty Vocabulary
 
@@ -170,6 +262,123 @@ Current facet roster:
   transition anchors, without adding facts or reading source prose. Temporary
   stay/override status still must be compiled explicitly before the helper can
   return it.
+- Oxalis adds three recall/regulatory query companions over frozen artifacts:
+  `recall_classification_at_date_support` derives effective classification from
+  admitted classification and reclassification anchors, `unit_range_count_support`
+  counts admitted lot-range atoms, and `recall_accounted_units_support` derives
+  termination-request accounting from admitted total and latest-unaccounted
+  rows. The accounting helper is deliberately scoped to termination questions
+  after a broader activation perturbed a unit-status row.
+- Three Moles adds two story-world companions without promoting a new lens:
+  `story_choice_contrast_support` contrasts accepted little/middle/great-family
+  items against rejected same-family judgments, and
+  `story_remediation_method_support` pairs admitted wound/method events with
+  admitted extraction/key outcomes. These helpers are allowed to compose only
+  already admitted rows; missing explicit morals, residents, and source phrasing
+  still belong to compile-side story acquisition. The companion pass therefore
+  adds narrative-only compile guidance for residence rosters, errand/distraction
+  setup, contrast choices, comic consequences, and explicit morals rather than
+  trying to infer those missing surfaces at query time.
+- Lantern adds `roster_state_support`, a query-only helper over admitted
+  `group_member`, `group_membership`, `supervises`, and
+  `supervision_assignment` rows. It normalizes temporary group membership,
+  supervision intervals, group counts, and role hints from admitted group atoms.
+  The first targeted replay recovered Lotte's Day 3 recording role, but left
+  Station A/B rosters and Day 3 chaperone count as compile gaps. This is the
+  desired boundary: helpers compose admitted rows; they do not invent missing
+  station facts.
+- Lantern then added an aggregate roster/station registry-context candidate.
+  Used as intake context rather than a direct profile, it admitted explicit
+  `session_attendance_count`, `station_roster`, `station_member`, and
+  `station_supervisor` rows. Targeted replay recovered the Day 1 attendance
+  count, Station A roster, Station B roster, and Freya Station B watch rows.
+  The selector needed an attendance-count guard so explicit count surfaces beat
+  broad interval roster volume.
+- Lantern's Day 3 chaperone count exposed a day-level aggregate admission
+  boundary. A first supervision-count registry failed because `date_or_interval`
+  argument roles caused day atoms like `day3` to be rejected as non-intervals.
+  The useful version used event/context roles and admitted
+  `supervision_scope_count` plus `trip_exception_summary` rows for the three
+  Day 3 chaperones and Jostad's non-return. A six-row targeted selector then
+  reached `6 exact / 0 miss` after adding a station-supervisor guard, which
+  routes named-station supervision questions to explicit `station_supervisor`
+  rows rather than standing group-supervision evidence. The supervision-count
+  registry is not yet a pegboard lens: its compile was broad and duplicate
+  heavy, so the lesson is promoted before the lens.
+- The full Lantern replay now reaches `40 exact / 0 miss` under row-gated
+  selection. The additional selector repairs are surface boundaries rather than
+  new lenses: total attendance must not be routed to a session count; station
+  arrival-time questions need event/report timestamps; temporary role questions
+  can require roster-state role hints; and trip-completion incident lists need
+  summary issue/medical/hazard surfaces instead of a single incident row.
+- Transfer safety check: after the Lantern selector repairs, Tournament,
+  Greenhouse, and Festival were replayed through their existing guarded
+  selectors. All three stayed exactly at their available upper bounds with
+  `40/40` selected-best rows. This is enough to keep the guards, but not enough
+  to promote the broad supervision-count registry as a durable lens.
+- `regulatory_period_deadline_registry_v1` is a candidate source-period/deadline
+  scaffold, not a permanent lens. It was created after
+  `deadline_cascade_docket` showed that an underlying violation period is a
+  different semantic object from a notice issue date or response deadline. Broad
+  policy prose did not recover the row; the registry supplied
+  `violation_period/4` and lifted Deadline q002/q006 to `2 / 0 / 0`, the
+  Deadline first-10 slice to `10 / 0 / 0`, and Deadline full-40 to `35 / 3 / 2`.
+  Copperfall q024-q030 then transferred at `7 / 0 / 0`. Both compiles were
+  thin/skip-heavy, so the surface is row-gated candidate vocabulary rather than
+  a global compile replacement.
+- The existing `hearing_evidence_provenance_registry_v1` transferred to
+  `harbor_collision_reports` q005/q006, recovering convening authority and CCTV
+  as a non-human evidence/source item. Direct first-10 Harbor replay regressed
+  ordinary incident rows, so this reinforces the existing evidence-provenance
+  lesson: use the lens surgically for source roles, not as a full incident
+  compiler.
+- `classification_conversion_effect_support` is a query-only conservation
+  helper for classification changes. When `conversion_effective_date/3` is
+  already queried, it can combine admitted converted-unit rows with admitted
+  before/after `unit_count/2` rows and expose `TotalCountEffect = no_change`
+  only when the source class decrease and target class increase balance. It
+  lifted `census_reconciliation` q009 from partial to exact without writing
+  facts or reading source prose. The pegboard lesson is that conversions can be
+  semantic conservation problems; missing unit rows or missing before/after
+  counts still belong to compile acquisition.
+- Census accounting added a broader helper substrate without adding a new
+  compile lens. `assessment_revenue_support`, `conversion_assessment_delta_support`,
+  `classification_deferral_effect_support`, `vacancy_voting_eligibility_support`,
+  and `assessment_transfer_policy_support` expose totals, deltas, deferred
+  current-state effects, vacancy/vote effects, and repeated transfer-policy
+  boundaries from admitted rows. On `census_reconciliation`, helper work plus
+  two scoped source compiles moved the fixture from `29 / 1 / 10` to a
+  diagnostic row-gated `40 / 0 / 0`. The pegboard lesson is the split: arithmetic
+  and repeated responsibility patterns belong to helpers; bylaw claims,
+  cross-reference errors, notice status, and exact open-item language belong to
+  narrow source surfaces.
+- `planning_application_summary_registry_v1` is a candidate row-gated
+  planning/staff-report scaffold. It separates application front matter,
+  applicant claims, staff findings, recommendation authority boundaries, draft
+  conditions, transit-distance corrections, rejected proposal versions, traffic
+  estimates, mitigation authority, environmental mitigations, construction
+  limits, existing site conditions, and source-opinion rows. On
+  `draft_within_draft`, the tight v3 scaffold compiled cleanly (`82` admitted /
+  `1` skipped) and lifted first-10 to `10 / 0 / 0`; the broader v4 scaffold
+  preserved first-10 and lifted full-40 to `31 / 2 / 7`. It is not a global
+  compiler because the broader version thinned the compile and still missed
+  lot-minimum, Saturday-hours, authority-modification, and opinion-rollup rows.
+- `board_recusal_conflict_registry_v1` is a candidate row-gated governance
+  scaffold for board/committee meeting records. It separates roster/attendance,
+  governance rules, agenda items, contract parties, disclosed interests,
+  recusal events, temporary authority transfer, and vote surfaces. On
+  `rotating_chair_authority`, v1 proved the disclosed-interest lesson by
+  recovering Marsh's brother-in-law/Greenline subcontractor conflict, but it
+  regressed an absence row until v2 added `meeting_attendance/4`. v2 reaches
+  first-10 `10 / 0 / 0` and full-40 `29 / 5 / 6`, so it is useful but not yet a
+  global governance compiler.
+- `lease_correction_financial_registry_v1` is a candidate row-gated financial
+  correction scaffold. It separates lease records, amendment/correction events,
+  rent terms, notice requirements, overcharge periods, refund calculations, and
+  current refund obligations. On `amended_lease_register`, it recovered the
+  `$600` refund calculation row exactly, but direct first-10 regressed Courtyard
+  B supersession/authorization questions. Keep it surgical unless paired with a
+  broader lease-amendment surface.
 
 Uncertainty is a domain language, not a tone. Future harness work should avoid
 collapsing these into a single "not sure" bucket:
@@ -211,7 +420,7 @@ Companion inventory:
 [Selector Guard Family Rollup](https://github.com/dr3d/prethinker/blob/main/docs/SELECTOR_GUARD_FAMILY_ROLLUP.md) is generated
 from `scripts/select_qa_mode_without_oracle.py` and tracks whether many
 individual selector guards are collapsing into a small number of semantic
-families. The current rollup has `53` guard return sites, `52` unique guard
+families. The current rollup has `244` guard return sites, `244` unique guard
 reasons, `7` families, and `0` unclassified reasons.
 
 [Cross-Fixture Repair Slices](https://github.com/dr3d/prethinker/blob/main/docs/CROSS_FIXTURE_REPAIR_SLICES.md) is generated

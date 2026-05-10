@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+import zipfile
 
 from scripts.stage_incoming_fixtures import stage_fixtures
 
@@ -96,3 +97,47 @@ def test_stage_incoming_fixtures_promotes_isolated_markdown_oracle_shape(tmp_pat
     assert oracle[1]["reference_answer"] == "A turnstream"
     assert metrics[0]["run_id"] == "VI-000"
     assert metrics[0]["qa_rows"] == 2
+
+
+def test_stage_incoming_fixtures_promotes_sealed_story_zip_shape(tmp_path: Path) -> None:
+    fixture = tmp_path / "nested_puppet_court"
+    inner = fixture / "nested_puppet_court"
+    out_root = tmp_path / "story_worlds"
+    inner.mkdir(parents=True)
+    (inner / "README.md").write_text("# Nested Puppet Court\n", encoding="utf-8")
+    (inner / "story.md").write_text("Puppet court story.\n", encoding="utf-8")
+    (inner / "challenge_strategy.md").write_text("Attacks quoted-world contamination.\n", encoding="utf-8")
+    (inner / "anti_leakage_manifest.md").write_text("Private answers stay out of QA.\n", encoding="utf-8")
+    (inner / "qa_questions.md").write_text(
+        "\n".join(f"q{i:03d}: Question {i}?" for i in range(1, 41)) + "\n",
+        encoding="utf-8",
+    )
+    (inner / "qa_answers_private.jsonl").write_text(
+        "\n".join(
+            json.dumps({"id": f"q{i:03d}", "reference_answer": f"Answer {i}.", "category": "quoted_world"})
+            for i in range(1, 41)
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    archive = tmp_path / "nested_puppet_court.zip"
+    with zipfile.ZipFile(archive, "w") as zipf:
+        for path in inner.iterdir():
+            zipf.write(path, arcname=f"nested_puppet_court/{path.name}")
+
+    report = stage_fixtures(fixture_dirs=[archive], out_root=out_root)
+
+    staged = out_root / "nested_puppet_court"
+    qa_md = (staged / "qa.md").read_text(encoding="utf-8")
+    oracle = [json.loads(line) for line in (staged / "oracle.jsonl").read_text(encoding="utf-8").splitlines()]
+    questions = [json.loads(line) for line in (staged / "qa_questions.jsonl").read_text(encoding="utf-8").splitlines()]
+
+    assert report["summary"]["staged_fixture_count"] == 1
+    assert (staged / "source.md").read_text(encoding="utf-8") == "Puppet court story.\n"
+    assert (staged / "story.md").exists()
+    assert (staged / "challenge_strategy.md").exists()
+    assert (staged / "anti_leakage_manifest.md").exists()
+    assert (staged / "qa_answers_private.jsonl").exists()
+    assert "Answer 1" not in qa_md
+    assert questions[0]["question"] == "Question 1?"
+    assert oracle[0]["reference_answer"] == "Answer 1."

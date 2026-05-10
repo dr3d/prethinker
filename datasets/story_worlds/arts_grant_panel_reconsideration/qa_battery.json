@@ -1,0 +1,322 @@
+[
+  {
+    "behavior": "",
+    "category": "direct_lookup",
+    "id": "q001",
+    "question": "What is the application number for Rosalind Okafor-Vance?",
+    "reference_answer": "NERAF-EAF-2026-0147.",
+    "source_id": "q001"
+  },
+  {
+    "behavior": "",
+    "category": "direct_lookup",
+    "id": "q002",
+    "question": "What is the funding threshold for the 2026 Emerging Artists Fellowship?",
+    "reference_answer": "75.0 out of 100.",
+    "source_id": "q002"
+  },
+  {
+    "behavior": "",
+    "category": "direct_lookup",
+    "id": "q003",
+    "question": "Who is the panel chair?",
+    "reference_answer": "Dr. Aida Marchetti, curator at Westmont Center.",
+    "source_id": "q003"
+  },
+  {
+    "behavior": "",
+    "category": "direct_lookup",
+    "id": "q004",
+    "question": "What is the standard fellowship award amount?",
+    "reference_answer": "$25,000.",
+    "source_id": "q004"
+  },
+  {
+    "behavior": "",
+    "category": "direct_lookup",
+    "id": "q005",
+    "question": "Who discovered the score correction during the post-cycle audit?",
+    "reference_answer": "Lin Whitley, Panel Coordinator.",
+    "source_id": "q005"
+  },
+  {
+    "behavior": "",
+    "category": "direct_lookup",
+    "id": "q006",
+    "question": "Who is the foundation's counsel?",
+    "reference_answer": "Beatriz Romero, Esq.",
+    "source_id": "q006"
+  },
+  {
+    "behavior": "",
+    "category": "direct_lookup",
+    "id": "q007",
+    "question": "On what date was the original panel meeting held?",
+    "reference_answer": "March 14, 2026.",
+    "source_id": "q007"
+  },
+  {
+    "behavior": "",
+    "category": "direct_lookup",
+    "id": "q008",
+    "question": "What is the total cycle budget for the Emerging Artists Fellowship?",
+    "reference_answer": "$500,000.",
+    "source_id": "q008"
+  },
+  {
+    "behavior": "",
+    "category": "provenance",
+    "id": "q009",
+    "question": "Which document records the corrected score sheet?",
+    "reference_answer": "Exhibit B, the corrected score sheet attached to the May 2, 2026 audit memo.",
+    "source_id": "q009"
+  },
+  {
+    "behavior": "",
+    "category": "provenance",
+    "id": "q010",
+    "question": "According to whose bench notes is Aragon's Artistic Merit score 38?",
+    "reference_answer": "Felipe Aragon's signed bench-note score sheet, handwritten and signed at the March 14 panel meeting.",
+    "source_id": "q010"
+  },
+  {
+    "behavior": "",
+    "category": "provenance",
+    "id": "q011",
+    "question": "Which document records the counsel note on §IV.B.3?",
+    "reference_answer": "The counsel note dated May 4, 2026 from Beatriz Romero, Esq.",
+    "source_id": "q011"
+  },
+  {
+    "behavior": "",
+    "category": "provenance",
+    "id": "q012",
+    "question": "Which source records the cycle's current fiscal balance?",
+    "reference_answer": "The NERAF-EAF-2026 cycle fiscal ledger.",
+    "source_id": "q012"
+  },
+  {
+    "behavior": "",
+    "category": "provenance",
+    "id": "q013",
+    "question": "What document is Okafor-Vance's reconsideration request?",
+    "reference_answer": "Exhibit C, Okafor-Vance's reconsideration request letter dated April 18, 2026.",
+    "source_id": "q013"
+  },
+  {
+    "behavior": "",
+    "category": "provenance",
+    "id": "q014",
+    "question": "Which application records Marcus Chen's recusal?",
+    "reference_answer": "Application NERAF-EAF-2026-0093 (Lily Brennan); Chen recused due to collaboration on the 2024 album 'Wires & Birds.'",
+    "source_id": "q014"
+  },
+  {
+    "behavior": "",
+    "category": "supersession",
+    "id": "q015",
+    "question": "As of packet time, what is Okafor-Vance's current corrected average score?",
+    "reference_answer": "75.4, per the corrected score sheet (Exhibit B).",
+    "source_id": "q015"
+  },
+  {
+    "behavior": "",
+    "category": "supersession",
+    "id": "q016",
+    "question": "What was Okafor-Vance's original average score before the correction?",
+    "reference_answer": "73.0, per the original score sheet from March 14, 2026.",
+    "source_id": "q016"
+  },
+  {
+    "behavior": "",
+    "category": "supersession",
+    "id": "q017",
+    "question": "As of packet time, has Okafor-Vance's reconsideration been granted?",
+    "reference_answer": "No. The reconsideration docket is scheduled for May 11, 2026 and has not been held.",
+    "source_id": "q017"
+  },
+  {
+    "behavior": "",
+    "category": "supersession",
+    "id": "q018",
+    "question": "Per the corrected score sheet, what is Aragon's current Artistic Merit score for application 0147?",
+    "reference_answer": "38.",
+    "source_id": "q018"
+  },
+  {
+    "behavior": "",
+    "category": "supersession",
+    "id": "q019",
+    "question": "Did the §IV.B.3 counsel note supersede the panel's original determination that Okafor-Vance's application was not fundable?",
+    "reference_answer": "No. The §IV.B.3 counsel note authorizes the scrivener's-error correction procedurally; per the note itself, it does not adjudicate the underlying funding question. The panel or reconsideration docket retains authority over award determinations.",
+    "source_id": "q019"
+  },
+  {
+    "behavior": "",
+    "category": "status_at_time",
+    "id": "q020",
+    "question": "As of packet time, has the reconsideration docket been held?",
+    "reference_answer": "No. Scheduled for May 11, 2026.",
+    "source_id": "q020"
+  },
+  {
+    "behavior": "",
+    "category": "status_at_time",
+    "id": "q021",
+    "question": "As of May 6, 2026, what is the status of the Tovar conflict question?",
+    "reference_answer": "Referred to Counsel Romero on May 6, 2026; not yet determined. Counsel's preliminary acknowledgment was received May 7 indicating a written opinion will be provided before the May 11 docket.",
+    "source_id": "q021"
+  },
+  {
+    "behavior": "",
+    "category": "status_at_time",
+    "id": "q022",
+    "question": "As of packet time, what is the remaining cycle budget?",
+    "reference_answer": "$25,000.",
+    "source_id": "q022"
+  },
+  {
+    "behavior": "",
+    "category": "status_at_time",
+    "id": "q023",
+    "question": "What document had Okafor-Vance filed by April 18, 2026?",
+    "reference_answer": "Her reconsideration request (Exhibit C), filed April 18, 2026.",
+    "source_id": "q023"
+  },
+  {
+    "behavior": "",
+    "category": "status_at_time",
+    "id": "q024",
+    "question": "As of packet time, has the conflict-of-interest question regarding Tovar been determined?",
+    "reference_answer": "No. Pending Counsel Romero's written opinion.",
+    "source_id": "q024"
+  },
+  {
+    "behavior": "",
+    "category": "rule_application",
+    "id": "q025",
+    "question": "Per bylaws §IV.B.3, may a scrivener's error in score transcription be corrected in-cycle?",
+    "reference_answer": "Yes. Per §IV.B.3, a transcription error in the score-tally entry documented by a contemporaneous, signed panelist bench note may be corrected in-cycle without convening a new panel.",
+    "source_id": "q025"
+  },
+  {
+    "behavior": "",
+    "category": "rule_application",
+    "id": "q026",
+    "question": "Per bylaws §IV.B.5, what occurs when a panelist is determined to have been ineligible to score?",
+    "reference_answer": "The corresponding score is removed and the average is recomputed on remaining panelists; the alternate panelist may be invited to score on reconsideration.",
+    "source_id": "q026"
+  },
+  {
+    "behavior": "",
+    "category": "rule_application",
+    "id": "q027",
+    "question": "Per the May 8 counsel note, in what order must reconsiderations be funded if both Okafor-Vance and Fontaine appeals are granted?",
+    "reference_answer": "In order of corrected score, highest first, per §V.A.3. Fontaine (76.0) precedes Okafor-Vance (75.4).",
+    "source_id": "q027"
+  },
+  {
+    "behavior": "",
+    "category": "rule_application",
+    "id": "q028",
+    "question": "Per bylaws §V.A.4, how are ties in corrected score broken?",
+    "reference_answer": "By earlier application date.",
+    "source_id": "q028"
+  },
+  {
+    "behavior": "",
+    "category": "rule_application",
+    "id": "q029",
+    "question": "Per bylaws §IV.B.5, if Tovar must recuse, what specifically happens to her recorded score on application 0147?",
+    "reference_answer": "Tovar's score of 76 is removed and the average is recomputed on the remaining four panelists. Alternate Wenjing Lu may be invited to score on reconsideration at the docket's discretion; the bylaws do not require her to score.",
+    "source_id": "q029"
+  },
+  {
+    "behavior": "",
+    "category": "count",
+    "id": "q030",
+    "question": "How many panelists scored Okafor-Vance in the original review?",
+    "reference_answer": "Five: Marchetti, Chen, Tovar, Aragon, and Rooke.",
+    "source_id": "q030"
+  },
+  {
+    "behavior": "",
+    "category": "count",
+    "id": "q031",
+    "question": "How many fellowships have already been awarded in the 2026 cycle as of packet date?",
+    "reference_answer": "19 fellowships.",
+    "source_id": "q031"
+  },
+  {
+    "behavior": "",
+    "category": "count",
+    "id": "q032",
+    "question": "If Tovar's score is dropped from the corrected score sheet, what is the resulting average for Okafor-Vance?",
+    "reference_answer": "75.25, computed as (79 + 70 + 78 + 74) / 4 = 301 / 4.",
+    "source_id": "q032"
+  },
+  {
+    "behavior": "",
+    "category": "count",
+    "id": "q033",
+    "question": "How many date-event anchors are listed from April 18, 2026 through May 11, 2026 inclusive?",
+    "reference_answer": "Six: April 18 (Okafor-Vance reconsideration filed), May 2 (score correction discovered), May 4 (counsel note §IV.B.3), May 6 (Tovar conflict referred), May 8 (counsel note funding order), and May 11 (reconsideration docket scheduled).",
+    "source_id": "q033"
+  },
+  {
+    "behavior": "",
+    "category": "unresolved",
+    "id": "q034",
+    "question": "Has Counsel Romero issued the Tovar conflict-of-interest determination?",
+    "reference_answer": "No. Pending; Counsel's written opinion is expected before the May 11 docket.",
+    "source_id": "q034"
+  },
+  {
+    "behavior": "",
+    "category": "unresolved",
+    "id": "q035",
+    "question": "Has the reconsideration docket been held?",
+    "reference_answer": "No. Scheduled for May 11, 2026 and not yet held.",
+    "source_id": "q035"
+  },
+  {
+    "behavior": "",
+    "category": "unresolved",
+    "id": "q036",
+    "question": "Will Okafor-Vance receive funding if her reconsideration is granted?",
+    "reference_answer": "Not determined. Funding is contingent on (a) the reconsideration being granted at the May 11 docket and (b) availability of cycle funds. With $25,000 remaining and Fontaine's higher corrected score (76.0) ranking ahead of hers, if both reconsiderations are granted Okafor-Vance would be placed on the contingent reserve list per §V.A.7 and would receive funding only from returned or declined awards or from the next cycle at the Foundation Director's discretion.",
+    "source_id": "q036"
+  },
+  {
+    "behavior": "",
+    "category": "unresolved",
+    "id": "q037",
+    "question": "Has Fontaine's reconsideration been adjudicated?",
+    "reference_answer": "No. Fontaine's reconsideration is also calendared for the May 11, 2026 docket.",
+    "source_id": "q037"
+  },
+  {
+    "behavior": "",
+    "category": "cross_source_conflict",
+    "id": "q038",
+    "question": "The official tally recorded Aragon's Artistic Merit at 26; the bench notes show 38. Which is authoritative, and what bylaw governs the correction?",
+    "reference_answer": "The bench notes (38) are authoritative for the corrected score; the official tally (26) was a transcription error. The correction is governed by Bylaws §IV.B.3, which permits in-cycle correction of scrivener's error documented by a contemporaneous, signed panelist bench note.",
+    "source_id": "q038"
+  },
+  {
+    "behavior": "",
+    "category": "cross_source_conflict",
+    "id": "q039",
+    "question": "The cycle has $25,000 remaining and Okafor-Vance's award would be $25,000. If Fontaine's reconsideration is also granted, can both reconsideration awards be funded immediately from cycle funds?",
+    "reference_answer": "No. Only one $25,000 award can be funded immediately from the remaining $25,000. Per the May 8 counsel note, awards must be issued in order of corrected score (highest first); Fontaine (76.0) would be funded first; Okafor-Vance (75.4) would be placed on the contingent reserve list per §V.A.7.",
+    "source_id": "q039"
+  },
+  {
+    "behavior": "",
+    "category": "cross_source_conflict",
+    "id": "q040",
+    "question": "The original panel rejected Okafor-Vance based on a 73.0 average. If the corrected average of 75.4 stands, does this automatically mean she is awarded the fellowship?",
+    "reference_answer": "No. The §IV.B.3 correction is procedural and does not itself grant the award. The reconsideration docket on May 11 must still grant the appeal, and any award is then contingent on cycle funds and the funding-order rule of §V.A.3.",
+    "source_id": "q040"
+  }
+]

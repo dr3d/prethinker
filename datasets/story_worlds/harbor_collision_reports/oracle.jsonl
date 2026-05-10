@@ -1,0 +1,40 @@
+{"category": "direct_fact", "id": "q001", "reference_answer": "Approximately 14:35 on August 7, 2025", "source_id": "q001"}
+{"category": "direct_fact", "id": "q002", "reference_answer": "Callister Marine Ltd", "source_id": "q002"}
+{"category": "direct_fact", "id": "q003", "reference_answer": "Deepwater Logistics", "source_id": "q003"}
+{"category": "direct_fact", "id": "q004", "reference_answer": "Bruised ribs, treated at Portmere General Hospital, released same day", "source_id": "q004"}
+{"category": "direct_fact", "id": "q005", "reference_answer": "Harbor Master Captain Elise Drummond", "source_id": "q005"}
+{"category": "direct_fact", "id": "q006", "reference_answer": "Four: Captain Vickers, Deckhand Novak, Harbor Pilot Ghali, and CCTV footage", "source_id": "q006"}
+{"category": "direct_fact", "id": "q007", "reference_answer": "5 knots", "source_id": "q007"}
+{"category": "direct_fact", "id": "q008", "reference_answer": "6 knots", "source_id": "q008"}
+{"category": "direct_fact", "id": "q009", "reference_answer": "Foundry Six's failure to display the required anchor ball", "source_id": "q009"}
+{"category": "temporal_status", "id": "q010", "reference_answer": "No. As of August 28, the GPS log has not been received.", "source_id": "q010"}
+{"category": "direct_fact", "id": "q011", "reference_answer": "When Foundry Six anchored at 11:20 that morning", "source_id": "q011"}
+{"category": "temporal_status", "id": "q012", "reference_answer": "At 14:00, when he went below to the engine room. He was below deck at the time of collision (approximately 14:35).", "source_id": "q012"}
+{"category": "direct_fact", "id": "q013", "reference_answer": "No. He was below deck in the engine room.", "source_id": "q013"}
+{"category": "direct_fact", "id": "q014", "reference_answer": "8 or 9 knots", "source_id": "q014"}
+{"category": "direct_fact", "id": "q015", "reference_answer": "No. Novak claims no horn signal was given.", "source_id": "q015"}
+{"category": "direct_fact", "id": "q016", "reference_answer": "7 knots, maybe more", "source_id": "q016"}
+{"category": "claim_fact_separation", "id": "q017", "reference_answer": "No. He did not observe it, but he cannot confirm it was absent. He was focused on his own vessel.", "source_id": "q017"}
+{"category": "claim_fact_separation", "id": "q018", "reference_answer": "Because he was focused on his own vessel and the container ship he was guiding. He did not look for it.", "source_id": "q018"}
+{"category": "direct_fact", "id": "q019", "reference_answer": "Yes. He heard one short horn blast approximately 10 seconds before the collision.", "source_id": "q019"}
+{"category": "direct_fact", "id": "q020", "reference_answer": "6.5 to 7 knots", "source_id": "q020"}
+{"category": "direct_fact", "id": "q021", "reference_answer": "Approximately ±1 knot, making the plausible range 5.5 to 8 knots", "source_id": "q021"}
+{"category": "direct_fact", "id": "q022", "reference_answer": "No. The camera angle does not show the anchor ball position.", "source_id": "q022"}
+{"category": "direct_fact", "id": "q023", "reference_answer": "Yes. It shows a brief wake disturbance consistent with engine reversal approximately 8 seconds before contact.", "source_id": "q023"}
+{"category": "claim_fact_separation", "id": "q024", "reference_answer": "Not definitively. The Harbor Master found Heron's Wake was 'likely' traveling above the limit, but could not determine the speed to a legal standard of certainty.", "source_id": "q024"}
+{"category": "authority", "id": "q025", "reference_answer": "Because the CCTV margin of error means the speed cannot be determined to a legal standard of certainty.", "source_id": "q025"}
+{"category": "structured_absence", "id": "q026", "reference_answer": "No. The anchor ball question is explicitly unresolved. The Harbor Master made no finding on this point.", "source_id": "q026"}
+{"category": "authority", "id": "q027", "reference_answer": "A horn signal was likely given (based on Ghali's testimony) but it was the wrong signal. One short blast was used instead of five or more short blasts (the danger signal).", "source_id": "q027"}
+{"category": "rule_application", "id": "q028", "reference_answer": "Five or more short blasts (the danger signal)", "source_id": "q028"}
+{"category": "rule_application", "id": "q029", "reference_answer": "Altering course to starboard, not an emergency warning", "source_id": "q029"}
+{"category": "authority", "id": "q030", "reference_answer": "Callister Marine Ltd (as vessel owner of Heron's Wake), pending final liability determination", "source_id": "q030"}
+{"category": "direct_fact", "id": "q031", "reference_answer": "80 to 120 liters", "source_id": "q031"}
+{"category": "temporal_status", "id": "q032", "reference_answer": "No. Final liability apportionment is deferred pending Vickers's GPS log and any additional evidence.", "source_id": "q032"}
+{"category": "authority", "id": "q033", "reference_answer": "Preliminary liability is shared. Both parties may bear fault.", "source_id": "q033"}
+{"category": "structured_absence", "id": "q034", "reference_answer": "Unknown. This is the central unresolved factual dispute. Novak says it was up; Vickers says it was not; Ghali didn't look; CCTV can't show it.", "source_id": "q034"}
+{"category": "claim_fact_separation", "id": "q035", "reference_answer": "Ghali's estimate of 7 knots and the CCTV estimate of 6.5-7 knots mutually support a speed above the 6-knot limit. Vickers's claim of 5 knots is not supported by any other evidence.", "source_id": "q035"}
+{"category": "claim_fact_separation", "id": "q036", "reference_answer": "Because Novak was below deck in the engine room, where engine noise would reduce his ability to hear an external signal. Ghali was on the water approximately 300 meters away.", "source_id": "q036"}
+{"category": "temporal_arithmetic", "id": "q037", "reference_answer": "September 4, 2025 (14 days from August 21)", "source_id": "q037"}
+{"category": "temporal_status", "id": "q038", "reference_answer": "No.", "source_id": "q038"}
+{"category": "rule_application", "id": "q039", "reference_answer": "It would constitute contributory fault for Foundry Six in the collision.", "source_id": "q039"}
+{"category": "structured_absence", "id": "q040", "reference_answer": "The anchor ball status at the moment of collision, the exact speed of Heron's Wake (pending GPS log), the final liability apportionment, and whether Vickers will submit the GPS log.", "source_id": "q040"}

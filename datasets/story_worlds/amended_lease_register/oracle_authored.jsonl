@@ -1,0 +1,40 @@
+{"id":"q001","source_id":"q001","category":"current_state","reference_answer":"$4,800/month, effective August 14, 2024"}
+{"id":"q002","source_id":"q002","category":"direct_fact","reference_answer":"March 2026"}
+{"id":"q003","source_id":"q003","category":"correction_provenance","reference_answer":"The market adjustment clause requires 60 days' notice. A2 was signed June 15 with a July 1 effective date, but 60 days from June 15 is August 14. The original July 1 date violated the notice requirement."}
+{"id":"q004","source_id":"q004","category":"correction_provenance","reference_answer":"August 14, 2024 (corrected from July 1, 2024)"}
+{"id":"q005","source_id":"q005","category":"arithmetic","reference_answer":"$600"}
+{"id":"q006","source_id":"q006","category":"arithmetic","reference_answer":"44 days (July 1 through August 13) at $20/day differential ($4,800 - $4,500 = $300/month ≈ $20/day for the overcharge period)"}
+{"id":"q007","source_id":"q007","category":"current_state","reference_answer":"$3,400/month, effective September 2024"}
+{"id":"q008","source_id":"q008","category":"current_state","reference_answer":"No. Courtyard B was superseded (removed) effective December 1, 2024."}
+{"id":"q009","source_id":"q009","category":"direct_fact","reference_answer":"Complaints from adjacent tenants about noise during nursery outdoor time"}
+{"id":"q010","source_id":"q010","category":"authority","reference_answer":"Senior Property Manager David Pryce, who overruled Corr's recommendation against it"}
+{"id":"q011","source_id":"q011","category":"authority","reference_answer":"Property Manager Helen Corr"}
+{"id":"q012","source_id":"q012","category":"current_state","reference_answer":"Courtyard C is available under a separate scheduling agreement, but it is not part of the lease."}
+{"id":"q013","source_id":"q013","category":"current_state","reference_answer":"No. It was never signed by either party and has no legal effect."}
+{"id":"q014","source_id":"q014","category":"correction_provenance","reference_answer":"It was an unsigned draft prepared during renegotiation discussions. It was never executed by either party."}
+{"id":"q015","source_id":"q015","category":"current_state","reference_answer":"$5,900/month, effective May 2024"}
+{"id":"q016","source_id":"q016","category":"current_state","reference_answer":"6 spaces"}
+{"id":"q017","source_id":"q017","category":"current_state","reference_answer":"4 in Lot A and 2 in Lot C (corrected from Lot B)"}
+{"id":"q018","source_id":"q018","category":"correction_provenance","reference_answer":"Lot B was reassigned to another property in July 2024. The original amendment named Lot B in error. Pryce corrected it as a landlord error."}
+{"id":"q019","source_id":"q019","category":"current_state","reference_answer":"No. Strand retracted it on March 15, 2025."}
+{"id":"q020","source_id":"q020","category":"direct_fact","reference_answer":"March 15, 2025"}
+{"id":"q021","source_id":"q021","category":"rule_application","reference_answer":"Bramwell must notify Strand before leasing Suite 342 to another party. It did not obligate Bramwell to offer Suite 342 to Strand."}
+{"id":"q022","source_id":"q022","category":"authority","reference_answer":"Strand Electronics voluntarily withdrew it."}
+{"id":"q023","source_id":"q023","category":"direct_fact","reference_answer":"April 2028"}
+{"id":"q024","source_id":"q024","category":"current_state","reference_answer":"No. It has been vacant since December 1, 2024."}
+{"id":"q025","source_id":"q025","category":"direct_fact","reference_answer":"November 30, 2024"}
+{"id":"q026","source_id":"q026","category":"direct_fact","reference_answer":"Holbrook Design exercised an early termination clause"}
+{"id":"q027","source_id":"q027","category":"direct_fact","reference_answer":"$8,000"}
+{"id":"q028","source_id":"q028","category":"current_state","reference_answer":"No. A letter of intent is not a binding lease. It is under review."}
+{"id":"q029","source_id":"q029","category":"authority","reference_answer":"Senior Property Manager David Pryce"}
+{"id":"q030","source_id":"q030","category":"authority","reference_answer":"Pryce (Senior Property Manager)"}
+{"id":"q031","source_id":"q031","category":"direct_fact","reference_answer":"$3,100/month (unchanged for the first extension year)"}
+{"id":"q032","source_id":"q032","category":"direct_fact","reference_answer":"$3,400/month"}
+{"id":"q033","source_id":"q033","category":"authority","reference_answer":"No. Pryce overruled Corr's recommendation and authorized the courtyard addition."}
+{"id":"q034","source_id":"q034","category":"direct_fact","reference_answer":"March 2024 (the original 5-year lease signed March 2019)"}
+{"id":"q035","source_id":"q035","category":"current_state","reference_answer":"$4,500/month (set by Amendment A1, effective April 2024)"}
+{"id":"q036","source_id":"q036","category":"direct_fact","reference_answer":"4 spaces in Lot A"}
+{"id":"q037","source_id":"q037","category":"authority","reference_answer":"Bramwell (it was a landlord error, per Pryce's note). Strand is not at fault."}
+{"id":"q038","source_id":"q038","category":"current_state","reference_answer":"No. The Courtyard C scheduling agreement is separate from the lease."}
+{"id":"q039","source_id":"q039","category":"authority","reference_answer":"Any amendment valued over $50,000 annually"}
+{"id":"q040","source_id":"q040","category":"enumeration","reference_answer":"Corrected: Kettner A2 effective date (July to August), Strand parking (Lot B to Lot C). Superseded: Primrose Courtyard B (removed December 2024). Voided: Primrose unsigned draft rent reduction ($2,900). Retracted: Strand right of first refusal on Suite 342 (March 2025). Terminated: Holbrook Design early termination (November 2024)."}

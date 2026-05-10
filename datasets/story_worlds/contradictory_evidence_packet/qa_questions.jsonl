@@ -1,0 +1,40 @@
+{"category": "lookup", "id": "q001", "question": "What is the investigation packet's identifier?", "source_id": "contradictory_evidence_packet"}
+{"category": "lookup", "id": "q002", "question": "Who compiled the packet, and on what date?", "source_id": "contradictory_evidence_packet"}
+{"category": "lookup", "id": "q003", "question": "What is T. Aldridge's badge ID?", "source_id": "contradictory_evidence_packet"}
+{"category": "temporal_interval", "id": "q004", "question": "On what dates does the alleged unauthorized access span?", "source_id": "contradictory_evidence_packet"}
+{"category": "lookup", "id": "q005", "question": "What time does Aldridge's authorized weekday after-hours window terminate?", "source_id": "contradictory_evidence_packet"}
+{"category": "lookup", "id": "q006", "question": "Since what date has the Lab 4-C supervising-presence requirement been in force?", "source_id": "contradictory_evidence_packet"}
+{"category": "lookup", "id": "q007", "question": "What is the raw (uncorrected) timestamp of BAS-002?", "source_id": "contradictory_evidence_packet"}
+{"category": "lookup", "id": "q008", "question": "What is the timestamp of CAM-002?", "source_id": "contradictory_evidence_packet"}
+{"category": "temporal", "id": "q009", "question": "What is the corrected wall-clock time of BAS-002 after applying the documented clock drift?", "source_id": "contradictory_evidence_packet"}
+{"category": "lookup", "id": "q010", "question": "What is the magnitude of PEM-BAS-7's clock drift as measured by Building Engineering on 2026-04-28?", "source_id": "contradictory_evidence_packet"}
+{"category": "lookup", "id": "q011", "question": "When was PEM-BAS-7's last successful NTP sync before the 2026-04-28 audit?", "source_id": "contradictory_evidence_packet"}
+{"category": "authority", "id": "q012", "question": "Under what maintenance ticket is the BAS clock drift documented?", "source_id": "contradictory_evidence_packet"}
+{"category": "temporal", "id": "q013", "question": "What is the corrected wall-clock time of the Lab 4-C ingress event (BAS-004)?", "source_id": "contradictory_evidence_packet"}
+{"category": "temporal", "id": "q014", "question": "What is the corrected wall-clock time of the Lab 4-C egress event (BAS-005)?", "source_id": "contradictory_evidence_packet"}
+{"category": "arithmetic", "id": "q015", "question": "How long, on the corrected timeline, was the badge holder inside Lab 4-C?", "source_id": "contradictory_evidence_packet"}
+{"category": "composition", "id": "q016", "question": "Does the BAS evidence, after clock correction, agree with the CCTV evidence on the lobby ingress time?", "source_id": "contradictory_evidence_packet"}
+{"category": "unresolved", "id": "q017", "question": "Does the available evidence establish that the individual who entered the lobby at 22:54 was T. Aldridge?", "source_id": "contradictory_evidence_packet"}
+{"category": "composition", "id": "q018", "question": "What does CAM-LOBBY-N reliably establish, and what does it not reliably establish?", "source_id": "contradictory_evidence_packet"}
+{"category": "temporal_interval", "id": "q019", "question": "What is the time window during which R. Okafor was present on the 4th floor?", "source_id": "contradictory_evidence_packet"}
+{"category": "composition", "id": "q020", "question": "Is Okafor's testimony in conflict with the corrected BAS timeline?", "source_id": "contradictory_evidence_packet"}
+{"category": "composition", "id": "q021", "question": "What does Okafor's testimony reliably establish?", "source_id": "contradictory_evidence_packet"}
+{"category": "composition", "id": "q022", "question": "What does Okafor's testimony NOT reliably establish?", "source_id": "contradictory_evidence_packet"}
+{"category": "lookup", "id": "q023", "question": "When did the Lab 4-C autoclave cycle terminate, according to LAB4C-MEM-2026-04-22?", "source_id": "contradictory_evidence_packet"}
+{"category": "composition", "id": "q024", "question": "What does Dr. Hsiao's memo establish about the autoclave's state?", "source_id": "contradictory_evidence_packet"}
+{"category": "negative_existential", "id": "q025", "question": "Does Dr. Hsiao's memo establish who was in Lab 4-C during the disputed interval?", "source_id": "contradictory_evidence_packet"}
+{"category": "composition", "id": "q026", "question": "What does EMAIL-001 reliably establish?", "source_id": "contradictory_evidence_packet"}
+{"category": "composition", "id": "q027", "question": "What does EMAIL-001 NOT establish?", "source_id": "contradictory_evidence_packet"}
+{"category": "lookup", "id": "q028", "question": "What carrier sectors do Aldridge's phone pings cover, and at what approximate granularity?", "source_id": "contradictory_evidence_packet"}
+{"category": "temporal_interval", "id": "q029", "question": "Between which two ping timestamps is there no record of Aldridge's phone transacting with any tower?", "source_id": "contradictory_evidence_packet"}
+{"category": "composition", "id": "q030", "question": "Does the absence of phone pings near Pemberton between 19:51 and 07:08 affirmatively establish that Aldridge's phone was not at Pemberton during that window?", "source_id": "contradictory_evidence_packet"}
+{"category": "count", "id": "q031", "question": "How many distinct evidence sources are cataloged in §2?", "source_id": "contradictory_evidence_packet"}
+{"category": "count", "id": "q032", "question": "How many of the identified conflicts in §3 are timeline-resolvable?", "source_id": "contradictory_evidence_packet"}
+{"category": "count", "id": "q033", "question": "How many of the identified conflicts in §3 are genuinely unresolved at packet close?", "source_id": "contradictory_evidence_packet"}
+{"category": "unresolved", "id": "q034", "question": "What are the items the packet identifies as remaining open at close?", "source_id": "contradictory_evidence_packet"}
+{"category": "unresolved", "id": "q035", "question": "Does the packet conclude that T. Aldridge entered Lab 4-C on the night in question?", "source_id": "contradictory_evidence_packet"}
+{"category": "negative_existential", "id": "q036", "question": "Is there any source in the record that places Aldridge inside Lab 4-C?", "source_id": "contradictory_evidence_packet"}
+{"category": "negative_existential", "id": "q037", "question": "Is there any witness in the record that contradicts Aldridge's denial?", "source_id": "contradictory_evidence_packet"}
+{"category": "negative_existential", "id": "q038", "question": "Is there CCTV coverage inside Lab 4-C or in the 4th-floor corridor?", "source_id": "contradictory_evidence_packet"}
+{"category": "lookup", "id": "q039", "question": "When is the Facilities Director's adjudication hearing scheduled?", "source_id": "contradictory_evidence_packet"}
+{"category": "negative_existential", "id": "q040", "question": "Has Aldridge reported badge BDG-44217 as lost or stolen?", "source_id": "contradictory_evidence_packet"}

@@ -1,0 +1,40 @@
+{"category": "direct_lookup", "id": "q001", "question": "Who is the decedent?", "source_id": "q001"}
+{"category": "direct_lookup", "id": "q002", "question": "On what date did the decedent die?", "source_id": "q002"}
+{"category": "direct_lookup", "id": "q003", "question": "Who is the named executor of the estate?", "source_id": "q003"}
+{"category": "direct_lookup", "id": "q004", "question": "What is the probate docket number?", "source_id": "q004"}
+{"category": "direct_lookup", "id": "q005", "question": "What is the catalog identifier for the Crimson Notebooks?", "source_id": "q005"}
+{"category": "direct_lookup", "id": "q006", "question": "Who is the Hartwell Curator of Manuscripts who signed the 2022 intake receipt?", "source_id": "q006"}
+{"category": "direct_lookup", "id": "q007", "question": "Who is the Probate Court Magistrate Judge?", "source_id": "q007"}
+{"category": "direct_lookup", "id": "q008", "question": "On what date was the codicil at issue signed?", "source_id": "q008"}
+{"category": "provenance", "id": "q009", "question": "Which document records the 2019 Deed of Gift's intake at Hartwell?", "source_id": "q009"}
+{"category": "provenance", "id": "q010", "question": "Which photograph records the empty shelf on April 21, 2022?", "source_id": "q010"}
+{"category": "provenance", "id": "q011", "question": "Which exhibit is the October 12, 2024 codicil?", "source_id": "q011"}
+{"category": "provenance", "id": "q012", "question": "Which exhibit is the estate inventory filed by the executor?", "source_id": "q012"}
+{"category": "provenance", "id": "q013", "question": "Which exhibit is the estate counsel's reply memo?", "source_id": "q013"}
+{"category": "provenance", "id": "q014", "question": "Which photograph in the photograph log was taken by Emiko Hennessy?", "source_id": "q014"}
+{"category": "supersession", "id": "q015", "question": "Per Schedule A of the 2019 Deed of Gift, were the Crimson Notebooks transferred to Hartwell in 2019?", "source_id": "q015"}
+{"category": "supersession", "id": "q016", "question": "Did the 2022 Supplementary Deed of Gift purport to transfer the Crimson Notebooks?", "source_id": "q016"}
+{"category": "supersession", "id": "q017", "question": "Did the September 24, 2024 codicil draft govern any disposition?", "source_id": "q017"}
+{"category": "supersession", "id": "q018", "question": "Per the October 12, 2024 codicil, what is the asserted disposition of the Crimson Notebooks?", "source_id": "q018"}
+{"category": "supersession", "id": "q019", "question": "What is the current Hartwell catalog status note for MS-Hennessy-068, and when was it added?", "source_id": "q019"}
+{"category": "status_at_time", "id": "q020", "question": "As of November 3, 2020, where were the Crimson Notebooks physically located?", "source_id": "q020"}
+{"category": "status_at_time", "id": "q021", "question": "As of April 21, 2022, where were the Crimson Notebooks physically located?", "source_id": "q021"}
+{"category": "status_at_time", "id": "q022", "question": "As of packet date (May 4, 2026), where are the Crimson Notebooks physically located?", "source_id": "q022"}
+{"category": "status_at_time", "id": "q023", "question": "As of packet date, what determinations has the court issued on disputed questions?", "source_id": "q023"}
+{"category": "status_at_time", "id": "q024", "question": "As of April 28, 2026, has Hartwell filed its reply on the reservation-of-access point?", "source_id": "q024"}
+{"category": "rule_application", "id": "q025", "question": "Per the estate's responsive brief, what statutory provision governs codicil execution requirements, and what does the brief argue is satisfied?", "source_id": "q025"}
+{"category": "rule_application", "id": "q026", "question": "Per Hartwell's memo, what legal theory applies to the 2022 supplementary deed?", "source_id": "q026"}
+{"category": "rule_application", "id": "q027", "question": "Per the estate's reply memo, what theory contests Hartwell's position?", "source_id": "q027"}
+{"category": "rule_application", "id": "q028", "question": "Who has authority to determine the validity of the October 12, 2024 codicil?", "source_id": "q028"}
+{"category": "rule_application", "id": "q029", "question": "Per the scheduling order, what specific questions are to be heard at the May 18 evidentiary hearing?", "source_id": "q029"}
+{"category": "count", "id": "q030", "question": "How many photographs in the photograph log are on file?", "source_id": "q030"}
+{"category": "count", "id": "q031", "question": "How many distinct items did the 2022 Supplementary Deed of Gift transfer?", "source_id": "q031"}
+{"category": "count", "id": "q032", "question": "How many of decedent's children are named beneficiaries in the October 12, 2024 codicil?", "source_id": "q032"}
+{"category": "count", "id": "q033", "question": "List the dates of all photographs in the photograph log.", "source_id": "q033"}
+{"category": "unresolved", "id": "q034", "question": "Has the capacity question regarding the October 12, 2024 codicil been determined?", "source_id": "q034"}
+{"category": "unresolved", "id": "q035", "question": "Has the legal effect of the codicil been adjudicated?", "source_id": "q035"}
+{"category": "unresolved", "id": "q036", "question": "Has the question of whether the 2022 deed was a completed inter vivos gift been resolved?", "source_id": "q036"}
+{"category": "unresolved", "id": "q037", "question": "Has the physical disposition of the Crimson Notebooks been determined?", "source_id": "q037"}
+{"category": "cross_source_conflict", "id": "q038", "question": "The 2022 supplementary deed and intake receipt indicate the Crimson Notebooks were transferred to Hartwell in April 2022. The October 12, 2024 codicil purports to revoke that conveyance. Which document is currently determinative of ownership?", "source_id": "q038"}
+{"category": "cross_source_conflict", "id": "q039", "question": "Hartwell asserts current physical possession of the Crimson Notebooks. The executor asserts ownership via the codicil. Per the packet, what is the relationship between current possession and legal ownership at packet time?", "source_id": "q039"}
+{"category": "cross_source_conflict", "id": "q040", "question": "Photo PH-2020-067 shows the Crimson Notebooks on Hennessy's shelf in November 2020; the 2019 intake receipt (#ARC-2019-0834) does not list the notebooks among items received. Are these two records consistent, and how?", "source_id": "q040"}

@@ -1,5 +1,7 @@
 # Prethinker Docs
 
+![Semantic Lenses Plain Guide](assets/Semantic%20Lenses-Plain%20Guide.png)
+
 This directory contains the current public documentation for Prethinker.
 
 Prethinker is a governed semantic-intake workbench: a model proposes a
@@ -22,7 +24,9 @@ Use this short path if you are new:
 10. [Public Docs Guide](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md) - the full reading map.
 11. [Explainer](https://github.com/dr3d/prethinker/blob/main/docs/EXPLAINER.md) - the plain-language project story.
 12. [Generalization Baseline Matrix](https://github.com/dr3d/prethinker/blob/main/docs/GENERALIZATION_BASELINE_MATRIX.md) - cold unseen fixture results for checking transfer.
-13. [Current Utterance Pipeline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_UTTERANCE_PIPELINE.md) - how a turn moves through router, context, Semantic IR, mapper, query, clarification, or mutation.
+13. [Two-Axis Benchmark Frame](https://github.com/dr3d/prethinker/blob/main/docs/TWO_AXIS_BENCHMARK_FRAME.md) - benchmark direction: compile-time fidelity versus retention durability.
+14. [Edge Governance Positioning](https://github.com/dr3d/prethinker/blob/main/docs/EDGE_GOVERNANCE_POSITIONING.md) - strategic category frame: governed memory on edge-class hardware.
+15. [Current Utterance Pipeline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_UTTERANCE_PIPELINE.md) - how a turn moves through router, context, Semantic IR, mapper, query, clarification, or mutation.
 
 Then go deeper:
 
@@ -33,6 +37,9 @@ Then go deeper:
 - [Cold Baseline Failure Rollup](https://github.com/dr3d/prethinker/blob/main/docs/COLD_BASELINE_FAILURE_ROLLUP.md) - cross-fixture failure-surface rollup for deciding which general problem to attack next.
 - [Frontier Fixture Strategy](https://github.com/dr3d/prethinker/blob/main/docs/FRONTIER_FIXTURE_STRATEGY.md) - how hostile fixtures are designed without oracle leakage.
 - [Frontier Progress Report](https://github.com/dr3d/prethinker/blob/main/docs/FRONTIER_PROGRESS_REPORT.md) - visitor-readable progress across the major research fixtures.
+- [Two-Axis Benchmark Frame](https://github.com/dr3d/prethinker/blob/main/docs/TWO_AXIS_BENCHMARK_FRAME.md) - separates what gets through the door from what stays in the room.
+- [Two-Axis Probe Discipline](https://github.com/dr3d/prethinker/blob/main/docs/TWO_AXIS_PROBE_DISCIPLINE.md) - the minimal stuffed-context probe before building a larger retention benchmark.
+- [Edge Governance Positioning](https://github.com/dr3d/prethinker/blob/main/docs/EDGE_GOVERNANCE_POSITIONING.md) - governed memory on edge-class systems, with the claims that still need measurement.
 - [Clarification Eagerness Strategy](https://github.com/dr3d/prethinker/blob/main/docs/CLARIFICATION_EAGERNESS_STRATEGY.md) - when Prethinker should ask instead of guessing during ingestion or query.
 - [Prethinker Design Overview](https://github.com/dr3d/prethinker/blob/main/docs/PRETHINKER.md) - stable design overview, secondary to the current snapshot.
 - [Roadmap](https://github.com/dr3d/prethinker/blob/main/ROADMAP.md) - secondary planning note; current truth stays in Project State and the headline.
@@ -53,6 +60,9 @@ Then go deeper:
 - [Cold Baseline Failure Rollup](https://github.com/dr3d/prethinker/blob/main/docs/COLD_BASELINE_FAILURE_ROLLUP.md)
 - [Frontier Progress Report](https://github.com/dr3d/prethinker/blob/main/docs/FRONTIER_PROGRESS_REPORT.md)
 - [Frontier Fixture Strategy](https://github.com/dr3d/prethinker/blob/main/docs/FRONTIER_FIXTURE_STRATEGY.md)
+- [Two-Axis Benchmark Frame](https://github.com/dr3d/prethinker/blob/main/docs/TWO_AXIS_BENCHMARK_FRAME.md)
+- [Two-Axis Probe Discipline](https://github.com/dr3d/prethinker/blob/main/docs/TWO_AXIS_PROBE_DISCIPLINE.md)
+- [Edge Governance Positioning](https://github.com/dr3d/prethinker/blob/main/docs/EDGE_GOVERNANCE_POSITIONING.md)
 - [Clarification Eagerness Strategy](https://github.com/dr3d/prethinker/blob/main/docs/CLARIFICATION_EAGERNESS_STRATEGY.md)
 - [Stenographer Mode Simulation](https://github.com/dr3d/prethinker/blob/main/docs/STENOGRAPHER_MODE_SIMULATION.md)
 - [Semantic Router Experiment](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_ROUTER_EXPERIMENT.md)

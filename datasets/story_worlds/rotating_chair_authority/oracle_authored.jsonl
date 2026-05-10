@@ -1,0 +1,40 @@
+{"id":"q001","source_id":"q001","category":"direct_fact","reference_answer":"Four members"}
+{"id":"q002","source_id":"q002","category":"direct_fact","reference_answer":"Delia Marsh"}
+{"id":"q003","source_id":"q003","category":"direct_fact","reference_answer":"Tobias Engel (travel, notified in advance)"}
+{"id":"q004","source_id":"q004","category":"rule_application","reference_answer":"Yes. Six of seven members were present, exceeding the four-member quorum requirement."}
+{"id":"q005","source_id":"q005","category":"authority","reference_answer":"Her brother-in-law is a subcontractor for Greenline Services, the contract party. She recused under GR-4 due to financial interest."}
+{"id":"q006","source_id":"q006","category":"authority","reference_answer":"Franco Herrera (Vice-Chair), who assumed Chair authority under GR-3 when Marsh recused."}
+{"id":"q007","source_id":"q007","category":"direct_fact","reference_answer":"4-1 (Herrera, Okonkwo, Patel, Janssen voted yes; Lowe voted no; Marsh did not vote)"}
+{"id":"q008","source_id":"q008","category":"authority","reference_answer":"No. She recused herself due to her financial interest."}
+{"id":"q009","source_id":"q009","category":"direct_fact","reference_answer":"Yes, 4-1."}
+{"id":"q010","source_id":"q010","category":"rule_application","reference_answer":"Recusal reduces the quorum requirement by one for that vote only, per GR-4."}
+{"id":"q011","source_id":"q011","category":"rule_application","reference_answer":"No. Under GR-2, the Chair may not make motions."}
+{"id":"q012","source_id":"q012","category":"direct_fact","reference_answer":"Kendra Lowe"}
+{"id":"q013","source_id":"q013","category":"authority","reference_answer":"No."}
+{"id":"q014","source_id":"q014","category":"rule_application","reference_answer":"Because the Chair does not vote except to break ties, per GR-2."}
+{"id":"q015","source_id":"q015","category":"direct_fact","reference_answer":"4-1 (Herrera, Okonkwo, Janssen, Lowe voted yes; Patel voted no)"}
+{"id":"q016","source_id":"q016","category":"direct_fact","reference_answer":"$6,200"}
+{"id":"q017","source_id":"q017","category":"rule_application","reference_answer":"Yes. GR-5 allows delegation for contracts under $10,000 and the signage contract is $6,200."}
+{"id":"q018","source_id":"q018","category":"direct_fact","reference_answer":"Vice-Chair Franco Herrera"}
+{"id":"q019","source_id":"q019","category":"rule_application","reference_answer":"At the end of the meeting in which it was made (October 14), unless the Board votes to extend."}
+{"id":"q020","source_id":"q020","category":"direct_fact","reference_answer":"No."}
+{"id":"q021","source_id":"q021","category":"temporal_status","reference_answer":"After. The delegation expired at the end of the October 14 meeting. Herrera signed on October 16."}
+{"id":"q022","source_id":"q022","category":"authority","reference_answer":"It is a valid concern and appears invalid. Marsh acknowledged the delegation appears to have expired and is consulting counsel. No determination has been made yet."}
+{"id":"q023","source_id":"q023","category":"authority","reference_answer":"Franco Herrera (Vice-Chair)"}
+{"id":"q024","source_id":"q024","category":"temporal_status","reference_answer":"No. Marsh was traveling from October 1 through October 5 and was formally unavailable."}
+{"id":"q025","source_id":"q025","category":"rule_application","reference_answer":"GR-6 (Emergency Authority), which allows the Vice-Chair to exercise emergency authority when the Chair is formally unavailable."}
+{"id":"q026","source_id":"q026","category":"rule_application","reference_answer":"Yes. The expenditure was $4,800, within the $5,000 emergency limit."}
+{"id":"q027","source_id":"q027","category":"authority","reference_answer":"Chair Delia Marsh"}
+{"id":"q028","source_id":"q028","category":"rule_application","reference_answer":"Yes. $3,200 is within the $5,000 limit."}
+{"id":"q029","source_id":"q029","category":"authority","reference_answer":"Because Marsh was available on October 18 but was formally unavailable (traveling) on October 3. GR-6 gives the Vice-Chair emergency authority only when the Chair is formally unavailable."}
+{"id":"q030","source_id":"q030","category":"direct_fact","reference_answer":"4-0-1 (Herrera, Okonkwo, Patel, Janssen voted yes; Lowe abstained; Marsh did not vote)"}
+{"id":"q031","source_id":"q031","category":"direct_fact","reference_answer":"No, she abstained."}
+{"id":"q032","source_id":"q032","category":"rule_application","reference_answer":"Yes, per GR-2."}
+{"id":"q033","source_id":"q033","category":"rule_application","reference_answer":"No. Under GR-3, the Secretary may preside if both Chair and Vice-Chair are absent, but may not cast tie-breaking votes."}
+{"id":"q034","source_id":"q034","category":"rule_application","reference_answer":"The Secretary, per GR-3."}
+{"id":"q035","source_id":"q035","category":"rule_application","reference_answer":"Yes. Any Board member may request an agenda item. Lowe's prior vote does not disqualify her, per Marsh's response."}
+{"id":"q036","source_id":"q036","category":"temporal_status","reference_answer":"No. Lowe has requested a rescission vote for the November meeting, but no vote has been held yet."}
+{"id":"q037","source_id":"q037","category":"direct_fact","reference_answer":"No. Discussion only. Marsh noted it will return at the November meeting with a formal proposal."}
+{"id":"q038","source_id":"q038","category":"direct_fact","reference_answer":"$45,000"}
+{"id":"q039","source_id":"q039","category":"direct_fact","reference_answer":"Secretary Suki Okonkwo"}
+{"id":"q040","source_id":"q040","category":"authority","reference_answer":"Whether the signing is binding given that the delegation expired at the end of the October 14 meeting and Herrera signed on October 16. Marsh is consulting counsel. No determination has been made."}

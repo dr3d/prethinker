@@ -1,6 +1,6 @@
 # Active Research Lanes
 
-Last updated: 2026-05-06
+Last updated: 2026-05-08
 
 This page is the short operational map for choosing the next few hours of work.
 It is intentionally stricter than a brainstorm: new ideas belong here only if
@@ -23,7 +23,7 @@ gold KB vocabulary, answer-shaped strategy, or Python prose interpretation.
 
 | Priority | Lane | Why It Matters Now | Good Next Move |
 | ---: | --- | --- | --- |
-| 1 | Source-surface acquisition | Cold rollup shows compile gaps dominate: `159` compile gaps versus `35` hybrid/reasoning, `26` query, and `5` answer gaps. | Improve compact acquisition/lens coverage and replay against unlike fixtures such as Oxalis, Three Moles, Calder, and Avalon. |
+| 1 | Source-surface acquisition | The cold-10 high-water still has `23` misses after row gating, and the biggest wins came from acquiring missing source/provenance surfaces rather than answer prompting. | Improve compact acquisition/lens coverage and replay against unlike fixtures such as Lantern, Salvage, Museum/Dream, Oxalis, and Avalon. |
 | 2 | Rule composition and promotion | Product power comes from executable inference, but cold fixtures still admit `0` rules by default. Glass Tide proved the staged path. | Generalize body-fact -> rule-lens -> shortcut-audit -> probe workflow to Avalon/Sable/Oxalis without fixture-specific clauses. |
 | 3 | Temporal/status/reasoning helpers | Regulatory, grant, ledger, recall, and story fixtures all need dates, intervals, deadlines, status-at-time, threshold, and exception helpers. | Add helper substrates only when two fixtures need the same helper shape. |
 | 4 | Clarification and stenographer mode | Live UI use is streaming, not monolithic. CE and queued delivery protect truth while reducing interruption. | Build fixtures/runs that score queued-slot closure, safe partials, and later-turn resolution. |
@@ -34,23 +34,33 @@ gold KB vocabulary, answer-shaped strategy, or Python prose interpretation.
 
 ## Current Evidence
 
-Cold baseline snapshot across `10` held-out fixtures:
+Cold-injected story-world snapshot across the 2026-05-07 sealed 10-fixture
+batch:
 
 ```text
-questions: 470
-exact / partial / miss: 245 / 81 / 144
-exact rate: 0.521
-exact+partial rate: 0.694
-failure surfaces:
-  compile: 159
-  hybrid/reasoning: 35
-  query: 26
-  answer: 5
+questions: 400
+cold baseline exact / partial / miss: 276 / 44 / 80
+row-gated high-water exact / partial / miss: 361 / 16 / 23
+row-gated exact rate: 0.9025
+write proposal rows: 0 in contributing QA runs
 ```
 
-This says the most useful next work is not a UI flourish, a broader prompt, or
-a single fixture registry. The broadest payoff is better acquisition of the
-right source surface, followed by reusable reasoning/rule substrates.
+This says the useful work is still not a UI flourish or a broader prompt. The
+biggest lift came from candidate modes selected row-by-row: permit rule/time,
+station roles, competition administrative certification, evidence provenance,
+and ledger/object provenance. The newest registry-scaffolded candidates are
+especially narrow: they rescue provenance rows, but they are bad global
+compiles and must stay behind selector gates until transfer is proven.
+
+Current operating vocabulary:
+
+```text
+compiled KB = durable state
+row = measured encounter with that state
+selector = chooses the best encounter surface
+guard = prevents a tempting wrong surface
+verdict = records what happened
+```
 
 ## Lens Roster Note
 
@@ -69,9 +79,12 @@ manifest, diagnostics). Query-time uncertainty and clarification should come
 from compiled symbolic state, not hidden source RAG.
 
 Selector guard growth is now tracked by
-`docs/SELECTOR_GUARD_FAMILY_ROLLUP.md`: `53` guard return sites collapse to
-`52` unique reasons across `7` families with `0` unclassified. Treat that
-family count, not the raw guard count, as the anti-sprawl metric.
+`docs/SELECTOR_GUARD_FAMILY_ROLLUP.md`: `244` guard return sites collapse to
+`244` unique reasons across `7` families with `0` unclassified. Treat that
+family count, not the raw guard count, as the anti-sprawl metric, while still
+watching raw guard pressure. The current rule is merge before parameterizing:
+collapse duplicate semantic guards only after replay proof, and do not hide
+fixture-shaped enumerations inside clean-looking family functions.
 
 Cross-fixture repair growth is now tracked by
 `docs/CROSS_FIXTURE_REPAIR_SLICES.md`: the current planner reads repair-target
@@ -105,21 +118,28 @@ Each long work block should look like this:
 
 ## Current Best Next Bite
 
-Work on source-surface acquisition with rule/reasoning readiness in mind:
+Work on transfer pressure, not more incoming-six polishing:
 
 ```text
-target = compact acquisition coverage that improves unlike fixtures
-first probes = Oxalis + Three Moles + Avalon
-guardrails = no source-specific predicate clues, no gold KB, no QA-derived context
-success = at least two fixtures improve or one improves with zero regression
+target = two or more remaining cold-10 fixtures improve, or one incoming-six
+         row shape transfers cold to an unlike fixture
+first probes = source lists, last-confirmed-at, unresolved authority questions,
+               rejected-version state, and date-event anchors
+controls = Lantern + Salvage + Museum/Dream, with Clock/Nested as provenance regressions
+guardrails = no answer-shaped strategy, no source-prose interpretation in Python,
+             registry scaffolds supply vocabulary only
+success = exact rows increase or hard misses fall without increasing selected misses
 ```
 
 That lane advances the most other lanes because better source rows feed rules,
-temporal helpers, query planning, CE decisions, and public demos.
+temporal helpers, query planning, CE decisions, public demos, and the new
+evidence-provenance pegboard hooks.
 
 Current score-hold check: Larkspur, Calder, Oxalis, Avalon, and Sable frozen
 selector lanes still match their documented results with perfect selected-best
-counts and `0` selector errors; full verification is `647 passed`.
+counts and `0` selector errors. The latest focused helper/selector verification
+for the incoming-six exhaustion pass is `135 passed`; rerun the full suite
+before updating any full-suite headline.
 
 First repair-slice action: the rule-interpretation/application pass is a
 Meridian win and a Heronvale boundary marker. Meridian full-40 now reaches
@@ -364,9 +384,21 @@ python scripts/stage_incoming_fixtures.py --root tmp/incoming --out-root tmp/inc
 ```
 
 This checks requested files, 40-row QA shape, source length, duplicate ids, and
-obvious answer-key leakage without interpreting fixture prose. If incoming
-`qa.jsonl` rows include authored answers, staging separates no-answer `qa.md`
-from `oracle.jsonl` so source compilation and query planning stay oracle-clean.
+obvious answer-key leakage without interpreting fixture prose. The intake tools
+now accept both legacy `source.md` + `qa.jsonl` folders and sealed story zips
+containing `story.md`, `qa_questions.md`, `qa_answers_private.jsonl`,
+`challenge_strategy.md`, and `anti_leakage_manifest.md`. Staging separates
+no-answer `qa.md` / `qa_questions.jsonl` from scoring-only `oracle.jsonl` so
+source compilation and query planning stay oracle-clean.
+
+Incoming-10 sealed story baseline: the 2026-05-07 zip batch is promoted into
+`datasets/story_worlds` and scored full-40 at `276 exact / 44 partial / 80
+miss` across `400` QA rows, with `0` write proposal rows and `0` runtime load
+errors. The artifact scorecard is
+`tmp/incoming_10_cold_qa_20260507/scorecard.md`. Four fixtures transferred
+strongly cold (`35/40`, `34/40`, `35/40`, and `31/40` exact); Festival Permit,
+Greenhouse Quarantine, and Lantern School Field Trip are the first repair
+frontier.
 
 Incoming smoke result: the first five new challenge fixtures now have a
 standard artifact-only scorecard at `tmp/incoming_smoke_summaries/scorecard.md`.
@@ -457,3 +489,115 @@ endpoint. After that fix, Larkspur permission/rationale acquisition became the
 best new source-surface candidate: `5 / 0 / 0` on its target rows and
 `31 / 3 / 6` on full-40. It still regresses `6` baseline-exact rows, so the
 lesson is row-gated acquisition, not global replacement.
+
+Incoming-6 sealed story intake: the 2026-05-08 zip batch is staged into
+`datasets/story_worlds` as `amended_lease_register`,
+`census_reconciliation`, `deadline_cascade_docket`, `draft_within_draft`,
+`harbor_collision_reports`, and `rotating_chair_authority`. The four-file
+authoring envelope (`source.md`, `qa.md`, `oracle.jsonl`, `strategy.md`) staged
+cleanly through `scripts/stage_incoming_fixtures.py`; each fixture has `40`
+numbered questions and `40` oracle rows. First compile pass completed for all
+six with `0` compile crashes. The bounded first-10 QA smoke scorecard is
+`50 exact / 5 partial / 5 miss` over `60` rows, with `0` runtime load errors
+and `0` write proposals. Artifact:
+`tmp/incoming_6_cold_smoke_qa_20260508/scorecard.md`. Full-40 QA should run
+later at a lower lane count; the first attempted two-lane full pass stalled
+before writing artifacts.
+
+Incoming-6 first repair bite: `deadline_cascade_docket` q006 exposed a reusable
+query substrate issue rather than a new semantic lens. The KB already admitted
+the extension request date, original deadline, and D-7 rule, but helper assembly
+could fail when the QA compiler used lowercase temporal slot labels such as
+`originaldeadline` or `dayselapsed`. The QA runner now repairs lowercase
+digit-free temporal slot labels ending in `date`, `time`, `deadline`, or
+`duration`, plus labels containing `elapsed`, into Prolog variables before
+execution and carries the repaired query into temporal joins. Unit verification
+is `33 passed` in `tests/test_domain_bootstrap_qa.py`; the fresh q006 replay is
+`1 / 0 / 0` with `0` writes at
+`tmp/incoming_6_repair_probe_20260508/deadline_q006_temporal_slot_placeholder_v2/`.
+The remaining incoming-6 smoke queue is now dominated by compile acquisition:
+front-matter/project identity, convening authority, violation period,
+source/evidence role breadth, and explicit no-count-effect surfaces.
+
+Negative acquisition probe: a broader policy/operational compile hint for
+`deadline_cascade_docket` did not recover the q002 violation period, and an
+explicit violation-period prompt went skip-heavy (`81` admitted / `30` skipped)
+while regressing q006. Do not promote that prompt. The next period/acquisition
+attempt should be registry-scaffolded or intake-plan-shaped so the profile has a
+real period predicate to admit, not just more prose pressure.
+
+Positive follow-up: a temporary `regulatory_period_deadline_registry_v1`
+scaffold proved that shape on `deadline_cascade_docket`. Direct registry compile
+is still too thin (`53` admitted / `22` skipped), but it acquired
+`violation_period/4`, rescued q002 and q006 (`2 / 0 / 0` targeted), reached
+`10 / 0 / 0` on the first-10 smoke slice, and reached `35 / 3 / 2` on full-40
+with `0` writes. Treat this as a candidate row-gated source-period/deadline
+surface, not a permanent lens yet. It needs transfer on another regulatory or
+source-record fixture before roster promotion.
+
+Transfer update: the source-period/deadline scaffold transferred positively to
+Copperfall's older q024-q030 deadline cluster (`7 / 0 / 0`) but remained
+skip-heavy (`94` admitted / `28` skipped), so it stays candidate row-gated
+rather than global. The existing hearing/evidence provenance registry also
+transferred surgically to Harbor q005-q006 (`2 / 0 / 0`), proving that CCTV can
+be preserved as an evidence/source item, but its direct first-10 Harbor run was
+only `6 / 2 / 2`. Net lesson: the pegboard candidates are increasingly real,
+but their power is in row-level selection and compatible baseline surfaces, not
+standalone direct-registry replacement.
+
+Census query-helper bite: `census_reconciliation` q009 did not need a new
+source lens. The cold compile already admitted the converted units and
+before/after class counts; the failure was that the answer compared
+pre-annexation `total_base=144` to post-annexation `total=156`. The QA runner
+now exposes `classification_conversion_effect_support/4` when
+`conversion_effective_date/3` is queried. It derives `TotalCountEffect =
+no_change` only when admitted source-class decrease and target-class increase
+balance over admitted existing units. Target q009 replay is `1 / 0 / 0` with
+`0` writes at
+`tmp/incoming_6_census_no_effect_probe_20260508/q009/`; unit verification is
+`34 passed` in `tests/test_domain_bootstrap_qa.py`. This belongs to the
+temporal/status/reasoning helper lane as a conservation-of-count query helper,
+not a compile lens.
+
+Planning-report registry bite: `draft_within_draft` exposed a front-matter,
+authority-boundary, traffic, environmental-review, and site-condition
+acquisition problem. A temporary `planning_application_summary_registry_v1`
+scaffold now separates current application request, parcel zoning, unit mix,
+transit route location/distance, applicant claims, staff findings, staff
+recommendation status, draft conditions, rejected prior proposal versions,
+traffic estimates, mitigation authority, environmental mitigations,
+construction limits, existing site conditions, and source-opinion rows. v3
+proved the tight front-matter surface (`82` admitted / `1` skipped, first-10
+`10 / 0 / 0`, full-40 `25 / 3 / 12`). v4 broadened the surface and lifted
+full-40 to `31 / 2 / 7` while preserving first-10 at `10 / 0 / 0`, but the
+compile got thinner (`49` admitted / `1` skipped). Treat this as row-gated
+candidate vocabulary, not a global planning compiler.
+
+Board-recusal registry bite: `rotating_chair_authority` q005 showed that a
+recusal reason is not just rule text plus attendance. The source-stated
+disclosed interest, family relationship, related contract party, matter under
+vote, and rule trigger need their own surface. A temporary
+`board_recusal_conflict_registry_v1` recovered q005 exactly; v1 regressed the
+ordinary absence question because it lacked attendance, so v2 added
+`meeting_attendance/4`. v2 reaches first-10 `10 / 0 / 0` and full-40
+`29 / 5 / 6` with `0` writes. At that point amended lease q006 was the only
+remaining incoming-6 first-10 non-exact.
+
+Lease-financial correction bite: `amended_lease_register` q006 showed that
+financial corrections need a calculation surface, not only a long correction
+reason atom. A temporary `lease_correction_financial_registry_v1` captures rent
+terms, corrected effective dates, notice requirements, overcharge periods,
+refund calculations, and current refund obligations. It recovers q006 exactly,
+but direct first-10 is only `8 / 0 / 2` because the narrow financial registry
+drops Courtyard B supersession and authorization rows. Row-gated, it clears the
+last incoming-6 first-10 non-exact. Current measured first-10 high-water:
+`60 / 0 / 0` over `60` rows.
+
+Incoming-6 full-40 exhaustion update: the later full-40 farming pass moved the
+same six fixtures from cold `186 / 16 / 38` to a diagnostic row-gated
+`240 / 0 / 0` over `240` rows. The proof artifact is
+`tmp/incoming_6_full40_qa_20260508/batch_exhaustion_proof_20260508.md`. This
+closes the batch as a score frontier and opens the transfer frontier for the
+new row shapes: source lists, last-confirmed-at, unresolved authority question
+answer surfaces, rejected-version planning state, and procedural date-event
+anchors.

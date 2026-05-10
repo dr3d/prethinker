@@ -1,0 +1,322 @@
+[
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q001",
+    "question": "What is the applicant requesting?",
+    "reference_answer": "A Conditional Use Permit for a 14-unit residential development on a 1.8-acre parcel zoned AR-2",
+    "source_id": "q001"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q002",
+    "question": "How many units does the current application propose?",
+    "reference_answer": "14 units (8 single-family homes and 6 townhomes)",
+    "source_id": "q002"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q003",
+    "question": "What is the zoning designation for the property?",
+    "reference_answer": "Agricultural-Residential (AR-2)",
+    "source_id": "q003"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q004",
+    "question": "Who prepared the staff report?",
+    "reference_answer": "Senior Planner Juliette Ramos",
+    "source_id": "q004"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q005",
+    "question": "Is the staff recommendation a decision?",
+    "reference_answer": "No. The staff recommendation is advisory only and does not bind the Commission.",
+    "source_id": "q005"
+  },
+  {
+    "behavior": "",
+    "category": "temporal_status",
+    "id": "q006",
+    "question": "Has the application been approved?",
+    "reference_answer": "No. No hearing has been held. The application has not been approved or denied as of April 28, 2025.",
+    "source_id": "q006"
+  },
+  {
+    "behavior": "",
+    "category": "claim_fact_separation",
+    "id": "q007",
+    "question": "Does the applicant claim the project is consistent with the Housing Element?",
+    "reference_answer": "Yes, the applicant claims this in their project narrative.",
+    "source_id": "q007"
+  },
+  {
+    "behavior": "",
+    "category": "claim_fact_separation",
+    "id": "q008",
+    "question": "Does staff agree that the project is consistent with the Housing Element?",
+    "reference_answer": "No. Staff notes that the applicant's characterization is the applicant's opinion, not a staff finding. The site does not meet the General Plan's transit corridor definition.",
+    "source_id": "q008"
+  },
+  {
+    "behavior": "",
+    "category": "rule_application",
+    "id": "q009",
+    "question": "Is Orchard Lane within the General Plan's transit corridor definition?",
+    "reference_answer": "No. The General Plan defines a transit corridor as within 0.25 miles of a fixed-route transit stop. County Transit Route 14 runs along Prospect Avenue, which is 0.6 miles from the site.",
+    "source_id": "q009"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q010",
+    "question": "How far is County Transit Route 14 from the project site?",
+    "reference_answer": "0.6 miles (Route 14 runs along Prospect Avenue, not Orchard Lane)",
+    "source_id": "q010"
+  },
+  {
+    "behavior": "",
+    "category": "arithmetic",
+    "id": "q011",
+    "question": "What density does Dr. Holm calculate?",
+    "reference_answer": "7.8 units per acre (14 ÷ 1.8)",
+    "source_id": "q011"
+  },
+  {
+    "behavior": "",
+    "category": "arithmetic",
+    "id": "q012",
+    "question": "Is Dr. Holm's density calculation correct?",
+    "reference_answer": "Yes. Staff confirms 14 ÷ 1.8 = 7.78 units per acre.",
+    "source_id": "q012"
+  },
+  {
+    "behavior": "",
+    "category": "rule_application",
+    "id": "q013",
+    "question": "Does the AR-2 zone specify a maximum density in units per acre?",
+    "reference_answer": "No. AR-2 regulates through lot size minimums, setbacks, and height limits, not through a units-per-acre density maximum.",
+    "source_id": "q013"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q014",
+    "question": "How many daily trips does Dr. Holm's traffic engineer estimate?",
+    "reference_answer": "140 daily vehicle trips",
+    "source_id": "q014"
+  },
+  {
+    "behavior": "",
+    "category": "claim_fact_separation",
+    "id": "q015",
+    "question": "Has Dr. Holm's traffic estimate been verified?",
+    "reference_answer": "No. The estimate is attributed to an unnamed traffic engineer and has not been verified by Stonebridge Public Works.",
+    "source_id": "q015"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q016",
+    "question": "How many daily trips does the Cortland traffic study project?",
+    "reference_answer": "98 daily trips",
+    "source_id": "q016"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q017",
+    "question": "Which traffic estimate does staff consider more credible?",
+    "reference_answer": "The Cortland study's 98-trip projection, because it uses standard ITE methodology, while Holm's 140-trip estimate is unsourced.",
+    "source_id": "q017"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q018",
+    "question": "How many units did the original rejected proposal include?",
+    "reference_answer": "18 units (10 single-family, 8 townhomes)",
+    "source_id": "q018"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q019",
+    "question": "Why was the original 18-unit version rejected?",
+    "reference_answer": "At least 4 lots were below the AR-2 minimum lot size (4,500 sq ft), and the proposal did not provide adequate guest parking.",
+    "source_id": "q019"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q020",
+    "question": "Was the 18-unit proposal denied by the Planning Commission?",
+    "reference_answer": "No. The 18-unit version was returned at the staff level. It was not denied by the Commission — it was never presented to the Commission.",
+    "source_id": "q020"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q021",
+    "question": "Which lots were below the AR-2 minimum in the 18-unit version?",
+    "reference_answer": "Lots 9, 10, 17, and 18",
+    "source_id": "q021"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q022",
+    "question": "What is the AR-2 minimum lot size?",
+    "reference_answer": "4,500 square feet",
+    "source_id": "q022"
+  },
+  {
+    "behavior": "",
+    "category": "scope_containment",
+    "id": "q023",
+    "question": "Is the 18-unit version the application before the Commission?",
+    "reference_answer": "No. The 18-unit version was rejected at the staff level and revised. The current application is for 14 units. All references to 18 units in public comment refer to the rejected version.",
+    "source_id": "q023"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q024",
+    "question": "Can the Commission impose the speed table recommendation?",
+    "reference_answer": "Not without Public Works concurrence, which has not been obtained. The speed table recommendation is advisory only.",
+    "source_id": "q024"
+  },
+  {
+    "behavior": "",
+    "category": "rule_application",
+    "id": "q025",
+    "question": "What condition must be met before building permits can be issued?",
+    "reference_answer": "The storm water management plan must be approved by the County (draft condition 7).",
+    "source_id": "q025"
+  },
+  {
+    "behavior": "",
+    "category": "temporal_arithmetic",
+    "id": "q026",
+    "question": "When does the conditional use permit expire if not used?",
+    "reference_answer": "24 months after approval, if construction does not commence (draft condition 8).",
+    "source_id": "q026"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q027",
+    "question": "What are the construction hour limits on Saturdays?",
+    "reference_answer": "8:00 AM to 5:00 PM",
+    "source_id": "q027"
+  },
+  {
+    "behavior": "",
+    "category": "temporal_status",
+    "id": "q028",
+    "question": "Has the MND been challenged?",
+    "reference_answer": "No. The 30-day comment period closed April 15 and no CEQA challenge was filed.",
+    "source_id": "q028"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q029",
+    "question": "What are the three environmental mitigations required?",
+    "reference_answer": "Bio-1 (pre-construction nesting bird survey), Hydro-1 (storm water management plan), and Noise-1 (construction hour limits)",
+    "source_id": "q029"
+  },
+  {
+    "behavior": "",
+    "category": "scope_containment",
+    "id": "q030",
+    "question": "Are the draft conditions of approval in effect?",
+    "reference_answer": "No. They are draft conditions recommended by staff. They have not been adopted by the Commission. The Commission may modify, add, or remove conditions at the hearing.",
+    "source_id": "q030"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q031",
+    "question": "Can the Commission modify the draft conditions?",
+    "reference_answer": "Yes. The Commission may modify, add, or remove conditions at the hearing.",
+    "source_id": "q031"
+  },
+  {
+    "behavior": "",
+    "category": "scope_containment",
+    "id": "q032",
+    "question": "Who recommended against the Courtyard B addition?",
+    "reference_answer": "This question references a 'Courtyard B addition' which does not appear in this document. The document does not contain information about a Courtyard B.",
+    "source_id": "q032"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q033",
+    "question": "What happened on April 15?",
+    "reference_answer": "The MND's 30-day public comment period closed.",
+    "source_id": "q033"
+  },
+  {
+    "behavior": "",
+    "category": "claim_fact_separation",
+    "id": "q034",
+    "question": "What is the applicant's projected build-out timeline?",
+    "reference_answer": "18 months from permit issuance. This is the applicant's projection from their project narrative, not a staff finding or condition.",
+    "source_id": "q034"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q035",
+    "question": "How many off-street parking spaces are proposed?",
+    "reference_answer": "28 (2 per unit)",
+    "source_id": "q035"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q036",
+    "question": "What is the size of the proposed community park?",
+    "reference_answer": "0.15 acres",
+    "source_id": "q036"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q037",
+    "question": "What is currently on the property?",
+    "reference_answer": "A derelict barn and a fenced horse paddock, both unused since 2018",
+    "source_id": "q037"
+  },
+  {
+    "behavior": "",
+    "category": "rule_application",
+    "id": "q038",
+    "question": "Does the current 14-unit proposal meet AR-2 dimensional standards?",
+    "reference_answer": "Yes. Staff states that the applicant's proposal meets the lot size, setback, and height requirements as submitted.",
+    "source_id": "q038"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q039",
+    "question": "What is the nearest school?",
+    "reference_answer": "Stonebridge Elementary, 0.4 miles northeast",
+    "source_id": "q039"
+  },
+  {
+    "behavior": "",
+    "category": "claim_fact_separation",
+    "id": "q040",
+    "question": "List all claims or characterizations in the document that are the applicant's opinion rather than established facts or staff findings.",
+    "reference_answer": "The applicant's claim that the project is consistent with the Housing Element, the applicant's claim that Orchard Lane is served by County Transit Route 14 (it runs on Prospect Avenue 0.6 miles away), and the applicant's build-out timeline of 18 months (a projection, not a commitment or condition).",
+    "source_id": "q040"
+  }
+]

@@ -1,0 +1,322 @@
+[
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q001",
+    "question": "When was the Notice of Violation issued?",
+    "reference_answer": "June 2, 2025",
+    "source_id": "q001"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q002",
+    "question": "What was the violation period?",
+    "reference_answer": "April 14 through April 28, 2025",
+    "source_id": "q002"
+  },
+  {
+    "behavior": "",
+    "category": "temporal_arithmetic",
+    "id": "q003",
+    "question": "What is the original response deadline?",
+    "reference_answer": "July 2, 2025 (30 calendar days from June 2)",
+    "source_id": "q003"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q004",
+    "question": "How many calendar days does the respondent have to file a response?",
+    "reference_answer": "30 calendar days",
+    "source_id": "q004"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q005",
+    "question": "When did Granger file the extension request?",
+    "reference_answer": "June 20, 2025",
+    "source_id": "q005"
+  },
+  {
+    "behavior": "",
+    "category": "temporal_arithmetic",
+    "id": "q006",
+    "question": "Was the extension request filed at least 7 calendar days before the original deadline?",
+    "reference_answer": "Yes. The request was filed 12 days before the July 2 deadline, exceeding the 7-day advance requirement.",
+    "source_id": "q006"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q007",
+    "question": "Who granted the extension?",
+    "reference_answer": "Executive Director Mira Tan",
+    "source_id": "q007"
+  },
+  {
+    "behavior": "",
+    "category": "temporal_arithmetic",
+    "id": "q008",
+    "question": "What is the extended response deadline?",
+    "reference_answer": "July 17, 2025",
+    "source_id": "q008"
+  },
+  {
+    "behavior": "",
+    "category": "temporal_arithmetic",
+    "id": "q009",
+    "question": "How is the extended deadline calculated?",
+    "reference_answer": "15 calendar days added to the original July 2 deadline. Not 15 days from the grant date.",
+    "source_id": "q009"
+  },
+  {
+    "behavior": "",
+    "category": "temporal_status",
+    "id": "q010",
+    "question": "Did Granger file the response by the extended deadline?",
+    "reference_answer": "Yes. The extended deadline was July 17 and Granger filed on July 17.",
+    "source_id": "q010"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q011",
+    "question": "What did Granger's response include?",
+    "reference_answer": "A request for a compliance schedule",
+    "source_id": "q011"
+  },
+  {
+    "behavior": "",
+    "category": "temporal_arithmetic",
+    "id": "q012",
+    "question": "What is the Compliance Plan deadline?",
+    "reference_answer": "August 31, 2025 (45 calendar days from the July 17 response filing date)",
+    "source_id": "q012"
+  },
+  {
+    "behavior": "",
+    "category": "rule_application",
+    "id": "q013",
+    "question": "Does the compliance plan deadline roll over to Monday because August 31 is a Sunday?",
+    "reference_answer": "No. The EPM's weekend-rollover rule (Rule D-1) applies only to the response deadline, not to the compliance plan deadline. The deadline is August 31 as stated.",
+    "source_id": "q013"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q014",
+    "question": "When did Granger submit the original Compliance Plan?",
+    "reference_answer": "August 29, 2025 (Friday)",
+    "source_id": "q014"
+  },
+  {
+    "behavior": "",
+    "category": "temporal_status",
+    "id": "q015",
+    "question": "Was the original Compliance Plan submitted on time?",
+    "reference_answer": "Yes, two days before the August 31 deadline.",
+    "source_id": "q015"
+  },
+  {
+    "behavior": "",
+    "category": "temporal_arithmetic",
+    "id": "q016",
+    "question": "What is the Board review period for the original Compliance Plan?",
+    "reference_answer": "21 calendar days from the date of receipt (August 29)",
+    "source_id": "q016"
+  },
+  {
+    "behavior": "",
+    "category": "temporal_arithmetic",
+    "id": "q017",
+    "question": "When does the Board review period end?",
+    "reference_answer": "September 19, 2025",
+    "source_id": "q017"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q018",
+    "question": "What was the Board's decision on the original Compliance Plan?",
+    "reference_answer": "Rejected, on September 15, 2025",
+    "source_id": "q018"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q019",
+    "question": "What was the reason for rejection?",
+    "reference_answer": "The proposed monitoring frequency was insufficient — the plan proposed monthly sampling but weekly sampling is required.",
+    "source_id": "q019"
+  },
+  {
+    "behavior": "",
+    "category": "rule_application",
+    "id": "q020",
+    "question": "What is the appeal window for the rejection?",
+    "reference_answer": "14 business days from the rejection date (September 15), per Rule D-4",
+    "source_id": "q020"
+  },
+  {
+    "behavior": "",
+    "category": "temporal_arithmetic",
+    "id": "q021",
+    "question": "What is the appeal deadline date?",
+    "reference_answer": "October 3, 2025 (Friday)",
+    "source_id": "q021"
+  },
+  {
+    "behavior": "",
+    "category": "temporal_arithmetic",
+    "id": "q022",
+    "question": "How is the appeal deadline calculated?",
+    "reference_answer": "14 business days counted from September 15 (not including September 15 itself), excluding weekends and Board holidays. September 16-19 (4 days), September 22-26 (9 days), September 29-30 (11 days), October 1-3 (14 days). No Board holidays fall within this window.",
+    "source_id": "q022"
+  },
+  {
+    "behavior": "",
+    "category": "temporal_arithmetic",
+    "id": "q023",
+    "question": "Do any Board holidays fall within the appeal counting window?",
+    "reference_answer": "No. September 1 (Labor Day) is a Board holiday but it falls before the rejection date. No holidays fall within the September 16 – October 3 counting window.",
+    "source_id": "q023"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q024",
+    "question": "When did Granger file the revised Compliance Plan?",
+    "reference_answer": "September 18, 2025",
+    "source_id": "q024"
+  },
+  {
+    "behavior": "",
+    "category": "temporal_arithmetic",
+    "id": "q025",
+    "question": "What is the deadline for filing the revised plan?",
+    "reference_answer": "September 29, 2025 (14 calendar days from the September 15 rejection, per Rule D-8)",
+    "source_id": "q025"
+  },
+  {
+    "behavior": "",
+    "category": "temporal_status",
+    "id": "q026",
+    "question": "Was the revised plan filed on time?",
+    "reference_answer": "Yes. September 18 is before the September 29 deadline.",
+    "source_id": "q026"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q027",
+    "question": "What does the revised plan propose for monitoring frequency?",
+    "reference_answer": "Biweekly monitoring, not the weekly monitoring the Board required",
+    "source_id": "q027"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q028",
+    "question": "When did Granger file the appeal?",
+    "reference_answer": "September 22, 2025",
+    "source_id": "q028"
+  },
+  {
+    "behavior": "",
+    "category": "temporal_status",
+    "id": "q029",
+    "question": "Was the appeal filed within the appeal window?",
+    "reference_answer": "Yes. The appeal deadline is October 3 and the appeal was filed September 22.",
+    "source_id": "q029"
+  },
+  {
+    "behavior": "",
+    "category": "rule_application",
+    "id": "q030",
+    "question": "Can Granger have both a revised plan and an appeal active simultaneously?",
+    "reference_answer": "Yes. Executive Director Tan stated they are separate proceedings. The EPM does not explicitly address the overlap, but the Board will review the revised plan and the appeal on separate tracks.",
+    "source_id": "q030"
+  },
+  {
+    "behavior": "",
+    "category": "rule_application",
+    "id": "q031",
+    "question": "Has the penalty assessment clock started?",
+    "reference_answer": "No. The penalty assessment clock has not started.",
+    "source_id": "q031"
+  },
+  {
+    "behavior": "",
+    "category": "rule_application",
+    "id": "q032",
+    "question": "Why hasn't the penalty clock started?",
+    "reference_answer": "Because Granger filed a timely response on July 17. Rule D-5 only activates the penalty clock if no response is filed by the response deadline.",
+    "source_id": "q032"
+  },
+  {
+    "behavior": "",
+    "category": "rule_application",
+    "id": "q033",
+    "question": "What is the tolling effect of the appeal on the penalty clock?",
+    "reference_answer": "The appeal tolls the penalty clock under Rule D-6, but the penalty clock is not running (since a timely response was filed), so tolling has no current practical effect.",
+    "source_id": "q033"
+  },
+  {
+    "behavior": "",
+    "category": "temporal_arithmetic",
+    "id": "q034",
+    "question": "When must the Board act on the revised Compliance Plan?",
+    "reference_answer": "October 9, 2025 (21 calendar days from the September 18 revised plan submission)",
+    "source_id": "q034"
+  },
+  {
+    "behavior": "",
+    "category": "rule_application",
+    "id": "q035",
+    "question": "What happens if the Board takes no action on the revised plan by October 9?",
+    "reference_answer": "The revised plan is deemed provisionally approved under Rule D-3.",
+    "source_id": "q035"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q036",
+    "question": "Has Inspector Baek made a compliance determination?",
+    "reference_answer": "No. Baek's note is an observation, not a compliance determination.",
+    "source_id": "q036"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q037",
+    "question": "Who can issue a formal compliance determination?",
+    "reference_answer": "Only the Board or the Executive Director",
+    "source_id": "q037"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q038",
+    "question": "What sampling frequency has Granger implemented on its own initiative?",
+    "reference_answer": "Biweekly sampling, begun on its own initiative as of September 1",
+    "source_id": "q038"
+  },
+  {
+    "behavior": "",
+    "category": "temporal_status",
+    "id": "q039",
+    "question": "What is the docket status of the appeal as of September 30?",
+    "reference_answer": "Pending. The appeal was filed September 22, within the October 3 deadline, and no decision has been issued.",
+    "source_id": "q039"
+  },
+  {
+    "behavior": "",
+    "category": "rule_application",
+    "id": "q040",
+    "question": "If the Board rejects the revised plan, what happens next?",
+    "reference_answer": "A new appeal window would open for the revised plan rejection. The existing appeal of the original rejection remains pending regardless.",
+    "source_id": "q040"
+  }
+]

@@ -1,0 +1,40 @@
+{"id":"q001","source_id":"q001","category":"direct_fact","reference_answer":"144"}
+{"id":"q002","source_id":"q002","category":"direct_fact","reference_answer":"84 (Lots 1-84)"}
+{"id":"q003","source_id":"q003","category":"direct_fact","reference_answer":"12 single-family homes (Lots 85-96)"}
+{"id":"q004","source_id":"q004","category":"direct_fact","reference_answer":"January 15, 2025"}
+{"id":"q005","source_id":"q005","category":"arithmetic","reference_answer":"156 (144 base + 12 Meadow Ridge)"}
+{"id":"q006","source_id":"q006","category":"direct_fact","reference_answer":"24 (Units C-1 through C-24)"}
+{"id":"q007","source_id":"q007","category":"arithmetic","reference_answer":"18 (24 minus 6 converted to townhomes)"}
+{"id":"q008","source_id":"q008","category":"arithmetic","reference_answer":"42 (36 original + 6 converted from condominium)"}
+{"id":"q009","source_id":"q009","category":"rule_application","reference_answer":"No. The units were already counted. The conversion changes their classification and assessment rate but not the total count."}
+{"id":"q010","source_id":"q010","category":"direct_fact","reference_answer":"75% of the standard assessment ($2,700 per unit)"}
+{"id":"q011","source_id":"q011","category":"rule_application","reference_answer":"100% of the standard assessment ($3,600), because they are now classified as townhomes"}
+{"id":"q012","source_id":"q012","category":"direct_fact","reference_answer":"Three"}
+{"id":"q013","source_id":"q013","category":"rule_application","reference_answer":"No. The count is 156 regardless of who owns each unit."}
+{"id":"q014","source_id":"q014","category":"temporal_status","reference_answer":"The Chao family (they purchased it on January 22)"}
+{"id":"q015","source_id":"q015","category":"temporal_status","reference_answer":"Highmark Homes (the original developer), which held it from annexation (January 15) through February 28 when it sold to the Yuen family"}
+{"id":"q016","source_id":"q016","category":"direct_fact","reference_answer":"It is listed as a single-family home but was converted to a duplex in 2019. Under bylaws, a duplex should carry two assessments and two votes, but this has never been enforced."}
+{"id":"q017","source_id":"q017","category":"structured_absence","reference_answer":"No. The Board deferred the decision to the April meeting pending legal review."}
+{"id":"q018","source_id":"q018","category":"rule_application","reference_answer":"As one unit under its current classification, because the Board deferred the reclassification"}
+{"id":"q019","source_id":"q019","category":"arithmetic","reference_answer":"156"}
+{"id":"q020","source_id":"q020","category":"direct_fact","reference_answer":"15"}
+{"id":"q021","source_id":"q021","category":"rule_application","reference_answer":"No. Vacant units still carry votes exercisable by the owner."}
+{"id":"q022","source_id":"q022","category":"rule_application","reference_answer":"No. Vacant units are still assessed."}
+{"id":"q023","source_id":"q023","category":"direct_fact","reference_answer":"4 units"}
+{"id":"q024","source_id":"q024","category":"rule_application","reference_answer":"Yes. The developer holds the votes as the current owner."}
+{"id":"q025","source_id":"q025","category":"direct_fact","reference_answer":"$3,600 per unit"}
+{"id":"q026","source_id":"q026","category":"arithmetic","reference_answer":"$2,700 per unit (75% of $3,600)"}
+{"id":"q027","source_id":"q027","category":"arithmetic","reference_answer":"$545,400"}
+{"id":"q028","source_id":"q028","category":"arithmetic","reference_answer":"$549,000 ($545,400 + $3,600 for the additional unit)"}
+{"id":"q029","source_id":"q029","category":"arithmetic","reference_answer":"40% of eligible votes"}
+{"id":"q030","source_id":"q030","category":"arithmetic","reference_answer":"63 (40% of 156 = 62.4, rounded up to 63)"}
+{"id":"q031","source_id":"q031","category":"temporal_status","reference_answer":"Yes, effective January 15, 2025"}
+{"id":"q032","source_id":"q032","category":"arithmetic","reference_answer":"156"}
+{"id":"q033","source_id":"q033","category":"temporal_status","reference_answer":"No, not as of March 15. This is listed as an open item."}
+{"id":"q034","source_id":"q034","category":"arithmetic","reference_answer":"$900 per unit ($3,600 minus $2,700)"}
+{"id":"q035","source_id":"q035","category":"arithmetic","reference_answer":"$5,400 (6 units × $900 increase per unit)"}
+{"id":"q036","source_id":"q036","category":"direct_fact","reference_answer":"February 1, 2025"}
+{"id":"q037","source_id":"q037","category":"rule_application","reference_answer":"The seller is responsible for assessments through the closing date and the buyer from the day after closing."}
+{"id":"q038","source_id":"q038","category":"temporal_status","reference_answer":"One assessment, under its current single-unit classification"}
+{"id":"q039","source_id":"q039","category":"direct_fact","reference_answer":"A cross-reference error in Flagg's working notes about a 'Vickers GPS log' that is not relevant to the HOA matter. It should be disregarded."}
+{"id":"q040","source_id":"q040","category":"arithmetic","reference_answer":"157"}

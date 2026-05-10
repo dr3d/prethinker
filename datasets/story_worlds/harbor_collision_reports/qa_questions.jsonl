@@ -1,0 +1,40 @@
+{"category": "direct_fact", "id": "q001", "question": "When did the collision occur?", "source_id": "q001"}
+{"category": "direct_fact", "id": "q002", "question": "Who owns Heron's Wake?", "source_id": "q002"}
+{"category": "direct_fact", "id": "q003", "question": "Who owns Foundry Six?", "source_id": "q003"}
+{"category": "direct_fact", "id": "q004", "question": "What injury did Pavel Novak sustain?", "source_id": "q004"}
+{"category": "direct_fact", "id": "q005", "question": "Who convened the investigation?", "source_id": "q005"}
+{"category": "direct_fact", "id": "q006", "question": "How many sources submitted statements?", "source_id": "q006"}
+{"category": "direct_fact", "id": "q007", "question": "What speed does Vickers claim Heron's Wake was traveling?", "source_id": "q007"}
+{"category": "direct_fact", "id": "q008", "question": "What is the posted speed limit for the inner harbor?", "source_id": "q008"}
+{"category": "direct_fact", "id": "q009", "question": "What does Vickers attribute the collision to?", "source_id": "q009"}
+{"category": "temporal_status", "id": "q010", "question": "Has Vickers submitted his GPS log?", "source_id": "q010"}
+{"category": "direct_fact", "id": "q011", "question": "When did Novak hoist the anchor ball?", "source_id": "q011"}
+{"category": "temporal_status", "id": "q012", "question": "When did Novak last confirm the anchor ball was displayed?", "source_id": "q012"}
+{"category": "direct_fact", "id": "q013", "question": "Was Novak on deck at the time of collision?", "source_id": "q013"}
+{"category": "direct_fact", "id": "q014", "question": "What speed does Novak estimate for Heron's Wake?", "source_id": "q014"}
+{"category": "direct_fact", "id": "q015", "question": "Does Novak claim a horn signal was given?", "source_id": "q015"}
+{"category": "direct_fact", "id": "q016", "question": "What speed does Ghali estimate?", "source_id": "q016"}
+{"category": "claim_fact_separation", "id": "q017", "question": "Did Ghali observe the anchor ball on Foundry Six?", "source_id": "q017"}
+{"category": "claim_fact_separation", "id": "q018", "question": "Why can't Ghali confirm the anchor ball's absence?", "source_id": "q018"}
+{"category": "direct_fact", "id": "q019", "question": "Did Ghali hear a horn signal?", "source_id": "q019"}
+{"category": "direct_fact", "id": "q020", "question": "What does the CCTV speed estimate show?", "source_id": "q020"}
+{"category": "direct_fact", "id": "q021", "question": "What is the margin of error on the CCTV speed estimate?", "source_id": "q021"}
+{"category": "direct_fact", "id": "q022", "question": "Can the CCTV footage resolve the anchor ball question?", "source_id": "q022"}
+{"category": "direct_fact", "id": "q023", "question": "Does the CCTV show engine reversal?", "source_id": "q023"}
+{"category": "claim_fact_separation", "id": "q024", "question": "Has the Harbor Master determined that Heron's Wake exceeded the speed limit?", "source_id": "q024"}
+{"category": "authority", "id": "q025", "question": "Why didn't the Harbor Master issue a speed violation?", "source_id": "q025"}
+{"category": "structured_absence", "id": "q026", "question": "Has the Harbor Master made a finding on the anchor ball?", "source_id": "q026"}
+{"category": "authority", "id": "q027", "question": "What did the Harbor Master find about the horn signal?", "source_id": "q027"}
+{"category": "rule_application", "id": "q028", "question": "What horn signal should Vickers have sounded?", "source_id": "q028"}
+{"category": "rule_application", "id": "q029", "question": "What signal does one short blast indicate?", "source_id": "q029"}
+{"category": "authority", "id": "q030", "question": "Who is responsible for spill cleanup costs?", "source_id": "q030"}
+{"category": "direct_fact", "id": "q031", "question": "What is the estimated spill volume?", "source_id": "q031"}
+{"category": "temporal_status", "id": "q032", "question": "Is liability finalized?", "source_id": "q032"}
+{"category": "authority", "id": "q033", "question": "Is liability shared or assigned to one party?", "source_id": "q033"}
+{"category": "structured_absence", "id": "q034", "question": "What is the anchor ball's status at the moment of collision?", "source_id": "q034"}
+{"category": "claim_fact_separation", "id": "q035", "question": "Whose speed claim is most supported by the available evidence?", "source_id": "q035"}
+{"category": "claim_fact_separation", "id": "q036", "question": "Why is Novak's denial of the horn signal considered less credible than Ghali's confirmation?", "source_id": "q036"}
+{"category": "temporal_arithmetic", "id": "q037", "question": "What is the deadline for Vickers to submit the GPS log?", "source_id": "q037"}
+{"category": "temporal_status", "id": "q038", "question": "Has the GPS log been received as of August 28?", "source_id": "q038"}
+{"category": "rule_application", "id": "q039", "question": "What would it mean for liability if Foundry Six failed to display the anchor ball?", "source_id": "q039"}
+{"category": "structured_absence", "id": "q040", "question": "List all questions or factual disputes that remain unresolved at the end of the document.", "source_id": "q040"}

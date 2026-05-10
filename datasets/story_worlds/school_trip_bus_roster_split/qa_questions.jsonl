@@ -1,0 +1,40 @@
+{"category": "direct_lookup", "id": "q001", "question": "What was the trip date?", "source_id": "q001"}
+{"category": "direct_lookup", "id": "q002", "question": "Who is the school principal?", "source_id": "q002"}
+{"category": "direct_lookup", "id": "q003", "question": "Who is the school nurse?", "source_id": "q003"}
+{"category": "direct_lookup", "id": "q004", "question": "Who substituted for Mrs. Pruitt as chaperone on the day of the trip?", "source_id": "q004"}
+{"category": "direct_lookup", "id": "q005", "question": "What is the total student roster size for the trip?", "source_id": "q005"}
+{"category": "direct_lookup", "id": "q006", "question": "Who drove Bus 2?", "source_id": "q006"}
+{"category": "direct_lookup", "id": "q007", "question": "Who is the homeroom teacher for class 7A?", "source_id": "q007"}
+{"category": "direct_lookup", "id": "q008", "question": "What is the name of the venue's RFID wristband management system?", "source_id": "q008"}
+{"category": "provenance", "id": "q009", "question": "Which exhibit is the venue wristband scan log?", "source_id": "q009"}
+{"category": "provenance", "id": "q010", "question": "Which exhibit is the nurse's note about Devin Rodriguez?", "source_id": "q010"}
+{"category": "provenance", "id": "q011", "question": "Which exhibit is Calderon's teacher statement?", "source_id": "q011"}
+{"category": "provenance", "id": "q012", "question": "Which exhibit is the parent letter from the Marchetti family?", "source_id": "q012"}
+{"category": "provenance", "id": "q013", "question": "According to whose statement was Lila observed walking toward the bus loading area at approximately 2:33 PM?", "source_id": "q013"}
+{"category": "provenance", "id": "q014", "question": "Which source records the Bus 2 student loading count of 41 at 8:25 AM?", "source_id": "q014"}
+{"category": "supersession", "id": "q015", "question": "As of the day of the trip, who was on the chaperone roster of record for Bus 2?", "source_id": "q015"}
+{"category": "supersession", "id": "q016", "question": "Was Pruitt on the chaperone roster of record on the day of the trip?", "source_id": "q016"}
+{"category": "supersession", "id": "q017", "question": "After the morning-of bus swaps, how many students were on Bus 1?", "source_id": "q017"}
+{"category": "supersession", "id": "q018", "question": "In what specific way was the pre-swap bus manifest superseded by the post-swap manifest of record?", "source_id": "q018"}
+{"category": "supersession", "id": "q019", "question": "Did the April 18 draft trip plan govern lunch supervision arrangements?", "source_id": "q019"}
+{"category": "status_at_time", "id": "q020", "question": "As of 2:35 PM at the bus reload, what was the headcount discrepancy?", "source_id": "q020"}
+{"category": "status_at_time", "id": "q021", "question": "As of 12:35 PM at the lunch table check, what was the confirmed student count?", "source_id": "q021"}
+{"category": "status_at_time", "id": "q022", "question": "As of 1:30 PM, where was Devin Rodriguez and who was supervising him?", "source_id": "q022"}
+{"category": "status_at_time", "id": "q023", "question": "As of 2:38 PM, had Lila Marchetti been located?", "source_id": "q023"}
+{"category": "status_at_time", "id": "q024", "question": "As of packet date, has the May 1 protocol review been held?", "source_id": "q024"}
+{"category": "rule_application", "id": "q025", "question": "Per district policy FT-2024.3 §6.4, what is the required chaperone-to-student ratio for grade 7–8 field trips?", "source_id": "q025"}
+{"category": "rule_application", "id": "q026", "question": "Per FT-2024.3 §7.2, what is required at each major program transition?", "source_id": "q026"}
+{"category": "rule_application", "id": "q027", "question": "Was the trip's chaperone-to-student ratio (excluding the nurse) within policy?", "source_id": "q027"}
+{"category": "rule_application", "id": "q028", "question": "Per the chaperone roster of record on the day of the trip, how many adults were on the trip?", "source_id": "q028"}
+{"category": "rule_application", "id": "q029", "question": "Who has authority to determine whether the schoolhouse-demo supervision arrangement met district policy?", "source_id": "q029"}
+{"category": "count", "id": "q030", "question": "How many parent chaperones were on the chaperone roster as of April 22, 2026?", "source_id": "q030"}
+{"category": "count", "id": "q031", "question": "What was the elapsed time between Bus 2's first short headcount at 2:35 PM and the final confirmed headcount?", "source_id": "q031"}
+{"category": "count", "id": "q032", "question": "List the wristband scan events for Lila Marchetti between 2:30 PM and 2:45 PM.", "source_id": "q032"}
+{"category": "count", "id": "q033", "question": "How many distinct stations does the wristband scan log show Lila visited during the trip (Welcome through bus reload)?", "source_id": "q033"}
+{"category": "unresolved", "id": "q034", "question": "Has the school administration determined whether the schoolhouse-demo supervision arrangement met district policy?", "source_id": "q034"}
+{"category": "unresolved", "id": "q035", "question": "Has it been determined whether the schoolhouse-demo to bus reload transition is a \"major program transition\" under FT-2024.3 §7.2?", "source_id": "q035"}
+{"category": "unresolved", "id": "q036", "question": "Has the parent letter from the Marchetti family received a substantive determination?", "source_id": "q036"}
+{"category": "unresolved", "id": "q037", "question": "Does the packet clarify whether the nurse counts toward the chaperone-to-student ratio?", "source_id": "q037"}
+{"category": "cross_source_conflict", "id": "q038", "question": "Whitaker's statement says he observed Lila walking toward the bus loading area at 2:33 PM. The wristband scan log shows Lila scanned into Mill Station at 2:35 PM. How is this reconciled?", "source_id": "q038"}
+{"category": "cross_source_conflict", "id": "q039", "question": "The April 23 parent newsletter named Pruitt as a Bus 2 chaperone. The day-of chaperone roster names Yi instead. Which is currently authoritative, and why?", "source_id": "q039"}
+{"category": "cross_source_conflict", "id": "q040", "question": "The Bus 2 driver's manual count at 2:35 PM was 40, indicating one student short. The wristband scan log places Lila Marchetti at Mill Station entry at 2:35 PM. How are these two records reconciled?", "source_id": "q040"}

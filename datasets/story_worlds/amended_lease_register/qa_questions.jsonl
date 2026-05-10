@@ -1,0 +1,40 @@
+{"category": "current_state", "id": "q001", "question": "What is the current monthly rent for Kettner & Associates?", "source_id": "q001"}
+{"category": "direct_fact", "id": "q002", "question": "When does the Kettner lease expire?", "source_id": "q002"}
+{"category": "correction_provenance", "id": "q003", "question": "Why was Amendment A2's effective date corrected for Kettner?", "source_id": "q003"}
+{"category": "correction_provenance", "id": "q004", "question": "What is the corrected effective date of Kettner's rent increase to $4,800?", "source_id": "q004"}
+{"category": "arithmetic", "id": "q005", "question": "How much is the refund owed to Kettner?", "source_id": "q005"}
+{"category": "arithmetic", "id": "q006", "question": "How is the $600 refund calculated?", "source_id": "q006"}
+{"category": "current_state", "id": "q007", "question": "What is the current monthly rent for Primrose Day Nursery?", "source_id": "q007"}
+{"category": "current_state", "id": "q008", "question": "Is Courtyard B currently part of the Primrose lease?", "source_id": "q008"}
+{"category": "direct_fact", "id": "q009", "question": "Why was Courtyard B removed?", "source_id": "q009"}
+{"category": "authority", "id": "q010", "question": "Who authorized the original addition of Courtyard B?", "source_id": "q010"}
+{"category": "authority", "id": "q011", "question": "Who recommended against adding Courtyard B?", "source_id": "q011"}
+{"category": "current_state", "id": "q012", "question": "Can Primrose use any outdoor space currently?", "source_id": "q012"}
+{"category": "current_state", "id": "q013", "question": "Is the $2,900 draft rent reduction in effect?", "source_id": "q013"}
+{"category": "correction_provenance", "id": "q014", "question": "Why does the draft rent reduction have no legal effect?", "source_id": "q014"}
+{"category": "current_state", "id": "q015", "question": "What is the current monthly rent for Strand Electronics?", "source_id": "q015"}
+{"category": "current_state", "id": "q016", "question": "How many parking spaces does Strand have?", "source_id": "q016"}
+{"category": "current_state", "id": "q017", "question": "Where are Strand's parking spaces located?", "source_id": "q017"}
+{"category": "correction_provenance", "id": "q018", "question": "Why were 2 spaces moved from Lot B to Lot C?", "source_id": "q018"}
+{"category": "current_state", "id": "q019", "question": "Does Strand currently have a right of first refusal on Suite 342?", "source_id": "q019"}
+{"category": "direct_fact", "id": "q020", "question": "When was the right of first refusal retracted?", "source_id": "q020"}
+{"category": "rule_application", "id": "q021", "question": "What did the right of first refusal require Bramwell to do?", "source_id": "q021"}
+{"category": "authority", "id": "q022", "question": "Who retracted the right of first refusal?", "source_id": "q022"}
+{"category": "direct_fact", "id": "q023", "question": "When does the Strand lease expire?", "source_id": "q023"}
+{"category": "current_state", "id": "q024", "question": "Is Suite 420 currently occupied?", "source_id": "q024"}
+{"category": "direct_fact", "id": "q025", "question": "When did Holbrook Design's lease terminate?", "source_id": "q025"}
+{"category": "direct_fact", "id": "q026", "question": "Why did Holbrook's lease terminate?", "source_id": "q026"}
+{"category": "direct_fact", "id": "q027", "question": "How much was the early termination fee?", "source_id": "q027"}
+{"category": "current_state", "id": "q028", "question": "Is the Navarro letter of intent a binding lease?", "source_id": "q028"}
+{"category": "authority", "id": "q029", "question": "Who can authorize amendments involving common-area changes?", "source_id": "q029"}
+{"category": "authority", "id": "q030", "question": "Who authorized the Courtyard B supersession?", "source_id": "q030"}
+{"category": "direct_fact", "id": "q031", "question": "What is the rent for Primrose in the first extension year?", "source_id": "q031"}
+{"category": "direct_fact", "id": "q032", "question": "What is the rent for Primrose from September 2024 onward?", "source_id": "q032"}
+{"category": "authority", "id": "q033", "question": "Was Corr's recommendation followed on the Courtyard B addition?", "source_id": "q033"}
+{"category": "direct_fact", "id": "q034", "question": "What was Kettner's original lease expiry before any amendments?", "source_id": "q034"}
+{"category": "current_state", "id": "q035", "question": "What was Kettner's rent immediately before Amendment A2?", "source_id": "q035"}
+{"category": "direct_fact", "id": "q036", "question": "What was Strand's original parking allocation?", "source_id": "q036"}
+{"category": "authority", "id": "q037", "question": "Who is responsible for correcting the Lot B parking error?", "source_id": "q037"}
+{"category": "current_state", "id": "q038", "question": "Is the Courtyard C scheduling agreement part of the Primrose lease?", "source_id": "q038"}
+{"category": "authority", "id": "q039", "question": "What requires Board approval?", "source_id": "q039"}
+{"category": "enumeration", "id": "q040", "question": "List all items that have been corrected, superseded, voided, or retracted across the register.", "source_id": "q040"}

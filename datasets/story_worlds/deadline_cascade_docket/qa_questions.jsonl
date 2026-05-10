@@ -1,0 +1,40 @@
+{"category": "direct_fact", "id": "q001", "question": "When was the Notice of Violation issued?", "source_id": "q001"}
+{"category": "direct_fact", "id": "q002", "question": "What was the violation period?", "source_id": "q002"}
+{"category": "temporal_arithmetic", "id": "q003", "question": "What is the original response deadline?", "source_id": "q003"}
+{"category": "direct_fact", "id": "q004", "question": "How many calendar days does the respondent have to file a response?", "source_id": "q004"}
+{"category": "direct_fact", "id": "q005", "question": "When did Granger file the extension request?", "source_id": "q005"}
+{"category": "temporal_arithmetic", "id": "q006", "question": "Was the extension request filed at least 7 calendar days before the original deadline?", "source_id": "q006"}
+{"category": "authority", "id": "q007", "question": "Who granted the extension?", "source_id": "q007"}
+{"category": "temporal_arithmetic", "id": "q008", "question": "What is the extended response deadline?", "source_id": "q008"}
+{"category": "temporal_arithmetic", "id": "q009", "question": "How is the extended deadline calculated?", "source_id": "q009"}
+{"category": "temporal_status", "id": "q010", "question": "Did Granger file the response by the extended deadline?", "source_id": "q010"}
+{"category": "direct_fact", "id": "q011", "question": "What did Granger's response include?", "source_id": "q011"}
+{"category": "temporal_arithmetic", "id": "q012", "question": "What is the Compliance Plan deadline?", "source_id": "q012"}
+{"category": "rule_application", "id": "q013", "question": "Does the compliance plan deadline roll over to Monday because August 31 is a Sunday?", "source_id": "q013"}
+{"category": "direct_fact", "id": "q014", "question": "When did Granger submit the original Compliance Plan?", "source_id": "q014"}
+{"category": "temporal_status", "id": "q015", "question": "Was the original Compliance Plan submitted on time?", "source_id": "q015"}
+{"category": "temporal_arithmetic", "id": "q016", "question": "What is the Board review period for the original Compliance Plan?", "source_id": "q016"}
+{"category": "temporal_arithmetic", "id": "q017", "question": "When does the Board review period end?", "source_id": "q017"}
+{"category": "direct_fact", "id": "q018", "question": "What was the Board's decision on the original Compliance Plan?", "source_id": "q018"}
+{"category": "direct_fact", "id": "q019", "question": "What was the reason for rejection?", "source_id": "q019"}
+{"category": "rule_application", "id": "q020", "question": "What is the appeal window for the rejection?", "source_id": "q020"}
+{"category": "temporal_arithmetic", "id": "q021", "question": "What is the appeal deadline date?", "source_id": "q021"}
+{"category": "temporal_arithmetic", "id": "q022", "question": "How is the appeal deadline calculated?", "source_id": "q022"}
+{"category": "temporal_arithmetic", "id": "q023", "question": "Do any Board holidays fall within the appeal counting window?", "source_id": "q023"}
+{"category": "direct_fact", "id": "q024", "question": "When did Granger file the revised Compliance Plan?", "source_id": "q024"}
+{"category": "temporal_arithmetic", "id": "q025", "question": "What is the deadline for filing the revised plan?", "source_id": "q025"}
+{"category": "temporal_status", "id": "q026", "question": "Was the revised plan filed on time?", "source_id": "q026"}
+{"category": "direct_fact", "id": "q027", "question": "What does the revised plan propose for monitoring frequency?", "source_id": "q027"}
+{"category": "direct_fact", "id": "q028", "question": "When did Granger file the appeal?", "source_id": "q028"}
+{"category": "temporal_status", "id": "q029", "question": "Was the appeal filed within the appeal window?", "source_id": "q029"}
+{"category": "rule_application", "id": "q030", "question": "Can Granger have both a revised plan and an appeal active simultaneously?", "source_id": "q030"}
+{"category": "rule_application", "id": "q031", "question": "Has the penalty assessment clock started?", "source_id": "q031"}
+{"category": "rule_application", "id": "q032", "question": "Why hasn't the penalty clock started?", "source_id": "q032"}
+{"category": "rule_application", "id": "q033", "question": "What is the tolling effect of the appeal on the penalty clock?", "source_id": "q033"}
+{"category": "temporal_arithmetic", "id": "q034", "question": "When must the Board act on the revised Compliance Plan?", "source_id": "q034"}
+{"category": "rule_application", "id": "q035", "question": "What happens if the Board takes no action on the revised plan by October 9?", "source_id": "q035"}
+{"category": "authority", "id": "q036", "question": "Has Inspector Baek made a compliance determination?", "source_id": "q036"}
+{"category": "authority", "id": "q037", "question": "Who can issue a formal compliance determination?", "source_id": "q037"}
+{"category": "direct_fact", "id": "q038", "question": "What sampling frequency has Granger implemented on its own initiative?", "source_id": "q038"}
+{"category": "temporal_status", "id": "q039", "question": "What is the docket status of the appeal as of September 30?", "source_id": "q039"}
+{"category": "rule_application", "id": "q040", "question": "If the Board rejects the revised plan, what happens next?", "source_id": "q040"}

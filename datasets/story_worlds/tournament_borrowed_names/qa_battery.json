@@ -1,0 +1,322 @@
+[
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q001",
+    "question": "Who won the 2025 tournament?",
+    "reference_answer": "Fox (Tamsin Jupp)",
+    "source_id": "q001"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q002",
+    "question": "What banner did Tamsin Jupp compete under?",
+    "reference_answer": "Fox",
+    "source_id": "q002"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q003",
+    "question": "Who is the current holder of the Stag banner?",
+    "reference_answer": "Nessa Calloway (2025)",
+    "source_id": "q003"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q004",
+    "question": "Who held the Stag banner in 2023?",
+    "reference_answer": "Bryce Emmet. He held Stag from 2022 to 2024 and passed it to Calloway for 2025.",
+    "source_id": "q004"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q005",
+    "question": "Who is the current holder of the Owl banner?",
+    "reference_answer": "Orla Venn (2025)",
+    "source_id": "q005"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q006",
+    "question": "Who won the tournament under the Owl banner in 2023?",
+    "reference_answer": "Kester Mace, who held the Owl banner from 2020 to 2024",
+    "source_id": "q006"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q007",
+    "question": "Does the current Owl holder have any championship record?",
+    "reference_answer": "No. Venn is the current Owl and has no championship record. The Owl's 2023 championship was Mace's, not Venn's.",
+    "source_id": "q007"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q008",
+    "question": "Why did Kester Mace change from Owl to Raven?",
+    "reference_answer": "He chose to pass Owl to Orla Venn and created a new banner, Raven.",
+    "source_id": "q008"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q009",
+    "question": "What banner does Bryce Emmet now compete under?",
+    "reference_answer": "Kingfisher (created new for 2025 after giving up Stag)",
+    "source_id": "q009"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q010",
+    "question": "Who was eliminated after Day 1?",
+    "reference_answer": "Owl (Orla Venn) and Kingfisher (Bryce Emmet)",
+    "source_id": "q010"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q011",
+    "question": "What was the scoring error in the qualifying totals?",
+    "reference_answer": "The original scorecard listed Heron (566) at rank 3 and Raven (567) at rank 4, but Raven's total is higher than Heron's. The ranks should be swapped.",
+    "source_id": "q011"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q012",
+    "question": "What was Raven's corrected qualifying rank?",
+    "reference_answer": "Rank 3 (corrected from original rank 4)",
+    "source_id": "q012"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q013",
+    "question": "Did Sefton Darke's protest of the ranking correction succeed?",
+    "reference_answer": "No. Darke protested but the Marshal confirmed the correction was arithmetic, not a judgment call. Darke withdrew the protest.",
+    "source_id": "q013"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q014",
+    "question": "Who served as assistant range officer on Day 2?",
+    "reference_answer": "Bryce Emmet (Kingfisher, eliminated)",
+    "source_id": "q014"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q015",
+    "question": "Was Bryce Emmet still a competitor on Day 2?",
+    "reference_answer": "He was registered as a competitor (eliminated) and served as assistant range officer. He did not compete on Day 2.",
+    "source_id": "q015"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q016",
+    "question": "Who served as substitute scorer for the final?",
+    "reference_answer": "Orla Venn, substituting for Ingrid Paal who had a scheduling conflict",
+    "source_id": "q016"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q017",
+    "question": "Did Orla Venn compete on Day 2?",
+    "reference_answer": "No. She was eliminated on Day 1 and served as substitute scorer on Day 2.",
+    "source_id": "q017"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q018",
+    "question": "Who did the Fox face in the semifinal?",
+    "reference_answer": "Raven (Kester Mace). Fox won 104–98.",
+    "source_id": "q018"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q019",
+    "question": "Who did the Stag face in the semifinal?",
+    "reference_answer": "Heron (Sefton Darke). Stag won 101–94.",
+    "source_id": "q019"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q020",
+    "question": "What happened to Darke's 8th arrow?",
+    "reference_answer": "It was released during a wind gust and struck the target boss frame, scoring zero.",
+    "source_id": "q020"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q021",
+    "question": "What did the Marshal rule about Darke's wind-affected arrow?",
+    "reference_answer": "That it was a valid shot scoring zero, not a misfire. The shot stands as scored.",
+    "source_id": "q021"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q022",
+    "question": "Why didn't Bryce Emmet call a hold during the wind gust?",
+    "reference_answer": "Because the gust arrived during the release, not before, so he could not call a hold in time.",
+    "source_id": "q022"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q023",
+    "question": "Did Darke's protest of the wind ruling succeed?",
+    "reference_answer": "No. The protest was noted but denied.",
+    "source_id": "q023"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q024",
+    "question": "How many protests did Darke file during the tournament?",
+    "reference_answer": "Two: one against the qualifying rank correction, one against the wind-affected arrow ruling. Both were denied.",
+    "source_id": "q024"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q025",
+    "question": "What was the final match score?",
+    "reference_answer": "Fox 108, Stag 106",
+    "source_id": "q025"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q026",
+    "question": "Who certified the final match scores?",
+    "reference_answer": "Substitute scorer Orla Venn",
+    "source_id": "q026"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q027",
+    "question": "What is Nessa Calloway's qualifying total?",
+    "reference_answer": "585 (298 + 287)",
+    "source_id": "q027"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q028",
+    "question": "What is Kester Mace's qualifying total?",
+    "reference_answer": "567 (289 + 278)",
+    "source_id": "q028"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q029",
+    "question": "What is the corrected rank order of the top four?",
+    "reference_answer": "1st Fox (597), 2nd Stag (585), 3rd Raven (567), 4th Heron (566)",
+    "source_id": "q029"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q030",
+    "question": "Who won the tournament in 2020?",
+    "reference_answer": "Kester Mace, competing under the Owl banner",
+    "source_id": "q030"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q031",
+    "question": "Is the 2020 Owl winner the same person as the 2025 Owl?",
+    "reference_answer": "No. The 2020 Owl was Kester Mace. The 2025 Owl is Orla Venn. They are different people.",
+    "source_id": "q031"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q032",
+    "question": "Who held the Heron banner before Sefton Darke?",
+    "reference_answer": "Ingrid Paal (2019–2024)",
+    "source_id": "q032"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q033",
+    "question": "Has Tamsin Jupp held the Fox banner continuously?",
+    "reference_answer": "Yes, from 2021 through 2025 (retained own banner)",
+    "source_id": "q033"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q034",
+    "question": "What was the Fox's Round 1 score?",
+    "reference_answer": "312",
+    "source_id": "q034"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q035",
+    "question": "What was the Fox's Round 2 score?",
+    "reference_answer": "285",
+    "source_id": "q035"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q036",
+    "question": "In which role was Bryce Emmet acting when the wind incident occurred?",
+    "reference_answer": "Assistant range officer (not as a competitor — he was eliminated)",
+    "source_id": "q036"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q037",
+    "question": "Was there a conflict of interest in Emmet's dual role?",
+    "reference_answer": "No conflict-of-interest objections were filed. The Marshal's closing notes state Emmet and Venn served without conflict-of-interest objections.",
+    "source_id": "q037"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q038",
+    "question": "Were any safety incidents reported?",
+    "reference_answer": "No. No safety incidents were reported. The wind-affected arrow was ruled a valid shot, not a safety incident.",
+    "source_id": "q038"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q039",
+    "question": "Does the Stag's 2022 championship belong to Calloway or Emmet?",
+    "reference_answer": "Bryce Emmet. He held the Stag in 2022 when the championship was won. Calloway is the 2025 Stag holder but the 2022 championship belongs to Emmet.",
+    "source_id": "q039"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q040",
+    "question": "List all people who held more than one role during the 2025 tournament.",
+    "reference_answer": "Bryce Emmet (competitor as Kingfisher AND assistant range officer on Day 2) and Orla Venn (competitor as Owl AND substitute scorer on Day 2)",
+    "source_id": "q040"
+  }
+]

@@ -1,0 +1,41 @@
+﻿{"id":"q001","source_id":"q001","category":"direct_lookup","reference_answer":"247 Maple Crest Drive (Lot 14, Block 22, Parcel 0140)."}
+{"id":"q002","source_id":"q002","category":"direct_lookup","reference_answer":"247 Maple Crest Properties, LLC."}
+{"id":"q003","source_id":"q003","category":"direct_lookup","reference_answer":"Tree Warden Marisol Hesselbach."}
+{"id":"q004","source_id":"q004","category":"direct_lookup","reference_answer":"TR-2026-014."}
+{"id":"q005","source_id":"q005","category":"direct_lookup","reference_answer":"Dr. Robin Tahir, ISA Certified Arborist (NE-7421A)."}
+{"id":"q006","source_id":"q006","category":"direct_lookup","reference_answer":"April 25, 2026."}
+{"id":"q007","source_id":"q007","category":"direct_lookup","reference_answer":"Adriana Brennan, Esq."}
+{"id":"q008","source_id":"q008","category":"direct_lookup","reference_answer":"Krzysztof Kowalski."}
+{"id":"q009","source_id":"q009","category":"provenance","reference_answer":"Exhibit T-1."}
+{"id":"q010","source_id":"q010","category":"provenance","reference_answer":"Kowalski's email of April 28, 2026 (Exhibit K-1) reports the felling at approximately 10:40 EDT on April 21. The removal is corroborated by City Inspector Helena Ruiz's April 26 site photos (Exhibit Ph-2) and Dr. Tahir's April 30 post-removal inspection (Exhibit T-2)."}
+{"id":"q011","source_id":"q011","category":"provenance","reference_answer":"Exhibit P-1, Joaquin Estevez's statement dated April 30, 2026."}
+{"id":"q012","source_id":"q012","category":"provenance","reference_answer":"Exhibit Ph-1."}
+{"id":"q013","source_id":"q013","category":"provenance","reference_answer":"Exhibit C-1."}
+{"id":"q014","source_id":"q014","category":"provenance","reference_answer":"Dr. Robin Tahir's post-removal inspection of April 30, 2026 (Exhibit T-2)."}
+{"id":"q015","source_id":"q015","category":"supersession","reference_answer":"7 protected trees, per the amendment TR-2026-014-A1, effective April 25, 2026."}
+{"id":"q016","source_id":"q016","category":"supersession","reference_answer":"6 protected trees."}
+{"id":"q017","source_id":"q017","category":"supersession","reference_answer":"Acer platanoides (Norway Maple), 22 inches DBH; classified as invasive and eligible for removal."}
+{"id":"q018","source_id":"q018","category":"supersession","reference_answer":"Acer saccharum (Sugar Maple), 24.5 inches DBH; classified as protected."}
+{"id":"q019","source_id":"q019","category":"supersession","reference_answer":"No. The April 11 draft was withdrawn April 14, 2026 and is retained for procedural records only; it did not govern any decision."}
+{"id":"q020","source_id":"q020","category":"status_at_time","reference_answer":"The original permit TR-2026-014. The amendment was filed April 18 but not issued until April 25, four days after the felling."}
+{"id":"q021","source_id":"q021","category":"status_at_time","reference_answer":"No. Pending the May 12, 2026 hearing; per the City Solicitor's May 4 memo, no determination is issued at this time."}
+{"id":"q022","source_id":"q022","category":"status_at_time","reference_answer":"Project manager Joaquin Estevez, per his April 30 statement. The contractor (Kowalski & Sons) had not been notified of the report at that time."}
+{"id":"q023","source_id":"q023","category":"status_at_time","reference_answer":"No. Originally scheduled for May 5, 2026, deferred pending the hearing."}
+{"id":"q024","source_id":"q024","category":"status_at_time","reference_answer":"Tree #19 was protected under the operative permit (the amendment) effective at issuance on April 25, 2026 — but tree #19 had already been felled on April 21, four days before amendment issuance."}
+{"id":"q025","source_id":"q025","category":"rule_application","reference_answer":"18 inches DBH. A Sugar Maple with DBH ≥ 18 inches qualifies under §18-12(b)(ii)."}
+{"id":"q026","source_id":"q026","category":"rule_application","reference_answer":"3:1 replacement ratio: three trees of comparable species and minimum 3-inch caliper at planting, to be planted within one year of violation determination."}
+{"id":"q027","source_id":"q027","category":"rule_application","reference_answer":"No. Norway Maple (Acer platanoides) is listed in §18-13(c) as an invasive species explicitly excluded from heritage protection."}
+{"id":"q028","source_id":"q028","category":"rule_application","reference_answer":"Whether Kowalski & Sons (or the applicant) had actual knowledge of Dr. Tahir's findings before April 21, 2026 — the actual-knowledge question."}
+{"id":"q029","source_id":"q029","category":"rule_application","reference_answer":"Native species with DBH ≥ 24 inches. At 24.5 inches DBH, tree #19 (a native Sugar Maple) independently qualifies under §18-12(b)(i) without reliance on the species-specific 18-inch threshold of §18-12(b)(ii)."}
+{"id":"q030","source_id":"q030","category":"count","reference_answer":"23 trees (out of 25 trees on the property; 2 are below the 6-inch DBH threshold)."}
+{"id":"q031","source_id":"q031","category":"count","reference_answer":"16 trees."}
+{"id":"q032","source_id":"q032","category":"count","reference_answer":"Seven trees: #4, #11, #14, #15, #19, #21, and #22."}
+{"id":"q033","source_id":"q033","category":"count","reference_answer":"Nine: T-1, T-2, K-1, P-1, Ph-1, Ph-2, Ph-3, O-1, and C-1."}
+{"id":"q034","source_id":"q034","category":"unresolved","reference_answer":"No. Pending the May 12 hearing; the City Solicitor's May 4 memo states no determination is issued at this time."}
+{"id":"q035","source_id":"q035","category":"unresolved","reference_answer":"No. Per the City Solicitor's memo, the actual-knowledge question is not resolved on this record."}
+{"id":"q036","source_id":"q036","category":"unresolved","reference_answer":"No. The 3:1 replacement requirement is contingent on the violation determination, which has not been made."}
+{"id":"q037","source_id":"q037","category":"unresolved","reference_answer":"No. Scheduled for May 12, 2026 and not yet held."}
+{"id":"q038","source_id":"q038","category":"cross_source_conflict","reference_answer":"Sugar Maple (Acer saccharum) is currently authoritative, per Dr. Tahir's April 14 certified re-survey (Exhibit T-1) and corroborated by his April 30 post-removal stump examination (Exhibit T-2). Supporting evidence: bark plate pattern, sap analysis (clear, not milky), bud and twig morphology, broadly serrated U-shaped sinus pattern, and stump growth-ring spacing all consistent with Sugar Maple. Apex's March 24 identification was based primarily on canopy silhouette of an unleafed tree."}
+{"id":"q039","source_id":"q039","category":"cross_source_conflict","reference_answer":"Per the City Solicitor's memo, the resolution turns substantially on whether Kowalski & Sons (or the applicant) had actual knowledge of Dr. Tahir's findings before April 21, 2026. The contractor's April 28 email and the project manager's April 30 statement together indicate Estevez did not notify Kowalski & Sons before April 21; the actual-knowledge question is not resolved on this record."}
+{"id":"q040","source_id":"q040","category":"cross_source_conflict","reference_answer":"24.5 inches DBH per Dr. Tahir's measurement at standardized DBH height (4.5 feet above grade per ANSI A300 Part 7). Apex's 22-inch measurement appears to have been taken below the standardized height, per Dr. Tahir's report. The 26.2-inch stump diameter at approximately 6 inches above grade observed at the post-removal inspection is consistent with 24.5 inches at standard DBH height."}
+

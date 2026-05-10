@@ -1,6 +1,6 @@
 # Prethinker Project Horizon
 
-Last updated: 2026-05-06
+Last updated: 2026-05-09
 
 Prethinker's current aim is governed semantic intake into auditable symbolic
 state.
@@ -24,6 +24,11 @@ The current POWER/NITRO lab is the research rig, not the product boundary. A
 future hosted lane must prove model-transfer evidence before it replaces the
 local 35B workhorse.
 
+The strategic product direction is edge-class governed memory: governance comes
+from architecture rather than model size. See
+[Edge Governance Positioning](https://github.com/dr3d/prethinker/blob/main/docs/EDGE_GOVERNANCE_POSITIONING.md)
+for the category frame and the claims that still need measurement.
+
 For the detailed technical contract, see:
 
 - [Semantic IR Mapper Spec](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_MAPPER_SPEC.md)
@@ -31,6 +36,7 @@ For the detailed technical contract, see:
 - [Domain Profile Catalog](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PROFILE_CATALOG.md)
 - [Public Docs Guide](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md)
 - [Portability And Model Transfer](https://github.com/dr3d/prethinker/blob/main/docs/PORTABILITY_AND_MODEL_TRANSFER.md)
+- [Edge Governance Positioning](https://github.com/dr3d/prethinker/blob/main/docs/EDGE_GOVERNANCE_POSITIONING.md)
 
 ## What Exists Today
 
@@ -50,11 +56,13 @@ Prethinker can make language-to-state mutation more explicit, testable, and
 auditable than a normal freeform chat transcript.
 
 The measured trajectory is broader than a toy demo. The instrument has been
-calibrated against `25` hostile benchmarks across `14` domain types. The
-current surgical fixture batch covers `9` fixtures and `303` questions, with
-`284` exact answers (`94%`), only `3` misses, `7` zero-miss fixtures, Fenmore
-and Greywell both perfect, and zero unauthorized writes across the checked
-corpus. The evidence trail lives in
+calibrated against hostile benchmarks across many domain types. A prior
+surgical fixture batch covers `9` fixtures and `303` questions, with `284`
+exact answers (`94%`), only `3` misses, `7` zero-miss fixtures, Fenmore and
+Greywell both perfect, and zero unauthorized writes across the checked corpus.
+The newest cold-injected 10-fixture story-world batch now has a row-gated
+high-water of `361 / 400` exact (`90.25%`), also with zero unauthorized QA
+writes in the contributing runs. The evidence trail lives in
 [Semantic Instrument](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_INSTRUMENT.md)
 and the active progress journals.
 
@@ -95,6 +103,27 @@ eventually support richer symbolic material:
   observation, user claim, document text, model inference, contradiction,
   retraction, and derived consequence.
 
+One deeper way to state the horizon is this: Prethinker should eventually turn
+language into a governed spreadsheet of the world.
+
+In that spreadsheet, admitted facts are filled cells. Degrees of freedom are
+blank cells with declared types, constraints, ranges, dependencies, and
+unknown/ambiguous status. Propagation is the governed recomputation of what
+must be true, what may be true, what is now impossible, and which missing cell
+would need clarification before an answer can be trusted.
+
+That matters because useful state is not only "what do we know?" It is also:
+
+- which slots are still unconstrained;
+- which constraints bind those slots;
+- which answers are direct, derived, blocked, or underdetermined;
+- which downstream conclusions would change if one admitted cell changes.
+
+The product magic is not silent omniscience. It is a live, inspectable
+constraint sheet under ordinary language: known state propagates, degrees of
+freedom stay visible, and derived answers show their supporting cells instead
+of pretending to be directly observed truth.
+
 The important part is not any one solver or representation.
 
 The important part is the boundary:
@@ -103,6 +132,8 @@ The important part is the boundary:
 language proposes
 admission governs
 state records
+constraints bind
+degrees of freedom remain visible
 solvers may consume
 dependencies stay visible
 ```

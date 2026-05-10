@@ -1,0 +1,322 @@
+[
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q001",
+    "question": "Who recovered the bell?",
+    "reference_answer": "Emil Strand, skipper of the fishing vessel Cormorant",
+    "source_id": "q001"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q002",
+    "question": "Where was the bell recovered?",
+    "reference_answer": "Approximately 1.4 nautical miles offshore of Dunmore Head",
+    "source_id": "q002"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q003",
+    "question": "What partial inscription is visible on the bell?",
+    "reference_answer": "'...RION 18...'",
+    "source_id": "q003"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q004",
+    "question": "What vessel does Strand believe the bell is from?",
+    "reference_answer": "The Dorian, specifically 'DORIAN 1847' or 'DORIAN 1857'",
+    "source_id": "q004"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q005",
+    "question": "Did Strand photograph the bell on the seabed?",
+    "reference_answer": "No. His first photographs were taken on deck after recovery.",
+    "source_id": "q005"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q006",
+    "question": "Who does Meridian Maritime Insurance represent?",
+    "reference_answer": "The insured owner of the wreck of the cargo vessel Dorian",
+    "source_id": "q006"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q007",
+    "question": "What is Meridian's basis for claiming the bell?",
+    "reference_answer": "Subrogation rights from the 1854 insurance payout — having paid the claim, Meridian asserts ownership of wreck components transferred to them.",
+    "source_id": "q007"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q008",
+    "question": "When did Meridian pay the insurance claim on the Dorian?",
+    "reference_answer": "1854",
+    "source_id": "q008"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q009",
+    "question": "Has the Board confirmed the bell is from the Dorian?",
+    "reference_answer": "No. The Board cannot determine that the bell is from the Dorian. The inscription matches multiple vessel names.",
+    "source_id": "q009"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q010",
+    "question": "How many vessels with names ending in \"-RION\" were lost near Dunmore Head between 1830 and 1870?",
+    "reference_answer": "Three",
+    "source_id": "q010"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q011",
+    "question": "Name the three vessels.",
+    "reference_answer": "Dorian (1853, cargo vessel), Dorien (1861, fishing smack), and Clarion (1844, coastal trader)",
+    "source_id": "q011"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q012",
+    "question": "Which of the three was insured by Meridian?",
+    "reference_answer": "Only the Dorian",
+    "source_id": "q012"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q013",
+    "question": "Can Dr. Hale confirm the bell is from the Dorian?",
+    "reference_answer": "No. He states he cannot confirm the identification without additional evidence such as a foundry mark, manifest reference, or corroborating artifact.",
+    "source_id": "q013"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q014",
+    "question": "What alternative vessel names could the inscription represent?",
+    "reference_answer": "DORIAN, DORIEN, ORION, CLARION, or other names ending in '-RION'",
+    "source_id": "q014"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q015",
+    "question": "What is the Dunmore Protected Maritime Zone boundary?",
+    "reference_answer": "1.5 nautical miles offshore",
+    "source_id": "q015"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q016",
+    "question": "Was the bell recovered inside or outside the zone?",
+    "reference_answer": "Inside the zone (1.4 nautical miles, within the 1.5-mile boundary)",
+    "source_id": "q016"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q017",
+    "question": "What statute governs artifacts from the Protected Maritime Zone?",
+    "reference_answer": "The Coastal Heritage Act 2003, Section 14",
+    "source_id": "q017"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q018",
+    "question": "Who currently has physical custody of the bell?",
+    "reference_answer": "The Dunmore Maritime Heritage Trust, under a custodial arrangement granted by the Board",
+    "source_id": "q018"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q019",
+    "question": "Does custody of the bell mean the Heritage Trust owns it?",
+    "reference_answer": "No. The Board explicitly states this is a custodial arrangement, not a finding of ownership.",
+    "source_id": "q019"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q020",
+    "question": "Has the Board determined who owns the bell?",
+    "reference_answer": "No. No ownership has been determined.",
+    "source_id": "q020"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q021",
+    "question": "Has the Board authorized a salvage payment to Strand?",
+    "reference_answer": "No. No salvage payment has been authorized.",
+    "source_id": "q021"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q022",
+    "question": "Are Strand's salvage rights extinguished by the heritage hold?",
+    "reference_answer": "No. The Board states salvor's rights are not extinguished by the heritage hold, but disposition is deferred.",
+    "source_id": "q022"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q023",
+    "question": "Is Meridian's claim accepted or rejected?",
+    "reference_answer": "Neither. Meridian's claim is contingent on identification of the bell as from the Dorian. The Board defers the claim.",
+    "source_id": "q023"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q024",
+    "question": "What must happen before Meridian can reassert its claim?",
+    "reference_answer": "The bell must be confirmed as from the Dorian",
+    "source_id": "q024"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q025",
+    "question": "Has the Board ruled on whether 1854 subrogation rights survive against the 2003 heritage statute?",
+    "reference_answer": "No. The Board explicitly makes no finding on this question.",
+    "source_id": "q025"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q026",
+    "question": "What did the independent metallurgical report conclude about the bell's origin?",
+    "reference_answer": "That the bell is consistent with mid-19th century British foundry work but not uniquely identifiable to a specific vessel. The inscription is too damaged for definitive reading.",
+    "source_id": "q026"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q027",
+    "question": "What foundry does the report suggest?",
+    "reference_answer": "The Whitechapel Bell Foundry or a similar British foundry",
+    "source_id": "q027"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q028",
+    "question": "What date range does the metallurgical report give?",
+    "reference_answer": "Circa 1840-1870",
+    "source_id": "q028"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q029",
+    "question": "According to Dr. Hale, what should happen to the bell regardless of ownership?",
+    "reference_answer": "That it should not leave Dunmore until heritage review is complete, regardless of ownership",
+    "source_id": "q029"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q030",
+    "question": "What is the deadline for Dr. Hale to complete his analysis?",
+    "reference_answer": "90 days from the Board's determination (April 28, 2025)",
+    "source_id": "q030"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q031",
+    "question": "What happens if identification remains inconclusive after 90 days?",
+    "reference_answer": "The Board will schedule a final determination hearing",
+    "source_id": "q031"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q032",
+    "question": "Did Creel acknowledge that the inscription could match other vessels?",
+    "reference_answer": "Yes. She acknowledged the inscription is consistent with the Dorian but also consistent with other vessel names.",
+    "source_id": "q032"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q033",
+    "question": "What year was the Dorian lost?",
+    "reference_answer": "1853",
+    "source_id": "q033"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q034",
+    "question": "What year was the Dorien lost?",
+    "reference_answer": "1861",
+    "source_id": "q034"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q035",
+    "question": "What type of vessel was the Clarion?",
+    "reference_answer": "A coastal trader",
+    "source_id": "q035"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q036",
+    "question": "Has a heritage designation been finalized?",
+    "reference_answer": "No. No heritage designation has been finalized.",
+    "source_id": "q036"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q037",
+    "question": "What evidence did Strand NOT produce?",
+    "reference_answer": "A marine archaeologist's assessment and in-situ photographs of the bell on the seabed",
+    "source_id": "q037"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q038",
+    "question": "What is the Board's official designation for the bell?",
+    "reference_answer": "'Unidentified, possibly from the Dorian or another vessel'",
+    "source_id": "q038"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q039",
+    "question": "Is the matter resolved at the end of the document?",
+    "reference_answer": "No. The matter remains open with no ownership, salvage payment, or heritage designation determined.",
+    "source_id": "q039"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q040",
+    "question": "List all questions or claims that remain unresolved at the end of the document.",
+    "reference_answer": "The bell's identity (Dorian or other vessel), ownership (Strand's salvage claim, Meridian's subrogation, Heritage Trust custody), whether 1854 subrogation survives against 2003 heritage statute, heritage designation status, and Dr. Hale's 90-day analysis.",
+    "source_id": "q040"
+  }
+]

@@ -1,4 +1,5 @@
 from pathlib import Path
+import zipfile
 
 from scripts.validate_fixture_intake import build_report
 
@@ -56,3 +57,62 @@ def test_fixture_intake_validator_requires_forty_rows(tmp_path: Path) -> None:
 
     assert report["summary"]["failed_fixture_count"] == 1
     assert "qa_row_count_expected_40_got_1" in report["fixtures"][0]["errors"]
+
+
+def test_fixture_intake_validator_accepts_sealed_story_zip_shape(tmp_path: Path) -> None:
+    fixture = tmp_path / "nested_puppet_court"
+    inner = fixture / "nested_puppet_court"
+    inner.mkdir(parents=True)
+    story = "The nested court record keeps fiction and testimony apart. "
+    (inner / "README.md").write_text("# Nested Puppet Court\n", encoding="utf-8")
+    (inner / "story.md").write_text(story * 160, encoding="utf-8")
+    (inner / "challenge_strategy.md").write_text("Attacks quoted-world contamination.\n", encoding="utf-8")
+    (inner / "anti_leakage_manifest.md").write_text("Questions are separate from private answers.\n", encoding="utf-8")
+    (inner / "qa_questions.md").write_text(
+        "\n".join(f"q{i:03d}: Question {i}?" for i in range(1, 41)) + "\n",
+        encoding="utf-8",
+    )
+    (inner / "qa_answers_private.jsonl").write_text(
+        "\n".join(f'{{"id":"q{i:03d}","reference_answer":"Answer {i}."}}' for i in range(1, 41)) + "\n",
+        encoding="utf-8",
+    )
+    archive = tmp_path / "nested_puppet_court.zip"
+    with zipfile.ZipFile(archive, "w") as zipf:
+        for path in inner.iterdir():
+            zipf.write(path, arcname=f"nested_puppet_court/{path.name}")
+
+    report = build_report(fixture_dirs=[archive])
+
+    assert report["summary"]["passed_fixture_count"] == 1
+    fixture_report = report["fixtures"][0]
+    assert fixture_report["fixture"] == "nested_puppet_court"
+    assert fixture_report["files"]["format"] == "sealed_story_zip_v1"
+    assert fixture_report["qa"]["row_count"] == 40
+
+
+def test_fixture_intake_validator_accepts_isolated_markdown_oracle_shape(tmp_path: Path) -> None:
+    fixture = tmp_path / "identifier_ledger_torture"
+    fixture.mkdir(parents=True)
+    sentence = "The evidence-room audit preserves exact labels and custody facts. "
+    (fixture / "source.md").write_text(sentence * 220, encoding="utf-8")
+    (fixture / "qa.md").write_text(
+        "\n".join(f"**q{i:03d}.** Question {i}?" for i in range(1, 41)) + "\n",
+        encoding="utf-8",
+    )
+    (fixture / "oracle.jsonl").write_text(
+        "\n".join(
+            f'{{"id":"q{i:03d}","source_id":"q{i:03d}","category":"lookup","reference_answer":"Answer {i}."}}'
+            for i in range(1, 41)
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    (fixture / "strategy.md").write_text("Attacks exact identifier preservation.\n", encoding="utf-8")
+    (fixture / "anti_leakage_manifest.md").write_text("Answers are separated for scoring.\n", encoding="utf-8")
+
+    report = build_report(fixture_dirs=[fixture])
+
+    assert report["summary"]["passed_fixture_count"] == 1
+    fixture_report = report["fixtures"][0]
+    assert fixture_report["files"]["format"] == "source_qa_md_oracle_jsonl_v1"
+    assert fixture_report["qa"]["row_count"] == 40

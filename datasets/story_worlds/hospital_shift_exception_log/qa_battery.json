@@ -1,0 +1,322 @@
+[
+  {
+    "behavior": "",
+    "category": "direct_lookup",
+    "id": "q001",
+    "question": "Who was the charge nurse on 5 East day shift on March 14, 2026?",
+    "reference_answer": "Patricia Halverson, RN.",
+    "source_id": "q001"
+  },
+  {
+    "behavior": "",
+    "category": "direct_lookup",
+    "id": "q002",
+    "question": "Which attending physician signed the order continuing heparin per protocol at 15:55?",
+    "reference_answer": "Marcus Chen, MD.",
+    "source_id": "q002"
+  },
+  {
+    "behavior": "",
+    "category": "direct_lookup",
+    "id": "q003",
+    "question": "What is the lot number of the heparin bag hung at 13:44?",
+    "reference_answer": "HEP-2026-0241.",
+    "source_id": "q003"
+  },
+  {
+    "behavior": "",
+    "category": "direct_lookup",
+    "id": "q004",
+    "question": "At what time did Devon Ramos clock out of the timekeeping system?",
+    "reference_answer": "11:14.",
+    "source_id": "q004"
+  },
+  {
+    "behavior": "",
+    "category": "direct_lookup",
+    "id": "q005",
+    "question": "Who is the Quality Director the quality review was routed to?",
+    "reference_answer": "Helen Yamamoto, MD, Quality Director.",
+    "source_id": "q005"
+  },
+  {
+    "behavior": "",
+    "category": "direct_lookup",
+    "id": "q006",
+    "question": "What was the patient's morning potassium value?",
+    "reference_answer": "3.4 (low-normal).",
+    "source_id": "q006"
+  },
+  {
+    "behavior": "",
+    "category": "direct_lookup",
+    "id": "q007",
+    "question": "What was the result of the 12:00 aPTT, in seconds?",
+    "reference_answer": "71 seconds, therapeutic.",
+    "source_id": "q007"
+  },
+  {
+    "behavior": "",
+    "category": "direct_lookup",
+    "id": "q008",
+    "question": "What is the protocol order number governing the heparin infusion?",
+    "reference_answer": "ORD-882341.",
+    "source_id": "q008"
+  },
+  {
+    "behavior": "",
+    "category": "provenance",
+    "id": "q009",
+    "question": "Which source records the 14:02:51 cabinet withdrawal?",
+    "reference_answer": "Pyxis MedStation 4000 cabinet log, Room 504 excerpt.",
+    "source_id": "q009"
+  },
+  {
+    "behavior": "",
+    "category": "provenance",
+    "id": "q010",
+    "question": "Which source documents Tilling's entry into Room 504 at 14:05?",
+    "reference_answer": "The 5 East badge access log.",
+    "source_id": "q010"
+  },
+  {
+    "behavior": "",
+    "category": "provenance",
+    "id": "q011",
+    "question": "Which source recorded the 14:37 ventricular tachycardia event?",
+    "reference_answer": "The Philips IntelliVue MX800 telemetry monitor, patient M.B., Room 504.",
+    "source_id": "q011"
+  },
+  {
+    "behavior": "",
+    "category": "provenance",
+    "id": "q012",
+    "question": "Who authored the pharmacist reconciliation note at 16:11?",
+    "reference_answer": "Steven Rao, PharmD.",
+    "source_id": "q012"
+  },
+  {
+    "behavior": "",
+    "category": "provenance",
+    "id": "q013",
+    "question": "According to whose statement was Tilling in Room 502 at 14:37?",
+    "reference_answer": "Brianna Tilling's own statement filed at 16:02.",
+    "source_id": "q013"
+  },
+  {
+    "behavior": "",
+    "category": "provenance",
+    "id": "q014",
+    "question": "According to which source did Pruitt arrive at Room 504 at 14:48:02?",
+    "reference_answer": "The badge access log.",
+    "source_id": "q014"
+  },
+  {
+    "behavior": "",
+    "category": "supersession",
+    "id": "q015",
+    "question": "The original Pyxis nightly summary reported the cabinet event at 14:02:21. Which timestamp is currently authoritative, and on what basis?",
+    "reference_answer": "14:02:51 from the central pharmacy server is authoritative. Per Addendum A by Rao, the unit terminal had a known clock-skew issue corrected March 12, 2026; the nightly summary value 14:02:21 is superseded.",
+    "source_id": "q015"
+  },
+  {
+    "behavior": "",
+    "category": "supersession",
+    "id": "q016",
+    "question": "Did the version of policy P-MED-014 in effect on March 14, 2026 include anticoagulant infusions in the two-RN witness requirement?",
+    "reference_answer": "Yes. The earlier draft that excluded anticoagulant infusions was withdrawn on February 11, 2026 and is not operative.",
+    "source_id": "q016"
+  },
+  {
+    "behavior": "",
+    "category": "supersession",
+    "id": "q017",
+    "question": "Was Dr. Okafor's 14:50 verbal order final on its own, or was it superseded?",
+    "reference_answer": "Not final on its own; it required attending co-signature. Dr. Chen's written order ORD-883104 at 15:55 satisfied that requirement and is the authoritative directive.",
+    "source_id": "q017"
+  },
+  {
+    "behavior": "",
+    "category": "supersession",
+    "id": "q018",
+    "question": "Which version of the Pyxis nightly summary should the timeline use, the nightly summary or the central pharmacy server record?",
+    "reference_answer": "The central pharmacy server record. The nightly summary timestamp is superseded by Addendum A.",
+    "source_id": "q018"
+  },
+  {
+    "behavior": "",
+    "category": "supersession",
+    "id": "q019",
+    "question": "Which assigned floor RN covered Rooms 501–505 between 11:14 and 11:32?",
+    "reference_answer": "No assigned floor RN covered Rooms 501–505 in that window. Ramos had clocked out at 11:14 and Tilling did not arrive on the unit until 11:32 (handoff at 11:38).",
+    "source_id": "q019"
+  },
+  {
+    "behavior": "",
+    "category": "status_at_time",
+    "id": "q020",
+    "question": "As of 14:00, when was the most recent confirmed bedside heparin infusion check by a nurse, and by whom?",
+    "reference_answer": "13:45, by Devon Ramos, RN.",
+    "source_id": "q020"
+  },
+  {
+    "behavior": "",
+    "category": "status_at_time",
+    "id": "q021",
+    "question": "As of 15:00, who was the assigned floor RN for Room 504?",
+    "reference_answer": "Brianna Tilling, RN, since unit handoff at 11:38.",
+    "source_id": "q021"
+  },
+  {
+    "behavior": "",
+    "category": "status_at_time",
+    "id": "q022",
+    "question": "As of 14:30, was there a documented nursing flow sheet entry for an infusion check after 13:45?",
+    "reference_answer": "No. There was no flow sheet entry between 13:45 and 14:48.",
+    "source_id": "q022"
+  },
+  {
+    "behavior": "",
+    "category": "status_at_time",
+    "id": "q023",
+    "question": "At 14:42, who acknowledged the alarm at the central station per the telemetry log?",
+    "reference_answer": "User 'BTILL' (Brianna Tilling) per the central station log.",
+    "source_id": "q023"
+  },
+  {
+    "behavior": "",
+    "category": "status_at_time",
+    "id": "q024",
+    "question": "At 19:08, who became the charge nurse for 5 East?",
+    "reference_answer": "Yusuf Adeyemi, RN.",
+    "source_id": "q024"
+  },
+  {
+    "behavior": "",
+    "category": "rule_application",
+    "id": "q025",
+    "question": "Per policy P-MED-014 §4.2 in effect on March 14, 2026, what was required at the 14:02 cabinet withdrawal?",
+    "reference_answer": "Two-RN witness verification, because heparin infusion is a high-alert anticoagulant.",
+    "source_id": "q025"
+  },
+  {
+    "behavior": "",
+    "category": "rule_application",
+    "id": "q026",
+    "question": "Per Pyxis Override Rule R-OV-2, what must occur within 60 seconds of an override withdrawal of a high-alert anticoagulant?",
+    "reference_answer": "A co-witness sign-on must occur within 60 seconds of the withdrawal. None occurred for the 14:02:51 event.",
+    "source_id": "q026"
+  },
+  {
+    "behavior": "",
+    "category": "rule_application",
+    "id": "q027",
+    "question": "Per policy P-MED-006 §2.1, whose order is the authoritative directive?",
+    "reference_answer": "The attending physician's signed order.",
+    "source_id": "q027"
+  },
+  {
+    "behavior": "",
+    "category": "rule_application",
+    "id": "q028",
+    "question": "Did Dr. Okafor's verbal order at 14:50 require attending co-signature, and if so, was it satisfied?",
+    "reference_answer": "Yes; as a resident verbal order it required attending co-signature. It was satisfied prospectively by Dr. Chen's written order ORD-883104 at 15:55.",
+    "source_id": "q028"
+  },
+  {
+    "behavior": "",
+    "category": "rule_application",
+    "id": "q029",
+    "question": "Was Tilling credentialed to work the cardiac step-down telemetry unit?",
+    "reference_answer": "Yes. Her float-pool credential file shows cardiac step-down orientation completed January 8, 2026.",
+    "source_id": "q029"
+  },
+  {
+    "behavior": "",
+    "category": "count",
+    "id": "q030",
+    "question": "How many distinct badge access events to Room 504 are listed in the packet on March 14, 2026?",
+    "reference_answer": "7 events: Ramos entry 13:41:12, Ramos exit 13:46:58, Tilling entry 14:05:11, Tilling exit 14:18:45, Pruitt entry 14:48:02, Velasco entry 14:48:09, Okafor entry 14:49:55.",
+    "source_id": "q030"
+  },
+  {
+    "behavior": "",
+    "category": "count",
+    "id": "q031",
+    "question": "How many staff members are listed on the original day-shift roster (excluding any float-pool replacement)?",
+    "reference_answer": "9 staff members: Halverson, Chen, Okafor, Ramos, Pruitt, Velasco, Rao, Brandt, Edinburgh.",
+    "source_id": "q031"
+  },
+  {
+    "behavior": "",
+    "category": "count",
+    "id": "q032",
+    "question": "How many minutes elapsed between the last confirmed bedside infusion check by a nurse and the first NSVT alarm?",
+    "reference_answer": "Approximately 52 minutes (13:45:00 to 14:37:18).",
+    "source_id": "q032"
+  },
+  {
+    "behavior": "",
+    "category": "count",
+    "id": "q033",
+    "question": "List all individuals who entered Room 504 between 14:48:00 and 14:50:00 according to the badge log.",
+    "reference_answer": "Three: Pruitt at 14:48:02, Velasco at 14:48:09, Okafor at 14:49:55.",
+    "source_id": "q033"
+  },
+  {
+    "behavior": "",
+    "category": "unresolved",
+    "id": "q034",
+    "question": "Has the quality review of QR-2026-0314-A been determined?",
+    "reference_answer": "No, not yet determined. Review by Dr. Yamamoto is scheduled for the morning of March 16, 2026.",
+    "source_id": "q034"
+  },
+  {
+    "behavior": "",
+    "category": "unresolved",
+    "id": "q035",
+    "question": "Was there a documented nursing flow sheet entry for the heparin infusion between 13:45 and 14:48?",
+    "reference_answer": "No. The packet states no flow sheet entry exists between 13:45 and 14:48.",
+    "source_id": "q035"
+  },
+  {
+    "behavior": "",
+    "category": "unresolved",
+    "id": "q036",
+    "question": "Has it been determined whether Tilling's 14:42 alarm acknowledgment without bedside response constitutes a policy deviation?",
+    "reference_answer": "No. It is one of the open questions referred to Dr. Yamamoto's pending review.",
+    "source_id": "q036"
+  },
+  {
+    "behavior": "",
+    "category": "unresolved",
+    "id": "q037",
+    "question": "Did Dr. Okafor receive contemporaneous attending co-signature at the moment of the 14:50 verbal order?",
+    "reference_answer": "Not stated. The packet records the verbal order at 14:50, attending discussion at 15:18, and written attending order at 15:55, but does not state contemporaneous co-signature at 14:50.",
+    "source_id": "q037"
+  },
+  {
+    "behavior": "",
+    "category": "cross_source_conflict",
+    "id": "q038",
+    "question": "Pruitt's statement says she was not the user \"BTILL\" who acknowledged the alarm at 14:42. What does the central station log indicate, and how does Tilling's statement reconcile this?",
+    "reference_answer": "The central station log records user 'BTILL' acknowledged the alarm. Tilling's own statement confirms she acknowledged it from the central station screen. Pruitt's denial is consistent with this; the conflict resolves in favor of Tilling having acknowledged.",
+    "source_id": "q038"
+  },
+  {
+    "behavior": "",
+    "category": "cross_source_conflict",
+    "id": "q039",
+    "question": "Tilling's statement says she did not administer the bag retrieved at 14:02. What evidence in the packet is consistent with that claim?",
+    "reference_answer": "Rao's reconciliation note that the bag retrieved at 14:02 was returned sealed and unspiked; Okafor's bedside finding that only the original Ramos bag (hung 13:44, ~140 mL remaining) was at the bedside; cabinet recount reconciled.",
+    "source_id": "q039"
+  },
+  {
+    "behavior": "",
+    "category": "cross_source_conflict",
+    "id": "q040",
+    "question": "Two timestamps were reported for the cabinet event near 14:02. What are they, which is authoritative, and why?",
+    "reference_answer": "The Pyxis nightly summary reported 14:02:21; the central pharmacy server records 14:02:51. The 14:02:51 value is authoritative. Per Addendum A, the unit terminal had a clock-skew issue corrected on March 12, 2026; the nightly summary value 14:02:21 is superseded.",
+    "source_id": "q040"
+  }
+]

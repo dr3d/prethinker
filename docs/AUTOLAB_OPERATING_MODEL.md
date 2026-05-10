@@ -1,6 +1,6 @@
 # Prethinker Autolab Operating Model
 
-Last updated: 2026-05-06
+Last updated: 2026-05-07
 
 ## The Short Version
 
@@ -112,6 +112,50 @@ The loop is artifact-first. Compile once, persist everything, then run many
 cheap parallax, selector, QA, and diagnostic passes against frozen artifacts.
 That turns the GPU from one big thinker into a small research factory.
 
+## Factory Cadence
+
+The preferred Autolab rhythm is supervised asynchronous research, not a single
+long blocking command.
+
+Codex should act as the lab lead:
+
+1. choose a small set of bounded jobs;
+2. start work in disposable `tmp/` run directories;
+3. use the configured LM Studio request lane budget;
+4. wake every `60` to `90` seconds to inspect process state, logs, JSON/Markdown
+   artifacts, score deltas, stderr, and hung lanes;
+5. harvest finished artifacts before starting the next batch;
+6. keep durable repo edits separate from disposable run output;
+7. let the user steer while background jobs continue;
+8. stop, split, or rerun jobs when a lane goes silent beyond the useful timeout
+   window.
+
+The current lane budget should be treated as an operator setting, not a law of
+nature:
+
+| Setting | Use When | Notes |
+| --- | --- | --- |
+| `gpu_lanes = 1` | Debugging, first contact with a new endpoint, or suspicious hangs. | Best for clean attribution. |
+| `gpu_lanes = 2` | Default research cadence on POWER. | Good balance of throughput and readable polling. |
+| `gpu_lanes = 3` | Short targeted replays where recent jobs have drained cleanly. | Watch latency and silence closely. |
+| `gpu_lanes = 4` | Burst mode only. | LM Studio can accept four parallel requests, but compile plus QA plus judging/classification can create long quiet pressure or apparent thrashing. Use when the host is demonstrably draining and the jobs are similarly sized. |
+
+This pattern matters because compile, QA, judging, and failure classification
+are model-facing and uneven in duration. A good factory cycle keeps useful
+lanes busy without turning the evidence stream into soup. The operator should
+prefer bounded targeted replays first, then full guardrail replays only after a
+candidate repair shows lift. If four lanes go quiet for a full polling window,
+dial down rather than assuming more parallelism is better.
+
+The cadence can also use annex workers when they are available. Annex work must
+stay artifact-shaped: source packets, QA drafts, deterministic script runs,
+scorecard rollups, and pattern reports. Harness promotion remains Codex-owned
+and must be backed by tests, journals, and regression evidence.
+
+The chat thread is allowed to steer the loop in real time. The record of what
+the lab learned belongs in tracked docs, fixture journals, scorecards, and
+scripts, not only in conversation.
+
 ## Host Notes
 
 These are operational notes about the current rig, not permanent product
@@ -135,6 +179,17 @@ POWER and NITRO for throughput.
   runners that merge `content` and `reasoning_content` can still consume
   structured outputs, but raw-chat workers should be treated as unproven until
   the runtime behavior is fixed.
+- A 2026-05-07 disposable NITRO playground probe confirmed the right sidecar
+  boundary: raw `qwen3.5-4b:2` artifacts were semantically useful but failed
+  validator shape checks (`0/4` raw artifacts passed), while deterministic
+  normalization produced validator-clean draft packets (`5/5` normalized
+  artifacts passed). NITRO is therefore useful for source scouting, synthetic
+  story sketches, and QA drafting only behind adapter/validator repair, not as
+  an autonomous ingestion producer.
+- The same probe found scheduled NITRO ticks active, but the legacy mailbox
+  inbox was not being consumed. Treat mailbox briefs as staged files unless a
+  specific consumer is restored; prefer explicit direct-mode scripts for
+  dependable annex work.
 
 ## Direct Worker Rules
 

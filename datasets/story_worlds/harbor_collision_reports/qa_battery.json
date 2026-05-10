@@ -1,0 +1,322 @@
+[
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q001",
+    "question": "When did the collision occur?",
+    "reference_answer": "Approximately 14:35 on August 7, 2025",
+    "source_id": "q001"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q002",
+    "question": "Who owns Heron's Wake?",
+    "reference_answer": "Callister Marine Ltd",
+    "source_id": "q002"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q003",
+    "question": "Who owns Foundry Six?",
+    "reference_answer": "Deepwater Logistics",
+    "source_id": "q003"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q004",
+    "question": "What injury did Pavel Novak sustain?",
+    "reference_answer": "Bruised ribs, treated at Portmere General Hospital, released same day",
+    "source_id": "q004"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q005",
+    "question": "Who convened the investigation?",
+    "reference_answer": "Harbor Master Captain Elise Drummond",
+    "source_id": "q005"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q006",
+    "question": "How many sources submitted statements?",
+    "reference_answer": "Four: Captain Vickers, Deckhand Novak, Harbor Pilot Ghali, and CCTV footage",
+    "source_id": "q006"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q007",
+    "question": "What speed does Vickers claim Heron's Wake was traveling?",
+    "reference_answer": "5 knots",
+    "source_id": "q007"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q008",
+    "question": "What is the posted speed limit for the inner harbor?",
+    "reference_answer": "6 knots",
+    "source_id": "q008"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q009",
+    "question": "What does Vickers attribute the collision to?",
+    "reference_answer": "Foundry Six's failure to display the required anchor ball",
+    "source_id": "q009"
+  },
+  {
+    "behavior": "",
+    "category": "temporal_status",
+    "id": "q010",
+    "question": "Has Vickers submitted his GPS log?",
+    "reference_answer": "No. As of August 28, the GPS log has not been received.",
+    "source_id": "q010"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q011",
+    "question": "When did Novak hoist the anchor ball?",
+    "reference_answer": "When Foundry Six anchored at 11:20 that morning",
+    "source_id": "q011"
+  },
+  {
+    "behavior": "",
+    "category": "temporal_status",
+    "id": "q012",
+    "question": "When did Novak last confirm the anchor ball was displayed?",
+    "reference_answer": "At 14:00, when he went below to the engine room. He was below deck at the time of collision (approximately 14:35).",
+    "source_id": "q012"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q013",
+    "question": "Was Novak on deck at the time of collision?",
+    "reference_answer": "No. He was below deck in the engine room.",
+    "source_id": "q013"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q014",
+    "question": "What speed does Novak estimate for Heron's Wake?",
+    "reference_answer": "8 or 9 knots",
+    "source_id": "q014"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q015",
+    "question": "Does Novak claim a horn signal was given?",
+    "reference_answer": "No. Novak claims no horn signal was given.",
+    "source_id": "q015"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q016",
+    "question": "What speed does Ghali estimate?",
+    "reference_answer": "7 knots, maybe more",
+    "source_id": "q016"
+  },
+  {
+    "behavior": "",
+    "category": "claim_fact_separation",
+    "id": "q017",
+    "question": "Did Ghali observe the anchor ball on Foundry Six?",
+    "reference_answer": "No. He did not observe it, but he cannot confirm it was absent. He was focused on his own vessel.",
+    "source_id": "q017"
+  },
+  {
+    "behavior": "",
+    "category": "claim_fact_separation",
+    "id": "q018",
+    "question": "Why can't Ghali confirm the anchor ball's absence?",
+    "reference_answer": "Because he was focused on his own vessel and the container ship he was guiding. He did not look for it.",
+    "source_id": "q018"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q019",
+    "question": "Did Ghali hear a horn signal?",
+    "reference_answer": "Yes. He heard one short horn blast approximately 10 seconds before the collision.",
+    "source_id": "q019"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q020",
+    "question": "What does the CCTV speed estimate show?",
+    "reference_answer": "6.5 to 7 knots",
+    "source_id": "q020"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q021",
+    "question": "What is the margin of error on the CCTV speed estimate?",
+    "reference_answer": "Approximately ±1 knot, making the plausible range 5.5 to 8 knots",
+    "source_id": "q021"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q022",
+    "question": "Can the CCTV footage resolve the anchor ball question?",
+    "reference_answer": "No. The camera angle does not show the anchor ball position.",
+    "source_id": "q022"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q023",
+    "question": "Does the CCTV show engine reversal?",
+    "reference_answer": "Yes. It shows a brief wake disturbance consistent with engine reversal approximately 8 seconds before contact.",
+    "source_id": "q023"
+  },
+  {
+    "behavior": "",
+    "category": "claim_fact_separation",
+    "id": "q024",
+    "question": "Has the Harbor Master determined that Heron's Wake exceeded the speed limit?",
+    "reference_answer": "Not definitively. The Harbor Master found Heron's Wake was 'likely' traveling above the limit, but could not determine the speed to a legal standard of certainty.",
+    "source_id": "q024"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q025",
+    "question": "Why didn't the Harbor Master issue a speed violation?",
+    "reference_answer": "Because the CCTV margin of error means the speed cannot be determined to a legal standard of certainty.",
+    "source_id": "q025"
+  },
+  {
+    "behavior": "",
+    "category": "structured_absence",
+    "id": "q026",
+    "question": "Has the Harbor Master made a finding on the anchor ball?",
+    "reference_answer": "No. The anchor ball question is explicitly unresolved. The Harbor Master made no finding on this point.",
+    "source_id": "q026"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q027",
+    "question": "What did the Harbor Master find about the horn signal?",
+    "reference_answer": "A horn signal was likely given (based on Ghali's testimony) but it was the wrong signal. One short blast was used instead of five or more short blasts (the danger signal).",
+    "source_id": "q027"
+  },
+  {
+    "behavior": "",
+    "category": "rule_application",
+    "id": "q028",
+    "question": "What horn signal should Vickers have sounded?",
+    "reference_answer": "Five or more short blasts (the danger signal)",
+    "source_id": "q028"
+  },
+  {
+    "behavior": "",
+    "category": "rule_application",
+    "id": "q029",
+    "question": "What signal does one short blast indicate?",
+    "reference_answer": "Altering course to starboard, not an emergency warning",
+    "source_id": "q029"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q030",
+    "question": "Who is responsible for spill cleanup costs?",
+    "reference_answer": "Callister Marine Ltd (as vessel owner of Heron's Wake), pending final liability determination",
+    "source_id": "q030"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q031",
+    "question": "What is the estimated spill volume?",
+    "reference_answer": "80 to 120 liters",
+    "source_id": "q031"
+  },
+  {
+    "behavior": "",
+    "category": "temporal_status",
+    "id": "q032",
+    "question": "Is liability finalized?",
+    "reference_answer": "No. Final liability apportionment is deferred pending Vickers's GPS log and any additional evidence.",
+    "source_id": "q032"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q033",
+    "question": "Is liability shared or assigned to one party?",
+    "reference_answer": "Preliminary liability is shared. Both parties may bear fault.",
+    "source_id": "q033"
+  },
+  {
+    "behavior": "",
+    "category": "structured_absence",
+    "id": "q034",
+    "question": "What is the anchor ball's status at the moment of collision?",
+    "reference_answer": "Unknown. This is the central unresolved factual dispute. Novak says it was up; Vickers says it was not; Ghali didn't look; CCTV can't show it.",
+    "source_id": "q034"
+  },
+  {
+    "behavior": "",
+    "category": "claim_fact_separation",
+    "id": "q035",
+    "question": "Whose speed claim is most supported by the available evidence?",
+    "reference_answer": "Ghali's estimate of 7 knots and the CCTV estimate of 6.5-7 knots mutually support a speed above the 6-knot limit. Vickers's claim of 5 knots is not supported by any other evidence.",
+    "source_id": "q035"
+  },
+  {
+    "behavior": "",
+    "category": "claim_fact_separation",
+    "id": "q036",
+    "question": "Why is Novak's denial of the horn signal considered less credible than Ghali's confirmation?",
+    "reference_answer": "Because Novak was below deck in the engine room, where engine noise would reduce his ability to hear an external signal. Ghali was on the water approximately 300 meters away.",
+    "source_id": "q036"
+  },
+  {
+    "behavior": "",
+    "category": "temporal_arithmetic",
+    "id": "q037",
+    "question": "What is the deadline for Vickers to submit the GPS log?",
+    "reference_answer": "September 4, 2025 (14 days from August 21)",
+    "source_id": "q037"
+  },
+  {
+    "behavior": "",
+    "category": "temporal_status",
+    "id": "q038",
+    "question": "Has the GPS log been received as of August 28?",
+    "reference_answer": "No.",
+    "source_id": "q038"
+  },
+  {
+    "behavior": "",
+    "category": "rule_application",
+    "id": "q039",
+    "question": "What would it mean for liability if Foundry Six failed to display the anchor ball?",
+    "reference_answer": "It would constitute contributory fault for Foundry Six in the collision.",
+    "source_id": "q039"
+  },
+  {
+    "behavior": "",
+    "category": "structured_absence",
+    "id": "q040",
+    "question": "List all questions or factual disputes that remain unresolved at the end of the document.",
+    "reference_answer": "The anchor ball status at the moment of collision, the exact speed of Heron's Wake (pending GPS log), the final liability apportionment, and whether Vickers will submit the GPS log.",
+    "source_id": "q040"
+  }
+]

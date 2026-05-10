@@ -1,0 +1,40 @@
+{"category": "direct_lookup", "id": "q001", "reference_answer": "Dr. Henrike Lentz, Associate Professor, Department of Environmental Chemistry.", "source_id": "q001"}
+{"category": "direct_lookup", "id": "q002", "reference_answer": "LS-PFAS-2026-0428-SR7-A.", "source_id": "q002"}
+{"category": "direct_lookup", "id": "q003", "reference_answer": "LC-MS/MS Q-Exactive instrument INST-04.", "source_id": "q003"}
+{"category": "direct_lookup", "id": "q004", "reference_answer": "R-2026-0501-12.", "source_id": "q004"}
+{"category": "direct_lookup", "id": "q005", "reference_answer": "Tara Mendelssohn, graduate student on the LSR-PFAS team.", "source_id": "q005"}
+{"category": "direct_lookup", "id": "q006", "reference_answer": "EPA Method 1633 by LC-MS/MS, for PFOA, PFOS, and GenX.", "source_id": "q006"}
+{"category": "direct_lookup", "id": "q007", "reference_answer": "Dr. Margaret Hsiao.", "source_id": "q007"}
+{"category": "direct_lookup", "id": "q008", "reference_answer": "LCV-2026-031.", "source_id": "q008"}
+{"category": "provenance", "id": "q009", "reference_answer": "The freezer F-3 telemetry log from HOBO U30 logger FZ-LOG-03.", "source_id": "q009"}
+{"category": "provenance", "id": "q010", "reference_answer": "The Acme Vial Co. quality-assurance email received May 5, 2026 at 08:55 PDT.", "source_id": "q010"}
+{"category": "provenance", "id": "q011", "reference_answer": "The badge access log (HID prox card) for the prep room and freezer alcove.", "source_id": "q011"}
+{"category": "provenance", "id": "q012", "reference_answer": "LabWare LIMS v.7.4 (the Trace Analytical Facility's LIMS).", "source_id": "q012"}
+{"category": "provenance", "id": "q013", "reference_answer": "The calibration curve reprocessing memo filed by Hsiao on May 5, 2026 at 11:14 PDT.", "source_id": "q013"}
+{"category": "provenance", "id": "q014", "reference_answer": "Sam Okeke's lab notebook entry on May 4, 2026 at 11:30 PDT.", "source_id": "q014"}
+{"category": "supersession", "id": "q015", "reference_answer": "168 ng/L, per the corrected report (version 1.1) issued May 5, 2026.", "source_id": "q015"}
+{"category": "supersession", "id": "q016", "reference_answer": "142 ng/L, per the initial report (version 1.0) issued May 2, 2026.", "source_id": "q016"}
+{"category": "supersession", "id": "q017", "reference_answer": "The corrected report. Per TAF-SOP-RPT-02 §5.3, when an erratum is issued, the corrected report is the report of record; prior versions are retained for audit but are not the report of record.", "source_id": "q017"}
+{"category": "supersession", "id": "q018", "reference_answer": "No. PFOS (89 ng/L) and GenX (12 ng/L) were unchanged because their respective internal standards were unaffected by the COA revision.", "source_id": "q018"}
+{"category": "supersession", "id": "q019", "reference_answer": "No. Aliquot A was analyzed on May 1, 2026, before the May 4–5 freezer failure; its results are unaffected by that excursion.", "source_id": "q019"}
+{"category": "status_at_time", "id": "q020", "reference_answer": "Aliquot B remains in freezer F-3 as a backup, per the LIMS chain-of-custody log.", "source_id": "q020"}
+{"category": "status_at_time", "id": "q021", "reference_answer": "-20 °C, no anomalies; manual check performed by Sam Okeke.", "source_id": "q021"}
+{"category": "status_at_time", "id": "q022", "reference_answer": "Sustained excursion to a maximum of -8 °C, duration 10 hours 44 minutes, caused by compressor failure. Maintenance ticket FAC-2026-0428 opened May 5 at 06:35; the freezer returned to specification at 07:48 PDT on May 5.", "source_id": "q022"}
+{"category": "status_at_time", "id": "q023", "reference_answer": "No. The contamination review is scheduled for May 8, 2026 at 10:00 PDT and has not been held.", "source_id": "q023"}
+{"category": "status_at_time", "id": "q024", "reference_answer": "Operational. System suitability QC was PASS for the run started at 09:14 PDT on May 1.", "source_id": "q024"}
+{"category": "rule_application", "id": "q025", "reference_answer": "50–150% per EPA Method 1633. The May 1 PFOA-13C8 recovery of 87% was within range.", "source_id": "q025"}
+{"category": "rule_application", "id": "q026", "reference_answer": "The Lab Director, Dr. Margaret Hsiao.", "source_id": "q026"}
+{"category": "rule_application", "id": "q027", "reference_answer": "Each transferring party must sign, and a co-witness signature is required at the split (per the LIMS log entries showing both signer and co-witness).", "source_id": "q027"}
+{"category": "rule_application", "id": "q028", "reference_answer": "-20 °C ± 1 °C.", "source_id": "q028"}
+{"category": "rule_application", "id": "q029", "reference_answer": "The corrected report (version 1.1). Prior versions are retained for audit but are not the report of record.", "source_id": "q029"}
+{"category": "count", "id": "q030", "reference_answer": "Three. April 29 02:14–02:32 (max -16 °C, 18 minutes, scheduled auto-defrost); May 1 03:22–03:49 (max -14 °C, 27 minutes, compressor cycling); and May 4 19:48 – May 5 06:32 (max -8 °C, 10 hours 44 minutes, compressor failure).", "source_id": "q030"}
+{"category": "count", "id": "q031", "reference_answer": "Two: LCV-2026-031 (subject to the advisory) and LCV-2026-029 (no advisory).", "source_id": "q031"}
+{"category": "count", "id": "q032", "reference_answer": "Three distinct named personnel: Tara Mendelssohn (collector), Sam Okeke (intake and co-witness), and Brendan Tu (split and run).", "source_id": "q032"}
+{"category": "count", "id": "q033", "reference_answer": "Six dates: April 28 (collection), April 29 (intake), April 30 (split), May 1 (run), May 2 (initial report v1.0), and May 5 (calibration reprocessing memo and erratum v1.1).", "source_id": "q033"}
+{"category": "unresolved", "id": "q034", "reference_answer": "No, not determined. The lab cannot determine which cap lot was used; supplier shipment-tracing data has been requested but not received.", "source_id": "q034"}
+{"category": "unresolved", "id": "q035", "reference_answer": "No. The contamination review is scheduled for May 8, 2026 at 10:00 PDT; no determination has been issued.", "source_id": "q035"}
+{"category": "unresolved", "id": "q036", "reference_answer": "No. The May 4–5 freezer failure put aliquot B outside the -20 °C ± 1 °C specification; integrity is pending Hsiao's documented determination.", "source_id": "q036"}
+{"category": "unresolved", "id": "q037", "reference_answer": "No. The notebook explicitly states Tu did not record the specific cap lot.", "source_id": "q037"}
+{"category": "cross_source_conflict", "id": "q038", "reference_answer": "Not a conflict. Tu's notebook records the bench split completion at 13:45, while the freezer door event at 14:00 corresponds to the subsequent return of aliquot B to freezer F-3 (LIMS records aliquot B return at 14:02). The two events describe different actions in the same workflow.", "source_id": "q038"}
+{"category": "cross_source_conflict", "id": "q039", "reference_answer": "No. The 87% internal standard recovery indicates the run met EPA Method 1633 system suitability for that internal standard, but it does not address the possibility of cap-lot background contribution to PFAS signal. The contamination question remains pending Hsiao's May 8 determination.", "source_id": "q039"}
+{"category": "cross_source_conflict", "id": "q040", "reference_answer": "168 ng/L per the corrected report (version 1.1) issued May 5, 2026. The 142 ng/L value from the initial report (version 1.0) is superseded.", "source_id": "q040"}

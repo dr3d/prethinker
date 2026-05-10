@@ -184,13 +184,27 @@ Examples:
 
 Those are the kinds of turns where deterministic memory discipline matters more than conversational style.
 
+The current harness vocabulary is deliberately small:
+
+```text
+compiled KB = durable state
+row = measured encounter with that state
+selector = chooses the best encounter surface
+guard = prevents a tempting wrong surface
+verdict = records what happened
+```
+
+Truth lives in the compiled KB. Rows are where the system tests whether that
+truth can be retrieved, selected, and answered under pressure.
+
 Current benchmark evidence gives that claim some teeth. The instrument has been
-calibrated against `25` hostile benchmarks across `14` domain types, including
+calibrated against hostile benchmarks across many domain types, including
 municipal water contamination, medical device recalls, zoning hearings,
-botanical seed banks, maritime insurance, and regulatory access ledgers. On the
-current surgical fixture batch, it is at `284 / 303` exact answers (`94%`), with
-only `3` misses, `7` zero-miss fixtures, Fenmore and Greywell both perfect, and
-zero unauthorized writes across the corpus.
+botanical seed banks, maritime insurance, regulatory access ledgers, and fresh
+story-world fixtures. A prior surgical fixture batch reached `284 / 303` exact
+answers (`94%`) with only `3` misses. The newest cold-injected 10-fixture
+story-world batch now has a row-gated high-water of `361 / 400` exact
+(`90.25%`), with zero unauthorized writes in the contributing QA runs.
 
 That is not perfection. Story-world longitudinal tracking, row-level activation,
 rule composition, and temporal arithmetic are still frontier work. But the
@@ -316,11 +330,12 @@ That is also why the repo is careful about honesty:
 
 ## What We Know Today
 
-As of May 6, 2026:
+As of May 8, 2026:
 
 ### Internal Health
 
-- the lean local pytest suite is green at `647 passed`
+- focused helper/selector verification is green at `135 passed`; rerun the
+  full suite before updating any full-suite headline
 - the console is the canonical interactive front door
 - `semantic_router_v1 -> semantic_ir_v1` is the active research lane for model-owned context planning and richer model understanding before deterministic admission
 - the latest semantic IR edge runtime A/B is `20/20` decision labels with `0.976` average score
@@ -329,7 +344,9 @@ As of May 6, 2026:
 
 ### Benchmark Evidence
 
-- the current surgical fixture batch spans `9` fixtures and `303` questions, with `284` exact answers (`94%`), only `3` misses, `7` zero-miss fixtures, and zero unauthorized writes
+- the prior surgical fixture batch spans `9` fixtures and `303` questions, with `284` exact answers (`94%`), only `3` misses, `7` zero-miss fixtures, and zero unauthorized writes
+- the newest cold-injected story-world batch spans `10` fixtures and `400` questions; row-gated selector replay is now `361 exact / 16 partial / 23 miss` (`90.25%`), including Nested Puppet Court at `40/40` and Clockmakers at `39/40` with zero misses
+- the incoming-6 full-40 batch spans `6` new fixtures and `240` rows; measured row-gated high-water is `240 / 0 / 0`, up from a cold `186 / 16 / 38` baseline. This is diagnostic evidence that the surfaces are reachable, not a claim that one global compiler solves the batch.
 - the Anaplan Polaris enterprise-guidance fixture reached `42 exact / 1 partial / 0 miss` on post-ingestion QA through multi-support safe-surface accumulation, with no QA write proposals
 - the Clarification Eagerness Trap fixture reached `40/40` under authority-aware scoring with perfect ask/no-ask posture, no context-write violations, and `10/10` blocked-slot question coverage
 - Fenmore Seedbank and Greywell Pipeline are current perfect surgical-batch fixtures

@@ -1,0 +1,41 @@
+﻿{"id":"q001","source_id":"q001","category":"direct_lookup","reference_answer":"NERAF-EAF-2026-0147."}
+{"id":"q002","source_id":"q002","category":"direct_lookup","reference_answer":"75.0 out of 100."}
+{"id":"q003","source_id":"q003","category":"direct_lookup","reference_answer":"Dr. Aida Marchetti, curator at Westmont Center."}
+{"id":"q004","source_id":"q004","category":"direct_lookup","reference_answer":"$25,000."}
+{"id":"q005","source_id":"q005","category":"direct_lookup","reference_answer":"Lin Whitley, Panel Coordinator."}
+{"id":"q006","source_id":"q006","category":"direct_lookup","reference_answer":"Beatriz Romero, Esq."}
+{"id":"q007","source_id":"q007","category":"direct_lookup","reference_answer":"March 14, 2026."}
+{"id":"q008","source_id":"q008","category":"direct_lookup","reference_answer":"$500,000."}
+{"id":"q009","source_id":"q009","category":"provenance","reference_answer":"Exhibit B, the corrected score sheet attached to the May 2, 2026 audit memo."}
+{"id":"q010","source_id":"q010","category":"provenance","reference_answer":"Felipe Aragon's signed bench-note score sheet, handwritten and signed at the March 14 panel meeting."}
+{"id":"q011","source_id":"q011","category":"provenance","reference_answer":"The counsel note dated May 4, 2026 from Beatriz Romero, Esq."}
+{"id":"q012","source_id":"q012","category":"provenance","reference_answer":"The NERAF-EAF-2026 cycle fiscal ledger."}
+{"id":"q013","source_id":"q013","category":"provenance","reference_answer":"Exhibit C, Okafor-Vance's reconsideration request letter dated April 18, 2026."}
+{"id":"q014","source_id":"q014","category":"provenance","reference_answer":"Application NERAF-EAF-2026-0093 (Lily Brennan); Chen recused due to collaboration on the 2024 album 'Wires & Birds.'"}
+{"id":"q015","source_id":"q015","category":"supersession","reference_answer":"75.4, per the corrected score sheet (Exhibit B)."}
+{"id":"q016","source_id":"q016","category":"supersession","reference_answer":"73.0, per the original score sheet from March 14, 2026."}
+{"id":"q017","source_id":"q017","category":"supersession","reference_answer":"No. The reconsideration docket is scheduled for May 11, 2026 and has not been held."}
+{"id":"q018","source_id":"q018","category":"supersession","reference_answer":"38."}
+{"id":"q019","source_id":"q019","category":"supersession","reference_answer":"No. The §IV.B.3 counsel note authorizes the scrivener's-error correction procedurally; per the note itself, it does not adjudicate the underlying funding question. The panel or reconsideration docket retains authority over award determinations."}
+{"id":"q020","source_id":"q020","category":"status_at_time","reference_answer":"No. Scheduled for May 11, 2026."}
+{"id":"q021","source_id":"q021","category":"status_at_time","reference_answer":"Referred to Counsel Romero on May 6, 2026; not yet determined. Counsel's preliminary acknowledgment was received May 7 indicating a written opinion will be provided before the May 11 docket."}
+{"id":"q022","source_id":"q022","category":"status_at_time","reference_answer":"$25,000."}
+{"id":"q023","source_id":"q023","category":"status_at_time","reference_answer":"Her reconsideration request (Exhibit C), filed April 18, 2026."}
+{"id":"q024","source_id":"q024","category":"status_at_time","reference_answer":"No. Pending Counsel Romero's written opinion."}
+{"id":"q025","source_id":"q025","category":"rule_application","reference_answer":"Yes. Per §IV.B.3, a transcription error in the score-tally entry documented by a contemporaneous, signed panelist bench note may be corrected in-cycle without convening a new panel."}
+{"id":"q026","source_id":"q026","category":"rule_application","reference_answer":"The corresponding score is removed and the average is recomputed on remaining panelists; the alternate panelist may be invited to score on reconsideration."}
+{"id":"q027","source_id":"q027","category":"rule_application","reference_answer":"In order of corrected score, highest first, per §V.A.3. Fontaine (76.0) precedes Okafor-Vance (75.4)."}
+{"id":"q028","source_id":"q028","category":"rule_application","reference_answer":"By earlier application date."}
+{"id":"q029","source_id":"q029","category":"rule_application","reference_answer":"Tovar's score of 76 is removed and the average is recomputed on the remaining four panelists. Alternate Wenjing Lu may be invited to score on reconsideration at the docket's discretion; the bylaws do not require her to score."}
+{"id":"q030","source_id":"q030","category":"count","reference_answer":"Five: Marchetti, Chen, Tovar, Aragon, and Rooke."}
+{"id":"q031","source_id":"q031","category":"count","reference_answer":"19 fellowships."}
+{"id":"q032","source_id":"q032","category":"count","reference_answer":"75.25, computed as (79 + 70 + 78 + 74) / 4 = 301 / 4."}
+{"id":"q033","source_id":"q033","category":"count","reference_answer":"Six: April 18 (Okafor-Vance reconsideration filed), May 2 (score correction discovered), May 4 (counsel note §IV.B.3), May 6 (Tovar conflict referred), May 8 (counsel note funding order), and May 11 (reconsideration docket scheduled)."}
+{"id":"q034","source_id":"q034","category":"unresolved","reference_answer":"No. Pending; Counsel's written opinion is expected before the May 11 docket."}
+{"id":"q035","source_id":"q035","category":"unresolved","reference_answer":"No. Scheduled for May 11, 2026 and not yet held."}
+{"id":"q036","source_id":"q036","category":"unresolved","reference_answer":"Not determined. Funding is contingent on (a) the reconsideration being granted at the May 11 docket and (b) availability of cycle funds. With $25,000 remaining and Fontaine's higher corrected score (76.0) ranking ahead of hers, if both reconsiderations are granted Okafor-Vance would be placed on the contingent reserve list per §V.A.7 and would receive funding only from returned or declined awards or from the next cycle at the Foundation Director's discretion."}
+{"id":"q037","source_id":"q037","category":"unresolved","reference_answer":"No. Fontaine's reconsideration is also calendared for the May 11, 2026 docket."}
+{"id":"q038","source_id":"q038","category":"cross_source_conflict","reference_answer":"The bench notes (38) are authoritative for the corrected score; the official tally (26) was a transcription error. The correction is governed by Bylaws §IV.B.3, which permits in-cycle correction of scrivener's error documented by a contemporaneous, signed panelist bench note."}
+{"id":"q039","source_id":"q039","category":"cross_source_conflict","reference_answer":"No. Only one $25,000 award can be funded immediately from the remaining $25,000. Per the May 8 counsel note, awards must be issued in order of corrected score (highest first); Fontaine (76.0) would be funded first; Okafor-Vance (75.4) would be placed on the contingent reserve list per §V.A.7."}
+{"id":"q040","source_id":"q040","category":"cross_source_conflict","reference_answer":"No. The §IV.B.3 correction is procedural and does not itself grant the award. The reconsideration docket on May 11 must still grant the appeal, and any award is then contingent on cycle funds and the funding-order rule of §V.A.3."}
+

@@ -1,0 +1,40 @@
+{"category": "direct_fact", "id": "q001", "question": "What is the base unit count as of December 31, 2024?", "source_id": "q001"}
+{"category": "direct_fact", "id": "q002", "question": "How many single-family homes are in the original development?", "source_id": "q002"}
+{"category": "direct_fact", "id": "q003", "question": "How many units does Meadow Ridge add?", "source_id": "q003"}
+{"category": "direct_fact", "id": "q004", "question": "When did Meadow Ridge become part of the HOA?", "source_id": "q004"}
+{"category": "arithmetic", "id": "q005", "question": "What is the post-annexation total unit count?", "source_id": "q005"}
+{"category": "direct_fact", "id": "q006", "question": "How many condominium units existed before the Building B conversion?", "source_id": "q006"}
+{"category": "arithmetic", "id": "q007", "question": "How many condominium units exist after the conversion?", "source_id": "q007"}
+{"category": "arithmetic", "id": "q008", "question": "How many townhome units exist after the conversion?", "source_id": "q008"}
+{"category": "rule_application", "id": "q009", "question": "Does the Building B conversion change the total unit count?", "source_id": "q009"}
+{"category": "direct_fact", "id": "q010", "question": "What assessment rate do condominiums pay?", "source_id": "q010"}
+{"category": "rule_application", "id": "q011", "question": "What assessment rate do the converted Building B units pay after conversion?", "source_id": "q011"}
+{"category": "direct_fact", "id": "q012", "question": "How many ownership transfers occurred during the count period?", "source_id": "q012"}
+{"category": "rule_application", "id": "q013", "question": "Do ownership transfers change the total unit count?", "source_id": "q013"}
+{"category": "temporal_status", "id": "q014", "question": "Who owns Lot 47 as of the census date (March 1)?", "source_id": "q014"}
+{"category": "temporal_status", "id": "q015", "question": "Who owned Lot 91 at the time of annexation?", "source_id": "q015"}
+{"category": "direct_fact", "id": "q016", "question": "What is the dispute about Lot 52?", "source_id": "q016"}
+{"category": "structured_absence", "id": "q017", "question": "Has the Board resolved the Lot 52 classification?", "source_id": "q017"}
+{"category": "rule_application", "id": "q018", "question": "How is Lot 52 counted in the 2025 census?", "source_id": "q018"}
+{"category": "arithmetic", "id": "q019", "question": "How many total units are in the 2025 census?", "source_id": "q019"}
+{"category": "direct_fact", "id": "q020", "question": "How many units are vacant?", "source_id": "q020"}
+{"category": "rule_application", "id": "q021", "question": "Does vacancy affect voting eligibility?", "source_id": "q021"}
+{"category": "rule_application", "id": "q022", "question": "Does vacancy affect assessment obligation?", "source_id": "q022"}
+{"category": "direct_fact", "id": "q023", "question": "How many Meadow Ridge units are still held by the developer?", "source_id": "q023"}
+{"category": "rule_application", "id": "q024", "question": "Can Highmark Homes vote on its unsold units?", "source_id": "q024"}
+{"category": "direct_fact", "id": "q025", "question": "What is the standard annual assessment per unit?", "source_id": "q025"}
+{"category": "arithmetic", "id": "q026", "question": "What is the condominium reduced rate?", "source_id": "q026"}
+{"category": "arithmetic", "id": "q027", "question": "What is the total assessment revenue?", "source_id": "q027"}
+{"category": "arithmetic", "id": "q028", "question": "What would the total be if Lot 52 is reclassified as two units?", "source_id": "q028"}
+{"category": "arithmetic", "id": "q029", "question": "What is the quorum for the annual meeting?", "source_id": "q029"}
+{"category": "arithmetic", "id": "q030", "question": "How many votes are needed for a quorum?", "source_id": "q030"}
+{"category": "temporal_status", "id": "q031", "question": "Do Meadow Ridge units have full voting rights?", "source_id": "q031"}
+{"category": "arithmetic", "id": "q032", "question": "How many total eligible votes are there?", "source_id": "q032"}
+{"category": "temporal_status", "id": "q033", "question": "Have the revised assessment notices been sent to the Building B converted units?", "source_id": "q033"}
+{"category": "arithmetic", "id": "q034", "question": "What is the per-unit assessment increase for the 6 converted units?", "source_id": "q034"}
+{"category": "arithmetic", "id": "q035", "question": "What is the total additional revenue from the Building B conversion?", "source_id": "q035"}
+{"category": "direct_fact", "id": "q036", "question": "When did the Building B conversion take effect?", "source_id": "q036"}
+{"category": "rule_application", "id": "q037", "question": "What is the HOA's policy on assessment responsibility during an ownership transfer?", "source_id": "q037"}
+{"category": "temporal_status", "id": "q038", "question": "Is Lot 52 currently paying one assessment or two?", "source_id": "q038"}
+{"category": "direct_fact", "id": "q039", "question": "What is item 3 in the Open Items list?", "source_id": "q039"}
+{"category": "arithmetic", "id": "q040", "question": "If the Board reclassifies Lot 52, how many total units would the HOA have?", "source_id": "q040"}

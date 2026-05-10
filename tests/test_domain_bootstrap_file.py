@@ -1,9 +1,14 @@
 from scripts.run_domain_bootstrap_file import (
+    COMPETITION_ROLE_ALIAS_CONTEXT_V1,
+    FICTION_REFERENCE_CONTAINMENT_CONTEXT_V1,
     NARRATIVE_SOURCE_COMPILER_CONTEXT_V1,
     OPERATIONAL_RECORD_STATUS_CONTEXT_V1,
+    PROBATE_PROPERTY_STATUS_CONTEXT_V1,
     PROFILE_SIGNATURE_ROSTER_JSON_SCHEMA,
+    SOURCE_AUTHORITY_AUDIT_CONTEXT_V1,
     SOURCE_ENTITY_LEDGER_SCHEMA,
     SOURCE_PASS_OPS_JSON_SCHEMA,
+    _append_source_record_ledger_facts,
     _call_lmstudio_json_schema,
     _compile_health_summary,
     _compile_source_with_plan_passes,
@@ -27,6 +32,11 @@ def test_narrative_context_guards_attributes_and_official_duties() -> None:
     assert "numeric ages" in context
     assert "not encode numeric ages or duties as names or aliases" in context
     assert "official inspects, certifies, authorizes, investigates, or decides" in context
+    assert "preserve each named resident separately" in context
+    assert "errand/distraction" in context
+    assert "choice-by-contrast" in context
+    assert "comic-consequence" in context
+    assert "explicit-moral" in context
 
 
 def test_operational_record_context_guards_status_corrections_and_unresolved_items() -> None:
@@ -47,6 +57,104 @@ def test_source_compiler_context_selects_operational_record_lens_from_domain_hin
 
     assert "operational_record_status_strategy_v1" in context
     assert "Operational join-readiness rule" in context
+    assert "permit/license lifecycle" in context
+    assert "quarantine/lot-status" in context
+
+
+def test_greenhouse_and_school_records_get_scoped_contexts() -> None:
+    greenhouse_context = "\n".join(
+        _source_compiler_context(
+            domain_hint="greenhouse quarantine lab result nursery lot status record",
+            intake_plan=None,
+        )
+    )
+    school_context = "\n".join(
+        _source_compiler_context(
+            domain_hint="school field trip attendance supervision chaperone station roster",
+            intake_plan=None,
+        )
+    )
+
+    assert "quarantine/lot-status" in greenhouse_context
+    assert "sample count" in greenhouse_context
+    assert "administrative_roster_timeline_strategy_v1" in school_context
+    assert "Mixed-session assignments must not overwrite the standing group roster" in school_context
+
+
+def test_probate_property_context_separates_ownership_possession_and_status() -> None:
+    context = "\n".join(PROBATE_PROPERTY_STATUS_CONTEXT_V1)
+
+    assert "ownership, possession, control, custody, maintenance" in context
+    assert "disputed, provisional, deferred, potential" in context
+    assert "gift cards, bills of sale, solicitor advice" in context
+    assert "balances, payments, seasonal values, totals" in context
+
+    selected = "\n".join(
+        _source_compiler_context(
+            domain_hint="probate inheritance estate will gift pledge possession ownership adverse possession",
+            intake_plan=None,
+        )
+    )
+
+    assert "probate_property_status_strategy_v1" in selected
+    assert "source-stated purchases, sales, wills, gifts" in selected
+
+
+def test_competition_role_alias_context_keeps_banners_roles_and_corrections() -> None:
+    context = "\n".join(COMPETITION_ROLE_ALIAS_CONTEXT_V1)
+
+    assert "banner/title aliases are time-scoped identities" in context
+    assert "dual-role records" in context
+    assert "original posted rank, corrected rank" in context
+    assert "Do not transfer an old banner victory" in context
+
+    selected = "\n".join(
+        _source_compiler_context(
+            domain_hint="tournament archery banner alias scoring ranking protest marshal range officer dual role",
+            intake_plan=None,
+        )
+    )
+
+    assert "competition_role_alias_strategy_v1" in selected
+    assert "protests, rulings, holds, misfires" in selected
+
+
+def test_source_authority_audit_context_keeps_claim_source_and_correction_status() -> None:
+    context = "\n".join(SOURCE_AUTHORITY_AUDIT_CONTEXT_V1)
+
+    assert "visible/public text, copied guide text" in context
+    assert "copied text is not independent confirmation" in context
+    assert "drafted, installed, rejected, queued" in context
+    assert "Authority override" in context
+
+    selected = "\n".join(
+        _source_compiler_context(
+            domain_hint="museum relabelling audit placard visitor guide catalog acquisition record curator correction status",
+            intake_plan=None,
+        )
+    )
+
+    assert "source_authority_audit_strategy_v1" in selected
+    assert "numeric counts, publication years, date ranges" in selected
+
+
+def test_fiction_reference_context_keeps_story_layer_boundaries() -> None:
+    context = "\n".join(FICTION_REFERENCE_CONTAINMENT_CONTEXT_V1)
+
+    assert "fictional events" in context
+    assert "source layer" in context
+    assert "Publication chronology" in context
+    assert "Unresolved real-incident" in context
+
+    selected = "\n".join(
+        _source_compiler_context(
+            domain_hint="library novel fiction story level reference containment fictional coincidence source layer",
+            intake_plan=None,
+        )
+    )
+
+    assert "fiction_reference_containment_strategy_v1" in selected
+    assert "do not promote fictional events as real-world facts" in selected
 
 
 def test_source_entity_ledger_schema_has_coverage_targets() -> None:
@@ -108,6 +216,30 @@ def test_source_entity_ledger_context_marks_partial_skeleton_as_ledger_backed() 
     assert "ledger-backed narrative skeleton passes" in context
     assert "partial safe skeleton is better than rejecting the pass" in context
     assert "coverage_targets, treat them as powerless pass-coverage hints" in context
+
+
+def test_append_source_record_ledger_facts_marks_deterministic_policy() -> None:
+    compile_record = {"facts": ["existing_fact(alpha)."], "unique_fact_count": 1}
+    ledger = {
+        "rows": [
+            {
+                "row_id": "src_line_0007",
+                "kind": "labeled_line",
+                "line": 7,
+                "section": "Evidence",
+                "exact": "Memo LAB4C-MEM-2026-04-22 states a row.",
+                "label": "LAB4C-MEM-2026-04-22",
+            }
+        ]
+    }
+
+    _append_source_record_ledger_facts(compile_record, ledger)
+
+    assert "existing_fact(alpha)." in compile_record["facts"]
+    assert "source_record_label(src_line_0007, lab4c_mem_2026_04_22)." in compile_record["facts"]
+    assert compile_record["unique_fact_count"] == len(compile_record["facts"])
+    assert compile_record["deterministic_source_record_fact_count"] > 0
+    assert compile_record["deterministic_source_record_policy"]["not_semantic_truth"] is True
 
 
 def test_source_pass_ops_schema_is_operations_only() -> None:

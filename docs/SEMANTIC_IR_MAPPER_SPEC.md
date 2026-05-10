@@ -1,6 +1,6 @@
 # Semantic IR Mapper Specification
 
-Last updated: 2026-04-28
+Last updated: 2026-05-09
 
 ## Purpose
 
@@ -306,6 +306,15 @@ errors, for example:
 - a `date` slot receiving a person or place-like entity;
 - a `person` slot receiving a time, place, document, or medical concept;
 - a `document`/`source` slot receiving a person or time value.
+
+Timestamp/date roles accept normalized date atoms such as `2026_05_09`,
+ISO-like date-time atoms such as `2026_05_09t14_30`, and source-record
+date-time atoms such as `2026_05_09_14_30`. The last form matters for
+operational ledgers: OpenRouter temporal-state compiles were proposing correct
+facts such as `event_timestamp(e_02, 2026_04_28_08_00)`, and the mapper was
+rejecting them as non-temporal before the timestamp validator learned that
+shape. This is a structural admission rule, not a fixture-specific temporal
+helper.
 
 The mapper does not infer legal, medical, or story meaning from raw English to
 make this decision. It uses the IR's normalized arguments, entity metadata, and

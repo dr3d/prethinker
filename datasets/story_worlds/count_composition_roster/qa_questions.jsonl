@@ -1,0 +1,40 @@
+{"category": "lookup", "id": "q001", "question": "What is the destination of the Spring Trip 2026?", "source_id": "count_composition_roster"}
+{"category": "lookup", "id": "q002", "question": "On what date is the trip scheduled?", "source_id": "count_composition_roster"}
+{"category": "lookup", "id": "q003", "question": "Who is named as the trip leader?", "source_id": "count_composition_roster"}
+{"category": "lookup", "id": "q004", "question": "Who is named as the registered nurse on the trip?", "source_id": "count_composition_roster"}
+{"category": "lookup", "id": "q005", "question": "Which district policy section governs the chaperone-to-student ratio for water-access trips?", "source_id": "count_composition_roster"}
+{"category": "lookup", "id": "q006", "question": "Which district policy section excludes medical staff from the §3.2 chaperone ratio?", "source_id": "count_composition_roster"}
+{"category": "lookup", "id": "q007", "question": "What is the chaperone-to-student ratio required by §3.2 for water-access trips?", "source_id": "count_composition_roster"}
+{"category": "lookup", "id": "q008", "question": "What is the student identifier for Halpern?", "source_id": "count_composition_roster"}
+{"category": "lookup", "id": "q009", "question": "What is the student identifier for Yates?", "source_id": "count_composition_roster"}
+{"category": "lookup", "id": "q010", "question": "On what date was Correction Notice 02 issued?", "source_id": "count_composition_roster"}
+{"category": "count", "id": "q011", "question": "How many student entries appear in roster v1.0?", "source_id": "count_composition_roster"}
+{"category": "count", "id": "q012", "question": "How many distinct students are on the trip per the registrar in v1.0?", "source_id": "count_composition_roster"}
+{"category": "count", "id": "q013", "question": "How many distinct students are on the trip in v1.3?", "source_id": "count_composition_roster"}
+{"category": "count", "id": "q014", "question": "How many student entries are listed for homeroom 7-A in roster v1.0?", "source_id": "count_composition_roster"}
+{"category": "count", "id": "q015", "question": "How many students are assigned to homeroom 7-A in roster v1.3?", "source_id": "count_composition_roster"}
+{"category": "count", "id": "q016", "question": "How many students are assigned to homeroom 7-C in roster v1.3?", "source_id": "count_composition_roster"}
+{"category": "count", "id": "q017", "question": "How many counting chaperones (chaperones who count toward the §3.2 ratio) are on the v1.3 roster?", "source_id": "count_composition_roster"}
+{"category": "count", "id": "q018", "question": "How many adults total are accompanying the trip in v1.3?", "source_id": "count_composition_roster"}
+{"category": "composition", "id": "q019", "question": "Did the total distinct-student count change between roster v1.0 and v1.3?", "source_id": "count_composition_roster"}
+{"category": "composition", "id": "q020", "question": "Did the total 7th-grade student count change between v1.0 and v1.3?", "source_id": "count_composition_roster"}
+{"category": "composition", "id": "q021", "question": "Which student was reassigned from homeroom 7-A to homeroom 7-C, and in which Correction Notice?", "source_id": "count_composition_roster"}
+{"category": "composition", "id": "q022", "question": "Which two students swapped homeroom assignments between 8-B and 8-C in Correction Notice 03?", "source_id": "count_composition_roster"}
+{"category": "composition", "id": "q023", "question": "Which student appeared as a duplicate in roster v1.0, and in which two homerooms?", "source_id": "count_composition_roster"}
+{"category": "composition", "id": "q024", "question": "What is the registrar's authoritative homeroom for STU-1063?", "source_id": "count_composition_roster"}
+{"category": "composition", "id": "q025", "question": "Which student withdrew in Correction Notice 01, and which student replaced them?", "source_id": "count_composition_roster"}
+{"category": "composition", "id": "q026", "question": "Which student withdrew in Correction Notice 02, and which student replaced them?", "source_id": "count_composition_roster"}
+{"category": "composition", "id": "q027", "question": "Did the total student count on the manifest change when Marrero's homeroom was reassigned?", "source_id": "count_composition_roster"}
+{"category": "composition", "id": "q028", "question": "Was the bus assignment of student Garner changed by any correction notice, and if so which?", "source_id": "count_composition_roster"}
+{"category": "temporal", "id": "q029", "question": "On what date was the initial roster (v1.0) issued?", "source_id": "count_composition_roster"}
+{"category": "temporal", "id": "q030", "question": "On what date was Correction Notice 03 issued?", "source_id": "count_composition_roster"}
+{"category": "authority", "id": "q031", "question": "Which person on the trip roster is excluded from the §3.2 chaperone-to-student ratio under §3.4?", "source_id": "count_composition_roster"}
+{"category": "authority", "id": "q032", "question": "Under §3.2, what is the minimum number of qualifying chaperones required for 38 students on a water-access trip?", "source_id": "count_composition_roster"}
+{"category": "composition", "id": "q033", "question": "Under §3.2, was roster v1.0 compliant with the chaperone-to-student ratio?", "source_id": "count_composition_roster"}
+{"category": "composition", "id": "q034", "question": "Under §3.2, is roster v1.3 compliant with the chaperone-to-student ratio?", "source_id": "count_composition_roster"}
+{"category": "count", "id": "q035", "question": "Across the four roster versions (v1.0, v1.1, v1.2, v1.3), how many times did §3.2 compliance status flip?", "source_id": "count_composition_roster"}
+{"category": "provenance", "id": "q036", "question": "On what date was the registrar's master enrollment record reconciled with the trip roster?", "source_id": "count_composition_roster"}
+{"category": "provenance", "id": "q037", "question": "Which Correction Notice identified Vinokur's duplicate listing?", "source_id": "count_composition_roster"}
+{"category": "unresolved", "id": "q038", "question": "As of packet close, how many students still owe permission slips, and what is the §4.2 deadline for receipt?", "source_id": "count_composition_roster"}
+{"category": "authority", "id": "q039", "question": "Is Ms. R. Lopez counted toward the §3.2 ratio in v1.3?", "source_id": "count_composition_roster"}
+{"category": "negative_existential", "id": "q040", "question": "Is student Wu listed on roster v1.3?", "source_id": "count_composition_roster"}

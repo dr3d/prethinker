@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import time
 import urllib.error
@@ -787,6 +788,7 @@ class SemanticIRCallConfig:
     think_enabled: bool = False
     reasoning_effort: str = "none"
     max_tokens: int = 12000
+    api_key: str = ""
 
 
 def build_semantic_ir_input_payload(
@@ -995,12 +997,22 @@ def _call_ollama_semantic_ir(*, config: SemanticIRCallConfig, messages: list[dic
 
 
 def _call_lmstudio_semantic_ir(*, config: SemanticIRCallConfig, messages: list[dict[str, str]]) -> dict[str, Any]:
+    request_messages = [dict(message) for message in messages]
+    if not bool(config.think_enabled):
+        for message in request_messages:
+            if message.get("role") == "system":
+                content = str(message.get("content") or "")
+                if not content.lstrip().startswith("/no_think"):
+                    message["content"] = "/no_think\n" + content
+                break
     payload: dict[str, Any] = {
         "model": config.model,
-        "messages": messages,
+        "messages": request_messages,
         "temperature": float(config.temperature),
         "top_p": float(config.top_p),
         "max_tokens": int(config.max_tokens),
+        "think": bool(config.think_enabled),
+        "thinking": bool(config.think_enabled),
         "response_format": {
             "type": "json_schema",
             "json_schema": {
@@ -1012,12 +1024,15 @@ def _call_lmstudio_semantic_ir(*, config: SemanticIRCallConfig, messages: list[d
     }
     if str(config.reasoning_effort or "").strip():
         payload["reasoning_effort"] = str(config.reasoning_effort).strip()
+    if _is_openrouter_base_url(config.base_url) and not bool(config.think_enabled):
+        payload["reasoning"] = {"effort": "none", "exclude": True}
+        payload["include_reasoning"] = False
     base_url = config.base_url.rstrip("/")
     endpoint = f"{base_url}/chat/completions" if base_url.endswith("/v1") else f"{base_url}/v1/chat/completions"
     req = urllib.request.Request(
         endpoint,
         data=json.dumps(payload).encode("utf-8"),
-        headers={"Content-Type": "application/json"},
+        headers=_chat_headers(config.api_key),
         method="POST",
     )
     started = time.perf_counter()
@@ -1043,6 +1058,18 @@ def _call_lmstudio_semantic_ir(*, config: SemanticIRCallConfig, messages: list[d
         "content": content,
         "parsed": parsed,
     }
+
+
+def _chat_headers(api_key: str = "") -> dict[str, str]:
+    headers = {"Content-Type": "application/json"}
+    key = str(api_key or os.environ.get("PRETHINKER_API_KEY") or os.environ.get("OPENROUTER_API_KEY") or "").strip()
+    if key:
+        headers["Authorization"] = f"Bearer {key}"
+    return headers
+
+
+def _is_openrouter_base_url(base_url: str) -> bool:
+    return "openrouter.ai" in str(base_url or "").lower()
 
 
 def parse_semantic_ir_json(text: str) -> dict[str, Any] | None:
@@ -2922,9 +2949,11 @@ def _role_argument_problem(role: str, arg: str, meta: dict[str, Any]) -> str:
     if role_kind == "interval":
         if entity_type == "person":
             return "a person, not an interval"
+        if _looks_like_interval_atom(value):
+            return ""
         if _looks_like_date_atom(value):
             return "a date, not an interval"
-        if "interval" not in value and not value.endswith("_period") and not value.endswith("_span"):
+        if not _looks_like_interval_atom(value):
             return "a non-interval atom"
     elif role_kind == "date":
         if entity_type == "person":
@@ -3008,6 +3037,8 @@ def _looks_like_date_atom(value: str) -> bool:
     atom = str(value or "").strip().lower()
     if re.fullmatch(r"\d{4}(_\d{1,2}){0,2}", atom):
         return True
+    if re.fullmatch(r"\d{4}_\d{1,2}_\d{1,2}_\d{1,2}_\d{2}(?:_\d{2})?", atom):
+        return True
     if re.fullmatch(r"\d{4}_\d{1,2}_\d{1,2}t\d{1,2}_\d{2}", atom):
         return True
     if re.search(r"\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|january|february|march|april|june|july|august|september|october|november|december)_", atom):
@@ -3023,6 +3054,21 @@ def _looks_like_temporal_atom(value: str) -> bool:
         return True
     if any(marker in atom for marker in ("today", "tomorrow", "yesterday", "morning", "afternoon", "evening")):
         return True
+    return False
+
+
+def _looks_like_interval_atom(value: str) -> bool:
+    atom = str(value or "").strip().lower()
+    if not atom:
+        return False
+    if "interval" in atom or atom.endswith("_period") or atom.endswith("_span"):
+        return True
+    if "_to_" in atom:
+        start, end = atom.split("_to_", 1)
+        return _looks_like_temporal_atom(start) and _looks_like_temporal_atom(end)
+    if "_until_" in atom:
+        start, end = atom.split("_until_", 1)
+        return _looks_like_temporal_atom(start) and _looks_like_temporal_atom(end)
     return False
 
 

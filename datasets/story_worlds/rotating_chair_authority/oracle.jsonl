@@ -1,0 +1,40 @@
+{"category": "direct_fact", "id": "q001", "reference_answer": "Four members", "source_id": "q001"}
+{"category": "direct_fact", "id": "q002", "reference_answer": "Delia Marsh", "source_id": "q002"}
+{"category": "direct_fact", "id": "q003", "reference_answer": "Tobias Engel (travel, notified in advance)", "source_id": "q003"}
+{"category": "rule_application", "id": "q004", "reference_answer": "Yes. Six of seven members were present, exceeding the four-member quorum requirement.", "source_id": "q004"}
+{"category": "authority", "id": "q005", "reference_answer": "Her brother-in-law is a subcontractor for Greenline Services, the contract party. She recused under GR-4 due to financial interest.", "source_id": "q005"}
+{"category": "authority", "id": "q006", "reference_answer": "Franco Herrera (Vice-Chair), who assumed Chair authority under GR-3 when Marsh recused.", "source_id": "q006"}
+{"category": "direct_fact", "id": "q007", "reference_answer": "4-1 (Herrera, Okonkwo, Patel, Janssen voted yes; Lowe voted no; Marsh did not vote)", "source_id": "q007"}
+{"category": "authority", "id": "q008", "reference_answer": "No. She recused herself due to her financial interest.", "source_id": "q008"}
+{"category": "direct_fact", "id": "q009", "reference_answer": "Yes, 4-1.", "source_id": "q009"}
+{"category": "rule_application", "id": "q010", "reference_answer": "Recusal reduces the quorum requirement by one for that vote only, per GR-4.", "source_id": "q010"}
+{"category": "rule_application", "id": "q011", "reference_answer": "No. Under GR-2, the Chair may not make motions.", "source_id": "q011"}
+{"category": "direct_fact", "id": "q012", "reference_answer": "Kendra Lowe", "source_id": "q012"}
+{"category": "authority", "id": "q013", "reference_answer": "No.", "source_id": "q013"}
+{"category": "rule_application", "id": "q014", "reference_answer": "Because the Chair does not vote except to break ties, per GR-2.", "source_id": "q014"}
+{"category": "direct_fact", "id": "q015", "reference_answer": "4-1 (Herrera, Okonkwo, Janssen, Lowe voted yes; Patel voted no)", "source_id": "q015"}
+{"category": "direct_fact", "id": "q016", "reference_answer": "$6,200", "source_id": "q016"}
+{"category": "rule_application", "id": "q017", "reference_answer": "Yes. GR-5 allows delegation for contracts under $10,000 and the signage contract is $6,200.", "source_id": "q017"}
+{"category": "direct_fact", "id": "q018", "reference_answer": "Vice-Chair Franco Herrera", "source_id": "q018"}
+{"category": "rule_application", "id": "q019", "reference_answer": "At the end of the meeting in which it was made (October 14), unless the Board votes to extend.", "source_id": "q019"}
+{"category": "direct_fact", "id": "q020", "reference_answer": "No.", "source_id": "q020"}
+{"category": "temporal_status", "id": "q021", "reference_answer": "After. The delegation expired at the end of the October 14 meeting. Herrera signed on October 16.", "source_id": "q021"}
+{"category": "authority", "id": "q022", "reference_answer": "It is a valid concern and appears invalid. Marsh acknowledged the delegation appears to have expired and is consulting counsel. No determination has been made yet.", "source_id": "q022"}
+{"category": "authority", "id": "q023", "reference_answer": "Franco Herrera (Vice-Chair)", "source_id": "q023"}
+{"category": "temporal_status", "id": "q024", "reference_answer": "No. Marsh was traveling from October 1 through October 5 and was formally unavailable.", "source_id": "q024"}
+{"category": "rule_application", "id": "q025", "reference_answer": "GR-6 (Emergency Authority), which allows the Vice-Chair to exercise emergency authority when the Chair is formally unavailable.", "source_id": "q025"}
+{"category": "rule_application", "id": "q026", "reference_answer": "Yes. The expenditure was $4,800, within the $5,000 emergency limit.", "source_id": "q026"}
+{"category": "authority", "id": "q027", "reference_answer": "Chair Delia Marsh", "source_id": "q027"}
+{"category": "rule_application", "id": "q028", "reference_answer": "Yes. $3,200 is within the $5,000 limit.", "source_id": "q028"}
+{"category": "authority", "id": "q029", "reference_answer": "Because Marsh was available on October 18 but was formally unavailable (traveling) on October 3. GR-6 gives the Vice-Chair emergency authority only when the Chair is formally unavailable.", "source_id": "q029"}
+{"category": "direct_fact", "id": "q030", "reference_answer": "4-0-1 (Herrera, Okonkwo, Patel, Janssen voted yes; Lowe abstained; Marsh did not vote)", "source_id": "q030"}
+{"category": "direct_fact", "id": "q031", "reference_answer": "No, she abstained.", "source_id": "q031"}
+{"category": "rule_application", "id": "q032", "reference_answer": "Yes, per GR-2.", "source_id": "q032"}
+{"category": "rule_application", "id": "q033", "reference_answer": "No. Under GR-3, the Secretary may preside if both Chair and Vice-Chair are absent, but may not cast tie-breaking votes.", "source_id": "q033"}
+{"category": "rule_application", "id": "q034", "reference_answer": "The Secretary, per GR-3.", "source_id": "q034"}
+{"category": "rule_application", "id": "q035", "reference_answer": "Yes. Any Board member may request an agenda item. Lowe's prior vote does not disqualify her, per Marsh's response.", "source_id": "q035"}
+{"category": "temporal_status", "id": "q036", "reference_answer": "No. Lowe has requested a rescission vote for the November meeting, but no vote has been held yet.", "source_id": "q036"}
+{"category": "direct_fact", "id": "q037", "reference_answer": "No. Discussion only. Marsh noted it will return at the November meeting with a formal proposal.", "source_id": "q037"}
+{"category": "direct_fact", "id": "q038", "reference_answer": "$45,000", "source_id": "q038"}
+{"category": "direct_fact", "id": "q039", "reference_answer": "Secretary Suki Okonkwo", "source_id": "q039"}
+{"category": "authority", "id": "q040", "reference_answer": "Whether the signing is binding given that the delegation expired at the end of the October 14 meeting and Herrera signed on October 16. Marsh is consulting counsel. No determination has been made.", "source_id": "q040"}

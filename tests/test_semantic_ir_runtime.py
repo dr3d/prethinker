@@ -1173,6 +1173,61 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         self.assertEqual(diagnostics["features"]["predicate_contract_enabled"], True)
         self.assertEqual(diagnostics["features"]["has_contract_invalid_safe_write"], False)
 
+    def test_mapper_admits_date_to_date_atom_for_interval_contract_role(self) -> None:
+        ir = _ir(
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "supervises",
+                    "args": ["person_tullis", "person_cosmo", "2025_10_07t11_00_to_2025_10_07t12_30"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+            ]
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=["supervises/3"],
+            predicate_contracts=[
+                {"signature": "supervises/3", "arguments": ["person", "group_or_person", "time_interval"]},
+            ],
+        )
+
+        self.assertEqual(warnings, [])
+        self.assertEqual(
+            parsed["facts"],
+            ["supervises(person_tullis, person_cosmo, 2025_10_07t11_00_to_2025_10_07t12_30)."],
+        )
+        diagnostics = parsed["admission_diagnostics"]
+        self.assertEqual(diagnostics["features"]["has_contract_invalid_safe_write"], False)
+
+    def test_mapper_admits_underscore_datetime_atom_for_timestamp_contract_role(self) -> None:
+        ir = _ir(
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "event_timestamp",
+                    "args": ["e_02", "2026_04_28_08_00"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+            ]
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=["event_timestamp/2"],
+            predicate_contracts=[
+                {"signature": "event_timestamp/2", "arguments": ["event_ref", "timestamp"]},
+            ],
+        )
+
+        self.assertEqual(warnings, [])
+        self.assertEqual(parsed["facts"], ["event_timestamp(e_02, 2026_04_28_08_00)."])
+        diagnostics = parsed["admission_diagnostics"]
+        self.assertEqual(diagnostics["features"]["has_contract_invalid_safe_write"], False)
+
     def test_mapper_records_clause_supports_for_admitted_operations(self) -> None:
         parsed, warnings = semantic_ir_to_legacy_parse(_ir())
         self.assertEqual(warnings, [])

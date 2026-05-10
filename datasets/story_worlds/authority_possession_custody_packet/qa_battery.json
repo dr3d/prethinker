@@ -1,0 +1,322 @@
+[
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q001",
+    "question": "Who has legal title to Notebook A as of 2026-04-30?",
+    "reference_answer": "The Pellico Society holds legal title to Notebook A as of 2026-04-30, and has done so since the 2022-09-14 Donor Agreement.",
+    "source_id": "q001"
+  },
+  {
+    "behavior": "",
+    "category": "custody",
+    "id": "q002",
+    "question": "Who has physical custody of Notebook A as of 2026-04-30?",
+    "reference_answer": "Stille Conservation Studio LLC, since 2025-11-12 (per receipt STL-2025-118).",
+    "source_id": "q002"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q003",
+    "question": "Who has authority to grant reading-room access to Notebook A as of 2026-04-30?",
+    "reference_answer": "The Pellico Society. Stille is the temporary physical custodian only and has no third-party access authority without Pellico's written authorization.",
+    "source_id": "q003"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q004",
+    "question": "Who has authority to publish facsimile reproductions of Notebook A's contents, and is that authority currently active?",
+    "reference_answer": "The Pellico Society holds publication authority, subject to the Halberd Family Trust's reserved right of pre-publication review. As of 2026-04-30, that authority is paused under Board Resolution 2026-08, which directs no publication of personal correspondence in any form pending arbitration.",
+    "source_id": "q004"
+  },
+  {
+    "behavior": "",
+    "category": "composition",
+    "id": "q005",
+    "question": "For Notebook A, distinguish the authorities held by the Pellico Society from the role held by Stille Conservation Studio.",
+    "reference_answer": "Pellico Society holds legal title, reading-room access authority, and publication authority (subject to the Trust's reserved review). Stille holds only temporary physical custody and conservation responsibility for the duration of the engagement.",
+    "source_id": "q005"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q006",
+    "question": "Who has legal title to Notebook B?",
+    "reference_answer": "The Pellico Society.",
+    "source_id": "q006"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q007",
+    "question": "Who may operate a reading room for the digitized images of Notebook B?",
+    "reference_answer": "Northbridge University Special Collections, per the 2023-05-20 MOU.",
+    "source_id": "q007"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q008",
+    "question": "Who may grant access to the original Notebook B?",
+    "reference_answer": "The Pellico Society. Northbridge does not have authority to grant access to the original; the original remains at Pellico's premises.",
+    "source_id": "q008"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q009",
+    "question": "Who may grant publication of images derived from the digitized Notebook B?",
+    "reference_answer": "The Pellico Society. The MOU expressly states Northbridge is not authorized to grant publication permission.",
+    "source_id": "q009"
+  },
+  {
+    "behavior": "",
+    "category": "composition",
+    "id": "q010",
+    "question": "Distinguish reading-room access authority for Notebook B between the Pellico Society and Northbridge University Special Collections.",
+    "reference_answer": "Pellico has access authority for the original Notebook B at its premises. Northbridge has access authority for the digitized images at its reading room. Northbridge cannot authorize access to the original.",
+    "source_id": "q010"
+  },
+  {
+    "behavior": "",
+    "category": "provenance",
+    "id": "q011",
+    "question": "Which document added Northbridge as an authorized reading-room location for digitized images of Notebook B, and did it transfer legal title?",
+    "reference_answer": "The 2023-05-20 Memorandum of Understanding between the Pellico Society and Northbridge. It expressly does not transfer legal title, physical custody of originals, or publication authority.",
+    "source_id": "q011"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q012",
+    "question": "Who could authorize Dr. K. Phenwick to view the eight letters at Stille on 2026-03-11?",
+    "reference_answer": "The Pellico Society. The access log records Pellico Society as the authorizing entity, with Stille coordinating as custodian only.",
+    "source_id": "q012"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q013",
+    "question": "Did Stille authorize the 2026-03-11 visit at its premises?",
+    "reference_answer": "No. The packet's note on the 2026-03-11 visit states Stille's role was custodial, not authorizing; the authorization came from the Pellico Society in writing.",
+    "source_id": "q013"
+  },
+  {
+    "behavior": "",
+    "category": "unresolved",
+    "id": "q014",
+    "question": "What is the unresolved question about the scope of the Halberd Family Trust's reserved right of pre-publication review?",
+    "reference_answer": "Whether the reserved right of pre-publication review covers transcripts and excerpts (the Trust's position) or only facsimile reproductions of personal correspondence (the Society and counsel's reading). Pending binding arbitration with R. Mendelssohn Esq.; hearing 2026-06-10.",
+    "source_id": "q014"
+  },
+  {
+    "behavior": "",
+    "category": "unresolved",
+    "id": "q015",
+    "question": "What is the second unresolved question that the arbitrator has authority to determine?",
+    "reference_answer": "Whether the conservation documentation photographs produced by Stille fall within the Trust's reserved right of pre-publication review.",
+    "source_id": "q015"
+  },
+  {
+    "behavior": "",
+    "category": "provenance",
+    "id": "q016",
+    "question": "Who is the selected arbitrator, and when is the hearing scheduled?",
+    "reference_answer": "R. Mendelssohn Esq., jointly selected by the Society and the Trust per the 2026-04-25 Pending Arbitration Notice. Hearing scheduled for 2026-06-10.",
+    "source_id": "q016"
+  },
+  {
+    "behavior": "",
+    "category": "unresolved",
+    "id": "q017",
+    "question": "Has the arbitrator's determination issued as of packet close?",
+    "reference_answer": "No. As of packet close (2026-04-30), the arbitrator's determination has not yet issued.",
+    "source_id": "q017"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q018",
+    "question": "As of 2026-04-30, may the Pellico Society publish a transcript of a personal letter?",
+    "reference_answer": "No. Under Resolution 2026-08 (2026-04-02), the Society has paused publication of personal correspondence in any form (facsimile, transcript, or excerpt) pending arbitration.",
+    "source_id": "q018"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q019",
+    "question": "As of 2026-04-30, may a researcher read a personal letter at Pellico's reading room?",
+    "reference_answer": "Yes. Resolution 2026-08 §2 expressly states that reading-room access to personal correspondence is not affected by the publication pause; the access log shows continuing reading-room access at both Pellico and Stille premises.",
+    "source_id": "q019"
+  },
+  {
+    "behavior": "",
+    "category": "count",
+    "id": "q020",
+    "question": "How many items in total are in the Halberd Collection?",
+    "reference_answer": "Forty-seven.",
+    "source_id": "q020"
+  },
+  {
+    "behavior": "",
+    "category": "count",
+    "id": "q021",
+    "question": "How many items are listed on the Stille conservation intake receipt?",
+    "reference_answer": "Twelve, per receipt STL-2025-118 (Notebook A; eight personal letters; the 1923 Halberd Mills bound ledger; the photograph album; one 1916 loose photograph).",
+    "source_id": "q021"
+  },
+  {
+    "behavior": "",
+    "category": "count",
+    "id": "q022",
+    "question": "How many items remain in Pellico's physical custody as of 2026-04-30?",
+    "reference_answer": "Thirty-five (forty-seven minus the twelve at Stille). The photograph album was temporarily recalled to Pellico for 2026-03-03 through 2026-03-05 but has been back at Stille since 2026-03-05; as of 2026-04-30 it is at Stille.",
+    "source_id": "q022"
+  },
+  {
+    "behavior": "",
+    "category": "count",
+    "id": "q023",
+    "question": "How many personal letters are at Pellico, and how many are at Stille, as of 2026-04-30?",
+    "reference_answer": "Sixteen letters at Pellico; eight letters at Stille.",
+    "source_id": "q023"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q024",
+    "question": "Who has publication authority over the 1923 Halberd Mills bound ledger?",
+    "reference_answer": "The Pellico Society alone. The 1923 Halberd Mills bound ledger is not personal correspondence under the Donor Agreement and is not subject to the Trust's reserved right of pre-publication review.",
+    "source_id": "q024"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q025",
+    "question": "Is publication of the 1923 Halberd Mills bound ledger paused under Resolution 2026-08?",
+    "reference_answer": "No. Resolution 2026-08 pauses publication of personal correspondence only; the bound ledger is not personal correspondence.",
+    "source_id": "q025"
+  },
+  {
+    "behavior": "",
+    "category": "provenance",
+    "id": "q026",
+    "question": "Which 2024 document governs the conservator's right to physical custody, and what does it specify?",
+    "reference_answer": "The 2024-02-05 Amendment to the Donor Agreement. It permits the Society to place items into a contractor's temporary physical custody without transferring title, access, publication, or alienation rights, and reserves the Society's right of recall on demand. Trust consent is not required, but the Society must notify the Trust within thirty days of any placement of personal correspondence.",
+    "source_id": "q026"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q027",
+    "question": "Does Stille have any right to grant publication of items in its custody?",
+    "reference_answer": "No. The intake receipt and the 2024 Amendment both state Stille has no right of access by third parties without written authorization, and no right of publication.",
+    "source_id": "q027"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q028",
+    "question": "What is the receipt number for the 2025-11-12 conservation intake?",
+    "reference_answer": "STL-2025-118.",
+    "source_id": "q028"
+  },
+  {
+    "behavior": "",
+    "category": "temporal",
+    "id": "q029",
+    "question": "Since when has the Pellico Society held legal title to Notebook A?",
+    "reference_answer": "Since 2022-09-14 (the Donor Agreement effective date).",
+    "source_id": "q029"
+  },
+  {
+    "behavior": "",
+    "category": "temporal",
+    "id": "q030",
+    "question": "When was Notebook B digitized?",
+    "reference_answer": "2023-04-12, per the MOU.",
+    "source_id": "q030"
+  },
+  {
+    "behavior": "",
+    "category": "temporal",
+    "id": "q031",
+    "question": "When does the conservation engagement at Stille for the twelve received items conclude (scheduled)?",
+    "reference_answer": "2026-08-30.",
+    "source_id": "q031"
+  },
+  {
+    "behavior": "",
+    "category": "composition",
+    "id": "q032",
+    "question": "On 2026-03-11, who held physical custody of the 8 letters under conservation, and who authorized Dr. Phenwick to view them?",
+    "reference_answer": "Stille held physical custody of the eight letters; the Pellico Society authorized Dr. Phenwick's viewing in writing.",
+    "source_id": "q032"
+  },
+  {
+    "behavior": "",
+    "category": "composition",
+    "id": "q033",
+    "question": "Where is Notebook A located as of 2026-04-30, and is its publication paused?",
+    "reference_answer": "Notebook A is in Stille's physical custody as of 2026-04-30. Yes, its publication is paused: Notebook A is personal correspondence under the Donor Agreement and falls within Resolution 2026-08.",
+    "source_id": "q033"
+  },
+  {
+    "behavior": "",
+    "category": "unresolved",
+    "id": "q034",
+    "question": "Has the question of whether Stille's conservation documentation photographs are within the Trust's reserved right been decided?",
+    "reference_answer": "No. Counsel's memorandum expressly does not resolve this; Resolution 2026-08 §4 directs the Society not to treat the photographs as publishable; the arbitrator has authority to determine.",
+    "source_id": "q034"
+  },
+  {
+    "behavior": "",
+    "category": "negative_existential",
+    "id": "q035",
+    "question": "Has any item beyond the original Notebook B been added to the Northbridge MOU scope since the MOU effective date?",
+    "reference_answer": "No. The MOU's 'Items added since MOU effective date' line states None.",
+    "source_id": "q035"
+  },
+  {
+    "behavior": "",
+    "category": "temporal_interval",
+    "id": "q036",
+    "question": "During what interval was the photograph album physically at Pellico's premises despite being on the conservation intake list at Stille?",
+    "reference_answer": "From 2026-03-03 through 2026-03-05 (the album was returned to Stille on 2026-03-05). The album was on the Stille intake list throughout, but physically at Pellico's premises during this interval under the Society's right of recall.",
+    "source_id": "q036"
+  },
+  {
+    "behavior": "",
+    "category": "provenance",
+    "id": "q037",
+    "question": "Which clause or document was exercised to permit the photograph album to be at Pellico's premises during 2026-03-03 through 2026-03-05?",
+    "reference_answer": "The recall provision of the 2024-02-05 Amendment, which reserves to the Society the right to recall any item from the contractor's custody on demand.",
+    "source_id": "q037"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q038",
+    "question": "Did the 2024 Amendment require the Trust's consent for placement of items into Stille's custody? Did it require notice?",
+    "reference_answer": "No, the Amendment does not require Trust consent for placement of items into Stille's custody. It does require the Society to notify the Trust within thirty days of any placement of personal correspondence.",
+    "source_id": "q038"
+  },
+  {
+    "behavior": "",
+    "category": "composition",
+    "id": "q039",
+    "question": "For the 1923 Halberd Mills bound ledger, identify the legal title holder, the current physical custodian, and the entity with publication authority. Note any difference from Notebook A's authority profile.",
+    "reference_answer": "Pellico Society holds legal title and publication authority. Stille holds physical custody (since 2025-11-12) and conservation responsibility during the engagement. Unlike Notebook A, the bound ledger is not personal correspondence and so is not subject to the Trust's reserved review or to Resolution 2026-08's publication pause.",
+    "source_id": "q039"
+  },
+  {
+    "behavior": "",
+    "category": "composition",
+    "id": "q040",
+    "question": "As of 2026-04-30, list every item or grouping in the Halberd Collection for which physical custody and conservation responsibility differ from legal title.",
+    "reference_answer": "As of 2026-04-30: Notebook A; the eight personal letters at Stille; the 1923 Halberd Mills bound ledger; the photograph album; and the 1916 loose photograph. For each, Pellico Society retains legal title while Stille holds physical custody and conservation responsibility.",
+    "source_id": "q040"
+  }
+]

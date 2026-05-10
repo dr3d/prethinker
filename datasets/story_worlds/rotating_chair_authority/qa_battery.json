@@ -1,0 +1,322 @@
+[
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q001",
+    "question": "How many Board members constitute a quorum?",
+    "reference_answer": "Four members",
+    "source_id": "q001"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q002",
+    "question": "Who is the Chair?",
+    "reference_answer": "Delia Marsh",
+    "source_id": "q002"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q003",
+    "question": "Who was absent from the October 14 meeting?",
+    "reference_answer": "Tobias Engel (travel, notified in advance)",
+    "source_id": "q003"
+  },
+  {
+    "behavior": "",
+    "category": "rule_application",
+    "id": "q004",
+    "question": "Was there a quorum at the October 14 meeting?",
+    "reference_answer": "Yes. Six of seven members were present, exceeding the four-member quorum requirement.",
+    "source_id": "q004"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q005",
+    "question": "Why did Marsh recuse herself from the trail maintenance vote?",
+    "reference_answer": "Her brother-in-law is a subcontractor for Greenline Services, the contract party. She recused under GR-4 due to financial interest.",
+    "source_id": "q005"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q006",
+    "question": "Who presided over the trail maintenance vote?",
+    "reference_answer": "Franco Herrera (Vice-Chair), who assumed Chair authority under GR-3 when Marsh recused.",
+    "source_id": "q006"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q007",
+    "question": "What was the vote count on the trail maintenance contract?",
+    "reference_answer": "4-1 (Herrera, Okonkwo, Patel, Janssen voted yes; Lowe voted no; Marsh did not vote)",
+    "source_id": "q007"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q008",
+    "question": "Did Marsh vote on the trail maintenance contract?",
+    "reference_answer": "No. She recused herself due to her financial interest.",
+    "source_id": "q008"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q009",
+    "question": "Did the trail maintenance contract pass?",
+    "reference_answer": "Yes, 4-1.",
+    "source_id": "q009"
+  },
+  {
+    "behavior": "",
+    "category": "rule_application",
+    "id": "q010",
+    "question": "What is the quorum requirement during a recusal vote?",
+    "reference_answer": "Recusal reduces the quorum requirement by one for that vote only, per GR-4.",
+    "source_id": "q010"
+  },
+  {
+    "behavior": "",
+    "category": "rule_application",
+    "id": "q011",
+    "question": "Can the Chair make motions?",
+    "reference_answer": "No. Under GR-2, the Chair may not make motions.",
+    "source_id": "q011"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q012",
+    "question": "Who moved to approve the community garden lease?",
+    "reference_answer": "Kendra Lowe",
+    "source_id": "q012"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q013",
+    "question": "Did Marsh vote on the community garden lease?",
+    "reference_answer": "No.",
+    "source_id": "q013"
+  },
+  {
+    "behavior": "",
+    "category": "rule_application",
+    "id": "q014",
+    "question": "Why didn't Marsh vote on the community garden lease?",
+    "reference_answer": "Because the Chair does not vote except to break ties, per GR-2.",
+    "source_id": "q014"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q015",
+    "question": "What was the vote on the community garden lease?",
+    "reference_answer": "4-1 (Herrera, Okonkwo, Janssen, Lowe voted yes; Patel voted no)",
+    "source_id": "q015"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q016",
+    "question": "What is the value of the Alderton Design signage contract?",
+    "reference_answer": "$6,200",
+    "source_id": "q016"
+  },
+  {
+    "behavior": "",
+    "category": "rule_application",
+    "id": "q017",
+    "question": "Is the signage contract within the Chair's delegation authority?",
+    "reference_answer": "Yes. GR-5 allows delegation for contracts under $10,000 and the signage contract is $6,200.",
+    "source_id": "q017"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q018",
+    "question": "Who received the signing delegation for the signage contract?",
+    "reference_answer": "Vice-Chair Franco Herrera",
+    "source_id": "q018"
+  },
+  {
+    "behavior": "",
+    "category": "rule_application",
+    "id": "q019",
+    "question": "When does the signing delegation expire?",
+    "reference_answer": "At the end of the meeting in which it was made (October 14), unless the Board votes to extend.",
+    "source_id": "q019"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q020",
+    "question": "Was an extension vote held for the delegation?",
+    "reference_answer": "No.",
+    "source_id": "q020"
+  },
+  {
+    "behavior": "",
+    "category": "temporal_status",
+    "id": "q021",
+    "question": "Did Herrera sign the signage contract before or after the delegation expired?",
+    "reference_answer": "After. The delegation expired at the end of the October 14 meeting. Herrera signed on October 16.",
+    "source_id": "q021"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q022",
+    "question": "Is Herrera's October 16 signing of the signage contract valid?",
+    "reference_answer": "It is a valid concern and appears invalid. Marsh acknowledged the delegation appears to have expired and is consulting counsel. No determination has been made yet.",
+    "source_id": "q022"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q023",
+    "question": "Who authorized the October 3 emergency tree removal expenditure?",
+    "reference_answer": "Franco Herrera (Vice-Chair)",
+    "source_id": "q023"
+  },
+  {
+    "behavior": "",
+    "category": "temporal_status",
+    "id": "q024",
+    "question": "Was Marsh available on October 3?",
+    "reference_answer": "No. Marsh was traveling from October 1 through October 5 and was formally unavailable.",
+    "source_id": "q024"
+  },
+  {
+    "behavior": "",
+    "category": "rule_application",
+    "id": "q025",
+    "question": "Under what rule did Herrera authorize the October 3 expenditure?",
+    "reference_answer": "GR-6 (Emergency Authority), which allows the Vice-Chair to exercise emergency authority when the Chair is formally unavailable.",
+    "source_id": "q025"
+  },
+  {
+    "behavior": "",
+    "category": "rule_application",
+    "id": "q026",
+    "question": "Was the October 3 expenditure within the emergency spending limit?",
+    "reference_answer": "Yes. The expenditure was $4,800, within the $5,000 emergency limit.",
+    "source_id": "q026"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q027",
+    "question": "Who authorized the October 18 water main repair?",
+    "reference_answer": "Chair Delia Marsh",
+    "source_id": "q027"
+  },
+  {
+    "behavior": "",
+    "category": "rule_application",
+    "id": "q028",
+    "question": "Was the October 18 expenditure within the emergency spending limit?",
+    "reference_answer": "Yes. $3,200 is within the $5,000 limit.",
+    "source_id": "q028"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q029",
+    "question": "Why could Marsh authorize the October 18 expenditure but not the October 3 one?",
+    "reference_answer": "Because Marsh was available on October 18 but was formally unavailable (traveling) on October 3. GR-6 gives the Vice-Chair emergency authority only when the Chair is formally unavailable.",
+    "source_id": "q029"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q030",
+    "question": "What was the vote on ratifying the emergency tree removal expenditure?",
+    "reference_answer": "4-0-1 (Herrera, Okonkwo, Patel, Janssen voted yes; Lowe abstained; Marsh did not vote)",
+    "source_id": "q030"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q031",
+    "question": "Did Lowe vote to ratify the emergency expenditure?",
+    "reference_answer": "No, she abstained.",
+    "source_id": "q031"
+  },
+  {
+    "behavior": "",
+    "category": "rule_application",
+    "id": "q032",
+    "question": "Can the Chair cast a tie-breaking vote?",
+    "reference_answer": "Yes, per GR-2.",
+    "source_id": "q032"
+  },
+  {
+    "behavior": "",
+    "category": "rule_application",
+    "id": "q033",
+    "question": "Can the Secretary cast a tie-breaking vote when presiding?",
+    "reference_answer": "No. Under GR-3, the Secretary may preside if both Chair and Vice-Chair are absent, but may not cast tie-breaking votes.",
+    "source_id": "q033"
+  },
+  {
+    "behavior": "",
+    "category": "rule_application",
+    "id": "q034",
+    "question": "If both the Chair and Vice-Chair are absent, who presides?",
+    "reference_answer": "The Secretary, per GR-3.",
+    "source_id": "q034"
+  },
+  {
+    "behavior": "",
+    "category": "rule_application",
+    "id": "q035",
+    "question": "Can Lowe request rescission of a contract she voted against?",
+    "reference_answer": "Yes. Any Board member may request an agenda item. Lowe's prior vote does not disqualify her, per Marsh's response.",
+    "source_id": "q035"
+  },
+  {
+    "behavior": "",
+    "category": "temporal_status",
+    "id": "q036",
+    "question": "Has the Greenline trail maintenance contract been rescinded?",
+    "reference_answer": "No. Lowe has requested a rescission vote for the November meeting, but no vote has been held yet.",
+    "source_id": "q036"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q037",
+    "question": "Was any motion made on the parcel acquisition at the October 14 meeting?",
+    "reference_answer": "No. Discussion only. Marsh noted it will return at the November meeting with a formal proposal.",
+    "source_id": "q037"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q038",
+    "question": "What is the estimated price of the Whitford parcel?",
+    "reference_answer": "$45,000",
+    "source_id": "q038"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q039",
+    "question": "Who confirmed Lowe's rescission request and added it to the November agenda?",
+    "reference_answer": "Secretary Suki Okonkwo",
+    "source_id": "q039"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q040",
+    "question": "As of October 23, what is the unresolved authority question about the Alderton signing?",
+    "reference_answer": "Whether the signing is binding given that the delegation expired at the end of the October 14 meeting and Herrera signed on October 16. Marsh is consulting counsel. No determination has been made.",
+    "source_id": "q040"
+  }
+]

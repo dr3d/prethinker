@@ -1,0 +1,40 @@
+{"category": "lookup", "id": "q001", "question": "What is the base grant amount under §5.1?", "source_id": "rule_activation_exception_matrix"}
+{"category": "lookup", "id": "q002", "question": "Which NAICS major group qualifies for the §3.1 hospitality bonus?", "source_id": "rule_activation_exception_matrix"}
+{"category": "lookup", "id": "q003", "question": "What bonus percentage does §3.2 award?", "source_id": "rule_activation_exception_matrix"}
+{"category": "lookup", "id": "q004", "question": "What bonus percentage does §3.1 award?", "source_id": "rule_activation_exception_matrix"}
+{"category": "lookup", "id": "q005", "question": "What is the §3.4 combined bonus cap?", "source_id": "rule_activation_exception_matrix"}
+{"category": "lookup", "id": "q006", "question": "What is the application deadline for 2026 Round 1?", "source_id": "rule_activation_exception_matrix"}
+{"category": "lookup", "id": "q007", "question": "When will Round 1 awards be announced?", "source_id": "rule_activation_exception_matrix"}
+{"category": "lookup", "id": "q008", "question": "What is the lower FTE bound under §2.4?", "source_id": "rule_activation_exception_matrix"}
+{"category": "lookup", "id": "q009", "question": "What is the upper FTE bound under §2.4?", "source_id": "rule_activation_exception_matrix"}
+{"category": "lookup", "id": "q010", "question": "What is the outstanding tax-liability threshold under §2.5?", "source_id": "rule_activation_exception_matrix"}
+{"category": "composition", "id": "q011", "question": "Does App-2026-014 (Burnside Café LLC) satisfy §2.1?", "source_id": "rule_activation_exception_matrix"}
+{"category": "composition", "id": "q012", "question": "Does the §3.4 cap apply to App-2026-014's combined bonus, and if so, what is the effective bonus rate?", "source_id": "rule_activation_exception_matrix"}
+{"category": "composition", "id": "q013", "question": "What grant amount does App-2026-014 receive?", "source_id": "rule_activation_exception_matrix"}
+{"category": "composition", "id": "q014", "question": "What grant amount would App-2026-014 have received if the §3.4 cap had not applied?", "source_id": "rule_activation_exception_matrix"}
+{"category": "composition", "id": "q015", "question": "Does App-2026-019 (Cale Industrial Coatings, Inc.) satisfy §2.1 by Borden County incorporation date alone?", "source_id": "rule_activation_exception_matrix"}
+{"category": "composition", "id": "q016", "question": "Does §4.1 apply to App-2026-019, and does it bring §2.1 into satisfaction?", "source_id": "rule_activation_exception_matrix"}
+{"category": "unresolved", "id": "q017", "question": "Why is App-2026-019 currently pending rather than approved?", "source_id": "rule_activation_exception_matrix"}
+{"category": "composition", "id": "q018", "question": "Does §4.2 apply to App-2026-021 (Hendricks Pet Grooming)?", "source_id": "rule_activation_exception_matrix"}
+{"category": "composition", "id": "q019", "question": "What is the disposition of App-2026-021?", "source_id": "rule_activation_exception_matrix"}
+{"category": "composition", "id": "q020", "question": "Does §4.2 apply to App-2026-027 (Marsh Common Tavern)?", "source_id": "rule_activation_exception_matrix"}
+{"category": "composition", "id": "q021", "question": "Does App-2026-027 receive the §3.1 hospitality bonus?", "source_id": "rule_activation_exception_matrix"}
+{"category": "composition", "id": "q022", "question": "Does App-2026-027 receive the §3.2 underrepresented-owner credit?", "source_id": "rule_activation_exception_matrix"}
+{"category": "composition", "id": "q023", "question": "What grant amount does App-2026-027 receive after the §3.4 cap?", "source_id": "rule_activation_exception_matrix"}
+{"category": "composition", "id": "q024", "question": "Why is App-2026-038 (Pellicano Furniture Repair LLC) denied?", "source_id": "rule_activation_exception_matrix"}
+{"category": "composition", "id": "q025", "question": "Why is App-2026-042 (Kintaro Sushi) denied?", "source_id": "rule_activation_exception_matrix"}
+{"category": "count", "id": "q026", "question": "How many applications are reviewed in this packet?", "source_id": "rule_activation_exception_matrix"}
+{"category": "count", "id": "q027", "question": "How many applications are approved?", "source_id": "rule_activation_exception_matrix"}
+{"category": "count", "id": "q028", "question": "How many applications are denied?", "source_id": "rule_activation_exception_matrix"}
+{"category": "count", "id": "q029", "question": "How many applications are pending?", "source_id": "rule_activation_exception_matrix"}
+{"category": "count", "id": "q030", "question": "What is the total approved grant dollar amount in this packet?", "source_id": "rule_activation_exception_matrix"}
+{"category": "authority", "id": "q031", "question": "Under which rule is the §3.1 + §3.2 stacked bonus capped?", "source_id": "rule_activation_exception_matrix"}
+{"category": "authority", "id": "q032", "question": "Under which rule is App-2026-027's §2.4 floor waived?", "source_id": "rule_activation_exception_matrix"}
+{"category": "authority", "id": "q033", "question": "Under which rule does App-2026-019's §2.1 1-year clock continue across counties?", "source_id": "rule_activation_exception_matrix"}
+{"category": "authority", "id": "q034", "question": "Under which rule could App-2026-019 potentially cure its §2.5 violation?", "source_id": "rule_activation_exception_matrix"}
+{"category": "unresolved", "id": "q035", "question": "What specifically is unresolved about App-2026-019?", "source_id": "rule_activation_exception_matrix"}
+{"category": "temporal", "id": "q036", "question": "What is the latest date by which an applicant must have entered a §4.3 payment plan to be eligible for the cure in 2026 Round 1?", "source_id": "rule_activation_exception_matrix"}
+{"category": "unresolved", "id": "q037", "question": "By what date does the Program Office expect Tax Office confirmation for App-2026-019?", "source_id": "rule_activation_exception_matrix"}
+{"category": "negative_existential", "id": "q038", "question": "Is App-2026-021 (Hendricks) eligible for any §3 bonus award in this round?", "source_id": "rule_activation_exception_matrix"}
+{"category": "negative_existential", "id": "q039", "question": "Is App-2026-038 (Pellicano) eligible for the §4.2 exception?", "source_id": "rule_activation_exception_matrix"}
+{"category": "negative_existential", "id": "q040", "question": "Is App-2026-042 (Kintaro) eligible for the §4.1 exception?", "source_id": "rule_activation_exception_matrix"}

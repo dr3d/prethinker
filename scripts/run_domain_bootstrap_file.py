@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 import time
@@ -124,8 +125,13 @@ NARRATIVE_SOURCE_COMPILER_CONTEXT_V1 = [
     "Narrative story-world object coverage: when object/1, kind/2, size/2, owned_by/2, designed_for/2, and initial_location/2 are available, preserve all of those facets for important repeated objects instead of only one ownership row. For repeated object families, emit the whole family in one consistent atom pattern: little/middle/great mug, little/middle/great boots, little/middle/great boat, or equivalent source-local families.",
     "Narrative story-world inventory coverage: introductory inventory lists are not decorative. If the source lists repeated possessed objects by size or owner, preserve every listed family even if later scenes focus on only one family. Do not drop cups/mugs/bowls, tools, footwear, vehicles, beds, boats, keys, or other listed object triads simply because later action scenes are more salient.",
     "Narrative story-world setting coverage: when located_in/2, under/2, near/2, part_of/2, or initial_location/2 are available, preserve descriptive setting relations for the home/place, not only lives_at/2 for residents.",
+    "Narrative story-world residence roster rule: opening home/household sentences are query-bearing. When the source says who lives in, keeps, shares, or belongs to a named home, preserve each named resident separately with lives_at/2 or household_member/2 when available; do not collapse a three-person roster into only a group atom.",
+    "Narrative story-world errand/distraction rule: errands, instructions, and comic distraction lists before arrival are query-bearing setup. Preserve who sent whom, intended purchases/tasks, and each named distraction as separate event/5, caused_by/2, has_property/2, or source-local detail rows instead of reducing the arrival to a single entered-home event.",
     "Narrative story-world food/occasion coverage: when ingredient_of/2, contains_before_eating/2, occasion/1, honoree/2, served_for/2, property/2, or portion_of/2 are available, preserve named ingredients/components, special occasions, honorees, and portion/component relations instead of reducing food to a single object.",
     "Narrative story-world event-spine coverage: when event/5 and story_time/2 are available, preserve source-stated actions such as making/baking/placing/leaving/gathering/entering/eating/trying/finding/repairing as event rows with stable event ids and story_time anchors. Use why_did_* helper predicates only when the profile provides them and the source directly states the reason.",
+    "Narrative story-world choice-by-contrast rule: when a character rejects two family members as too X and accepts the remaining little/middle/great item because it is just enough/right/brisk/secret/etc., preserve both the rejected judgments and the positive property for the accepted item. The accepted item is not safe to infer from size alone unless the positive source phrase is preserved.",
+    "Narrative story-world comic-consequence rule: comic object scenes often encode the answer in concrete consequences, not just the attempt. Preserve pretend roles, unsuitable-purpose contrasts, knocked-down objects, spilled contents, path details such as through/under locations, and final item conditions such as tooth marks or still-working status as explicit rows when the profile gives any usable event, condition, has_property, location, or said predicate.",
+    "Narrative story-world explicit-moral rule: closing morals, lessons, warnings, songs, labels, or aphoristic quoted lines are source facts when stated by the narrator or source. Preserve the exact moral/lesson surface with moral/1, lesson/1, final_state/1, condition_after_story/2, said/3, or the nearest profile-owned quote/state predicate; do not replace an explicit quote with only a paraphrased condition.",
     "Narrative story-world backbone-plus-detail rule: rich detail predicates are additive layers, not substitutes for the queryable story backbone. Event, story_time, character, kind, lives_at, object/food/place, ownership/design, location, speech, judgment, cause, and final-state rows should survive in the same compile when the profile supports them.",
     "Narrative story-world registry mapping rule: if an intake pass recommends generic story predicates that are not in the allowed profile, map the pass purpose onto the actual allowed story-world predicates instead. For this style of source, the actual backbone is usually character/1, kind/2, household_member/2, lives_at/2, object/1, food/1, place/1, owned_by/2, designed_for/2, initial_location/2, location_after_event/3, event/5, story_time/2, said/3, judged/4, causes/2, caused_by/2, final_state/1, condition_after_story/2, and restitution/2.",
     "Narrative story-world entity-role rule: named characters, homes, object families, food/components, and important places are not merely entity metadata. If the profile supports typed rows and relationship rows, emit both the entity/type row and the relationship row so later queries can join them without guessing atoms.",
@@ -333,6 +339,72 @@ OPERATIONAL_RECORD_STATUS_CONTEXT_V1 = [
     "Operational reason rule: if a decision, split, denial, remedy, or priority is explained by the source, preserve the stated reason/rationale as an additive detail row when the profile supports it. A decision row alone is partial support for why-questions.",
     "Operational unresolved-item rule: pending, unresolved, referred, deferred, and not-yet-decided items are first-class epistemic states. Preserve the item, owner/source, current status, and any referred authority rather than answering them as yes/no outcomes.",
     "Operational join-readiness rule: use one canonical atom for each record, person, role, facility, application, accession, lot, vault, concern, and date/turn. Reuse that atom across role rows, event rows, status rows, correction rows, threshold rows, and rationale rows so later QA can join without alias repair.",
+    "Operational permit/license lifecycle rule: for permit, license, inspection, appeal, exemption, suspension, restriction, renewal, or extension records, preserve each instrument separately with issuing authority, validity window, fee, rule text, triggering incidents, inspection results, effective status intervals, appeal/hearing status, and meeting authority statements when the profile supports those row classes.",
+    "Operational permit-terms rule: permit type descriptions are rule-bearing source text. Preserve default allowed hours, validity formulas, renewal requirements, extension request windows, approval authority, exemption windows, inspection windows, suspension duration rules, appeal windows, and status-effect text as queryable rule/requirement rows instead of only preserving actual permit instances.",
+    "Operational clock-delta rule: when a permit violation is stated as an action continuing past an allowed time, preserve both the allowed endpoint and the observed endpoint, plus the stated or computable overage amount when the profile supports any duration/detail predicate. Do not confuse violation overage duration with the resulting suspension duration.",
+    "Operational event-outcome rule: completed inspections, displays, hearings, pickups, repairs, or reviews need outcome rows even when the related license immediately expires or remains pending afterward. Event occurrence/outcome and current permit status are different surfaces.",
+    "Operational itemized-failure rule: aggregate inspection failures should preserve itemized failed subjects and stated deficiency reasons when the source lists them. Count rows and status rows are useful but not enough for which-and-why questions.",
+    "Operational quarantine/lot-status rule: for quarantine, nursery, greenhouse, lab, lot, sample, movement, destruction, or disease-control records, preserve lot id, location, species, count, subset count, sample count, positive/negative result count, status transition, movement interval, destruction deadline/completion, supervisor/witness, and final current status as separate queryable rows rather than hiding them inside a status summary.",
+]
+
+PROBATE_PROPERTY_STATUS_CONTEXT_V1 = [
+    "probate_property_status_strategy_v1: Use this for probate, inheritance, estate, will, gift, pledge/security, possession, ownership, custody, sale, title, adverse-possession, or disputed-property records.",
+    "Probate/property rule: ownership, possession, control, custody, maintenance, harvest rights, and legal status are distinct surfaces. Preserve each stated surface separately rather than resolving them into one owner-like fact.",
+    "Probate/property rule: source-stated purchases, sales, wills, gifts, loans, pledges, releases, court observations, interim rulings, and deferred matters are first-class transaction/status records when the profile supports compatible predicates.",
+    "Probate/property dispute rule: disputed, provisional, deferred, potential, satisfied, released, over-recovered, and historical-debt states are not final determinations. Preserve the status, date, authority/source, and affected object so later queries can answer with visible uncertainty.",
+    "Probate/property evidence rule: gift cards, bills of sale, solicitor advice, court observations, maintenance/harvest history, and quantified debt/harvest values are answer-bearing evidence. Preserve speaker/source, object, text/detail, amount/count/date, and evidentiary status when the profile has any compatible detail or record predicate.",
+    "Probate/property inventory rule: named inherited sets and compound property units are query-bearing. Preserve both the aggregate unit and its member objects, and keep the same atoms across part_of, inheritance, will_transfer, court_ruling, ownership/status, and possession rows.",
+    "Probate/property arithmetic rule: stated balances, payments, seasonal values, totals, and over-recovery comparisons should remain queryable. Do not collapse them into a pledge-satisfied label if amount/value predicates or compatible detail rows are available.",
+    "Probate/property QA-readiness rule: choose one canonical atom for each person, estate, property unit, organization, court, debt, pledge, claim, and date. Reuse those atoms across transaction, evidence, status, and ruling rows so later QA can join without alias repair.",
+]
+
+COMPETITION_ROLE_ALIAS_CONTEXT_V1 = [
+    "competition_role_alias_strategy_v1: Use this for tournament, match, contest, scoring, bracket, ranking, protest, referee/marshal, role-change, inherited banner/title, alias, or competition-administration records.",
+    "Competition alias rule: banner/title aliases are time-scoped identities, not people. Preserve person, alias/banner, year/date/session, previous holder, current holder, successor, and change reason separately when the profile supports compatible rows.",
+    "Competition role rule: competitor status, eliminated status, scorer, range officer, marshal, committee member, substitute, and witness/source roles are different surfaces. Preserve dual-role records rather than overwriting the competitor role with an administrative role.",
+    "Competition scoring rule: original posted rank, corrected rank, component scores, arithmetic correction, advancement set, match result, final certification, and champion attribution are distinct query surfaces. Preserve both erroneous posted values and corrected values with authority/source when supported.",
+    "Competition incident rule: protests, rulings, holds, misfires, zero-score shots, safety incidents, and no-incident notes are distinct. Preserve the event, reason, decision, status, and explicit non-finding rather than reducing them to a generic dispute.",
+    "Competition certification rule: match scores, final scores, score recorders, score certifiers, score certification authority, and certification date/session are separate administrative surfaces. Do not assume the marshal certified a score when the source names a scorer or substitute scorer as the certifying actor.",
+    "Competition objection rule: dual-role facts are not the same as conflict findings. Preserve stated conflict-of-interest objections, explicit no-objection notes, and the role/status basis for the objection or non-objection separately from ordinary role assignment rows.",
+    "Competition protest-count rule: count protest filing events, not only successful protests or marshal ruling rows. If a source says the same competitor filed two protests and describes both subjects, preserve both filing events with subject, filer, status, and ruling link.",
+    "Competition history rule: historical winners under reused banners must keep the historical person and year attached to the banner. Do not transfer an old banner victory to the current holder.",
+    "Competition QA-readiness rule: choose one canonical atom for each person, banner, match, round, protest, role assignment, score row, correction, and ruling. Reuse those atoms across registry, score, protest, ruling, role, and closing-note rows so later QA can join without alias repair.",
+]
+
+SOURCE_AUTHORITY_AUDIT_CONTEXT_V1 = [
+    "source_authority_audit_strategy_v1: Use this for audits that compare public labels, guides, catalogs, acquisition records, reports, board decisions, correction notes, or other source layers with different authority.",
+    "Source authority rule: visible/public text, copied guide text, catalog entries, original records, expert reports, curator notes, and board decisions are different evidence surfaces. Preserve source, claim, object/room/item, value, status, and authority separately when the profile supports compatible rows.",
+    "Source authority rule: copied text is not independent confirmation. If a visitor guide, public notice, or summary copied a placard/source, preserve the copy relationship and do not treat the duplicate as a second authority.",
+    "Source authority provenance rule: reports, surveys, exhibits, photographs, receipts, and expert statements need provenance surfaces. Preserve who commissioned, prepared, presented, dated, admitted, rejected, or relied on each source when the text states those roles.",
+    "Correction status rule: drafted, installed, rejected, queued, not-yet-reprinted, and no-change-needed statuses are distinct. Preserve the current public display state separately from the recommended correction.",
+    "Authority override rule: when a board, court, or controlling body rejects an expert/curator correction, preserve both the expert recommendation and the controlling decision. Do not silently promote the expert view to current public text.",
+    "Source detail rule: numeric counts, publication years, date ranges, exact proposed wording, suspected typo origins, and original-versus-added totals are answer-bearing details. Preserve them as rows or compatible detail records rather than hiding them in long labels.",
+    "Source audit QA-readiness rule: choose one canonical atom for each room/item/source document/correction/review date. Reuse those atoms across claim, catalog, acquisition, report, correction, status, and board-decision rows so later QA can join without alias repair.",
+]
+
+FICTION_REFERENCE_CONTAINMENT_CONTEXT_V1 = [
+    "fiction_reference_containment_strategy_v1: Use this for sources that mix real incidents with novels, plays, quoted stories, fictional documents, literary references, nested narratives, or lookalike events whose entities/numbers overlap with the real-world record.",
+    "Fiction containment rule: fictional events, fictional characters, fictional titles, and fictional explanations must stay inside their work/world/source layer. Preserve the fiction layer and source work, but do not promote fictional events as real-world facts.",
+    "Reference collision rule: when a real person/title/count/event resembles a fictional person/title/count/event, preserve both rows with source layer, publication/event date, and explicit non-explanation or coincidence boundary when stated.",
+    "Publication chronology rule: publication dates and incident dates are answer-bearing. Preserve chronology so later queries can distinguish prior fiction from later real incidents without treating the earlier fiction as evidence for the later event.",
+    "Disclosure rationale rule: voluntary disclosures, clarification notes, and warnings about misleading coincidences are first-class rationale/evidence rows. Preserve why the source disclosed the overlap and what boundary it intended to clarify.",
+    "Unresolved real-incident rule: if the real incident remains unresolved, preserve unresolved status and candidate explanations separately. Do not use fictional parallels to fill missing causal facts.",
+    "Fiction containment QA-readiness rule: choose one canonical atom for each real person/title/incident, fictional work, fictional character/title/event, disclosure, and date. Reuse those atoms across source-layer, title, author, incident, coincidence, and unresolved-status rows.",
+]
+
+ADMINISTRATIVE_ROSTER_TIMELINE_CONTEXT_V1 = [
+    "administrative_roster_timeline_strategy_v1: Use this for school trips, field trips, attendance logs, supervision records, station assignments, group rosters, shifts, team rotations, and event schedules.",
+    "Administrative roster rule: initial group/team rosters are backbone rows. Preserve every named member with group, role/chaperone/supervisor, and date/session scope when the profile supports membership or assignment predicates. Do not collapse a roster into only a count.",
+    "Administrative backbone preservation rule: if the profile offers standing-roster predicates such as group_membership/3 or supervision_assignment/4, keep using them for original groups and chaperone/supervisor coverage. Temporary pairings, station splits, shore teams, substitutions, and incident summaries are additive rows; they must not replace the standing roster and supervision backbone.",
+    "Administrative timeline rule: session windows and supervision intervals are query-bearing. Preserve start/end times, day labels, locations/stations, supervisor changes, transfers, departures, returns, and temporary substitutions as explicit event or status rows.",
+    "Administrative assignment rule: paired work, station assignments, subgroup splits, role assignments, and resumed original groups should each become queryable membership/assignment rows with their session scope. Mixed-session assignments must not overwrite the standing group roster.",
+    "Administrative station-split rule: when a group is split across named stations, benches, rooms, vehicles, or work areas, preserve each station roster separately with station/location, session time, supervisor or monitor, and member list. A station split is not the same as the parent group roster.",
+    "Administrative temporary-monitor rule: when a student, volunteer, substitute, or non-chaperone is asked to keep watch, escort, record, hold equipment, or supervise a station temporarily, preserve the role assignment with actor, role/task, target group/location, and session scope. Do not drop the row because the actor is not an official chaperone.",
+    "Administrative absence-coverage rule: when a supervisor leaves with a student, stays behind, returns, or does not return on a later day, preserve the absence window and the coverage/substitution state separately from the person's standing role.",
+    "Administrative role-task rule: task assignments such as recording clipboard, first-aid duty, watch duty, escort duty, or active collection are query-bearing role rows. Preserve the task, assignee, reason if stated, and day/session scope.",
+    "Administrative completion-report rule: closing reports are compact authoritative summaries. Preserve each listed incident/outcome as a separate row, including illness, injury, absence, hazard report, unresolved discrepancy, final attendance, and no-touch/no-hazard determinations.",
+    "Administrative attendance/count rule: attendance counts and exceptions need scoped rows: full trip attendance, session attendance, absent/ill/injured participants, chaperone presence, return-coach count, and final accounted-for status are different surfaces.",
+    "Administrative incident-report rule: incident reports can conflict. Preserve reporter, filing time, claim content, observed aftermath, unresolved discrepancy, and authoritative non-finding separately. Do not merge competing student reports into one objective event unless the source states a finding.",
 ]
 
 RULE_INGESTION_SOURCE_COMPILER_CONTEXT_V1 = [
@@ -414,6 +486,15 @@ from src.document_intake_plan import (  # noqa: E402
     intake_plan_context,
     parse_intake_plan_json,
 )
+from src.archival_identifier_ledger import (  # noqa: E402
+    archival_identifier_context,
+    extract_archival_identifier_ledger,
+)
+from src.source_record_ledger import (  # noqa: E402
+    extract_source_record_ledger,
+    source_record_ledger_facts,
+    source_record_ledger_context,
+)
 from src.semantic_ir import (  # noqa: E402
     SemanticIRCallConfig,
     call_semantic_ir,
@@ -451,6 +532,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--backend", choices=["lmstudio"], default="lmstudio")
     parser.add_argument("--model", default="qwen/qwen3.6-35b-a3b")
     parser.add_argument("--base-url", default="http://127.0.0.1:1234")
+    parser.add_argument(
+        "--api-key",
+        default="",
+        help="Optional OpenAI-compatible API key. Defaults to PRETHINKER_API_KEY or OPENROUTER_API_KEY.",
+    )
     parser.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
     parser.add_argument("--timeout", type=int, default=420)
     parser.add_argument("--temperature", type=float, default=0.0)
@@ -514,6 +600,31 @@ def parse_args() -> argparse.Namespace:
         help="Experimental: run an LLM-owned source_entity_ledger_v1 pass and inject it as compile context.",
     )
     parser.add_argument(
+        "--archival-identifier-ledger",
+        action="store_true",
+        help=(
+            "Experimental: extract exact identifier-like lexical spans as context guidance for archival "
+            "row/source labels. This does not admit facts or interpret source meaning."
+        ),
+    )
+    parser.add_argument(
+        "--source-record-ledger",
+        action="store_true",
+        help=(
+            "Experimental: extract line-numbered source headings, table rows, bullets, and labeled rows as "
+            "context guidance for record addressability. This does not admit facts or interpret source meaning."
+        ),
+    )
+    parser.add_argument(
+        "--source-record-ledger-facts",
+        action="store_true",
+        help=(
+            "Experimental: when --source-record-ledger is enabled, append deterministic source-address "
+            "facts to the compiled KB. These preserve row labels, lines, sections, and exact row text; "
+            "they do not encode semantic conclusions."
+        ),
+    )
+    parser.add_argument(
         "--review-profile",
         action="store_true",
         help="Run an LLM-owned profile review pass before optional source compilation.",
@@ -528,6 +639,8 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
+    if str(args.api_key or "").strip():
+        os.environ["PRETHINKER_API_KEY"] = str(args.api_key).strip()
     text_path = args.text_file if args.text_file.is_absolute() else (REPO_ROOT / args.text_file).resolve()
     source_text = text_path.read_text(encoding="utf-8-sig")
     expected_path = None
@@ -785,6 +898,7 @@ def main() -> int:
         record["model_input"] = {"messages": messages}
     source_entity_ledger: dict[str, Any] | None = None
     source_entity_ledger_context: list[str] = []
+    extra_compile_context: list[str] = []
     if bool(args.source_entity_ledger) and bool(args.compile_source) and isinstance(parsed, dict) and _should_build_source_entity_ledger(
         intake_plan=intake_plan,
         domain_hint=str(args.domain_hint or ""),
@@ -822,13 +936,31 @@ def main() -> int:
                 "latency_ms": int((time.perf_counter() - ledger_started) * 1000),
                 "parsed": {},
             }
+    extra_compile_context.extend(source_entity_ledger_context)
+    if bool(args.archival_identifier_ledger) and bool(args.compile_source) and isinstance(parsed, dict):
+        archival_identifier_ledger = extract_archival_identifier_ledger(source_text)
+        record["archival_identifier_ledger"] = {
+            "parsed_ok": True,
+            "parse_error": "",
+            "parsed": archival_identifier_ledger,
+        }
+        extra_compile_context.extend(archival_identifier_context(archival_identifier_ledger))
+    source_record_ledger: dict[str, Any] | None = None
+    if bool(args.source_record_ledger) and bool(args.compile_source) and isinstance(parsed, dict):
+        source_record_ledger = extract_source_record_ledger(source_text)
+        record["source_record_ledger"] = {
+            "parsed_ok": True,
+            "parse_error": "",
+            "parsed": source_record_ledger,
+        }
+        extra_compile_context.extend(source_record_ledger_context(source_record_ledger))
     if bool(args.compile_source) and isinstance(parsed, dict) and bool(args.compile_flat_plus_plan_passes) and isinstance(intake_plan, dict):
         record["source_compile"] = _compile_source_flat_plus_plan_passes(
             source_text=source_text,
             parsed_profile=parsed,
             intake_plan=intake_plan,
             args=args,
-            extra_context=source_entity_ledger_context,
+            extra_context=extra_compile_context,
         )
     elif bool(args.compile_source) and isinstance(parsed, dict) and bool(args.compile_plan_passes) and isinstance(intake_plan, dict):
         record["source_compile"] = _compile_source_with_plan_passes(
@@ -836,7 +968,7 @@ def main() -> int:
             parsed_profile=parsed,
             intake_plan=intake_plan,
             args=args,
-            extra_context=source_entity_ledger_context,
+            extra_context=extra_compile_context,
         )
     elif bool(args.compile_source) and isinstance(parsed, dict):
         record["source_compile"] = _compile_source_with_draft_profile(
@@ -844,8 +976,14 @@ def main() -> int:
             parsed_profile=parsed,
             intake_plan=intake_plan,
             args=args,
-            extra_context=source_entity_ledger_context,
+            extra_context=extra_compile_context,
         )
+    if (
+        bool(args.source_record_ledger_facts)
+        and isinstance(source_record_ledger, dict)
+        and isinstance(record.get("source_compile"), dict)
+    ):
+        _append_source_record_ledger_facts(record["source_compile"], source_record_ledger)
     if args.expected_prolog:
         record["expected_prolog"] = _compare_expected_prolog(
             expected_path=expected_path or (REPO_ROOT / args.expected_prolog).resolve(),
@@ -1302,6 +1440,7 @@ def _compile_source_with_draft_profile(
         max_tokens=int(args.max_tokens),
         think_enabled=False,
         reasoning_effort="none",
+        api_key=str(getattr(args, "api_key", "") or ""),
     )
     plan_context = intake_plan_context(intake_plan)
     try:
@@ -1818,6 +1957,34 @@ def _compile_source_flat_plus_plan_passes(
     return result
 
 
+def _append_source_record_ledger_facts(source_compile: dict[str, Any], ledger: dict[str, Any]) -> None:
+    facts = source_record_ledger_facts(ledger)
+    if not facts:
+        source_compile["deterministic_source_record_fact_count"] = 0
+        return
+    existing = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    seen = set(existing)
+    appended: list[str] = []
+    for fact in facts:
+        if fact not in seen:
+            seen.add(fact)
+            existing.append(fact)
+            appended.append(fact)
+    source_compile["facts"] = existing
+    source_compile["unique_fact_count"] = len(existing)
+    source_compile["deterministic_source_record_fact_count"] = len(appended)
+    source_compile["deterministic_source_record_policy"] = {
+        "schema_version": "deterministic_source_record_facts_v1",
+        "authority": "source_addressability_only",
+        "not_semantic_truth": True,
+        "description": (
+            "Facts under source_record_* preserve deterministic source row addressability "
+            "from source_record_ledger_v1. They do not admit ownership, status, authority, "
+            "causality, counts, or other semantic conclusions."
+        ),
+    }
+
+
 def _union_clause_lists(
     flat_facts: Any,
     focused_facts: Any,
@@ -2052,6 +2219,10 @@ def _source_compiler_context(*, intake_plan: dict[str, Any] | None, domain_hint:
             "threshold",
             "authorization",
             "permit",
+            "quarantine",
+            "greenhouse",
+            "nursery",
+            "lab result",
         ]
     ):
         contexts.extend(POLICY_INCIDENT_SOURCE_COMPILER_CONTEXT_V1)
@@ -2071,9 +2242,111 @@ def _source_compiler_context(*, intake_plan: dict[str, Any] | None, domain_hint:
             "application docket",
             "correction log",
             "operations log",
+            "quarantine",
+            "greenhouse",
+            "nursery",
+            "lab result",
+            "license",
+            "inspection",
+            "appeal",
         ]
     ):
         contexts.extend(OPERATIONAL_RECORD_STATUS_CONTEXT_V1)
+    if any(
+        token in label
+        for token in [
+            "probate",
+            "inheritance",
+            "estate",
+            "will",
+            "gift",
+            "pledge",
+            "possession",
+            "ownership",
+            "custody",
+            "property status",
+            "adverse possession",
+            "disputed property",
+        ]
+    ):
+        contexts.extend(PROBATE_PROPERTY_STATUS_CONTEXT_V1)
+    if any(
+        token in label
+        for token in [
+            "tournament",
+            "match",
+            "contest",
+            "scoring",
+            "bracket",
+            "ranking",
+            "protest",
+            "marshal",
+            "referee",
+            "range officer",
+            "banner",
+            "alias",
+            "role change",
+            "dual role",
+        ]
+    ):
+        contexts.extend(COMPETITION_ROLE_ALIAS_CONTEXT_V1)
+    if any(
+        token in label
+        for token in [
+            "audit",
+            "placard",
+            "visitor guide",
+            "catalog",
+            "acquisition record",
+            "curator",
+            "museum",
+            "source authority",
+            "copied from",
+            "correction status",
+            "relabel",
+            "relabelling",
+            "hearing",
+            "survey",
+            "evidence",
+            "testimony",
+            "exhibit",
+            "photograph",
+            "photographs",
+            "commissioned",
+        ]
+    ):
+        contexts.extend(SOURCE_AUTHORITY_AUDIT_CONTEXT_V1)
+    if any(
+        token in label
+        for token in [
+            "fiction",
+            "novel",
+            "literary",
+            "story level",
+            "reference containment",
+            "fictional",
+            "quoted story",
+            "nested narrative",
+            "coincidence",
+            "source layer",
+        ]
+    ):
+        contexts.extend(FICTION_REFERENCE_CONTAINMENT_CONTEXT_V1)
+    if any(
+        token in label
+        for token in [
+            "field trip",
+            "school",
+            "attendance",
+            "supervision",
+            "chaperone",
+            "roster",
+            "station",
+            "group assignment",
+            "return coach",
+        ]
+    ):
+        contexts.extend(ADMINISTRATIVE_ROSTER_TIMELINE_CONTEXT_V1)
     if any(
         token in label
         for token in [
@@ -2197,12 +2470,22 @@ def _call_lmstudio_json_schema(
     empty_response_retries: int = 2,
     empty_response_backoff_seconds: float = 1.0,
 ) -> dict[str, Any]:
+    request_messages = [dict(message) for message in messages]
+    if str(reasoning_effort or "").strip().lower() in {"none", "off", "false", "0"}:
+        for message in request_messages:
+            if message.get("role") == "system":
+                content = str(message.get("content") or "")
+                if not content.lstrip().startswith("/no_think"):
+                    message["content"] = "/no_think\n" + content
+                break
     payload: dict[str, Any] = {
         "model": model,
-        "messages": messages,
+        "messages": request_messages,
         "temperature": temperature,
         "top_p": top_p,
         "max_tokens": max_tokens,
+        "think": False,
+        "thinking": False,
         "response_format": {
             "type": "json_schema",
             "json_schema": {
@@ -2214,6 +2497,9 @@ def _call_lmstudio_json_schema(
     }
     if str(reasoning_effort or "").strip():
         payload["reasoning_effort"] = str(reasoning_effort).strip()
+    if _is_openrouter_base_url(base_url):
+        payload["reasoning"] = {"effort": "none", "exclude": True}
+        payload["include_reasoning"] = False
     started = time.perf_counter()
     max_attempts = max(1, int(empty_response_retries or 0) + 1)
     last_raw: dict[str, Any] = {}
@@ -2221,7 +2507,7 @@ def _call_lmstudio_json_schema(
         req = urllib.request.Request(
             _lmstudio_chat_completions_url(base_url),
             data=json.dumps(payload).encode("utf-8"),
-            headers={"Content-Type": "application/json"},
+            headers=_chat_headers(),
             method="POST",
         )
         try:
@@ -2254,6 +2540,18 @@ def _call_lmstudio_json_schema(
         "attempts": max_attempts,
         "empty_response_retries": max_attempts - 1,
     }
+
+
+def _chat_headers(api_key: str = "") -> dict[str, str]:
+    headers = {"Content-Type": "application/json"}
+    key = str(api_key or os.environ.get("PRETHINKER_API_KEY") or os.environ.get("OPENROUTER_API_KEY") or "").strip()
+    if key:
+        headers["Authorization"] = f"Bearer {key}"
+    return headers
+
+
+def _is_openrouter_base_url(base_url: str) -> bool:
+    return "openrouter.ai" in str(base_url or "").lower()
 
 
 def _lmstudio_chat_completions_url(base_url: str) -> str:

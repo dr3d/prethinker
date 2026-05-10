@@ -1,0 +1,322 @@
+[
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q001",
+    "question": "How many permit types does the festival require?",
+    "reference_answer": "Five: Ground Use (A), Temporary Food Service (B), Amplified Sound (C), Fireworks Display (D), and Alcohol Service (E)",
+    "source_id": "q001"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q002",
+    "question": "Who is the festival director?",
+    "reference_answer": "Marcus Holt",
+    "source_id": "q002"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q003",
+    "question": "What is the valid period for the Ground Use Permit?",
+    "reference_answer": "October 10-19, 2025, extended to October 20 for teardown only",
+    "source_id": "q003"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q004",
+    "question": "Was the Ground Use Permit extended, and for what purpose?",
+    "reference_answer": "Yes, extended to October 20 for teardown only, not public events",
+    "source_id": "q004"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q005",
+    "question": "Can public events be held on October 20?",
+    "reference_answer": "No. The extension is for teardown only, not public events.",
+    "source_id": "q005"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q006",
+    "question": "When does the Temporary Food Service License expire if not renewed?",
+    "reference_answer": "14 calendar days from issue. Issued October 3, so it expires October 16.",
+    "source_id": "q006"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q007",
+    "question": "How many vendors failed the October 15 reinspection?",
+    "reference_answer": "Three: Grill House, Noodle Cart, and Bake Tent",
+    "source_id": "q007"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q008",
+    "question": "Which vendors failed and why?",
+    "reference_answer": "Grill House (grease trap), Noodle Cart (handwashing station), and Bake Tent (temperature log)",
+    "source_id": "q008"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q009",
+    "question": "Which vendors are currently suspended as of October 16?",
+    "reference_answer": "Noodle Cart and Bake Tent. Grill House was reinstated after passing a follow-up inspection on October 16.",
+    "source_id": "q009"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q010",
+    "question": "When does the renewed food license for the eight passing vendors expire?",
+    "reference_answer": "October 29 (14 calendar days from October 16)",
+    "source_id": "q010"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q011",
+    "question": "Has Grill House been reinstated?",
+    "reference_answer": "Yes, reinstated October 16 at 09:00 after passing a follow-up inspection",
+    "source_id": "q011"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q012",
+    "question": "What are the permitted sound hours under the Amplified Sound Permit?",
+    "reference_answer": "10:00 to 22:00 daily",
+    "source_id": "q012"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q013",
+    "question": "What triggered the first sound permit suspension?",
+    "reference_answer": "A band played until 22:47 on October 12, 47 minutes past the 22:00 limit",
+    "source_id": "q013"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q014",
+    "question": "What was the duration of the first sound suspension?",
+    "reference_answer": "24 hours, from 22:47 October 12 through 22:47 October 13",
+    "source_id": "q014"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q015",
+    "question": "Is the sound permit active on October 16 at 14:00?",
+    "reference_answer": "No. The second suspension runs from 22:15 October 15 through 22:15 October 16. At 14:00 on October 16, the permit is still suspended.",
+    "source_id": "q015"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q016",
+    "question": "When does the second sound suspension end?",
+    "reference_answer": "22:15 on October 16",
+    "source_id": "q016"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q017",
+    "question": "Is the October 18 late-night exemption still valid despite the violations?",
+    "reference_answer": "Yes. The exemption was approved by the Town Council on October 6, before any violations occurred. It remains valid for October 18 only.",
+    "source_id": "q017"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q018",
+    "question": "How late can sound go on October 18?",
+    "reference_answer": "Until midnight (00:00 October 19), per the approved exemption",
+    "source_id": "q018"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q019",
+    "question": "What happens if a third sound violation occurs?",
+    "reference_answer": "The Town Clerk will recommend permanent revocation to the Council",
+    "source_id": "q019"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q020",
+    "question": "How many fireworks displays are approved?",
+    "reference_answer": "Two: October 12 and October 18",
+    "source_id": "q020"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q021",
+    "question": "Has the October 18 fireworks inspection been conducted?",
+    "reference_answer": "No. As of October 16, it has not yet been conducted.",
+    "source_id": "q021"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q022",
+    "question": "What is the deadline for the October 18 fireworks inspection?",
+    "reference_answer": "October 17 (the inspection must be within 5 days before the display)",
+    "source_id": "q022"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q023",
+    "question": "What happened at the October 12 fireworks display?",
+    "reference_answer": "It was completed without incident",
+    "source_id": "q023"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q024",
+    "question": "Is the October 12 display license still active?",
+    "reference_answer": "No. The license expires at the end of each approved display. The October 12 display is completed and its license expired.",
+    "source_id": "q024"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q025",
+    "question": "Why were alcohol service hours restricted?",
+    "reference_answer": "Because police responded to a disturbance at the beer tent on October 14, classified as a 'serious incident' by PC Ellen Farrow",
+    "source_id": "q025"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q026",
+    "question": "What are the current alcohol service hours?",
+    "reference_answer": "12:00 to 20:00 for the remainder of the festival",
+    "source_id": "q026"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q027",
+    "question": "Has the alcohol restriction appeal been heard?",
+    "reference_answer": "No. The hearing is scheduled for October 20.",
+    "source_id": "q027"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q028",
+    "question": "When is the appeal hearing scheduled?",
+    "reference_answer": "October 20, one day after the festival ends",
+    "source_id": "q028"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q029",
+    "question": "Is the restriction in effect during the appeal period?",
+    "reference_answer": "Yes. The restriction is effective during the appeal period.",
+    "source_id": "q029"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q030",
+    "question": "Who has authority to override the automatic sound suspension?",
+    "reference_answer": "No one present at the meeting. Burr stated she has no authority to override the automatic suspension.",
+    "source_id": "q030"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q031",
+    "question": "Did the emergency review meeting change any permit terms?",
+    "reference_answer": "No. No permit terms were changed at the meeting.",
+    "source_id": "q031"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q032",
+    "question": "How long was the first sound violation (past 22:00)?",
+    "reference_answer": "47 minutes (the band played until 22:47)",
+    "source_id": "q032"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q033",
+    "question": "How long was the second sound violation (past 22:00)?",
+    "reference_answer": "15 minutes (violation at 22:15)",
+    "source_id": "q033"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q034",
+    "question": "What is the extension rule for the Ground Use Permit?",
+    "reference_answer": "A written request must be filed at least 72 hours before expiration, approved by the Parks Director",
+    "source_id": "q034"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q035",
+    "question": "What is the renewal rule for the Food Service License?",
+    "reference_answer": "Renewal requires a reinspection within 48 hours of expiration. If reinspection fails, the license is suspended immediately.",
+    "source_id": "q035"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q036",
+    "question": "Can Noodle Cart resume serving food without reinspection?",
+    "reference_answer": "No. A follow-up inspection must clear each deficiency before a suspended vendor can resume service.",
+    "source_id": "q036"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q037",
+    "question": "What did Town Clerk Burr conclude about her authority at the meeting?",
+    "reference_answer": "That she has no authority to override the automatic sound suspension, the food reinspection requirements, or the Licensing Authority's restriction. She can only note Holt's position and recommend prioritizing the fireworks inspection.",
+    "source_id": "q037"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q038",
+    "question": "What did Holt characterize the sound violations as?",
+    "reference_answer": "He called them 'honest mistakes' — the first by 47 minutes, the second by 15 minutes",
+    "source_id": "q038"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q039",
+    "question": "As of October 16, how many of the five permit types are fully active without restrictions?",
+    "reference_answer": "Only one: Permit A (Ground Use) is fully active without restrictions. All other permits have suspensions, restrictions, expirations, or pending actions.",
+    "source_id": "q039"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q040",
+    "question": "List every permit that has been suspended, restricted, or is pending action as of October 16.",
+    "reference_answer": "Permit B: Noodle Cart and Bake Tent suspended. Permit C: suspended until 22:15 October 16 (second 24-hour suspension). Permit D: October 18 display pending inspection by October 17. Permit E: restricted to 12:00-20:00, appeal hearing not until October 20.",
+    "source_id": "q040"
+  }
+]

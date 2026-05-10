@@ -1,0 +1,40 @@
+{"id":"q001","source_id":"q001","category":"direct_fact","reference_answer":"June 2, 2025"}
+{"id":"q002","source_id":"q002","category":"direct_fact","reference_answer":"April 14 through April 28, 2025"}
+{"id":"q003","source_id":"q003","category":"temporal_arithmetic","reference_answer":"July 2, 2025 (30 calendar days from June 2)"}
+{"id":"q004","source_id":"q004","category":"direct_fact","reference_answer":"30 calendar days"}
+{"id":"q005","source_id":"q005","category":"direct_fact","reference_answer":"June 20, 2025"}
+{"id":"q006","source_id":"q006","category":"temporal_arithmetic","reference_answer":"Yes. The request was filed 12 days before the July 2 deadline, exceeding the 7-day advance requirement."}
+{"id":"q007","source_id":"q007","category":"authority","reference_answer":"Executive Director Mira Tan"}
+{"id":"q008","source_id":"q008","category":"temporal_arithmetic","reference_answer":"July 17, 2025"}
+{"id":"q009","source_id":"q009","category":"temporal_arithmetic","reference_answer":"15 calendar days added to the original July 2 deadline. Not 15 days from the grant date."}
+{"id":"q010","source_id":"q010","category":"temporal_status","reference_answer":"Yes. The extended deadline was July 17 and Granger filed on July 17."}
+{"id":"q011","source_id":"q011","category":"direct_fact","reference_answer":"A request for a compliance schedule"}
+{"id":"q012","source_id":"q012","category":"temporal_arithmetic","reference_answer":"August 31, 2025 (45 calendar days from the July 17 response filing date)"}
+{"id":"q013","source_id":"q013","category":"rule_application","reference_answer":"No. The EPM's weekend-rollover rule (Rule D-1) applies only to the response deadline, not to the compliance plan deadline. The deadline is August 31 as stated."}
+{"id":"q014","source_id":"q014","category":"direct_fact","reference_answer":"August 29, 2025 (Friday)"}
+{"id":"q015","source_id":"q015","category":"temporal_status","reference_answer":"Yes, two days before the August 31 deadline."}
+{"id":"q016","source_id":"q016","category":"temporal_arithmetic","reference_answer":"21 calendar days from the date of receipt (August 29)"}
+{"id":"q017","source_id":"q017","category":"temporal_arithmetic","reference_answer":"September 19, 2025"}
+{"id":"q018","source_id":"q018","category":"direct_fact","reference_answer":"Rejected, on September 15, 2025"}
+{"id":"q019","source_id":"q019","category":"direct_fact","reference_answer":"The proposed monitoring frequency was insufficient — the plan proposed monthly sampling but weekly sampling is required."}
+{"id":"q020","source_id":"q020","category":"rule_application","reference_answer":"14 business days from the rejection date (September 15), per Rule D-4"}
+{"id":"q021","source_id":"q021","category":"temporal_arithmetic","reference_answer":"October 3, 2025 (Friday)"}
+{"id":"q022","source_id":"q022","category":"temporal_arithmetic","reference_answer":"14 business days counted from September 15 (not including September 15 itself), excluding weekends and Board holidays. September 16-19 (4 days), September 22-26 (9 days), September 29-30 (11 days), October 1-3 (14 days). No Board holidays fall within this window."}
+{"id":"q023","source_id":"q023","category":"temporal_arithmetic","reference_answer":"No. September 1 (Labor Day) is a Board holiday but it falls before the rejection date. No holidays fall within the September 16 – October 3 counting window."}
+{"id":"q024","source_id":"q024","category":"direct_fact","reference_answer":"September 18, 2025"}
+{"id":"q025","source_id":"q025","category":"temporal_arithmetic","reference_answer":"September 29, 2025 (14 calendar days from the September 15 rejection, per Rule D-8)"}
+{"id":"q026","source_id":"q026","category":"temporal_status","reference_answer":"Yes. September 18 is before the September 29 deadline."}
+{"id":"q027","source_id":"q027","category":"direct_fact","reference_answer":"Biweekly monitoring, not the weekly monitoring the Board required"}
+{"id":"q028","source_id":"q028","category":"direct_fact","reference_answer":"September 22, 2025"}
+{"id":"q029","source_id":"q029","category":"temporal_status","reference_answer":"Yes. The appeal deadline is October 3 and the appeal was filed September 22."}
+{"id":"q030","source_id":"q030","category":"rule_application","reference_answer":"Yes. Executive Director Tan stated they are separate proceedings. The EPM does not explicitly address the overlap, but the Board will review the revised plan and the appeal on separate tracks."}
+{"id":"q031","source_id":"q031","category":"rule_application","reference_answer":"No. The penalty assessment clock has not started."}
+{"id":"q032","source_id":"q032","category":"rule_application","reference_answer":"Because Granger filed a timely response on July 17. Rule D-5 only activates the penalty clock if no response is filed by the response deadline."}
+{"id":"q033","source_id":"q033","category":"rule_application","reference_answer":"The appeal tolls the penalty clock under Rule D-6, but the penalty clock is not running (since a timely response was filed), so tolling has no current practical effect."}
+{"id":"q034","source_id":"q034","category":"temporal_arithmetic","reference_answer":"October 9, 2025 (21 calendar days from the September 18 revised plan submission)"}
+{"id":"q035","source_id":"q035","category":"rule_application","reference_answer":"The revised plan is deemed provisionally approved under Rule D-3."}
+{"id":"q036","source_id":"q036","category":"authority","reference_answer":"No. Baek's note is an observation, not a compliance determination."}
+{"id":"q037","source_id":"q037","category":"authority","reference_answer":"Only the Board or the Executive Director"}
+{"id":"q038","source_id":"q038","category":"direct_fact","reference_answer":"Biweekly sampling, begun on its own initiative as of September 1"}
+{"id":"q039","source_id":"q039","category":"temporal_status","reference_answer":"Pending. The appeal was filed September 22, within the October 3 deadline, and no decision has been issued."}
+{"id":"q040","source_id":"q040","category":"rule_application","reference_answer":"A new appeal window would open for the revised plan rejection. The existing appeal of the original rejection remains pending regardless."}

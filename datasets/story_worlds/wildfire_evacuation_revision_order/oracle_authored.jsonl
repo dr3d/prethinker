@@ -1,0 +1,41 @@
+﻿{"id":"q001","source_id":"q001","category":"direct_lookup","reference_answer":"Sheriff Anthony Krasinski, on the recommendation of CAL FIRE IC Dale Frohlich, on April 14, 2026 at 18:30 PDT."}
+{"id":"q002","source_id":"q002","category":"direct_lookup","reference_answer":"EO-2026-014."}
+{"id":"q003","source_id":"q003","category":"direct_lookup","reference_answer":"Dale Frohlich."}
+{"id":"q004","source_id":"q004","category":"direct_lookup","reference_answer":"4,820 acres at 3 percent containment."}
+{"id":"q005","source_id":"q005","category":"direct_lookup","reference_answer":"Lisette Boyer, GIS Analyst II, Tehama County."}
+{"id":"q006","source_id":"q006","category":"direct_lookup","reference_answer":"Form TCSO-RE-04."}
+{"id":"q007","source_id":"q007","category":"direct_lookup","reference_answer":"12 mph sustained wind from the southwest."}
+{"id":"q008","source_id":"q008","category":"direct_lookup","reference_answer":"Wesley Harlan."}
+{"id":"q009","source_id":"q009","category":"provenance","reference_answer":"The TCSO dispatch radio log, Channel 4, 03:42 entry."}
+{"id":"q010","source_id":"q010","category":"provenance","reference_answer":"Map correction MC-2026-014-01, filed 09:47 PDT April 15."}
+{"id":"q011","source_id":"q011","category":"provenance","reference_answer":"The TCSO dispatch radio log, Channel 4, 07:35 entry from Patrol 17 (Dep. Joaquin Reyes)."}
+{"id":"q012","source_id":"q012","category":"provenance","reference_answer":"Patrol 17, Dep. Joaquin Reyes, in the radio log entry at 04:48 PDT."}
+{"id":"q013","source_id":"q013","category":"provenance","reference_answer":"TCPW_Roads_v2025.4, the Tehama County Public Works road-jurisdiction layer."}
+{"id":"q014","source_id":"q014","category":"provenance","reference_answer":"EO-2026-014-DRAFT, the withdrawn April 13 pre-incident draft."}
+{"id":"q015","source_id":"q015","category":"supersession","reference_answer":"Evacuation Warning. EO-2026-014B downgraded TC-7 from Mandatory Evacuation to Evacuation Warning at 04:12 PDT April 15."}
+{"id":"q016","source_id":"q016","category":"supersession","reference_answer":"TCSO_Evac_Layers_v1.1.1, published with the 09:47 correction."}
+{"id":"q017","source_id":"q017","category":"supersession","reference_answer":"No. The v1.1 polygon erroneously placed Manton Knolls in TC-11; the authoritative state per v1.1.1 is TC-9. The v1.1 placement for those parcels is superseded."}
+{"id":"q018","source_id":"q018","category":"supersession","reference_answer":"MANDATORY EVACUATION as part of TC-9, per TCSO_Evac_Layers_v1.1.1."}
+{"id":"q019","source_id":"q019","category":"supersession","reference_answer":"No. It was withdrawn on April 13, 2026 at the close of the tabletop exercise and is not operative."}
+{"id":"q020","source_id":"q020","category":"status_at_time","reference_answer":"According to the GIS layer published at that time (v1.1, published 04:12 PDT), Manton Knolls was placed in TC-11 with an Evacuation Warning. This was the published-but-erroneous status until the 09:51 correction."}
+{"id":"q021","source_id":"q021","category":"status_at_time","reference_answer":"Mandatory Evacuation as part of TC-9. Per the v1.1.1 correction, this was always the intended order; the v1.1 placement was a drafting error."}
+{"id":"q022","source_id":"q022","category":"status_at_time","reference_answer":"No. As of packet time, no re-entry authorizations have been signed for any zone."}
+{"id":"q023","source_id":"q023","category":"status_at_time","reference_answer":"USFS Lassen LE Officer Patel returned the call. He stated the gate at MP 6 is a Forest Service jurisdictional matter and that he would consult the Forest Supervisor."}
+{"id":"q024","source_id":"q024","category":"status_at_time","reference_answer":"No. The Board of Supervisors emergency briefing is scheduled for April 16 at 09:00 PDT, with no vote on the agenda."}
+{"id":"q025","source_id":"q025","category":"rule_application","reference_answer":"All four conditions: (1) damage assessment complete, (2) PG&E gas and electric restoration or confirmation of safe de-energized state, (3) hazard tree assessment complete, and (4) Sheriff's signed re-entry authorization on Form TCSO-RE-04."}
+{"id":"q026","source_id":"q026","category":"rule_application","reference_answer":"Federal — USFS Lassen NF."}
+{"id":"q027","source_id":"q027","category":"rule_application","reference_answer":"County — Tehama County Public Works (TCPW) maintained."}
+{"id":"q028","source_id":"q028","category":"rule_application","reference_answer":"The road-jurisdiction layer TCPW_Roads_v2025.4. The packet states that where the radio log differs from the road-jurisdiction layer, the road-jurisdiction layer is the authoritative description of who controls the gate; the radio log describes events on the road."}
+{"id":"q029","source_id":"q029","category":"rule_application","reference_answer":"Not specified. The packet does not state the USFS process for opening the gate to civilian egress; the matter is pending Forest Supervisor and counsel determination."}
+{"id":"q030","source_id":"q030","category":"count","reference_answer":"Five zones: TC-7, TC-8, TC-9, TC-10, and TC-11."}
+{"id":"q031","source_id":"q031","category":"count","reference_answer":"46 parcels (074-220-001 through 074-220-046)."}
+{"id":"q032","source_id":"q032","category":"count","reference_answer":"Three: 09:47 PDT (map correction MC-2026-014-01 filed; v1.1.1 GIS layer published), 09:51 PDT (correction WEA alert sent), and 10:30 PDT (public information meeting comment period opened)."}
+{"id":"q033","source_id":"q033","category":"count","reference_answer":"Three: 18:34 PDT April 14 (original), 04:18 PDT April 15 (revised), and 09:51 PDT April 15 (correction)."}
+{"id":"q034","source_id":"q034","category":"unresolved","reference_answer":"No, not yet determined. Pending USFS Regional Office and counsel determination, with the Forest Supervisor expected to revert this afternoon."}
+{"id":"q035","source_id":"q035","category":"unresolved","reference_answer":"No. The question is referred to County Counsel and no opinion has been issued."}
+{"id":"q036","source_id":"q036","category":"unresolved","reference_answer":"No. The decision is pending the IC's 17:00 PDT briefing."}
+{"id":"q037","source_id":"q037","category":"unresolved","reference_answer":"No. The comment period opened at 10:30 PDT and is scheduled to close at 17:00 PDT; packet time is 11:30 PDT, so the comment period is still open."}
+{"id":"q038","source_id":"q038","category":"cross_source_conflict","reference_answer":"It is not a logical conflict. The radio log describes events on the road (evacuee use), and the road-jurisdiction layer describes who controls the gate (USFS). The packet resolves any apparent inconsistency by stating that the road-jurisdiction layer is authoritative on jurisdiction, while the radio log describes events."}
+{"id":"q039","source_id":"q039","category":"cross_source_conflict","reference_answer":"No. The 04:18 WEA alert reflected the v1.1 GIS layer, which placed Manton Knolls in TC-11 (Evacuation Warning). Per the v1.1.1 correction, the parcels should have been described as TC-9 Mandatory Evacuation. The 04:18 alert was incorrect for those parcels and was superseded by the 09:51 correction WEA."}
+{"id":"q040","source_id":"q040","category":"cross_source_conflict","reference_answer":"EO-2026-014B is currently in force. EO-2026-014A was the operative order for TC-7 (Mandatory Evacuation) between 18:30 April 14 and 04:12 April 15, when it was superseded by EO-2026-014B (Evacuation Warning). EO-2026-014-DRAFT was withdrawn April 13 and was never operative."}
+

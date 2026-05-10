@@ -1,0 +1,40 @@
+{"category": "direct_lookup", "id": "q001", "reference_answer": "Patricia Halverson, RN.", "source_id": "q001"}
+{"category": "direct_lookup", "id": "q002", "reference_answer": "Marcus Chen, MD.", "source_id": "q002"}
+{"category": "direct_lookup", "id": "q003", "reference_answer": "HEP-2026-0241.", "source_id": "q003"}
+{"category": "direct_lookup", "id": "q004", "reference_answer": "11:14.", "source_id": "q004"}
+{"category": "direct_lookup", "id": "q005", "reference_answer": "Helen Yamamoto, MD, Quality Director.", "source_id": "q005"}
+{"category": "direct_lookup", "id": "q006", "reference_answer": "3.4 (low-normal).", "source_id": "q006"}
+{"category": "direct_lookup", "id": "q007", "reference_answer": "71 seconds, therapeutic.", "source_id": "q007"}
+{"category": "direct_lookup", "id": "q008", "reference_answer": "ORD-882341.", "source_id": "q008"}
+{"category": "provenance", "id": "q009", "reference_answer": "Pyxis MedStation 4000 cabinet log, Room 504 excerpt.", "source_id": "q009"}
+{"category": "provenance", "id": "q010", "reference_answer": "The 5 East badge access log.", "source_id": "q010"}
+{"category": "provenance", "id": "q011", "reference_answer": "The Philips IntelliVue MX800 telemetry monitor, patient M.B., Room 504.", "source_id": "q011"}
+{"category": "provenance", "id": "q012", "reference_answer": "Steven Rao, PharmD.", "source_id": "q012"}
+{"category": "provenance", "id": "q013", "reference_answer": "Brianna Tilling's own statement filed at 16:02.", "source_id": "q013"}
+{"category": "provenance", "id": "q014", "reference_answer": "The badge access log.", "source_id": "q014"}
+{"category": "supersession", "id": "q015", "reference_answer": "14:02:51 from the central pharmacy server is authoritative. Per Addendum A by Rao, the unit terminal had a known clock-skew issue corrected March 12, 2026; the nightly summary value 14:02:21 is superseded.", "source_id": "q015"}
+{"category": "supersession", "id": "q016", "reference_answer": "Yes. The earlier draft that excluded anticoagulant infusions was withdrawn on February 11, 2026 and is not operative.", "source_id": "q016"}
+{"category": "supersession", "id": "q017", "reference_answer": "Not final on its own; it required attending co-signature. Dr. Chen's written order ORD-883104 at 15:55 satisfied that requirement and is the authoritative directive.", "source_id": "q017"}
+{"category": "supersession", "id": "q018", "reference_answer": "The central pharmacy server record. The nightly summary timestamp is superseded by Addendum A.", "source_id": "q018"}
+{"category": "supersession", "id": "q019", "reference_answer": "No assigned floor RN covered Rooms 501–505 in that window. Ramos had clocked out at 11:14 and Tilling did not arrive on the unit until 11:32 (handoff at 11:38).", "source_id": "q019"}
+{"category": "status_at_time", "id": "q020", "reference_answer": "13:45, by Devon Ramos, RN.", "source_id": "q020"}
+{"category": "status_at_time", "id": "q021", "reference_answer": "Brianna Tilling, RN, since unit handoff at 11:38.", "source_id": "q021"}
+{"category": "status_at_time", "id": "q022", "reference_answer": "No. There was no flow sheet entry between 13:45 and 14:48.", "source_id": "q022"}
+{"category": "status_at_time", "id": "q023", "reference_answer": "User 'BTILL' (Brianna Tilling) per the central station log.", "source_id": "q023"}
+{"category": "status_at_time", "id": "q024", "reference_answer": "Yusuf Adeyemi, RN.", "source_id": "q024"}
+{"category": "rule_application", "id": "q025", "reference_answer": "Two-RN witness verification, because heparin infusion is a high-alert anticoagulant.", "source_id": "q025"}
+{"category": "rule_application", "id": "q026", "reference_answer": "A co-witness sign-on must occur within 60 seconds of the withdrawal. None occurred for the 14:02:51 event.", "source_id": "q026"}
+{"category": "rule_application", "id": "q027", "reference_answer": "The attending physician's signed order.", "source_id": "q027"}
+{"category": "rule_application", "id": "q028", "reference_answer": "Yes; as a resident verbal order it required attending co-signature. It was satisfied prospectively by Dr. Chen's written order ORD-883104 at 15:55.", "source_id": "q028"}
+{"category": "rule_application", "id": "q029", "reference_answer": "Yes. Her float-pool credential file shows cardiac step-down orientation completed January 8, 2026.", "source_id": "q029"}
+{"category": "count", "id": "q030", "reference_answer": "7 events: Ramos entry 13:41:12, Ramos exit 13:46:58, Tilling entry 14:05:11, Tilling exit 14:18:45, Pruitt entry 14:48:02, Velasco entry 14:48:09, Okafor entry 14:49:55.", "source_id": "q030"}
+{"category": "count", "id": "q031", "reference_answer": "9 staff members: Halverson, Chen, Okafor, Ramos, Pruitt, Velasco, Rao, Brandt, Edinburgh.", "source_id": "q031"}
+{"category": "count", "id": "q032", "reference_answer": "Approximately 52 minutes (13:45:00 to 14:37:18).", "source_id": "q032"}
+{"category": "count", "id": "q033", "reference_answer": "Three: Pruitt at 14:48:02, Velasco at 14:48:09, Okafor at 14:49:55.", "source_id": "q033"}
+{"category": "unresolved", "id": "q034", "reference_answer": "No, not yet determined. Review by Dr. Yamamoto is scheduled for the morning of March 16, 2026.", "source_id": "q034"}
+{"category": "unresolved", "id": "q035", "reference_answer": "No. The packet states no flow sheet entry exists between 13:45 and 14:48.", "source_id": "q035"}
+{"category": "unresolved", "id": "q036", "reference_answer": "No. It is one of the open questions referred to Dr. Yamamoto's pending review.", "source_id": "q036"}
+{"category": "unresolved", "id": "q037", "reference_answer": "Not stated. The packet records the verbal order at 14:50, attending discussion at 15:18, and written attending order at 15:55, but does not state contemporaneous co-signature at 14:50.", "source_id": "q037"}
+{"category": "cross_source_conflict", "id": "q038", "reference_answer": "The central station log records user 'BTILL' acknowledged the alarm. Tilling's own statement confirms she acknowledged it from the central station screen. Pruitt's denial is consistent with this; the conflict resolves in favor of Tilling having acknowledged.", "source_id": "q038"}
+{"category": "cross_source_conflict", "id": "q039", "reference_answer": "Rao's reconciliation note that the bag retrieved at 14:02 was returned sealed and unspiked; Okafor's bedside finding that only the original Ramos bag (hung 13:44, ~140 mL remaining) was at the bedside; cabinet recount reconciled.", "source_id": "q039"}
+{"category": "cross_source_conflict", "id": "q040", "reference_answer": "The Pyxis nightly summary reported 14:02:21; the central pharmacy server records 14:02:51. The 14:02:51 value is authoritative. Per Addendum A, the unit terminal had a clock-skew issue corrected on March 12, 2026; the nightly summary value 14:02:21 is superseded.", "source_id": "q040"}

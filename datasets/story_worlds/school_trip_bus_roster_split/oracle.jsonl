@@ -1,0 +1,40 @@
+{"category": "direct_lookup", "id": "q001", "reference_answer": "April 24, 2026.", "source_id": "q001"}
+{"category": "direct_lookup", "id": "q002", "reference_answer": "Dr. Imani Adeyemi.", "source_id": "q002"}
+{"category": "direct_lookup", "id": "q003", "reference_answer": "Karen Tomic, RN.", "source_id": "q003"}
+{"category": "direct_lookup", "id": "q004", "reference_answer": "Ms. Hattie Yi, school librarian.", "source_id": "q004"}
+{"category": "direct_lookup", "id": "q005", "reference_answer": "79 students (38 in 7A, 41 in 7B).", "source_id": "q005"}
+{"category": "direct_lookup", "id": "q006", "reference_answer": "Karenna Adekoya (Hamilton-Worthing Transit, vehicle HWT-209).", "source_id": "q006"}
+{"category": "direct_lookup", "id": "q007", "reference_answer": "Ms. Beatriz Calderon.", "source_id": "q007"}
+{"category": "direct_lookup", "id": "q008", "reference_answer": "Cranberry Hollow Visitor Management System v.5.2.", "source_id": "q008"}
+{"category": "provenance", "id": "q009", "reference_answer": "Exhibit V-1.", "source_id": "q009"}
+{"category": "provenance", "id": "q010", "reference_answer": "Exhibit N-1.", "source_id": "q010"}
+{"category": "provenance", "id": "q011", "reference_answer": "Exhibit S-1.", "source_id": "q011"}
+{"category": "provenance", "id": "q012", "reference_answer": "Exhibit P-1.", "source_id": "q012"}
+{"category": "provenance", "id": "q013", "reference_answer": "Davis Whitaker's statement (Exhibit S-2).", "source_id": "q013"}
+{"category": "provenance", "id": "q014", "reference_answer": "Bus 2 driver Karenna Adekoya's manifest log.", "source_id": "q014"}
+{"category": "supersession", "id": "q015", "reference_answer": "Lead chaperone Mr. Davis Whitaker; parent/other chaperones Drummond, Boateng, Halloran, Petrov, and Ms. Yi (substituting for Pruitt). Nurse Karen Tomic was also assigned to Bus 2.", "source_id": "q015"}
+{"category": "supersession", "id": "q016", "reference_answer": "No. Pruitt called out sick at 7:10 AM on April 24 and was replaced by Yi at 7:35 AM. The April 22/April 23 newsletter version naming Pruitt is superseded.", "source_id": "q016"}
+{"category": "supersession", "id": "q017", "reference_answer": "38 students: 37 from 7A plus Aliyah Saint-Pierre (7B).", "source_id": "q017"}
+{"category": "supersession", "id": "q018", "reference_answer": "The post-swap manifest replaced Marcus Donovan (7A, moved to Bus 2) with Aliyah Saint-Pierre (7B, moved to Bus 1) on Bus 1, and made the inverse change on Bus 2. Total counts on each bus remained the same (38 on Bus 1, 41 on Bus 2), but the homeroom composition of each bus changed.", "source_id": "q018"}
+{"category": "supersession", "id": "q019", "reference_answer": "No. The April 18 draft was revised on April 20 and superseded by the April 22 final plan; it is retained for procedural records only.", "source_id": "q019"}
+{"category": "status_at_time", "id": "q020", "reference_answer": "Bus 2 was one student short, with Bus 2 driver Adekoya counting 40 instead of the expected 41.", "source_id": "q020"}
+{"category": "status_at_time", "id": "q021", "reference_answer": "79 students.", "source_id": "q021"}
+{"category": "status_at_time", "id": "q022", "reference_answer": "Devin was at the Welcome Center, supervised by Ms. Hattie Yi. He sat out the Schoolhouse Demonstration from 1:30 to 2:30, when he rejoined the group for bus reload.", "source_id": "q022"}
+{"category": "status_at_time", "id": "q023", "reference_answer": "No. She was located at 2:42 PM at the Mill Station restroom area.", "source_id": "q023"}
+{"category": "status_at_time", "id": "q024", "reference_answer": "No. Scheduled for May 1, 2026; not yet held as of the April 28 packet date.", "source_id": "q024"}
+{"category": "rule_application", "id": "q025", "reference_answer": "1:10 or better.", "source_id": "q025"}
+{"category": "rule_application", "id": "q026", "reference_answer": "Per-student check-in/check-out at each major program transition.", "source_id": "q026"}
+{"category": "rule_application", "id": "q027", "reference_answer": "Yes. With 12 chaperones (excluding the nurse) for 79 students, the ratio of approximately 1:6.58 is within the 1:10 policy.", "source_id": "q027"}
+{"category": "rule_application", "id": "q028", "reference_answer": "13 adults: 12 chaperones plus 1 nurse (Tomic).", "source_id": "q028"}
+{"category": "rule_application", "id": "q029", "reference_answer": "Principal Dr. Imani Adeyemi, in conjunction with the building leadership team via the May 1 review.", "source_id": "q029"}
+{"category": "count", "id": "q030", "reference_answer": "10 parent chaperones: 5 on Bus 1 (Vargas, Mitchell, Goldberg, Echeverria, Ryker) and 5 on Bus 2 (Pruitt, Drummond, Boateng, Halloran, Petrov).", "source_id": "q030"}
+{"category": "count", "id": "q031", "reference_answer": "10 minutes (2:35 PM to 2:45 PM).", "source_id": "q031"}
+{"category": "count", "id": "q032", "reference_answer": "Three events: 2:33 PM Schoolhouse exit; 2:35 PM Mill Station entry; 2:42 PM Mill Station exit.", "source_id": "q032"}
+{"category": "count", "id": "q033", "reference_answer": "Five distinct stations: Welcome Center, Mill Station, Farm Station, Pavilion, and Schoolhouse. Mill Station was visited twice (10:32–11:30 and 2:35–2:42), but counts once.", "source_id": "q033"}
+{"category": "unresolved", "id": "q034", "reference_answer": "No. Pending the May 1 review by the building leadership team.", "source_id": "q034"}
+{"category": "unresolved", "id": "q035", "reference_answer": "No. The packet states this is one of the questions referred to the May 1 review.", "source_id": "q035"}
+{"category": "unresolved", "id": "q036", "reference_answer": "No. Adeyemi acknowledged receipt April 30 and confirmed the May 1 review will address the protocol questions; no determination has been issued as of packet date.", "source_id": "q036"}
+{"category": "unresolved", "id": "q037", "reference_answer": "No. The packet's open-items list flags this question as 'referenced but not clarified in current packet.'", "source_id": "q037"}
+{"category": "cross_source_conflict", "id": "q038", "reference_answer": "Whitaker's observation at 2:33 PM was approximately at the moment Lila exited the Schoolhouse (the scan log records Schoolhouse exit at 2:33). The wristband log records Mill Station entry at 2:35; in the intervening two minutes, Lila diverged from the group toward the Mill Station restroom (the nearest restroom to the Schoolhouse). Whitaker's statement reflects an instantaneous observation; the scan log records her subsequent path.", "source_id": "q038"}
+{"category": "cross_source_conflict", "id": "q039", "reference_answer": "The day-of chaperone roster (with Yi) is currently authoritative. Pruitt called out at 7:10 AM April 24, was replaced by Yi at 7:35 AM, and the April 23 newsletter version naming Pruitt is superseded.", "source_id": "q039"}
+{"category": "cross_source_conflict", "id": "q040", "reference_answer": "There is no contradiction. The Bus 2 driver's count at 2:35 of 40 students reflects that one student (Lila Marchetti) was not at the bus. The wristband scan log places Lila at Mill Station entry at the same time, corroborating her absence from the bus area. Both records consistently identify Lila as the student missing from the bus reload count.", "source_id": "q040"}

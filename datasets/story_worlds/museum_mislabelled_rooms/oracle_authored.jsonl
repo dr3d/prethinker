@@ -1,0 +1,40 @@
+{"id": "q001", "answer": "Dr. Petra Vane", "support_note": "Background section."}
+{"id": "q002", "answer": "2020 (the 2020 edition)", "support_note": "Background section."}
+{"id": "q003", "answer": "1958, per the acquisition record and digital catalog. The placard incorrectly says 1962.", "support_note": "Room 3 section."}
+{"id": "q004", "answer": "Linen production, per the acquisition record and digital catalog. The placard incorrectly says wool.", "support_note": "Room 3 section."}
+{"id": "q005", "answer": "The original placard was wrong (said 1962 instead of 1958), but a new placard was installed March 12 with the correct information.", "support_note": "Room 3 status."}
+{"id": "q006", "answer": "From the placard text. The guide was printed from placard text, not from the catalog.", "support_note": "Room 3 visitor guide note."}
+{"id": "q007", "answer": "Yes, a new placard was installed March 12.", "support_note": "Room 3 status."}
+{"id": "q008", "answer": "No. The visitor guide has not yet been reprinted.", "support_note": "Room 3 status."}
+{"id": "q009", "answer": "1852 — keel laid 1851, launched 1852 per yard records and the model's own label.", "support_note": "Room 5 acquisition record."}
+{"id": "q010", "answer": "1847, which is incorrect", "support_note": "Room 5 placard."}
+{"id": "q011", "answer": "1843, which is also incorrect and matches neither the placard nor the catalog", "support_note": "Room 5 visitor guide."}
+{"id": "q012", "answer": "The digital catalog (1852), which matches the acquisition record and the model's own label", "support_note": "Room 5 curator's note."}
+{"id": "q013", "answer": "A new placard was drafted March 10 but not yet installed.", "support_note": "Room 5 status."}
+{"id": "q014", "answer": "Alderman W. Jessop, in 1901", "support_note": "Room 7 acquisition record."}
+{"id": "q015", "answer": "No. Jessop was an alderman, not the mayor. The docent script incorrectly calls it 'a gift from the mayor.'", "support_note": "Room 7 curator's note."}
+{"id": "q016", "answer": "Yes. The Room 7 placard correctly identifies Jessop as an alderman.", "support_note": "Room 7 curator's note."}
+{"id": "q017", "answer": "It incorrectly states the mace was 'a gift from the mayor' when Jessop was an alderman.", "support_note": "Room 7 curator's note."}
+{"id": "q018", "answer": "The authenticity is disputed. The conservator's report suggests the chart was produced between 1740 and 1770, not 1703.", "support_note": "Room 9 conservator's report."}
+{"id": "q019", "answer": "That ink analysis suggests production between 1740 and 1770, the paper is mid-18th century, and the 1703 date may refer to an earlier survey that this chart copies, or may be deliberate false dating.", "support_note": "Conservator's report 2018-CR-041."}
+{"id": "q020", "answer": "It presents the chart as a 1703 coastal survey without qualification.", "support_note": "Room 9 placard text."}
+{"id": "q021", "answer": "Yes. She proposed a revised placard reading 'attributed to Captain James Bourne, date disputed.'", "support_note": "Room 9 curator's note."}
+{"id": "q022", "answer": "The Board of Trustees rejected it, stating the chart has been displayed as a 1703 original since acquisition and that changing the label would 'undermine public confidence in the collection.'", "support_note": "Room 9 curator's additional note."}
+{"id": "q023", "answer": "The Board of Trustees. The curator disagrees but the Board's decision controls the public display.", "support_note": "Room 9 curator's additional note."}
+{"id": "q024", "answer": "Yes. The digital catalog retains the dispute note from the conservator's report.", "support_note": "Room 9 status."}
+{"id": "q025", "answer": "No. It describes the chart as 'an authentic 1703 survey,' which the conservator's report disputes.", "support_note": "Room 9 visitor guide vs conservator's report."}
+{"id": "q026", "answer": "Winifred Pole, at Heathwell Cliffs in June 1934", "support_note": "Room 10 placard and acquisition record."}
+{"id": "q027", "answer": "Ichthyosaurus communis", "support_note": "Room 10 visitor guide."}
+{"id": "q028", "answer": "No. The acquisition record's initial assessment suggests temnodontosaurus, an entirely different genus.", "support_note": "Room 10 acquisition record."}
+{"id": "q029", "answer": "Temnodontosaurus", "support_note": "Room 10 acquisition record."}
+{"id": "q030", "answer": "No. No formal species determination has ever been made.", "support_note": "Room 10 curator's note."}
+{"id": "q031", "answer": "Yes. The placard says 'ichthyosaur' generically without a species claim, which the curator considers acceptable.", "support_note": "Room 10 curator's note."}
+{"id": "q032", "answer": "347", "support_note": "Room 12 placard."}
+{"id": "q033", "answer": "344 (341 original names plus 3 added in 1924)", "support_note": "Room 12 acquisition record and digital catalog."}
+{"id": "q034", "answer": "The curator cannot determine where 347 originated. It may be a typographical error from the 2019 renovation placard printing.", "support_note": "Room 12 curator's note."}
+{"id": "q035", "answer": "341", "support_note": "Room 12 acquisition record."}
+{"id": "q036", "answer": "Only Room 3 (new placard installed March 12)", "support_note": "Status lines across all rooms."}
+{"id": "q037", "answer": "Room 5 (drafted but not installed), Room 9 (correction rejected by Board), and Room 12 (drafted but not installed)", "support_note": "Status lines across rooms with identified placard errors."}
+{"id": "q038", "answer": "The Bourne Chart in Room 9 — presenting a disputed item as authentic. The curator calls this 'the most serious error in the audit.'", "support_note": "Room 9 curator's note."}
+{"id": "q039", "answer": "At least four: Room 3 (donation date, period, material), Room 5 (construction date), Room 9 (authenticity), Room 10 (species identification). Room 12's visitor guide matches the wrong placard count.", "support_note": "Visitor guide entries across rooms."}
+{"id": "q040", "answer": "The curator recommended correcting the placard to show the disputed dating. The Board rejected the correction, so the public placard remains unchanged and presents the 1703 date without qualification. However, the digital catalog preserves the conservator's dispute note. The public display and the internal record now deliberately disagree.", "support_note": "Room 9 curator's notes and status."}

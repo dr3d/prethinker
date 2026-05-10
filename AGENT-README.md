@@ -75,13 +75,14 @@ python -m pytest tests/test_sec_edgar_adapter.py tests/test_domain_profiles.py -
 python -m pytest -q
 ```
 
-The latest full-suite result is `647 passed`. Recent focused
-batteries also cover CourtListener, SEC/contracts, domain profiles, Semantic IR
-runtime, UI gateway phases, trace rendering, router agility, router training
-data, archived Lava stress packs, UMLS builders, profile bootstrap, raw-file intake planning,
-post-ingestion QA, story-world fixtures, CE, and rule acquisition. Live/generated
-smoke traces belong under ignored paths such as `datasets/*/generated/` and
-`tmp/`.
+The latest focused helper/selector verification is `153 passed`; rerun the full
+suite before updating any full-suite headline. Recent focused batteries also
+cover CourtListener, SEC/contracts, domain profiles, Semantic IR runtime, UI
+gateway phases, trace rendering, router agility, router training data, archived
+Lava stress packs, UMLS builders, profile bootstrap, raw-file intake planning,
+post-ingestion QA, story-world fixtures, CE, and rule acquisition.
+Live/generated smoke traces belong under ignored paths such as
+`datasets/*/generated/` and `tmp/`.
 
 ## Harness Preflight Notes
 

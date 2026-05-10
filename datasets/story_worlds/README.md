@@ -25,6 +25,32 @@ fixture journal.
 
 Current fixtures:
 
+- Claude 8 dense operational-record fixtures, promoted 2026-05-08 after a
+  cold-to-source-record repair cycle:
+  - `hospital_shift_exception_log/`: hospital incident packet for shift
+    coverage, Pyxis/badge/telemetry logs, source provenance, and unresolved
+    quality-review questions.
+  - `wildfire_evacuation_revision_order/`: evacuation-order packet for map
+    layer corrections, dispatch radio entries, USFS gate jurisdiction, and
+    current order status.
+  - `university_lab_sample_chain/`: laboratory chain-of-custody packet for
+    aliquot isolation, LIMS/badge/freezer records, corrected reports, and
+    contamination-review status.
+  - `arts_grant_panel_reconsideration/`: grant reconsideration packet for
+    bench notes, recusals, score correction, fiscal ledger, bylaw application,
+    and pending conflict review.
+  - `maritime_salvage_sensor_packet/`: maritime salvage packet for sonar
+    positions, ownership claims, court-order limits, sensor/source provenance,
+    and disputed interpretation.
+  - `municipal_tree_permit_amendment/`: tree-permit amendment packet for
+    filed-vs-issued authority, protected-tree status, exhibit provenance, and
+    measurement-method conflict.
+  - `school_trip_bus_roster_split/`: school trip roster/manifest packet for
+    bus swaps, chaperone scope, RFID scans, headcounts, and false-conflict
+    timeline resolution.
+  - `estate_archive_access_dispute/`: estate/archive dispute packet for deeds,
+    codicils, exhibit labels, custody vs title, catalog IDs, and unresolved
+    probate effect.
 - `otters_clockwork_pie/`: a Goldilocks-shaped but source-local whimsical story
   designed to expose template contamination, predicate drift, chronology loss,
   and weak final-state modeling.

@@ -1,0 +1,40 @@
+{"category": "direct_fact", "id": "q001", "question": "What is the applicant requesting?", "source_id": "q001"}
+{"category": "direct_fact", "id": "q002", "question": "How many units does the current application propose?", "source_id": "q002"}
+{"category": "direct_fact", "id": "q003", "question": "What is the zoning designation for the property?", "source_id": "q003"}
+{"category": "direct_fact", "id": "q004", "question": "Who prepared the staff report?", "source_id": "q004"}
+{"category": "authority", "id": "q005", "question": "Is the staff recommendation a decision?", "source_id": "q005"}
+{"category": "temporal_status", "id": "q006", "question": "Has the application been approved?", "source_id": "q006"}
+{"category": "claim_fact_separation", "id": "q007", "question": "Does the applicant claim the project is consistent with the Housing Element?", "source_id": "q007"}
+{"category": "claim_fact_separation", "id": "q008", "question": "Does staff agree that the project is consistent with the Housing Element?", "source_id": "q008"}
+{"category": "rule_application", "id": "q009", "question": "Is Orchard Lane within the General Plan's transit corridor definition?", "source_id": "q009"}
+{"category": "direct_fact", "id": "q010", "question": "How far is County Transit Route 14 from the project site?", "source_id": "q010"}
+{"category": "arithmetic", "id": "q011", "question": "What density does Dr. Holm calculate?", "source_id": "q011"}
+{"category": "arithmetic", "id": "q012", "question": "Is Dr. Holm's density calculation correct?", "source_id": "q012"}
+{"category": "rule_application", "id": "q013", "question": "Does the AR-2 zone specify a maximum density in units per acre?", "source_id": "q013"}
+{"category": "direct_fact", "id": "q014", "question": "How many daily trips does Dr. Holm's traffic engineer estimate?", "source_id": "q014"}
+{"category": "claim_fact_separation", "id": "q015", "question": "Has Dr. Holm's traffic estimate been verified?", "source_id": "q015"}
+{"category": "direct_fact", "id": "q016", "question": "How many daily trips does the Cortland traffic study project?", "source_id": "q016"}
+{"category": "authority", "id": "q017", "question": "Which traffic estimate does staff consider more credible?", "source_id": "q017"}
+{"category": "direct_fact", "id": "q018", "question": "How many units did the original rejected proposal include?", "source_id": "q018"}
+{"category": "direct_fact", "id": "q019", "question": "Why was the original 18-unit version rejected?", "source_id": "q019"}
+{"category": "authority", "id": "q020", "question": "Was the 18-unit proposal denied by the Planning Commission?", "source_id": "q020"}
+{"category": "direct_fact", "id": "q021", "question": "Which lots were below the AR-2 minimum in the 18-unit version?", "source_id": "q021"}
+{"category": "direct_fact", "id": "q022", "question": "What is the AR-2 minimum lot size?", "source_id": "q022"}
+{"category": "scope_containment", "id": "q023", "question": "Is the 18-unit version the application before the Commission?", "source_id": "q023"}
+{"category": "authority", "id": "q024", "question": "Can the Commission impose the speed table recommendation?", "source_id": "q024"}
+{"category": "rule_application", "id": "q025", "question": "What condition must be met before building permits can be issued?", "source_id": "q025"}
+{"category": "temporal_arithmetic", "id": "q026", "question": "When does the conditional use permit expire if not used?", "source_id": "q026"}
+{"category": "direct_fact", "id": "q027", "question": "What are the construction hour limits on Saturdays?", "source_id": "q027"}
+{"category": "temporal_status", "id": "q028", "question": "Has the MND been challenged?", "source_id": "q028"}
+{"category": "direct_fact", "id": "q029", "question": "What are the three environmental mitigations required?", "source_id": "q029"}
+{"category": "scope_containment", "id": "q030", "question": "Are the draft conditions of approval in effect?", "source_id": "q030"}
+{"category": "authority", "id": "q031", "question": "Can the Commission modify the draft conditions?", "source_id": "q031"}
+{"category": "scope_containment", "id": "q032", "question": "Who recommended against the Courtyard B addition?", "source_id": "q032"}
+{"category": "direct_fact", "id": "q033", "question": "What happened on April 15?", "source_id": "q033"}
+{"category": "claim_fact_separation", "id": "q034", "question": "What is the applicant's projected build-out timeline?", "source_id": "q034"}
+{"category": "direct_fact", "id": "q035", "question": "How many off-street parking spaces are proposed?", "source_id": "q035"}
+{"category": "direct_fact", "id": "q036", "question": "What is the size of the proposed community park?", "source_id": "q036"}
+{"category": "direct_fact", "id": "q037", "question": "What is currently on the property?", "source_id": "q037"}
+{"category": "rule_application", "id": "q038", "question": "Does the current 14-unit proposal meet AR-2 dimensional standards?", "source_id": "q038"}
+{"category": "direct_fact", "id": "q039", "question": "What is the nearest school?", "source_id": "q039"}
+{"category": "claim_fact_separation", "id": "q040", "question": "List all claims or characterizations in the document that are the applicant's opinion rather than established facts or staff findings.", "source_id": "q040"}

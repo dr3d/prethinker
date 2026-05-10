@@ -10,6 +10,29 @@ measurable: claims stay separate from facts, rules stay separate from outcomes,
 authority boundaries stay visible, and zombie retries are stopped instead of
 rewarded.
 
+Current harness vocabulary:
+
+```text
+compiled KB = durable state
+row = measured encounter with that state
+selector = chooses the best encounter surface
+guard = prevents a tempting wrong surface
+verdict = records what happened
+```
+
+Rows are the unit of scoring, classification, guarding, selection, and replay.
+They are not the truth store. The compiled KB is the truth store; a row is the
+stress test that shows whether the right admitted state can be surfaced for a
+specific question.
+
+The harness now distinguishes semantic lenses from deterministic pre-compile
+ledgers. Lenses ask the model to propose meaning under governance. Ledgers pin
+literal source addressability before the model reads: identifiers, headings,
+line numbers, table rows, table cells, numeric tokens, and labeled official
+prose. Ledgers do not infer source truth; they make the source's printed
+structure queryable so a later compile or QA pass can recover the exact row,
+date, count, source label, or record cell without relying on model recall.
+
 The daily-driver surface is `src/kb_pipeline_clean` plus
 `scripts/run_kb_pipeline_clean_harness.py`. The live behavior source remains
 `src/mcp_server.py` until each compiler, gate, apply, or normalization piece has
@@ -39,6 +62,7 @@ python scripts/plan_story_world_repair_targets.py --scorecard-json tmp/story_wor
 python scripts/plan_story_world_repair_targets.py --scorecard-json tmp/story_world_full40_classified_scorecards/scorecard.json --fixture larkspur_clockwork_fair --out-json tmp/story_world_repair_plans/larkspur_full40_repair_targets.json --out-md tmp/story_world_repair_plans/larkspur_full40_repair_targets.md
 python scripts/select_qa_mode_without_oracle.py --selection-policy protected --group <name>:baseline=<QA_JSON>,evidence=<QA_JSON> --out-json <OUT_JSON> --out-md <OUT_MD>
 python scripts/select_qa_mode_without_oracle.py --selection-policy guarded_activation --group <name>:baseline=<QA_JSON>+<FAILURE_SURFACE_QA_JSON>,candidate=<QA_JSON> --out-json <OUT_JSON> --out-md <OUT_MD>
+python scripts/select_qa_mode_without_oracle.py --selection-policy hybrid --hybrid-llm-policy activation --include-self-check --group <name>:baseline=<QA_JSON>,candidate=<QA_JSON>,registry=<QA_JSON> --out-json <OUT_JSON> --out-md <OUT_MD>
 python scripts/plan_selector_risk_gate.py --baseline-run protected=<SELECTOR_JSON> --candidate-run guarded_activation=<SELECTOR_JSON> --transfer-comparison <SELECTOR_POLICY_COMPARISON_JSON> --out-dir tmp/selector_risk_gates
 ```
 
@@ -63,6 +87,11 @@ python scripts/run_kb_pipeline_clean_harness.py --pack docs/data/frontier_packs/
 - Canonical signatures are calibration artifacts for extraction parity.
 - New public names should describe the guardrail or reason for being, not the
   fixture that first exposed the issue.
+- Treat registry-scaffolded candidates as vocabulary scaffolds, not fact
+  sources. A registry can name `report_commissioned_by/4` or
+  `item_received_from/4`, but it must not supply fixture facts; promotion still
+  requires compile artifacts, QA replay, selector gating, and journaled transfer
+  evidence.
 - Maintain a lens roster for meaning surfaces such as source acquisition, rule
   composition, temporal/status, authority, uncertainty, query, selector, answer,
   and struggle detection. See `docs/SEMANTIC_INSTRUMENT.md` for the public
@@ -76,6 +105,43 @@ python scripts/run_kb_pipeline_clean_harness.py --pack docs/data/frontier_packs/
   admitted surface, duplicate most of their output, go skip-heavy, or fail
   activation-governor targets, the instrument should recommend stopping or
   continuing only with a named expected contribution.
+- Guard growth is itself telemetry. A new guard should name a reusable
+  question/evidence mismatch; if it only names a fixture, it is probably
+  overfitting. Merge duplicate guards only after replay proof, and retire guards
+  when better compile/helper surfaces make them unnecessary.
+- Selector improvements can close real score gaps without new compiles. On
+  2026-05-10, replaying existing precision-batch artifacts with the latest
+  guarded selector and helper surfaces moved the six precision fixtures to a
+  row-gated `240 / 0 / 0` over `240`, equal to the available candidate ceiling.
+  Authority/Possession reached `40 / 0 / 0` after a query-only
+  archive-authority/custody companion exposed grouped custody counts, access
+  authorization from source-record table cells, recall rights, and contractor
+  custody notice/consent clauses from already admitted state. Contradictory
+  Evidence reached `40 / 0 / 0` after a query-only source-record clock-sync
+  companion exposed exact last-successful NTP sync dates from admitted text
+  atoms and numeric tokens. Treat that as evidence that this batch is now
+  exhausted by helper/queryability over admitted memory, not by new lens or
+  guard-family expansion.
+- Deterministic ledger growth is not lens growth. Promote a ledger expansion
+  only when it preserves source structure without semantic interpretation and
+  improves row-gated replay. The 2026-05-10 source-record ledger V2 added table
+  cells, numeric tokens, bold-label rows, and anchored official prose; on the
+  precision batch it raised the seven-candidate selected score to `223 / 8 / 9`
+  and the candidate ceiling to `232 / 4 / 4` over `240` rows.
+- Temporal helpers are part of the query substrate, not a lens. A 2026-05-10
+  repair showed that admitted notice timestamps were present but duration rows
+  failed because placeholder repair and relaxed fallback queries lost shared
+  temporal variables or accidentally joined local `Eventid` provenance slots.
+  The helper join now preserves repaired start/end variables, computes
+  `elapsed_hours/3` plus `elapsed_minutes/3`, and localizes repeated source
+  event variables before joining. A follow-on clear-sample probe made the same
+  point for clock-state snapshots: the runtime can derive
+  `clear_sample_clock_pause_support` from admitted counted segments,
+  sampler-offline intervals, and rule exceptions, so "paused with 18 hours
+  counted" is queryable state rather than fresh model inference. The
+  row-gated nine-candidate temporal selector then reached `40 / 0 / 0` on
+  Temporal State Ledger by selecting the duration-helper surface for duration
+  rows and the pause-helper surface for the clock-state snapshot row.
 
 ## Extraction Rule
 
@@ -121,12 +187,72 @@ context. Search it narrowly when a named prior artifact matters. Do not treat it
 as live guidance; if an archived run becomes an active lesson, summarize that
 lesson in tracked docs or the fixture's journal.
 
-The current incoming rule is now exercised on zip-delivered drops after
-extraction, as well as loose folders. The five 2026-05-04 zip fixtures were
-normalized, promoted into `datasets/story_worlds`, and given
-`progress_journal.md` plus `progress_metrics.jsonl` before baselining. The
-generated scorecard lives at `tmp/story_world_zip_baseline_summaries/scorecard.md`;
-the durable lesson lives beside each fixture.
+The current incoming rule is now exercised on zip-delivered drops and loose
+folders. Two authoring shapes are first-class:
+
+- legacy source-plus-QA folders: `source.md`, `qa.jsonl`, and
+  `fixture_notes.md`;
+- sealed story zips: `story.md`, `qa_questions.md`,
+  `qa_answers_private.jsonl`, `challenge_strategy.md`, and
+  `anti_leakage_manifest.md`.
+
+`scripts/validate_fixture_intake.py` validates both shapes without interpreting
+source prose. `scripts/stage_incoming_fixtures.py` normalizes both shapes into
+the promoted harness package: `source.md`/`story.md`, question-only `qa.md`,
+question-only `qa_questions.jsonl`, scoring-only `oracle.jsonl`, fixture notes,
+and progress scaffolds. The private answer file is preserved for audit but must
+not enter compile or query-planning context.
+
+The five 2026-05-04 zip fixtures were normalized, promoted into
+`datasets/story_worlds`, and given `progress_journal.md` plus
+`progress_metrics.jsonl` before baselining. The generated scorecard lives at
+`tmp/story_world_zip_baseline_summaries/scorecard.md`; the durable lesson lives
+beside each fixture.
+
+The 2026-05-07 sealed story zip batch follows the same path through the updated
+intake tools. Its first full-40 cold baseline is
+`tmp/incoming_10_cold_qa_20260507/scorecard.md`: `276 exact / 44 partial / 80
+miss` over `400` rows, with `0` write proposal rows and `0` runtime load
+errors.
+
+The same batch now has a row-gated high-water after candidate-mode farming:
+`361 exact / 16 partial / 23 miss` over `400` rows (`90.25%`). The result is
+artifact-first and selector-gated, not a single cold compile. The current best
+selector artifacts are under `tmp/incoming_10_candidate_mode_selectors/`,
+including:
+
+- `clockmaker_object_registry_guarded_selector_v2.json`:
+  `39 exact / 1 partial / 0 miss`;
+- `nested_hearing_registry_guarded_selector_v2.json`:
+  `40 exact / 0 partial / 0 miss`;
+- `tournament_admin_guarded_selector_v2.json`:
+  `37 exact / 3 partial / 0 miss`.
+
+The durable lens lessons are captured in the fixture journals and
+`docs/SEMANTIC_LENS_ROSTER.md`: evidence provenance and ledger/object
+provenance are narrow pegboard lenses. They rescue explicit provenance rows but
+regress broad legal, financial, or narrative rows when used as global compile
+replacements.
+
+The 2026-05-08 six-fixture administrative/story batch demonstrates the newer
+GPU discipline: compile sparingly, select aggressively, and add helpers only
+when the admitted KB already contains the needed arithmetic substrate. The cold
+full-40 result was `186 / 16 / 38` over `240` rows (`77.5%`). Artifact selection
+and scoped helper/compile work raised the row-gated high-water to
+`223 / 6 / 11` (`92.9%`). A final residual repair pass then reached a
+diagnostic row-gated `240 / 0 / 0` over the batch. This is not a single global
+compile mode; it is the proof that every row has a reachable admitted surface
+when the harness can select among existing and narrow repair artifacts. Proof
+artifact:
+`tmp/incoming_6_full40_qa_20260508/batch_exhaustion_proof_20260508.md`.
+
+Census is the cleanest helper lesson: baseline `29 / 1 / 10`,
+helper/accounting surfaces plus two scoped compiles, diagnostic upper bound
+`40 / 0 / 0`, with the comparison artifact at
+`tmp/incoming_6_full40_qa_20260508/census_multisurface_comparison.md`. The
+other incoming-six lessons are row-shape transfer candidates: source lists,
+last-confirmed-at, unresolved authority question answer surfaces,
+rejected-version planning rows, and procedural date-event anchors.
 
 `scripts/plan_story_world_fixture_runs.py` is the promoted-fixture daily-driver
 planner. It reads runnable fixtures directly from `datasets/story_worlds`,

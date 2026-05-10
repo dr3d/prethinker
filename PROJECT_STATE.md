@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: 2026-05-06
+Last updated: 2026-05-08
 
 ## One-Sentence Shape
 
@@ -25,9 +25,24 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 - Background domain asset: local UMLS Semantic Network KB built from `sn_current.tgz` for bounded medical type steering and explanation.
 - Active architecture pivot: two-pass `semantic_router_v1 -> semantic_ir_v1`, using the LLM as the context/profile/action planner and the deterministic mapper as the admission authority.
 - Active architecture frontier: multi-pass semantic compilation with safe-surface accumulation. Independent backbone/support/temporal/rule lenses can propose fragments, the mapper admits each lens independently, and deterministic union accumulates only admitted clauses.
-- Active harness frontier: stenographer-mode simulation, where fixtures arrive as ordered utterance streams and Prethinker may only see the current turn plus prior admitted/pending state.
+- Active harness frontier: row-gated semantic parallax over frozen compiled KB
+  artifacts. Each candidate lens, registry, helper, evidence mode, or selector
+  policy is measured per row rather than promoted globally by aggregate hope.
+- Stenographer-mode simulation remains important for live product behavior,
+  where fixtures arrive as ordered utterance streams and Prethinker may only
+  see the current turn plus prior admitted/pending state.
 - Current development model: `qwen/qwen3.6-35b-a3b` through LM Studio/OpenAI-compatible structured output. This is the best-known local path, not a permanent product dependency.
 - Current demonstration surface: prompt-book UI plus live ledger cards showing route, semantic workspace, deterministic admission, clarification, blocked execution, and KB mutation outcomes.
+
+Current mini-architecture:
+
+```text
+compiled KB = durable state
+row = measured encounter with that state
+selector = chooses the best encounter surface
+guard = prevents a tempting wrong surface
+verdict = records what happened
+```
 
 ## Capabilities Live
 
@@ -56,7 +71,19 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 
 ## Recent Frontier Results
 
-- Current full-suite verification: `647 passed`.
+- Current focused verification for the newest helper/selector work:
+  `153 passed` across `tests/test_domain_bootstrap_file.py`,
+  `tests/test_domain_bootstrap_qa.py`, `tests/test_qa_mode_selector.py`, and
+  `tests/test_selector_guard_families.py`. Earlier full-suite counts remain
+  historical snapshots unless rerun in this branch.
+- Incoming-6 full-40 high-water: six new 2026-05-08 fixtures moved from a cold
+  `186 / 16 / 38` to a diagnostic row-gated `240 / 0 / 0` over `240` rows. The
+  result proves every row has a reachable surface, not that one global compiler
+  solves the batch. The contributing source-list, last-confirmed-at,
+  unresolved-authority, rejected-version, date-event, planning/staff-report,
+  evidence-provenance, board-recusal, lease-financial, and
+  conservation-of-count candidates remain row-gated until transfer checks prove
+  them.
 - Iron Harbor: `86 exact / 14 partial / 0 miss` on a full 100-question source-document battery, with `0` write proposals during post-ingestion QA.
 - Blackthorn: baseline first-20 was `2 exact / 1 partial / 17 miss`; current diagnostic lanes include BTC-022 at `82 / 9 / 9` full-100 and BTC-027 at `85 / 4 / 11`. These are different configurations, so compare within lane rather than treating one number as a universal replacement.
 - Kestrel: profile-guided KCL-016 reached `73 exact / 11 partial / 16 miss` full-100 with `0` write proposals. Cold/source-aware evidence remains much lower, and the distinction is intentional.
@@ -95,15 +122,17 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
   prefer-baseline target, not a selected miss.
 - Selector guard growth now has a family-level rollup:
   `scripts/summarize_selector_guard_families.py` parses selector guard reasons
-  and writes `docs/SELECTOR_GUARD_FAMILY_ROLLUP.md`. Current inventory is `50`
-  guard return sites, `49` unique guard reasons, `7` semantic families, and
-  `0` unclassified. Use the family count to detect lens sprawl; individual
-  row guards should stay diagnostic until they transfer or fold into a family.
+  and writes `docs/SELECTOR_GUARD_FAMILY_ROLLUP.md`. Current inventory is
+  `125` guard return sites, `123` unique guard reasons, `7` semantic families,
+  `0` unclassified reasons, and `2` exact duplicate reasons queued for merge
+  review. Use the family count to detect sprawl, but keep watching raw guard
+  pressure; merge and retire before parameterizing.
 - Broad score-hold check after the rule/selector guard work is clean: the main
   frozen-artifact selector lanes still match documented results for Larkspur
   (`40 / 0 / 0`), Calder (`14 / 3 / 3`), Oxalis (`33 / 6 / 1`), Avalon
   (`32 / 7 / 1`), and Sable (`26 / 7 / 7`), each with perfect selected-best
-  counts and `0` selector errors. Full verification is now `647 passed`.
+  counts and `0` selector errors. Treat the verification count attached to that
+  older replay as historical unless the whole suite is rerun.
 - Current-harness cold replay over Avalon, Oxalis, and Three Moles produced
   `97 exact / 10 partial / 13 miss` across `120` judged rows with `0` write
   proposals and `0` runtime load errors: Avalon `34 / 2 / 4`, Oxalis
@@ -633,6 +662,7 @@ Top priority:
 
 - Extend the new temporal kernel from ordering relations into richer date/interval and correction semantics. The first slice now supports deterministic ordering queries over admitted temporal facts; the next slice should let extracted dates, intervals, corrections, and relative-time anchors support policy-demo questions without writing derived conclusions as durable facts.
 - Build on the new `temporal_graph_v1` sub-IR inspired by TG-LLM: event nodes, separated start/end anchors, interval edges, ordering/gap/overlap facts, support refs, and graph-derived QA probes. The key adaptation is Prethinker's authority boundary: the LLM proposes temporal graph structure, deterministic admission decides durable facts, and Prolog/temporal context answers queries.
+- Treat propagation as the "world as governed spreadsheet" substrate: admitted facts are filled cells, unknown or ambiguous degrees of freedom are constrained blanks, and deterministic helpers/solvers should recompute direct consequences, blocked consequences, impossible states, and remaining unknowns without promoting derived answers into durable truth unless admission explicitly authorizes them.
 
 Supporting architecture:
 
@@ -684,7 +714,12 @@ Domain/data lanes:
 
 ## Verification Snapshot
 
-**Current headline:** the lean full pytest suite is `614 passed`. The current research center is semantic parallax: multi-pass semantic compilation, mapper-admitted safe-surface accumulation, rule-lens promotion trials, row-level activation, clarification eagerness under an explicit authority boundary, and stenographer-mode stream simulation.
+**Current headline:** focused verification for the newest helper/selector work
+is `153 passed`; the current research center is row-gated semantic parallax
+over compiled KB artifacts. Multi-pass compilation, mapper-admitted
+safe-surface accumulation, rule-lens promotion trials, query helpers,
+clarification eagerness, stenographer-mode stream simulation, and selector
+guards are now measured as row-level encounters with durable state.
 
 Recent verified results:
 

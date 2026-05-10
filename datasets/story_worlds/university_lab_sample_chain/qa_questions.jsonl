@@ -1,0 +1,40 @@
+{"category": "direct_lookup", "id": "q001", "question": "Who is the project PI on the Lower Sammish River PFAS Monitoring Study?", "source_id": "q001"}
+{"category": "direct_lookup", "id": "q002", "question": "What is the parent sample identifier for the water sample collected at site SR-7?", "source_id": "q002"}
+{"category": "direct_lookup", "id": "q003", "question": "What instrument was used for analysis on May 1, 2026?", "source_id": "q003"}
+{"category": "direct_lookup", "id": "q004", "question": "What is the run number for the May 1 analysis?", "source_id": "q004"}
+{"category": "direct_lookup", "id": "q005", "question": "Who collected the field sample on April 28, 2026?", "source_id": "q005"}
+{"category": "direct_lookup", "id": "q006", "question": "What analytical method was requested for this sample?", "source_id": "q006"}
+{"category": "direct_lookup", "id": "q007", "question": "Who is the Lab Director who issued the calibration curve reprocessing memo?", "source_id": "q007"}
+{"category": "direct_lookup", "id": "q008", "question": "What is the cap lot number flagged in the vial cap manufacturer advisory?", "source_id": "q008"}
+{"category": "provenance", "id": "q009", "question": "Which source records the freezer temperature excursion that began at 02:14 on April 29?", "source_id": "q009"}
+{"category": "provenance", "id": "q010", "question": "Which document records the manufacturer's notification regarding the LC vial cap lot?", "source_id": "q010"}
+{"category": "provenance", "id": "q011", "question": "According to which source did Tu enter the prep room at 13:42 on April 30?", "source_id": "q011"}
+{"category": "provenance", "id": "q012", "question": "Which system records the chain-of-custody log entries?", "source_id": "q012"}
+{"category": "provenance", "id": "q013", "question": "Which document recorded the calibration reprocessing that changed the PFOA value?", "source_id": "q013"}
+{"category": "provenance", "id": "q014", "question": "Whose lab notebook entry recorded the manual freezer check at 11:30 on May 4?", "source_id": "q014"}
+{"category": "supersession", "id": "q015", "question": "As of packet time, what is the reported value of PFOA in sample LS-PFAS-2026-0428-SR7-A?", "source_id": "q015"}
+{"category": "supersession", "id": "q016", "question": "What was the initial reported PFOA value before the erratum?", "source_id": "q016"}
+{"category": "supersession", "id": "q017", "question": "Per SOP TAF-SOP-RPT-02 §5.3, which report version is the report of record after an erratum?", "source_id": "q017"}
+{"category": "supersession", "id": "q018", "question": "Did the erratum change the reported PFOS value? If so, to what?", "source_id": "q018"}
+{"category": "supersession", "id": "q019", "question": "Was the May 1 analysis of aliquot A affected by the May 4–5 freezer failure?", "source_id": "q019"}
+{"category": "status_at_time", "id": "q020", "question": "As of packet time, where is aliquot B located?", "source_id": "q020"}
+{"category": "status_at_time", "id": "q021", "question": "As of May 4 at 11:30, what was freezer F-3's temperature according to the manual check, and who performed it?", "source_id": "q021"}
+{"category": "status_at_time", "id": "q022", "question": "What was freezer F-3's temperature behavior between May 4 19:48 and May 5 06:32, and what was the cause?", "source_id": "q022"}
+{"category": "status_at_time", "id": "q023", "question": "As of packet time, has the contamination review been completed?", "source_id": "q023"}
+{"category": "status_at_time", "id": "q024", "question": "As of May 1 at 09:14, what was the operational status of instrument INST-04 per the run log?", "source_id": "q024"}
+{"category": "rule_application", "id": "q025", "question": "Per EPA Method 1633, what is the acceptable range for internal standard recovery, and was the May 1 PFOA-13C8 recovery within range?", "source_id": "q025"}
+{"category": "rule_application", "id": "q026", "question": "According to the packet, who has authority to issue the contamination determination?", "source_id": "q026"}
+{"category": "rule_application", "id": "q027", "question": "Per the chain-of-custody log convention, who must sign at sample transfer between custody points?", "source_id": "q027"}
+{"category": "rule_application", "id": "q028", "question": "What is the freezer F-3 temperature specification?", "source_id": "q028"}
+{"category": "rule_application", "id": "q029", "question": "Per laboratory SOP TAF-SOP-RPT-02 §5.3, which report version governs after an erratum has been issued?", "source_id": "q029"}
+{"category": "count", "id": "q030", "question": "How many distinct freezer F-3 temperature excursions are recorded in the packet between April 28 and May 5?", "source_id": "q030"}
+{"category": "count", "id": "q031", "question": "How many cap lots were in active use in the lab during April 25 – May 1, 2026?", "source_id": "q031"}
+{"category": "count", "id": "q032", "question": "How many distinct named personnel are recorded in the chain-of-custody log for sample LS-PFAS-2026-0428-SR7-A?", "source_id": "q032"}
+{"category": "count", "id": "q033", "question": "List the dates of all procedural anchors for this sample from collection through erratum issuance.", "source_id": "q033"}
+{"category": "unresolved", "id": "q034", "question": "Has it been determined whether vial cap lot LCV-2026-031 was used for aliquot A?", "source_id": "q034"}
+{"category": "unresolved", "id": "q035", "question": "Has Dr. Hsiao issued the formal contamination determination?", "source_id": "q035"}
+{"category": "unresolved", "id": "q036", "question": "Is the integrity of aliquot B confirmed as of packet time?", "source_id": "q036"}
+{"category": "unresolved", "id": "q037", "question": "Did Tu's bench notebook specify which cap lot was used for the April 30 split?", "source_id": "q037"}
+{"category": "cross_source_conflict", "id": "q038", "question": "Tu's notebook records the split as completed at 13:45, but the freezer logger records a door event at 14:00. Does this constitute a conflict, and how is it resolved?", "source_id": "q038"}
+{"category": "cross_source_conflict", "id": "q039", "question": "The vial cap memo says lot LCV-2026-031 may contribute PFAS background; the May 1 run's internal standard recovery was 87% (within method acceptance). Does this resolve the contamination question?", "source_id": "q039"}
+{"category": "cross_source_conflict", "id": "q040", "question": "The initial report on May 2 stated PFOA at 142 ng/L; the erratum on May 5 states 168 ng/L. Which value is currently authoritative for the watershed monitoring study?", "source_id": "q040"}

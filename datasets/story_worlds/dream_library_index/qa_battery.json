@@ -1,0 +1,322 @@
+[
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q001",
+    "question": "Who is the librarian at Harfield Lending Library?",
+    "reference_answer": "June Odell",
+    "source_id": "q001"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q002",
+    "question": "What caused the pipe burst in RI-1?",
+    "reference_answer": "Age and corrosion, per Odell's note on Novel A",
+    "source_id": "q002"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q003",
+    "question": "Was the pipe burst caused by sabotage?",
+    "reference_answer": "No. The sabotage occurs only in the fictional Novel A. Odell explicitly states the real pipe burst was caused by age and corrosion, not sabotage.",
+    "source_id": "q003"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q004",
+    "question": "How many books were damaged in the pipe burst?",
+    "reference_answer": "Approximately forty",
+    "source_id": "q004"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q005",
+    "question": "Were the damaged books rare manuscripts?",
+    "reference_answer": "No. They were standard lending stock. The 'rare manuscripts' are from the fictional Novel A.",
+    "source_id": "q005"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q006",
+    "question": "Who discovered the pipe leak?",
+    "reference_answer": "Volunteer Gary Sims",
+    "source_id": "q006"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q007",
+    "question": "Is Gary Sims a suspect in the missing book case?",
+    "reference_answer": "No. The police investigation has not identified any suspect. The fictional theft by a character named Gary occurs only in Novel B.",
+    "source_id": "q007"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q008",
+    "question": "What book is missing from the Rare Shelf?",
+    "reference_answer": "A first edition of 'Compass and Wheel' by Morton Hale",
+    "source_id": "q008"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q009",
+    "question": "Who is the author of the real \"Compass and Wheel\"?",
+    "reference_answer": "Morton Hale",
+    "source_id": "q009"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q010",
+    "question": "Is the real \"Compass and Wheel\" a navigation manual?",
+    "reference_answer": "No. The real copy is a poetry collection. The navigation manual version is from the fictional Novel B.",
+    "source_id": "q010"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q011",
+    "question": "Has anyone been identified as a suspect in the book theft?",
+    "reference_answer": "No. No suspect has been identified. The police case is still open.",
+    "source_id": "q011"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q012",
+    "question": "What is the insured value of the missing book?",
+    "reference_answer": "£1,800",
+    "source_id": "q012"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q013",
+    "question": "How many titles does the inventory system show?",
+    "reference_answer": "4,312",
+    "source_id": "q013"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q014",
+    "question": "How many titles were found in the physical count?",
+    "reference_answer": "4,287",
+    "source_id": "q014"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q015",
+    "question": "What is the inventory discrepancy?",
+    "reference_answer": "25 books",
+    "source_id": "q015"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q016",
+    "question": "Did June Odell fabricate the inventory discrepancy?",
+    "reference_answer": "No. The fictional fabrication occurs only in Novel C. The real discrepancy is under investigation and may be explained by water-damaged books not yet re-cataloged. No finding of misconduct has been made.",
+    "source_id": "q016"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q017",
+    "question": "What explanation does Odell offer for the discrepancy?",
+    "reference_answer": "That some of the missing titles may be among the water-damaged books moved to the Drying Room and not yet re-cataloged",
+    "source_id": "q017"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q018",
+    "question": "Who is conducting the independent audit?",
+    "reference_answer": "Frances Kemp",
+    "source_id": "q018"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q019",
+    "question": "When does the audit begin?",
+    "reference_answer": "November 15, 2025",
+    "source_id": "q019"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q020",
+    "question": "Has the Library Board found Odell guilty of misconduct?",
+    "reference_answer": "No. The Board has made no finding of misconduct and notes that Odell voluntarily disclosed the coincidence.",
+    "source_id": "q020"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q021",
+    "question": "In Novel A, who sabotaged the pipe?",
+    "reference_answer": "A fictional character named Gerald, a disgruntled patron in the novel 'The Flooded Archive.' Gerald is not a real person at Harfield.",
+    "source_id": "q021"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q022",
+    "question": "Did Gerald sabotage the real Harfield pipe?",
+    "reference_answer": "No. Gerald is a fictional character. There is no patron named Gerald at Harfield and no evidence of sabotage.",
+    "source_id": "q022"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q023",
+    "question": "Is there a patron named Gerald at Harfield?",
+    "reference_answer": "No.",
+    "source_id": "q023"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q024",
+    "question": "In Novel B, who stole the book?",
+    "reference_answer": "A fictional volunteer named Gary in the novel 'Midnight in the Stacks.' This is not the real Gary Sims.",
+    "source_id": "q024"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q025",
+    "question": "Did Gary Sims steal the real \"Compass and Wheel\"?",
+    "reference_answer": "No. Gary Sims is not a suspect. The fictional theft is from Novel B. The police have not identified any suspect.",
+    "source_id": "q025"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q026",
+    "question": "Was Novel B published before or after the real book went missing?",
+    "reference_answer": "Before. Novel B was published January 2025; the real book went missing September 2025.",
+    "source_id": "q026"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q027",
+    "question": "Has the author of Novel B ever visited Harfield?",
+    "reference_answer": "No. The publisher confirmed Ashworth has never visited the library and the manuscript was completed in 2023.",
+    "source_id": "q027"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q028",
+    "question": "In Novel C, why did the librarian fabricate the discrepancy?",
+    "reference_answer": "To cover up books she had been secretly selling. This is entirely fictional.",
+    "source_id": "q028"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q029",
+    "question": "Was Novel C published before or after the real discrepancy was discovered?",
+    "reference_answer": "Before. Novel C was published March 2025; the real discrepancy was discovered November 1, 2025.",
+    "source_id": "q029"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q030",
+    "question": "Who reported the fall on the entrance steps?",
+    "reference_answer": "Patron Reggie Lam",
+    "source_id": "q030"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q031",
+    "question": "Has Reggie Lam filed a liability claim?",
+    "reference_answer": "No, not as of the report date.",
+    "source_id": "q031"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q032",
+    "question": "What was the cost of the heating repair?",
+    "reference_answer": "£2,300",
+    "source_id": "q032"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q033",
+    "question": "Who performed the heating repair?",
+    "reference_answer": "Contractor Tobin Greaves",
+    "source_id": "q033"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q034",
+    "question": "What is the current status of the pipe burst damage restoration?",
+    "reference_answer": "In progress, not yet complete",
+    "source_id": "q034"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q035",
+    "question": "Is the missing book police case still open?",
+    "reference_answer": "Yes",
+    "source_id": "q035"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q036",
+    "question": "In the fictional \"Compass and Wheel,\" what kind of book is it?",
+    "reference_answer": "A navigation manual",
+    "source_id": "q036"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q037",
+    "question": "What kind of book is the real \"Compass and Wheel\"?",
+    "reference_answer": "A poetry collection by Morton Hale",
+    "source_id": "q037"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q038",
+    "question": "Has any novel event been confirmed as part of the factual record?",
+    "reference_answer": "No. The Board has made no finding linking any novel to any real incident. None of the fictional events are part of the factual record.",
+    "source_id": "q038"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q039",
+    "question": "Why did Odell voluntarily disclose the novel coincidences?",
+    "reference_answer": "Because she understood that someone reading the novels and then the incident log might draw wrong conclusions, and she wanted to make the boundary between fiction and fact explicit.",
+    "source_id": "q039"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q040",
+    "question": "List all incidents that remain unresolved at the end of the document.",
+    "reference_answer": "The pipe burst damage restoration (in progress), the missing book (no suspect, police case open), and the inventory discrepancy (under investigation, independent audit begins November 15).",
+    "source_id": "q040"
+  }
+]

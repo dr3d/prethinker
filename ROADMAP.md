@@ -47,7 +47,8 @@ authority boundary.
 
 Latest local verification:
 
-- Full pytest suite: `647 passed`
+- Focused helper/selector verification: `153 passed`; rerun the full suite
+  before updating any full-suite headline.
 - Edge runtime A/B: semantic IR `20/20`, `0.976` avg score, `0` non-mapper parse rescues
 - Weak-edge runtime A/B: semantic IR `10/10`, `1.000` avg score, `0` non-mapper parse rescues
 - Policy/reimbursement demo: `4/4` parsed, `4/4` apply-error-free, `4/4`

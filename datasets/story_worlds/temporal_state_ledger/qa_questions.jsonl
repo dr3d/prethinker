@@ -1,0 +1,40 @@
+{"category": "temporal", "id": "q001", "question": "At what time on 2026-04-28 was the Boil-Water Notice for Service Zone 2 issued?", "source_id": "temporal_state_ledger"}
+{"category": "lookup", "id": "q002", "question": "What is the identifier of the Lift Notice issued on 2026-05-04?", "source_id": "temporal_state_ledger"}
+{"category": "lookup", "id": "q003", "question": "Which Service Zone is covered by BWN-2026-04-28-A?", "source_id": "temporal_state_ledger"}
+{"category": "lookup", "id": "q004", "question": "Which Service Zone is covered by RUN-2026-04-28-B?", "source_id": "temporal_state_ledger"}
+{"category": "lookup", "id": "q005", "question": "What was the recorded cause of the sampler going offline at event E-04?", "source_id": "temporal_state_ledger"}
+{"category": "lookup", "id": "q006", "question": "What was the recorded cause of the sampler going offline at event E-08?", "source_id": "temporal_state_ledger"}
+{"category": "lookup", "id": "q007", "question": "Who is recorded as the compiler of this packet?", "source_id": "temporal_state_ledger"}
+{"category": "lookup", "id": "q008", "question": "Who is named as the Metrology Technician in the packet?", "source_id": "temporal_state_ledger"}
+{"category": "lookup", "id": "q009", "question": "Who is named as the Communications Officer who drafted BWN-2026-04-28-A, RUN-2026-04-28-B, and LFT-2026-05-04?", "source_id": "temporal_state_ledger"}
+{"category": "lookup", "id": "q010", "question": "On what date did the metrology technician perform the review of the S-3 sampler-controller clock drift?", "source_id": "temporal_state_ledger"}
+{"category": "temporal", "id": "q011", "question": "What is the corrected timestamp of event E-04 under §6.5?", "source_id": "temporal_state_ledger"}
+{"category": "temporal", "id": "q012", "question": "What was the as-logged (uncorrected) timestamp of event E-04?", "source_id": "temporal_state_ledger"}
+{"category": "temporal", "id": "q013", "question": "At what date and time was the §6.1 24-hour clear-sample requirement met?", "source_id": "temporal_state_ledger"}
+{"category": "temporal", "id": "q014", "question": "At what date and time did the §6.3 48-hour lift-notification clock begin?", "source_id": "temporal_state_ledger"}
+{"category": "temporal", "id": "q015", "question": "What would the §6.3 48-hour deadline have been if the weekend-shift rule had not been applied?", "source_id": "temporal_state_ledger"}
+{"category": "temporal", "id": "q016", "question": "What is the §6.3 lift-notification deadline as adjusted under the weekend-shift rule?", "source_id": "temporal_state_ledger"}
+{"category": "temporal_interval", "id": "q017", "question": "What was the total active duration of BWN-2026-04-28-A from issuance to lift?", "source_id": "temporal_state_ledger"}
+{"category": "temporal_interval", "id": "q018", "question": "What was the total active duration of RUN-2026-04-28-B from issuance to lift?", "source_id": "temporal_state_ledger"}
+{"category": "temporal_interval", "id": "q019", "question": "What was the duration of the first sampler-offline interval (E-04 corrected to E-05)?", "source_id": "temporal_state_ledger"}
+{"category": "temporal_interval", "id": "q020", "question": "What was the duration of the second sampler-offline interval (E-08 to E-09)?", "source_id": "temporal_state_ledger"}
+{"category": "temporal_interval", "id": "q021", "question": "Over what date-and-time interval was the §6.1 clear-sample clock paused under §6.2a during the event?", "source_id": "temporal_state_ledger"}
+{"category": "count", "id": "q022", "question": "How many distinct sampler-offline intervals occurred at Station S-3 during the event?", "source_id": "temporal_state_ledger"}
+{"category": "count", "id": "q023", "question": "How many positive samples (E. coli) were detected at Station S-3 during the event documented in §2?", "source_id": "temporal_state_ledger"}
+{"category": "count", "id": "q024", "question": "How many distinct notices (BWN, RUN, or Lift Notice) were issued during the event documented in §2?", "source_id": "temporal_state_ledger"}
+{"category": "count", "id": "q025", "question": "How many event rows are listed in the chronological event log in §2?", "source_id": "temporal_state_ledger"}
+{"category": "count", "id": "q026", "question": "How many open items are listed at packet close in §7?", "source_id": "temporal_state_ledger"}
+{"category": "composition", "id": "q027", "question": "What was the operational state of sampler S-3 at 2026-04-29 04:30 according to the snapshot table?", "source_id": "temporal_state_ledger"}
+{"category": "composition", "id": "q028", "question": "What was the state of BWN-2026-04-28-A at 2026-05-04 13:00 according to the snapshot table?", "source_id": "temporal_state_ledger"}
+{"category": "composition", "id": "q029", "question": "What was the state of the clear-sample clock at 2026-05-01 10:00 according to the snapshot table, and how many hours had been counted?", "source_id": "temporal_state_ledger"}
+{"category": "composition", "id": "q030", "question": "What was the operational state of sampler S-3 at 2026-04-30 12:00 according to the snapshot table?", "source_id": "temporal_state_ledger"}
+{"category": "supersession", "id": "q031", "question": "Was the projection memo OPS-PROJ-04-29 a binding lift schedule for Service Zone 2?", "source_id": "temporal_state_ledger"}
+{"category": "supersession", "id": "q032", "question": "What event caused the projection in OPS-PROJ-04-29 to be superseded, and on what date and time did that event occur?", "source_id": "temporal_state_ledger"}
+{"category": "authority", "id": "q033", "question": "Under which rule does the corrected timestamp on E-04 replace the as-logged timestamp for rule computations?", "source_id": "temporal_state_ledger"}
+{"category": "authority", "id": "q034", "question": "Under which rule does the clear-sample clock pause when the sampler is offline?", "source_id": "temporal_state_ledger"}
+{"category": "authority", "id": "q035", "question": "Under which rule did the §6.3 deadline shift from Sunday 2026-05-03 to Monday 2026-05-04?", "source_id": "temporal_state_ledger"}
+{"category": "unresolved", "id": "q036", "question": "What is the status, as of packet close, of the engineering review report on the cause of the 2026-04-28 contamination, and by what date is it expected?", "source_id": "temporal_state_ledger"}
+{"category": "unresolved", "id": "q037", "question": "What is the status, as of packet close, of the procedure review on whether OPS-PROJ-04-29 should have been suppressed, and on what date is the review scheduled?", "source_id": "temporal_state_ledger"}
+{"category": "negative_existential", "id": "q038", "question": "Did the second sampler-offline interval (maintenance, E-08 to E-09) trigger a §6.2 clear-sample reset?", "source_id": "temporal_state_ledger"}
+{"category": "negative_existential", "id": "q039", "question": "Was a separate Lift Notice issued to lift the Restricted-Use Notice in Service Zone 3?", "source_id": "temporal_state_ledger"}
+{"category": "composition", "id": "q040", "question": "If the §6.3 weekend-shift rule had not been applied, by how many hours would the Authority have missed the §6.3 deadline given that the Lift Notice was issued at 2026-05-04 12:00?", "source_id": "temporal_state_ledger"}

@@ -1,0 +1,40 @@
+{"id": "q001", "answer": "Citrus canker (Xanthomonas citri)", "support_note": "Background section."}
+{"id": "q002", "answer": "Margit Solberg", "support_note": "Background section."}
+{"id": "q003", "answer": "GH-3", "support_note": "Initial quarantine section."}
+{"id": "q004", "answer": "40 plants (Meyer lemon)", "support_note": "Initial quarantine, Lot 3A."}
+{"id": "q005", "answer": "Suspect", "support_note": "Initial quarantine section."}
+{"id": "q006", "answer": "Due to proximity to Lot 3A within the same greenhouse (GH-3), despite showing no visible symptoms", "support_note": "Initial quarantine, Lot 3B."}
+{"id": "q007", "answer": "4 of 6", "support_note": "Lab result August 26."}
+{"id": "q008", "answer": "Confirmed positive", "support_note": "Lab result section, updated classifications."}
+{"id": "q009", "answer": "September 9 (14 calendar days from the August 26 destruction order)", "support_note": "Lab result section."}
+{"id": "q010", "answer": "Yes, it was destroyed September 8, one day before the deadline", "support_note": "Lot 3A destruction section."}
+{"id": "q011", "answer": "All 5 samples tested negative", "support_note": "Lot 3B lab result September 5."}
+{"id": "q012", "answer": "Cleared. Quarantine lifted September 5.", "support_note": "Lot 3B lab result and status summary."}
+{"id": "q013", "answer": "Yes. Lot 3B was cleared on September 5 and may resume normal operations including distribution.", "support_note": "Lot 3B reclassification."}
+{"id": "q014", "answer": "Because nursery manager Hartwell disclosed that Lot 3A plants had been temporarily moved to GH-5 on July 30 for repotting, then returned to GH-3 on August 2. This movement was not disclosed during the initial inspection.", "support_note": "Scope expansion August 28."}
+{"id": "q015", "answer": "July 30 to August 2, 2025", "support_note": "Scope expansion section."}
+{"id": "q016", "answer": "No. It was disclosed on August 28, after the initial August 12 inspection.", "support_note": "Scope expansion section."}
+{"id": "q017", "answer": "Because Lot 5C arrived in GH-5 on August 5, after the Lot 3A plants were returned to GH-3 on August 2. There was no overlap exposure.", "support_note": "Scope expansion, Lot 5C classification."}
+{"id": "q018", "answer": "3 of 5", "support_note": "Lot 5A lab result September 10."}
+{"id": "q019", "answer": "September 24 (14 calendar days from the September 10 destruction order)", "support_note": "Lot 5A lab result section."}
+{"id": "q020", "answer": "Yes, destroyed September 23, one day before the deadline", "support_note": "Lot 5A destruction section."}
+{"id": "q021", "answer": "Because the adjacent Lot 5A was confirmed positive, and Lot 5B shared GH-5 with Lot 5A for the entire period since August 28", "support_note": "Lot 5A lab result, updated Lot 5B classification."}
+{"id": "q022", "answer": "No. Solberg did not retract the 'separate bench, no shared irrigation' fact but stated that proximity alone warranted elevated sampling given the confirmed status of the adjacent lot.", "support_note": "Lot 5A lab result section, Solberg's note on Lot 5B."}
+{"id": "q023", "answer": "All 8 samples tested negative", "support_note": "Lot 5B lab result September 22."}
+{"id": "q024", "answer": "Cleared. Quarantine lifted September 22.", "support_note": "Lot 5B lab result and status summary."}
+{"id": "q025", "answer": "A seasonal worker mistakenly moved 5 plants from Lot 5C to the Lot 5B bench, misreading the lot tags", "support_note": "Mistaken inclusion September 15."}
+{"id": "q026", "answer": "A seasonal worker who misread the lot tags", "support_note": "Mistaken inclusion section."}
+{"id": "q027", "answer": "Yes, on September 14 when Hartwell noticed the error", "support_note": "Mistaken inclusion section."}
+{"id": "q028", "answer": "5 (only the plants that were mistakenly moved)", "support_note": "Solberg's response in the mistaken inclusion section."}
+{"id": "q029", "answer": "10 (the remaining plants that were never moved)", "support_note": "Solberg's response and note."}
+{"id": "q030", "answer": "No. Solberg explicitly states the action is targeted for the 5 misplaced plants only and does not change the status of the 10 unmoved plants.", "support_note": "Solberg's note in the mistaken inclusion section."}
+{"id": "q031", "answer": "All 5 samples tested negative", "support_note": "Lot 5C subset lab result September 29."}
+{"id": "q032", "answer": "All 15 are either not quarantined (10 plants that were never moved) or cleared (5 plants that were temporarily suspect and then cleared September 29). All can resume normal operations.", "support_note": "Status summary."}
+{"id": "q033", "answer": "Two: Lot 3A and Lot 5A", "support_note": "Status summary."}
+{"id": "q034", "answer": "Three: Lot 3B, Lot 5B, and the 5-plant Lot 5C subset", "support_note": "Status summary."}
+{"id": "q035", "answer": "GH-1, GH-2, GH-4, GH-6, GH-7, and GH-8", "support_note": "Solberg's August 28 note and status summary."}
+{"id": "q036", "answer": "Suspect (elevated from precautionary hold on September 10 when Lot 5A was confirmed positive; not cleared until September 22)", "support_note": "Timeline: elevated September 10, cleared September 22."}
+{"id": "q037", "answer": "Precautionary hold (placed on hold August 12, not cleared until September 5)", "support_note": "Timeline: hold applied August 12, cleared September 5."}
+{"id": "q038", "answer": "The 5 moved plants were suspect (moved to Lot 5B bench September 12, discovered and separated September 14-15, classified suspect by Solberg). The 10 unmoved plants remained not quarantined.", "support_note": "Mistaken inclusion timeline."}
+{"id": "q039", "answer": "Nursery foreman Ola Nyberg supervised both destructions. Inspector Solberg witnessed both.", "support_note": "Lot 3A and Lot 5A destruction sections."}
+{"id": "q040", "answer": "No. Solberg's closing note states the quarantine is concluded and no further action is recommended unless new symptoms are reported.", "support_note": "Solberg's closing note."}

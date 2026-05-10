@@ -269,3 +269,41 @@ and `CaseMatch` fields rather than hiding it. The remaining hard Copperfall
 status rows are the stay overlay: `stayed` was not admitted as a status anchor,
 so deriving it from docket/correction rows would be a future explicit
 status-override surface, not a silent Python guess.
+
+## CFD-007 - Period/Deadline Registry Transfer Probe
+
+Date: 2026-05-08
+
+Evidence lane: `registry_scaffold_transfer`
+
+Mode: direct registry compile using the temporary
+`tmp/regulatory_period_deadline_registry_v1.json` vocabulary. This tested
+whether the Millhaven `violation_period/4`/deadline scaffold transfers to an
+older court deadline docket. The registry is vocabulary only; it supplies no
+fixture facts.
+
+Artifacts:
+
+- Compile:
+  `tmp/registry_period_transfer_20260508/copperfall_deadline_docket/domain_bootstrap_file_20260508T082150557491Z_source_qwen-qwen3-6-35b-a3b.json`
+- Targeted QA q024-q030:
+  `tmp/registry_period_transfer_20260508/copperfall_deadline_docket_qa_q024_q030/domain_bootstrap_qa_20260508T082352803088Z_qa_qwen-qwen3-6-35b-a3b.json`
+
+Result:
+
+```text
+compile admitted / skipped: 94 / 28
+target slice q024-q030:     7 exact / 0 partial / 0 miss
+write proposals:            0
+runtime errors:             0
+```
+
+Lesson:
+
+The registry is still too thin and skip-heavy for global Copperfall use, but
+the deadline cluster transfer is positive. The same scaffold that acquired
+Millhaven's underlying violation period can also preserve Copperfall's answer,
+post-denial answer, discovery, extension, post-stay, dispositive, and timeliness
+deadline rows on a narrow deadline slice. This strengthens the candidate case
+for a row-gated source-period/deadline registry surface, not for global direct
+registry compilation.

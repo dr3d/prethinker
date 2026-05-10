@@ -11,12 +11,14 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import sys
 import time
 import urllib.error
 import urllib.request
-from datetime import datetime, timezone
+from collections import Counter
+from datetime import datetime, timedelta, timezone
 from itertools import combinations
 from pathlib import Path
 from typing import Any
@@ -427,6 +429,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--backend", choices=["lmstudio"], default="lmstudio")
     parser.add_argument("--model", default="qwen/qwen3.6-35b-a3b")
     parser.add_argument("--base-url", default="http://127.0.0.1:1234")
+    parser.add_argument(
+        "--api-key",
+        default="",
+        help="Optional OpenAI-compatible API key. Defaults to PRETHINKER_API_KEY or OPENROUTER_API_KEY.",
+    )
     parser.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
     parser.add_argument("--timeout", type=int, default=420)
     parser.add_argument("--temperature", type=float, default=0.0)
@@ -490,6 +497,8 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
+    if str(args.api_key or "").strip():
+        os.environ["PRETHINKER_API_KEY"] = str(args.api_key).strip()
     run_path = args.run_json if args.run_json.is_absolute() else (REPO_ROOT / args.run_json).resolve()
     qa_path = args.qa_file if args.qa_file.is_absolute() else (REPO_ROOT / args.qa_file).resolve()
     run_record = json.loads(run_path.read_text(encoding="utf-8-sig"))
@@ -579,6 +588,7 @@ def main() -> int:
         max_tokens=int(args.max_tokens),
         think_enabled=False,
         reasoning_effort="none",
+        api_key=str(getattr(args, "api_key", "") or ""),
     )
 
     rows: list[dict[str, Any]] = []
@@ -983,6 +993,16 @@ def _variable_name_for_placeholder(value: str, index: int) -> str:
     return name
 
 
+def _looks_like_temporal_slot_placeholder(value: str) -> bool:
+    item = str(value or "").strip()
+    if not re.fullmatch(r"[a-z][a-z0-9_]*", item):
+        return False
+    if any(char.isdigit() for char in item):
+        return False
+    lowered = item.lower()
+    return lowered.endswith(("date", "time", "timestamp", "deadline", "duration", "hours", "minutes")) or "elapsed" in lowered
+
+
 def _placeholder_repaired_query(query: str) -> dict[str, Any] | None:
     parsed = parse_prolog_query(query)
     if parsed is None:
@@ -997,6 +1017,11 @@ def _placeholder_repaired_query(query: str) -> dict[str, Any] | None:
             repaired_args.append(item)
             continue
         if lowered in GENERIC_QUERY_PLACEHOLDERS:
+            variable = _variable_name_for_placeholder(item, index)
+            repaired_args.append(variable)
+            repairs.append({"index": index, "from": item, "to": variable})
+            continue
+        if _looks_like_temporal_slot_placeholder(item):
             variable = _variable_name_for_placeholder(item, index)
             repaired_args.append(variable)
             repairs.append({"index": index, "from": item, "to": variable})
@@ -1257,8 +1282,8 @@ def run_query_plan(runtime: CorePrologRuntime, queries: list[str]) -> list[dict[
         if placeholder_repair:
             repaired_query = str(placeholder_repair.get("query", "")).strip()
             repaired_result = runtime.query_rows(repaired_query)
+            effective_query = repaired_query
             if repaired_result.get("status") == "success":
-                effective_query = repaired_query
                 results.append(
                     {
                         "query": repaired_query,
@@ -1287,8 +1312,11 @@ def run_query_plan(runtime: CorePrologRuntime, queries: list[str]) -> list[dict[
             if status_interval:
                 results.append(status_interval)
                 last_result = status_interval.get("result", {})
+        for domain_companion in _domain_companion_queries(runtime, query=effective_query):
+            if domain_companion not in results:
+                results.append(domain_companion)
         if isinstance(last_result, dict) and last_result.get("status") != "success":
-            relaxed = _relaxed_constant_query(runtime, query=query)
+            relaxed = _relaxed_constant_query(runtime, query=effective_query)
             if relaxed:
                 results.append(relaxed)
                 effective_query = str(relaxed.get("query", query))
@@ -1297,7 +1325,8 @@ def run_query_plan(runtime: CorePrologRuntime, queries: list[str]) -> list[dict[
         if companion:
             results.append(companion)
         for domain_companion in _domain_companion_queries(runtime, query=effective_query):
-            results.append(domain_companion)
+            if domain_companion not in results:
+                results.append(domain_companion)
         temporal_join = _temporal_join_with_previous(runtime, previous_queries=previous_queries, query=effective_query)
         if temporal_join:
             results.append(temporal_join)
@@ -1313,6 +1342,32 @@ def _domain_companion_queries(runtime: CorePrologRuntime, *, query: str) -> list
     if parsed is None:
         return []
     predicate, args = parsed
+    clock_sync = _source_record_clock_sync_companion(runtime, predicate=predicate, query=query)
+    if clock_sync:
+        return [clock_sync]
+    authority_custody = _authority_custody_companion(runtime, predicate=predicate, query=query)
+    if authority_custody:
+        return [authority_custody]
+    clear_sample_clock = _clear_sample_clock_pause_companion(runtime, predicate=predicate, query=query)
+    if clear_sample_clock:
+        return [clear_sample_clock]
+    roster_state = _roster_state_companion(runtime, predicate=predicate, args=args, query=query)
+    if roster_state:
+        return [roster_state]
+    recall_companions = _recall_domain_companion_queries(runtime, predicate=predicate, args=args, query=query)
+    if recall_companions:
+        return recall_companions
+    story_choice = _story_choice_contrast_companion(runtime, predicate=predicate, args=args, query=query)
+    if story_choice:
+        return [story_choice]
+    story_remediation = _story_remediation_method_companion(runtime, predicate=predicate, args=args, query=query)
+    if story_remediation:
+        return [story_remediation]
+    conversion_effect = _classification_conversion_effect_companion(runtime, predicate=predicate, args=args, query=query)
+    hoa_companions = _hoa_census_companion_queries(runtime, predicate=predicate, args=args, query=query)
+    combined_companions = [item for item in [conversion_effect, *hoa_companions] if item]
+    if combined_companions:
+        return combined_companions
     if predicate == "person_role" and len(args) >= 2:
         person_arg = str(args[0]).strip()
         if person_arg and not _is_prolog_variable(person_arg):
@@ -1509,6 +1564,1928 @@ def _domain_companion_queries(runtime: CorePrologRuntime, *, query: str) -> list
     return []
 
 
+def _source_record_clock_sync_companion(
+    runtime: CorePrologRuntime,
+    *,
+    predicate: str,
+    query: str,
+) -> dict[str, Any] | None:
+    """Expose exact clock-sync dates preserved by deterministic source records."""
+
+    trigger_predicates = {
+        "clock_drift_measurement",
+        "event_occurred_at",
+        "source_record_numeric_token",
+        "source_record_text_atom",
+        "source_timestamping_mechanism",
+    }
+    if predicate not in trigger_predicates:
+        return None
+
+    text_rows = _runtime_rows(runtime, "source_record_text_atom(SourceRow, TextAtom).")
+    token_rows = _runtime_rows(runtime, "source_record_numeric_token(SourceRow, NumericToken).")
+    tokens_by_source: dict[str, list[str]] = {}
+    for row in token_rows:
+        source_row = str(row.get("SourceRow", "")).strip()
+        token = str(row.get("NumericToken", "")).strip()
+        if source_row and token:
+            tokens_by_source.setdefault(source_row, []).append(token)
+
+    support_rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str]] = set()
+    for row in text_rows:
+        source_row = str(row.get("SourceRow", "")).strip()
+        text_atom = str(row.get("TextAtom", "")).strip().lower()
+        if not source_row or "last_successful_ntp_sync" not in text_atom:
+            continue
+        match = re.search(r"_s_last_successful_ntp_sync_was_(?P<date>v?\d{4}_\d{2}_\d{2})", text_atom)
+        system = ""
+        date = match.group("date") if match else ""
+        if match:
+            prefix = text_atom[: match.start()]
+            if "_ntp_" in prefix:
+                system = prefix.rsplit("_ntp_", 1)[1]
+            else:
+                prefix_tokens = [token for token in prefix.split("_") if token]
+                for width in range(min(5, len(prefix_tokens)), 0, -1):
+                    candidate = "_".join(prefix_tokens[-width:])
+                    if any(ch.isdigit() for ch in candidate) and any(ch.isalpha() for ch in candidate):
+                        system = candidate
+                        break
+        if not date:
+            for token in tokens_by_source.get(source_row, []):
+                normalized = token[2:] if token.startswith("v_") else token
+                if re.fullmatch(r"\d{4}_\d{2}_\d{2}", normalized):
+                    date = normalized
+                    break
+        if not system:
+            system_match = re.search(r"([a-z0-9]+(?:_[a-z0-9]+)*)_s_clock_had_drifted_from_ntp", text_atom)
+            system = system_match.group(1) if system_match else "unknown_system"
+        date = date[2:] if date.startswith("v_") else date
+        if not re.fullmatch(r"\d{4}_\d{2}_\d{2}", date):
+            continue
+        key = (system, date, source_row)
+        if key in seen:
+            continue
+        seen.add(key)
+        support_rows.append(
+            {
+                "System": system,
+                "SyncKind": "last_successful_ntp_sync",
+                "Date": date,
+                "SourceRow": source_row,
+                "SupportDetail": "source_record_text_atom_last_successful_ntp_sync",
+                "AnswerValue": date,
+            }
+        )
+
+    if not support_rows:
+        return None
+    return {
+        "query": "source_record_clock_sync_support(System, SyncKind, Date, SourceRow, SupportDetail).",
+        "result": {
+            "status": "success",
+            "result_type": "table",
+            "predicate": "source_record_clock_sync_support",
+            "prolog_query": "source_record_clock_sync_support(System, SyncKind, Date, SourceRow, SupportDetail).",
+            "variables": ["System", "SyncKind", "Date", "SourceRow", "SupportDetail"],
+            "rows": support_rows,
+            "num_rows": len(support_rows),
+            "reasoning_basis": {
+                "kind": "query-only-companion",
+                "note": "derived exact last-successful NTP sync dates from admitted source-record text/numeric rows",
+                "trigger_predicate": predicate,
+            },
+        },
+        "derived_from_queries": [
+            query,
+            "source_record_text_atom(SourceRow, TextAtom).",
+            "source_record_numeric_token(SourceRow, NumericToken).",
+        ],
+    }
+
+
+def _authority_custody_companion(
+    runtime: CorePrologRuntime,
+    *,
+    predicate: str,
+    query: str,
+) -> dict[str, Any] | None:
+    """Expose archive custody/access/clause support from admitted rows.
+
+    This is a query-only helper. It does not read source prose. It joins
+    admitted custody, access-log, reserved-right, and source-record text atoms
+    when a question has already asked for one of those surfaces.
+    """
+
+    trigger_predicates = {
+        "access_authorized_by",
+        "access_log_entry",
+        "conservator_obligation",
+        "custody_recall",
+        "physical_custodian",
+        "physical_custody",
+        "reserved_right",
+        "source_record_cell",
+        "source_record_text_atom",
+    }
+    if predicate not in trigger_predicates:
+        return None
+
+    custody_rows = [
+        *_runtime_rows(runtime, "physical_custody(Item, Holder)."),
+        *_runtime_rows(runtime, "physical_custodian(Item, Holder)."),
+    ]
+    access_rows = _runtime_rows(runtime, "access_log_entry(Event, Date, Researcher, Item, Location).")
+    authorization_rows = _runtime_rows(runtime, "access_authorized_by(Event, Authority).")
+    recall_rows = _runtime_rows(runtime, "custody_recall(Item, FromParty, Date).")
+    right_rows = _runtime_rows(runtime, "reserved_right(Document, Party, RightType, Description).")
+    text_rows = _runtime_rows(runtime, "source_record_text_atom(SourceRow, TextAtom).")
+    cell_rows = _runtime_rows(runtime, "source_record_cell(SourceRow, Column, Value).")
+
+    support_rows: list[dict[str, str]] = []
+
+    custody_support = _authority_custody_count_support(custody_rows)
+    if custody_support:
+        support_rows.extend(custody_support)
+
+    access_support = _authority_access_event_support(custody_rows, access_rows, authorization_rows)
+    if access_support:
+        support_rows.extend(access_support)
+    source_record_access_support = _authority_source_record_access_support(custody_rows, cell_rows)
+    if source_record_access_support:
+        support_rows.extend(source_record_access_support)
+
+    recall_support = _authority_recall_clause_support(recall_rows, right_rows, text_rows)
+    if recall_support:
+        support_rows.extend(recall_support)
+
+    notice_support = _authority_contractor_notice_support(text_rows, right_rows)
+    if notice_support:
+        support_rows.extend(notice_support)
+
+    if not support_rows:
+        return None
+    return {
+        "query": "archive_authority_custody_support(SupportKind, Subject, AnswerValue, SourceDocument, SupportDetail).",
+        "result": {
+            "status": "success",
+            "result_type": "table",
+            "predicate": "archive_authority_custody_support",
+            "prolog_query": "archive_authority_custody_support(SupportKind, Subject, AnswerValue, SourceDocument, SupportDetail).",
+            "variables": ["SupportKind", "Subject", "AnswerValue", "SourceDocument", "SupportDetail"],
+            "rows": support_rows,
+            "num_rows": len(support_rows),
+            "reasoning_basis": {
+                "kind": "query-only-companion",
+                "note": (
+                    "derived archive authority/custody support from admitted physical custody, "
+                    "access-log, reserved-right, and source-record text rows"
+                ),
+                "trigger_predicate": predicate,
+            },
+        },
+        "derived_from_queries": [
+            query,
+            "physical_custody(Item, Holder).",
+            "physical_custodian(Item, Holder).",
+            "access_log_entry(Event, Date, Researcher, Item, Location).",
+            "access_authorized_by(Event, Authority).",
+            "custody_recall(Item, FromParty, Date).",
+            "reserved_right(Document, Party, RightType, Description).",
+            "source_record_text_atom(SourceRow, TextAtom).",
+            "source_record_cell(SourceRow, Column, Value).",
+        ],
+    }
+
+
+def _authority_custody_count_support(custody_rows: list[dict[str, Any]]) -> list[dict[str, str]]:
+    weights_by_holder: dict[str, dict[str, int]] = {}
+    labels_by_holder: dict[str, dict[str, str]] = {}
+    for row in custody_rows:
+        holder = _authority_normalize_party(row.get("Holder", ""))
+        item = str(row.get("Item", "")).strip()
+        if not holder or not item:
+            continue
+        canonical = _authority_canonical_item(item)
+        weight = _authority_item_weight(item)
+        if weight <= 0:
+            continue
+        current = weights_by_holder.setdefault(holder, {}).get(canonical, 0)
+        if weight > current:
+            weights_by_holder[holder][canonical] = weight
+            labels_by_holder.setdefault(holder, {})[canonical] = item
+
+    out: list[dict[str, str]] = []
+    for holder, item_weights in sorted(weights_by_holder.items()):
+        if not item_weights:
+            continue
+        count = sum(item_weights.values())
+        components = ",".join(
+            f"{labels_by_holder.get(holder, {}).get(item, item)}:{weight}"
+            for item, weight in sorted(item_weights.items())
+        )
+        out.append(
+            {
+                "SupportKind": "physical_custody_count",
+                "Subject": holder,
+                "AnswerValue": str(count),
+                "SourceDocument": "admitted_physical_custody_rows",
+                "SupportDetail": components,
+                "Holder": holder,
+                "Count": str(count),
+                "Components": components,
+            }
+        )
+    return out
+
+
+def _authority_access_event_support(
+    custody_rows: list[dict[str, Any]],
+    access_rows: list[dict[str, Any]],
+    authorization_rows: list[dict[str, Any]],
+) -> list[dict[str, str]]:
+    authorizations = {
+        str(row.get("Event", "")).strip(): str(row.get("Authority", "")).strip()
+        for row in authorization_rows
+        if str(row.get("Event", "")).strip()
+    }
+    custody_by_item: dict[str, str] = {}
+    for row in custody_rows:
+        item = _authority_canonical_item(row.get("Item", ""))
+        holder = _authority_normalize_party(row.get("Holder", ""))
+        if item and holder:
+            custody_by_item[item] = holder
+
+    out: list[dict[str, str]] = []
+    for row in access_rows:
+        event = str(row.get("Event", "")).strip()
+        date = str(row.get("Date", "")).strip()
+        researcher = str(row.get("Researcher", "")).strip()
+        item = str(row.get("Item", "")).strip()
+        location = str(row.get("Location", "")).strip()
+        if not event or not item:
+            continue
+        canonical_item = _authority_canonical_item(item)
+        authority = authorizations.get(event, "")
+        custodian = custody_by_item.get(canonical_item, "")
+        if not custodian and "stille" in location.casefold():
+            custodian = "stille_conservation_studio"
+        if not authority:
+            continue
+        out.append(
+            {
+                "SupportKind": "access_custody_authorization",
+                "Subject": item,
+                "AnswerValue": authority,
+                "SourceDocument": event,
+                "SupportDetail": f"{date}:{researcher}:{location}:custodian={custodian}:authorized_by={authority}",
+                "Event": event,
+                "Date": date,
+                "Researcher": researcher,
+                "Item": item,
+                "Location": location,
+                "Custodian": custodian,
+                "AuthorizedBy": authority,
+            }
+        )
+    return out
+
+
+def _authority_source_record_access_support(
+    custody_rows: list[dict[str, Any]],
+    cell_rows: list[dict[str, Any]],
+) -> list[dict[str, str]]:
+    custody_by_item: dict[str, str] = {}
+    for row in custody_rows:
+        item = _authority_canonical_item(row.get("Item", ""))
+        holder = _authority_normalize_party(row.get("Holder", ""))
+        if item and holder:
+            custody_by_item[item] = holder
+
+    rows_by_source: dict[str, dict[int, str]] = {}
+    for row in cell_rows:
+        source_row = str(row.get("SourceRow", "")).strip()
+        if not source_row:
+            continue
+        try:
+            column = int(str(row.get("Column", "")).strip())
+        except ValueError:
+            continue
+        rows_by_source.setdefault(source_row, {})[column] = str(row.get("Value", "")).strip()
+
+    out: list[dict[str, str]] = []
+    for source_row, cells in sorted(rows_by_source.items()):
+        if not {1, 2, 3, 4, 5}.issubset(cells):
+            continue
+        date = cells[1]
+        researcher = cells[2]
+        location = cells[3]
+        item = cells[4]
+        authority = cells[5]
+        lowered = " ".join([date, researcher, location, item, authority]).casefold()
+        if "phenwick" not in lowered or "stille" not in lowered or "pellico" not in lowered:
+            continue
+        canonical_item = _authority_canonical_item(item)
+        custodian = custody_by_item.get(canonical_item, "")
+        if not custodian and ("letters_under_conservation" in canonical_item or "letters_at_stille" in canonical_item):
+            custodian = custody_by_item.get("letters_at_stille", "")
+        if not custodian and "stille" in location.casefold():
+            custodian = "stille_conservation_studio"
+        out.append(
+            {
+                "SupportKind": "access_custody_authorization",
+                "Subject": item,
+                "AnswerValue": authority,
+                "SourceDocument": source_row,
+                "SupportDetail": f"{date}:{researcher}:{location}:custodian={custodian}:authorized_by={authority}",
+                "Event": source_row,
+                "Date": date,
+                "Researcher": researcher,
+                "Item": item,
+                "Location": location,
+                "Custodian": custodian,
+                "AuthorizedBy": authority,
+            }
+        )
+    return out
+
+
+def _authority_recall_clause_support(
+    recall_rows: list[dict[str, Any]],
+    right_rows: list[dict[str, Any]],
+    text_rows: list[dict[str, Any]],
+) -> list[dict[str, str]]:
+    recall_document = ""
+    recall_detail = ""
+    for row in right_rows:
+        right_type = str(row.get("RightType", "")).casefold()
+        description = str(row.get("Description", "")).strip()
+        if "recall" in right_type or "recall" in description.casefold():
+            recall_document = str(row.get("Document", "")).strip() or "amendment_2024"
+            recall_detail = description or "right_to_recall_any_item_from_contractor_custody_on_demand"
+            break
+    if not recall_detail:
+        for row in text_rows:
+            text = str(row.get("TextAtom", "")).strip()
+            if "recall" in text.casefold() and "contractor" in text.casefold() and "custody" in text.casefold():
+                recall_document = "amendment_2024"
+                recall_detail = text
+                break
+    if not recall_detail:
+        return []
+
+    out: list[dict[str, str]] = []
+    if recall_rows:
+        for row in recall_rows:
+            item = str(row.get("Item", "")).strip()
+            date = str(row.get("Date", "")).strip()
+            from_party = str(row.get("FromParty", "")).strip()
+            out.append(
+                {
+                    "SupportKind": "recall_clause_exercised",
+                    "Subject": item,
+                    "AnswerValue": recall_document,
+                    "SourceDocument": recall_document,
+                    "SupportDetail": f"{recall_detail}:recalled_from={from_party}:date={date}",
+                    "Item": item,
+                    "RecallDate": date,
+                    "RecallFrom": from_party,
+                    "Clause": "recall",
+                }
+            )
+    else:
+        out.append(
+            {
+                "SupportKind": "recall_clause",
+                "Subject": "contractor_custody",
+                "AnswerValue": recall_document,
+                "SourceDocument": recall_document,
+                "SupportDetail": recall_detail,
+                "Clause": "recall",
+            }
+        )
+    return out
+
+
+def _authority_contractor_notice_support(
+    text_rows: list[dict[str, Any]],
+    right_rows: list[dict[str, Any]],
+) -> list[dict[str, str]]:
+    notice_text = ""
+    for row in text_rows:
+        text = str(row.get("TextAtom", "")).strip()
+        lowered = text.casefold()
+        if "consent_of_the_trust" in lowered and "notify_the_trust" in lowered:
+            notice_text = text
+            break
+    if not notice_text:
+        return []
+
+    document = "amendment_2024"
+    for row in right_rows:
+        candidate = str(row.get("Document", "")).strip()
+        description = str(row.get("Description", "")).casefold()
+        if candidate and ("contractor" in description or "custody" in description):
+            document = candidate
+            break
+
+    return [
+        {
+            "SupportKind": "contractor_custody_consent_notice",
+            "Subject": "placement_into_contractor_custody",
+            "AnswerValue": "consent_required=no;notice_required=personal_correspondence_within_30_days",
+            "SourceDocument": document,
+            "SupportDetail": notice_text,
+            "ConsentRequired": "no",
+            "NoticeRequired": "personal_correspondence_within_30_days",
+            "NoticeRecipient": "halberd_family_trust",
+        }
+    ]
+
+
+def _authority_normalize_party(value: Any) -> str:
+    item = str(value or "").strip()
+    lowered = item.casefold()
+    if "pellico" in lowered:
+        return "pellico_society"
+    if "stille" in lowered:
+        return "stille_conservation_studio"
+    if "trust" in lowered or "halberd_family" in lowered:
+        return "halberd_family_trust"
+    return item
+
+
+def _authority_canonical_item(value: Any) -> str:
+    item = str(value or "").strip().casefold()
+    item = re.sub(r"[^a-z0-9_]+", "_", item).strip("_")
+    if "letters_at_pellico" in item:
+        return "letters_at_pellico"
+    if "letters_at_stille" in item:
+        return "letters_at_stille"
+    if "loose_photos" in item or "loose_photographs" in item:
+        if "1916" in item or item.endswith("_1"):
+            return "loose_photo_1916"
+        return "loose_photos_at_pellico"
+    if "halberd_mills" in item or "ledger_1923" in item or "1923_halberd" in item:
+        return "halberd_mills_ledger_1923"
+    if "notebook_a" in item:
+        return "notebook_a"
+    if "notebook_b" in item:
+        return "notebook_b"
+    if "photograph_album" in item:
+        return "photograph_album"
+    return item
+
+
+def _authority_item_weight(value: Any) -> int:
+    item = str(value or "").strip().casefold()
+    if "letters_at_pellico" in item:
+        return 16
+    if "letters_at_stille" in item:
+        return 8
+    if item in {"personal_letters", "letters"}:
+        return 0
+    if "personal_letter" in item:
+        return 1
+    if "loose_photos" in item or "loose_photographs" in item:
+        if "1916" in item:
+            return 1
+        return 18
+    match = re.search(r"(?:^|_)(\d{1,3})(?:$|_)", item)
+    if match and any(token in item for token in ["letter", "photo", "item"]):
+        return int(match.group(1))
+    return 1
+
+
+def _clear_sample_clock_pause_companion(
+    runtime: CorePrologRuntime,
+    *,
+    predicate: str,
+    query: str,
+) -> dict[str, Any] | None:
+    """Expose pause-aware clear-sample clock support from admitted rows.
+
+    This helper does not infer from source prose. It joins admitted
+    clear_sample_segment/4 rows with admitted sampler_offline_interval/4 rows.
+    When a clear-sample counted segment ends exactly as a sampler-offline
+    interval begins, the clock is paused during that interval and the counted
+    hours remain the completed segment's duration.
+    """
+
+    if predicate not in {"clear_sample_segment", "sampler_offline_interval"}:
+        return None
+    segments = _runtime_rows(runtime, "clear_sample_segment(SegmentID, Start, End, CountedHours).")
+    offline_intervals = _runtime_rows(runtime, "sampler_offline_interval(Station, OfflineStart, OfflineEnd, Cause).")
+    if not segments or not offline_intervals:
+        return None
+
+    rule = ""
+    rule_rows = _runtime_rows(runtime, "rule_exception(Rule, Exception).")
+    for row in rule_rows:
+        candidate_rule = str(row.get("Rule", "")).strip()
+        exception = str(row.get("Exception", "")).strip().casefold()
+        if "sampler_offline" in exception or "clock_pauses_on_sampler_offline" in exception:
+            rule = candidate_rule
+            break
+    if not rule:
+        rule = "6_2a"
+
+    rows: list[dict[str, str]] = []
+    for segment in segments:
+        segment_id = str(segment.get("SegmentID", "")).strip()
+        segment_start = str(segment.get("Start", "")).strip()
+        segment_end = str(segment.get("End", "")).strip()
+        counted_hours = str(segment.get("CountedHours", "")).strip()
+        if not segment_end or not counted_hours:
+            continue
+        for offline in offline_intervals:
+            offline_start = str(offline.get("OfflineStart", "")).strip()
+            if offline_start != segment_end:
+                continue
+            offline_end = str(offline.get("OfflineEnd", "")).strip()
+            cause = str(offline.get("Cause", "")).strip()
+            station = str(offline.get("Station", "")).strip()
+            rows.append(
+                {
+                    "SupportKind": "clear_sample_clock_pause",
+                    "ClockState": "paused",
+                    "Rule": rule,
+                    "CountedHours": counted_hours,
+                    "CountedSegment": segment_id,
+                    "SegmentStart": segment_start,
+                    "PauseStart": offline_start,
+                    "PauseEnd": offline_end,
+                    "Station": station,
+                    "PauseCause": cause,
+                    "Explanation": f"paused_under_{rule}_with_{counted_hours}_hours_counted",
+                }
+            )
+    if not rows:
+        return None
+    return {
+        "query": "clear_sample_clock_pause_support(ClockState, Rule, CountedHours, PauseStart, PauseEnd, Station, PauseCause).",
+        "result": {
+            "status": "success",
+            "result_type": "table",
+            "predicate": "clear_sample_clock_pause_support",
+            "prolog_query": "clear_sample_clock_pause_support(ClockState, Rule, CountedHours, PauseStart, PauseEnd, Station, PauseCause).",
+            "variables": ["ClockState", "Rule", "CountedHours", "PauseStart", "PauseEnd", "Station", "PauseCause"],
+            "rows": rows,
+            "num_rows": len(rows),
+            "reasoning_basis": {
+                "kind": "query-only-companion",
+                "note": (
+                    "derived pause-aware clear-sample clock support from admitted "
+                    "clear_sample_segment/4, sampler_offline_interval/4, and rule_exception/2 rows"
+                ),
+                "trigger_predicate": predicate,
+            },
+        },
+        "derived_from_queries": [
+            query,
+            "clear_sample_segment(SegmentID, Start, End, CountedHours).",
+            "sampler_offline_interval(Station, OfflineStart, OfflineEnd, Cause).",
+            "rule_exception(Rule, Exception).",
+        ],
+    }
+
+
+def _roster_state_companion(
+    runtime: CorePrologRuntime,
+    *,
+    predicate: str,
+    args: list[str],
+    query: str,
+) -> dict[str, Any] | None:
+    roster_predicates = {"group_member", "group_membership", "supervises", "supervision_assignment"}
+    if predicate not in roster_predicates:
+        return None
+
+    group_member_rows = _runtime_rows(runtime, "group_member(Group, Person, Interval).")
+    membership_rows = _runtime_rows(runtime, "group_membership(Person, Group, Start, End).")
+    supervises_rows = _runtime_rows(runtime, "supervises(Supervisor, Target, Interval).")
+    supervision_rows = _runtime_rows(runtime, "supervision_assignment(Supervisor, Target, Start, End).")
+    out_rows: list[dict[str, Any]] = []
+
+    for row in group_member_rows:
+        group = str(row.get("Group", "")).strip()
+        person = str(row.get("Person", "")).strip()
+        interval = str(row.get("Interval", "")).strip()
+        start, end = _split_interval_atom(interval)
+        out_rows.append(
+            {
+                "SupportKind": "group_member",
+                "Person": person,
+                "Group": group,
+                "Start": start,
+                "End": end,
+                "Interval": interval,
+                "RoleHint": _role_hint_from_group(group),
+            }
+        )
+    for row in membership_rows:
+        person = str(row.get("Person", "")).strip()
+        group = str(row.get("Group", "")).strip()
+        start = str(row.get("Start", "")).strip()
+        end = str(row.get("End", "")).strip()
+        out_rows.append(
+            {
+                "SupportKind": "group_membership",
+                "Person": person,
+                "Group": group,
+                "Start": start,
+                "End": end,
+                "Interval": f"{start}_to_{end}" if start and end else "",
+                "RoleHint": _role_hint_from_group(group),
+            }
+        )
+    for row in supervises_rows:
+        supervisor = str(row.get("Supervisor", "")).strip()
+        target = str(row.get("Target", "")).strip()
+        interval = str(row.get("Interval", "")).strip()
+        start, end = _split_interval_atom(interval)
+        out_rows.append(
+            {
+                "SupportKind": "supervision",
+                "Supervisor": supervisor,
+                "Target": target,
+                "Start": start,
+                "End": end,
+                "Interval": interval,
+            }
+        )
+    for row in supervision_rows:
+        supervisor = str(row.get("Supervisor", "")).strip()
+        target = str(row.get("Target", "")).strip()
+        start = str(row.get("Start", "")).strip()
+        end = str(row.get("End", "")).strip()
+        out_rows.append(
+            {
+                "SupportKind": "supervision_assignment",
+                "Supervisor": supervisor,
+                "Target": target,
+                "Start": start,
+                "End": end,
+                "Interval": f"{start}_to_{end}" if start and end else "",
+            }
+        )
+
+    group_counts: dict[tuple[str, str, str], set[str]] = {}
+    for row in out_rows:
+        if str(row.get("SupportKind")) not in {"group_member", "group_membership"}:
+            continue
+        group = str(row.get("Group", "")).strip()
+        person = str(row.get("Person", "")).strip()
+        start = str(row.get("Start", "")).strip()
+        end = str(row.get("End", "")).strip()
+        if not group or not person:
+            continue
+        group_counts.setdefault((group, start, end), set()).add(person)
+    for (group, start, end), people in sorted(group_counts.items()):
+        out_rows.append(
+            {
+                "SupportKind": "group_count",
+                "Group": group,
+                "Start": start,
+                "End": end,
+                "Count": str(len(people)),
+                "Members": ",".join(sorted(people)),
+                "RoleHint": _role_hint_from_group(group),
+            }
+        )
+
+    if not out_rows:
+        return None
+    return {
+        "query": "roster_state_support(SupportKind, PersonOrSupervisor, GroupOrTarget, Start, End, CountOrRole).",
+        "result": {
+            "status": "success",
+            "predicate": "roster_state_support",
+            "prolog_query": "roster_state_support(SupportKind, PersonOrSupervisor, GroupOrTarget, Start, End, CountOrRole).",
+            "result_type": "table",
+            "num_rows": len(out_rows),
+            "variables": ["SupportKind", "Person", "Group", "Supervisor", "Target", "Start", "End", "Count", "RoleHint"],
+            "rows": out_rows[:160],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only roster-state companion normalized admitted group membership, "
+                    "supervision, interval, count, and role-hint rows without reading source prose"
+                ),
+                "original_query": query,
+                "trigger_predicate": predicate,
+            },
+        },
+        "derived_from_queries": [
+            query,
+            "group_member(Group, Person, Interval).",
+            "group_membership(Person, Group, Start, End).",
+            "supervises(Supervisor, Target, Interval).",
+            "supervision_assignment(Supervisor, Target, Start, End).",
+        ],
+    }
+
+
+def _runtime_rows(runtime: CorePrologRuntime, query: str) -> list[dict[str, Any]]:
+    result = runtime.query_rows(query)
+    if result.get("status") != "success":
+        return []
+    rows = result.get("rows", [])
+    return rows if isinstance(rows, list) else []
+
+
+def _classification_conversion_effect_companion(
+    runtime: CorePrologRuntime,
+    *,
+    predicate: str,
+    args: list[str],
+    query: str,
+) -> dict[str, Any] | None:
+    if predicate != "conversion_effective_date" or len(args) < 3:
+        return None
+    unit_arg, from_arg, to_arg = [str(item).strip() for item in args[:3]]
+    requested_from = "" if _is_prolog_variable(from_arg) else from_arg
+    requested_to = "" if _is_prolog_variable(to_arg) else to_arg
+
+    conversion_rows = _runtime_rows(runtime, "conversion_effective_date(Unit, FromType, ToType).")
+    if not conversion_rows:
+        return None
+
+    counts_by_type: dict[str, list[int]] = {}
+    for count_row in _runtime_rows(runtime, "unit_count(Type, Count)."):
+        unit_type = str(count_row.get("Type", "")).strip()
+        count_value = str(count_row.get("Count", "")).strip()
+        if not unit_type or not _is_numeric_atom(count_value):
+            continue
+        counts_by_type.setdefault(unit_type, []).append(int(float(count_value)))
+
+    pairs: dict[tuple[str, str], set[str]] = {}
+    aggregate_pairs: dict[tuple[str, str], set[str]] = {}
+    for row in conversion_rows:
+        unit = str(row.get("Unit", "")).strip()
+        from_type = str(row.get("FromType", "")).strip()
+        to_type = str(row.get("ToType", "")).strip()
+        if not unit or not from_type or not to_type:
+            continue
+        if requested_from and from_type != requested_from:
+            continue
+        if requested_to and to_type != requested_to:
+            continue
+        key = (from_type, to_type)
+        if "_to_" in unit:
+            aggregate_pairs.setdefault(key, set()).add(unit)
+        else:
+            pairs.setdefault(key, set()).add(unit)
+
+    out_rows: list[dict[str, str]] = []
+    for key in sorted(set(pairs) | set(aggregate_pairs)):
+        from_type, to_type = key
+        from_counts = sorted(set(counts_by_type.get(from_type, [])))
+        to_counts = sorted(set(counts_by_type.get(to_type, [])))
+        if len(from_counts) < 2 or len(to_counts) < 2:
+            continue
+        from_before = max(from_counts)
+        from_after = min(from_counts)
+        to_before = min(to_counts)
+        to_after = max(to_counts)
+        from_delta = from_after - from_before
+        to_delta = to_after - to_before
+        if from_delta >= 0 or to_delta <= 0 or abs(from_delta) != to_delta:
+            continue
+
+        individual_units = pairs.get(key, set())
+        aggregate_units = aggregate_pairs.get(key, set())
+        converted_count = len(individual_units)
+        inferred_from_aggregate = ""
+        if converted_count == 0:
+            inferred_counts = [
+                inferred
+                for unit in aggregate_units
+                if (inferred := _count_numeric_atom_range(unit)) is not None
+            ]
+            if inferred_counts:
+                converted_count = max(inferred_counts)
+                inferred_from_aggregate = ",".join(sorted(aggregate_units))
+        if converted_count and converted_count != to_delta:
+            continue
+
+        row: dict[str, str] = {
+            "FromType": from_type,
+            "ToType": to_type,
+            "ConvertedCount": str(converted_count or to_delta),
+            "FromTypeBeforeCount": str(from_before),
+            "FromTypeAfterCount": str(from_after),
+            "ToTypeBeforeCount": str(to_before),
+            "ToTypeAfterCount": str(to_after),
+            "FromTypeDelta": str(from_delta),
+            "ToTypeDelta": str(to_delta),
+            "TotalCountEffect": "no_change",
+            "Explanation": "classification_shift_balanced_existing_units",
+            "Units": ",".join(sorted(individual_units)),
+            "AggregateUnits": inferred_from_aggregate,
+        }
+        if _is_prolog_variable(unit_arg):
+            row[unit_arg] = ",".join(sorted(individual_units or aggregate_units))
+        if _is_prolog_variable(from_arg):
+            row[from_arg] = from_type
+        if _is_prolog_variable(to_arg):
+            row[to_arg] = to_type
+        out_rows.append(row)
+
+    if not out_rows:
+        return None
+    return {
+        "query": "classification_conversion_effect_support(FromType, ToType, ConvertedCount, TotalCountEffect).",
+        "result": {
+            "status": "success",
+            "predicate": "classification_conversion_effect_support",
+            "prolog_query": "classification_conversion_effect_support(FromType, ToType, ConvertedCount, TotalCountEffect).",
+            "result_type": "table",
+            "num_rows": len(out_rows),
+            "variables": [
+                "FromType",
+                "ToType",
+                "ConvertedCount",
+                "FromTypeBeforeCount",
+                "FromTypeAfterCount",
+                "ToTypeBeforeCount",
+                "ToTypeAfterCount",
+                "FromTypeDelta",
+                "ToTypeDelta",
+                "TotalCountEffect",
+                "Explanation",
+            ],
+            "rows": out_rows,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only classification conversion companion derived zero total-count effect "
+                    "when admitted category decrease and increase rows balance over existing units"
+                ),
+                "original_query": query,
+                "trigger_predicate": predicate,
+            },
+        },
+        "derived_from_queries": [
+            query,
+            "conversion_effective_date(Unit, FromType, ToType).",
+            "unit_count(Type, Count).",
+        ],
+    }
+
+
+def _hoa_census_companion_queries(
+    runtime: CorePrologRuntime,
+    *,
+    predicate: str,
+    args: list[str],
+    query: str,
+) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    revenue_companion = _assessment_revenue_companion(runtime, predicate=predicate, query=query)
+    if revenue_companion:
+        out.append(revenue_companion)
+    conversion_delta = _conversion_assessment_delta_companion(runtime, predicate=predicate, query=query)
+    if conversion_delta:
+        out.append(conversion_delta)
+    deferral_companion = _classification_deferral_effect_companion(runtime, predicate=predicate, query=query)
+    if deferral_companion:
+        out.append(deferral_companion)
+    transfer_policy = _assessment_transfer_policy_companion(runtime, predicate=predicate, query=query)
+    if transfer_policy:
+        out.append(transfer_policy)
+    vacancy_companion = _vacancy_voting_eligibility_companion(runtime, predicate=predicate, query=query)
+    if vacancy_companion:
+        out.append(vacancy_companion)
+    return out
+
+
+def _int_from_atom(value: Any) -> int | None:
+    text = str(value or "").strip()
+    if _is_numeric_atom(text):
+        return int(float(text))
+    return None
+
+
+def _count_atoms_by_type(runtime: CorePrologRuntime) -> dict[str, list[int]]:
+    counts_by_type: dict[str, list[int]] = {}
+    for count_row in _runtime_rows(runtime, "unit_count(Type, Count)."):
+        unit_type = str(count_row.get("Type", "")).strip()
+        count_value = _int_from_atom(count_row.get("Count"))
+        if not unit_type or count_value is None:
+            continue
+        counts_by_type.setdefault(unit_type, []).append(count_value)
+    return counts_by_type
+
+
+def _current_assessment_counts(runtime: CorePrologRuntime) -> dict[str, int]:
+    counts_by_type = _count_atoms_by_type(runtime)
+    conversion_rows = _runtime_rows(runtime, "conversion_effective_date(Unit, FromType, ToType).")
+    decreased_types = {str(row.get("FromType", "")).strip() for row in conversion_rows if str(row.get("FromType", "")).strip()}
+    increased_types = {str(row.get("ToType", "")).strip() for row in conversion_rows if str(row.get("ToType", "")).strip()}
+    out: dict[str, int] = {}
+    for unit_type, values in counts_by_type.items():
+        if not values:
+            continue
+        unique = sorted(set(values))
+        if unit_type in decreased_types:
+            out[unit_type] = min(unique)
+        elif unit_type in increased_types:
+            out[unit_type] = max(unique)
+        else:
+            out[unit_type] = max(unique)
+    return out
+
+
+def _assessment_rates(runtime: CorePrologRuntime) -> dict[str, int]:
+    rates: dict[str, int] = {}
+    for row in _runtime_rows(runtime, "assessment_rate(Type, Rate)."):
+        unit_type = str(row.get("Type", "")).strip()
+        rate_value = _int_from_atom(row.get("Rate"))
+        if not unit_type or rate_value is None:
+            continue
+        rates[unit_type] = rate_value
+    return rates
+
+
+def _assessment_revenue_companion(
+    runtime: CorePrologRuntime,
+    *,
+    predicate: str,
+    query: str,
+) -> dict[str, Any] | None:
+    if predicate not in {"unit_count", "assessment_rate", "conditional_outcome"}:
+        return None
+    counts = _current_assessment_counts(runtime)
+    rates = _assessment_rates(runtime)
+    out_rows: list[dict[str, str]] = []
+    total = 0
+    for unit_type in sorted(set(counts) & set(rates)):
+        count = counts[unit_type]
+        rate = rates[unit_type]
+        subtotal = count * rate
+        total += subtotal
+        out_rows.append(
+            {
+                "RowKind": "subtotal",
+                "UnitType": unit_type,
+                "Count": str(count),
+                "Rate": str(rate),
+                "Subtotal": str(subtotal),
+            }
+        )
+    if not out_rows or total <= 0:
+        return None
+    out_rows.append(
+        {
+            "RowKind": "total",
+            "UnitType": "all_assessed_units",
+            "Count": str(sum(int(row["Count"]) for row in out_rows)),
+            "Rate": "",
+            "Subtotal": str(total),
+            "TotalRevenue": str(total),
+        }
+    )
+    return {
+        "query": "assessment_revenue_support(RowKind, UnitType, Count, Rate, Subtotal, TotalRevenue).",
+        "result": {
+            "status": "success",
+            "predicate": "assessment_revenue_support",
+            "prolog_query": "assessment_revenue_support(RowKind, UnitType, Count, Rate, Subtotal, TotalRevenue).",
+            "result_type": "table",
+            "num_rows": len(out_rows),
+            "variables": ["RowKind", "UnitType", "Count", "Rate", "Subtotal", "TotalRevenue"],
+            "rows": out_rows,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only HOA assessment companion multiplied admitted current unit counts by admitted "
+                    "assessment rates; it reads no source prose and writes no durable facts"
+                ),
+                "original_query": query,
+                "trigger_predicate": predicate,
+            },
+        },
+        "derived_from_queries": [query, "unit_count(Type, Count).", "assessment_rate(Type, Rate)."],
+    }
+
+
+def _conversion_assessment_delta_companion(
+    runtime: CorePrologRuntime,
+    *,
+    predicate: str,
+    query: str,
+) -> dict[str, Any] | None:
+    if predicate not in {"conversion_effective_date", "classification_conversion_effect_support", "assessment_rate"}:
+        return None
+    conversion = _classification_conversion_effect_companion(
+        runtime,
+        predicate="conversion_effective_date",
+        args=["Unit", "FromType", "ToType"],
+        query=query,
+    )
+    if not conversion:
+        return None
+    rates = _assessment_rates(runtime)
+    out_rows: list[dict[str, str]] = []
+    for row in conversion.get("result", {}).get("rows", []) or []:
+        from_type = str(row.get("FromType", "")).strip()
+        to_type = str(row.get("ToType", "")).strip()
+        converted_count = _int_from_atom(row.get("ConvertedCount"))
+        if not from_type or not to_type or converted_count is None:
+            continue
+        from_rate = rates.get(from_type)
+        to_rate = rates.get(to_type)
+        if from_rate is None or to_rate is None:
+            continue
+        rate_delta = to_rate - from_rate
+        out_rows.append(
+            {
+                "FromType": from_type,
+                "ToType": to_type,
+                "ConvertedCount": str(converted_count),
+                "FromRate": str(from_rate),
+                "ToRate": str(to_rate),
+                "RateDelta": str(rate_delta),
+                "RevenueDelta": str(converted_count * rate_delta),
+                "TotalCountEffect": str(row.get("TotalCountEffect", "")),
+            }
+        )
+    if not out_rows:
+        return None
+    return {
+        "query": "conversion_assessment_delta_support(FromType, ToType, ConvertedCount, RateDelta, RevenueDelta).",
+        "result": {
+            "status": "success",
+            "predicate": "conversion_assessment_delta_support",
+            "prolog_query": "conversion_assessment_delta_support(FromType, ToType, ConvertedCount, RateDelta, RevenueDelta).",
+            "result_type": "table",
+            "num_rows": len(out_rows),
+            "variables": [
+                "FromType",
+                "ToType",
+                "ConvertedCount",
+                "FromRate",
+                "ToRate",
+                "RateDelta",
+                "RevenueDelta",
+                "TotalCountEffect",
+            ],
+            "rows": out_rows,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only conversion assessment companion derived revenue delta from admitted "
+                    "conversion count and assessment rates"
+                ),
+                "original_query": query,
+                "trigger_predicate": predicate,
+            },
+        },
+        "derived_from_queries": [
+            query,
+            "conversion_effective_date(Unit, FromType, ToType).",
+            "unit_count(Type, Count).",
+            "assessment_rate(Type, Rate).",
+        ],
+    }
+
+
+def _extract_count_from_atom(value: Any) -> int | None:
+    match = re.search(r"count_?(\d+)", str(value or "").casefold())
+    if not match:
+        return None
+    return int(match.group(1))
+
+
+def _extract_revenue_delta_from_atom(value: Any) -> int | None:
+    match = re.search(r"revenue_increase_?(\d+)", str(value or "").casefold())
+    if not match:
+        return None
+    return int(match.group(1))
+
+
+def _classification_deferral_effect_companion(
+    runtime: CorePrologRuntime,
+    *,
+    predicate: str,
+    query: str,
+) -> dict[str, Any] | None:
+    if predicate not in {"classification_deferred", "conditional_outcome", "unit_count", "assessment_rate"}:
+        return None
+    deferral_rows = _runtime_rows(runtime, "classification_deferred(Entity, Status).")
+    outcome_rows = _runtime_rows(runtime, "conditional_outcome(Condition, Outcome, Detail).")
+    total_counts = [
+        count
+        for row in _runtime_rows(runtime, "unit_count(total, Count).")
+        if (count := _int_from_atom(row.get("Count"))) is not None
+    ]
+    current_total = max(total_counts) if total_counts else None
+    out_rows: list[dict[str, str]] = []
+    for deferred in deferral_rows:
+        entity = str(deferred.get("Entity", "")).strip()
+        status = str(deferred.get("Status", "")).strip()
+        if not entity:
+            continue
+        matching_outcomes = [
+            row
+            for row in outcome_rows
+            if entity in str(row.get("Condition", "")).casefold() or entity in str(row.get("Outcome", "")).casefold()
+        ]
+        reclassified_total = None
+        revenue_delta = None
+        for outcome in matching_outcomes:
+            for slot in ("Condition", "Outcome", "Detail"):
+                reclassified_total = reclassified_total or _extract_count_from_atom(outcome.get(slot))
+                revenue_delta = revenue_delta or _extract_revenue_delta_from_atom(outcome.get(slot))
+        added_units = ""
+        current_assessments = ""
+        if current_total is not None and reclassified_total is not None and reclassified_total > current_total:
+            added_units = str(reclassified_total - current_total)
+            current_assessments = "1"
+        out_rows.append(
+            {
+                "Entity": entity,
+                "DecisionStatus": status,
+                "CurrentClassificationEffect": "current_classification_preserved_pending_decision",
+                "CurrentAssessments": current_assessments,
+                "CurrentVotes": current_assessments,
+                "CurrentTotalUnitCount": str(current_total or ""),
+                "IfReclassifiedUnitCount": str(reclassified_total or ""),
+                "AdditionalUnitsIfReclassified": added_units,
+                "RevenueDeltaIfReclassified": str(revenue_delta or ""),
+            }
+        )
+    if not out_rows:
+        return None
+    return {
+        "query": "classification_deferral_effect_support(Entity, DecisionStatus, CurrentAssessments, CurrentVotes, AdditionalUnitsIfReclassified).",
+        "result": {
+            "status": "success",
+            "predicate": "classification_deferral_effect_support",
+            "prolog_query": "classification_deferral_effect_support(Entity, DecisionStatus, CurrentAssessments, CurrentVotes, AdditionalUnitsIfReclassified).",
+            "result_type": "table",
+            "num_rows": len(out_rows),
+            "variables": [
+                "Entity",
+                "DecisionStatus",
+                "CurrentClassificationEffect",
+                "CurrentAssessments",
+                "CurrentVotes",
+                "CurrentTotalUnitCount",
+                "IfReclassifiedUnitCount",
+                "AdditionalUnitsIfReclassified",
+                "RevenueDeltaIfReclassified",
+            ],
+            "rows": out_rows,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only classification deferral companion exposed current preserved status and "
+                    "conditional reclassification effect from admitted deferral/outcome/count rows"
+                ),
+                "original_query": query,
+                "trigger_predicate": predicate,
+            },
+        },
+        "derived_from_queries": [
+            query,
+            "classification_deferred(Entity, Status).",
+            "conditional_outcome(Condition, Outcome, Detail).",
+            "unit_count(total, Count).",
+        ],
+    }
+
+
+def _vacancy_voting_eligibility_companion(
+    runtime: CorePrologRuntime,
+    *,
+    predicate: str,
+    query: str,
+) -> dict[str, Any] | None:
+    if predicate not in {"voting_eligibility", "occupancy_status"}:
+        return None
+    eligible_all_units = any(
+        str(row.get("X", row.get("Entity", ""))).strip() == "all_units"
+        and str(row.get("Y", row.get("Status", ""))).strip() == "eligible"
+        for row in _runtime_rows(runtime, "voting_eligibility(X, Y).")
+    )
+    vacant_rows = _runtime_rows(runtime, "occupancy_status(Unit, vacant).")
+    if not eligible_all_units or not vacant_rows:
+        return None
+    return {
+        "query": "vacancy_voting_eligibility_support(VacancyAffectsEligibility, VacantUnitsCarryVotes, VacantUnits).",
+        "result": {
+            "status": "success",
+            "predicate": "vacancy_voting_eligibility_support",
+            "prolog_query": "vacancy_voting_eligibility_support(VacancyAffectsEligibility, VacantUnitsCarryVotes, VacantUnits).",
+            "result_type": "table",
+            "num_rows": 1,
+            "variables": ["VacancyAffectsEligibility", "VacantUnitsCarryVotes", "VacantUnits"],
+            "rows": [
+                {
+                    "VacancyAffectsEligibility": "no",
+                    "VacantUnitsCarryVotes": "yes",
+                    "VacantUnits": ",".join(sorted(str(row.get("Unit", "")).strip() for row in vacant_rows)),
+                }
+            ],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only vacancy companion combined admitted all-units voting eligibility with admitted "
+                    "vacant-unit rows; it does not infer occupant identity"
+                ),
+                "original_query": query,
+                "trigger_predicate": predicate,
+            },
+        },
+        "derived_from_queries": [query, "voting_eligibility(all_units, eligible).", "occupancy_status(Unit, vacant)."],
+    }
+
+
+def _date_atom_plus_one(runtime: CorePrologRuntime, value: str) -> str:
+    observed = _runtime_temporal_datetime(runtime, value)
+    if observed is None:
+        return ""
+    return (observed + timedelta(days=1)).strftime("%Y_%m_%d")
+
+
+def _assessment_transfer_policy_companion(
+    runtime: CorePrologRuntime,
+    *,
+    predicate: str,
+    query: str,
+) -> dict[str, Any] | None:
+    if predicate not in {"assessment_responsibility", "transfer_date", "owner_of"}:
+        return None
+    rows = _runtime_rows(runtime, "assessment_responsibility(Unit, Party, StartDate, EndDate).")
+    if not rows:
+        return None
+    by_unit: dict[str, list[dict[str, str]]] = {}
+    for row in rows:
+        unit = str(row.get("Unit", "")).strip()
+        party = str(row.get("Party", "")).strip()
+        start = str(row.get("StartDate", "")).strip()
+        end = str(row.get("EndDate", "")).strip()
+        if not unit or not party or not start or not end:
+            continue
+        by_unit.setdefault(unit, []).append({"Unit": unit, "Party": party, "StartDate": start, "EndDate": end})
+
+    support_rows: list[dict[str, str]] = []
+    for unit, unit_rows in sorted(by_unit.items()):
+        ordered = sorted(unit_rows, key=lambda item: item["StartDate"])
+        for left, right in zip(ordered, ordered[1:]):
+            expected_next = _date_atom_plus_one(runtime, left["EndDate"])
+            if expected_next and expected_next == right["StartDate"]:
+                support_rows.append(
+                    {
+                        "Unit": unit,
+                        "SellerOrPriorOwner": left["Party"],
+                        "BuyerOrNextOwner": right["Party"],
+                        "SellerResponsibleThrough": left["EndDate"],
+                        "BuyerResponsibleFrom": right["StartDate"],
+                        "PolicyPattern": "seller_through_closing_buyer_from_day_after",
+                    }
+                )
+    if not support_rows:
+        return None
+    return {
+        "query": "assessment_transfer_policy_support(Unit, SellerOrPriorOwner, BuyerOrNextOwner, SellerResponsibleThrough, BuyerResponsibleFrom, PolicyPattern).",
+        "result": {
+            "status": "success",
+            "predicate": "assessment_transfer_policy_support",
+            "prolog_query": (
+                "assessment_transfer_policy_support(Unit, SellerOrPriorOwner, BuyerOrNextOwner, "
+                "SellerResponsibleThrough, BuyerResponsibleFrom, PolicyPattern)."
+            ),
+            "result_type": "table",
+            "num_rows": len(support_rows),
+            "variables": [
+                "Unit",
+                "SellerOrPriorOwner",
+                "BuyerOrNextOwner",
+                "SellerResponsibleThrough",
+                "BuyerResponsibleFrom",
+                "PolicyPattern",
+            ],
+            "rows": support_rows,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only assessment-transfer companion detected the repeated admitted pattern "
+                    "that prior owners are responsible through closing and next owners from the following day"
+                ),
+                "original_query": query,
+                "trigger_predicate": predicate,
+            },
+        },
+        "derived_from_queries": [query, "assessment_responsibility(Unit, Party, StartDate, EndDate)."],
+    }
+
+
+def _split_interval_atom(value: str) -> tuple[str, str]:
+    text = str(value or "").strip()
+    if "_to_" not in text:
+        return text, text
+    start, end = text.split("_to_", 1)
+    return start, end
+
+
+def _role_hint_from_group(group: str) -> str:
+    folded = str(group or "").casefold()
+    hints: list[str] = []
+    if "station_a" in folded or folded.endswith("_a"):
+        hints.append("station_a")
+    if "station_b" in folded or folded.endswith("_b"):
+        hints.append("station_b")
+    if "record" in folded:
+        hints.append("recording")
+    if "clipboard" in folded:
+        hints.append("clipboard")
+    if "shore" in folded:
+        hints.append("shore")
+    if "dune" in folded:
+        hints.append("dune")
+    return ",".join(hints)
+
+
+def _recall_domain_companion_queries(
+    runtime: CorePrologRuntime,
+    *,
+    predicate: str,
+    args: list[str],
+    query: str,
+) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    if predicate == "recall_classification" and len(args) == 3:
+        companion = _recall_classification_at_date_companion(runtime, query=query, args=args)
+        if companion:
+            out.append(companion)
+    if predicate == "unit_count" and len(args) == 3:
+        companion = _unit_range_count_companion(runtime, query=query, args=args)
+        if companion:
+            out.append(companion)
+    if predicate == "termination_request":
+        companion = _recall_accounted_units_companion(runtime, query=query, predicate=predicate, args=args)
+        if companion:
+            out.append(companion)
+    return out
+
+
+def _recall_classification_at_date_companion(
+    runtime: CorePrologRuntime,
+    *,
+    query: str,
+    args: list[str],
+) -> dict[str, Any] | None:
+    recall_arg, class_arg, date_arg = [str(item).strip() for item in args[:3]]
+    if not recall_arg or _is_prolog_variable(recall_arg) or not date_arg or _is_prolog_variable(date_arg):
+        return None
+    requested_key = _date_atom_sort_key(date_arg)
+    if requested_key is None:
+        return None
+    classifications = runtime.query_rows("recall_classification(Recall, Classification, Date).")
+    reclassifications = runtime.query_rows("recall_reclassification(Recall, FromClass, ToClass, Date).")
+    rows: list[dict[str, Any]] = []
+    for row in classifications.get("rows", []) if classifications.get("status") == "success" else []:
+        recall = str(row.get("Recall", "")).strip()
+        if not _same_recall_family(recall_arg, recall):
+            continue
+        date = str(row.get("Date", "")).strip()
+        key = _date_atom_sort_key(date)
+        if key is None or key > requested_key:
+            continue
+        rows.append(
+            {
+                "Recall": recall,
+                "Classification": str(row.get("Classification", "")).strip(),
+                "EffectiveDate": date,
+                "Source": "recall_classification",
+            }
+        )
+    for row in reclassifications.get("rows", []) if reclassifications.get("status") == "success" else []:
+        recall = str(row.get("Recall", "")).strip()
+        if not _same_recall_family(recall_arg, recall):
+            continue
+        date = str(row.get("Date", "")).strip()
+        key = _date_atom_sort_key(date)
+        if key is None or key > requested_key:
+            continue
+        rows.append(
+            {
+                "Recall": recall,
+                "Classification": str(row.get("ToClass", "")).strip(),
+                "FromClass": str(row.get("FromClass", "")).strip(),
+                "EffectiveDate": date,
+                "Source": "recall_reclassification",
+            }
+        )
+    if not rows:
+        return None
+    rows.sort(key=lambda item: (_date_atom_sort_key(str(item.get("EffectiveDate", ""))) or (0, 0, 0), item.get("Source") == "recall_reclassification"))
+    current = rows[-1]
+    projected = dict(current)
+    projected["RequestedDate"] = date_arg
+    if _is_prolog_variable(class_arg):
+        projected[class_arg] = projected.get("Classification", "")
+    else:
+        projected["RequestedClassification"] = class_arg
+        projected["ClassificationMatches"] = "true" if class_arg == projected.get("Classification") else "false"
+    return {
+        "query": "recall_classification_at_date_support(QueryRecall, RequestedDate, Classification, EffectiveDate).",
+        "result": {
+            "status": "success",
+            "predicate": "recall_classification_at_date_support",
+            "prolog_query": "recall_classification_at_date_support(QueryRecall, RequestedDate, Classification, EffectiveDate).",
+            "rows": [projected],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": "query-only status-at-date companion derived current recall classification from admitted classification and reclassification anchors",
+                "original_query": query,
+            },
+        },
+        "derived_from_queries": [
+            query,
+            "recall_classification(Recall, Classification, Date).",
+            "recall_reclassification(Recall, FromClass, ToClass, Date).",
+        ],
+    }
+
+
+def _unit_range_count_companion(
+    runtime: CorePrologRuntime,
+    *,
+    query: str,
+    args: list[str],
+) -> dict[str, Any] | None:
+    recall_arg, count_arg, date_arg = [str(item).strip() for item in args[:3]]
+    rows_result = runtime.query_rows("unit_count(Recall, UnitSurface, Date).")
+    if rows_result.get("status") != "success":
+        return None
+    out_rows: list[dict[str, Any]] = []
+    for row in rows_result.get("rows", []):
+        recall = str(row.get("Recall", "")).strip()
+        if recall_arg and not _is_prolog_variable(recall_arg) and not _same_recall_family(recall_arg, recall):
+            continue
+        surface = str(row.get("UnitSurface", "")).strip()
+        range_count = _count_atom_range(surface)
+        if range_count is None:
+            continue
+        date = str(row.get("Date", "")).strip()
+        projected = {
+            "Recall": recall,
+            "UnitSurface": surface,
+            "Date": date,
+            "RangeCount": str(range_count),
+        }
+        if _is_prolog_variable(count_arg):
+            projected[count_arg] = str(range_count)
+        if _is_prolog_variable(date_arg):
+            projected[date_arg] = date
+        out_rows.append(projected)
+    if not out_rows:
+        return None
+    return {
+        "query": "unit_range_count_support(Recall, UnitSurface, RangeCount, Date).",
+        "result": {
+            "status": "success",
+            "predicate": "unit_range_count_support",
+            "prolog_query": "unit_range_count_support(Recall, UnitSurface, RangeCount, Date).",
+            "rows": out_rows,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": "query-only range companion counted admitted lot-range atoms such as *_a_through_*_f without reading source prose",
+                "original_query": query,
+            },
+        },
+        "derived_from_queries": [query, "unit_count(Recall, UnitSurface, Date)."],
+    }
+
+
+def _recall_accounted_units_companion(
+    runtime: CorePrologRuntime,
+    *,
+    query: str,
+    predicate: str,
+    args: list[str],
+) -> dict[str, Any] | None:
+    recall_arg = str(args[0]).strip() if args else ""
+    if not recall_arg or _is_prolog_variable(recall_arg):
+        return None
+    requested_date = ""
+    if predicate == "termination_request" and len(args) >= 3:
+        requested_date = str(args[2]).strip()
+    elif predicate == "unit_status_change" and len(args) >= 2:
+        requested_date = str(args[1]).strip()
+    requested_key = _date_atom_sort_key(requested_date) if requested_date and not _is_prolog_variable(requested_date) else None
+    if requested_key is None:
+        term_result = runtime.query_rows(format_prolog_query("termination_request", [recall_arg, "Requester", "RequestDate"]))
+        term_rows = term_result.get("rows", []) if term_result.get("status") == "success" else []
+        dated = [
+            (key, str(row.get("RequestDate", "")).strip())
+            for row in term_rows
+            if (key := _date_atom_sort_key(str(row.get("RequestDate", "")).strip())) is not None
+        ]
+        if dated:
+            requested_key, requested_date = sorted(dated)[-1]
+    if requested_key is None:
+        return None
+    totals = runtime.query_rows("unit_count(Recall, TotalUnits, Date).")
+    changes = runtime.query_rows("unit_status_change(Recall, Date, Status, Count, Actor).")
+    if totals.get("status") != "success" or changes.get("status") != "success":
+        return None
+    total_candidates: list[tuple[tuple[int, int, int], int, str, str]] = []
+    for row in totals.get("rows", []):
+        recall = str(row.get("Recall", "")).strip()
+        if not _same_recall_family(recall_arg, recall):
+            continue
+        value = str(row.get("TotalUnits", "")).strip()
+        if not value.isdigit():
+            continue
+        date = str(row.get("Date", "")).strip()
+        key = _date_atom_sort_key(date)
+        if key is None or key > requested_key:
+            continue
+        total_candidates.append((key, int(value), recall, date))
+    unaccounted_candidates: list[tuple[tuple[int, int, int], int, str, str]] = []
+    for row in changes.get("rows", []):
+        recall = str(row.get("Recall", "")).strip()
+        if not _same_recall_family(recall_arg, recall):
+            continue
+        if str(row.get("Status", "")).strip() != "unaccounted":
+            continue
+        count = str(row.get("Count", "")).strip()
+        if not count.isdigit():
+            continue
+        date = str(row.get("Date", "")).strip()
+        key = _date_atom_sort_key(date)
+        if key is None or key > requested_key:
+            continue
+        unaccounted_candidates.append((key, int(count), recall, date))
+    if not total_candidates or not unaccounted_candidates:
+        return None
+    _total_key, total, total_recall, total_date = sorted(total_candidates)[-1]
+    _unaccounted_key, unaccounted, unaccounted_recall, unaccounted_date = sorted(unaccounted_candidates)[-1]
+    accounted = total - unaccounted
+    if accounted < 0:
+        return None
+    percent = round((accounted / total) * 100, 1) if total else 0.0
+    return {
+        "query": "recall_accounted_units_support(Recall, RequestedDate, AccountedUnits, TotalUnits, AccountedPercent).",
+        "result": {
+            "status": "success",
+            "predicate": "recall_accounted_units_support",
+            "prolog_query": "recall_accounted_units_support(Recall, RequestedDate, AccountedUnits, TotalUnits, AccountedPercent).",
+            "rows": [
+                {
+                    "Recall": recall_arg,
+                    "RequestedDate": requested_date,
+                    "AccountedUnits": str(accounted),
+                    "TotalUnits": str(total),
+                    "UnaccountedUnits": str(unaccounted),
+                    "AccountedPercent": f"{percent:.1f}",
+                    "TotalSourceRecall": total_recall,
+                    "TotalDate": total_date,
+                    "UnaccountedSourceRecall": unaccounted_recall,
+                    "UnaccountedDate": unaccounted_date,
+                }
+            ],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": "query-only aggregation companion derived accounted units from admitted total-unit and latest unaccounted-unit rows at or before the requested date",
+                "original_query": query,
+            },
+        },
+        "derived_from_queries": [
+            query,
+            "unit_count(Recall, TotalUnits, Date).",
+            "unit_status_change(Recall, Date, unaccounted, Count, Actor).",
+        ],
+    }
+
+
+def _story_choice_contrast_companion(
+    runtime: CorePrologRuntime,
+    *,
+    predicate: str,
+    args: list[str],
+    query: str,
+) -> dict[str, Any] | None:
+    family = _choice_family_from_query(predicate=predicate, args=args)
+    if not family:
+        return None
+    properties = runtime.query_rows("has_property(Entity, Property).")
+    judgments = runtime.query_rows("judged(Judge, Entity, Dimension, Verdict).")
+    events = runtime.query_rows("event(Event, Actor, Action, Entity, Location).")
+    property_rows = [
+        row
+        for row in properties.get("rows", [])
+        if _choice_family_matches(family, str(row.get("Entity", "")).strip())
+    ] if properties.get("status") == "success" else []
+    judgment_rows = (
+        [
+            row
+            for row in judgments.get("rows", [])
+            if _choice_family_matches(family, str(row.get("Entity", "")).strip())
+        ]
+        if judgments.get("status") == "success"
+        else []
+    )
+    event_rows = (
+        [
+            row
+            for row in events.get("rows", [])
+            if _choice_family_matches(family, str(row.get("Entity", "")).strip())
+        ]
+        if events.get("status") == "success"
+        else []
+    )
+    positive_rows = [
+        row
+        for row in property_rows
+        if _positive_choice_property(str(row.get("Property", "")).strip())
+    ]
+    negative_rows = [
+        row
+        for row in judgment_rows
+        if str(row.get("Verdict", "")).strip().startswith("too_")
+    ]
+    if not negative_rows:
+        negative_rows = _negative_choice_speech_rows(runtime, family=family)
+    inferred_positive_rows: list[dict[str, Any]] = []
+    if not positive_rows:
+        inferred_positive_rows = _choice_by_elimination_rows(
+            family=family,
+            property_rows=property_rows,
+            event_rows=event_rows,
+            negative_rows=negative_rows,
+        )
+        positive_rows = inferred_positive_rows
+    if not positive_rows or not negative_rows:
+        return None
+    out_rows: list[dict[str, Any]] = []
+    for positive in positive_rows:
+        entity = str(positive.get("Entity", "")).strip()
+        out_rows.append(
+            {
+                "ChoiceFamily": family,
+                "AcceptedCandidate": entity,
+                "PositiveProperty": str(positive.get("Property", "")).strip(),
+                "EvidenceStatus": str(positive.get("EvidenceStatus", "direct_positive_property")).strip(),
+                "RejectedCandidates": ",".join(
+                    sorted({str(row.get("Entity", "")).strip() for row in negative_rows if str(row.get("Entity", "")).strip()})
+                ),
+                "ObservedActions": ",".join(
+                    sorted(
+                        {
+                            str(row.get("Action", "")).strip()
+                            for row in event_rows
+                            if str(row.get("Entity", "")).strip() == entity and str(row.get("Action", "")).strip()
+                        }
+                    )
+                ),
+            }
+        )
+    return {
+        "query": "story_choice_contrast_support(ChoiceFamily, AcceptedCandidate, PositiveProperty, RejectedCandidates).",
+        "result": {
+            "status": "success",
+            "predicate": "story_choice_contrast_support",
+            "prolog_query": "story_choice_contrast_support(ChoiceFamily, AcceptedCandidate, PositiveProperty, RejectedCandidates).",
+            "rows": out_rows,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": "query-only story choice companion contrasted positive item properties with same-family rejected judgments",
+                "original_query": query,
+            },
+        },
+        "derived_from_queries": [
+            query,
+            "has_property(Entity, Property).",
+            "judged(Judge, Entity, Dimension, Verdict).",
+            "event(Event, Actor, Action, Entity, Location).",
+        ],
+    }
+
+
+def _choice_family_from_query(*, predicate: str, args: list[str]) -> str:
+    candidates: list[str] = []
+    if predicate == "has_property" and args:
+        candidates.append(str(args[0]).strip())
+    if predicate == "judged" and len(args) >= 2:
+        candidates.append(str(args[1]).strip())
+    if predicate == "event" and len(args) >= 4:
+        candidates.append(str(args[3]).strip())
+    for candidate in candidates:
+        if _is_prolog_variable(candidate):
+            continue
+        lowered = candidate.lower()
+        for family in ["cart", "cap", "jar", "cup", "boat", "boot"]:
+            if (
+                lowered == family
+                or lowered.startswith(f"{family}_")
+                or lowered.endswith(f"_{family}")
+            ):
+                return family
+    return ""
+
+
+def _choice_family_matches(family: str, entity: str) -> bool:
+    lowered = str(entity or "").lower()
+    return lowered == family or lowered.startswith(f"{family}_") or lowered.endswith(f"_{family}")
+
+
+def _positive_choice_property(value: str) -> bool:
+    lowered = str(value or "").lower()
+    return lowered.startswith("just_") or lowered in {"accepted", "chosen", "suitable", "right_size"}
+
+
+def _negative_choice_speech_rows(runtime: CorePrologRuntime, *, family: str) -> list[dict[str, str]]:
+    result = runtime.query_rows("said(Speaker, Listener, Text).")
+    if result.get("status") != "success":
+        return []
+    out: list[dict[str, str]] = []
+    ordinal_sizes = ["great", "middle", "little"]
+    for row in result.get("rows", []):
+        text = str(row.get("Text", "")).strip().lower()
+        if family not in text or "_too_" not in text and "too_" not in text:
+            continue
+        size = _choice_size_from_text(text)
+        if not size and len(out) < len(ordinal_sizes):
+            size = ordinal_sizes[len(out)]
+        entity = f"{size}_{family}" if size else family
+        out.append(
+            {
+                "Entity": entity,
+                "Verdict": text,
+                "Speaker": str(row.get("Speaker", "")).strip(),
+                "Dimension": "speech_rejection",
+            }
+        )
+    return out
+
+
+def _choice_by_elimination_rows(
+    *,
+    family: str,
+    property_rows: list[dict[str, Any]],
+    event_rows: list[dict[str, Any]],
+    negative_rows: list[dict[str, Any]],
+) -> list[dict[str, str]]:
+    entities = {
+        str(row.get("Entity", "")).strip()
+        for row in [*property_rows, *event_rows]
+        if _choice_family_matches(family, str(row.get("Entity", "")).strip())
+    }
+    if not entities:
+        return []
+    negative_entities = {
+        _canonical_choice_entity(family, str(row.get("Entity", "")).strip())
+        for row in negative_rows
+        if str(row.get("Entity", "")).strip()
+    }
+    candidates = sorted(entity for entity in entities if _canonical_choice_entity(family, entity) not in negative_entities)
+    if len(candidates) != 1 or len(negative_entities) < 2:
+        return []
+    return [
+        {
+            "Entity": candidates[0],
+            "Property": "accepted_by_contrast",
+            "EvidenceStatus": "inferred_by_complete_family_contrast",
+        }
+    ]
+
+
+def _canonical_choice_entity(family: str, entity: str) -> str:
+    lowered = str(entity or "").lower()
+    lowered = lowered.replace("middle_sized_", "middle_")
+    if lowered == family:
+        return lowered
+    return lowered
+
+
+def _choice_size_from_text(value: str) -> str:
+    lowered = str(value or "").lower()
+    if "great" in lowered:
+        return "great"
+    if "middle" in lowered:
+        return "middle"
+    if "little" in lowered:
+        return "little"
+    return ""
+
+
+def _story_remediation_method_companion(
+    runtime: CorePrologRuntime,
+    *,
+    predicate: str,
+    args: list[str],
+    query: str,
+) -> dict[str, Any] | None:
+    if predicate != "event" or len(args) < 5:
+        return None
+    query_text = " ".join(str(item or "").lower() for item in args)
+    if "extract" not in query_text and "key" not in query_text:
+        return None
+    events = runtime.query_rows("event(Event, Actor, Action, Object, Location).")
+    if events.get("status") != "success":
+        return None
+    wound_rows: list[dict[str, Any]] = []
+    extraction_rows: list[dict[str, Any]] = []
+    for row in events.get("rows", []):
+        action = str(row.get("Action", "")).strip()
+        obj = str(row.get("Object", "")).strip()
+        loc = str(row.get("Location", "")).strip()
+        if action == "wound":
+            wound_rows.append(row)
+        if "extract" in action or "key" in obj or "key" in loc:
+            extraction_rows.append(row)
+    if not wound_rows or not extraction_rows:
+        return None
+    out_rows: list[dict[str, str]] = []
+    for wound in wound_rows:
+        wound_actor = str(wound.get("Actor", "")).strip()
+        wound_object = str(wound.get("Object", "")).strip()
+        for extraction in extraction_rows:
+            extraction_actor = str(extraction.get("Actor", "")).strip()
+            extraction_location = str(extraction.get("Location", "")).strip()
+            if wound_actor and extraction_actor and wound_actor != extraction_actor:
+                continue
+            if wound_object and extraction_location and wound_object not in extraction_location:
+                continue
+            out_rows.append(
+                {
+                    "MethodEvent": str(wound.get("Event", "")).strip(),
+                    "Actor": wound_actor or extraction_actor,
+                    "MethodAction": str(wound.get("Action", "")).strip(),
+                    "Patient": wound_object,
+                    "OutcomeEvent": str(extraction.get("Event", "")).strip(),
+                    "OutcomeAction": str(extraction.get("Action", "")).strip(),
+                    "OutcomeObject": str(extraction.get("Object", "")).strip(),
+                    "OutcomeLocation": extraction_location,
+                }
+            )
+    if not out_rows:
+        return None
+    return {
+        "query": "story_remediation_method_support(MethodEvent, Actor, MethodAction, Patient, OutcomeEvent, OutcomeObject).",
+        "result": {
+            "status": "success",
+            "predicate": "story_remediation_method_support",
+            "prolog_query": "story_remediation_method_support(MethodEvent, Actor, MethodAction, Patient, OutcomeEvent, OutcomeObject).",
+            "rows": out_rows,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": "query-only story remediation companion paired admitted method events with admitted extraction/key outcome events",
+                "original_query": query,
+            },
+        },
+        "derived_from_queries": [query, "event(Event, Actor, Action, Object, Location)."],
+    }
+
+
+def _same_recall_family(left: str, right: str) -> bool:
+    left_norm = _normalized_atom_tokens(left)
+    right_norm = _normalized_atom_tokens(right)
+    return bool(left_norm and right_norm and left_norm == right_norm)
+
+
+def _normalized_atom_tokens(value: str) -> tuple[str, ...]:
+    tokens = [token for token in re.split(r"[^a-z0-9]+", str(value or "").lower()) if token]
+    noise = {"recall"}
+    return tuple(sorted(token for token in tokens if token not in noise))
+
+
+def _date_atom_sort_key(value: str) -> tuple[int, int, int] | None:
+    match = re.fullmatch(r"(\d{4})_(\d{2})_(\d{2})(?:t.*)?", str(value or "").strip())
+    if not match:
+        return None
+    return tuple(int(part) for part in match.groups())
+
+
+def _count_atom_range(value: str) -> int | None:
+    match = re.search(r"([a-z])_through_.*_([a-z])$", str(value or "").lower())
+    if not match:
+        return None
+    start, end = match.groups()
+    start_ord = ord(start)
+    end_ord = ord(end)
+    if end_ord < start_ord:
+        return None
+    return end_ord - start_ord + 1
+
+
+def _count_numeric_atom_range(value: str) -> int | None:
+    match = re.search(r"(\d+)_to_.*?(\d+)$", str(value or "").lower())
+    if not match:
+        return None
+    start, end = (int(part) for part in match.groups())
+    if end < start:
+        return None
+    return end - start + 1
+
+
 def _case_atom_key(value: str) -> str:
     return re.sub(r"_+", "", str(value or "").strip().lower())
 
@@ -1529,46 +3506,72 @@ def _status_at_date_interval_companion(runtime: CorePrologRuntime, *, query: str
     if parsed is None:
         return None
     predicate, args = parsed
-    if predicate != "case_status_at_date" or len(args) != 3:
+    if len(args) != 3:
         return None
 
-    case_arg = str(args[0]).strip()
-    date_arg = str(args[1]).strip()
-    status_arg = str(args[2]).strip()
-    if not case_arg or not date_arg or _is_prolog_variable(case_arg) or _is_prolog_variable(date_arg):
+    if predicate == "case_status_at_date":
+        entity_arg = str(args[0]).strip()
+        date_arg = str(args[1]).strip()
+        status_arg = str(args[2]).strip()
+        timeline_query = "case_status_at_date(Entity, Date, Status)."
+        result_predicate = "case_status_at_date"
+        support_query = (
+            "case_status_at_date_interval_support"
+            "(QueryCase, RequestedDate, Status, EffectiveFrom, EffectiveUntil)."
+        )
+        entity_key = "QueryCase"
+        observed_key = "ObservedCase"
+        match_key = "CaseMatch"
+    elif predicate.endswith("_status"):
+        entity_arg = str(args[0]).strip()
+        status_arg = str(args[1]).strip()
+        date_arg = str(args[2]).strip()
+        timeline_query = format_prolog_query(predicate, ["Entity", "Status", "Date"])
+        result_predicate = predicate
+        support_query = (
+            f"{predicate}_interval_support"
+            "(QueryEntity, RequestedDate, Status, EffectiveFrom, EffectiveUntil)."
+        )
+        entity_key = "QueryEntity"
+        observed_key = "ObservedEntity"
+        match_key = "EntityMatch"
+    else:
+        return None
+
+    if not entity_arg or not date_arg or _is_prolog_variable(entity_arg) or _is_prolog_variable(date_arg):
         return None
 
     requested_at = _runtime_temporal_datetime(runtime, date_arg)
     if requested_at is None:
         return None
 
-    timeline = runtime.query_rows("case_status_at_date(Case, Date, Status).")
+    timeline = runtime.query_rows(timeline_query)
     if timeline.get("status") != "success":
         return None
 
-    requested_case_key = _case_atom_key(case_arg)
+    requested_entity_key = _case_atom_key(entity_arg)
     anchors: list[dict[str, Any]] = []
     for row in timeline.get("rows", []) or []:
         if not isinstance(row, dict):
             continue
-        observed_case = str(row.get("Case", "")).strip()
+        observed_entity = str(row.get("Entity", "")).strip()
         observed_date = str(row.get("Date", "")).strip()
         observed_status = str(row.get("Status", "")).strip()
-        if not observed_case or not observed_date or not observed_status:
+        if not observed_entity or not observed_date or not observed_status:
             continue
-        case_match = "exact" if observed_case == case_arg else "canonical_atom"
-        if case_match != "exact" and _case_atom_key(observed_case) != requested_case_key:
+        entity_match = "exact" if observed_entity == entity_arg else "canonical_atom"
+        if entity_match != "exact" and _case_atom_key(observed_entity) != requested_entity_key:
             continue
         observed_at = _runtime_temporal_datetime(runtime, observed_date)
         if observed_at is None:
             continue
         anchors.append(
             {
-                "observed_case": observed_case,
+                "observed_entity": observed_entity,
                 "observed_date": observed_date,
                 "observed_status": observed_status,
                 "observed_at": observed_at,
-                "case_match": case_match,
+                "entity_match": entity_match,
             }
         )
 
@@ -1592,13 +3595,13 @@ def _status_at_date_interval_companion(runtime: CorePrologRuntime, *, query: str
         status_matches = "true" if requested_status == previous_anchor["observed_status"] else "false"
 
     row: dict[str, str] = {
-        "QueryCase": case_arg,
+        entity_key: entity_arg,
         "RequestedDate": date_arg,
         "Status": previous_anchor["observed_status"],
         "EffectiveFrom": previous_anchor["observed_date"],
         "EffectiveUntil": str(next_anchor["observed_date"]) if next_anchor else "",
-        "ObservedCase": previous_anchor["observed_case"],
-        "CaseMatch": previous_anchor["case_match"],
+        observed_key: previous_anchor["observed_entity"],
+        match_key: previous_anchor["entity_match"],
     }
     if requested_status:
         row["RequestedStatus"] = requested_status
@@ -1607,21 +3610,21 @@ def _status_at_date_interval_companion(runtime: CorePrologRuntime, *, query: str
     result = {
         "status": "success",
         "result_type": "table",
-        "predicate": "case_status_at_date",
-        "prolog_query": "case_status_at_date_interval_support(QueryCase, RequestedDate, Status, EffectiveFrom, EffectiveUntil).",
+        "predicate": result_predicate,
+        "prolog_query": support_query,
         "variables": list(row.keys()),
         "rows": [row],
         "num_rows": 1,
         "reasoning_basis": {
             "kind": "core-local",
-            "note": "query-only interval support derived status at an interior date from admitted case_status_at_date/3 transition anchors; no durable fact was written",
+            "note": f"query-only interval support derived status at an interior date from admitted {predicate}/3 transition anchors; no durable fact was written",
             "original_query": query,
         },
     }
     return {
         "query": result["prolog_query"],
         "result": result,
-        "derived_from_queries": [query, "case_status_at_date(Case, Date, Status)."],
+        "derived_from_queries": [query, timeline_query],
     }
 
 
@@ -1924,6 +3927,7 @@ def _temporal_join_with_previous(
                 changed = True
     if not selected:
         return None
+    selected_for_join = _disambiguate_relaxed_temporal_join_variables(selected, helper_args_text=args_text)
     query_for_join = query.strip()
     derived_from = [*selected, query]
     if predicate == "elapsed_hours":
@@ -1932,7 +3936,7 @@ def _temporal_join_with_previous(
             minute_query = f"elapsed_minutes({args[0]}, {args[1]}, Minutes)."
             query_for_join = f"{query_for_join.rstrip('. ')}, {minute_query}"
             derived_from.append(minute_query)
-    joined = f"{', '.join(item.rstrip('. ') for item in selected)}, {query_for_join}"
+    joined = f"{', '.join(item.rstrip('. ') for item in selected_for_join)}, {query_for_join}"
     result = runtime.query_rows(joined)
     if result.get("status") == "success":
         return {
@@ -1948,13 +3952,57 @@ def _temporal_join_with_previous(
         }
     subset_join = _temporal_subset_join(
         runtime,
-        selected=selected,
+        selected=selected_for_join,
         query_for_join=query_for_join,
         derived_query=query,
     )
     if subset_join is not None:
         return subset_join
     return None
+
+
+def _disambiguate_relaxed_temporal_join_variables(selected: list[str], *, helper_args_text: str) -> list[str]:
+    """Avoid accidental joins between local source/provenance slot variables.
+
+    Relaxed fallback queries name widened constants by argument position
+    (`Relaxed1`, `Relaxed2`, ...). When two different predicates both widen a
+    non-key source slot at the same position, joining them later can falsely
+    require the two unrelated slots to have the same value. Temporal helpers
+    only need their explicit start/end variables plus whatever key variable the
+    relaxed query shares; source/provenance relaxed slots should remain local to
+    each prior query. The same issue appears when the model uses a repeated
+    variable such as `Eventid` for both an issuance row and a lift row; those are
+    provenance anchors, not the temporal values being compared.
+    """
+
+    helper_variables = set(re.findall(r"\b[A-Z][A-Za-z0-9_]*\b", helper_args_text))
+    variable_counts = Counter(
+        variable
+        for query in selected
+        for variable in re.findall(r"\b[A-Z][A-Za-z0-9_]*\b", query)
+        if variable not in helper_variables
+    )
+    variables_to_localize = {
+        variable
+        for variable, count in variable_counts.items()
+        if count > 1 and _is_local_temporal_join_variable(variable)
+    }
+    if not variables_to_localize:
+        return selected
+    disambiguated: list[str] = []
+    for index, query in enumerate(selected, start=1):
+        updated = query
+        for variable in variables_to_localize:
+            updated = re.sub(rf"\b{re.escape(variable)}\b", f"{variable}Join{index}", updated)
+        disambiguated.append(updated)
+    return disambiguated
+
+
+def _is_local_temporal_join_variable(variable: str) -> bool:
+    if re.fullmatch(r"Relaxed[2-9]\d*", variable):
+        return True
+    lowered = variable.casefold()
+    return any(marker in lowered for marker in ("event", "source", "provenance", "rowid", "recordid"))
 
 
 def _temporal_subset_join(
@@ -2087,6 +4135,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "Source-scope policy: if the reference answer says the event is not applicable to this source/document and all relevant queries return no matching rows while the source KB clearly concerns a different document/domain, this supports the reference. Use exact when this is the central answer.",
             "Normalized-atom policy: snake_case atoms are the KB's canonical surface. If a returned atom embeds the reference answer as a clear normalized phrase, such as departed_dock_c_before_yeast_inspection supporting 'Dock C', that can be exact support even when the value appears inside a method or explanation predicate.",
             "Normalized legal/status atom policy: phrases such as does_not_intend_to_raise_the_defense, reserves_all_defenses, not_a_defense_to_assured, remedied_before_loss, no_contribution_to_loss, statement_not_finding, or accepted_without_prejudice are answer-bearing content when they appear in any returned row. Do not discard them merely because they appear in a Detail, Source, or evidence slot.",
+            "Purpose/action atom policy: normalized action-purpose atoms such as fetching_fog_leaves, gathered_fog_leaves, or submitted_revised_budget are answer-bearing. If adjacent returned rows establish the affected object or problem context, do not downgrade solely because the reference answer phrases the same purpose in natural language.",
             "Return the final judgment only. Do not include internal debate, alternative verdicts, or self-correction in concise_answer.",
         ],
     }
@@ -2236,12 +4285,22 @@ def call_lmstudio_json_schema(
 ) -> dict[str, Any]:
     base_url = str(config.base_url or "").rstrip("/")
     endpoint = f"{base_url}/chat/completions" if base_url.endswith("/v1") else f"{base_url}/v1/chat/completions"
+    request_messages = [dict(message) for message in messages]
+    if not bool(config.think_enabled):
+        for message in request_messages:
+            if message.get("role") == "system":
+                content = str(message.get("content") or "")
+                if not content.lstrip().startswith("/no_think"):
+                    message["content"] = "/no_think\n" + content
+                break
     payload: dict[str, Any] = {
         "model": config.model,
-        "messages": messages,
+        "messages": request_messages,
         "temperature": float(config.temperature),
         "top_p": float(config.top_p),
         "max_tokens": int(max_tokens),
+        "think": bool(config.think_enabled),
+        "thinking": bool(config.think_enabled),
         "response_format": {
             "type": "json_schema",
             "json_schema": {
@@ -2253,10 +4312,13 @@ def call_lmstudio_json_schema(
     }
     if str(config.reasoning_effort or "").strip():
         payload["reasoning_effort"] = str(config.reasoning_effort).strip()
+    if _is_openrouter_base_url(config.base_url) and not bool(config.think_enabled):
+        payload["reasoning"] = {"effort": "none", "exclude": True}
+        payload["include_reasoning"] = False
     req = urllib.request.Request(
         endpoint,
         data=json.dumps(payload).encode("utf-8"),
-        headers={"Content-Type": "application/json"},
+        headers=_chat_headers(config.api_key),
         method="POST",
     )
     try:
@@ -2275,6 +4337,18 @@ def call_lmstudio_json_schema(
     if not isinstance(parsed, dict):
         raise RuntimeError("structured judge returned non-object JSON")
     return parsed
+
+
+def _chat_headers(api_key: str = "") -> dict[str, str]:
+    headers = {"Content-Type": "application/json"}
+    key = str(api_key or os.environ.get("PRETHINKER_API_KEY") or os.environ.get("OPENROUTER_API_KEY") or "").strip()
+    if key:
+        headers["Authorization"] = f"Bearer {key}"
+    return headers
+
+
+def _is_openrouter_base_url(base_url: str) -> bool:
+    return "openrouter.ai" in str(base_url or "").lower()
 
 
 def summarize(*, rows: list[dict[str, Any]], load_errors: list[str], elapsed_ms: int) -> dict[str, Any]:

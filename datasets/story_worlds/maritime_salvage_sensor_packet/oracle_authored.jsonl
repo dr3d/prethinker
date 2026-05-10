@@ -1,0 +1,41 @@
+﻿{"id":"q001","source_id":"q001","category":"direct_lookup","reference_answer":"1:26-cv-00138-HKK."}
+{"id":"q002","source_id":"q002","category":"direct_lookup","reference_answer":"Velasco Brothers Fishing Co., LLC, of Portland, Maine."}
+{"id":"q003","source_id":"q003","category":"direct_lookup","reference_answer":"Penobscot Marine Salvage, Inc."}
+{"id":"q004","source_id":"q004","category":"direct_lookup","reference_answer":"1247889."}
+{"id":"q005","source_id":"q005","category":"direct_lookup","reference_answer":"Federal Magistrate Judge Helena Kovacs."}
+{"id":"q006","source_id":"q006","category":"direct_lookup","reference_answer":"$487,500, equal to 90% of an agreed insured value of $541,667."}
+{"id":"q007","source_id":"q007","category":"direct_lookup","reference_answer":"March 22, 2026, at approximately 04:50 EDT."}
+{"id":"q008","source_id":"q008","category":"direct_lookup","reference_answer":"Karl Bjorklund."}
+{"id":"q009","source_id":"q009","category":"provenance","reference_answer":"USCG initial side-scan sonar survey conducted March 24, 2026 by USCGC Vigilant, sonar operator LT Sandra Pham."}
+{"id":"q010","source_id":"q010","category":"provenance","reference_answer":"Penobscot Marine Salvage multibeam sonar survey conducted April 5, 2026 from M/V Penobscot Pioneer, sonar operator Karl Bjorklund."}
+{"id":"q011","source_id":"q011","category":"provenance","reference_answer":"Diver Yusuf Banerjee's dive log (Exhibit D-2), April 11, 2026."}
+{"id":"q012","source_id":"q012","category":"provenance","reference_answer":"The April 15, 2026 letter from North Atlantic Marine Mutual to Velasco Brothers Fishing Co. (Exhibit I-1)."}
+{"id":"q013","source_id":"q013","category":"provenance","reference_answer":"The April 7, 2026 erratum, which produced corrected report version 1.1."}
+{"id":"q014","source_id":"q014","category":"provenance","reference_answer":"Exhibit M-1."}
+{"id":"q015","source_id":"q015","category":"supersession","reference_answer":"The current authoritative wreck depth is 84 meters. The prior superseded value, listed in §3.2 of the original April 5 survey report, was 84 feet."}
+{"id":"q016","source_id":"q016","category":"supersession","reference_answer":"Version 1.1, the April 7 erratum-corrected version. Version 1.0 is retained for archival purposes only."}
+{"id":"q017","source_id":"q017","category":"supersession","reference_answer":"The current operative claim, filed April 20, 2026, asserts salvage rights regardless of ownership. The withdrawn earlier position was the April 4 draft asserting 'no apparent owner' status, withdrawn April 6 when Velasco Brothers placed the marker buoy."}
+{"id":"q018","source_id":"q018","category":"supersession","reference_answer":"No. The documented owner remains Velasco Brothers Fishing Co., LLC. The 'lost at sea' status flag does not by itself transfer title or alter ownership of record."}
+{"id":"q019","source_id":"q019","category":"supersession","reference_answer":"No. Per the memo, the insurance settlement does not by itself transfer title to the wreck absent a written assignment."}
+{"id":"q020","source_id":"q020","category":"status_at_time","reference_answer":"No. The instrument has not been executed; it is on file as Exhibit I-2 in unexecuted form."}
+{"id":"q021","source_id":"q021","category":"status_at_time","reference_answer":"Position B (43°48.4'N, 069°07.7'W), per Yusuf Banerjee's April 11, 2026 dive."}
+{"id":"q022","source_id":"q022","category":"status_at_time","reference_answer":"The wreck (hull listed approximately 35° to starboard at Position B), and a yellow polyball surface buoy approximately 40 meters east of the wreck stenciled VELASCO BROS FISHING, with a subsurface line down to a small Danforth-style anchor placed on the hull aft section. The buoy and anchor were placed by Velasco Brothers on April 6 and were not present on Lindgren's April 9 dive."}
+{"id":"q023","source_id":"q023","category":"status_at_time","reference_answer":"No. Originally scheduled for April 22 but weather-postponed; rescheduled to May 2, 2026. Not yet performed as of the April 30 packet date."}
+{"id":"q024","source_id":"q024","category":"status_at_time","reference_answer":"No determination on the salvage award. The court declined to enter a determination on salvage award until ownership is settled. Salvor's pre-recovery survey activity may continue without prejudice; recovery operations shall not commence until further order of the court."}
+{"id":"q025","source_id":"q025","category":"rule_application","reference_answer":"A written assignment is required. Per Maine common law and applicable federal admiralty principles cited in the memo, the insurance settlement does not by itself transfer title absent a written assignment."}
+{"id":"q026","source_id":"q026","category":"rule_application","reference_answer":"Pre-recovery survey activity may continue without prejudice. Recovery operations shall not commence until further order of the court."}
+{"id":"q027","source_id":"q027","category":"rule_application","reference_answer":"No. The 'lost at sea' status flag does not by itself transfer title or alter ownership of record; the documented owner remains until a registered transfer instrument is filed."}
+{"id":"q028","source_id":"q028","category":"rule_application","reference_answer":"The International Convention on Salvage 1989 (incorporated under 46 U.S.C. § 80107) and U.S. common law of salvage."}
+{"id":"q029","source_id":"q029","category":"rule_application","reference_answer":"Federal Magistrate Judge Helena Kovacs, the assigned judge in the salvage case."}
+{"id":"q030","source_id":"q030","category":"count","reference_answer":"Two: the USCG side-scan sonar survey on March 24, 2026, and the Penobscot Marine multibeam sonar survey on April 5, 2026. The post-storm verification rescheduled to May 2 has not been performed."}
+{"id":"q031","source_id":"q031","category":"count","reference_answer":"Approximately 220 meters northeast."}
+{"id":"q032","source_id":"q032","category":"count","reference_answer":"Three parties: Velasco Brothers Fishing Co. (Atty. Erin Halloran), Penobscot Marine Salvage (Atty. Stephen O'Neill), and North Atlantic Marine Mutual (Atty. Beatriz Ndongo)."}
+{"id":"q033","source_id":"q033","category":"count","reference_answer":"April 5: Penobscot Marine sonar survey (Position B), report v1.0. April 6: Velasco Brothers buoy placed; salvor's draft notice withdrawn. April 7: survey report erratum (v1.1)."}
+{"id":"q034","source_id":"q034","category":"unresolved","reference_answer":"No. The court declined to enter a determination on salvage award until ownership is settled."}
+{"id":"q035","source_id":"q035","category":"unresolved","reference_answer":"No. The April 5 survey report records both interpretations and does not adjudicate between them; no subsequent adjudication has resolved the question."}
+{"id":"q036","source_id":"q036","category":"unresolved","reference_answer":"No. Rescheduled to May 2, 2026; not yet performed as of packet time."}
+{"id":"q037","source_id":"q037","category":"unresolved","reference_answer":"No. Referred to merits briefing; not yet adjudicated."}
+{"id":"q038","source_id":"q038","category":"cross_source_conflict","reference_answer":"84 meters is currently authoritative. The original April 5 survey report (v1.0) listed '84 feet' in §3.2; the April 7 erratum corrected the value to 84 meters. The corrected report v1.1 supersedes the original. The Position A and Position B coordinates were not affected by this correction."}
+{"id":"q039","source_id":"q039","category":"cross_source_conflict","reference_answer":"Neither has been adjudicated. The April 5 survey report records both interpretations (the wreck did not move and Position A was imprecise; or the wreck drifted approximately 220 meters). The report does not adjudicate, and no subsequent adjudication has resolved the question."}
+{"id":"q040","source_id":"q040","category":"cross_source_conflict","reference_answer":"Title has not been determined to have transferred. The documented owner of record remains Velasco Brothers Fishing Co., LLC. Per the Magistrate Judge's April 28 memo, the insurance settlement does not by itself transfer title to the wreck absent a written assignment; no such instrument has been executed; and no determination on ownership has been issued."}
+

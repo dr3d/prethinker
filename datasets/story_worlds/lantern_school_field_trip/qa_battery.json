@@ -1,0 +1,322 @@
+[
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q001",
+    "question": "How many students went on the field trip?",
+    "reference_answer": "32",
+    "source_id": "q001"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q002",
+    "question": "Who was the lead teacher?",
+    "reference_answer": "Ms. Naomi Strand",
+    "source_id": "q002"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q003",
+    "question": "Name the four chaperones at departure.",
+    "reference_answer": "Ms. Naomi Strand, Mr. Edgar Tullis, Ms. Pia Okafor, and parent volunteer Mr. Henrik Jostad",
+    "source_id": "q003"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q004",
+    "question": "Which group was Cosmo originally assigned to?",
+    "reference_answer": "Red Group",
+    "source_id": "q004"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q005",
+    "question": "Why did Cosmo miss the Day 1 afternoon session?",
+    "reference_answer": "He reported feeling unwell at 11:00 on Day 1, was sent back to the coach, and remained there through the afternoon.",
+    "source_id": "q005"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q006",
+    "question": "Who supervised Blue Group on the northern dune path after 11:00 on Day 1?",
+    "reference_answer": "Ms. Strand. Mr. Tullis transferred Blue Group to Ms. Strand when he went to stay with Cosmo.",
+    "source_id": "q006"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q007",
+    "question": "What was Mr. Tullis doing from 11:00 to 12:30 on Day 1?",
+    "reference_answer": "Staying with Cosmo at the coach",
+    "source_id": "q007"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q008",
+    "question": "Were group designations maintained during the Day 1 afternoon beach survey?",
+    "reference_answer": "No. Group designations were suspended during the afternoon beach survey. Students worked in mixed-group pairs assigned by the beach ranger.",
+    "source_id": "q008"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q009",
+    "question": "Who was Hana paired with during the beach survey?",
+    "reference_answer": "Niles (Blue Group)",
+    "source_id": "q009"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q010",
+    "question": "How many students attended the Day 1 afternoon session?",
+    "reference_answer": "31. Cosmo remained at the coach.",
+    "source_id": "q010"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q011",
+    "question": "Did Cosmo participate on Day 2?",
+    "reference_answer": "Yes. Cosmo returned to participation on Day 2 and rejoined Red Group.",
+    "source_id": "q011"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q012",
+    "question": "Why did Mr. Jostad leave on Day 2?",
+    "reference_answer": "A family emergency",
+    "source_id": "q012"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q013",
+    "question": "Which Yellow Group students joined Blue Group on Day 2?",
+    "reference_answer": "Yara, Ziv, and Arden B. (Arden Banerjee)",
+    "source_id": "q013"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q014",
+    "question": "Which Yellow Group students joined Green Group on Day 2?",
+    "reference_answer": "Brigid, Cleo, Dion, Elio, and Freya",
+    "source_id": "q014"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q015",
+    "question": "How many students were in Green Group after the Day 2 reassignment?",
+    "reference_answer": "13 students: the original 8 Green Group members plus Brigid, Cleo, Dion, Elio, and Freya from Yellow Group",
+    "source_id": "q015"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q016",
+    "question": "Who supervised Station B at the tide pools?",
+    "reference_answer": "Freya, the oldest student present. She was asked by Ms. Okafor to keep watch, but she was a student, not a chaperone.",
+    "source_id": "q016"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q017",
+    "question": "According to Freya, what was Elio reaching for when he slipped?",
+    "reference_answer": "A starfish",
+    "source_id": "q017"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q018",
+    "question": "According to Brigid, what was Elio reaching for?",
+    "reference_answer": "A crab",
+    "source_id": "q018"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q019",
+    "question": "According to Freya, who applied the bandage?",
+    "reference_answer": "Freya claims she (Freya) applied the bandage.",
+    "source_id": "q019"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q020",
+    "question": "According to Brigid, who applied the bandage?",
+    "reference_answer": "Brigid claims she (Brigid) applied the bandage, and that Freya was facing away.",
+    "source_id": "q020"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q021",
+    "question": "Does Ms. Okafor's report confirm who applied the bandage?",
+    "reference_answer": "No. Ms. Okafor arrived after the bandage was already applied and noted both Freya and Brigid were next to Elio. She did not determine who applied it.",
+    "source_id": "q021"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q022",
+    "question": "Does Ms. Okafor's report confirm whether Dion's contact was accidental or intentional?",
+    "reference_answer": "No. Ms. Okafor states she cannot confirm whether Dion's contact was accidental or intentional, as she only observed the aftermath.",
+    "source_id": "q022"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q023",
+    "question": "Was Mr. Jostad present during the tide pool incident?",
+    "reference_answer": "No. Mr. Jostad departed at noon and the tide pool incident occurred at approximately 10:45. However, Mr. Jostad had already informed Ms. Strand he needed to leave by noon, and Yellow Group had been reassigned. He was not at the tide pool station.",
+    "source_id": "q023"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q024",
+    "question": "What time did Ms. Okafor arrive at Station B?",
+    "reference_answer": "10:52",
+    "source_id": "q024"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q025",
+    "question": "Which students were at Station A during the tide pool session?",
+    "reference_answer": "Quinn, Rafe, Suki, Tamsin, Uriel, Vera, Willem, and Xiomara (the original Green Group members)",
+    "source_id": "q025"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q026",
+    "question": "Which students were at Station B?",
+    "reference_answer": "Brigid, Cleo, Dion, Elio, and Freya (the former Yellow Group members)",
+    "source_id": "q026"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q027",
+    "question": "Who twisted their ankle on the cliff walk?",
+    "reference_answer": "Lotte (Blue Group)",
+    "source_id": "q027"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q028",
+    "question": "Who supervised Blue Group after Lotte's injury on Day 2 afternoon?",
+    "reference_answer": "Ms. Strand. Mr. Tullis escorted Lotte back to the coach, so Ms. Strand took over Blue Group.",
+    "source_id": "q028"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q029",
+    "question": "Which group was Maeve in during the final observation point on Day 2?",
+    "reference_answer": "Green Group (she swapped from Blue to Green for the final observation point)",
+    "source_id": "q029"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q030",
+    "question": "Which group was Vera in during the final observation point on Day 2?",
+    "reference_answer": "Blue Group (she swapped from Green to Blue for the final observation point)",
+    "source_id": "q030"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q031",
+    "question": "How many chaperones were present on Day 3?",
+    "reference_answer": "Three. Mr. Jostad did not return on Day 3.",
+    "source_id": "q031"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q032",
+    "question": "Which students formed Shore Team on Day 3?",
+    "reference_answer": "Red and Blue students — 19 students total. Maeve returned to Blue Group and Vera returned to Green Group for this division.",
+    "source_id": "q032"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q033",
+    "question": "What role was Lotte assigned on Day 3?",
+    "reference_answer": "The recording clipboard instead of active collection, because of her wrapped ankle",
+    "source_id": "q033"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q034",
+    "question": "What was found on the beach on Day 3?",
+    "reference_answer": "A sealed container marked 'CAUTION — AGRICULTURAL' washed up near the high-tide line",
+    "source_id": "q034"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q035",
+    "question": "Did any students touch the sealed container?",
+    "reference_answer": "No. Ms. Strand instructed students to stay back.",
+    "source_id": "q035"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q036",
+    "question": "What did the coast guard determine about the container?",
+    "reference_answer": "It was an empty fertilizer drum and posed no hazard.",
+    "source_id": "q036"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q037",
+    "question": "How many students were on the return coach?",
+    "reference_answer": "All 32",
+    "source_id": "q037"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q038",
+    "question": "What is the difference between Arden and Arden B.?",
+    "reference_answer": "Arden is Arden Marsh (Red Group). Arden B. is Arden Banerjee (Yellow Group). They are different students.",
+    "source_id": "q038"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q039",
+    "question": "List all incidents noted in Ms. Strand's trip completion report.",
+    "reference_answer": "One illness (Cosmo, Day 1 morning), one minor injury (Elio, Day 2 tide pool), one sprained ankle (Lotte, Day 2 cliff), one chaperone early departure (Jostad, Day 2 noon), one hazardous material report (empty drum, Day 3), and two unresolved incident report discrepancies (Freya vs Brigid).",
+    "source_id": "q039"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q040",
+    "question": "Are the discrepancies between Freya's and Brigid's incident reports resolved at the end of the document?",
+    "reference_answer": "No. The discrepancies remain unresolved at the end of the document. Ms. Strand notes them as unresolved in her trip completion report.",
+    "source_id": "q040"
+  }
+]

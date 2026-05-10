@@ -1,0 +1,322 @@
+[
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q001",
+    "question": "Who is the hearing officer?",
+    "reference_answer": "Constance Drury",
+    "source_id": "q001"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q002",
+    "question": "What is the width of the disputed land strip?",
+    "reference_answer": "2.4 meters",
+    "source_id": "q002"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q003",
+    "question": "Which survey does Edwin Fenn rely on to support his claim?",
+    "reference_answer": "The 1987 Hargreaves & Lowell survey",
+    "source_id": "q003"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q004",
+    "question": "When was the Hargreaves survey conducted?",
+    "reference_answer": "1987",
+    "source_id": "q004"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q005",
+    "question": "What year did James Hargreaves's surveyor certification lapse?",
+    "reference_answer": "1994",
+    "source_id": "q005"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q006",
+    "question": "What two features are located on the disputed strip?",
+    "reference_answer": "A stone well and a mature walnut tree",
+    "source_id": "q006"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q007",
+    "question": "Who represented the Gowan family at the hearing?",
+    "reference_answer": "Nora Gowan",
+    "source_id": "q007"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q008",
+    "question": "What does Nora Gowan claim happened in the summer of 2003?",
+    "reference_answer": "That Malcolm Gowan and Gerald Fenn shook hands and agreed the fence would serve as the permanent boundary, with the well and walnut tree staying on the Gowan side",
+    "source_id": "q008"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q009",
+    "question": "Did Nora Gowan directly hear the conversation between Gerald and Malcolm?",
+    "reference_answer": "No. She did not hear the conversation directly. Her testimony is based on what Malcolm told her afterward.",
+    "source_id": "q009"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q010",
+    "question": "What evidence did Nora present to support the Gowan family's maintenance of the well?",
+    "reference_answer": "A receipt dated March 2004 showing the Gowan family paid for well maintenance",
+    "source_id": "q010"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q011",
+    "question": "Who confessed to diverting a well's water channel?",
+    "reference_answer": "Farmer Wynn, a fictional puppet character in the play 'The Greedy Farmer and the Honest Well.' No real party in the hearing confessed to anything.",
+    "source_id": "q011"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q012",
+    "question": "Who ruled that the well belongs to whoever dug it?",
+    "reference_answer": "Magistrate Thornberry, a fictional puppet character. This ruling has no bearing on the real hearing.",
+    "source_id": "q012"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q013",
+    "question": "Is Magistrate Thornberry a participant in the Fenn-Gowan hearing?",
+    "reference_answer": "No. Magistrate Thornberry is a fictional puppet character. The document explicitly states that Baldric, Wynn, and Thornberry are fictional and do not represent any party in the hearing.",
+    "source_id": "q013"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q014",
+    "question": "Did any party in the real hearing allege water diversion or theft?",
+    "reference_answer": "No. The document explicitly states that no party in the real hearing has alleged water diversion or theft.",
+    "source_id": "q014"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q015",
+    "question": "What did Officer Drury state about the puppet performance's relationship to the proceedings?",
+    "reference_answer": "That the performance was not part of the proceedings.",
+    "source_id": "q015"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q016",
+    "question": "What was struck from the record during the afternoon session?",
+    "reference_answer": "Nora Gowan's remark referencing the puppet judge during cross-examination of Rowan Fenn",
+    "source_id": "q016"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q017",
+    "question": "Why was Nora Gowan's reference to the puppet judge objected to?",
+    "reference_answer": "Because the puppet performance was not evidence and should not be referenced in testimony",
+    "source_id": "q017"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q018",
+    "question": "How many kilograms of walnuts does the tree produce annually according to Rowan Fenn?",
+    "reference_answer": "Approximately 40 kilograms",
+    "source_id": "q018"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q019",
+    "question": "What years were the photographs Rowan presented dated?",
+    "reference_answer": "2016 and 2019",
+    "source_id": "q019"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q020",
+    "question": "Who lives on parcel 12-A?",
+    "reference_answer": "Pauline Hatch",
+    "source_id": "q020"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q021",
+    "question": "What did Pauline Hatch observe in the summer of 2003?",
+    "reference_answer": "She observed Gerald Fenn and Malcolm Gowan speaking near the fence. They seemed friendly, Gerald was pointing at the well, Malcolm was nodding. She did not hear what was said.",
+    "source_id": "q021"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q022",
+    "question": "Did Pauline Hatch hear what Gerald and Malcolm discussed?",
+    "reference_answer": "No. She explicitly stated she did not hear what was said.",
+    "source_id": "q022"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q023",
+    "question": "What did Malcolm Gowan ask Pauline Hatch for permission to do in 2007?",
+    "reference_answer": "Permission to run a water line from the well across her property to his vegetable garden. She denied the request.",
+    "source_id": "q023"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q024",
+    "question": "How did the Voss survey boundary compare to the Hargreaves survey boundary?",
+    "reference_answer": "The Voss survey placed the boundary at 2.1 meters west of the current fence, slightly closer than the Hargreaves survey's 2.4 meters, but both place the well and walnut tree on the Fenn side.",
+    "source_id": "q024"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q025",
+    "question": "How far is the well from the corrected Voss boundary line?",
+    "reference_answer": "0.6 meters east of the corrected boundary line, placing it on Fenn land",
+    "source_id": "q025"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q026",
+    "question": "On whose land does the well sit according to the Voss survey?",
+    "reference_answer": "On Fenn land",
+    "source_id": "q026"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q027",
+    "question": "How far does the walnut tree canopy extend into Gowan airspace?",
+    "reference_answer": "3.8 meters",
+    "source_id": "q027"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q028",
+    "question": "Is the canopy overhang relevant to the boundary determination?",
+    "reference_answer": "No. Officer Drury's findings state that canopy overhang into Gowan airspace is governed by municipal arboricultural rules, not boundary determination.",
+    "source_id": "q028"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q029",
+    "question": "What did Officer Drury find about the alleged 2003 handshake agreement?",
+    "reference_answer": "That it is not supported by direct witness testimony. Both Nora Gowan and Pauline Hatch provide secondhand or observational accounts, and no written record exists.",
+    "source_id": "q029"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q030",
+    "question": "Does the well maintenance receipt establish ownership?",
+    "reference_answer": "No. Officer Drury noted the receipt for the record but stated it does not establish ownership or boundary position.",
+    "source_id": "q030"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q031",
+    "question": "Has a final boundary determination been made?",
+    "reference_answer": "No. The hearing remains open pending a 30-day evidence window. The preliminary finding is not yet a final determination.",
+    "source_id": "q031"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q032",
+    "question": "How many days does the Gowan family have to provide additional evidence?",
+    "reference_answer": "30 days from the date of the preliminary findings (September 21, 2025)",
+    "source_id": "q032"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q033",
+    "question": "What happens if no additional evidence is produced within the deadline?",
+    "reference_answer": "The preliminary finding that the surveyed boundary controls will become the final determination.",
+    "source_id": "q033"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q034",
+    "question": "What is the current legal status of the fence?",
+    "reference_answer": "The fence remains in place as a matter of practical status, not legal boundary. No boundary adjustment has been ordered.",
+    "source_id": "q034"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q035",
+    "question": "Who ordered Farmer Wynn to pay twelve silver coins?",
+    "reference_answer": "Magistrate Thornberry, a fictional puppet judge in the play. This is not a real order and has no bearing on the hearing.",
+    "source_id": "q035"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q036",
+    "question": "Did Farmer Wynn's confession have any bearing on the Fenn-Gowan proceedings?",
+    "reference_answer": "No. Farmer Wynn is a fictional puppet character. The puppet play is not part of the evidentiary record and references to it were struck.",
+    "source_id": "q036"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q037",
+    "question": "Is Edwin Fenn's testimony about his father's views based on direct knowledge of the 2003 conversation?",
+    "reference_answer": "No. Edwin acknowledged he was not present for any conversation between his father and Malcolm Gowan. His knowledge is based entirely on what Gerald told him privately.",
+    "source_id": "q037"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q038",
+    "question": "According to Officer Drury's findings, what is the range of the boundary's distance west of the current fence?",
+    "reference_answer": "Between 2.1 and 2.4 meters west of the current fence",
+    "source_id": "q038"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q039",
+    "question": "Who commissioned the Voss survey?",
+    "reference_answer": "Officer Drury commissioned the Voss survey",
+    "source_id": "q039"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q040",
+    "question": "What caused the discrepancy between the Hargreaves and Voss boundary measurements?",
+    "reference_answer": "One boundary marker post at the northern end had shifted approximately 15 centimeters due to soil movement",
+    "source_id": "q040"
+  }
+]

@@ -1,0 +1,40 @@
+{"category": "direct_fact", "id": "q001", "question": "How many Board members constitute a quorum?", "source_id": "q001"}
+{"category": "direct_fact", "id": "q002", "question": "Who is the Chair?", "source_id": "q002"}
+{"category": "direct_fact", "id": "q003", "question": "Who was absent from the October 14 meeting?", "source_id": "q003"}
+{"category": "rule_application", "id": "q004", "question": "Was there a quorum at the October 14 meeting?", "source_id": "q004"}
+{"category": "authority", "id": "q005", "question": "Why did Marsh recuse herself from the trail maintenance vote?", "source_id": "q005"}
+{"category": "authority", "id": "q006", "question": "Who presided over the trail maintenance vote?", "source_id": "q006"}
+{"category": "direct_fact", "id": "q007", "question": "What was the vote count on the trail maintenance contract?", "source_id": "q007"}
+{"category": "authority", "id": "q008", "question": "Did Marsh vote on the trail maintenance contract?", "source_id": "q008"}
+{"category": "direct_fact", "id": "q009", "question": "Did the trail maintenance contract pass?", "source_id": "q009"}
+{"category": "rule_application", "id": "q010", "question": "What is the quorum requirement during a recusal vote?", "source_id": "q010"}
+{"category": "rule_application", "id": "q011", "question": "Can the Chair make motions?", "source_id": "q011"}
+{"category": "direct_fact", "id": "q012", "question": "Who moved to approve the community garden lease?", "source_id": "q012"}
+{"category": "authority", "id": "q013", "question": "Did Marsh vote on the community garden lease?", "source_id": "q013"}
+{"category": "rule_application", "id": "q014", "question": "Why didn't Marsh vote on the community garden lease?", "source_id": "q014"}
+{"category": "direct_fact", "id": "q015", "question": "What was the vote on the community garden lease?", "source_id": "q015"}
+{"category": "direct_fact", "id": "q016", "question": "What is the value of the Alderton Design signage contract?", "source_id": "q016"}
+{"category": "rule_application", "id": "q017", "question": "Is the signage contract within the Chair's delegation authority?", "source_id": "q017"}
+{"category": "direct_fact", "id": "q018", "question": "Who received the signing delegation for the signage contract?", "source_id": "q018"}
+{"category": "rule_application", "id": "q019", "question": "When does the signing delegation expire?", "source_id": "q019"}
+{"category": "direct_fact", "id": "q020", "question": "Was an extension vote held for the delegation?", "source_id": "q020"}
+{"category": "temporal_status", "id": "q021", "question": "Did Herrera sign the signage contract before or after the delegation expired?", "source_id": "q021"}
+{"category": "authority", "id": "q022", "question": "Is Herrera's October 16 signing of the signage contract valid?", "source_id": "q022"}
+{"category": "authority", "id": "q023", "question": "Who authorized the October 3 emergency tree removal expenditure?", "source_id": "q023"}
+{"category": "temporal_status", "id": "q024", "question": "Was Marsh available on October 3?", "source_id": "q024"}
+{"category": "rule_application", "id": "q025", "question": "Under what rule did Herrera authorize the October 3 expenditure?", "source_id": "q025"}
+{"category": "rule_application", "id": "q026", "question": "Was the October 3 expenditure within the emergency spending limit?", "source_id": "q026"}
+{"category": "authority", "id": "q027", "question": "Who authorized the October 18 water main repair?", "source_id": "q027"}
+{"category": "rule_application", "id": "q028", "question": "Was the October 18 expenditure within the emergency spending limit?", "source_id": "q028"}
+{"category": "authority", "id": "q029", "question": "Why could Marsh authorize the October 18 expenditure but not the October 3 one?", "source_id": "q029"}
+{"category": "direct_fact", "id": "q030", "question": "What was the vote on ratifying the emergency tree removal expenditure?", "source_id": "q030"}
+{"category": "direct_fact", "id": "q031", "question": "Did Lowe vote to ratify the emergency expenditure?", "source_id": "q031"}
+{"category": "rule_application", "id": "q032", "question": "Can the Chair cast a tie-breaking vote?", "source_id": "q032"}
+{"category": "rule_application", "id": "q033", "question": "Can the Secretary cast a tie-breaking vote when presiding?", "source_id": "q033"}
+{"category": "rule_application", "id": "q034", "question": "If both the Chair and Vice-Chair are absent, who presides?", "source_id": "q034"}
+{"category": "rule_application", "id": "q035", "question": "Can Lowe request rescission of a contract she voted against?", "source_id": "q035"}
+{"category": "temporal_status", "id": "q036", "question": "Has the Greenline trail maintenance contract been rescinded?", "source_id": "q036"}
+{"category": "direct_fact", "id": "q037", "question": "Was any motion made on the parcel acquisition at the October 14 meeting?", "source_id": "q037"}
+{"category": "direct_fact", "id": "q038", "question": "What is the estimated price of the Whitford parcel?", "source_id": "q038"}
+{"category": "direct_fact", "id": "q039", "question": "Who confirmed Lowe's rescission request and added it to the November agenda?", "source_id": "q039"}
+{"category": "authority", "id": "q040", "question": "As of October 23, what is the unresolved authority question about the Alderton signing?", "source_id": "q040"}

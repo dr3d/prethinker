@@ -1,0 +1,322 @@
+[
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q001",
+    "question": "Who originally purchased the orchard?",
+    "reference_answer": "Idris Pritchard, in 1948",
+    "source_id": "q001"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q002",
+    "question": "How many named trees or tree units are in the orchard?",
+    "reference_answer": "Ten named trees or tree units: King Pear, Duchess Apple, Cider Row (three trees as one unit), Blenheim Orange, Quince Pair (two trees as one unit), Damson Wall, Medlar, Cherry Arch, Worcester Pearmain, and Greengage",
+    "source_id": "q002"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q003",
+    "question": "Which trees did Gethin inherit?",
+    "reference_answer": "King Pear, Duchess Apple, Cider Row, Blenheim Orange, Quince Pair, and Damson Wall (the western half)",
+    "source_id": "q003"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q004",
+    "question": "Which trees did Bronwen inherit?",
+    "reference_answer": "Medlar, Cherry Arch, Worcester Pearmain, and Greengage (the eastern half)",
+    "source_id": "q004"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q005",
+    "question": "Why did Bronwen receive a £600 equalization payment?",
+    "reference_answer": "Because the eastern half contained fewer trees than the western half",
+    "source_id": "q005"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q006",
+    "question": "Was the £600 equalization payment ever made?",
+    "reference_answer": "No. The court notes it was never made and the creditor estate has been fully distributed.",
+    "source_id": "q006"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q007",
+    "question": "What did Gethin pledge the Cider Row as security for?",
+    "reference_answer": "A £4,000 loan from a local agricultural cooperative in 1997",
+    "source_id": "q007"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q008",
+    "question": "Does the cooperative still have harvest rights to the Cider Row?",
+    "reference_answer": "No. The debt was satisfied in 2007 (acknowledged by the cooperative) and the formal release was executed in March 2009.",
+    "source_id": "q008"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q009",
+    "question": "When was the Cider Row pledge debt satisfied?",
+    "reference_answer": "2007, when the cooperative acknowledged the debt as satisfied after three harvest seasons totaling £1,350 against the £1,200 remaining debt",
+    "source_id": "q009"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q010",
+    "question": "When was the formal pledge release executed?",
+    "reference_answer": "March 2009",
+    "source_id": "q010"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q011",
+    "question": "Who has been harvesting the Medlar since 2001?",
+    "reference_answer": "Douglas Pye, Bronwen's neighbor",
+    "source_id": "q011"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q012",
+    "question": "Was the Medlar loan a transfer of ownership?",
+    "reference_answer": "No. Bronwen explicitly described it as 'a loan of harvest rights, not a transfer of ownership,' confirmed in a 2003 letter to her solicitor.",
+    "source_id": "q012"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q013",
+    "question": "Did the Medlar harvest loan survive Bronwen's death?",
+    "reference_answer": "The solicitor advised that the verbal harvest loan likely terminated on Bronwen's death since it was not a formal easement. However, this has not been adjudicated. Pye continued harvesting regardless.",
+    "source_id": "q013"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q014",
+    "question": "How many years had Pye harvested the Medlar continuously by 2019?",
+    "reference_answer": "Eighteen years (2001 to 2019)",
+    "source_id": "q014"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q015",
+    "question": "Has Pye filed a formal adverse possession claim?",
+    "reference_answer": "No. The probate court notes that Pye has not filed a formal adverse possession claim.",
+    "source_id": "q015"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q016",
+    "question": "Who did Bronwen leave her trees to in her will?",
+    "reference_answer": "Her nephew Rhodri, Gethin's son",
+    "source_id": "q016"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q017",
+    "question": "How many trees did Rhodri ultimately inherit?",
+    "reference_answer": "All twelve trees (ten named units): six from Gethin's western half and four from Bronwen's eastern half",
+    "source_id": "q017"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q018",
+    "question": "Who does Rhodri's will leave the orchard to?",
+    "reference_answer": "His daughter Ffion",
+    "source_id": "q018"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q019",
+    "question": "What evidence exists that Rhodri gifted the Greengage to Carys?",
+    "reference_answer": "A birthday card on which Rhodri wrote 'The Greengage is yours, my darling. Happy birthday.' Plus Carys has maintained and harvested the tree since 2013.",
+    "source_id": "q019"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q020",
+    "question": "Was a formal deed executed for the Greengage gift?",
+    "reference_answer": "No.",
+    "source_id": "q020"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q021",
+    "question": "Has the probate court ruled on whether the Greengage gift is valid?",
+    "reference_answer": "No. The court deferred the matter to a full hearing. It has not yet ruled on whether the card constitutes a valid gift or whether maintenance establishes an equitable claim.",
+    "source_id": "q021"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q022",
+    "question": "Who currently maintains the Greengage?",
+    "reference_answer": "Carys, since 2013",
+    "source_id": "q022"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q023",
+    "question": "Who owns the Blenheim Orange?",
+    "reference_answer": "Wye Valley Pressings, since 2016",
+    "source_id": "q023"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q024",
+    "question": "Is the Blenheim Orange physically in the orchard?",
+    "reference_answer": "Yes. It remains physically in the orchard under an access agreement for annual harvest.",
+    "source_id": "q024"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q025",
+    "question": "Who sold the Blenheim Orange and when?",
+    "reference_answer": "Rhodri sold it to Wye Valley Pressings in 2016 for £800 with a proper bill of sale.",
+    "source_id": "q025"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q026",
+    "question": "Is the Blenheim Orange part of Rhodri's estate?",
+    "reference_answer": "No. The probate court confirms it was validly sold.",
+    "source_id": "q026"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q027",
+    "question": "List the trees that are uncontested parts of Ffion's inheritance.",
+    "reference_answer": "King Pear, Duchess Apple, Quince Pair, Damson Wall, Cherry Arch, and Worcester Pearmain",
+    "source_id": "q027"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q028",
+    "question": "Who holds provisional control of the orchard?",
+    "reference_answer": "Ffion, provisionally, pending the Greengage hearing and any potential Medlar claim by Pye",
+    "source_id": "q028"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q029",
+    "question": "What is the current legal status of the Greengage?",
+    "reference_answer": "Disputed. Carys claims it was gifted in 2013. The probate court has deferred the question to a full hearing.",
+    "source_id": "q029"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q030",
+    "question": "What is the current legal status of the Medlar?",
+    "reference_answer": "Noted but not adjudicated. Pye has not filed a formal claim. The court observes his continuous harvest may support an adverse possession claim if filed, but no determination has been made.",
+    "source_id": "q030"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q031",
+    "question": "Who legally owns the King Pear?",
+    "reference_answer": "Ffion (uncontested inheritance)",
+    "source_id": "q031"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q032",
+    "question": "Who legally owns the Cider Row?",
+    "reference_answer": "Ffion (the pledge was satisfied and released; the Cider Row is part of the estate)",
+    "source_id": "q032"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q033",
+    "question": "Who currently possesses the Medlar (harvests it)?",
+    "reference_answer": "Douglas Pye has been harvesting it continuously, most recently through 2024",
+    "source_id": "q033"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q034",
+    "question": "Who currently possesses the Greengage (maintains it)?",
+    "reference_answer": "Carys, since 2013",
+    "source_id": "q034"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q035",
+    "question": "Does possessing a tree mean owning it in this document?",
+    "reference_answer": "No. The document explicitly distinguishes between possession (physical harvest/maintenance), ownership (legal title), inheritance, pledging, and borrowing as different states.",
+    "source_id": "q035"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q036",
+    "question": "What was Rhodri's solicitor's advice about Pye's harvest rights?",
+    "reference_answer": "That the verbal harvest loan likely terminated on Bronwen's death since it was not a formal easement, but that Pye could argue adverse possession if he had harvested continuously and openly for twelve or more years",
+    "source_id": "q036"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q037",
+    "question": "What is the probate court's position on the Medlar?",
+    "reference_answer": "It is noted but not adjudicated. The court observes Pye's continuous harvest may support an adverse possession claim if filed, but makes no determination.",
+    "source_id": "q037"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q038",
+    "question": "What would the cooperative's total harvest have been over three seasons?",
+    "reference_answer": "Approximately £1,350 (approximately £450 per season over three seasons: 2005, 2006, 2007)",
+    "source_id": "q038"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q039",
+    "question": "Did the cooperative over-recover on the Cider Row debt?",
+    "reference_answer": "Yes. The outstanding debt was £1,200 and the cooperative harvested approximately £1,350, an over-recovery of approximately £150.",
+    "source_id": "q039"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q040",
+    "question": "List all items or obligations whose ownership, possession, or legal status remains unresolved at the end of the document.",
+    "reference_answer": "The Greengage (disputed gift, deferred to full hearing), the Medlar (Pye's harvest rights and potential adverse possession claim, not adjudicated), and the £600 equalization payment (historical debt, creditor estate fully distributed, no action taken)",
+    "source_id": "q040"
+  }
+]

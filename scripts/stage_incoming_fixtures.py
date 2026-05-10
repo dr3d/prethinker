@@ -16,6 +16,8 @@ import argparse
 import json
 import re
 import shutil
+import tempfile
+import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -39,7 +41,11 @@ def main() -> int:
     root = args.root if args.root.is_absolute() else REPO_ROOT / args.root
     out_root = args.out_root if args.out_root.is_absolute() else REPO_ROOT / args.out_root
     selected = {str(item).strip() for item in args.fixture if str(item).strip()}
-    fixture_dirs = [path for path in sorted(root.iterdir()) if path.is_dir()]
+    fixture_dirs = [
+        path
+        for path in sorted(root.iterdir())
+        if path.is_dir() or (path.is_file() and path.suffix.casefold() == ".zip")
+    ]
     if selected:
         fixture_dirs = [path for path in fixture_dirs if path.name in selected]
     report = stage_fixtures(fixture_dirs=fixture_dirs, out_root=out_root)
@@ -66,29 +72,51 @@ def stage_fixtures(*, fixture_dirs: list[Path], out_root: Path) -> dict[str, Any
         },
         "fixtures": fixtures,
     }
-    (out_root / "stage_manifest.json").write_text(
-        json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True),
-        encoding="utf-8",
-    )
+    if out_root.resolve() != (REPO_ROOT / "datasets" / "story_worlds").resolve():
+        (out_root / "stage_manifest.json").write_text(
+            json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True),
+            encoding="utf-8",
+        )
     return manifest
 
 
 def stage_fixture(path: Path, *, out_root: Path) -> dict[str, Any]:
-    out_dir = out_root / path.name
+    original_path = path
+    fixture_name = path.stem if path.is_file() and path.suffix.casefold() == ".zip" else path.name
+    zip_temp: tempfile.TemporaryDirectory[str] | None = None
+    if path.is_file() and path.suffix.casefold() == ".zip":
+        zip_temp = tempfile.TemporaryDirectory(prefix=f"prethinker_stage_{fixture_name}_")
+        extracted_root = Path(zip_temp.name)
+        try:
+            with zipfile.ZipFile(path) as archive:
+                archive.extractall(extracted_root)
+        except zipfile.BadZipFile:
+            zip_temp.cleanup()
+            return {"fixture": fixture_name, "status": "fail", "errors": ["zip_read_error:bad_zip_file"]}
+        path = _fixture_payload_dir(extracted_root, fallback_name=fixture_name)
+    else:
+        path = _fixture_payload_dir(path, fallback_name=fixture_name)
+
+    out_dir = out_root / fixture_name
     errors: list[str] = []
     source_path = _source_asset(path)
     raw_qa_path = path / "qa.jsonl"
     qa_md_path = path / "qa.md"
     oracle_path = path / "oracle.jsonl"
+    sealed_questions_path = path / "qa_questions.md"
+    sealed_answers_path = path / "qa_answers_private.jsonl"
 
     if source_path is None:
-        errors.append("missing_source.md_or_turns.md")
+        errors.append("missing_source.md_story.md_or_turns.md")
     raw_authoring = raw_qa_path.exists()
     isolated_authoring = qa_md_path.exists() and oracle_path.exists()
-    if not raw_authoring and not isolated_authoring:
-        errors.append("missing_qa.jsonl_or_qa.md_plus_oracle.jsonl")
+    sealed_authoring = sealed_questions_path.exists() and sealed_answers_path.exists()
+    if not raw_authoring and not isolated_authoring and not sealed_authoring:
+        errors.append("missing_qa.jsonl_or_qa.md_plus_oracle.jsonl_or_sealed_story_qa")
     if errors:
-        return {"fixture": path.name, "status": "fail", "errors": errors}
+        if zip_temp is not None:
+            zip_temp.cleanup()
+        return {"fixture": fixture_name, "status": "fail", "errors": errors}
 
     if raw_authoring:
         rows = _load_raw_qa_rows(raw_qa_path)
@@ -101,7 +129,7 @@ def stage_fixture(path: Path, *, out_root: Path) -> dict[str, Any]:
         ]
         if missing_answers:
             errors.append(f"qa_rows_missing_answer:{','.join(missing_answers[:8])}")
-    else:
+    elif isolated_authoring:
         rows = _load_isolated_qa_rows(qa_md_path=qa_md_path, oracle_path=oracle_path)
         if not rows:
             errors.append("qa_row_count_expected_positive_got_0")
@@ -112,8 +140,21 @@ def stage_fixture(path: Path, *, out_root: Path) -> dict[str, Any]:
         ]
         if missing_answers:
             errors.append(f"qa_rows_missing_answer:{','.join(missing_answers[:8])}")
+    else:
+        rows = _load_sealed_story_rows(qa_md_path=sealed_questions_path, private_answers_path=sealed_answers_path)
+        if len(rows) != 40:
+            errors.append(f"qa_row_count_expected_40_got_{len(rows)}")
+        missing_answers = [
+            str(row.get("source_id") or row.get("id") or index + 1)
+            for index, row in enumerate(rows)
+            if not str(row.get("answer", "")).strip()
+        ]
+        if missing_answers:
+            errors.append(f"qa_rows_missing_answer:{','.join(missing_answers[:8])}")
     if errors:
-        return {"fixture": path.name, "status": "fail", "errors": errors}
+        if zip_temp is not None:
+            zip_temp.cleanup()
+        return {"fixture": fixture_name, "status": "fail", "errors": errors}
 
     out_dir.mkdir(parents=True, exist_ok=True)
     assert source_path is not None
@@ -121,28 +162,49 @@ def stage_fixture(path: Path, *, out_root: Path) -> dict[str, Any]:
     shutil.copyfile(source_path, out_dir / "story.md")
     if source_path.name == "turns.md":
         shutil.copyfile(source_path, out_dir / "turns.md")
+    if source_path.name == "story.md" and (path / "source.md").exists():
+        shutil.copyfile(path / "source.md", out_dir / "source_authored.md")
     if (path / "fixture_notes.md").exists():
         shutil.copyfile(path / "fixture_notes.md", out_dir / "fixture_notes.md")
+    elif (path / "challenge_strategy.md").exists():
+        shutil.copyfile(path / "challenge_strategy.md", out_dir / "fixture_notes.md")
     else:
-        (out_dir / "fixture_notes.md").write_text(_render_fixture_notes(fixture=path.name), encoding="utf-8")
+        (out_dir / "fixture_notes.md").write_text(_render_fixture_notes(fixture=fixture_name), encoding="utf-8")
+    if (path / "challenge_strategy.md").exists():
+        shutil.copyfile(path / "challenge_strategy.md", out_dir / "challenge_strategy.md")
+    if (path / "anti_leakage_manifest.md").exists():
+        shutil.copyfile(path / "anti_leakage_manifest.md", out_dir / "anti_leakage_manifest.md")
     if (path / "expected_failure_modes.md").exists():
         shutil.copyfile(path / "expected_failure_modes.md", out_dir / "expected_failure_modes.md")
     if raw_authoring:
         shutil.copyfile(raw_qa_path, out_dir / "qa_authored_with_answers.jsonl")
-    else:
+    elif isolated_authoring:
         shutil.copyfile(qa_md_path, out_dir / "qa_source.md")
         shutil.copyfile(oracle_path, out_dir / "oracle_authored.jsonl")
+    else:
+        shutil.copyfile(sealed_questions_path, out_dir / "qa_source.md")
+        shutil.copyfile(sealed_answers_path, out_dir / "oracle_authored.jsonl")
+        shutil.copyfile(sealed_answers_path, out_dir / "qa_answers_private.jsonl")
     (out_dir / "qa_questions.jsonl").write_text(_render_question_jsonl(rows), encoding="utf-8")
     (out_dir / "oracle.jsonl").write_text(_render_oracle_jsonl(rows), encoding="utf-8")
     (out_dir / "qa_battery.json").write_text(
         json.dumps(_render_qa_battery(rows), ensure_ascii=False, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
-    (out_dir / "qa.md").write_text(_render_qa_markdown(fixture=path.name, rows=rows), encoding="utf-8")
-    (out_dir / "README.md").write_text(_render_readme(fixture=path.name, qa_rows=len(rows)), encoding="utf-8")
-    _write_progress_scaffold(out_dir=out_dir, fixture=path.name, source_path=source_path, qa_rows=len(rows))
-    return {
-        "fixture": path.name,
+    (out_dir / "qa.md").write_text(_render_qa_markdown(fixture=fixture_name, rows=rows), encoding="utf-8")
+    if (path / "README.md").exists():
+        shutil.copyfile(path / "README.md", out_dir / "README.authored.md")
+    (out_dir / "README.md").write_text(_render_readme(fixture=fixture_name, qa_rows=len(rows)), encoding="utf-8")
+    source_label = _display_path(original_path) if original_path.suffix.casefold() == ".zip" else _display_path(source_path.parent)
+    _write_progress_scaffold(
+        out_dir=out_dir,
+        fixture=fixture_name,
+        source_path=source_path,
+        qa_rows=len(rows),
+        source_label=source_label,
+    )
+    result = {
+        "fixture": fixture_name,
         "status": "staged",
         "path": _display_path(out_dir),
         "qa_rows": len(rows),
@@ -151,6 +213,9 @@ def stage_fixture(path: Path, *, out_root: Path) -> dict[str, Any]:
         "qa_file": _display_path(out_dir / "qa.md"),
         "oracle_jsonl": _display_path(out_dir / "oracle.jsonl"),
     }
+    if zip_temp is not None:
+        zip_temp.cleanup()
+    return result
 
 
 def _source_asset(path: Path) -> Path | None:
@@ -159,6 +224,19 @@ def _source_asset(path: Path) -> Path | None:
         if candidate.exists():
             return candidate
     return None
+
+
+def _fixture_payload_dir(path: Path, *, fallback_name: str) -> Path:
+    if not path.exists() or not path.is_dir():
+        return path
+    present = {child.name for child in path.iterdir()}
+    if present & {"source.md", "story.md", "turns.md", "qa.jsonl", "qa.md", "qa_questions.md"}:
+        return path
+    children = [child for child in path.iterdir() if child.is_dir()]
+    if len(children) == 1:
+        return children[0]
+    named = path / fallback_name
+    return named if named.exists() and named.is_dir() else path
 
 
 def _load_raw_qa_rows(path: Path) -> list[dict[str, Any]]:
@@ -191,6 +269,26 @@ def _load_isolated_qa_rows(*, qa_md_path: Path, oracle_path: Path) -> list[dict[
     return rows
 
 
+def _load_sealed_story_rows(*, qa_md_path: Path, private_answers_path: Path) -> list[dict[str, Any]]:
+    questions = _load_markdown_questions(qa_md_path)
+    oracle = _load_oracle_rows(private_answers_path)
+    rows: list[dict[str, Any]] = []
+    for question in questions:
+        qid = str(question.get("id", "")).strip()
+        answer = oracle.get(qid, {})
+        rows.append(
+            {
+                "id": qid,
+                "source_id": str(answer.get("source_id") or qid),
+                "category": str(answer.get("category") or answer.get("behavior") or "").strip(),
+                "behavior": str(answer.get("behavior") or "").strip(),
+                "question": str(question.get("question", "")).strip(),
+                "answer": str(answer.get("reference_answer") or answer.get("answer") or "").strip(),
+            }
+        )
+    return rows
+
+
 def _load_markdown_questions(path: Path) -> list[dict[str, str]]:
     questions: list[dict[str, str]] = []
     for line in path.read_text(encoding="utf-8-sig").splitlines():
@@ -199,7 +297,11 @@ def _load_markdown_questions(path: Path) -> list[dict[str, str]]:
             continue
         qid = ""
         question = ""
-        qid_match = re.match(r"^(q\d{1,4})\s*:\s*(.*\S)\s*$", stripped, flags=re.IGNORECASE)
+        qid_match = re.match(
+            r"^\*{0,2}(q\d{1,4})[\.:]\*{0,2}\s*(.*\S)\s*$",
+            stripped,
+            flags=re.IGNORECASE,
+        )
         numbered_match = re.match(r"^(\d+)\.\s+(.*\S)\s*$", stripped)
         if qid_match:
             qid = f"q{int(qid_match.group(1)[1:]):03d}"
@@ -322,8 +424,16 @@ def _render_fixture_notes(*, fixture: str) -> str:
     )
 
 
-def _write_progress_scaffold(*, out_dir: Path, fixture: str, source_path: Path, qa_rows: int) -> None:
+def _write_progress_scaffold(
+    *,
+    out_dir: Path,
+    fixture: str,
+    source_path: Path,
+    qa_rows: int,
+    source_label: str | None = None,
+) -> None:
     prefix = _run_prefix(fixture)
+    admission_date = datetime.now(timezone.utc).date().isoformat()
     journal = out_dir / "progress_journal.md"
     metrics = out_dir / "progress_metrics.jsonl"
     if not journal.exists():
@@ -339,11 +449,11 @@ def _write_progress_scaffold(*, out_dir: Path, fixture: str, source_path: Path, 
                     "",
                     f"## {prefix}-000 - Fixture Admission",
                     "",
-                    "Date: 2026-05-04",
+                    f"Date: {admission_date}",
                     "",
                     "Evidence lane: `fixture_admission`",
                     "",
-                    f"Source admitted from: `{_display_path(source_path.parent)}`",
+                    f"Source admitted from: `{source_label or _display_path(source_path.parent)}`",
                     "",
                     "Files admitted:",
                     "",
@@ -368,7 +478,7 @@ def _write_progress_scaffold(*, out_dir: Path, fixture: str, source_path: Path, 
         metrics.write_text(
             json.dumps(
                 {
-                    "timestamp": "2026-05-04",
+                    "timestamp": admission_date,
                     "run_id": f"{prefix}-000",
                     "evidence_lane": "fixture_admission",
                     "compile_run": False,

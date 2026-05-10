@@ -1,0 +1,40 @@
+{"id": "q001", "source_id": "count_composition_roster", "category": "lookup", "reference_answer": "Lakeport Marine Science Center."}
+{"id": "q002", "source_id": "count_composition_roster", "category": "lookup", "reference_answer": "2026-05-22."}
+{"id": "q003", "source_id": "count_composition_roster", "category": "lookup", "reference_answer": "Mr. R. Avery, the Principal."}
+{"id": "q004", "source_id": "count_composition_roster", "category": "lookup", "reference_answer": "Ms. S. Patel, RN."}
+{"id": "q005", "source_id": "count_composition_roster", "category": "lookup", "reference_answer": "§3.2 of the Whitfield Unified School District Field Trip Policy."}
+{"id": "q006", "source_id": "count_composition_roster", "category": "lookup", "reference_answer": "§3.4."}
+{"id": "q007", "source_id": "count_composition_roster", "category": "lookup", "reference_answer": "One qualifying chaperone for every ten students on the trip-day manifest, computed as ⌈students ÷ 10⌉."}
+{"id": "q008", "source_id": "count_composition_roster", "category": "lookup", "reference_answer": "STU-1042."}
+{"id": "q009", "source_id": "count_composition_roster", "category": "lookup", "reference_answer": "STU-1187."}
+{"id": "q010", "source_id": "count_composition_roster", "category": "lookup", "reference_answer": "2026-05-19."}
+{"id": "q011", "source_id": "count_composition_roster", "category": "count", "reference_answer": "39 entries (including the duplicate listing of STU-1063 Vinokur in both 7-A and 7-B)."}
+{"id": "q012", "source_id": "count_composition_roster", "category": "count", "reference_answer": "38 distinct students."}
+{"id": "q013", "source_id": "count_composition_roster", "category": "count", "reference_answer": "38 distinct students."}
+{"id": "q014", "source_id": "count_composition_roster", "category": "count", "reference_answer": "6 entries."}
+{"id": "q015", "source_id": "count_composition_roster", "category": "count", "reference_answer": "4 students (Park, Lin, Cohen, Bauer)."}
+{"id": "q016", "source_id": "count_composition_roster", "category": "count", "reference_answer": "7 students (Pacheco, Stahl, Ardelean, Foster, Mehta, Brennan, Marrero)."}
+{"id": "q017", "source_id": "count_composition_roster", "category": "count", "reference_answer": "4 (Avery, Reyes, Cardenas, Garcia)."}
+{"id": "q018", "source_id": "count_composition_roster", "category": "count", "reference_answer": "5 adults (4 counting chaperones plus Ms. S. Patel, RN)."}
+{"id": "q019", "source_id": "count_composition_roster", "category": "composition", "reference_answer": "No. The total distinct-student count is 38 in every version. The entry count fell from 39 to 38 only because the Vinokur duplicate row was consolidated in CN-02; no student joined or left between v1.0 and v1.3 net (three swaps occurred but each was 1-in/1-out or a within-group reassignment)."}
+{"id": "q020", "source_id": "count_composition_roster", "category": "composition", "reference_answer": "No. The 7th-grade total is 18 in every version, even though the per-homeroom counts within 7th grade shifted (7-A from 5 to 4 distinct students, 7-C from 6 to 7)."}
+{"id": "q021", "source_id": "count_composition_roster", "category": "composition", "reference_answer": "STU-1019 Marrero, in Correction Notice 02, effective 2026-05-18."}
+{"id": "q022", "source_id": "count_composition_roster", "category": "composition", "reference_answer": "STU-1061 Tarrant moved from 8-C to 8-B; STU-1028 Olsen moved from 8-B to 8-C. Both remained on the trip; no addition or withdrawal."}
+{"id": "q023", "source_id": "count_composition_roster", "category": "composition", "reference_answer": "STU-1063 Vinokur appeared in both homeroom 7-A and homeroom 7-B in roster v1.0."}
+{"id": "q024", "source_id": "count_composition_roster", "category": "composition", "reference_answer": "Homeroom 7-B."}
+{"id": "q025", "source_id": "count_composition_roster", "category": "composition", "reference_answer": "STU-1042 Halpern withdrew (family conflict); STU-1187 Yates joined 8-B from the waitlist."}
+{"id": "q026", "source_id": "count_composition_roster", "category": "composition", "reference_answer": "STU-1056 Wu withdrew (medical); STU-1203 Stahl joined 7-C from the waitlist."}
+{"id": "q027", "source_id": "count_composition_roster", "category": "composition", "reference_answer": "No. Marrero remained on the trip; only the homeroom assignment changed (7-A to 7-C)."}
+{"id": "q028", "source_id": "count_composition_roster", "category": "composition", "reference_answer": "Yes. Correction Notice 03 reassigned STU-1085 Garner from Bus 2 to Bus 3 to balance bus capacity. Garner's homeroom (7-B) did not change."}
+{"id": "q029", "source_id": "count_composition_roster", "category": "temporal", "reference_answer": "2026-05-08."}
+{"id": "q030", "source_id": "count_composition_roster", "category": "temporal", "reference_answer": "2026-05-21."}
+{"id": "q031", "source_id": "count_composition_roster", "category": "authority", "reference_answer": "Ms. S. Patel, RN, is excluded under §3.4 because she accompanies the trip in a medical capacity."}
+{"id": "q032", "source_id": "count_composition_roster", "category": "authority", "reference_answer": "4 chaperones (⌈38 ÷ 10⌉ = 4)."}
+{"id": "q033", "source_id": "count_composition_roster", "category": "composition", "reference_answer": "No. The v1.0 roster had 3 counting chaperones (Avery, Reyes, Donovan) for 38 students; §3.2 required 4."}
+{"id": "q034", "source_id": "count_composition_roster", "category": "composition", "reference_answer": "Yes. The v1.3 roster has 4 counting chaperones (Avery, Reyes, Cardenas, Garcia) for 38 students; §3.2 requires 4."}
+{"id": "q035", "source_id": "count_composition_roster", "category": "count", "reference_answer": "3 flips (non-compliant in v1.0; compliant after CN-01; non-compliant after CN-02; compliant after CN-03)."}
+{"id": "q036", "source_id": "count_composition_roster", "category": "provenance", "reference_answer": "2026-05-19, in connection with Correction Notice 02."}
+{"id": "q037", "source_id": "count_composition_roster", "category": "provenance", "reference_answer": "Correction Notice 02 (CN-02)."}
+{"id": "q038", "source_id": "count_composition_roster", "category": "unresolved", "reference_answer": "2 students (STU-1075 Patel-Singh and STU-1078 Stamper). The §4.2 deadline for receipt is 17:00 on 2026-05-21. As of packet close at 16:30 on 2026-05-21 the slips had not been received; final disposition is unresolved."}
+{"id": "q039", "source_id": "count_composition_roster", "category": "authority", "reference_answer": "No. Lopez is the standby chaperone and is not counted toward the §3.2 ratio in v1.3 because Lopez is not on the trip-day manifest (per §3.5)."}
+{"id": "q040", "source_id": "count_composition_roster", "category": "negative_existential", "reference_answer": "No. STU-1056 Wu was withdrawn in Correction Notice 02 and is not on roster v1.3; STU-1203 Stahl appears in 7-C in Wu's place."}

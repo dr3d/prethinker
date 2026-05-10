@@ -1,0 +1,322 @@
+[
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q001",
+    "question": "What disease was identified at Cranesbrook?",
+    "reference_answer": "Citrus canker (Xanthomonas citri)",
+    "source_id": "q001"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q002",
+    "question": "Who is the Plant Health Inspector?",
+    "reference_answer": "Margit Solberg",
+    "source_id": "q002"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q003",
+    "question": "Which greenhouse was initially affected?",
+    "reference_answer": "GH-3",
+    "source_id": "q003"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q004",
+    "question": "How many plants were in Lot 3A?",
+    "reference_answer": "40 plants (Meyer lemon)",
+    "source_id": "q004"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q005",
+    "question": "What was Lot 3A's initial classification?",
+    "reference_answer": "Suspect",
+    "source_id": "q005"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q006",
+    "question": "Why was Lot 3B placed on precautionary hold?",
+    "reference_answer": "Due to proximity to Lot 3A within the same greenhouse (GH-3), despite showing no visible symptoms",
+    "source_id": "q006"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q007",
+    "question": "How many of the 6 sampled Lot 3A plants tested positive?",
+    "reference_answer": "4 of 6",
+    "source_id": "q007"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q008",
+    "question": "What was Lot 3A reclassified to after the lab result?",
+    "reference_answer": "Confirmed positive",
+    "source_id": "q008"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q009",
+    "question": "What was the destruction deadline for Lot 3A?",
+    "reference_answer": "September 9 (14 calendar days from the August 26 destruction order)",
+    "source_id": "q009"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q010",
+    "question": "Was Lot 3A destroyed on time?",
+    "reference_answer": "Yes, it was destroyed September 8, one day before the deadline",
+    "source_id": "q010"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q011",
+    "question": "What was the Lot 3B lab result?",
+    "reference_answer": "All 5 samples tested negative",
+    "source_id": "q011"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q012",
+    "question": "What is Lot 3B's current status?",
+    "reference_answer": "Cleared. Quarantine lifted September 5.",
+    "source_id": "q012"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q013",
+    "question": "Can Lot 3B be distributed as of October 1?",
+    "reference_answer": "Yes. Lot 3B was cleared on September 5 and may resume normal operations including distribution.",
+    "source_id": "q013"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q014",
+    "question": "Why was the quarantine expanded to GH-5?",
+    "reference_answer": "Because nursery manager Hartwell disclosed that Lot 3A plants had been temporarily moved to GH-5 on July 30 for repotting, then returned to GH-3 on August 2. This movement was not disclosed during the initial inspection.",
+    "source_id": "q014"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q015",
+    "question": "When were Lot 3A plants temporarily in GH-5?",
+    "reference_answer": "July 30 to August 2, 2025",
+    "source_id": "q015"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q016",
+    "question": "Was the July 30 movement disclosed during the initial inspection?",
+    "reference_answer": "No. It was disclosed on August 28, after the initial August 12 inspection.",
+    "source_id": "q016"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q017",
+    "question": "Why was Lot 5C NOT quarantined on August 28?",
+    "reference_answer": "Because Lot 5C arrived in GH-5 on August 5, after the Lot 3A plants were returned to GH-3 on August 2. There was no overlap exposure.",
+    "source_id": "q017"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q018",
+    "question": "How many Lot 5A samples tested positive?",
+    "reference_answer": "3 of 5",
+    "source_id": "q018"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q019",
+    "question": "What was the destruction deadline for Lot 5A?",
+    "reference_answer": "September 24 (14 calendar days from the September 10 destruction order)",
+    "source_id": "q019"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q020",
+    "question": "Was Lot 5A destroyed on time?",
+    "reference_answer": "Yes, destroyed September 23, one day before the deadline",
+    "source_id": "q020"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q021",
+    "question": "Why was Lot 5B elevated from precautionary hold to suspect?",
+    "reference_answer": "Because the adjacent Lot 5A was confirmed positive, and Lot 5B shared GH-5 with Lot 5A for the entire period since August 28",
+    "source_id": "q021"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q022",
+    "question": "Did Solberg retract the \"separate bench, no shared irrigation\" finding when elevating Lot 5B?",
+    "reference_answer": "No. Solberg did not retract the 'separate bench, no shared irrigation' fact but stated that proximity alone warranted elevated sampling given the confirmed status of the adjacent lot.",
+    "source_id": "q022"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q023",
+    "question": "What was the Lot 5B lab result?",
+    "reference_answer": "All 8 samples tested negative",
+    "source_id": "q023"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q024",
+    "question": "What is Lot 5B's current status?",
+    "reference_answer": "Cleared. Quarantine lifted September 22.",
+    "source_id": "q024"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q025",
+    "question": "What happened to 5 plants from Lot 5C on September 12?",
+    "reference_answer": "A seasonal worker mistakenly moved 5 plants from Lot 5C to the Lot 5B bench, misreading the lot tags",
+    "source_id": "q025"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q026",
+    "question": "Who caused the Lot 5C mix-up?",
+    "reference_answer": "A seasonal worker who misread the lot tags",
+    "source_id": "q026"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q027",
+    "question": "Were the moved plants returned to Lot 5C?",
+    "reference_answer": "Yes, on September 14 when Hartwell noticed the error",
+    "source_id": "q027"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q028",
+    "question": "How many Lot 5C plants were placed under quarantine?",
+    "reference_answer": "5 (only the plants that were mistakenly moved)",
+    "source_id": "q028"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q029",
+    "question": "How many Lot 5C plants were never quarantined?",
+    "reference_answer": "10 (the remaining plants that were never moved)",
+    "source_id": "q029"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q030",
+    "question": "Did the mistaken movement change the status of the 10 unmoved Lot 5C plants?",
+    "reference_answer": "No. Solberg explicitly states the action is targeted for the 5 misplaced plants only and does not change the status of the 10 unmoved plants.",
+    "source_id": "q030"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q031",
+    "question": "What was the lab result for the 5 moved Lot 5C plants?",
+    "reference_answer": "All 5 samples tested negative",
+    "source_id": "q031"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q032",
+    "question": "What is the current status of all 15 Lot 5C plants?",
+    "reference_answer": "All 15 are either not quarantined (10 plants that were never moved) or cleared (5 plants that were temporarily suspect and then cleared September 29). All can resume normal operations.",
+    "source_id": "q032"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q033",
+    "question": "How many lots were destroyed in total?",
+    "reference_answer": "Two: Lot 3A and Lot 5A",
+    "source_id": "q033"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q034",
+    "question": "How many lots were cleared?",
+    "reference_answer": "Three: Lot 3B, Lot 5B, and the 5-plant Lot 5C subset",
+    "source_id": "q034"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q035",
+    "question": "Which greenhouses are unaffected by the quarantine?",
+    "reference_answer": "GH-1, GH-2, GH-4, GH-6, GH-7, and GH-8",
+    "source_id": "q035"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q036",
+    "question": "What was Lot 5B's status on September 15?",
+    "reference_answer": "Suspect (elevated from precautionary hold on September 10 when Lot 5A was confirmed positive; not cleared until September 22)",
+    "source_id": "q036"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q037",
+    "question": "What was Lot 3B's status on August 20?",
+    "reference_answer": "Precautionary hold (placed on hold August 12, not cleared until September 5)",
+    "source_id": "q037"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q038",
+    "question": "What was Lot 5C's status on September 13?",
+    "reference_answer": "The 5 moved plants were suspect (moved to Lot 5B bench September 12, discovered and separated September 14-15, classified suspect by Solberg). The 10 unmoved plants remained not quarantined.",
+    "source_id": "q038"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q039",
+    "question": "Who supervised the destruction of Lot 3A and Lot 5A?",
+    "reference_answer": "Nursery foreman Ola Nyberg supervised both destructions. Inspector Solberg witnessed both.",
+    "source_id": "q039"
+  },
+  {
+    "behavior": "",
+    "category": "",
+    "id": "q040",
+    "question": "Is any further action recommended as of October 1?",
+    "reference_answer": "No. Solberg's closing note states the quarantine is concluded and no further action is recommended unless new symptoms are reported.",
+    "source_id": "q040"
+  }
+]

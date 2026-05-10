@@ -1,0 +1,322 @@
+[
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q001",
+    "question": "What is the current exhibit label for the .38 revolver?",
+    "reference_answer": "EX-C-01",
+    "source_id": "q001"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q002",
+    "question": "What is the current exhibit label for the Dell Latitude laptop?",
+    "reference_answer": "EX-D-04",
+    "source_id": "q002"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q003",
+    "question": "What is the current chain-of-custody slip number for the revolver?",
+    "reference_answer": "SLIP-7712A",
+    "source_id": "q003"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q004",
+    "question": "What is the current chain-of-custody slip number for the Dell Latitude laptop?",
+    "reference_answer": "SLIP-7712-A",
+    "source_id": "q004"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q005",
+    "question": "What is the current barcode for the revolver?",
+    "reference_answer": "BC-883014",
+    "source_id": "q005"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q006",
+    "question": "What was the original (later-corrected) barcode scanned for the revolver on 2026-04-04?",
+    "reference_answer": "BC-833014. This was the mistaken intake scan on 2026-04-04 and was superseded on 2026-04-08; it must not appear in current reports.",
+    "source_id": "q006"
+  },
+  {
+    "behavior": "",
+    "category": "supersession",
+    "id": "q007",
+    "question": "Which barcode scan superseded the 2026-04-04 scan of the revolver, and on what date?",
+    "reference_answer": "BC-883014, scanned 2026-04-08 by OFC-7741.",
+    "source_id": "q007"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q008",
+    "question": "At which exact bay and shelf location is the revolver stored?",
+    "reference_answer": "BAY-04-L, Shelf 3.",
+    "source_id": "q008"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q009",
+    "question": "At which exact bay/locker location is the Dell Latitude laptop stored?",
+    "reference_answer": "BAY-04-I.",
+    "source_id": "q009"
+  },
+  {
+    "behavior": "",
+    "category": "composition",
+    "id": "q010",
+    "question": "Which two near-duplicate codes are used for sub-locations within BAY-04, and what does each suffix mean?",
+    "reference_answer": "BAY-04-L (the left-side open shelving unit on the south wall) and BAY-04-I (the interior locker behind the bay's mesh door).",
+    "source_id": "q010"
+  },
+  {
+    "behavior": "",
+    "category": "provenance",
+    "id": "q011",
+    "question": "Which exhibit label was formally withdrawn on 2026-03-22?",
+    "reference_answer": "EX-C-1.",
+    "source_id": "q011"
+  },
+  {
+    "behavior": "",
+    "category": "provenance",
+    "id": "q012",
+    "question": "Which exhibit label was formally withdrawn on 2026-03-29?",
+    "reference_answer": "EX-E-9.",
+    "source_id": "q012"
+  },
+  {
+    "behavior": "",
+    "category": "composition",
+    "id": "q013",
+    "question": "To which physical item did the withdrawn label EX-E-9 previously refer, and what is that item's current label?",
+    "reference_answer": "The iPhone. Its current label is EX-E-10.",
+    "source_id": "q013"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q014",
+    "question": "What is the current label of the Samsung Galaxy?",
+    "reference_answer": "EX-E-09.",
+    "source_id": "q014"
+  },
+  {
+    "behavior": "",
+    "category": "composition",
+    "id": "q015",
+    "question": "Are EX-E-09 and EX-E-10 the same item? Briefly explain.",
+    "reference_answer": "No. EX-E-09 is the Samsung Galaxy; EX-E-10 is the iPhone. They are two physically distinct phones; only the visually adjacent numbering invites confusion.",
+    "source_id": "q015"
+  },
+  {
+    "behavior": "",
+    "category": "unresolved",
+    "id": "q016",
+    "question": "Which item has confirmed physical custody but unresolved legal disposition?",
+    "reference_answer": "The .38 revolver (EX-C-01) at BAY-04-L Shelf 3. Physical custody is confirmed; legal disposition is pending Judge Anwar's order, expected no earlier than 2026-05-20.",
+    "source_id": "q016"
+  },
+  {
+    "behavior": "",
+    "category": "count",
+    "id": "q017",
+    "question": "How many active labels remain in the master inventory after the withdrawals during the window are applied?",
+    "reference_answer": "Twelve.",
+    "source_id": "q017"
+  },
+  {
+    "behavior": "",
+    "category": "count",
+    "id": "q018",
+    "question": "How many labels were formally withdrawn during the audit window?",
+    "reference_answer": "Two: EX-C-1 (2026-03-22) and EX-E-9 (2026-03-29).",
+    "source_id": "q018"
+  },
+  {
+    "behavior": "",
+    "category": "count",
+    "id": "q019",
+    "question": "How many audit exceptions are open at packet close?",
+    "reference_answer": "Three (Exceptions A, B, and C).",
+    "source_id": "q019"
+  },
+  {
+    "behavior": "",
+    "category": "composition",
+    "id": "q020",
+    "question": "Which two folder labels and which two bin codes form a near-duplicate pair, and which item belongs in each?",
+    "reference_answer": "Folder labels EX-P-3 (financial papers, in BIN-A12) and EX-P-3B (correspondence, in BIN-A1-2).",
+    "source_id": "q020"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q021",
+    "question": "What is the receipt number for the financial papers folder?",
+    "reference_answer": "REC-A-118.",
+    "source_id": "q021"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q022",
+    "question": "What is the receipt number for the correspondence folder?",
+    "reference_answer": "REC-A-1-18.",
+    "source_id": "q022"
+  },
+  {
+    "behavior": "",
+    "category": "composition",
+    "id": "q023",
+    "question": "Which two TAG-R codes are stored on shelving row N, and to which items and shelf codes do they belong?",
+    "reference_answer": "TAG-R-9 belongs to the black canvas jacket EX-J-7 at SHELF-N-2; TAG-R-G belongs to the toolbox EX-T-2 at SHELF-N-Z.",
+    "source_id": "q023"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q024",
+    "question": "Which locker holds the currency bag, and on which floor?",
+    "reference_answer": "LK-03, in the basement.",
+    "source_id": "q024"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q025",
+    "question": "Which locker holds the USB thumb drive, and on which floor?",
+    "reference_answer": "LK-3, on the ground floor.",
+    "source_id": "q025"
+  },
+  {
+    "behavior": "",
+    "category": "composition",
+    "id": "q026",
+    "question": "Which two locker codes differ only by a leading zero, and what item is in each?",
+    "reference_answer": "LK-3 (ground floor) holds EX-U-1, the USB thumb drive; LK-03 (basement) holds EX-C-02, the currency bag of $4,200 USD.",
+    "source_id": "q026"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q027",
+    "question": "What is Auditor R. Hensel's badge number?",
+    "reference_answer": "OFC-7714.",
+    "source_id": "q027"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q028",
+    "question": "What is Property Sergeant K. Vidal's badge number?",
+    "reference_answer": "OFC-7741.",
+    "source_id": "q028"
+  },
+  {
+    "behavior": "",
+    "category": "provenance",
+    "id": "q029",
+    "question": "Which slip was voided during the window because no item had been received against it, and on what date?",
+    "reference_answer": "SLIP-7691, voided on 2026-03-19.",
+    "source_id": "q029"
+  },
+  {
+    "behavior": "",
+    "category": "provenance",
+    "id": "q030",
+    "question": "Which slip replaced the voided slip, and for which item?",
+    "reference_answer": "SLIP-7720, issued for the rebagged Sony external drive (EX-D-04R).",
+    "source_id": "q030"
+  },
+  {
+    "behavior": "",
+    "category": "supersession",
+    "id": "q031",
+    "question": "Which case-number string was corrected during the window, and what was the correction?",
+    "reference_answer": "CASE-22-O917 (with capital letter O) was corrected to CASE-22-0917 (with numeral zero) on 2026-04-15.",
+    "source_id": "q031"
+  },
+  {
+    "behavior": "",
+    "category": "provenance",
+    "id": "q032",
+    "question": "Under which case number is the packet filed?",
+    "reference_answer": "CASE-22-0917.",
+    "source_id": "q032"
+  },
+  {
+    "behavior": "",
+    "category": "composition",
+    "id": "q033",
+    "question": "Provide the four current identifiers (exhibit label, slip, barcode, location) for the .38 revolver.",
+    "reference_answer": "EX-C-01; SLIP-7712A; BC-883014; BAY-04-L Shelf 3.",
+    "source_id": "q033"
+  },
+  {
+    "behavior": "",
+    "category": "composition",
+    "id": "q034",
+    "question": "Provide the four current identifiers (exhibit label, slip, barcode, location) for the Dell Latitude laptop.",
+    "reference_answer": "EX-D-04; SLIP-7712-A; BC-883104; BAY-04-I.",
+    "source_id": "q034"
+  },
+  {
+    "behavior": "",
+    "category": "temporal",
+    "id": "q035",
+    "question": "When did the laptop EX-D-04 leave evidence custody, and to whom?",
+    "reference_answer": "Released to owner on 2026-03-12.",
+    "source_id": "q035"
+  },
+  {
+    "behavior": "",
+    "category": "temporal",
+    "id": "q036",
+    "question": "On what date did Sergeant Vidal correct the revolver's barcode?",
+    "reference_answer": "2026-04-08.",
+    "source_id": "q036"
+  },
+  {
+    "behavior": "",
+    "category": "temporal_interval",
+    "id": "q037",
+    "question": "Between which two dates was the revolver's barcode entry incorrect in the system?",
+    "reference_answer": "From 2026-04-04 (mistaken intake scan recorded as BC-833014) until 2026-04-08 (re-scan recorded as BC-883014). The packet treats those dates as the boundary events.",
+    "source_id": "q037"
+  },
+  {
+    "behavior": "",
+    "category": "negative_existential",
+    "id": "q038",
+    "question": "Has the bin-code collision between BIN-A12 and BIN-A1-2 been resolved by relabeling during the window?",
+    "reference_answer": "No. Sergeant Vidal flagged the pair for relabeling at the next intake cycle, but no relabeling occurred during this window. Exception B remains open.",
+    "source_id": "q038"
+  },
+  {
+    "behavior": "",
+    "category": "unresolved",
+    "id": "q039",
+    "question": "When is Judge Anwar's order on EX-C-01 expected?",
+    "reference_answer": "Expected no earlier than 2026-05-20. The order has not yet issued at packet close (2026-05-04); only the earliest expected date is on record.",
+    "source_id": "q039"
+  },
+  {
+    "behavior": "",
+    "category": "count",
+    "id": "q040",
+    "question": "Counting only currently active labels and excluding any item that has already been released from custody, how many items remain physically held in the evidence room?",
+    "reference_answer": "Eleven. The twelve active labels minus EX-D-04 (laptop, released 2026-03-12) leaves eleven items physically held.",
+    "source_id": "q040"
+  }
+]

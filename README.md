@@ -1,5 +1,7 @@
 # Prethinker
 
+![Semantic Lenses Plain Guide](docs/assets/Semantic%20Lenses-Plain%20Guide.png)
+
 **A governed write layer between natural language and a deterministic knowledge base.**
 
 Prethinker is a governed semantic-intake layer for turning natural-language claims into auditable symbolic state.
@@ -8,12 +10,28 @@ The core bet is simple: **the model may propose, but deterministic code decides 
 
 This is not "English to Prolog by vibes." It is a research workbench for controlled memory admission: how much semantic understanding can a strong model contribute while a deterministic runtime prevents unsafe writes, ambiguity collapse, and claim/fact confusion?
 
-Current center: a live `ui_gateway` console backed by `src/mcp_server.py`, the `semantic_router_v1 -> semantic_ir_v1` runtime path with `qwen/qwen3.6-35b-a3b`, profile-aware admission, scoped Epistemic Worlds diagnostics, multi-pass semantic compilation, and starter domain lanes for bounded medical/UMLS, legal-source intake, SEC/contracts, story worlds, and enterprise guidance.
+Current center: artifact-first semantic parallax over compiled KB packages. Prethinker compiles source material into governed `world.pl` / `epistemic.pl` state, then tests row-level QA encounters through a pegboard of measured lenses, selectors, guards, and helpers. The live `ui_gateway` console still demonstrates the same authority boundary, but the active research work is now the harness learning which semantic surface to trust for each question without giving the model write authority or answer keys.
 
 ```text
 Autolab lines up challenges.
 Prethinker produces governed artifacts.
 Codex improves the instrument.
+```
+
+```text
+compiled KB = durable state
+row = measured encounter with that state
+selector = chooses the best encounter surface
+guard = prevents a tempting wrong surface
+verdict = records what happened
+```
+
+Longer horizon:
+
+```text
+known state = filled cells
+degrees of freedom = constrained blanks
+propagation = visible recomputation, not hidden belief
 ```
 
 ![Prethinker semantic IR workspace](docs/assets/prethinker-semantic-ir-workspace.png)
@@ -35,26 +53,26 @@ Codex improves the instrument.
 
 ## Current Research Headline
 
-The active frontier is **semantic parallax**: one compile is one viewpoint.
-Prethinker is testing whether multiple constrained semantic lenses over the
-same source can build a richer symbolic surface than a single giant pass, while
-keeping the authority boundary intact.
+The active frontier is **row-gated semantic parallax**. One compile is one
+viewpoint, and one broader prompt is rarely the answer. Prethinker now treats
+each lens, registry scaffold, query helper, and selector policy as a measured
+candidate surface over frozen artifacts.
 
-The rule-ingestion frontier started in **Glass Tide** and is now transferring
-across fresh governance fixtures such as **Sable Creek** and **Avalon**. Broad
-compiles preserve rules as source records; separate rule lenses can admit
-executable clauses; runtime trials expose fanout, dormancy, unsupported body
-goals, and helper-substrate gaps before rules are promoted.
+Rows are not where truth lives. Truth lives in the compiled KB. A row is the
+scored encounter where a question tests whether that state is present,
+retrievable, and safe to answer from. The selector is the steering wheel; guards
+are the rumble strips that stop tempting but wrong surfaces from winning.
 
-The newest hard question is **row-level activation**: safe accumulated
-rule/evidence surfaces can rescue rows that need them, but global activation can
-also perturb rows that were already answered well. Prethinker is now measuring
-when to activate alternate symbolic surfaces without using oracle answers.
+The newest hard problem is no longer "can we add another lens?" It is whether
+new lenses, guards, helpers, and selector rules compress into reusable semantic
+families instead of fixture-shaped scar tissue. New guards are welcome when
+they name a question/evidence mismatch; they are suspicious when they only name
+a fixture.
 
 For the freshest orientation, read the
 [current headline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md)
 and then the
-[multi-pass compiler note](https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md).
+[selector guard rollup](https://github.com/dr3d/prethinker/blob/main/docs/SELECTOR_GUARD_FAMILY_ROLLUP.md).
 
 ## Current State
 
@@ -62,9 +80,10 @@ Read [PROJECT_STATE.md](https://github.com/dr3d/prethinker/blob/main/PROJECT_STA
 
 The short version:
 
-- `process_utterance()` is the canonical runtime entrypoint.
+- `process_utterance()` is the canonical live runtime entrypoint.
 - The UI is a manual demonstration cockpit, not a marketing page.
-- `semantic_ir_v1` is the active architecture pivot: stronger model semantics before deterministic admission.
+- Source-document research is artifact-first: compile once, freeze the KB package, then run row-level QA, selector, helper, and repair experiments against that package.
+- `semantic_ir_v1` remains the live architecture pivot: stronger model semantics before deterministic admission.
 - The console defaults to the current LM Studio `qwen/qwen3.6-35b-a3b` Semantic IR lane for manual research runs.
 - `medical@v0` is the main bounded domain profile.
 - UMLS is used as a bounded normalization and semantic-type bridge, not as a giant preloaded clinical encyclopedia.
@@ -79,6 +98,7 @@ The short version:
 - The Prolog KB is the committed truth layer; model output remains provisional until the runtime admits it.
 - Long story-like utterances can now be segmented into focused Semantic IR passes so narrative ingestion stays inspectable instead of relying on one summary-shaped model response.
 - Historical reports, old prompt snapshots, and run logs were pruned from the forward-facing tree because Git already preserves them.
+- Selector guard pressure is tracked as a design signal: the current guard surface has many explicit return sites, but they still collapse into `7` semantic families with `0` unclassified reasons. The next discipline is merge and retire before parameterizing.
 
 ## Useful Entry Points
 
@@ -119,11 +139,11 @@ Open `http://127.0.0.1:8765` for the live console.
 
 ## Reproducibility Notes
 
-The public repo currently tracks `61` pytest files under [tests/](https://github.com/dr3d/prethinker/tree/main/tests). Latest lean local full-suite verification:
+The public repo currently tracks `61` pytest files under [tests/](https://github.com/dr3d/prethinker/tree/main/tests). Current focused local verification for the newest helper/guard work:
 
 ```powershell
-python -m pytest -q
-# 647 passed
+python -m pytest tests\test_domain_bootstrap_file.py tests\test_domain_bootstrap_qa.py tests\test_qa_mode_selector.py tests\test_selector_guard_families.py -q
+# 153 passed
 ```
 
 Current high-signal evidence:
@@ -137,7 +157,9 @@ Current high-signal evidence:
 - Sable Creek Budget rule replay: a narrow rule lens plus admitted-fact signature support produced the first fresh-fixture promotion-ready public-hearing rule without gold KBs, answer keys, or Python prose interpretation.
 - Avalon Grant Committee rule replay: mapper-side rule gates skip raw Prolog negation/disjunction/comparison constructs, while helper-composed matching-fund rules remain promotion-ready; post-gate rule union reached `27 exact / 10 partial / 3 miss`.
 - Clarification Eagerness source-context regression check: `40/40` correct, `0` unsafe candidates, `0` context-write violations, and `10/10` blocked-slot coverage after the rule-admission changes.
-- Cold generalization baseline: ten source-only fixtures currently total `245 exact / 81 partial / 144 miss` across `470` QA items, making overfit and fixture-transfer visible instead of assumed.
+- Cold generalization evidence: the 2026-05-07 sealed 10-fixture story batch has a row-gated high-water of `361 exact / 16 partial / 23 miss` across `400` QA rows (`90.25%`), with zero QA write proposals in the contributing runs.
+- Incoming-6 full-40 evidence: six new 2026-05-08 fixtures moved from a cold baseline of `186 / 16 / 38` to a diagnostic row-gated high-water of `240 / 0 / 0` over `240` rows. This proves reachable surfaces, not one global compiler; the new row shapes remain selector-scoped until unlike transfer checks prove them.
+- Selector guard family rollup: `143` guard return sites, `141` unique reasons, `7` semantic families, `0` unclassified reasons. This is explicit guard discovery, not a frozen parameterized design.
 - Temporal kernel slice: admitted `before/2` facts now support deterministic `after/2`, transitive `precedes/2`, and `follows/2` queries through Prolog rules; `temporal_graph_v1` remains proposal-only unless matching candidate operations pass admission.
 - Temporal correction guard: replacement `event_on/2`, `interval_start/2`, and `interval_end/2` anchors are blocked unless the model emits an explicit retract/correction plan.
 - Historical Lava stress packs remain under `docs/data/frontier_packs/` as calibration evidence, but they are no longer treated as the active research frontier.

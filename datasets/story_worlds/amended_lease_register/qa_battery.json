@@ -1,0 +1,322 @@
+[
+  {
+    "behavior": "",
+    "category": "current_state",
+    "id": "q001",
+    "question": "What is the current monthly rent for Kettner & Associates?",
+    "reference_answer": "$4,800/month, effective August 14, 2024",
+    "source_id": "q001"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q002",
+    "question": "When does the Kettner lease expire?",
+    "reference_answer": "March 2026",
+    "source_id": "q002"
+  },
+  {
+    "behavior": "",
+    "category": "correction_provenance",
+    "id": "q003",
+    "question": "Why was Amendment A2's effective date corrected for Kettner?",
+    "reference_answer": "The market adjustment clause requires 60 days' notice. A2 was signed June 15 with a July 1 effective date, but 60 days from June 15 is August 14. The original July 1 date violated the notice requirement.",
+    "source_id": "q003"
+  },
+  {
+    "behavior": "",
+    "category": "correction_provenance",
+    "id": "q004",
+    "question": "What is the corrected effective date of Kettner's rent increase to $4,800?",
+    "reference_answer": "August 14, 2024 (corrected from July 1, 2024)",
+    "source_id": "q004"
+  },
+  {
+    "behavior": "",
+    "category": "arithmetic",
+    "id": "q005",
+    "question": "How much is the refund owed to Kettner?",
+    "reference_answer": "$600",
+    "source_id": "q005"
+  },
+  {
+    "behavior": "",
+    "category": "arithmetic",
+    "id": "q006",
+    "question": "How is the $600 refund calculated?",
+    "reference_answer": "44 days (July 1 through August 13) at $20/day differential ($4,800 - $4,500 = $300/month ≈ $20/day for the overcharge period)",
+    "source_id": "q006"
+  },
+  {
+    "behavior": "",
+    "category": "current_state",
+    "id": "q007",
+    "question": "What is the current monthly rent for Primrose Day Nursery?",
+    "reference_answer": "$3,400/month, effective September 2024",
+    "source_id": "q007"
+  },
+  {
+    "behavior": "",
+    "category": "current_state",
+    "id": "q008",
+    "question": "Is Courtyard B currently part of the Primrose lease?",
+    "reference_answer": "No. Courtyard B was superseded (removed) effective December 1, 2024.",
+    "source_id": "q008"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q009",
+    "question": "Why was Courtyard B removed?",
+    "reference_answer": "Complaints from adjacent tenants about noise during nursery outdoor time",
+    "source_id": "q009"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q010",
+    "question": "Who authorized the original addition of Courtyard B?",
+    "reference_answer": "Senior Property Manager David Pryce, who overruled Corr's recommendation against it",
+    "source_id": "q010"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q011",
+    "question": "Who recommended against adding Courtyard B?",
+    "reference_answer": "Property Manager Helen Corr",
+    "source_id": "q011"
+  },
+  {
+    "behavior": "",
+    "category": "current_state",
+    "id": "q012",
+    "question": "Can Primrose use any outdoor space currently?",
+    "reference_answer": "Courtyard C is available under a separate scheduling agreement, but it is not part of the lease.",
+    "source_id": "q012"
+  },
+  {
+    "behavior": "",
+    "category": "current_state",
+    "id": "q013",
+    "question": "Is the $2,900 draft rent reduction in effect?",
+    "reference_answer": "No. It was never signed by either party and has no legal effect.",
+    "source_id": "q013"
+  },
+  {
+    "behavior": "",
+    "category": "correction_provenance",
+    "id": "q014",
+    "question": "Why does the draft rent reduction have no legal effect?",
+    "reference_answer": "It was an unsigned draft prepared during renegotiation discussions. It was never executed by either party.",
+    "source_id": "q014"
+  },
+  {
+    "behavior": "",
+    "category": "current_state",
+    "id": "q015",
+    "question": "What is the current monthly rent for Strand Electronics?",
+    "reference_answer": "$5,900/month, effective May 2024",
+    "source_id": "q015"
+  },
+  {
+    "behavior": "",
+    "category": "current_state",
+    "id": "q016",
+    "question": "How many parking spaces does Strand have?",
+    "reference_answer": "6 spaces",
+    "source_id": "q016"
+  },
+  {
+    "behavior": "",
+    "category": "current_state",
+    "id": "q017",
+    "question": "Where are Strand's parking spaces located?",
+    "reference_answer": "4 in Lot A and 2 in Lot C (corrected from Lot B)",
+    "source_id": "q017"
+  },
+  {
+    "behavior": "",
+    "category": "correction_provenance",
+    "id": "q018",
+    "question": "Why were 2 spaces moved from Lot B to Lot C?",
+    "reference_answer": "Lot B was reassigned to another property in July 2024. The original amendment named Lot B in error. Pryce corrected it as a landlord error.",
+    "source_id": "q018"
+  },
+  {
+    "behavior": "",
+    "category": "current_state",
+    "id": "q019",
+    "question": "Does Strand currently have a right of first refusal on Suite 342?",
+    "reference_answer": "No. Strand retracted it on March 15, 2025.",
+    "source_id": "q019"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q020",
+    "question": "When was the right of first refusal retracted?",
+    "reference_answer": "March 15, 2025",
+    "source_id": "q020"
+  },
+  {
+    "behavior": "",
+    "category": "rule_application",
+    "id": "q021",
+    "question": "What did the right of first refusal require Bramwell to do?",
+    "reference_answer": "Bramwell must notify Strand before leasing Suite 342 to another party. It did not obligate Bramwell to offer Suite 342 to Strand.",
+    "source_id": "q021"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q022",
+    "question": "Who retracted the right of first refusal?",
+    "reference_answer": "Strand Electronics voluntarily withdrew it.",
+    "source_id": "q022"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q023",
+    "question": "When does the Strand lease expire?",
+    "reference_answer": "April 2028",
+    "source_id": "q023"
+  },
+  {
+    "behavior": "",
+    "category": "current_state",
+    "id": "q024",
+    "question": "Is Suite 420 currently occupied?",
+    "reference_answer": "No. It has been vacant since December 1, 2024.",
+    "source_id": "q024"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q025",
+    "question": "When did Holbrook Design's lease terminate?",
+    "reference_answer": "November 30, 2024",
+    "source_id": "q025"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q026",
+    "question": "Why did Holbrook's lease terminate?",
+    "reference_answer": "Holbrook Design exercised an early termination clause",
+    "source_id": "q026"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q027",
+    "question": "How much was the early termination fee?",
+    "reference_answer": "$8,000",
+    "source_id": "q027"
+  },
+  {
+    "behavior": "",
+    "category": "current_state",
+    "id": "q028",
+    "question": "Is the Navarro letter of intent a binding lease?",
+    "reference_answer": "No. A letter of intent is not a binding lease. It is under review.",
+    "source_id": "q028"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q029",
+    "question": "Who can authorize amendments involving common-area changes?",
+    "reference_answer": "Senior Property Manager David Pryce",
+    "source_id": "q029"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q030",
+    "question": "Who authorized the Courtyard B supersession?",
+    "reference_answer": "Pryce (Senior Property Manager)",
+    "source_id": "q030"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q031",
+    "question": "What is the rent for Primrose in the first extension year?",
+    "reference_answer": "$3,100/month (unchanged for the first extension year)",
+    "source_id": "q031"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q032",
+    "question": "What is the rent for Primrose from September 2024 onward?",
+    "reference_answer": "$3,400/month",
+    "source_id": "q032"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q033",
+    "question": "Was Corr's recommendation followed on the Courtyard B addition?",
+    "reference_answer": "No. Pryce overruled Corr's recommendation and authorized the courtyard addition.",
+    "source_id": "q033"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q034",
+    "question": "What was Kettner's original lease expiry before any amendments?",
+    "reference_answer": "March 2024 (the original 5-year lease signed March 2019)",
+    "source_id": "q034"
+  },
+  {
+    "behavior": "",
+    "category": "current_state",
+    "id": "q035",
+    "question": "What was Kettner's rent immediately before Amendment A2?",
+    "reference_answer": "$4,500/month (set by Amendment A1, effective April 2024)",
+    "source_id": "q035"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q036",
+    "question": "What was Strand's original parking allocation?",
+    "reference_answer": "4 spaces in Lot A",
+    "source_id": "q036"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q037",
+    "question": "Who is responsible for correcting the Lot B parking error?",
+    "reference_answer": "Bramwell (it was a landlord error, per Pryce's note). Strand is not at fault.",
+    "source_id": "q037"
+  },
+  {
+    "behavior": "",
+    "category": "current_state",
+    "id": "q038",
+    "question": "Is the Courtyard C scheduling agreement part of the Primrose lease?",
+    "reference_answer": "No. The Courtyard C scheduling agreement is separate from the lease.",
+    "source_id": "q038"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q039",
+    "question": "What requires Board approval?",
+    "reference_answer": "Any amendment valued over $50,000 annually",
+    "source_id": "q039"
+  },
+  {
+    "behavior": "",
+    "category": "enumeration",
+    "id": "q040",
+    "question": "List all items that have been corrected, superseded, voided, or retracted across the register.",
+    "reference_answer": "Corrected: Kettner A2 effective date (July to August), Strand parking (Lot B to Lot C). Superseded: Primrose Courtyard B (removed December 2024). Voided: Primrose unsigned draft rent reduction ($2,900). Retracted: Strand right of first refusal on Suite 342 (March 2025). Terminated: Holbrook Design early termination (November 2024).",
+    "source_id": "q040"
+  }
+]

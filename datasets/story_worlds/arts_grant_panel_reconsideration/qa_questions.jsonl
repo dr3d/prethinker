@@ -1,0 +1,40 @@
+{"category": "direct_lookup", "id": "q001", "question": "What is the application number for Rosalind Okafor-Vance?", "source_id": "q001"}
+{"category": "direct_lookup", "id": "q002", "question": "What is the funding threshold for the 2026 Emerging Artists Fellowship?", "source_id": "q002"}
+{"category": "direct_lookup", "id": "q003", "question": "Who is the panel chair?", "source_id": "q003"}
+{"category": "direct_lookup", "id": "q004", "question": "What is the standard fellowship award amount?", "source_id": "q004"}
+{"category": "direct_lookup", "id": "q005", "question": "Who discovered the score correction during the post-cycle audit?", "source_id": "q005"}
+{"category": "direct_lookup", "id": "q006", "question": "Who is the foundation's counsel?", "source_id": "q006"}
+{"category": "direct_lookup", "id": "q007", "question": "On what date was the original panel meeting held?", "source_id": "q007"}
+{"category": "direct_lookup", "id": "q008", "question": "What is the total cycle budget for the Emerging Artists Fellowship?", "source_id": "q008"}
+{"category": "provenance", "id": "q009", "question": "Which document records the corrected score sheet?", "source_id": "q009"}
+{"category": "provenance", "id": "q010", "question": "According to whose bench notes is Aragon's Artistic Merit score 38?", "source_id": "q010"}
+{"category": "provenance", "id": "q011", "question": "Which document records the counsel note on §IV.B.3?", "source_id": "q011"}
+{"category": "provenance", "id": "q012", "question": "Which source records the cycle's current fiscal balance?", "source_id": "q012"}
+{"category": "provenance", "id": "q013", "question": "What document is Okafor-Vance's reconsideration request?", "source_id": "q013"}
+{"category": "provenance", "id": "q014", "question": "Which application records Marcus Chen's recusal?", "source_id": "q014"}
+{"category": "supersession", "id": "q015", "question": "As of packet time, what is Okafor-Vance's current corrected average score?", "source_id": "q015"}
+{"category": "supersession", "id": "q016", "question": "What was Okafor-Vance's original average score before the correction?", "source_id": "q016"}
+{"category": "supersession", "id": "q017", "question": "As of packet time, has Okafor-Vance's reconsideration been granted?", "source_id": "q017"}
+{"category": "supersession", "id": "q018", "question": "Per the corrected score sheet, what is Aragon's current Artistic Merit score for application 0147?", "source_id": "q018"}
+{"category": "supersession", "id": "q019", "question": "Did the §IV.B.3 counsel note supersede the panel's original determination that Okafor-Vance's application was not fundable?", "source_id": "q019"}
+{"category": "status_at_time", "id": "q020", "question": "As of packet time, has the reconsideration docket been held?", "source_id": "q020"}
+{"category": "status_at_time", "id": "q021", "question": "As of May 6, 2026, what is the status of the Tovar conflict question?", "source_id": "q021"}
+{"category": "status_at_time", "id": "q022", "question": "As of packet time, what is the remaining cycle budget?", "source_id": "q022"}
+{"category": "status_at_time", "id": "q023", "question": "What document had Okafor-Vance filed by April 18, 2026?", "source_id": "q023"}
+{"category": "status_at_time", "id": "q024", "question": "As of packet time, has the conflict-of-interest question regarding Tovar been determined?", "source_id": "q024"}
+{"category": "rule_application", "id": "q025", "question": "Per bylaws §IV.B.3, may a scrivener's error in score transcription be corrected in-cycle?", "source_id": "q025"}
+{"category": "rule_application", "id": "q026", "question": "Per bylaws §IV.B.5, what occurs when a panelist is determined to have been ineligible to score?", "source_id": "q026"}
+{"category": "rule_application", "id": "q027", "question": "Per the May 8 counsel note, in what order must reconsiderations be funded if both Okafor-Vance and Fontaine appeals are granted?", "source_id": "q027"}
+{"category": "rule_application", "id": "q028", "question": "Per bylaws §V.A.4, how are ties in corrected score broken?", "source_id": "q028"}
+{"category": "rule_application", "id": "q029", "question": "Per bylaws §IV.B.5, if Tovar must recuse, what specifically happens to her recorded score on application 0147?", "source_id": "q029"}
+{"category": "count", "id": "q030", "question": "How many panelists scored Okafor-Vance in the original review?", "source_id": "q030"}
+{"category": "count", "id": "q031", "question": "How many fellowships have already been awarded in the 2026 cycle as of packet date?", "source_id": "q031"}
+{"category": "count", "id": "q032", "question": "If Tovar's score is dropped from the corrected score sheet, what is the resulting average for Okafor-Vance?", "source_id": "q032"}
+{"category": "count", "id": "q033", "question": "How many date-event anchors are listed from April 18, 2026 through May 11, 2026 inclusive?", "source_id": "q033"}
+{"category": "unresolved", "id": "q034", "question": "Has Counsel Romero issued the Tovar conflict-of-interest determination?", "source_id": "q034"}
+{"category": "unresolved", "id": "q035", "question": "Has the reconsideration docket been held?", "source_id": "q035"}
+{"category": "unresolved", "id": "q036", "question": "Will Okafor-Vance receive funding if her reconsideration is granted?", "source_id": "q036"}
+{"category": "unresolved", "id": "q037", "question": "Has Fontaine's reconsideration been adjudicated?", "source_id": "q037"}
+{"category": "cross_source_conflict", "id": "q038", "question": "The official tally recorded Aragon's Artistic Merit at 26; the bench notes show 38. Which is authoritative, and what bylaw governs the correction?", "source_id": "q038"}
+{"category": "cross_source_conflict", "id": "q039", "question": "The cycle has $25,000 remaining and Okafor-Vance's award would be $25,000. If Fontaine's reconsideration is also granted, can both reconsideration awards be funded immediately from cycle funds?", "source_id": "q039"}
+{"category": "cross_source_conflict", "id": "q040", "question": "The original panel rejected Okafor-Vance based on a 73.0 average. If the corrected average of 75.4 stands, does this automatically mean she is awarded the fellowship?", "source_id": "q040"}

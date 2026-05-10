@@ -1,0 +1,322 @@
+[
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q001",
+    "question": "What is the investigation packet's identifier?",
+    "reference_answer": "IIR-2026-0084.",
+    "source_id": "contradictory_evidence_packet"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q002",
+    "question": "Who compiled the packet, and on what date?",
+    "reference_answer": "J. Voskresenskaya, Office of the Facilities Inspector, on 2026-05-06.",
+    "source_id": "contradictory_evidence_packet"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q003",
+    "question": "What is T. Aldridge's badge ID?",
+    "reference_answer": "BDG-44217.",
+    "source_id": "contradictory_evidence_packet"
+  },
+  {
+    "behavior": "",
+    "category": "temporal_interval",
+    "id": "q004",
+    "question": "On what dates does the alleged unauthorized access span?",
+    "reference_answer": "The night of Friday 2026-04-17 into Saturday 2026-04-18, between approximately 22:00 and 02:00.",
+    "source_id": "contradictory_evidence_packet"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q005",
+    "question": "What time does Aldridge's authorized weekday after-hours window terminate?",
+    "reference_answer": "21:00.",
+    "source_id": "contradictory_evidence_packet"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q006",
+    "question": "Since what date has the Lab 4-C supervising-presence requirement been in force?",
+    "reference_answer": "2025-09-01.",
+    "source_id": "contradictory_evidence_packet"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q007",
+    "question": "What is the raw (uncorrected) timestamp of BAS-002?",
+    "reference_answer": "2026-04-17 22:07:34 (raw PEM-BAS-7 timestamp).",
+    "source_id": "contradictory_evidence_packet"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q008",
+    "question": "What is the timestamp of CAM-002?",
+    "reference_answer": "2026-04-17 22:54:29.",
+    "source_id": "contradictory_evidence_packet"
+  },
+  {
+    "behavior": "",
+    "category": "temporal",
+    "id": "q009",
+    "question": "What is the corrected wall-clock time of BAS-002 after applying the documented clock drift?",
+    "reference_answer": "2026-04-17 22:54:46 (raw 22:07:34 + 47 minutes 12 seconds drift correction).",
+    "source_id": "contradictory_evidence_packet"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q010",
+    "question": "What is the magnitude of PEM-BAS-7's clock drift as measured by Building Engineering on 2026-04-28?",
+    "reference_answer": "+47 minutes 12 seconds.",
+    "source_id": "contradictory_evidence_packet"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q011",
+    "question": "When was PEM-BAS-7's last successful NTP sync before the 2026-04-28 audit?",
+    "reference_answer": "2026-03-19.",
+    "source_id": "contradictory_evidence_packet"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q012",
+    "question": "Under what maintenance ticket is the BAS clock drift documented?",
+    "reference_answer": "BAS-MAINT-2026-04-28-003.",
+    "source_id": "contradictory_evidence_packet"
+  },
+  {
+    "behavior": "",
+    "category": "temporal",
+    "id": "q013",
+    "question": "What is the corrected wall-clock time of the Lab 4-C ingress event (BAS-004)?",
+    "reference_answer": "2026-04-17 22:59:00 (raw 22:11:48 + 47:12 drift correction).",
+    "source_id": "contradictory_evidence_packet"
+  },
+  {
+    "behavior": "",
+    "category": "temporal",
+    "id": "q014",
+    "question": "What is the corrected wall-clock time of the Lab 4-C egress event (BAS-005)?",
+    "reference_answer": "2026-04-18 02:41:34 (raw 01:54:22 + 47:12 drift correction).",
+    "source_id": "contradictory_evidence_packet"
+  },
+  {
+    "behavior": "",
+    "category": "arithmetic",
+    "id": "q015",
+    "question": "How long, on the corrected timeline, was the badge holder inside Lab 4-C?",
+    "reference_answer": "Approximately 3 hours 42 minutes 34 seconds (corrected ingress 22:59:00, corrected egress 02:41:34).",
+    "source_id": "contradictory_evidence_packet"
+  },
+  {
+    "behavior": "",
+    "category": "composition",
+    "id": "q016",
+    "question": "Does the BAS evidence, after clock correction, agree with the CCTV evidence on the lobby ingress time?",
+    "reference_answer": "Yes, after clock correction. The +47:12 correction brings BAS-002's raw 22:07:34 to 22:54:46, within 17 seconds of CAM-002's 22:54:29.",
+    "source_id": "contradictory_evidence_packet"
+  },
+  {
+    "behavior": "",
+    "category": "unresolved",
+    "id": "q017",
+    "question": "Does the available evidence establish that the individual who entered the lobby at 22:54 was T. Aldridge?",
+    "reference_answer": "No. The available evidence does not resolve identity. Aldridge's badge was used and a build-consistent individual is on camera, but the camera does not facially identify the individual, Aldridge denies being there, and no witness or other source places Aldridge at the scene. The packet flags this as genuinely unresolved (§3.3).",
+    "source_id": "contradictory_evidence_packet"
+  },
+  {
+    "behavior": "",
+    "category": "composition",
+    "id": "q018",
+    "question": "What does CAM-LOBBY-N reliably establish, and what does it not reliably establish?",
+    "reference_answer": "Reliable for: that a lobby entry/exit occurred and the timestamp of that event (NTP-synced). Not reliable for: positive identification of the obscured individual.",
+    "source_id": "contradictory_evidence_packet"
+  },
+  {
+    "behavior": "",
+    "category": "temporal_interval",
+    "id": "q019",
+    "question": "What is the time window during which R. Okafor was present on the 4th floor?",
+    "reference_answer": "Approximately 23:00 to 23:40 on 2026-04-17.",
+    "source_id": "contradictory_evidence_packet"
+  },
+  {
+    "behavior": "",
+    "category": "composition",
+    "id": "q020",
+    "question": "Is Okafor's testimony in conflict with the corrected BAS timeline?",
+    "reference_answer": "No. Okafor's 23:00–23:40 corridor presence is consistent with the corrected BAS timeline, on which the badge holder entered Lab 4-C at 22:59 (≈1 minute before Okafor's floor presence) and remained inside until 02:41 (≈3 hours after Okafor left). A person inside a closed lab would not generate corridor activity.",
+    "source_id": "contradictory_evidence_packet"
+  },
+  {
+    "behavior": "",
+    "category": "composition",
+    "id": "q021",
+    "question": "What does Okafor's testimony reliably establish?",
+    "reference_answer": "That there was no observable corridor activity on the 4th floor between approximately 23:00 and 23:40 on 2026-04-17.",
+    "source_id": "contradictory_evidence_packet"
+  },
+  {
+    "behavior": "",
+    "category": "composition",
+    "id": "q022",
+    "question": "What does Okafor's testimony NOT reliably establish?",
+    "reference_answer": "What occurred inside Lab 4-C (Okafor did not enter), and what occurred on the 4th floor outside the 23:00–23:40 window.",
+    "source_id": "contradictory_evidence_packet"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q023",
+    "question": "When did the Lab 4-C autoclave cycle terminate, according to LAB4C-MEM-2026-04-22?",
+    "reference_answer": "21:58 on 2026-04-17.",
+    "source_id": "contradictory_evidence_packet"
+  },
+  {
+    "behavior": "",
+    "category": "composition",
+    "id": "q024",
+    "question": "What does Dr. Hsiao's memo establish about the autoclave's state?",
+    "reference_answer": "That the autoclave cycle completed at 21:58 and was not manually closed; the unit was found in an idle-but-powered state at 09:15 on 2026-04-18; closing the cycle requires a credentialed user inside the lab.",
+    "source_id": "contradictory_evidence_packet"
+  },
+  {
+    "behavior": "",
+    "category": "negative_existential",
+    "id": "q025",
+    "question": "Does Dr. Hsiao's memo establish who was in Lab 4-C during the disputed interval?",
+    "reference_answer": "No. Hsiao explicitly disclaims personal knowledge of who, if anyone, was in Lab 4-C between 22:00 on 2026-04-17 and 09:15 on 2026-04-18.",
+    "source_id": "contradictory_evidence_packet"
+  },
+  {
+    "behavior": "",
+    "category": "composition",
+    "id": "q026",
+    "question": "What does EMAIL-001 reliably establish?",
+    "reference_answer": "That Aldridge sent a message at 19:24:52 on 2026-04-17 stating an intent to leave, with a server timestamp considered reliable.",
+    "source_id": "contradictory_evidence_packet"
+  },
+  {
+    "behavior": "",
+    "category": "composition",
+    "id": "q027",
+    "question": "What does EMAIL-001 NOT establish?",
+    "reference_answer": "Whether Aldridge actually left the building, and whether Aldridge did or did not return later. EMAIL-001 establishes intent at 19:24:52, not subsequent physical presence or absence.",
+    "source_id": "contradictory_evidence_packet"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q028",
+    "question": "What carrier sectors do Aldridge's phone pings cover, and at what approximate granularity?",
+    "reference_answer": "The pings cover (a) a sector containing the Pemberton Building and three surrounding blocks, and (b) a sector covering Aldridge's residential neighborhood approximately 4.2 km from Pemberton. Granularity is approximately 400 m.",
+    "source_id": "contradictory_evidence_packet"
+  },
+  {
+    "behavior": "",
+    "category": "temporal_interval",
+    "id": "q029",
+    "question": "Between which two ping timestamps is there no record of Aldridge's phone transacting with any tower?",
+    "reference_answer": "Between 20:47 (LOC-003) and 23:12 (LOC-004) on 2026-04-17, and between 23:12 (LOC-004) and 07:08 on 2026-04-18 (LOC-005).",
+    "source_id": "contradictory_evidence_packet"
+  },
+  {
+    "behavior": "",
+    "category": "composition",
+    "id": "q030",
+    "question": "Does the absence of phone pings near Pemberton between 19:51 and 07:08 affirmatively establish that Aldridge's phone was not at Pemberton during that window?",
+    "reference_answer": "No. The carrier note states that pings are recorded only when the device transacts with a tower, and that a powered-down or airplane-mode device generates no pings. Absence of pings near Pemberton does not affirmatively establish device location.",
+    "source_id": "contradictory_evidence_packet"
+  },
+  {
+    "behavior": "",
+    "category": "count",
+    "id": "q031",
+    "question": "How many distinct evidence sources are cataloged in §2?",
+    "reference_answer": "Six (Source A: BAS logs; Source B: CCTV; Source C: Okafor witness statement; Source D: Hsiao memo; Source E: email thread; Source F: phone location data).",
+    "source_id": "contradictory_evidence_packet"
+  },
+  {
+    "behavior": "",
+    "category": "count",
+    "id": "q032",
+    "question": "How many of the identified conflicts in §3 are timeline-resolvable?",
+    "reference_answer": "Three: §3.1 (lobby ingress timestamp disagreement), §3.2 (BAS internal-event timestamps, resolvable for ordering), and §3.5 (the 19:30 vs 19:31 departure).",
+    "source_id": "contradictory_evidence_packet"
+  },
+  {
+    "behavior": "",
+    "category": "count",
+    "id": "q033",
+    "question": "How many of the identified conflicts in §3 are genuinely unresolved at packet close?",
+    "reference_answer": "Two: §3.3 (identity of the lobby individual) and §3.4 (activity inside Lab 4-C).",
+    "source_id": "contradictory_evidence_packet"
+  },
+  {
+    "behavior": "",
+    "category": "unresolved",
+    "id": "q034",
+    "question": "What are the items the packet identifies as remaining open at close?",
+    "reference_answer": "(1) Identity of the individual who entered the lobby at 22:54 and Lab 4-C at 22:59 on the corrected timeline; (2) activity inside Lab 4-C between 22:59 and 02:41; (3) whether the autoclave's unclosed state is causally related to the in-lab presence or coincidental.",
+    "source_id": "contradictory_evidence_packet"
+  },
+  {
+    "behavior": "",
+    "category": "unresolved",
+    "id": "q035",
+    "question": "Does the packet conclude that T. Aldridge entered Lab 4-C on the night in question?",
+    "reference_answer": "No. The packet explicitly takes no position; the Inspector's role is to make the conflicts explicit for the Facilities Director's adjudication. The identity of the badge holder during the disputed events is genuinely unresolved at packet close.",
+    "source_id": "contradictory_evidence_packet"
+  },
+  {
+    "behavior": "",
+    "category": "negative_existential",
+    "id": "q036",
+    "question": "Is there any source in the record that places Aldridge inside Lab 4-C?",
+    "reference_answer": "No. No source in the record places Aldridge inside Lab 4-C. The badge BDG-44217 was used at the Lab 4-C door, but badge use does not establish identity of the holder.",
+    "source_id": "contradictory_evidence_packet"
+  },
+  {
+    "behavior": "",
+    "category": "negative_existential",
+    "id": "q037",
+    "question": "Is there any witness in the record that contradicts Aldridge's denial?",
+    "reference_answer": "No. The packet states explicitly that no witness contradicts Aldridge's denial.",
+    "source_id": "contradictory_evidence_packet"
+  },
+  {
+    "behavior": "",
+    "category": "negative_existential",
+    "id": "q038",
+    "question": "Is there CCTV coverage inside Lab 4-C or in the 4th-floor corridor?",
+    "reference_answer": "No. The packet states explicitly that there is no CCTV inside Lab 4-C or in the 4th-floor corridor; CAM-LOBBY-N covers only the lobby.",
+    "source_id": "contradictory_evidence_packet"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q039",
+    "question": "When is the Facilities Director's adjudication hearing scheduled?",
+    "reference_answer": "2026-05-19.",
+    "source_id": "contradictory_evidence_packet"
+  },
+  {
+    "behavior": "",
+    "category": "negative_existential",
+    "id": "q040",
+    "question": "Has Aldridge reported badge BDG-44217 as lost or stolen?",
+    "reference_answer": "No. The packet states explicitly that Aldridge has not reported the badge as lost or stolen.",
+    "source_id": "contradictory_evidence_packet"
+  }
+]

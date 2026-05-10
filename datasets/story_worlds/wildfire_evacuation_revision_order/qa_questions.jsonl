@@ -1,0 +1,40 @@
+{"category": "direct_lookup", "id": "q001", "question": "Who issued EO-2026-014A and at what date and time?", "source_id": "q001"}
+{"category": "direct_lookup", "id": "q002", "question": "What is the order series number for this incident?", "source_id": "q002"}
+{"category": "direct_lookup", "id": "q003", "question": "Who is the CAL FIRE incident commander?", "source_id": "q003"}
+{"category": "direct_lookup", "id": "q004", "question": "What was the estimated acreage at packet time?", "source_id": "q004"}
+{"category": "direct_lookup", "id": "q005", "question": "Who filed the map correction MC-2026-014-01?", "source_id": "q005"}
+{"category": "direct_lookup", "id": "q006", "question": "What is the form number for the Sheriff's re-entry authorization?", "source_id": "q006"}
+{"category": "direct_lookup", "id": "q007", "question": "What wind speed and direction did the NWS spot forecast confirm?", "source_id": "q007"}
+{"category": "direct_lookup", "id": "q008", "question": "Who is the USFS Forest Supervisor on the email exchange?", "source_id": "q008"}
+{"category": "provenance", "id": "q009", "question": "Which source recorded the wind shift confirmation message at 03:42?", "source_id": "q009"}
+{"category": "provenance", "id": "q010", "question": "Which document records the boundary error correction?", "source_id": "q010"}
+{"category": "provenance", "id": "q011", "question": "Which source records the eight vehicles stopped at the USFS gate at 07:35?", "source_id": "q011"}
+{"category": "provenance", "id": "q012", "question": "According to whose radio entry was the gate at MP 6 first reported as locked?", "source_id": "q012"}
+{"category": "provenance", "id": "q013", "question": "Which GIS layer encodes road jurisdiction in this packet?", "source_id": "q013"}
+{"category": "provenance", "id": "q014", "question": "Which document is the withdrawn pre-incident planning scenario?", "source_id": "q014"}
+{"category": "supersession", "id": "q015", "question": "As of packet time, what evacuation order is in force for zone TC-7?", "source_id": "q015"}
+{"category": "supersession", "id": "q016", "question": "As of packet time, what is the current GIS layer of record?", "source_id": "q016"}
+{"category": "supersession", "id": "q017", "question": "Was the v1.1 GIS layer authoritative for the Manton Knolls subdivision parcels?", "source_id": "q017"}
+{"category": "supersession", "id": "q018", "question": "As of packet time, what is the current evacuation order for the Manton Knolls subdivision?", "source_id": "q018"}
+{"category": "supersession", "id": "q019", "question": "Is EO-2026-014-DRAFT operative?", "source_id": "q019"}
+{"category": "status_at_time", "id": "q020", "question": "As of 04:30 PDT on April 15, what evacuation order applied to the Manton Knolls subdivision according to the GIS layer published at that time?", "source_id": "q020"}
+{"category": "status_at_time", "id": "q021", "question": "As of 04:30 PDT on April 15, what evacuation order should have applied to the Manton Knolls subdivision according to the corrected understanding?", "source_id": "q021"}
+{"category": "status_at_time", "id": "q022", "question": "As of packet time, has any re-entry authorization been signed for any zone?", "source_id": "q022"}
+{"category": "status_at_time", "id": "q023", "question": "At 06:02 PDT on April 15, who returned the call regarding the USFS gate, and what did he state?", "source_id": "q023"}
+{"category": "status_at_time", "id": "q024", "question": "As of packet time, has the Tehama County Board of Supervisors voted on this incident?", "source_id": "q024"}
+{"category": "rule_application", "id": "q025", "question": "Per the conditional re-entry framework, what conditions must be met before re-entry to TC-9 is authorized?", "source_id": "q025"}
+{"category": "rule_application", "id": "q026", "question": "Per the road-jurisdiction layer, who has authority over Forest Road 32N17?", "source_id": "q026"}
+{"category": "rule_application", "id": "q027", "question": "Per the road-jurisdiction layer, who maintains Highway Spur 36?", "source_id": "q027"}
+{"category": "rule_application", "id": "q028", "question": "According to the packet, which source is the authoritative description of who controls the gate at MP 6 of Forest Road 32N17 — the radio log or the road-jurisdiction layer?", "source_id": "q028"}
+{"category": "rule_application", "id": "q029", "question": "If the Forest Supervisor's pending determination concludes USFS retains authority, what specific process must occur for civilian egress through the gate?", "source_id": "q029"}
+{"category": "count", "id": "q030", "question": "How many evacuation zones are listed in EO-2026-014B?", "source_id": "q030"}
+{"category": "count", "id": "q031", "question": "How many parcels are affected by map correction MC-2026-014-01?", "source_id": "q031"}
+{"category": "count", "id": "q032", "question": "List all date-event anchors from §8 of the packet that occur on April 15, 2026 between 09:00 and 11:00 PDT.", "source_id": "q032"}
+{"category": "count", "id": "q033", "question": "How many distinct WEA alerts have been sent regarding this incident as of packet time?", "source_id": "q033"}
+{"category": "unresolved", "id": "q034", "question": "Has the question of authority over Forest Road 32N17 been determined?", "source_id": "q034"}
+{"category": "unresolved", "id": "q035", "question": "Has County Counsel issued an opinion on whether the interim mapping error is an actionable notification deficiency under § 8588.10?", "source_id": "q035"}
+{"category": "unresolved", "id": "q036", "question": "Has the IC decided whether to lift TC-7 to all-clear?", "source_id": "q036"}
+{"category": "unresolved", "id": "q037", "question": "Has the public information meeting comment period closed as of packet time (11:30 PDT)?", "source_id": "q037"}
+{"category": "cross_source_conflict", "id": "q038", "question": "The radio log at 04:48 describes evacuees using Forest Road 32N17, while the road-jurisdiction layer marks the road as USFS. Does this constitute a conflict, and if so, how does the packet resolve it?", "source_id": "q038"}
+{"category": "cross_source_conflict", "id": "q039", "question": "Did the 04:18 WEA alert correctly describe the order applicable to Manton Knolls residents?", "source_id": "q039"}
+{"category": "cross_source_conflict", "id": "q040", "question": "The pre-incident draft assigned TC-7 to Evacuation Warning. EO-2026-014A assigned TC-7 to Mandatory Evacuation. EO-2026-014B downgraded TC-7 to Evacuation Warning. Which document is currently in force, and what was the operative order for TC-7 between 18:30 April 14 and 04:12 April 15?", "source_id": "q040"}
