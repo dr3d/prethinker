@@ -382,6 +382,12 @@ def test_industrial_sensor_companion_derives_event_and_sensor_support() -> None:
         for row in rows
     )
     assert any(
+        row.get("SupportKind") == "corrected_response_interval"
+        and row.get("Subject") == "EV-08->EV-09"
+        and row.get("HelperClass") == "clean-helper"
+        for row in rows
+    )
+    assert any(
         row.get("SupportKind") == "sensor_vendor_model"
         and row.get("Subject") == "HUM-D-04"
         and row.get("HelperClass") == "clean-helper"

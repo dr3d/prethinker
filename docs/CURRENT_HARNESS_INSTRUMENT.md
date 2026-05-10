@@ -256,6 +256,11 @@ Grant cleanup promoted appeal-window and committee-recusal vote-count support
 to generic source-record extraction, bringing `grant_award_support` to 14 clean
 / 2 candidate rows and the six-fixture transfer audit to 198 `clean-helper` and
 149 `candidate-helper` rows.
+Industrial cleanup promoted computed corrected-response and line-stop durations
+from candidate rows to clean timestamp arithmetic over admitted corrected event
+times. `industrial_sensor_support` is now 35 clean / 9 candidate, and the
+six-fixture transfer audit is 200 `clean-helper` and 147 `candidate-helper`
+rows.
 
 `scripts/audit_helper_usage.py` adds the complementary transfer-pressure view:
 fixtures per helper and helpers per fixture across QA artifacts. The first scan

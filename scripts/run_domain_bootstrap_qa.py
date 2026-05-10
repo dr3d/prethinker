@@ -2911,7 +2911,7 @@ def _industrial_sensor_companion(
         end_time = corrected_events.get(end_event, {}).get("time", "")
         duration = _duration_between_atoms(start_time, end_time)
         if duration:
-            add_candidate(
+            add(
                 support_kind,
                 f"{_display_event_id(start_event)}->{_display_event_id(end_event)}",
                 duration,
