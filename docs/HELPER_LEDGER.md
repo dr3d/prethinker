@@ -92,6 +92,11 @@ on `school_activity_roster_reconciliation` it emits `0` because the relevant
 bus tables lack a group column. That is the desired boundary: explicit table
 membership can become deterministic memory, while section/prose-derived roster
 membership stays candidate-helper until a stronger ledger design exists.
+A narrowed QA planning hint for homeroom membership/count questions lifted the
+table-ledger replay from `28 / 3 / 9` to `30 / 3 / 7` by routing q015 and q016
+to `roster_table_member/4`; the guarded selector remains higher at `34 / 2 / 4`.
+The next pressure is row routing and answer-surface handling, not broader roster
+parsing.
 
 The next cleanup work should reduce candidate or unlabeled helper rows and seek
 sibling proof for one-fixture helpers rather than create new lenses.

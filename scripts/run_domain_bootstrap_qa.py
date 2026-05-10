@@ -552,6 +552,7 @@ def main() -> int:
         "Never put lowercase generic placeholder words into query arguments when you want the KB to return a value. This includes label words such as grievance_label, method_detail, explanation_detail, candidate, label, content, value, status, authority, and institution.",
         "compiled_query_templates shows legal query shapes. Prefer those templates and then bind only the slots that are clearly named in the question.",
         "For multi-hop questions, emit multiple safe query operations over the actual KB predicates instead of inventing a composite predicate.",
+        "For homeroom membership or homeroom student-count questions, if compiled_query_templates includes roster_table_member/4, prefer roster_table_member(SourceRow, Version, Group, Student) for explicit table membership before sparse semantic member predicates such as homeroom_member/3.",
         "For source/institution questions, prefer predicates that actually expose source, ledger, actor, reporter, complainant, or institution values in the compiled KB examples.",
         "For ledger/record/institution questions, pair the descriptive event predicate with the likely container predicate using the same variable name, such as grievance_method(Grievance, Method) plus grievance_target(Grievance, Institution).",
         "Do not lock onto a single grievance/document id before discovering answer-bearing rows; duplicate compiled records may contain different detail levels.",
@@ -1422,6 +1423,7 @@ def _domain_companion_queries(runtime: CorePrologRuntime, *, query: str) -> list
             "adult_role",
             "group_member",
             "group_membership",
+            "homeroom_member",
             "role_counts_towards_ratio",
             "roster_version",
             "roster_version_status",
@@ -4394,6 +4396,7 @@ def _roster_state_companion(
         "adult_role",
         "group_member",
         "group_membership",
+        "homeroom_member",
         "role_counts_towards_ratio",
         "roster_version",
         "roster_version_status",
@@ -4750,7 +4753,7 @@ def _prioritize_roster_state_rows(
                 priority = 5
             elif version_ok:
                 priority = 12
-        elif predicate == "student_in_homeroom" and len(args) >= 3:
+        elif predicate in {"homeroom_member", "student_in_homeroom"} and len(args) >= 3:
             person_ok = is_requested(person, args[0])
             group_ok = is_requested(group, args[1])
             version_ok = is_requested(version, args[2])

@@ -330,3 +330,41 @@ membership from candidate-helper parsing toward deterministic memory, but it is
 not yet a helper-promotion proof. The next work is a row-level comparison of
 clean ledger wins versus older helper/selector wins, then selector guidance if
 the deterministic surface is being missed.
+
+## CCR-011 - Roster Table Query Guidance
+
+Date: 2026-05-10
+
+Evidence lane: `deterministic_ledger_query_guidance`
+
+Artifacts:
+
+- row comparison report:
+  `tmp/transfer_fixtures_20260510/count_roster_table_row_compare_20260510/row_compare.md`
+- first broad query guidance full replay:
+  `tmp/transfer_fixtures_20260510/count_roster_table_query_guidance_full_20260510/`
+- narrowed guidance targeted replay:
+  `tmp/transfer_fixtures_20260510/count_roster_table_query_guidance_narrow_targeted_20260510/`
+- narrowed guidance full replay:
+  `tmp/transfer_fixtures_20260510/count_roster_table_query_guidance_narrow_full_20260510/`
+
+Results:
+
+- old source-record V2: `27 / 4 / 9`
+- focused homeroom helper: `29 / 2 / 9`
+- adult/compliance helper: `30 / 2 / 8`
+- table ledger replay before guidance: `28 / 3 / 9`
+- narrow table-guidance full replay: `30 / 3 / 7`
+- guarded selector remains higher: `34 / 2 / 4`
+- zero write proposals
+
+Lesson: deterministic table memory helps when the query planner is told exactly
+where it applies. Broad wording around "roster/group count" churned unrelated
+chaperone and compliance questions; narrowed wording to "homeroom membership or
+homeroom student-count" moved q015 and q016 to direct
+`roster_table_member/4` queries and made both exact. The full replay now matches
+the previous best exact count without relying on the larger candidate-helper
+surface as the main route, but it does not close the selector gap. Remaining
+hard rows are not a reason to widen deterministic parsing: q023/q024 are
+identifier/name-normalization and registrar-authority answer-surface problems,
+while q028 still needs correction-notice/bus-assignment routing.

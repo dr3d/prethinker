@@ -1656,6 +1656,16 @@ def test_roster_state_support_handles_homeroom_table_and_semantic_rows() -> None
     assert first_row.get("Group") == "7_a"
     assert first_row.get("Version") == "v1_3"
 
+    homeroom_rows = run_query_plan(runtime, ["homeroom_member(stu_1023, 7_a, v1_3)."])
+    homeroom_companion = next(
+        item for item in homeroom_rows if item["result"].get("predicate") == "roster_state_support"
+    )
+    homeroom_first = homeroom_companion["result"]["rows"][0]
+    assert homeroom_first.get("SupportKind") == "roster_table_student_group_assignment"
+    assert homeroom_first.get("Person") == "stu_1023"
+    assert homeroom_first.get("Group") == "7_a"
+    assert homeroom_first.get("Version") == "v1_3"
+
     latest_rows = run_query_plan(runtime, ["student_in_homeroom(stu_1023, homeroom, version)."])
     latest_companion = next(
         item for item in latest_rows if item["result"].get("predicate") == "roster_state_support"

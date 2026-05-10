@@ -183,7 +183,10 @@ prose directly and do not mutate the KB. Current active examples include:
   deterministic pre-compile ledger fact, `roster_table_member/4`, now captures
   explicit grouping/member table rows before the helper runs. The helper may
   consume those explicit rows as clean structural memory, while section/prose
-  roster parsing stays candidate-helper.
+  roster parsing stays candidate-helper. QA planning now prefers
+  `roster_table_member/4` for homeroom membership/count questions when that
+  predicate exists, but does not broaden the rule to all roster or compliance
+  counts.
 - `grant_award_support`: derives award totals, eligible application sets,
   cap-applied applications, appeal pending status, recusal records, committee
   recusal vote counts, and corrected-score support from admitted grant facts and

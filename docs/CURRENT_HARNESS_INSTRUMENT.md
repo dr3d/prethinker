@@ -387,6 +387,12 @@ facts on `count_composition_roster` and `0` on the fresh school transfer
 fixture, whose bus tables require section/prose context. That is a deliberate
 boundary: explicit roster table rows become clean structural memory; inferred
 bus or group membership remains candidate-helper work.
+With a narrowed QA planning hint for homeroom membership/count questions, the
+table-ledger replay on `count_composition_roster` moves from `28 / 3 / 9` to
+`30 / 3 / 7`. The lift comes from q015 and q016 switching to direct
+`roster_table_member/4` queries. The guarded selector still reaches `34 / 2 / 4`,
+so the remaining gap is row routing and answer-surface normalization, not a
+mandate to infer more roster structure from prose.
 
 `scripts/audit_helper_usage.py` adds the complementary transfer-pressure view:
 fixtures per helper and helpers per fixture across QA artifacts. The first scan
