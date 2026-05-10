@@ -1087,12 +1087,14 @@ def test_run_query_plan_adds_roster_state_support_from_group_membership() -> Non
         and row.get("Group") == "red_group"
         and row.get("Count") == "2"
         and row.get("Members") == "arden,bettina"
+        and row.get("HelperClass") == "clean-helper"
         for row in result_rows
     )
     assert any(
         row.get("SupportKind") == "supervision_assignment"
         and row.get("Supervisor") == "ms_strand"
         and row.get("Target") == "red_group"
+        and row.get("HelperClass") == "clean-helper"
         for row in result_rows
     )
 
@@ -1420,6 +1422,7 @@ def test_roster_state_support_derives_operational_roster_from_source_record_ledg
         and row.get("Group") == "group_b"
         and row.get("Version") == "v3"
         and row.get("SourceRow") == "src_line_0089"
+        and row.get("HelperClass") == "candidate-helper"
         for row in result_rows
     )
     assert any(
@@ -1427,6 +1430,7 @@ def test_roster_state_support_derives_operational_roster_from_source_record_ledg
         and row.get("Group") == "group_b"
         and row.get("Version") == "v3"
         and row.get("Count") == "10"
+        and row.get("HelperClass") == "candidate-helper"
         for row in result_rows
     )
     assert not any(
@@ -1460,12 +1464,14 @@ def test_roster_state_support_joins_adult_roles_to_ratio_scope() -> None:
         row.get("SupportKind") == "ratio_counted_adults"
         and row.get("Count") == "2"
         and row.get("Members") == "j_phelps,t_mendez"
+        and row.get("HelperClass") == "clean-helper"
         for row in result_rows
     )
     assert any(
         row.get("SupportKind") == "adult_role"
         and row.get("Person") == "n_park"
         and row.get("CountsTowardRatio") == "false"
+        and row.get("HelperClass") == "clean-helper"
         for row in result_rows
     )
     assert any(

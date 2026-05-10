@@ -4098,6 +4098,7 @@ def _roster_state_companion(
                 "Role": role,
                 "CountsTowardRatio": ratio_by_role.get(role, ""),
                 "RoleHint": _role_hint_from_group(role),
+                "HelperClass": "clean-helper",
             }
         )
     for role, counts in sorted(ratio_by_role.items()):
@@ -4114,6 +4115,7 @@ def _roster_state_companion(
                 "Count": str(len(adults)),
                 "Members": ",".join(adults),
                 "RoleHint": _role_hint_from_group(role),
+                "HelperClass": "clean-helper",
             }
         )
     counted_adults = sorted(
@@ -4129,6 +4131,7 @@ def _roster_state_companion(
                 "Count": str(len(counted_adults)),
                 "Members": ",".join(counted_adults),
                 "CountsTowardRatio": "true",
+                "HelperClass": "clean-helper",
             }
         )
     excluded_adults = sorted(
@@ -4144,6 +4147,7 @@ def _roster_state_companion(
                 "Count": str(len(excluded_adults)),
                 "Members": ",".join(excluded_adults),
                 "CountsTowardRatio": "false",
+                "HelperClass": "clean-helper",
             }
         )
 
@@ -4161,6 +4165,7 @@ def _roster_state_companion(
                 "End": end,
                 "Interval": interval,
                 "RoleHint": _role_hint_from_group(group),
+                "HelperClass": "clean-helper",
             }
         )
     for row in membership_rows:
@@ -4177,6 +4182,7 @@ def _roster_state_companion(
                 "End": end,
                 "Interval": f"{start}_to_{end}" if start and end else "",
                 "RoleHint": _role_hint_from_group(group),
+                "HelperClass": "clean-helper",
             }
         )
     for row in student_assignment_rows:
@@ -4192,6 +4198,7 @@ def _roster_state_companion(
                 "Group": group,
                 "Version": version,
                 "RoleHint": _role_hint_from_group(group),
+                "HelperClass": "clean-helper",
             }
         )
     for row in supervises_rows:
@@ -4207,6 +4214,7 @@ def _roster_state_companion(
                 "Start": start,
                 "End": end,
                 "Interval": interval,
+                "HelperClass": "clean-helper",
             }
         )
     for row in supervision_rows:
@@ -4222,12 +4230,14 @@ def _roster_state_companion(
                 "Start": start,
                 "End": end,
                 "Interval": f"{start}_to_{end}" if start and end else "",
+                "HelperClass": "clean-helper",
             }
         )
 
     out_rows.extend(_source_record_roster_assignment_support(runtime))
 
     group_counts: dict[tuple[str, str, str, str], set[str]] = {}
+    group_count_classes: dict[tuple[str, str, str, str], set[str]] = {}
     for row in out_rows:
         if str(row.get("SupportKind")) not in {
             "group_member",
@@ -4243,8 +4253,15 @@ def _roster_state_companion(
         end = str(row.get("End", "")).strip()
         if not group or not person:
             continue
-        group_counts.setdefault((group, version, start, end), set()).add(person)
+        group_key = (group, version, start, end)
+        group_counts.setdefault(group_key, set()).add(person)
+        group_count_classes.setdefault(group_key, set()).add(str(row.get("HelperClass", "") or "unlabeled"))
     for (group, version, start, end), people in sorted(group_counts.items()):
+        helper_class = (
+            "candidate-helper"
+            if "candidate-helper" in group_count_classes.get((group, version, start, end), set())
+            else "clean-helper"
+        )
         out_rows.append(
             {
                 "SupportKind": "group_count",
@@ -4255,6 +4272,7 @@ def _roster_state_companion(
                 "Count": str(len(people)),
                 "Members": ",".join(sorted(people)),
                 "RoleHint": _role_hint_from_group(group),
+                "HelperClass": helper_class,
             }
         )
 
@@ -4270,14 +4288,25 @@ def _roster_state_companion(
             "prolog_query": "roster_state_support(SupportKind, PersonOrSupervisor, GroupOrTarget, Start, End, CountOrRole).",
             "result_type": "table",
             "num_rows": len(out_rows),
-            "variables": ["SupportKind", "Person", "Group", "Supervisor", "Target", "Start", "End", "Count", "RoleHint"],
+            "variables": [
+                "SupportKind",
+                "Person",
+                "Group",
+                "Supervisor",
+                "Target",
+                "Start",
+                "End",
+                "Count",
+                "RoleHint",
+                "HelperClass",
+            ],
             "rows": out_rows[:180],
             "reasoning_basis": {
                 "kind": "core-local",
                 "note": (
-                    "query-only roster-state companion normalized admitted group membership, "
-                    "supervision, interval, count, source-record roster, and role-hint rows "
-                    "without reading source prose outside the admitted source-record ledger"
+                    "query-only roster-state companion labels admitted-predicate joins as "
+                    "clean-helper rows and source-record roster parsing as candidate-helper "
+                    "rows until the roster parser transfers beyond the school activity packet"
                 ),
                 "original_query": query,
                 "trigger_predicate": predicate,
@@ -4427,6 +4456,7 @@ def _source_record_roster_assignment_support(runtime: CorePrologRuntime) -> list
                     "SourceGroupRow": current_group_source,
                     "Line": str(line),
                     "RoleHint": _role_hint_from_group(current_group),
+                    "HelperClass": "candidate-helper",
                 }
             )
     return out_rows

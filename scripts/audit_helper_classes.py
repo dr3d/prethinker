@@ -21,6 +21,7 @@ try:
         _clinic_device_recall_companion,
         _grant_award_companion,
         _industrial_sensor_companion,
+        _roster_state_companion,
         _source_record_packet_metadata_companion,
         load_runtime,
     )
@@ -29,6 +30,7 @@ except ModuleNotFoundError:
         _clinic_device_recall_companion,
         _grant_award_companion,
         _industrial_sensor_companion,
+        _roster_state_companion,
         _source_record_packet_metadata_companion,
         load_runtime,
     )
@@ -57,6 +59,11 @@ COMPANIONS: dict[str, tuple[CompanionFn, str, str]] = {
         _grant_award_companion,
         "application_eligibility",
         "application_eligibility(App, Rule, Result).",
+    ),
+    "roster_state_support": (
+        _roster_state_companion,
+        "student_group_assignment",
+        "student_group_assignment(Student, Version, Group).",
     ),
 }
 

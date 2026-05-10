@@ -218,6 +218,11 @@ sensor model row, bringing the audit to 163 companion rows: 125 `clean-helper`
 and 38 `candidate-helper`. Generic extraction of batch IDs and maintenance
 tickets from raw event descriptions then brought the audit to 164 companion
 rows: 128 `clean-helper` and 36 `candidate-helper`.
+Adding `roster_state_support` to the same artifact-only audit widened the pass
+to 344 companion rows: 191 `clean-helper` and 153 `candidate-helper`. The roster
+helper itself emits 63 clean admitted-predicate join rows and 117 candidate rows
+from source-record roster parsing. That formalizes the school roster saturation
+as a split-helper result, not a fully clean-helper result.
 
 `scripts/audit_helper_usage.py` adds the complementary transfer-pressure view:
 fixtures per helper and helpers per fixture across QA artifacts. The first scan

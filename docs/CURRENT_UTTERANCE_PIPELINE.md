@@ -172,7 +172,11 @@ prose directly and do not mutate the KB. Current active examples include:
 
 - `roster_state_support`: derives group membership, roster versions, counted
   adults, excluded adults, temporary assignments, and group counts from admitted
-  roster predicates plus source-record rows.
+  roster predicates plus source-record rows. Its emitted rows carry
+  `HelperClass`: admitted-predicate joins are `clean-helper`, while
+  school-roster source-record parsing over `v1/v2/v3`, `group_a/group_b/group_c`,
+  and `s_###` shaped atoms remains `candidate-helper` until transfer-proven or
+  generalized.
 - `grant_award_support`: derives award totals, eligible application sets,
   cap-applied applications, appeal pending status, recusal records, committee
   recusal vote counts, and corrected-score support from admitted grant facts and
