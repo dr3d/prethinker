@@ -218,3 +218,59 @@ lines containing "forensic handwriting analyst's report (when filed)" and
 "Court's ultimate rulings are the authoritative sources." The next bite should
 inspect and repair deterministic source-record paragraph/continuation
 acquisition for skipped lines before adding more query helpers.
+
+## PSAR-006 - Refreshed Source-Record Acquisition And Order-Section Bridge
+
+Date: 2026-05-10
+
+Evidence lane: `source_record_acquisition_refresh`
+
+Artifacts:
+
+- No-LLM refreshed compile artifact:
+  `tmp/transfer_fixtures_20260510/probate_source_record_refresh_v4_no_llm_20260510/domain_bootstrap_file_20260510T093021249770Z_source_qwen-qwen3-6-35b-a3b.json`
+- q040 acquisition probe:
+  `tmp/transfer_fixtures_20260510/probate_q040_source_record_refresh_v4_20260510/domain_bootstrap_qa_20260510T231601345690Z_qa_qwen-qwen3-6-35b-a3b.json`
+- q010/q040 order-section probe:
+  `tmp/transfer_fixtures_20260510/probate_order_section_q010_q040_20260510/domain_bootstrap_qa_20260510T232534337383Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Full refreshed replay:
+  `tmp/transfer_fixtures_20260510/probate_source_record_refresh_v4_full_20260510/domain_bootstrap_qa_20260510T232347357003Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Final full refreshed replay:
+  `tmp/transfer_fixtures_20260510/probate_source_record_refresh_v4_full_final_20260510/domain_bootstrap_qa_20260510T233508535773Z_qa_qwen-qwen3-6-35b-a3b.json`
+- q005/q037 residual probe:
+  `tmp/transfer_fixtures_20260510/probate_q005_q037_residual_20260510/domain_bootstrap_qa_20260510T233613063047Z_qa_qwen-qwen3-6-35b-a3b.json`
+
+Results:
+
+- refreshed deterministic source-record rows: `169` versus stale cold artifact
+  `122`
+- refreshed deterministic source-record facts: `2106`
+- q040 acquisition probe: `1 / 0 / 0`
+- q010/q040 focused probe: `2 / 0 / 0`
+- best full refreshed replay: `38 / 0 / 2`
+- q005/q037 residual probe: `2 / 0 / 0`
+- clean-helper row-gated high-water over refreshed full plus residual probes:
+  `40 / 0 / 0`
+- final full replay helper rows: `3401 clean-helper / 0 candidate-helper`
+- local tests: `890 passed, 2 subtests passed`
+
+Repair:
+
+- Confirmed the q040 miss was not a semantic/lens gap: the stale cold artifact's
+  deterministic source-record ledger stopped before the Section F authoritative
+  source paragraph, while the live ledger extracts `src_line_0166`,
+  `src_line_0167`, and `src_line_0168`.
+- Built a no-LLM refreshed artifact preserving the existing semantic facts and
+  replacing stale deterministic `source_record_*` facts with the current ledger.
+- Added clean `source_record_order_section` rows inside
+  `source_record_packet_metadata_support`, linking source-record table
+  `order_id` fields to their containing section.
+
+Lesson: probate storage/access no longer needs the orphaned
+`probate_storage_support` helper. The source-record memory substrate now holds
+the needed rows cleanly. The remaining single-run failures are planner/parser
+churn: q005 can still ask the wrong `party_role` surface, and one full replay
+returned an empty row for q037, but both rows answer exactly in focused probes
+from the same refreshed artifact. Report probate as `38 / 0 / 2` single-run
+clean-helper and `40 / 0 / 0` clean-helper row-gated, with the caveat that
+row-gating is diagnostic high-water rather than production selector behavior.

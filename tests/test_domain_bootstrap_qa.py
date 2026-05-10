@@ -1827,6 +1827,34 @@ def test_source_record_packet_metadata_derives_reading_room_policy_from_access_f
     )
 
 
+def test_source_record_packet_metadata_links_court_order_to_source_section() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "source_record_row(src_line_0147, table_row, 147, section_e_court_orders_affecting_this_register, p_26_347_d).",
+        "source_record_section(src_line_0147, section_e_court_orders_affecting_this_register).",
+        "source_record_line(src_line_0147, 147).",
+        "source_record_text_atom(src_line_0147, p_26_347_d_2026_02_14_l_park_granted_observation_access).",
+        "source_record_field(src_line_0147, order_id, p_26_347_d).",
+        "source_record_field(src_line_0147, date, v_2026_02_14).",
+        "court_order(p_26_347_d, v_2026_02_14, l_park_granted_observation_access).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["court_order(p_26_347_d, Date, Content)."])
+
+    companion = next(
+        item for item in rows if item["result"].get("predicate") == "source_record_packet_metadata_support"
+    )
+    result_rows = companion["result"]["rows"]
+    assert any(
+        row.get("Kind") == "source_record_order_section"
+        and row.get("Value") == "p_26_347_d"
+        and row.get("DisplayValue") == "Section E"
+        and row.get("HelperClass") == "clean-helper"
+        for row in result_rows
+    )
+
+
 def test_source_record_section_display_renders_roman_section_atoms() -> None:
     runtime = CorePrologRuntime(max_depth=200)
     for fact in [

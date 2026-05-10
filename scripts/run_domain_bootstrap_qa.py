@@ -1819,7 +1819,17 @@ def _source_record_packet_metadata_companion(
                 item,
                 detail=detail,
                 display_value=f"{_display_source_phrase(location)}"
-                + (f" (External ID {_display_source_phrase(external_id)})" if external_id else ""),
+                    + (f" (External ID {_display_source_phrase(external_id)})" if external_id else ""),
+            )
+        order_id = _field_value(row_fields, "order_id") or _field_value(row_fields, "order")
+        if order_id:
+            section_atom = section_by_row.get(source_row, "")
+            add(
+                source_row,
+                "source_record_order_section",
+                order_id,
+                detail=f"order_id={order_id};section={section_atom}",
+                display_value=_display_section_from_atom(section_atom),
             )
         access_parties = _field_value(row_fields, "authorized_parties_access") or _field_value(row_fields, "authorized_parties")
         authorizing_source = _field_value(row_fields, "authorizing_source") or _field_value(row_fields, "access_authorizing_source")
@@ -2361,7 +2371,7 @@ def _scope_source_record_packet_metadata_rows(
             "no_delivery_direction",
         },
         "motion_filed": {"motion_status"},
-        "court_order": {"motion_status"},
+        "court_order": {"motion_status", "source_record_order_section"},
     }
     wanted = wanted_by_predicate.get(predicate)
     if predicate.startswith("source_record_"):
