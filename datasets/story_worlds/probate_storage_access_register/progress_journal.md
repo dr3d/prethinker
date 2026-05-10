@@ -165,3 +165,56 @@ LLM query planner still sometimes asks a weaker query shape and the answer judge
 will not infer across an auxiliary companion row unless the linkage is obvious.
 This is now query-planner/selector discrimination pressure, not new helper or
 new lens pressure.
+
+## PSAR-005 - Generic Residual Source-Record Bridges
+
+Date: 2026-05-10
+
+Evidence lane: `clean_helper_residual_bridge`
+
+Artifacts:
+
+- Five-row residual probe:
+  `tmp/transfer_fixtures_20260510/probate_residual_query_support_targeted_20260510/domain_bootstrap_qa_20260510T225402966365Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Three-row residual probe after compilation-note broadening:
+  `tmp/transfer_fixtures_20260510/probate_residual_query_support_targeted_v2_20260510/domain_bootstrap_qa_20260510T230350295151Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Full replay:
+  `tmp/transfer_fixtures_20260510/probate_residual_query_support_full_20260510/domain_bootstrap_qa_20260510T230129552463Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Full replay rerun:
+  `tmp/transfer_fixtures_20260510/probate_residual_query_support_full_v2_20260510/domain_bootstrap_qa_20260510T231104162211Z_qa_qwen-qwen3-6-35b-a3b.json`
+
+Results:
+
+- targeted five-row probe: `4 / 0 / 1`
+- targeted three-row probe: `2 / 0 / 1`
+- best full replay this bite: `37 / 0 / 3`
+- rerun full replay: `35 / 0 / 5`
+- best full replay helper rows: `1779 clean-helper / 0 candidate-helper`
+- rerun full replay helper rows: `1797 clean-helper / 0 candidate-helper`
+- local tests: `889 passed, 2 subtests passed`
+
+Repair:
+
+- Added `item_description_detail_support`, a clean query-only bridge that
+  derives display titles and trailing years from admitted `item_description/2`
+  atoms.
+- Added `source_record_table_body_count_support`, a clean source-record bridge
+  that counts field-bearing table body rows while excluding header rows.
+- Extended `source_record_packet_metadata_support` with clean joins from
+  admitted `access_authority/3` rows to admitted `court_order/3` rows, plus
+  field-derived reading-room policy support from source-record access-register
+  rows.
+- Broadened unreproduced-reference detection for compilation-note sections,
+  allowing the will/reference rows to surface as clean source-record metadata.
+
+Lesson: the legitimate residual repair pattern is still generic bridge work,
+not resurrection of `probate_storage_support`. The focused probes show that
+the missing `q008`, `q024`, `q031`, `q032`, and `q036` answer surfaces are now
+reachable as clean-helper rows. Full replay remains unstable because planner
+and judge behavior sometimes prefer a weak primary query over a correct clean
+companion row; that is selector/query-surface pressure. `q040` remains a true
+source-record acquisition gap: the cold compile artifact lacks the Section F
+lines containing "forensic handwriting analyst's report (when filed)" and
+"Court's ultimate rulings are the authoritative sources." The next bite should
+inspect and repair deterministic source-record paragraph/continuation
+acquisition for skipped lines before adding more query helpers.

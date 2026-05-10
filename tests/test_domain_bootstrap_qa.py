@@ -1717,6 +1717,116 @@ def test_source_record_packet_metadata_surfaces_asserted_event_dates() -> None:
     )
 
 
+def test_item_description_detail_companion_derives_year_from_description_atom() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    assert runtime.assert_fact("item_description(ex_001, painting_three_apples_in_saucer_1987).").get("status") == "success"
+
+    rows = run_query_plan(runtime, ["item_description(ex_001, Description)."])
+
+    companion = next(
+        item for item in rows if item["result"].get("predicate") == "item_description_detail_support"
+    )
+    result_rows = companion["result"]["rows"]
+    assert result_rows == [
+        {
+            "Item": "ex_001",
+            "Description": "painting_three_apples_in_saucer_1987",
+            "DisplayDescription": "Painting Three Apples in Saucer",
+            "Year": "1987",
+            "HelperClass": "clean-helper",
+        }
+    ]
+
+
+def test_source_record_table_body_count_companion_excludes_header_rows() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "source_record_row(src_line_0041, table_row, 41, section_b_item_inventory_and_custody_register, item_id).",
+        "source_record_field(src_line_0041, item_id, item_id).",
+        "source_record_field(src_line_0041, external_id, external_id).",
+        "source_record_row(src_line_0043, table_row, 43, section_b_item_inventory_and_custody_register, ex_001).",
+        "source_record_field(src_line_0043, item_id, ex_001).",
+        "source_record_field(src_line_0043, external_id, nrm_ll_2019_08).",
+        "source_record_row(src_line_0044, table_row, 44, section_b_item_inventory_and_custody_register, ex_002).",
+        "source_record_field(src_line_0044, item_id, ex_002).",
+        "source_record_field(src_line_0044, external_id, nrm_ll_2020_02).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(
+        runtime,
+        ["source_record_row(Row, table_row, Line, section_b_item_inventory_and_custody_register, Label)."],
+    )
+
+    companion = next(
+        item for item in rows if item["result"].get("predicate") == "source_record_table_body_count_support"
+    )
+    result_rows = companion["result"]["rows"]
+    assert result_rows == [
+        {
+            "SectionAtom": "section_b_item_inventory_and_custody_register",
+            "RowType": "table_row",
+            "BodyRowCount": 2,
+            "Labels": "ex_001, ex_002",
+            "HelperClass": "clean-helper",
+        }
+    ]
+
+
+def test_source_record_packet_metadata_links_access_authority_to_court_order() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "access_authority(ex_004, lillian_park, p_26_347_d).",
+        "court_order(p_26_347_d, v_2026_02_14, grants_observation_access).",
+        "source_record_text_atom(src_line_0001, neutral_packet_anchor).",
+        "source_record_section(src_line_0001, section_e_court_orders).",
+        "source_record_line(src_line_0001, 1).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["access_authority(ex_004, lillian_park, SourceId)."])
+
+    companion = next(
+        item for item in rows if item["result"].get("predicate") == "source_record_packet_metadata_support"
+    )
+    result_rows = companion["result"]["rows"]
+    assert any(
+        row.get("Kind") == "access_authority_order"
+        and row.get("Value") == "p_26_347_d"
+        and "2026-02-14" in row.get("DisplayValue", "")
+        and row.get("HelperClass") == "clean-helper"
+        for row in result_rows
+    )
+
+
+def test_source_record_packet_metadata_derives_reading_room_policy_from_access_fields() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "source_record_row(src_line_0078, table_row, 78, section_c_access_register, ex_009).",
+        "source_record_section(src_line_0078, section_c_access_register).",
+        "source_record_line(src_line_0078, 78).",
+        "source_record_text_atom(src_line_0078, ex_009_executor_museum_reading_room_patrons_per_museum_policy_museum_policy_mrp_04_estate_authority).",
+        "source_record_field(src_line_0078, item_id, ex_009).",
+        "source_record_field(src_line_0078, authorized_parties_access, executor_museum_reading_room_patrons_per_museum_policy).",
+        "source_record_field(src_line_0078, authorizing_source, museum_policy_mrp_04_estate_authority).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["access_type(ex_009, museum_reading_room_patrons, standing)."])
+
+    companion = next(
+        item for item in rows if item["result"].get("predicate") == "source_record_packet_metadata_support"
+    )
+    result_rows = companion["result"]["rows"]
+    assert any(
+        row.get("Kind") == "non_revocable_access_policy"
+        and row.get("Value") == "mrp_04"
+        and "Reading-room patron access governed by museum policy" in row.get("DisplayValue", "")
+        and row.get("HelperClass") == "clean-helper"
+        for row in result_rows
+    )
+
+
 def test_source_record_section_display_renders_roman_section_atoms() -> None:
     runtime = CorePrologRuntime(max_depth=200)
     for fact in [

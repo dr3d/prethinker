@@ -1403,6 +1403,12 @@ def _domain_companion_queries(runtime: CorePrologRuntime, *, query: str) -> list
         return []
     predicate, args = parsed
     source_record_companions: list[dict[str, Any]] = []
+    item_description_detail = _item_description_detail_companion(runtime, predicate=predicate, args=args, query=query)
+    if item_description_detail:
+        source_record_companions.append(item_description_detail)
+    table_body_count = _source_record_table_body_count_companion(runtime, predicate=predicate, args=args, query=query)
+    if table_body_count:
+        source_record_companions.append(table_body_count)
     section_display = _source_record_section_display_companion(runtime, predicate=predicate, query=query)
     if section_display:
         source_record_companions.append(section_display)
@@ -1691,6 +1697,7 @@ def _source_record_packet_metadata_companion(
         "access_authority",
         "access_type",
         "external_id",
+        "item_description",
         "party_role",
         "physical_custodian",
         "recorded_assertion",
@@ -1713,6 +1720,9 @@ def _source_record_packet_metadata_companion(
     line_rows = _runtime_rows(runtime, "source_record_line(SourceRow, Line).")
     source_rows = _runtime_rows(runtime, "source_record_row(SourceRow, RowType, Line, SectionAtom, Label).")
     numeric_rows = _runtime_rows(runtime, "source_record_numeric_token(SourceRow, NumericToken).")
+    item_description_rows = _runtime_rows(runtime, "item_description(Item, Description).")
+    access_authority_rows = _runtime_rows(runtime, "access_authority(Item, Party, SourceId).")
+    court_order_rows = _runtime_rows(runtime, "court_order(OrderId, OrderDate, OrderContent).")
     if not text_rows and not label_rows:
         return None
 
@@ -1811,6 +1821,62 @@ def _source_record_packet_metadata_companion(
                 display_value=f"{_display_source_phrase(location)}"
                 + (f" (External ID {_display_source_phrase(external_id)})" if external_id else ""),
             )
+        access_parties = _field_value(row_fields, "authorized_parties_access") or _field_value(row_fields, "authorized_parties")
+        authorizing_source = _field_value(row_fields, "authorizing_source") or _field_value(row_fields, "access_authorizing_source")
+        if item and access_parties and authorizing_source and _is_non_revocable_access_policy_field(
+            access_parties=access_parties,
+            authorizing_source=authorizing_source,
+        ):
+            policy_value = _access_policy_value_from_atom(authorizing_source) or _access_policy_value_from_atom(access_parties)
+            add(
+                source_row,
+                "non_revocable_access_policy",
+                policy_value or item,
+                detail=f"item={item};authorized_parties={access_parties};authorizing_source={authorizing_source}",
+                display_value=(
+                    "Reading-room patron access governed by museum policy"
+                    + (f" {_display_source_atom(policy_value)}" if policy_value else "")
+                    + "; not executor-revocable."
+                ),
+            )
+
+    for row in item_description_rows:
+        item = str(row.get("Item", "")).strip()
+        description = str(row.get("Description", "")).strip()
+        if not item or not description:
+            continue
+        year = _year_from_atom(description)
+        if not year:
+            continue
+        add(
+            item,
+            "item_description_detail",
+            item,
+            detail=f"description={description};year={year}",
+            display_value=f"{_display_item_description_atom(description)} ({year})",
+        )
+
+    court_orders_by_id = {
+        str(row.get("OrderId", "")).strip(): row
+        for row in court_order_rows
+        if str(row.get("OrderId", "")).strip()
+    }
+    for row in access_authority_rows:
+        item = str(row.get("Item", "")).strip()
+        party = str(row.get("Party", "")).strip()
+        source_id = str(row.get("SourceId", "")).strip()
+        order = court_orders_by_id.get(source_id)
+        if not item or not party or not source_id or not order:
+            continue
+        order_date = str(order.get("OrderDate", "")).strip()
+        order_content = str(order.get("OrderContent", "")).strip()
+        add(
+            item,
+            "access_authority_order",
+            source_id,
+            detail=f"item={item};party={party};order_date={order_date};order_content={order_content}",
+            display_value=f"{_display_source_atom(source_id)} dated {_display_source_date_atom(order_date)}",
+        )
 
     for row in text_rows:
         source_row = str(row.get("SourceRow", "")).strip()
@@ -2031,12 +2097,17 @@ def _source_record_packet_metadata_companion(
                 display_value="NRM-LL-2020-02: lender unchanged; loan period extended to 2027-09-30.",
             )
         if _is_non_revocable_access_policy_context(combined=window, section_atom=section_atom):
+            value = _access_policy_value_from_atom(window) or "reading_room_access_policy"
             add(
                 source_row,
                 "non_revocable_access_policy",
-                "nrm_rr_2018_44",
+                value,
                 detail=window,
-                display_value="Reading-room patron access governed by museum policy; not subject to change by the lender.",
+                display_value=(
+                    "Reading-room patron access governed by museum policy"
+                    + (f" {_display_source_atom(value)}" if value else "")
+                    + "; not subject to change by the lender."
+                ),
             )
         if _is_no_executor_delivery_direction_context(combined=window, section_atom=section_atom):
             add(
@@ -2108,6 +2179,149 @@ def _source_record_packet_metadata_companion(
     }
 
 
+def _item_description_detail_companion(
+    runtime: CorePrologRuntime,
+    *,
+    predicate: str,
+    args: list[str],
+    query: str,
+) -> dict[str, Any] | None:
+    if predicate != "item_description":
+        return None
+    item_arg = str(args[0]).strip() if args else ""
+    rows: list[dict[str, str]] = []
+    for row in _runtime_rows(runtime, "item_description(Item, Description)."):
+        item = str(row.get("Item", "")).strip()
+        description = str(row.get("Description", "")).strip()
+        if not item or not description:
+            continue
+        if item_arg and not _is_prolog_variable(item_arg) and item != item_arg:
+            continue
+        year = _year_from_atom(description)
+        rows.append(
+            {
+                "Item": item,
+                "Description": description,
+                "DisplayDescription": _display_item_description_atom(description),
+                "Year": year,
+                "HelperClass": "clean-helper",
+            }
+        )
+    if not rows:
+        return None
+    return {
+        "query": "item_description_detail_support(Item, Description, DisplayDescription, Year).",
+        "result": {
+            "status": "success",
+            "predicate": "item_description_detail_support",
+            "prolog_query": "item_description_detail_support(Item, Description, DisplayDescription, Year).",
+            "result_type": "table",
+            "num_rows": len(rows),
+            "variables": ["Item", "Description", "DisplayDescription", "Year", "HelperClass"],
+            "rows": rows[:80],
+            "reasoning_basis": {
+                "kind": "query-only-companion",
+                "note": "derived display title and trailing year from admitted item_description atoms",
+                "trigger_predicate": predicate,
+                "original_query": query,
+            },
+        },
+        "derived_from_queries": [query, "item_description(Item, Description)."],
+    }
+
+
+def _source_record_table_body_count_companion(
+    runtime: CorePrologRuntime,
+    *,
+    predicate: str,
+    args: list[str],
+    query: str,
+) -> dict[str, Any] | None:
+    if predicate not in {"source_record_row", "source_record_field", "source_record_cell", "source_record_label"}:
+        return None
+    query_text = str(query or "").casefold()
+    if "count" not in query_text and "how_many" not in query_text and "source_record_row" not in query_text:
+        return None
+    source_rows = _runtime_rows(runtime, "source_record_row(SourceRow, RowType, Line, SectionAtom, Label).")
+    field_rows = _runtime_rows(runtime, "source_record_field(SourceRow, Header, Value).")
+    fields_by_row = _source_record_fields_by_row_from_rows(field_rows)
+    if not source_rows or not fields_by_row:
+        return None
+    section_filter = ""
+    if predicate == "source_record_row" and len(args) >= 4:
+        maybe_section = str(args[3]).strip()
+        if maybe_section and not _is_prolog_variable(maybe_section):
+            section_filter = maybe_section
+    rows_by_section: dict[str, list[dict[str, Any]]] = {}
+    for row in source_rows:
+        source_row = str(row.get("SourceRow", "")).strip()
+        row_type = str(row.get("RowType", "")).strip()
+        section_atom = str(row.get("SectionAtom", "")).strip()
+        label = str(row.get("Label", "")).strip()
+        if not source_row or row_type != "table_row":
+            continue
+        if section_filter and section_atom != section_filter:
+            continue
+        fields = fields_by_row.get(source_row, {})
+        if not fields or _source_record_table_row_is_header(label=label, fields=fields):
+            continue
+        rows_by_section.setdefault(section_atom, []).append(
+            {
+                "SourceRow": source_row,
+                "Label": label,
+                "Line": str(row.get("Line", "")).strip(),
+            }
+        )
+    out_rows: list[dict[str, Any]] = []
+    for section_atom, body_rows in sorted(rows_by_section.items()):
+        labels = [str(row.get("Label", "")) for row in body_rows if str(row.get("Label", ""))]
+        out_rows.append(
+            {
+                "SectionAtom": section_atom,
+                "RowType": "table_row",
+                "BodyRowCount": len(body_rows),
+                "Labels": ", ".join(labels[:40]),
+                "HelperClass": "clean-helper",
+            }
+        )
+    if not out_rows:
+        return None
+    return {
+        "query": "source_record_table_body_count_support(SectionAtom, RowType, BodyRowCount, Labels).",
+        "result": {
+            "status": "success",
+            "predicate": "source_record_table_body_count_support",
+            "prolog_query": "source_record_table_body_count_support(SectionAtom, RowType, BodyRowCount, Labels).",
+            "result_type": "table",
+            "num_rows": len(out_rows),
+            "variables": ["SectionAtom", "RowType", "BodyRowCount", "Labels", "HelperClass"],
+            "rows": out_rows[:80],
+            "reasoning_basis": {
+                "kind": "query-only-companion",
+                "note": "counted source-record table body rows from field-bearing data rows while excluding header rows",
+                "trigger_predicate": predicate,
+                "original_query": query,
+            },
+        },
+        "derived_from_queries": [
+            query,
+            "source_record_row(SourceRow, RowType, Line, SectionAtom, Label).",
+            "source_record_field(SourceRow, Header, Value).",
+        ],
+    }
+
+
+def _source_record_table_row_is_header(*, label: str, fields: dict[str, list[str]]) -> bool:
+    label_text = str(label or "").strip().lower()
+    if label_text in {"item_id", "order_id", "date", "event_id", "application_id", "student_id"}:
+        return True
+    field_values = {str(value).strip().lower() for values in fields.values() for value in values}
+    if not field_values:
+        return True
+    header_names = {str(header).strip().lower() for header in fields}
+    return bool(field_values) and field_values.issubset(header_names | {label_text})
+
+
 def _scope_source_record_packet_metadata_rows(
     rows: list[dict[str, str]],
     *,
@@ -2127,7 +2341,7 @@ def _scope_source_record_packet_metadata_rows(
     wanted_by_predicate: dict[str, set[str]] = {
         "party_role": {"role_holder"},
         "physical_custodian": {"source_record_custody_location"},
-        "access_authority": {"non_revocable_access_policy", "loan_amendment_effect"},
+        "access_authority": {"access_authority_order", "non_revocable_access_policy", "loan_amendment_effect"},
         "access_type": {"non_revocable_access_policy", "loan_amendment_effect"},
         "external_id": {"source_record_custody_location", "loan_amendment_effect", "non_revocable_access_policy"},
         "recorded_assertion": {
@@ -2259,7 +2473,12 @@ def _numeric_tokens_in_window(
 
 def _source_record_section_is_provenance(section_atom: str) -> bool:
     text = str(section_atom or "").strip().lower()
-    return "provenance" in text or "source_note" in text or "source_notes" in text
+    return (
+        "provenance" in text
+        or "source_note" in text
+        or "source_notes" in text
+        or "compilation_notes" in text
+    )
 
 
 def _is_unreproduced_reference_row(*, text_atom: str, section_atom: str, row_type: str) -> bool:
@@ -2275,7 +2494,7 @@ def _is_unreproduced_reference_row(*, text_atom: str, section_atom: str, row_typ
     ]
     if not any(marker in text for marker in reference_markers):
         return False
-    return row_type in {"list_row", ""} or text.startswith(("cycle_procedure_manual", "census_designated"))
+    return row_type in {"list_row", "anchored_line", ""} or text.startswith(("cycle_procedure_manual", "census_designated"))
 
 
 def _is_unreproduced_reference_context(*, combined: str, section_atom: str) -> bool:
@@ -2362,7 +2581,45 @@ def _display_source_date_atom(value: str) -> str:
     match = re.fullmatch(r"v_(\d{4})_(\d{2})_(\d{2})", text)
     if match:
         return f"{match.group(1)}-{match.group(2)}-{match.group(3)}"
+    match = re.fullmatch(r"(\d{4})_(\d{2})_(\d{2})", text)
+    if match:
+        return f"{match.group(1)}-{match.group(2)}-{match.group(3)}"
     return _display_source_phrase(text)
+
+
+def _year_from_atom(value: str) -> str:
+    text = str(value or "").strip().lower()
+    match = re.search(r"(?:^|_)((?:19|20)\d{2})(?:_|$)", text)
+    return match.group(1) if match else ""
+
+
+def _display_item_description_atom(value: str) -> str:
+    text = str(value or "").strip().lower()
+    year = _year_from_atom(text)
+    if year:
+        text = re.sub(rf"(?:^|_){re.escape(year)}(?:_|$)", "_", text).strip("_")
+    words = [word for word in text.split("_") if word]
+    return " ".join(word.capitalize() if len(word) > 2 else word for word in words)
+
+
+def _is_non_revocable_access_policy_field(*, access_parties: str, authorizing_source: str) -> bool:
+    combined = f"{access_parties} {authorizing_source}".lower()
+    return (
+        "reading_room" in combined
+        and "museum_policy" in combined
+        and ("patron" in combined or "patrons" in combined)
+    )
+
+
+def _access_policy_value_from_atom(value: str) -> str:
+    text = str(value or "").strip().lower()
+    match = re.search(r"(?:^|_)(mrp_\d+)(?:_|$)", text)
+    if match:
+        return match.group(1)
+    match = re.search(r"(?:^|_)(nrm_rr_\d{4}_\d+)(?:_|$)", text)
+    if match:
+        return match.group(1)
+    return ""
 
 
 def _display_unreproduced_reference(text_atom: str) -> str:
