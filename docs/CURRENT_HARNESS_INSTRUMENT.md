@@ -219,6 +219,15 @@ and 38 `candidate-helper`. Generic extraction of batch IDs and maintenance
 tickets from raw event descriptions then brought the audit to 164 companion
 rows: 128 `clean-helper` and 36 `candidate-helper`.
 
+`scripts/audit_helper_usage.py` adds the complementary transfer-pressure view:
+fixtures per helper and helpers per fixture across QA artifacts. The first scan
+over `tmp/transfer_fixtures_20260510` plus `tmp/openrouter_precision_20260509`
+observed 9 support helpers across 453 JSON files; 8 appeared on two or fewer
+fixtures and should be treated as transfer-pending or candidate-scar surfaces
+until wider replay evidence proves otherwise. Only
+`source_record_packet_metadata_support` appeared on more than two fixtures in
+that artifact set.
+
 ## Extraction Rule
 
 ```text
