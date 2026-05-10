@@ -254,3 +254,37 @@ carries compliance rows. The remaining gap is selector discrimination across
 known surfaces. Do not promote the helper as clean architecture yet; promote the
 pattern that artifact packages must report which helper class and surface won
 each row.
+
+## CCR-009 - Selector Discrimination Probe
+
+Date: 2026-05-10
+
+Evidence lane: `selector_discrimination_probe`
+
+Artifacts:
+
+- feature readout:
+  `tmp/openrouter_precision_20260509/roster_sibling_selector_discrimination_20260510/selector_discrimination.md`
+- structural selector:
+  `tmp/openrouter_precision_20260509/roster_sibling_selector_discrimination_20260510/structural_selector.json`
+- guarded activation selector:
+  `tmp/openrouter_precision_20260509/roster_sibling_selector_discrimination_20260510/guarded_activation_selector.json`
+- support-kind guarded selector:
+  `tmp/openrouter_precision_20260509/roster_sibling_selector_discrimination_20260510/guarded_activation_selector_support_kind.json`
+
+Results:
+
+- structural selector: `29 / 2 / 9`, selected-best `32 / 40`
+- guarded activation selector: `34 / 2 / 4`, selected-best `37 / 40`
+- support-kind guarded selector: `34 / 2 / 4`, selected-best `37 / 40`
+- row-gated ceiling remains `36 / 3 / 1`
+
+Lesson: existing guarded activation can use most of the complementary roster
+surfaces when allowed to inspect activation evidence. Adding support-kind
+extraction to selector quality made the helper evidence visible and moved the
+Marrero total-count row into deterministic structural override, but the overall
+score did not improve yet. The remaining gap is small and content-sensitive:
+`q024` needs current-version support rather than any roster helper rows, and
+`q028` needs bus-assignment/correction-notice source support rather than
+homeroom rows. Do not add fixture-named guards; next selector work should expose
+version/content hints from helper rows or leave this as selector-training data.

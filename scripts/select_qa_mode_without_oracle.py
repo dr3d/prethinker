@@ -1266,10 +1266,25 @@ def structural_specialized_answer_surface_override(
             if label.startswith("source_record_facts"):
                 continue
             predicates = set(quality.get("predicate_names", []) or [])
+            support_kinds = set(quality.get("support_kinds", []) or [])
+            if support_kinds.intersection({"source_record_student_group_assignment", "student_group_assignment"}):
+                return (
+                    label,
+                    "authoritative-homeroom question needs focused current roster helper rows",
+                )
             if predicates.intersection({"student_in_homeroom", "homeroom_reassigned"}) and "correction_action" not in predicates:
                 return (
                     label,
                     "authoritative-homeroom question needs current roster membership surface rather than correction-action text alone",
+                )
+
+    if "total student count" in question and "homeroom" in question and "reassigned" in question:
+        for _score, label, quality in scored:
+            support_kinds = set(quality.get("support_kinds", []) or [])
+            if support_kinds.intersection({"group_count", "source_record_student_group_assignment"}):
+                return (
+                    label,
+                    "homeroom-reassignment count question needs roster helper membership/count surface",
                 )
 
     if "correction notice" in question and ("withdrew" in question or "withdrawn" in question) and "replaced" in question:
@@ -3580,6 +3595,7 @@ def structural_evidence_quality(evidence: dict[str, Any]) -> dict[str, Any]:
     relaxed_row_total = 0
     success_count = 0
     non_empty_predicates: set[str] = set()
+    support_kinds: set[str] = set()
     for result in results:
         if not isinstance(result, dict):
             continue
@@ -3590,6 +3606,12 @@ def structural_evidence_quality(evidence: dict[str, Any]) -> dict[str, Any]:
         predicate = str(result.get("predicate", "")).strip()
         if rows > 0 and predicate:
             non_empty_predicates.add(predicate)
+        for sample_row in result.get("sample_rows", []) if isinstance(result.get("sample_rows"), list) else []:
+            if not isinstance(sample_row, dict):
+                continue
+            support_kind = str(sample_row.get("SupportKind", "")).strip()
+            if support_kind:
+                support_kinds.add(support_kind)
         if bool(result.get("was_relaxed_fallback")):
             relaxed_row_total += rows
         else:
@@ -3618,6 +3640,7 @@ def structural_evidence_quality(evidence: dict[str, Any]) -> dict[str, Any]:
         "success_results": success_count,
         "non_empty_predicates": len(non_empty_predicates),
         "predicate_names": sorted(non_empty_predicates),
+        "support_kinds": sorted(support_kinds),
         "warning_count": warning_count,
         "parse_error": parse_error,
         "reason": (
