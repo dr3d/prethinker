@@ -100,9 +100,16 @@ parsing.
 The ledger also now preserves printed member labels via
 `roster_table_member_label/5` and `roster_table_member_alias/2`, so
 `STU-1063 Vinokur` can remain linked to normalized `stu_1063` without counting
-as a second student. That rescues q023 in targeted replay. q024 still exposes a
-result-precedence problem: clean roster support contains the right current
-homeroom, but the answer judge can overvalue a failed sparse semantic query.
+as a second student. That rescues q023, and a narrow homeroom/roster-table
+alias support path can make q024 exact by surfacing the current `v1_3 -> 7_b`
+assignment. Full replay remains below the guarded selector because other rows
+still churn; the next pressure is selector/answer routing, not more roster
+parsing.
+A row gate across old V2, focused homeroom, adult/compliance, narrow
+table-guidance, and alias surfaces reaches `39 / 1 / 0`, with only q012
+remaining partial. That is strong evidence the answerable memory surface is
+present and the active runtime gap is selector discrimination plus one residual
+distinct-count/composition row.
 
 The next cleanup work should reduce candidate or unlabeled helper rows and seek
 sibling proof for one-fixture helpers rather than create new lenses.

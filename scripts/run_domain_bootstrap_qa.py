@@ -1409,6 +1409,9 @@ def _domain_companion_queries(runtime: CorePrologRuntime, *, query: str) -> list
     packet_metadata = _source_record_packet_metadata_companion(runtime, predicate=predicate, query=query)
     if packet_metadata:
         source_record_companions.append(packet_metadata)
+    homeroom_alias = _homeroom_member_alias_companion(runtime, predicate=predicate, args=args, query=query)
+    if homeroom_alias:
+        source_record_companions.append(homeroom_alias)
     roster_table_alias = _roster_table_member_alias_companion(runtime, predicate=predicate, args=args, query=query)
     if roster_table_alias:
         source_record_companions.append(roster_table_alias)
@@ -4455,6 +4458,84 @@ def _roster_table_member_alias_companion(
                 "note": (
                     "query-only roster table alias companion maps exact printed member labels "
                     "such as stu_1063_vinokur back to the normalized roster member id stu_1063"
+                ),
+                "original_query": query,
+                "trigger_predicate": predicate,
+            },
+        },
+        "derived_from_queries": [
+            query,
+            "roster_table_member_label(SourceRow, Version, Group, Member, PrintedMember).",
+        ],
+    }
+
+
+def _homeroom_member_alias_companion(
+    runtime: CorePrologRuntime,
+    *,
+    predicate: str,
+    args: list[str],
+    query: str,
+) -> dict[str, Any] | None:
+    if predicate != "homeroom_member" or len(args) < 3:
+        return None
+    requested_student, requested_homeroom, requested_version = [str(item).strip() for item in args[:3]]
+    if not requested_student or _is_prolog_variable(requested_student):
+        return None
+    label_rows = _runtime_rows(runtime, "roster_table_member_label(SourceRow, Version, Group, Member, PrintedMember).")
+    if not label_rows:
+        return None
+
+    def matches(value: str, requested: str) -> bool:
+        if not requested or _is_prolog_variable(requested):
+            return True
+        return value == requested
+
+    out_rows: list[dict[str, Any]] = []
+    for row in label_rows:
+        source_row = str(row.get("SourceRow", "")).strip()
+        version = str(row.get("Version", "")).strip()
+        group = str(row.get("Group", "")).strip()
+        member = str(row.get("Member", "")).strip()
+        printed_member = str(row.get("PrintedMember", "")).strip()
+        if not source_row or not version or not group or not member:
+            continue
+        if requested_student not in {member, printed_member}:
+            continue
+        if not matches(group, requested_homeroom):
+            continue
+        if not matches(version, requested_version):
+            continue
+        out_rows.append(
+            {
+                "SupportKind": "homeroom_member_printed_label",
+                "Student": member,
+                "PrintedMember": printed_member,
+                "Homeroom": group,
+                "Version": version,
+                "SourceRow": source_row,
+                "HelperClass": "clean-helper",
+            }
+        )
+    if not out_rows:
+        return None
+    out_rows = sorted(out_rows, key=lambda row: -_roster_version_rank(str(row.get("Version", ""))))
+    return {
+        "query": "homeroom_member_alias_support(Student, Homeroom, Version, PrintedMember).",
+        "result": {
+            "status": "success",
+            "predicate": "homeroom_member_alias_support",
+            "prolog_query": "homeroom_member_alias_support(Student, Homeroom, Version, PrintedMember).",
+            "result_type": "table",
+            "num_rows": len(out_rows),
+            "variables": ["SupportKind", "Student", "PrintedMember", "Homeroom", "Version", "SourceRow", "HelperClass"],
+            "rows": out_rows[:80],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only homeroom alias companion answers a sparse homeroom_member/3 "
+                    "lookup from clean roster_table_member_label/5 rows when the question uses "
+                    "a printed member label such as stu_1063_vinokur"
                 ),
                 "original_query": query,
                 "trigger_predicate": predicate,

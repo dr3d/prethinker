@@ -1763,6 +1763,30 @@ def test_roster_table_member_alias_support_maps_printed_labels() -> None:
     } == {"7_a", "7_b"}
 
 
+def test_homeroom_member_alias_support_prioritizes_latest_printed_label_row() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "roster_table_member_label(src_line_0041, v1_0, 7_a, stu_1063, stu_1063_vinokur).",
+        "roster_table_member_label(src_line_0042, v1_0, 7_b, stu_1063, stu_1063_vinokur).",
+        "roster_table_member_label(src_line_0127, v1_3, 7_b, stu_1063, stu_1063_vinokur).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["homeroom_member(stu_1063_vinokur, Homeroom, Version)."])
+
+    companion = next(
+        item for item in rows if item["result"].get("predicate") == "homeroom_member_alias_support"
+    )
+    first_row = companion["result"]["rows"][0]
+
+    assert first_row.get("SupportKind") == "homeroom_member_printed_label"
+    assert first_row.get("Student") == "stu_1063"
+    assert first_row.get("PrintedMember") == "stu_1063_vinokur"
+    assert first_row.get("Homeroom") == "7_b"
+    assert first_row.get("Version") == "v1_3"
+    assert first_row.get("HelperClass") == "clean-helper"
+
+
 def test_fallback_queries_project_roster_compliance_ir() -> None:
     ir = {
         "entities": [

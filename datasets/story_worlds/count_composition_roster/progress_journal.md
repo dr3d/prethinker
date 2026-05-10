@@ -383,6 +383,10 @@ Artifacts:
   `tmp/transfer_fixtures_20260510/count_roster_table_alias_targeted_v2_20260510/`
 - q024 one-row probe before alias companion narrowing:
   `tmp/transfer_fixtures_20260510/count_roster_table_alias_q024_v2_20260510/`
+- homeroom alias q024 probe:
+  `tmp/transfer_fixtures_20260510/count_roster_table_homeroom_alias_q024_20260510/`
+- full alias replay:
+  `tmp/transfer_fixtures_20260510/count_roster_table_alias_full_v2_20260510/`
 
 Results:
 
@@ -390,16 +394,53 @@ Results:
 - q023/q024 targeted replay: `1 / 0 / 1`
 - q023 exact: `STU-1063 Vinokur` is linked to normalized `stu_1063` and both
   v1.0 homerooms (`7_a`, `7_b`)
-- q024 still miss in the two-row replay, despite the first roster helper row
-  exposing `stu_1063_vinokur -> v1_3 -> 7_b`
+- q024 exact after homeroom/roster-table alias support exposes
+  `stu_1063_vinokur -> stu_1063 -> v1_3 -> 7_b`
+- full alias replay: `29 / 3 / 8`
 - zero write proposals
 
-Lesson: the remaining edge is now visibly answer/result precedence, not memory
-acquisition. The deterministic ledger preserves printed member labels through
+Lesson: the deterministic ledger now preserves printed member labels through
 `roster_table_member_label/5` and `roster_table_member_alias/2`, without
 counting the printed label as a second student. That is clean identity
-addressability. q023 uses it successfully. q024 still fails when the answer
-judge overweights a failed primary `homeroom_member/3` query over a correct
-clean-helper roster row. Do not widen the roster parser; the next bite should
-be result precedence or answer-surface handling for clean deterministic support
-that contradicts a sparse failed semantic query.
+addressability. q023 uses it to connect `STU-1063 Vinokur` to duplicate v1.0
+homerooms. q024 becomes exact once the query path can see the alias-backed
+current homeroom support. The full replay does not improve over the narrowed
+guidance run because row-level query churn still moves other questions around;
+this is a selector/answer-routing frontier, not a reason to broaden roster
+parsing.
+
+## CCR-013 - Alias/Table Row-Gated Ceiling
+
+Date: 2026-05-10
+
+Evidence lane: `artifact_only_row_gate`
+
+Artifacts:
+
+- row gate:
+  `tmp/transfer_fixtures_20260510/count_roster_alias_row_gate_20260510/row_gate.md`
+- row gate JSON:
+  `tmp/transfer_fixtures_20260510/count_roster_alias_row_gate_20260510/row_gate.json`
+
+Inputs:
+
+- old source-record V2: `27 / 4 / 9`
+- focused homeroom helper: `29 / 2 / 9`
+- adult/compliance helper: `30 / 2 / 8`
+- narrow table-guidance replay: `30 / 3 / 7`
+- alias full replay: `29 / 3 / 8`
+
+Result:
+
+- row-gated ceiling: `39 / 1 / 0`
+- remaining non-exact row: `q012`, distinct students in v1.0
+- chosen rows: old V2 `27`, focused homeroom `8`, narrow guidance `3`,
+  adult/compliance `2`, alias full `0` under first-exact tie order
+
+Lesson: the available answer surface is now nearly saturated. The alias/table
+work did not produce a dominant single run, but it expanded the complementary
+surface enough that a perfect selector can answer every row except q012. This
+is exactly the architecture-shape finding: memory acquisition is mostly present,
+but runtime row routing is still weaker than the artifact package. The next
+work should be selector discrimination over source-record/table/helper surfaces,
+then a focused q012 count/composition inspection.

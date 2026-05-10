@@ -397,9 +397,15 @@ The same ledger now preserves printed member labels with
 `roster_table_member_label/5` and `roster_table_member_alias/2`. This keeps
 `STU-1063 Vinokur` attached to normalized `stu_1063` without treating the
 printed label as a separate member. A q023/q024 probe shows q023 becomes exact,
-while q024 still fails when the answer layer overweights a failed
-`homeroom_member/3` query despite clean roster support containing the current
-`v1_3 -> 7_b` assignment.
+and q024 becomes exact once homeroom/roster-table alias support surfaces the
+current `v1_3 -> 7_b` assignment. The full alias replay lands at `29 / 3 / 8`,
+below the narrowed table-guidance replay and the guarded selector, because other
+rows still churn under query planning. That keeps the next frontier at
+selector/answer routing rather than broader roster parsing.
+A row gate over old V2, focused homeroom, adult/compliance, narrow
+table-guidance, and alias surfaces reaches `39 / 1 / 0`; only q012 remains
+partial. That makes the current roster frontier selector discrimination over
+known memory surfaces, plus one residual distinct-count/composition row.
 
 `scripts/audit_helper_usage.py` adds the complementary transfer-pressure view:
 fixtures per helper and helpers per fixture across QA artifacts. The first scan
