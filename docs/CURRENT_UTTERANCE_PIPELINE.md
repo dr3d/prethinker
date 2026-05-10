@@ -214,6 +214,9 @@ prose directly and do not mutate the KB. Current active examples include:
   siblings, and admitted timestamp support. `source_record_clock_sync_support`
   is labeled `clean-helper` because it derives exact last-successful sync dates
   from admitted source-record text/numeric rows without domain constants.
+  `clear_sample_clock_pause_support` is also labeled `clean-helper` because it
+  joins admitted counted segments, sampler-offline intervals, and rule
+  exceptions without source-prose recognition.
 - constraint propagation: narrows numeric and date-time domains with
   `less_than`, `less_equal`, `greater_than`, `greater_equal`, `before`,
   `before_or_equal`, `after`, `after_or_equal`, `at_or_before`, and

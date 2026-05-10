@@ -230,6 +230,10 @@ candidate-helper rows from older family-specific source-cell/text recognizers.
 The complementary precision-batch audit over `tmp/openrouter_precision_20260509`
 shows `source_record_clock_sync_support` as clean deterministic substrate:
 2 rows, both `clean-helper`, with zero unlabeled rows.
+The same audit now covers `clear_sample_clock_pause_support`: 1 row,
+`clean-helper`, zero candidate rows, zero unlabeled rows, confirming that the
+pause-aware clock helper is currently generic temporal substrate over admitted
+segments, offline intervals, and rule exceptions.
 
 `scripts/audit_helper_usage.py` adds the complementary transfer-pressure view:
 fixtures per helper and helpers per fixture across QA artifacts. The first scan

@@ -21,6 +21,7 @@ try:
         _clinic_device_recall_companion,
         _authority_custody_companion,
         _grant_award_companion,
+        _clear_sample_clock_pause_companion,
         _industrial_sensor_companion,
         _roster_state_companion,
         _source_record_clock_sync_companion,
@@ -32,6 +33,7 @@ except ModuleNotFoundError:
         _clinic_device_recall_companion,
         _authority_custody_companion,
         _grant_award_companion,
+        _clear_sample_clock_pause_companion,
         _industrial_sensor_companion,
         _roster_state_companion,
         _source_record_clock_sync_companion,
@@ -48,6 +50,11 @@ COMPANIONS: dict[str, tuple[CompanionFn, str, str]] = {
         _authority_custody_companion,
         "object_custody_status",
         "object_custody_status(Object, Holder, StatusKind, TimeOrDate, SourceDocument).",
+    ),
+    "clear_sample_clock_pause_support": (
+        _clear_sample_clock_pause_companion,
+        "clear_sample_segment",
+        "clear_sample_segment(SegmentID, Start, End, CountedHours).",
     ),
     "source_record_packet_metadata_support": (
         _source_record_packet_metadata_companion,

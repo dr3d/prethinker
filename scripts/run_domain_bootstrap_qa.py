@@ -4030,6 +4030,7 @@ def _clear_sample_clock_pause_companion(
                     "Station": station,
                     "PauseCause": cause,
                     "Explanation": f"paused_under_{rule}_with_{counted_hours}_hours_counted",
+                    "HelperClass": "clean-helper",
                 }
             )
     if not rows:
@@ -4041,7 +4042,16 @@ def _clear_sample_clock_pause_companion(
             "result_type": "table",
             "predicate": "clear_sample_clock_pause_support",
             "prolog_query": "clear_sample_clock_pause_support(ClockState, Rule, CountedHours, PauseStart, PauseEnd, Station, PauseCause).",
-            "variables": ["ClockState", "Rule", "CountedHours", "PauseStart", "PauseEnd", "Station", "PauseCause"],
+            "variables": [
+                "ClockState",
+                "Rule",
+                "CountedHours",
+                "PauseStart",
+                "PauseEnd",
+                "Station",
+                "PauseCause",
+                "HelperClass",
+            ],
             "rows": rows,
             "num_rows": len(rows),
             "reasoning_basis": {

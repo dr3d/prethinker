@@ -702,6 +702,7 @@ def test_clear_sample_clock_pause_companion_derives_counted_hours_during_pause()
     assert row["Rule"] == "rule_6_2a"
     assert row["CountedHours"] == "18"
     assert row["PauseStart"] == "2026_05_01_09_00"
+    assert row["HelperClass"] == "clean-helper"
 
 
 def test_authority_custody_companion_counts_grouped_physical_custody() -> None:
