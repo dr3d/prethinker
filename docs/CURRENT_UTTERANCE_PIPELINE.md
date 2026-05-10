@@ -151,6 +151,7 @@ interpreting meaning:
 - `source_record_field(Row, Header, Value)` facts
 - bullet/list rows
 - labeled prose rows
+- blockquoted memo metadata rows (`From`, `To`, `Date`, `Re`)
 - continuation lines for official procedural prose
 - numeric tokens
 - exact text atoms and stable text keys
@@ -203,9 +204,10 @@ prose directly and do not mutate the KB. Current active examples include:
   manufacturer-liaison, verification-procedure, acronym-derived clinic
   abbreviations, explicit glossary abbreviations, cabinet/seal range,
   failure-rate atoms, and visit-date ranges are `clean-helper` when the
-  required source-record rows are present, while key-retainer identity and
-  named medical-director authority remain `candidate-helper` until blockquoted
-  memo sender lines are preserved by the source-record ledger.
+  required source-record rows are present. Key-retainer identity and named
+  medical-director authority are `clean-helper` on refreshed artifacts whose
+  source-record ledger preserves blockquoted memo sender lines; stale artifacts
+  keep those rows candidate-labeled.
 - `source_record_packet_metadata_support`: surfaces exact packet IDs, policy
   IDs, appeal IDs, score correction memo IDs, recusal memo IDs, and device IDs.
   Its emitted rows now carry `HelperClass`: generic identifier/metadata rows are

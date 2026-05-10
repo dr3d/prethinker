@@ -140,3 +140,26 @@ def test_source_record_ledger_keeps_root_cause_scope_refusal() -> None:
     assert "does not assign root cause" in exact_by_line[2]
     assert "separate root-cause analysis" in exact_by_line[3]
     assert "not part of this packet" in exact_by_line[4]
+
+
+def test_source_record_ledger_keeps_blockquoted_memo_metadata() -> None:
+    ledger = extract_source_record_ledger(
+        "\n".join(
+            [
+                "### 8.1 Site Lead Memo",
+                "> **From:** D. Rourke, NBFH Site Lead",
+                "> **Date:** 2026-04-13",
+                "> I will retain the keys personally pending verification visit.",
+            ]
+        )
+    )
+
+    rows = ledger["rows"]
+    exact_by_line = {row["line"]: row["exact"] for row in rows}
+    label_by_line = {row["line"]: row["label"] for row in rows}
+
+    assert exact_by_line[2] == "**From:** D. Rourke, NBFH Site Lead"
+    assert label_by_line[2] == "From"
+    assert exact_by_line[3] == "**Date:** 2026-04-13"
+    assert label_by_line[3] == "Date"
+    assert exact_by_line[4] == "I will retain the keys personally pending verification visit."

@@ -127,7 +127,8 @@ python scripts/run_kb_pipeline_clean_harness.py --pack docs/data/frontier_packs/
 - Deterministic ledger growth is not lens growth. Promote a ledger expansion
   only when it preserves source structure without semantic interpretation and
   improves row-gated replay. The 2026-05-10 source-record ledger V2 added table
-  cells, numeric tokens, bold-label rows, and anchored official prose; on the
+  cells, numeric tokens, bold-label rows, blockquoted memo metadata, and
+  anchored official prose; on the
   precision batch it raised the seven-candidate selected score to `223 / 8 / 9`
   and the candidate ceiling to `232 / 4 / 4` over `240` rows.
 - Cold acquisition now preserves table cell headers as deterministic source
@@ -307,6 +308,13 @@ stale six-fixture transfer audit now stands at 209 `clean-helper` and 136
 candidate. The remaining clinic candidates require blockquoted memo sender
 lines to become deterministic source-record text, rather than more
 fixture-shaped helper logic.
+The source-record ledger now strips markdown blockquote markers before row
+classification, so blockquoted `From`, `To`, `Date`, and `Re` memo metadata
+becomes deterministic source addressability. A refreshed OpenRouter compile of
+`clinic_device_recall_field_packet` preserved D. Rourke and Dr. R. Iwasaki
+sender rows; `clinic_recall_support` is 29 clean / 0 candidate on that
+refreshed artifact. The stale transfer artifact remains 23 clean / 2 candidate
+because it was compiled before the blockquote ledger repair.
 
 `scripts/audit_helper_usage.py` adds the complementary transfer-pressure view:
 fixtures per helper and helpers per fixture across QA artifacts. The first scan

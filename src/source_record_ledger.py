@@ -52,7 +52,7 @@ def extract_source_record_ledger(
     continuation_label = ""
     continuation_line = 0
     for line_no, raw_line in enumerate(source_text.splitlines(), start=1):
-        line = raw_line.rstrip()
+        line = _strip_blockquote_marker(raw_line.rstrip())
         if not line.strip():
             pending_table_header = None
             active_table_header = None
@@ -272,6 +272,10 @@ def _row_id(line_no: int) -> str:
     return f"src_line_{line_no:04d}"
 
 
+def _strip_blockquote_marker(line: str) -> str:
+    return re.sub(r"^\s{0,3}>\s?", "", str(line or "").rstrip())
+
+
 def _clean_text(value: str, *, max_chars: int) -> str:
     cleaned = re.sub(r"\s+", " ", str(value).strip())
     return cleaned[:max_chars]
@@ -286,7 +290,7 @@ def _is_table_separator(cells: list[str]) -> bool:
 def _best_label(line: str) -> str:
     bold_label = re.match(r"^\s*\*\*([^*]{1,80}?)\.?\*\*", line)
     if bold_label:
-        return _clean_text(bold_label.group(1), max_chars=80)
+        return _clean_text(bold_label.group(1).rstrip(".:"), max_chars=80)
     matches = [_clean_text(match.group(0), max_chars=80) for match in LABEL_RE.finditer(line)]
     if not matches:
         return ""

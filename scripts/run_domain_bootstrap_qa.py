@@ -3373,11 +3373,21 @@ def _clinic_device_recall_companion(
         if _is_numeric_atom(line) and source_row in text_by_row
     }
     coverage_clinics_by_section: dict[str, set[str]] = {}
+    memo_sender_by_section: dict[str, tuple[str, str]] = {}
+    network_medical_director = ""
     for source_row, text_atom in text_by_row.items():
         coverage_match = re.search(r"coverage_(?:all_)?(?P<clinic>[a-z]{2,6})_held", text_atom)
         section_atom = section_by_row.get(source_row, "")
         if coverage_match and section_atom:
             coverage_clinics_by_section.setdefault(section_atom, set()).add(coverage_match.group("clinic").upper())
+        sender_match = re.fullmatch(r"from_(?P<person>(?:dr_)?[a-z]_[a-z]+)(?:_(?P<role>[a-z0-9_]+))?", text_atom)
+        if sender_match and section_atom:
+            person = _display_person_atom(sender_match.group("person"))
+            role_atom = sender_match.group("role") or ""
+            role = _display_role_atom(role_atom) if role_atom else ""
+            memo_sender_by_section[section_atom] = (person, role)
+            if "network_medical_director" in role_atom or "network_medical_director" in section_atom:
+                network_medical_director = person
 
     out_rows: list[dict[str, str]] = []
     seen: set[tuple[str, str, str, str, str]] = set()
@@ -3525,14 +3535,30 @@ def _clinic_device_recall_companion(
                 f"{cabinet} was sealed with tamper-evident tape, seal numbers {start_seal} through {end_seal}.",
                 source_row,
             )
-        if "through_seal_nbfh_04_003" in text_atom and "i_will_retain_the_keys" in text_atom:
-            add_candidate(
-                "cabinet_key_retainer",
-                "Cabinet B-3",
-                "D. Rourke",
-                "D. Rourke, NBFH Site Lead, wrote that he would retain the Cabinet B-3 keys personally.",
-                source_row,
+        if "i_will_retain_the_keys" in text_atom:
+            section_text = "_".join(
+                atom for row, atom in text_by_row.items() if section_by_row.get(row, "") == section_atom
             )
+            cabinet_match = re.search(r"cabinet_(?P<cabinet>[a-z]_\d+)", section_text)
+            sender, role = memo_sender_by_section.get(section_atom, ("", ""))
+            if cabinet_match and sender:
+                cabinet = _display_cabinet_atom(cabinet_match.group("cabinet"))
+                role_text = f", {role}," if role else ""
+                add(
+                    "cabinet_key_retainer",
+                    cabinet,
+                    sender,
+                    f"{sender}{role_text} wrote that they would retain the {cabinet} keys personally.",
+                    source_row,
+                )
+            else:
+                add_candidate(
+                    "cabinet_key_retainer",
+                    "Cabinet B-3",
+                    "D. Rourke",
+                    "D. Rourke, NBFH Site Lead, wrote that he would retain the Cabinet B-3 keys personally.",
+                    source_row,
+                )
         visit_range_match = re.search(
             r"manufacturer_technician_visit_log_(?P<start>\d{4}_\d{2}_\d{2})_through",
             text_atom,
@@ -3554,29 +3580,48 @@ def _clinic_device_recall_companion(
                 source_row,
             )
         if "from_dr_r_iwasaki_network_medical_director" in text_atom:
-            add_candidate(
+            director = _display_person_atom("dr_r_iwasaki")
+            add(
                 "network_medical_director",
                 "Network Medical Director",
-                "Dr. R. Iwasaki",
-                "From: Dr. R. Iwasaki, Network Medical Director.",
+                director,
+                f"From: {director}, Network Medical Director.",
                 source_row,
             )
         if "formal_release_for_verified_devices_at_the_network_level" in text_atom:
-            add_candidate(
-                "quarantine_release_authority",
-                "verified devices",
-                "Network Medical Director (Dr. R. Iwasaki)",
-                "Dr. R. Iwasaki will issue the formal release for verified devices at the network level after reviewing all sites' reports.",
-                source_row,
-            )
+            if network_medical_director:
+                add(
+                    "quarantine_release_authority",
+                    "verified devices",
+                    f"Network Medical Director ({network_medical_director})",
+                    f"{network_medical_director} will issue the formal release for verified devices at the network level after reviewing all sites' reports.",
+                    source_row,
+                )
+            else:
+                add_candidate(
+                    "quarantine_release_authority",
+                    "verified devices",
+                    "Network Medical Director (Dr. R. Iwasaki)",
+                    "Dr. R. Iwasaki will issue the formal release for verified devices at the network level after reviewing all sites' reports.",
+                    source_row,
+                )
         if "medical_director_s_patient_use_exception_authority" in text_atom:
-            add_candidate(
-                "patient_use_exception_authority",
-                "patient-use exception",
-                "Network Medical Director (Dr. R. Iwasaki)",
-                "NBFH memo identifies Medical Director patient-use exception authority.",
-                source_row,
-            )
+            if network_medical_director:
+                add(
+                    "patient_use_exception_authority",
+                    "patient-use exception",
+                    f"Network Medical Director ({network_medical_director})",
+                    "Memo identifies Medical Director patient-use exception authority.",
+                    source_row,
+                )
+            else:
+                add_candidate(
+                    "patient_use_exception_authority",
+                    "patient-use exception",
+                    "Network Medical Director (Dr. R. Iwasaki)",
+                    "NBFH memo identifies Medical Director patient-use exception authority.",
+                    source_row,
+                )
 
     for source_row, fields in source_fields.items():
         device_id = _field_value(fields, "device_id")
@@ -4127,9 +4172,16 @@ def _display_person_atom(value: str) -> str:
     if not text:
         return ""
     parts = [part for part in text.split("_") if part]
+    if len(parts) == 3 and parts[0].lower() == "dr" and len(parts[1]) == 1:
+        return f"Dr. {parts[1].upper()}. {parts[2].title()}"
     if len(parts) == 2 and len(parts[0]) == 1:
         return f"{parts[0].upper()}. {parts[1].title()}"
     return " ".join(part.title() for part in parts)
+
+
+def _display_role_atom(value: str) -> str:
+    parts = [part for part in str(value or "").strip().split("_") if part]
+    return " ".join(part.upper() if 2 <= len(part) <= 5 else part.title() for part in parts)
 
 
 def _prioritize_grant_award_rows(

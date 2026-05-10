@@ -501,10 +501,17 @@ def test_clinic_recall_companion_derives_official_source_record_support() -> Non
         "source_record_text_atom(src_line_0116, procedure_mv_vp_04_a).",
         "source_record_text_atom(src_line_0195, medical_director_s_patient_use_exception_authority_cabinet_b_3_has).",
         "source_record_line(src_line_0195, 195).",
+        "source_record_section(src_line_0195, v_8_1_nbfh_site_lead_memo).",
         "source_record_text_atom(src_line_0196, been_sealed_with_tamper_evident_tape_seal_numbers_seal_nbfh_04_001).",
         "source_record_line(src_line_0196, 196).",
+        "source_record_section(src_line_0196, v_8_1_nbfh_site_lead_memo).",
         "source_record_text_atom(src_line_0197, through_seal_nbfh_04_003_one_seal_per_shelf_i_will_retain_the_keys).",
         "source_record_line(src_line_0197, 197).",
+        "source_record_section(src_line_0197, v_8_1_nbfh_site_lead_memo).",
+        "source_record_text_atom(src_line_0187, from_d_rourke_nbfh_site_lead).",
+        "source_record_section(src_line_0187, v_8_1_nbfh_site_lead_memo).",
+        "source_record_text_atom(src_line_0087, from_dr_r_iwasaki_network_medical_director).",
+        "source_record_section(src_line_0087, section_4_patient_use_exception_memo).",
         "source_record_text_atom(src_line_0111, reproduced_from_the_manufacturer_technician_visit_log_2026_04_14_through).",
         "source_record_line(src_line_0111, 111).",
         "source_record_section(src_line_0111, section_5_manufacturer_repair_verification_log).",
@@ -579,6 +586,18 @@ def test_clinic_recall_companion_derives_official_source_record_support() -> Non
     )
     assert any(
         row.get("SupportKind") == "quarantine_seal_range"
+        and row.get("HelperClass") == "clean-helper"
+        for row in rows
+    )
+    assert any(
+        row.get("SupportKind") == "cabinet_key_retainer"
+        and row.get("Value") == "D. Rourke"
+        and row.get("HelperClass") == "clean-helper"
+        for row in rows
+    )
+    assert any(
+        row.get("SupportKind") == "patient_use_exception_authority"
+        and "Dr. R. Iwasaki" in row.get("Value", "")
         and row.get("HelperClass") == "clean-helper"
         for row in rows
     )
