@@ -335,6 +335,9 @@ def test_industrial_sensor_companion_derives_event_and_sensor_support() -> None:
         "source_record_field(src_line_0096, wall_clock_time_utc_corrected, v_2026_04_22_15_14_03).",
         "source_record_line(src_line_0095, 95).",
         "source_record_section(src_line_0095, section_4_corrected_timeline).",
+        "source_record_line(src_line_0159, 159).",
+        "source_record_text_atom(src_line_0159, inferred_from_these_entries_r_kim_was_not_the_originating_reporter).",
+        "source_record_line(src_line_0160, 160).",
         "source_record_text_atom(src_line_0160, of_ev_08_or_ev_12_those_originated_from_qis_opt_12_automatic_flagging).",
         "sensor_id(hum_d_04).",
         "sensor_id(qis_opt_12).",
@@ -357,6 +360,12 @@ def test_industrial_sensor_companion_derives_event_and_sensor_support() -> None:
         "source_record_text_atom(src_line_0252, v_2026_04_22_lab_2026_0422_s3_sample_sent_for_moisture_analysis).",
         "source_record_text_atom(src_line_0257, v_2026_04_29_estimated_return_date_for_lab_2026_0422_s3_per_lab_confirmation).",
         "source_record_text_atom(src_line_0044, sys_c_timestamps_are_accepted_as_wall_clock).",
+        "source_record_line(src_line_0208, 208).",
+        "source_record_text_atom(src_line_0208, this_packet_does_not_assign_root_cause_root_cause_assignment_is_the).",
+        "source_record_line(src_line_0209, 209).",
+        "source_record_text_atom(src_line_0209, function_of_a_separate_root_cause_analysis_rca_which_is_in).",
+        "source_record_line(src_line_0210, 210).",
+        "source_record_text_atom(src_line_0210, preparation_but_not_part_of_this_packet).",
         "source_record_text_atom(src_line_0264, compliance_packet_id_mpp_comp_2026_0427_the_two_packets_cover_the).",
     ]
     for fact in facts:
@@ -453,6 +462,18 @@ def test_industrial_sensor_companion_derives_event_and_sensor_support() -> None:
     assert any(
         row.get("SupportKind") == "system_clock_authority"
         and row.get("Subject") == "SYS-C"
+        and row.get("HelperClass") == "clean-helper"
+        for row in rows
+    )
+    assert any(
+        row.get("SupportKind") == "packet_scope_exclusion"
+        and row.get("Subject") == "root_cause"
+        and row.get("HelperClass") == "clean-helper"
+        for row in rows
+    )
+    assert any(
+        row.get("SupportKind") == "operator_not_originating_events"
+        and row.get("Subject") == "R. Kim"
         and row.get("HelperClass") == "clean-helper"
         for row in rows
     )

@@ -191,7 +191,9 @@ prose directly and do not mutate the KB. Current active examples include:
   `HelperClass`: field/ledger-derived event, timestamp, computed-duration,
   packet-id, data-loss, lab-sample logistics, and system clock-authority rows
   are `clean-helper`, while stated-duration and remaining exact prose recognizers remain
-  `candidate-helper`.
+  `candidate-helper`. Refreshed artifacts whose source-record ledger preserves
+  the root-cause refusal and operator-origin prose can classify those rows as
+  `clean-helper`; stale artifacts keep them candidate-labeled.
 - `clinic_recall_support`: derives clinic abbreviations, manufacturer liaison
   identity, failure rates, cabinet/seal/key custody, verification procedure
   support, full device serial displays, pending-determination correspondence,

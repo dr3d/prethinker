@@ -279,6 +279,17 @@ The remaining industrial root-cause packet-scope row is explicitly left
 this packet, but the current source-record ledger only exposes the weaker
 `tbd_root_cause_analysis_report` table row. That is a source-acquisition gap,
 not a row safe to promote through helper inference.
+After widening the deterministic source-record anchor rules for root-cause
+scope refusals, a one-fixture OpenRouter refresh of
+`industrial_sensor_clock_correction` preserved `src_line_0208` through
+`src_line_0210` as source-record text atoms. On that refreshed artifact,
+`packet_scope_exclusion(root_cause, not_assigned_in_packet, ...)` is
+`clean-helper`; on the stale transfer artifact, it remains correctly
+candidate-labeled.
+The same refreshed artifact preserves the R. Kim operator-origin prose at
+`src_line_0159` through `src_line_0160`, allowing
+`operator_not_originating_events(R. Kim, EV-08/EV-12, ...)` to move clean on
+refreshed artifacts while staying candidate on the stale transfer compile.
 
 `scripts/audit_helper_usage.py` adds the complementary transfer-pressure view:
 fixtures per helper and helpers per fixture across QA artifacts. The first scan

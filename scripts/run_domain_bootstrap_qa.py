@@ -2939,6 +2939,11 @@ def _industrial_sensor_companion(
         set(text_by_row) | set(labels_by_row) | set(section_by_row),
         key=lambda source_row: int(float(line_by_row.get(source_row, "0"))) if _is_numeric_atom(line_by_row.get(source_row, "")) else 0,
     )
+    row_by_line = {
+        int(float(line)): source_row
+        for source_row, line in line_by_row.items()
+        if _is_numeric_atom(line)
+    }
     for source_row in ordered_source_rows:
         section_atom = section_by_row.get(source_row, "")
         labels = labels_by_row.get(source_row, set())
@@ -2969,6 +2974,8 @@ def _industrial_sensor_companion(
                     source_row,
                 )
 
+    operator_origin_clean_added = False
+    packet_scope_clean_added = False
     for source_row, text_atom in text_by_row.items():
         for sensor_id in sorted(sensor_ids, key=len, reverse=True):
             prefix = f"{sensor_id}_vendor_"
@@ -3002,7 +3009,38 @@ def _industrial_sensor_companion(
                 f"Lost: buffer overflow on {system} confirmed by maintenance; no recovery.",
                 source_row,
             )
-        if "of_ev_08_or_ev_12_those_originated_from_qis_opt_12_automatic_flagging" in text_atom:
+        operator_origin_match = re.search(r"(?P<actor>[a-z]_[a-z]+)_was_not_the_originating_reporter", text_atom)
+        if operator_origin_match:
+            try:
+                origin_line = int(float(line_by_row.get(source_row, "0") or "0"))
+            except ValueError:
+                origin_line = 0
+            next_row = row_by_line.get(origin_line + 1)
+            next_atom = text_by_row.get(next_row or "", "")
+            next_match = re.search(
+                r"of_(?P<events>ev_\d+(?:_or_ev_\d+)*)_those_originated_from_(?P<origin>[a-z0-9_]+?)_automatic_flagging",
+                next_atom,
+            )
+            if next_match:
+                actor = _display_person_atom(operator_origin_match.group("actor"))
+                event_ids = [
+                    _display_event_id(event_id)
+                    for event_id in re.findall(r"ev_\d+", next_match.group("events"))
+                ]
+                event_phrase = " or ".join(event_ids) if len(event_ids) == 2 else ", ".join(event_ids)
+                origin = _display_source_atom(next_match.group("origin"))
+                add(
+                    "operator_not_originating_events",
+                    actor,
+                    ", ".join(event_ids),
+                    f"{actor} did not originate {event_phrase}; those originated from {origin} automatic flagging.",
+                    source_row,
+                )
+                operator_origin_clean_added = True
+        if (
+            "of_ev_08_or_ev_12_those_originated_from_qis_opt_12_automatic_flagging" in text_atom
+            and not operator_origin_clean_added
+        ):
             add_candidate(
                 "operator_not_originating_events",
                 "R. Kim",
@@ -3060,7 +3098,27 @@ def _industrial_sensor_companion(
                 f"Estimated return date for {sample_id} is {return_date} per source record.",
                 source_row,
             )
-        if "tbd_root_cause_analysis_report" in text_atom:
+        if "does_not_assign_root_cause" in text_atom:
+            try:
+                root_line = int(float(line_by_row.get(source_row, "0") or "0"))
+            except ValueError:
+                root_line = 0
+            nearby_atoms = [text_atom]
+            for offset in (1, 2):
+                nearby_row = row_by_line.get(root_line + offset)
+                if nearby_row:
+                    nearby_atoms.append(text_by_row.get(nearby_row, ""))
+            nearby_text = "_".join(atom for atom in nearby_atoms if atom)
+            if "separate_root_cause_analysis" in nearby_text and "not_part_of_this_packet" in nearby_text:
+                add(
+                    "packet_scope_exclusion",
+                    "root_cause",
+                    "not_assigned_in_packet",
+                    "This packet does not assign root cause; root-cause analysis is a separate report in preparation and not part of this packet.",
+                    source_row,
+                )
+                packet_scope_clean_added = True
+        if "tbd_root_cause_analysis_report" in text_atom and not packet_scope_clean_added:
             add_candidate(
                 "packet_scope_exclusion",
                 "root_cause",
