@@ -379,7 +379,7 @@ def test_industrial_sensor_companion_derives_event_and_sensor_support() -> None:
     assert any(
         row.get("SupportKind") == "sensor_vendor_model"
         and row.get("Subject") == "HUM-D-04"
-        and row.get("HelperClass") == "candidate-helper"
+        and row.get("HelperClass") == "clean-helper"
         for row in rows
     )
     assert any(

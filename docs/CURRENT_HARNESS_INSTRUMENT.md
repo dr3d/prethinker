@@ -211,7 +211,11 @@ provenance can ride with score reports instead of living only in a side audit.
 The first candidate-retirement passes moved industrial sensor-register section
 support plus calibration due-date/ticket support from text recognizers to
 generic source-record label/section joins, bringing the six-fixture audit to 162
-companion rows: 122 `clean-helper` and 40 `candidate-helper`.
+companion rows: 122 `clean-helper` and 40 `candidate-helper`. A subsequent
+generic parser for `<sensor_id>_vendor_<vendor>_model_<model>` source atoms
+moved sensor vendor/model rows to `clean-helper` and exposed one additional
+sensor model row, bringing the audit to 163 companion rows: 125 `clean-helper`
+and 38 `candidate-helper`.
 
 ## Extraction Rule
 

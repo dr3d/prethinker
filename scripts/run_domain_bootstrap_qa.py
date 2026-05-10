@@ -2939,22 +2939,28 @@ def _industrial_sensor_companion(
                 )
 
     for source_row, text_atom in text_by_row.items():
-        if "hum_d_04_vendor_sentec_model_sentec_rh_220_plus" in text_atom:
-            add_candidate(
+        for sensor_id in sorted(sensor_ids, key=len, reverse=True):
+            prefix = f"{sensor_id}_vendor_"
+            if not text_atom.startswith(prefix) or "_model_" not in text_atom:
+                continue
+            vendor_part, model_part = text_atom[len(prefix):].split("_model_", 1)
+            model_part = re.sub(r"_location(?:_.*)?$", "", model_part)
+            if not vendor_part or not model_part:
+                continue
+            vendor_display = " ".join(_display_vendor_model_piece(piece) for piece in vendor_part.split("_") if piece)
+            model_display = _display_model_atom(model_part)
+            if not vendor_display or not model_display:
+                continue
+            add(
                 "sensor_vendor_model",
-                "HUM-D-04",
-                "Sentec RH-220-Plus",
-                "Vendor Sentec; model Sentec RH-220-Plus.",
+                _display_source_atom(sensor_id),
+                f"{vendor_display} {model_display}",
+                f"Vendor {vendor_display}; model {model_display}.",
                 source_row,
             )
-        if "qis_opt_12_vendor_vexcel_model_v_opticheck_4" in text_atom:
-            add_candidate(
-                "sensor_vendor_model",
-                "QIS-OPT-12",
-                "Vexcel V-OptiCheck 4",
-                "Vendor Vexcel; model V-OptiCheck 4.",
-                source_row,
-            )
+            break
+
+    for source_row, text_atom in text_by_row.items():
         if "buffer_overflow_on_dry_dl_04_confirmed" in text_atom and "no_recovery" in text_atom:
             add_candidate(
                 "data_loss_status",
@@ -3119,6 +3125,30 @@ def _display_datetime_atom(value: str) -> str:
     if match:
         return f"{match.group(1)}-{match.group(2)}-{match.group(3)}"
     return str(value or "")
+
+
+def _display_vendor_model_piece(value: str) -> str:
+    text = str(value or "").strip().lower()
+    if not text:
+        return ""
+    if text.isdigit():
+        return text
+    if len(text) <= 3 and text.isalpha():
+        return text.upper()
+    return text.capitalize()
+
+
+def _display_model_atom(value: str) -> str:
+    pieces = [_display_vendor_model_piece(piece) for piece in str(value or "").split("_") if piece]
+    if not pieces:
+        return ""
+    out = pieces[:1]
+    for piece in pieces[1:]:
+        if piece.isdigit() or piece.lower() in {"plus", "minus"}:
+            out[-1] = f"{out[-1]}-{piece}"
+        else:
+            out.append(piece)
+    return " ".join(out)
 
 
 def _datetime_from_ledger_atom(value: str) -> datetime | None:
