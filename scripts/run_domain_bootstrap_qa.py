@@ -2207,6 +2207,7 @@ def _source_record_clock_sync_companion(
                 "SourceRow": source_row,
                 "SupportDetail": "source_record_text_atom_last_successful_ntp_sync",
                 "AnswerValue": date,
+                "HelperClass": "clean-helper",
             }
         )
 
@@ -2219,7 +2220,7 @@ def _source_record_clock_sync_companion(
             "result_type": "table",
             "predicate": "source_record_clock_sync_support",
             "prolog_query": "source_record_clock_sync_support(System, SyncKind, Date, SourceRow, SupportDetail).",
-            "variables": ["System", "SyncKind", "Date", "SourceRow", "SupportDetail"],
+            "variables": ["System", "SyncKind", "Date", "SourceRow", "SupportDetail", "HelperClass"],
             "rows": support_rows,
             "num_rows": len(support_rows),
             "reasoning_basis": {

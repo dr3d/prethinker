@@ -840,6 +840,7 @@ def test_source_record_clock_sync_companion_derives_last_successful_ntp_sync_dat
     assert row["SyncKind"] == "last_successful_ntp_sync"
     assert row["Date"] == "2026_03_19"
     assert row["SourceRow"] == "src_line_0106"
+    assert row["HelperClass"] == "clean-helper"
 
 
 def test_temporal_join_supports_elapsed_days_for_inspection_windows() -> None:

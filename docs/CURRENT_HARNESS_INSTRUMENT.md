@@ -227,6 +227,9 @@ as a split-helper result, not a fully clean-helper result. Adding
 rows: 191 `clean-helper` and 157 `candidate-helper`; the transfer-batch
 authority/custody rows currently reached by that companion are all
 candidate-helper rows from older family-specific source-cell/text recognizers.
+The complementary precision-batch audit over `tmp/openrouter_precision_20260509`
+shows `source_record_clock_sync_support` as clean deterministic substrate:
+2 rows, both `clean-helper`, with zero unlabeled rows.
 
 `scripts/audit_helper_usage.py` adds the complementary transfer-pressure view:
 fixtures per helper and helpers per fixture across QA artifacts. The first scan

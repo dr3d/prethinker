@@ -114,7 +114,7 @@ This is a working classification, not a final ledger.
 | Helper Surface | Current Status | Notes |
 | --- | --- | --- |
 | `source_record_section_display` | Clean helper | Renders admitted section atoms; no fixture answer knowledge. |
-| `source_record_clock_sync_support` | Clean/candidate helper | Generic clock-sync support; keep auditing domain labels. |
+| `source_record_clock_sync_support` | Clean helper | Deterministically extracts last-successful clock-sync dates from admitted source-record text/numeric rows. |
 | `clear_sample_clock_pause_support` | Clean helper | Joins admitted segments and offline intervals. |
 | temporal and negative join helpers | Clean helper | Query-composition substrate over prior query results. |
 | authority/custody support | Split, audit ongoing | Generic `object_custody_status/5`, access-log, authorization, and recall-right joins are labeled `clean-helper`; older Pellico/Stille/Halberd family count, source-cell, contractor-notice, and text fallback recognizers are labeled `candidate-helper`. |

@@ -23,6 +23,7 @@ try:
         _grant_award_companion,
         _industrial_sensor_companion,
         _roster_state_companion,
+        _source_record_clock_sync_companion,
         _source_record_packet_metadata_companion,
         load_runtime,
     )
@@ -33,6 +34,7 @@ except ModuleNotFoundError:
         _grant_award_companion,
         _industrial_sensor_companion,
         _roster_state_companion,
+        _source_record_clock_sync_companion,
         _source_record_packet_metadata_companion,
         load_runtime,
     )
@@ -51,6 +53,11 @@ COMPANIONS: dict[str, tuple[CompanionFn, str, str]] = {
         _source_record_packet_metadata_companion,
         "source_record_field",
         "source_record_field(SourceRow, Header, Value).",
+    ),
+    "source_record_clock_sync_support": (
+        _source_record_clock_sync_companion,
+        "source_record_text_atom",
+        "source_record_text_atom(SourceRow, TextAtom).",
     ),
     "industrial_sensor_support": (
         _industrial_sensor_companion,
