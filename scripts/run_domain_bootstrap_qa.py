@@ -2309,14 +2309,15 @@ def _authority_custody_companion(
             "result_type": "table",
             "predicate": "archive_authority_custody_support",
             "prolog_query": "archive_authority_custody_support(SupportKind, Subject, AnswerValue, SourceDocument, SupportDetail).",
-            "variables": ["SupportKind", "Subject", "AnswerValue", "SourceDocument", "SupportDetail"],
+            "variables": ["SupportKind", "Subject", "AnswerValue", "SourceDocument", "SupportDetail", "HelperClass"],
             "rows": support_rows,
             "num_rows": len(support_rows),
             "reasoning_basis": {
                 "kind": "query-only-companion",
                 "note": (
-                    "derived archive authority/custody support from admitted physical custody, "
-                    "access-log, reserved-right, and source-record text rows"
+                    "derived archive authority/custody support, labeling generic admitted-predicate "
+                    "joins as clean-helper rows and older fixture-family source/text recognizers "
+                    "as candidate-helper rows"
                 ),
                 "trigger_predicate": predicate,
             },
@@ -2372,6 +2373,7 @@ def _authority_custody_count_support(custody_rows: list[dict[str, Any]]) -> list
                 "Holder": holder,
                 "Count": str(count),
                 "Components": components,
+                "HelperClass": "candidate-helper",
             }
         )
     return out
@@ -2423,6 +2425,7 @@ def _authority_object_custody_status_support(object_rows: list[dict[str, Any]]) 
                 "Holder": holder,
                 "StatusKind": status_kind,
                 "TimeOrDate": time_or_date,
+                "HelperClass": "clean-helper",
             }
         )
     return out
@@ -2457,8 +2460,10 @@ def _authority_access_event_support(
         canonical_item = _authority_canonical_item(item)
         authority = authorizations.get(event, "")
         custodian = custody_by_item.get(canonical_item, "")
+        helper_class = "clean-helper"
         if not custodian and "stille" in location.casefold():
             custodian = "stille_conservation_studio"
+            helper_class = "candidate-helper"
         if not authority:
             continue
         out.append(
@@ -2475,6 +2480,7 @@ def _authority_access_event_support(
                 "Location": location,
                 "Custodian": custodian,
                 "AuthorizedBy": authority,
+                "HelperClass": helper_class,
             }
         )
     return out
@@ -2534,6 +2540,7 @@ def _authority_source_record_access_support(
                 "Location": location,
                 "Custodian": custodian,
                 "AuthorizedBy": authority,
+                "HelperClass": "candidate-helper",
             }
         )
     return out
@@ -2580,6 +2587,7 @@ def _authority_recall_clause_support(
                     "RecallDate": date,
                     "RecallFrom": from_party,
                     "Clause": "recall",
+                    "HelperClass": "clean-helper",
                 }
             )
     else:
@@ -2591,6 +2599,7 @@ def _authority_recall_clause_support(
                 "SourceDocument": recall_document,
                 "SupportDetail": recall_detail,
                 "Clause": "recall",
+                "HelperClass": "candidate-helper",
             }
         )
     return out
@@ -2628,6 +2637,7 @@ def _authority_contractor_notice_support(
             "ConsentRequired": "no",
             "NoticeRequired": "personal_correspondence_within_30_days",
             "NoticeRecipient": "halberd_family_trust",
+            "HelperClass": "candidate-helper",
         }
     ]
 

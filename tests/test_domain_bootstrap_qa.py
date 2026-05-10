@@ -726,6 +726,7 @@ def test_authority_custody_companion_counts_grouped_physical_custody() -> None:
     assert pellico["Count"] == "35"
     assert "letters_at_pellico_16:16" in pellico["Components"]
     assert "loose_photos_18:18" in pellico["Components"]
+    assert pellico["HelperClass"] == "candidate-helper"
     stille = next(row for row in rows if row.get("SupportKind") == "physical_custody_count" and row.get("Holder") == "stille_conservation_studio")
     assert stille["Count"] == "10"
 
@@ -753,6 +754,7 @@ def test_authority_custody_companion_surfaces_object_custody_status_rows() -> No
     assert "access_restriction_status" in kinds
     assert "legal_title_or_ownership_claim" in kinds
     assert "ownership_or_custody_dispute_status" in kinds
+    assert all(row.get("HelperClass") == "clean-helper" for row in rows)
 
 
 def test_authority_custody_companion_pairs_stille_access_with_pellico_authorization() -> None:
@@ -771,6 +773,7 @@ def test_authority_custody_companion_pairs_stille_access_with_pellico_authorizat
     row = next(row for row in support[-1]["result"]["rows"] if row.get("SupportKind") == "access_custody_authorization")
     assert row["Custodian"] == "stille_conservation_studio"
     assert row["AuthorizedBy"] == "pellico_society_with_stille_coordination"
+    assert row["HelperClass"] == "clean-helper"
 
 
 def test_authority_custody_companion_derives_access_support_from_source_record_cells() -> None:
@@ -793,6 +796,7 @@ def test_authority_custody_companion_derives_access_support_from_source_record_c
     assert row["Custodian"] == "stille_conservation_studio"
     assert row["AuthorizedBy"] == "pellico_society_with_stille_coordination"
     assert row["Item"] == "v_8_letters_under_conservation"
+    assert row["HelperClass"] == "candidate-helper"
 
 
 def test_authority_custody_companion_surfaces_recall_and_notice_clauses() -> None:
@@ -813,8 +817,10 @@ def test_authority_custody_companion_surfaces_recall_and_notice_clauses() -> Non
     notice = next(row for row in rows if row.get("SupportKind") == "contractor_custody_consent_notice")
     assert recall["AnswerValue"] == "amendment_2024"
     assert recall["Item"] == "photograph_album"
+    assert recall["HelperClass"] == "clean-helper"
     assert notice["ConsentRequired"] == "no"
     assert notice["NoticeRequired"] == "personal_correspondence_within_30_days"
+    assert notice["HelperClass"] == "candidate-helper"
 
 
 def test_source_record_clock_sync_companion_derives_last_successful_ntp_sync_date() -> None:

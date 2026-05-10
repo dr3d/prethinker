@@ -206,7 +206,10 @@ prose directly and do not mutate the KB. Current active examples include:
 - `source_record_section_display`: renders normalized section atoms such as
   `v_9_2_fall_2026_cycle_carryover` into human section labels.
 - authority/custody helpers: join possession, legal title, access, custody, and
-  source-record location rows.
+  source-record location rows. Their emitted rows carry `HelperClass`: generic
+  object-custody, access-log, authorization, and recall-right joins are
+  `clean-helper`, while older family-specific source-cell/text recognizers are
+  `candidate-helper`.
 - temporal helpers: expose clock-sync, pause-aware intervals, deadline-family
   siblings, and admitted timestamp support.
 - constraint propagation: narrows numeric and date-time domains with

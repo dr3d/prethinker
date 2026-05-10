@@ -117,7 +117,7 @@ This is a working classification, not a final ledger.
 | `source_record_clock_sync_support` | Clean/candidate helper | Generic clock-sync support; keep auditing domain labels. |
 | `clear_sample_clock_pause_support` | Clean helper | Joins admitted segments and offline intervals. |
 | temporal and negative join helpers | Clean helper | Query-composition substrate over prior query results. |
-| authority/custody support | Mostly generic helper | General joins over possession, access, title, recall, and source rows; minor older text patterns need review. |
+| authority/custody support | Split, audit ongoing | Generic `object_custody_status/5`, access-log, authorization, and recall-right joins are labeled `clean-helper`; older Pellico/Stille/Halberd family count, source-cell, contractor-notice, and text fallback recognizers are labeled `candidate-helper`. |
 | roster state support | Split, audit ongoing | Admitted-predicate joins for adult roles, supervision, memberships, and group counts are labeled `clean-helper`; source-record roster parsing over school-roster shapes such as `v1/v2/v3`, `group_a/group_b/group_c`, and `s_###` rows is labeled `candidate-helper` until transfer-proven or generalized. |
 | grant award support | Split, audit ongoing | Award, cap, eligibility, and field-driven recusal rows are labeled `clean-helper`; appeal/procedure/score-correction text recognizers are labeled `candidate-helper`. |
 | industrial sensor support | Split, audit ongoing | Field-driven event/timestamp/count rows are labeled `clean-helper`; exact sensor/ticket/prose recognizers are labeled `candidate-helper`. |

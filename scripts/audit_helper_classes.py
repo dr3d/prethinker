@@ -19,6 +19,7 @@ from typing import Any, Callable
 try:
     from run_domain_bootstrap_qa import (
         _clinic_device_recall_companion,
+        _authority_custody_companion,
         _grant_award_companion,
         _industrial_sensor_companion,
         _roster_state_companion,
@@ -28,6 +29,7 @@ try:
 except ModuleNotFoundError:
     from scripts.run_domain_bootstrap_qa import (
         _clinic_device_recall_companion,
+        _authority_custody_companion,
         _grant_award_companion,
         _industrial_sensor_companion,
         _roster_state_companion,
@@ -40,6 +42,11 @@ CompanionFn = Callable[..., dict[str, Any] | None]
 
 
 COMPANIONS: dict[str, tuple[CompanionFn, str, str]] = {
+    "archive_authority_custody_support": (
+        _authority_custody_companion,
+        "object_custody_status",
+        "object_custody_status(Object, Holder, StatusKind, TimeOrDate, SourceDocument).",
+    ),
     "source_record_packet_metadata_support": (
         _source_record_packet_metadata_companion,
         "source_record_field",

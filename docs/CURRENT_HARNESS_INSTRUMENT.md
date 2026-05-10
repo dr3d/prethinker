@@ -222,7 +222,11 @@ Adding `roster_state_support` to the same artifact-only audit widened the pass
 to 344 companion rows: 191 `clean-helper` and 153 `candidate-helper`. The roster
 helper itself emits 63 clean admitted-predicate join rows and 117 candidate rows
 from source-record roster parsing. That formalizes the school roster saturation
-as a split-helper result, not a fully clean-helper result.
+as a split-helper result, not a fully clean-helper result. Adding
+`archive_authority_custody_support` then brought the audit to 348 companion
+rows: 191 `clean-helper` and 157 `candidate-helper`; the transfer-batch
+authority/custody rows currently reached by that companion are all
+candidate-helper rows from older family-specific source-cell/text recognizers.
 
 `scripts/audit_helper_usage.py` adds the complementary transfer-pressure view:
 fixtures per helper and helpers per fixture across QA artifacts. The first scan
