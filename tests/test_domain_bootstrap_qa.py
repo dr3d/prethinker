@@ -966,10 +966,28 @@ def test_source_record_clock_sync_companion_derives_last_successful_ntp_sync_dat
     assert support
     row = support[-1]["result"]["rows"][0]
     assert row["System"] == "pem_bas_7"
+    assert row["SupportKind"] == "last_successful_ntp_sync"
     assert row["SyncKind"] == "last_successful_ntp_sync"
     assert row["Date"] == "2026_03_19"
     assert row["SourceRow"] == "src_line_0106"
     assert row["HelperClass"] == "clean-helper"
+
+
+def test_source_record_clock_sync_companion_triggers_for_timestamp_queries() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "source_record_text_atom(src_line_0106, status_timeline_resolvable_the_building_engineering_office_confirmed_on_2026_04_28_that_pem_bas_7_s_clock_had_drifted_from_ntp_pem_bas_7_s_last_successful_ntp_sync_was_2026_03_19_engineering_s_audit_measured_drift).",
+        "source_record_numeric_token(src_line_0106, v_2026_03_19).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = run_query_plan(runtime, ["has_corrected_timestamp(pem_bas_7, Time)."])
+
+    support = [item for item in results if item.get("result", {}).get("predicate") == "source_record_clock_sync_support"]
+    assert support
+    row = support[-1]["result"]["rows"][0]
+    assert row["SupportKind"] == "last_successful_ntp_sync"
+    assert row["Date"] == "2026_03_19"
 
 
 def test_temporal_join_supports_elapsed_days_for_inspection_windows() -> None:

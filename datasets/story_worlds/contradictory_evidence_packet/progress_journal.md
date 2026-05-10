@@ -150,3 +150,33 @@ for event/timestamp predicates, so the runtime now exposes a query-only
 are queried. The helper is deliberately narrow: it derives exact last-successful
 NTP sync dates from admitted source-record rows and leaves all broader conflict
 interpretation to the existing KB and selector.
+
+## CEP-006 - Clock-Sync Helper Label And Trigger Hygiene
+
+Date: 2026-05-10
+
+Evidence lane: `helper_audit_hygiene`
+
+Artifacts:
+
+- helper-class audit:
+  `tmp/openrouter_precision_20260509/clock_sync_label_probe_20260510/helper_class_audit_v2.md`
+- q011 before trigger widening:
+  `tmp/openrouter_precision_20260509/clock_sync_label_probe_20260510/qa_q011/`
+- q011 after trigger widening:
+  `tmp/openrouter_precision_20260509/clock_sync_label_probe_20260510/qa_q011_v2/`
+- helper usage audit:
+  `tmp/helper_usage_audit_20260510/helper_usage_audit_latest.md`
+
+Results:
+
+- q011 before trigger widening: `0 / 0 / 1`
+- q011 after trigger widening: `1 / 0 / 0`
+- helper rows in q011 after widening: `3 clean-helper`
+- support kind now emitted as `last_successful_ntp_sync`
+
+Lesson: the helper was clean substrate but not audit-normalized. It lacked a
+standard `SupportKind`, and it did not trigger when the model asked timestamp
+queries such as `has_corrected_timestamp/2` or `has_raw_timestamp/2`. Adding the
+support kind and widening the trigger set makes the row visible to helper usage
+audits and recovers the targeted q011 answer without adding a lens or guard.

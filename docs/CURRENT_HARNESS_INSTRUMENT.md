@@ -402,6 +402,11 @@ support kinds and 10 quarantined content-note kinds. The current decision is to
 keep the helper as identifier metadata substrate and not promote embedded
 content notes such as appeal funding source, observer permission scope, pending
 packet item, role definitions, or transport departure as metadata.
+The clock-sync helper also had a small audit-hygiene pass: its rows now expose
+`SupportKind=last_successful_ntp_sync`, and it triggers on corrected/raw
+timestamp predicates as well as explicit clock-sync predicates. A targeted
+`contradictory_evidence_packet` q011 replay moved from miss to exact with three
+clean helper rows.
 
 ## Extraction Rule
 

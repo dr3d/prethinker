@@ -2205,6 +2205,8 @@ def _source_record_clock_sync_companion(
     trigger_predicates = {
         "clock_drift_measurement",
         "event_occurred_at",
+        "has_corrected_timestamp",
+        "has_raw_timestamp",
         "source_record_numeric_token",
         "source_record_text_atom",
         "source_timestamping_mechanism",
@@ -2261,6 +2263,7 @@ def _source_record_clock_sync_companion(
         support_rows.append(
             {
                 "System": system,
+                "SupportKind": "last_successful_ntp_sync",
                 "SyncKind": "last_successful_ntp_sync",
                 "Date": date,
                 "SourceRow": source_row,
@@ -2279,7 +2282,7 @@ def _source_record_clock_sync_companion(
             "result_type": "table",
             "predicate": "source_record_clock_sync_support",
             "prolog_query": "source_record_clock_sync_support(System, SyncKind, Date, SourceRow, SupportDetail).",
-            "variables": ["System", "SyncKind", "Date", "SourceRow", "SupportDetail", "HelperClass"],
+            "variables": ["System", "SupportKind", "SyncKind", "Date", "SourceRow", "SupportDetail", "HelperClass"],
             "rows": support_rows,
             "num_rows": len(support_rows),
             "reasoning_basis": {
