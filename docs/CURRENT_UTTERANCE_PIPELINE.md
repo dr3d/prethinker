@@ -198,7 +198,8 @@ prose directly and do not mutate the KB. Current active examples include:
   manufacturer-liaison, verification-procedure, acronym-derived clinic
   abbreviations, and failure-rate atoms are `clean-helper` when the required
   source-record rows are present, while non-initialism abbreviations,
-  cabinet/seal/key, and authority recognizers remain `candidate-helper`.
+  key-retainer identity, visit date range, and authority recognizers remain
+  `candidate-helper`.
 - `source_record_packet_metadata_support`: surfaces exact packet IDs, policy
   IDs, appeal IDs, score correction memo IDs, recusal memo IDs, and device IDs.
   Its emitted rows now carry `HelperClass`: generic identifier/metadata rows are

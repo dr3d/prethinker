@@ -3428,14 +3428,34 @@ def _clinic_device_recall_companion(
                 "Halberg's reproduced reply says Medivolt engineering determination on firmware 4.2.1 is still awaited.",
                 source_row,
             )
-        if "storage_cabinet_b_3_sealed" in text_atom:
-            add_candidate("quarantine_cabinet", "NBFH", "Cabinet B-3", "NBFH quarantine storage cabinet B-3, sealed.", source_row)
-        if "seal_numbers_seal_nbfh_04_001" in text_atom:
-            add_candidate(
+        cabinet_match = re.search(r"storage_cabinet_(?P<cabinet>[a-z]_\d+)_sealed", text_atom)
+        if cabinet_match:
+            line = line_by_row.get(source_row, "")
+            prev_text = text_by_line.get(int(line) - 1, "") if _is_numeric_atom(line) else ""
+            clinic_code = _clinic_code_from_quarantine_log(prev_text) or "quarantine_site"
+            cabinet = _display_cabinet_atom(cabinet_match.group("cabinet"))
+            add(
+                "quarantine_cabinet",
+                clinic_code,
+                cabinet,
+                f"{clinic_code} quarantine storage {cabinet}, sealed.",
+                source_row,
+            )
+        seal_match = re.search(r"seal_numbers_(?P<start>seal_[a-z]+_\d{2}_\d{3})", text_atom)
+        if seal_match:
+            line = line_by_row.get(source_row, "")
+            next_text = text_by_line.get(int(line) + 1, "") if _is_numeric_atom(line) else ""
+            prev_text = text_by_line.get(int(line) - 1, "") if _is_numeric_atom(line) else ""
+            end_match = re.search(r"through_(?P<end>seal_[a-z]+_\d{2}_\d{3})", next_text)
+            cabinet_match = re.search(r"cabinet_(?P<cabinet>[a-z]_\d+)", prev_text)
+            cabinet = _display_cabinet_atom(cabinet_match.group("cabinet")) if cabinet_match else "Quarantine cabinet"
+            start_seal = _display_upper_hyphen_atom(seal_match.group("start"))
+            end_seal = _display_upper_hyphen_atom(end_match.group("end")) if end_match else start_seal
+            add(
                 "quarantine_seal_range",
-                "Cabinet B-3",
-                "SEAL-NBFH-04-001 through SEAL-NBFH-04-003",
-                "Cabinet B-3 was sealed with tamper-evident tape, seal numbers SEAL-NBFH-04-001 through SEAL-NBFH-04-003.",
+                cabinet,
+                f"{start_seal} through {end_seal}",
+                f"{cabinet} was sealed with tamper-evident tape, seal numbers {start_seal} through {end_seal}.",
                 source_row,
             )
         if "through_seal_nbfh_04_003" in text_atom and "i_will_retain_the_keys" in text_atom:
@@ -3444,13 +3464,6 @@ def _clinic_device_recall_companion(
                 "Cabinet B-3",
                 "D. Rourke",
                 "D. Rourke, NBFH Site Lead, wrote that he would retain the Cabinet B-3 keys personally.",
-                source_row,
-            )
-            add_candidate(
-                "quarantine_seal_range",
-                "Cabinet B-3",
-                "SEAL-NBFH-04-001 through SEAL-NBFH-04-003",
-                "Cabinet B-3 seal range continues through SEAL-NBFH-04-003.",
                 source_row,
             )
         if "reproduced_from_the_manufacturer_technician_visit_log_2026_04_14_through" in text_atom:
@@ -3615,6 +3628,18 @@ def _clinic_abbreviation_from_atom(text_atom: str) -> tuple[str, str, str] | Non
     initials = "".join(part[0] for part in name_parts).upper()
     helper_class = "clean-helper" if initials == abbr else "candidate-helper"
     return display_name, abbr, helper_class
+
+
+def _display_cabinet_atom(value: str) -> str:
+    parts = [part for part in str(value or "").strip().split("_") if part]
+    if len(parts) == 2:
+        return f"Cabinet {parts[0].upper()}-{parts[1]}"
+    return _display_upper_hyphen_atom(value)
+
+
+def _clinic_code_from_quarantine_log(text_atom: str) -> str:
+    match = re.search(r"(?:^|_)(?P<clinic>[a-z]{2,6})_mp_\d+", text_atom)
+    return match.group("clinic").upper() if match else ""
 
 
 def _display_device_atom(value: str) -> str:

@@ -240,6 +240,11 @@ The clinic abbreviation parser now promotes only mechanically derivable
 acronym/name rows to `clean-helper`; `EPA` and `CIM` move clean, while
 non-initialism `NBFH` remains candidate. That brings the six-fixture transfer
 audit to 194 `clean-helper` and 154 `candidate-helper` rows.
+The cabinet/seal/key pass then promoted cabinet and seal-range rows to generic
+source-record adjacency extraction while leaving key-retainer identity
+candidate. The six-fixture transfer audit now stands at 196 `clean-helper` and
+151 `candidate-helper` rows; `clinic_recall_support` itself is 21 clean / 4
+candidate.
 The complementary precision-batch audit over `tmp/openrouter_precision_20260509`
 shows `source_record_clock_sync_support` as clean deterministic substrate:
 2 rows, both `clean-helper`, with zero unlabeled rows.

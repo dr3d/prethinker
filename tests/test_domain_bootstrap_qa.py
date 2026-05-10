@@ -444,8 +444,12 @@ def test_clinic_recall_companion_derives_official_source_record_support() -> Non
         "source_record_section(src_line_0075, section_3_network_inventory_table).",
         "source_record_section(src_line_0076, section_3_network_inventory_table).",
         "source_record_text_atom(src_line_0116, procedure_mv_vp_04_a).",
+        "source_record_text_atom(src_line_0195, medical_director_s_patient_use_exception_authority_cabinet_b_3_has).",
+        "source_record_line(src_line_0195, 195).",
         "source_record_text_atom(src_line_0196, been_sealed_with_tamper_evident_tape_seal_numbers_seal_nbfh_04_001).",
+        "source_record_line(src_line_0196, 196).",
         "source_record_text_atom(src_line_0197, through_seal_nbfh_04_003_one_seal_per_shelf_i_will_retain_the_keys).",
+        "source_record_line(src_line_0197, 197).",
         "source_record_text_atom(src_line_0230, issue_the_formal_release_for_verified_devices_at_the_network_level_once).",
         "source_record_field(src_line_0063, device_id, mp_009).",
         "source_record_field(src_line_0063, serial, v_4501_aa_100158).",
@@ -503,7 +507,7 @@ def test_clinic_recall_companion_derives_official_source_record_support() -> Non
     )
     assert any(
         row.get("SupportKind") == "quarantine_seal_range"
-        and row.get("HelperClass") == "candidate-helper"
+        and row.get("HelperClass") == "clean-helper"
         for row in rows
     )
     assert "K. Halberg" in details
