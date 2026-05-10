@@ -315,9 +315,14 @@ now stands at 205 `clean-helper` and 140 `candidate-helper` rows, with
 `industrial_sensor_support` at 40 clean / 2 candidate. The refreshed industrial
 artifact emits 33 helper rows and zero candidate rows.
 Grant helper cleanup then promoted score-correction operational status and
-appeal-pending status over generic source-record atoms/sections. The stale
-six-fixture transfer audit now stands at 207 `clean-helper` and 138
-`candidate-helper` rows, with `grant_award_support` at 16 clean / 0 candidate.
+appeal-pending status over generic source-record atoms/sections. A later audit
+pass backtracked the claim that `grant_award_support` was fully clean:
+hard-coded appeal review/funding assumptions were rewritten to extract nearby
+app/date atoms, and the current transfer class audit reads `32` clean /
+`5` candidate rows. A fresh full replay scores `37 / 1 / 2` with zero writes,
+but it is still reported as candidate-helper evidence until sibling transfer or
+source-record acquisition closes the filing-location and unreproduced-reference
+gaps.
 Clinic helper cleanup then promoted explicit glossary abbreviations and
 manufacturer visit-date ranges over generic source-record atoms/sections. The
 stale six-fixture transfer audit now stands at 209 `clean-helper` and 136

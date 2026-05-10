@@ -4067,23 +4067,51 @@ def _grant_award_companion(
         source_row: int(float(line_by_row.get(source_row, "0"))) if _is_numeric_atom(line_by_row.get(source_row, "")) else 0
         for source_row in ordered_source_rows
     }
+    pending_apps_by_section: dict[str, list[str]] = {}
+    for source_row, text_atom in text_by_row.items():
+        pending_match = re.search(r"pending_(?P<app>a_\d+)_has_neither_been_awarded_nor_finally_declined", text_atom)
+        if pending_match:
+            pending_apps_by_section.setdefault(section_by_row.get(source_row, ""), []).append(pending_match.group("app"))
+
+    def appeal_app_near_text(text: str, *, section_atom: str = "") -> str:
+        patterns = [
+            r"(?:if_the_)?(?P<app>a_\d+)_appeal_is_sustained",
+            r"pending_(?P<app>a_\d+)_has_neither_been_awarded",
+        ]
+        for pattern in patterns:
+            match = re.search(pattern, text)
+            if match:
+                return match.group("app")
+        section_apps = pending_apps_by_section.get(section_atom, [])
+        if len(set(section_apps)) == 1:
+            return section_apps[0]
+        return ""
+
     for source_row in ordered_source_rows:
         text_atom = text_by_row.get(source_row, "")
         next_text = _next_source_text_atom(source_row, ordered_source_rows, text_by_row, line_by_row_int)
         combined = f"{text_atom} {next_text}".strip()
+        section_atom = section_by_row.get(source_row, "")
         appeal_window_match = re.search(r"(?P<days>\d+)_day_appeal_window_from_the_decision_letter", text_atom)
         if appeal_window_match:
             days = appeal_window_match.group("days")
             add("appeal_window_rule", amount=f"{days} days", detail=f"{days} days from the decision letter", source_row=source_row)
-        if "on_2026_05_22" in text_atom and "appeal" in text_atom:
-            add_candidate("appeal_review_date", app="a_07", amount="2026-05-22", detail="next scheduled committee meeting", source_row=source_row)
+        appeal_review_date_match = re.search(r"(?:^|_)on_(?P<date>\d{4}_\d{2}_\d{2})(?:_|$)", text_atom)
+        if appeal_review_date_match and ("appeal" in text_atom or re.search(r"(?:^|_)ap_\d{4}_\d{4}_[a-z](?:_|$)", text_atom)):
+            add_candidate(
+                "appeal_review_date",
+                app=appeal_app_near_text(combined, section_atom=section_atom),
+                amount=_display_datetime_atom(appeal_review_date_match.group("date")),
+                detail="next scheduled committee meeting",
+                source_row=source_row,
+            )
         pending_appeal_match = re.search(
             r"pending_(?P<app>a_\d+)_has_neither_been_awarded_nor_finally_declined",
             text_atom,
         )
         if pending_appeal_match:
             app = pending_appeal_match.group("app")
-            section_text = "_".join(text_by_section.get(section_by_row.get(source_row, ""), []))
+            section_text = "_".join(text_by_section.get(section_atom, []))
             appeal_match = re.search(r"(?P<appeal>ap_\d{4}_\d{4}_[a-z])_is", section_text)
             appeal_display = _display_source_atom(appeal_match.group("appeal")) if appeal_match else "the appeal"
             status_detail = "Declined as of the funding decision; " if final_awards.get(app, (0, ""))[1] == "pending" else ""
@@ -4104,7 +4132,7 @@ def _grant_award_companion(
         if "appeal_award_would_be_drawn" in combined and "fall_2026_carryover" in combined:
             add_candidate(
                 "appeal_award_funding_source",
-                app="a_07",
+                app=appeal_app_near_text(combined, section_atom=section_atom),
                 status="fall_2026_carryover",
                 detail="If sustained, the appeal award is drawn against Fall 2026 carryover, not Spring 2026 awards.",
                 source_row=source_row,

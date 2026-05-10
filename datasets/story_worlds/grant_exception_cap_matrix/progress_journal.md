@@ -103,3 +103,51 @@ clean-helper transfer proof. The generic award/cap joins are promising, but the
 source-record metadata surface still contains fixture-family appeal, recusal,
 and procedure recognizers that must be split into generic extraction or kept
 quarantined as candidate-helper evidence.
+
+## GECM-003 - Grant Helper Scar Cleanup And Relabeled Replay
+
+Date: 2026-05-10
+
+Evidence lane: `helper_audit_cleanup`
+
+Artifacts:
+
+- refreshed helper class audit:
+  `tmp/helper_usage_audit_20260510/helper_class_audit_transfer_after_grant_cleanup.md`
+- full QA replay after helper cleanup:
+  `tmp/transfer_fixtures_20260510/grant_helper_cleanup_replay_20260510/domain_bootstrap_qa_20260510T212657629642Z_qa_qwen-qwen3-6-35b-a3b.json`
+
+Code change:
+
+- Generalized `grant_award_support` appeal review/funding extraction so it no
+  longer hard-codes `a_07` or `2026-05-22`.
+- Appeal review dates now extract the nearby source-record date atom, and appeal
+  funding rows extract the nearby `A-##` app token when available.
+
+Results:
+
+- transfer compile helper-class audit for `grant_award_support`:
+  `32 clean / 5 candidate`
+- full replay after cleanup: `37 exact / 1 partial / 2 miss`
+- helper rows in the replay:
+  - `grant_award_support`: `1008 clean / 252 candidate`
+  - `source_record_packet_metadata_support`: `960 clean / 480 candidate`
+- write proposals: `0`
+
+Residuals:
+
+- `q036` partial: hybrid join gap around recusal/non-decisional outcome; the
+  evidence has recusal status and vote mechanics but not a tight enough joined
+  support bundle.
+- `q039` miss: compile-surface gap for where recusal memo originals are filed.
+- `q040` miss: compile-surface gap for packet references not reproduced in full.
+
+Lesson:
+
+The grant helper is less fixture-shaped after this pass, but it is not promoted
+architecture. It remains a one-fixture helper with candidate appeal/procedure
+rows and a fresh replay that still depends heavily on
+`source_record_packet_metadata_support`. Treat the `37 / 1 / 2` result as
+candidate-helper evidence. The next clean move is source-record acquisition for
+unreproduced-reference and filing-location rows, or a sibling transfer proof
+before any broader claim.

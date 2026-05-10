@@ -1475,6 +1475,8 @@ def test_grant_award_support_derives_counts_caps_recusals_and_appeal_status() ->
         "source_record_text_atom(src_line_0189, on_2026_05_22_as_of_the_compilation_date_ap_2026_0429_a_is).",
         "source_record_line(src_line_0190, 190).",
         "source_record_text_atom(src_line_0190, pending_a_07_has_neither_been_awarded_nor_finally_declined).",
+        "source_record_line(src_line_0191, 191).",
+        "source_record_text_atom(src_line_0191, if_the_a_12_appeal_is_sustained_the_appeal_award_would_be_drawn_against_fall_2026_carryover_not_spring_2026_awards).",
         "source_record_line(src_line_0126, 126).",
         "source_record_text_atom(src_line_0126, the_committee_has_7_voting_members_with_one_recusal_6_members_vote).",
         "source_record_line(src_line_0103, 103).",
@@ -1523,6 +1525,19 @@ def test_grant_award_support_derives_counts_caps_recusals_and_appeal_status() ->
         row.get("SupportKind") == "appeal_pending_status"
         and row.get("App") == "a_07"
         and row.get("HelperClass") == "clean-helper"
+        for row in result_rows
+    )
+    assert any(
+        row.get("SupportKind") == "appeal_review_date"
+        and row.get("App") == "a_07"
+        and row.get("Amount") == "2026-05-22"
+        and row.get("HelperClass") == "candidate-helper"
+        for row in result_rows
+    )
+    assert any(
+        row.get("SupportKind") == "appeal_award_funding_source"
+        and row.get("App") == "a_12"
+        and row.get("HelperClass") == "candidate-helper"
         for row in result_rows
     )
     assert any(
