@@ -315,6 +315,15 @@ becomes deterministic source addressability. A refreshed OpenRouter compile of
 sender rows; `clinic_recall_support` is 29 clean / 0 candidate on that
 refreshed artifact. The stale transfer artifact remains 23 clean / 2 candidate
 because it was compiled before the blockquote ledger repair.
+Roster parser transfer pressure is now measured separately from promotion. The
+source-record roster parser still emits candidate-helper rows, but it now covers
+two independent notations: the fresh transfer fixture's `v1/v2/v3`,
+`group_a/group_b/group_c`, `s_###` rows and the older precision sibling's
+`v1_0/v1_3`, `7_a`, `STU-####` homeroom table rows. Direct parser inspection
+finds 108 candidate assignment rows on `school_activity_roster_reconciliation`
+and 78 on `count_composition_roster`. The completed QA usage audit still sees
+roster support on one fixture, so the next promotion gate is a sibling QA replay,
+not a clean-helper relabel.
 
 `scripts/audit_helper_usage.py` adds the complementary transfer-pressure view:
 fixtures per helper and helpers per fixture across QA artifacts. The first scan

@@ -4336,6 +4336,7 @@ def _roster_state_companion(
         "roster_version",
         "roster_version_status",
         "student_group_assignment",
+        "student_in_homeroom",
         "supervises",
         "supervision_assignment",
     }
@@ -4347,6 +4348,7 @@ def _roster_state_companion(
     membership_rows = _runtime_rows(runtime, "group_membership(Person, Group, Start, End).")
     ratio_rows = _runtime_rows(runtime, "role_counts_towards_ratio(Role, Counts).")
     student_assignment_rows = _runtime_rows(runtime, "student_group_assignment(Student, Version, Group).")
+    student_homeroom_rows = _runtime_rows(runtime, "student_in_homeroom(Student, Homeroom, Version).")
     supervises_rows = _runtime_rows(runtime, "supervises(Supervisor, Target, Interval).")
     supervision_rows = _runtime_rows(runtime, "supervision_assignment(Supervisor, Target, Start, End).")
     out_rows: list[dict[str, Any]] = []
@@ -4468,6 +4470,22 @@ def _roster_state_companion(
                 "Group": group,
                 "Version": version,
                 "RoleHint": _role_hint_from_group(group),
+                "HelperClass": "clean-helper",
+            }
+        )
+    for row in student_homeroom_rows:
+        person = str(row.get("Student", "")).strip()
+        version = str(row.get("Version", "")).strip()
+        homeroom = str(row.get("Homeroom", "")).strip()
+        if not person or not homeroom:
+            continue
+        out_rows.append(
+            {
+                "SupportKind": "student_group_assignment",
+                "Person": person,
+                "Group": homeroom,
+                "Version": version,
+                "RoleHint": _role_hint_from_group(homeroom),
                 "HelperClass": "clean-helper",
             }
         )
@@ -4703,7 +4721,6 @@ def _source_record_roster_assignment_support(runtime: CorePrologRuntime) -> list
         if group:
             current_group = group
             current_group_source = source_row
-            continue
 
         if not current_group or not current_version:
             continue
@@ -4734,6 +4751,9 @@ def _source_record_roster_assignment_support(runtime: CorePrologRuntime) -> list
 
 def _version_from_section_atom(value: str) -> str:
     text = value.lower().strip()
+    match = re.search(r"(?:^|_)v1_(?P<minor>\d)(?:_|$)", text)
+    if match:
+        return f"v1_{match.group('minor')}"
     if "roster_v3" in text:
         return "v3"
     if "roster_v2_1" in text:
@@ -4753,11 +4773,15 @@ def _group_from_roster_atom(value: str) -> str:
         return "group_b"
     if text.startswith("group_c_"):
         return "group_c"
+    match = re.match(r"v_(?P<grade>\d+)_(?P<section>[a-z])(?:_|$)", text)
+    if match:
+        return f"{match.group('grade')}_{match.group('section')}"
     return ""
 
 
 def _student_ids_from_atom(value: str) -> list[str]:
-    return re.findall(r"s_\d{3}", value.lower())
+    text = value.lower()
+    return re.findall(r"s_\d{3}", text) + re.findall(r"stu_\d{4,}", text)
 
 
 def _runtime_rows(runtime: CorePrologRuntime, query: str) -> list[dict[str, Any]]:

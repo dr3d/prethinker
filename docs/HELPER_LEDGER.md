@@ -23,7 +23,7 @@ across QA files.
 | `grant_award_support` | 1 | yes | clean-helper on transfer batch | transfer: 16 clean / 0 candidate | Award, cap, eligibility, field-recusal, appeal-window, committee-recusal vote-count, score-correction operational status, and appeal-pending status rows are clean over admitted predicates plus generic source-record atoms/sections. | Seek sibling transfer proof before treating the helper as broadly promoted; no current fixture constants remain in emitted rows. |
 | `industrial_sensor_support` | 1 | yes | split, audit ongoing | transfer: 40 clean / 2 candidate; refreshed industrial: 33 clean / 0 candidate | Event/timestamp/count, computed duration, vendor/model, batch-id, ticket, packet-id, data-loss status, lab-sample status/return, system clock authority, and field-derived rows are mostly clean after recent cleanup. The old transfer artifact leaves only the root-cause packet-scope and operator-origin rows candidate because it does not preserve the necessary refusal/provenance prose. A refreshed compile after the source-ledger anchor repair preserves those lines and makes the helper output fully clean for that artifact. Two stated-duration recognizers were retired as duplicate/overclaiming scar rows. | Treat stale root-cause/operator rows as source-acquisition artifacts; use refreshed source-record ledgers before claiming clean industrial high-water. |
 | `probate_storage_support` | 1 | no | orphaned artifact helper | not applicable | Historical QA artifacts contain this helper, but no current companion implementation is registered in the repo. | Do not report old probate rows as active architecture; rebuild generically only if probate pressure returns. |
-| `roster_state_support` | 1 | yes | split, audit ongoing | transfer: 63 clean / 117 candidate | Admitted-predicate joins are clean; source-record roster parsing over `v1/v2/v3`, `group_a/group_b/group_c`, and `s_###` shapes is candidate. | Generalize roster parser or prove transfer on sibling roster fixtures before promotion. |
+| `roster_state_support` | 1 in completed QA artifacts; 2 by direct parser audit | yes | split, audit ongoing | transfer: 63 clean / 117 candidate | Admitted-predicate joins are clean. Source-record roster parsing now handles both the fresh transfer shape (`v1/v2/v3`, `group_a/group_b/group_c`, `s_###`) and the older sibling homeroom-table shape (`v1_0/v1_3`, `7_a`, `STU-####`). These parser rows remain candidate-helper until sibling QA replay proves answer lift without fixture constants. | Run sibling QA replay on `count_composition_roster`; promote only if the same parser improves sibling answerability without new literals. |
 | `source_record_clock_sync_support` | 1 | yes | clean-helper | precision: 2 clean / 0 candidate | Deterministically extracts last-successful clock-sync dates from admitted source-record text/numeric rows. | Seek transfer fixture evidence; no cleanup needed in current code. |
 | `source_record_packet_metadata_support` | 3 | yes | split, audit ongoing | transfer: 67 clean / 11 candidate | Generic identifiers and packet metadata are clean; packet-family physical retention/pending/role-scope notes remain candidate. | Keep generic identifiers; rewrite or quarantine embedded packet-family facts. |
 
@@ -35,9 +35,14 @@ across QA files.
 - Helpers with row-level class audit coverage: 7
 
 The high-pressure candidate surface is now primarily `roster_state_support`.
-`clinic_recall_support` and `industrial_sensor_support` are mostly blocked only
-by stale source-record artifacts; `grant_award_support` is clean on the current
-transfer batch pending sibling proof.
+Direct parser inspection shows the roster source-record parser is not a
+one-fixture scar anymore: it finds `108` candidate assignment rows on
+`school_activity_roster_reconciliation` and `78` on the sibling
+`count_composition_roster`. Completed QA artifacts still show one-fixture usage,
+so the helper stays candidate-labeled until a sibling QA replay records actual
+answer lift. `clinic_recall_support` and `industrial_sensor_support` are mostly
+blocked only by stale source-record artifacts; `grant_award_support` is clean on
+the current transfer batch pending sibling proof.
 The next cleanup work should reduce candidate rows inside those helpers rather
 than create new lenses.
 

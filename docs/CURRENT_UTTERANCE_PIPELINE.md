@@ -175,9 +175,10 @@ prose directly and do not mutate the KB. Current active examples include:
   adults, excluded adults, temporary assignments, and group counts from admitted
   roster predicates plus source-record rows. Its emitted rows carry
   `HelperClass`: admitted-predicate joins are `clean-helper`, while
-  school-roster source-record parsing over `v1/v2/v3`, `group_a/group_b/group_c`,
-  and `s_###` shaped atoms remains `candidate-helper` until transfer-proven or
-  generalized.
+  school-roster source-record parsing remains `candidate-helper`. That parser
+  now handles both fresh transfer rows shaped like `v1/v2/v3`,
+  `group_a/group_b/group_c`, and `s_###`, and sibling homeroom-table rows shaped
+  like `v1_0/v1_3`, `7_a`, and `STU-####`; promotion waits on sibling QA replay.
 - `grant_award_support`: derives award totals, eligible application sets,
   cap-applied applications, appeal pending status, recusal records, committee
   recusal vote counts, and corrected-score support from admitted grant facts and
