@@ -334,6 +334,13 @@ the same source-record V2 artifact scored `29 / 2 / 9` with 1,209 clean-helper
 and 2,790 candidate-helper row emissions, improving on the older source-record
 V2 QA's `27 / 4 / 9`. This is still candidate-helper evidence with row-level
 churn, not clean-helper promotion.
+The next bite added generic source-record adult/compliance rows for accompanying
+adult sections and compliance-log rows, plus a narrow fallback that projects
+parsed no-query IR about `count`, `compliance_check`, `§3.2`, and qualifying
+chaperones into existing roster helper triggers. With `max_tokens=3000` to avoid
+truncated Semantic IR, the same artifact reached `30 / 2 / 8`; targeted
+compliance rows `q017,q033,q034,q035` were `4 / 0 / 0`. The remaining gap is now
+row selection across complementary query surfaces.
 
 `scripts/audit_helper_usage.py` adds the complementary transfer-pressure view:
 fixtures per helper and helpers per fixture across QA artifacts. The first scan

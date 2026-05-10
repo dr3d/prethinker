@@ -185,3 +185,39 @@ improves the standalone source-record V2 result by two exact rows, but row-level
 churn remains: some older exact rows regress because query generation still
 misses chaperone/count compliance surfaces. This is useful candidate-helper
 transfer evidence, not yet clean promotion.
+
+## CCR-007 - Adult Compliance Helper And IR Fallback
+
+Date: 2026-05-10
+
+Evidence lane: `candidate_helper_compliance_projection`
+
+Artifacts:
+
+- targeted low-token replay:
+  `tmp/openrouter_precision_20260509/roster_sibling_adult_compliance_targeted_20260510/count_composition_roster/`
+- full low-token replay:
+  `tmp/openrouter_precision_20260509/roster_sibling_adult_compliance_full_20260510/count_composition_roster/`
+- targeted 3000-token replay:
+  `tmp/openrouter_precision_20260509/roster_sibling_compliance_fallback_targeted_3000_20260510/count_composition_roster/`
+- full 3000-token replay:
+  `tmp/openrouter_precision_20260509/roster_sibling_compliance_full_3000_20260510/count_composition_roster/`
+
+Results:
+
+- low-token targeted compliance rows: `1 / 0 / 4`
+- 3000-token targeted compliance rows (`q017,q033,q034,q035`): `4 / 0 / 0`
+- 3000-token full replay: `30 / 2 / 8`
+- zero write proposals
+- full helper classes: `2242 clean-helper / 3420 candidate-helper`
+
+Lesson: the adult/compliance surface was present in deterministic source-record
+memory but needed a helper bridge: v1.3 adult rows expose 5 adults, 4 counted
+chaperones, Patel excluded under `§3.4`, and the compliance log exposes
+`v1_3_after_cn_03_2026_05_21_4_4_yes` plus the 3-flip summary. Four compliance
+questions initially looked like query failures because the model's Semantic IR
+was truncated at `max_tokens=1200`. With `max_tokens=3000`, the narrow fallback
+from parsed no-query IR to roster helper triggers made the targeted compliance
+set exact. The full run improves to `30 / 2 / 8`, but remaining row churn means
+the next step is row-gating/selector discrimination across complementary
+surfaces.

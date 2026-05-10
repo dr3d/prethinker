@@ -1238,6 +1238,8 @@ def run_one_question(
     diagnostics = mapped.get("admission_diagnostics", {}) if isinstance(mapped, dict) else {}
     clauses = diagnostics.get("clauses", {}) if isinstance(diagnostics.get("clauses"), dict) else {}
     queries = [str(q).strip() for q in clauses.get("queries", []) if str(q).strip()]
+    if not queries:
+        queries = _fallback_queries_from_semantic_ir(ir, allowed_predicates=allowed_predicates)
     facts_out = [str(q).strip() for q in clauses.get("facts", []) if str(q).strip()]
     rules_out = [str(q).strip() for q in clauses.get("rules", []) if str(q).strip()]
     query_results = run_query_plan(runtime, queries)
@@ -1271,6 +1273,63 @@ def run_one_question(
         row["mapper_diagnostics"] = diagnostics
     row["oracle_match"] = score_oracle(row=row, oracle=oracle)
     return row
+
+
+def _fallback_queries_from_semantic_ir(
+    ir: dict[str, Any],
+    *,
+    allowed_predicates: set[str],
+) -> list[str]:
+    """Project narrow query fallbacks from parsed IR when the mapper emitted none."""
+
+    entities = ir.get("entities", [])
+    assertions = ir.get("assertions", [])
+    if not isinstance(entities, list) or not isinstance(assertions, list):
+        return []
+    normalized = {
+        str(entity.get("normalized", "")).strip().lower()
+        for entity in entities
+        if isinstance(entity, dict) and str(entity.get("normalized", "")).strip()
+    }
+    relation_concepts = {
+        str(assertion.get("relation_concept", "")).strip().lower()
+        for assertion in assertions
+        if isinstance(assertion, dict)
+    }
+    surfaces = {
+        str(entity.get("surface", "")).strip().lower()
+        for entity in entities
+        if isinstance(entity, dict) and str(entity.get("surface", "")).strip()
+    }
+    out: list[str] = []
+
+    version_atoms = sorted(
+        (value for value in normalized if re.fullmatch(r"v\d+(?:_\d+)?", value)),
+        key=_roster_version_rank,
+        reverse=True,
+    )
+    asks_roster_compliance = bool(
+        {"compliance_check", "count"} & relation_concepts
+        and (
+            "3_2" in normalized
+            or "qualifying_chaperone" in normalized
+            or any("chaperone" in surface or "compliance" in surface for surface in surfaces)
+        )
+    )
+    if asks_roster_compliance:
+        if "adult_role" in allowed_predicates:
+            out.append("adult_role(Adult, Role).")
+        if "role_counts_towards_ratio" in allowed_predicates:
+            out.append("role_counts_towards_ratio(Role, Counts).")
+        if "roster_version" in allowed_predicates:
+            if version_atoms:
+                out.extend(f"roster_version({version})." for version in version_atoms)
+            else:
+                out.append("roster_version(Version).")
+    elif any("compliance" in surface for surface in surfaces) and "roster_version" in allowed_predicates:
+        out.append("roster_version(Version).")
+
+    return _ordered_query_unique(out)
 
 
 def run_query_plan(runtime: CorePrologRuntime, queries: list[str]) -> list[dict[str, Any]]:
@@ -4523,6 +4582,8 @@ def _roster_state_companion(
         )
 
     out_rows.extend(_source_record_roster_assignment_support(runtime))
+    out_rows.extend(_source_record_roster_adult_support(runtime))
+    out_rows.extend(_source_record_roster_compliance_support(runtime))
 
     group_counts: dict[tuple[str, str, str, str], set[str]] = {}
     group_count_classes: dict[tuple[str, str, str, str], set[str]] = {}
@@ -4672,15 +4733,31 @@ def _prioritize_roster_state_rows(
             if requested_is_wildcard(2):
                 version_priority = -version_priority
         elif predicate in {"adult_role", "role_counts_towards_ratio"}:
-            if support_kind in {"adult_role", "ratio_counted_adults", "role_ratio_scope"}:
+            if support_kind in {
+                "adult_manifest_total",
+                "adult_role",
+                "ratio_counted_adults",
+                "ratio_excluded_adults",
+                "role_ratio_scope",
+                "source_record_adult_role",
+            }:
                 priority = 0
             if predicate == "adult_role" and len(args) >= 2 and is_requested(role, args[1]):
                 priority = min(priority, 0)
             if predicate == "role_counts_towards_ratio" and len(args) >= 1 and is_requested(role, args[0]):
                 priority = min(priority, 0)
+            version_priority = -version_priority
         elif predicate in {"roster_version", "roster_version_status"}:
-            if support_kind in {"group_count", "source_record_student_group_assignment", "student_group_assignment"}:
-                priority = 4
+            version_ok = len(args) < 1 or is_requested(version, args[0])
+            if support_kind in {
+                "compliance_status",
+                "group_count",
+                "source_record_student_group_assignment",
+                "student_group_assignment",
+            }:
+                priority = 4 if version_ok else 20
+            if requested_is_wildcard(0):
+                version_priority = -version_priority
         elif support_kind in {"group_count", "source_record_student_group_assignment", "student_group_assignment"}:
             priority = 10
 
@@ -4780,6 +4857,191 @@ def _source_record_roster_assignment_support(runtime: CorePrologRuntime) -> list
                 }
             )
     return out_rows
+
+
+def _source_record_roster_adult_support(runtime: CorePrologRuntime) -> list[dict[str, Any]]:
+    text_rows = _runtime_rows(runtime, "source_record_text_atom(SourceRow, TextAtom).")
+    section_rows = _runtime_rows(runtime, "source_record_section(SourceRow, Section).")
+    line_rows = _runtime_rows(runtime, "source_record_line(SourceRow, Line).")
+    if not text_rows or not section_rows:
+        return []
+
+    section_by_row = {
+        str(row.get("SourceRow", "")).strip(): str(row.get("Section", "")).strip()
+        for row in section_rows
+    }
+    line_by_row = {
+        str(row.get("SourceRow", "")).strip(): str(row.get("Line", "")).strip()
+        for row in line_rows
+        if str(row.get("SourceRow", "")).strip()
+    }
+
+    out_rows: list[dict[str, Any]] = []
+    counted_by_version: dict[str, set[str]] = {}
+    excluded_by_version: dict[str, set[str]] = {}
+    adult_by_version: dict[str, set[str]] = {}
+    for row in text_rows:
+        source_row = str(row.get("SourceRow", "")).strip()
+        text_atom = str(row.get("TextAtom", "")).strip().lower()
+        section = section_by_row.get(source_row, "")
+        version = _version_from_section_atom(section)
+        if "accompanying_adults" not in section or not version:
+            continue
+        parsed = _adult_role_from_roster_atom(text_atom)
+        if not parsed:
+            continue
+        role, person, counts = parsed
+        adult_by_version.setdefault(version, set()).add(person)
+        if counts == "true":
+            counted_by_version.setdefault(version, set()).add(person)
+        elif counts == "false":
+            excluded_by_version.setdefault(version, set()).add(person)
+        out_rows.append(
+            {
+                "SupportKind": "source_record_adult_role",
+                "Person": person,
+                "Role": role,
+                "Version": version,
+                "CountsTowardRatio": counts,
+                "SourceRow": source_row,
+                "Line": line_by_row.get(source_row, ""),
+                "HelperClass": "clean-helper",
+            }
+        )
+    for version, adults in sorted(adult_by_version.items()):
+        out_rows.append(
+            {
+                "SupportKind": "adult_manifest_total",
+                "Version": version,
+                "Count": str(len(adults)),
+                "Members": ",".join(sorted(adults)),
+                "HelperClass": "clean-helper",
+            }
+        )
+    for version, adults in sorted(counted_by_version.items()):
+        out_rows.append(
+            {
+                "SupportKind": "ratio_counted_adults",
+                "Version": version,
+                "Count": str(len(adults)),
+                "Members": ",".join(sorted(adults)),
+                "CountsTowardRatio": "true",
+                "HelperClass": "clean-helper",
+            }
+        )
+    for version, adults in sorted(excluded_by_version.items()):
+        out_rows.append(
+            {
+                "SupportKind": "ratio_excluded_adults",
+                "Version": version,
+                "Count": str(len(adults)),
+                "Members": ",".join(sorted(adults)),
+                "CountsTowardRatio": "false",
+                "HelperClass": "clean-helper",
+            }
+        )
+    return out_rows
+
+
+def _adult_role_from_roster_atom(text_atom: str) -> tuple[str, str, str] | None:
+    text = str(text_atom or "").strip().lower()
+    for prefix, role, counts in [
+        ("trip_leader_", "trip_leader", "true"),
+        ("chaperone_", "chaperone", "true"),
+        ("medical_", "medical_staff", "false"),
+    ]:
+        if not text.startswith(prefix):
+            continue
+        remainder = text.removeprefix(prefix)
+        for suffix in ["_yes", "_no_per_3_4", "_no"]:
+            if suffix in remainder:
+                person = remainder.split(suffix, 1)[0]
+                break
+        else:
+            person = remainder
+        person = re.sub(r"_(principal|parent_volunteer|7th_grade_math|rn)$", "", person)
+        if person:
+            return role, person, counts
+    return None
+
+
+def _source_record_roster_compliance_support(runtime: CorePrologRuntime) -> list[dict[str, Any]]:
+    text_rows = _runtime_rows(runtime, "source_record_text_atom(SourceRow, TextAtom).")
+    section_rows = _runtime_rows(runtime, "source_record_section(SourceRow, Section).")
+    line_rows = _runtime_rows(runtime, "source_record_line(SourceRow, Line).")
+    if not text_rows or not section_rows:
+        return []
+
+    section_by_row = {
+        str(row.get("SourceRow", "")).strip(): str(row.get("Section", "")).strip()
+        for row in section_rows
+    }
+    line_by_row = {
+        str(row.get("SourceRow", "")).strip(): str(row.get("Line", "")).strip()
+        for row in line_rows
+        if str(row.get("SourceRow", "")).strip()
+    }
+    out_rows: list[dict[str, Any]] = []
+    for row in text_rows:
+        source_row = str(row.get("SourceRow", "")).strip()
+        text_atom = str(row.get("TextAtom", "")).strip().lower()
+        section = section_by_row.get(source_row, "")
+        if "compliance_log" not in section:
+            continue
+        match = re.match(
+            r"(?P<version>v\d+(?:_\d+)?)(?:_after_(?P<notice>cn_\d+))?_(?P<date>\d{4}_\d{2}_\d{2})_(?P<count>\d+)_(?P<required>\d+)_(?P<compliant>yes|no)$",
+            text_atom,
+        )
+        if match:
+            out_rows.append(
+                {
+                    "SupportKind": "compliance_status",
+                    "Version": match.group("version"),
+                    "Notice": match.group("notice") or "",
+                    "Date": match.group("date"),
+                    "Count": match.group("count"),
+                    "Required": match.group("required"),
+                    "Compliant": "true" if match.group("compliant") == "yes" else "false",
+                    "SourceRow": source_row,
+                    "Line": line_by_row.get(source_row, ""),
+                    "HelperClass": "clean-helper",
+                }
+            )
+            continue
+        flip_match = re.search(r"compliance_status_flipped_(?P<count>\w+)_times", text_atom)
+        if flip_match:
+            count = _number_word_or_digits(flip_match.group("count"))
+            if count:
+                out_rows.append(
+                    {
+                        "SupportKind": "compliance_flip_count",
+                        "Count": count,
+                        "SourceRow": source_row,
+                        "Line": line_by_row.get(source_row, ""),
+                        "HelperClass": "clean-helper",
+                    }
+                )
+    return out_rows
+
+
+def _number_word_or_digits(value: str) -> str:
+    text = str(value or "").strip().lower()
+    if text.isdigit():
+        return text
+    words = {
+        "zero": "0",
+        "one": "1",
+        "two": "2",
+        "three": "3",
+        "four": "4",
+        "five": "5",
+        "six": "6",
+        "seven": "7",
+        "eight": "8",
+        "nine": "9",
+        "ten": "10",
+    }
+    return words.get(text, "")
 
 
 def _version_from_section_atom(value: str) -> str:

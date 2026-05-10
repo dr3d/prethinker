@@ -8,6 +8,7 @@ from scripts.run_domain_bootstrap_qa import (
     _conversion_assessment_delta_companion,
     _clinic_device_recall_companion,
     _industrial_sensor_companion,
+    _fallback_queries_from_semantic_ir,
     _negative_join_with_previous,
     _placeholder_repaired_query,
     _relaxed_constant_query,
@@ -1632,6 +1633,88 @@ def test_roster_state_support_handles_homeroom_table_and_semantic_rows() -> None
         item for item in latest_rows if item["result"].get("predicate") == "roster_state_support"
     )
     assert latest_companion["result"]["rows"][0].get("Version") == "v1_3"
+
+
+def test_roster_state_support_derives_adult_counts_and_compliance_log() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "source_record_section(src_line_0139, v_6_2_accompanying_adults_v1_3).",
+        "source_record_text_atom(src_line_0139, trip_leader_mr_r_avery_yes).",
+        "source_record_section(src_line_0140, v_6_2_accompanying_adults_v1_3).",
+        "source_record_text_atom(src_line_0140, chaperone_ms_t_reyes_yes).",
+        "source_record_section(src_line_0141, v_6_2_accompanying_adults_v1_3).",
+        "source_record_text_atom(src_line_0141, chaperone_ms_l_cardenas_yes).",
+        "source_record_section(src_line_0142, v_6_2_accompanying_adults_v1_3).",
+        "source_record_text_atom(src_line_0142, chaperone_ms_p_garcia_yes).",
+        "source_record_section(src_line_0143, v_6_2_accompanying_adults_v1_3).",
+        "source_record_text_atom(src_line_0143, medical_ms_s_patel_rn_no_per_3_4).",
+        "source_record_section(src_line_0162, v_7_3_2_compliance_log).",
+        "source_record_text_atom(src_line_0162, v1_3_after_cn_03_2026_05_21_4_4_yes).",
+        "source_record_section(src_line_0164, v_7_3_2_compliance_log).",
+        "source_record_text_atom(src_line_0164, the_3_2_compliance_status_flipped_three_times_across_the_four_versions).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["adult_role(Adult, Role)."])
+    companion = next(item for item in rows if item["result"].get("predicate") == "roster_state_support")
+    result_rows = companion["result"]["rows"]
+
+    assert any(
+        row.get("SupportKind") == "ratio_counted_adults"
+        and row.get("Version") == "v1_3"
+        and row.get("Count") == "4"
+        and row.get("HelperClass") == "clean-helper"
+        for row in result_rows
+    )
+    assert any(
+        row.get("SupportKind") == "adult_manifest_total"
+        and row.get("Version") == "v1_3"
+        and row.get("Count") == "5"
+        and row.get("HelperClass") == "clean-helper"
+        for row in result_rows
+    )
+    assert any(
+        row.get("SupportKind") == "compliance_status"
+        and row.get("Version") == "v1_3"
+        and row.get("Count") == "4"
+        and row.get("Required") == "4"
+        and row.get("Compliant") == "true"
+        for row in result_rows
+    )
+    assert any(
+        row.get("SupportKind") == "compliance_flip_count"
+        and row.get("Count") == "3"
+        for row in result_rows
+    )
+
+
+def test_fallback_queries_project_roster_compliance_ir() -> None:
+    ir = {
+        "entities": [
+            {"surface": "roster v1.3", "normalized": "v1_3"},
+            {"surface": "§3.2 ratio", "normalized": "3_2"},
+            {"surface": "counting chaperones", "normalized": "qualifying_chaperone"},
+        ],
+        "assertions": [
+            {
+                "kind": "question",
+                "subject": "e3",
+                "relation_concept": "count",
+                "object": "e1",
+            }
+        ],
+    }
+
+    queries = _fallback_queries_from_semantic_ir(
+        ir,
+        allowed_predicates={"adult_role", "role_counts_towards_ratio", "roster_version"},
+    )
+
+    assert queries == [
+        "adult_role(Adult, Role).",
+        "role_counts_towards_ratio(Role, Counts).",
+        "roster_version(v1_3).",
+    ]
 
 
 def test_roster_state_support_joins_adult_roles_to_ratio_scope() -> None:
