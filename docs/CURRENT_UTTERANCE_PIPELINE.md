@@ -201,10 +201,11 @@ prose directly and do not mutate the KB. Current active examples include:
   and medical-director authority from admitted source-record rows. Its emitted
   rows carry `HelperClass`: source-record-field device/serial rows plus generic
   manufacturer-liaison, verification-procedure, acronym-derived clinic
-  abbreviations, and failure-rate atoms are `clean-helper` when the required
-  source-record rows are present, while non-initialism abbreviations,
-  key-retainer identity, visit date range, and authority recognizers remain
-  `candidate-helper`.
+  abbreviations, explicit glossary abbreviations, cabinet/seal range,
+  failure-rate atoms, and visit-date ranges are `clean-helper` when the
+  required source-record rows are present, while key-retainer identity and
+  named medical-director authority remain `candidate-helper` until blockquoted
+  memo sender lines are preserved by the source-record ledger.
 - `source_record_packet_metadata_support`: surfaces exact packet IDs, policy
   IDs, appeal IDs, score correction memo IDs, recusal memo IDs, and device IDs.
   Its emitted rows now carry `HelperClass`: generic identifier/metadata rows are

@@ -300,6 +300,13 @@ Grant helper cleanup then promoted score-correction operational status and
 appeal-pending status over generic source-record atoms/sections. The stale
 six-fixture transfer audit now stands at 207 `clean-helper` and 138
 `candidate-helper` rows, with `grant_award_support` at 16 clean / 0 candidate.
+Clinic helper cleanup then promoted explicit glossary abbreviations and
+manufacturer visit-date ranges over generic source-record atoms/sections. The
+stale six-fixture transfer audit now stands at 209 `clean-helper` and 136
+`candidate-helper` rows, with `clinic_recall_support` at 23 clean / 2
+candidate. The remaining clinic candidates require blockquoted memo sender
+lines to become deterministic source-record text, rather than more
+fixture-shaped helper logic.
 
 `scripts/audit_helper_usage.py` adds the complementary transfer-pressure view:
 fixtures per helper and helpers per fixture across QA artifacts. The first scan

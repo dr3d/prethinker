@@ -3372,6 +3372,12 @@ def _clinic_device_recall_companion(
         for source_row, line in line_by_row.items()
         if _is_numeric_atom(line) and source_row in text_by_row
     }
+    coverage_clinics_by_section: dict[str, set[str]] = {}
+    for source_row, text_atom in text_by_row.items():
+        coverage_match = re.search(r"coverage_(?:all_)?(?P<clinic>[a-z]{2,6})_held", text_atom)
+        section_atom = section_by_row.get(source_row, "")
+        if coverage_match and section_atom:
+            coverage_clinics_by_section.setdefault(section_atom, set()).add(coverage_match.group("clinic").upper())
 
     out_rows: list[dict[str, str]] = []
     seen: set[tuple[str, str, str, str, str]] = set()
@@ -3527,12 +3533,24 @@ def _clinic_device_recall_companion(
                 "D. Rourke, NBFH Site Lead, wrote that he would retain the Cabinet B-3 keys personally.",
                 source_row,
             )
-        if "reproduced_from_the_manufacturer_technician_visit_log_2026_04_14_through" in text_atom:
-            add_candidate(
+        visit_range_match = re.search(
+            r"manufacturer_technician_visit_log_(?P<start>\d{4}_\d{2}_\d{2})_through",
+            text_atom,
+        )
+        if visit_range_match:
+            line = line_by_row.get(source_row, "")
+            next_text = text_by_line.get(int(line) + 1, "") if _is_numeric_atom(line) else ""
+            end_match = re.search(r"(?:^|_)v_(?P<end>\d{4}_\d{2}_\d{2})(?:_|$)", next_text)
+            start_date = _display_datetime_atom(visit_range_match.group("start"))
+            end_date = _display_datetime_atom(end_match.group("end")) if end_match else ""
+            coverage = sorted(coverage_clinics_by_section.get(section_atom, set()))
+            subject = "/".join(coverage) if coverage else "manufacturer technician visit log"
+            value = f"{start_date} through {end_date}" if end_date else f"starting {start_date}"
+            add(
                 "verification_visit_date_range",
-                "CIM/EPA",
-                "2026-04-14 through 2026-04-15",
-                "Manufacturer technician visit log covers 2026-04-14 through 2026-04-15.",
+                subject,
+                value,
+                f"Manufacturer technician visit log covers {value}.",
                 source_row,
             )
         if "from_dr_r_iwasaki_network_medical_director" in text_atom:
@@ -3686,9 +3704,7 @@ def _clinic_abbreviation_from_atom(text_atom: str) -> tuple[str, str, str] | Non
     if len(name_parts) < 2:
         return None
     display_name = " ".join(part.title() for part in name_parts)
-    initials = "".join(part[0] for part in name_parts).upper()
-    helper_class = "clean-helper" if initials == abbr else "candidate-helper"
-    return display_name, abbr, helper_class
+    return display_name, abbr, "clean-helper"
 
 
 def _display_cabinet_atom(value: str) -> str:

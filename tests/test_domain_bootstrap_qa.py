@@ -505,6 +505,16 @@ def test_clinic_recall_companion_derives_official_source_record_support() -> Non
         "source_record_line(src_line_0196, 196).",
         "source_record_text_atom(src_line_0197, through_seal_nbfh_04_003_one_seal_per_shelf_i_will_retain_the_keys).",
         "source_record_line(src_line_0197, 197).",
+        "source_record_text_atom(src_line_0111, reproduced_from_the_manufacturer_technician_visit_log_2026_04_14_through).",
+        "source_record_line(src_line_0111, 111).",
+        "source_record_section(src_line_0111, section_5_manufacturer_repair_verification_log).",
+        "source_record_text_atom(src_line_0112, v_2026_04_15).",
+        "source_record_line(src_line_0112, 112).",
+        "source_record_section(src_line_0112, section_5_manufacturer_repair_verification_log).",
+        "source_record_text_atom(src_line_0117, coverage_all_cim_held_mp_450_devices_with_serials_in_the_inclusive).",
+        "source_record_section(src_line_0117, section_5_manufacturer_repair_verification_log).",
+        "source_record_text_atom(src_line_0126, coverage_epa_held_mp_450_devices_with_serials_4501_aa_100159_and).",
+        "source_record_section(src_line_0126, section_5_manufacturer_repair_verification_log).",
         "source_record_text_atom(src_line_0230, issue_the_formal_release_for_verified_devices_at_the_network_level_once).",
         "source_record_field(src_line_0063, device_id, mp_009).",
         "source_record_field(src_line_0063, serial, v_4501_aa_100158).",
@@ -551,7 +561,14 @@ def test_clinic_recall_companion_derives_official_source_record_support() -> Non
     assert any(
         row.get("SupportKind") == "clinic_abbreviation"
         and row.get("Value") == "NBFH"
-        and row.get("HelperClass") == "candidate-helper"
+        and row.get("HelperClass") == "clean-helper"
+        for row in rows
+    )
+    assert any(
+        row.get("SupportKind") == "verification_visit_date_range"
+        and row.get("Subject") == "CIM/EPA"
+        and row.get("Value") == "2026-04-14 through 2026-04-15"
+        and row.get("HelperClass") == "clean-helper"
         for row in rows
     )
     assert any(
