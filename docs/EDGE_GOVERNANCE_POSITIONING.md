@@ -2,7 +2,7 @@
 
 *A strategic positioning document for Prethinker Labs*
 
-Last updated: 2026-05-09
+Last updated: 2026-05-10
 Audience: Architecture Codex, Benchmark Sr Dev, Scott, future collaborators
 Status: Strategic positioning, not benchmark methodology specification
 
@@ -12,6 +12,7 @@ Read with:
 - [Benchmark Publication Plan](https://github.com/dr3d/prethinker/blob/main/docs/BENCHMARK_PUBLICATION_PLAN.md)
 - [Two-Axis Benchmark Frame](https://github.com/dr3d/prethinker/blob/main/docs/TWO_AXIS_BENCHMARK_FRAME.md)
 - [Two-Axis Probe Discipline](https://github.com/dr3d/prethinker/blob/main/docs/TWO_AXIS_PROBE_DISCIPLINE.md)
+- [Artifact Unit And Helper Classification](https://github.com/dr3d/prethinker/blob/main/docs/ARTIFACT_UNIT_AND_HELPER_CLASSIFICATION.md)
 
 ---
 
@@ -105,6 +106,22 @@ This isn't "Prethinker beats frontier LLMs." It's "Prethinker and frontier chat 
 The architectural insight Prethinker captures is that *governance and capability can be decoupled*.
 
 The mapper does validation work. The compiled KB does durability work. The selector does routing work. The model does proposal work. The model just has to propose plausibly; the architecture decides what becomes truth.
+
+Helpers also need to be treated as part of the evaluated instrument, not as
+invisible plumbing. The artifact unit for document work is:
+
+```text
+source + lens set + deterministic ledgers + admitted predicates + helper set
+```
+
+That means helper-assisted scores must name the helper class in use. A `cold`
+score, a `candidate-helper` score, a `transfer-proven-helper` score, and a
+`clean-helper` score are different epistemic claims. Recent saturated helper
+results are useful evidence that cross-component composition can rescue rows,
+but several of those helpers are currently mixed: their field-driven and
+predicate-driven parts are legitimate, while some text-specific recognizers
+still need generic rewrite or quarantine. This does not weaken the governance
+claim; it makes the reporting discipline honest.
 
 This implies that as the underlying model shrinks, the architecture's role grows in importance. A 7B model might propose more flawed candidates than a 70B model, but the mapper rejects ungrounded proposals regardless of source. The output is governed either way; the proposal admission rate just decreases.
 
@@ -244,6 +261,12 @@ Today's direction toward "the part of Prethinker that does compiling into perfec
 The new pre-compile ledger category (deterministic source addressability) is moat-strengthening: structural memory that needs no LLM interpretation. Every category of deterministic structure preserved at compile time is durable advantage.
 
 The strategic priority shifts subtly: not just "improve scores," but "improve durable structural state." Both matter, but durable structural state is the part that defines Prethinker's category.
+
+The helper audit now sits beside the guard audit. Helper count, helper class,
+transfer evidence, and retirement conditions should be tracked alongside lens
+count and guard-family pressure. A helper that rescues one fixture is a
+candidate scar until it is rewritten generically or proves itself on fresh
+sibling fixtures.
 
 ### For Benchmark Sr Dev
 
