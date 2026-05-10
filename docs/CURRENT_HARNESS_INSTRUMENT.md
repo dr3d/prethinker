@@ -290,6 +290,12 @@ The same refreshed artifact preserves the R. Kim operator-origin prose at
 `src_line_0159` through `src_line_0160`, allowing
 `operator_not_originating_events(R. Kim, EV-08/EV-12, ...)` to move clean on
 refreshed artifacts while staying candidate on the stale transfer compile.
+The two industrial stated-duration recognizers were then retired instead of
+promoted: one duplicated the clean computed-duration helper, and the other
+overstated from a truncated source atom. The stale six-fixture transfer audit
+now stands at 205 `clean-helper` and 140 `candidate-helper` rows, with
+`industrial_sensor_support` at 40 clean / 2 candidate. The refreshed industrial
+artifact emits 33 helper rows and zero candidate rows.
 
 `scripts/audit_helper_usage.py` adds the complementary transfer-pressure view:
 fixtures per helper and helpers per fixture across QA artifacts. The first scan

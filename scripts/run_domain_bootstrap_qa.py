@@ -3126,23 +3126,6 @@ def _industrial_sensor_companion(
                 "This packet does not assign root cause; root-cause analysis is a separate report in preparation and not part of this packet.",
                 source_row,
             )
-        if "the_line_stop_duration_between_ev_10_and_ev_14_is_17_hours_45" in text_atom:
-            add_candidate(
-                "line_stop_duration_stated",
-                "EV-10->EV-14",
-                "17 hours 45 minutes 52 seconds",
-                "The packet states the line-stop duration between EV-10 and EV-14 is 17 hours 45 minutes 52 seconds.",
-                source_row,
-            )
-        if "corrected_computation_15_14_03_wall_15_11_51_wall_00_02_12" in text_atom:
-            add_candidate(
-                "corrected_response_interval_stated",
-                "EV-08->EV-09",
-                "2 minutes 12 seconds",
-                "The packet states corrected computation EV-08 to EV-09 is 00:02:12.",
-                source_row,
-            )
-
     out_rows = _prioritize_industrial_sensor_rows(out_rows, predicate=predicate, args=args, query=query)
     if not out_rows:
         return None
