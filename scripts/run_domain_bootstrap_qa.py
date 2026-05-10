@@ -3919,6 +3919,11 @@ def _grant_award_companion(
         str(row.get("SourceRow", "")).strip(): str(row.get("TextAtom", "")).strip()
         for row in source_text_rows
     }
+    text_by_section: dict[str, list[str]] = {}
+    for source_row, text_atom in text_by_row.items():
+        section_atom = section_by_row.get(source_row, "")
+        if section_atom and text_atom:
+            text_by_section.setdefault(section_atom, []).append(text_atom)
     ordered_source_rows = sorted(
         text_by_row,
         key=lambda source_row: int(float(line_by_row.get(source_row, "0"))) if _is_numeric_atom(line_by_row.get(source_row, "")) else 0,
@@ -3937,12 +3942,21 @@ def _grant_award_companion(
             add("appeal_window_rule", amount=f"{days} days", detail=f"{days} days from the decision letter", source_row=source_row)
         if "on_2026_05_22" in text_atom and "appeal" in text_atom:
             add_candidate("appeal_review_date", app="a_07", amount="2026-05-22", detail="next scheduled committee meeting", source_row=source_row)
-        if "ap_2026_0429_a_is_pending" in text_atom or "a_07_has_neither_been_awarded_nor_finally_declined" in text_atom:
-            add_candidate(
+        pending_appeal_match = re.search(
+            r"pending_(?P<app>a_\d+)_has_neither_been_awarded_nor_finally_declined",
+            text_atom,
+        )
+        if pending_appeal_match:
+            app = pending_appeal_match.group("app")
+            section_text = "_".join(text_by_section.get(section_by_row.get(source_row, ""), []))
+            appeal_match = re.search(r"(?P<appeal>ap_\d{4}_\d{4}_[a-z])_is", section_text)
+            appeal_display = _display_source_atom(appeal_match.group("appeal")) if appeal_match else "the appeal"
+            status_detail = "Declined as of the funding decision; " if final_awards.get(app, (0, ""))[1] == "pending" else ""
+            add(
                 "appeal_pending_status",
-                app="a_07",
+                app=app,
                 status="pending_not_final",
-                detail="Declined as of 2026-04-26; appeal AP-2026-0429-A pending; neither awarded nor finally declined.",
+                detail=f"{status_detail}{appeal_display} pending; neither awarded nor finally declined.",
                 source_row=source_row,
             )
         if "does_not_automatically_decide_the_named_item" in combined:
@@ -3982,15 +3996,30 @@ def _grant_award_companion(
                 detail="Committee size for a given item is 7 minus the number of recusals filed for that item.",
                 source_row=source_row,
             )
-        if "composite_from_7_4_to_8_4" in combined or "the_corrected_score_is_operational_as_of_2026_04_22" in combined:
-            add_candidate(
-                "score_correction_operational",
-                app="a_02",
-                amount="8.4",
-                status="operational",
-                detail="A-02 corrected composite is 8.4; pre-correction 7.4 is retained in the audit binder and not used for the 2026-04-26 funding decision.",
-                source_row=source_row,
-            )
+        score_match = re.search(
+            r"composite_from_(?P<old>\d+_\d+)_to_(?P<new>\d+_\d+)_(?P<app>a_\d+)_s_revised_composite",
+            text_atom,
+        )
+        if score_match:
+            section_text = "_".join(text_by_section.get(section_by_row.get(source_row, ""), []))
+            if "corrected_score_is_operational" in section_text or "corrected_score_is_operational" in combined:
+                app = score_match.group("app")
+                old_score = score_match.group("old").replace("_", ".")
+                new_score = score_match.group("new").replace("_", ".")
+                decision_match = re.search(r"the_(?P<date>\d{4}_\d{2}_\d{2})_funding_decision", section_text)
+                decision_text = (
+                    f" for the {_display_datetime_atom(decision_match.group('date'))} funding decision"
+                    if decision_match
+                    else ""
+                )
+                add(
+                    "score_correction_operational",
+                    app=app,
+                    amount=new_score,
+                    status="operational",
+                    detail=f"{app.upper().replace('_', '-')} corrected composite changed from {old_score} to {new_score}; corrected score is operational{decision_text}.",
+                    source_row=source_row,
+                )
 
     out_rows = _prioritize_grant_award_rows(out_rows, predicate=predicate, args=args)
     if not out_rows:

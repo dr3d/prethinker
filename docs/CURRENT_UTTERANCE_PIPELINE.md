@@ -181,9 +181,9 @@ prose directly and do not mutate the KB. Current active examples include:
   cap-applied applications, appeal pending status, recusal records, committee
   recusal vote counts, and corrected-score support from admitted grant facts and
   source-record fields. Its emitted rows carry `HelperClass`: award, cap,
-  eligibility, field-recusal, appeal-window, and committee-recusal vote-count
-  rows are `clean-helper`, while score-correction operational status and
-  appeal-pending status remain `candidate-helper`.
+  eligibility, field-recusal, appeal-window, committee-recusal vote-count,
+  score-correction operational status, and appeal-pending status rows are
+  `clean-helper` on the current transfer batch.
 - `industrial_sensor_support`: derives sensor-register facts, raw-event-log
   counts, per-system event composition, corrected timeline intervals,
   maintenance tickets, lab sample logistics, packet IDs, and packet-scope

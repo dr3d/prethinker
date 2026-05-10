@@ -1423,10 +1423,13 @@ def test_grant_award_support_derives_counts_caps_recusals_and_appeal_status() ->
         "source_record_line(src_line_0126, 126).",
         "source_record_text_atom(src_line_0126, the_committee_has_7_voting_members_with_one_recusal_6_members_vote).",
         "source_record_line(src_line_0103, 103).",
+        "source_record_section(src_line_0103, v_5_1_score_correction_memo_sc_2026_04_22).",
         "source_record_text_atom(src_line_0103, composite_from_7_4_to_8_4_a_02_s_revised_composite_is_above_the).",
         "source_record_line(src_line_0106, 106).",
+        "source_record_section(src_line_0106, v_5_1_score_correction_memo_sc_2026_04_22).",
         "source_record_text_atom(src_line_0106, the_corrected_score_is_operational_as_of_2026_04_22_the_pre_correction).",
         "source_record_line(src_line_0107, 107).",
+        "source_record_section(src_line_0107, v_5_1_score_correction_memo_sc_2026_04_22).",
         "source_record_text_atom(src_line_0107, composite_7_4_is_retained_in_the_audit_binder_but_is_not_used_for).",
     ]:
         assert runtime.assert_fact(fact).get("status") == "success"
@@ -1464,7 +1467,7 @@ def test_grant_award_support_derives_counts_caps_recusals_and_appeal_status() ->
     assert any(
         row.get("SupportKind") == "appeal_pending_status"
         and row.get("App") == "a_07"
-        and row.get("HelperClass") == "candidate-helper"
+        and row.get("HelperClass") == "clean-helper"
         for row in result_rows
     )
     assert any(
@@ -1488,7 +1491,7 @@ def test_grant_award_support_derives_counts_caps_recusals_and_appeal_status() ->
         row.get("SupportKind") == "score_correction_operational"
         and row.get("App") == "a_02"
         and row.get("Amount") == "8.4"
-        and row.get("HelperClass") == "candidate-helper"
+        and row.get("HelperClass") == "clean-helper"
         for row in result_rows
     )
 

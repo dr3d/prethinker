@@ -20,7 +20,7 @@ across QA files.
 | `archive_authority_custody_support` | 2 | yes | split, audit ongoing | transfer: 0 clean / 4 candidate; precision: 1 clean / 11 candidate | Generic object-custody/access/recalled-right joins are clean; older Pellico/Stille/Halberd source-cell and text recognizers remain candidate. | Genericize or retire family-specific count/source-cell recognizers before treating authority saturation as clean-helper evidence. |
 | `clear_sample_clock_pause_support` | 1 | yes | clean-helper | precision: 1 clean / 0 candidate | Joins admitted clear-sample segments, sampler-offline intervals, and rule exceptions. | Seek transfer fixture evidence; no cleanup needed in current code. |
 | `clinic_recall_support` | 1 | yes | split, audit ongoing | transfer cold: 21 clean / 4 candidate; refreshed clinic: 19 clean / 10 candidate | Device/serial field rows plus generic manufacturer-liaison, verification-procedure, acronym-derived clinic abbreviations, cabinet/seal range, and failure-rate atoms are clean when the needed source-record rows exist; non-initialism abbreviations such as `NBFH`, key-retainer identity, visit date range, and medical-director authority remain candidate. The visit dates alone are mechanically extractable, but the current `CIM/EPA` subject requires cross-section composition, so it stays candidate. | Rewrite candidate recognizers over generic source-record fields/labels or quarantine them. |
-| `grant_award_support` | 1 | yes | split, audit ongoing | transfer: 14 clean / 2 candidate | Award, cap, eligibility, field-recusal, appeal-window, and committee-recusal vote-count rows are clean; score-correction operational status and appeal-pending status remain candidate. | Genericize or quarantine the remaining score-correction and appeal-pending recognizers. |
+| `grant_award_support` | 1 | yes | clean-helper on transfer batch | transfer: 16 clean / 0 candidate | Award, cap, eligibility, field-recusal, appeal-window, committee-recusal vote-count, score-correction operational status, and appeal-pending status rows are clean over admitted predicates plus generic source-record atoms/sections. | Seek sibling transfer proof before treating the helper as broadly promoted; no current fixture constants remain in emitted rows. |
 | `industrial_sensor_support` | 1 | yes | split, audit ongoing | transfer: 40 clean / 2 candidate; refreshed industrial: 33 clean / 0 candidate | Event/timestamp/count, computed duration, vendor/model, batch-id, ticket, packet-id, data-loss status, lab-sample status/return, system clock authority, and field-derived rows are mostly clean after recent cleanup. The old transfer artifact leaves only the root-cause packet-scope and operator-origin rows candidate because it does not preserve the necessary refusal/provenance prose. A refreshed compile after the source-ledger anchor repair preserves those lines and makes the helper output fully clean for that artifact. Two stated-duration recognizers were retired as duplicate/overclaiming scar rows. | Treat stale root-cause/operator rows as source-acquisition artifacts; use refreshed source-record ledgers before claiming clean industrial high-water. |
 | `probate_storage_support` | 1 | no | orphaned artifact helper | not applicable | Historical QA artifacts contain this helper, but no current companion implementation is registered in the repo. | Do not report old probate rows as active architecture; rebuild generically only if probate pressure returns. |
 | `roster_state_support` | 1 | yes | split, audit ongoing | transfer: 63 clean / 117 candidate | Admitted-predicate joins are clean; source-record roster parsing over `v1/v2/v3`, `group_a/group_b/group_c`, and `s_###` shapes is candidate. | Generalize roster parser or prove transfer on sibling roster fixtures before promotion. |
@@ -34,9 +34,10 @@ across QA files.
 - Orphaned artifact helpers: 1 (`probate_storage_support`)
 - Helpers with row-level class audit coverage: 7
 
-The high-pressure candidate surfaces are `roster_state_support`,
-`clinic_recall_support`, and `grant_award_support`; `industrial_sensor_support`
-is now mostly blocked only by stale source-record artifacts.
+The high-pressure candidate surfaces are `roster_state_support` and
+`clinic_recall_support`; `industrial_sensor_support` is now mostly blocked only
+by stale source-record artifacts, and `grant_award_support` is clean on the
+current transfer batch pending sibling proof.
 The next cleanup work should reduce candidate rows inside those helpers rather
 than create new lenses.
 
