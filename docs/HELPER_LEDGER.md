@@ -29,28 +29,53 @@ across QA files.
 
 ## Current Pressure
 
+Latest usage audit:
+`tmp/helper_usage_audit_20260510/helper_usage_audit_latest.md`
+
+- QA JSON artifacts scanned: 473
 - Helpers observed in usage audit: 9
 - Suspicious low-transfer helpers, used on two or fewer fixtures: 8
 - Orphaned artifact helpers: 1 (`probate_storage_support`)
 - Helpers with row-level class audit coverage: 7
 
-The high-pressure candidate surface is now primarily `roster_state_support`.
-The roster source-record parser is not a one-fixture scar anymore: it finds
-`108` candidate assignment rows on `school_activity_roster_reconciliation` and
-`78` on the sibling `count_composition_roster`, and a completed sibling QA
-replay now makes `roster_state_support` visible on two fixtures. Focused
-homeroom prioritization improves the sibling source-record V2 artifact from
-`27 / 4 / 9` to `29 / 2 / 9`; source-record adult/compliance rows plus a narrow
-IR fallback for no-query compliance intents move it to `30 / 2 / 8`. An
-artifact-only row gate across old V2, focused homeroom, and adult/compliance
-surfaces reaches `36 / 3 / 1`. Row-level churn remains, so the next work is
-selector/query discrimination over emitted helper rows, not promotion.
-`clinic_recall_support` and
-`industrial_sensor_support` are mostly blocked only by stale source-record
-artifacts; `grant_award_support` is clean on the current transfer batch pending
-sibling proof.
-The next cleanup work should reduce candidate rows inside those helpers rather
-than create new lenses.
+Fixtures per helper is the sharper pressure view right now. Only
+`source_record_packet_metadata_support` appears on more than two fixtures in
+completed QA artifacts. `roster_state_support` and
+`archive_authority_custody_support` appear on two fixtures; every other helper
+is still one-fixture by usage count. That does not make them wrong, but it means
+their scores must remain labeled as narrow, candidate, or awaiting sibling proof
+until the spread changes.
+
+Helpers per fixture is also useful. The heaviest helper-dependent fixtures are
+`school_activity_roster_reconciliation`,
+`industrial_sensor_clock_correction`, `grant_exception_cap_matrix`, and
+`probate_storage_access_register`, each with two helper surfaces. The remaining
+observed fixtures use one helper surface. There is not yet evidence of fixtures
+requiring a sprawling helper stack; the mess risk is concentrated in
+low-transfer helper breadth, not helpers-per-fixture explosion.
+
+Most historical QA artifacts still lack row-level `HelperClass` labels, so the
+usage audit now reports those rows as `unlabeled` rather than silently omitting
+them. Treat unlabeled helper rows as audit debt. Current usage artifacts show
+large unlabeled surfaces for `industrial_sensor_support`, `clinic_recall_support`,
+`grant_award_support`, and `archive_authority_custody_support`; their separate
+class-audit reports remain the authority for clean/candidate split until fresh
+QA artifacts carry class labels end to end.
+
+The high-pressure candidate surface is still `roster_state_support`. The roster
+source-record parser is not a one-fixture scar anymore: it finds `108` candidate
+assignment rows on `school_activity_roster_reconciliation` and `78` on the
+sibling `count_composition_roster`, and completed sibling QA replays now make
+`roster_state_support` visible on two fixtures. Focused homeroom prioritization
+improves the sibling source-record V2 artifact from `27 / 4 / 9` to
+`29 / 2 / 9`; source-record adult/compliance rows plus a narrow IR fallback for
+no-query compliance intents move it to `30 / 2 / 8`. An artifact-only row gate
+across old V2, focused homeroom, and adult/compliance surfaces reaches
+`36 / 3 / 1`. Guarded selector discrimination reaches `34 / 2 / 4`, so remaining
+pressure is row routing over emitted helper rows, not helper acquisition.
+
+The next cleanup work should reduce candidate or unlabeled helper rows and seek
+sibling proof for one-fixture helpers rather than create new lenses.
 
 ## Promotion Rule
 

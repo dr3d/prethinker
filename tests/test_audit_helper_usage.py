@@ -63,3 +63,17 @@ def test_helper_usage_audit_flags_low_transfer_helpers(tmp_path) -> None:
     assert "one_fixture_support" in markdown
     assert "shared_support" in markdown
     assert "fixture_a" in markdown
+
+
+def test_helper_usage_audit_counts_unlabeled_helper_rows(tmp_path) -> None:
+    write_qa_artifact(
+        tmp_path / "unlabeled.json",
+        "fixture_a",
+        "unlabeled_support",
+        [{"SupportKind": "legacy_row"}],
+    )
+
+    payload = audit_roots([tmp_path], rare_threshold=1, implemented_helpers={"unlabeled_support"})
+
+    assert payload["helpers"]["unlabeled_support"]["helper_class_counts"] == {"unlabeled": 1}
+    assert payload["fixtures"]["fixture_a"]["helper_class_counts"] == {"unlabeled": 1}

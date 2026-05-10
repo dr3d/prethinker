@@ -87,8 +87,7 @@ def helper_class_counts(result: dict[str, Any]) -> Counter[str]:
     for row in rows:
         if not isinstance(row, dict):
             continue
-        if "HelperClass" in row:
-            counts[str(row.get("HelperClass") or "unlabeled")] += 1
+        counts[str(row.get("HelperClass") or "unlabeled")] += 1
     return counts
 
 
