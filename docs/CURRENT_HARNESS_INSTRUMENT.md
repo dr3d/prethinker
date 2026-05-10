@@ -371,6 +371,13 @@ extracts row-level `SupportKind` values from helper sample rows so future guards
 can reason about `source_record_student_group_assignment`, `group_count`,
 `compliance_status`, `ratio_counted_adults`, and related helper surfaces without
 fixture-specific names.
+A follow-on roster label audit keeps `source_record_student_group_assignment`
+candidate-labeled. It has transferred across two roster notations, but it still
+derives membership from source-record text atoms and section context rather than
+from admitted semantic predicates or structured roster table fields. Adult and
+compliance source-record rows stay clean because they are narrow deterministic
+parses over explicit row shapes; group counts inherit the clean/candidate class
+of their member rows.
 
 `scripts/audit_helper_usage.py` adds the complementary transfer-pressure view:
 fixtures per helper and helpers per fixture across QA artifacts. The first scan
