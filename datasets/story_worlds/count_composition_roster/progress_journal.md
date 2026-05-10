@@ -368,3 +368,38 @@ surface as the main route, but it does not close the selector gap. Remaining
 hard rows are not a reason to widen deterministic parsing: q023/q024 are
 identifier/name-normalization and registrar-authority answer-surface problems,
 while q028 still needs correction-notice/bus-assignment routing.
+
+## CCR-012 - Roster Member Printed Labels
+
+Date: 2026-05-10
+
+Evidence lane: `deterministic_identity_preservation`
+
+Artifacts:
+
+- alias-bearing compile:
+  `tmp/transfer_fixtures_20260510/count_roster_table_alias_compile_20260510/`
+- q023/q024 targeted replay:
+  `tmp/transfer_fixtures_20260510/count_roster_table_alias_targeted_v2_20260510/`
+- q024 one-row probe before alias companion narrowing:
+  `tmp/transfer_fixtures_20260510/count_roster_table_alias_q024_v2_20260510/`
+
+Results:
+
+- focused code tests: `100 passed`
+- q023/q024 targeted replay: `1 / 0 / 1`
+- q023 exact: `STU-1063 Vinokur` is linked to normalized `stu_1063` and both
+  v1.0 homerooms (`7_a`, `7_b`)
+- q024 still miss in the two-row replay, despite the first roster helper row
+  exposing `stu_1063_vinokur -> v1_3 -> 7_b`
+- zero write proposals
+
+Lesson: the remaining edge is now visibly answer/result precedence, not memory
+acquisition. The deterministic ledger preserves printed member labels through
+`roster_table_member_label/5` and `roster_table_member_alias/2`, without
+counting the printed label as a second student. That is clean identity
+addressability. q023 uses it successfully. q024 still fails when the answer
+judge overweights a failed primary `homeroom_member/3` query over a correct
+clean-helper roster row. Do not widen the roster parser; the next bite should
+be result precedence or answer-surface handling for clean deterministic support
+that contradicts a sparse failed semantic query.

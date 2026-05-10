@@ -97,6 +97,12 @@ table-ledger replay from `28 / 3 / 9` to `30 / 3 / 7` by routing q015 and q016
 to `roster_table_member/4`; the guarded selector remains higher at `34 / 2 / 4`.
 The next pressure is row routing and answer-surface handling, not broader roster
 parsing.
+The ledger also now preserves printed member labels via
+`roster_table_member_label/5` and `roster_table_member_alias/2`, so
+`STU-1063 Vinokur` can remain linked to normalized `stu_1063` without counting
+as a second student. That rescues q023 in targeted replay. q024 still exposes a
+result-precedence problem: clean roster support contains the right current
+homeroom, but the answer judge can overvalue a failed sparse semantic query.
 
 The next cleanup work should reduce candidate or unlabeled helper rows and seek
 sibling proof for one-fixture helpers rather than create new lenses.

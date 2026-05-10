@@ -107,6 +107,8 @@ def test_source_record_ledger_emits_explicit_roster_table_members() -> None:
 
     assert "roster_table_member(src_line_0004, v1_3, 7_a, stu_1023)." in facts
     assert "roster_table_member(src_line_0004, v1_3, 7_a, stu_1041)." in facts
+    assert "roster_table_member_label(src_line_0004, v1_3, 7_a, stu_1023, stu_1023_park)." in facts
+    assert "roster_table_member_alias(stu_1023, stu_1023_park)." in facts
     assert "roster_table_member_header(src_line_0004, student_ids)." in facts
     assert "roster_table_scope(src_line_0004, 7_a)." in facts
     assert "roster_table_version(src_line_0004, v1_3)." in facts

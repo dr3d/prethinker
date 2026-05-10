@@ -385,9 +385,11 @@ def _roster_table_member_facts(raw: dict[str, object], *, row_id: str) -> list[s
             continue
         for member_index in member_indexes:
             member_header = _atom(str(headers[member_index]))
-            for member in _roster_member_atoms(str(cells[member_index])):
+            for member, printed_member in _roster_member_mentions(str(cells[member_index])):
                 out.append(f"roster_table_member({row_id}, {version}, {group}, {member}).")
                 out.append(f"roster_table_member_header({row_id}, {member_header}).")
+                out.append(f"roster_table_member_label({row_id}, {version}, {group}, {member}, {printed_member}).")
+                out.append(f"roster_table_member_alias({member}, {printed_member}).")
                 out.append(f"roster_table_scope({row_id}, {group}).")
                 out.append(f"roster_table_version({row_id}, {version}).")
     return out
@@ -413,12 +415,29 @@ def _roster_group_atom(value: str) -> str:
 
 
 def _roster_member_atoms(value: str) -> list[str]:
+    return _dedupe(member for member, _printed_member in _roster_member_mentions(value))
+
+
+def _roster_member_mentions(value: str) -> list[tuple[str, str]]:
     text = str(value or "")
-    out: list[str] = []
-    for match in re.finditer(r"\bS[-_\s]?(?P<num>\d{3})\b", text, flags=re.IGNORECASE):
-        out.append(f"s_{match.group('num')}")
-    for match in re.finditer(r"\bSTU[-_\s]?(?P<num>\d{4,})\b", text, flags=re.IGNORECASE):
-        out.append(f"stu_{match.group('num')}")
+    out: list[tuple[str, str]] = []
+    for chunk in re.split(r"[·,;]+", text):
+        match = re.search(
+            r"\b(?P<prefix>STU|S)[-_\s]?(?P<num>\d{3,})\b(?:\s+(?P<name>[A-Z][A-Za-z'-]*(?:\s+[A-Z][A-Za-z'-]*)?))?",
+            chunk.strip(),
+            flags=re.IGNORECASE,
+        )
+        if not match:
+            continue
+        prefix = match.group("prefix").lower()
+        num = match.group("num")
+        member = f"stu_{num}" if prefix == "stu" else f"s_{num}"
+        printed = f"{match.group('prefix').upper()}-{num}"
+        if match.group("name"):
+            printed = f"{printed} {match.group('name').strip()}"
+        printed_atom = _atom(printed)
+        if member and printed_atom:
+            out.append((member, printed_atom))
     return _dedupe(out)
 
 

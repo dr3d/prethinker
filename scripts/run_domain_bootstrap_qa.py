@@ -1409,6 +1409,9 @@ def _domain_companion_queries(runtime: CorePrologRuntime, *, query: str) -> list
     packet_metadata = _source_record_packet_metadata_companion(runtime, predicate=predicate, query=query)
     if packet_metadata:
         source_record_companions.append(packet_metadata)
+    roster_table_alias = _roster_table_member_alias_companion(runtime, predicate=predicate, args=args, query=query)
+    if roster_table_alias:
+        source_record_companions.append(roster_table_alias)
     grant_award = _grant_award_companion(runtime, predicate=predicate, args=args, query=query)
     if grant_award:
         source_record_companions.append(grant_award)
@@ -4385,6 +4388,85 @@ def _clear_sample_clock_pause_companion(
     }
 
 
+def _roster_table_member_alias_companion(
+    runtime: CorePrologRuntime,
+    *,
+    predicate: str,
+    args: list[str],
+    query: str,
+) -> dict[str, Any] | None:
+    if predicate != "roster_table_member" or len(args) < 4:
+        return None
+    requested_row, requested_version, requested_group, requested_member = [str(item).strip() for item in args[:4]]
+    if not requested_member or _is_prolog_variable(requested_member):
+        return None
+    label_rows = _runtime_rows(runtime, "roster_table_member_label(SourceRow, Version, Group, Member, PrintedMember).")
+    if not label_rows:
+        return None
+
+    def matches(value: str, requested: str) -> bool:
+        if not requested or _is_prolog_variable(requested):
+            return True
+        return value == requested
+
+    out_rows: list[dict[str, Any]] = []
+    for row in label_rows:
+        source_row = str(row.get("SourceRow", "")).strip()
+        version = str(row.get("Version", "")).strip()
+        group = str(row.get("Group", "")).strip()
+        member = str(row.get("Member", "")).strip()
+        printed_member = str(row.get("PrintedMember", "")).strip()
+        if not source_row or not version or not group or not member:
+            continue
+        if not matches(source_row, requested_row):
+            continue
+        if not matches(version, requested_version):
+            continue
+        if not matches(group, requested_group):
+            continue
+        if requested_member and not _is_prolog_variable(requested_member):
+            if requested_member not in {member, printed_member}:
+                continue
+        out_rows.append(
+            {
+                "SupportKind": "roster_table_member_label",
+                "SourceRow": source_row,
+                "Version": version,
+                "Group": group,
+                "Member": member,
+                "PrintedMember": printed_member,
+                "HelperClass": "clean-helper",
+            }
+        )
+    if not out_rows:
+        return None
+    return {
+        "query": "roster_table_member_label(SourceRow, Version, Group, Member, PrintedMember).",
+        "result": {
+            "status": "success",
+            "predicate": "roster_table_member_alias_support",
+            "prolog_query": "roster_table_member_label(SourceRow, Version, Group, Member, PrintedMember).",
+            "result_type": "table",
+            "num_rows": len(out_rows),
+            "variables": ["SupportKind", "SourceRow", "Version", "Group", "Member", "PrintedMember", "HelperClass"],
+            "rows": out_rows[:120],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only roster table alias companion maps exact printed member labels "
+                    "such as stu_1063_vinokur back to the normalized roster member id stu_1063"
+                ),
+                "original_query": query,
+                "trigger_predicate": predicate,
+            },
+        },
+        "derived_from_queries": [
+            query,
+            "roster_table_member_label(SourceRow, Version, Group, Member, PrintedMember).",
+        ],
+    }
+
+
 def _roster_state_companion(
     runtime: CorePrologRuntime,
     *,
@@ -4415,6 +4497,7 @@ def _roster_state_companion(
     student_assignment_rows = _runtime_rows(runtime, "student_group_assignment(Student, Version, Group).")
     student_homeroom_rows = _runtime_rows(runtime, "student_in_homeroom(Student, Homeroom, Version).")
     roster_table_member_rows = _runtime_rows(runtime, "roster_table_member(SourceRow, Version, Group, Student).")
+    roster_table_label_rows = _runtime_rows(runtime, "roster_table_member_label(SourceRow, Version, Group, Member, PrintedMember).")
     supervises_rows = _runtime_rows(runtime, "supervises(Supervisor, Target, Interval).")
     supervision_rows = _runtime_rows(runtime, "supervision_assignment(Supervisor, Target, Start, End).")
     out_rows: list[dict[str, Any]] = []
@@ -4422,6 +4505,15 @@ def _roster_state_companion(
         str(row.get("Role", "")).strip(): str(row.get("Counts", "")).strip()
         for row in ratio_rows
         if str(row.get("Role", "")).strip()
+    }
+    printed_member_by_key = {
+        (
+            str(row.get("SourceRow", "")).strip(),
+            str(row.get("Version", "")).strip(),
+            str(row.get("Group", "")).strip(),
+            str(row.get("Member", "")).strip(),
+        ): str(row.get("PrintedMember", "")).strip()
+        for row in roster_table_label_rows
     }
 
     for row in adult_role_rows:
@@ -4562,10 +4654,12 @@ def _roster_state_companion(
         group = str(row.get("Group", "")).strip()
         if not person or not group:
             continue
+        printed_member = printed_member_by_key.get((source_row, version, group, person), "")
         out_rows.append(
             {
                 "SupportKind": "roster_table_student_group_assignment",
                 "Person": person,
+                "PrintedMember": printed_member,
                 "Group": group,
                 "Version": version,
                 "SourceRow": source_row,
@@ -4669,6 +4763,7 @@ def _roster_state_companion(
                 "Group",
                 "Supervisor",
                 "Target",
+                "PrintedMember",
                 "Start",
                 "End",
                 "Count",
@@ -4693,6 +4788,7 @@ def _roster_state_companion(
             "group_membership(Person, Group, Start, End).",
             "student_group_assignment(Student, Version, Group).",
             "roster_table_member(SourceRow, Version, Group, Student).",
+            "roster_table_member_label(SourceRow, Version, Group, Member, PrintedMember).",
             "supervises(Supervisor, Target, Interval).",
             "supervision_assignment(Supervisor, Target, Start, End).",
             "adult_role(Adult, Role).",
@@ -4731,6 +4827,7 @@ def _prioritize_roster_state_rows(
     def score(row: dict[str, Any]) -> tuple[int, int, str, str]:
         support_kind = str(row.get("SupportKind", "")).strip()
         person = str(row.get("Person", "")).strip()
+        printed_member = str(row.get("PrintedMember", "")).strip()
         group = str(row.get("Group", "")).strip()
         version = str(row.get("Version", "")).strip()
         role = str(row.get("Role", "")).strip()
@@ -4754,7 +4851,7 @@ def _prioritize_roster_state_rows(
             elif version_ok:
                 priority = 12
         elif predicate in {"homeroom_member", "student_in_homeroom"} and len(args) >= 3:
-            person_ok = is_requested(person, args[0])
+            person_ok = is_requested(person, args[0]) or is_requested(printed_member, args[0])
             group_ok = is_requested(group, args[1])
             version_ok = is_requested(version, args[2])
             if person_ok and version_ok and group_ok:

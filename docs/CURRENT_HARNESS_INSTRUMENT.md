@@ -393,6 +393,13 @@ table-ledger replay on `count_composition_roster` moves from `28 / 3 / 9` to
 `roster_table_member/4` queries. The guarded selector still reaches `34 / 2 / 4`,
 so the remaining gap is row routing and answer-surface normalization, not a
 mandate to infer more roster structure from prose.
+The same ledger now preserves printed member labels with
+`roster_table_member_label/5` and `roster_table_member_alias/2`. This keeps
+`STU-1063 Vinokur` attached to normalized `stu_1063` without treating the
+printed label as a separate member. A q023/q024 probe shows q023 becomes exact,
+while q024 still fails when the answer layer overweights a failed
+`homeroom_member/3` query despite clean roster support containing the current
+`v1_3 -> 7_b` assignment.
 
 `scripts/audit_helper_usage.py` adds the complementary transfer-pressure view:
 fixtures per helper and helpers per fixture across QA artifacts. The first scan

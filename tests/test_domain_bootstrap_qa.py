@@ -1614,6 +1614,7 @@ def test_roster_state_support_handles_homeroom_table_and_semantic_rows() -> None
         "source_record_text_atom(src_line_0126, v_7_a_4_stu_1023_park_stu_1041_lin_stu_1058_cohen_stu_1077_bauer).",
         "roster_table_member(src_line_0126, v1_3, 7_a, stu_1023).",
         "roster_table_member(src_line_0126, v1_3, 7_a, stu_1041).",
+        "roster_table_member_label(src_line_0126, v1_3, 7_a, stu_1023, stu_1023_park).",
     ]:
         assert runtime.assert_fact(fact).get("status") == "success"
 
@@ -1632,6 +1633,7 @@ def test_roster_state_support_handles_homeroom_table_and_semantic_rows() -> None
     assert any(
         row.get("SupportKind") == "roster_table_student_group_assignment"
         and row.get("Person") == "stu_1023"
+        and row.get("PrintedMember") == "stu_1023_park"
         and row.get("Group") == "7_a"
         and row.get("Version") == "v1_3"
         and row.get("HelperClass") == "clean-helper"
@@ -1665,6 +1667,15 @@ def test_roster_state_support_handles_homeroom_table_and_semantic_rows() -> None
     assert homeroom_first.get("Person") == "stu_1023"
     assert homeroom_first.get("Group") == "7_a"
     assert homeroom_first.get("Version") == "v1_3"
+
+    printed_label_rows = run_query_plan(runtime, ["homeroom_member(stu_1023_park, 7_a, v1_3)."])
+    printed_label_companion = next(
+        item for item in printed_label_rows if item["result"].get("predicate") == "roster_state_support"
+    )
+    printed_label_first = printed_label_companion["result"]["rows"][0]
+    assert printed_label_first.get("SupportKind") == "roster_table_student_group_assignment"
+    assert printed_label_first.get("Person") == "stu_1023"
+    assert printed_label_first.get("PrintedMember") == "stu_1023_park"
 
     latest_rows = run_query_plan(runtime, ["student_in_homeroom(stu_1023, homeroom, version)."])
     latest_companion = next(
@@ -1724,6 +1735,32 @@ def test_roster_state_support_derives_adult_counts_and_compliance_log() -> None:
         and row.get("Count") == "3"
         for row in result_rows
     )
+
+
+def test_roster_table_member_alias_support_maps_printed_labels() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "roster_table_member(src_line_0041, v1_0, 7_a, stu_1063).",
+        "roster_table_member(src_line_0042, v1_0, 7_b, stu_1063).",
+        "roster_table_member_label(src_line_0041, v1_0, 7_a, stu_1063, stu_1063_vinokur).",
+        "roster_table_member_label(src_line_0042, v1_0, 7_b, stu_1063, stu_1063_vinokur).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["roster_table_member(Row, v1_0, Homeroom, stu_1063_vinokur)."])
+
+    companion = next(
+        item for item in rows if item["result"].get("predicate") == "roster_table_member_alias_support"
+    )
+    result_rows = companion["result"]["rows"]
+
+    assert {
+        row.get("Group")
+        for row in result_rows
+        if row.get("SupportKind") == "roster_table_member_label"
+        and row.get("Member") == "stu_1063"
+        and row.get("PrintedMember") == "stu_1063_vinokur"
+    } == {"7_a", "7_b"}
 
 
 def test_fallback_queries_project_roster_compliance_ir() -> None:

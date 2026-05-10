@@ -186,7 +186,9 @@ prose directly and do not mutate the KB. Current active examples include:
   roster parsing stays candidate-helper. QA planning now prefers
   `roster_table_member/4` for homeroom membership/count questions when that
   predicate exists, but does not broaden the rule to all roster or compliance
-  counts.
+  counts. Printed member labels are preserved separately with
+  `roster_table_member_label/5` and `roster_table_member_alias/2` so exact
+  labels such as `STU-1063 Vinokur` survive without becoming duplicate members.
 - `grant_award_support`: derives award totals, eligible application sets,
   cap-applied applications, appeal pending status, recusal records, committee
   recusal vote counts, and corrected-score support from admitted grant facts and
