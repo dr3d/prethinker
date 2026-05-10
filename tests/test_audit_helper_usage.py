@@ -52,6 +52,7 @@ def test_helper_usage_audit_flags_low_transfer_helpers(tmp_path) -> None:
     assert payload["helper_count"] == 2
     assert payload["helpers"]["one_fixture_support"]["suspicious_low_transfer"] is True
     assert payload["helpers"]["one_fixture_support"]["implemented"] is False
+    assert payload["helpers"]["one_fixture_support"]["support_kind_counts"] == {"unknown": 1}
     assert payload["orphaned_artifact_helper_count"] == 1
     assert payload["helpers"]["shared_support"]["suspicious_low_transfer"] is False
     assert payload["helpers"]["shared_support"]["implemented"] is True
@@ -76,4 +77,5 @@ def test_helper_usage_audit_counts_unlabeled_helper_rows(tmp_path) -> None:
     payload = audit_roots([tmp_path], rare_threshold=1, implemented_helpers={"unlabeled_support"})
 
     assert payload["helpers"]["unlabeled_support"]["helper_class_counts"] == {"unlabeled": 1}
+    assert payload["helpers"]["unlabeled_support"]["support_kind_counts"] == {"legacy_row": 1}
     assert payload["fixtures"]["fixture_a"]["helper_class_counts"] == {"unlabeled": 1}

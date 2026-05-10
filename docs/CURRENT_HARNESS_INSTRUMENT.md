@@ -395,6 +395,13 @@ replaced by audited live surfaces.
 `docs/HELPER_LEDGER.md` is the durable rollup of this audit surface: each helper
 gets fixture count, implementation status, class-audit counts, current read, and
 next action.
+The broadest helper by fixture spread is
+`source_record_packet_metadata_support`; it appears on three fixtures. Its
+cleanup readout splits the surface into 17 clean identifier/addressability
+support kinds and 10 quarantined content-note kinds. The current decision is to
+keep the helper as identifier metadata substrate and not promote embedded
+content notes such as appeal funding source, observer permission scope, pending
+packet item, role definitions, or transport departure as metadata.
 
 ## Extraction Rule
 

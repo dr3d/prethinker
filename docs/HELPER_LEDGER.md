@@ -25,7 +25,7 @@ across QA files.
 | `probate_storage_support` | 1 | no | orphaned artifact helper | not applicable | Historical QA artifacts contain this helper and a `36 / 0 / 4` replay, but no current companion implementation is registered in the repo. A current live replay without the orphan scores `29 / 3 / 8`; a row gate across cold, orphan, and current surfaces reaches `40 / 0 / 0` only as historical diagnostic evidence. | Do not report old probate rows as active architecture; rebuild generically only if probate storage/access pressure remains important. |
 | `roster_state_support` | 2 | yes | split, audit ongoing | transfer class audit: 63 clean / 117 candidate; usage audit: 8306 clean / 15660 candidate across completed QA artifacts | Admitted-predicate joins are clean. Source-record roster parsing now handles both the fresh transfer shape (`v1/v2/v3`, `group_a/group_b/group_c`, `s_###`) and the older sibling homeroom-table shape (`v1_0/v1_3`, `7_a`, `STU-####`). A sibling QA replay on `count_composition_roster` proves the helper is reachable in completed artifacts; focused homeroom prioritization scores `29 / 2 / 9`, and source-record adult/compliance rows plus a narrow compliance IR fallback score `30 / 2 / 8`, up from the older source-record V2 QA's `27 / 4 / 9`. Artifact-only row-gating across the three surfaces reaches `36 / 3 / 1`. | Build selector discrimination for roster helper surfaces; remaining pressure is row routing, not helper acquisition. |
 | `source_record_clock_sync_support` | 1 | yes | clean-helper | precision: 2 clean / 0 candidate | Deterministically extracts last-successful clock-sync dates from admitted source-record text/numeric rows. | Seek transfer fixture evidence; no cleanup needed in current code. |
-| `source_record_packet_metadata_support` | 3 | yes | split, audit ongoing | transfer: 67 clean / 11 candidate | Generic identifiers and packet metadata are clean; packet-family physical retention/pending/role-scope notes remain candidate. | Keep generic identifiers; rewrite or quarantine embedded packet-family facts. |
+| `source_record_packet_metadata_support` | 3 | yes | split, audit ongoing | transfer: 67 clean / 11 candidate; cleanup audit: 17 identifier kinds / 10 content-note kinds | Generic identifiers and packet metadata are clean. The remaining candidate rows are not identifier metadata; they are content notes such as appeal funding source, appeal pending status, observer permission scope, pending packet item, role definitions, and transport departure. | Keep generic identifiers; quarantine embedded content notes until moved to domain helpers or retired as duplicates. |
 
 ## Current Pressure
 
@@ -86,6 +86,14 @@ pressure is row routing over emitted helper rows, not helper acquisition.
 
 The next cleanup work should reduce candidate or unlabeled helper rows and seek
 sibling proof for one-fixture helpers rather than create new lenses.
+
+`source_record_packet_metadata_support` now has an explicit cleanup readout at
+`tmp/transfer_fixtures_20260510/source_record_packet_metadata_cleanup_20260510/packet_metadata_cleanup.md`.
+The decision is no code change yet: the helper's clean surface is exact
+identifier/addressability metadata, while its candidate surface is embedded
+content notes. Those candidate rows should remain quarantined rather than being
+promoted as metadata. Future cleanup should either move useful content notes
+into domain helpers or retire them if duplicate.
 
 ## Promotion Rule
 
